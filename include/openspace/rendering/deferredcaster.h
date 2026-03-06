@@ -65,7 +65,7 @@ public:
      * redefinitions of helper functions.
      *
      * The shader preprocessor will have access to the #{namespace} variable (unique per
-     * helper file) which should be a prefix to all symbols defined by the helper
+     * helper file) which should be a prefix to all symbols defined by the helper.
      */
     virtual std::filesystem::path helperPath() const = 0;
 };

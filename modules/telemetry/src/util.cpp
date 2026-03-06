@@ -75,7 +75,9 @@ double calculateDistanceTo(const Camera* camera, glm::dvec3 nodePosition,
     return convertMeters(distance, unit);
 }
 
-// Horizontal angles
+/**
+ * Horizontal angles.
+ */
 double calculateAngleTo(const Camera* camera, const std::string& nodeIdentifier,
                         TelemetryModule::AngleCalculationMode angleCalculationMode)
 {
@@ -245,7 +247,9 @@ double calculateAngleFromAToB(const Camera* camera, glm::dvec3 nodePositionA,
     return 0.0;
 }
 
-// Elevation angles
+/**
+ * Elevation angles.
+ */
 double calculateElevationAngleTo(const Camera* camera,
                                  const std::string& nodeIdentifier,
                                TelemetryModule::AngleCalculationMode angleCalculationMode)

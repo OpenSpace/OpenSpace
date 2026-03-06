@@ -42,8 +42,8 @@ namespace {
         // The folder to the cdf files to extract data from.
         std::filesystem::path input [[codegen::directory()]];
 
-        // A text file with seedpoints with the format x1 y1 z1 x2 y2 z2 ...
-        // Seedpoints are expressed in the native coordinate system of the model.
+        // A text file with seedpoints with the format x1 y1 z1 x2 y2 z2 ... Seedpoints
+        // are expressed in the native coordinate system of the model.
         std::filesystem::path seedpoints [[codegen::directory()]];
 
         // If data sets parameter start_time differ from start of run,

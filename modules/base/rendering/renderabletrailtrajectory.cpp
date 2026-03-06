@@ -107,9 +107,9 @@ namespace {
         std::string endTime [[codegen::annotation("A valid date in ISO 8601 format")]];
 
         // [[codegen::verbatim(SampleIntervalInfo.description)]]
-        // The final interval is calculated as SampleInterval/TimeStampSubsampleFactor.
-        // If SampleInterval is not specified, it will be automatically calculated to
-        // produce two samples per day between the 'StartTime' and 'EndTime'.
+        // The final interval is calculated as SampleInterval/TimeStampSubsampleFactor. If
+        // SampleInterval is not specified, it will be automatically calculated to produce
+        // two samples per day between the 'StartTime' and 'EndTime'.
         std::optional<double> sampleInterval;
 
         // [[codegen::verbatim(TimeSubSampleInfo.description)]]
@@ -140,7 +140,7 @@ namespace openspace {
 // In addition, this RenderableTrail implementation uses an additional RenderInformation
 // bucket that contains the line from the last shown point to the current location of the
 // object iff not the entire path is shown and the object is between _startTime and
-// _endTime. This buffer is updated every frame.
+// _endTime. This buffer is updated every frame
 
 Documentation RenderableTrailTrajectory::Documentation() {
     return codegen::doc<Parameters>(

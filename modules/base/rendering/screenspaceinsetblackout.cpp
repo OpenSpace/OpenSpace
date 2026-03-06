@@ -207,23 +207,23 @@ namespace {
         Property::Visibility::Developer
     };
 
-    // A ScreenSpaceInsetBlackout can be used to render a screen-space shape used to
-    // black out part of the rendering. This can be useful in a dome environment where
-    // you have a secondary presentation projector that can project on the dome surface.
-    // The blackout is used to avoid overlapping rendering between the dome projectors
-    // and the presentation projector.
+    // A ScreenSpaceInsetBlackout can be used to render a screen-space shape used to black
+    // out part of the rendering. This can be useful in a dome environment where you have
+    // a secondary presentation projector that can project on the dome surface. The
+    // blackout is used to avoid overlapping rendering between the dome projectors and the
+    // presentation projector.
     struct [[codegen::Dictionary(ScreenSpaceInsetBlackout)]] Parameters {
         struct BlackoutShape {
-            // List of corner positions for the blackout shape. The order of
-            // corner points are Top-Left, Top-Right, Bottom-Right, Bottom-Left with the
-            // range of 0 to 1 for `{X,Y}`, where `{0,1}` is the Top-Left corner and
-            // `{1,0}` is the Bottom-Right corner.
+            // List of corner positions for the blackout shape. The order of corner points
+            // are Top-Left, Top-Right, Bottom-Right, Bottom-Left with the range of 0 to 1
+            // for `{X,Y}`, where `{0,1}` is the Top-Left corner and `{1,0}` is the
+            // Bottom-Right corner.
             std::vector<glm::vec2> corners;
 
-            // List of points between the Top-Left and Top-Right corners that will be
-            // used to define top spline of the blackout shape. Each point is specified
-            // in the range of 0 to 1, where `{0,1}` is the Top-Left corner and `{1,1}`
-            // is the Top-Right corner.
+            // List of points between the Top-Left and Top-Right corners that will be used
+            // to define top spline of the blackout shape. Each point is specified in the
+            // range of 0 to 1, where `{0,1}` is the Top-Left corner and `{1,1}` is the
+            // Top-Right corner.
             std::optional<std::vector<glm::vec2>> top;
 
             // List of points between the Bottom-Right and Bottom-Left corners that will
@@ -234,14 +234,14 @@ namespace {
 
             // List of points between the Bottom-Left and Top-Left corners that will be
             // used to define left spline of the blackout shape. Each point is specified
-            // in the range of 0 to 1, where `{0,0}` is the Bottom-Left corner and
-            // `{0,1}` is the Top-Left corner.
+            // in the range of 0 to 1, where `{0,0}` is the Bottom-Left corner and `{0,1}`
+            // is the Top-Left corner.
             std::optional<std::vector<glm::vec2>> left;
 
-            // List of points between the Top-Right and Bottom-Right corners that will
-            // be used to define right spline of the blackout shape. Each point is
-            // specified in the range of 0 to 1, where `{1,1}` is the Top-Right corner
-            // and `{1,0}` is the Bottom-Right corner.
+            // List of points between the Top-Right and Bottom-Right corners that will be
+            // used to define right spline of the blackout shape. Each point is specified
+            // in the range of 0 to 1, where `{1,1}` is the Top-Right corner and `{1,0}`
+            // is the Bottom-Right corner.
             std::optional<std::vector<glm::vec2>> right;
 
             // File path for the texture that should be used when displaying the

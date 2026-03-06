@@ -103,10 +103,6 @@ public:
      */
     GLuint additionalDepthTexture() const;
 
-    //=============================//
-    //=====  Access G-buffer  =====//
-    //=============================//
-    // Functions to access the G-buffer textures
     /**
      * Gives access to the color texture of the G-buffer. NOTE: This texture is used for
      * the majority of rendering the scene and might be already in use. Use CAUTION when
@@ -170,7 +166,7 @@ public:
     void render(Scene* scene, Camera* camera, float blackoutFactor);
 
     /**
-     * Update render data. Responsible for calling renderEngine::setRenderData
+     * Update render data. Responsible for calling RenderEngine::setRenderData.
      */
     virtual void updateRendererData();
 

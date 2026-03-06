@@ -128,8 +128,7 @@ namespace {
                                                        int nSubdatasets)
     {
         // Idea: Iterate over the list of sublayers keeping a current layer and identify
-        //       it by its number.  If this number changes, we know that we have a new
-        //       layer
+        // it by its number.  If this number changes, we know that we have a new layer
 
         using Layer = GlobeBrowsingModule::Layer;
         std::vector<Layer> result;

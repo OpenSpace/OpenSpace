@@ -99,7 +99,7 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
 
     switch (binFileVersion) {
         case 0:
-            // No need to put everything in this scope now, as only version 0 exists!
+            // No need to put everything in this scope now, as only version 0 exists
             break;
         default:
             LERROR("Version of binary file was not recognized");
@@ -264,7 +264,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
  * 11. array of c_str         - Strings naming the extra quantities (elements of
  *                              _extraQuantityNames). Each string ends with null char '\0'
  *
- * \param absPath must be the path to the folder to save to.
+ * \param absPath Must be the path to the folder to save to
  */
 void FieldlinesState::saveStateToOsfls(const std::string& absPath) {
     // Create the file

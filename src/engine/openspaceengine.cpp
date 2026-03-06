@@ -327,7 +327,7 @@ void OpenSpaceEngine::initialize() {
         );
     }
 
-    // Create directories that doesn't exist
+    // Create directories that don't exist
     for (const std::string& token : FileSys.tokens()) {
         if (!std::filesystem::is_directory(absPath(token))) {
             std::filesystem::create_directories(absPath(token));
@@ -441,7 +441,7 @@ void OpenSpaceEngine::initialize() {
 
     if (!global::configuration->sandboxedLua) {
         // The Lua state is sandboxed by default, so if the user wants an unsandboxed one,
-        // we have to recreate it here.
+        // we have to recreate it here
         // @TODO (2024-08-07, abock) It's not pretty, but doing it differently would
         // require a bigger rewrite of how we handle the ScriptEngine
         global::scriptEngine->~ScriptEngine();

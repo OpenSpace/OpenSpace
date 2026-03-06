@@ -62,8 +62,8 @@ struct TextureFormatHash {
 
 /**
  * This class describes a point cloud renderable that can be used to draw billboraded
- * points based on a data file with 3D positions.  Alternatively the points can also
- * be colored and sized based on a separate column in the data file.
+ * points based on a data file with 3D positions. Alternatively the points can also be
+ * colored and sized based on a separate column in the data file.
  */
 class RenderablePointCloud : public Renderable {
 public:
@@ -99,10 +99,10 @@ protected:
     virtual int nAttributesPerPoint() const;
 
     /**
-     * Helper function to buffer the vertex attribute with the given name and number
-     * of values. Assumes that the value is a float value.
+     * Helper function to buffer the vertex attribute with the given name and number of
+     * values. Assumes that the value is a float value.
      *
-     * Returns the updated offset after this attribute is added
+     * \return The updated offset after this attribute is added
      */
     int bufferVertexAttribute(const std::string& name, GLint nValues,
         int nAttributesPerPoint, int offset) const;
@@ -110,9 +110,14 @@ protected:
     virtual void updateBufferData();
     void updateSpriteTexture();
 
-    /// Find the index of the currently chosen color parameter in the dataset
+    /**
+     * Find the index of the currently chosen color parameter in the dataset.
+     */
     int currentColorParameterIndex() const;
-    /// Find the index of the currently chosen size parameter in the dataset
+
+    /**
+     * Find the index of the currently chosen size parameter in the dataset.
+     */
     int currentSizeParameterIndex() const;
 
     bool hasColorData() const;
@@ -131,7 +136,7 @@ protected:
 
     /**
      * A function that subclasses could override to initialize their own textures to
-     * use for rendering, when the `_textureMode` is set to Other
+     * use for rendering, when the `_textureMode` is set to Other.
      */
     virtual void initializeCustomTexture();
     void initializeSingleTexture();
@@ -253,15 +258,15 @@ protected:
     GLuint _vao = 0;
     GLuint _vbo = 0;
 
-    // List of (unique) loaded textures. The other maps refer to the index in this vector
+    /// List of (unique) loaded textures. The other maps refer to the index in this vector
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
     std::unordered_map<std::string, size_t> _textureNameToIndex;
 
-    // Texture index in dataset to index in vector of textures
+    /// Texture index in dataset to index in vector of textures
     std::unordered_map<int, size_t> _indexInDataToTextureIndex;
 
-    // Resolution/format to index in textures vector (used to generate one texture
-    // array per unique format)
+    /// Resolution/format to index in textures vector (used to generate one texture
+    /// array per unique format)
     std::unordered_map<TextureFormat, std::vector<size_t>, TextureFormatHash>
         _textureMapByFormat;
 

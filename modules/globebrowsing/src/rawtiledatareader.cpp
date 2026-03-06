@@ -150,8 +150,8 @@ namespace {
      * Geodetic2 coordinate \p geo. If the dataset has overviews the function returns the
      * pixel at the lowest overview (highest resolution).
      *
-     * \param geo The position on the globe to convert to pixel space.
-     * \return a pixel coordinate in the dataset.
+     * \param geo The position on the globe to convert to pixel space
+     * \return A pixel coordinate in the dataset
      */
     glm::ivec2 geodeticToPixel(const Geodetic2& geo,
                                const std::array<double, 6>& transform)
@@ -183,7 +183,7 @@ namespace {
      * resolution).
      *
      * \param \p geodeticPatch is a patch covering an area in geodetic coordinates
-     * \return A PixelRegion covering the given geodetic patch at highest resolution.
+     * \return A PixelRegion covering the given geodetic patch at highest resolution
      */
     PixelRegion highestResPixelRegion(const GeodeticPatch& geodeticPatch,
                                       const std::array<double, 6>& transform)
@@ -472,11 +472,11 @@ RawTile::ReadError RawTileDataReader::rasterRead(int rasterBand, const IODescrip
         GF_Read,
         io.read.region.start.x,         // Begin read x
         io.read.region.start.y,         // Begin read y
-        io.read.region.numPixels.x,     // width to read x
-        io.read.region.numPixels.y,     // width to read y
+        io.read.region.numPixels.x,     // Width to read x
+        io.read.region.numPixels.y,     // Width to read y
         dataDest,                       // Where to put data
-        io.write.region.numPixels.x,    // width to write x in destination
-        io.write.region.numPixels.y,    // width to write y in destination
+        io.write.region.numPixels.x,    // Width to write x in destination
+        io.write.region.numPixels.y,    // Width to write y in destination
         _dataType,                      // Type
         static_cast<int>(_initData.bytesPerPixel), // Pixel spacing
         -static_cast<int>(io.write.bytesPerLine)     // Line spacing

@@ -84,7 +84,7 @@ std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
                                  const std::string& stopTime, const std::string& stepSize,
                                  const std::string& unit)
 {
-    // Construct url for request
+    // Construct URL for request
     std::string url;
     switch (type) {
         case HorizonsType::Vector:
@@ -157,7 +157,7 @@ nlohmann::json convertHorizonsDownloadToJson(const std::filesystem::path& filePa
     }
     answer.append(buf, 0, stream.gcount());
 
-    // Convert to a json object
+    // Convert to a JSON object
     return nlohmann::json::parse(answer);
 }
 
@@ -206,7 +206,7 @@ HorizonsResultCode isValidHorizonsAnswer(const nlohmann::json& answer) {
         if (errorMsg.contains("Projected output length")) {
             return HorizonsResultCode::ErrorSize;
         }
-        // STEP_SIZE too big, exceeds available span.
+        // STEP_SIZE too big, exceeds available span
         else if (errorMsg.contains("STEP_SIZE too big")) {
             return HorizonsResultCode::ErrorSpan;
         }
@@ -214,25 +214,25 @@ HorizonsResultCode isValidHorizonsAnswer(const nlohmann::json& answer) {
         else if (errorMsg.contains("No ephemeris for target")) {
             return HorizonsResultCode::ErrorTimeRange;
         }
-        // No site matches. Use "*@body" to list, "c@body" to enter coords, ?! for help.
+        // No site matches. Use "*@body" to list, "c@body" to enter coords, ?! for help
         else if (errorMsg.contains("No site matches") ||
                  errorMsg.contains("Cannot find central body"))
         {
             return HorizonsResultCode::ErrorNoObserver;
         }
-        // Observer table for X / Y->Y disallowed.
+        // Observer table for X / Y->Y disallowed
         else if (errorMsg.contains("disallowed")) {
             return HorizonsResultCode::ErrorObserverTargetSame;
         }
         // Insufficient ephemeris data has been loaded to compute the state of X
-        // relative to Y at the ephemeris epoch Z;
+        // relative to Y at the ephemeris epoch Z
         else if (errorMsg.contains("Insufficient ephemeris data")) {
             return HorizonsResultCode::ErrorNoData;
         }
         // #   E. Lon    DXY      DZ    Observatory Name;
         // -- - -------- ------ - ------ - ----------------;
         // * Observer station *
-        // Multiple matching stations found.
+        // Multiple matching stations found
         else if (errorMsg.contains("Multiple matching stations found")) {
             return HorizonsResultCode::MultipleObserverStations;
         }
@@ -264,7 +264,8 @@ HorizonsResultCode isValidHorizonsFile(const std::filesystem::path& file) {
     std::string line;
     bool foundTarget = false;
     ghoul::getline(fileStream, line);
-    ghoul::getline(fileStream, line); // First line is just stars (*) no information, skip
+    // First line is just stars (*) no information, skip
+    ghoul::getline(fileStream, line);
 
     // Valid Target?
     if (fileStream.good() && (line.contains("Revised") || line.contains("JPL"))) {
@@ -288,7 +289,7 @@ HorizonsResultCode isValidHorizonsFile(const std::filesystem::path& file) {
         // Outside valid time range?
         if (line.contains("No ephemeris for target")) {
             // Available time range is located several lines before this in the file
-            // The avalable time range is persed later
+            // The available time range is persed later
             return HorizonsResultCode::ErrorTimeRange;
         }
 
@@ -805,8 +806,8 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
         return std::pair("", "");
     }
 
-    // In the other lines only parse the end time and update it
-    // Get the end time from the last trajectery
+    // In the other lines only parse the end time and update it. Get the end time from the
+    // last trajectery
     while (fileStream.good()) {
         if (line.contains(endPhrase) || line.empty() || line == " ") {
             return std::pair(startTime, endTime);

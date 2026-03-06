@@ -198,7 +198,7 @@ void DebugRenderer::renderCameraFrustum(const RenderData& data, const Camera& ot
         const double y = cornerIsUp ? 1 : -1;
         const double z = cornerIsFar ? 1 : 0;
 
-        // p represents a corner in the frustum of the saved camera
+        // `p` represents a corner in the frustum of the saved camera
         const dvec4 pSavedClippingSpace(x, y, z, 1);
         dvec4 pSavedCameraSpace = inverseSavedP * pSavedClippingSpace;
         if (cornerIsFar) {

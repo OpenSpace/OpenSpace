@@ -315,15 +315,15 @@ namespace {
     //   make sure the points are visual, and then adapt the value interactively when
     //   OpenSpace is running until you find a value that you find suitable.
     //
-    // - There is also an option to limit the size of the points based on a given max
-    //   size value.
+    // - There is also an option to limit the size of the points based on a given max size
+    //   value.
     //
     // - And an option to scale the points based on a data value (see `SizeMapping` in
     //   `SizeSettings`)
     //
     // - To easily change the visual size of the points, the multiplicative `ScaleFactor`
-    //   may be used. A value of 2 makes the points twice as large, visually, compared
-    //   to 1.
+    //   may be used. A value of 2 makes the points twice as large, visually, compared to
+    //   1.
     struct [[codegen::Dictionary(RenderablePointCloud)]] Parameters {
         // The path to the data file that contains information about the point to be
         // rendered. Can be either a CSV or SPECK file.
@@ -799,7 +799,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         _labels = std::make_unique<LabelsComponent>(*p.labels);
         _hasLabels = true;
         addPropertySubOwner(_labels.get());
-        // Fading of the labels should depend on the fading of the renderable
+        // Fading of the labels should depend on the fading of the Renderable
         _labels->setParentFadeable(this);
     }
 
@@ -1029,8 +1029,7 @@ void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
     gl::GLenum format = gl::GLenum(glFormat(useAlpha));
 
     // Create storage for the texture
-    // The nicer way would be to use glTexStorage3D, but that is only available in OpenGL
-    // 4.2 and above
+    // The nicer way would be to use glTexStorage3D
     glTexImage3D(
         GL_TEXTURE_2D_ARRAY,
         0,
@@ -1409,7 +1408,7 @@ glm::quat RenderablePointCloud::orientationQuaternion(
     ));
 
     // Get the quaternion that represents the rotation from XY plane to the plane that is
-    // spanned by the UV vectors.
+    // spanned by the UV vectors
 
     // First rotate to align the z-axis with plane normal
     const glm::vec3 planeNormal = glm::normalize(glm::cross(u, v));

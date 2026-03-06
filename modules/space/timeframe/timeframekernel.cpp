@@ -241,7 +241,7 @@ namespace {
             if (std::string_view(type.data()) != "CK") {
                 // Since SCLK kernels are allowed as well we can't throw an exception
                 // here. We can't even warn about it since the tested spacecraft clock
-                // kernels report a type and architecture of '?' which is not helpful.
+                // kernels report a type and architecture of '?' which is not helpful
                 continue;
             }
 
@@ -361,18 +361,17 @@ namespace {
     // kernel to the CK struct in this class.
     //
     // The resulting validity of the time frame is based on the following conditions:
-    //
     //   1. If either SPK or CK (but not both) are specified, the time frame depends on
     //      the union of all windows within all kernels that were provided. This means
     //      that if the simulation time is within any time where the kernel has data for
-    //      the provided object, the TimeFrame will be valid.
+    //      the provided object, the TimeFrame will be valid
     //   2. If SPK and CK kernels are both specified, the time range validity for SPK and
     //      CK kernels are calculated separately, but both results must be valid to result
     //      in a valid time frame. This means that if only position data is available but
     //      not orientation data, the time frame is invalid. Only if positional and
-    //      orientation data is available, then the TimeFrame will be valid.
+    //      orientation data is available, then the TimeFrame will be valid
     //   3. If neither SPK nor CK kernels are specified, the creation of the `TimeFrame`
-    //      will fail.
+    //      will fail
     struct [[codegen::Dictionary(TimeFrameKernel)]] Parameters {
         // Specifies information about the kernels and object name used to extract the
         // times when positional information for the provided object is available.

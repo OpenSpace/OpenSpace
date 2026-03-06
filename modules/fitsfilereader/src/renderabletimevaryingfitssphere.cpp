@@ -262,7 +262,7 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
                 for (File& file : _files) {
                     if (file.texture) {
                         // @TODO (2026-02-19, abock) This should be replaced with a
-                        //                           sampler at some point
+                        // sampler at some point
                         GLuint id = *file.texture;
                         glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
                         glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -273,7 +273,7 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
                 for (File& file : _files) {
                     if (file.texture) {
                         // @TODO (2026-02-19, abock) This should be replaced with a
-                        //                           sampler at some point
+                        // sampler at some point
                         GLuint id = *file.texture;
                         glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                         glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -298,14 +298,14 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
                     using enum ghoul::opengl::Texture::FilterMode;
                     if (_textureFilterProperty == static_cast<int>(Nearest)) {
                         // @TODO (2026-02-19, abock) This should be replaced with a
-                        //                           sampler at some point
+                        // sampler at some point
                         GLuint id = *file.texture;
                         glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
                         glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
                     }
                     else if (_textureFilterProperty == static_cast<int>(Linear)) {
                         // @TODO (2026-02-19, abock) This should be replaced with a
-                        //                           sampler at some point
+                        // sampler at some point
                         GLuint id = *file.texture;
                         glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                         glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

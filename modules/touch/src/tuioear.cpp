@@ -61,8 +61,8 @@ void TuioEar::updateTuioCursor(TuioCursor* tcur) {
     _inputList.push_back(touchInput(tcur));
 }
 
-// save id to be removed and remove it in clearInput
 void TuioEar::removeTuioCursor(TuioCursor* tcur) {
+    // Save id to be removed and remove it in clearInput
     const std::unique_lock lock(_mx);
     _removalList.push_back(touchInput(tcur));
 }
@@ -73,7 +73,7 @@ void TuioEar::updateTuioBlob(TuioBlob*) {}
 
 void TuioEar::removeTuioBlob(TuioBlob*) {}
 
-void TuioEar::refresh(TuioTime) {} // about every 15ms
+void TuioEar::refresh(TuioTime) {} // About every 15ms
 
 std::vector<TouchInput> TuioEar::takeInputs() {
     std::vector<TouchInput> outputList;

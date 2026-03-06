@@ -505,8 +505,8 @@ namespace {
     }
     
     struct [[codegen::Dictionary(RenderableGlobe)]] Parameters {
-        // The radii for this planet. If only one value is given, all three radii are
-        // set to that value.
+        // The radii for this planet. If only one value is given, all three radii are set
+        // to that value.
         std::optional<std::variant<glm::dvec3, double>> radii;
 
         // [[codegen::verbatim(PerformShadingInfo.description)]]
@@ -2664,11 +2664,11 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data,
 {
     ZoneScoped;
 
-    // abock:  I tried turning this into a queue and use iteration, rather than recursion
-    //         but that made the code harder to understand as the breadth-first traversal
-    //         requires parents to be passed through the pipe twice (first to add the
-    //         children and then again it self to be processed after the children finish).
-    //         In addition, this didn't even improve performance ---  2018-10-04
+    // abock, 2018-10-04: I tried turning this into a queue and use iteration, rather than
+    // recursion but that made the code harder to understand as the breadth-first
+    // traversal requires parents to be passed through the pipe twice (first to add the
+    // children and then again it self to be processed after the children finish). In
+    // addition, this didn't even improve performance
     if (isLeaf(cn)) {
         ZoneScopedN("leaf");
         updateChunk(cn, data, mvp);

@@ -86,13 +86,13 @@ namespace openspace {
  * Requires the kameleon module to be activated.
  *
  * \param state FieldlineState which should hold the extracted data
- * \param cdfPath std::string of the absolute path to a .cdf file
- * \param seedPoints vector of seed points from which to trace field lines
- * \param tracingVar which quantity to trace lines from. Typically "b" for magnetic field
+ * \param cdfPath `std::string` of the absolute path to a .cdf file
+ * \param seedPoints Vector of seed points from which to trace field lines
+ * \param tracingVar Which quantity to trace lines from. Typically "b" for magnetic field
  *        lines and "u" for velocity flow lines
- * \param extraVars extra scalar quantities to be stored in the FieldlinesState; e.g. "T"
+ * \param extraVars Extra scalar quantities to be stored in the FieldlinesState; e.g. "T"
  *        for temperature, "rho" for density or "P" for pressure
- * \param extraMagVars variables which should be used for extracting magnitudes, must be
+ * \param extraMagVars Variables which should be used for extracting magnitudes, must be
  *        a multiple of 3; e.g. "ux", "uy" & "uz" to get the magnitude of the velocity
  *        vector at each line vertex
  */
@@ -119,7 +119,7 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
         cdfDoubleTime, "YYYYMMDDHRMNSC::RND"
     );
 
-    // Use time as string for picking seedpoints from seedm
+    // Use time as string for picking seedpoints from seedmap
     std::vector<glm::vec3> seedPoints = seedMap.at(cdfStringTime);
     bool success = addLinesToState(kameleon.get(), seedPoints, tracingVar, state);
     if (success) {
@@ -345,7 +345,7 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
  *        names of the components needed to calculate magnitude. E.g. {"ux", "uy", "uz"}
  *        will calculate: sqrt(ux*ux + uy*uy + uz*uz). Magnitude will be stored in
  *        _extraQuantities
- * \param state The FieldlinesState which the extra quantities should be added to.
+ * \param state The FieldlinesState which the extra quantities should be added to
  */
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 void addExtraQuantities(ccmc::Kameleon* kameleon,

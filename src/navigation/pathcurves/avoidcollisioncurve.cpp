@@ -53,7 +53,7 @@ namespace openspace {
 AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& end)
     : _relevantNodes(global::navigationHandler->pathNavigator().relevantNodes())
 {
-    if (!start.node() || !end.node()) { // guard, but should never happen
+    if (!start.node() || !end.node()) {
         LERROR("Something went wrong. The start or end node does not exist");
         return;
     }
@@ -72,7 +72,7 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     const glm::dvec3 nodeToStart = start.position() - startNodeCenter;
     const double distanceToStartNode = glm::length(nodeToStart);
 
-    // Note that the factor 2.0 is arbitrarily chosen to look ok.
+    // Note that the factor 2.0 is arbitrarily chosen to look ok
     // @TODO: (2022-02-27, emmbr) Should be unified to a "getting close to object sphere"
     // that can be used in multiple cases when creating paths more cleverly later on
     const double closeToNodeThresholdFactor = std::max(

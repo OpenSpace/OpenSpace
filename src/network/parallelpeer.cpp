@@ -294,7 +294,7 @@ void ParallelPeer::handleMessage(const ParallelConnection::Message& message) {
             nConnectionsMessageReceived(message.content);
             break;
         default:
-            // unknown message type
+            // Unknown message type
             break;
     }
 }

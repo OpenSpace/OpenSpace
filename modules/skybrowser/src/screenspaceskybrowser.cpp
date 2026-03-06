@@ -100,7 +100,9 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    /// Generate a random border color with sufficient lightness
+    /**
+     * Generate a random border color with sufficient lightness.
+     */
     glm::ivec3 randomBorderColor() {
         std::random_device rd;
         // Hue is in the unit degrees [0, 360]

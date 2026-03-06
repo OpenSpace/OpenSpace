@@ -444,7 +444,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
                     nFilteredStars++;
                     continue;
                 }
-                // Generate a 50/12,5 dataset (gMag <=13/>13).
+                // Generate a 50/12,5 dataset (gMag <=13/>13)
 
                 // If all filters passed then insert render values into Octree
                 const std::vector<float> renderValues(

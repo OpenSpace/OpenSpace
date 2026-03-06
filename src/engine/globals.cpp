@@ -404,7 +404,7 @@ void initialize() {
 
     rootPropertyOwner->addPropertySubOwner(global::moduleEngine);
 
-    // New property subowners also have to be added to the ImGuiModule callback!
+    // New property subowners also have to be added to the ImGuiModule callback
     rootPropertyOwner->addPropertySubOwner(global::navigationHandler);
     rootPropertyOwner->addPropertySubOwner(global::keyframeRecording);
     rootPropertyOwner->addPropertySubOwner(global::interactionMonitor);

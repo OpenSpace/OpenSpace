@@ -319,7 +319,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     const bool modifierControl = hasKeyModifier(modifier, KeyModifier::Control);
 
     // Button left of 1 and above TAB (default)
-    // Can be changed to any other key with the setCommandInputButton funciton
+    // Can be changed to any other key with the setCommandInputButton function
     if (key == _commandInputButton) {
         if (_isVisible) {
             if (modifierShift) {
@@ -473,7 +473,7 @@ void LuaConsole::render() {
 
     const ghoul::GLDebugGroup group("LuaConsole");
 
-    // Don't render the console if it's collapsed.
+    // Don't render the console if it's collapsed
     if (_currentHeight < 1.f) {
         return;
     }
@@ -520,14 +520,14 @@ void LuaConsole::render() {
     size_t nCommandRows = static_cast<size_t>(
         std::ceil(static_cast<double>(totalCommandSize) / nCharactersPerRow)
     );
-    // We're intrested in the zero based index when computing the input position
+    // We're intrested in the zero based index when computing the input position.
     // If the characters fit on one line we should not add any extra rows
     nCommandRows = nCommandRows > 1 ? nCommandRows - 1 : 0;
 
     // The command is split in 3 parts to render the suggestion in a different color:
     // the part before the suggestion, the suggestion, and the part after the suggestion
     std::string beforeSuggestion =  currentCommand;
-    std::string afterSuggestion = "";
+    std::string afterSuggestion;
 
     if (_autoCompleteState.insertPosition != 0) {
         beforeSuggestion = currentCommand.substr(0, _autoCompleteState.insertPosition);
@@ -535,7 +535,7 @@ void LuaConsole::render() {
     }
 
     // We pad the strings with empty spaces so that each part is rendered in their correct
-    // positions, even if linebreaks are added
+    // positions, even if linebreaks are added.
     // Pad suggestion before and after with ' '
     const std::string suggestion = std::string(beforeSuggestion.size() + 2, ' ') +
         _autoCompleteState.suggestion + std::string(afterSuggestion.size(), ' ');
@@ -1199,7 +1199,7 @@ void LuaConsole::filterSuggestions() {
 
 #ifdef WIN32
         // On Windows, file paths are generally case-insensitive. For example,
-        // "C:/User/Desktop/Foo" refers to the same location as "c:/user/desktop/foo"
+        // "C:/User/Desktop/Foo" refers to the same location as "c:/user/desktop/foo".
         // Normalize paths to lowercase so they are treated equivalently
         if (_autoCompleteState.context == Context::Path) {
             out = ghoul::toLowerCase(sanitizeInput(out));

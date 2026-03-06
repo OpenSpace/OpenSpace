@@ -68,7 +68,7 @@ public:
      *         TableVerifier, a list of all offending subkeys as fully qualified names
      *
      * \post If the return values' TestResult::success is `true`, its
-     *      TestResult::offenders is empty
+     *       TestResult::offenders is empty
      */
     virtual TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const = 0;
@@ -76,7 +76,7 @@ public:
     /**
      * This method returns a human-readable string describing the type of object that is
      * handled by the Verifier subclass. This is only used for generating a human-readable
-     * documentation and description of a Documenation object.
+     * documentation and description of a Documentation object.
      *
      * \return A human-readable string describing the type of object for the Verifier
      *
@@ -96,10 +96,6 @@ public:
      */
     virtual std::string documentation() const = 0;
 };
-
-//----------------------------------------------------------------------------------------
-// General verifiers
-//----------------------------------------------------------------------------------------
 
 /**
  * The base class Verifier for all Verifier%s that have to test against a specific value
@@ -151,9 +147,9 @@ public:
 };
 
 /**
- * A Verifier that checks whether a given key inside a ghoul::Dictionary is of type
- * `int`. It will also return `true` if the key's value is of type `double`, but is a
- * integer value (for example, `0.0`, `12.0`, but not `0.5`).
+ * A Verifier that checks whether a given key inside a ghoul::Dictionary is of type `int`.
+ * It will also return `true` if the key's value is of type `double`, but is a integer
+ * value (for example, `0.0`, `12.0`, but not `0.5`).
  */
 class IntVerifier : public TemplateVerifier<int> {
 public:
@@ -184,7 +180,7 @@ private:
 
 /**
  * A Verifier that checks whether a given string is a valid identifier, meaning that is
- * does not contain any whitespaces or dots
+ * does not contain any whitespaces or dots.
  */
 class IdentifierVerifier : public StringVerifier {
 public:
@@ -237,8 +233,8 @@ private:
 };
 
 /**
- * A Verifier that checks whether a given key inside a ghoul::Dictionary is a string and
- * a valid date time.
+ * A Verifier that checks whether a given key inside a ghoul::Dictionary is a string and a
+ * valid date time.
  */
 class DateTimeVerifier : public StringVerifier {
 public:
@@ -330,10 +326,6 @@ public:
     std::string type() const override;
 };
 
-//----------------------------------------------------------------------------------------
-// Vector verifiers
-//----------------------------------------------------------------------------------------
-
 /**
  * This Verifier checks whether the value is of type `glm::tvec2<T>`.
  */
@@ -378,8 +370,8 @@ public:
 };
 
 /**
- * A Verifier that checks whether all values contained in a Table are of
- * type `glm::tvec2<T>`.
+ * A Verifier that checks whether all values contained in a Table are of type
+ * `glm::tvec2<T>`.
  */
 template <typename T>
 class Vector2ListVerifier : public TableVerifier {
@@ -402,8 +394,8 @@ public:
 };
 
 /**
- * A Verifier that checks whether all values contained in a Table are of
- * type `glm::tvec3<T>`.
+ * A Verifier that checks whether all values contained in a Table are of type
+ * `glm::tvec3<T>`.
  */
 template <typename T>
 class Vector3ListVerifier : public TableVerifier {
@@ -426,8 +418,8 @@ public:
 };
 
 /**
- * A Verifier that checks whether all values contained in a Table are of
- * type `glm::tvec4<T>`.
+ * A Verifier that checks whether all values contained in a Table are of type
+ * `glm::tvec4<T>`.
  */
 template <typename T>
 class Vector4ListVerifier : public TableVerifier {
@@ -448,10 +440,6 @@ public:
         return "List of ints";
     }
 };
-
-//----------------------------------------------------------------------------------------
-// Matrix verifiers
-//----------------------------------------------------------------------------------------
 
 /**
  * This Verifier checks whether the value is of type `glm::mat2x2<T>`.
@@ -534,10 +522,6 @@ public:
     std::string type() const override;
 };
 
-//----------------------------------------------------------------------------------------
-// Operator verifiers
-//----------------------------------------------------------------------------------------
-
 /**
  * This is the abstract base class of all binary operator-based verifiers. This class
  * takes two template parameters. The first is the Verifier that one would use to only
@@ -547,11 +531,11 @@ public:
  * used.
  *
  * This verifier will apply the `Operator` to the stored value and the incoming value
- * (after type checking) and will check if the `Operator` returns `true` or `false`.
- * The incoming value is used as the first argument and the stored value as the second
+ * (after type checking) and will check if the `Operator` returns `true` or `false`. The
+ * incoming value is used as the first argument and the stored value as the second
  * argument to the `Operator`. If the type checking fails, the offense reason
- * TestResult::Offense::Reason::WrongType is returned. If the `Operator` fails, the
- * reason TestResult::Offense::Verification is returned instead.
+ * TestResult::Offense::Reason::WrongType is returned. If the `Operator` fails, the reason
+ * TestResult::Offense::Verification is returned instead.
  */
 template <typename T, typename Operator>
 class OperatorVerifier : public T {
@@ -698,15 +682,11 @@ private:
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
 };
 
-//----------------------------------------------------------------------------------------
-// List verifiers
-//----------------------------------------------------------------------------------------
-
 /**
  * This Verifier checks whether the incoming value is of the correct type, using the
  * Verifier passed as a template parameter `T` and then checks whether it is part of a
- * list that is passed to the constructor. To the missing equality operator, `T` cannot
- * be a subclass of (or the same as) TableVerifier.
+ * list that is passed to the constructor. To the missing equality operator, `T` cannot be
+ * a subclass of (or the same as) TableVerifier.
  */
 template <typename T>
 class InListVerifier : public T {
@@ -746,9 +726,9 @@ private:
 
 /**
  * This Verifier checks whether the incoming value is of the correct type, using the
- * Verifier passed as a template parameter `T` and then checks whether it is not part of
- * a list that is passed to the constructor. To the missing equality operator, `T` cannot
- * be a subclass of (or the same as) TableVerifier.
+ * Verifier passed as a template parameter `T` and then checks whether it is not part of a
+ * list that is passed to the constructor. To the missing equality operator, `T` cannot be
+ * a subclass of (or the same as) TableVerifier.
  */
 template <typename T>
 class NotInListVerifier : public T {
@@ -784,10 +764,6 @@ public:
 private:
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
 };
-
-//----------------------------------------------------------------------------------------
-// Range verifiers
-//----------------------------------------------------------------------------------------
 
 /**
  * This Verifier checks whether the incoming value is of the correct type, using the
@@ -890,11 +866,6 @@ private:
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
 };
 
-
-//----------------------------------------------------------------------------------------
-// Misc verifiers
-//----------------------------------------------------------------------------------------
-
 /**
  * This Verifier only checks for the correct type of the incoming value. If the
  * documentation is requested, it will return an additional string that is the annotation.
@@ -946,8 +917,8 @@ public:
      * Checks whether the \p key in the \p dictionary exists and is of type Table (similar
      * to the TableVerifier). If it exists and is a Table, the Documentation referenced by
      * the identifier provided in the constructor is used to validate the Table. If the
-     * identifier does not name a registered Documentation, the TestResult::offenses
-     * will contain the \p key and TestResult::Offense::Reason::UnknownIdentifier will be
+     * identifier does not name a registered Documentation, the TestResult::offenses will
+     * contain the \p key and TestResult::Offense::Reason::UnknownIdentifier will be
      * signaled. If the identifier exists and the \p key%'s value does not comply with the
      * Documentation, the offending keys will be returned in the TestResult with their
      * fully qualified names.
@@ -966,10 +937,6 @@ public:
     std::string identifier;
 };
 
-//----------------------------------------------------------------------------------------
-// Misc verifiers
-//----------------------------------------------------------------------------------------
-
 /**
  * This Verifier takes two Verifiers and performs a boolean `or` operation on their
  * results. In essence, a value only passes this Verifier if it passes either of the two
@@ -987,9 +954,9 @@ public:
      * \pre values must contain at least two values
      *
      * \todo The use of the variant to use both raw pointers and shared pointers is
-     *       definitely undesired. At the momement we are not handling the ownership of
-     *       the verifiers very well and this must be cleaned up when doing a pass over
-     *       the entire ownership model of the documentation/verifiers. For now it was
+     *       definitely undesired. At the moment we are not handling the ownership of the
+     *       verifiers very well and this must be cleaned up when doing a pass over the
+     *       entire ownership model of the documentation/verifiers. For now it was
      *       necessary to make the codegen work in all cases without complications there
      */
     explicit OrVerifier(const std::vector<std::variant<Verifier*,
@@ -1003,12 +970,11 @@ public:
      *
      * \param dictionary The ghoul::Dictionary that is to be tested
      * \param key The key contained in \p dictionary that is to be tested
-     * \return A TestResult object that contains the test results. If the value fails
-     *         all Verifiers, TestResult::success is `false` and the
-     *         TestResult::offenses list contains \p with a reason of
-     *         TestResult::Offense::Reason::Verification. If \p key%'s value passes either
-     *         of the two Verifier%s, the result's TestResult::success is `true` and the
-     *         TestResult::offenses is empty
+     * \return A TestResult object that contains the test results. If the value fails all
+     *         Verifiers, TestResult::success is `false` and the TestResult::offenses list
+     *         contains \p with a reason of TestResult::Offense::Reason::Verification. If
+     *         \p key%'s value passes either of the two Verifier%s, the result's
+     *         TestResult::success is `true` and the TestResult::offenses is empty
      */
     TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;
@@ -1286,9 +1252,9 @@ using StringAnnotationVerifier = AnnotationVerifier<StringVerifier>;
  */
 using TableAnnotationVerifier = AnnotationVerifier<TableVerifier>;
 
-// Definitions of external templates that are instantiated in the cpp file
-// This cuts down the compilation times as almost all of the possible template types do
-// not need to be instantiated multiple times
+// Definitions of external templates that are instantiated in the cpp file. This cuts down
+// the compilation times as almost all of the possible template types do not need to be
+// instantiated multiple times
 extern template class Vector2Verifier<int>;
 extern template class Vector2Verifier<double>;
 extern template class Vector3Verifier<int>;

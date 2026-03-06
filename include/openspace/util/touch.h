@@ -47,9 +47,9 @@ struct TouchInput {
     size_t touchDeviceId = size_t(-1);
     size_t fingerId = size_t(-1);
     glm::vec2 pos = glm::vec2(0.f);
-    // movement since last touch input
+    // Movement since last touch input
     glm::vec2 dPos = glm::vec2(0.f);
-    // timestamp in seconds from global touch initialization
+    // Timestamp in seconds from global touch initialization
     double timestamp = 0.0;
 };
 

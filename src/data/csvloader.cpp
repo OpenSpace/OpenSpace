@@ -184,8 +184,8 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         entry.data.reserve(nDataColumns);
 
         for (size_t i = 0; i < row.size(); i++) {
-            // Check if column should be excluded. Note that list of indices is sorted
-            // so we can do a binary search
+            // Check if column should be excluded. Note that list of indices is sorted so
+            // we can do a binary search
             if (hasExcludeColumns &&
                 std::binary_search(skipColumns.begin(), skipColumns.end(), i))
             {

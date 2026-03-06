@@ -136,9 +136,9 @@ namespace {
             RealTimeLoop
         };
 
-        // The mode of how the video is played back. The Default is `RealTimeLoop`,
-        // which means that the video is played in realtime using the `Play` command
-        // in the user interface.
+        // The mode of how the video is played back. The Default is `RealTimeLoop`, which
+        // means that the video is played in realtime using the `Play` command in the user
+        // interface.
         std::optional<PlaybackMode> playbackMode;
     };
 } // namespace
@@ -436,10 +436,9 @@ void VideoPlayer::initializeMpv() {
         LINFO("Failed to initialize libmpv OpenGL context");
     }
 
-    // When there is a need to call mpv_render_context_update(), which can
-    // request a new frame to be rendered.
-    // (Separate from the normal event handling mechanism for the sake of
-    //  users which run OpenGL on a different thread.)
+    // When there is a need to call mpv_render_context_update(), which can request a new
+    // frame to be rendered. (Separate from the normal event handling mechanism for the
+    // sake of users which run OpenGL on a different thread.)
     mpv_render_context_set_update_callback(_mpvRenderContext, onMpvRenderUpdate, this);
 
     // Load file
@@ -617,7 +616,7 @@ void VideoPlayer::handleMpvEvents() {
                 break;
             }
             default: {
-                // Ignore uninteresting or unknown events.
+                // Ignore uninteresting or unknown events
                 break;
             }
         }

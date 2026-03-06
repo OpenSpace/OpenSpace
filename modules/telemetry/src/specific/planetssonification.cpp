@@ -54,7 +54,7 @@ namespace {
     constexpr std::string_view _loggerCat = "PlanetsSonification";
 
     // Number of data items for planets and moons, which is used to calculate the total
-    // size of the data vector sent to the Open Sound Control receiver.
+    // size of the data vector sent to the Open Sound Control receiver
     constexpr int NumDataItemsPlanet = 4;
     constexpr int NumDataItemsMoon = 3;
 
@@ -234,10 +234,10 @@ namespace {
     };
 
     struct [[codegen::Dictionary(PlanetsSonification)]] Parameters {
-        // The name of the planet
+        // The name of the planet.
         std::string name;
 
-        // Names of the moons for the planet
+        // Names of the moons for the planet.
         std::optional<std::vector<std::string>> moons;
     };
 } // namespace
@@ -578,7 +578,7 @@ bool PlanetsSonification::updateData(const Camera* camera, int planetIndex,
 
     // Calculate the angles depending on the Angle calculation mode and if the overview
     // mode is enabled, then calculate the angles with respect to the Sun instead of
-    // the camera.
+    // the camera
     double horizontalAngle = 0.0;
     if (_overviewEnabled) {
         horizontalAngle = calculateAngleFromAToB(
@@ -614,7 +614,7 @@ bool PlanetsSonification::updateData(const Camera* camera, int planetIndex,
 
     // Calculate the angles to the moons from the planet. These angles are used for the
     // sonification of the moons. The reason why the angle is calculated from the planet
-    // and not the camera is to give a feeling that the moons are orbiting the audience.
+    // and not the camera is to give a feeling that the moons are orbiting the audience
     bool dataWasUpdated = false;
     for (DataBody& moon : _planets[planetIndex].moons) {
         double dist = calculateDistanceTo(camera, moon.name, DistanceUnit::Kilometer);
@@ -691,8 +691,8 @@ void PlanetsSonification::sendData(int planetIndex) {
     std::string label = "/" + _planets[planetIndex].name;
     std::vector<OpenSoundControlDataType> data;
 
-    // The total size of the data vector is NumDataItemsPlanet for the
-    // planet, and then NumDataItemsMoon per moon
+    // The total size of the data vector is NumDataItemsPlanet for the planet, and then
+    // NumDataItemsMoon per moon
     data.reserve(
         NumDataItemsPlanet + NumDataItemsMoon * _planets[planetIndex].moons.size()
     );

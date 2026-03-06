@@ -172,10 +172,9 @@ namespace {
     constexpr Property::PropertyInfo GlobalRotationInfo = {
         "GlobalRotation",
         "Global rotation",
-        "Applies a global view rotation. Use this to rotate the position of the "
-        "focus node away from the default location on the screen. This setting "
-        "persists even when a new focus node is selected. Defined using pitch, yaw, roll "
-        "in radians.",
+        "Applies a global view rotation. Use this to rotate the position of the focus "
+        "node away from the default location on the screen. This setting persists even "
+        "when a new focus node is selected. Defined using pitch, yaw, roll in radians.",
         Property::Visibility::AdvancedUser
     };
 
@@ -253,9 +252,8 @@ namespace {
     constexpr Property::PropertyInfo HorizFieldOfViewInfo = {
         "HorizFieldOfView",
         "Horizontal field of view",
-        "Adjusts the degrees of the horizontal field of view. The vertical field of "
-        "view will be automatically adjusted to match, according to the current aspect "
-        "ratio.",
+        "Adjusts the degrees of the horizontal field of view. The vertical field of view "
+        "will be automatically adjusted to match, according to the current aspect ratio.",
         Property::Visibility::User
     };
 
@@ -510,7 +508,7 @@ void RenderEngine::initializeGL() {
     _renderer.setHDRExposure(_hdrExposure);
     _renderer.initialize();
 
-    // set the close clip plane and the far clip plane to extreme values while in
+    // Set the close clip plane and the far clip plane to extreme values while in
     // development
     global::windowDelegate->setNearFarClippingPlane(0.001f, 1000.f);
 
@@ -995,11 +993,11 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
 {
     ghoul::Dictionary dict = std::move(data);
 
-    // set path to the current renderer's main fragment shader
+    // Set path to the current renderer's main fragment shader
     dict.setValue("rendererData", _rendererData);
-    // parameterize the main fragment shader program with specific contents.
-    // fsPath should point to a shader file defining a Fragment getFragment() function
-    // instead of a void main() setting glFragColor, glFragDepth, etc
+    // Parameterize the main fragment shader program with specific contents. `fsPath`
+    // should point to a shader file defining a Fragment getFragment() function instead of
+    // a void main() setting glFragColor, glFragDepth, etc
     dict.setValue("fragmentPath", fsPath);
 
     using namespace ghoul::opengl;
@@ -1029,9 +1027,9 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     ghoul::Dictionary dict = std::move(data);
     dict.setValue("rendererData", _rendererData);
 
-    // parameterize the main fragment shader program with specific contents.
-    // fsPath should point to a shader file defining a Fragment getFragment() function
-    // instead of a void main() setting glFragColor, glFragDepth, etc
+    // Parameterize the main fragment shader program with specific contents. `fsPath`
+    // should point to a shader file defining a Fragment getFragment() function instead of
+    // a void main() setting glFragColor, glFragDepth, etc
     dict.setValue("fragmentPath", fsPath);
 
     using namespace ghoul::opengl;
@@ -1079,9 +1077,9 @@ void RenderEngine::setResolveData(ghoul::Dictionary resolveData) {
 }
 
 void RenderEngine::takeScreenshot() {
-    // We only create the directory here, as we don't want to spam the users
-    // screenshot folder everytime we start OpenSpace even when we are not taking any
-    // screenshots. So the first time we actually take one, we create the folder:
+    // We only create the directory here, as we don't want to spam the users screenshot
+    // folder everytime we start OpenSpace even when we are not taking any screenshots. So
+    // the first time we actually take one, we create the folder
 
     if (!std::filesystem::is_directory(absPath("${SCREENSHOTS}"))) {
         std::filesystem::create_directories(absPath("${SCREENSHOTS}"));

@@ -74,7 +74,7 @@ std::pair<double, std::string> ImageSequencer::nextTarget(double time) const {
         return *it;
     }
     else {
-        return { 0.0, "No Target" };
+        return std::pair(0.0, "No Target");
     }
 }
 
@@ -90,7 +90,7 @@ std::pair<double, std::string> ImageSequencer::currentTarget(double time) const 
         return *std::prev(it);
     }
     else {
-        return { 0.0, "No Target" };
+        return std::pair(0.0, "No Target");
     }
 }
 
@@ -199,7 +199,7 @@ std::vector<Image> ImageSequencer::imagePaths(const std::string& projectee,
 {
     // TODO: Check how this works with time jumps
 
-    // Check if this instance is either in range or a valid candidate to recieve data
+    // Check if this instance is either in range or a valid candidate to receive data
 
     const bool instrumentActive = isInstrumentActive(time, instrument);
     const bool hasCurrentTime = _subsetMap[projectee]._range.includes(time);

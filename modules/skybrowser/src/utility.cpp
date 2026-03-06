@@ -49,7 +49,9 @@ namespace {
 
 namespace openspace {
 
-/// Converts from spherical coordinates in the unit of degrees to cartesian coordinates
+/**
+ * Converts from spherical coordinates in the unit of degrees to cartesian coordinates.
+ */
 glm::dvec3 sphericalToCartesian(const glm::dvec2& coords) {
     const glm::dvec2 coordsRadians = glm::radians(coords);
     const glm::dvec3 cartesian = glm::dvec3(
@@ -60,7 +62,9 @@ glm::dvec3 sphericalToCartesian(const glm::dvec2& coords) {
     return cartesian;
 }
 
-/// Converts from cartesian coordianates to spherical in the unit of degrees
+/**
+ * Converts from cartesian coordianates to spherical in the unit of degrees.
+ */
 glm::dvec2 cartesianToSpherical(const glm::dvec3& coords) {
     // Equatorial coordinates RA = right ascension, Dec = declination
     double ra = std::atan2(coords.y, coords.x);
@@ -178,7 +182,9 @@ bool isCoordinateInView(const glm::dvec3& equatorial) {
     return isCoordInView;
 }
 
-/// Transforms a pixel coordinate to a screen space coordinate
+/**
+ * Transforms a pixel coordinate to a screen space coordinate.
+ */
 glm::vec2 pixelToScreenSpace2d(const glm::vec2& mouseCoordinate) {
     const glm::vec2 size = glm::vec2(global::windowDelegate->currentWindowSize());
     // Change origin to middle of the window
@@ -190,7 +196,9 @@ glm::vec2 pixelToScreenSpace2d(const glm::vec2& mouseCoordinate) {
     return screenSpacePos;
 }
 
-/// The horizontal and vertical fov of the OpenSpace window
+/**
+ * The horizontal and vertical fov of the OpenSpace window.
+ */
 glm::dvec2 fovWindow() {
     // OpenSpace FOV
     const glm::dvec2 windowDim = glm::dvec2(global::windowDelegate->currentWindowSize());

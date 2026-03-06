@@ -117,18 +117,20 @@ protected:
 
     static openspace::Documentation Documentation();
 
-    /// The layout of the VBOs (use float if sending as positions to shader)
+    /**
+     * The layout of the VBOs (use float if sending as positions to shader).
+     */
     template <typename T>
     struct TrailVBOLayout {
         T x, y, z;
     };
 
     /// The backend storage for the vertex buffer object containing all points for this
-    /// trail.
+    /// trail
     std::vector<TrailVBOLayout<float>> _vertexArray;
 
     /// The index array that is potentially used in the draw call. If this is empty, no
-    /// element draw call is used.
+    /// element draw call is used
     std::vector<unsigned int> _indexArray;
 
     /// The Translation object that provides the position of the individual trail points

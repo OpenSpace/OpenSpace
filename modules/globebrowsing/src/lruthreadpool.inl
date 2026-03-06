@@ -73,7 +73,7 @@ LRUThreadPool<KeyType>::LRUThreadPool(const LRUThreadPool& toCopy)
     : LRUThreadPool(toCopy._workers.size(), toCopy._queuedTasks.maximumCacheSize())
 {}
 
-// the destructor joins all threads
+// The destructor joins all threads
 template <typename KeyType>
 LRUThreadPool<KeyType>::~LRUThreadPool() {
     {
@@ -82,19 +82,19 @@ LRUThreadPool<KeyType>::~LRUThreadPool() {
     }
     _condition.notify_all();
 
-    // join them
+    // Join them
     for (size_t i = 0; i < _workers.size(); i++) {
         _workers[i].join();
     }
 }
 
-// add new work item to the pool
+// Add new work item to the pool
 template <typename KeyType>
 void LRUThreadPool<KeyType>::enqueue(std::function<void()> f, KeyType key) {
     {
         const std::unique_lock lock(_queueMutex);
 
-        // add the task
+        // Add the task
         //_queuedTasks.put(key, f);
         const std::vector<std::pair<KeyType, std::function<void()>>>& unfinishedTasks =
             _queuedTasks.putAndFetchPopped(key, f);
@@ -105,7 +105,7 @@ void LRUThreadPool<KeyType>::enqueue(std::function<void()> f, KeyType key) {
         }
     }
 
-    // wake up one thread
+    // Wake up one thread
     _condition.notify_one();
 }
 

@@ -132,8 +132,8 @@ namespace {
         std::optional<std::filesystem::path> textureMapFile;
 
         // Specifies whether to do case sensitive checks when reading column names.
-        // Default is not to, so that 'X' and 'x' are both valid column names for the
-        // x position column, for example.
+        // Default is not to, so that 'X' and 'x' are both valid column names for the x
+        // position column, for example.
         std::optional<bool> caseSensitive;
 
         // Specifies a value that, when read from the file, should be interpreted as 'no

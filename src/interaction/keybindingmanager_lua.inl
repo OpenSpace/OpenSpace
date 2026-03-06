@@ -142,7 +142,9 @@ namespace {
     }
 }
 
-// Clear all key bindings.
+/**
+ * Clear all key bindings.
+ */
 [[codegen::luawrap]] void clearKeys() {
     global::keybindingManager->resetKeyBindings();
 }

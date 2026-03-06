@@ -64,6 +64,7 @@ public:
      *        relative to the base directory (the path starting with . or ..), an absolute
      *        path (that path starting with *:/ or /) or relative to the global asset root
      *        (if the path starts any other way)
+     *
      * \pre \p path must not be the empty string
      */
     void add(const std::string& path);
@@ -76,6 +77,7 @@ public:
      *        relative to the base directory (the path starting with . or ..), an absolute
      *        path (that path starting with *:/ or /) or relative to the global asset root
      *        (if the path starts any other way)
+     *
      * \pre \p path must not be the empty string
      */
     void remove(const std::string& path);
@@ -89,6 +91,7 @@ public:
      *        relative to the base directory (the path starting with . or ..), an absolute
      *        path (that path starting with *:/ or /) or relative to the global asset root
      *        (if the path starts any other way)
+     *
      * \pre \p path must not be the empty string
      */
     void reload(const std::string& path);

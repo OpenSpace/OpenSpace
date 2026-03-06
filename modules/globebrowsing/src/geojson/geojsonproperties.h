@@ -94,8 +94,10 @@ struct GeoJsonProperties : public PropertyOwner {
     OptionProperty altitudeModeOption;
 };
 
-// Optional versions of all the properties above, that can be read from a geoJson file
-// and used to override any default values
+/**
+ * Optional versions of all the properties above, that can be read from a geoJson file and
+ * used to override any default values.
+ */
 struct GeoJsonOverrideProperties {
     std::optional<std::string> name;
 
@@ -122,7 +124,7 @@ struct GeoJsonOverrideProperties {
 GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& feature);
 
 struct PropertySet {
-    /// This value set should be a reference to the main component's propertyowner
+    /// This value set should be a reference to the main component's PropertyOwner
     GeoJsonProperties& defaultValues;
     /// This is a unique set of properties to use for overriding the default values
     GeoJsonOverrideProperties overrideValues;

@@ -37,15 +37,16 @@ namespace {
         // This key specifies the type of ResourceSyncrhonization that gets created. It
         // has to be one of the valid ResourceSyncrhonizations that are available for
         // creation (see the FactoryDocumentation for a list of possible
-        // ResourceSyncrhonizations), which depends on the configration of the application
+        // ResourceSyncrhonizations), which depends on the configration of the
+        // application.
         std::string type
             [[codegen::annotation("A ResourceSynchronization created by a factory")]];
 
         // A unique identifier that is used to reference this specific
-        // ResourceSynchronization object
+        // ResourceSynchronization object.
         std::string identifier [[codegen::identifier()]];
 
-        // A user readable name of this synchronization
+        // A user readable name of this synchronization.
         std::string name;
     };
 } // namespace

@@ -98,7 +98,7 @@ ReadFitsTask::ReadFitsTask(const ghoul::Dictionary& dictionary) {
     if (p.filterColumnNames.has_value()) {
         const ghoul::Dictionary d = *p.filterColumnNames;
 
-        // Ugly fix for ASCII sorting when there are more columns read than 10.
+        // Ugly fix for ASCII sorting when there are more columns read than 10
         std::set<int> intKeys;
         for (const std::string_view key : d.keys()) {
             intKeys.insert(std::stoi(std::string(key)));

@@ -286,10 +286,9 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
                 LWARNING(std::format("Error downloading '{}': {}", url, err));
             }
             curl_easy_cleanup(curl);
-            // Set a boolean variable in MemoryFile to determine if it is
-            // valid/corrupted or not.
-            // Return MemoryFile even if it is not valid, and check if it is after
-            // future.get() call.
+            // Set a boolean variable in MemoryFile to determine if it is valid/corrupted
+            // or not. Return MemoryFile even if it is not valid, and check if it is after
+            // future.get() call
             file.corrupted = true;
             return file;
         }

@@ -223,8 +223,8 @@ namespace {
             std::optional<glm::vec2> colorMappingDataRange;
         };
 
-        // Settings related to the coloring of the vectors, such as a fixed color,
-        // color map, etc.
+        // Settings related to the coloring of the vectors, such as a fixed color, color
+        // map, etc.
         std::optional<ColorSettings> coloring;
 
         // [[codegen::verbatim(VectorFieldScaleInfo.description)]]

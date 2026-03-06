@@ -118,7 +118,7 @@ void GalaxyRaycaster::preRaycast(const RaycastData& data,
 }
 
 void GalaxyRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&) {
-    _textureUnit = nullptr; // release texture unit.
+    _textureUnit = nullptr;
 }
 
 bool GalaxyRaycaster::isCameraInside(const RenderData& data, glm::vec3& localPosition) {
@@ -145,7 +145,7 @@ std::filesystem::path GalaxyRaycaster::raycasterPath() const {
 }
 
 std::filesystem::path GalaxyRaycaster::helperPath() const {
-    return ""; // no helper file
+    return "";
 }
 
 void GalaxyRaycaster::setAspect(const glm::vec3& aspect) {

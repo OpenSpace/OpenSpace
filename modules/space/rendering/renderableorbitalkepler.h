@@ -136,11 +136,11 @@ private:
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;
 
-    // Line cache
+    /// Line cache
     UniformCache(modelViewTransform, projectionTransform, trailFadeExponent,
         colorFadeCutoffValue, inGameTime, color, opacity) _uniformTrailCache;
 
-    // Point cache
+    /// Point cache
     UniformCache(modelTransform, viewTransform, projectionTransform, renderOption,
         cameraViewDirectionUp, cameraViewDirectionRight, cameraPositionWorld,
         cameraUpWorld, inGameTime, color, pointSizeExponent, enableMaxSize, maxSize,

@@ -98,15 +98,30 @@ private:
         Seek,
         Loop
     };
+
     // Framebuffer
     void createTexture(glm::ivec2 size);
     void resizeTexture(glm::ivec2 size);
 
-    // Libmpv
-    static void onMpvRenderUpdate(void*); // Has to be static because of C api
-    void initializeMpv(); // Called first time in update
-    void renderMpv(); // Called in update
-    void renderFrame(); // Renders a frame; called in renderMpv
+    /**
+     * Has to be static because of C API.
+     */
+    static void onMpvRenderUpdate(void*); 
+
+    /**
+     * Called first time in update.
+     */
+    void initializeMpv();
+
+    /**
+     * Called in update.
+     */
+    void renderMpv();
+
+    /**
+     * Renders a frame; called in renderMpv.
+     */
+    void renderFrame();
     void commandAsyncMpv(const char* cmd[], MpvKey key = MpvKey::Command);
     void handleMpvEvents();
     // Libmpv properties
@@ -134,11 +149,14 @@ private:
     // Video properties. Try to read all these values from the video
     std::filesystem::path _videoFile;
     double _currentVideoTime = 0.0;
-    double _fps = 24.0; // If when we read it it is 0, use 24 fps
+    /// If when we read it it is 0, use 24 fps
+    double _fps = 24.0;
     double _videoDuration = 0.0;
-    glm::ivec2 _videoResolution = glm::ivec2(2048, 1024); // Used for the fbos
+    /// Used for the fbos
+    glm::ivec2 _videoResolution = glm::ivec2(2048, 1024);
     bool _isPaused = false;
-    PlaybackMode _playbackMode = PlaybackMode::RealTimeLoop; // Default is to loop
+    /// Default is to loop
+    PlaybackMode _playbackMode = PlaybackMode::RealTimeLoop;
 
     // Maps for keeping track of libmpv commands and formats
     std::map<MpvKey, const char*> keys;
@@ -156,12 +174,17 @@ private:
     mpv_handle* _mpvHandle = nullptr;
     mpv_render_context* _mpvRenderContext = nullptr;
     std::unique_ptr<ghoul::opengl::Texture> _frameTexture;
-    GLuint _fbo = 0; // Our opengl framebuffer where mpv renders to
-    int _wakeup = 0; // Signals when libmpv has a new frame ready
-    bool _isInitialized = false; // If libmpv has been inititalized
-    bool _isSeeking = false; // Prevent seeking while already seeking
+    /// Our OpenGL framebuffer where mpv renders to
+    GLuint _fbo = 0;
+    /// Signals when libmpv has a new frame ready
+    int _wakeup = 0;
+    /// If libmpv has been inititalized
+    bool _isInitialized = false;
+    /// Prevent seeking while already seeking
+    bool _isSeeking = false;
     bool _isDestroying = false;
-    double _seekThreshold = 1.0; // Threshold to ensure we seek to a different time
+    /// Threshold to ensure we seek to a different time
+    double _seekThreshold = 1.0;
 };
 } // namespace video
 

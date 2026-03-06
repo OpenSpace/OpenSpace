@@ -396,7 +396,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
             line.substr(0, 7) != "texture" && line.substr(0, 10) != "maxcomment")
         {
             // We read a line that doesn't belong to the header, so we have to jump back
-            // before the beginning of the current line.
+            // before the beginning of the current line
             fileStream.seekg(position);
             break;
         }
@@ -474,7 +474,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
 
             // Gaia DR1 data from AMNH measures positions in Parsec, but
             // RenderableGaiaStars expects kiloParsec (because fits file from Vienna had
-            // in kPc). Thus we need to convert positions twice atm.
+            // in kPc). Thus we need to convert positions twice atm
             renderValues[0] = readValues[0] / 1000.f; // PosX
             renderValues[1] = readValues[1] / 1000.f; // PosY
             renderValues[2] = readValues[2] / 1000.f; // PosZ
@@ -497,8 +497,10 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
     return fullData;
 }
 
-// This is pretty annoying, the read method is not derived from the HDU class in CCfits -
-// need to explicitly cast to the sub classes to access read.
+/**
+ * This is pretty annoying, the read method is not derived from the HDU class in CCfits -
+ * need to explicitly cast to the sub classes to access read.
+ */
 template <typename T>
 std::shared_ptr<ImageData<T>> FitsFileReader::readImageInternal(ExtHDU& image) {
    try {

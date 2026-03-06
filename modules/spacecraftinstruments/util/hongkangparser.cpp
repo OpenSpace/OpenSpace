@@ -110,7 +110,7 @@ HongKangParser::HongKangParser(std::string name, std::filesystem::path fileName,
 }
 
 std::string HongKangParser::findPlaybookSpecifiedTarget(std::string line) {
-    //remember to add this lua later...
+    // Remember to add this Lua later...
     line = ghoul::toUpperCase(line);
     const std::vector<std::string>& ptarg = _potentialTargets;
     std::string target;
@@ -129,7 +129,7 @@ std::string HongKangParser::findPlaybookSpecifiedTarget(std::string line) {
 }
 
 bool HongKangParser::create() {
-    // Check input for errors.
+    // Check input for errors
     const bool hasObserver = SpiceManager::ref().hasNaifId(_spacecraft);
     if (!hasObserver) {
         throw ghoul::RuntimeError(
@@ -209,7 +209,7 @@ bool HongKangParser::create() {
                 // Store actual image in map. All targets get _only_ their corresp. subset
                 _subsetMap[image.target]._subset.push_back(std::move(image));
             }
-            if (it->second->decoderType() == "SCANNER") { // SCANNER START
+            if (it->second->decoderType() == "SCANNER") {
                 const double scanStart = time;
 
                 InstrumentDecoder* scanner = static_cast<InstrumentDecoder*>(

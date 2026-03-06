@@ -147,7 +147,7 @@ namespace {
  * The last parameter is only used if there are multiple craft specified in the provided
  * TLE file and is selecting which (0-based index) of the list to create a kernel from.
  *
- * This function returns the SPICE ID of the object for which the kernel was created
+ * This function returns the SPICE ID of the object for which the kernel was created.
  */
 [[codegen::luawrap]] int convertTLEtoSPK(std::filesystem::path tle,
                                          std::filesystem::path spk,
@@ -201,7 +201,7 @@ namespace {
 
     std::vector<std::string> lines = ghoul::tokenizeString(contents, '\n');
 
-    // erase carriage return characters
+    // Erase carriage return characters
     for (std::string& line : lines) {
         line.erase(std::remove(begin(line), end(line), '\r'), end(line));
     }

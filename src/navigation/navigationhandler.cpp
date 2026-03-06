@@ -469,9 +469,9 @@ void NavigationHandler::updateCameraTransitions() {
 
     const bool anchorWasChanged = anchorNode() != _lastAnchor;
     if (anchorWasChanged) {
-        // The anchor was changed between frames, so the transitions we have to check
-        // are a bit different. Just directly trigger the relevant events for the
-        // respective node
+        // The anchor was changed between frames, so the transitions we have to check are
+        // a bit different. Just directly trigger the relevant events for the respective
+        // node
         if (wasInReachSphere) {
             triggerRecedeEvent(_lastAnchor);
         }
@@ -647,7 +647,7 @@ NavigationState NavigationHandler::navigationState(
     const double pitch = eulerAngles.x;
     const double yaw = -eulerAngles.y;
 
-    // Need to compensate by redisual roll left in local rotation:
+    // Need to compensate by residual roll left in local rotation
     const glm::dquat unroll = glm::angleAxis(eulerAngles.z, glm::dvec3(0.0, 0.0, 1.0));
     const glm::dvec3 neutralUp =
         glm::inverse(invNeutralRotation) * unroll * _camera->lookUpVectorCameraSpace();

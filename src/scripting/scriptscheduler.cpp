@@ -176,8 +176,8 @@ std::vector<std::string> ScriptScheduler::progressTo(double newTime) {
     }
 
     if (newTime > _currentTime) {
-        // Moving forward in time; we need to find the highest entry in the timings
-        // vector that is still smaller than the newTime
+        // Moving forward in time; we need to find the highest entry in the timings vector
+        // that is still smaller than the newTime
         const size_t prevIndex = _currentIndex;
         const auto it = std::upper_bound(
             _scripts.begin() + prevIndex, // We only need to start at the previous time

@@ -34,9 +34,9 @@
 #include <openspace/navigation/pathnavigator.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/query/query.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/query/query.h>
 #include <openspace/util/universalhelpers.h>
 #include <ghoul/format.h>
 #include <ghoul/glm.h>
@@ -65,7 +65,7 @@ namespace {
             BoolProperty* boolProp = dynamic_cast<BoolProperty*>(prop);
             ghoul_assert(boolProp, "Enabled is not a boolean property");
             return boolProp;
-            };
+        };
 
         // Show some info related to the visiblity of the object
         const Renderable* renderable = node->renderable();
@@ -364,8 +364,8 @@ CameraPose Path::linearInterpolatedPose(double distance, double displacement,
     }
 
 
-    // Interpolate rotation based on time instead of distance, to avoid precision
-    // problems for long paths
+    // Interpolate rotation based on time instead of distance, to avoid precision problems
+    // for long paths
     double time = static_cast<double>(_progressedTime * speedScale / _expectedDuration);
     time = std::clamp(time, 0.0, 1.0);
     pose.rotation = easedSlerpRotation(time);
@@ -646,9 +646,9 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
         return createPathFromDictionary(dictionary, Path::Type::Linear);
 
         // @TODO (emmbr26, 2022-02-15): later on we want to improve this case, so that
-        // interpolation is not a problem. One suggestion to solve this would be using
-        // two identical paths and switch the direction of interpolation halfway through.
-        // That should give us sufficient precision at both ends of the path
+        // interpolation is not a problem. One suggestion to solve this would be using two
+        // identical paths and switch the direction of interpolation halfway through. That
+        // should give us sufficient precision at both ends of the path
     }
 }
 

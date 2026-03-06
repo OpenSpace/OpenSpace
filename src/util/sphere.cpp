@@ -59,13 +59,13 @@ void Sphere::initialize() {
     const float fsegments = static_cast<float>(_nSegments);
 
     for (int i = 0; i <= _nSegments; i++) {
-        // define an extra vertex around the y-axis due to texture mapping
+        // Define an extra vertex around the y-axis due to texture mapping
         for (int j = 0; j <= _nSegments; j++) {
             const float fi = static_cast<float>(i);
             const float fj = static_cast<float>(j);
-            // inclination angle (north to south)
+            // Inclination angle (north to south)
             const float theta = fi * glm::pi<float>() / fsegments;  // 0 -> PI
-            // azimuth angle (east to west)
+            // Azimuth angle (east to west)
             const float phi = fj * glm::pi<float>() * 2.f / fsegments;  // 0 -> 2*PI
 
             // Spherical coordinates based on ISO standard.
@@ -100,7 +100,7 @@ void Sphere::initialize() {
     }
 
     nr = 0;
-    // define indices for all triangles
+    // Define indices for all triangles
     for (int i = 1; i <= _nSegments; i++) {
         for (int j = 0; j < _nSegments; j++) {
             const int t = _nSegments + 1;

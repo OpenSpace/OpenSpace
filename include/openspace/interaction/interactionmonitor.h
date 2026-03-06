@@ -33,9 +33,9 @@
 namespace openspace {
 
 /**
- * The class InteractionMonitor keeps track of user interactions during an OpenSpace
- * session. It keeps track of when the latest interaction was made and of when the state
- * changes to idle.
+ * The class InteractionMonitor keeps track of user interactions during a session. It
+ * keeps track of when the latest interaction was made and of when the state changes to
+ * idle.
  */
 class InteractionMonitor : public PropertyOwner {
 public:

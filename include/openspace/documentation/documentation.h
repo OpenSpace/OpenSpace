@@ -68,8 +68,8 @@ struct TestResult {
             /// The identifier for a ReferencingVerifier did not exist
             UnknownIdentifier
         };
-        /// The offending key that caused the Offense. In the case of a nested table,
-        /// this value will be the fully qualified name of the key
+        /// The offending key that caused the Offense. In the case of a nested table, this
+        /// value will be the fully qualified name of the key
         std::string offender;
         /// The Reason that caused this offense
         Reason reason = Reason::Unknown;
@@ -90,8 +90,8 @@ struct TestResult {
             Deprecated
         };
 
-        /// The offending key that caused the Warning. In the case of a nested table,
-        /// this value will be the fully qualified name of the key
+        /// The offending key that caused the Warning. In the case of a nested table, this
+        /// value will be the fully qualified name of the key
         std::string offender;
         /// The Reason that caused this Warning
         Reason reason;
@@ -100,7 +100,7 @@ struct TestResult {
     /// Is `true` if the TestResult is positive, `false` otherwise
     bool success = false;
     /// Contains a list of offenses that were found in the test. Is empty if
-    /// TestResult::Success `true`
+    /// TestResult::Success is `true`
     std::vector<Offense> offenses;
     /// Contains a list of warnings that were found in the test
     std::vector<Warning> warnings;
@@ -152,13 +152,13 @@ struct DocumentationEntry {
      * The constructor for a DocumentationEntry describing a key \p k in a Documentation.
      * The value for the key (or each value in the case of the
      * DocumentationEntry::Wildcard) is tested using the verifier \p v, that specifies the
-     * conditions that the \p k%'s value has to fulfill. The textual documentation
-     * \p doc shall describe the usage of the key-value pair and will be printed for human
+     * conditions that the \p k%'s value has to fulfill. The textual documentation \p doc
+     * shall describe the usage of the key-value pair and will be printed for human
      * consumption for example in the DocumentationEngine. Each DocumentationEntry can
      * further be \p opt.
      *
-     * \param k The key for which this DocumentationEntry is valid. If this valid is
-     *        equal to DocumentationEntry::Wildcard, each entry in the Documentation that
+     * \param k The key for which this DocumentationEntry is valid. If this valid is equal
+     *        to DocumentationEntry::Wildcard, each entry in the Documentation that
      *        contains this DocumentationEntry will be matched
      * \param v The Verifier that is used to test the \p k%'s value to determine if it is
      *        a valid value
@@ -181,8 +181,8 @@ struct DocumentationEntry {
      * The constructor for a DocumentationEntry describing a key \p k in a Documentation.
      * The value for the key (or each value in the case of the
      * DocumentationEntry::Wildcard) is tested using the verifier \p v, that specifies the
-     * conditions that the \p k%'s value has to fulfill. The textual documentation
-     * \p doc shall describe the usage of the key-value pair and will be printed for human
+     * conditions that the \p k%'s value has to fulfill. The textual documentation \p doc
+     * shall describe the usage of the key-value pair and will be printed for human
      * consumption for example in the DocumentationEngine. Each DocumentationEntry can
      * further be \p opt.
      *
@@ -313,7 +313,7 @@ std::string to_string(const openspace::TestResult::Warning::Reason& value);
 
 // The verifier header depends on the classes defined in here, but we want to make it
 // easier for consumers of this header to just have access to all verifiers without
-// needing to include this file separately.  Particularly with the use of the codegen, it
+// needing to include this file separately. Particularly with the use of the codegen, it
 // might lead to some unexcepted error messages about recognized identifiers in the
 // generated code which look scary
 #include <openspace/documentation/verifier.h>

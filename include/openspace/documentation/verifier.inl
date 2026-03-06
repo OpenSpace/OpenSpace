@@ -452,8 +452,9 @@ TestResult NotInListVerifier<T>::operator()(const ghoul::Dictionary& dict,
             val = static_cast<int>(d);
         }
         else {
-            TestResult r;
-            r.success = false;
+            TestResult r = {
+                .success = false
+            };
             TestResult::Offense o = {
                 .offender = key,
                 .reason = TestResult::Offense::Reason::WrongType
@@ -471,8 +472,9 @@ TestResult NotInListVerifier<T>::operator()(const ghoul::Dictionary& dict,
         return { true, {}, {} };
     }
     else {
-        TestResult r;
-        r.success = false;
+        TestResult r = {
+            .success = false
+        };
         TestResult::Offense o = {
             .offender = key,
             .reason = TestResult::Offense::Reason::Verification
@@ -579,8 +581,9 @@ TestResult InRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
         return { true, {}, {} };
     }
     else {
-        TestResult r;
-        r.success = false;
+        TestResult r = {
+            .success = false
+        };
         TestResult::Offense o = {
             .offender = key,
             .reason = TestResult::Offense::Reason::Verification
@@ -654,8 +657,9 @@ TestResult NotInRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
             val = static_cast<int>(d);
         }
         else {
-            TestResult r;
-            r.success = false;
+            TestResult r = {
+                .success = false
+            };
             TestResult::Offense o = {
                 .offender = key,
                 .reason = TestResult::Offense::Reason::WrongType
@@ -674,8 +678,9 @@ TestResult NotInRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
         return { true, {}, {} };
     }
     else {
-        TestResult r;
-        r.success = false;
+        TestResult r = {
+            .success = false
+        };
         TestResult::Offense o = {
             .offender = key,
             .reason = TestResult::Offense::Reason::Verification
@@ -687,8 +692,9 @@ TestResult NotInRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
 
 template <typename T>
 std::string NotInRangeVerifier<T>::documentation() const {
-    return "Not in range: ( " + ghoul::to_string(lower) + "," +
-           ghoul::to_string(upper) + " )";
+    return std::format(
+        "Not in range: ( {}, {} )", ghoul::to_string(lower), ghoul::to_string(upper)
+    );
 }
 
 template <typename T>

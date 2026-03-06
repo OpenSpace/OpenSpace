@@ -506,7 +506,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     setModelDependentConstants();
 
     // Setting the scaling factor after model to support the case with unknown models
-    // (model = invalid), but scaling factor being specified.
+    // (model = invalid), but scaling factor being specified
     _scalingFactor = p.scaleToMeters.value_or(_scalingFactor);
 
     if (_loadingType == LoadingType::DynamicDownloading) {
@@ -651,7 +651,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _shouldUpdateColorBuffer = true;
         // Note that we do not need to set _selectedColorRange in the constructor, due to
         // this onChange being declared before firstupdate() function that sets
-        // _colorQuantity.
+        // _colorQuantity
         if (_colorQuantity < static_cast<int>(_colorTableRanges.size())) {
             _selectedColorRange = _colorTableRanges[_colorQuantity];
         }
@@ -1132,7 +1132,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     {
         int previousIndex = _activeIndex;
         _activeIndex = updateActiveIndex(currentTime);
-        // check index again after updating
+        // Check index again after updating
         if (_activeIndex == -1) {
             return;
         }

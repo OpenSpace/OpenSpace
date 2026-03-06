@@ -45,28 +45,36 @@ namespace {
     }
 }
 
-// Connect to parallel.
+/**
+ * Connect to parallel.
+ */
 [[codegen::luawrap]] void connect() {
     if (global::windowDelegate->isMaster()) {
         global::parallelPeer->connect();
     }
 }
 
-// Disconnect from parallel.
+/**
+ * Disconnect from parallel.
+ */
 [[codegen::luawrap]] void disconnect() {
     if (global::windowDelegate->isMaster()) {
         global::parallelPeer->disconnect();
     }
 }
 
-// Request to be the host for this session.
+/**
+ * Request to be the host for this session.
+ */
 [[codegen::luawrap]] void requestHostship() {
     if (global::windowDelegate->isMaster()) {
         global::parallelPeer->requestHostship();
     }
 }
 
-// Resign hostship.
+/**
+ * Resign hostship.
+ */
 [[codegen::luawrap]] void resignHostship() {
     if (global::windowDelegate->isMaster()) {
         global::parallelPeer->resignHostship();

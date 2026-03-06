@@ -51,7 +51,7 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ScriptEngine";
 
-    constexpr int TableOffset = -3; // top-first argument-second argument
+    constexpr int TableOffset = -3; // Top-first argument-second argument
 
     struct [[codegen::Dictionary(Documentation)]] Parameters {
         std::string name;
@@ -142,7 +142,7 @@ void ScriptEngine::addLibrary(LuaLibrary library) {
         return lhs.name < rhs.name;
     };
 
-    // do we have a library with the same name as the incoming one
+    // Do we have a library with the same name as the incoming one
     const auto it = std::find_if(
         _registeredLibraries.begin(),
         _registeredLibraries.end(),
@@ -150,7 +150,7 @@ void ScriptEngine::addLibrary(LuaLibrary library) {
     );
 
     if (it != _registeredLibraries.end()) {
-        // if we found the library, we want to merge them
+        // If we found the library, we want to merge them
         LuaLibrary cpy = *it;
         cpy.merge(std::move(library));
         _registeredLibraries.erase(it);

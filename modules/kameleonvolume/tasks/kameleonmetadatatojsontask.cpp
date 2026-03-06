@@ -36,10 +36,10 @@
 
 namespace {
     struct [[codegen::Dictionary(KameleonMetadataToJsonTask)]] Parameters {
-        // The CDF file to extract data from
+        // The CDF file to extract data from.
         std::filesystem::path input;
 
-        // The JSON file to export data into
+        // The JSON file to export data into.
         std::string output [[codegen::annotation("A valid filepath")]];
     };
 } // namespace

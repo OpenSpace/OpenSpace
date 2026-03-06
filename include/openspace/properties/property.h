@@ -164,7 +164,7 @@ public:
      * read-only state is `false`.
      *
      * \param info The PropertyInfo structure that contains all the required static
-     *        information for initializing this Property.
+     *        information for initializing this Property
      *
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
@@ -246,7 +246,7 @@ public:
      *
      * \param callback The callback function that is called when the encapsulated type has
      *        been successfully changed by either the Property::set or
-     *        Property::setLuaValue methods.
+     *        Property::setLuaValue methods
      * \return An OnChangeHandle that can be used in subsequent calls to remove a callback
      *
      * \pre The \p callback must not be empty
@@ -270,7 +270,7 @@ public:
      * returned here.
      *
      * \param callback The callback function that is called when the meta data of the
-     *        property has been changed.
+     *        property has been changed
      * \return An OnMetaDataChangeHandle that can be used in subsequent calls to remove a
      *         callback
      *
@@ -284,7 +284,7 @@ public:
      * are removed.
      *
      * \param handle An OnChangeHandle that was returned from a previous call to onChange
-     *        by this property or OnChangeHandleAll if all callbacks should be removed.
+     *        by this property or OnChangeHandleAll if all callbacks should be removed
      *
      * \pre \p handle must refer to a callback that has been previously registred
      * \pre \p handle must refer to a callback that has not been removed previously
@@ -296,7 +296,7 @@ public:
      * method.
      *
      * \param handle An OnDeleteHandle that was returned from a previous call to onDelete
-     *        by this property.
+     *        by this property
      *
      * \pre \p handle must refer to a callback that has been previously registred
      * \pre \p handle must refer to a callback that has not been removed previously
@@ -309,8 +309,8 @@ public:
      * all registered callbacks are removed.
      *
      * \param handle An OnMetaDataChangeHandle that was returned from a previous call to
-     * onMetaDataChange by this property or OnMetaDataChangeHandleAll if all callbacks
-     * should be removed.
+     *        onMetaDataChange by this property or OnMetaDataChangeHandleAll if all
+     *        callbacks should be removed
      *
      * \pre \p handle must refer to a callback that has been previously registred
      * \pre \p handle must refer to a callback that has not been removed previously
@@ -426,7 +426,7 @@ public:
      * Property::setLuaValue methods.
      *
      * \param needsConfirmation `true` if confirmation dialogs should be shown, `false`
-     *        otherwise.
+     *        otherwise
      */
     void setNeedsConfirmation(bool needsConfirmation);
 
@@ -501,7 +501,7 @@ public:
     /**
      * Returns whether or not the property value has changed.
      *
-     * \return true if the property has changed
+     * \return `true` if the property has changed
      */
     bool hasChanged() const;
 
@@ -525,8 +525,8 @@ protected:
     void notifyChangeListeners();
 
     /**
-     * This method must be called by all subclasses whenever the meta data has
-     * changed and potential listeners need to be informed.
+     * This method must be called by all subclasses whenever the meta data has changed and
+     * potential listeners need to be informed.
      */
     void notifyMetaDataChangeListeners();
 
@@ -574,7 +574,7 @@ private:
 
 #ifdef _DEBUG
     // These identifiers can be used for debugging. Each Property is assigned one unique
-    // identifier.
+    // identifier
     static uint64_t Identifier;
     uint64_t _id;
 #endif

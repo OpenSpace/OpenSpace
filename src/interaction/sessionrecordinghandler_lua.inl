@@ -95,12 +95,16 @@ namespace {
     );
 }
 
-// Stops a playback session before playback of all keyframes is complete.
+/**
+ * Stops a playback session before playback of all keyframes is complete.
+ */
 [[codegen::luawrap]] void stopPlayback() {
     global::sessionRecordingHandler->stopPlayback();
 }
 
-// Pauses or resumes the playback progression through keyframes.
+/**
+ * Pauses or resumes the playback progression through keyframes.
+ */
 [[codegen::luawrap]] void setPlaybackPause(bool pause) {
     global::sessionRecordingHandler->setPlaybackPause(pause);
 }
@@ -114,12 +118,16 @@ namespace {
     global::sessionRecordingHandler->setPlaybackPause(!isPlaybackPaused);
 }
 
-// Returns true if session recording is currently playing back a recording.
+/**
+ * Returns true if session recording is currently playing back a recording.
+ */
 [[codegen::luawrap]] bool isPlayingBack() {
     return global::sessionRecordingHandler->isPlayingBack();
 }
 
-// Returns true if session recording is currently recording a recording.
+/**
+ * Returns true if session recording is currently recording a recording.
+ */
 [[codegen::luawrap]] bool isRecording() {
     return global::sessionRecordingHandler->isRecording();
 }

@@ -49,7 +49,7 @@ void goToGeodetic3(const SceneGraphNode& sgn, Geodetic3 geo) {
         "",
         sgn.identifier(),
         positionModelSpace,
-        // For globes, we know that the up-direction will always be positive Z.
+        // For globes, we know that the up-direction will always be positive Z
         // @TODO (2023-12-06 emmbr) Eventually, we want each scene graph node to be aware
         // of its own preferred up-direction. At that time, this should no longer be
         // hardcoded

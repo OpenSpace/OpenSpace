@@ -36,12 +36,14 @@ namespace {
 
 namespace openspace {
 
-/// Go far out to get a view of both tagets, aimed to match lookAt orientation.
+/**
+ * Go far out to get a view of both tagets, aimed to match lookAt orientation.
+ */
 ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint& end) {
     const double startNodeRadius = start.validBoundingSphere();
     const double endNodeRadius = end.validBoundingSphere();
 
-    if (!start.node() || !end.node()) { // guard, but should never happen
+    if (!start.node() || !end.node()) {
         LERROR("Something went wrong. The start or end node does not exist");
         return;
     }

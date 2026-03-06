@@ -100,9 +100,9 @@ public:
     /**
      * Stops all currently playing tracks. After this function, none of the identifiers
      * used to previously play a sound a valid any longer, but can still be used by the
-     * #playAudio or #playAudio3d functions to start a new sound.
-     * This function behaves the same way as if manually calling #stopAudio on all of the
-     * sounds that have been started.
+     * #playAudio or #playAudio3d functions to start a new sound. This function behaves
+     * the same way as if manually calling #stopAudio on all of the sounds that have been
+     * started.
      */
     void stopAll();
 
@@ -306,6 +306,7 @@ private:
      *
      * \param path The path to the audio file on disk that should be loaded
      * \return The SoLoud::Wav object of the loaded file
+     *
      * \throw ghoul::RuntimeError If the \p path is not a loadable audio file
      */
     std::unique_ptr<SoLoud::Wav> loadSound(const std::filesystem::path& path);

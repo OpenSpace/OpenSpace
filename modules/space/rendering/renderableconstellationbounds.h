@@ -104,7 +104,8 @@ private:
         float y;
         float z;
     };
-    std::vector<Vertex> _vertexValues; ///< A list of all vertices of all bounds
+    /// A list of all vertices of all bounds
+    std::vector<Vertex> _vertexValues;
 
     GLuint _vao = 0;
     GLuint _vbo = 0;

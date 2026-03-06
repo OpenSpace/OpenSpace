@@ -93,7 +93,7 @@ private:
     std::vector<std::string> _commandsHistory;
     size_t _activeCommand = 0;
     std::vector<std::string> _commands;
-    // Map of registered keybinds and their corresponding callbacks
+    /// Map of registered keybinds and their corresponding callbacks
     std::map<KeyWithModifier, std::function<void()>> _keyHandlers;
 
     enum class Context {
@@ -103,21 +103,21 @@ private:
     };
 
     struct AutoCompleteState {
-        // Assumed context we are currently in based on
+        /// Assumed context we are currently in based on
         Context context = Context::None;
-        // Flag indicating if we need to update the suggestion data
+        /// Flag indicating if we need to update the suggestion data
         bool isDataDirty = true;
-        // Part of the command that we're intrested in
+        /// Part of the command that we're intrested in
         std::string input;
-        // All suggestions found so far
+        /// All suggestions found so far
         std::vector<std::string> suggestions;
-        // Current suggestion index
+        /// Current suggestion index
         int currentIndex = -1;
-        // Current suggestion to show
+        /// Current suggestion to show
         std::string suggestion;
-        // Whether we should cycle suggestions forward or backwards
+        /// Whether we should cycle suggestions forward or backwards
         bool cycleReverse = false;
-        // Where to insert the suggestion in the command
+        /// Where to insert the suggestion in the command
         size_t insertPosition = 0;
     };
 

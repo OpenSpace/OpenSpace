@@ -52,7 +52,6 @@ public:
         Severity severity;
     };
 
-    // Version
     struct Version {
         int major = 0;
         int minor = 0;
@@ -176,7 +175,9 @@ public:
      */
     void addAsset(const std::string& path);
 
-    /// Removes an asset unless the `ignoreUpdates` member is set to `true`
+    /**
+     * Removes an asset unless the `ignoreUpdates` member is set to `true`.
+     */
     void removeAsset(const std::string& path);
 
     static constexpr Version CurrentVersion = Version{ 1, 4 };

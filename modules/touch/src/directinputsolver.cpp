@@ -36,7 +36,9 @@
 namespace {
     using namespace openspace;
 
-    // Used in the LM algorithm
+    /**
+     * Used in the LM algorithm.
+     */
     struct FunctionData {
         std::vector<glm::dvec3> selectedPoints;
         std::vector<glm::dvec2> screenPoints;
@@ -46,8 +48,10 @@ namespace {
         LMstat stats;
     };
 
-    // project back a 3D point in model view to clip space [-1,1] coordinates on the view
-    // plane
+    /**
+     * Project back a 3D point in model view to clip space[-1, 1] coordinates on the view
+     * plane.
+     */
     glm::dvec2 castToNDC(const glm::dvec3& vec, Camera& camera, SceneGraphNode* node) {
         glm::dvec3 posInCamSpace = glm::inverse(camera.rotationQuaternion()) *
             (node->worldRotationMatrix() * vec +
@@ -57,7 +61,9 @@ namespace {
         return (glm::dvec2(clipspace) / clipspace.w);
     }
 
-    // Returns screen point s(xi,par) dependent the transform M(par) and object point xi
+    /**
+     * Returns screen point s(xi, par) dependent the transform M(par) and object point xi.
+     */
     double distToMinimize(double* par, int x, void* fdata, LMstat* lmstat) {
         FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
 
@@ -143,11 +149,13 @@ namespace {
         return glm::length(ptr->screenPoints.at(x) - newScreenPoint);
     }
 
-    // Gradient of distToMinimize w.r.t par (using forward difference)
+    /**
+     * Gradient of distToMinimize w.r.t par(using forward difference).
+     */
     void gradient(double* g, double* par, int x, void* fdata, LMstat* lmstat) {
         FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
         double f0 = distToMinimize(par, x, fdata, lmstat);
-        // scale value to find minimum step size h, dependant on planet size
+        // Scale value to find minimum step size h, dependant on planet size
         double scale = log10(ptr->node->interactionSphere());
         std::vector<double> dPar(ptr->nDOF, 0.0);
         dPar.assign(par, par + ptr->nDOF);
@@ -161,32 +169,33 @@ namespace {
             dPar.at(i) = par[i];
             // Iterative process to find the minimum step h that gives a good gradient
             for (int j = 0; j < 100; j++) {
-                if ((f1 - f0) != 0 && lastG == 0) { // found minimum step size h
-                    // scale up to get a good initial guess value
+                if ((f1 - f0) != 0 && lastG == 0) {
+                    // Found minimum step size h
+                    // Scale up to get a good initial guess value
                     h *= scale * scale * scale;
 
-                    // clamp min step size to a fraction of the incoming parameter
+                    // Clamp min step size to a fraction of the incoming parameter
                     if (i == 2) {
                         double epsilon = 1e-3;
-                        // make sure incoming parameter is larger than 0
+                        // Make sure incoming parameter is larger than 0
                         h = std::max(std::max(std::abs(dPar.at(i)), epsilon) * 0.001, h);
                     }
                     else if (ptr->nDOF == 2) {
                         h = std::max(std::abs(dPar.at(i)) * 0.001, h);
                     }
 
-                    // calculate f1 with good h for finite difference
+                    // Calculate f1 with good h for finite difference
                     dPar[i] += h;
                     f1 = distToMinimize(dPar.data(), x, fdata, lmstat);
                     dPar[i] = par[i];
                     break;
                 }
                 else if ((f1 - f0) != 0 && lastG != 0) {
-                    // h too big
+                    // `h` too big
                     h /= scale;
                 }
                 else if ((f1 - f0) == 0) {
-                    // h too small
+                    // `h` too small
                     h *= scale;
                 }
                 lastG = f1 - f0;
@@ -197,14 +206,14 @@ namespace {
             g[i] = (f1 - f0) / h;
         }
         if (ptr->nDOF == 2) {
-            // normalize on 1 finger case to allow for horizontal/vertical movement
+            // Normalize on 1 finger case to allow for horizontal/vertical movement
             for (int i = 0; i < 2; i++) {
                 g[i] = g[i] / std::abs(g[i]);
             }
         }
         else if (ptr->nDOF == 6) {
             for (int i = 0; i < ptr->nDOF; i++) {
-                // lock to only pan and zoom on 3 finger case, no roll/orbit
+                // Lock to only pan and zoom on 3 finger case, no roll/orbit
                 g[i] = (i == 2) ? g[i] : g[i] / std::abs(g[i]);
             }
         }

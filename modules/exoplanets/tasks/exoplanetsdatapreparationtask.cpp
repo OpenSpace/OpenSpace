@@ -43,13 +43,13 @@ namespace {
     constexpr std::string_view _loggerCat = "ExoplanetsDataPreparationTask";
 
     // This task is used for generating the binary data files that are used for the
-    // exoplanet system loading in OpenSpace. Using this binary file allows efficient
-    // data loading of an arbitrary exoplanet system during runtime, without keeping all
-    // data in memory.
+    // exoplanet system loading in OpenSpace. Using this binary file allows efficient data
+    // loading of an arbitrary exoplanet system during runtime, without keeping all data
+    // in memory.
     //
     // Two output files are generated, whose paths have to be specified: One binary with
-    // the data for the exoplanets (OutputBIN) and one look-up table that is used to
-    // find where in the binary file a particular system is located (OutputLUT).
+    // the data for the exoplanets (OutputBIN) and one look-up table that is used to find
+    // where in the binary file a particular system is located (OutputLUT).
     //
     // Additionally, the task uses three different files as input: 1) a CSV file with the
     // data from the NASA Exoplanet Archive, 2) A SPECK file that contains star positions,

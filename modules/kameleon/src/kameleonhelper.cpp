@@ -68,7 +68,7 @@ std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFileP
  * Extract the time for the simulation. Time is returned as a J2000 double.
  *
  * *NOTE!* The function has only been tested for some BATSRUS and ENLIL and may need to
- *         be updated to work with other models!
+ *         be updated to work with other models
  */
 double getTime(ccmc::Kameleon* kameleon, double manualOffset) {
     // Inspiration from 'void KameleonInterpolator::setEphemTime()' which doesn't seem to

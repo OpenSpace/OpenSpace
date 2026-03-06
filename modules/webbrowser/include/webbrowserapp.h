@@ -31,8 +31,8 @@
 namespace openspace {
 
 /**
- * Custom interface to CefApp and CefRenderProcessHandler. This allows us to
- * set global objects within, and modify, the DOM.
+ * Custom interface to CefApp and CefRenderProcessHandler. This allows us to set global
+ objects within, and modify, the DOM.
  */
 class WebBrowserApp : public CefApp, public CefRenderProcessHandler {
 public:

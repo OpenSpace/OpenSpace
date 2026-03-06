@@ -311,7 +311,6 @@ std::vector<float> KameleonWrapper::uniformSampledValues(const std::string& var,
     return data;
 }
 
-// This method returns new'd memory,  turn into std::vector<float> instead?
 std::vector<float> KameleonWrapper::uniformSliceValues(const std::string& var,
                                                        const glm::size3_t& outDimensions,
                                                        float slice) const

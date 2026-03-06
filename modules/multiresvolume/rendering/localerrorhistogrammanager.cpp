@@ -326,7 +326,7 @@ bool LocalErrorHistogramManager::loadFromFile(const std::filesystem::path& filen
     _spatialHistograms = std::vector<Histogram>(_numInnerNodes);
     for (unsigned int i = 0; i < _numInnerNodes; i++) {
         const int offset = i * _numBins;
-        // No need to deallocate histogram data, since histograms take ownership.
+        // No need to deallocate histogram data, since histograms take ownership
         float* data = new float[_numBins];
         memcpy(data, &histogramData[offset], sizeof(float) * _numBins);
         _spatialHistograms[i] = Histogram(_minBin, _maxBin, _numBins, data);
@@ -336,7 +336,7 @@ bool LocalErrorHistogramManager::loadFromFile(const std::filesystem::path& filen
     _temporalHistograms = std::vector<Histogram>(_numInnerNodes);
     for (unsigned int i = 0; i < _numInnerNodes; i++) {
         const int offset = i * _numBins;
-        // No need to deallocate histogram data, since histograms take ownership.
+        // No need to deallocate histogram data, since histograms take ownership
         float* data = new float[_numBins];
         memcpy(data, &histogramData[offset], sizeof(float) * _numBins);
         _temporalHistograms[i] = Histogram(_minBin, _maxBin, _numBins, data);

@@ -211,7 +211,7 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
         }
         for (const std::pair<const std::string, std::string>& e : _endpoints) {
             if (newEndpoints.find(e.first) == newEndpoints.end()) {
-                // This endpoint existed before but does not exist anymore.
+                // This endpoint existed before but does not exist anymore
                 notifyEndpointListeners(e.first, false);
             }
         }
@@ -219,8 +219,8 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
             if (_endpoints.find(e.first) == _endpoints.end() ||
                 newEndpoints[e.first] != e.second)
             {
-                // This endpoint exists now but did not exist before,
-                // or the directory has changed.
+                // This endpoint exists now but did not exist before, or the directory has
+                // changed
                 notifyEndpointListeners(e.first, true);
             }
         }

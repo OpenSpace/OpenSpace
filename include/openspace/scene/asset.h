@@ -53,7 +53,7 @@ class ResourceSynchronization;
  * Asset transitions into the Synchronized state (#isLoaded = true,
  * #isSynchronized = true, #isInitialized = false) and after the final initialization
  * step, the asset is initialized (#isLoaded = true, #isSynchronized = true and
- * #isInitialized = true)
+ * #isInitialized = true).
  */
 class Asset {
 public:
@@ -152,7 +152,7 @@ public:
     bool hasLoadedParent();
 
     /**
-     * Returns `true` if this Asset has been successfully #load ed.
+     * Returns `true` if this Asset has been successfully #load%ed.
      *
      * /return `true` if this Asset has been successfully loaded
      */
@@ -194,9 +194,9 @@ public:
     void initialize();
 
     /**
-     * Returns `true` if this Asset has been #initialize d successfully.
+     * Returns `true` if this Asset has been #initialize%d successfully.
      *
-     * \return `true` if this Asset has been #initialize d successfully. It returns
+     * \return `true` if this Asset has been #initialize%d successfully. It returns
      *         `false` both if this initialization failed as well as if thie #initialize
      *         function has not been called on this Asset
      */
@@ -231,7 +231,7 @@ public:
      *
      * \param dependency The asset that is required by this asset
      *
-     * \pre \p dependency must not be nullptr
+     * \pre \p dependency must not be `nullptr`
      */
     void require(Asset* dependency);
 

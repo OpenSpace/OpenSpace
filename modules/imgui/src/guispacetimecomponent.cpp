@@ -237,16 +237,16 @@ void GuiSpaceTimeComponent::render() {
         const double newTime = days < 0.f ? j2000 - seconds : j2000 + seconds;
 
         if (shift) {
-            // If any shift key is pressed we want to always jump to the time.
-            // No sync or send because time settings are always synced and sent
-            // to the connected nodes and peers
+            // If any shift key is pressed we want to always jump to the time. No sync or
+            // send because time settings are always synced and sent to the connected
+            // nodes and peers
             global::scriptEngine->queueScript(
                 "openspace.time.setTime(" + std::to_string(newTime) + ")"
             );
         }
         else {
-            // No sync or send because time settings are always synced and sent
-            // to the connected nodes and peers
+            // No sync or send because time settings are always synced and sent to the
+            // connected nodes and peers
             const std::string script = std::format(
                 "openspace.time.interpolateTime({}, {})", newTime, duration
             );
@@ -370,8 +370,8 @@ void GuiSpaceTimeComponent::render() {
                 TimeUnit::Second
             );
 
-            // No sync or send because time settings are always synced and sent
-            // to the connected nodes and peers
+            // No sync or send because time settings are always synced and sent to the
+            // connected nodes and peers
             global::scriptEngine->queueScript(std::format(
                 "openspace.time.interpolateDeltaTime({})", newDt
             ));
@@ -419,8 +419,8 @@ void GuiSpaceTimeComponent::render() {
                 TimeUnit::Second
             );
 
-            // No sync or send because time settings are always synced and sent
-            // to the connected nodes and peers
+            // No sync or send because time settings are always synced and sent to the
+            // connected nodes and peers
             const std::string s = std::format(
                 "openspace.time.setDeltaTime({})", newDeltaTime
             );
@@ -428,8 +428,8 @@ void GuiSpaceTimeComponent::render() {
         }
         if (!ImGui::IsItemActive() && !ImGui::IsItemClicked()) {
             if (_slidingDelta != 0.f) {
-                // No sync or send because time settings are always synced and sent
-                // to the connected nodes and peers
+                // No sync or send because time settings are always synced and sent to the
+                // connected nodes and peers
                 global::scriptEngine->queueScript(std::format(
                     "openspace.time.setDeltaTime({})", _oldDeltaTime
                 ));
@@ -456,8 +456,8 @@ void GuiSpaceTimeComponent::render() {
                 TimeUnit::Second
             );
 
-            // No sync or send because time settings are always synced and sent
-            // to the connected nodes and peers
+            // No sync or send because time settings are always synced and sent to the
+            // connected nodes and peers
             const std::string script = std::format(
                 "openspace.time.setDeltaTime({})", newDeltaTime
             );

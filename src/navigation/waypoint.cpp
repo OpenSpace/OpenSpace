@@ -47,7 +47,7 @@ namespace {
 
     /**
      * Compute a target position close to the specified target node, using knowledge of
-     * the start point and a desired distance from the node's center
+     * the start point and a desired distance from the node's center.
      */
     glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
                                         const Waypoint& startPoint)
@@ -76,15 +76,15 @@ namespace {
             return glm::dvec3(0.0, 0.0, 1.0);
         }
         else {
-            // Go to a point that is lit by the Sun, slightly offsett from sun direction
+            // Go to a point that is lit by the Sun, slightly offset from sun direction
             const glm::dvec3 sunPos = sun->worldPosition();
 
             const glm::dvec3 prevPos = startPoint.position();
             const glm::dvec3 targetToPrev = prevPos - nodePos;
             const glm::dvec3 targetToSun = sunPos - nodePos;
 
-            // Check against zero vectors, as this will lead to nan-values from the
-            // cross product
+            // Check against zero vectors, as this will lead to nan-values from the cross
+            // product
             if (glm::length(targetToSun) < LengthEpsilon ||
                 glm::length(targetToPrev) < LengthEpsilon)
             {

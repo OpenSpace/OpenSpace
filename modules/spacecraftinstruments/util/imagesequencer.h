@@ -183,12 +183,12 @@ private:
      */
     std::vector<double> _captureProgression;
 
-    // default capture image
+    /// Default capture image
     std::filesystem::path _defaultCaptureImage;
 
     std::map<std::string, Image> _latestImages;
 
-    // if no data, no run
+    /// If no data, no run
     bool _hasData = false;
 };
 

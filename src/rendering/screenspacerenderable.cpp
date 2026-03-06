@@ -609,15 +609,15 @@ glm::vec3 ScreenSpaceRenderable::raePosition() const {
 
 glm::mat4 ScreenSpaceRenderable::globalRotationMatrix() {
     // We do not want the screen space planes to be affected by
-    // 1) The global rotation of the view applied in the render engine
-    // 2) sgct's scene matrix (also called model matrix by sgct)
+    // 1. The global rotation of the view applied in the render engine
+    // 2. sgct's scene matrix (also called model matrix by sgct)
 
     const glm::mat4 inverseRotation = glm::inverse(
         global::renderEngine->globalRotation() *
         global::windowDelegate->modelMatrix()
     );
 
-    // The rotation of all screen space renderables is adjustable in the render engine:
+    // The rotation of all screen space renderables is adjustable in the render engine
     return global::renderEngine->screenSpaceRotation() * inverseRotation;
 }
 
@@ -746,7 +746,6 @@ glm::vec3 ScreenSpaceRenderable::cartesianToSpherical(const glm::vec3& cartesian
     return sanitizeSphericalCoordinates(glm::vec3(r, theta, phi));
 }
 
-// Radius, azimiuth, elevation to spherical coordinates.
 glm::vec3 ScreenSpaceRenderable::raeToSpherical(const glm::vec3& rae) const {
     const float r = rae.x;
 
@@ -760,7 +759,6 @@ glm::vec3 ScreenSpaceRenderable::raeToSpherical(const glm::vec3& rae) const {
     return glm::vec3(r, theta, phi);
 }
 
-// Spherical coordinates to radius, azimuth and elevation.
 glm::vec3 ScreenSpaceRenderable::sphericalToRae(const glm::vec3& spherical) const {
     const float r = spherical.x;
 

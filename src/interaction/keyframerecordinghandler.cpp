@@ -64,9 +64,9 @@ void KeyframeRecordingHandler::addCameraKeyframe(double sequenceTime) {
         .followFocusNodeRotation = kf._followNodeRotation
     };
     SessionRecording::Entry entry = {
-        sequenceTime,
-        global::timeManager->time().j2000Seconds(),
-        std::move(pose)
+        .timestamp = sequenceTime,
+        .simulationTime = global::timeManager->time().j2000Seconds(),
+        .value = std::move(pose)
     };
 
     auto it = std::upper_bound(
@@ -83,9 +83,9 @@ void KeyframeRecordingHandler::addCameraKeyframe(double sequenceTime) {
 void KeyframeRecordingHandler::addScriptKeyframe(double sequenceTime, std::string script)
 {
     SessionRecording::Entry entry = {
-        sequenceTime,
-        global::timeManager->time().j2000Seconds(),
-        std::move(script)
+        .timestamp = sequenceTime,
+        .simulationTime = global::timeManager->time().j2000Seconds(),
+        .value = std::move(script)
     };
 
     auto it = std::upper_bound(

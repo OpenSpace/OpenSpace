@@ -447,7 +447,6 @@ void AssetManager::unloadAsset(Asset* asset) {
     }
     _onDeinitializeFunctionRefs[asset].clear();
 
-    //
     // Tear down asset lua table
     const int top = lua_gettop(*_luaState);
     // Push the global table of AssetInfos to the lua stack
@@ -819,7 +818,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             lua_getfield(L, -1, ExportsTableName);
             const int exportsTableIndex = lua_gettop(L);
 
-            // push the second argument
+            // Push the second argument
             lua_pushvalue(L, targetLocation);
             lua_setfield(L, exportsTableIndex, exportName.c_str());
 
@@ -914,7 +913,7 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
         _assets.cend(),
         [&path](const std::unique_ptr<Asset>& asset) {
 #ifdef WIN32
-            // std::filesystem::path is case-sensitive, but paths on Windows are not, so
+            // `std::filesystem::path` is case-sensitive, but paths on Windows are not, so
             // we have to compare them in lower-case instead
             std::string p1 = asset->path().string();
             std::transform(

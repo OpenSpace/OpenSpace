@@ -81,7 +81,7 @@ public:
      * Removes all scripts for the schedule.
      *
      * \param group An int that specifies which group to clear. If none given then all
-     *              scripts are cleared from the schedule
+     *        scripts are cleared from the schedule
      */
     void clearSchedule(std::optional<int> group = std::nullopt);
 
@@ -92,7 +92,7 @@ public:
      *
      * \param newTime A j2000 time value specifying the new time stamp that the script
      *        scheduler should progress to.
-     * \return vector with the scheduled scripts that should be run from begining to end
+     * \return Vector with the scheduled scripts that should be run from begining to end
      */
     std::vector<std::string> progressTo(double newTime);
 
@@ -109,9 +109,9 @@ public:
     /**
      * Function that returns all scripts currently loaded in the script scheduler.
      *
-     * \param group An int specifying which group to return, if empty all scripts
-     *              will be returned
-     * \return a vector of all scripts that has been loaded
+     * \param group An int specifying which group to return, if empty all scripts will be
+     *        returned
+     * \return A vector of all scripts that has been loaded
      */
     std::vector<ScheduledScript> allScripts(
         std::optional<int> group = std::nullopt) const;

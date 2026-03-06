@@ -135,8 +135,9 @@ createExtrudedGeometryVertices(const std::vector<std::vector<glm::vec3>>& edgeVe
                 vertices.push_back({ { v1.x, v1.y, v1.z }, { n.x, n.y, n.z } });
                 vertices.push_back({ { v0.x, v0.y, v0.z }, { n.x, n.y, n.z } });
             }
-            // Inner boundary
             else {
+                // Inner boundary
+
                 // Flipped winding order and normal for inner rings
                 const glm::vec3 n = glm::normalize(
                     glm::cross(v0 - vOrigin, v1 - vOrigin)
@@ -260,7 +261,8 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
             const float w2 = glm::length(comp02) / lengthEdge02;
 
             if (w1 + w2 > 1.f - std::numeric_limits<float>::epsilon()) {
-                continue; // Sum larger than 1.0 => Outside of triangle
+                // Sum larger than 1.0 => Outside of triangle
+                continue;
             }
 
             const glm::vec3 pos = v0 + comp01 + comp02;

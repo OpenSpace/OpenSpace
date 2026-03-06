@@ -285,7 +285,7 @@ void HorizonsTranslation::saveCachedFile(const std::filesystem::path& file) cons
     }
 
     // Write of entire vector will only work if the data is plain old data type, is_pod is
-    // depricated in C++20 and replaced with both is_trivial and is_standard_layout
+    // deprecated in C++20 and replaced with both is_trivial and is_standard_layout
     static_assert(std::is_trivial_v<CacheKeyframe>);
     static_assert(std::is_standard_layout_v<CacheKeyframe>);
 

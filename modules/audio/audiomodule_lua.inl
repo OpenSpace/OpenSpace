@@ -118,8 +118,8 @@ namespace {
 }
 
 /**
- * Takes all of the sounds that are currently registers, unpauses them and plays them
- * from their starting points
+ * Takes all of the sounds that are currently registers, unpauses them and plays them from
+ * their starting points.
  */
 [[codegen::luawrap]] void playAllFromStart() {
     global::moduleEngine->module<AudioModule>()->playAllFromStart();

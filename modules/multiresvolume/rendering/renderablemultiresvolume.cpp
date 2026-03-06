@@ -499,65 +499,6 @@ bool RenderableMultiresVolume::initializeSelector() {
 
     return success;
 }
-/*
-void RenderableMultiresVolume::preResolve(ghoul::opengl::ProgramObject* program) {
-    RenderableVolume::preResolve(program);
-
-
-    std::stringstream ss;
-    ss << "opacity_" << getId();
-    program->setUniform(ss.str(), visible ? 1.f : 0.f);
-
-    ss.str(std::string());
-    ss << "stepSizeCoefficient_" << getId();
-    program->setUniform(ss.str(), _stepSizeCoefficient);
-
-    ss.str(std::string());
-    ss << "transferFunction_" << getId();
-    program->setUniform(ss.str(), getTextureUnit(_transferFunction->texture()));
-
-    ss.str(std::string());
-    ss << "textureAtlas_" << getId();
-    program->setUniform(ss.str(), getTextureUnit(_atlasManager->textureAtlas()));
-
-    ss.str(std::string());
-    ss << "atlasMapBlock_" << getId();
-    program->setSsboBinding(ss.str(), getSsboBinding(_atlasManager->atlasMapBuffer()));
-
-    ss.str(std::string());
-    ss << "gridType" << getId();
-    program->setUniform(ss.str(), static_cast<int>(_tsp->header().gridType));
-
-    ss.str(std::string());
-    ss << "maxNumBricksPerAxis_" << getId();
-    program->setUniform(ss.str(), static_cast<unsigned int>(_tsp->header().xNumBricks));
-
-    ss.str(std::string());
-    ss << "paddedBrickDim_" << getId();
-    program->setUniform(ss.str(), static_cast<unsigned int>(_tsp->paddedBrickDim()));
-
-    ss.str(std::string());
-    ss << "atlasSize_" << getId();
-    glm::size3_t size = _atlasManager->textureSize();
-    glm::ivec3 atlasSize(size.x, size.y, size.z);
-    program->setUniform(ss.str(), atlasSize);
-
-    _timestep++;
-}
-*/
-/*
-std::vector<ghoul::opengl::Texture*> RenderableMultiresVolume::getTextures() {
-    std::vector<ghoul::opengl::Texture*> textures{
-        _transferFunction->texture(),
-        _atlasManager->textureAtlas()
-    };
-    return textures;
-}
-
-std::vector<unsigned int> RenderableMultiresVolume::getBuffers() {
-    std::vector<unsigned int> buffers{_atlasManager->atlasMapBuffer()};
-    return buffers;
-}*/
 
 void RenderableMultiresVolume::update(const UpdateData& data) {
     _timestep++;

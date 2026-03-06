@@ -143,7 +143,7 @@ namespace {
     }
 
     int daysIntoGivenYear(int year, int month, int dayOfMonth) {
-        // month and dayCount are zero-based.
+        // Month and dayCount are zero-based
         month -= 1;
         int dayCount = dayOfMonth - 1;
         constexpr int February = 1;
@@ -234,7 +234,7 @@ namespace {
         // 3
         using namespace std::chrono;
         const int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
-        //Need to subtract 1 from daysInYear since it is not a zero-based count
+        // Need to subtract 1 from daysInYear since it is not a zero-based count
         const double nSecondsSince2000 = (daysSince2000 + daysInYear - 1) * SecondsPerDay;
 
         // 4
@@ -258,7 +258,7 @@ namespace {
         // YYYYMMDD.ddddddd
         // YYYY-MM-DD.ddddddd
         // With YYYY as the year, MM the month (1 - 12), DD the day of month (1-31),
-        // and dddd the fraction of that day.
+        // and dddd the fraction of that day
 
         // The main overview of this function:
         // 1. Read the year value

@@ -65,7 +65,7 @@ public:
      * Bumps the job identified with `key` to the beginning of the queue. In case the job
      * was not already enqueued the function simply returns false and no state is changed.
      *
-     * \param key this is the identifier of the job to bump
+     * \param key The identifier of the job to bump
      * \return `true` if the job was found, else returns false
      */
     bool touch(KeyType key);
@@ -78,7 +78,7 @@ public:
     void clearEnqueuedJobs();
 
     /**
-     * \return one finished job
+     * \return One finished job
      */
     std::shared_ptr<Job<P>> popFinishedJob();
 

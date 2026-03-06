@@ -45,7 +45,7 @@ KeyWithModifier stringToKey(const std::string& str) {
         t = ghoul::toUpperCase(t);
     }
 
-    // default is unknown
+    // Default is unknown
     Key key = Key::Unknown;
     std::string keyName = tokens.back();
     const std::string keyNameOriginal = originalTokens.back();
@@ -90,8 +90,8 @@ std::string keyToString(KeyWithModifier keyWithModifier) {
     std::string modifier;
     if (keyWithModifier.modifier != KeyModifier::None) {
         for (const KeyModifierInfo& kmi : KeyModifierInfos) {
-            // No need for an extra check for the empty modifier since that is mapped
-            // to 0, meaning that the `hasKeyModifier` will always fail for it since it
+            // No need for an extra check for the empty modifier since that is mapped to
+            // 0, meaning that the `hasKeyModifier` will always fail for it since it
             // checks internally against != 0
 
             if (hasKeyModifier(keyWithModifier.modifier, kmi.modifier)) {
@@ -114,49 +114,46 @@ std::string keyToString(KeyWithModifier keyWithModifier) {
 } // namespace openspace
 
 namespace ghoul {
-
-template <>
-std::string to_string(const openspace::Key& value) {
-    for (const openspace::KeyInfo& ki : openspace::KeyInfos) {
-        if (ki.key == value) {
-            return std::string(ki.name);
-        }
-    }
-
-    throw ghoul::MissingCaseException();
-}
-
-template <>
-std::string to_string(const openspace::KeyModifier& value) {
-    if (value == openspace::KeyModifier::None) {
-        return "";
-    }
-
-    std::string result;
-    for (const openspace::KeyModifierInfo& kmi : openspace::KeyModifierInfos) {
-        // No need for an extra check for the empty modifier since that is mapped to 0,
-        // meaning that the `hasKeyModifier` will always fail for it since it checks
-        // internally against != 0
-
-        if (hasKeyModifier(value, kmi.modifier)) {
-            result += std::format("{}+", kmi.name);
+    template <>
+    std::string to_string(const openspace::Key& value) {
+        for (const openspace::KeyInfo& ki : openspace::KeyInfos) {
+            if (ki.key == value) {
+                return std::string(ki.name);
+            }
         }
 
+        throw ghoul::MissingCaseException();
     }
-    // The last addition has added an additional '+' that we
-    // should remove
-    result.pop_back();
-    return result;
-}
 
-template <>
-std::string to_string(const openspace::KeyWithModifier& value) {
-    if (value.modifier == openspace::KeyModifier::None) {
-        return to_string(value.key);
-    }
-    else {
-        return std::format("{}+{}", to_string(value.modifier), to_string(value.key));
-    }
-}
+    template <>
+    std::string to_string(const openspace::KeyModifier& value) {
+        if (value == openspace::KeyModifier::None) {
+            return "";
+        }
 
+        std::string result;
+        for (const openspace::KeyModifierInfo& kmi : openspace::KeyModifierInfos) {
+            // No need for an extra check for the empty modifier since that is mapped to
+            // 0, meaning that the `hasKeyModifier` will always fail for it since it
+            // checks internally against != 0
+
+            if (hasKeyModifier(value, kmi.modifier)) {
+                result += std::format("{}+", kmi.name);
+            }
+
+        }
+        // The last addition has added an additional '+' that we should remove
+        result.pop_back();
+        return result;
+    }
+
+    template <>
+    std::string to_string(const openspace::KeyWithModifier& value) {
+        if (value.modifier == openspace::KeyModifier::None) {
+            return to_string(value.key);
+        }
+        else {
+            return std::format("{}+{}", to_string(value.modifier), to_string(value.key));
+        }
+    }
 } // namespace ghoul

@@ -128,7 +128,7 @@ void PathCurve::initializeParameterData() {
 }
 
 // Compute the curve parameter from an arc length value, using a combination of Newton's
-// method and bisection. Source:
+// method and bisection.
 // https://www.geometrictools.com/Documentation/MovingAlongCurveSpecifiedSpeed.pdf
 // Input s is a length value, in the range [0, _totalLength]
 // Returns curve parameter in range [0, _nSegments]
@@ -270,7 +270,7 @@ glm::dvec3 PathCurve::interpolate(double u) const {
         _points[index + 1],
         _points[index + 2],
         _points[index + 3],
-        1.0 // chordal version
+        1.0 // Chordal version
     );
 }
 

@@ -83,8 +83,8 @@ std::string escapedJson(const std::vector<std::string>& list) {
 }
 
 std::string formatJsonNumber(double d) {
-    // to_string will represent infinite values with 'inf' and NaNs with 'nan'.
-    // These are not valid in JSON, so use 'null' instead
+    // `to_string` will represent infinite values with 'inf' and NaNs with 'nan'. These
+    // are not valid in JSON, so use 'null' instead
     if (!std::isfinite(d)) {
         return "null";
     }

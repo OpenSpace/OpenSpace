@@ -91,8 +91,8 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
     while (ghoul::getline(file, line)) {
         currentLineNumber++;
 
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
+        // Guard against wrong line endings (copying files between operating systems)
+        // causes lines to have a final \r
         if (!line.empty() && line.back() == '\r') {
             line = line.substr(0, line.length() - 1);
         }
@@ -112,7 +112,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
 
 
         if (startsWith(line, "datavar")) {
-            // each datavar line is following the form:
+            // Each datavar line is following the form:
             // datavar <idx> <description>
             // with <idx> being the index of the data variable
 
@@ -127,7 +127,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
         }
 
         if (startsWith(line, "texturevar")) {
-            // each texturevar line is following the form:
+            // Each texturevar line is following the form:
             // texturevar <idx>
             // where <idx> is the data value index where the texture index is stored
             if (res.textureDataIndex != -1) {
@@ -144,7 +144,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
         }
 
         if (startsWith(line, "polyorivar")) {
-            // each polyorivar line is following the form:
+            // Each polyorivar line is following the form:
             // texturevar <idx>
             // where <idx> is the data value index where the orientation index storage
             // starts. There are 6 values stored in total, xyz + uvw
@@ -159,7 +159,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
             std::string dummy;
             str >> dummy >> res.orientationDataIndex;
 
-            // Ok.. this is kind of weird.  Speck unfortunately doesn't tell us in the
+            // Ok.. this is kind of weird. Speck unfortunately doesn't tell us in the
             // specification how many values a datavar has. Usually this is 1 value per
             // datavar, unless it is a polygon orientation thing. Now, the datavar name
             // for these can be anything (have seen 'orientation' and 'ori' before, so we
@@ -173,7 +173,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
         }
 
         if (startsWith(line, "texture")) {
-            // each texture line is following one of two forms:
+            // Each texture line is following one of two forms:
             // 1:   texture -M 1 halo.sgi
             // 2:   texture 1 M1.sgi
             // The parameter in #1 is currently being ignored

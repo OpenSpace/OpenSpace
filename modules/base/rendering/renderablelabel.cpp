@@ -416,10 +416,6 @@ void RenderableLabel::renderLabels(const RenderData& data,
                                    const glm::dvec3& orthoRight,
                                    const glm::dvec3& orthoUp, float fadeInVariable)
 {
-    glm::vec4 textColor = glm::vec4(glm::vec3(_color), 1.f);
-    textColor.a *= fadeInVariable;
-    textColor.a *= opacity();
-
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo = {
         .enableDepth = true,
         .enableFalseDepth = false,
@@ -439,6 +435,7 @@ void RenderableLabel::renderLabels(const RenderData& data,
         _transformationMatrix * glm::dvec4(data.modelTransform.translation, 1.0)
     );
 
+    glm::vec4 textColor = glm::vec4(glm::vec3(_color), fadeInVariable * opacity());
     ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
         *_font,
         transformedPos,

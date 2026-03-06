@@ -183,7 +183,7 @@ void TimeManager::preSynchronization(double dt) {
     removeKeyframesBefore(_latestConsumedTimestamp);
     progressTime(dt);
 
-    // Notify observers about time changes if any.
+    // Notify observers about time changes if any
     const double newTime = time().j2000Seconds();
 
     if (newTime != _lastTime) {
@@ -272,7 +272,7 @@ TimeManager::TimeKeyframeData TimeManager::interpolate(double applicationTime) {
             .jump = false
         };
     }
-    // As the last option, fall back on the current time.
+    // As the last option, fall back on the current time
     return TimeKeyframeData {
         .time = _currentTime,
         .delta = _targetDeltaTime,
@@ -302,8 +302,7 @@ void TimeManager::progressTime(double dt) {
     // _latestConsumedTimestamp: a.timestamp
 
     if (_shouldSetTime) {
-        // Setting the time using `setTimeNextFrame`
-        // will override any timeline operations.
+        // Setting the time using `setTimeNextFrame` will override any timeline operations
         _currentTime.data().setTime(_timeNextFrame.j2000Seconds());
         _integrateFromTime.data().setTime(_timeNextFrame.j2000Seconds());
 
@@ -346,8 +345,7 @@ void TimeManager::progressTime(double dt) {
         true;
 
     if (hasFutureKeyframes && hasPastKeyframes && !firstFutureKeyframe->data.jump) {
-        // If keyframes exist before and after this frame,
-        // interpolate between those.
+        // If keyframes exist before and after this frame, interpolate between those
         const TimeKeyframeData interpolated = interpolate(
             *lastPastKeyframe,
             *firstFutureKeyframe,
@@ -361,8 +359,7 @@ void TimeManager::progressTime(double dt) {
         applyKeyframeData(lastPastKeyframe->data, dt);
     }
     else if (!isPaused()) {
-        // If there are no keyframes to consider
-        // and time is not paused, just advance time.
+        // If there are no keyframes to consider and time is not paused, just advance time
         _deltaTime = _targetDeltaTime;
         _currentTime.data().advanceTime(dt * _deltaTime);
     }
@@ -381,7 +378,7 @@ TimeManager::TimeKeyframeData TimeManager::interpolate(
     // interpolatedTime = (1 - t)y1 + t*y2 + t(1 - t)(a(1 - t) + bt), where
     // a = k1 * deltaAppTime - deltaSimTime,
     // b = -k2 * deltaAppTime + deltaSimTime,
-    // with y1 = pastTime, y2 = futureTime, k1 = past dt, k2 = future dt.
+    // with y1 = pastTime, y2 = futureTime, k1 = past dt, k2 = future dt
 
     const double pastSimTime = past.data.time.j2000Seconds();
     const double futureSimTime = future.data.time.j2000Seconds();
@@ -399,8 +396,8 @@ TimeManager::TimeKeyframeData TimeManager::interpolate(
         (1 - t) * pastSimTime + t * futureSimTime + t * (1 - t) * (a * (1 - t) + b * t);
 
     // Derivative of interpolated time.
-    // Division by deltaAppTime to get appTime derivative
-    // as opposed to t (in [0, 1]) derivative.
+    // Division by deltaAppTime to get appTime derivative as opposed to t (in [0, 1])
+    // derivative
     const double interpolatedDeltaTime =
         (3 * a*t*t - 4 * a*t + a - 3 * b*t*t + 2 * b*t - pastSimTime + futureSimTime) /
         deltaAppTime;
@@ -830,7 +827,8 @@ std::optional<double> TimeManager::nextDeltaTimeStep() {
     );
 
     if (nextStepIterator == _deltaTimeSteps.end()) {
-        return std::nullopt; // should not get here
+        // Should not get here
+        return std::nullopt;
     }
 
     return *nextStepIterator;
@@ -847,7 +845,8 @@ std::optional<double> TimeManager::previousDeltaTimeStep() {
     );
 
     if (lowerBoundIterator == _deltaTimeSteps.begin()) {
-        return std::nullopt; // should not get here
+        // Should not get here
+        return std::nullopt;
     }
 
     const std::vector<double>::iterator prevStepIterator = lowerBoundIterator - 1;
@@ -949,7 +948,7 @@ double TimeManager::previousApplicationTimeForInterpolation() const {
     // two identical frames are generated at the begin & end. This only happens when the
     // application time is forced to discrete intervals for a fixed rendering framerate.
     // Using the previous frame render time fixes this problem. This doesn't adversely
-    // affect playback without frames.
+    // affect playback without frames
     return _previousApplicationTime;
 }
 

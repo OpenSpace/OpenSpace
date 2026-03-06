@@ -309,7 +309,7 @@ glm::dmat3 KeplerTranslation::computeOrbitPlane(double ascendingNode, double inc
     // Perform three rotations:
     // 1. Around the z axis to place the location of the ascending node
     // 2. Around the x axis (now aligned with the ascending node) to get the correct
-    // inclination
+    //    inclination
     // 3. Around the new z axis to place the closest approach to the correct location
 
     const glm::dvec3 ascendingNodeAxisRot = glm::dvec3(0.f, 0.f, 1.f);

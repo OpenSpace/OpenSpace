@@ -652,11 +652,10 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
         );
         _trailProgram->setUniform(_uniformTrailCache.trailFadeExponent, fade);
 
-        // 0.05 is the "alpha value" for which the trail should no longer be rendered.
-        // The value that's compared to 0.05 is calculated in the shader and depends on
-        // the distance from the head of the trail to the part that's being rendered.
-        // Value is passed as uniform due to it being used in both geometry and fragment
-        // shader.
+        // 0.05 is the "alpha value" for which the trail should no longer be rendered. The
+        // value that's compared to 0.05 is calculated in the shader and depends on the
+        // distance from the head of the trail to the part that's being rendered. Value is
+        // passed as uniform due to it being used in both geometry and fragment shader
         _trailProgram->setUniform(_uniformTrailCache.colorFadeCutoffValue, 0.05f);
 
         glLineWidth(_appearance.trailWidth);
@@ -892,13 +891,13 @@ void RenderableOrbitalKepler::threadedSegmentCalculations(int threadId,
 
             // There is a lot of what seems to be "magic numbers" in this section. They
             // will most likely disappear when we change our method of determining the
-            // trail fade amount is changed.
+            // trail fade amount is changed
             if (_renderTrails) {
                 // When rendering a trail we don't know if the trail will pass over the
                 // starting point of the orbit or not. If the trail passes over the
                 // starting point of the orbit, then we can't draw the entire trail as
                 // line strip. Instead we need to divide the line strip into two parts,
-                // where p0 and p1 denotes the respctive line strips (parts).
+                // where p0 and p1 denotes the respctive line strips (parts)
                 int p0Start = -1;
                 int p0Length = -1;
                 int p1Start = -1;
@@ -934,7 +933,7 @@ void RenderableOrbitalKepler::threadedSegmentCalculations(int threadId,
 
                         // Special check to make sure we don't end up with segment
                         // sections 1 vertex length. A segment must contain at least 2
-                        // vertices or more.
+                        // vertices or more
                         if (lastVertexIndex - correctVertexIndex == 1) {
                             p1Length = 0;
                             p0Length = correctTrailLength - 1;

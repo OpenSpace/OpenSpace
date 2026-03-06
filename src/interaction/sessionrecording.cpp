@@ -496,7 +496,7 @@ namespace {
 
         // Erase all \r (from windows newline), and all \n from line endings and replace
         // with ';' so that lua will treat them as separate lines. This is done in order
-        // to treat a multi-line script as a single line in the file.
+        // to treat a multi-line script as a single line in the file
         size_t startPos = s.find('\r', 0);
         while (startPos != std::string::npos) {
             s.erase(startPos, 1);

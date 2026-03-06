@@ -319,8 +319,8 @@ void mainInitFunc(GLFWwindow*) {
     //
     //  Screenshots
     //
-    // We save the startup value of the screenshots just in case we want to add a date
-    // to them later in the RenderEngine
+    // We save the startup value of the screenshots just in case we want to add a date to
+    // them later in the RenderEngine
     std::filesystem::path screenshotPath = absPath("${SCREENSHOTS}");
     sgct::Engine::instance().setCapturePath(screenshotPath);
     FileSys.registerPathToken("${STARTUP_SCREENSHOT}", std::move(screenshotPath));

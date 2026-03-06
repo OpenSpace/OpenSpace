@@ -274,7 +274,7 @@ namespace data {
         // Now we have the comments and the data values, we need to implant them into the
         // data entries
 
-        // commentIdx is the running index into the total comment buffer
+        // `commentIdx` is the running index into the total comment buffer
         size_t commentIdx = 0;
         int valuesIdx = 0;
         for (Dataset::Entry& e : result.entries) {

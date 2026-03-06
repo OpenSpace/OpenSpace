@@ -38,13 +38,14 @@ namespace ghoul::filesystem { class File; }
 
 namespace openspace {
 
-// Multithreaded
 class DownloadManager {
 public:
     struct FileFuture {
-        // Since the FileFuture object will be used from multiple threads, we have to be
-        // careful about the access pattern, that is, no values should be read and written
-        // by both the DownloadManager and the outside threads.
+        /**
+         * Since the FileFuture object will be used from multiple threads, we have to be
+         * careful about the access pattern, that is, no values should be read and written
+         * by both the DownloadManager and the outside threads.
+         */
         explicit FileFuture(std::filesystem::path file);
 
         // Values that are written by the DownloadManager to be consumed by others
@@ -57,6 +58,7 @@ public:
         std::filesystem::path filePath;
         std::string errorMessage;
         std::string format;
+
         // Values set by others to be consumed by the DownloadManager
         bool abortDownload = false;
     };
@@ -83,8 +85,10 @@ public:
     using AsyncDownloadFinishedCallback =
         std::function<void(const std::vector<std::shared_ptr<FileFuture>>&)>;
 
-    // Just a helper function to check if a future is ready to ".get()". Not specific
-    // to DownloadManager but is useful for anyone using the DownloadManager
+    /**
+     * Just a helper function to check if a future is ready to ".get()". Not specific to
+     * DownloadManager but is useful for anyone using the DownloadManager.
+     */
     template <typename R>
     static bool futureReady(const std::future<R>& f) {
         return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
@@ -93,14 +97,20 @@ public:
     explicit DownloadManager(
         UseMultipleThreads useMultipleThreads = UseMultipleThreads::Yes);
 
-    //downloadFile
-    // url - specifies the target of the download
-    // file - specifies path to local saved file
-    // overrideFile - if true, overrides existing file of same name
-    // failOnError - if true, http codes >= 400 (client/server errors) result in fail
-    // timeout_secs - timeout in seconds before giving up on download (0 = no timeout)
-    // finishedCallback - callback when download finished (happens on different thread)
-    // progressCallback - callback for status during (happens on different thread)
+    /**
+     * DownloadFile
+     *
+     * \param url Specifies the target of the download
+     * \param file Specifies path to local saved file
+     * \param overrideFile If `true`, overrides existing file of same name
+     * \param failOnError If `true`, http codes >= 400 (client/server errors) result in
+     *        fail
+     * \param timeout_secs Timeout in seconds before giving up on download (0 = no
+     *        timeout)
+     * \param finishedCallback Callback when download finished (happens on different
+     *        thread)
+     * \param progressCallback Callback for status during (happens on different thread)
+     */
     std::shared_ptr<FileFuture> downloadFile(const std::string& url,
         const std::filesystem::path& file,
         OverrideFile overrideFile = OverrideFile::Yes,

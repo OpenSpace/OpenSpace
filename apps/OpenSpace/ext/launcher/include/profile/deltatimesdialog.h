@@ -55,8 +55,8 @@ public:
     /**
      * Returns a text summary of the delta time list for display purposes.
      *
-     * \param idx index in dt list
-     * \param forListView true if this summary is for the Qt list view, false if it is
+     * \param idx Index in dt list
+     * \param forListView `true` if this summary is for the Qt list view, `false` if it is
      *        used for a different display mode
      */
     std::string createSummaryForDeltaTime(size_t idx, bool forListView);

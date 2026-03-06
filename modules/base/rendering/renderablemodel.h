@@ -131,7 +131,7 @@ private:
     GLuint _vbo = 0;
     bool _shouldRenderTwice = false;
 
-    // Opacity program
+    /// Opacity program
     ghoul::opengl::ProgramObject* _quadProgram = nullptr;
     UniformCache(opacity, colorTexture, depthTexture, viewport,
         resolution) _uniformOpacityCache;

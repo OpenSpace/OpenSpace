@@ -300,7 +300,8 @@ float AtmosphereDeferredcaster::eclipseShadow(const glm::dvec3& position) {
             return std::sqrt(s);
         }
     }
-    else if (distanceToShadow < radiusPenumbra) { // In penumbra - partially shaded part
+    else if (distanceToShadow < radiusPenumbra) {
+        // In penumbra - partially shaded part
         return _hardShadowsEnabled ? 0.5f : distanceToShadow / radiusPenumbra;
     }
     else {

@@ -362,7 +362,7 @@ RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimes
     // Get the first item with time > currentTime
     auto currentTimestepIt = _volumeTimesteps.upper_bound(currentTime);
     if (currentTimestepIt == _volumeTimesteps.end()) {
-        // No such timestep was found: show last timestep if it is within the time margin.
+        // No such timestep was found: show last timestep if it is within the time margin
         Timestep* lastTimestep = &(_volumeTimesteps.rbegin()->second);
         const double threshold =
             lastTimestep->metadata.time + static_cast<double>(_secondsAfter);

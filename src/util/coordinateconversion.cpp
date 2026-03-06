@@ -176,8 +176,7 @@ namespace openspace {
  * Convert Equatorial coordinates ICRS right ascension and declination (a, d) into
  * Galactic coordinates (l, b).
  *
- * Reference:
- * https://www.atnf.csiro.au/people/Tobias.Westmeier/tools_coords.php
+ * Reference: https://www.atnf.csiro.au/people/Tobias.Westmeier/tools_coords.php
  */
 glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance) {
     // (Ra, Dec) -> (a, d)

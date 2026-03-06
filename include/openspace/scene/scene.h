@@ -222,7 +222,7 @@ public:
      * string value (which must be converted because a Profile stores all values as
      * strings).
      *
-     * \param p The Profile to be read.
+     * \param p The Profile to be read
      */
     void setPropertiesFromProfile(const Profile& p);
 
@@ -239,7 +239,7 @@ public:
     /**
      * Returns a list of all unique tags that are used in the currently loaded scene.
      *
-     * \return A list of all unique tags that are used in the currently loaded scene.
+     * \return A list of all unique tags that are used in the currently loaded scene
      */
     std::vector<std::string> allTags() const;
 
@@ -248,7 +248,7 @@ public:
      *
      * \param guiPath The GUI path for which to set the order
      * \param list A list of names of scene graph nodes or subgroups in the GUI, in the
-     *             order of which they should appear in the tree.
+     *        order of which they should appear in the tree
      */
     void setGuiTreeOrder(const std::string& guiPath,
         const std::vector<std::string>& list);
@@ -310,7 +310,9 @@ private:
     std::unordered_map<std::string, std::vector<std::string>> _guiTreeOrderMap;
 };
 
-// Convert the input string to a format that is valid as an identifier
+/**
+ * Convert the input string to a format that is valid as an identifier.
+ */
 std::string makeIdentifier(std::string str);
 
 } // namespace openspace

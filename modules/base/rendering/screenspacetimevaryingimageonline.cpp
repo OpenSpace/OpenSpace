@@ -182,9 +182,8 @@ void ScreenSpaceTimeVaryingImageOnline::update() {
 
         try {
             // @TODO (2026-02-18, abock): This code was settings the swizzle mask only if
-            //                            the returned image was having a single Red
-            //                            channel. This can't currently be expressed
-            //                            unfortunately
+            // the returned image was having a single Red channel. This can't currently be
+            // expressed unfortunately
             ghoul::opengl::Texture::SamplerInit samplerInit = {
                 // TODO: AnisotropicMipMap crashes on ATI cards ---abock
                 //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,

@@ -348,7 +348,6 @@ void GuiPropertyComponent::render() {
         std::for_each(owners.begin(), owners.end(), renderProp);
     }
     else {
-        // _useTreeLayout && gui groups exist
         TreeNode root = TreeNode("");
 
         for (PropertyOwner* pOwner : owners) {

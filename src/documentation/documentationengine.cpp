@@ -189,8 +189,8 @@ namespace {
                 // Since this is a table we need to recurse this function to extract data
                 nlohmann::json tableDocs = documentationToJson(doc);
 
-                // Set the members entry to the members of the table
-                // to remove unnecessary nestling
+                // Set the members entry to the members of the table to remove unnecessary
+                // nestling
                 entry[MembersKey] = tableDocs[MembersKey];
             }
             else {
@@ -676,7 +676,7 @@ void DocumentationEngine::writeJsonDocumentation() const {
     nlohmann::json factory = generateFactoryManagerJson();
     nlohmann::json scripting = generateScriptEngineJson();
 
-    // Write two json files for the static docs page - asset components and scripting api
+    // Write two json files for the static docs page - asset components and scripting API
     std::ofstream out = std::ofstream(absPath("${DOCUMENTATION}/assetComponents.json"));
     if (out) {
         out << factory.dump();
@@ -698,7 +698,7 @@ nlohmann::json DocumentationEngine::generateActionJson() const {
 
     for (const Action& action : actions) {
         nlohmann::json d;
-        // Use identifier as name to make it more similar to scripting api
+        // Use identifier as name to make it more similar to the scripting API
         d[NameKey] = action.identifier;
         d[GuiNameKey] = action.name;
         d[DocumentationKey] = action.documentation;

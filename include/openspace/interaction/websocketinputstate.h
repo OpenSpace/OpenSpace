@@ -82,7 +82,7 @@ struct WebsocketInputState {
 /// The maximum number of websockets that are supported by this system. This number is
 /// derived from the available GLFW constants
 constexpr int MaxWebsockets = 16;
-//struct WebsocketInputStates : public std::array<WebsocketInputState, MaxWebsockets> {
+
 struct WebsocketInputStates : public std::unordered_map<size_t, WebsocketInputState*> {
     /**
      * This function adds the contributions of all connected websockets for the provided
@@ -111,31 +111,29 @@ struct WebsocketInputStates : public std::unordered_map<size_t, WebsocketInputSt
      */
     bool button(int button, WebsocketAction action) const;
 };
-
 } // namespace openspace
 
 namespace ghoul {
-
-template <>
-inline std::string to_string(const openspace::WebsocketAction& action) {
-    switch (action) {
-        case openspace::WebsocketAction::Idle:    return "Idle";
-        case openspace::WebsocketAction::Press:   return "Press";
-        case openspace::WebsocketAction::Repeat:  return "Repeat";
-        case openspace::WebsocketAction::Release: return "Release";
-        default:                                  throw MissingCaseException();
+    template <>
+    inline std::string to_string(const openspace::WebsocketAction& action) {
+        switch (action) {
+            case openspace::WebsocketAction::Idle:    return "Idle";
+            case openspace::WebsocketAction::Press:   return "Press";
+            case openspace::WebsocketAction::Repeat:  return "Repeat";
+            case openspace::WebsocketAction::Release: return "Release";
+            default:                                  throw MissingCaseException();
+        }
     }
-}
 
-template <>
-constexpr openspace::WebsocketAction from_string(std::string_view string) {
-    if (string == "Idle") { return openspace::WebsocketAction::Idle; }
-    else if (string == "Press") { return openspace::WebsocketAction::Press; }
-    else if (string == "Repeat") { return openspace::WebsocketAction::Repeat; }
-    else if (string == "Release") { return openspace::WebsocketAction::Release; }
-    throw RuntimeError("Unknown action '" + std::string(string) + "'");
-}
+    template <>
+    constexpr openspace::WebsocketAction from_string(std::string_view string) {
+        if (string == "Idle") { return openspace::WebsocketAction::Idle; }
+        else if (string == "Press") { return openspace::WebsocketAction::Press; }
+        else if (string == "Repeat") { return openspace::WebsocketAction::Repeat; }
+        else if (string == "Release") { return openspace::WebsocketAction::Release; }
 
+        throw RuntimeError(std::format("Unknown action '{}'", string));
+    }
 } // namespace ghoul
 
 #endif // __OPENSPACE_CORE___WEBSOCKETINPUTSTATE___H__

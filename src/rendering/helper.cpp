@@ -146,7 +146,6 @@ namespace {
 namespace openspace::rendering {
 
 namespace detail {
-
     Shaders& gShadersConstructor() {
         static Shaders g;
         return g;
@@ -156,7 +155,6 @@ namespace detail {
         static VertexObjects g;
         return g;
     }
-
 } // namespace detail
 
 void initialize() {
@@ -715,11 +713,11 @@ VertexIndexListCombo<Vertex> createSphere(int nSegments, glm::vec3 radii,
         for (int j = 0; j <= nSegments; j++) {
             const float fi = static_cast<float>(i);
             const float fj = static_cast<float>(j);
-            // inclination angle (north to south)
+            // Inclination angle (north to south)
             // 0 -> PI
             const float theta = fi * glm::pi<float>() / nSegments;
 
-            // azimuth angle (east to west)
+            // Azimuth angle (east to west)
             // 0 -> 2*PI
             const float phi = fj * glm::pi<float>() * 2.f / nSegments;
 
@@ -769,8 +767,8 @@ static VertexIndexListCombo<VertexXYZNormal> createConicalCylinder(unsigned int 
     std::vector<VertexXYZ> bottomVertices = createRingXYZ(nSegments, bottomRadius);
     std::vector<VertexXYZ> topVertices = createRingXYZ(nSegments, topRadius);
 
-    // Build the 4 rings of vertices (with different normals), that will make up the
-    // shape for the cylinder
+    // Build the 4 rings of vertices (with different normals), that will make up the shape
+    // for the cylinder
     std::vector<VertexXYZNormal> vertices;
     vertices.reserve(4 * bottomVertices.size() + 2);
 
@@ -918,8 +916,8 @@ void LightSourceRenderData::updateBasedOnLightSources(const RenderData& renderDa
     intensitiesBuffer.resize(sources.size());
     directionsViewSpaceBuffer.resize(sources.size());
 
-    // Get intensities and view space direction for the given light sources,
-    // given the provided render data information
+    // Get intensities and view space direction for the given light sources, given the
+    // provided render data information
     for (const std::unique_ptr<LightSource>& lightSource : sources) {
         if (!lightSource->isEnabled()) {
             continue;

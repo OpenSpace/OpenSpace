@@ -198,8 +198,8 @@ SpiceManager& SpiceManager::ref() {
 }
 
 // This method checks if one of the previous SPICE methods has failed. If it has, an
-// exception with the SPICE error message is thrown
-// If an error occurred, true is returned, otherwise, false
+// exception with the SPICE error message is thrown. If an error occurred, true is
+// returned, otherwise, false
 void throwSpiceError(const std::string& errorMessage) {
     if (SpiceManager::ref().exceptionHandling()) {
         std::string buffer;
@@ -262,12 +262,14 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::filesystem::path filePa
     if (fileExtension == ".bc" || fileExtension == ".BC" ||
         fileExtension == ".ck" || fileExtension == ".CK")
     {
-        findCkCoverage(filePath); // binary ck kernel
+        // Binary ck kernel
+        findCkCoverage(filePath);
     }
     else if (fileExtension == ".bsp" || fileExtension == ".BSP" ||
             fileExtension == ".spk" || fileExtension == ".SPK")
     {
-            findSpkCoverage(filePath); // spk kernel
+        // Spk kernel
+        findSpkCoverage(filePath);
     }
 
     const KernelHandle kernelId = ++_lastAssignedKernel;
@@ -476,18 +478,6 @@ std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
     return bodies;
 }
 
-//bool SpiceManager::hasValue(int naifId, const std::string& item) const {
-//    return bodfnd_c(naifId, item.c_str()) == SPICETRUE;
-//}
-//
-//bool SpiceManager::hasValue(const std::string& body, const std::string& item) const {
-//    ghoul_assert(!body.empty(), "Empty body");
-//    ghoul_assert(!item.empty(), "Empty item");
-//
-//    const int id = naifId(body);
-//    return hasValue(id, item);
-//}
-
 int SpiceManager::naifId(const std::string& body) const {
     ghoul_assert(!body.empty(), "Empty body");
 
@@ -641,7 +631,7 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
         return position;
     }
     else if (targetHasCoverage) {
-        // observer has no coverage, so we try getting position from the reverse
+        // Observer has no coverage, so we try getting position from the reverse
         const std::string& invObserver = target;
         const std::string& invTarget = observer;
         return getEstimatedPosition(
@@ -654,7 +644,7 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
         ) * -1.0;
     }
     else {
-        // target has no coverage
+        // Target has no coverage
         return getEstimatedPosition(
             target,
             observer,
@@ -690,7 +680,7 @@ glm::dmat3 SpiceManager::frameTransformationMatrix(const std::string& from,
     ghoul_assert(!from.empty(), "From must not be empty");
     ghoul_assert(!to.empty(), "To must not be empty");
 
-    // get rotation matrix from frame A - frame B
+    // Get rotation matrix from frame A - frame B
     glm::dmat3 transform = glm::dmat3(1.0);
     pxform_c(
         from.c_str(),
@@ -1120,7 +1110,7 @@ void SpiceManager::findSpkCoverage(const std::filesystem::path &path) {
         const SpiceInt numberOfIntervals = wncard_c(&cover);
 
         for (SpiceInt j = 0; j < numberOfIntervals; j++) {
-            //Get the endpoints of the jth interval.
+            // Get the endpoints of the jth interval.
             SpiceDouble b = 0.0;
             SpiceDouble e = 0.0;
             wnfetd_c(&cover, j, &b, &e);
@@ -1128,7 +1118,7 @@ void SpiceManager::findSpkCoverage(const std::filesystem::path &path) {
                 throwSpiceError("Error finding Spk coverage");
             }
 
-            // insert all into coverage time set, the windows could be merged @AA
+            // Insert all into coverage time set, the windows could be merged @AA
             _spkCoverageTimes[obj].insert(e);
             _spkCoverageTimes[obj].insert(b);
             _spkIntervals[obj].emplace_back(b, e);
@@ -1171,7 +1161,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
 
     glm::dvec3 pos = glm::dvec3(0.0);
     if (coveredTimes.lower_bound(ephemerisTime) == coveredTimes.begin()) {
-        // coverage later, fetch first position
+        // Coverage later, fetch first position
         spkpos_c(
             target.c_str(),
             *(coveredTimes.begin()),
@@ -1190,7 +1180,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
 
     }
     else if (coveredTimes.upper_bound(ephemerisTime) == coveredTimes.end()) {
-        // coverage earlier, fetch last position
+        // Coverage earlier, fetch last position
         spkpos_c(
             target.c_str(),
             *(coveredTimes.rbegin()),
@@ -1208,7 +1198,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
         }
     }
     else {
-        // coverage both earlier and later, interpolate these positions
+        // Coverage both earlier and later, interpolate these positions
         glm::dvec3 posEarlier = glm::dvec3(0.0);
         double ltEarlier = 0.0;
         const double timeEarlier = *std::prev((coveredTimes.lower_bound(ephemerisTime)));
@@ -1242,7 +1232,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
             ));
         }
 
-        // linear interpolation
+        // Linear interpolation
         const double t = (ephemerisTime - timeEarlier) / (timeLater - timeEarlier);
         pos = posEarlier * (1.0 - t) + posLater * t;
         lightTime = ltEarlier * (1.0 - t) + ltLater * t;
@@ -1260,7 +1250,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
 
     if (_ckCoverageTimes.find(idFrame) == _ckCoverageTimes.end()) {
         if (_useExceptions) {
-            // no coverage
+            // No coverage
             throw SpiceException(std::format(
                 "No data available for transform matrix from '{}' to '{}' at any time",
                 fromFrame, toFrame
@@ -1274,7 +1264,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
     std::set<double> coveredTimes = _ckCoverageTimes.find(idFrame)->second;
 
     if (coveredTimes.lower_bound(time) == coveredTimes.begin()) {
-        // coverage later, fetch first transform
+        // Coverage later, fetch first transform
         pxform_c(
             fromFrame.c_str(),
             toFrame.c_str(),
@@ -1289,7 +1279,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
         }
     }
     else if (coveredTimes.upper_bound(time) == coveredTimes.end()) {
-        // coverage earlier, fetch last transform
+        // Coverage earlier, fetch last transform
         pxform_c(
             fromFrame.c_str(),
             toFrame.c_str(),
@@ -1304,7 +1294,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
         }
     }
     else {
-        // coverage both earlier and later, interpolate these transformations
+        // Coverage both earlier and later, interpolate these transformations
         const double earlier = *std::prev((coveredTimes.lower_bound(time)));
         const double later = *(coveredTimes.upper_bound(time));
 

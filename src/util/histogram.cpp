@@ -80,7 +80,7 @@ bool Histogram::add(float value, float repeat) {
     const int binIndex = static_cast<int>(std::min(
         static_cast<float>(std::floor(normalizedValue * _numBins)),
         _numBins - 1.f
-    )); // [0, _numBins - 1]
+    ));
 
     _data[binIndex] += repeat;
     _numValues = static_cast<int>(_numValues + repeat);
@@ -105,7 +105,7 @@ void Histogram::changeRange(float minValue, float maxValue) {
         const int binIndex = static_cast<int>(std::min(
             static_cast<float>(std::floor(normalizedValue * _numBins)),
             _numBins - 1.f
-        )); // [0, _numBins - 1]
+        ));
 
         newData[binIndex] = oldData[i];
     }
@@ -251,7 +251,7 @@ Histogram Histogram::equalize() {
 float Histogram::equalize(float value) const {
     const float normalizedValue = (value - _minValue) / (_maxValue - _minValue);
     int bin = static_cast<int>(std::floor(normalizedValue * _numBins));
-    // If value == _maxValues then bin == _numBins, which is a invalid index.
+    // If value == _maxValues then bin == _numBins, which is a invalid index
     bin = std::min(_numBins-1, bin);
     bin = std::max(0, bin);
 

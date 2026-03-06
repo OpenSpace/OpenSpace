@@ -580,15 +580,14 @@ OrbitalNavigator::OrbitalNavigator()
     // exponentially decreasing value but we want to be able to control it. Either as
     // a linear interpolation or a smooth step interpolation. Therefore we use
     // newValue = lerp(0, currentValue * f(t) * dt) where f(t) is the transfer function
-    // and lerp is a linear iterpolation
-    // lerp(endValue, startValue, interpolationParameter).
+    // and lerp is a linear iterpolation `lerp(end, start, interpolationParameter)`.
     //
     // The transfer functions are derived from:
-    // f(t) = d/dt (ln(1 / f_orig(t))) where f_orig is the transfer function that would
-    // be used if the interpolation was sinply linear between a start value and an end
-    // value instead of current value and end value (0) as we use it when inerpolating.
-    // As an example f_orig(t) = 1 - t yields f(t) = 1 / (1 - t) which results in a linear
-    // interpolation from 1 to 0.
+    // f(t) = d/dt (ln(1 / f_orig(t))) where f_orig is the transfer function that would be
+    // used if the interpolation was sinply linear between a start value and an end value
+    // instead of current value and end value (0) as we use it when inerpolating. As an
+    // example f_orig(t) = 1 - t yields f(t) = 1 / (1 - t) which results in a linear
+    // interpolation from 1 to 0
     auto smoothStepDerivedTF = [](double t) {
         return (6 * (t + t*t) / (1 - 3 * t*t + 2 * t*t*t));
     };
@@ -861,13 +860,13 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
     // Decompose camera rotation so that we can handle global and local rotation
     // individually. Then we combine them again when finished.
-    // Compensate for relative movement of aim node,
-    // in order to maintain the old global/local rotation
+    // Compensate for relative movement of aim node, in order to maintain the old
+    // global/local rotation
     CameraRotationDecomposition camRot =
         decomposeCameraRotationSurface(pose, *_anchorNode);
 
-    // Rotate with the object by finding a differential rotation from the previous
-    // to the current rotation
+    // Rotate with the object by finding a differential rotation from the previous to the
+    // current rotation
     const glm::dquat anchorRotation = glm::quat_cast(_anchorNode->worldRotationMatrix());
 
     glm::dquat anchorNodeRotationDiff = _previousAnchorNodeRotation.has_value() ?
@@ -876,8 +875,8 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
     _previousAnchorNodeRotation = anchorRotation;
 
-    // Interpolate rotation differential so that the camera rotates with the object
-    // only if close enough
+    // Interpolate rotation differential so that the camera rotates with the object only
+    // if close enough
     anchorNodeRotationDiff = interpolateRotationDifferential(
         deltaTime,
         pose.position,
@@ -895,9 +894,8 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     const double horizontalTranslationSpeedScale =
         rotationSpeedScaleFromCameraHeight(pose.position, posHandle);
 
-    // Rotation around target object's up vector based on user input
-    // (one kind of horizontal translation)
-    // Affects the position and global rotation
+    // Rotation around target object's up vector based on user input (one kind of
+    // horizontal translation). Affects the position and global rotation
     if (_shouldRotateAroundUp) {
         rotateAroundAnchorUp(
             deltaTime,
@@ -918,8 +916,8 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     );
 
     // Apply any automatic idle behavior. Note that the idle behavior is aborted if there
-    // is no input from interaction. So, it assumes that all the other effects from
-    // user input results in no change
+    // is no input from interaction. So, it assumes that all the other effects from user
+    // input results in no change
     applyIdleBehavior(
         deltaTime,
         pose.position,
@@ -937,8 +935,8 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     // Recalculate posHandle since horizontal position changed
     posHandle = calculateSurfacePositionHandle(*_anchorNode, pose.position);
 
-    // Rotate globally to keep camera rotation fixed
-    // in the rotating reference frame of the anchor object
+    // Rotate globally to keep camera rotation fixed in the rotating reference frame of
+    // the anchor object
     camRot.globalRotation = rotateGlobally(
         camRot.globalRotation,
         anchorNodeRotationDiff,
@@ -1092,8 +1090,8 @@ void OrbitalNavigator::updateAnchorNode(const SceneGraphNode* anchorNode) {
     _anchorNode = anchorNode;
     _syncedAnchorNode = anchorNode ? anchorNode->identifier() : "";
 
-    // Need to reset velocities after the actual switch in anchor node,
-    // since the reset behavior depends on the anchor node
+    // Need to reset velocities after the actual switch in anchor node, since the reset
+    // behavior depends on the anchor node
     if (_resetVelocitiesOnAnchorChange) {
         resetVelocities();
     }
@@ -1423,8 +1421,8 @@ CameraPose OrbitalNavigator::followAim(CameraPose pose, const glm::dvec3& camera
     const double correctionFactor =
         std::clamp(1.0 - std::pow(ratio, CorrectionFactorExponent), 0.0, 1.0);
 
-    // newCameraAnchorAngle has two solutions, depending on whether the camera is
-    // in the half-space closest to the anchor or aim
+    // `newCameraAnchorAngle` has two solutions, depending on whether the camera is in
+    // the half-space closest to the anchor or aim
     double newCameraAnchorAngle = std::asin(ratio);
     if (glm::dot(intermediateCameraToAnchor, anchorToAim.second) <= 0.0 &&
         glm::dot(intermediateCameraToProjectedAim, anchorToAim.second) <= 0.0)
@@ -1458,7 +1456,6 @@ CameraPose OrbitalNavigator::followAim(CameraPose pose, const glm::dvec3& camera
 
         anchorDecomp.globalRotation = aimAdjustRotation * anchorDecomp.globalRotation;
     }
-    // End of step 2
 
     pose.rotation = composeCameraRotation(anchorDecomp);
 
@@ -1532,8 +1529,8 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
         targetRotation,
         std::min(t * _retargetAnchorInterpolator.deltaTimeScaled(), 1.0));
 
-    // Retrieving the angle of a quaternion uses acos on the w component, which can
-    // have numerical instability for values close to 1.0
+    // Retrieving the angle of a quaternion uses acos on the w component, which can have
+    // numerical instability for values close to 1.0
     constexpr double Epsilon = 1.0e-13;
     if (std::abs((std::abs(result.w) - 1.0)) < Epsilon || glm::angle(result) < 0.01) {
         _retargetAnchorInterpolator.end();
@@ -1558,20 +1555,20 @@ OrbitalNavigator::interpolateRetargetAim(double deltaTime, const CameraPose& pos
     const double aimDistance = glm::length(prevCameraToAim);
     const glm::dquat prevRotation = pose.rotation;
 
-    // Introduce a virtual aim - a position straight ahead of the camera,
-    // that should be rotated around the camera, until it reaches the aim node.
+    // Introduce a virtual aim - a position straight ahead of the camera, that should be
+    // rotated around the camera, until it reaches the aim node
 
     const glm::dvec3 prevCameraToVirtualAim =
         aimDistance * (prevRotation * Camera::ViewDirectionCameraSpace);
 
-    // Max angle: the maximum possible angle between anchor and aim, given that
-    // the camera orbits the anchor on a fixed distance.
+    // Max angle: the maximum possible angle between anchor and aim, given that the camera
+    // orbits the anchor on a fixed distance.
     const double maxAngle =
         glm::atan(glm::length(anchorToAim.first), glm::length(prevCameraToAnchor));
 
-    // Requested angle: The angle between the vector straight ahead from the
-    // camera and the vector from camera to anchor should remain constant, in
-    // order for the anchor not to move in screen space.
+    // Requested angle: The angle between the vector straight ahead from the camera and
+    // the vector from camera to anchor should remain constant, in order for the anchor
+    // not to move in screen space
     const double requestedAngle = glm::angle(
         glm::normalize(prevCameraToVirtualAim),
         glm::normalize(prevCameraToAnchor)
@@ -1580,7 +1577,7 @@ OrbitalNavigator::interpolateRetargetAim(double deltaTime, const CameraPose& pos
     if (requestedAngle <= maxAngle) {
         const glm::dvec3 aimPos = pose.position + prevCameraToAnchor + anchorToAim.second;
         const CameraRotationDecomposition aimDecomp = decomposeCameraRotation(
-            pose,
+          pose,
             aimPos
         );
 
@@ -1602,7 +1599,7 @@ OrbitalNavigator::interpolateRetargetAim(double deltaTime, const CameraPose& pos
         // Bail out.
         // Cannot put aim node in center without moving anchor in screen space.
         // Future work: Rotate as much as possible, or possibly use some other DOF to find
-        // solution, like moving the camera.
+        // solution, like moving the camera
         _retargetAimInterpolator.end();
     }
     return anchorToAim;
@@ -2036,8 +2033,8 @@ void OrbitalNavigator::orbitAroundAxis(const glm::dvec3& axis, double angle,
 
     position += rotationDiff;
 
-    // Also apply the rotation to the global rotation, so the camera up vector is
-    // rotated around the axis as well
+    // Also apply the rotation to the global rotation, so the camera up vector is rotated
+    // around the axis as well
     globalRotation = spinRotation * globalRotation;
 }
 

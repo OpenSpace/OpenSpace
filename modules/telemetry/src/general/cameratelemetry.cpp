@@ -79,8 +79,8 @@ namespace {
     constexpr Property::PropertyInfo RotationPrecisionInfo = {
         "RotationPrecision",
         "Rotation precision",
-        "The precision used to determin when to send updated camera rotational "
-        "data to the Open Sound Control receiver.",
+        "The precision used to determin when to send updated camera rotational data to "
+        "the Open Sound Control receiver.",
         Property::Visibility::User
     };
 
@@ -134,8 +134,8 @@ bool CameraTelemetry::updateData(const Camera* camera) {
     const double distanceMoved = glm::length(_cameraPosition - cameraPosition);
 
     const glm::dquat cameraRotation = camera->rotationQuaternion();
-    // To check if the rotation has changed above the precision threshold, check the
-    // angle and axis of the quaternion seperatly
+    // To check if the rotation has changed above the precision threshold, check the angle
+    // and axis of the quaternion seperatly
     const double rotationAngleDifference = std::abs(_cameraRotation.w - cameraRotation.w);
     const double rotationAxisDifference = glm::length(
         glm::dvec3(_cameraRotation.x, _cameraRotation.y, _cameraRotation.z) -

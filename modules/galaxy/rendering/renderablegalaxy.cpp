@@ -320,8 +320,8 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     addProperty(_downScaleVolumeRendering);
     addProperty(_numberOfRayCastingSteps);
 
-    // Use max component instead of length, to avoid problems with taking square
-    // of huge value
+    // Use max component instead of length, to avoid problems with taking square of huge
+    // value
     setBoundingSphere(glm::compMax(0.5f * _volumeSize));
 }
 

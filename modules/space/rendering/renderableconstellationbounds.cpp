@@ -332,9 +332,9 @@ bool RenderableConstellationBounds::loadVertexFile() {
         // Likewise, the declination is stored in degrees and needs to be converted
         dec = glm::radians(dec);
 
-        // Convert the (right ascension, declination) to rectangular coordinates.
-        // The 1.0 is the distance of the celestial sphere, we will scale that in the
-        // render function
+        // Convert the (right ascension, declination) to rectangular coordinates. The 1.0
+        // is the distance of the celestial sphere, we will scale that in the render
+        // function
         std::array<double, 3> rectangularValues;
         radrec_c(1.0, ra, dec, rectangularValues.data());
 

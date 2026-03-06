@@ -63,7 +63,7 @@ namespace {
         // manually find the downloaded folder in the synchronization folder.
         std::string identifier [[codegen::identifier()]];
 
-        // Deprecated, use SecondsUntilResync instead
+        // Deprecated, use SecondsUntilResync instead.
         std::optional<bool> forceOverride [[codegen::key("Override")]];
 
         // If this value is set to 'true' (the default), the hash of the URL is appended

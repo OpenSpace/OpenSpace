@@ -689,7 +689,6 @@ int propertyGetValue(lua_State* L) {
     prop->getLuaValue(L);
     return 1;
 }
-
 } // namespace openspace::luascriptfunctions
 
 namespace {
@@ -706,8 +705,8 @@ namespace {
  * match the URI are changed instead.
  *
  * \param uri The URI that identifies the property or properties whose values should be
- *            changed. The URI can contain 0 or 1 wildcard `*` characters or a tag
- *            expression (`{tag}`) that identifies a property owner.
+ *        changed. The URI can contain 0 or 1 wildcard `*` characters or a tag expression
+ *        (`{tag}`) that identifies a property owner
  */
 [[codegen::luawrap]] bool hasProperty(std::string uri) {
     Property* prop = property(uri);
@@ -727,8 +726,8 @@ namespace {
  * instead.
  *
  * \param uri The URI that identifies the property or properties to get. The URI can
- *            contain 0 or 1 wildcard `*` characters or a tag expression (`{tag}`) that
- *            identifies a property owner.
+ *        contain 0 or 1 wildcard `*` characters or a tag expression (`{tag}`) that
+ *        identifies a property owner
  * \return A list of property URIs
  */
 [[codegen::luawrap]] std::vector<std::string> property(std::string uri) {
@@ -761,8 +760,8 @@ namespace {
  * match the URI are returned instead.
  *
  * \param uri The URI that identifies the property owner or owners to get. The URI can
- *            contain 0 or 1 wildcard `*` characters or a tag expression (`{tag}`) that
- *            identifies a property owner.
+ *        contain 0 or 1 wildcard `*` characters or a tag expression (`{tag}`) that
+ *        identifies a property owner
  * \return A list of property owner URIs
  */
 [[codegen::luawrap]] std::vector<std::string> propertyOwner(std::string uri) {
@@ -995,13 +994,17 @@ namespace {
     }
 }
 
-// Checks whether the specifies SceneGraphNode is present in the current scene.
+/**
+ * Checks whether the specifies SceneGraphNode is present in the current scene.
+ */
 [[codegen::luawrap]] bool hasSceneGraphNode(std::string nodeName) {
     SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(nodeName);
     return node != nullptr;
 }
 
-// Returns a list of all scene graph nodes in the scene.
+/**
+ * Returns a list of all scene graph nodes in the scene.
+ */
 [[codegen::luawrap]] std::vector<std::string> sceneGraphNodes() {
     const std::vector<SceneGraphNode*>& nodes =
         global::renderEngine->scene()->allSceneGraphNodes();
@@ -1024,15 +1027,15 @@ namespace {
  * objects other than the shadowee.
  *
  * \param lightSource The identifier of the scene graph node that should act as the source
- *                    of the light for shadowing purposes
+ *        of the light for shadowing purposes
  * \param shadower The identifier of the scene graph node that is the object that casts a
- *                 shadow on the shadowee and other shadowers in the tsame shadow group
+ *        shadow on the shadowee and other shadowers in the tsame shadow group
  * \param shadowee The identifier of the scene graph node that is the object that receives
- *                 the shadow of the shadower
+ *        the shadow of the shadower
  * \param shadowGroup An arbitrary name that identifies a shadow group, meaning multiple
- *                    shadowcaster registrations that should act in unison. The name must
- *                    not start with a `_` character. If this parameter is omitted, a
- *                    suitable unique name will be automatically generated
+ *        shadowcaster registrations that should act in unison. The name must not start
+ *        with a `_` character. If this parameter is omitted, a suitable unique name will
+ *        be automatically generated
  */
 [[codegen::luawrap]] void registerShadowcaster(std::string lightSource,
                                                std::string shadower, std::string shadowee,
@@ -1081,17 +1084,16 @@ namespace {
  * message will be raised.
  *
  * \param lightSource The identifier of the scene graph node that should act as the source
- *                    of the light for shadowing purposes
+ *        of the light for shadowing purposes
  * \param shadower The identifier of the scene graph node that is the object that casts a
- *                 shadow on the shadowee and other shadowers in the tsame shadow group
+ *        shadow on the shadowee and other shadowers in the same shadow group
  * \param shadowee The identifier of the scene graph node that is the object that receives
- *                 the shadow of the shadower
+ *        the shadow of the shadower
  * \param shadowGroup An arbitrary name that identifies a shadow group, meaning multiple
- *                    shadowcaster registrations that should act in unison. The name must
- *                    not start with a `_` character. If this parameter is omitted, a
- *                    suitable unique name will be automatically generated. If the same
- *                    light source, shadower, and shadowee are provided as for a previous
- *                    register call, the generated name will be identical
+ *        shadowcaster registrations that should act in unison. The name must not start
+ *        with a `_` character. If this parameter is omitted, a suitable unique name will
+ *        be automatically generated. If the same light source, shadower, and shadowee are
+ *        provided as for a previous register call, the generated name will be identical
  */
 [[codegen::luawrap]] void removeShadowcaster(std::string lightSource,
                                              std::string shadower, std::string shadowee,
@@ -1320,7 +1322,7 @@ enum class [[codegen::enum]] CustomPropertyType {
     // @TODO (abock, 2022-05-01)  These if statements here are a bit gnarly since it
     // requires us to update them as soon as we add a new property type. It would be nicer
     // to have a factory function for this but right now this is the only place where that
-    // factory would be used.
+    // factory would be used
 
     const char* gui =
         guiName.has_value() && !guiName->empty() ?
@@ -1441,7 +1443,7 @@ enum class [[codegen::enum]] CustomPropertyType {
 
 /**
  * Create a valid identifier from the provided input string. Will replace invalid
- * characters like whitespaces and some punctuation marks with valid alternatives
+ * characters like whitespaces and some punctuation marks with valid alternatives.
  */
 [[codegen::luawrap]] std::string makeIdentifier(std::string input) {
     return openspace::makeIdentifier(input);
@@ -1452,10 +1454,10 @@ enum class [[codegen::enum]] CustomPropertyType {
  * for a specific GUI path.
  *
  * \param guiPath The GUI path for which the order should be set.
- * \param list A list of names of scene wwwwwwgraph nodes or subgroups in the GUI, in the
- *             order of which they should appear in the tree. The list does not have to
- *             include all items in the given GUI path. Any excluded items will be placed
- *             after the ones in the list.
+ * \param list A list of names of scene graph nodes or subgroups in the GUI, in the order
+ *        of which they should appear in the tree. The list does not have to include all
+ *        items in the given GUI path. Any excluded items will be placed after the ones in
+ *        the list
  */
 [[codegen::luawrap]] void setGuiOrder(std::string guiPath, std::vector<std::string> list)
 {

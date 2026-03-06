@@ -73,7 +73,6 @@ public:
 
     void resetNavigationUpdateVariables();
 
-    // Accessors
     Camera* camera() const;
     const SceneGraphNode* anchorNode() const;
     const MouseInputState& mouseInputState() const;
@@ -87,7 +86,6 @@ public:
     float jumpToFadeDuration() const;
     float interpolationTime() const;
 
-    // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
     bool disabledKeybindings() const;
@@ -133,7 +131,6 @@ public:
     std::vector<std::string> joystickButtonCommand(const std::string& joystickName,
         int button) const;
 
-    // Websockets
     void setWebsocketAxisMapping(int axis, WebsocketCameraStates::AxisType mapping,
         WebsocketCameraStates::AxisInvert shouldInvert =
         WebsocketCameraStates::AxisInvert::No,
@@ -159,21 +156,21 @@ public:
     /**
      * Set camera state from a provided node based camera specification structure, next
      * frame. The camera position will be computed to look at the node provided in the
-     * node info. The actual position will computed from the scene in the same frame as
-     * it is set.
+     * node info. The actual position will computed from the scene in the same frame as it
+     * is set.
      *
      * \param spec The node specification from which to compute the resulting camera pose
      */
     void setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec);
 
     /**
-     * Trigger a transition script after first fading out the rendering, and fading in
-     * the rendering when the script is finished. One example use case could be to fade
-     * out, move the camera to another focus node, and then fade in
+     * Trigger a transition script after first fading out the rendering, and fading in the
+     * rendering when the script is finished. One example use case could be to fade out,
+     * move the camera to another focus node, and then fade in.
      *
      * \param transitionScript The Lua script to handle the transition. Can be anything
      * \param fadeDuration An optional duration for the fading. If unspecified, use the
-     *                     JumpToFadeDuration property
+     *        JumpToFadeDuration property
      */
     void triggerFadeToTransition(std::string transitionScript,
         std::optional<float> fadeDuration = std::nullopt);

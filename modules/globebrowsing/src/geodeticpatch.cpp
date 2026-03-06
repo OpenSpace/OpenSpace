@@ -209,7 +209,7 @@ Geodetic2 GeodeticPatch::closestPoint(const Geodetic2& p) const {
     //    patchCenter = (0,0), patchHalfSize = (45,45), point = (5, 170)
     //    Note, the point and the patch are on opposite sides of the sphere
     //
-    //    cartesian clamp:
+    //    Cartesian clamp:
     //       --> clampedPointLat = clamp(5, -45, 45) = 5
     //       --> clampedPointLon = clamp(170, -45, 45) = 45
     //       --> result: (5, 45)

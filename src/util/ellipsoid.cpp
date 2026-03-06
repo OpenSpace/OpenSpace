@@ -39,7 +39,7 @@ namespace openspace {
 Ellipsoid::Ellipsoid(glm::dvec3 radii)
     : _radii(std::move(radii))
 {
-    // If the radii is equal to 0, all of the calculations below fail and result in nan's
+    // If the radii is equal to 0, all of the calculations below fail and result in nans
     // being raised all over the place
     if (glm::length(radii) > 0.0) {
         updateInternalCache();
@@ -158,7 +158,7 @@ Geodetic2 Ellipsoid::cartesianToGeodetic2(const glm::dvec3& p) const {
 }
 
 glm::dvec3 Ellipsoid::cartesianSurfacePosition(const Geodetic2& geodetic2) const {
-    // Position on surface : height = 0
+    // Position on surface: height = 0
     return cartesianPosition(Geodetic3({ geodetic2, 0.0 }));
 }
 

@@ -31,13 +31,13 @@
 
 namespace openspace {
 
-// This class represents the global input state of interaction devices
+/**
+ * This class represents the global input state of interaction devices.
+ */
 class KeyboardInputState {
 public:
-    // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
-    // Accessors
     const std::vector<std::pair<Key, KeyModifier>>& pressedKeys() const;
     bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const;
     bool isKeyPressed(Key key) const;

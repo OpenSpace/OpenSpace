@@ -204,9 +204,8 @@ std::vector<std::string> hostStarsWithSufficientData() {
 }
 
 /**
- * Returns a list with names of the host star of all the exoplanet systems
- * that have sufficient data for generating a visualization, based on the
- * module's loaded data file.
+ * Returns a list with names of the host star of all the exoplanet systems that have
+ * sufficient data for generating a visualization, based on the module's loaded data file.
  *
  * \return A list of exoplanet host star names.
  */
@@ -216,8 +215,8 @@ std::vector<std::string> hostStarsWithSufficientData() {
 }
 
 /**
- * Lists the names of the host stars of all exoplanet systems that have sufficient
- * data for generating a visualization, and prints the list to the console.
+ * Lists the names of the host stars of all exoplanet systems that have sufficient data
+ * for generating a visualization, and prints the list to the console.
  */
 [[codegen::luawrap]] void listAvailableExoplanetSystems() {
     std::vector<std::string> names = hostStarsWithSufficientData();

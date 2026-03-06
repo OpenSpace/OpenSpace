@@ -91,7 +91,6 @@ std::string prunedIdentifier(std::string identifier) {
     }
 }
 
-
 /**
  * Takes an index to an image and selects that image in the currently selected sky
  * browser.
@@ -199,7 +198,7 @@ std::string prunedIdentifier(std::string identifier) {
     LINFO("Connection established to WorldWide Telescope application in " + prunedId);
     LINFO("Loading image collections to " + prunedId);
 
-    // Load the collections here because we know that the browser can execute javascript
+    // Load the collections here because we know that the browser can execute JavaScript
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(prunedId);
     if (pair) {
@@ -305,9 +304,9 @@ std::string prunedIdentifier(std::string identifier) {
 
 /**
  * Returns a list of all the loaded AAS WorldWide Telescope images that have been loaded.
- * Each image has a name, thumbnail url, equatorial spherical coordinates RA and Dec,
+ * Each image has a name, thumbnail URL, equatorial spherical coordinates RA and Dec,
  * equatorial Cartesian coordinates, if the image has celestial coordinates, credits text,
- * credits url and the identifier of the image which is a unique number.
+ * credits URL and the identifier of the image which is a unique number.
  */
 [[codegen::luawrap]] ghoul::Dictionary listOfImages() {
     // Send image list to GUI

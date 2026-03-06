@@ -108,14 +108,14 @@ namespace {
             double inclination;
 
             // The longitude of ascending node, that is, the angle for the direction of
-            // the point where the orbit passes through a reference plane. Also
-            // known as the right ascension of the ascending node. The angle is given as
-            // degrees in the range 0-360. If it does not exist in the data, it is given
-            // a default value of 180 degrees.
+            // the point where the orbit passes through a reference plane. Also known as
+            // the right ascension of the ascending node. The angle is given as degrees in
+            // the range 0-360. If it does not exist in the data, it is given a default
+            // value of 180 degrees.
             double ascendingNode;
 
-            // The argument of periapsis of the orbit, given as an angle in degrees in
-            // the range 0-360. It is the angle between the planet's periapsis (the point
+            // The argument of periapsis of the orbit, given as an angle in degrees in the
+            // range 0-360. It is the angle between the planet's periapsis (the point
             // where it is closest to its star) and its ascending node, that is, where it
             // passes through its reference plane. If it does not exist in the data, it
             // is given a default value of 90 degrees.

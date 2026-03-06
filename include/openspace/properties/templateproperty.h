@@ -58,7 +58,7 @@ public:
      * \p info and and the default value \p value.
      *
      * \param info The PropertyInfo structure that contains all the required static
-     *        information for initializing this Property.
+     *        information for initializing this Property
      * \param value The default value of the Property
      *
      * \pre \p info.identifier must not be empty

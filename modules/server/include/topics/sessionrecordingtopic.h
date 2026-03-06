@@ -45,7 +45,9 @@ private:
     bool _sendState = false;
     bool _sendFiles = false;
 
-    // Provides the idle/recording/playback state int value in json message
+    /**
+     * Provides the idle / recording / playback state int value in JSON message.
+     */
     void sendJsonData();
 
     SessionRecordingHandler::SessionState _lastState =

@@ -104,7 +104,7 @@ namespace {
         // [[codegen::verbatim(StepSizeInfo.description)]]
         std::optional<float> stepSize;
 
-        // Raycast steps
+        // Raycast steps.
         std::optional<int> steps;
 
         // [[codegen::verbatim(DownscaleVolumeRenderingInfo.description)]]

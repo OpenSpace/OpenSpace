@@ -86,7 +86,7 @@ public:
      *
      * \throw ghoul::RuntimeError If the name of the \p module was already registered
      *        previously
-     * \pre \p module must not be nullptr
+     * \pre \p module must not be `nullptr`
      */
     void registerModule(std::unique_ptr<OpenSpaceModule> module);
 
@@ -100,8 +100,8 @@ public:
 
     /**
      * Get the module subclass with given template argument. Requires the module subclass
-     * to have the public static member variable `name` which must be equal to
-     * the name of the module used in its constructor.
+     * to have the public static member variable `name` which must be equal to the name of
+     * the module used in its constructor.
      *
      * \return A pointer to the module of the given subclass
      */

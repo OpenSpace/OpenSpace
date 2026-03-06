@@ -40,13 +40,15 @@
 #include <utility>
 
 // @TODO (abock, 2020-08-07) All of the time handling in this class should be cleaned up
-//       a bit. There are lots of conversions between ISO strings for time and Time
-//       objects and back which eat up performance.  For example, the TimeRange should
-//       operate on Time objects rather than date strings and the DateTime likewise (if
-//       this class needs to exist at all)
+// a bit. There are lots of conversions between ISO strings for time and Time objects and
+// back which eat up performance. For example, the TimeRange should operate on Time
+// objects rather than date strings and the DateTime likewise (if this class needs to
+// exist at all)
 
 namespace {
-    // Returns the number of days in a given month and year (takes leap year into account)
+    /**
+     * Returns the number of days in a given month and year(takes leap year into account).
+     */
     constexpr int monthSize(int month_, int year_) {
         using namespace date;
         const year_month_day_last d = year(year_) / month(month_) / last;
@@ -57,11 +59,11 @@ namespace {
      * `singleIncrement` is used for any of the date/time types, and handles overflow
      * values using the min/max parameters.
      *
-     * \param oper the date/time variable to operate on (will be changed)
-     * \param val the value of the increment, which may be changed in this function if an
+     * \param oper The date/time variable to operate on (will be changed)
+     * \param val The value of the increment, which may be changed in this function if an
      *        overflow occurs
-     * \param min the minimum allowable value
-     * \param max the maximum allowable value (determines where overflow occurs)
+     * \param min The minimum allowable value
+     * \param max The maximum allowable value (determines where overflow occurs)
      */
     bool singleIncrement(int& oper, int& val, int min, int max) {
         oper += val;
@@ -78,11 +80,11 @@ namespace {
      * `singleDecrement` is used for any of the date/time types, and handles underflow
      * values using the min/max parameters.
      *
-     * \param oper the date/time variable to operate on (will be changed)
-     * \param val the value of the decrement, which may be changed in this function if an
+     * \param oper The date/time variable to operate on (will be changed)
+     * \param val The value of the decrement, which may be changed in this function if an
      *        underflow occurs
-     * \param min the minimum allowable value
-     * \param max the maximum allowable value (determines where underflow occurs)
+     * \param min The minimum allowable value
+     * \param max The maximum allowable value (determines where underflow occurs)
      */
     bool singleDecrement(int& oper, int& val, int min, int max) {
         oper -= val;

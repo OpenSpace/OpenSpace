@@ -74,10 +74,10 @@ namespace {
         "RegularFormat",
         "Regular format",
         "The format string used to format the text if the target delta time is the same "
-        "as the current delta time. This format gets three parameters in this order:  "
-        "The target delta value, the target delta unit, and the string 'Paused' if the "
-        "delta time is paused or the empty string otherwise. More information about how "
-        "to make use of the format string, see the documentation at "
+        "as the current delta time. This format gets three parameters in this order: The "
+        "target delta value, the target delta unit, and the string 'Paused' if the delta "
+        "time is paused or the empty string otherwise. More information about how to "
+        "make use of the format string, see the documentation at "
         "https://en.cppreference.com/w/cpp/utility/format/spec",
         Property::Visibility::AdvancedUser
     };

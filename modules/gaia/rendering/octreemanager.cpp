@@ -45,7 +45,7 @@ namespace {
     constexpr std::string_view BinarySuffix = ".bin";
 
     /**
-     * \return the correct index of child node. Maps [1,1,1] to 0 and [-1,-1,-1] to 7
+     * \return The correct index of child node. Maps [1,1,1] to 0 and [-1,-1,-1] to 7
      */
     size_t childIndex(const glm::vec3& pos, const glm::vec3& orig = glm::vec3(0.f)) {
         size_t index = 0;
@@ -485,8 +485,7 @@ void OctreeManager::fetchSurroundingNodes(const glm::dvec3& cameraPos,
                 }
 
                 // Use multithreading to load files and detach thread from main execution
-                // so it can execute independently. Thread will be destroyed when
-                // finished
+                // so it can execute independently. Thread will be destroyed when finished
                 std::thread([this, n = child]() {
                     fetchChildrenNodes(*n, -1);
                 }).detach();
@@ -1231,7 +1230,7 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNod
                 return fetchedData;
             }
 
-            // Insert data and adjust stars added in this frame.
+            // Insert data and adjust stars added in this frame
             fetchedData[node.bufferIndex] = constructInsertData(node, mode, deltaStars);
         }
         return fetchedData;

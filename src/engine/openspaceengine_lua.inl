@@ -42,8 +42,8 @@ using namespace openspace;
 namespace {
 
 /**
- * Toggles the shutdown mode that will close the application after the countdown timer
- * is reached.
+ * Toggles the shutdown mode that will close the application after the countdown timer is
+ * reached.
  */
 [[codegen::luawrap]] void toggleShutdown() {
     global::openSpaceEngine->toggleShutdownMode();

@@ -168,8 +168,8 @@ void GuiGlobeBrowsingComponent::render() {
     }
 
     if (iNode == -1) {
-        // This should only occur if the Focusnode is not a RenderableGlobe
-        // or if there are no nodes
+        // This should only occur if the Focusnode is not a RenderableGlobe or if there
+        // are no nodes
         return;
     }
 

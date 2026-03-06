@@ -119,14 +119,14 @@ public:
     void setCamera(Camera* camera);
 
     /**
-     * Lets the renderer update the data to be brought into the rendererer programs
-     * as a 'rendererData' variable in the dictionary.
+     * Lets the renderer update the data to be brought into the rendererer programs as a
+     * 'rendererData' variable in the dictionary.
      */
     void setRendererData(ghoul::Dictionary rendererData);
 
     /**
-    * Lets the renderer update the data to be brought into the post rendererer programs
-    * as a 'resolveData' variable in the dictionary.
+    * Lets the renderer update the data to be brought into the post rendererer programs as
+    * a 'resolveData' variable in the dictionary.
     */
     void setResolveData(ghoul::Dictionary resolveData);
 

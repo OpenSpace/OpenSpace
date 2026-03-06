@@ -95,8 +95,8 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
     int nBricksInMemory = 1;
     int nStreamedBricks = 1;
 
-    // First loop: While neither the memory nor the streaming budget is reached,
-    // try to optimize for visual quality vs memory
+    // First loop: While neither the memory nor the streaming budget is reached, try to
+    // optimize for visual quality vs memory
 
     std::vector<BrickSelection> temporalSplitQueue;
     std::vector<BrickSelection> deadEnds;

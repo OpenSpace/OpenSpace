@@ -53,7 +53,7 @@ ReadFileJob::ReadFileJob(std::filesystem::path filePath,
 {}
 
 void ReadFileJob::execute() {
-    // Read columns from FITS file. If rows aren't specified then full table will be read.
+    // Read columns from FITS file. If rows aren't specified then full table will be read
     const std::shared_ptr<TableData<float>> table = _fitsFileReader->readTable<float>(
         _inFilePath,
         _allColumns,

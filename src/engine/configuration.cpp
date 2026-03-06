@@ -312,7 +312,7 @@ namespace {
 
         // If this value is set to 'true', the launcher will not be shown and OpenSpace
         // will start with the provided configuration options directly. Useful in
-        // multiprojector setups where a launcher window would be undesired
+        // multiprojector setups where a launcher window would be undesired.
         std::optional<bool> bypassLauncher;
 
         // Set which layer server should be preferd to be used, the options are

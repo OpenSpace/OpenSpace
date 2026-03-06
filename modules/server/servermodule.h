@@ -88,7 +88,7 @@ private:
     PropertyOwner _interfaceOwner;
     int _skyBrowserUpdateTime = 100;
 
-    // Callbacks for tiggering topic
+    /// Callbacks for triggering topic
     int _nextCallbackHandle = 0;
     std::vector<std::pair<CallbackHandle, CallbackFunction>> _preSyncCallbacks;
 };

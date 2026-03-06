@@ -605,7 +605,7 @@ void LoadingScreen::renderLogMessages() const {
             std::string word;
             while (is >> word) {
                 charactersSinceNewLine += static_cast<int>(word.size());
-                // Insert a new line when we exceede messageLength
+                // Insert a new line when we exceed messageLength
                 if (charactersSinceNewLine > MessageLength) {
                     result << '\n';
                     charactersSinceNewLine = static_cast<int>(word.size());
@@ -688,8 +688,8 @@ void LoadingScreen::updateItem(const std::string& itemIdentifier,
                                ProgressInfo progressInfo)
 {
     if (!_showNodeNames) {
-        // If we don't want to show the node names, we can disable the updating which
-        // also would create any of the text information
+        // If we don't want to show the node names, we can disable the updating which also
+        // would create any of the text information
         return;
     }
     const std::unique_lock lock(_itemsMutex);

@@ -113,7 +113,7 @@ namespace {
     std::string childNodeContentFromImageSet(const tinyxml2::XMLElement* imageSet,
                                              std::string_view elementName)
     {
-        // Find the thumbnail image url. The thumbnail is the last node so traverse
+        // Find the thumbnail image URL. The thumbnail is the last node so traverse
         // backwards for speed
         const std::string n = std::string(elementName);
         const tinyxml2::XMLElement* child = imageSet->FirstChildElement(n.c_str());
@@ -121,17 +121,17 @@ namespace {
     }
 
     std::string urlFromPlace(const tinyxml2::XMLElement* place) {
-        // If the place has a thumbnail url, return it
+        // If the place has a thumbnail URL, return it
         if (hasAttribute(place, Thumbnail)) {
             return attribute(place, Thumbnail);
         }
 
-        // If the place doesn't have a thumbnail url data attribute. Load the image set it
+        // If the place doesn't have a thumbnail URL data attribute. Load the image set it
         // stores instead
         const tinyxml2::XMLElement* imageSet = childNode(place, ImageSet);
 
-        // If there is an imageSet, collect thumbnail url, if it doesn't contain an
-        // ImageSet, it doesn't have an url
+        // If there is an imageSet, collect thumbnail URL, if it doesn't contain an
+        // ImageSet, it doesn't have an URL
         return imageSet ?
             childNodeContentFromImageSet(imageSet, ThumbnailUrl) :
             std::string(Undefined);
@@ -209,7 +209,7 @@ namespace {
             return std::nullopt;
         }
 
-        // Collect name, image url and credits
+        // Collect name, image URL and credits
         std::string name = attribute(node, Name);
         if (std::islower(name[0])) {
             // Convert first character in string to upper case
@@ -374,7 +374,7 @@ void WwtDataHandler::saveImagesFromXml(const tinyxml2::XMLElement* root,
     const tinyxml2::XMLElement* node = root->FirstChildElement();
 
     // Iterate through all siblings of node. If sibling is folder, open recursively. If
-    // sibling is image, save it.
+    // sibling is image, save it
     while (node) {
         const std::string name = node->Name();
         // If node is an image or place, load it

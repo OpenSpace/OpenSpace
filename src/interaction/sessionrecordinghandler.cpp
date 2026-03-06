@@ -340,7 +340,7 @@ void SessionRecordingHandler::startRecording() {
     _recording.elapsedTime = 0.0;
 
     // Record the current delta time as the first property to save in the file. This needs
-    // to be saved as a baseline whether or not it changes during recording.
+    // to be saved as a baseline whether or not it changes during recording
     // Dummy `_time` "property" to store the time setup in the baseline
     _savePropertiesBaseline["_time"] = std::format(
         "openspace.time.setPause({});openspace.time.setDeltaTime({});",
@@ -565,7 +565,7 @@ void SessionRecordingHandler::saveScriptKeyframeToTimeline(std::string script) {
 
     // Any script snippet included in this vector will be trimmed from any script from the
     // script manager, before it is recorded in the session recording file. The remainder
-    // of the script will be retained.
+    // of the script will be retained
     using ScriptSubstringReplace = std::pair<std::string_view, std::string_view>;
     constexpr std::array<ScriptSubstringReplace, 2> ScriptsToBeReplaced = {
         std::pair {
@@ -636,8 +636,8 @@ SessionRecordingHandler::SessionState SessionRecordingHandler::state() const {
 }
 
 double SessionRecordingHandler::fixedDeltaTimeDuringFrameOutput() const {
-    // Check if renderable in focus is still resolving tile loading
-    // do not adjust time while we are doing this
+    // Check if renderable in focus is still resolving tile loading do not adjust time
+    // while we are doing this
     const SceneGraphNode* an = global::navigationHandler->orbitalNavigator().anchorNode();
     const Renderable* focusRenderable = an->renderable();
     if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {

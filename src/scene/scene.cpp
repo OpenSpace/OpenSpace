@@ -810,20 +810,10 @@ void Scene::propertyPushProfileValueToLua(ghoul::lua::LuaState& L,
         _profilePropertyName
     );
     if (!_valueIsTable) {
-        std::visit(overloaded {
-            [&L](bool v) {
-                ghoul::lua::push(L, v);
-            },
-            [&L](float v) {
-                ghoul::lua::push(L, v);
-            },
-            [&L](const std::string& v) {
-                ghoul::lua::push(L, v);
-            },
-            [&L](ghoul::lua::nil_t v) {
-                ghoul::lua::push(L, v);
-            }
-        }, elem);
+        std::visit(
+            overloaded { [&L](auto v) { ghoul::lua::push(L, v); } },
+            elem
+        );
     }
 }
 

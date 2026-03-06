@@ -78,9 +78,9 @@ public:
     void publishEvent(Args&&... args);
 
     /**
-     * This function cleans up the memory for all published events.After this function
-     * has been called, no previously published events are valid any longer. This means
-     * that pointers retrieved from events before this call must be kept beyond this call.
+     * This function cleans up the memory for all published events.After this function has
+     * been called, no previously published events are valid any longer. This means that
+     * pointers retrieved from events before this call must be kept beyond this call.
      */
     void postFrameCleanup();
 
@@ -172,7 +172,7 @@ public:
     /**
      * Triggers all topics that are registered for events that are in the current event
      * queue.
-    */
+     */
     void triggerTopics() const;
 
     static LuaLibrary luaLibrary();

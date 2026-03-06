@@ -161,9 +161,8 @@ NavigationState::NavigationState(const nlohmann::json& json) {
 
 NavigationState::NavigationState(std::string anchor_, std::string aim_,
                                  std::string referenceFrame_, glm::dvec3 position_,
-                                 std::optional<glm::dvec3> up_,
-                                 double yaw_, double pitch_,
-                                 std::optional<double> timestamp_)
+                                 std::optional<glm::dvec3> up_, double yaw_,
+                                 double pitch_, std::optional<double> timestamp_)
     : anchor(std::move(anchor_))
     , aim(std::move(aim_))
     , referenceFrame(std::move(referenceFrame_))
@@ -197,9 +196,9 @@ CameraPose NavigationState::cameraPose() const {
 
     const glm::dmat3 referenceFrameTransform = referenceFrameNode->modelTransform();
 
-    // @TODO (2023-05-16, emmbr) This computation is wrong and has to be fixed! Only
-    // works if the reference frame is also the anchor node. I remember that fixing it
-    // was not as easy as using referenceFrameNode instead of anchor node though..
+    // @TODO (2023-05-16, emmbr) This computation is wrong and has to be fixed! Only works
+    // if the reference frame is also the anchor node. I remember that fixing it was not
+    // as easy as using referenceFrameNode instead of anchor node though..
     resultingPose.position = anchorNode->worldPosition() +
         referenceFrameTransform * glm::dvec3(position);
 

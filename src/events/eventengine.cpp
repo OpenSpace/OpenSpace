@@ -151,8 +151,8 @@ void EventEngine::unregisterEventTopic(size_t topicId, Event::Type type) {
     if (jt != it->second.end()) {
         it->second.erase(jt);
 
-        // This might have been the last action so we might need to remove the
-        // entry alltogether
+        // This might have been the last action so we might need to remove the entry
+        // alltogether
         if (it->second.empty()) {
             _eventTopics.erase(it);
         }

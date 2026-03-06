@@ -290,7 +290,7 @@ void PropertyOwner::addPropertySubOwner(PropertyOwner* owner) {
         }
     );
 
-    // If we found the propertyowner's name, we need to bail out
+    // If we found the PropertyOwner's name, we need to bail out
     if (it != _subOwners.end() && (*it)->identifier() == owner->identifier()) {
         LERROR(std::format(
             "PropertyOwner '{}' already present in PropertyOwner '{}'",
@@ -362,7 +362,7 @@ void PropertyOwner::removeProperty(Property& prop) {
 void PropertyOwner::removePropertySubOwner(PropertyOwner* owner) {
     ghoul_precondition(owner != nullptr, "owner must not be nullptr");
 
-    // See if we can find the name of the propertyowner to add
+    // See if we can find the name of the PropertyOwner to add
     std::vector<PropertyOwner*>::const_iterator it = std::find_if(
         _subOwners.begin(),
         _subOwners.end(),
@@ -371,7 +371,7 @@ void PropertyOwner::removePropertySubOwner(PropertyOwner* owner) {
         }
     );
 
-    // If we found the propertyowner, we can delete it
+    // If we found the PropertyOwner, we can delete it
     if (it == _subOwners.end() || (*it)->identifier() != owner->identifier()) {
         LERROR(std::format(
             "PropertyOwner with name '{}' not found for removal", owner->identifier()

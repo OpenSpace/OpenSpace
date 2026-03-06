@@ -289,7 +289,8 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
     // Target position, in the reference frame of the source node (to correctly inherit
     // parent transform)
     glm::dvec3 targetPosition = glm::dvec3(
-        glm::inverse(sourceNode->modelTransform()) * glm::dvec4(_targetNode->worldPosition(), 1.0)
+        glm::inverse(sourceNode->modelTransform()) *
+        glm::dvec4(_targetNode->worldPosition(), 1.0)
     );
 
     // Assumes source position is at origin, i.e. the parent node position

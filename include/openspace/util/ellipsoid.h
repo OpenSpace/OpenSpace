@@ -54,7 +54,7 @@ public:
     };
 
     /**
-     * \param radii defines three radii for the Ellipsoid
+     * \param radii Defines three radii for the Ellipsoid
      */
     explicit Ellipsoid(glm::dvec3 radii = glm::dvec3(1.0));
 
@@ -62,8 +62,8 @@ public:
      * Scales a point along the geocentric normal and places it on the surface of the
      * Ellipsoid.
      *
-     * \param p is a point in the cartesian coordinate system to be placed on the surface
-     *        of the Ellipsoid
+     * \param p A point in the cartesian coordinate system to be placed on the surface of
+     *        the Ellipsoid
      */
     glm::dvec3 geocentricSurfaceProjection(const glm::dvec3& p) const;
 
@@ -71,8 +71,8 @@ public:
      * Scales a point along the geodetic normal and places it on the surface of the
      * Ellipsoid.
      *
-     * \param p is a point in the cartesian coordinate system to be placed on the surface
-     *        of the Ellipsoid
+     * \param p A point in the cartesian coordinate system to be placed on the surface of
+     *        the Ellipsoid
      */
     glm::dvec3 geodeticSurfaceProjection(const glm::dvec3& p) const;
 
@@ -110,7 +110,7 @@ private:
 
     glm::dvec3 _radii = glm::dvec3(0.0);
 
-    // Eclipse shadows conf
+    // Eclipse shadows configuration
     std::vector<Ellipsoid::ShadowConfiguration> _shadowConfArray;
 };
 

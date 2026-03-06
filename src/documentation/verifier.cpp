@@ -39,7 +39,7 @@
 
 namespace openspace {
 
-// The explicit template instantiations for many of the commonly used template values
+// The explicit template instantiations for many of the commonly used template values.
 // This cuts down on the compilation time by only compiling these once
 template class Vector2Verifier<int>;
 template class Vector2Verifier<double>;
@@ -162,8 +162,9 @@ TestResult IntVerifier::operator()(const ghoul::Dictionary& dict,
         }
         else {
             // If we don't have a double value, we cannot have an int value
-            TestResult res;
-            res.success = false;
+            TestResult res = {
+                .success = false
+            };
             TestResult::Offense o = {
                 .offender = key,
                 .reason = TestResult::Offense::Reason::WrongType
@@ -173,8 +174,9 @@ TestResult IntVerifier::operator()(const ghoul::Dictionary& dict,
         }
     }
     else {
-        TestResult res;
-        res.success = false;
+        TestResult res = {
+            .success = false
+        };
         TestResult::Offense o = {
             .offender = key,
             .reason = TestResult::Offense::Reason::MissingKey
@@ -855,16 +857,16 @@ TestResult OrVerifier::operator()(const ghoul::Dictionary& dictionary,
         for (const TestResult& r2 : res) {
             for (const TestResult::Offense& o : r2.offenses) {
                 if (o.reason != TestResult::Offense::Reason::WrongType) {
-                    // This is the first reason that is not a wrong type, so this
-                    // is a good candidate for a useful error message
+                    // This is the first reason that is not a wrong type, so this is a
+                    // good candidate for a useful error message
                     r.offenses.push_back(o);
                     return r;
                 }
             }
         }
 
-        // If we got here, all of the offense reasons were a wrong type, so we
-        // can report that back
+        // If we got here, all of the offense reasons were a wrong type, so we can report
+        // that back
         TestResult::Offense o = {
             .offender = key,
             .reason = TestResult::Offense::Reason::WrongType

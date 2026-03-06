@@ -115,9 +115,8 @@ namespace openspace {
 // Rendering 16 elements will 'generate' the index buffer:
 // 10 11 12 13 14 15 00 01 02 03 04 05 06 07 08 09
 //
-//
 // NB: This method was implemented without a ring buffer before by manually shifting the
-// items in memory as was shown to be much slower than the current system.   ---abock
+// items in memory as was shown to be much slower than the current system         ---abock
 
 Documentation RenderableTrailOrbit::Documentation() {
     return codegen::doc<Parameters>(
@@ -190,9 +189,9 @@ void RenderableTrailOrbit::deinitializeGL() {
 
 void RenderableTrailOrbit::update(const UpdateData& data) {
     // Overview:
-    // 1. Update trails
-    // 2. Update floating position
-    // 3. Determine which parts of the array to upload and upload the data
+    //   1. Update trails
+    //   2. Update floating position
+    //   3. Determine which parts of the array to upload and upload the data
 
     // 1
     // Update the trails; the report contains whether any of the other values has been
@@ -262,7 +261,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             // Only update the changed ones
             // Since we are using a ring buffer, the number of updated needed might be
             // bigger than our current points, which means we have to split the upload
-            // into two calls.
+            // into two calls
             if (report.nUpdated > 0) {
                 // deltaT is positive, so the pointer is moving backwards and update has
                 // to happen towards the front
@@ -290,7 +289,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
                 }
             }
             else {
-                // deltaT is negative, so the pointer is moving forwards
+                // `deltaT` is negative, so the pointer is moving forwards
 
                 // The current index
                 const int i = _primaryRenderInformation.first;
@@ -306,8 +305,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
                 else {
                     // The current index is too close to the beginning of the array, so we
                     // need to split the upload into two parts:
-                    // 1. from the beginning of the array to the current index
-                    // 2. filling the back of the array with the rest
+                    //   1. From the beginning of the array to the current index
+                    //   2. Filling the back of the array with the rest
                     const int b = n - (i + 1);
                     upload(0, i + 1); // 1
                     upload(s-b, b);   // 2

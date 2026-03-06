@@ -372,7 +372,7 @@ void RenderableEclipseCone::createCone(double et) {
         et,
         _numberOfPoints
     );
-    // convert to meter
+    // Convert to meter
     for (glm::dvec3& p : resSrc.terminatorPoints) {
         p *= 1000.0;
     }
@@ -403,7 +403,7 @@ void RenderableEclipseCone::createCone(double et) {
         et,
         _numberOfPoints
     );
-    // convert to meter
+    // Convert to meter
     for (glm::dvec3& p : resDst.terminatorPoints) {
         p *= 1000.0;
     }

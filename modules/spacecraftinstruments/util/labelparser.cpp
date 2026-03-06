@@ -63,7 +63,7 @@ LabelParser::LabelParser(std::filesystem::path fileName,
 
         // Create dictionary containing all {playbookKeys , spice IDs}
         if (decoderStr == "Instrument") {
-            // for each playbook call -> create a Decoder object
+            // For each playbook call -> create a Decoder object
             for (const std::string_view key : typeDict.keys()) {
                 if (!typeDict.hasValue<Dictionary>(key)) {
                     continue;

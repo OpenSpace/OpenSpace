@@ -31,10 +31,10 @@
 
 namespace {
     struct [[codegen::Dictionary(TimeRange)]] Parameters {
-        // The start date of the time range
+        // The start date of the time range.
         std::string start [[codegen::annotation("A string representing a valid date")]];
 
-        // The end date of the time range
+        // The end date of the time range.
         std::string end [[codegen::annotation("A string representing a valid date")]];
     };
 } // namespace

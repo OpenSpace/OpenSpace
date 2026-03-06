@@ -482,7 +482,9 @@ bool RenderableFov::isReady() const {
     return _program && !_instrument.bounds.empty();
 }
 
-// Orthogonal projection next to planets surface
+/**
+ * Orthogonal projection next to planets surface.
+ */
 glm::dvec3 RenderableFov::orthogonalProjection(const glm::dvec3& vecFov, double time,
                                                const std::string& target) const
 {
@@ -573,7 +575,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
                 first.color = RenderInformation::VertexColorTypeIntersectionStart;
 
                 // If we had to convert the reference frame into a body-fixed frame, we
-                // need to apply this change here:
+                // need to apply this change here
                 if (ref.second) {
                     r.surfaceVector = SpiceManager::ref().frameTransformationMatrix(
                         ref.first,
@@ -886,7 +888,7 @@ std::pair<std::string, bool> RenderableFov::determineTarget(double time) {
 
         if (inFOV) {
             _previousTarget = pt;
-            return { pt, true };
+            return std::pair(pt, true);
         }
     }
 
@@ -924,7 +926,7 @@ std::pair<std::string, bool> RenderableFov::determineTarget(double time) {
         ];
     }
 
-    return { _previousTarget, false };
+    return std::pair(_previousTarget, false);
 }
 
 void RenderableFov::updateGPU() {

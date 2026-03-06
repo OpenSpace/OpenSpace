@@ -185,7 +185,7 @@ void RenderableKameleonPlane::initializeGL() {
                 _backgroundValues.setVisibility(Property::Visibility::Hidden);
             }
             else {
-                // else if autofilter is turned off, register backgroundValues
+                // Else if autofilter is turned off, register backgroundValues
                 _backgroundValues.setVisibility(Property::Visibility::Always);
             }
         });
@@ -295,7 +295,7 @@ void RenderableKameleonPlane::updateFieldlineSeeds() {
     using K = int;
     using V = std::tuple<std::string, std::string, bool>;
     for (std::pair<const K, V>& seedPath : _fieldlineState) {
-        // if this option was turned off
+        // If this option was turned off
         std::string o = opts[seedPath.first];
         const auto it = std::find(selectedOptions.begin(), selectedOptions.end(), o);
         if (it == selectedOptions.end() && std::get<2>(seedPath.second)) {

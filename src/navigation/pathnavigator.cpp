@@ -155,7 +155,7 @@ PathNavigator::PathNavigator()
     addProperty(_linearRotationSpeedFactor);
     addProperty(_minValidBoundingSphere);
 
-    _relevantNodeTags = std::vector<std::string>{
+    _relevantNodeTags = std::vector<std::string> {
         "planet_solarSystem",
         "moon_solarSystem"
     };

@@ -117,7 +117,7 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
             _localRotationState.velocity.decelerate(deltaTime);
         }
     }
-    else { // !button1Pressed
+    else {
         _localRotationState.previousValue = mousePosition;
         _localRotationState.velocity.decelerate(deltaTime);
 
@@ -132,7 +132,7 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
             deltaTime
         );
     }
-    else { // !button2Pressed
+    else {
         _truckMovementState.previousValue = mousePosition.y;
         _truckMovementState.velocity.decelerate(deltaTime);
     }
@@ -152,7 +152,7 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
             _localRollState.velocity.decelerate(deltaTime);
         }
     }
-    else { // !button3Pressed
+    else {
         _globalRollState.previousValue = mousePosition.x;
         _globalRollState.velocity.decelerate(deltaTime);
 

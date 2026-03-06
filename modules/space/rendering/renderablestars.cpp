@@ -340,8 +340,8 @@ namespace {
         // [[codegen::verbatim(FilterOutOfRangeInfo.description)]]
         std::optional<bool> filterOutOfRange;
 
-        // Specifies a value that is always filtered out of the value ranges on load.
-        // This can be used to trim the dataset's automatic value range.
+        // Specifies a value that is always filtered out of the value ranges on load. This
+        // can be used to trim the dataset's automatic value range.
         std::optional<float> staticFilter;
 
         // A value that is used to replace statically filtered values. Setting this value
@@ -718,7 +718,7 @@ void RenderableStars::initializeGL() {
     loadData();
 
     // We need to wait until after loading the data until we can see if the requested data
-    // value actually exists or not.  Once we determine the index, we no longer need the
+    // value actually exists or not. Once we determine the index, we no longer need the
     // value and can clear it
     if (!_queuedOtherData.empty()) {
         const int idx = _dataset.index(_queuedOtherData);

@@ -208,11 +208,11 @@ public:
      *
      * \throw SpiceException If the loading of the kernel \p filePath failed if, for
      *        example, \p filePath is not a valid SPICE kernel
-     * \pre \p filePath must not be empty.
-     * \pre \p filePath must be an absolute or relative path pointing to an existing file.
+     * \pre \p filePath must not be empty
+     * \pre \p filePath must be an absolute or relative path pointing to an existing file
      * \post The kernel is loaded or has its reference counter incremented and the handle
      *       to the kernel is returned. The returned value is never equal to
-     *       `KernelHandle(0)`.
+     *       `KernelHandle(0)`
      *
      * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/furnsh_c.html
      */
@@ -226,9 +226,9 @@ public:
      * \param kernelId The unique identifier that was returned from the call to
      *        #loadKernel which loaded the kernel
      *
-     * \pre \p kernelId must be a valid handle.
-     * \pre \p kernelId cannot be equal to `KernelHandle(0)`.
-     * \post The kernel identified by \p kernelId is unloaded.
+     * \pre \p kernelId must be a valid handle
+     * \pre \p kernelId cannot be equal to `KernelHandle(0)`
+     * \post The kernel identified by \p kernelId is unloaded
      *
      * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
      */
@@ -250,9 +250,9 @@ public:
      * \param filePath The path of the kernel that should be unloaded
      *
      * \throw SpiceException If the \p filePath has not been previously used to
-     *        successfully load a kernel.
-     * \pre \p filePath must not be empty.
-     * \post The kernel identified by \p filePath is unloaded.
+     *        successfully load a kernel
+     * \pre \p filePath must not be empty
+     * \post The kernel identified by \p filePath is unloaded
      *
      * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
      */
@@ -281,7 +281,7 @@ public:
      * \return `list` of SPK kernels for \p target, `empty` list if none loaded
      *
      * \throw SpiceException If \p target does not name a valid SPICE object
-     * \pre \p target must not be empty.
+     * \pre \p target must not be empty
      */
     std::vector<std::pair<double, double>> spkCoverage(const std::string& target) const;
 
@@ -309,7 +309,7 @@ public:
      * \return `list` of CK kernels for \p target, `empty` list if none loaded
      *
      * \throw SpiceException If \p target does not name a valid SPICE object
-     * \pre \p target must not be empty.
+     * \pre \p target must not be empty
      */
     std::vector<std::pair<double, double>> ckCoverage(const std::string& target) const;
 
@@ -343,7 +343,7 @@ public:
      * \param body The body for which the presence of a valid ID should be checked
      * \return `true` if the \p body has a NAIF ID, `false` otherwise
      *
-     * \pre \p body must not be empty.
+     * \pre \p body must not be empty
      */
     bool hasNaifId(const std::string& body) const;
 
@@ -494,7 +494,7 @@ public:
      * \throw SpiceException If the \p target or \p observer do not name a valid NAIF
      *        object, \p referenceFrame does not name a valid reference frame or if there
      *        is not sufficient data available to compute the position or neither the
-     *        target nor the observer have coverage.
+     *        target nor the observer have coverage
      * \pre \p target must not be empty
      * \pre \p observer must not be empty
      * \pre \p referenceFrame must not be empty
@@ -547,8 +547,8 @@ public:
      * \param ephemerisTime Time at which to get the transformation matrix
      * \return The transformation matrix
      *
-     * \throw SpiceException If the transformation matrix between \p from and \p to
-     *        cannot be determined
+     * \throw SpiceException If the transformation matrix between \p from and \p to cannot
+     *        be determined
      * \pre \p from must not be empty
      * \pre \p to must not be empty
      */
@@ -596,7 +596,7 @@ public:
      * \throw SpiceException If the \p target or \p observer do not name the same NAIF
      *        object, the \p target or \p observer name the same NAIF object or are in the
      *        same location, the \p referenceFrame or \p fovFrame are not recognized,
-     *        insufficient kernel information has been loaded.
+     *        insufficient kernel information has been loaded
      * \pre \p target must not be empty
      * \pre \p observer must not be empty
      * \pre \p The \p target and \p observer must be different strings
@@ -703,8 +703,8 @@ public:
      * \return The TransformMatrix containing the transformation matrix that defines the
      *         transformation from the \p sourceFrame to the \p destinationFrame
      *
-     * \throw SpiceException If the \p sourceFrame or the \p destinationFrame is
-     *        not a valid frame
+     * \throw SpiceException If the \p sourceFrame or the \p destinationFrame is not a
+     *        valid frame
      * \pre \p sourceFrame must not be empty
      * \pre \p destinatoinFrame must not be empty
      *
@@ -886,14 +886,14 @@ public:
     /**
      * Returns the current SpiceManager's exception strategy. See #setExceptionHandling.
      *
-     * \return The current exception handling strategy.
+     * \return The current exception handling strategy
      */
     UseException exceptionHandling() const;
 
     /**
      * Returns the path to the most current leap second kernel.
      *
-     * \return The path to the most current leap second kernel.
+     * \return The path to the most current leap second kernel
      */
     static std::filesystem::path leapSecondKernel();
 
@@ -971,8 +971,8 @@ private:
      *        between the observer and the target.
      * \return The position of the \p target relative to the \p origin
      *
-     * \throw SpiceException If the \p target or \p origin are not valid NAIF
-     *        objects or if there is no position for the \p target at any time
+     * \throw SpiceException If the \p target or \p origin are not valid NAIF objects or
+     *        if there is no position for the \p target at any time
      * \pre \p target must not be empty
      * \pre \p observer must not be empty
      * \pre \p referenceFrame must not be empty
@@ -998,7 +998,7 @@ private:
      *
      * \throw SpiceException If there is no coverage available for the specified
      *        \p sourceFrame and \p destinationFrame or the reference frames do not name a
-     *        valid NAIF frame.
+     *        valid NAIF frame
      * \pre \p fromFrame must not be empty
      * \pre \p toFrame must not be empty
      */
@@ -1011,7 +1011,7 @@ private:
     void loadLeapSecondsSpiceKernel();
 
     /**
-     * Loads pre defined geophysical constants kernel (geophysical.ker)
+     * Loads pre defined geophysical constants kernel (geophysical.ker).
      */
     void loadGeophysicalConstantsKernel();
 
@@ -1019,7 +1019,7 @@ private:
     /// A list of all loaded kernels
     std::vector<KernelInformation> _loadedKernels;
 
-    // Map: id, vector of pairs. Pair: Start time, end time;
+    // Map: id, vector of pairs. Pair: Start time, end time
     std::map<int, std::vector<std::pair<double, double>>> _ckIntervals;
     std::map<int, std::vector<std::pair<double, double>>> _spkIntervals;
     std::map<int, std::set<double>> _ckCoverageTimes;

@@ -178,8 +178,8 @@ TestResult testSpecification(const Documentation& documentation,
         }
     }
 
-    // Remove duplicate offenders that might occur if multiple rules apply to a single
-    // key and more than one of these rules are broken
+    // Remove duplicate offenders that might occur if multiple rules apply to a single key
+    // and more than one of these rules are broken
     const std::set<TestResult::Offense, OffenseCompare> uniqueOffenders(
         result.offenses.begin(),
         result.offenses.end()
@@ -277,5 +277,4 @@ namespace ghoul {
                 throw ghoul::MissingCaseException();
         }
     }
-
 } // namespace ghoul

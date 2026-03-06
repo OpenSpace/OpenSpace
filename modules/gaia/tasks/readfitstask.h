@@ -51,8 +51,8 @@ private:
     void readSingleFitsFile(const Task::ProgressCallback& progressCallback);
 
     /**
-     * Reads all FITS files in a folder with multiple threads and stores ordered star
-     * data into 8 binary files.
+     * Reads all FITS files in a folder with multiple threads and stores ordered star data
+     * into 8 binary files.
      */
     void readAllFitsFilesFromFolder(const Task::ProgressCallback& progressCallback);
 

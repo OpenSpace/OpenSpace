@@ -56,7 +56,7 @@ namespace {
         std::ifstream inFile = std::ifstream(syncFilePath);
         std::string line;
 
-        // load existing entries
+        // Load existing entries
         while (ghoul::getline(inFile, line)) {
             if (!line.empty()) {
                 existingEntries.insert(std::filesystem::path(line).filename().string());
@@ -78,7 +78,7 @@ namespace {
     std::string buildDataHttpRequest(double minTime, double maxTime, int dataID,
                                      const std::string& baseUrl)
     {
-        // formulate a min and a max time from time
+        // Formulate a min and a max time from time
         // The thing is time might be "now" and no items
         // ISO8601 format: yyyy-mm-ddThh:mm:ssZ
 
@@ -194,7 +194,6 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
     int attempt = 0;
     constexpr int MaxRetries = 1;
 
-    //
     // Example response
     //
     // {
@@ -256,7 +255,6 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
     constexpr int MaxRetries = 1;
     nlohmann::json jsonResult;
 
-    //
     // Example response
     //
     // {
@@ -276,7 +274,7 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
     // }
     //
     // Note that requested time can be month 10 but last entry in list is month 07,
-    // meaning there are no more available files between month 7-10.
+    // meaning there are no more available files between month 7-10
     while (attempt <= MaxRetries && !success) {
         try {
             std::vector<char> data = response.downloadedData();
@@ -423,7 +421,7 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
                 file->state = File::State::Downloaded;
                 trackFinishedDownloads(_trackSynced, file->path);
                 currentIt = _filesCurrentlyDownloading.erase(currentIt);
-                // if one is removed, i is reduced, else we'd skip one in the list
+                // If one is removed, i is reduced, else we'd skip one in the list
                 --i;
             }
         }
@@ -538,8 +536,8 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
         }
         return;
     }
-    // More than 2hrs a second would generally be unfeasable
-    // for a regular internet connection to operate at
+    // More than 2hrs a second would generally be unfeasable for a regular internet
+    // connection to operate at
     constexpr int SpeedThreshold = 7200; // 2 hours in seconds
     if (std::abs(deltaTime) > SpeedThreshold) {
         // Too fast, do nothing
@@ -552,7 +550,7 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
         return;
     }
 
-    // if delta time direction got changed
+    // If delta time direction got changed
     if ((_isForwardDirection && deltaTime < 0) || (!_isForwardDirection && deltaTime > 0))
     {
         _isForwardDirection = !_isForwardDirection;
@@ -564,49 +562,48 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
     }
 
     if (_isForwardDirection && _currentFile != _availableData.end()) {
-        // if files are there and time is between next file (+1) and +2 file
-        // (meaning the this file is active from now till next file)
-        // change this to be next
+        // If files are there and time is between next file (+1) and +2 file (meaning the
+        // this file is active from now till next file) change this to be next
         if (_currentFile + 1 != _availableData.end() &&
             _currentFile + 2 != _availableData.end() &&
             (_currentFile + 1)->time < time && (_currentFile + 2)->time > time)
         {
             _currentFile++;
         }
-        // if its beyond the +2 file, arguably that can mean delta time is to fast
-        // and files might be missed. But we also know we went past beyond the next so
-        // we no longer know where we are so we reinitialize
+        // If its beyond the +2 file, arguably that can mean delta time is to fast and
+        // files might be missed. But we also know we went past beyond the next so we no
+        // longer know where we are so we reinitialize
         else if (_currentFile + 1 != _availableData.end() &&
                  _currentFile + 2 != _availableData.end() &&
                  (_currentFile + 2)->time < time)
         {
             _currentFile = closestFileToNow(time);
         }
-        // We've jumped back without interpolating to a previous time step,
-        // past circa 2 files worth of time and without changing delta time
+        // We've jumped back without interpolating to a previous time step, past circa 2
+        // files worth of time and without changing delta time
         // >>>>>>>we jumped to here>>>>>>>>>now>>>>>>>
         else if (_currentFile->time - 2 * _currentFile->cadence > time) {
             _currentFile = closestFileToNow(time);
         }
     }
     else if (!_isForwardDirection && _currentFile != _availableData.begin()) {
-        // If file is there and time is between prev and this file
-        // then change this to be prev. Same goes here as if time is moving forward
-        // we will use forward 'usage', meaning file is active from now till next
+        // If file is there and time is between prev and this file then change this to be
+        // prev. Same goes here as if time is moving forward we will use forward 'usage',
+        // meaning file is active from now till next
         if (_currentFile - 1 != _availableData.begin() && _currentFile->time < time &&
             (_currentFile - 1)->time > time)
         {
             _currentFile--;
         }
-        // If we are beyond the prev file, again delta time might be to fast, but we
-        // no longer know where we are so we reinitialize
+        // If we are beyond the prev file, again delta time might be to fast, but we no
+        // longer know where we are so we reinitialize
         else if (_currentFile - 1 != _availableData.begin() &&
                 (_currentFile - 1)->time > time)
         {
             _currentFile = closestFileToNow(time);
         }
-        // We've jumped forward without interpolating to a future time step,
-        // past circa 2 files worth of time and without changing delta time
+        // We've jumped forward without interpolating to a future time step, past circa 2
+        // files worth of time and without changing delta time
         // <<<<<<now<<<<<<<<<we jumped to here<<<<<<<
         else if (_currentFile->time - 2 * _currentFile->cadence < time) {
             _currentFile = closestFileToNow(time);

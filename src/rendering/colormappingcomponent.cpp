@@ -47,7 +47,7 @@ namespace {
     constexpr Property::PropertyInfo FileInfo = {
         "File",
         "Color map file",
-        "The path to the color map file to use. Should be a .cmap file",
+        "The path to the color map file to use. Should be a .cmap file.",
         Property::Visibility::AdvancedUser
     };
 
@@ -157,20 +157,17 @@ namespace {
     //
     // The option for the parameters will be initialized based on the dataset used for
     // the specific renderable. The value range will be set based on the min and max
-    // values for the respective column in the dataset, but can be manually adjusted.
-    // Per default, all columns will be loaded, but this can also be adjusted.
+    // values for the respective column in the dataset, but can be manually adjusted. Per
+    // default, all columns will be loaded, but this can also be adjusted.
     //
     // In addition to specifying a color map (.cmap) file and changing the parameter used
     // for determining the color, this component includes features such as:
     //
     //   - Inverting the color map
-    //
     //   - Handling colors for missing data values (or hiding these data points)
-    //
     //   - Handling colors for values outside the provided range
-    //
     //   - Predefining which parameters to load from the dataset, and the range of values
-    // to use for color mapping
+    //      to use for color mapping
     struct [[codegen::Dictionary(ColorMappingComponent)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -192,9 +189,9 @@ namespace {
         // first option in the list is selected.
         //
         // Each option is a table in the form
-        // `{ Key = \"dataColumn\", Range = {min, max} }`, where the `Range` is optional.
-        // The specified range (or the min/max values for this data column) will be used
-        // for color mapping when the option is selected.
+        // `{ Key = \"dataColumn\", Range = { min, max } }`, where the `Range` is
+        // optional. The specified range (or the min/max values for this data column) will
+        // be used for color mapping when the option is selected.
         std::optional<std::vector<ColorMapParameter>> parameterOptions;
 
         // The default parameter to use for the color map. The options for this parameter
@@ -308,8 +305,8 @@ ColorMappingComponent::ColorMappingComponent(const ghoul::Dictionary& dictionary
         _colorRangeData.reserve(opts.size());
         for (size_t i = 0; i < opts.size(); i++) {
             dataColumn.addOption(static_cast<int>(i), opts[i].key);
-            // Add the provided range or an empty range. We will fill it later on,
-            // when the dataset is loaded, if it is empty
+            // Add the provided range or an empty range. We will fill it later on, when
+            // the dataset is loaded, if it is empty
             _colorRangeData.push_back(opts[i].range.value_or(glm::vec2(0.f)));
         }
     }

@@ -460,8 +460,8 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     //}
 
     if (_useSplitRenderMode) {
-        // Splits the trail up into three parts for more accurate rendering
-        // of renderableTrailTrajectory trails
+        // Splits the trail up into three parts for more accurate rendering of
+        // RenderableTrailTrajectory trails
 
         internalRender(
             renderLines,

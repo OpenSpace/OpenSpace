@@ -51,8 +51,8 @@ struct TileLoadJob : public Job<RawTile> {
 
     /**
      * If the TileLoadJob has been created using PBO, this is the address that the
-     * RawTileDataReader will read to. In case specified so in the TileTextureInitData
-     * of RawTileDataReader, the data will also be written to CPU memory.
+     * RawTileDataReader will read to. In case specified so in the TileTextureInitData of
+     * RawTileDataReader, the data will also be written to CPU memory.
      */
     void execute() override;
 

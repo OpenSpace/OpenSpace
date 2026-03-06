@@ -118,7 +118,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
         timeRangeSubPhases.start = _subphases[0].timeRange().start;
         timeRangeSubPhases.end = _subphases.back().timeRange().end;
 
-        // user may specify an overall time range. In that case expand this timerange
+        // User may specify an overall time range. In that case expand this timerange
         if (p.timeRange.has_value()) {
             const std::string start = p.timeRange->start;
             const std::string end = p.timeRange->end.value_or(start);
@@ -139,7 +139,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
         }
         else {
             // Its OK to not specify an overall time range, the time range for the
-            // subphases will simply be used.
+            // subphases will simply be used
             _timeRange.include(timeRangeSubPhases);
         }
     }

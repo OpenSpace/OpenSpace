@@ -173,8 +173,8 @@ void IswaManager::addIswaCygnet(int id, const std::string& type, std::string gro
             return;
         }
 
-        // This callback determines what geometry should be used and creates
-        // the right cygnet
+        // This callback determines what geometry should be used and creates the right
+        // cygnet
         auto metadataCallback =
             [this, &metaFuture](const DownloadManager::MemoryFile& file) {
                 // Create a string from downloaded file
@@ -250,16 +250,14 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id,
     return global::downloadManager->fetchFile(
         iswaUrl(id, timestamp, "data"),
         [id](const DownloadManager::MemoryFile&) {
-            LDEBUG(
-                "Download to memory finished for data cygnet with id: " +
-                std::to_string(id)
-            );
+            LDEBUG(std::format(
+                "Download to memory finished for data cygnet with id: {}", id
+            ));
         },
         [id](const std::string& err) {
-            LDEBUG(
-                "Download to memory was aborted for data cygnet with id " +
-                std::to_string(id) + ": " + err
-            );
+            LDEBUG(std::format(
+                "Download to memory was aborted for data cygnet with id {}: {}", id, err
+            ));
         }
     );
 }
@@ -446,7 +444,7 @@ std::string IswaManager::parseKWToLuaTable(const CdfInfo& info, const std::strin
     }
     else {
         spatialScale = glm::vec4(1.f);
-        spatialScale.w = 1; //-log10(1.f/max.x);
+        spatialScale.w = 1; // -log10(1.f/max.x);
         coordinateType = "Polar";
     }
 

@@ -700,8 +700,8 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
             std::string name = _geometryFeatures.back().key();
             std::string identifier = makeIdentifier(name);
 
-            // If there is already an owner with that name as an identifier, make a
-            // unique one
+            // If there is already an owner with that name as an identifier, make a unique
+            // one
             if (_featuresPropertyOwner.hasPropertySubOwner(identifier)) {
                 identifier = std::format("Feature{}-", index, identifier);
             }

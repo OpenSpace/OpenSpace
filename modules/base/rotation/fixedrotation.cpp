@@ -255,7 +255,7 @@ namespace {
 
         // [[codegen::verbatim(YAxisOrthogonalVectorInfo.description)]]
         std::optional<bool> yAxisOrthogonal;
-
+        
         // [[codegen::verbatim(YAxisInvertObjectInfo.description)]]
         std::optional<bool> yAxisInvert;
 
@@ -284,44 +284,41 @@ Documentation FixedRotation::Documentation() {
 FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
     : Rotation(dictionary)
     , _enabled(EnableInfo, true)
-    , _xAxis{
-        OptionProperty(XAxisTypeInfo),
-        StringProperty(XAxisObjectInfo, ""),
-        BoolProperty(XAxisInvertObjectInfo, false),
-        Vec3Property(
+    , _xAxis {
+        .type = OptionProperty(XAxisTypeInfo),
+        .object = StringProperty(XAxisObjectInfo, ""),
+        .invertObject = BoolProperty(XAxisInvertObjectInfo, false),
+        .vector = Vec3Property(
             XAxisVectorInfo,
             glm::vec3(1.f, 0.f, 0.f),
             glm::vec3(-1.f),
             glm::vec3(1.f)
         ),
-        BoolProperty(XAxisOrthogonalVectorInfo, false),
-        nullptr
+        .isOrthogonal = BoolProperty(XAxisOrthogonalVectorInfo, false)
     }
     , _yAxis{
-        OptionProperty(YAxisTypeInfo),
-        StringProperty(YAxisObjectInfo, ""),
-        BoolProperty(YAxisInvertObjectInfo, false),
-        Vec3Property(
+        .type = OptionProperty(YAxisTypeInfo),
+        .object = StringProperty(YAxisObjectInfo, ""),
+        .invertObject = BoolProperty(YAxisInvertObjectInfo, false),
+        .vector = Vec3Property(
             YAxisVectorInfo,
             glm::vec3(0.f, 1.f, 0.f),
             glm::vec3(-1.f),
             glm::vec3(1.f)
         ),
-        BoolProperty(YAxisOrthogonalVectorInfo, false),
-        nullptr
+        .isOrthogonal = BoolProperty(YAxisOrthogonalVectorInfo, false)
     }
     , _zAxis{
-        OptionProperty(ZAxisTypeInfo),
-        StringProperty(ZAxisObjectInfo, ""),
-        BoolProperty(ZAxisInvertObjectInfo, false),
-        Vec3Property(
+        .type = OptionProperty(ZAxisTypeInfo),
+        .object = StringProperty(ZAxisObjectInfo, ""),
+        .invertObject = BoolProperty(ZAxisInvertObjectInfo, false),
+        .vector = Vec3Property(
             ZAxisVectorInfo,
             glm::vec3(0.f, 0.f, 1.f),
             glm::vec3(-1.f),
             glm::vec3(1.f)
         ),
-        BoolProperty(ZAxisOrthogonalVectorInfo, false),
-        nullptr
+        .isOrthogonal = BoolProperty(ZAxisOrthogonalVectorInfo, false)
     }
     , _attachedObject(AttachedInfo, "")
     , _constructorDictionary(dictionary)
@@ -536,8 +533,8 @@ void FixedRotation::update(const UpdateData& data) {
     );
 
     // @TODO (2024-06-15, abock) None of the following four checks should be necessary as
-    //       the nodes are retrieved whenever the property value is changed, but we had an
-    //       initialization issue and this was the fastest way to fix the bug
+    // the nodes are retrieved whenever the property value is changed, but we had an
+    // initialization issue and this was the fastest way to fix the bug
     if (!_attachedNode) {
         _attachedNode = sceneGraphNode(_attachedObject);
     }

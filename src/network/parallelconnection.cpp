@@ -90,7 +90,7 @@ bool ParallelConnection::sendMessage(const Message& message) {
     const uint32_t messageSizeOut = static_cast<uint32_t>(message.content.size());
     std::vector<char> payload;
 
-    // insert header into buffer
+    // Insert header into buffer
     payload.push_back('O');
     payload.push_back('S');
 

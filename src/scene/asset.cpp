@@ -276,8 +276,8 @@ void Asset::unload() {
 
         child->_parentAssets.erase(parentIt);
 
-        // We only want to deinitialize the child if noone is keeping track of it,
-        // which is either a still initialized parent or that it is loaded as a root
+        // We only want to deinitialize the child if noone is keeping track of it, which
+        // is either a still initialized parent or that it is loaded as a root
         if (!child->hasInitializedParent() && !_manager.isRootAsset(child)) {
             child->deinitialize();
         }

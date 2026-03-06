@@ -141,8 +141,8 @@ public:
     std::string ISO8601() const;
 
     /**
-     * Get the J2000 seconds equivalent of the object's date/time, using the loaded
-     * SPICE kernel.
+     * Get the J2000 seconds equivalent of the object's date/time, using the loaded SPICE
+     * kernel.
      *
      * \return J2000 seconds of date/time
      */
@@ -235,8 +235,8 @@ public:
     /**
      * Increment operation for the date/time.
      *
-     * \param value integer value for number of units in an operation
-     * \param unit single char that specifies the unit of increment. Allowable units are:
+     * \param value Integer value for number of units in an operation
+     * \param unit Single char that specifies the unit of increment. Allowable units are:
      *        (y)ear, (M)onth, (d)ay, (h)our, (m)inute, (s)econd
      * \param error The difference in J2000 seconds from current date/time to target (a
      *        positive value means target is in the future)
@@ -250,23 +250,23 @@ public:
     /**
      * Decrement operation for the date/time.
      *
-     * \param value integer value for number of units in an operation
-     * \param unit single char that specifies the unit of decrement. Allowable units are:
+     * \param value Integer value for number of units in an operation
+     * \param unit Single char that specifies the unit of decrement. Allowable units are:
      *        (y)ear, (M)onth, (d)ay, (h)our, (m)inute, (s)econd
      * \param error The difference in J2000 seconds from current date/time to target (a
      *        positive value means target is in the future)
      * \param resolution The J2000 seconds of the interval defined by the value & unit
      * \return The number of decrements that were performed in order to get as close as
-     *         possible to the target, where each decrement is defined by the value &
-     *         unit (and approximated but not fixed by the resolution param)
+     *         possible to the target, where each decrement is defined by the value & unit
+     *         (and approximated but not fixed by the resolution param)
      */
     int decrement(int value, char unit, double error, double resolution);
 
     /**
      * Single increment operation for the date/time.
      *
-     * \param value integer value for number of units in an operation
-     * \param unit single char that specifies the unit of increment. Allowable units are:
+     * \param value Integer value for number of units in an operation
+     * \param unit Single char that specifies the unit of increment. Allowable units are:
      *        (y)ear, (M)onth, (d)ay, (h)our, (m)inute, (s)econd
      */
     void incrementOnce(int value, char unit);
@@ -274,8 +274,8 @@ public:
     /**
      * Single decrement operation for the date/time.
      *
-     * \param value integer value for number of units in an operation
-     * \param unit single char that specifies the unit of decrement. Allowable units are:
+     * \param value Integer value for number of units in an operation
+     * \param unit Single char that specifies the unit of decrement. Allowable units are:
      *        (y)ear, (M)onth, (d)ay, (h)our, (m)inute, (s)econd
      */
     void decrementOnce(int value, char unit);
@@ -300,9 +300,9 @@ public:
      * Constructor that initializes with formatted strings for start & ends date/times,
      * and a time resolution within that range.
      *
-     * \param start the ISO8601 date/time string (YYYY-MM-DDTHH:mm:ss) for start
-     * \param end the ISO8601 date/time string (YYYY-MM-DDTHH:mm:ss) for end
-     * \param resolution the formatted resolution, which consists of an integer & unit
+     * \param start The ISO8601 date/time string (YYYY-MM-DDTHH:mm:ss) for start
+     * \param end The ISO8601 date/time string (YYYY-MM-DDTHH:mm:ss) for end
+     * \param resolution The formatted resolution, which consists of an integer & unit
      *        character. The acceptable unit characters are:
      *        (y)ear   Example: '1y' = 1 year. No range limitations
      *        (M)onth  Example: '4M' = 4 months.    Allowable values: 1, 2, 3, 4, 6

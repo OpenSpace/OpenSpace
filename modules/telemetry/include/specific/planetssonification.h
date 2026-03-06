@@ -75,9 +75,10 @@ public:
     static LuaLibrary luaLibrary();
 
 private:
-    // To hold all the data for a planet or a moon, including a list of data for the
-    // moons of the planet. However, in the case of a moon, then the list of moons
-    // is empty
+    /**
+     * To hold all the data for a planet or a moon, including a list of data for the moons
+     * of the planet. However, in the case of a moon, then the list of moons is empty.
+     */
     struct DataBody {
         explicit DataBody(std::string inName);
 
@@ -86,16 +87,15 @@ private:
         double horizontalAngle = 0.0;
         double verticalAngle = 0.0;
 
-        // List of moons that orbit this planet (in the case that this is a moon, then
-        // this list is empty)
+        /// List of moons that orbit this planet (in the case that this is a moon, then
+        /// this list is empty)
         std::vector<DataBody> moons;
     };
 
     /**
      * Create an osc::Blob object with the current sonification settings for the indicated
-     * planet.
-     * Order of settings: Size/day, gravity, temperature, and optionally atmosphere,
-     *                    moons, and rings.
+     * planet. Order of settings: Size/day, gravity, temperature, and optionally
+     * atmosphere, moons, and rings.
      *
      * \param planetIndex The index of the planet to create the settings blob for
      * \return An osc::Blob object with current sonification settings for the indicated
@@ -129,7 +129,6 @@ private:
      * \param angleCalculationMode The angle calculation mode to use. This determines
      *        which method to use when calculating the angle.
      * \param includeElevation Whether the additional elevation angle should be calculated
-     *
      * \return `true` if the data is new compared to before, otherwise `false`
      */
     bool updateData(const Camera* camera, int planetIndex,
@@ -185,7 +184,7 @@ private:
         // is due to the sonification and planet being in the current focus and should
         // therefore have better precision. If the planet is not the current focus node,
         // then the low precision value is used to save performance, both on the
-        // OpenSpace side and the receiving side.
+        // OpenSpace side and the receiving side
         DoubleProperty lowDistancePrecision;
         DoubleProperty highDistancePrecision;
         DoubleProperty lowAnglePrecision;

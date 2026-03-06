@@ -200,8 +200,8 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
                 std::vector<geos::geom::Coordinate> triCoords;
                 triCoords.reserve(3 * triangles.size());
 
-                // Add three coordinates per triangle. Note flipped winding order
-                // (want counter clockwise, but GEOS provides clockwise)
+                // Add three coordinates per triangle. Note flipped winding order (want
+                // counter clockwise, but GEOS provides clockwise)
                 for (const geos::triangulate::tri::Tri* t : triangles) {
                     triCoords.push_back(t->getCoordinate(0));
                     triCoords.push_back(t->getCoordinate(2));

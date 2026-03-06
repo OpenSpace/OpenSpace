@@ -244,9 +244,11 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // Compute coefficient of decay based on current frametime; if frametime has been
-    // longer than usual then multiple decay steps may be applied to keep the decay
-    // relative to user time
+    /**
+     * Compute coefficient of decay based on current frametime; if frametime has been
+     * longer than usual then multiple decay steps may be applied to keep the decay
+     * relative to user time.
+     */
     constexpr double computeDecayCoeffFromFrametime(double coeff, int times) {
         if (coeff > 0.00001) {
             return std::pow(coeff, times);
@@ -311,7 +313,7 @@ TouchInteraction::TouchInteraction()
     )
     , _constTimeDecay_secs(ConstantTimeDecaySecsInfo, 1.75f, 0.1f, 4.f)
     // Calculated with two vectors with known diff in length, then
-    // projDiffLength/diffLength.
+    // projDiffLength/diffLength
     , _enableDirectManipulation(EnableDirectManipulationInfo, true)
     , _directTouchDistanceThreshold(DirectManipulationThresholdInfo, 5.f, 0.f, 10.f)
     , _pinchInputs({
@@ -378,8 +380,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
     }
 
     if (_tap) {
-        // @TODO (2023-02-01, emmbr) This if is not triggered on every touch tap.
-        // Why?
+        // @TODO (2023-02-01, emmbr) This if is not triggered on every touch tap. Why?
 
         // Check for doubletap
         std::chrono::milliseconds timestamp = duration_cast<std::chrono::milliseconds>(
@@ -455,7 +456,8 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
 
     // Find best transform values for the new camera state and store them in par
     std::vector<double> par(6, 0.0);
-    par[0] = _lastVel.orbit.x; // use _lastVel for orbit
+    // Use _lastVel for orbit
+    par[0] = _lastVel.orbit.x;
     par[1] = _lastVel.orbit.y;
     bool lmSuccess = _directInputSolver.solve(
         list,
@@ -525,8 +527,8 @@ void TouchInteraction::updateNodeSurfacePoints(const std::vector<TouchInputHolde
         const glm::dvec3 raytrace = glm::normalize(cursorInWorldSpace);
         const size_t id = inputHolder.fingerId();
 
-        // Compute positions on anchor node, by checking if touch input
-        // intersect interaction sphere
+        // Compute positions on anchor node, by checking if touch input intersect
+        // interaction sphere
         double intersectionDist = 0.0;
         const bool intersected = glm::intersectRaySphere(
             camPos,
@@ -871,13 +873,15 @@ double TouchInteraction::computeTapZoomDistance(double zoomGain) {
 
 bool TouchInteraction::hasNonZeroVelocities() const {
     glm::dvec2 sum = _vel.orbit + glm::dvec2(_vel.zoom + _vel.roll, 0.0) + _vel.pan;
-    // Epsilon size based on that even if no interaction is happening,
-    // there might still be some residual velocity in the
+    // Epsilon size based on that even if no interaction is happening, there might still
+    // be some residual velocity in the
     return glm::length(sum) > 0.001;
 }
 
-// Main update call, calculates the new orientation and position for the camera depending
-// on _vel and dt. Called every frame
+/**
+ * Main update call, calculates the new orientation and position for the camera depending
+ * on _vel and dt. Called every frame.
+ */
 void TouchInteraction::step(double dt, bool directTouch) {
     using namespace glm;
 
@@ -959,8 +963,8 @@ void TouchInteraction::step(double dt, bool directTouch) {
         {
             // Zooming
 
-            // This is a rough estimate of the node surface
-            // If nobody has set another zoom in limit, use this as default zoom in bounds
+            // This is a rough estimate of the node surface. If nobody has set another
+            // zoom in limit, use this as default zoom in bounds
             double zoomInBounds = interactionSphere * _zoomInBoundarySphereMultiplier;
             bool isZoomInLimitSet = (_zoomInLimit.value() >= 0.0);
 
@@ -1064,11 +1068,11 @@ void TouchInteraction::step(double dt, bool directTouch) {
 
         decelerate(dt);
 
-        // @TODO (emmbr, 2023-02-08) This is ugly, but for now prevents jittering
-        // when zooming in closer than the orbital navigator allows. Long term, we
-        // should make the touch interaction tap into the orbitalnavigator and let that
-        // do the updating of the camera, instead of handling them separately. Then we
-        // would keep them in sync and avoid duplicated camera updating code.
+        // @TODO (emmbr, 2023-02-08) This is ugly, but for now prevents jittering when
+        // zooming in closer than the orbital navigator allows. Long term, we should make
+        // the touch interaction tap into the orbitalnavigator and let that do the
+        // updating of the camera, instead of handling them separately. Then we would keep
+        // them in sync and avoid duplicated camera updating code
         OrbitalNavigator& orbitalNavigator =
             global::navigationHandler->orbitalNavigator();
         camPos = orbitalNavigator.pushToSurfaceOfAnchor(camPos);
@@ -1102,12 +1106,15 @@ void TouchInteraction::step(double dt, bool directTouch) {
     }
 }
 
-// Decelerate velocities, called a set number of times per second to dereference it from
-// frame time
-// Example:
-// Assume: frequency = 0.01, dt = 0.05 (200 fps), _timeSlack = 0.0001
-// times = floor((0.05 + 0.0001) / 0.01) = 5
-// _timeSlack = 0.0501 % 0.01 = 0.01
+/**
+ * Decelerate velocities, called a set number of times per second to dereference it from
+ * frame time.
+ *
+ * Example:
+ * Assume: frequency = 0.01, dt = 0.05 (200 fps), _timeSlack = 0.0001
+ *  times = floor((0.05 + 0.0001) / 0.01) = 5
+ * _timeSlack = 0.0501 % 0.01 = 0.01
+ */
 void TouchInteraction::decelerate(double dt) {
     _frameTimeAvg.updateWithNewFrame(dt);
     double expectedFrameTime = _frameTimeAvg.averageFrameTime();
@@ -1127,17 +1134,19 @@ void TouchInteraction::decelerate(double dt) {
     _vel.zoom *= computeDecayCoeffFromFrametime(_constTimeDecayCoeff.zoom,  times);
 }
 
-// Called if all fingers are off the screen
+/**
+ * Called if all fingers are off the screen.
+ */
 void TouchInteraction::resetAfterInput() {
 #ifdef TOUCH_DEBUG_PROPERTIES
     _debugProperties.nFingers = 0;
     _debugProperties.interactionMode = "None";
 #endif // TOUCH_DEBUG_PROPERTIES
-    // @TODO (emmbr 2023-02-03) Bring back feature that allows node to spin when
-    // the direct manipulaiton finger is let go. Should implement this using the
-    // orbitalnavigator's friction values. This also implies passing velocities to
-    // the orbitalnavigator, instead of setting the camera directly as is currently
-    // done in this class.
+    // @TODO (emmbr 2023-02-03) Bring back feature that allows node to spin when the
+    // direct manipulaiton finger is let go. Should implement this using the
+    // orbitalnavigator's friction values. This also implies passing velocities to the
+    // orbitalnavigator, instead of setting the camera directly as is currently done in
+    // this class
 
     // Reset variables
     _lastVel.orbit = glm::dvec2(0.0);
@@ -1152,7 +1161,9 @@ void TouchInteraction::resetAfterInput() {
     _selectedNodeSurfacePoints.clear();
 }
 
-// Reset all property values to default
+/**
+ * Reset all property values to default.
+ */
 void TouchInteraction::resetPropertiesToDefault() {
     _unitTest = false;
     _disableZoom = false;

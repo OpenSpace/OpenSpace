@@ -154,21 +154,19 @@ namespace {
     // different statistical aspects of the framerate.
     //
     //   - `Deltatime`: Shows the time in milliseconds it took to render the previous
-    //                  frame
+    //     frame
     //   - `Average Deltatime`: Shows the time that it took to render in milliseconds
-    //                          averaged over the last 100 or so frames
+    //     averaged over the last 100 or so frames
     //   - `Deltatime extremes`: Shows the minimum and maximum values of the render time
-    //                           in milliseconds over the last 100 or so frames
+    //     in milliseconds over the last 100 or so frames
     //  - `Deltatime standard deviation`: Shows the standard deviation of the render time
-    //                                    in milliseconds over the last 100 or so frames
+    //    in milliseconds over the last 100 or so frames
     //  - `Deltatime coefficient of variation`: Shows the normalized root-mean-square
-    //                                          deviation of the render time in
-    //                                          milliseconds over the last 100 or so
-    //                                          frames
+    //    deviation of the render time in milliseconds over the last 100 or so frames
     //  - `Frames per second`: Shows the inverse of the delta time it took the render the
-    //                         last frame.
+    //    last frame
     //  - `Average frames per second`: Shows average number of frames that have been
-    //                                 presented over the last 100 or so frames
+    //    presented over the last 100 or so frames
     struct [[codegen::Dictionary(DashboardItemFramerate)]] Parameters {
         enum class [[codegen::map(FrametimeType)]] Type {
             DtTime [[codegen::key("Deltatime")]],
