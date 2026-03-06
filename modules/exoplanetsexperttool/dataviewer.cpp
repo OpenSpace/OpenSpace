@@ -1367,7 +1367,7 @@ void DataViewer::updateGlyphRenderData() {
     data.shrink_to_fit();
 
     auto mod = global::moduleEngine->module<ExoplanetsExpertToolModule>();
-    mod->updateGlyphRenderData(data);
+    mod->updateGlyphRenderData(std::move(data));
 }
 
 void DataViewer::updateSelectionInRenderable() {

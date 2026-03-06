@@ -37,6 +37,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <array>
 
 namespace openspace::documentation { struct Documentation; }
 
@@ -96,7 +97,7 @@ private:
         float component = -1.f;
         size_t index = 0;
         int nColors = -1;
-        glm::vec4 colors[MaxNumberColors];
+        std::array<glm::vec4, MaxNumberColors> colors = {};
     };
 
     std::vector<GlyphData> _glyphData;

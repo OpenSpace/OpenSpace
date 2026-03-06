@@ -235,8 +235,14 @@ std::filesystem::path ExoplanetsExpertToolModule::dataConfigFile() const {
     return std::filesystem::path(_dataConfigFile.value());
 }
 
-const ExoplanetsExpertToolModule::GlyphRenderData&
+ExoplanetsExpertToolModule::GlyphRenderData
 ExoplanetsExpertToolModule::glyphRenderData() const {
+    // Mutex to make sure we don't read data while it's being updated in the
+    // middle of a sync
+    std::lock_guard guard(_syncMutex);
+
+    // We return a copy, since the data may be updated asynchronously while rendering,
+    // and we want to avoid any issues with that
     return _glyphRenderData;
 }
 
@@ -285,6 +291,10 @@ void ExoplanetsExpertToolModule::encode(SyncBuffer* syncBuffer) {
 
     // Sync timestamp
     syncBuffer->encode(_glyphRenderData.timeStamp);
+
+    LDEBUG(std::format("Message size: {}", sizeof(syncBuffer->data())));
+
+    LDEBUG("Encode: Done encoding glyph render data");
 }
 
 void ExoplanetsExpertToolModule::decode(SyncBuffer* syncBuffer) {
@@ -297,7 +307,14 @@ void ExoplanetsExpertToolModule::decode(SyncBuffer* syncBuffer) {
         return;
     }
 
+    if (nItems < 0) {
+        LERROR(std::format("Invalid nItems received in sync: {}", nItems));
+        return;
+    }
+
     LDEBUG("Decode: Decoding glyph data");
+
+    LDEBUG(std::format("Message size: {}", sizeof(syncBuffer->data())));
 
     _glyphRenderData.items.clear();
     _glyphRenderData.items.reserve(nItems);
@@ -306,11 +323,14 @@ void ExoplanetsExpertToolModule::decode(SyncBuffer* syncBuffer) {
         GlyphRenderData::Item item;
         syncBuffer->decode(item.index);
         syncBuffer->decode(item.component);
+
         syncBuffer->decode(item.position.x);
         syncBuffer->decode(item.position.y);
         syncBuffer->decode(item.position.z);
+
         size_t nColors;
         syncBuffer->decode(nColors);
+
         for (size_t j = 0; j < nColors; j++) {
             glm::vec4 color;
             syncBuffer->decode(color.r);
@@ -323,6 +343,8 @@ void ExoplanetsExpertToolModule::decode(SyncBuffer* syncBuffer) {
     }
 
     syncBuffer->decode(_glyphRenderData.timeStamp);
+
+    LDEBUG("Decode: Done decoding glyph data");
 }
 
 void ExoplanetsExpertToolModule::internalInitialize(const ghoul::Dictionary& dict) {

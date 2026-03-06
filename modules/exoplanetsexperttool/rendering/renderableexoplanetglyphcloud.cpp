@@ -564,7 +564,7 @@ void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
         return; // No update
     }
 
-    LDEBUG("Gor new data. Updating data for rendering");
+    LDEBUG("Got new data. Updating data for rendering");
 
     _lastDataTimeStamp = syncedData.timeStamp;
 
@@ -589,6 +589,11 @@ void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
 
         size_t nColors = item.colors.size();
         d.nColors = static_cast<int>(nColors);
+
+        // Clear all color slots first (defensive programming)
+        for (size_t i = 0; i < MaxNumberColors; i++) {
+            d.colors[i] = glm::vec4(0.0f);
+        }
 
         // Limit the number of colors to the maximum supported by the shader
         size_t temp = std::min(nColors, MaxNumberColors);

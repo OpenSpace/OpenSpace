@@ -66,7 +66,8 @@ public:
     bool showInfoWindowAtStartup() const;
     std::filesystem::path dataConfigFile() const;
 
-    const GlyphRenderData& glyphRenderData() const;
+    GlyphRenderData glyphRenderData() const;
+
     void updateGlyphRenderData(std::vector<GlyphRenderData::Item> data);
 
     // Encode the data that should be synced to the other nodes
@@ -94,12 +95,13 @@ protected:
     // This data is set from master only, but should be synced to all the nodes
     GlyphRenderData _glyphRenderData;
 
+    // Synced data are mutex protected since decode and rendering may happen
+    // asynchronously. Mutable since we need to lock it in const functions that
+    // are called during rendering
+    mutable std::mutex _syncMutex;
+
     // Master-only flag to track if new data needs syncing to nodes
     bool _gotNewDataFromGui = false;
-
-    // Synced data are mutex protected since decode and rendering may happen
-    // asynchronously
-    std::mutex _syncMutex;
 };
 
 } // namespace openspace
