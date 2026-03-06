@@ -1,7 +1,6 @@
 local transforms = asset.require("scene/solarsystem/heliosphere/transforms_heliosphere")
 
 
-
 local transferFunctions = asset.resource({
   Type = "HttpSynchronization",
   Name = "Today's Sun Transfer Functions",
