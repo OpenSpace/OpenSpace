@@ -14,6 +14,7 @@
   ],
   "assets": [
     "base_exoplanets",
+    "exoplanetexplorer/actions/dome_setup",
     "exoplanetexplorer/events/fade_glyphs",
     "exoplanetexplorer/kepler_prism",
     "exoplanetexplorer/milkyway_center_line",
