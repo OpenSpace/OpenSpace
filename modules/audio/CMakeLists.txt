@@ -49,7 +49,7 @@ if (WIN32)
 elseif (UNIX)
   set(SOLOUD_BACKEND_ALSA ON CACHE BOOL "")
 endif ()
-add_subdirectory(ext/soloud/contrib SYSTEM)
+add_subdirectory(ext/soloud/contrib SYSTEM EXCLUDE_FROM_ALL)
 
 # Unfortunately, the soloud cmake tarket doesn't set the include directories correctly
 target_include_directories(openspace-module-audio SYSTEM PRIVATE ext/soloud/include)
