@@ -1,7 +1,7 @@
 local transforms = asset.require("../transforms")
 local kernels = asset.require("../kernels")
 local kernels415 = asset.require("../kernels415")
-local kernels452 = asset.require("../kernels452")
+local kernels454 = asset.require("../kernels454")
 local coreKernels = asset.require("spice/core")
 
 
@@ -716,7 +716,7 @@ local S2004S24 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels452.ID.S2004S24,
+      Target = kernels454.ID.S2004S24,
       Observer = coreKernels.ID.SaturnBarycenter
     }
   },
@@ -745,7 +745,7 @@ local S2004S24Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels452.ID.S2004S24,
+      Target = kernels454.ID.S2004S24,
       Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },

@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local kernels452 = asset.require("../kernels452")
+local kernels454 = asset.require("../kernels454")
 local coreKernels = asset.require("spice/core")
 
 
@@ -10,7 +10,7 @@ local Albiorix = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels452.ID.Albiorix,
+      Target = kernels454.ID.Albiorix,
       Observer = coreKernels.ID.SaturnBarycenter
     }
   },
@@ -39,7 +39,7 @@ local AlbiorixTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels452.ID.Albiorix,
+      Target = kernels454.ID.Albiorix,
       Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
@@ -98,7 +98,7 @@ local Bebhionn = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels452.ID.Bebhionn,
+      Target = kernels454.ID.Bebhionn,
       Observer = coreKernels.ID.SaturnBarycenter
     }
   },
@@ -127,7 +127,7 @@ local BebhionnTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels452.ID.Bebhionn,
+      Target = kernels454.ID.Bebhionn,
       Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
@@ -186,7 +186,7 @@ local Erriapus = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels452.ID.Erriapus,
+      Target = kernels454.ID.Erriapus,
       Observer = coreKernels.ID.SaturnBarycenter
     }
   },
@@ -215,7 +215,7 @@ local ErriapusTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels452.ID.Erriapus,
+      Target = kernels454.ID.Erriapus,
       Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
@@ -274,7 +274,7 @@ local Tarvos = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels452.ID.Tarvos,
+      Target = kernels454.ID.Tarvos,
       Observer = coreKernels.ID.SaturnBarycenter
     }
   },
@@ -303,7 +303,7 @@ local TarvosTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels452.ID.Tarvos,
+      Target = kernels454.ID.Tarvos,
       Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },

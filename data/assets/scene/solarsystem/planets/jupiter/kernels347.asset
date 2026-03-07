@@ -6,7 +6,7 @@ local kernels = asset.resource({
   Name = "Jupiter Spice Kernels",
   Type = "HttpSynchronization",
   Identifier = "jupiter_kernels",
-  Version = 2
+  Version = 3
 })
 
 local ID = {
@@ -64,11 +64,15 @@ local ID = {
   S2003J18 = 555,
   S2003J19 = 561,
   S2003J23 = 55507,
+  S2003J24 = 55508,
   S2010J1 = 551,
   S2010J2 = 552,
   S2011J1 = 572,
   S2011J2 = 556,
+  S2011J3 = 55509,
   S2016J1 = 554,
+  S2016J3 = 55518,
+  S2016J4 = 55519,
   S2017J1 = 559,
   S2017J2 = 563,
   S2017J3 = 564,
@@ -77,6 +81,20 @@ local ID = {
   S2017J7 = 568,
   S2017J8 = 569,
   S2017J9 = 570,
+  S2017J10 = 55525,
+  S2017J11 = 55526,
+  S2018J2 = 55510,
+  S2018J3 = 55511,
+  S2018J4 = 55520,
+  S2021J1 = 55512,
+  S2021J2 = 55513,
+  S2021J3 = 55514,
+  S2021J4 = 55515,
+  S2021J5 = 55516,
+  S2021J6 = 55517,
+  S2022J1 = 55521,
+  S2022J2 = 55522,
+  S2022J3 = 55523,
   Sinope = "SINOPE",
   Sponde = "SPONDE",
   Taygete = "TAYGETE",
@@ -103,7 +121,7 @@ local Frame = {
   Kalyke = coreKernels.Frame.Kalyke,
   Leda = coreKernels.Frame.Leda,
   Lysithea = coreKernels.Frame.Lysithea,
-  Megaclite = coreKernels.Frame.Magaclite,
+  Megaclite = coreKernels.Frame.Megaclite,
   Metis = coreKernels.Frame.Metis,
   Pasiphae = coreKernels.Frame.Pasiphae,
   Praxidike = coreKernels.Frame.Praxidike,
@@ -113,23 +131,20 @@ local Frame = {
   Themisto = coreKernels.Frame.Themisto
 }
 
-
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels .. "jup344.bsp")
+  openspace.spice.loadKernel(kernels .. "jup347.bsp")
 end)
 
 asset.onDeinitialize(function()
-  openspace.spice.unloadKernel(kernels .. "jup344.bsp")
+  openspace.spice.unloadKernel(kernels .. "jup347.bsp")
 end)
 
 asset.export("ID", ID)
 asset.export("Frame", Frame)
 
-
-
 asset.meta = {
   Name = "Jupiter Spice Kernels",
-  Description = "Generic SPICE kernels for Jupiter",
+  Description = "All Jovian moons in a single SPICE kernel (jup347.bsp)",
   Author = "OpenSpace Team",
   URL = "https://naif.jpl.nasa.gov/pub/naif/pds/wgc/kernels/spk/",
   License = "NASA"

@@ -1,5 +1,5 @@
 local transforms = asset.require("./transforms")
-local kernels102 = asset.require("./kernels102")
+local kernels104 = asset.require("./kernels104")
 local coreKernels = asset.require("spice/core")
 
 
@@ -10,7 +10,7 @@ local Halimede = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels102.ID.Halimede,
+      Target = kernels104.ID.Halimede,
       Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
@@ -39,7 +39,7 @@ local HalimedeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels102.ID.Halimede,
+      Target = kernels104.ID.Halimede,
       Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
@@ -92,7 +92,7 @@ local Psamathe = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels102.ID.Psamathe,
+      Target = kernels104.ID.Psamathe,
       Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
@@ -121,7 +121,7 @@ local PsamatheTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels102.ID.Psamathe,
+      Target = kernels104.ID.Psamathe,
       Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
@@ -174,7 +174,7 @@ local Sao = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels102.ID.Sao,
+      Target = kernels104.ID.Sao,
       Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
@@ -203,7 +203,7 @@ local SaoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels102.ID.Sao,
+      Target = kernels104.ID.Sao,
       Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
@@ -256,7 +256,7 @@ local Laomedeia = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels102.ID.Laomedeia,
+      Target = kernels104.ID.Laomedeia,
       Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
@@ -285,7 +285,7 @@ local LaomedeiaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels102.ID.Laomedeia,
+      Target = kernels104.ID.Laomedeia,
       Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
@@ -338,7 +338,7 @@ local Neso = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels102.ID.Neso,
+      Target = kernels104.ID.Neso,
       Observer = coreKernels.ID.NeptuneBarycenter
     }
   },
@@ -367,7 +367,7 @@ local NesoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels102.ID.Neso,
+      Target = kernels104.ID.Neso,
       Observer = coreKernels.ID.NeptuneBarycenter
     },
     Color = { 0.2, 0.5, 0.75 },
@@ -414,6 +414,169 @@ local NesoLabel = {
   }
 }
 
+local S2002N5 = {
+  Identifier = "S2002N5",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels104.ID.S2002N5,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 11500, 11500, 11500 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_irregular_retrograde",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "S/2002 N 5",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Retrograde Moons/S2002N5"
+  }
+}
+
+local S2002N5Trail = {
+  Identifier = "S2002N5Trail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels104.ID.S2002N5,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 3151,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "S/2002 N 5 Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Retrograde Moons/S2002N5",
+    Focusable = false
+  }
+}
+
+local S2002N5Label = {
+  Identifier = "S2002N5Label",
+  Parent = S2002N5.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S2002N5",
+    FontSize = 70.0,
+    Size = 7.4,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2002 N 5 Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Retrograde Moons/S2002N5",
+    Focusable = false,
+    Description = "Label for Neptune's moon S2002N5 (Irregular Retrograde Moons)"
+  }
+}
+
+local S2021N1 = {
+  Identifier = "S2021N1",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels104.ID.S2021N1,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 7000, 7000, 7000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_irregular_prograde",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "S2021N1",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/S2021N1"
+  }
+}
+
+local S2021N1Trail = {
+  Identifier = "S2021N1Trail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels104.ID.S2021N1,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 10043,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "S/2021 N 1 Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/S2021N1",
+    Focusable = false
+  }
+}
+
+local S2021N1Label = {
+  Identifier = "S2021N1Label",
+  Parent = S2021N1.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S2021N1",
+    FontSize = 70.0,
+    Size = 7.4,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2021 N 1 Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/S2021N1",
+    Focusable = false,
+    Description = "Label for Neptune's moon S2021N1 (Irregular Prograde Moons)"
+  }
+}
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Halimede)
@@ -435,6 +598,14 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Neso)
   openspace.addSceneGraphNode(NesoTrail)
   openspace.addSceneGraphNode(NesoLabel)
+
+  openspace.addSceneGraphNode(S2002N5)
+  openspace.addSceneGraphNode(S2002N5Trail)
+  openspace.addSceneGraphNode(S2002N5Label)
+
+  openspace.addSceneGraphNode(S2021N1)
+  openspace.addSceneGraphNode(S2021N1Trail)
+  openspace.addSceneGraphNode(S2021N1Label)
 end)
 
 asset.onDeinitialize(function()
@@ -457,6 +628,14 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NesoLabel)
   openspace.removeSceneGraphNode(NesoTrail)
   openspace.removeSceneGraphNode(Neso)
+
+  openspace.removeSceneGraphNode(S2002N5Label)
+  openspace.removeSceneGraphNode(S2002N5Trail)
+  openspace.removeSceneGraphNode(S2002N5)
+
+  openspace.removeSceneGraphNode(S2021N1Label)
+  openspace.removeSceneGraphNode(S2021N1Trail)
+  openspace.removeSceneGraphNode(S2021N1)
 end)
 
 asset.export(Halimede)
@@ -479,12 +658,18 @@ asset.export(Neso)
 asset.export(NesoTrail)
 asset.export(NesoLabel)
 
+asset.export(S2002N5)
+asset.export(S2002N5Trail)
+asset.export(S2002N5Label)
 
+asset.export(S2021N1)
+asset.export(S2021N1Trail)
+asset.export(S2021N1Label)
 
 asset.meta = {
-  Name = "Neptune Irregular Prograde Moons",
-  Description = [[Procedural Globe asset containing Neptune' irregular prograde
-    moons: Halimede, Psamathe and Neso. Blank globes and SPICE trails are generated for
+  Name = "Neptune Irregular Prograde and Retrograde Moons",
+  Description = [[Procedural Globe asset containing Neptune' irregular prograde and retrograde
+    moons: Halimede, Psamathe, Laomedeia, Neso, S/2021 N 1 and S/2002 N 5. Blank globes and SPICE trails are generated for
     each moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

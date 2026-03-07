@@ -6,27 +6,27 @@ local kernels = asset.resource({
   Name = "Uranus Spice Kernels",
   Type = "HttpSynchronization",
   Identifier = "uranus_kernels",
-  Version = 2
+  Version = 3
 })
 
-
 local ID = {
+  -- Major moons
   Ariel = "ARIEL",
   Miranda = "MIRANDA",
   Oberon = "OBERON",
   Titania = "TITANIA",
   Umbriel = "UMBRIEL",
-  Uranus = "URANUS"
+  Uranus = "URANUS",
 }
 
 local Frame = {
+  -- Major moons
   Ariel = coreKernels.Frame.Ariel,
   Miranda = coreKernels.Frame.Miranda,
   Oberon = coreKernels.Frame.Oberon,
   Titania = coreKernels.Frame.Titania,
-  Umbriel = coreKernels.Frame.Umbriel
+  Umbriel = coreKernels.Frame.Umbriel,
 }
-
 
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernels .. "ura111.bsp")
@@ -39,11 +39,9 @@ end)
 asset.export("ID", ID)
 asset.export("Frame", Frame)
 
-
-
 asset.meta = {
   Name = "Uranus Spice Kernels",
-  Description = "Generic SPICE kernels for Uranus",
+  Description = "SPICE kernels for Uranus",
   Author = "OpenSpace Team",
   URL = "https://naif.jpl.nasa.gov/pub/naif/pds/wgc/kernels/spk/",
   License = "NASA"
