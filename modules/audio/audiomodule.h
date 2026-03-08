@@ -233,7 +233,7 @@ public:
      *
      * \return The list of all tracks that are currently playing
      */
-    std::vector<std::string> currentlyPlaying() const;
+    std::vector<std::string> currentlyPlaying();
 
     /**
      * Sets the global volume for all track referred to the new \p volume. The total
@@ -299,6 +299,14 @@ private:
 
     void internalInitialize(const ghoul::Dictionary&) override;
     void internalDeinitializeGL() override;
+
+    /**
+     * We want to do a little garbage collection on our internal data structure to remove
+     * the songs that someone has loaded at some point and that have since organically
+     * stopped. In general, this should only happen if the song was started without
+     * looping and has ended.
+     */
+    void garbageCollection();
 
     /**
      * Loads the sound at the provided \p path as an audio source and returns the pointer
