@@ -131,30 +131,26 @@ namespace {
         // Remove carriage returns
         str.erase(std::remove(str.begin(), str.end(), '\r'), str.end());
 
-        std::transform(
-            str.begin(),
-            str.end(),
-            str.begin(),
-            [](char c) {
-                // Replace newlines with spaces
-                if (c == '\n') {
-                    return ' ';
-                }
-
-                // The documentation contains “ and ” which we convert to " to make them
-                // copy-and-pastable
-                if (c == -109 || c == -108) {
-                    return '"';
-                }
-
-                // Convert \ into / to make paths pastable
-                if (c == '\\') {
-                    return '/';
-                }
-
-                return c;
+        for (size_t i = 0; i < str.size(); i++) {
+            // Replace newlines with spaces
+            if (str[i] == '\n') {
+                str[i] = ' ';
             }
-        );
+
+            // The documentation contains “ and ” which we convert to " to make them
+            // copy-and-pastable
+            if (str[i] == -109 || str[i] == -108) {
+                str[i] = '"';
+            }
+
+            // Convert \ into / to make paths pastable. Unless the \ is followed by a " in
+            // which case we do want to keep it. The check against .size() - 1 is there so
+            // that we don't access the string out of bounds if the \ is the last
+            // character in the pasted string
+            if (str[i] == '\\' && (i == str.size() - 1 || str[i + 1] != '"')) {
+                str[i] = '/';
+            }
+        }
 
         return str;
     }
