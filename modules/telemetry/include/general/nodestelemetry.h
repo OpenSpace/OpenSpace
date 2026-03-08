@@ -107,7 +107,7 @@ private:
      * \param nodeIndex The index to the internally stored node data that should be
      *        updated
      * \param angleCalculationMode The angle calculation mode to use. This determines
-     *        which method to use when calculating the angle.
+     *        which method to use when calculating the angle
      * \param includeElevation Whether the additional elevation angle should be calculated
      * \return `true` if the data is new compared to before, otherwise `false`
      */

@@ -344,7 +344,7 @@ std::string prunedIdentifier(std::string identifier) {
 /**
  * Returns a table of data regarding the current view and the sky browsers and targets.
  *
- * \return A table of data regarding the current targets.
+ * \return A table of data regarding the current targets
  */
 [[codegen::luawrap]] ghoul::Dictionary targetData() {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();

@@ -54,7 +54,7 @@ namespace {
  * \param filePath The path to the file, including the file name (and extension, if it is
  *        anything other than `.navstate`)
  * \param useTimeStamp If `true`, and the provided NavigationState includes a timestamp,
- *        the time will be set as well.
+ *        the time will be set as well
  */
 [[codegen::luawrap]] void loadNavigationState(std::string filePath,
                                               bool useTimeStamp = false)
@@ -365,7 +365,6 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * \param joystickName The name for the joystick or game controller with the axis for
  *        which to find the information
  * \param axis The joystick axis for which to find the information
- *
  * \return An object with information about the joystick axis
  */
 [[codegen::luawrap]] ghoul::Dictionary joystickAxis(std::string joystickName, int axis) {
@@ -413,7 +412,6 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * \param joystickName The name for the joystick or game controller which information
  *        should be returned
  * \param axis The joystick axis for which to get the deadzone value
- *
  * \return The deadzone value
  */
 [[codegen::luawrap("axisDeadzone")]] float joystickAxisDeadzone(std::string joystickName,
@@ -570,7 +568,7 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * produces reasonable results.
  *
  * \param value A positive value rolls the camera to the left and a negative value rolls
- *              the camera to the right
+ *        the camera to the right
  */
 [[codegen::luawrap]] void addGlobalRoll(double value) {
     global::navigationHandler->orbitalNavigator().scriptStates().addGlobalRoll(value);

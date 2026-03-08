@@ -968,7 +968,7 @@ private:
      * \param ephemerisTime The time for which an estimated position is desirable
      * \param lightTime If the \p aberrationCorrection is different from
      *        AbberationCorrection::Type::None, this variable will contain the light time
-     *        between the observer and the target.
+     *        between the observer and the target
      * \return The position of the \p target relative to the \p origin
      *
      * \throw SpiceException If the \p target or \p origin are not valid NAIF objects or

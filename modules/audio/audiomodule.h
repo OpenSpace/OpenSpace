@@ -265,7 +265,7 @@ public:
      * value continues to be used instead. The coordinate system for the tracks and the
      * listener is a meter-based coordinate system.
      *
-     * \param position The position of the listener.
+     * \param position The position of the listener
      * \param lookAt The direction vector of the forward direction
      * \param up The up-vector of the coordinate system
      */
@@ -285,6 +285,7 @@ public:
 
     /**
      * Returns the position for the speaker of the provided \p channel.
+     *
      * \return The position for the speaker of the provided \p channel
      */
     glm::vec3 speakerPosition(int channel) const;

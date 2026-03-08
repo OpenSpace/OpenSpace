@@ -71,7 +71,6 @@ glm::dvec3 galacticToEquatorial(const glm::dvec3& coords);
  */
 glm::dvec3 equatorialToGalactic(const glm::dvec3& coords);
 
-// Conversion to screenspace from local camera / pixels
 /**
  * Converts from local camera coordinates to screenspace coordinates. The screenspace
  * coordinates are placed on the screenspace plane which has the z-coordinate as -2.1.
@@ -133,7 +132,8 @@ double targetRoll(const glm::dvec3& up, const glm::dvec3& forward);
 
 /**
  * Returns the view direction of the OpenSpace camera in galactic coordinates.
- * \return View direction of the OpenSpace camera in Cartesian galactic coordinates.
+ *
+ * \return View direction of the OpenSpace camera in Cartesian galactic coordinates
  */
 glm::dvec3 cameraDirectionGalactic();
 

@@ -241,8 +241,8 @@ struct EventCameraFocusTransition : public Event {
      * \param transition_ The transition type that the camera just finished; is one of
      *        `Approaching`, `Reaching`, `Receding`, or `Exiting`
      *
-     * \pre camera_ must not be nullptr
-     * \pre node_ must not be nullptr
+     * \pre camera_ must not be `nullptr`
+     * \pre node_ must not be `nullptr`
      */
     EventCameraFocusTransition(const Camera* camera_, const SceneGraphNode* node_,
         Transition transition_);
@@ -513,7 +513,7 @@ struct EventRenderableEnabled : public Event {
      *
      * \param node_ The identifier of the node that contains the renderable
      *
-     * \pre node_ must not be nullptr
+     * \pre node_ must not be `nullptr`
      */
     explicit EventRenderableEnabled(const SceneGraphNode* node_);
 

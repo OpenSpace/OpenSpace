@@ -172,7 +172,7 @@ struct DocumentationEntry {
      *        human readable format
      *
      * \pre \p k must not be empty
-     * \pre \p v must not be nullptr
+     * \pre \p v must not be `nullptr`
      */
     DocumentationEntry(std::string k, std::shared_ptr<Verifier> v,
         Optional opt = Optional::No, Private priv = Private::No, std::string doc = "");
@@ -202,7 +202,7 @@ struct DocumentationEntry {
      *        human readable format
      *
      * \pre \p k must not be empty
-     * \pre \p v must not be nullptr
+     * \pre \p v must not be `nullptr`
      */
     DocumentationEntry(std::string k, Verifier* v, Optional opt = Optional::No,
         Private priv = Private::No, std::string doc = "");

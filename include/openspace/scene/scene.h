@@ -191,7 +191,7 @@ public:
      *
      * \param prop The Property that should not longer be updated
      *
-     * \pre \p prop must not be nullptr
+     * \pre \p prop must not be `nullptr`
      * \post No interpolation record exists for \p prop
      */
     void removePropertyInterpolation(Property* prop);

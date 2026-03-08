@@ -167,7 +167,7 @@ public:
      *
      * \param timeout The amount of time the request will wait before aborting due to the
      *        server not responding. If this value is 0, there is no timeout on the
-     *        request.
+     *        request
      * \return `true` if the request completed successfully, `false` otherwise
      */
     bool perform(std::chrono::milliseconds timeout = std::chrono::milliseconds(0));

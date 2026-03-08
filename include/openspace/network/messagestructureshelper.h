@@ -38,7 +38,7 @@ struct TimeKeyframe;
  * properties of the camera from the navigation handler.
  *
  * \return CameraKeyframe with current state from NavigationHandler
-*/
+ */
 CameraKeyframe generateCameraKeyframe();
 
 /**

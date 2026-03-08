@@ -431,7 +431,7 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
  * \param extraScalarVars Names of scalar quantities to add to state; e.g "rho" for
  *        density
  * \param extraMagVars Names of the variables used for calculating magnitudes. Must be
- *        multiple of 3.
+ *        multiple of 3
  */
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,

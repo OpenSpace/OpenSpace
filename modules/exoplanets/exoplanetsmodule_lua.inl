@@ -207,7 +207,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
  * Returns a list with names of the host star of all the exoplanet systems that have
  * sufficient data for generating a visualization, based on the module's loaded data file.
  *
- * \return A list of exoplanet host star names.
+ * \return A list of exoplanet host star names
  */
 [[codegen::luawrap]] std::vector<std::string> listOfExoplanets() {
     std::vector<std::string> names = hostStarsWithSufficientData();

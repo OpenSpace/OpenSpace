@@ -1453,7 +1453,7 @@ enum class [[codegen::enum]] CustomPropertyType {
  * Set a custom ordering of the items in a specific branch in the Scene GUI tree, i.e.
  * for a specific GUI path.
  *
- * \param guiPath The GUI path for which the order should be set.
+ * \param guiPath The GUI path for which the order should be set
  * \param list A list of names of scene graph nodes or subgroups in the GUI, in the order
  *        of which they should appear in the tree. The list does not have to include all
  *        items in the given GUI path. Any excluded items will be placed after the ones in

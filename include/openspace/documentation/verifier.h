@@ -284,7 +284,7 @@ public:
      * \return A TestResult containing the results of the testing. If DocumentationEntry%s
      *         were specified in the constructor and one of those values find an offending
      *         key inside the table, it's name will be returned with a fully qualified
-     *         name by prepending the name (= \p key) of the table.
+     *         name by prepending the name (= \p key) of the table
      */
     TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;

@@ -105,7 +105,8 @@ public:
      *
      * \param synchronization The resource synchronization object that is bound to this
      *        Asset
-     * \pre \p synchronization must not be nullptr
+     *
+     * \pre \p synchronization must not be `nullptr`
      * \pre \p synchronization must not have been added to this Asset before
      */
     void addSynchronization(ResourceSynchronization* synchronization);

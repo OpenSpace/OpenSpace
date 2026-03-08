@@ -42,8 +42,8 @@ namespace openspace {
  * \param center The center point for the sphere
  * \param r The radius of the sphere
  * \param intersectionPoint A variable to store the resulting intersection point in
- * \return `true` if the line between \p p1 and \p p2 intersects the sphere given by
- *         \p r and \p center, and `false` otherwise
+ * \return `true` if the line between \p p1 and \p p2 intersects the sphere given by \p r
+ *         and \p center, and `false` otherwise
  */
 bool lineSphereIntersection(const glm::dvec3& p1, const glm::dvec3& p2,
     const glm::dvec3& center, double r, glm::dvec3& intersectionPoint);

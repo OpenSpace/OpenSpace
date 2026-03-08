@@ -893,7 +893,7 @@ that identifies a property owner
 should be changed to. The type of this parameter must agree with the type of the selected
 property
 \\param duration The number of seconds over which the change will occur. If not provided
-or the provided value is 0, the change is instantaneously.
+or the provided value is 0, the change is instantaneously
 \\param easing If a duration larger than 0 is provided, this parameter controls the manner
 in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEaseIn",
 "QuadraticEaseOut", "QuadraticEaseInOut", "CubicEaseIn", "CubicEaseOut", "CubicEaseInOut",
@@ -904,7 +904,7 @@ in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEas
 "BounceEaseIn", "BounceEaseOut", "BounceEaseInOut"
 \\param postscript A Lua script that will be executed once the change of property value
 is completed. If a duration larger than 0 was provided, it is at the end of the
-interpolation. If 0 was provided, the script runs immediately.
+interpolation. If 0 was provided, the script runs immediately
 )",
                 {
                     std::source_location::current().file_name(),
@@ -936,7 +936,7 @@ efficiently for individual property values.
 \\param value The new value to which the property identified by the `uri` should be
 changed to. The type of this parameter must agree with the type of the selected property
 \\param duration The number of seconds over which the change will occur. If not provided
-or the provided value is 0, the change is instantaneously.
+or the provided value is 0, the change is instantaneously
 \\param easing If a duration larger than 0 is provided, this parameter controls the manner
 in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEaseIn",
 "QuadraticEaseOut", "QuadraticEaseInOut", "CubicEaseIn", "CubicEaseOut", "CubicEaseInOut",
@@ -947,7 +947,7 @@ in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEas
 "BounceEaseIn", "BounceEaseOut", "BounceEaseInOut"
 \\param postscript This parameter specifies a Lua script that will be executed once the
 change of property value is completed. If a duration larger than 0 was provided, it is
-at the end of the interpolation. If 0 was provided, the script runs immediately.
+at the end of the interpolation. If 0 was provided, the script runs immediately
 )",
                 {
                     std::source_location::current().file_name(),

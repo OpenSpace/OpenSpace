@@ -225,7 +225,7 @@ public:
      * can be a combination of any value contained in the `LuaTypes`.
      *
      * \return The Lua type that will be consumed or produced by the Property::getLuaValue
-     *         and Property::setLuaValue methods.
+     *         and Property::setLuaValue methods
      */
     virtual ghoul::lua::LuaTypes typeLua() const = 0;
 
@@ -286,7 +286,7 @@ public:
      * \param handle An OnChangeHandle that was returned from a previous call to onChange
      *        by this property or OnChangeHandleAll if all callbacks should be removed
      *
-     * \pre \p handle must refer to a callback that has been previously registred
+     * \pre \p handle must refer to a callback that has been previously registered
      * \pre \p handle must refer to a callback that has not been removed previously
      */
     void removeOnChange(OnChangeHandle handle);
@@ -298,7 +298,7 @@ public:
      * \param handle An OnDeleteHandle that was returned from a previous call to onDelete
      *        by this property
      *
-     * \pre \p handle must refer to a callback that has been previously registred
+     * \pre \p handle must refer to a callback that has been previously registered
      * \pre \p handle must refer to a callback that has not been removed previously
      */
     void removeOnDelete(OnDeleteHandle handle);
@@ -312,7 +312,7 @@ public:
      *        onMetaDataChange by this property or OnMetaDataChangeHandleAll if all
      *        callbacks should be removed
      *
-     * \pre \p handle must refer to a callback that has been previously registred
+     * \pre \p handle must refer to a callback that has been previously registered
      * \pre \p handle must refer to a callback that has not been removed previously
      */
     void removeOnMetaDataChange(OnMetaDataChangeHandle handle);

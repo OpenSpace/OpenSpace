@@ -54,7 +54,7 @@ namespace {
  * of each specified time step will be added per default as well.
  *
  * \param deltaTime The list of delta times, given in seconds per real time second. Should
- *        only include positive values.
+ *        only include positive values
  */
 [[codegen::luawrap]] void setDeltaTimeSteps(std::vector<double> deltaTime) {
     global::timeManager->setDeltaTimeSteps(deltaTime);
@@ -378,7 +378,7 @@ namespace {
  * number of seconds past the J2000 epoch, or an ISO 8601 date string.
  *
  * \param base The timestamp to alter, either given as an ISO 8601 date string or a number
- *        of seconds past the J2000 epoch.
+ *        of seconds past the J2000 epoch
  * \param change The amount of time to add to the specified timestamp. Can be given either
  *        in a number of seconds (including negative), or as a string of the form
  *        [-]XX(s,m,h,d,M,y] with (s)econds, (m)inutes, (h)ours, (d)ays, (M)onths, and

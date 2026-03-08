@@ -55,8 +55,8 @@ public:
     /**
      * Saves the state machine to a .dot file, as a directed graph.
      *
-     * \param filename This is the full name of the file, including the directory,
-     *        but without the extension
+     * \param filename This is the full name of the file, including the directory, but
+     *        without the extension
      */
     void saveToDotFile(const std::filesystem::path& filename) const;
 

@@ -91,7 +91,7 @@ public:
      * of this method.
      *
      * \param newTime A j2000 time value specifying the new time stamp that the script
-     *        scheduler should progress to.
+     *        scheduler should progress to
      * \return Vector with the scheduled scripts that should be run from begining to end
      */
     std::vector<std::string> progressTo(double newTime);
