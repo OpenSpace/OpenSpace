@@ -38,11 +38,13 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
 #include <sgct/config.h>
+#include <QCheckbox>
 #include <QFile>
 #include <QKeyEvent>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QVBoxLayout>
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
@@ -78,6 +80,7 @@ namespace {
         constexpr QRect EditProfileButton(
             LeftRuler, TopRuler + 180, SmallItemWidth, SmallItemHeight
         );
+        constexpr QRect VariantBox(LeftRuler + ItemWidth + 10, TopRuler + 110, 160, 100);
         constexpr QRect OptionsLabel(LeftRuler + 10, TopRuler + 230, 151, 24);
         constexpr QRect WindowConfigBox(LeftRuler, TopRuler + 260, ItemWidth, ItemHeight);
         constexpr QRect NewWindowButton(
@@ -203,9 +206,6 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         labelChoose->setObjectName("label_choose");
     }
 
-    // Creating the profile box _after_ the Edit and New buttons as the comboboxes
-    // `selectionChanged` signal will trigger that will try to make changes to the edit
-    // button
     _profileBox = new SplitComboBox(
         centralWidget,
         _userProfilePath,
@@ -229,7 +229,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     _profileBox->setGeometry(geometry::ProfileBox);
     _profileBox->setAccessibleName("Choose profile");
     _profileBox->setEnabled(profileEnabled);
-    _profileBox->populateList(globalConfig.profile);
+    _profileBox->populateList(globalConfig.profile.profile);
     connect(
         _profileBox, &SplitComboBox::selectionChanged,
         this, &LauncherWindow::selectProfile
@@ -238,6 +238,25 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         _profileBox, &SplitComboBox::selectionChanged,
         this, &LauncherWindow::updateStartButton
     );
+
+    _variantBox.container = new QWidget(centralWidget);
+    _variantBox.container->setObjectName("variants");
+    _variantBox.container->move(geometry::VariantBox.x(), geometry::VariantBox.top());
+    _variantBox.container->setMinimumWidth(geometry::VariantBox.width());
+    _variantBox.container->setMaximumWidth(geometry::VariantBox.width());
+    //_variantBox.container->setGeometry(geometry::VariantBox);
+    _variantBox.container->setAccessibleName("Select variants");
+    _variantBox.layout = new QVBoxLayout(_variantBox.container);
+    _variantBox.layout->setSpacing(0);
+    updateVariantBox(globalConfig.profile.profile + ".profile");
+    for (const std::string& variant : globalConfig.profile.variants) {
+        for (QCheckBox* cb : _variantBox.elements) {
+            std::string id = cb->property("id").toString().toStdString();
+            if (id == variant) {
+                cb->setChecked(true);
+            }
+        }
+    }
 
 
     _editProfileButton = new QPushButton("Edit", centralWidget);
@@ -456,6 +475,8 @@ void LauncherWindow::selectProfile(std::optional<std::string> selection) {
                 "Cannot edit the selected profile as it is one of the built-in profiles"
             );
         }
+
+        updateVariantBox(*selection);
     }
 }
 
@@ -704,13 +725,62 @@ void LauncherWindow::updateStartButton() const {
     _startButton->setEnabled(!profilePath.empty() && !configPath.empty());
 }
 
+void LauncherWindow::updateVariantBox(const std::string& profile) {
+    // First delete the old variants
+    for (QCheckBox* cb : _variantBox.elements) {
+        delete cb;
+    }
+    _variantBox.elements.clear();
+
+    // Then recreate the new ones
+    const std::filesystem::path coreCandidate = _profilePath / profile;
+    const std::filesystem::path userCandidate = _userProfilePath / profile;
+
+    ghoul_assert(
+        std::filesystem::exists(coreCandidate) || std::filesystem::exists(userCandidate),
+        "One of the two options must exist"
+    );
+
+    Profile p = Profile(
+        // User path has precedence
+        std::filesystem::exists(userCandidate) ? userCandidate : coreCandidate
+    );
+
+    if (p.variants.empty()) {
+        _variantBox.container->hide();
+        return;
+    }
+
+    for (auto& [key, variant] : p.variants) {
+        QCheckBox* cb = new QCheckBox(QString::fromStdString(variant.name));
+        cb->setChecked(variant.isEnabled);
+        cb->setToolTip(QString::fromStdString(variant.description));
+        cb->setProperty("id", QString::fromStdString(key));
+
+        _variantBox.layout->addWidget(cb);
+        _variantBox.elements.push_back(cb);
+    }
+
+    _variantBox.layout->addStretch();
+    // We show it at the end as the call to `show` will cause the layout recalculation
+    _variantBox.container->show();
+}
+
 bool LauncherWindow::wasLaunchSelected() const {
     return _shouldLaunch;
 }
 
-std::string LauncherWindow::selectedProfile() const {
-    // The user data stores the full path to the profile
-    return std::get<1>(_profileBox->currentSelection());
+std::pair<std::string, std::vector<std::string>> LauncherWindow::selectedProfile() const {
+    const std::string profile = std::get<1>(_profileBox->currentSelection());
+    std::vector<std::string> variants;
+    for (QCheckBox* cb : _variantBox.elements) {
+        if (cb->isChecked()) {
+            const std::string id = cb->property("id").toString().toStdString();
+            variants.push_back(id);
+        }
+    }
+
+    return std::pair(profile, variants);
 }
 
 std::string LauncherWindow::selectedWindowConfig() const {

@@ -38,8 +38,10 @@
 #include <ghoul/misc/dictionaryjsonformatter.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringconversion.h>
+#include <ghoul/misc/stringhelper.h>
 #include <memory>
 #include <new>
+#include <numeric>
 #include <optional>
 #include <string_view>
 #include <utility>
@@ -66,6 +68,10 @@ namespace {
         // The profile that should be loaded at the startup. The profile determines which
         // assets are loaded, the startup time, keyboard shortcuts, and other settings.
         std::optional<std::string> profile;
+
+        // The list of variants that should be loaded for the provided `Profile`. The
+        // listed variants must exist for the selected profile.
+        std::optional<std::vector<std::string>> profileVariants;
 
         // This value names a list of scripts that get executed after initialization of
         // any scene. These scripts can be used for user-specific customization, such as a
@@ -352,7 +358,8 @@ ghoul::Dictionary Configuration::createDictionary() {
 
     res.setValue("WindowConfiguration", windowConfiguration);
     res.setValue("Asset", asset);
-    res.setValue("Profile", profile);
+    res.setValue("Profile", profile.profile);
+    res.setValue("ProfileVariants", profile.variants);
     res.setValue("PropertyVisibility", static_cast<int>(propertyVisibility));
     res.setValue("ShowPropertyConfirmation", static_cast<int>(showPropertyConfirmation));
 
@@ -549,7 +556,13 @@ void parseLuaState(Configuration& configuration) {
 
     c.windowConfiguration = p.windowConfiguration.value_or(c.windowConfiguration);
     c.asset = p.asset.value_or(c.asset);
-    c.profile = p.profile.value_or(c.profile);
+    if (p.profile.has_value()) {
+        c.profile.profile = *p.profile;
+    }
+    if (p.profileVariants.has_value()) {
+        c.profile.variants = *p.profileVariants;
+    }
+
     c.globalCustomizationScripts =
         p.globalCustomizationScripts.value_or(c.globalCustomizationScripts);
 
@@ -678,8 +691,13 @@ void patchConfiguration(Configuration& configuration, const Settings& settings) 
         configuration.windowConfiguration = *settings.configuration;
         configuration.sgctConfigNameInitialized.clear();
     }
-    if (settings.rememberLastProfile.value_or(false) && settings.profile.has_value()) {
-        configuration.profile = *settings.profile;
+    if (settings.rememberLastProfile.value_or(false)) {
+        if (settings.profile.has_value()) {
+            configuration.profile.profile = *settings.profile;
+        }
+        if (settings.profileVariants.has_value()) {
+            configuration.profile.variants = *settings.profileVariants;
+        }
     }
     if (settings.visibility.has_value()) {
         configuration.propertyVisibility = *settings.visibility;

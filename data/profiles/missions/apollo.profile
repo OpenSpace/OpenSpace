@@ -9,6 +9,17 @@
     "scene/solarsystem/missions/apollo/insignias_map",
     "scene/solarsystem/missions/apollo/mission"
   ],
+  "variants": {
+    "apollo17_boulders": {
+      "name": "Apollo 17 Boulders",
+      "description": "Adds 3D reconstructed boulders for Stations 2, 6, and 7 of the Apollo 17 EVAs.",
+      "assets": [
+        "scene/solarsystem/mssions/apollo/17/bouldersstation2",
+        "scene/solarsystem/mssions/apollo/17/bouldersstation6",
+        "scene/solarsystem/mssions/apollo/17/bouldersstation7"
+      ]
+    }
+  },
   "camera": {
     "altitude": 15000000.0,
     "anchor": "Earth",
@@ -76,6 +87,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 4
+    "minor": 5
   }
 }

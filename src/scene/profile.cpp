@@ -402,6 +402,26 @@ static void to_json(nlohmann::json& j, const Profile::CameraNavState& v) {
     }
 }
 
+static void from_json(const nlohmann::json& j, Profile::Variant& v) {
+    checkValue(j, "name", &nlohmann::json::is_string, "name", false);
+    checkValue(j, "assets", &nlohmann::json::is_array, "assets", false);
+    checkValue(j, "description", &nlohmann::json::is_string, "description", true);
+
+    j["name"].get_to(v.name);
+    if (j.find("description") != j.end()) {
+        j["description"].get_to(v.description);
+    }
+    j["assets"].get_to(v.assets);
+}
+
+static void to_json(nlohmann::json& j, const Profile::Variant& v) {
+    j["name"] = v.name;
+    if (!v.description.empty()) {
+        j["description"] = v.description;
+    }
+    j["assets"] = v.assets;
+}
+
 static void from_json(const nlohmann::json& j, Profile::CameraNavState& v) {
     ghoul_assert(
         j.at("type").get<std::string>() == Profile::CameraNavState::Type,
@@ -633,6 +653,15 @@ static void convertVersion13to14(nlohmann::json& profile) {
 
 } // namespace version13
 
+namespace version14 {
+
+static void convertVersion14to15(nlohmann::json& profile) {
+    // Version 1.5 introduced profile variants
+    profile["version"] = Profile::Version{ 1, 5 };
+}
+
+} // namespace version14
+
 Profile::ParsingError::ParsingError(Severity severity_, std::string msg)
     : ghoul::RuntimeError(std::move(msg), "profile")
     , severity(severity_)
@@ -753,6 +782,10 @@ std::string Profile::serialize() const {
         r["panel_visibility"] = uiPanelVisibility;
     }
 
+    if (!variants.empty()) {
+        r["variants"] = variants;
+    }
+
     return r.dump(2);
 }
 
@@ -793,6 +826,11 @@ Profile::Profile(const std::filesystem::path& path) {
 
         if (version.major == 1 && version.minor == 3) {
             version13::convertVersion13to14(profile);
+            profile["version"].get_to(version);
+        }
+
+        if (version.major == 1 && version.minor == 4) {
+            version14::convertVersion14to15(profile);
             profile["version"].get_to(version);
         }
 
@@ -847,6 +885,9 @@ Profile::Profile(const std::filesystem::path& path) {
         if (profile.find("panel_visibility") != profile.end()) {
             profile["panel_visibility"].get_to(uiPanelVisibility);
         }
+        if (profile.find("variants") != profile.end()) {
+            profile["variants"].get_to(variants);
+        }
     }
     catch (const nlohmann::json::exception& e) {
         std::string err = e.what();
@@ -860,6 +901,7 @@ LuaLibrary Profile::luaLibrary() {
         {
             codegen::lua::ProfileName,
             codegen::lua::ProfilePath,
+            codegen::lua::ProfileVariants,
             codegen::lua::SaveSettingsToProfile
         }
     };

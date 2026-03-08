@@ -156,6 +156,16 @@ public:
 
     using CameraType = std::variant<CameraGoToNode, CameraNavState, CameraGoToGeo>;
 
+    struct Variant {
+        // The enabled state is not stored in the profile file
+        bool isEnabled = false;
+        std::string name;
+        std::string description;
+        std::vector<std::string> assets;
+
+        bool operator==(const Variant&) const noexcept = default;
+    };
+
     Profile() = default;
     explicit Profile(const std::filesystem::path& path);
     std::string serialize() const;
@@ -180,7 +190,7 @@ public:
      */
     void removeAsset(const std::string& path);
 
-    static constexpr Version CurrentVersion = Version{ 1, 4 };
+    static constexpr Version CurrentVersion = Version{ 1, 5 };
 
     Version version = CurrentVersion;
     std::vector<Module> modules;
@@ -195,6 +205,7 @@ public:
     std::vector<std::string> markNodes;
     std::vector<std::string> additionalScripts;
     std::map<std::string, bool> uiPanelVisibility;
+    std::map<std::string, Variant> variants;
 
     bool ignoreUpdates = false;
 

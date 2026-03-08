@@ -15,6 +15,15 @@
     "scene/solarsystem/telescopes/jwst/point_jwst",
     "scene/digitaluniverse/hdf"
   ],
+  "variants": {
+    "l2_spacecraft": {
+      "name": "Spacecraft in L2",
+      "description": "Includes other spacecraft that are in the Earth's L2 orbit.",
+      "assets": [
+        "scene/solarsystem/telescopes/euclid/euclid"
+      ]
+    }
+  },
   "camera": {
     "aim": "",
     "anchor": "JWSTModel",
@@ -208,6 +217,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 4
+    "minor": 5
   }
 }

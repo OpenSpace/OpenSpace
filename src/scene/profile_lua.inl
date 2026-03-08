@@ -34,7 +34,7 @@ namespace {
  * Returns the name of the profile with which OpenSpace was started.
  */
 [[codegen::luawrap]] std::string profileName() {
-    std::string p = global::configuration->profile;
+    std::string p = global::configuration->profile.profile;
     const std::string builtInPath = absPath("${PROFILES}").string();
     const std::string userPath = absPath("${USER_PROFILES}").string();
 
@@ -53,7 +53,14 @@ namespace {
  * Returns the full path of the profile with which OpenSpace was started.
  */
 [[codegen::luawrap]] std::filesystem::path profilePath() {
-    return global::configuration->profile;
+    return global::configuration->profile.profile;
+}
+
+/**
+ * Returns the enabled variants of the profile that was started.
+ */
+[[codegen::luawrap]] std::vector<std::string> profileVariants() {
+    return global::configuration->profile.variants;
 }
 
 /**
@@ -82,19 +89,21 @@ namespace {
             utcTime->tm_min,
             utcTime->tm_sec
         );
-        std::filesystem::path path = global::configuration->profile;
+        std::filesystem::path path = global::configuration->profile.profile;
         path.replace_extension();
         std::string newFile = std::format("{}_{}", path, time);
         std::string sourcePath = std::format(
-            "{}/{}.profile", absPath("${USER_PROFILES}"), global::configuration->profile
+            "{}/{}.profile",
+            absPath("${USER_PROFILES}"), global::configuration->profile.profile
         );
         std::string destPath = std::format(
-            "{}/{}.profile", absPath("${PROFILES}"), global::configuration->profile
+            "{}/{}.profile",
+            absPath("${PROFILES}"), global::configuration->profile.profile
         );
         if (!std::filesystem::is_regular_file(sourcePath)) {
             sourcePath = std::format(
                 "{}/{}.profile",
-                absPath("${USER_PROFILES}"), global::configuration->profile
+                absPath("${USER_PROFILES}"), global::configuration->profile.profile
             );
         }
         LINFOC(
@@ -102,7 +111,7 @@ namespace {
             std::format("Saving a copy of the old profile as '{}'", newFile)
         );
         std::filesystem::copy(sourcePath, destPath);
-        saveFilePath = global::configuration->profile;
+        saveFilePath = global::configuration->profile.profile;
     }
     if (saveFilePath->empty()) {
         throw ghoul::lua::LuaError("Save filepath string is empty");
@@ -112,7 +121,7 @@ namespace {
     std::string currentTime = std::string(global::timeManager->time().ISO8601());
     NavigationState navState = global::navigationHandler->navigationState();
     global::profile->saveCurrentSettingsToProfile(root, currentTime, navState);
-    global::configuration->profile = *saveFilePath;
+    global::configuration->profile.profile = *saveFilePath;
 
     if (saveFilePath->contains('/')) {
         throw ghoul::lua::LuaError("Profile filename must not contain (/) elements");

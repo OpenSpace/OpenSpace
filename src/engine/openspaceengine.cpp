@@ -321,7 +321,9 @@ void OpenSpaceEngine::initialize() {
 
     std::filesystem::path cacheFolder = absPath("${CACHE}");
     if (global::configuration->usePerProfileCache) {
-        cacheFolder = std::format("{}-{}", cacheFolder, global::configuration->profile);
+        cacheFolder = std::format(
+            "{}-{}", cacheFolder, global::configuration->profile.profile
+        );
 
         LINFO(std::format("Old cache: {}", absPath("${CACHE}")));
         LINFO(std::format("New cache: {}", cacheFolder));
@@ -461,12 +463,12 @@ void OpenSpaceEngine::initialize() {
 
     // Process profile file
     std::filesystem::path profile;
-    if (!std::filesystem::is_regular_file(global::configuration->profile)) {
+    if (!std::filesystem::is_regular_file(global::configuration->profile.profile)) {
         const std::filesystem::path userCandidate = absPath(std::format(
-            "${{USER_PROFILES}}/{}.profile", global::configuration->profile
+            "${{USER_PROFILES}}/{}.profile", global::configuration->profile.profile
         ));
         const std::filesystem::path profileCandidate = absPath(std::format(
-            "${{PROFILES}}/{}.profile", global::configuration->profile
+            "${{PROFILES}}/{}.profile", global::configuration->profile.profile
         ));
 
         // Give the user profile priority if there are both
@@ -479,17 +481,29 @@ void OpenSpaceEngine::initialize() {
         else {
             throw ghoul::RuntimeError(std::format(
                 "Could not load profile '{}': File does not exist",
-                global::configuration->profile
+                global::configuration->profile.profile
             ));
         }
     }
     else {
-        profile = global::configuration->profile;
+        profile = global::configuration->profile.profile;
     }
 
     // Load the profile
     LINFO(std::format("Loading profile '{}'", profile));
     *global::profile = Profile(profile);
+
+    // Enable the variants
+    for (const std::string& variant : global::configuration->profile.variants) {
+        auto it = global::profile->variants.find(variant);
+        if (it == global::profile->variants.end()) {
+            LWARNING(std::format("Could find requested variant '{}'", variant));
+            continue;
+        }
+
+        it->second.isEnabled = true;
+    }
+
 
     // Set up asset loader
     _assetManager = std::make_unique<AssetManager>(
@@ -840,8 +854,20 @@ void OpenSpaceEngine::loadAssets() {
         );
     }
 
+    // Load all of the assets specified in the profile
     for (const std::string& a : global::profile->assets) {
         _assetManager->add(a);
+    }
+
+    // Load all assets in enabled variants
+    for (auto& [_, variant] : global::profile->variants) {
+        if (!variant.isEnabled) {
+            continue;
+        }
+
+        for (const std::string& a : variant.assets) {
+            _assetManager->add(a);
+        }
     }
 
     _loadingScreen->exec(*_assetManager, *_scene);

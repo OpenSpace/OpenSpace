@@ -50,7 +50,12 @@ struct Configuration {
 
     std::string windowConfiguration = "${CONFIG}/single.json";
     std::string asset;
-    std::string profile;
+
+    struct Profile {
+        std::string profile;
+        std::vector<std::string> variants;
+    };
+    Profile profile;
 
     Property::Visibility propertyVisibility = Property::Visibility::User;
 

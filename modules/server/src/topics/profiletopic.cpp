@@ -39,7 +39,8 @@ void ProfileTopic::handleJson(const nlohmann::json&) {
     nlohmann::json data = {
         { "uiPanelVisibility", global::profile->uiPanelVisibility },
         { "markNodes", global::profile->markNodes },
-        { "filePath", global::configuration->profile },
+        { "filePath", global::configuration->profile.profile },
+        { "variants", global::configuration->profile.variants }
     };
 
     Settings settings = loadSettings();
@@ -49,7 +50,6 @@ void ProfileTopic::handleJson(const nlohmann::json&) {
 
     if (global::profile->meta.has_value()) {
         data["name"] = global::profile->meta->name.value_or("");
-
         data["author"] = global::profile->meta->author.value_or("");
         data["description"] = global::profile->meta->description.value_or("");
         data["license"] = global::profile->meta->license.value_or("");

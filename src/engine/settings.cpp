@@ -96,6 +96,12 @@ namespace version1 {
             }
         }
 
+        std::optional<std::vector<std::string>> variants =
+            get_to<std::vector<std::string>>(json, "profile-variants");
+        if (variants.has_value()) {
+            settings.profileVariants = *variants;
+        }
+
         return settings;
     }
 } // namespace version1
@@ -154,6 +160,9 @@ void saveSettings(const Settings& settings, const std::filesystem::path& filenam
     }
     if (settings.profile.has_value()) {
         json["profile"] = *settings.profile;
+    }
+    if (settings.profileVariants.has_value()) {
+        json["profile-variants"] = *settings.profileVariants;
     }
     if (settings.rememberLastProfile.has_value()) {
         json["profile-remember"] = *settings.rememberLastProfile;
