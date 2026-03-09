@@ -1344,7 +1344,7 @@ void DataViewer::updateGlyphRenderData() {
         GlyphRenderData::Item renderItem;
         renderItem.index = index;
         renderItem.position = *item.position;
-        renderItem.component = item.indexInSystem;
+        renderItem.component = static_cast<size_t>(item.indexInSystem + 1);
 
         size_t nVariables = _colorMappingView->colorMapperVariables().size();
 
