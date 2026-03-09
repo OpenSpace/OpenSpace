@@ -358,7 +358,7 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
         _variables.size() == 1 && _variables[0] == VectorFieldKameleonVariableLorentz;
 
     if (!threeVariables && !lorentzForce) {
-        LERROR(std::format("Illformed variables: '{}'", _variables));
+        LERROR(std::format("Illformed variables: '{}'", ghoul::join(_variables, ",")));
         return {};
     }
 
