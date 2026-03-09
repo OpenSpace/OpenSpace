@@ -97,7 +97,7 @@ namespace {
         SpiceManager::ref().dateFromEphemerisTime(time, OutBuf, BufferSize, FormatBuf);
         return std::string_view(OutBuf, format.size());
     }
-    
+
     struct [[codegen::Dictionary(TemporalTileProvider)]] Parameters {
         // [[codegen::verbatim(UseFixedTimeInfo.description)]]
         std::optional<bool> useFixedTime;

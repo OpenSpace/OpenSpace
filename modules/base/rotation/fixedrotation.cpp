@@ -255,7 +255,7 @@ namespace {
 
         // [[codegen::verbatim(YAxisOrthogonalVectorInfo.description)]]
         std::optional<bool> yAxisOrthogonal;
-        
+
         // [[codegen::verbatim(YAxisInvertObjectInfo.description)]]
         std::optional<bool> yAxisInvert;
 

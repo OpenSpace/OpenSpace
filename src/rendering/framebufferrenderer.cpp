@@ -1374,8 +1374,8 @@ void FramebufferRenderer::renderDepthMaps() {
 
     glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
     glViewport(prevVp[0], prevVp[1], prevVp[2], prevVp[3]);
-  
 }
+
 void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks,
                                                 const glm::ivec4& viewport)
 {

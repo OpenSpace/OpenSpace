@@ -503,7 +503,7 @@ namespace {
             return dir;
         }
     }
-    
+
     struct [[codegen::Dictionary(RenderableGlobe)]] Parameters {
         // The radii for this planet. If only one value is given, all three radii are set
         // to that value.
@@ -1446,7 +1446,10 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     std::vector<std::pair<ghoul::opengl::TextureUnit, GLuint>> depthmapTextureUnits;
     for (const DepthMapData& depthData : depthMapData) {
         lightViewProjections.push_back(depthData.viewProjection);
-        depthmapTextureUnits.emplace_back(ghoul::opengl::TextureUnit(), depthData.depthMap);
+        depthmapTextureUnits.emplace_back(
+            ghoul::opengl::TextureUnit(),
+            depthData.depthMap
+        );
     }
 
     std::vector<GLint> boundUnits;

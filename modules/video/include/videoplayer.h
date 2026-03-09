@@ -106,7 +106,7 @@ private:
     /**
      * Has to be static because of C API.
      */
-    static void onMpvRenderUpdate(void*); 
+    static void onMpvRenderUpdate(void*);
 
     /**
      * Called first time in update.

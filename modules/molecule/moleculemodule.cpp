@@ -55,7 +55,9 @@ vec2 encode_normal(vec3 n) {
   return n.xy / p + 0.5;
 }
 
-void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color, uint atom_index) {
+void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color,
+                    uint atom_index)
+{
   out_normal = vec4(encode_normal(view_normal), 0, 0);
   out_color = color;
 }
