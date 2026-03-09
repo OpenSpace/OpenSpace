@@ -6,6 +6,9 @@ local DomeSetup = {
     openspace.setPropertyValueSingle("Scene.ExoplanetDataPoints.Renderable.OrientationRenderOption", 1.000000)
     openspace.setPropertyValueSingle("RenderEngine.MasterRotation", {-1.030000,0.000000,0.000000})
     openspace.setPropertyValueSingle("Dashboard.StartPositionOffset", {20.000000,60.000000})
+
+    -- Remove fade glyphs event - does not work in dome
+    openspace.asset.remove("${ASSETS}/exoplanetexplorer/events/fade_glyphs.asset")
   ]],
   Documentation = [[ExoplanetExplorer dome setup (Nkpg dome)]],
   GuiPath = "/ExoplanetExplorer",
