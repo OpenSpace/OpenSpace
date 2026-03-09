@@ -305,6 +305,11 @@ void OpenSpaceEngine::initialize() {
 
     LTRACE("OpenSpaceEngine::initialize(begin)");
 
+    // Remove any previously existing temporary folder
+    if (std::filesystem::exists(absPath("${TEMPORARY}"))) {
+        std::filesystem::remove_all(absPath("${TEMPORARY}"));
+    }
+
     global::initialize();
     // Initialize the general capabilities component
     SysCap.addComponent(
