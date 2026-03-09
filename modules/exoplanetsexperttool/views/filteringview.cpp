@@ -220,7 +220,7 @@ void FilteringView::applyRowLimit(const std::vector<ExoplanetItem>& data,
 void FilteringView::applyExternalSelection(const std::vector<int>& externalSelection,
                                            std::vector<size_t>& prefilteredData)
 {
-    if (!_useExternalSelection) {
+    if (!_useExternalSelection || externalSelection.empty()) {
         return;
     }
 
