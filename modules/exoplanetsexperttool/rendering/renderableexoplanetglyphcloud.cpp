@@ -229,6 +229,14 @@ void RenderableExoplanetGlyphCloud::initializeSelectionCallbacks() {
             }
         }
     );
+
+    global::callback::preSync->emplace_back([this]() {
+        if (!_enabled) {
+            return;
+        }
+        // Update flag that needs syncing
+        _shouldHighlightHovered = _isInSelectionMode && _isLeftShiftHeld;
+    });
 }
 
 int RenderableExoplanetGlyphCloud::hoveredIndex() const {
@@ -429,9 +437,6 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
     }
 
     updateDataIfChanged();
-
-    // Update flag needed for rendering (synced to nodes)
-    _shouldHighlightHovered = _isInSelectionMode && _isLeftShiftHeld;
 
     if (_renderDataIsDirty) {
         glNamedBufferData(
