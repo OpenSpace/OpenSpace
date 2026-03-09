@@ -102,7 +102,7 @@ void main() {
 
   // Limit the max size of the points, as the angle in "FOV" that the point is allowed
   // to take up. Note that the max size is for the diameter, and we need the radius
-  const float DesiredAngleRadians = radians(0.4);
+  const float DesiredAngleRadians = radians(0.3);
 
   double distanceToCamera = length(dpos.xyz - cameraPosition);
   float pointSize = length(scaledRight);
