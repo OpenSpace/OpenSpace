@@ -45,6 +45,7 @@ uniform int maxIndex;
 uniform int currentIndex;
 uniform bool isRenderIndexStep = false;
 uniform bool isHighlightMode = false;
+uniform float darkenFactor;
 
 const float M_PI = 3.141592657;
 
@@ -135,7 +136,7 @@ Fragment getFragment() {
 
     // When in higlight mode, also dim all other glyphs
     if (isHighlightMode && !isCurrentHoveredGlyph) {
-      color.rgb *= 0.3;
+      color.rgb *= darkenFactor;
     }
   }
 

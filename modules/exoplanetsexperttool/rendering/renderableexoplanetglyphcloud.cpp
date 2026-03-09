@@ -84,6 +84,13 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DarkenFactorInfo = {
+        "DarkenFactor",
+        "Darker factor (on highlight)",
+        "The factor t use when darkening the glyph when in highlight mode (triggered by "
+        "holding CTRL + SHIFT)."
+    };
+
     struct [[codegen::Dictionary(RenderableExoplanetGlyphCloud)]] Parameters {
         // [[codegen::verbatim(ScaleInfo.description)]]
         std::optional<float> scale;
@@ -93,6 +100,9 @@ namespace {
 
         // [[codegen::verbatim(UseFixedWidthInfo.description)]]
         std::optional<bool> useFixedWidth;
+
+        // [[codegen::verbatim(DarkenFactorInfo.description)]]
+        std::optional<float> darkenFactor [[codegen::inrange(0.f, 1.f)]];
 
         enum class [[codegen::map(RenderOption)]] RenderOption {
             ViewDirection [[codegen::key("Camera View Direction")]],
@@ -121,6 +131,7 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
     , _selectedIndices(SelectionInfo)
     , _useFixedRingWidth(UseFixedWidthInfo, true)
     , _renderOption(OrientationRenderOptionInfo)
+    , _darkenFactor(DarkenFactorInfo, 0.3f, 0.f, 1.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -144,6 +155,8 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
         codegen::map<RenderOption>(*p.billboard) : RenderOption::ViewDirection;
 
     addProperty(_renderOption);
+
+    addProperty(_darkenFactor);
 
     updateDataIfChanged();
 
@@ -227,7 +240,7 @@ bool RenderableExoplanetGlyphCloud::isReady() const {
 }
 
 void RenderableExoplanetGlyphCloud::initialize() {
-    global::syncEngine->addSyncable({ &_currentlyHoveredIndex });
+    global::syncEngine->addSyncables({ &_currentlyHoveredIndex, &_shouldHighlightHovered });
 }
 
 void RenderableExoplanetGlyphCloud::initializeGL() {
@@ -262,7 +275,7 @@ void RenderableExoplanetGlyphCloud::initializeGL() {
 }
 
 void RenderableExoplanetGlyphCloud::deinitialize() {
-    global::syncEngine->removeSyncable({ &_currentlyHoveredIndex });
+    global::syncEngine->removeSyncables({ &_currentlyHoveredIndex, &_shouldHighlightHovered });
 }
 
 void RenderableExoplanetGlyphCloud::deinitializeGL() {
@@ -310,7 +323,8 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
 
     _program->setUniform(_uniformCache.useFixedRingWidth, _useFixedRingWidth);
 
-    _program->setUniform(_uniformCache.isHighlightMode, _isInSelectionMode && _isLeftShiftHeld);
+    _program->setUniform(_uniformCache.isHighlightMode, _shouldHighlightHovered);
+    _program->setUniform(_uniformCache.darkenFactor, _darkenFactor);
 
     glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
     glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
@@ -415,6 +429,9 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
     }
 
     updateDataIfChanged();
+
+    // Update flag needed for rendering (synced to nodes)
+    _shouldHighlightHovered = _isInSelectionMode && _isLeftShiftHeld;
 
     if (_renderDataIsDirty) {
         glNamedBufferData(

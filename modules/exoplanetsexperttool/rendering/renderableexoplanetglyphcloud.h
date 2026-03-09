@@ -82,8 +82,8 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
     UniformCache(modelMatrix, cameraViewProjectionMatrix, onTop, useFixedRingWidth,
-        opacity, scale, maxIndex, currentIndex, isRenderIndexStep,
-        renderOption, up, right, cameraPosition, cameraLookUp, isHighlightMode
+        opacity, scale, maxIndex, currentIndex, isRenderIndexStep, renderOption, up,
+        right, cameraPosition, cameraLookUp, isHighlightMode, darkenFactor
     ) _uniformCache;
 
     properties::FloatProperty _scale;
@@ -91,6 +91,8 @@ private:
     properties::BoolProperty _useFixedRingWidth;
 
     properties::OptionProperty _renderOption;
+
+    properties::FloatProperty _darkenFactor;
 
     struct GlyphData {
         glm::vec3 position;
@@ -106,6 +108,7 @@ private:
 
     // Hovered index, set from interaction on master node and synced to other nodes
     SyncData<int> _currentlyHoveredIndex;
+    SyncData<bool> _shouldHighlightHovered;
 
     bool _isInSelectionMode = false;
     bool _isLeftShiftHeld = false;
