@@ -30,10 +30,7 @@ ScriptCameraStates::ScriptCameraStates() : OrbitalCameraStates(1.0, 1.0) {}
 
 void ScriptCameraStates::updateVelocitiesFromInput(double deltaTime) {
     if (_localRotation != glm::dvec2(0.0)) {
-        _localRotationVelocity.set(
-            _localRotation * _sensitivity,
-            deltaTime
-        );
+        _localRotationVelocity.set(_localRotation * _sensitivity, deltaTime);
         _localRotation = glm::dvec2(0.0);
     }
     else {
@@ -41,10 +38,7 @@ void ScriptCameraStates::updateVelocitiesFromInput(double deltaTime) {
     }
 
     if (_globalRotation != glm::dvec2(0.0)) {
-        _globalRotationVelocity.set(
-            _globalRotation * _sensitivity,
-            deltaTime
-        );
+        _globalRotationVelocity.set(_globalRotation * _sensitivity, deltaTime);
         _globalRotation = glm::dvec2(0.0);
     }
     else {
@@ -52,10 +46,7 @@ void ScriptCameraStates::updateVelocitiesFromInput(double deltaTime) {
     }
 
     if (_truckMovement != 0.0) {
-        _truckMovementVelocity.set(
-            _truckMovement * _sensitivity,
-            deltaTime
-        );
+        _truckMovementVelocity.set(_truckMovement * _sensitivity, deltaTime);
         _truckMovement = 0.0;
     }
     else {
@@ -63,10 +54,7 @@ void ScriptCameraStates::updateVelocitiesFromInput(double deltaTime) {
     }
 
     if (_localRoll != 0.0) {
-        _localRollVelocity.set(
-            _localRoll * _sensitivity,
-            deltaTime
-        );
+        _localRollVelocity.set(_localRoll * _sensitivity, deltaTime);
         _localRoll = 0.0;
     }
     else {
@@ -74,10 +62,7 @@ void ScriptCameraStates::updateVelocitiesFromInput(double deltaTime) {
     }
 
     if (_globalRoll != 0.0) {
-        _globalRollVelocity.set(
-            _globalRoll * _sensitivity,
-            deltaTime
-        );
+        _globalRollVelocity.set(_globalRoll * _sensitivity, deltaTime);
         _globalRoll = 0.0;
     }
     else {

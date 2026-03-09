@@ -25,11 +25,11 @@
 #ifndef __OPENSPACE_CORE___CAMERAPOSE___H__
 #define __OPENSPACE_CORE___CAMERAPOSE___H__
 
-#include <openspace/scene/scenegraphnode.h>
 #include <ghoul/glm.h>
 
 namespace openspace {
 
+class SceneGraphNode;
 
 struct CameraPose {
     glm::dvec3 position = glm::dvec3(0.0);

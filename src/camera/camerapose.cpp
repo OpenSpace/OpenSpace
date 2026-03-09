@@ -25,6 +25,7 @@
 #include <openspace/camera/camerapose.h>
 
 #include <openspace/camera/camera.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 
 namespace openspace {

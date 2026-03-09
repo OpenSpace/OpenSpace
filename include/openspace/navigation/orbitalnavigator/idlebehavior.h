@@ -57,10 +57,10 @@ public:
      * \param anchor The current anchor node
      * \param deltaTime The time step to apply
      * \param speedScale A speed scale factor provided by the caller, to adjust the speed
-     *                   of the motion
+     *        of the motion
      * \param position The current position of the camera. Will be changed by the function
      * \param globalRotation The current global rotation of the camera. Will be changed by
-     *                       the function
+     *        the function
      */
     void applyIdleBehavior(const SceneGraphNode* anchor, double deltaTime,
         double speedScale, glm::dvec3& position, glm::dquat& globalRotation);
@@ -70,7 +70,7 @@ public:
      * string is empty.
      *
      * \param choice A string corresponding to the idle behavior to trigger, or empty for
-     *               default behavior
+     *        default behavior
      */
     void triggerIdleBehavior(std::string_view choice = "");
 

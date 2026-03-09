@@ -54,9 +54,7 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo
-        ShouldTriggerIdleBehaviorWhenIdleInfo =
-    {
+    constexpr Property::PropertyInfo ShouldTriggerIdleBehaviorWhenIdleInfo = {
         "ShouldTriggerWhenIdle",
         "Should trigger when idle",
         "If true, the chosen idle behavior will trigger automatically after a certain "

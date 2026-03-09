@@ -154,9 +154,9 @@ private:
     /// anchor. If these are the same node we call it the `focus` node
     StringProperty _aim;
 
-    // Reset camera direction to the anchor node.
+    /// Reset camera direction to the anchor node
     TriggerProperty _retargetAnchor;
-    // Reset camera direction to the aim node.
+    /// Reset camera direction to the aim node
     TriggerProperty _retargetAim;
 
     BoolProperty _followAnchorNodeRotation;
@@ -261,8 +261,8 @@ private:
         double targetDistance);
 
     /**
-     * Modify the camera position and global rotation to rotate around the up vector
-     * of the current anchor based on x-wise input.
+     * Modify the camera position and global rotation to rotate around the up vector of
+     * the current anchor based on x-wise input.
      *
      * The up-vector to rotate around is determined by the "_upToUseForRotation" property
      */
@@ -274,7 +274,7 @@ private:
      * result in an orbital rotation around the object. This function does not affect the
      * rotation but only the position.
      *
-     * \return A position vector adjusted in the horizontal direction.
+     * \return A position vector adjusted in the horizontal direction
      */
     glm::dvec3 translateHorizontally(double deltaTime, double speedScale,
         const glm::dvec3& cameraPosition, const glm::dvec3& objectPosition,
@@ -302,7 +302,7 @@ private:
     /**
      * Translates the camera position towards or away from the anchor node.
      *
-     * \return A position vector adjusted in the vertical direction.
+     * \return A position vector adjusted in the vertical direction
      */
     glm::dvec3 translateVertically(double deltaTime, const glm::dvec3& cameraPosition,
         const glm::dvec3& objectPosition,

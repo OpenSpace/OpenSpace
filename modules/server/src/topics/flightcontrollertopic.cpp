@@ -371,20 +371,17 @@ void FlightControllerTopic::setFriction(bool roll, bool rotation, bool zoom) con
     const OrbitalNavigator& navigator = global::navigationHandler->orbitalNavigator();
 
     Property* rollProp = navigator.property(RollFriction);
-    BoolProperty* rollBoolProp =
-        dynamic_cast<BoolProperty*>(rollProp);
+    BoolProperty* rollBoolProp = dynamic_cast<BoolProperty*>(rollProp);
     ghoul_assert(rollBoolProp, "RollFriction is not a boolean property");
     *rollBoolProp = roll;
 
     Property* rotProp = navigator.property(RotationalFriction);
-    BoolProperty* rotBoolProp =
-        dynamic_cast<BoolProperty*>(rotProp);
+    BoolProperty* rotBoolProp = dynamic_cast<BoolProperty*>(rotProp);
     ghoul_assert(rotBoolProp, "RotationFriction is not a boolean property");
     *rotBoolProp = rotation;
 
     Property* zoomProp = navigator.property(ZoomFriction);
-    BoolProperty* zoomBoolProp =
-        dynamic_cast<BoolProperty*>(zoomProp);
+    BoolProperty* zoomBoolProp = dynamic_cast<BoolProperty*>(zoomProp);
     ghoul_assert(zoomBoolProp, "ZoomFriction is not a boolean property");
     *zoomBoolProp = zoom;
 

@@ -68,9 +68,8 @@ namespace {
         // [[codegen::verbatim(TuioPortInfo.description)]]
         std::optional<int> tuioPort [[codegen::inrange(1, 65535)]];
     };
-
-    #include "touchmodule_codegen.cpp"
 } // namespace
+#include "touchmodule_codegen.cpp"
 
 namespace openspace {
 
@@ -98,8 +97,8 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& dict) {
 
     global::callback::initializeGL->push_back([this]() {
 #ifdef WIN32
-        // We currently only support one window of touch input internally
-        // so here we grab the first window-handle and use it.
+        // We currently only support one window of touch input internally so here we grab
+        // the first window-handle and use it.
         void* nativeWindowHandle = global::windowDelegate->getNativeWindowHandle(0);
         if (nativeWindowHandle) {
             _win32TouchHook = std::make_unique<Win32TouchHook>(nativeWindowHandle);

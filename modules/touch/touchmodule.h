@@ -39,7 +39,7 @@ class TuioEar;
 
 #ifdef WIN32
 class Win32TouchHook;
-#endif //WIN32
+#endif // WIN32
 
 class TouchModule : public OpenSpaceModule {
 public:
@@ -62,7 +62,7 @@ private:
     IntProperty _tuioPort;
     BoolProperty _hasActiveTouchEvent;
 
-    // contains an id and the Point that was processed last frame
+    /// Contains an id and the Point that was processed last frame
     glm::ivec2 _webPositionCallback = glm::ivec2(0);
 #ifdef WIN32
     std::unique_ptr<Win32TouchHook> _win32TouchHook;
