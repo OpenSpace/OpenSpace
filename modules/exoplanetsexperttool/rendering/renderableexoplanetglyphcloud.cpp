@@ -173,6 +173,15 @@ void RenderableExoplanetGlyphCloud::initializeSelectionCallbacks() {
                 _currentlyHoveredIndex = -1;
             }
 
+            // Extra check for left shift, used for extra highlighting
+            bool isLeftShift = key == Key::LeftShift;
+            if (isLeftShift && action == KeyAction::Press) {
+                _isLeftShiftHeld = true;
+            }
+            else if (isLeftShift && action == KeyAction::Release) {
+                _isLeftShiftHeld = false;
+            }
+
             // Do not capture
             return false;
         }
@@ -301,7 +310,7 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
 
     _program->setUniform(_uniformCache.useFixedRingWidth, _useFixedRingWidth);
 
-    _program->setUniform(_uniformCache.renderOption, _renderOption.value());
+    _program->setUniform(_uniformCache.isHighlightMode, _isInSelectionMode && _isLeftShiftHeld);
 
     glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
     glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
@@ -317,6 +326,8 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
         orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));
     }
     glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
+
+    _program->setUniform(_uniformCache.renderOption, _renderOption.value());
 
     _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
     _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));

@@ -83,7 +83,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
     UniformCache(modelMatrix, cameraViewProjectionMatrix, onTop, useFixedRingWidth,
         opacity, scale, maxIndex, currentIndex, isRenderIndexStep,
-        renderOption, up, right, cameraPosition, cameraLookUp
+        renderOption, up, right, cameraPosition, cameraLookUp, isHighlightMode
     ) _uniformCache;
 
     properties::FloatProperty _scale;
@@ -108,6 +108,7 @@ private:
     SyncData<int> _currentlyHoveredIndex;
 
     bool _isInSelectionMode = false;
+    bool _isLeftShiftHeld = false;
 
     GLuint _pointsVao = 0;
     GLuint _pointsVbo = 0;

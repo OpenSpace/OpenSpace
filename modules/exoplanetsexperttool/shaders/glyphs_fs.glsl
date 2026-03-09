@@ -44,6 +44,7 @@ uniform bool useFixedRingWidth;
 uniform int maxIndex;
 uniform int currentIndex;
 uniform bool isRenderIndexStep = false;
+uniform bool isHighlightMode = false;
 
 const float M_PI = 3.141592657;
 
@@ -122,14 +123,19 @@ Fragment getFragment() {
     bool isCurrentHoveredGlyph = in_data.glyphIndex == currentIndex;
 
     // Ring border
-    float borderWidth = isCurrentHoveredGlyph ? 0.20: 0.13;
+    float borderWidth = isCurrentHoveredGlyph ? 0.2: 0.13;
     if (coord > 1.0 - borderWidth || coord < 1.0 - 1.0 + borderWidth) {
-      color.rgb = isCurrentHoveredGlyph ? color.rgb * 2.5 : vec3(0.0);
+      color.rgb = isCurrentHoveredGlyph ? color.rgb : vec3(0.0);
     }
 
     // Brighten hovered glyph
     if (isCurrentHoveredGlyph) {
-      color.rgb *= 1.5;
+      color.rgb *= 2.5;
+    }
+
+    // When in higlight mode, also dim all other glyphs
+    if (isHighlightMode && !isCurrentHoveredGlyph) {
+      color.rgb *= 0.3;
     }
   }
 
