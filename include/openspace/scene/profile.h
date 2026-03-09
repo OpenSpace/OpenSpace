@@ -156,14 +156,14 @@ public:
 
     using CameraType = std::variant<CameraGoToNode, CameraNavState, CameraGoToGeo>;
 
-    struct Variant {
+    struct Addon {
         // The enabled state is not stored in the profile file
         bool isEnabled = false;
         std::string name;
         std::string description;
         std::vector<std::string> assets;
 
-        bool operator==(const Variant&) const noexcept = default;
+        bool operator==(const Addon&) const noexcept = default;
     };
 
     Profile() = default;
@@ -205,7 +205,7 @@ public:
     std::vector<std::string> markNodes;
     std::vector<std::string> additionalScripts;
     std::map<std::string, bool> uiPanelVisibility;
-    std::map<std::string, Variant> variants;
+    std::map<std::string, Addon> addons;
 
     bool ignoreUpdates = false;
 

@@ -35,6 +35,7 @@
 class QBoxLayout;
 class QCheckBox;
 class QKeyEvent;
+class QLabel;
 class QPushButton;
 class SplitComboBox;
 
@@ -65,7 +66,7 @@ public:
     /**
       * Returns the selected profile name when the launcher window closed.
       *
-      * \return The path to the selected profile and the list of selected variants
+      * \return The path to the selected profile and the list of selected add-ons
       */
     std::pair<std::string, std::vector<std::string>> selectedProfile() const;
 
@@ -120,7 +121,7 @@ private:
     // profile and configurations
     void updateStartButton() const;
 
-    void updateVariantBox(const std::string& profile);
+    void updateAddonsBox(const std::string& profile);
 
     const std::filesystem::path _assetPath;
     const std::filesystem::path _userAssetPath;
@@ -134,8 +135,9 @@ private:
     struct {
         QWidget* container = nullptr;
         QBoxLayout* layout = nullptr;
+        QLabel* title = nullptr;
         std::vector<QCheckBox*> elements;
-    } _variantBox;
+    } _addonBox;
     SplitComboBox* _windowConfigBox = nullptr;
     QPushButton* _editProfileButton = nullptr;
     QPushButton* _editWindowButton = nullptr;

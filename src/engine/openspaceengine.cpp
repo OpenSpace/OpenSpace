@@ -493,11 +493,11 @@ void OpenSpaceEngine::initialize() {
     LINFO(std::format("Loading profile '{}'", profile));
     *global::profile = Profile(profile);
 
-    // Enable the variants
-    for (const std::string& variant : global::configuration->profile.variants) {
-        auto it = global::profile->variants.find(variant);
-        if (it == global::profile->variants.end()) {
-            LWARNING(std::format("Could find requested variant '{}'", variant));
+    // Enable the add-ons
+    for (const std::string& addon : global::configuration->profile.addons) {
+        auto it = global::profile->addons.find(addon);
+        if (it == global::profile->addons.end()) {
+            LWARNING(std::format("Could find requested variant '{}'", addon));
             continue;
         }
 
@@ -859,13 +859,13 @@ void OpenSpaceEngine::loadAssets() {
         _assetManager->add(a);
     }
 
-    // Load all assets in enabled variants
-    for (auto& [_, variant] : global::profile->variants) {
-        if (!variant.isEnabled) {
+    // Load all assets in enabled add-ons
+    for (auto& [_, addon] : global::profile->addons) {
+        if (!addon.isEnabled) {
             continue;
         }
 
-        for (const std::string& a : variant.assets) {
+        for (const std::string& a : addon.assets) {
             _assetManager->add(a);
         }
     }

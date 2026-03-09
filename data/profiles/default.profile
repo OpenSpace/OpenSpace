@@ -7,7 +7,7 @@
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/planets/earth/noaa-sos/overlays/latlon_grid-white"
   ],
-  "variants": {
+  "addons": {
     "minor_moons": {
       "name": "Minor Moons",
       "description": "Includes the minor moons of the outer solar system planets Jupiter, Saturn, Uranus, and Neptune.",

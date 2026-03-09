@@ -61,9 +61,13 @@ LauncherWindow  QComboBox#config:disabled {
   color: rgb(225, 225, 225);
 }
 
-LauncherWindow  QWidget#variants {
+LauncherWindow  QWidget#addons {
   background: rgba(0, 0, 0, 140);
   font-size: 10pt;
+}
+
+LauncherWindow  QWidget#addons > QLabel#title {
+  font-size: 12pt;
 }
 
 LauncherWindow  QMenu#newprofile {

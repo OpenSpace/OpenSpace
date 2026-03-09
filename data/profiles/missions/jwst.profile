@@ -15,7 +15,7 @@
     "scene/solarsystem/telescopes/jwst/point_jwst",
     "scene/digitaluniverse/hdf"
   ],
-  "variants": {
+  "addons": {
     "l2_spacecraft": {
       "name": "Spacecraft in L2",
       "description": "Includes other spacecraft that are in the Earth's L2 orbit.",

@@ -41,6 +41,7 @@
 #include <QCheckbox>
 #include <QFile>
 #include <QKeyEvent>
+#include <QLabel>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
@@ -80,7 +81,7 @@ namespace {
         constexpr QRect EditProfileButton(
             LeftRuler, TopRuler + 180, SmallItemWidth, SmallItemHeight
         );
-        constexpr QRect VariantBox(LeftRuler + ItemWidth + 10, TopRuler + 110, 160, 100);
+        constexpr QRect AddonBox(LeftRuler + ItemWidth + 10, TopRuler + 110, 160, 100);
         constexpr QRect OptionsLabel(LeftRuler + 10, TopRuler + 230, 151, 24);
         constexpr QRect WindowConfigBox(LeftRuler, TopRuler + 260, ItemWidth, ItemHeight);
         constexpr QRect NewWindowButton(
@@ -239,20 +240,22 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         this, &LauncherWindow::updateStartButton
     );
 
-    _variantBox.container = new QWidget(centralWidget);
-    _variantBox.container->setObjectName("variants");
-    _variantBox.container->move(geometry::VariantBox.x(), geometry::VariantBox.top());
-    _variantBox.container->setMinimumWidth(geometry::VariantBox.width());
-    _variantBox.container->setMaximumWidth(geometry::VariantBox.width());
-    //_variantBox.container->setGeometry(geometry::VariantBox);
-    _variantBox.container->setAccessibleName("Select variants");
-    _variantBox.layout = new QVBoxLayout(_variantBox.container);
-    _variantBox.layout->setSpacing(0);
-    updateVariantBox(globalConfig.profile.profile + ".profile");
-    for (const std::string& variant : globalConfig.profile.variants) {
-        for (QCheckBox* cb : _variantBox.elements) {
+    _addonBox.container = new QWidget(centralWidget);
+    _addonBox.container->setObjectName("addons");
+    _addonBox.container->move(geometry::AddonBox.x(), geometry::AddonBox.top());
+    _addonBox.container->setMinimumWidth(geometry::AddonBox.width());
+    _addonBox.container->setMaximumWidth(geometry::AddonBox.width());
+    _addonBox.container->setAccessibleName("Select Add-Ons");
+    _addonBox.layout = new QVBoxLayout(_addonBox.container);
+    _addonBox.layout->setSpacing(0);
+    _addonBox.title = new QLabel("Add-Ons");
+    _addonBox.title->setObjectName("title");
+    _addonBox.layout->addWidget(_addonBox.title);
+    updateAddonsBox(globalConfig.profile.profile + ".profile");
+    for (const std::string& addon : globalConfig.profile.addons) {
+        for (QCheckBox* cb : _addonBox.elements) {
             std::string id = cb->property("id").toString().toStdString();
-            if (id == variant) {
+            if (id == addon) {
                 cb->setChecked(true);
             }
         }
@@ -476,7 +479,7 @@ void LauncherWindow::selectProfile(std::optional<std::string> selection) {
             );
         }
 
-        updateVariantBox(*selection);
+        updateAddonsBox(*selection);
     }
 }
 
@@ -725,12 +728,12 @@ void LauncherWindow::updateStartButton() const {
     _startButton->setEnabled(!profilePath.empty() && !configPath.empty());
 }
 
-void LauncherWindow::updateVariantBox(const std::string& profile) {
-    // First delete the old variants
-    for (QCheckBox* cb : _variantBox.elements) {
+void LauncherWindow::updateAddonsBox(const std::string& profile) {
+    // First delete the old addons
+    for (QCheckBox* cb : _addonBox.elements) {
         delete cb;
     }
-    _variantBox.elements.clear();
+    _addonBox.elements.clear();
 
     // Then recreate the new ones
     const std::filesystem::path coreCandidate = _profilePath / profile;
@@ -746,24 +749,24 @@ void LauncherWindow::updateVariantBox(const std::string& profile) {
         std::filesystem::exists(userCandidate) ? userCandidate : coreCandidate
     );
 
-    if (p.variants.empty()) {
-        _variantBox.container->hide();
+    if (p.addons.empty()) {
+        _addonBox.container->hide();
         return;
     }
 
-    for (auto& [key, variant] : p.variants) {
+    for (auto& [key, variant] : p.addons) {
         QCheckBox* cb = new QCheckBox(QString::fromStdString(variant.name));
         cb->setChecked(variant.isEnabled);
         cb->setToolTip(QString::fromStdString(variant.description));
         cb->setProperty("id", QString::fromStdString(key));
 
-        _variantBox.layout->addWidget(cb);
-        _variantBox.elements.push_back(cb);
+        _addonBox.layout->addWidget(cb);
+        _addonBox.elements.push_back(cb);
     }
 
-    _variantBox.layout->addStretch();
+    _addonBox.layout->addStretch();
     // We show it at the end as the call to `show` will cause the layout recalculation
-    _variantBox.container->show();
+    _addonBox.container->show();
 }
 
 bool LauncherWindow::wasLaunchSelected() const {
@@ -773,7 +776,7 @@ bool LauncherWindow::wasLaunchSelected() const {
 std::pair<std::string, std::vector<std::string>> LauncherWindow::selectedProfile() const {
     const std::string profile = std::get<1>(_profileBox->currentSelection());
     std::vector<std::string> variants;
-    for (QCheckBox* cb : _variantBox.elements) {
+    for (QCheckBox* cb : _addonBox.elements) {
         if (cb->isChecked()) {
             const std::string id = cb->property("id").toString().toStdString();
             variants.push_back(id);

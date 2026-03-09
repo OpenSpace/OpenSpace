@@ -53,7 +53,7 @@ struct Configuration {
 
     struct Profile {
         std::string profile;
-        std::vector<std::string> variants;
+        std::vector<std::string> addons;
     };
     Profile profile;
 

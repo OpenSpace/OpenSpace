@@ -57,10 +57,10 @@ namespace {
 }
 
 /**
- * Returns the enabled variants of the profile that was started.
+ * Returns the enabled add-ons of the profile that was started.
  */
-[[codegen::luawrap]] std::vector<std::string> profileVariants() {
-    return global::configuration->profile.variants;
+[[codegen::luawrap]] std::vector<std::string> profileAddons() {
+    return global::configuration->profile.addons;
 }
 
 /**

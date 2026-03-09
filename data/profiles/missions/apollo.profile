@@ -9,7 +9,7 @@
     "scene/solarsystem/missions/apollo/insignias_map",
     "scene/solarsystem/missions/apollo/mission"
   ],
-  "variants": {
+  "addons": {
     "apollo17_boulders": {
       "name": "Apollo 17 Boulders",
       "description": "Adds 3D reconstructed boulders for Stations 2, 6, and 7 of the Apollo 17 EVAs.",

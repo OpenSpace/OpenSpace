@@ -40,7 +40,7 @@ void ProfileTopic::handleJson(const nlohmann::json&) {
         { "uiPanelVisibility", global::profile->uiPanelVisibility },
         { "markNodes", global::profile->markNodes },
         { "filePath", global::configuration->profile.profile },
-        { "variants", global::configuration->profile.variants }
+        { "addons", global::configuration->profile.addons }
     };
 
     Settings settings = loadSettings();

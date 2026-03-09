@@ -402,7 +402,7 @@ static void to_json(nlohmann::json& j, const Profile::CameraNavState& v) {
     }
 }
 
-static void from_json(const nlohmann::json& j, Profile::Variant& v) {
+static void from_json(const nlohmann::json& j, Profile::Addon& v) {
     checkValue(j, "name", &nlohmann::json::is_string, "name", false);
     checkValue(j, "assets", &nlohmann::json::is_array, "assets", false);
     checkValue(j, "description", &nlohmann::json::is_string, "description", true);
@@ -414,7 +414,7 @@ static void from_json(const nlohmann::json& j, Profile::Variant& v) {
     j["assets"].get_to(v.assets);
 }
 
-static void to_json(nlohmann::json& j, const Profile::Variant& v) {
+static void to_json(nlohmann::json& j, const Profile::Addon& v) {
     j["name"] = v.name;
     if (!v.description.empty()) {
         j["description"] = v.description;
@@ -656,7 +656,7 @@ static void convertVersion13to14(nlohmann::json& profile) {
 namespace version14 {
 
 static void convertVersion14to15(nlohmann::json& profile) {
-    // Version 1.5 introduced profile variants
+    // Version 1.5 introduced profile add-ons
     profile["version"] = Profile::Version{ 1, 5 };
 }
 
@@ -782,8 +782,8 @@ std::string Profile::serialize() const {
         r["panel_visibility"] = uiPanelVisibility;
     }
 
-    if (!variants.empty()) {
-        r["variants"] = variants;
+    if (!addons.empty()) {
+        r["addons"] = addons;
     }
 
     return r.dump(2);
@@ -885,8 +885,8 @@ Profile::Profile(const std::filesystem::path& path) {
         if (profile.find("panel_visibility") != profile.end()) {
             profile["panel_visibility"].get_to(uiPanelVisibility);
         }
-        if (profile.find("variants") != profile.end()) {
-            profile["variants"].get_to(variants);
+        if (profile.find("addons") != profile.end()) {
+            profile["addons"].get_to(addons);
         }
     }
     catch (const nlohmann::json::exception& e) {
@@ -901,7 +901,7 @@ LuaLibrary Profile::luaLibrary() {
         {
             codegen::lua::ProfileName,
             codegen::lua::ProfilePath,
-            codegen::lua::ProfileVariants,
+            codegen::lua::ProfileAddons,
             codegen::lua::SaveSettingsToProfile
         }
     };

@@ -1259,13 +1259,13 @@ int main(int argc, char* argv[]) {
         "the profile specified in the `openspace.cfg` and the settings."
     ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-        commandlineArguments.profileVariants,
-        "--variants",
-        "-v",
-        "Specifies the variants of the profile that should be loaded. The provided "
-        "variants must exist on the profile. Multiple variants can be specified by "
+        commandlineArguments.profileAddons,
+        "--addons",
+        "-a",
+        "Specifies the add-ons of the profile that should be loaded. The provided "
+        "add-ons must exist on the profile. Multiple add-ons can be specified by "
         "separating them with a \";\", for example \"--variants abc;def\" specifies the "
-        "variants \"abc\" and \"def\"."
+        "add-ons \"abc\" and \"def\"."
     ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
         commandlineArguments.propertyVisibility,
@@ -1384,9 +1384,9 @@ int main(int argc, char* argv[]) {
         if (commandlineArguments.profile.has_value()) {
             global::configuration->profile.profile = *commandlineArguments.profile;
         }
-        if (commandlineArguments.profileVariants.has_value()) {
-            global::configuration->profile.variants =
-                ghoul::tokenizeString(*commandlineArguments.profileVariants, ';');
+        if (commandlineArguments.profileAddons.has_value()) {
+            global::configuration->profile.addons =
+                ghoul::tokenizeString(*commandlineArguments.profileAddons, ';');
         }
         if (commandlineArguments.propertyVisibility.has_value()) {
             if (commandlineArguments.propertyVisibility == "NoviceUser") {
@@ -1474,7 +1474,7 @@ int main(int argc, char* argv[]) {
 
         LauncherWindow launcher = LauncherWindow(
             !commandlineArguments.profile.has_value() &&
-                !commandlineArguments.profileVariants.has_value(),
+                !commandlineArguments.profileAddons.has_value(),
             *global::configuration,
             !commandlineArguments.windowConfig.has_value(),
             std::move(windowCfgPreset)
@@ -1528,9 +1528,9 @@ int main(int argc, char* argv[]) {
             size
         );
 
-        auto [profile, variants] = launcher.selectedProfile();
+        auto [profile, addons] = launcher.selectedProfile();
         global::configuration->profile.profile = profile;
-        global::configuration->profile.variants = variants;
+        global::configuration->profile.addons = addons;
 
         std::string config = windowConfiguration;
         isGeneratedWindowConfig = false;
@@ -1600,7 +1600,7 @@ int main(int argc, char* argv[]) {
             );
         }
 
-        settings.profileVariants = global::configuration->profile.variants;
+        settings.profileAddons = global::configuration->profile.addons;
 
         settings.configuration =
             isGeneratedWindowConfig ? "" : global::configuration->windowConfiguration;

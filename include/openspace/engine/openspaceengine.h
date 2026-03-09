@@ -72,7 +72,7 @@ struct CommandlineArguments {
     std::optional<std::string> configuration;
     std::optional<std::string> windowConfig;
     std::optional<std::string> profile;
-    std::optional<std::string> profileVariants;
+    std::optional<std::string> profileAddons;
     std::optional<std::string> propertyVisibility;
     std::optional<bool> bypassLauncher;
 
