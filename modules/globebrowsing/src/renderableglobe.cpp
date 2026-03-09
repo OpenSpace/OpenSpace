@@ -503,7 +503,37 @@ namespace {
             return dir;
         }
     }
-    
+
+    // RenderableGlobe is responsible for rendering planets, moons, and other ellipsoidal
+    // bodies with tiled surface data. It renders a globe as an ellipsoid whose appearance
+    // is assembled dynamically from one or more layer stacks, such as color imagery,
+    // elevation data, night textures, overlays, and water masks.
+    //
+    // The class is designed for large planetary datasets that cannot be drawn as a single
+    // static mesh or texture. Instead, it divides the globe into chunks and continuously
+    // adjusts the visible level of detail based on camera position, projected screen
+    // coverage, and available tile data. This allows close-up surface exploration while
+    // still supporting full-planet views in the same renderable.
+    //
+    // RenderableGlobe supports both shape and surface variation. The base body is defined
+    // as an ellipsoid, while height layers can displace the rendered surface to represent
+    // terrain. When elevation data is available, the globe can also use more accurate
+    // normals for improved lighting and shading across detailed topography.
+    //
+    // A major responsibility of the class is coordinating tiled layer rendering. It
+    // manages multiple layer groups. This makes it possible to combine imagery,
+    // topography, and auxiliary visual layers into a single coherent planetary surface.
+    //
+    // RenderableGlobe also integrates planetary lighting and shadowing features. It
+    // supports standard directional illumination, optional higher-quality surface
+    // shading, eclipse-based shadows from other bodies, and shadow mapping for more
+    // advanced shadow interactions. If the globe has rings or related shadow components,
+    // those systems are incorporated into the rendering pipeline as well.
+    //
+    // Beyond the base surface, the class can host globe-specific secondary content such
+    // as labels and GeoJSON-based overlays. These are rendered as companion systems tied
+    // to the globe, allowing annotations and vector-based geographic content to appear
+    // correctly on or around the planetary body.
     struct [[codegen::Dictionary(RenderableGlobe)]] Parameters {
         // The radii for this planet. If only one value is given, all three radii are set
         // to that value.

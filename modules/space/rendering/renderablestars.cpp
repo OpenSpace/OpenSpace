@@ -314,6 +314,29 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
+    // RenderableStars renders large star catalogs as a point-based star field using data
+    // loaded from a SPECK file or a CSV file. It is intended for astronomical datasets
+    // where each entry represents a star with position and optional physical metadata
+    // such as color index, luminosity, magnitude, and motion.
+    //
+    // Visually, each star is drawn as a billboarded light source made up of one or two
+    // textured components: a central core and a surrounding glare.
+    //
+    // The class supports several coloring modes. In its standard mode, star color is
+    // derived from stellar B–V color values through a lookup texture, enabling physically
+    // motivated color variation across the dataset. It can also color stars using
+    // velocity, speed, arbitrary data columns from the source file, or a single fixed
+    // color for the entire set.
+    //
+    // Star size is computed from astronomical properties rather than fixed screen size
+    // alone. Different sizing strategies are available to emphasize apparent brightness,
+    // luminosity, magnitude, or related measures, which lets the same dataset be
+    // presented in different scientifically meaningful ways.
+    //
+    // This Renderable class also supports proper motion. When velocity data is available,
+    // star positions can evolve over time relative to a chosen epoch, allowing the star
+    // field to reflect stellar motion rather than remaining static. This is especially
+    // useful for long-timescale astronomical simulations and temporal exploration.
     struct [[codegen::Dictionary(RenderableStars)]] Parameters {
         // [[codegen::verbatim(SpeckFileInfo.description)]]
         std::filesystem::path speckFile [[codegen::key("File")]];
