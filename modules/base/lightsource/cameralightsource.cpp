@@ -30,11 +30,13 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo IntensityInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo IntensityInfo = {
         "Intensity",
         "Intensity",
         "The intensity of this light source.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
     // This `LightSource` type represents a light source placed at the position of the
@@ -44,12 +46,12 @@ namespace {
         // [[codegen::verbatim(IntensityInfo.description)]]
         std::optional<float> intensity;
     };
-#include "cameralightsource_codegen.cpp"
 } // namespace
+#include "cameralightsource_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation CameraLightSource::Documentation() {
+Documentation CameraLightSource::Documentation() {
     return codegen::doc<Parameters>("base_camera_light_source");
 }
 

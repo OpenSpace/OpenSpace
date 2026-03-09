@@ -37,59 +37,61 @@
 #include <cmath>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color of the grid lines.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HighlightColorInfo = {
+    constexpr Property::PropertyInfo HighlightColorInfo = {
         "HighlightColor",
         "Highlight color",
         "The color of the highlighted lines in the grid.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
+    constexpr Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of segments",
         "The number of segments to split the grid into, in each direction (x and y).",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HighlightRateInfo = {
+    constexpr Property::PropertyInfo HighlightRateInfo = {
         "HighlightRate",
         "Highlight rate",
         "The rate that the columns and rows are highlighted, counted with respect to the "
         "center of the grid. If the number of segments in the grid is odd, the "
         "highlighting might be offset from the center.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the grid lines. The larger number, the thicker the lines.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HighlightLineWidthInfo = {
+    constexpr Property::PropertyInfo HighlightLineWidthInfo = {
         "HighlightLineWidth",
         "Highlight line width",
         "The width of the highlighted grid lines. The larger number, the thicker the "
         "lines.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr Property::PropertyInfo SizeInfo = {
         "Size",
         "Grid size",
         "The size of the grid (in the x and y direction), given in meters.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+    const PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the grid."
@@ -99,8 +101,8 @@ namespace {
     // distances in 3D space.
     //
     // The grid is created by specifying a size and how many segments to split each
-    // dimension into. A secondary color can be used to highlight grid lines with a
-    // given interval.
+    // dimension into. A secondary color can be used to highlight grid lines with a given
+    // interval.
     struct [[codegen::Dictionary(RenderableGrid)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
@@ -126,12 +128,12 @@ namespace {
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels [[codegen::reference("labelscomponent")]];
     };
-#include "renderablegrid_codegen.cpp"
 } // namespace
+#include "renderablegrid_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableGrid::Documentation() {
+Documentation RenderableGrid::Documentation() {
     return codegen::doc<Parameters>("base_renderable_grid");
 }
 
@@ -150,12 +152,12 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     addProperty(Fadeable::_opacity);
 
     _color = p.color.value_or(_color);
-    _color.setViewOption(properties::Property::ViewOptions::Color);
+    _color.setViewOption(Property::ViewOptions::Color);
     addProperty(_color);
 
     // If no highlight color is specified then use the base color
     _highlightColor = p.highlightColor.value_or(_color);
-    _highlightColor.setViewOption(properties::Property::ViewOptions::Color);
+    _highlightColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_highlightColor);
 
     _segments = p.segments.value_or(_segments);
@@ -182,7 +184,7 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
         _labels = std::make_unique<LabelsComponent>(*p.labels);
         _hasLabels = true;
         addPropertySubOwner(_labels.get());
-        // Fading of the labels should also depend on the fading of the renderable
+        // Fading of the labels should also depend on the fading of the Renderable
         _labels->setParentFadeable(this);
     }
 }
@@ -269,7 +271,6 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
-    // Change GL state:
     glLineWidth(_lineWidth);
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -286,10 +287,9 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&) {
 
     glBindVertexArray(_highlightVao);
     glDrawArrays(_mode, 0, static_cast<GLsizei>(_highlightArray.size()));
-
-    // Restore GL State
     glBindVertexArray(0);
     _gridProgram->deactivate();
+
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
     global::renderEngine->openglStateCache().resetDepthState();
@@ -367,7 +367,7 @@ void RenderableGrid::update(const UpdateData&) {
         }
     }
 
-    // last x row
+    // Last x row
     for (unsigned int i = 0; i < nSegments.x; i++) {
         const double x0 = -halfSize.x + i * step.x;
         const double x1 = x0 + step.x;
@@ -391,7 +391,7 @@ void RenderableGrid::update(const UpdateData&) {
         }
     }
 
-    // last y col
+    // Last y col
     for (unsigned int j = 0; j < nSegments.y; j++) {
         const double y0 = -halfSize.y + j * step.y;
         const double y1 = y0 + step.y;

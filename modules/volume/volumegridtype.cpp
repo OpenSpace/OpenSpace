@@ -27,7 +27,7 @@
 #include <ghoul/format.h>
 #include <ghoul/misc/exception.h>
 
-namespace openspace::volume {
+namespace openspace {
 
 VolumeGridType parseGridType(const std::string& gridType) {
     if (gridType == "Cartesian") {
@@ -47,4 +47,4 @@ std::string gridTypeToString(VolumeGridType gridType) {
     }
 }
 
-} // namespace openspace::volume
+} // namespace openspace

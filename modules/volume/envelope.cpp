@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace openspace::volume {
+namespace openspace {
 
 EnvelopePoint::EnvelopePoint(glm::vec3 c, float x, float y)
     : color(std::move(c))
@@ -230,4 +230,4 @@ void Envelope::setEnvelopeLuaTable(lua_State* state) const {
     }
 }
 
-}  //namespace openspace::volume
+} // namespace openspace

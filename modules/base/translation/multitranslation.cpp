@@ -34,16 +34,16 @@ namespace {
     // This Translation type combines multiple translations that are applied one after the
     // other.
     struct [[codegen::Dictionary(MultiTranslation)]] Parameters {
-        // The list of translations that are applied one after the other
+        // The list of translations that are applied one after the other.
         std::vector<ghoul::Dictionary> translations
             [[codegen::reference("core_transform_translation")]];
     };
-#include "multitranslation_codegen.cpp"
 } // namespace
+#include "multitranslation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation MultiTranslation::Documentation() {
+Documentation MultiTranslation::Documentation() {
     return codegen::doc<Parameters>("base_transform_translation_multi");
 }
 

@@ -38,7 +38,7 @@ namespace {
     constexpr std::string_view _loggerCat = "JoystickCameraStates";
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
 JoystickCameraStates::JoystickCameraStates(double sensitivity, double velocityScaleFactor)
     : OrbitalCameraStates(sensitivity, velocityScaleFactor)
@@ -179,11 +179,10 @@ void JoystickCameraStates::updateVelocitiesFromInput(
                         axis.propertyUri, value
                     );
 
-                    using Script = scripting::ScriptEngine::Script;
                     global::scriptEngine->queueScript({
                         .code = script,
-                        .synchronized = Script::ShouldBeSynchronized(axis.isRemote),
-                        .sendToRemote = Script::ShouldSendToRemote(axis.isRemote)
+                        .synchronized = ScriptEngine::Script::ShouldBeSynchronized(axis.isRemote),
+                        .sendToRemote = ScriptEngine::Script::ShouldSendToRemote(axis.isRemote)
                     });
                     break;
             }
@@ -200,7 +199,7 @@ void JoystickCameraStates::updateVelocitiesFromInput(
                 );
 
                 if (active) {
-                    using Script = scripting::ScriptEngine::Script;
+                    using Script = ScriptEngine::Script;
                     global::scriptEngine->queueScript({
                         .code = it->second.command,
                         .synchronized = Script::ShouldBeSynchronized(
@@ -429,4 +428,4 @@ JoystickCameraStates::findOrAddJoystickMapping(const std::string& joystickName)
     return joystick;
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

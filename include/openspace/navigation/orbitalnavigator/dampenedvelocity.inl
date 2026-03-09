@@ -25,7 +25,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/glm.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
 template <typename T>
 DampenedVelocity<T>::DampenedVelocity(double scaleFactor, bool useFriction)
@@ -80,4 +80,4 @@ void DampenedVelocity<T>::update(std::optional<T> value, double dt) {
     }
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

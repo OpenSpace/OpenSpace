@@ -24,11 +24,12 @@
 
 #include <openspace/properties/vector/dvec3property.h>
 
-namespace openspace::properties {
+#include <ghoul/lua/lua_helper.h>
 
-DVec3Property::DVec3Property(Property::PropertyInfo info, glm::dvec3 value,
-                             glm::dvec3 minValue, glm::dvec3 maxValue,
-                             glm::dvec3 stepValue)
+namespace openspace {
+
+DVec3Property::DVec3Property(PropertyInfo info, glm::dvec3 value, glm::dvec3 minValue,
+                             glm::dvec3 maxValue, glm::dvec3 stepValue)
     : NumericalProperty<glm::dvec3>(
         std::move(info),
         std::move(value),
@@ -58,4 +59,4 @@ std::string DVec3Property::stringValue() const {
     return formatJson(_value);
 }
 
-} // namespace openspace::properties
+} // namespace openspace

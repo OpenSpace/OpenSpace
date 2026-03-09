@@ -40,11 +40,11 @@
 #include <utility>
 #include <vector>
 
-namespace openspace::properties { class Property; }
+namespace openspace {
 
-namespace openspace::interaction {
+class Property;
 
-class SessionRecordingHandler : public properties::PropertyOwner {
+class SessionRecordingHandler : public PropertyOwner {
 public:
     enum class SessionState {
         Idle = 0,
@@ -113,6 +113,7 @@ public:
     /**
      * Used to stop a recording in progress. If open, the recording file will be closed,
      * and all keyframes deleted from memory.
+     *
      * \param filename File saved with recorded keyframes
      */
     void stopRecording(const std::filesystem::path& filename, DataMode dataMode,
@@ -164,18 +165,6 @@ public:
     void setPlaybackPause(bool pause);
 
     /**
-     * Enables that rendered frames should be saved during playback.
-     *
-     * \param fps Number of frames per second.
-     */
-    //void enableTakeScreenShotDuringPlayback(int fps);
-
-    /**
-     * Used to disable that renderings are saved during playback.
-     */
-    //void disableTakeScreenShotDuringPlayback();
-
-    /**
      * Used to check if a session playback is in progress.
      *
      * \return `true` if playback is in progress
@@ -194,7 +183,7 @@ public:
     /**
      * Used to obtain the state of idle/recording/playback.
      *
-     * \return int value of state as defined by struct SessionState
+     * \return The current session state
      */
     SessionState state() const;
 
@@ -210,7 +199,7 @@ public:
      * \return The Lua library that contains all Lua functions available to affect the
      *         interaction
      */
-    static openspace::scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
     /**
      * Used to request a callback for notification of playback state change.
@@ -244,7 +233,7 @@ public:
      *
      * \param prop The property being set
      */
-    void savePropertyBaseline(properties::Property& prop);
+    void savePropertyBaseline(Property& prop);
 
 private:
     void tickPlayback(double dt);
@@ -257,9 +246,9 @@ private:
     void checkIfScriptUsesScenegraphNode(std::string_view script) const;
 
 
-    properties::BoolProperty _renderPlaybackInformation;
-    properties::BoolProperty _ignoreRecordedScale;
-    properties::BoolProperty _addModelMatrixinAscii;
+    BoolProperty _renderPlaybackInformation;
+    BoolProperty _ignoreRecordedScale;
+    BoolProperty _addModelMatrixinAscii;
 
     struct {
         double elapsedTime = 0.0;
@@ -293,6 +282,6 @@ private:
     std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SESSIONRECORDINGHANDLER___H__

@@ -43,7 +43,9 @@
 
 namespace openspace {
 
-IswaModule::IswaModule() : OpenSpaceModule(Name) {
+IswaModule::IswaModule()
+    : OpenSpaceModule(Name)
+{
     global::callback::initialize->push_back([]() {
         ZoneScopedN("IswaModule");
         IswaManager::initialize();
@@ -67,7 +69,7 @@ void IswaModule::internalInitialize(const ghoul::Dictionary&) {
     fScreenSpaceRenderable->registerClass<ScreenSpaceCygnet>("ScreenSpaceCygnet");
 }
 
-std::vector<documentation::Documentation> IswaModule::documentations() const {
+std::vector<Documentation> IswaModule::documentations() const {
     return {
         RenderableTexturePlane::Documentation(),
         RenderableDataPlane::Documentation(),
@@ -76,7 +78,7 @@ std::vector<documentation::Documentation> IswaModule::documentations() const {
     };
 }
 
-scripting::LuaLibrary IswaModule::luaLibrary() const {
+LuaLibrary IswaModule::luaLibrary() const {
     return IswaManager::luaLibrary();
 }
 

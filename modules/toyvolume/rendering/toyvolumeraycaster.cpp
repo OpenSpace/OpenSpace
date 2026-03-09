@@ -71,7 +71,6 @@ void ToyVolumeRaycaster::renderEntryPoints(const RenderData& data,
 void ToyVolumeRaycaster::renderExitPoints(const RenderData& data,
                                           ghoul::opengl::ProgramObject& program)
 {
-    // Uniforms
     program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
     program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
@@ -134,7 +133,7 @@ std::filesystem::path ToyVolumeRaycaster::raycasterPath() const {
 }
 
 std::filesystem::path ToyVolumeRaycaster::helperPath() const {
-    return ""; // no helper file
+    return "";
 }
 
 void ToyVolumeRaycaster::setColor(glm::vec4 color) {

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace::volume {
+namespace openspace {
 
 template <typename ValueType>
 LinearLruCache<ValueType>::LinearLruCache(size_t capacity, size_t nIndices)
@@ -82,4 +82,4 @@ void LinearLruCache<ValueType>::insert(size_t key, const ValueType& value) {
     _cache[key] = { value, iter };
 }
 
-} // namespace openspace::volume
+} // namespace openspace

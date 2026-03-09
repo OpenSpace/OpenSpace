@@ -33,7 +33,7 @@
 #include <string>
 #include <vector>
 
-namespace openspace::gaia {
+namespace openspace {
 
 struct ReadFileJob : public Job<std::vector<std::vector<float>>> {
     /**
@@ -75,6 +75,6 @@ private:
     std::vector<std::vector<float>> _octants;
 };
 
-} // namespace openspace::gaiamission
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GAIA___READFILEJOB___H__

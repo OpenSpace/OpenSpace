@@ -48,20 +48,20 @@
 using namespace TUIO;
 
 namespace {
-    constexpr std::string_view _loggerCat = "TouchModule";
+    using namespace openspace;
 
-    constexpr openspace::properties::Property::PropertyInfo TuioPortInfo = {
+    constexpr Property::PropertyInfo TuioPortInfo = {
         "TuioPort",
         "TUIO Port",
         "TUIO UDP port, by default 3333. The port cannot be changed after startup.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
+    constexpr Property::PropertyInfo EventsInfo = {
         "DetectedTouchEvent",
         "Detected touch event",
         "True when there is an active touch TUIO event.",
-        openspace::properties::Property::Visibility::Hidden
+        Property::Visibility::Hidden
     };
 
     struct [[codegen::Dictionary(TouchModule)]] Parameters {
@@ -117,8 +117,7 @@ void TouchModule::processNewInput() {
     std::vector<TouchInput> earInputs = _ear->takeInputs();
     std::vector<TouchInput> earRemovals = _ear->takeRemovals();
 
-    interaction::TouchInputState& touchInputState =
-        global::interactionHandler->touchInputState();
+    TouchInputState& touchInputState = global::interactionHandler->touchInputState();
 
     touchInputState.processTouchInput(earInputs, earRemovals);
 

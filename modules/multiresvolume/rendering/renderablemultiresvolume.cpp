@@ -53,97 +53,99 @@
 #include <fstream>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableMultiresVolume";
 
-    constexpr openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
+    constexpr Property::PropertyInfo StepSizeCoefficientInfo = {
         "StepSizeCoefficient",
         "Stepsize coefficient",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CurrentTimeInfo = {
+    constexpr Property::PropertyInfo CurrentTimeInfo = {
         "CurrentTime",
         "Current time",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MemoryBudgetInfo = {
+    constexpr Property::PropertyInfo MemoryBudgetInfo = {
         "MemoryBudget",
         "Memory budget",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StreamingBudgetInfo = {
+    constexpr Property::PropertyInfo StreamingBudgetInfo = {
         "StreamingBudget",
         "Streaming budget",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseGlobalTimeInfo = {
+    constexpr Property::PropertyInfo UseGlobalTimeInfo = {
         "UseGlobalTime",
         "Global time",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LoopInfo = {
+    constexpr Property::PropertyInfo LoopInfo = {
         "Loop",
         "Loop",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SelectorNameInfo = {
+    constexpr Property::PropertyInfo SelectorNameInfo = {
         "Selector",
         "Brick selector",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StatsToFileInfo = {
+    constexpr Property::PropertyInfo StatsToFileInfo = {
         "PrintStats",
         "Print stats",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StatsToFileNameInfo = {
+    constexpr Property::PropertyInfo StatsToFileNameInfo = {
         "PrintStatsFileName",
         "Stats filename",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
+    constexpr Property::PropertyInfo ScalingExponentInfo = {
         "ScalingExponent",
         "Scaling Exponent",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScalingInfo = {
+    constexpr Property::PropertyInfo ScalingInfo = {
         "Scaling",
         "Scaling",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TranslationInfo = {
+    constexpr Property::PropertyInfo TranslationInfo = {
         "Translation",
         "Translation",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
+    constexpr Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(RenderableMultiresVolume)]] Parameters {
@@ -162,8 +164,8 @@ namespace {
 
         std::optional<std::string> brickSelector;
     };
-#include "renderablemultiresvolume_codegen.cpp"
 } // namespace
+#include "renderablemultiresvolume_codegen.cpp"
 
 namespace openspace {
 
@@ -212,7 +214,6 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
 
     _tsp = std::make_shared<TSP>(_filename);
-    _atlasManager = std::make_shared<AtlasManager>(_tsp.get());
 
     _selectorName = p.brickSelector.value_or(_selectorName);
 
@@ -265,65 +266,67 @@ void RenderableMultiresVolume::setSelectorType(Selector selector) {
     _selector = selector;
     switch (_selector) {
         case Selector::TF:
-            if (!_tfBrickSelector) {
-                _errorHistogramManager = std::make_unique<ErrorHistogramManager>(
-                    _tsp.get()
-                );
-                _tfBrickSelector = std::make_unique<TfBrickSelector>(
-                    _tsp.get(),
-                    _errorHistogramManager.get(),
-                    _transferFunction.get(),
-                    _memoryBudget,
-                    _streamingBudget
-                );
-                _transferFunction->setCallback([this](const TransferFunction&) {
-                    _tfBrickSelector->calculateBrickErrors();
-                });
-                if (initializeSelector()) {
-                    _tfBrickSelector->calculateBrickErrors();
-                    return;
-                }
+            if (_tfBrickSelector) {
+                break;
+            }
+
+            _errorHistogramManager = std::make_unique<ErrorHistogramManager>(_tsp.get());
+            _tfBrickSelector = std::make_unique<TfBrickSelector>(
+                _tsp.get(),
+                _errorHistogramManager.get(),
+                _transferFunction.get(),
+                _memoryBudget,
+                _streamingBudget
+            );
+            _transferFunction->setCallback([this](const TransferFunction&) {
+                _tfBrickSelector->calculateBrickErrors();
+            });
+            if (initializeSelector()) {
+                _tfBrickSelector->calculateBrickErrors();
+                return;
             }
             break;
-
         case Selector::SIMPLE:
-            if (!_simpleTfBrickSelector) {
-                _histogramManager = std::make_unique<HistogramManager>();
-                _simpleTfBrickSelector = std::make_unique<SimpleTfBrickSelector>(
-                    _tsp.get(),
-                    _histogramManager.get(),
-                    _transferFunction.get(),
-                    _memoryBudget,
-                    _streamingBudget
-                );
-                _transferFunction->setCallback([this](const TransferFunction&) {
-                    _simpleTfBrickSelector->calculateBrickImportances();
-                });
-                if (initializeSelector()) {
-                    _simpleTfBrickSelector->calculateBrickImportances();
-                    return;
-                }
+            if (_simpleTfBrickSelector) {
+                break;
+            }
+
+            _histogramManager = std::make_unique<HistogramManager>();
+            _simpleTfBrickSelector = std::make_unique<SimpleTfBrickSelector>(
+                _tsp.get(),
+                _histogramManager.get(),
+                _transferFunction.get(),
+                _memoryBudget,
+                _streamingBudget
+            );
+            _transferFunction->setCallback([this](const TransferFunction&) {
+                _simpleTfBrickSelector->calculateBrickImportances();
+            });
+            if (initializeSelector()) {
+                _simpleTfBrickSelector->calculateBrickImportances();
+                return;
             }
             break;
-
         case Selector::LOCAL:
-            if (!_localTfBrickSelector) {
-                _localErrorHistogramManager =
-                    std::make_unique<LocalErrorHistogramManager>(_tsp.get());
-                _localTfBrickSelector = std::make_unique<LocalTfBrickSelector>(
-                    _tsp.get(),
-                    _localErrorHistogramManager.get(),
-                    _transferFunction.get(),
-                    _memoryBudget,
-                    _streamingBudget
-                );
-                _transferFunction->setCallback([this](const TransferFunction&) {
-                    _localTfBrickSelector->calculateBrickErrors();
-                });
-                if (initializeSelector()) {
-                    _localTfBrickSelector->calculateBrickErrors();
-                    return;
-                }
+            if (_localTfBrickSelector) {
+                break;
+            }
+
+            _localErrorHistogramManager =
+                std::make_unique<LocalErrorHistogramManager>(_tsp.get());
+            _localTfBrickSelector = std::make_unique<LocalTfBrickSelector>(
+                _tsp.get(),
+                _localErrorHistogramManager.get(),
+                _transferFunction.get(),
+                _memoryBudget,
+                _streamingBudget
+            );
+            _transferFunction->setCallback([this](const TransferFunction&) {
+                _localTfBrickSelector->calculateBrickErrors();
+            });
+            if (initializeSelector()) {
+                _localTfBrickSelector->calculateBrickErrors();
+                return;
             }
             break;
     }
@@ -332,8 +335,8 @@ void RenderableMultiresVolume::setSelectorType(Selector selector) {
 void RenderableMultiresVolume::initializeGL() {
     bool success = _tsp && _tsp->load();
 
-    unsigned int maxNumBricks = _tsp->header().xNumBricks * _tsp->header().yNumBricks *
-                                _tsp->header().zNumBricks;
+    unsigned int maxNumBricks =
+        _tsp->header().xNumBricks * _tsp->header().yNumBricks * _tsp->header().zNumBricks;
 
     constexpr unsigned int MaxInitialBudget = 2048;
     int initialBudget = std::min(MaxInitialBudget, maxNumBricks);
@@ -353,7 +356,7 @@ void RenderableMultiresVolume::initializeGL() {
         setSelectorType(_selector);
     }
 
-    success &= _atlasManager && _atlasManager->initialize();
+    _atlasManager = std::make_shared<AtlasManager>(_tsp.get());
 
     _transferFunction->update();
 
@@ -398,160 +401,104 @@ bool RenderableMultiresVolume::initializeSelector() {
     bool success = true;
 
     switch (_selector) {
-        case Selector::TF:
-            if (_errorHistogramManager) {
-                 std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
-                     std::format("{}_{}_errorHistograms", _filename.stem(), nHistograms),
-                     ""
-                );
-                std::ifstream cacheFile(cached, std::ios::in | std::ios::binary);
-                if (cacheFile.is_open()) {
-                    // Read histograms from cache
-                    cacheFile.close();
-                    LINFO(
-                        std::format("Loading histograms from cache '{}'", cached)
-                    );
-                    success &= _errorHistogramManager->loadFromFile(cached);
-                }
-                else if (!_errorHistogramsPath.empty()) {
-                    // Read histograms from scene data
-                    LINFO(std::format(
-                        "Loading histograms from scene data '{}'", _errorHistogramsPath
-                    ));
-                    success &= _errorHistogramManager->loadFromFile(_errorHistogramsPath);
-                }
-                else {
-                    // Build histograms from tsp file
-                    LWARNING(std::format("Failed to open '{}'", cached));
-                    success &= _errorHistogramManager->buildHistograms(nHistograms);
-                    if (success) {
-                        LINFO(std::format("Writing cache to '{}'", cached));
-                        _errorHistogramManager->saveToFile(cached);
-                    }
-                }
-                success &= _tfBrickSelector && _tfBrickSelector->initialize();
+        case Selector::TF: {
+            if (!_errorHistogramManager) {
+                break;
             }
-            break;
 
-        case Selector::SIMPLE:
-            if (_histogramManager) {
-                std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
-                    std::format("{}_{}_histogram", _filename.stem(), nHistograms),
-                    ""
-                );
-                std::ifstream cacheFile(cached, std::ios::in | std::ios::binary);
-                if (cacheFile.is_open()) {
-                    // Read histograms from cache.
-                    cacheFile.close();
-                    LINFO(std::format("Loading histograms from '{}'", cached));
-                    success &= _histogramManager->loadFromFile(cached);
-                }
-                else {
-                    // Build histograms from tsp file.
-                    LWARNING(std::format("Failed to open '{}'", cached));
-                    success &= _histogramManager->buildHistograms(
-                        _tsp.get(),
-                        nHistograms
-                    );
-                    if (success) {
-                        LINFO(std::format("Writing cache to '{}'", cached));
-                        _histogramManager->saveToFile(cached);
-                    }
-                }
-                success &= _simpleTfBrickSelector && _simpleTfBrickSelector->initialize();
+            std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
+                std::format("{}_{}_errorHistograms", _filename.stem(), nHistograms),
+                ""
+            );
+            std::ifstream cacheFile =
+                std::ifstream(cached, std::ios::in | std::ios::binary);
+            if (cacheFile.is_open()) {
+                // Read histograms from cache
+                cacheFile.close();
+                LINFO(std::format("Loading histograms from cache '{}'", cached));
+                success &= _errorHistogramManager->loadFromFile(cached);
             }
+            else if (!_errorHistogramsPath.empty()) {
+                // Read histograms from scene data
+                LINFO(std::format(
+                    "Loading histograms from scene data '{}'", _errorHistogramsPath
+                ));
+                success &= _errorHistogramManager->loadFromFile(_errorHistogramsPath);
+            }
+            else {
+                // Build histograms from tsp file
+                LWARNING(std::format("Failed to open '{}'", cached));
+                success &= _errorHistogramManager->buildHistograms(nHistograms);
+                if (success) {
+                    LINFO(std::format("Writing cache to '{}'", cached));
+                    _errorHistogramManager->saveToFile(cached);
+                }
+            }
+            success &= _tfBrickSelector && _tfBrickSelector->initialize();
             break;
+        }
+        case Selector::SIMPLE: {
+            if (!_histogramManager) {
+                break;
+            }
 
-        case Selector::LOCAL:
-            if (_localErrorHistogramManager) {
-                 std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
-                    std::format(
-                        "{}_{}_localErrorHistograms", _filename.stem(), nHistograms
-                    ),
-                    ""
-                );
-                std::ifstream cacheFile(cached, std::ios::in | std::ios::binary);
-                if (cacheFile.is_open()) {
-                    // Read histograms from cache.
-                    cacheFile.close();
-                    LINFO(std::format("Loading histograms from '{}'", cached));
-                    success &= _localErrorHistogramManager->loadFromFile(cached);
-                }
-                else {
-                    // Build histograms from tsp file.
-                    LWARNING(std::format("Failed to open '{}'", cached));
-                    success &= _localErrorHistogramManager->buildHistograms(nHistograms);
-                    if (success) {
-                        LINFO(std::format("Writing cache to '{}'", cached));
-                        _localErrorHistogramManager->saveToFile(cached);
-                    }
-                }
-                success &= _localTfBrickSelector && _localTfBrickSelector->initialize();
+            std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
+                std::format("{}_{}_histogram", _filename.stem(), nHistograms),
+                ""
+            );
+            std::ifstream cacheFile =
+                std::ifstream(cached, std::ios::in | std::ios::binary);
+            if (cacheFile.is_open()) {
+                // Read histograms from cache
+                cacheFile.close();
+                LINFO(std::format("Loading histograms from '{}'", cached));
+                success &= _histogramManager->loadFromFile(cached);
             }
+            else {
+                // Build histograms from tsp file
+                LWARNING(std::format("Failed to open '{}'", cached));
+                success &= _histogramManager->buildHistograms(_tsp.get(), nHistograms);
+                if (success) {
+                    LINFO(std::format("Writing cache to '{}'", cached));
+                    _histogramManager->saveToFile(cached);
+                }
+            }
+            success &= _simpleTfBrickSelector && _simpleTfBrickSelector->initialize();
             break;
+        }
+        case Selector::LOCAL: {
+            if (!_localErrorHistogramManager) {
+                break;
+            }
+
+            std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
+                std::format("{}_{}_localErrorHistograms", _filename.stem(), nHistograms),
+                ""
+            );
+            std::ifstream cacheFile =
+                std::ifstream(cached, std::ios::in | std::ios::binary);
+            if (cacheFile.is_open()) {
+                // Read histograms from cache
+                cacheFile.close();
+                LINFO(std::format("Loading histograms from '{}'", cached));
+                success &= _localErrorHistogramManager->loadFromFile(cached);
+            }
+            else {
+                // Build histograms from tsp file
+                LWARNING(std::format("Failed to open '{}'", cached));
+                success &= _localErrorHistogramManager->buildHistograms(nHistograms);
+                if (success) {
+                    LINFO(std::format("Writing cache to '{}'", cached));
+                    _localErrorHistogramManager->saveToFile(cached);
+                }
+            }
+            success &= _localTfBrickSelector && _localTfBrickSelector->initialize();
+            break;
+        }
     }
 
     return success;
 }
-/*
-void RenderableMultiresVolume::preResolve(ghoul::opengl::ProgramObject* program) {
-    RenderableVolume::preResolve(program);
-
-
-    std::stringstream ss;
-    ss << "opacity_" << getId();
-    program->setUniform(ss.str(), visible ? 1.f : 0.f);
-
-    ss.str(std::string());
-    ss << "stepSizeCoefficient_" << getId();
-    program->setUniform(ss.str(), _stepSizeCoefficient);
-
-    ss.str(std::string());
-    ss << "transferFunction_" << getId();
-    program->setUniform(ss.str(), getTextureUnit(_transferFunction->texture()));
-
-    ss.str(std::string());
-    ss << "textureAtlas_" << getId();
-    program->setUniform(ss.str(), getTextureUnit(_atlasManager->textureAtlas()));
-
-    ss.str(std::string());
-    ss << "atlasMapBlock_" << getId();
-    program->setSsboBinding(ss.str(), getSsboBinding(_atlasManager->atlasMapBuffer()));
-
-    ss.str(std::string());
-    ss << "gridType" << getId();
-    program->setUniform(ss.str(), static_cast<int>(_tsp->header().gridType));
-
-    ss.str(std::string());
-    ss << "maxNumBricksPerAxis_" << getId();
-    program->setUniform(ss.str(), static_cast<unsigned int>(_tsp->header().xNumBricks));
-
-    ss.str(std::string());
-    ss << "paddedBrickDim_" << getId();
-    program->setUniform(ss.str(), static_cast<unsigned int>(_tsp->paddedBrickDim()));
-
-    ss.str(std::string());
-    ss << "atlasSize_" << getId();
-    glm::size3_t size = _atlasManager->textureSize();
-    glm::ivec3 atlasSize(size.x, size.y, size.z);
-    program->setUniform(ss.str(), atlasSize);
-
-    _timestep++;
-}
-*/
-/*
-std::vector<ghoul::opengl::Texture*> RenderableMultiresVolume::getTextures() {
-    std::vector<ghoul::opengl::Texture*> textures{
-        _transferFunction->texture(),
-        _atlasManager->textureAtlas()
-    };
-    return textures;
-}
-
-std::vector<unsigned int> RenderableMultiresVolume::getBuffers() {
-    std::vector<unsigned int> buffers{_atlasManager->atlasMapBuffer()};
-    return buffers;
-}*/
 
 void RenderableMultiresVolume::update(const UpdateData& data) {
     _timestep++;
@@ -672,12 +619,11 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
 
         _raycaster->setStepSizeCoefficient(_stepSizeCoefficient);
         _raycaster->setModelTransform(transform);
-        //_raycaster->setTime(data.time);
     }
 }
 
 void RenderableMultiresVolume::render(const RenderData& data, RendererTasks& tasks) {
-    RaycasterTask task { _raycaster.get(), data };
+    RaycasterTask task { .raycaster = _raycaster.get(), .renderData = data };
     tasks.raycasterTasks.push_back(task);
 }
 

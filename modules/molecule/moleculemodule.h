@@ -54,13 +54,13 @@ public:
 
     ThreadPool& threadPool();
 
-    std::vector<documentation::Documentation> documentations() const override;
+    std::vector<openspace::Documentation> documentations() const override;
 
 private:
     void internalInitialize(const ghoul::Dictionary&) override;
     void preDraw();
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
-        const glm::mat4& projectionMatrix);
+        const glm::mat4& projectionMatrix) const;
 
     inline static int _initializeCounter = 0;
 
@@ -71,20 +71,20 @@ private:
     int _width = 0;
     int _height = 0;
 
-    struct SSAO : public properties::PropertyOwner {
+    struct SSAO : public PropertyOwner {
         explicit SSAO(PropertyOwnerInfo info);
 
-        properties::BoolProperty enabled;
-        properties::FloatProperty intensity;
-        properties::FloatProperty radius;
-        properties::FloatProperty horizonBias;
-        properties::FloatProperty normalBias;
+        BoolProperty enabled;
+        FloatProperty intensity;
+        FloatProperty radius;
+        FloatProperty horizonBias;
+        FloatProperty normalBias;
     };
 
     SSAO _ssao;
     SSAO _ssao2;
 
-    properties::FloatProperty _exposure;
+    FloatProperty _exposure;
 
     ThreadPool _threadPool;
 };

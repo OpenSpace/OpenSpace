@@ -28,7 +28,7 @@
 
 #include "systemcapabilitiesbinding_lua.inl"
 
-namespace openspace::scripting {
+namespace openspace {
 
 LuaLibrary generalSystemCapabilities() {
     return {
@@ -66,4 +66,4 @@ LuaLibrary openglSystemCapabilities() {
     };
 }
 
-} // namespace openspace::scripting
+} // namespace openspace

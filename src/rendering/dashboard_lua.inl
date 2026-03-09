@@ -30,17 +30,20 @@
 #include <utility>
 #include <variant>
 
+using namespace openspace;
+
 namespace {
 
- // Adds a new dashboard item to the main dashboard.
+/**
+ * Adds a new dashboard item to the main dashboard
+ */
 [[codegen::luawrap]] void addDashboardItem(ghoul::Dictionary dashboard) {
-    using namespace openspace;
     try {
         global::dashboard->addDashboardItem(
             DashboardItem::createFromDictionary(std::move(dashboard))
         );
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const SpecificationError& e) {
         logError(e);
         throw ghoul::lua::LuaError("Error adding dashboard item");
     }
@@ -51,7 +54,9 @@ namespace {
     }
 }
 
-// Removes the dashboard item with the specified identifier.
+/**
+ * Removes the dashboard item with the specified identifier.
+ */
 [[codegen::luawrap]] void removeDashboardItem(
                                   std::variant<std::string, ghoul::Dictionary> identifier)
 {
@@ -67,31 +72,32 @@ namespace {
         identifierStr = d.value<std::string>("Identifier");
     }
 
-    openspace::global::dashboard->removeDashboardItem(identifierStr);
+    global::dashboard->removeDashboardItem(identifierStr);
 }
 
-// Removes all dashboard items from the main dashboard.
+/**
+ * Removes all dashboard items from the main dashboard.
+ */
 [[codegen::luawrap]] void clearDashboardItems() {
-    openspace::global::dashboard->clearDashboardItems();
+    global::dashboard->clearDashboardItems();
 }
 
 
 /**
  * Returns all loaded dashboard-item identifiers from the main dashboard.
  *
- * \return a list of loaded dashboard-item identifiers from the main dashbaord
+ * \return A list of loaded dashboard-item identifiers from the main dashboard
  */
 [[codegen::luawrap]] std::vector<std::string> dashboardItems() {
     std::vector<std::string> result;
-    std::vector<openspace::DashboardItem*> dashboardItems =
-        openspace::global::dashboard->dashboardItems();
+    std::vector<DashboardItem*> dashboardItems = global::dashboard->dashboardItems();
     result.reserve(dashboardItems.size());
-    for (openspace::DashboardItem* dItem : dashboardItems) {
+    for (DashboardItem* dItem : dashboardItems) {
         result.push_back(dItem->identifier());
     }
     return result;
 }
 
-#include "dashboard_lua_codegen.cpp"
-
 } // namespace
+
+#include "dashboard_lua_codegen.cpp"

@@ -29,7 +29,7 @@
 #include <filesystem>
 #include <memory>
 
-namespace openspace::volume {
+namespace openspace {
 
 template <typename T> class RawVolume;
 
@@ -55,7 +55,7 @@ private:
     std::filesystem::path _path;
 };
 
-} // namespace openspace::volume
+} // namespace openspace
 
 #include "rawvolumereader.inl"
 

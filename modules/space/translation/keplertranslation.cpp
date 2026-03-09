@@ -38,6 +38,8 @@
 #include <variant>
 
 namespace {
+    using namespace openspace;
+
     struct RangeError final : public ghoul::RuntimeError {
         explicit RangeError(std::string off) :
             ghoul::RuntimeError(
@@ -62,71 +64,71 @@ namespace {
         return x2;
     }
 
-    constexpr openspace::properties::Property::PropertyInfo EccentricityInfo = {
+    constexpr Property::PropertyInfo EccentricityInfo = {
         "Eccentricity",
         "Eccentricity",
         "This value determines the eccentricity, that is the deviation from a perfect "
         "sphere, for this orbit. Currently, hyperbolic orbits using Keplerian elements "
         "are not supported.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SemiMajorAxisInfo = {
+    constexpr Property::PropertyInfo SemiMajorAxisInfo = {
         "SemiMajorAxis",
         "Semi-major axis",
         "This value determines the semi-major axis, that is the distance of the object "
         "from the central body in kilometers (semi-major axis = average of periapsis and "
         "apoapsis).",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InclinationInfo = {
+    constexpr Property::PropertyInfo InclinationInfo = {
         "Inclination",
         "Inclination",
         "This value determines the degrees of inclination, or the angle of the orbital "
         "plane, relative to the reference plane, on which the object orbits around the "
         "central body.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AscendingNodeInfo = {
+    constexpr Property::PropertyInfo AscendingNodeInfo = {
         "AscendingNode",
         "Right ascension of ascending node",
         "This value determines the right ascension of the ascending node in degrees, "
         "that is the location of position along the orbit where the inclined plane and "
         "the horizonal reference plane intersect.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ArgumentOfPeriapsisInfo = {
+    constexpr Property::PropertyInfo ArgumentOfPeriapsisInfo = {
         "ArgumentOfPeriapsis",
         "Argument of periapsis",
         "This value determines the argument of periapsis in degrees, that is the "
         "position on the orbit that is closest to the orbiting body.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MeanAnomalyAtEpochInfo = {
+    constexpr Property::PropertyInfo MeanAnomalyAtEpochInfo = {
         "MeanAnomaly",
         "Mean anomaly at epoch",
         "This value determines the mean anomaly at the epoch in degrees, which "
         "determines the initial location of the object along the orbit at epoch.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EpochInfo = {
+    constexpr Property::PropertyInfo EpochInfo = {
         "Epoch",
         "Epoch",
         "Specifies the epoch in which the first position of the Kepler arguments are "
         "provided. The epoch is specified in numbers of seconds past the J2000 epoch.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PeriodInfo = {
+    constexpr Property::PropertyInfo PeriodInfo = {
         "Period",
         "Orbit period",
         "Specifies the orbital period (in seconds).",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(KeplerTranslation)]] Parameters {
@@ -156,12 +158,12 @@ namespace {
         // [[codegen::verbatim(PeriodInfo.description)]]
         double period [[codegen::greater(0.0)]];
     };
-#include "keplertranslation_codegen.cpp"
 } // namespace
+#include "keplertranslation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation KeplerTranslation::Documentation() {
+Documentation KeplerTranslation::Documentation() {
     return codegen::doc<Parameters>("space_transform_kepler");
 }
 
@@ -307,7 +309,7 @@ glm::dmat3 KeplerTranslation::computeOrbitPlane(double ascendingNode, double inc
     // Perform three rotations:
     // 1. Around the z axis to place the location of the ascending node
     // 2. Around the x axis (now aligned with the ascending node) to get the correct
-    // inclination
+    //    inclination
     // 3. Around the new z axis to place the closest approach to the correct location
 
     const glm::dvec3 ascendingNodeAxisRot = glm::dvec3(0.f, 0.f, 1.f);
@@ -350,41 +352,31 @@ void KeplerTranslation::setKeplerElements(double eccentricity, double semiMajorA
     auto isInRange = [](double val, double min, double max) -> bool {
         return val >= min && val <= max;
     };
-    if (isInRange(eccentricity, 0.0, 1.0)) {
-        _eccentricity = eccentricity;
-    }
-    else {
+    if (!isInRange(eccentricity, 0.0, 1.0)) {
         throw RangeError("Eccentricity");
     }
-
+    _eccentricity = eccentricity;
     _semiMajorAxis = semiMajorAxis;
 
-    if (isInRange(inclination, 0.0, 360.0)) {
-        _inclination = inclination;
-    }
-    else {
+    if (!isInRange(inclination, 0.0, 360.0)) {
         throw RangeError("Inclination");
     }
+    _inclination = inclination;
 
-    if (isInRange(_ascendingNode, 0.0, 360.0)) {
-        _ascendingNode = ascendingNode;
-    }
-    else {
+    if (!isInRange(_ascendingNode, 0.0, 360.0)) {
         throw RangeError("Ascending Node");
     }
-    if (isInRange(_argumentOfPeriapsis, 0.0, 360.0)) {
-        _argumentOfPeriapsis = argumentOfPeriapsis;
-    }
-    else {
+    _ascendingNode = ascendingNode;
+
+    if (!isInRange(_argumentOfPeriapsis, 0.0, 360.0)) {
         throw RangeError("Argument of Periapsis");
     }
+    _argumentOfPeriapsis = argumentOfPeriapsis;
 
-    if (isInRange(_meanAnomalyAtEpoch, 0.0, 360.0)) {
-        _meanAnomalyAtEpoch = meanAnomalyAtEpoch;
-    }
-    else {
+    if (!isInRange(_meanAnomalyAtEpoch, 0.0, 360.0)) {
         throw RangeError("Mean anomaly at epoch");
     }
+    _meanAnomalyAtEpoch = meanAnomalyAtEpoch;
 
     _period = orbitalPeriod;
     _epoch = epoch;

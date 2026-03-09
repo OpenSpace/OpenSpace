@@ -37,19 +37,17 @@
 
 namespace geos::geom { class Geometry; }
 namespace ghoul::opengl { class ProgramObject; }
+
 namespace openspace {
-    namespace documentation { struct Documentation; }
-    struct Geodetic2;
-    struct Geodetic3;
-    struct RenderData;
-} // namespace openspace
-namespace rendering::helper {
+
+namespace rendering {
     struct LightSourceRenderData;
     struct VertexXYZNormal;
-} // namespace rendering::helper
-
-namespace openspace::globebrowsing {
-
+} // namespace rendering
+struct Documentation;
+struct Geodetic2;
+struct Geodetic3;
+struct RenderData;
 class RenderableGlobe;
 
 /**
@@ -58,7 +56,7 @@ class RenderableGlobe;
  */
 class GlobeGeometryFeature {
 public:
-    using Vertex = rendering::helper::VertexXYZNormal;
+    using Vertex = rendering::VertexXYZNormal;
 
     GlobeGeometryFeature(const RenderableGlobe& globe,
         GeoJsonProperties& defaultProperties,
@@ -118,7 +116,7 @@ public:
         float pointSizeScale;
         float lineWidthScale;
         PointRenderMode& pointRenderMode;
-        rendering::helper::LightSourceRenderData& lightSourceData;
+        rendering::LightSourceRenderData& lightSourceData;
     };
 
     std::string key() const;
@@ -227,6 +225,6 @@ private:
     ghoul::opengl::ProgramObject* _pointsProgram = nullptr;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEGEOMETRYFEATURE___H__

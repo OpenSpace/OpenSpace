@@ -38,13 +38,13 @@ public:
     explicit RenderableDistanceLabel(const ghoul::Dictionary& dictionary);
 
      void update(const UpdateData& data) override;
-     static documentation::Documentation Documentation();
+     static openspace::Documentation Documentation();
 
 private:
-     properties::StringProperty _nodelineId;
-     properties::OptionProperty _distanceUnit;
-     properties::StringProperty _customUnitDescriptor;
-     properties::IntProperty _precision;
+     StringProperty _nodelineId;
+     OptionProperty _distanceUnit;
+     StringProperty _customUnitDescriptor;
+     IntProperty _precision;
      bool _errorThrown = false;
 };
 

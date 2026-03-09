@@ -33,7 +33,7 @@
 
 #define TOUCH_DEBUG_MODE
 
-namespace openspace::interaction {
+namespace openspace {
 
 class TouchInputState;
 
@@ -73,6 +73,6 @@ private:
     glm::vec2 _centroid = glm::vec2(0.f);
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___TOUCHCAMERASTATES___H__

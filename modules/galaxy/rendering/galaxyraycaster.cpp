@@ -79,7 +79,6 @@ void GalaxyRaycaster::renderEntryPoints(const RenderData& data,
 void GalaxyRaycaster::renderExitPoints(const RenderData& data,
                                        ghoul::opengl::ProgramObject& program)
 {
-    // Uniforms
     program.setUniform("modelViewTransform", modelViewTransform(data));
     program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
@@ -119,7 +118,7 @@ void GalaxyRaycaster::preRaycast(const RaycastData& data,
 }
 
 void GalaxyRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&) {
-    _textureUnit = nullptr; // release texture unit.
+    _textureUnit = nullptr;
 }
 
 bool GalaxyRaycaster::isCameraInside(const RenderData& data, glm::vec3& localPosition) {
@@ -128,9 +127,9 @@ bool GalaxyRaycaster::isCameraInside(const RenderData& data, glm::vec3& localPos
 
     localPosition = (glm::vec3(modelPos) + glm::vec3(0.5f));
 
-    return (localPosition.x > 0 && localPosition.x < 1 &&
-        localPosition.y > 0 && localPosition.y < 1 &&
-        localPosition.z > 0 && localPosition.z < 1);
+    return (localPosition.x > 0.f && localPosition.x < 1.f &&
+        localPosition.y > 0.f && localPosition.y < 1.f &&
+        localPosition.z > 0.f && localPosition.z < 1.f);
 }
 
 std::filesystem::path GalaxyRaycaster::boundsVertexShaderPath() const {
@@ -146,7 +145,7 @@ std::filesystem::path GalaxyRaycaster::raycasterPath() const {
 }
 
 std::filesystem::path GalaxyRaycaster::helperPath() const {
-    return ""; // no helper file
+    return "";
 }
 
 void GalaxyRaycaster::setAspect(const glm::vec3& aspect) {

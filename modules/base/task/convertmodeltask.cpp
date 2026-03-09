@@ -47,12 +47,12 @@ namespace {
         // The path to the output file
         std::filesystem::path outputFilePath [[codegen::mustexist(false)]];
     };
-#include "convertmodeltask_codegen.cpp"
 } // namespace
+#include "convertmodeltask_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ConvertModelTask::Documentation() {
+Documentation ConvertModelTask::Documentation() {
     return codegen::doc<Parameters>("base_convert_model_task");
 }
 
@@ -68,7 +68,7 @@ std::string ConvertModelTask::description() {
         "supported both by OpenSpace and common 3D modelling tools and converts it into "
         "an OpenSpace proprietary format that can be loaded more efficiently, but more "
         "important can be distributed without violating terms of service for various 3D "
-        "model hosting websites";
+        "model hosting websites.";
 }
 
 void ConvertModelTask::perform(const Task::ProgressCallback&) {

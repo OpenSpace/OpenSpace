@@ -29,15 +29,14 @@
 
 #include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 /**
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type `long`.
+ * This class is a concrete implementation of TemplateProperty with the type `long`.
  */
 class LongProperty : public NumericalProperty<long> {
 public:
-    explicit LongProperty(Property::PropertyInfo info, long value = long(0),
+    explicit LongProperty(PropertyInfo info, long value = long(0),
         long minValue = std::numeric_limits<long>::lowest(),
         long maxValue = std::numeric_limits<long>::max(),
         long stepValue = long(1));
@@ -54,6 +53,6 @@ private:
     long toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___LONGPROPERTY___H__

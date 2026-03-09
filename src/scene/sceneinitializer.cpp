@@ -77,7 +77,7 @@ void SceneInitializer::initializeNode(SceneGraphNode* node) {
             catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
-            const std::lock_guard g(_mutex);
+            const std::unique_lock lock(_mutex);
             _initializedNodes.push_back(node);
             _initializingNodes.erase(node);
 
@@ -89,7 +89,7 @@ void SceneInitializer::initializeNode(SceneGraphNode* node) {
                     progressInfo
                 );
             }
-            };
+        };
 
         LoadingScreen::ProgressInfo progressInfo;
         progressInfo.progress = 0.f;
@@ -104,7 +104,7 @@ void SceneInitializer::initializeNode(SceneGraphNode* node) {
             );
         }
 
-        const std::lock_guard g(_mutex);
+        const std::unique_lock lock(_mutex);
         _initializingNodes.insert(node);
         _threadPool.enqueue(initFunction);
     }
@@ -118,13 +118,13 @@ std::vector<SceneGraphNode*> SceneInitializer::takeInitializedNodes() {
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
-    const std::lock_guard g(_mutex);
+    const std::unique_lock lock(_mutex);
     std::vector<SceneGraphNode*> nodes = std::move(_initializedNodes);
     return nodes;
 }
 
 bool SceneInitializer::isInitializing() const {
-    const std::lock_guard g(_mutex);
+    const std::unique_lock lock(_mutex);
     return !_initializingNodes.empty();
 }
 

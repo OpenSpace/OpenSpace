@@ -35,6 +35,8 @@
 #include <variant>
 #include <vector>
 
+using namespace openspace;
+
 namespace {
 
 /**
@@ -43,7 +45,7 @@ namespace {
  * \param deltaTime The value to set the speed to, in seconds per real time second
  */
 [[codegen::luawrap]] void setDeltaTime(double deltaTime) {
-    openspace::global::timeManager->setDeltaTime(deltaTime);
+    global::timeManager->setDeltaTime(deltaTime);
 }
 
 /**
@@ -51,11 +53,11 @@ namespace {
  * jumped between. The list will be sorted to be in increasing order. A negative verison
  * of each specified time step will be added per default as well.
  *
- * \param deltaTime The list of delta times, given in seconds per real time second.
- *                  Should only include positive values.
+ * \param deltaTime The list of delta times, given in seconds per real time second. Should
+ *        only include positive values
  */
 [[codegen::luawrap]] void setDeltaTimeSteps(std::vector<double> deltaTime) {
-    openspace::global::timeManager->setDeltaTimeSteps(deltaTime);
+    global::timeManager->setDeltaTimeSteps(deltaTime);
 }
 
 /**
@@ -63,7 +65,7 @@ namespace {
  * larger than the current choice of simulation speed, if any.
  */
 [[codegen::luawrap]] void setNextDeltaTimeStep() {
-    openspace::global::timeManager->setNextDeltaTimeStep();
+    global::timeManager->setNextDeltaTimeStep();
 }
 
 /**
@@ -71,22 +73,20 @@ namespace {
  * smaller than the current choice of simulation speed, if any.
  */
 [[codegen::luawrap]] void setPreviousDeltaTimeStep() {
-    openspace::global::timeManager->setPreviousDeltaTimeStep();
+    global::timeManager->setPreviousDeltaTimeStep();
 }
 
 /**
  * Interpolate the simulation speed to the first delta time step in the list that is
  * larger than the current simulation speed, if any.
  *
- * \param interpolationDuration The number of seconds that the interpolation should
- *                              be done over. If excluded, the time is decided based
- *                              on the default value specified in the TimeManager.
+ * \param interpolationDuration The number of seconds that the interpolation should be
+ *        done over. If excluded, the time is decided based on the default value specified
+ *        in the TimeManager
  */
 [[codegen::luawrap]] void interpolateNextDeltaTimeStep(
                                               std::optional<double> interpolationDuration)
 {
-    using namespace openspace;
-
     double interp = interpolationDuration.value_or(
         global::timeManager->defaultDeltaTimeInterpolationDuration()
     );
@@ -97,15 +97,13 @@ namespace {
  * Interpolate the simulation speed to the first delta time step in the list that is
  * smaller than the current simulation speed, if any.
  *
- * \param interpolationDuration The number of seconds that the interpolation should
- *                              be done over. If excluded, the time is decided based
- *                              on the default value specified in the TimeManager.
+ * \param interpolationDuration The number of seconds that the interpolation should be
+ *        done over. If excluded, the time is decided based on the default value specified
+ *        in the TimeManager
  */
 [[codegen::luawrap]] void interpolatePreviousDeltaTimeStep(
                                               std::optional<double> interpolationDuration)
 {
-    using namespace openspace;
-
     double interp = interpolationDuration.value_or(
         global::timeManager->defaultDeltaTimeInterpolationDuration()
     );
@@ -117,16 +115,13 @@ namespace {
  * interpolating to that value.
  *
  * \param deltaTime The value to set the speed to, in seconds per real time second
- * \param interpolationDuration The number of seconds that the interpolation should
- *                              be done over. If excluded, the time is decided based
- *                              on the default value for delta time interpolation
- *                              specified in the TimeManager.
+ * \param interpolationDuration The number of seconds that the interpolation should be
+ *        done over. If excluded, the time is decided based on the default value for delta
+ *        time interpolation specified in the TimeManager
  */
 [[codegen::luawrap]] void interpolateDeltaTime(double deltaTime,
                                               std::optional<double> interpolationDuration)
 {
-    using namespace openspace;
-
     double interp = interpolationDuration.value_or(
         global::timeManager->defaultDeltaTimeInterpolationDuration()
     );
@@ -140,7 +135,7 @@ namespace {
  * \return The simulated delta time, in seconds per real time second
  */
 [[codegen::luawrap]] double deltaTime() {
-    return openspace::global::timeManager->deltaTime();
+    return global::timeManager->deltaTime();
 }
 
 /**
@@ -149,7 +144,6 @@ namespace {
  * time to 0, and unpausing means restoring it to whatever delta time value is set.
  */
 [[codegen::luawrap]] void togglePause() {
-    using namespace openspace;
     global::timeManager->setPause(!global::timeManager->isPaused());
 }
 
@@ -160,15 +154,12 @@ namespace {
  * (unpause).
  *
  * \param interpolationDuration The number of seconds that the interpolation should be
- *                              done over. If excluded, the time is decided based on the
- *                              default value for pause/unpause specified in the
- *                              TimeManager.
+ *        done over. If excluded, the time is decided based on the default value for
+ *        pause/unpause specified in the TimeManager
  */
 [[codegen::luawrap]] void interpolateTogglePause(
                                               std::optional<double> interpolationDuration)
 {
-    using namespace openspace;
-
     double interp = interpolationDuration.value_or(
         global::timeManager->isPaused() ?
         global::timeManager->defaultUnpauseInterpolationDuration() :
@@ -185,8 +176,6 @@ namespace {
  * delta time.
  */
 [[codegen::luawrap]] void pauseToggleViaKeyboard() {
-    using namespace openspace;
-
     OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
     if (m == OpenSpaceEngine::Mode::SessionRecordingPlayback) {
         bool isPlaybackPaused = global::sessionRecordingHandler->isPlaybackPaused();
@@ -208,10 +197,10 @@ namespace {
  * temporarily setting the delta time to 0, and unpausing means restoring it to whatever
  * delta time value is set.
  *
- * \param isPaused True if the simulation should be paused, and false otherwise
+ * \param isPaused `true` if the simulation should be paused, and `false` otherwise
  */
 [[codegen::luawrap]] void setPause(bool isPaused) {
-    openspace::global::timeManager->setPause(isPaused);
+    global::timeManager->setPause(isPaused);
 }
 
 /**
@@ -219,17 +208,14 @@ namespace {
  * the delta time will be interpolated to 0, and if unpausing, the delta time will be
  * interpolated to whatever delta time value is set.
  *
- * \param isPaused True if the simulation should be paused, and false otherwise
+ * \param isPaused `true` if the simulation should be paused, and `false` otherwise
  * \param interpolationDuration The number of seconds that the interpolation should be
- *                              done over. If excluded, the time is decided based on the
- *                              default value for pause/unpause specified in the
- *                              TimeManager.
+ *        done over. If excluded, the time is decided based on the default value for
+ *        pause/unpause specified in the TimeManager
  */
 [[codegen::luawrap]] void interpolatePause(bool isPaused,
                                            std::optional<double> interpolationDuration)
 {
-    using namespace openspace;
-
     double interp = interpolationDuration.value_or(
         isPaused ?
             global::timeManager->defaultPauseInterpolationDuration() :
@@ -245,7 +231,7 @@ namespace {
  * \return True if the simulation is paused, and false otherwise
  */
 [[codegen::luawrap]] bool isPaused() {
-    return openspace::global::timeManager->isPaused();
+    return global::timeManager->isPaused();
 }
 
 /**
@@ -255,12 +241,10 @@ namespace {
  * Note that providing time zone using the Z format is not supported. UTC is assumed.
  *
  * \param time The time to set. If the parameter is a number, the value is the number of
- *             seconds past the J2000 epoch. If it is a string, it has to be a valid ISO
- *             8601-like date string of the format YYYY-MM-DDTHH:MN:SS.
+ *        seconds past the J2000 epoch. If it is a string, it has to be a valid ISO 8601
+ *        like date string of the format YYYY-MM-DDTHH:MN:SS
  */
 [[codegen::luawrap]] void setTime(std::variant<double, std::string> time) {
-    using namespace openspace;
-
     double t;
     if (std::holds_alternative<std::string>(time)) {
         t = Time::convertTime(std::get<std::string>(time));
@@ -280,18 +264,15 @@ namespace {
   * Note that providing time zone using the Z format is not supported. UTC is assumed.
   *
   * \param time The time to set. If the parameter is a number, the value is the number of
-  *             seconds past the J2000 epoch. If it is a string, it has to be a valid ISO
-  *             8601-like date string of the format YYYY-MM-DDTHH:MN:SS.
-  * \param interpolationDuration The number of seconds that the interpolation should
-  *                              be done over. If excluded, the time is decided based
-  *                              on the default value for time interpolation specified in
-  *                              the TimeManager.
+  *        seconds past the J2000 epoch. If it is a string, it has to be a valid ISO 8601
+  *        like date string of the format YYYY-MM-DDTHH:MN:SS
+  * \param interpolationDuration The number of seconds that the interpolation should be
+  *        done over. If excluded, the time is decided based on the default value for time
+  *        interpolation specified in the TimeManager
   */
 [[codegen::luawrap]] void interpolateTime(std::variant<std::string, double> time,
                                           std::optional<double> interpolationDuration)
 {
-    using namespace openspace;
-
     double targetTime =
         std::holds_alternative<std::string>(time) ?
         Time::convertTime(std::get<std::string>(time)) :
@@ -314,16 +295,13 @@ namespace {
   * interpolation.
   *
   * \param delta The number of seconds to increase the current simulation time by
-  * \param interpolationDuration The number of seconds that the interpolation should
-  *                              be done over. If excluded, the time is decided based
-  *                              on the default value for time interpolation specified in
-  *                              the TimeManager.
+  * \param interpolationDuration The number of seconds that the interpolation should be
+  *        done over. If excluded, the time is decided based on the default value for time
+  *        interpolation specified in the TimeManager
   */
 [[codegen::luawrap]] void interpolateTimeRelative(double delta,
                                               std::optional<double> interpolationDuration)
 {
-    using namespace openspace;
-
     double interp = interpolationDuration.value_or(
         global::timeManager->defaultTimeInterpolationDuration()
     );
@@ -344,7 +322,7 @@ namespace {
  * \return The current time, as the number of seconds since the J2000 epoch
  */
 [[codegen::luawrap]] double currentTime() {
-    return openspace::global::timeManager->time().j2000Seconds();
+    return global::timeManager->time().j2000Seconds();
 }
 
 /**
@@ -353,7 +331,7 @@ namespace {
  * \return The current time, as an ISO 8601 date string
  */
 [[codegen::luawrap("UTC")]] std::string currentTimeUTC() {
-    return std::string(openspace::global::timeManager->time().ISO8601());
+    return std::string(global::timeManager->time().ISO8601());
 }
 
 
@@ -369,7 +347,7 @@ namespace {
 [[codegen::luawrap("SPICE")]] std::string currentTimeSpice(
                                     std::string format = "YYYY MON DDTHR:MN:SC.### ::RND")
 {
-    return std::string(openspace::global::timeManager->time().string(format));
+    return std::string(global::timeManager->time().string(format));
 }
 
 /**
@@ -379,7 +357,7 @@ namespace {
  * \return The current wall time, in the UTC time zone, as an ISO 8601 date string
  */
 [[codegen::luawrap]] std::string currentWallTime() {
-    return openspace::Time::currentWallTime();
+    return Time::currentWallTime();
 }
 
 /**
@@ -389,7 +367,7 @@ namespace {
  * \return The number of seconds since OpenSpace started
  */
 [[codegen::luawrap]] double currentApplicationTime() {
-    return openspace::global::windowDelegate->applicationTime();
+    return global::windowDelegate->applicationTime();
 }
 
 /**
@@ -399,14 +377,12 @@ namespace {
  * The returned value will be of the same type as the first argument. That is, either a
  * number of seconds past the J2000 epoch, or an ISO 8601 date string.
  *
- * \param base The timestamp to alter, either given as an ISO 8601 date string or a
- *             number of seconds past the J2000 epoch.
- * \param change The amount of time to add to the specified timestamp. Can be given
- *               either in a number of seconds (including negative), or as a string of
- *               the form [-]XX(s,m,h,d,M,y] with (s)econds, (m)inutes, (h)ours, (d)ays,
- *               (M)onths, and (y)ears as units and an optional - sign to move backwards
- *               in time.
- *
+ * \param base The timestamp to alter, either given as an ISO 8601 date string or a number
+ *        of seconds past the J2000 epoch
+ * \param change The amount of time to add to the specified timestamp. Can be given either
+ *        in a number of seconds (including negative), or as a string of the form
+ *        [-]XX(s,m,h,d,M,y] with (s)econds, (m)inutes, (h)ours, (d)ays, (M)onths, and
+ *        (y)ears as units and an optional - sign to move backwards in time
  * \return The updated timestamp
  */
 [[codegen::luawrap]] std::variant<std::string, double> advancedTime(
@@ -430,13 +406,13 @@ namespace {
         c = std::format("{}s", v);
     }
 
-    std::string res = openspace::Time::advancedTime(std::move(b), std::move(c));
+    std::string res = Time::advancedTime(std::move(b), std::move(c));
 
     if (std::holds_alternative<std::string>(base)) {
         return res;
     }
     else {
-        return openspace::Time::convertTime(res);
+        return Time::convertTime(res);
     }
 }
 
@@ -451,15 +427,12 @@ namespace {
  * If the given time is a J2000 seconds value, the function returns a ISO 8601 timestamp.
  *
  * \param time The timestamp to convert, either given as an ISO 8601 date string or a
- *             number of seconds past the J2000 epoch.
- *
+ *        number of seconds past the J2000 epoch
  * \return The converted timestamp
  */
 [[codegen::luawrap]] std::variant<std::string, double> convertTime(
                                                    std::variant<std::string, double> time)
 {
-    using namespace openspace;
-
     // Convert from timestamp to J2000 seconds
     if (std::holds_alternative<std::string>(time)) {
         return Time::convertTime(std::get<std::string>(time));
@@ -478,12 +451,9 @@ namespace {
  *
  * \param start The start time for the computation, given as an ISO 8601 date string
  * \param end The end time for the computation, given as an ISO 8601 date string
- *
  * \return The time between the start time and end time
  */
 [[codegen::luawrap]] double duration(std::string start, std::string end) {
-    using namespace openspace;
-
     const double tStart = Time::convertTime(start);
     const double tEnd = Time::convertTime(end);
     return tEnd - tStart;
@@ -496,7 +466,7 @@ namespace {
  * \return The number of seconds in a day
  */
 [[codegen::luawrap]] double secondsPerDay() {
-    return openspace::timeconstants::SecondsPerDay;
+    return timeconstants::SecondsPerDay;
 }
 
 /**
@@ -506,9 +476,9 @@ namespace {
  */
 [[codegen::luawrap]] double secondsPerYear() {
     // We could use a call to SPICE here, but the value is a constant anyway
-    return openspace::timeconstants::SecondsPerYear;
+    return timeconstants::SecondsPerYear;
 }
 
-#include "time_lua_codegen.cpp"
-
 } // namespace
+
+#include "time_lua_codegen.cpp"

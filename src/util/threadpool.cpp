@@ -36,22 +36,23 @@ void Worker::operator()() {
         {
             std::unique_lock lock(_pool._queueMutex);
 
-            // look for a work item
+            // Look for a work item
             while (!_pool._shouldStop && _pool._tasks.empty()) {
-                // if there are none wait for notification
+                // If there are none wait for notification
                 _pool._condition.wait(lock);
             }
 
-            if (_pool._shouldStop) { // exit if the pool is stopped
+            if (_pool._shouldStop) {
+                // Exit if the pool is stopped
                 return;
             }
 
-            // get the task from the queue
+            // Get the task from the queue
             task = _pool._tasks.front();
             _pool._tasks.pop_front();
         }
 
-        // execute the task
+        // Execute the task
         task();
     }
 }
@@ -64,31 +65,31 @@ ThreadPool::ThreadPool(size_t numThreads) {
 
 ThreadPool::ThreadPool(const ThreadPool& toCopy) : ThreadPool(toCopy._workers.size()) {}
 
-// the destructor joins all threads
+// The destructor joins all threads
 ThreadPool::~ThreadPool() {
-    // stop all threads
+    // Stop all threads
     {
         const std::unique_lock lock(_queueMutex);
         _shouldStop = true;
     }
     _condition.notify_all();
 
-    // join them
+    // Join them
     for (std::thread& w : _workers) {
         w.join();
     }
 }
 
-// add new work item to the pool
+// Add new work item to the pool
 void ThreadPool::enqueue(std::function<void()> f) {
     {
         const std::unique_lock lock(_queueMutex);
 
-        // add the task
+        // Add the task
         _tasks.push_back(std::move(f));
     }
 
-    // wake up one thread
+    // Wake up one thread
     _condition.notify_one();
 }
 

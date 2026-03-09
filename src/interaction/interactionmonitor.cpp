@@ -28,27 +28,29 @@
 #include <openspace/engine/windowdelegate.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo IdleTimeInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo IdleTimeInfo = {
         "IdleTime",
         "Idle time",
         "Time in seconds that has passed from latest registered interaction until the "
         "application goes idle.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IsInActiveStateInfo = {
+    constexpr Property::PropertyInfo IsInActiveStateInfo = {
         "IsInActiveState",
         "Is state active",
         "Keeps track whether the interaction session is in active state or not. False if "
         "application is in idle state, true if it is in active state.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
 InteractionMonitor::InteractionMonitor()
-    : properties::PropertyOwner({
+    : PropertyOwner({
         "InteractionMonitor",
         "Interaction Monitor",
         "Keeps track of the last time any interaction happened in the application and "
@@ -84,4 +86,4 @@ void InteractionMonitor::markInteraction() {
     _isInActiveState = true;
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

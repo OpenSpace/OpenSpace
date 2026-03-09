@@ -28,21 +28,17 @@
 #include <type_traits>
 
 namespace {
+    using namespace openspace;
 
     size_t numberOfRasters(ghoul::opengl::Texture::Format format) {
         switch (format) {
-            case ghoul::opengl::Texture::Format::Red:
-                return 1;
-            case ghoul::opengl::Texture::Format::RG:
-                return 2;
-            case ghoul::opengl::Texture::Format::RGB:
-            case ghoul::opengl::Texture::Format::BGR:
-                return 3;
-            case ghoul::opengl::Texture::Format::RGBA:
-            case ghoul::opengl::Texture::Format::BGRA:
-                return 4;
-            default:
-                throw ghoul::MissingCaseException();
+            case ghoul::opengl::Texture::Format::Red:  return 1;
+            case ghoul::opengl::Texture::Format::RG:   return 2;
+            case ghoul::opengl::Texture::Format::RGB:  return 3;
+            case ghoul::opengl::Texture::Format::BGR:  return 3;
+            case ghoul::opengl::Texture::Format::RGBA: return 4;
+            case ghoul::opengl::Texture::Format::BGRA: return 4;
+            default:                                  throw ghoul::MissingCaseException();
         }
     }
 
@@ -57,8 +53,7 @@ namespace {
             case GL_HALF_FLOAT:     return sizeof(GLhalf);
             case GL_FLOAT:          return sizeof(GLfloat);
             case GL_DOUBLE:         return sizeof(GLdouble);
-            default:
-                throw ghoul::MissingCaseException();
+            default:                throw ghoul::MissingCaseException();
         }
     }
 
@@ -75,8 +70,7 @@ namespace {
         }
     }
 
-    openspace::globebrowsing::TileTextureInitData::HashKey calculateHashKey(
-                                                             const glm::ivec3& dimensions,
+    TileTextureInitData::HashKey calculateHashKey(const glm::ivec3& dimensions,
                                              const ghoul::opengl::Texture::Format& format,
                                                                      const GLenum& glType)
     {
@@ -88,7 +82,7 @@ namespace {
         const unsigned int formatId = uniqueIdForTextureFormat(format);
         ghoul_assert(formatId < 256, "Incorrect format");
 
-        openspace::globebrowsing::TileTextureInitData::HashKey res = 0ULL;
+        TileTextureInitData::HashKey res = 0ULL;
 
         res |= dimensions.x;
         res |= dimensions.y << 10;
@@ -99,7 +93,7 @@ namespace {
     }
 } // namespace
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 TileTextureInitData tileTextureInitData(layers::Group::ID id,
                                         size_t preferredTileSize)
@@ -187,4 +181,4 @@ TileTextureInitData& TileTextureInitData::operator=(TileTextureInitData&& rhs) n
     return *this;
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

@@ -37,7 +37,7 @@ public:
     void update() override;
     void render(glm::vec2& penPosition) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 };
 
 } // namespace openspace

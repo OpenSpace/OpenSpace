@@ -38,38 +38,40 @@
 #include <cmath>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo EffectiveTemperatureInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo EffectiveTemperatureInfo = {
         "EffectiveTemperature",
         "Effective temperature",
         "The effective temperature of the corresponding star, in Kelvin. Used to compute "
         "the width and size of the disc.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LuminosityInfo = {
+    constexpr Property::PropertyInfo LuminosityInfo = {
         "Luminosity",
         "Luminosity",
         "The luminosity of the corresponding star, in units of solar luminosities. Used "
         "to compute the width and size of the disc.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OptimisticInfo = {
+    constexpr Property::PropertyInfo OptimisticInfo = {
         "Optimistic",
         "Optimistic" ,
         "If true, the habitable zone disc is rendered with the optimistic boundaries "
         "rather than the conservative ones.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo KopparapuTeffIntervalInfo = {
+    constexpr Property::PropertyInfo KopparapuTeffIntervalInfo = {
         "KopparapuTeffInterval",
         "Kopparapu TEFF",
         "The effective temperature interval for which Kopparapu's formula is used for "
         "the habitable zone computation. For stars with temperatures outside the range, "
         "a simpler method by Tom E. Harris is used. This method only uses the star "
         "luminosity and does not include computation of the optimistic boundaries.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableHabitableZone)]] Parameters {
@@ -85,12 +87,12 @@ namespace {
         // [[codegen::verbatim(KopparapuTeffIntervalInfo.description)]]
         std::optional<glm::vec2> kopparapuTeffInterval;
     };
-#include "renderablehabitablezone_codegen.cpp"
 } // namespace
+#include "renderablehabitablezone_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableHabitableZone::Documentation() {
+Documentation RenderableHabitableZone::Documentation() {
     return codegen::doc<Parameters>(
         "space_renderablehabitablezone",
         RenderableDisc::Documentation()
@@ -120,7 +122,7 @@ RenderableHabitableZone::RenderableHabitableZone(const ghoul::Dictionary& dictio
     // The user should not be able to change this property. It's just used to communicate
     // the different rendering that happens outside of this interval
     addProperty(_kopparapuTeffInterval);
-    _kopparapuTeffInterval.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _kopparapuTeffInterval.setViewOption(Property::ViewOptions::MinMaxRange);
     _kopparapuTeffInterval.setReadOnly(true);
 
     // Make parent's size related properties read only. We want to set them based on the
@@ -157,7 +159,6 @@ void RenderableHabitableZone::render(const RenderData& data, RendererTasks&) {
 
     _shader->deactivate();
 
-    // Restores GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();
@@ -202,8 +203,8 @@ glm::dvec4 RenderableHabitableZone::computeKopparapuZoneBoundaries(float teff,
 {
     // Kopparapu's formula only considers stars with teff in range [2600, 7200] K.
     // However, we want to use the formula for more stars, so add some flexibility to
-    // the teff boundaries (see constructor).
-    // OBS! This also prevents problems with too large teff values in the computation
+    // the teff boundaries (see constructor). OBS! This also prevents problems with too
+    // large teff values in the computation
     const glm::vec2 teffBounds = _kopparapuTeffInterval;
     if (teff > teffBounds.y || teff < teffBounds.x) {
         // For the other stars, use a method by Tom E. Morris:

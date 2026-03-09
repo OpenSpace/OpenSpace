@@ -31,7 +31,7 @@
 
 namespace ghoul::opengl { class ProgramObject; }
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 struct LayerGroup;
 struct TileIndex;
@@ -56,9 +56,9 @@ public:
     void bind(ghoul::opengl::ProgramObject& programObject, const LayerGroup& layerGroup);
 
     /**
-    * Deactivates any `TextureUnit`s assigned by this object. This method should be called
-    * after the OpenGL draw call.
-    */
+     * Deactivates any `TextureUnit`s assigned by this object. This method should be
+     * called after the OpenGL draw call.
+     */
     void deactivate();
 
 private:
@@ -78,6 +78,6 @@ private:
     std::vector<GPULayer> _gpuActiveLayers;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERGROUP___H__

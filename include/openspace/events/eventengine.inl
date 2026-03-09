@@ -29,7 +29,7 @@ namespace openspace {
 template <typename T, typename... Args>
 void EventEngine::publishEvent(Args&&... args) {
     static_assert(
-        std::is_base_of<events::Event, T>::value,
+        std::is_base_of<Event, T>::value,
         "T must be a subclass of Event"
     );
 

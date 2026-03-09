@@ -68,7 +68,7 @@ public:
     void setStepSizeCoefficient(float coefficient);
 
 private:
-    BoxGeometry _boundingBox;
+    BoxGeometry _boundingBox = BoxGeometry(glm::vec3(1.f));
     glm::mat4 _modelTransform = glm::mat4(1.f);
     float _stepSizeCoefficient = 0.f;
 

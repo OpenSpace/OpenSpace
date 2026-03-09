@@ -28,7 +28,7 @@
 #include <cmath>
 #include <utility>
 
-namespace openspace::interaction {
+namespace openspace {
 
 WebsocketCameraStates::WebsocketCameraStates(double sensitivity,
                                              double velocityScaleFactor)
@@ -37,7 +37,7 @@ WebsocketCameraStates::WebsocketCameraStates(double sensitivity,
 
 void WebsocketCameraStates::updateVelocitiesFromInput(
                                          const WebsocketInputStates& websocketInputStates,
-                                                 double deltaTime)
+                                                                         double deltaTime)
 {
     UpdateStates updateStates;
 
@@ -156,7 +156,12 @@ void WebsocketCameraStates::bindButtonCommand(int button, std::string command,
 {
     _buttonMapping.insert({
         button,
-        { std::move(command), action, remote, std::move(documentation) }
+        {
+            .command = std::move(command),
+            .action = action,
+            .synchronization = remote,
+            .documentation = std::move(documentation)
+        }
     });
 }
 
@@ -182,4 +187,4 @@ std::vector<std::string> WebsocketCameraStates::buttonCommand(int button) const 
     return result;
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

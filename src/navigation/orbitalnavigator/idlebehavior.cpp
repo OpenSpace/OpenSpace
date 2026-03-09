@@ -30,90 +30,89 @@
 #include <openspace/scene/scenegraphnode.h>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view IdleKeyOrbit = "Orbit";
     constexpr std::string_view IdleKeyOrbitAtConstantLat = "OrbitAtConstantLatitude";
     constexpr std::string_view IdleKeyOrbitAroundUp = "OrbitAroundUp";
 
     constexpr double AngleEpsilon = 1e-7;
 
-    constexpr openspace::properties::Property::PropertyInfo ApplyIdleBehaviorInfo = {
+    constexpr Property::PropertyInfo ApplyIdleBehaviorInfo = {
         "ApplyIdleBehavior",
         "Apply idle behavior",
         "When set to true, the chosen idle behavior will be applied to the camera, "
         "moving the camera accordingly.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IdleBehaviorInfo = {
+    constexpr Property::PropertyInfo IdleBehaviorInfo = {
         "IdleBehavior",
         "Idle behavior",
         "The chosen camera behavior that will be triggered when the idle behavior is "
         "applied. Each option represents a predefined camera behavior.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
+    constexpr Property::PropertyInfo
         ShouldTriggerIdleBehaviorWhenIdleInfo =
     {
         "ShouldTriggerWhenIdle",
         "Should trigger when idle",
         "If true, the chosen idle behavior will trigger automatically after a certain "
         "time (see 'IdleWaitTime' property).",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IdleWaitTimeInfo = {
+    constexpr Property::PropertyInfo IdleWaitTimeInfo = {
         "IdleWaitTime",
         "Idle wait time",
         "The time (seconds) until idle behavior starts, if no camera interaction "
         "has been performed. Note that friction counts as camera interaction.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IdleBehaviorSpeedInfo = {
+    constexpr Property::PropertyInfo IdleBehaviorSpeedInfo = {
         "SpeedFactor",
         "Speed factor",
         "A factor that can be used to increase or slow down the speed of an applied "
         "idle behavior. A negative value will invert the direction. Note that a speed "
         "of exactly 0 leads to no movement at all.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InvertIdleBehaviorInfo = {
+    constexpr Property::PropertyInfo InvertIdleBehaviorInfo = {
         "Invert",
         "Invert",
         "If true, the direction of the idle behavior motion will be inverted compared "
         "to the default. For example, the 'Orbit' option rotates to the right per "
         "default, and will rotate to the left when inverted.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AbortOnCameraInteractionInfo =
-    {
+    constexpr Property::PropertyInfo AbortOnCameraInteractionInfo = {
         "AbortOnCameraInteraction",
         "Abort on camera interaction",
         "If set to true, the idle behavior is aborted on camera interaction. If false, "
         "the behavior will be reapplied after the interaction. Examples of camera "
         "interaction are: changing the anchor node, starting a camera path or session "
         "recording playback, or navigating manually using an input device.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        IdleBehaviorDampenInterpolationTimeInfo =
-    {
+    constexpr Property::PropertyInfo IdleBehaviorDampenInterpolationTimeInfo = {
         "DampenInterpolationTime",
         "Start/end dampen interpolation time",
         "The time to interpolate to/from full speed when an idle behavior is triggered "
         "or canceled, in seconds.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
 IdleBehavior::IdleBehavior()
-    : properties::PropertyOwner({
+    : PropertyOwner({
         "IdleBehavior",
         "Idle Behavior",
         "Triggers a chosen type of automatic camera motion, which is aborted when the "
@@ -345,4 +344,4 @@ void IdleBehavior::orbitAroundAxis(const SceneGraphNode* anchor, const glm::dvec
     globalRotation = spinRotation * globalRotation;
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

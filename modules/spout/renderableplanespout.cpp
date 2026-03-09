@@ -36,17 +36,16 @@ namespace {
     // This `Renderable` type can be used to render a plane with a texture that is
     // provided by another application on the same computer using the SPOUT library.
     // Note: The Spout library is only available on Windows.
-    struct [[codegen::Dictionary(RenderablePlaneSpout)]] Parameters {
-    };
-#include "renderableplanespout_codegen.cpp"
+    struct [[codegen::Dictionary(RenderablePlaneSpout)]] Parameters {};
 } // namespace
+#include "renderableplanespout_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderablePlaneSpout::Documentation() {
+Documentation RenderablePlaneSpout::Documentation() {
     return codegen::doc<Parameters>(
         "spout_renderableplanespout",
-        spout::SpoutReceiverPropertyProxy::Documentation()
+        SpoutReceiverPropertyProxy::Documentation()
     );
 }
 

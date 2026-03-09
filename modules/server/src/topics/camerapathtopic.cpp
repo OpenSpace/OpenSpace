@@ -37,11 +37,11 @@
 #include <cmath>
 #include <string_view>
 
+using nlohmann::json;
+
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
 } // namespace
-
-using nlohmann::json;
 
 namespace openspace {
 
@@ -86,18 +86,17 @@ bool CameraPathTopic::isDone() const {
 }
 
 void CameraPathTopic::sendCameraPathData() {
-    const interaction::PathNavigator& pathNavigator =
-        global::navigationHandler->pathNavigator();
+    const PathNavigator& pathNavigator = global::navigationHandler->pathNavigator();
 
-    const interaction::Path* path = pathNavigator.currentPath();
+    const Path* path = pathNavigator.currentPath();
 
     if (!path) {
         ghoul_assert(path, "Path must exist");
         return;
     }
 
-    // The time is not exact, and we only care about the number of seconds. Also,
-    // any negative values should be interpreted as positive
+    // The time is not exact, and we only care about the number of seconds. Also, any
+    // negative values should be interpreted as positive
     int seconds = static_cast<int>(
         std::round(pathNavigator.estimatedRemainingTimeInPath())
     );

@@ -44,19 +44,19 @@ public:
     void update(const UpdateData& data) override;
     glm::dvec3 position(const UpdateData& data) const override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void fillAttachedNode();
     void setUpdateVariables();
 
-    properties::StringProperty _sceneGraphNode;
-    properties::DoubleProperty _latitude;
-    properties::DoubleProperty _longitude;
-    properties::DoubleProperty _altitude;
-    properties::BoolProperty _useHeightmap;
-    properties::BoolProperty _useCamera;
-    properties::BoolProperty _useCameraAltitude;
+    StringProperty _sceneGraphNode;
+    DoubleProperty _latitude;
+    DoubleProperty _longitude;
+    DoubleProperty _altitude;
+    BoolProperty _useHeightmap;
+    BoolProperty _useCamera;
+    BoolProperty _useCameraAltitude;
 
     SceneGraphNode* _attachedNode = nullptr;
 

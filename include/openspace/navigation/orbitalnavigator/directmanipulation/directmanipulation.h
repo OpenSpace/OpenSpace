@@ -36,14 +36,12 @@
 #include <set>
 
 namespace openspace {
-    class Camera;
-    struct CameraPose;
-    class SceneGraphNode;
-} // namespace openspace
 
-namespace openspace::interaction {
+class Camera;
+struct CameraPose;
+class SceneGraphNode;
 
-class DirectManipulation : public properties::PropertyOwner {
+class DirectManipulation : public PropertyOwner {
 public:
     struct VelocityStates {
         glm::dvec2 orbit = glm::dvec2(0.0);
@@ -79,11 +77,11 @@ private:
     bool isValidDirectTouchNode() const;
     bool isWithinDirectTouchDistance() const;
 
-    properties::BoolProperty _enabled;
-    properties::BoolProperty _isActive;
-    properties::BoolProperty _allowMouseInput;
-    properties::FloatProperty _distanceThreshold;
-    properties::StringListProperty _defaultRenderableTypes;
+    BoolProperty _enabled;
+    BoolProperty _isActive;
+    BoolProperty _allowMouseInput;
+    FloatProperty _distanceThreshold;
+    StringListProperty _defaultRenderableTypes;
 
     // A sorted version of the list in the property
     std::set<std::string> _sortedDefaultRenderableTypes;
@@ -92,6 +90,6 @@ private:
     DirectInputSolver _directInputSolver;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___DIRECTMANIPULATION___H__

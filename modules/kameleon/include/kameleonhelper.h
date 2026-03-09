@@ -30,7 +30,7 @@
 
 namespace ccmc { class Kameleon; }
 
-namespace openspace::kameleonhelper {
+namespace openspace {
 
 /**
  * Opens a ccmc::Kameleon object from the provided path to a .cdf file. Path should be
@@ -41,6 +41,6 @@ namespace openspace::kameleonhelper {
 std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFilePath);
 double getTime(ccmc::Kameleon* kameleon, double manualOffset);
 
-} //namespace openspace::kameleonhelper
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_KAMELEON___KAMELEONHELPER___H__

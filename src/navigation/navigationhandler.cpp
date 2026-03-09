@@ -57,35 +57,37 @@
 #include "navigationhandler_lua.inl"
 
 namespace {
+    using namespace openspace;
+
     // Helper structs for the visitor pattern of the std::variant
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
     constexpr std::string_view _loggerCat = "NavigationHandler";
 
-    constexpr openspace::properties::Property::PropertyInfo FrameInfo = {
+    constexpr Property::PropertyInfo FrameInfo = {
         "UseKeyFrameInteraction",
         "Use keyframe interaction",
         "If this is set to 'true' the entire interaction is based off key frames rather "
         "than using the mouse interaction.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo JumpToFadeDurationInfo = {
+    constexpr Property::PropertyInfo JumpToFadeDurationInfo = {
         "JumpToFadeDuration",
         "Jump to fade duration",
         "The number of seconds the fading of the rendering should take per default when "
         "navigating through a 'jump' transition. This is when the rendering is first "
         "faded to black, then the camera is moved, and then the rendering fades in "
         "again.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
 NavigationHandler::NavigationHandler()
-    : properties::PropertyOwner({ "NavigationHandler", "Navigation Handler" })
+    : PropertyOwner({ "NavigationHandler", "Navigation Handler" })
     , _useKeyFrameInteraction(FrameInfo, false)
     , _jumpToFadeDuration(JumpToFadeDurationInfo, 1.f, 0.f, 10.f)
 {
@@ -120,7 +122,7 @@ void NavigationHandler::deinitialize() {
 void NavigationHandler::setFocusNode(SceneGraphNode* node) {
     ghoul_assert(node, "Focus node must not be nullptr");
     _orbitalNavigator.setFocusNode(node);
-    _camera->setPositionVec3(anchorNode()->worldPosition());
+    _camera->setPosition(anchorNode()->worldPosition());
 }
 
 void NavigationHandler::setCamera(Camera* camera) {
@@ -194,8 +196,8 @@ void NavigationHandler::triggerFadeToTransition(std::string transitionScript,
     // No syncing, as this was called from a script that should have been synced already
     global::scriptEngine->queueScript({
         .code = std::move(script),
-        .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
-        .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+        .synchronized = ScriptEngine::Script::ShouldBeSynchronized::No,
+        .sendToRemote = ScriptEngine::Script::ShouldSendToRemote::No
     });
 }
 
@@ -277,7 +279,7 @@ void NavigationHandler::updateCameraTransitions() {
     // ^            ^                 ^            ^
     // OnExit       OnMoveAway        OnReach      OnApproach
     const glm::dvec3 anchorPos = anchorNode()->worldPosition();
-    const glm::dvec3 cameraPos = _camera->positionVec3();
+    const glm::dvec3 cameraPos = _camera->position();
     const double currDistance = glm::distance(anchorPos, cameraPos);
     const double d = anchorNode()->interactionSphere();
     const double af = anchorNode()->approachFactor();
@@ -307,15 +309,15 @@ void NavigationHandler::updateCameraTransitions() {
                 global::actionManager->triggerAction(
                     action,
                     dict,
-                    interaction::ActionManager::ShouldBeSynchronized::No
+                    ActionManager::ShouldBeSynchronized::No
                 );
             }
         }
 
-        global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
+        global::eventEngine->publishEvent<EventCameraFocusTransition>(
             _camera,
             node,
-            events::EventCameraFocusTransition::Transition::Approaching
+            EventCameraFocusTransition::Transition::Approaching
         );
     };
 
@@ -331,15 +333,15 @@ void NavigationHandler::updateCameraTransitions() {
                 global::actionManager->triggerAction(
                     action,
                     dict,
-                    interaction::ActionManager::ShouldBeSynchronized::No
+                    ActionManager::ShouldBeSynchronized::No
                 );
             }
         }
 
-        global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
+        global::eventEngine->publishEvent<EventCameraFocusTransition>(
             _camera,
             node,
-            events::EventCameraFocusTransition::Transition::Reaching
+            EventCameraFocusTransition::Transition::Reaching
         );
      };
 
@@ -355,15 +357,15 @@ void NavigationHandler::updateCameraTransitions() {
                 global::actionManager->triggerAction(
                     action,
                     dict,
-                    interaction::ActionManager::ShouldBeSynchronized::No
+                    ActionManager::ShouldBeSynchronized::No
                 );
             }
         }
 
-        global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
+        global::eventEngine->publishEvent<EventCameraFocusTransition>(
             _camera,
             node,
-            events::EventCameraFocusTransition::Transition::Receding
+            EventCameraFocusTransition::Transition::Receding
         );
     };
 
@@ -379,15 +381,15 @@ void NavigationHandler::updateCameraTransitions() {
                 global::actionManager->triggerAction(
                     action,
                     dict,
-                    interaction::ActionManager::ShouldBeSynchronized::No
+                    ActionManager::ShouldBeSynchronized::No
                 );
             }
         }
 
-        global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
+        global::eventEngine->publishEvent<EventCameraFocusTransition>(
             _camera,
             node,
-            events::EventCameraFocusTransition::Transition::Exiting
+            EventCameraFocusTransition::Transition::Exiting
         );
     };
 
@@ -474,7 +476,7 @@ NavigationState NavigationHandler::navigationState(
 
     const glm::dquat invNeutralRotation = glm::quat_cast(glm::lookAt(
         glm::dvec3(0.0),
-        anchor->worldPosition() - _camera->positionVec3(),
+        anchor->worldPosition() - _camera->position(),
         glm::normalize(_camera->lookUpVectorWorldSpace())
     ));
 
@@ -493,7 +495,7 @@ NavigationState NavigationHandler::navigationState(
         glm::inverse(referenceFrame.modelTransform());
 
     const glm::dvec3 position = invReferenceFrameTransform *
-        (glm::dvec4(_camera->positionVec3() - anchor->worldPosition(), 1.0));
+        (glm::dvec4(_camera->position() - anchor->worldPosition(), 1.0));
 
     return NavigationState(
         _orbitalNavigator.anchorNode()->identifier(),
@@ -583,7 +585,7 @@ void NavigationHandler::loadNavigationState(const std::string& filepath,
     }
 }
 
-scripting::LuaLibrary NavigationHandler::luaLibrary() {
+LuaLibrary NavigationHandler::luaLibrary() {
     return {
         "navigation",
         {
@@ -631,4 +633,4 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
     };
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

@@ -35,7 +35,7 @@ public:
     explicit BoxGeometry(glm::vec3 size);
     ~BoxGeometry();
 
-    bool initialize();
+    void initialize();
     void render() const;
 
     GLuint _vao = 0;

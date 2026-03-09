@@ -33,41 +33,43 @@
 #include <variant>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "SizeMapping";
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Size mapping enabled",
         "If this value is set to 'true' and at least one column was loaded as an option "
         "for size mapping, the chosen data column will be used to scale the size of the "
         "points. The first option in the list is selected per default.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OptionInfo = {
+    constexpr Property::PropertyInfo OptionInfo = {
         "Parameter",
         "Parameter option",
         "This value determines which parameter is used for scaling of the point. The "
         "parameter value will be used as a multiplicative factor to scale the size of "
         "the points. Note that they may however still be scaled by max size adjustment "
         "effects.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
+    constexpr Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale factor",
         "This value is a multiplicative factor that is applied to the data values that "
         "are used to scale the points, when size mapping is applied.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IsRadiusInfo = {
+    constexpr Property::PropertyInfo IsRadiusInfo = {
         "IsRadius",
         "Size is radius",
         "If true, the size value in the data is interpreted as the radius of the points. "
         "Otherwise, it is interpreted as the diameter.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(SizeMappingComponent)]] Parameters {
@@ -113,17 +115,17 @@ namespace {
         // [[codegen::verbatim(IsRadiusInfo.description)]]
         std::optional<bool> isRadius;
     };
+} // namespace
 #include "sizemappingcomponent_codegen.cpp"
-}  // namespace
 
 namespace openspace {
 
-documentation::Documentation SizeMappingComponent::Documentation() {
+Documentation SizeMappingComponent::Documentation() {
     return codegen::doc<Parameters>("base_sizemappingcomponent");
 }
 
 SizeMappingComponent::SizeMappingComponent()
-    : properties::PropertyOwner({ "SizeMapping", "Size Mapping", "" })
+    : PropertyOwner({ "SizeMapping", "Size Mapping", "" })
     , enabled(EnabledInfo, true)
     , parameterOption(OptionInfo)
     , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 1000.f)

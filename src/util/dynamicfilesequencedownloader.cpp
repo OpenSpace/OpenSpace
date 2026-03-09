@@ -45,6 +45,8 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "DynamicFileSequenceDownloader";
 
     void trackFinishedDownloads(const std::filesystem::path& syncFilePath,
@@ -54,7 +56,7 @@ namespace {
         std::ifstream inFile = std::ifstream(syncFilePath);
         std::string line;
 
-        // load existing entries
+        // Load existing entries
         while (ghoul::getline(inFile, line)) {
             if (!line.empty()) {
                 existingEntries.insert(std::filesystem::path(line).filename().string());
@@ -76,7 +78,7 @@ namespace {
     std::string buildDataHttpRequest(double minTime, double maxTime, int dataID,
                                      const std::string& baseUrl)
     {
-        // formulate a min and a max time from time
+        // Formulate a min and a max time from time
         // The thing is time might be "now" and no items
         // ISO8601 format: yyyy-mm-ddThh:mm:ssZ
 
@@ -84,8 +86,8 @@ namespace {
         // days in seconds      : 86400
         // 30 days in seconds   : 2592000
         // 1 year in seconds    : 31556926
-        std::string_view min = openspace::Time(minTime).ISO8601();
-        std::string_view max = openspace::Time(maxTime).ISO8601();
+        std::string_view min = Time(minTime).ISO8601();
+        std::string_view max = Time(maxTime).ISO8601();
 
         return std::format("{}{}&time.min={}&time.max={}", baseUrl, dataID, min, max);
     }
@@ -131,9 +133,7 @@ DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
             continue;
         }
         std::string name = entry.path().filename().string();
-        if (name != _trackSynced.filename().string() &&
-            !keepFiles.contains(name))
-        {
+        if (name != _trackSynced.filename().string() && !keepFiles.contains(name)) {
             std::filesystem::remove(entry.path());
         }
     }
@@ -194,19 +194,17 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
     int attempt = 0;
     constexpr int MaxRetries = 1;
 
-    /********************
-    * Example response
-    *********************
-    * {
-    *    "availability": {
-    *        "startDate": "2017-07-01T00:42:02.0Z",
-    *        "stopDate" : "2017-09-30T22:43:18.0Z"
-    *    },
-    *    "description" : "WSA 4.4 field line trace from the SCS outer boundary to the
-    *                     source surface",
-    *    "id" : 1177
-    * }
-    */
+    // Example response
+    //
+    // {
+    //   "availability": {
+    //     "startDate": "2017-07-01T00:42:02.0Z",
+    //     "stopDate": "2017-09-30T22:43:18.0Z"
+    //   },
+    //   "description": "WSA 4.4 field line trace from the SCS outer boundary to the
+    //                   source surface",
+    //   "id": 1177
+    // }
     while (attempt <= MaxRetries && !success) {
         try {
             std::vector<char> responseText = response.downloadedData();
@@ -257,28 +255,26 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
     constexpr int MaxRetries = 1;
     nlohmann::json jsonResult;
 
-    /********************
-    * Example response
-    *********************
-    * {
-    *  "dataID": 1234,
-    *  "files": [
-    *   {
-    *    "timestamp": "2017-07-01 00:42:02.0",
-    *    "url": "https://iswa...fieldlines/trace_scs_outtoin/timestamp.osfls"
-    *   },
-    *   {
-    *    "timestamp": "2017-07-01 00:51:36.0",
-    *    "url": "https://iswa...fieldlines/trace_scs_outtoin/timestamp.osfls"
-    *   }
-    *  ],
-    *  "time.max": "2017-10-01 00:00:00.0",
-    *  "time.min": "2017-06-01 00:00:00.0"
-    * }
-    *
-    * Note that requested time can be month 10 but last entry in list is month 07,
-    * meaning there are no more available files between month 7-10.
-    * *****************/
+    // Example response
+    //
+    // {
+    //   "dataID": 1234,
+    //   "files": [
+    //     {
+    //       "timestamp": "2017-07-01 00:42:02.0",
+    //       "url": "https://iswa...fieldlines/trace_scs_outtoin/timestamp.osfls"
+    //     },
+    //     {
+    //       "timestamp": "2017-07-01 00:51:36.0",
+    //       "url": "https://iswa...fieldlines/trace_scs_outtoin/timestamp.osfls"
+    //     }
+    //   ],
+    //   "time.max": "2017-10-01 00:00:00.0",
+    //   "time.min": "2017-06-01 00:00:00.0"
+    // }
+    //
+    // Note that requested time can be month 10 but last entry in list is month 07,
+    // meaning there are no more available files between month 7-10
     while (attempt <= MaxRetries && !success) {
         try {
             std::vector<char> data = response.downloadedData();
@@ -425,7 +421,7 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
                 file->state = File::State::Downloaded;
                 trackFinishedDownloads(_trackSynced, file->path);
                 currentIt = _filesCurrentlyDownloading.erase(currentIt);
-                // if one is removed, i is reduced, else we'd skip one in the list
+                // If one is removed, i is reduced, else we'd skip one in the list
                 --i;
             }
         }
@@ -540,8 +536,8 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
         }
         return;
     }
-    // More than 2hrs a second would generally be unfeasable
-    // for a regular internet connection to operate at
+    // More than 2hrs a second would generally be unfeasable for a regular internet
+    // connection to operate at
     constexpr int SpeedThreshold = 7200; // 2 hours in seconds
     if (std::abs(deltaTime) > SpeedThreshold) {
         // Too fast, do nothing
@@ -554,7 +550,7 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
         return;
     }
 
-    // if delta time direction got changed
+    // If delta time direction got changed
     if ((_isForwardDirection && deltaTime < 0) || (!_isForwardDirection && deltaTime > 0))
     {
         _isForwardDirection = !_isForwardDirection;
@@ -566,51 +562,48 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
     }
 
     if (_isForwardDirection && _currentFile != _availableData.end()) {
-        // if files are there and time is between next file (+1) and +2 file
-        // (meaning the this file is active from now till next file)
-        // change this to be next
+        // If files are there and time is between next file (+1) and +2 file (meaning the
+        // this file is active from now till next file) change this to be next
         if (_currentFile + 1 != _availableData.end() &&
             _currentFile + 2 != _availableData.end() &&
-            (_currentFile + 1)->time < time &&
-            (_currentFile + 2)->time > time)
+            (_currentFile + 1)->time < time && (_currentFile + 2)->time > time)
         {
             _currentFile++;
         }
-        // if its beyond the +2 file, arguably that can mean delta time is to fast
-        // and files might be missed. But we also know we went past beyond the next so
-        // we no longer know where we are so we reinitialize
+        // If its beyond the +2 file, arguably that can mean delta time is to fast and
+        // files might be missed. But we also know we went past beyond the next so we no
+        // longer know where we are so we reinitialize
         else if (_currentFile + 1 != _availableData.end() &&
                  _currentFile + 2 != _availableData.end() &&
                  (_currentFile + 2)->time < time)
         {
             _currentFile = closestFileToNow(time);
         }
-        // We've jumped back without interpolating to a previous time step,
-        // past circa 2 files worth of time and without changing delta time
+        // We've jumped back without interpolating to a previous time step, past circa 2
+        // files worth of time and without changing delta time
         // >>>>>>>we jumped to here>>>>>>>>>now>>>>>>>
         else if (_currentFile->time - 2 * _currentFile->cadence > time) {
             _currentFile = closestFileToNow(time);
         }
     }
     else if (!_isForwardDirection && _currentFile != _availableData.begin()) {
-        // If file is there and time is between prev and this file
-        // then change this to be prev. Same goes here as if time is moving forward
-        // we will use forward 'usage', meaning file is active from now till next
-        if (_currentFile - 1 != _availableData.begin() &&
-            _currentFile->time < time &&
+        // If file is there and time is between prev and this file then change this to be
+        // prev. Same goes here as if time is moving forward we will use forward 'usage',
+        // meaning file is active from now till next
+        if (_currentFile - 1 != _availableData.begin() && _currentFile->time < time &&
             (_currentFile - 1)->time > time)
         {
             _currentFile--;
         }
-        // If we are beyond the prev file, again delta time might be to fast, but we
-        // no longer know where we are so we reinitialize
+        // If we are beyond the prev file, again delta time might be to fast, but we no
+        // longer know where we are so we reinitialize
         else if (_currentFile - 1 != _availableData.begin() &&
-                 (_currentFile - 1)->time > time)
+                (_currentFile - 1)->time > time)
         {
             _currentFile = closestFileToNow(time);
         }
-        // We've jumped forward without interpolating to a future time step,
-        // past circa 2 files worth of time and without changing delta time
+        // We've jumped forward without interpolating to a future time step, past circa 2
+        // files worth of time and without changing delta time
         // <<<<<<now<<<<<<<<<we jumped to here<<<<<<<
         else if (_currentFile->time - 2 * _currentFile->cadence < time) {
             _currentFile = closestFileToNow(time);
@@ -651,4 +644,4 @@ DynamicFileSequenceDownloader::downloadedFiles() const
     return _downloadedFiles;
 }
 
-} // openspace namespace
+} // namespace openspace

@@ -32,7 +32,7 @@
 #include <ghoul/opengl/texture.h>
 #include <cstdint>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 /**
  * All information needed to create a texture used for a Tile.
@@ -69,6 +69,6 @@ public:
 TileTextureInitData tileTextureInitData(layers::Group::ID id,
     size_t preferredTileSize = 0);
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_TEXTURE_INIT_DATA___H__

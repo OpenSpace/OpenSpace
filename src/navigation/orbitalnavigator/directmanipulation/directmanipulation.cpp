@@ -57,47 +57,49 @@
 #endif // WIN32
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "DirectManipulation";
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enable direct manipulation",
         "Decides whether the direct manipulation mode should be enabled or not.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IsActiveInfo = {
+    constexpr Property::PropertyInfo IsActiveInfo = {
         "IsActive",
         "Is active",
         "True if the direct manipulation interaction scheme is currently being applied.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AllowMouseInputInfo = {
+    constexpr Property::PropertyInfo AllowMouseInputInfo = {
         "AllowMouseInput",
         "Allow mouse input",
         "Decides whether direct manipulation should be applied when using mouse input."
         "Otherwise, it is only applied for touch input.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DistanceThresholdInfo = {
+    constexpr Property::PropertyInfo DistanceThresholdInfo = {
         "DistanceThreshold",
         "Distance threshold factor",
         "This threshold affects the distance from the interaction sphere at which the "
         "direct manipulation interaction mode starts being active. The value is given "
         "as a factor times the interaction sphere.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DefaultRenderableTypesInfo = {
+    constexpr Property::PropertyInfo DefaultRenderableTypesInfo = {
         "DefaultRenderableTypes",
         "Default renderable types",
         "A list of renderable types that will automatically use the direct "
         "manipulation scheme when interacted with, keeping the finger on a static "
         "position on the interaction sphere of the object when touching. Good for "
         "relatively spherical objects.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     constexpr std::string_view Description =
@@ -109,10 +111,10 @@ namespace {
         "renderable types.";
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
 DirectManipulation::DirectManipulation()
-    : properties::PropertyOwner({
+    : PropertyOwner({
         "DirectManipulation",
         "Direct Manipulation",
         std::string(Description)
@@ -161,8 +163,8 @@ void DirectManipulation::updateCameraFromInput() {
     for (const TouchInputHolder& input : touchInputs) {
         touchPoints.push_back({
             .id = input.latestInput().fingerId,
-            .x = input.latestInput().x,
-            .y = input.latestInput().y
+            .x = input.latestInput().pos.x,
+            .y = input.latestInput().pos.y
         });
     }
 
@@ -260,7 +262,7 @@ void DirectManipulation::updateNodeSurfacePoints(
     const Camera* camera = global::navigationHandler->camera();
 
     const glm::dquat camRotation = camera->rotationQuaternion();
-    const glm::dvec3 camPos = camera->positionVec3();
+    const glm::dvec3 camPos = camera->position();
 
     std::vector<DirectInputSolver::SelectedBody> surfacePoints;
 
@@ -390,7 +392,7 @@ bool DirectManipulation::isWithinDirectTouchDistance() const {
     }
 
     const double interactionSphere = anchor->interactionSphere();
-    const glm::dvec3 centerToCamera = camera->positionVec3() - anchor->worldPosition();
+    const glm::dvec3 centerToCamera = camera->position() - anchor->worldPosition();
 
     // Check if camera is within distance for direct manipulation to be applicable
     if (interactionSphere > 0.0) {
@@ -405,4 +407,4 @@ bool DirectManipulation::isWithinDirectTouchDistance() const {
     return false;
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

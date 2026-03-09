@@ -33,12 +33,14 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ShouldInterpolateInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ShouldInterpolateInfo = {
         "ShouldInterpolate",
         "Should interpolate",
         "If this value is set to 'true', an interpolation is applied between the given "
         "keyframes. If this value is set to 'false', the interpolation is not applied.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `Translation` uses a timeline of other `Translation` classes to calculate the
@@ -48,19 +50,19 @@ namespace {
     // `ShouldInterpolate` parameter to `false`.
     struct [[codegen::Dictionary(TimelineTranslation)]] Parameters {
         // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
-        // that are valid Translation objects
+        // that are valid Translation objects.
         std::map<std::string, ghoul::Dictionary> keyframes
             [[codegen::reference("core_transform_translation")]];
 
         // [[codegen::verbatim(ShouldInterpolateInfo.description)]]
         std::optional<bool> shouldInterpolate;
     };
-#include "timelinetranslation_codegen.cpp"
 } // namespace
+#include "timelinetranslation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation TimelineTranslation::Documentation() {
+Documentation TimelineTranslation::Documentation() {
     return codegen::doc<Parameters>("base_transform_translation_keyframe");
 }
 

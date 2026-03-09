@@ -36,6 +36,8 @@
 
 #if 0
 
+using namespace openspace;
+
 TEST_CASE("CreateSingleColorImage: Create image and check return value",
           "[createsinglecolorimage]")
 {

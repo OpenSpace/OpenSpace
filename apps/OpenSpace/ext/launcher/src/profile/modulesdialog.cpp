@@ -65,8 +65,7 @@ namespace {
     }
 } // namespace
 
-ModulesDialog::ModulesDialog(QWidget* parent,
-                             std::vector<openspace::Profile::Module>* modules)
+ModulesDialog::ModulesDialog(QWidget* parent, std::vector<Profile::Module>* modules)
     : QDialog(parent)
     , _modules(modules)
     , _moduleData(*_modules)

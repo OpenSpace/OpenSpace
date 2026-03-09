@@ -66,7 +66,7 @@ enum class HorizonsResultCode {
     Valid,
     Empty,
 
-    // Errors caught by the error field in the json output
+    // Errors caught by the error field in the JSON output
     ErrorSize,
     ErrorSpan,
     ErrorTimeRange,
@@ -76,7 +76,7 @@ enum class HorizonsResultCode {
     MultipleObserverStations,
     News,
 
-    // Errors/problems NOT caught by the error field in the json output
+    // Errors/problems NOT caught by the error field in the JSON output
     MultipleObserver,
     ErrorNoTarget,
     MultipleTarget,
@@ -91,8 +91,8 @@ enum class HorizonsType {
 };
 
 struct HorizonsKeyframe {
-    double time;            // J2000 seconds
-    glm::dvec3 position;    // GALACTIC cartesian coordinates in meters
+    double time = 0.0;   // J2000 seconds
+    glm::dvec3 position; // GALACTIC cartesian coordinates in meters
 };
 
 struct HorizonsResult {
@@ -124,7 +124,6 @@ private:
     std::filesystem::path _file;
 };
 
-// Free functions
 std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
     const std::string& observer, const std::string& startTime,
     const std::string& stopTime, const std::string& stepSize, const std::string& unit);

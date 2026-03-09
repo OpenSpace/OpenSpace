@@ -31,19 +31,18 @@
 #include <openspace/scene/scenegraphnode.h>
 
 namespace {
+    using namespace openspace;
+
     // Indices for data items
     constexpr int NumDataItems = 1;
     constexpr int FocusNodeIndex = 0;
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        FocusTelemetryInfo =
-    {
+    static const PropertyOwner::PropertyOwnerInfo FocusTelemetryInfo = {
         "FocusTelemetry",
         "Focus Telemetry",
         "Telemetry that sends out the current focus node to the Open Sound Control "
         "receiver."
     };
-
 } // namespace
 
 namespace openspace {

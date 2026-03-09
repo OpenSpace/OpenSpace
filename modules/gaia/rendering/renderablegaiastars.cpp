@@ -39,10 +39,10 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -52,228 +52,230 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableGaiaStars";
 
     constexpr size_t PositionSize = 3;
     constexpr size_t ColorSize = 2;
     constexpr size_t VelocitySize = 3;
 
-    constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
+    constexpr Property::PropertyInfo FilePathInfo = {
         "File",
         "File path",
         "The path to the file with data for the stars to be rendered.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FileReaderOptionInfo = {
+    constexpr Property::PropertyInfo FileReaderOptionInfo = {
         "FileReaderOption",
         "File reader option",
-        "This value tells the renderable what format the input data file has. "
-        "'Fits' will read a FITS file, construct an Octree from it and render full "
-        "data. 'Speck' will read a SPECK file, construct an Octree from it and render "
-        "full data. 'BinaryRaw' will read a preprocessed binary file with ordered star "
-        "data, construct an Octree and render it. 'BinaryOctree' will read a constructed "
+        "This value tells the renderable what format the input data file has. 'Fits' "
+        "will read a FITS file, construct an Octree from it and render full data. "
+        "'Speck' will read a SPECK file, construct an Octree from it and render full "
+        "data. 'BinaryRaw' will read a preprocessed binary file with ordered star data, "
+        "construct an Octree and render it. 'BinaryOctree' will read a constructed "
         "Octree from binary file and render full data. 'StreamOctree' will read an index "
         "file with full Octree structure and then stream nodes during runtime. (This "
         "option is suited for bigger datasets).",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderModeInfo = {
+    constexpr Property::PropertyInfo RenderModeInfo = {
         "RenderMode",
         "Render mode",
-        "This value determines which predefined columns to use in rendering. If "
-        "'Static' only the position of the stars is used. 'Color' uses position + color "
+        "This value determines which predefined columns to use in rendering. If 'Static' "
+        "only the position of the stars is used. 'Color' uses position + color "
         "parameters and 'Motion' uses pos, color as well as velocity for the stars.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LuminosityMultiplierInfo = {
+    constexpr Property::PropertyInfo LuminosityMultiplierInfo = {
         "LuminosityMultiplier",
         "Luminosity multiplier",
         "Factor by which to multiply the luminosity with. [Works in Color and Motion "
         "modes].",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CutOffThresholdInfo = {
+    constexpr Property::PropertyInfo CutOffThresholdInfo = {
         "CutOffThreshold",
         "Cut off threshold",
         "Set threshold for when to cut off star rendering. Stars closer than this "
         "threshold are given full opacity. Farther away, stars dim proportionally to the "
         "4-logarithm of their distance.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TmPointFilterSizeInfo = {
+    constexpr Property::PropertyInfo TmPointFilterSizeInfo = {
         "FilterSize",
         "Filter size [px]",
         "Set the filter size in pixels used in tonemapping for point splatting "
         "rendering.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TmPointSigmaInfo = {
+    constexpr Property::PropertyInfo TmPointSigmaInfo = {
         "Sigma",
         "Normal distribution sigma",
         "Set the normal distribution sigma used in tonemapping for point splatting "
         "rendering.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AdditionalNodesInfo = {
+    constexpr Property::PropertyInfo AdditionalNodesInfo = {
         "AdditionalNodes",
         "Additional nodes",
         "Determines how many additional nodes around the camera that will be fetched "
         "from disk. The first value determines how many additional layers of parents "
         "that will be fetched. The second value determines how many layers of descendant "
         "that will be fetched from the found parents.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TmPointPxThresholdInfo = {
+    constexpr Property::PropertyInfo TmPointPxThresholdInfo = {
         "PixelWeightThreshold",
         "Pixel weight threshold",
         "Set the threshold for how big the elliptic weight of a pixel has to be to "
         "contribute to the final elliptic shape. A smaller value gives a more visually "
         "pleasing result while a bigger value will speed up the rendering on skewed "
         "frustums (aka Domes).",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
+    constexpr Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
         "Color texture",
         "The path to the texture that is used to convert from the magnitude of the star "
         "to its color. The texture is used as a one dimensional lookup function.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FirstRowInfo = {
+    constexpr Property::PropertyInfo FirstRowInfo = {
         "FirstRow",
         "First row to read",
         "Defines the first row that will be read from the specified FITS file No need to "
         "define if data already has been processed. [Works only with "
         "FileReaderOption::Fits].",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LastRowInfo = {
+    constexpr Property::PropertyInfo LastRowInfo = {
         "LastRow",
         "Last row to read",
         "Defines the last row that will be read from the specified FITS file; has to be "
         "equal to or greater than FirstRow. No need to define if data already has been "
         "processed. [Works only with FileReaderOption::Fits].",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NumRenderedStarsInfo = {
+    constexpr Property::PropertyInfo NumRenderedStarsInfo = {
         "NumRenderedStars",
         "Rendered stars",
         "The number of rendered stars in the current frame.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CpuRamBudgetInfo = {
+    constexpr Property::PropertyInfo CpuRamBudgetInfo = {
         "CpuRamBudget",
         "CPU RAM budget",
         "Current remaining budget (bytes) on the CPU RAM for loading more node data "
         "files.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GpuStreamBudgetInfo = {
+    constexpr Property::PropertyInfo GpuStreamBudgetInfo = {
         "GpuStreamBudget",
         "GPU stream budget",
         "Current remaining memory budget [in number of chunks] on the GPU for streaming "
         "additional stars.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LodPixelThresholdInfo = {
+    constexpr Property::PropertyInfo LodPixelThresholdInfo = {
         "LodPixelThreshold",
         "LOD pixel threshold",
         "The number of total pixels a nodes AABB can have in clipping space before its "
         "parent is fetched as LOD cache.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MaxGpuMemoryPercentInfo = {
+    constexpr Property::PropertyInfo MaxGpuMemoryPercentInfo = {
         "MaxGpuMemoryPercent",
         "Max GPU memory",
         "Sets the max percent of existing GPU memory budget that the streaming will use.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MaxCpuMemoryPercentInfo = {
+    constexpr Property::PropertyInfo MaxCpuMemoryPercentInfo = {
         "MaxCpuMemoryPercent",
         "Max CPU memory",
         "Sets the max percent of existing CPU memory budget that the streaming of files "
         "will use.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilterPosXInfo = {
+    constexpr Property::PropertyInfo FilterPosXInfo = {
         "FilterPosX",
         "PosX threshold",
         "If defined then only stars with Position X values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
         "read as +Inf). Measured in KiloParsec.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilterPosYInfo = {
+    constexpr Property::PropertyInfo FilterPosYInfo = {
         "FilterPosY",
         "PosY threshold",
         "If defined then only stars with Position Y values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
         "read as +Inf). Measured in KiloParsec.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilterPosZInfo = {
+    constexpr Property::PropertyInfo FilterPosZInfo = {
         "FilterPosZ",
         "PosZ threshold",
         "If defined then only stars with Position Z values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
         "read as +Inf). Measured in KiloParsec.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilterGMagInfo = {
+    constexpr Property::PropertyInfo FilterGMagInfo = {
         "FilterGMag",
         "GMag threshold",
         "If defined then only stars with G mean magnitude values between [min, max] will "
         "be rendered (if min is set to 20.0 it is read as -Inf, if max is set to 20.0 it "
         "is read as +Inf). If min = max then all values equal min|max will be filtered "
         "away.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilterBpRpInfo = {
+    constexpr Property::PropertyInfo FilterBpRpInfo = {
         "FilterBpRp",
         "Bp-Rp threshold",
         "If defined then only stars with Bp-Rp color values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
         "read as +Inf). If min = max then all values equal min|max will be filtered "
         "away.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilterDistInfo = {
+    constexpr Property::PropertyInfo FilterDistInfo = {
         "FilterDist",
         "Dist threshold",
         "If defined then only stars with Distances values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
         "read as +Inf). Measured in KiloParsec.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableGaiaStars)]] Parameters {
         // [[codegen::verbatim(FilePathInfo.description)]]
         std::string file;
 
-        enum class [[codegen::map(openspace::gaia::FileReaderOption)]] FileReader {
+        enum class [[codegen::map(openspace::FileReaderOption)]] FileReader {
             Fits,
             Speck,
             BinaryRaw,
@@ -283,7 +285,7 @@ namespace {
         // [[codegen::verbatim(FileReaderOptionInfo.description)]]
         FileReader fileReaderOption;
 
-        enum class [[codegen::map(openspace::gaia::RenderMode)]] RenderMode {
+        enum class [[codegen::map(openspace::RenderMode)]] RenderMode {
             Static,
             Color,
             Motion
@@ -353,13 +355,13 @@ namespace {
         // [codegen::verbatim(ReportGlErrorsInfo.description)]]
         std::optional<bool> reportGlErrors;
     };
+} // namespace
 #include "renderablegaiastars_codegen.cpp"
-}  // namespace
 
 namespace openspace {
 
-documentation::Documentation RenderableGaiaStars::Documentation() {
-    return codegen::doc<Parameters>("gaiamission_renderablegaiastars");
+Documentation RenderableGaiaStars::Documentation() {
+    return codegen::doc<Parameters>("gaia_renderablegaiastars");
 }
 
 RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
@@ -407,21 +409,21 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     addProperty(_filePath);
 
     _fileReaderOption.addOptions({
-        { gaia::FileReaderOption::Fits, "Fits" },
-        { gaia::FileReaderOption::Speck, "Speck" },
-        { gaia::FileReaderOption::BinaryRaw, "BinaryRaw" },
-        { gaia::FileReaderOption::BinaryOctree, "BinaryOctree" },
-        { gaia::FileReaderOption::StreamOctree, "StreamOctree" }
+        { FileReaderOption::Fits, "Fits" },
+        { FileReaderOption::Speck, "Speck" },
+        { FileReaderOption::BinaryRaw, "BinaryRaw" },
+        { FileReaderOption::BinaryOctree, "BinaryOctree" },
+        { FileReaderOption::StreamOctree, "StreamOctree" }
     });
-    _fileReaderOption = codegen::map<gaia::FileReaderOption>(p.fileReaderOption);
+    _fileReaderOption = codegen::map<FileReaderOption>(p.fileReaderOption);
 
     _renderMode.addOptions({
-        { gaia::RenderMode::Static, "Static" },
-        { gaia::RenderMode::Color, "Color" },
-        { gaia::RenderMode::Motion, "Motion" }
+        { RenderMode::Static, "Static" },
+        { RenderMode::Color, "Color" },
+        { RenderMode::Motion, "Motion" }
     });
     if (p.renderMode.has_value()) {
-        _renderMode = codegen::map<gaia::RenderMode>(*p.renderMode);
+        _renderMode = codegen::map<RenderMode>(*p.renderMode);
     }
     _renderMode.onChange([this]() { _buffersAreDirty = true; });
     addProperty(_renderMode);
@@ -472,7 +474,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
             static_cast<long long>(nDedicatedVidMemoryInKB) * 1024
         );
 
-        // TODO: Need to fix what happens if we can't query! For now use 2 GB by default
+        // TODO: Need to fix what happens if we can't query. For now use 2 GB by default
         _gpuMemoryBudgetInBytes = dedicatedVidMem > 0 ?
             static_cast<long long>(dedicatedVidMem * _maxGpuMemoryPercent) :
             2147483648;
@@ -501,8 +503,8 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     _distThreshold = p.filterDist.value_or(_distThreshold);
     addProperty(_distThreshold);
 
-    // Only add properties correlated to fits files if we're reading from a fits file
-    if (_fileReaderOption == gaia::FileReaderOption::Fits) {
+    // Only add properties correlated to fits files if we're reading from a FITS file
+    if (_fileReaderOption == FileReaderOption::Fits) {
         _firstRow = p.firstRow.value_or(_firstRow);
         _firstRow.onChange([this]() { _dataIsDirty = true; });
         addProperty(_firstRow);
@@ -549,7 +551,7 @@ void RenderableGaiaStars::initializeGL() {
         "GaiaStar",
         absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
         absPath("${MODULE_GAIA}/shaders/gaia_point_fs.glsl"),
-        absPath("${MODULE_GAIA}/shaders/gaia_point_ge.glsl")
+        absPath("${MODULE_GAIA}/shaders/gaia_point_gs.glsl")
     );
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
@@ -586,13 +588,14 @@ void RenderableGaiaStars::initializeGL() {
     glCreateFramebuffers(1, &_fbo);
     // Generate a new texture and attach it to our FBO
     _fboTexture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(global::renderEngine->renderingResolution(), 1),
-        GL_TEXTURE_2D,
-        ghoul::opengl::Texture::Format::RGBA,
-        GL_RGBA32F,
-        GL_FLOAT
+        ghoul::opengl::Texture::FormatInit {
+            .dimensions = glm::uvec3(global::renderEngine->renderingResolution(), 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::RGBA,
+            .dataType = GL_FLOAT
+        },
+        ghoul::opengl::Texture::SamplerInit {}
     );
-    _fboTexture->uploadTexture();
     glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_fboTexture, 0);
     const GLenum textureBuffer = GL_COLOR_ATTACHMENT0;
     glNamedFramebufferDrawBuffers(_fbo, 1, &textureBuffer);
@@ -617,7 +620,7 @@ void RenderableGaiaStars::initializeGL() {
     const float dedicatedVidMem = static_cast<float>(
         static_cast<long long>(nDedicatedVidMemoryInKB) * 1024
     );
-    // TODO: Need to fix what happens if we can't query! For now use 2 GB by default
+    // TODO: Need to fix what happens if we can't query. For now use 2 GB by default
     _gpuMemoryBudgetInBytes = dedicatedVidMem > 0 ?
         static_cast<long long>(dedicatedVidMem * _maxGpuMemoryPercent) :
         2147483648;
@@ -671,8 +674,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
 
     // Update which nodes are stored in memory as the camera moves around (if streaming)
-    if (_fileReaderOption == gaia::FileReaderOption::StreamOctree) {
-        const glm::dvec3 cameraPos = data.camera.positionVec3();
+    if (_fileReaderOption == FileReaderOption::StreamOctree) {
+        const glm::dvec3 cameraPos = data.camera.position();
         const size_t chunkSizeBytes = _chunkSize * sizeof(GLfloat);
         _octreeManager.fetchSurroundingNodes(cameraPos, chunkSizeBytes, _additionalNodes);
 
@@ -688,7 +691,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         modelViewProjMat,
         screenSize,
         deltaStars,
-        gaia::RenderMode(_renderMode.value()),
+        RenderMode(_renderMode.value()),
         _lodPixelThreshold
     );
 
@@ -709,8 +712,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     for (const auto& [offset, subData] : updateData) {
         if (offset >= static_cast<int>(_accumulatedIndices.size()) - 1) {
             // @TODO(2023-03-08, alebo) We want to redo the whole rendering pipeline
-            // anyway, so right now we just bail out early if we get an invalid index
-            // that would trigger a crash
+            // anyway, so right now we just bail out early if we get an invalid index that
+            // would trigger a crash
             continue;
         }
 
@@ -744,11 +747,10 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     // Use orphaning strategy for data SSBO
     glNamedBufferData(_ssboData, _maxStreamingBudgetInBytes, nullptr, GL_STREAM_DRAW);
 
-    // Update SSBO with one insert per chunk/node.
-    // The key in map holds the offset index
+    // Update SSBO with one insert per chunk/node. The key in map holds the offset index
     for (const auto& [offset, subData] : updateData) {
-        // We don't need to fill chunk with zeros for SSBOs.
-        // Just check if we have any values to update
+        // We don't need to fill chunk with zeros for SSBOs. Just check if we have any
+        // values to update
         if (!subData.empty()) {
             glNamedBufferSubData(
                 _ssboData,
@@ -847,13 +849,13 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _buffersAreDirty = true;
     }
 
-    if (_program->isDirty()) {
+    if (_program->isDirty()) [[unlikely]] {
         global::renderEngine->removeRenderProgram(_program.get());
         _program = ghoul::opengl::ProgramObject::Build(
             "GaiaStar",
             absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
             absPath("${MODULE_GAIA}/shaders/gaia_point_fs.glsl"),
-            absPath("${MODULE_GAIA}/shaders/gaia_point_ge.glsl")
+            absPath("${MODULE_GAIA}/shaders/gaia_point_gs.glsl")
         );
 
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
@@ -862,7 +864,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _program->setSsboBinding("ssbo_comb_data", _ssboDataBinding->bindingNumber());
     }
 
-    if (_programTM->isDirty()) {
+    if (_programTM->isDirty()) [[unlikely]] {
         global::renderEngine->removeRenderProgram(_programTM.get());
         _programTM = global::renderEngine->buildRenderProgram(
             "ToneMapping",
@@ -876,17 +878,18 @@ void RenderableGaiaStars::update(const UpdateData&) {
         LDEBUG("Regenerating buffers");
 
         // Set values per star slice depending on render option
-        if (_renderMode == gaia::RenderMode::Static) {
+        if (_renderMode == RenderMode::Static) {
             _nRenderValuesPerStar = PositionSize;
         }
-        else if (_renderMode == gaia::RenderMode::Color) {
+        else if (_renderMode == RenderMode::Color) {
             _nRenderValuesPerStar = PositionSize + ColorSize;
         }
-        else { // (renderOption == gaia::RenderOption::Motion)
+        else {
+            // (renderOption == RenderOption::Motion)
             _nRenderValuesPerStar = PositionSize + ColorSize + VelocitySize;
         }
 
-        // Calculate memory budgets.
+        // Calculate memory budgets
         _chunkSize = _octreeManager.maxStarsPerNode() * _nRenderValuesPerStar;
         const long long totalChunkSizeInBytes =
             _octreeManager.totalNodes() * _chunkSize * sizeof(GLfloat);
@@ -894,8 +897,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
             totalChunkSizeInBytes,
             _gpuMemoryBudgetInBytes
         );
-        long long maxNodesInStream = _maxStreamingBudgetInBytes /
-                                     (_chunkSize * sizeof(GLfloat));
+        long long maxNodesInStream =
+            _maxStreamingBudgetInBytes / (_chunkSize * sizeof(GLfloat));
 
         _gpuStreamBudgetProperty.setMaxValue(static_cast<float>(maxNodesInStream));
         const bool datasetFitInMemory =
@@ -906,13 +909,13 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _chunkSize, _maxStreamingBudgetInBytes, maxNodesInStream
         ));
 
-        // Trigger a rebuild of buffer data from octree.
-        // With SSBO we won't fill the chunks
+        // Trigger a rebuild of buffer data from octree. With SSBO we won't fill the
+        // chunks
         _octreeManager.initBufferIndexStack(maxNodesInStream, datasetFitInMemory);
         _nStarsToRender = 0;
 
-        // Bind SSBO blocks to our shader positions
-        // Number of stars per chunk (a.k.a. Index)
+        // Bind SSBO blocks to our shader positions. Number of stars per chunk (a.k.a.
+        // Index)
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboIdx);
 
         _ssboIdxBinding = std::make_unique<ghoul::opengl::BufferBinding<
@@ -951,12 +954,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 absPath(_colorTexturePath),
                 1
             );
-            if (_colorTexture) {
-                LDEBUG(std::format(
-                    "Loaded texture from '{}'", _colorTexturePath.value()
-                ));
-                _colorTexture->uploadTexture();
-            }
+            LDEBUG(std::format("Loaded texture from '{}'", _colorTexturePath.value()));
 
             _colorTextureFile = std::make_unique<ghoul::filesystem::File>(
                 _colorTexturePath.value()
@@ -977,13 +975,14 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
         if (hasChanged) {
             _fboTexture = std::make_unique<ghoul::opengl::Texture>(
-                glm::uvec3(screenSize, 1),
-                GL_TEXTURE_2D,
-                ghoul::opengl::Texture::Format::RGBA,
-                GL_RGBA32F,
-                GL_FLOAT
+                ghoul::opengl::Texture::FormatInit {
+                    .dimensions = glm::uvec3(screenSize, 1),
+                    .type = GL_TEXTURE_2D,
+                    .format = ghoul::opengl::Texture::Format::RGBA,
+                    .dataType = GL_FLOAT
+                },
+                ghoul::opengl::Texture::SamplerInit {}
             );
-            _fboTexture->uploadTexture();
             LDEBUG("Re-Generating Gaia Framebuffer Texture");
 
             glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_fboTexture, 0);
@@ -1001,23 +1000,23 @@ bool RenderableGaiaStars::readDataFile() {
 
     int nReadStars = 0;
     switch (_fileReaderOption) {
-        case gaia::FileReaderOption::Fits:
+        case FileReaderOption::Fits:
             // Read raw fits file and construct Octree
             nReadStars = readFitsFile(file);
             break;
-        case gaia::FileReaderOption::Speck:
+        case FileReaderOption::Speck:
             // Read raw speck file and construct Octree
             nReadStars = readSpeckFile(file);
             break;
-        case gaia::FileReaderOption::BinaryRaw:
+        case FileReaderOption::BinaryRaw:
             // Stars are stored in an ordered binary file
             nReadStars = readBinaryRawFile(file);
             break;
-        case gaia::FileReaderOption::BinaryOctree:
+        case FileReaderOption::BinaryOctree:
             // Octree already constructed and stored as a binary file
             nReadStars = readBinaryOctreeFile(file);
             break;
-        case gaia::FileReaderOption::StreamOctree:
+        case FileReaderOption::StreamOctree:
             // Read Octree structure from file, without data
             nReadStars = readBinaryOctreeStructureFile(file);
             break;

@@ -47,7 +47,7 @@ struct ImageData {
  * \param path The path to the FITS file
  * \param layerIndex The index of the layer to load from the FITS file
  * \param minMax The minimum and maximum value range in which to cap the data between
-          Values outside of range will be overexposed
+          values outside of range will be overexposed
    \return The texture created from the layer in the file with the set min-max range
  */
 std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(

@@ -42,8 +42,7 @@ namespace {
     void validate([[maybe_unused]] int xSegments, [[maybe_unused]] int ySegments) {
         ghoul_assert(
             xSegments > 0 && ySegments > 0,
-            "Resolution must be at least 1x1. (" + std::to_string(xSegments) + ", " +
-            std::to_string(ySegments) + ")"
+            std::format("Resolution must be at least 1x1. ({}, {})", xSegments, ySegments)
         );
     }
 
@@ -67,12 +66,12 @@ namespace {
                 const GLuint v01 = (y + 1) * (xSegments + 2 + 1) + x + 0;
                 const GLuint v11 = (y + 1) * (xSegments + 2 + 1) + x + 1;
 
-                // add upper triangle
+                // Add upper triangle
                 elements.push_back(static_cast<GLushort>(v00));
                 elements.push_back(static_cast<GLushort>(v10));
                 elements.push_back(static_cast<GLushort>(v11));
 
-                // add lower triangle
+                // Add lower triangle
                 elements.push_back(static_cast<GLushort>(v00));
                 elements.push_back(static_cast<GLushort>(v11));
                 elements.push_back(static_cast<GLushort>(v01));
@@ -105,10 +104,9 @@ namespace {
         }
         return textureCoordinates;
     }
-
 } // namespace
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 SkirtedGrid::SkirtedGrid(unsigned int xSeg, unsigned int ySeg)
     : xSegments(xSeg)
@@ -172,4 +170,4 @@ void SkirtedGrid::drawUsingActiveProgram() const {
     glBindVertexArray(0);
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

@@ -24,7 +24,7 @@
 
 #include <openspace/navigation/orbitalnavigator/orbitalcamerastates.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
 OrbitalCameraStates::OrbitalCameraStates(double sensitivity, double velocityScaleFactor)
     : _sensitivity(sensitivity)
@@ -114,4 +114,4 @@ void OrbitalCameraStates::updateVelocities(const UpdateStates& updateState,
     _globalRollVelocity.update(updateState.globalRoll, deltaTime);
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

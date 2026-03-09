@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___DAMPENEDVELOCITY___H__
 #define __OPENSPACE_CORE___DAMPENEDVELOCITY___H__
 
-namespace openspace::interaction {
+namespace openspace {
 
 /**
  * This class acts as a smoothing filter to a variable representing a velocity.
@@ -63,7 +63,7 @@ private:
     T _currentValue = T(0);
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #include "dampenedvelocity.inl"
 

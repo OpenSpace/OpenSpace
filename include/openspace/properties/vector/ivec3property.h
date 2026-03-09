@@ -30,11 +30,11 @@
 #include <ghoul/glm.h>
 #include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 class IVec3Property : public NumericalProperty<glm::ivec3> {
 public:
-    explicit IVec3Property(Property::PropertyInfo info, glm::ivec3 value = glm::ivec3(0),
+    explicit IVec3Property(PropertyInfo info, glm::ivec3 value = glm::ivec3(0),
         glm::ivec3 minValue = glm::ivec3(std::numeric_limits<int>::lowest()),
         glm::ivec3 maxValue = glm::ivec3(std::numeric_limits<int>::max()),
         glm::ivec3 stepValue = glm::ivec3(1));
@@ -51,6 +51,6 @@ private:
     glm::ivec3 toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___IVEC3PROPERTY___H__

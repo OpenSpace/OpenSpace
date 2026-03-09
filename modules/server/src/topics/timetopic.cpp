@@ -31,13 +31,13 @@
 #include <optional>
 #include <string_view>
 
+using nlohmann::json;
+
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
     constexpr std::string_view UnsubscribeEvent = "stop_subscription";
     constexpr std::chrono::milliseconds TimeUpdateInterval(50);
 } // namespace
-
-using nlohmann::json;
 
 namespace openspace {
 
@@ -82,8 +82,8 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
     });
 
     _deltaTimeCallbackHandle = global::timeManager->addDeltaTimeChangeCallback([this]() {
-        // Throttle by last update,
-        // but force update if pause state or target delta changes.
+        // Throttle by last update, but force update if pause state or target delta
+        // changes
 
         const auto now = std::chrono::system_clock::now();
         const double targetDeltaTime = global::timeManager->targetDeltaTime();

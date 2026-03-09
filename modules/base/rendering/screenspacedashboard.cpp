@@ -38,12 +38,14 @@
 #include "screenspacedashboard_lua.inl"
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo UseMainInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo UseMainInfo = {
         "UseMainDashboard",
         "Use main dashboard",
         "If true, this ScreenSpaceDashboard will use the main dashboard instead of "
         "creating an independent one.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(ScreenSpaceDashboard)]] Parameters {
@@ -58,12 +60,12 @@ namespace {
         std::optional<std::vector<ghoul::Dictionary>>
             items [[codegen::reference("dashboarditem")]];
     };
-#include "screenspacedashboard_codegen.cpp"
 } // namespace
+#include "screenspacedashboard_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceDashboard::Documentation() {
+Documentation ScreenSpaceDashboard::Documentation() {
     return codegen::doc<Parameters>("base_screenspace_dashboard");
 }
 
@@ -127,7 +129,7 @@ const Dashboard& ScreenSpaceDashboard::dashboard() const {
     return _dashboard;
 }
 
-scripting::LuaLibrary ScreenSpaceDashboard::luaLibrary() {
+LuaLibrary ScreenSpaceDashboard::luaLibrary() {
     return {
         "dashboard",
         {
@@ -136,4 +138,5 @@ scripting::LuaLibrary ScreenSpaceDashboard::luaLibrary() {
         }
     };
 }
+
 } // namespace openspace

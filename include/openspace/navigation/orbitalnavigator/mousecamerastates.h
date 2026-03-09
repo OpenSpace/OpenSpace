@@ -27,7 +27,7 @@
 
 #include <openspace/navigation/orbitalnavigator/orbitalcamerastates.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
 class KeyboardInputState;
 class MouseInputState;
@@ -50,6 +50,6 @@ private:
     } _prevMousePos;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___MOUSECAMERASTATES___H__

@@ -34,16 +34,15 @@
 using namespace openspace;
 
 namespace {
-    void singleTimeTest(Time& t, globebrowsing::TimeQuantizer& tq, bool clamp,
-                        const std::string& input, const std::string& expected)
+    void singleTimeTest(Time& t, TimeQuantizer& tq, bool clamp, const std::string& input,
+                        const std::string& expected)
     {
         t.setTime(input);
         tq.quantize(t, clamp);
         CHECK(t.ISO8601() == expected);
     }
 
-    void singleResolutionTest(globebrowsing::TimeQuantizer& tq,
-                              const std::string& resolution,
+    void singleResolutionTest(TimeQuantizer& tq, const std::string& resolution,
                               const std::string& expectedType, bool expectFailure)
     {
         std::string res;
@@ -55,15 +54,14 @@ namespace {
         }
 
         if (expectFailure) {
-            CHECK(res.find(expectedType) != std::string::npos);
+            CHECK(res.contains(expectedType));
         }
         else {
-            CHECK(res.find(expectedType) == std::string::npos);
+            CHECK(!res.contains(expectedType));
         }
     }
 
-    void singleStartTimeTest(globebrowsing::TimeQuantizer& tq,
-                             const std::string& startTime,
+    void singleStartTimeTest(TimeQuantizer& tq, const std::string& startTime,
                              const std::string& expectedErrSubstring, bool expectFailure)
     {
         std::string res;
@@ -75,10 +73,10 @@ namespace {
         }
 
         if (expectFailure) {
-            CHECK(res.find(expectedErrSubstring) != std::string::npos);
+            CHECK(res.contains(expectedErrSubstring));
         }
         else {
-            CHECK(res.find(expectedErrSubstring) == std::string::npos);
+            CHECK(!res.contains(expectedErrSubstring));
         }
     }
 
@@ -87,17 +85,17 @@ namespace {
     {
         std::string res;
         try {
-            const globebrowsing::TimeQuantizer tq(startTime, startTime, "1d");
+            const TimeQuantizer tq(startTime, startTime, "1d");
         }
         catch (const ghoul::RuntimeError & e) {
             res = e.message;
         }
 
         if (expectFailure) {
-            CHECK(res.find(expectedErrSubstring) != std::string::npos);
+            CHECK(res.contains(expectedErrSubstring));
         }
         else {
-            CHECK(res.find(expectedErrSubstring) == std::string::npos);
+            CHECK(!res.contains(expectedErrSubstring));
         }
     }
 } // namespace
@@ -105,7 +103,7 @@ namespace {
 TEST_CASE("TimeQuantizer: Test years resolution", "[timequantizer]") {
     SpiceManager::initialize();
 
-    globebrowsing::TimeQuantizer t1;
+    TimeQuantizer t1;
     Time testT;
 
     t1.setStartEndRange("2019-12-09T00:00:00", "2030-03-01T00:00:00");
@@ -134,8 +132,10 @@ TEST_CASE("TimeQuantizer: Test years resolution", "[timequantizer]") {
         t1.setStartEndRange("2020-02-29T00:00:00", "2030-02-29T00:00:00");
     }
     catch (const ghoul::RuntimeError& e) {
-        REQUIRE(e.message.find("Invalid start day value of 29 for the selected month "
-            "on a yearly increment, valid days are 1 - 28") != std::string::npos);
+        REQUIRE(e.message.contains(
+            "Invalid start day value of 29 for the selected month on a yearly increment, "
+            "valid days are 1 - 28"
+        ));
     }
     t1.setStartEndRange("2020-02-28T00:00:00", "2030-02-28T00:00:00");
 
@@ -145,7 +145,7 @@ TEST_CASE("TimeQuantizer: Test years resolution", "[timequantizer]") {
 TEST_CASE("TimeQuantizer: Test days resolution", "[timequantizer]") {
     SpiceManager::initialize();
 
-    globebrowsing::TimeQuantizer t1;
+    TimeQuantizer t1;
     Time testT;
 
     t1.setStartEndRange("2019-12-09T00:00:00", "2020-03-01T00:00:00");
@@ -192,7 +192,7 @@ TEST_CASE("TimeQuantizer: Test days resolution", "[timequantizer]") {
 TEST_CASE("TimeQuantizer: Test months resolution", "[timequantizer]") {
     SpiceManager::initialize();
 
-    globebrowsing::TimeQuantizer t1;
+    TimeQuantizer t1;
     Time testT;
 
     t1.setStartEndRange("2017-01-28T00:00:00", "2020-09-01T00:00:00");
@@ -205,8 +205,9 @@ TEST_CASE("TimeQuantizer: Test months resolution", "[timequantizer]") {
         t1.setStartEndRange("2017-01-30T00:00:00", "2020-09-01T00:00:00");
     }
     catch (const ghoul::RuntimeError& e) {
-        CHECK(e.message.find("Invalid start day value of 30 for monthly increment, "
-                             "valid days are 1 - 28") != std::string::npos);
+        CHECK(e.message.contains(
+            "Invalid start day value of 30 for monthly increment, valid days are 1 - 28"
+        ));
     }
 
     t1.setStartEndRange("2016-01-17T00:00:00", "2020-09-01T00:00:00");
@@ -238,7 +239,7 @@ TEST_CASE("TimeQuantizer: Test months resolution", "[timequantizer]") {
 TEST_CASE("TimeQuantizer: Test hours & minutes resolution", "[timequantizer]") {
     SpiceManager::initialize();
 
-    globebrowsing::TimeQuantizer t1;
+    TimeQuantizer t1;
     Time testT;
 
     t1.setStartEndRange("2019-02-21T00:00:00", "2021-09-01T00:00:00");
@@ -276,7 +277,7 @@ TEST_CASE("TimeQuantizer: Test hours & minutes resolution", "[timequantizer]") {
 TEST_CASE("TimeQuantizer: Test pre-2000 dates", "[timequantizer]") {
     SpiceManager::initialize();
 
-    globebrowsing::TimeQuantizer t1;
+    TimeQuantizer t1;
     Time testT;
 
     t1.setStartEndRange("1000-01-01T00:00:00", "2001-01-01T00:00:00");
@@ -306,7 +307,7 @@ TEST_CASE("TimeQuantizer: Test pre-2000 dates", "[timequantizer]") {
 TEST_CASE("TimeQuantizer: Test valid resolutions", "[timequantizer]") {
     SpiceManager::initialize();
 
-    globebrowsing::TimeQuantizer t1;
+    TimeQuantizer t1;
 
     singleResolutionTest(t1, "29d", "(d)ay option.", true);
     singleResolutionTest(t1, "0d", "(d)ay option.", true);
@@ -328,7 +329,7 @@ TEST_CASE("TimeQuantizer: Test valid resolutions", "[timequantizer]") {
 TEST_CASE("TimeQuantizer: Test start time pre-existing object", "[timequantizer]") {
     SpiceManager::initialize();
 
-    globebrowsing::TimeQuantizer t1;
+    TimeQuantizer t1;
 
     singleStartTimeTest(t1, "2017-01-20T00:00:00", "Invalid start", false);
     singleStartTimeTest(t1, "2017-01-29T00:00:00", "Invalid start day value", false);

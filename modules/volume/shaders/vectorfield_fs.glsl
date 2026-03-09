@@ -22,38 +22,49 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/volume/transferfunctionproperty.h>
+#include "fragment.glsl"
 
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/lua/lua_types.h>
+in Data {
+  flat vec3 direction;
+  flat float magnitude;
+  float depth;
+} in_data;
 
-namespace openspace::properties {
 
-TransferFunctionProperty::TransferFunctionProperty(Property::PropertyInfo info,
-                                                   volume::TransferFunction value)
-    : TemplateProperty<volume::TransferFunction>(std::move(info), std::move(value))
-{}
+uniform float opacity;
+uniform vec2 dataRangeFilter;
+uniform int colorMode;
+uniform vec2 magDomain;
+uniform sampler1D colorTexture;
+uniform vec4 fixedColor;
 
-std::string_view TransferFunctionProperty::className() const {
-    return "TransferFunctionProperty";
+const int ColorModeFixed = 0;
+const int ColorModeMagnitude = 1;
+const int ColorModeDirection = 2;
+
+Fragment getFragment() {
+  Fragment frag;
+
+  if (opacity == 0.0) {
+      discard;
+  }
+
+  // vec4 fixedColor = vec4(1.0, 0.0, 0.0, 1.0);
+  if (colorMode == ColorModeFixed) {
+    frag.color = fixedColor;
+  }
+  else if (colorMode == ColorModeMagnitude) {
+    float t = (in_data.magnitude - magDomain.x) / (magDomain.y - magDomain.x);
+    t = clamp(t, 0.0, 1.0);
+    frag.color = texture(colorTexture, t);
+  }
+  else { // colorMode == ColorModeDirection
+    vec3 dir = normalize(in_data.direction);
+    vec3 color = 0.5 * (dir + vec3(1.0)); // remaps [-1, 1] -> [0, 1]
+    frag.color = vec4(color, 1.0);
+  }
+
+  frag.color.a *= opacity;
+  frag.depth = in_data.depth;
+  return frag;
 }
-
-ghoul::lua::LuaTypes TransferFunctionProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Table;
-}
-
-void TransferFunctionProperty::getLuaValue(lua_State* state) const {
-    _value.envelopesToLua(state);
-}
-
-volume::TransferFunction TransferFunctionProperty::toValue(lua_State* state) const {
-    openspace::volume::TransferFunction tf;
-    tf.setEnvelopesFromLua(state);
-    return tf;
-}
-
-std::string TransferFunctionProperty::stringValue() const {
-    return _value.serializedToString();
-}
-
-} // namespace openspace::properties

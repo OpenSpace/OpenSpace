@@ -32,7 +32,7 @@
 
 struct lua_State;
 
-namespace openspace::scripting {
+namespace openspace {
 
 /**
  * This structure represents a Lua library, itself consisting of a unique #name and an
@@ -63,7 +63,7 @@ struct LuaLibrary {
         std::vector<Argument> arguments;
         /// Information about the type that this function returns
         std::string returnType;
-        /// A help text describing what the function does/
+        /// A help text describing what the function does
         std::string helpText;
         /// The source location where the implementation for this Lua file is located
         struct {
@@ -91,6 +91,6 @@ struct LuaLibrary {
     void merge(LuaLibrary rhs);
 };
 
-} // namespace openspace::scripting
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___LUALIBRARY___H__

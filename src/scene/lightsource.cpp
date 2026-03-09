@@ -31,11 +31,13 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "Whether the light source is enabled or not.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This is the base class of all `LightSource` types, which are components that can be
@@ -57,8 +59,8 @@ namespace {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
     };
-#include "lightsource_codegen.cpp"
 } // namespace
+#include "lightsource_codegen.cpp"
 
 namespace openspace {
 
@@ -66,7 +68,7 @@ bool LightSource::isEnabled() const {
     return _enabled;
 }
 
-documentation::Documentation LightSource::Documentation() {
+Documentation LightSource::Documentation() {
     return codegen::doc<Parameters>("core_light_source");
 }
 
@@ -85,7 +87,7 @@ std::unique_ptr<LightSource> LightSource::createFromDictionary(
 }
 
 LightSource::LightSource(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "LightSource", "Light Source" })
+    : PropertyOwner({ "LightSource", "Light Source" })
     , _enabled(EnabledInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

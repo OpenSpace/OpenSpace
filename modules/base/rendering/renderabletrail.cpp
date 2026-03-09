@@ -44,12 +44,7 @@
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 18> UniformNames = {
-        "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
-        "lineLength", "lineFadeAmount", "vertexSortingMethod", "idOffset", "nVertices",
-        "stride", "pointSize", "renderPhase", "viewport", "lineWidth", "floatingOffset",
-        "useSplitRenderMode", "numberOfUniqueVertices"
-    };
+    using namespace openspace;
 
     // The possible values for the _renderingModes property
     enum RenderingMode {
@@ -66,71 +61,71 @@ namespace {
         { "Points+Lines", RenderingModeLinesPoints }
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
+    constexpr Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
         "This value determines the RGB main color for the lines and points of the trail.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableFadeInfo = {
+    constexpr Property::PropertyInfo EnableFadeInfo = {
         "EnableFade",
         "Enable line fading of old points",
-        "Toggles whether the trail should fade older points out. If this value is "
-        "true, the 'Fade' parameter determines the speed of fading. If this value is "
-        "false, the entire trail is rendered at full opacity and color.",
-        openspace::properties::Property::Visibility::NoviceUser
+        "Toggles whether the trail should fade older points out. If this value is true, "
+        "the 'Fade' parameter determines the speed of fading. If this value is false, "
+        "the entire trail is rendered at full opacity and color.",
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineLengthInfo = {
+    constexpr Property::PropertyInfo LineLengthInfo = {
         "LineLength",
         "Line length",
         "The extent of the rendered trail. A value of 0 will result in no trail and a "
         "value of 1 will result in a trail that covers the entire extent. The setting "
-        "only applies if 'EnableFade' is true. If it is false, this setting has "
-        "no effect.",
-        openspace::properties::Property::Visibility::User
+        "only applies if 'EnableFade' is true. If it is false, this setting has no "
+        "effect.",
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineFadeAmountInfo = {
+    constexpr Property::PropertyInfo LineFadeAmountInfo = {
         "LineFadeAmount",
         "Line fade amount",
-        "The amount of the trail that should be faded. If the value is 0 then the "
-        "trail will have no fading applied. A value of 0.6 will result in a trail "
-        "where 60% of the extent of the trail will have fading applied to it. In other "
-        "words, the 40% closest to the head of the trail will be solid and the rest "
-        "will fade until completely transparent at the end of the trail. A value of 1 "
-        "will result in a trail that starts fading immediately, becoming fully "
-        "transparent by the end of the trail. This setting only applies if the "
-        "'EnableFade' value is true. If it is false, this setting has no effect.",
-        openspace::properties::Property::Visibility::User
+        "The amount of the trail that should be faded. If the value is 0 then the trail "
+        "will have no fading applied. A value of 0.6 will result in a trail where 60% of "
+        "the extent of the trail will have fading applied to it. In other words, the 40% "
+        "closest to the head of the trail will be solid and the rest will fade until "
+        "completely transparent at the end of the trail. A value of 1 will result in a "
+        "trail that starts fading immediately, becoming fully transparent by the end of "
+        "the trail.This setting only applies if the 'EnableFade' value is true. If it is "
+        "false, this setting has no effect.",
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "Specifies the line width of the trail lines, if the selected rendering method "
         "includes lines. If the rendering mode is Points, this value is ignored.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
+    constexpr Property::PropertyInfo PointSizeInfo = {
         "PointSize",
         "Point size",
         "Specifies the base size of the points along the line, if the selected rendering "
         "method includes points. If the rendering mode is Lines, this value is ignored. "
         "If a subsampling of the values is performed, the subsampled values are half "
         "this size.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
+    constexpr Property::PropertyInfo RenderingModeInfo = {
         "Rendering",
         "Rendering mode",
         "Determines how the trail should be rendered. If 'Lines' is selected, only the "
         "line part is visible, if 'Points' is selected, only the corresponding points "
         "(and subpoints) are shown. 'Lines+Points' shows both parts.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrail)]] Parameters {
@@ -165,17 +160,17 @@ namespace {
         // [[codegen::verbatim(RenderingModeInfo.description)]]
         std::optional<RenderingMode> renderingMode [[codegen::key("Rendering")]];
     };
-#include "renderabletrail_codegen.cpp"
 } // namespace
+#include "renderabletrail_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableTrail::Documentation() {
+Documentation RenderableTrail::Documentation() {
     return codegen::doc<Parameters>("base_renderable_renderabletrail");
 }
 
 RenderableTrail::Appearance::Appearance()
-    : properties::PropertyOwner({
+    : PropertyOwner({
         "Appearance",
         "Appearance",
         "The appearance of the trail"
@@ -194,7 +189,7 @@ RenderableTrail::Appearance::Appearance()
         { RenderingModeLinesPoints, "Lines+Points" }
     });
 
-    lineColor.setViewOption(properties::Property::ViewOptions::Color);
+    lineColor.setViewOption(Property::ViewOptions::Color);
     addProperty(lineColor);
     addProperty(lineWidth);
     addProperty(pointSize);
@@ -261,7 +256,7 @@ void RenderableTrail::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_programObject, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_programObject, _uniformCache);
 }
 
 void RenderableTrail::deinitializeGL() {
@@ -282,9 +277,9 @@ glm::dvec3 RenderableTrail::translationPosition(Time time) const {
     // Use empty modelTransform (local coordinates) and time 0; previous frame time
     // doesn't matter
     const UpdateData data = { {}, time, Time(0.0) };
-    // (2025-06-09, emmbr) No need to call update here, since it's only for caching
-    // the position and kills the trail performance. If behavior changes or we add
-    // a translation type that needs pre-update, we need add the update and address
+    // (2025-06-09, emmbr) No need to call update here, since it's only for caching the
+    // position and kills the trail performance. If behavior changes or we add a
+    // translation type that needs pre-update, we need add the update and address
     // performance
     //_translation->update(data);
     return _translation->position(data);
@@ -299,9 +294,9 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
 {
     ZoneScoped;
 
-    // We pass in the model view transformation matrix as double in order to maintain
-    // high precision for vertices; especially for the trails, a high vertex precision
-    // is necessary as they are usually far away from their reference
+    // We pass in the model view transformation matrix as double in order to maintain high
+    // precision for vertices; especially for the trails, a high vertex precision is
+    // necessary as they are usually far away from their reference
     const glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
     _programObject->setUniform(
         _uniformCache.modelViewTransform,
@@ -320,16 +315,17 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
     // The vertex sorting method is used to tweak the fading along the trajectory
     _programObject->setUniform(_uniformCache.vertexSortingMethod, sorting);
 
-    // This value is subtracted from the vertex id in the case of a potential ring
-    // buffer (as used in RenderableTrailOrbit) to keep the first vertex at its
-    // brightest
+    // This value is subtracted from the vertex id in the case of a potential ring buffer
+    // (as used in RenderableTrailOrbit) to keep the first vertex at its brightest
     _programObject->setUniform(_uniformCache.idOffset, ringOffset);
 
     _programObject->setUniform(_uniformCache.nVertices, nVertices);
     _programObject->setUniform(_uniformCache.floatingOffset, floatingOffset);
     _programObject->setUniform(_uniformCache.useSplitRenderMode, useSplitRenderMode);
-    _programObject->setUniform(_uniformCache.numberOfUniqueVertices,
-        numberOfUniqueVertices);
+    _programObject->setUniform(
+        _uniformCache.numberOfUniqueVertices,
+        numberOfUniqueVertices
+    );
 
     std::array<GLint, 4> viewport;
     global::renderEngine->openglStateCache().viewport(viewport.data());
@@ -346,8 +342,8 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
     );
 
     if (renderPoints) {
-        // The stride parameter determines the distance between larger points and
-        // smaller ones
+        // The stride parameter determines the distance between larger points and smaller
+        // ones
         _programObject->setUniform(_uniformCache.stride, info.stride);
         _programObject->setUniform(_uniformCache.pointSize, _appearance.pointSize);
     }
@@ -361,9 +357,9 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
     glBindVertexArray(info._vao);
     if (renderLines) {
         _programObject->setUniform(_uniformCache.renderPhase, RenderPhaseLines);
-        // Subclasses of this renderer might be using the index array or might now be
-        // so we check if there is data available and if there isn't, we use the
-        // glDrawArrays draw call; otherwise the glDrawElements
+        // Subclasses of this renderer might be using the index array or might now be so
+        // we check if there is data available and if there isn't, we use the glDrawArrays
+        // draw call; otherwise the glDrawElements
         if (info._ibo == 0) {
             glDrawArrays(
                 GL_LINE_STRIP,
@@ -381,9 +377,9 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
         }
     }
     if (renderPoints) {
-        // Subclasses of this renderer might be using the index array or might now be
-        // so we check if there is data available and if there isn't, we use the
-        // glDrawArrays draw call; otherwise the glDrawElements
+        // Subclasses of this renderer might be using the index array or might now be so
+        // we check if there is data available and if there isn't, we use the glDrawArrays
+        // draw call; otherwise the glDrawElements
         _programObject->setUniform(_uniformCache.renderPhase, RenderPhasePoints);
         if (info._ibo == 0) {
             glDrawArrays(GL_POINTS, info.first, info.count);
@@ -422,9 +418,6 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         _programObject->setUniform(_uniformCache.lineLength, startPoint);
         _programObject->setUniform(_uniformCache.lineFadeAmount, endPoint);
     }
-
-    /*glm::ivec2 resolution = global::renderEngine.renderingResolution();
-    _programObject->setUniform(_uniformCache.resolution, resolution);*/
 
     glDepthMask(false);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -467,8 +460,8 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     //}
 
     if (_useSplitRenderMode) {
-        // Splits the trail up into three parts for more accurate rendering
-        // of renderableTrailTrajectory trails
+        // Splits the trail up into three parts for more accurate rendering of
+        // RenderableTrailTrajectory trails
 
         internalRender(
             renderLines,
@@ -546,7 +539,6 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
     glBindVertexArray(0);
 
-    // Reset
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
 

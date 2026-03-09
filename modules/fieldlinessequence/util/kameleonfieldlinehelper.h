@@ -32,9 +32,10 @@
 #include <vector>
 
 namespace ccmc { class Kameleon; }
-namespace openspace { class FieldlinesState; }
 
-namespace openspace::fls {
+namespace openspace {
+
+class FieldlinesState;
 
 std::vector<std::string>
     extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
@@ -79,6 +80,6 @@ bool traceFromListOfPoints(FieldlinesState& state, const std::string& cdfPath,
     std::vector<glm::vec3>& seedpoints, const std::string& tracingVar,
     std::vector<std::string>& extraVars, std::vector<std::string>& extraMagVars);
 
-} // namespace openspace::fls
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONFIELDLINEHELPER___H__

@@ -22,13 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
-#define __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
+#ifndef __OPENSPACE_CORE___ORBITALCAMERASTATES___H__
+#define __OPENSPACE_CORE___ORBITALCAMERASTATES___H__
 
 #include <openspace/navigation/orbitalnavigator/dampenedvelocity.h>
 #include <ghoul/glm.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
 /**
  * Velocity input states for the OrbitalNavigator's camera interaction.
@@ -83,6 +83,6 @@ protected:
     DampenedVelocity<double> _globalRollVelocity;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
-#endif // __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
+#endif // __OPENSPACE_CORE___ORBITALCAMERASTATES___H__

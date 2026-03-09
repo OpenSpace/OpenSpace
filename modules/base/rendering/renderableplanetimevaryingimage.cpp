@@ -39,14 +39,16 @@
 #include <iterator>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderablePlaneTimeVaryingImage";
 
-    constexpr openspace::properties::Property::PropertyInfo SourceFolderInfo = {
+    constexpr Property::PropertyInfo SourceFolderInfo = {
         "SourceFolder",
         "Source folder",
         "An image directory that is loaded from disk and contains the textures to use "
         "for this plane.",
-       openspace::properties::Property::Visibility::AdvancedUser
+       Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderablePlaneTimeVaryingImage)]] Parameters {
@@ -54,15 +56,15 @@ namespace {
         std::string sourceFolder;
 
         // If set to `true` the images are only loaded when it is about to be shown
-        // instead of preloading them
+        // instead of preloading them.
         std::optional<bool> lazyLoading;
     };
-#include "renderableplanetimevaryingimage_codegen.cpp"
 } // namespace
+#include "renderableplanetimevaryingimage_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderablePlaneTimeVaryingImage::Documentation() {
+Documentation RenderablePlaneTimeVaryingImage::Documentation() {
     return codegen::doc<Parameters>(
         "base_renderable_plane_time_varying_image",
         RenderablePlane::Documentation()
@@ -79,8 +81,7 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
     _sourceFolder = p.sourceFolder;
     if (!std::filesystem::is_directory(absPath(_sourceFolder))) {
         LERROR(std::format(
-            "Time varying image, '{}' is not a valid directory",
-            _sourceFolder.value()
+            "Time varying image, '{}' is not a valid directory", _sourceFolder.value()
         ));
     }
 
@@ -120,10 +121,6 @@ void RenderablePlaneTimeVaryingImage::initializeGL() {
             absPath(_sourceFiles[i]),
             2
         );
-        _textureFiles[i]->setInternalFormat(GL_COMPRESSED_RGBA);
-        _textureFiles[i]->uploadTexture();
-        _textureFiles[i]->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        _textureFiles[i]->purgeFromRAM();
     }
     if (!_isLoadingLazily) {
         _texture = loadTexture();
@@ -131,8 +128,8 @@ void RenderablePlaneTimeVaryingImage::initializeGL() {
 }
 
 bool RenderablePlaneTimeVaryingImage::extractMandatoryInfoFromDictionary() {
-    // Ensure that the source folder exists and then extract
-    // the files with the same extension as <inputFileTypeString>
+    // Ensure that the source folder exists and then extract the files with the same
+    // extension as <inputFileTypeString>
     namespace fs = std::filesystem;
     const fs::path sourceFolder = absPath(_sourceFolder);
     // Extract all file paths from the provided folder
@@ -195,7 +192,7 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
         } // else we're still in same state as previous frame (no changes needed)
     }
     else {
-        // not in interval => set everything to false
+        // Not in interval => set everything to false
         _activeTriggerTimeIndex = -1;
         needsUpdate = false;
     }
@@ -270,4 +267,5 @@ ghoul::opengl::Texture* RenderablePlaneTimeVaryingImage::loadTexture() const {
     }
     return texture;
 }
+
 } // namespace openspace

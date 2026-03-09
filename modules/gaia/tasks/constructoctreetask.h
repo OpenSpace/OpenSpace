@@ -41,7 +41,7 @@ public:
 
     std::string description() override;
     void perform(const Task::ProgressCallback& onProgress) override;
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     const int RENDER_VALUES = 8;
@@ -66,7 +66,6 @@ private:
      * \p filterValues are outside of the defined range.
      *
      * \param filterValues Are all read filter values in binary file
-     *
      * \return `false` if value should be inserted into Octree
      */
     bool checkAllFilters(const std::vector<float>& filterValues);

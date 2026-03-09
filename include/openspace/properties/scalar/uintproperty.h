@@ -29,15 +29,15 @@
 
 #include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 /**
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type `unsigned int`.
+ * This class is a concrete implementation of TemplateProperty with the type
+ * `unsigned int`.
  */
 class UIntProperty : public NumericalProperty<unsigned int> {
 public:
-    explicit UIntProperty(Property::PropertyInfo info, unsigned int value = 0,
+    explicit UIntProperty(PropertyInfo info, unsigned int value = 0,
         unsigned int minValue = std::numeric_limits<unsigned int>::lowest(),
         unsigned int maxValue = std::numeric_limits<unsigned int>::max(),
         unsigned int stepValue = 1);
@@ -54,6 +54,6 @@ private:
     unsigned int toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___UINTPROPERTY___H__

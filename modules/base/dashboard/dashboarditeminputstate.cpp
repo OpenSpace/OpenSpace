@@ -34,39 +34,41 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ShowWhenEnabledInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ShowWhenEnabledInfo = {
         "ShowWhenEnabled",
         "Show when enabled",
         "Show text when the input is enabled.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowWhenDisabledInfo = {
+    constexpr Property::PropertyInfo ShowWhenDisabledInfo = {
         "ShowWhenDisabled",
         "Show when disabled",
         "Show text when the input is disabled.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowKeyboardInfo = {
+    constexpr Property::PropertyInfo ShowKeyboardInfo = {
         "ShowKeyboard",
         "Show keyboard information",
         "Display the state of the keyboard input.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowMouseInfo = {
+    constexpr Property::PropertyInfo ShowMouseInfo = {
         "ShowMouse",
         "Show mouse information",
         "Display the state of the mouse input.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowJoystickInfo = {
+    constexpr Property::PropertyInfo ShowJoystickInfo = {
         "ShowJoystick",
         "Show joystick information",
         "Display the state of the joystick input.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `DashboardItem` shows the current state of the different methods to provide
@@ -90,12 +92,12 @@ namespace {
         // [[codegen::verbatim(ShowJoystickInfo.description)]]
         std::optional<bool> showJoystick;
     };
-#include "dashboarditeminputstate_codegen.cpp"
 } // namespace
+#include "dashboarditeminputstate_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemInputState::Documentation() {
+Documentation DashboardItemInputState::Documentation() {
     return codegen::doc<Parameters>(
         "base_dashboarditem_inputstate",
         DashboardTextItem::Documentation()

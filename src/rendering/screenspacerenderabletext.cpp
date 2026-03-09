@@ -33,19 +33,21 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo FontNameInfo = {
         "FontName",
         "Font name",
         "This value is the name of the font that is used. It can either refer to an "
         "internal name registered previously, or it can refer to a path that is used.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
+    constexpr Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font size",
         "This value determines the size of the font that is used to render the distance.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(DashboardTextItem)]] Parameters {
@@ -55,12 +57,12 @@ namespace {
         // [[codegen::verbatim(FontSizeInfo.description)]]
         std::optional<float> fontSize;
     };
-#include "screenspacerenderabletext_codegen.cpp"
 } // namespace
+#include "screenspacerenderabletext_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceRenderableText::Documentation() {
+Documentation ScreenSpaceRenderableText::Documentation() {
     return codegen::doc<Parameters>("screenspace_text");
 }
 
@@ -128,7 +130,7 @@ void ScreenSpaceRenderableText::render(const RenderData& renderData) {
 
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glm::vec2 pos = glm::vec2(0.f, size.y / 4);
+    glm::vec2 pos = glm::vec2(0.f, size.y / 4.f);
     _fontRenderer->render(*_font, pos, _buffer);
     ghoul::opengl::FramebufferObject::deactivate();
 
@@ -158,13 +160,14 @@ void ScreenSpaceRenderableText::updateFramebuffer() {
     _framebuffer->activate();
     // Create a texture that has 2 times the size to create a buffer
     _texture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(bbox.x, bbox.y, 1),
-        GL_TEXTURE_2D
+        ghoul::opengl::Texture::FormatInit {
+            .dimensions = glm::uvec3(bbox.x, bbox.y, 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::RGB,
+            .dataType = GL_UNSIGNED_BYTE
+        },
+        ghoul::opengl::Texture::SamplerInit {}
     );
-
-    _texture->uploadTexture();
-    _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-    _texture->purgeFromRAM();
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
     ghoul::opengl::FramebufferObject::deactivate();
 }
@@ -173,4 +176,4 @@ void ScreenSpaceRenderableText::bindTexture(ghoul::opengl::TextureUnit& unit) {
     unit.bind(*_texture);
 }
 
-} //namespace openspace
+} // namespace openspace

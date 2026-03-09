@@ -24,8 +24,8 @@
 
 #include <modules/gaia/gaiamodule.h>
 
-#include <modules/gaia/tasks/constructoctreetask.h>
 #include <modules/gaia/rendering/renderablegaiastars.h>
+#include <modules/gaia/tasks/constructoctreetask.h>
 #include <modules/gaia/tasks/readfitstask.h>
 #include <modules/gaia/tasks/readspecktask.h>
 #include <openspace/documentation/documentation.h>
@@ -41,7 +41,9 @@
 
 namespace openspace {
 
-GaiaModule::GaiaModule() : OpenSpaceModule(Name) {}
+GaiaModule::GaiaModule()
+    : OpenSpaceModule(Name)
+{}
 
 void GaiaModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul::TemplateFactory<Renderable>* fRenderable =
@@ -56,16 +58,16 @@ void GaiaModule::internalInitialize(const ghoul::Dictionary&) {
     fTask->registerClass<ConstructOctreeTask>("ConstructOctreeTask");
 }
 
-std::vector<documentation::Documentation> GaiaModule::documentations() const {
+std::vector<Documentation> GaiaModule::documentations() const {
     return {
         RenderableGaiaStars::Documentation(),
         ReadFitsTask::Documentation(),
         ReadSpeckTask::Documentation(),
-        ConstructOctreeTask::Documentation(),
+        ConstructOctreeTask::Documentation()
     };
 }
 
-scripting::LuaLibrary GaiaModule::luaLibrary() const {
+LuaLibrary GaiaModule::luaLibrary() const {
     return {
         .name = "gaia",
         .scripts = {

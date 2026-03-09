@@ -37,9 +37,9 @@
 
 namespace openspace {
 
-namespace scripting { struct LuaLibrary; }
+struct LuaLibrary;
 
-class Dashboard : public properties::PropertyOwner {
+class Dashboard : public PropertyOwner {
 public:
     Dashboard();
     virtual ~Dashboard() override = default;
@@ -67,12 +67,12 @@ public:
      * Returns the Lua library that contains all Lua functions available to affect the
      * rendering.
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
-    properties::BoolProperty _isEnabled;
-    properties::IVec2Property _startPositionOffset;
-    properties::IntProperty _refreshRate;
+    BoolProperty _isEnabled;
+    IVec2Property _startPositionOffset;
+    IntProperty _refreshRate;
 
     std::vector<std::unique_ptr<DashboardItem>> _items;
     std::chrono::steady_clock::time_point _lastRefresh;

@@ -34,10 +34,9 @@
 #include <openspace/navigation/orbitalnavigator/websocketcamerastates.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
-
-class OrbitalInputHandler : public properties::PropertyOwner {
+class OrbitalInputHandler : public PropertyOwner {
 public:
     OrbitalInputHandler(double friction);
 
@@ -71,10 +70,10 @@ public:
     void setZoomFrictionEnabled(bool enabled);
 
 private:
-    properties::FloatProperty _mouseSensitivity;
-    properties::FloatProperty _joystickSensitivity;
-    properties::FloatProperty _websocketSensitivity;
-    properties::FloatProperty _touchSensitivity;
+    FloatProperty _mouseSensitivity;
+    FloatProperty _joystickSensitivity;
+    FloatProperty _websocketSensitivity;
+    FloatProperty _touchSensitivity;
 
     MouseCameraStates _mouseStates;
     JoystickCameraStates _joystickStates;
@@ -83,6 +82,6 @@ private:
     TouchCameraStates _touchStates;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___ORBITALINPUTHANDLER___H__

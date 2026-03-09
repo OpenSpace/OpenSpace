@@ -95,7 +95,7 @@ void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
     if (event == SubscribeEvent && _sendState) {
         _stateCallbackHandle = global::sessionRecordingHandler->addStateChangeCallback(
             [this]() {
-                const interaction::SessionRecordingHandler::SessionState currentState =
+                const SessionRecordingHandler::SessionState currentState =
                     global::sessionRecordingHandler->state();
                 if (currentState != _lastState) {
                     sendJsonData();
@@ -112,7 +112,6 @@ bool SessionRecordingTopic::isDone() const {
 
 void SessionRecordingTopic::sendJsonData() {
     nlohmann::json stateJson;
-    using SessionRecordingHandler = interaction::SessionRecordingHandler;
     if (_sendState) {
         std::string stateString;
         switch (global::sessionRecordingHandler->state()) {

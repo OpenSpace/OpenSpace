@@ -30,12 +30,11 @@
 #include <ghoul/glm.h>
 #include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 class DVec2Property : public NumericalProperty<glm::dvec2> {
 public:
-    explicit DVec2Property(Property::PropertyInfo info,
-        glm::dvec2 value = glm::dvec2(0.0),
+    explicit DVec2Property(PropertyInfo info, glm::dvec2 value = glm::dvec2(0.0),
         glm::dvec2 minValue = glm::dvec2(std::numeric_limits<double>::lowest()),
         glm::dvec2 maxValue = glm::dvec2(std::numeric_limits<double>::max()),
         glm::dvec2 stepValue = glm::dvec2(0.01));
@@ -52,6 +51,6 @@ private:
     glm::dvec2 toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___DVEC2PROPERTY___H__

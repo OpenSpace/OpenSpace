@@ -35,59 +35,62 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "IswaDataGroup";
 
-    constexpr openspace::properties::Property::PropertyInfo UseLogInfo = {
+    constexpr Property::PropertyInfo UseLogInfo = {
         "UseLog",
         "Use logarithm",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseHistogramInfo = {
+    constexpr Property::PropertyInfo UseHistogramInfo = {
         "UseHistogram",
         "Auto contrast",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AutoFilterInfo = {
+    constexpr Property::PropertyInfo AutoFilterInfo = {
         "AutoFilter",
         "Auto filter",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NormalizeValues = {
+    constexpr Property::PropertyInfo NormalizeValues = {
         "NormValues",
         "Normalize values",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BackgroundInfo = {
+    constexpr Property::PropertyInfo BackgroundInfo = {
         "BackgroundValues",
         "Background values",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
+    constexpr Property::PropertyInfo TransferFunctionInfo = {
         "Transferfunctions",
         "Transfer functions",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DataOptionsInfo = {
+    constexpr Property::PropertyInfo DataOptionsInfo = {
         "DataOptions",
         "Data options",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 } // namespace
 
-namespace openspace{
+namespace openspace {
+
 IswaDataGroup::IswaDataGroup(std::string name, std::string type)
     : IswaBaseGroup(name, type)
     , _useLog(UseLogInfo, false)
@@ -114,14 +117,14 @@ IswaDataGroup::~IswaDataGroup() {}
 
 void IswaDataGroup::registerProperties() {
     _useLog.onChange([this]() {
-        LDEBUG("Group " + identifier() + " published useLogChanged");
+        LDEBUG(std::format("Group {} published useLogChanged", identifier()));
         ghoul::Dictionary d;
         d.setValue("useLog", _useLog.value());
         _groupEvent.publish("useLogChanged", d);
     });
 
     _useHistogram.onChange([this]() {
-        LDEBUG("Group " + identifier() + " published useHistogramChanged");
+        LDEBUG(std::format("Group {} published useHistogramChanged", identifier()));
         ghoul::Dictionary d;
         d.setValue("useHistogram", _useHistogram.value());
         _groupEvent.publish("useHistogramChanged", d);
@@ -129,18 +132,16 @@ void IswaDataGroup::registerProperties() {
 
     // If autofiler is on, background values property should be hidden
     _autoFilter.onChange([this]() {
-        LDEBUG("Group " + identifier() + " published autoFilterChanged");
-        // If autofiler is selected, use _dataProcessor to set backgroundValues
-        // and unregister backgroundvalues property.
+        LDEBUG(std::format("Group {} published autoFilterChanged", identifier()));
+        // If autofiler is selected, use _dataProcessor to set backgroundValues and
+        // unregister backgroundvalues property
         if (_autoFilter) {
             _backgroundValues = _dataProcessor->filterValues();
-            _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
-            //_backgroundValues.setVisible(false);
-        // else if autofilter is turned off, register backgroundValues
+            _backgroundValues.setVisibility(Property::Visibility::Hidden);
         }
         else {
-            _backgroundValues.setVisibility(properties::Property::Visibility::Always);
-            //_backgroundValues.setVisible(true);
+            // If autofilter is turned off, register backgroundValues
+            _backgroundValues.setVisibility(Property::Visibility::Always);
         }
         ghoul::Dictionary d;
         d.setValue("autoFilter", _autoFilter.value());
@@ -148,28 +149,28 @@ void IswaDataGroup::registerProperties() {
     });
 
     _normValues.onChange([this]() {
-        LDEBUG("Group " + identifier() + " published normValuesChanged");
+        LDEBUG(std::format("Group {} published normValuesChanged", identifier()));
         ghoul::Dictionary d;
         d.setValue("normValues", glm::dvec2(_normValues.value()));
         _groupEvent.publish("normValuesChanged", d);
     });
 
     _backgroundValues.onChange([this]() {
-        LDEBUG("Group " + identifier() + " published backgroundValuesChanged");
+        LDEBUG(std::format("Group {} published backgroundValuesChanged", identifier()));
         ghoul::Dictionary d;
         d.setValue("backgroundValues", glm::dvec2(_backgroundValues.value()));
         _groupEvent.publish("backgroundValuesChanged", d);
     });
 
     _transferFunctionsFile.onChange([this]() {
-        LDEBUG("Group " + identifier() + " published transferFunctionsChanged");
+        LDEBUG(std::format("Group {} published transferFunctionsChanged", identifier()));
         ghoul::Dictionary d;
         d.setValue("transferFunctionsChanged", _transferFunctionsFile.value());
         _groupEvent.publish("transferFunctionsChanged", d);
     });
 
     _dataOptions.onChange([this]() {
-        LDEBUG("Group " + identifier() + " published dataOptionsChanged");
+        LDEBUG(std::format("Group {} published dataOptionsChanged", identifier()));
         ghoul::Dictionary dict;
         std::set<std::string> set = _dataOptions;
         std::vector<std::string> vec(set.begin(), set.end());
@@ -207,4 +208,4 @@ std::set<std::string> IswaDataGroup::dataOptionsValue() const {
     return _dataOptions;
 }
 
-} //namespace openspace
+} // namespace openspace

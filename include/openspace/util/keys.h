@@ -409,16 +409,14 @@ std::string keyToString(KeyWithModifier keyWithModifier);
 } // namespace openspace
 
 namespace ghoul {
+    template <>
+    std::string to_string(const openspace::Key& key);
 
-template <>
-std::string to_string(const openspace::Key& key);
+    template <>
+    std::string to_string(const openspace::KeyModifier& mod);
 
-template <>
-std::string to_string(const openspace::KeyModifier& mod);
-
-template <>
-std::string to_string(const openspace::KeyWithModifier& keyMod);
-
+    template <>
+    std::string to_string(const openspace::KeyWithModifier& keyMod);
 } // namespace ghoul
 
 #endif // __OPENSPACE_CORE___KEYS___H__

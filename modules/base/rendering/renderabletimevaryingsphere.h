@@ -45,7 +45,7 @@ public:
 
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     void bindTexture(ghoul::opengl::TextureUnit& unit) override;
@@ -62,12 +62,12 @@ private:
     void updateActiveTriggerTimeIndex(double currenttime);
     void computeSequenceEndTime();
 
-    // If there's just one state it should never disappear!
+    // If there's just one state it should never disappear
     double _sequenceEndTime = std::numeric_limits<double>::max();
     std::vector<FileData> _files;
     int _activeTriggerTimeIndex = 0;
 
-    properties::StringProperty _textureSourcePath;
+    StringProperty _textureSourcePath;
     ghoul::opengl::Texture* _texture = nullptr;
     bool _textureIsDirty = false;
 };

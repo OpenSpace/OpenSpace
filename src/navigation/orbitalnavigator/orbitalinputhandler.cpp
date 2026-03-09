@@ -28,36 +28,38 @@
 #include <openspace/interaction/interactionhandler.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo MouseSensitivityInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo MouseSensitivityInfo = {
         "MouseSensitivity",
         "Mouse sensitivity",
         "Determines the sensitivity of the camera motion through the mouse. The lower "
         "the sensitivity is the less impact a mouse motion will have.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo JoystickSensitivityInfo = {
+    constexpr Property::PropertyInfo JoystickSensitivityInfo = {
         "JoystickSensitivity",
         "Joystick sensitivity",
         "Determines the sensitivity of the camera motion through a joystick. The lower "
         "the sensitivity is the less impact a joystick motion will have.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo WebsocketSensitivityInfo = {
+    constexpr Property::PropertyInfo WebsocketSensitivityInfo = {
         "WebsocketSensitivity",
         "Websocket sensitivity",
         "Determines the sensitivity of the camera motion through a websocket. The lower "
         "the sensitivity is the less impact a webstick motion will have.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TouchSensitivityInfo = {
+    constexpr Property::PropertyInfo TouchSensitivityInfo = {
         "TouchSensitivity",
         "Touch sensitivity",
         "Determines the sensitivity of the camera motion through touch interaction. The "
         "lower the sensitivity is the less the impact from touch motion will be.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
     double velocityScaleFromFriction(double friction) {
@@ -65,10 +67,10 @@ namespace {
     }
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
 OrbitalInputHandler::OrbitalInputHandler(double friction)
-    : properties::PropertyOwner({"Input", "Input"})
+    : PropertyOwner({"Input", "Input"})
     , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.f, 50.f)
     , _websocketSensitivity(WebsocketSensitivityInfo, 5.f, 1.f, 50.f)
@@ -253,4 +255,4 @@ void OrbitalInputHandler::setZoomFrictionEnabled(bool enabled) {
     _touchStates.setVerticalFriction(enabled);
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

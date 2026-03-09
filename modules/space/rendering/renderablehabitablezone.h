@@ -40,7 +40,7 @@ public:
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void initializeShader() override;
@@ -60,11 +60,11 @@ private:
      */
     glm::dvec4 computeKopparapuZoneBoundaries(float teff, float luminosity);
 
-    properties::FloatProperty _teff;
-    properties::FloatProperty _luminosity;
-    properties::BoolProperty _showOptimistic;
+    FloatProperty _teff;
+    FloatProperty _luminosity;
+    BoolProperty _showOptimistic;
 
-    properties::Vec2Property _kopparapuTeffInterval;
+    Vec2Property _kopparapuTeffInterval;
 
     glm::vec2 _conservativeBounds;
 

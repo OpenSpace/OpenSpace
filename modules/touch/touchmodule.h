@@ -59,8 +59,8 @@ private:
 
     std::unique_ptr<TuioEar> _ear;
 
-    properties::IntProperty _tuioPort;
-    properties::BoolProperty _hasActiveTouchEvent;
+    IntProperty _tuioPort;
+    BoolProperty _hasActiveTouchEvent;
 
     // contains an id and the Point that was processed last frame
     glm::ivec2 _webPositionCallback = glm::ivec2(0);

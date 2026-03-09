@@ -63,13 +63,13 @@ private:
         const std::vector<float>& voxels) const;
 
     TSP* _tsp;
-    std::ifstream* _file;
+    std::ifstream* _file = nullptr;
 
     std::vector<Histogram> _histograms;
-    unsigned int _numInnerNodes;
-    float _minBin;
-    float _maxBin;
-    int _numBins;
+    unsigned int _numInnerNodes = 0;
+    float _minBin = 0.f;
+    float _maxBin = 0.f;
+    int _numBins = 0;
 
     std::map<unsigned int, std::vector<float>> _voxelCache;
 };

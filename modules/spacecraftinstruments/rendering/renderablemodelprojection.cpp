@@ -47,12 +47,14 @@
 #include <variant>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo PerformShadingInfo = {
         "PerformShading",
         "Perform shading",
         "If true, the model will be shaded based on the location of the Sun. If false, "
         "shading is disabled and the model is fully illuminated.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
     // Similarly to the
@@ -102,12 +104,12 @@ namespace {
         // [[codegen::verbatim(PerformShadingInfo.description)]]
         std::optional<bool> performShading;
     };
-#include "renderablemodelprojection_codegen.cpp"
 } // namespace
+#include "renderablemodelprojection_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableModelProjection::Documentation() {
+Documentation RenderableModelProjection::Documentation() {
     return codegen::doc<Parameters>("spacecraftinstruments_renderablemodelprojection");
 }
 
@@ -318,7 +320,7 @@ void RenderableModelProjection::update(const UpdateData& data) {
     const double time = data.time.j2000Seconds();
     const double integrateFromTime = data.previousFrameTime.j2000Seconds();
 
-    // Only project new images if time changed since last update.
+    // Only project new images if time changed since last update
     if (time > integrateFromTime && ImageSequencer::ref().isReady() &&
         _projectionComponent.doesPerformProjection())
     {
@@ -438,4 +440,4 @@ glm::mat4 RenderableModelProjection::attitudeParameters(double time, const glm::
     );
 }
 
-}  // namespace openspace
+} // namespace openspace

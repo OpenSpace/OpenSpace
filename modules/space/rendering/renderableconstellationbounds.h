@@ -56,7 +56,7 @@ public:
 
     void render(const RenderData& data, RendererTasks& tasks) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     /**
@@ -68,9 +68,9 @@ private:
         std::string constellationFullName;
         bool isEnabled = false;
         /// The index of the first vertex describing the bounds
-        GLsizei startIndex;
+        GLsizei startIndex = 0;
         /// The number of vertices describing the bounds
-        GLsizei nVertices;
+        GLsizei nVertices = 0;
     };
 
     /**
@@ -89,10 +89,10 @@ private:
     void selectionPropertyHasChanged() override;
 
     /// The filename containing the constellation bounds
-    properties::StringProperty _vertexFilename;
+    StringProperty _vertexFilename;
 
     /// Determines the color of the constellation lines
-    properties::Vec3Property _color;
+    Vec3Property _color;
 
     /// The list of all loaded constellation bounds
     std::vector<ConstellationBound> _constellationBounds;
@@ -104,7 +104,8 @@ private:
         float y;
         float z;
     };
-    std::vector<Vertex> _vertexValues; ///< A list of all vertices of all bounds
+    /// A list of all vertices of all bounds
+    std::vector<Vertex> _vertexValues;
 
     GLuint _vao = 0;
     GLuint _vbo = 0;

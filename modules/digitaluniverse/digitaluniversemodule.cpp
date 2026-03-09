@@ -53,7 +53,7 @@ void DigitalUniverseModule::internalDeinitializeGL() {
     ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
 }
 
-std::vector<documentation::Documentation> DigitalUniverseModule::documentations() const {
+std::vector<Documentation> DigitalUniverseModule::documentations() const {
     return {
         RenderableDUMeshes::Documentation()
     };

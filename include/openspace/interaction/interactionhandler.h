@@ -39,13 +39,13 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec4property.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
 /**
  * This handler is responsible for keeping track of the different input states provided
  * through the software's interaction system.
  */
-class InteractionHandler: public properties::PropertyOwner {
+class InteractionHandler: public PropertyOwner {
 public:
     InteractionHandler();
     virtual ~InteractionHandler() override;
@@ -105,21 +105,21 @@ private:
     // Keeps track of when interaction has happened
     InteractionMonitor _interactionMonitor;
 
-    properties::BoolProperty _invertMouseButtons;
+    BoolProperty _invertMouseButtons;
 
-    properties::BoolProperty _disableKeybindings;
-    properties::BoolProperty _disableMouseInputs;
-    properties::BoolProperty _disableJoystickInputs;
-    properties::BoolProperty _disableTouchInputs;
+    BoolProperty _disableKeybindings;
+    BoolProperty _disableMouseInputs;
+    BoolProperty _disableJoystickInputs;
+    BoolProperty _disableTouchInputs;
 
-    properties::IntProperty _maxDoubleTapTime;
+    IntProperty _maxDoubleTapTime;
 
     TouchMarker _touchMarkers;
 
     struct {
-        properties::PropertyOwner owner;
-        properties::BoolProperty enable;
-        properties::Vec4Property color;
+        PropertyOwner owner;
+        BoolProperty enable;
+        Vec4Property color;
 
         bool isMouseFirstPress = false;
         bool isMousePressed = false;
@@ -128,6 +128,6 @@ private:
     } _mouseVisualizer;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___INTERACTIONHANDLER___H__

@@ -46,13 +46,13 @@ namespace {
     }
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
 TouchCameraStates::TouchCameraStates(double sensitivity, double velocityScaleFactor)
     : OrbitalCameraStates(sensitivity, velocityScaleFactor)
     , _pinchInputs({
-        TouchInputHolder(TouchInput(0, 0, 0.f, 0.f, 0.0)),
-        TouchInputHolder(TouchInput(0, 0, 0.f, 0.f, 0.0))
+        TouchInputHolder(TouchInput(0, 0, glm::vec2(0.f), 0.0)),
+        TouchInputHolder(TouchInput(0, 0, glm::vec2(0.f), 0.0))
     })
 {}
 
@@ -114,14 +114,26 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
             // points this/first frame
             const TouchInput& startFinger0 = _pinchInputs[0].firstInput();
             const TouchInput& startFinger1 = _pinchInputs[1].firstInput();
-            const glm::dvec2 startVec0 = glm::dvec2(startFinger0.x * aspectRatio, startFinger0.y);
-            const glm::dvec2 startVec1 = glm::dvec2(startFinger1.x * aspectRatio, startFinger1.y);
+            const glm::dvec2 startVec0 = glm::dvec2(
+                startFinger0.pos.x * aspectRatio,
+                startFinger0.pos.y
+            );
+            const glm::dvec2 startVec1 = glm::dvec2(
+                startFinger1.pos.x * aspectRatio,
+                startFinger1.pos.y
+            );
             double distToCentroidStart = glm::length(startVec0 - startVec1) / 2.0;
 
             const TouchInput& endFinger0 = _pinchInputs[0].latestInput();
             const TouchInput& endFinger1 = _pinchInputs[1].latestInput();
-            const glm::dvec2 endVec0 = glm::dvec2(endFinger0.x * aspectRatio, endFinger0.y);
-            const glm::dvec2 endVec1 = glm::dvec2(endFinger1.x * aspectRatio, endFinger1.y);
+            const glm::dvec2 endVec0 = glm::dvec2(
+                endFinger0.pos.x * aspectRatio,
+                endFinger0.pos.y
+            );
+            const glm::dvec2 endVec1 = glm::dvec2(
+                endFinger1.pos.x * aspectRatio,
+                endFinger1.pos.y
+            );
             double distToCentroidEnd = glm::length(endVec0 - endVec1) / 2.0;
 
             double zoomFactor = distToCentroidEnd - distToCentroidStart;
@@ -145,11 +157,8 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
                         return touchPoint.holdsInput(input);
                     }
                 );
-                float lastAngle = point.angleToPos(_centroid.x, _centroid.y);
-                float currentAngle = touchPoint.latestInput().angleToPos(
-                    _centroid.x,
-                    _centroid.y
-                );
+                float lastAngle = point.angleToPos(_centroid);
+                float currentAngle = touchPoint.latestInput().angleToPos(_centroid);
                 rollFactor += validAngleDiff(lastAngle, currentAngle);
             }
             double avgRollFactor = rollFactor / static_cast<double>(touchPoints.size());
@@ -206,10 +215,7 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
     glm::vec2 lastCentroid = _centroid;
     _centroid = glm::vec2(0.f, 0.f);
     for (const TouchInputHolder& inputHolder : inputs) {
-        _centroid += glm::vec2(
-            inputHolder.latestInput().x,
-            inputHolder.latestInput().y
-        );
+        _centroid += inputHolder.latestInput().pos;
     }
     _centroid /= static_cast<float>(inputs.size());
 
@@ -219,18 +225,12 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
     TouchInput distInput = inputs[0].latestInput();
     for (const TouchInputHolder& inputHolder : inputs) {
         const TouchInput& latestInput = inputHolder.latestInput();
-        dist += glm::length(glm::dvec2(
-            latestInput.x - distInput.x,
-            latestInput.y - distInput.y
-        ));
+        dist += glm::length(glm::dvec2(latestInput.pos) - glm::dvec2(distInput.pos));
         distInput = latestInput;
     }
     distInput = lastProcessed[0];
     for (const TouchInput& p : lastProcessed) {
-        lastDist += glm::length(glm::dvec2(
-            p.x - distInput.x,
-            p.y - distInput.y
-        ));
+        lastDist += glm::length(glm::dvec2(p.pos) - glm::dvec2(distInput.pos));
         distInput = p;
     }
 
@@ -265,7 +265,8 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
         const TouchInput& prevInput = *it;
 
         // Compute diff for slowest moving finger
-        double diff = latestInput.x - prevInput.x + latestInput.y - prevInput.y;
+        const glm::vec2 d = latestInput.pos - prevInput.pos;
+        const double diff = d.x + d.y;
         if (!inputHolder.isMoving()) {
             minDiff = 0.0;
         }
@@ -274,9 +275,8 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
         }
 
         // Compute roll factor, as the difference in angle to centroid between frames
-        float lastAngle = prevInput.angleToPos(_centroid.x, _centroid.y);
-        float currentAngle =
-            inputHolder.latestInput().angleToPos(_centroid.x, _centroid.y);
+        float lastAngle = prevInput.angleToPos(_centroid);
+        float currentAngle = inputHolder.latestInput().angleToPos(_centroid);
 
         double res = validAngleDiff(lastAngle, currentAngle);
 
@@ -324,4 +324,4 @@ void TouchCameraStates::resetAfterInput() {
     _pinchInputs[1].clearInputs();
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

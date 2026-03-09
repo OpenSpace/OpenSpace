@@ -53,7 +53,7 @@ public:
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void updateTrajectoryFrame(const UpdateData& data);
@@ -73,7 +73,7 @@ private:
     md_gl_molecule_t _glMolecule = {};
     double _radius = 0.0;
 
-    struct Representation : public properties::PropertyOwner {
+    struct Representation : public PropertyOwner {
         explicit Representation(size_t number, const md_molecule_t& molecule_,
             bool enabled_, molecule::rep::Type type_, molecule::rep::Color color_,
             std::string filter_, float scale_, glm::vec4 uniformColor_);
@@ -84,25 +84,25 @@ private:
         const md_molecule_t& molecule;
         bool isDynamic = false;
 
-        properties::BoolProperty enabled;
-        properties::OptionProperty type;
-        properties::OptionProperty color;
-        properties::StringProperty filter;
-        properties::FloatProperty scale;
-        properties::Vec4Property uniformColor;
+        BoolProperty enabled;
+        OptionProperty type;
+        OptionProperty color;
+        StringProperty filter;
+        FloatProperty scale;
+        Vec4Property uniformColor;
     };
 
     std::vector<std::unique_ptr<Representation>> _repData;
-    properties::PropertyOwner _repProps;
+    PropertyOwner _repProps;
 
-    properties::StringProperty _moleculeFile;
-    properties::StringProperty _trajectoryFile;
-    properties::BoolProperty _coarseGrained;
-    properties::BoolProperty _applyPbcOnLoad;
-    properties::BoolProperty _applyPbcPerFrame;
-    properties::DoubleProperty _animationBaseScale;
-    properties::DoubleProperty _animationSpeed;
-    properties::OptionProperty _animationRepeatMode;
+    StringProperty _moleculeFile;
+    StringProperty _trajectoryFile;
+    BoolProperty _coarseGrained;
+    BoolProperty _applyPbcOnLoad;
+    BoolProperty _applyPbcPerFrame;
+    DoubleProperty _animationBaseScale;
+    DoubleProperty _animationSpeed;
+    OptionProperty _animationRepeatMode;
 };
 
 } // namespace openspace

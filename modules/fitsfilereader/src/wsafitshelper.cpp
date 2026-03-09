@@ -24,21 +24,20 @@
 
 #include <modules/fitsfilereader/include/wsafitshelper.h>
 
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureconversion.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/texture.h>
 #include <CCfits>
 #include <algorithm>
 #include <string>
 #include <string_view>
 #include <vector>
 
+using namespace CCfits;
+
 namespace {
     constexpr std::string_view _loggerCat = "RenderableTimeVaryingSphere";
 } // namespace
-
-using namespace CCfits;
 
 namespace openspace {
 
@@ -63,8 +62,8 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         const int nLayers = static_cast<int>(fitsValues->contents.size()) / layerSize;
         if (static_cast<int>(layerIndex) >= nLayers) {
             LERROR(
-                "Chosen layer in fits file is not supported. Index too high. "
-                "First layer chosen instead"
+                "Chosen layer in fits file is not supported. Index too high. First layer "
+                "chosen instead"
             );
             layerIndex = 0;
             return nullptr;
@@ -78,7 +77,7 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
             return nullptr;
         }
 
-        float* imageData = new float[layerValues.size()];
+        std::vector<float> imageData = std::vector<float>(layerValues.size());
         std::vector<glm::vec3> rgbLayers;
         for (size_t i = 0; i < layerValues.size(); i++) {
             // Normalization
@@ -91,18 +90,18 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
             imageData[i] = normalizedValue;
         }
 
-        // Create texture from imagedata
         auto texture = std::make_unique<ghoul::opengl::Texture>(
-            imageData,
-            glm::uvec3(fitsValues->width, fitsValues->height, 1),
-            GL_TEXTURE_2D,
-            ghoul::opengl::Texture::Format::Red,
-            GL_RED,
-            GL_FLOAT
+            ghoul::opengl::Texture::FormatInit {
+                .dimensions = glm::uvec3(fitsValues->width, fitsValues->height, 1),
+                .type = GL_TEXTURE_2D,
+                .format = ghoul::opengl::Texture::Format::Red,
+                .dataType = GL_FLOAT
+            },
+            ghoul::opengl::Texture::SamplerInit {
+                .swizzleMask = std::array<GLenum, 4> { GL_RED, GL_RED, GL_RED, GL_ONE }
+            },
+            reinterpret_cast<std::byte*>(imageData.data())
         );
-        // Tell it to use the single color channel as grayscale
-        convertTextureFormat(*texture, ghoul::opengl::Texture::Format::RGB);
-        texture->uploadTexture();
         return texture;
     }
     catch (const CCfits::FitsException& e) {

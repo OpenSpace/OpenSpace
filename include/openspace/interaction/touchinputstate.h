@@ -29,7 +29,7 @@
 #include <chrono>
 #include <vector>
 
-namespace openspace::interaction {
+namespace openspace {
 
 /**
  * This class represents the global input state of touch interaction.
@@ -74,6 +74,6 @@ private:
     unsigned int _maxDoubleTapTimeInterval = 300; // milliseconds
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___TOUCHINPUTSTATE___H__

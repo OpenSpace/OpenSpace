@@ -7,7 +7,7 @@ local modelFolder = asset.resource({
   Name = "Scale Model Burj Khalifa",
   Type = "HttpSynchronization",
   Identifier = "scale_model_burj_khalifa",
-  Version = 1
+  Version = 2
 })
 
 

@@ -24,32 +24,31 @@
 
 #include <ghoul/lua/lua_helper.h>
 
+using namespace openspace;
+
 namespace {
 
 /**
  * Load timed scripts from a Lua script file that returns a list of scheduled scripts.
  */
 [[codegen::luawrap]] void loadFile(std::string fileName) {
-    using namespace openspace;
-
     if (fileName.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
 
     ghoul::Dictionary scriptsDict;
     scriptsDict.setValue("Scripts", ghoul::lua::loadDictionaryFromFile(fileName));
-    documentation::testSpecificationAndThrow(
-        scripting::ScriptScheduler::Documentation(),
+    testSpecificationAndThrow(
+        ScriptScheduler::Documentation(),
         scriptsDict,
         "ScriptScheduler"
     );
 
-    std::vector<scripting::ScriptScheduler::ScheduledScript> scripts;
+    std::vector<ScriptScheduler::ScheduledScript> scripts;
     for (size_t i = 1; i <= scriptsDict.size(); i++) {
         ghoul::Dictionary d = scriptsDict.value<ghoul::Dictionary>(std::to_string(i));
 
-        scripting::ScriptScheduler::ScheduledScript script =
-            scripting::ScriptScheduler::ScheduledScript(d);
+        ScriptScheduler::ScheduledScript script = ScriptScheduler::ScheduledScript(d);
         scripts.push_back(script);
     }
 
@@ -68,16 +67,14 @@ namespace {
                                               std::optional<std::string> universalScript,
                                               std::optional<int> group)
 {
-    using namespace openspace;
-
-    scripting::ScriptScheduler::ScheduledScript script;
+    ScriptScheduler::ScheduledScript script;
     script.time = Time::convertTime(time);
     script.forwardScript = std::move(forwardScript);
     script.backwardScript = backwardScript.value_or(script.backwardScript);
     script.universalScript = universalScript.value_or(script.universalScript);
     script.group = group.value_or(script.group);
 
-    std::vector<scripting::ScriptScheduler::ScheduledScript> scripts;
+    std::vector<ScriptScheduler::ScheduledScript> scripts;
     scripts.push_back(std::move(script));
     global::scriptScheduler->loadScripts(scripts);
 }
@@ -86,22 +83,20 @@ namespace {
  * Clears all scheduled scripts.
  */
 [[codegen::luawrap]] void clear(std::optional<int> group) {
-    openspace::global::scriptScheduler->clearSchedule(group);
+    global::scriptScheduler->clearSchedule(group);
 }
 
 /**
  * Returns the list of all scheduled scripts.
  */
 [[codegen::luawrap]] std::vector<ghoul::Dictionary> scheduledScripts() {
-    using namespace openspace;
-
-    std::vector<scripting::ScriptScheduler::ScheduledScript> scripts =
+    std::vector<ScriptScheduler::ScheduledScript> scripts =
         global::scriptScheduler->allScripts();
 
     std::vector<ghoul::Dictionary> result;
     result.reserve(scripts.size());
 
-    for (const scripting::ScriptScheduler::ScheduledScript& script : scripts) {
+    for (const ScriptScheduler::ScheduledScript& script : scripts) {
         ghoul::Dictionary d;
         d.setValue("Time", script.time);
         if (!script.forwardScript.empty()) {
@@ -121,6 +116,6 @@ namespace {
     return result;
 }
 
-#include "scriptscheduler_lua_codegen.cpp"
-
 } // namespace
+
+#include "scriptscheduler_lua_codegen.cpp"

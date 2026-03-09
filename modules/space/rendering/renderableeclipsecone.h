@@ -48,23 +48,23 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void createCone(double et);
 
-    properties::IntProperty _numberOfPoints;
-    properties::FloatProperty _shadowLength;
-    properties::BoolProperty _showUmbralShadow;
-    properties::Vec4Property _umbralShadowColor;
-    properties::BoolProperty _showPenumbralShadow;
-    properties::Vec4Property _penumbralShadowColor;
+    IntProperty _numberOfPoints;
+    FloatProperty _shadowLength;
+    BoolProperty _showUmbralShadow;
+    Vec4Property _umbralShadowColor;
+    BoolProperty _showPenumbralShadow;
+    Vec4Property _penumbralShadowColor;
 
-    properties::StringProperty _lightSource;
-    properties::StringProperty _lightSourceFrame;
-    properties::StringProperty _shadower;
-    properties::StringProperty _shadowerFrame;
-    properties::StringProperty _shadowee;
+    StringProperty _lightSource;
+    StringProperty _lightSourceFrame;
+    StringProperty _shadower;
+    StringProperty _shadowerFrame;
+    StringProperty _shadowee;
 
     ghoul::opengl::ProgramObject* _shader = nullptr;
     UniformCache(modelViewProjectionTransform, shadowColor, opacity) _uniformCache;

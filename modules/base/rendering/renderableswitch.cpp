@@ -32,11 +32,13 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo DistanceThresholdInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo DistanceThresholdInfo = {
         "DistanceThreshold",
         "Distance threshold",
         "Threshold in meters for when the switch happens between the two renderables.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // A RenderableSwitch can be used to render one of two renderables depending on the
@@ -45,8 +47,8 @@ namespace {
     // The two renderables are specified separately: `RenderableNear` and `RenderableFar`.
     // These can be any renderable types.
     //
-    // The `DistanceThreshold` property determines which renderable will be shown.
-    // If the camera is closer to the object than the threshold, `RenderableNear` is used,
+    // The `DistanceThreshold` property determines which renderable will be shown. If the
+    // camera is closer to the object than the threshold, `RenderableNear` is used,
     // otherwise, `RenderableFar` is rendered.
     struct [[codegen::Dictionary(RenderableSwitch)]] Parameters {
         // The renderable to show when the camera is closer to the object than the
@@ -61,12 +63,12 @@ namespace {
         // [[codegen::verbatim(DistanceThresholdInfo.description)]]
         std::optional<double> distanceThreshold [[codegen::greater(0.f)]];
     };
-#include "renderableswitch_codegen.cpp"
 } // namespace
+#include "renderableswitch_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableSwitch::Documentation() {
+Documentation RenderableSwitch::Documentation() {
     return codegen::doc<Parameters>(
         "base_renderable_switch"
     );
@@ -170,7 +172,7 @@ void RenderableSwitch::update(const UpdateData& data) {
 }
 
 void RenderableSwitch::render(const RenderData& data, RendererTasks& tasks) {
-    glm::dvec3 cameraPosition = data.camera.positionVec3();
+    glm::dvec3 cameraPosition = data.camera.position();
     glm::dvec3 modelPosition = data.modelTransform.translation;
 
     if (glm::distance(cameraPosition, modelPosition) < _distanceThreshold) {

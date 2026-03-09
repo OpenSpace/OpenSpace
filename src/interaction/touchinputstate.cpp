@@ -24,7 +24,7 @@
 
 #include <openspace/interaction/touchinputstate.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
 void TouchInputState::initialize() {
     _time = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -175,4 +175,4 @@ void TouchInputState::removeTouchInput(TouchInput input) {
     }
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

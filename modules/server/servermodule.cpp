@@ -44,12 +44,12 @@ namespace {
         std::optional<std::vector<std::string>> allowAddresses;
         std::optional<int> skyBrowserUpdateTime;
     };
-#include "servermodule_codegen.cpp"
 } // namespace
+#include "servermodule_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ServerModule::Documentation() {
+Documentation ServerModule::Documentation() {
     return codegen::doc<Parameters>("module_server");
 }
 
@@ -60,11 +60,10 @@ ServerModule::ServerModule()
     addPropertySubOwner(_interfaceOwner);
 
     global::callback::preSync->emplace_back([this]() {
-        // Trigger callbacks
         using K = CallbackHandle;
         using V = CallbackFunction;
         for (const std::pair<K, V>& it : _preSyncCallbacks) {
-            it.second(); // call function
+            it.second();
         }
     });
 }
@@ -125,7 +124,7 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
 }
 
 void ServerModule::preSync() {
-    // Set up new connections.
+    // Set up new connections
     for (std::unique_ptr<ServerInterface>& serverInterface : _interfaces) {
         if (!serverInterface->isEnabled()) {
             continue;
@@ -141,7 +140,7 @@ void ServerModule::preSync() {
         while ((socket = socketServer->nextPendingSocket())) {
             const std::string address = socket->address();
             if (serverInterface->clientIsBlocked(address)) {
-                // Drop connection if the address is blocked.
+                // Drop connection if the address is blocked
                 continue;
             }
             socket->startStreams();
@@ -161,10 +160,10 @@ void ServerModule::preSync() {
         }
     }
 
-    // Consume all messages put into the message queue by the socket threads.
+    // Consume all messages put into the message queue by the socket threads
     consumeMessages();
 
-    // Join threads for sockets that disconnected.
+    // Join threads for sockets that disconnected
     cleanUpFinishedThreads();
 }
 
@@ -212,7 +211,7 @@ void ServerModule::handleConnection(const std::shared_ptr<Connection>& connectio
     std::string messageString;
     messageString.reserve(256);
     while (connection->socket()->getMessage(messageString)) {
-        const std::lock_guard lock(_messageQueueMutex);
+        const std::unique_lock lock(_messageQueueMutex);
         _messageQueue.push_back({ connection, messageString });
     }
 }
@@ -220,7 +219,7 @@ void ServerModule::handleConnection(const std::shared_ptr<Connection>& connectio
 void ServerModule::consumeMessages() {
     ZoneScoped;
 
-    const std::lock_guard lock(_messageQueueMutex);
+    const std::unique_lock lock(_messageQueueMutex);
     while (!_messageQueue.empty()) {
         const Message& m = _messageQueue.front();
         if (const std::shared_ptr<Connection>& c = m.connection.lock()) {

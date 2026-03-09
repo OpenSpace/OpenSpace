@@ -81,7 +81,7 @@ public:
     /**
      * Add multiple Syncables to be synchronized over the SGCT cluster.
      *
-     * \pre syncables must not contain any nullptr
+     * \pre syncables must not contain any `nullptr`
      */
     void addSyncables(const std::vector<Syncable*>& syncables);
 
@@ -96,7 +96,7 @@ public:
     void removeSyncables(const std::vector<Syncable*>& syncables);
 
 private:
-    /// Vector of Syncables. The vectors ensures consistent encode/decode order.
+    /// Vector of Syncables. The vectors ensures consistent encode/decode order
     std::vector<Syncable*> _syncables;
 
     /// Databuffer used in encoding/decoding

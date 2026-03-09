@@ -38,7 +38,7 @@
 namespace openspace::datamessagestructures {
 
 CameraKeyframe generateCameraKeyframe() {
-    interaction::NavigationHandler& navHandler = *global::navigationHandler;
+    NavigationHandler& navHandler = *global::navigationHandler;
     CameraKeyframe kf;
     const SceneGraphNode* focusNode = navHandler.orbitalNavigator().anchorNode();
 
@@ -46,7 +46,6 @@ CameraKeyframe generateCameraKeyframe() {
         return kf;
     }
 
-    //kf._position = global::navigationHandler.camera()->positionVec3();
     kf._position = navHandler.orbitalNavigator().anchorNodeToCameraVector();
 
     kf._followNodeRotation = navHandler.orbitalNavigator().followingAnchorRotation();
@@ -69,23 +68,18 @@ CameraKeyframe generateCameraKeyframe() {
 
 TimeKeyframe generateTimeKeyframe() {
     TimeKeyframe kf;
-    const Time& time = global::timeManager->time();
-
     kf._dt = global::timeManager->deltaTime();
     kf._paused = global::timeManager->isPaused();
-    kf._time = time.j2000Seconds();
-
-    // Timestamp as current runtime of OpenSpace instance
+    kf._time = global::timeManager->time().j2000Seconds();
     kf._timestamp = global::windowDelegate->applicationTime();
     return kf;
 }
 
 ScriptMessage generateScriptMessage(std::string script) {
-    ScriptMessage sm;
-    sm._script = std::move(script);
-    // Timestamp as current runtime of OpenSpace instance
-    sm._timestamp = global::windowDelegate->applicationTime();
-    return sm;
+    return {
+        ._script = std::move(script),
+        ._timestamp = global::windowDelegate->applicationTime()
+    };
 }
 
 } // namespace openspace::datamessagestructures

@@ -35,15 +35,17 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "ScreenSpaceImageOnline";
 
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
+    constexpr Property::PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
         "The URL of the texture to be displayed on this screen space plane. If changed, "
         "the image at the new path will automatically be loaded and displayed. The "
         "default size of the plane will be set based on the size of the image.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `ScreenSpaceRenderable` can be used to display an image from a web URL.
@@ -56,12 +58,12 @@ namespace {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::optional<std::string> url [[codegen::key("URL")]];
     };
-#include "screenspaceimageonline_codegen.cpp"
 } // namespace
+#include "screenspaceimageonline_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceImageOnline::Documentation() {
+Documentation ScreenSpaceImageOnline::Documentation() {
     return codegen::doc<Parameters>("base_screenspace_image_online");
 }
 
@@ -113,31 +115,26 @@ void ScreenSpaceImageOnline::update() {
         }
 
         try {
-            std::unique_ptr<ghoul::opengl::Texture> texture =
-                ghoul::io::TextureReader::ref().loadTexture(
-                    reinterpret_cast<void*>(imageFile.buffer),
-                    imageFile.size,
-                    2,
-                    imageFile.format
-                );
+            // @TODO (2026-02-18, abock): This code was settings the swizzle mask only if
+            // the returned image was having a single Red channel. This can't currently be
+            // expressed unfortunately
+            ghoul::opengl::Texture::SamplerInit samplerInit = {
+                // TODO: AnisotropicMipMap crashes on ATI cards ---abock
+                //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
+                .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
+                //.swizzleMask = std::array<GLenum, 4>{ GL_RED, GL_RED, GL_RED, GL_ONE }
+            };
 
-            if (texture) {
-                // Images don't need to start on 4-byte boundaries, for example if the
-                // image is only RGB
-                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            _texture = ghoul::io::TextureReader::ref().loadTexture(
+                reinterpret_cast<void*>(imageFile.buffer),
+                imageFile.size,
+                2,
+                samplerInit,
+                imageFile.format
+            );
 
-                if (texture->format() == ghoul::opengl::Texture::Format::Red) {
-                    texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_ONE });
-                }
-
-                texture->uploadTexture();
-                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-                texture->purgeFromRAM();
-
-                _texture = std::move(texture);
-                _objectSize = _texture->dimensions();
-                _textureIsDirty = false;
-            }
+            _objectSize = _texture->dimensions();
+            _textureIsDirty = false;
         }
         catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
             _textureIsDirty = false;

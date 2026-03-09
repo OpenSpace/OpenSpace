@@ -33,15 +33,15 @@ namespace openspace {
 class Sphere {
 public:
     explicit Sphere(float radius, int segments = 8);
+    // Alternative Constructor for using accurate triaxial ellipsoid
     Sphere(glm::vec3 radius, int segments);
-    Sphere(const Sphere& cpy);
     ~Sphere();
 
-    bool initialize();
+    void initialize();
 
     void render() const;
 
-//private:
+private:
     struct Vertex {
         GLfloat location[4];
         GLfloat tex[2];
@@ -54,8 +54,8 @@ public:
 
     unsigned int _isize;
     unsigned int _vsize;
-    Vertex* _varray;
-    int* _iarray;
+    glm::vec3 _radius;
+    int _nSegments;
 };
 
 } // namespace openspace

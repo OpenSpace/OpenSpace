@@ -167,7 +167,7 @@ public:
      *
      * \param timeout The amount of time the request will wait before aborting due to the
      *        server not responding. If this value is 0, there is no timeout on the
-     *        request.
+     *        request
      * \return `true` if the request completed successfully, `false` otherwise
      */
     bool perform(std::chrono::milliseconds timeout = std::chrono::milliseconds(0));
@@ -302,8 +302,8 @@ protected:
      * \param buffer The beginning of the buffer of this chunk of data
      * \param size The number of bytes that the \p buffer contains
      * \return The implementation should return `true` if the downloading should continue
-     *         and `false` if the handling of the data caused some error that the
-     *         subclass is incapable of recovering from
+     *         and `false` if the handling of the data caused some error that the subclass
+     *         is incapable of recovering from
      */
     virtual bool handleData(char* buffer, size_t size) = 0;
 
@@ -315,8 +315,8 @@ protected:
      * error occurred that will cause the download to be terminated. This function will be
      * called on a different thread from the one that called the #start method.
      *
-     * \return `true` if the setup completed successfully and `false` if the setup
-     *         failed unrecoverably
+     * \return `true` if the setup completed successfully and `false` if the setup failed
+     *         unrecoverably
      */
     virtual bool setup();
 

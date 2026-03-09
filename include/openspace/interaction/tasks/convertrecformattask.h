@@ -30,7 +30,7 @@
 #include <openspace/interaction/sessionrecording.h>
 #include <filesystem>
 
-namespace openspace::interaction {
+namespace openspace {
 
 class ConvertRecFormatTask : public Task {
 public:
@@ -45,14 +45,14 @@ public:
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
 
-    static documentation::Documentation documentation();
+    static Documentation documentation();
 
 private:
     std::filesystem::path _inFilePath;
     std::filesystem::path _outFilePath;
-    DataMode _dataMode;
+    DataMode _dataMode = DataMode::Binary;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___CONVERTRECFORMATTASK___H__

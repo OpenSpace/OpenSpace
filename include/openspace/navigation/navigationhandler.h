@@ -42,21 +42,18 @@
 #include <variant>
 
 namespace openspace {
-    namespace scripting { struct LuaLibrary; }
-    class Camera;
-    class SceneGraphNode;
-} // namespace openspace
 
-namespace openspace::interaction {
-
+class Camera;
+struct LuaLibrary;
 struct NavigationState;
 struct NodeCameraStateSpec;
+class SceneGraphNode;
 
 /**
  * The NavigationHandler is responsible for updating the camera, and switching between
  * different navigation modes (navigators).
  */
-class NavigationHandler : public properties::PropertyOwner {
+class NavigationHandler : public PropertyOwner {
 public:
     NavigationHandler();
     ~NavigationHandler() override;
@@ -115,11 +112,11 @@ public:
     /**
      * Trigger a transition script after first fading out the rendering, and fading in
      * the rendering when the script is finished. One example use case could be to fade
-     * out, move the camera to another focus node, and then fade in
+     * out, move the camera to another focus node, and then fade in.
      *
      * \param transitionScript The Lua script to handle the transition. Can be anything
      * \param fadeDuration An optional duration for the fading. If unspecified, use the
-     *                     JumpToFadeDuration property
+     *        JumpToFadeDuration property
      */
     void triggerFadeToTransition(std::string transitionScript,
         std::optional<float> fadeDuration = std::nullopt);
@@ -128,7 +125,7 @@ public:
      * \return The Lua library that contains all Lua functions available to affect the
      *         interaction
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     void applyPendingState();
@@ -147,10 +144,10 @@ private:
 
     std::optional<std::variant<NodeCameraStateSpec, NavigationState>> _pendingState;
 
-    properties::BoolProperty _useKeyFrameInteraction;
-    properties::FloatProperty _jumpToFadeDuration;
+    BoolProperty _useKeyFrameInteraction;
+    FloatProperty _jumpToFadeDuration;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___NAVIGATIONHANDLER___H__

@@ -48,8 +48,8 @@ namespace {
         std::string target;
         std::map<std::string, ghoul::Dictionary> instruments;
     };
-#include "instrumenttimesparser_codegen.cpp"
 } // namespace
+#include "instrumenttimesparser_codegen.cpp"
 
 namespace openspace {
 
@@ -118,7 +118,7 @@ bool InstrumentTimesParser::create() {
                 }
 
                 TimeRange tr;
-                try { // parse date strings
+                try {
                     const std::string start = matches[1].str();
                     const std::string stop = matches[2].str();
                     tr.start = SpiceManager::ref().ephemerisTimeFromDate(start);

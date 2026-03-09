@@ -28,45 +28,47 @@
 #include <fstream>
 #include <sstream>
 
-namespace openspace {
-
 namespace {
-template <typename T>
-std::optional<T> get_to(nlohmann::json& obj, const std::string& key) {
-    auto it = obj.find(key);
-    if (it != obj.end()) {
-        return it->get<T>();
+    template <typename T>
+    std::optional<T> get_to(nlohmann::json& obj, const std::string& key) {
+        auto it = obj.find(key);
+        if (it != obj.end()) {
+            return it->get<T>();
+        }
+        else {
+            return std::nullopt;
+        }
     }
-    else {
-        return std::nullopt;
-    }
-}
 } // namespace
+
+namespace openspace {
 
 namespace version1 {
     static Settings parseSettings(nlohmann::json json) {
         ghoul_assert(json.at("version").get<int>() == 1, "Wrong value");
 
-        Settings settings;
-        settings.hasStartedBefore = get_to<bool>(json, "started-before");
-        settings.lastStartedDate = get_to<std::string>(json, "last-started-date");
-        settings.configuration = get_to<std::string>(json, "config");
-        settings.rememberLastConfiguration = get_to<bool>(json, "config-remember");
-        settings.profile = get_to<std::string>(json, "profile");
-        settings.rememberLastProfile = get_to<bool>(json, "profile-remember");
+        Settings settings = {
+            .hasStartedBefore = get_to<bool>(json, "started-before"),
+            .lastStartedDate = get_to<std::string>(json, "last-started-date"),
+            .configuration = get_to<std::string>(json, "config"),
+            .rememberLastConfiguration = get_to<bool>(json, "config-remember"),
+            .profile = get_to<std::string>(json, "profile"),
+            .rememberLastProfile = get_to<bool>(json, "profile-remember"),
+            .bypassLauncher = get_to<bool>(json, "bypass"),
+        };
         std::optional<std::string> visibility = get_to<std::string>(json, "visibility");
         if (visibility.has_value()) {
             if (*visibility == "NoviceUser") {
-                settings.visibility = properties::Property::Visibility::NoviceUser;
+                settings.visibility = Property::Visibility::NoviceUser;
             }
             else if (*visibility == "User") {
-                settings.visibility = properties::Property::Visibility::User;
+                settings.visibility = Property::Visibility::User;
             }
             else if (*visibility == "AdvancedUser") {
-                settings.visibility = properties::Property::Visibility::AdvancedUser;
+                settings.visibility = Property::Visibility::AdvancedUser;
             }
             else if (*visibility == "Developer") {
-                settings.visibility = properties::Property::Visibility::Developer;
+                settings.visibility = Property::Visibility::Developer;
             }
             else {
                 throw ghoul::RuntimeError(std::format(
@@ -74,7 +76,6 @@ namespace version1 {
                 ));
             }
         }
-        settings.bypassLauncher = get_to<bool>(json, "bypass");
 
         std::optional<std::string> layerServer = get_to<std::string>(json, "layerserver");
         if (layerServer.has_value()) {
@@ -85,9 +86,10 @@ namespace version1 {
             if (!it->is_object()) {
                 throw ghoul::RuntimeError("'mrf' is not an object");
             }
-            Settings::MRF mrf;
-            mrf.isEnabled = get_to<bool>(*it, "enabled");
-            mrf.location = get_to<std::string>(*it, "location");
+            Settings::MRF mrf = {
+                .isEnabled = get_to<bool>(*it, "enabled"),
+                .location = get_to<std::string>(*it, "location")
+            };
 
             if (mrf.isEnabled.has_value() || mrf.location.has_value()) {
                 settings.mrf = mrf;
@@ -158,16 +160,16 @@ void saveSettings(const Settings& settings, const std::filesystem::path& filenam
     }
     if (settings.visibility.has_value()) {
         switch (*settings.visibility) {
-            case properties::Property::Visibility::NoviceUser:
+            case Property::Visibility::NoviceUser:
                 json["visibility"] = "NoviceUser";
                 break;
-            case properties::Property::Visibility::User:
+            case Property::Visibility::User:
                 json["visibility"] = "User";
                 break;
-            case properties::Property::Visibility::AdvancedUser:
+            case Property::Visibility::AdvancedUser:
                 json["visibility"] = "AdvancedUser";
                 break;
-            case properties::Property::Visibility::Developer:
+            case Property::Visibility::Developer:
                 json["visibility"] = "Developer";
                 break;
             default:

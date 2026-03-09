@@ -42,10 +42,10 @@
 
 #include "keyframerecordinghandler_lua.inl"
 
-namespace openspace::interaction {
+namespace openspace {
 
 KeyframeRecordingHandler::KeyframeRecordingHandler()
-    : properties::PropertyOwner({ "KeyframeRecording", "Keyframe Recording" })
+    : PropertyOwner({ "KeyframeRecording", "Keyframe Recording" })
 {}
 
 void KeyframeRecordingHandler::newSequence() {
@@ -56,10 +56,17 @@ void KeyframeRecordingHandler::addCameraKeyframe(double sequenceTime) {
     using namespace datamessagestructures;
     CameraKeyframe kf = datamessagestructures::generateCameraKeyframe();
 
+    KeyframeNavigator::CameraPose pose = {
+        .position = kf._position,
+        .rotation = kf._rotation,
+        .focusNode = kf._focusNode,
+        .scale = kf._scale,
+        .followFocusNodeRotation = kf._followNodeRotation
+    };
     SessionRecording::Entry entry = {
-        sequenceTime,
-        global::timeManager->time().j2000Seconds(),
-        KeyframeNavigator::CameraPose(std::move(kf))
+        .timestamp = sequenceTime,
+        .simulationTime = global::timeManager->time().j2000Seconds(),
+        .value = std::move(pose)
     };
 
     auto it = std::upper_bound(
@@ -76,9 +83,9 @@ void KeyframeRecordingHandler::addCameraKeyframe(double sequenceTime) {
 void KeyframeRecordingHandler::addScriptKeyframe(double sequenceTime, std::string script)
 {
     SessionRecording::Entry entry = {
-        sequenceTime,
-        global::timeManager->time().j2000Seconds(),
-        std::move(script)
+        .timestamp = sequenceTime,
+        .simulationTime = global::timeManager->time().j2000Seconds(),
+        .value = std::move(script)
     };
 
     auto it = std::upper_bound(
@@ -110,11 +117,18 @@ void KeyframeRecordingHandler::updateKeyframe(int index) {
         throw ghoul::RuntimeError(std::format("Index {} is not a camera frame", index));
     }
     auto& camera = std::get<SessionRecording::Entry::Camera>(entry.value);
-    camera = KeyframeNavigator::CameraPose(generateCameraKeyframe());
+    CameraKeyframe kf = datamessagestructures::generateCameraKeyframe();
+    camera = KeyframeNavigator::CameraPose {
+        .position = kf._position,
+        .rotation = kf._rotation,
+        .focusNode = kf._focusNode,
+        .scale = kf._scale,
+        .followFocusNodeRotation = kf._followNodeRotation
+    };
 }
 
 void KeyframeRecordingHandler::moveKeyframe(int index, double sequenceTime) {
-    if (index < 0 || static_cast<size_t>(index) >(_timeline.entries.size() - 1)) {
+    if (index < 0 || static_cast<size_t>(index) > (_timeline.entries.size() - 1)) {
         throw ghoul::RuntimeError(std::format("Index {} out of range", index));
     }
 
@@ -128,7 +142,7 @@ void KeyframeRecordingHandler::moveKeyframe(int index, double sequenceTime) {
     );
 }
 
-void KeyframeRecordingHandler::saveSequence(std::filesystem::path filename) {
+void KeyframeRecordingHandler::saveSequence(std::filesystem::path filename) const {
     if (filename.empty()) {
         throw ghoul::RuntimeError("Failed to save file, reason: Invalid empty file name");
     }
@@ -152,7 +166,7 @@ std::vector<ghoul::Dictionary> KeyframeRecordingHandler::keyframes() const {
     return sessionRecordingToDictionary(_timeline);
 }
 
-scripting::LuaLibrary KeyframeRecordingHandler::luaLibrary() {
+LuaLibrary KeyframeRecordingHandler::luaLibrary() {
     return {
         "keyframeRecording",
         {
@@ -171,4 +185,4 @@ scripting::LuaLibrary KeyframeRecordingHandler::luaLibrary() {
     };
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

@@ -40,7 +40,9 @@ namespace openspace {
  */
 class NotificationLog : public ghoul::logging::Log {
 public:
-    /// The type of function that is used as a callback in this log
+    /**
+     * The type of function that is used as a callback in this log.
+     */
     using CallbackFunction = std::function<void(
         std::string_view timeString,
         std::string_view dateString,

@@ -29,7 +29,7 @@
 
 namespace openspace {
 
-namespace properties { class Property; }
+class Property;
 
 class SubscriptionTopic : public Topic {
 public:
@@ -49,7 +49,7 @@ private:
     int _onChangeHandle = UnsetCallbackHandle;
     int _onDeleteHandle = UnsetCallbackHandle;
     int _onMetaDataChangeHandle = UnsetCallbackHandle;
-    properties::Property* _prop = nullptr;
+    Property* _prop = nullptr;
 };
 
 } // namespace openspace

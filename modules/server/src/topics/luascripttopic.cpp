@@ -133,8 +133,6 @@ namespace {
         }
         return script + ")";
     }
-
-
 } // namespace
 
 namespace openspace {
@@ -194,8 +192,6 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
 void LuaScriptTopic::runScript(std::string script, bool shouldReturn,
                                bool shouldBeSynchronized)
 {
-    using namespace scripting;
-
     ScriptEngine::Script::Callback callback;
     if (shouldReturn) {
         callback = [this](const ghoul::Dictionary& data) {

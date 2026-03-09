@@ -62,9 +62,6 @@ namespace {
         bool deperiodize;
     };
 
-    LoadedMolecule loadedMolecules[8] = {};
-    int64_t numLoadedMolecules = 0;
-
     LoadedTrajectory loadedTrajectories[8] = {};
     int64_t numLoadedTrajectories = 0;
 
@@ -147,7 +144,7 @@ namespace {
             const int64_t frameDataSize = md_trajectory_fetch_frame_data(
                 trajectory->traj,
                 idx,
-                0
+                nullptr
             );
             void* frameDataPtr = md_alloc(default_allocator, frameDataSize);
             defer {
@@ -259,7 +256,7 @@ namespace {
     }
 } // namespace
 
-namespace molecule::load {
+namespace molecule {
 
 md_molecule_api* moleculeApi(std::filesystem::path filename) {
     std::filesystem::path ext = filename.extension();
@@ -417,4 +414,4 @@ int64_t numCacheFrames(md_trajectory_i* traj) {
     return 0;
 }
 
-}  // namespace molecule::load
+} // namespace molecule

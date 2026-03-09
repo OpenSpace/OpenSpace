@@ -31,59 +31,61 @@
 #include <openspace/util/mouse.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo InvertMouseButtons = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo InvertMouseButtons = {
         "InvertMouseButtons",
         "Invert left and right mouse buttons",
         "If this setting is enabled, the right mouse button is considered the primary "
         "one, rather than the left. This means that behavior usually mapped to the left "
         "mouse button will be mapped to the right mouse button, and vice versa.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableKeybindingsInfo = {
+    constexpr Property::PropertyInfo DisableKeybindingsInfo = {
         "DisableKeybindings",
         "Disable all keybindings",
         "Disables all keybindings without removing them. Please note that this does not "
         "apply to the key to open the console.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableMouseInputInfo = {
+    constexpr Property::PropertyInfo DisableMouseInputInfo = {
         "DisableMouseInput",
         "Disable all mouse inputs",
         "Disables all mouse inputs and prevents them from affecting the camera.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableJoystickInputInfo = {
+    constexpr Property::PropertyInfo DisableJoystickInputInfo = {
         "DisableJoystickInput",
         "Disable all joystick inputs",
         "Disables all joystick inputs and prevents them from affecting the camera.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableTouchInputInfo = {
+    constexpr Property::PropertyInfo DisableTouchInputInfo = {
         "DisableTouchInput",
         "Disable all touch inputs",
         "Disables all touch inputs and prevents them from affecting the camera.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MaxDoubleTapTimeInfo = {
+    constexpr Property::PropertyInfo MaxDoubleTapTimeInfo = {
         "MaxDoubleTapTime",
         "Max time for touch double tap detection (milliseconds)",
         "Max tap delay (in ms) for double tap detection in touch interaction.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo MouseVisualizerInfo = {
+    const PropertyOwner::PropertyOwnerInfo MouseVisualizerInfo = {
         "MouseInteractionVisualizer",
         "Mouse Interaction Visualizer",
         "The mouse interaction visualizer shows the distance the mouse has been moved "
         "since it was pressed down."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MouseVisualizerEnabledInfo = {
+    constexpr Property::PropertyInfo MouseVisualizerEnabledInfo = {
         "Enabled",
         "Enabled",
         "If this setting is enabled, the mouse interaction will be visualized on the "
@@ -91,17 +93,17 @@ namespace {
         "down."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MouseVisualizerColorInfo = {
+    constexpr Property::PropertyInfo MouseVisualizerColorInfo = {
         "Color",
         "Color",
         "The color used to render the line showing the mouse visualizer."
     };
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
 InteractionHandler::InteractionHandler()
-    : properties::PropertyOwner({ "InteractionHandler", "Interaction Handler" })
+    : PropertyOwner({ "InteractionHandler", "Interaction Handler" })
     , _invertMouseButtons(InvertMouseButtons, false)
     , _disableKeybindings(DisableKeybindingsInfo, false)
     , _disableMouseInputs(DisableMouseInputInfo, false)
@@ -109,9 +111,9 @@ InteractionHandler::InteractionHandler()
     , _disableTouchInputs(DisableTouchInputInfo, false)
     , _maxDoubleTapTime(MaxDoubleTapTimeInfo, 300, 10, 1000)
     , _mouseVisualizer({
-        properties::PropertyOwner(MouseVisualizerInfo),
-        properties::BoolProperty(MouseVisualizerEnabledInfo, false),
-        properties::Vec4Property(
+        PropertyOwner(MouseVisualizerInfo),
+        BoolProperty(MouseVisualizerEnabledInfo, false),
+        Vec4Property(
             MouseVisualizerColorInfo,
             glm::vec4(1.f),
             glm::vec4(0.f),
@@ -151,7 +153,7 @@ InteractionHandler::InteractionHandler()
 
     addPropertySubOwner(_mouseVisualizer.owner);
     _mouseVisualizer.owner.addProperty(_mouseVisualizer.enable);
-    _mouseVisualizer.color.setViewOption(properties::Property::ViewOptions::Color);
+    _mouseVisualizer.color.setViewOption(Property::ViewOptions::Color);
     _mouseVisualizer.owner.addProperty(_mouseVisualizer.color);
 
     addPropertySubOwner(_touchMarkers);
@@ -327,7 +329,7 @@ void InteractionHandler::touchExitCallback(TouchInput i) {
 void InteractionHandler::renderOverlay() {
     if (_mouseVisualizer.enable && _mouseVisualizer.isMousePressed) {
         constexpr glm::vec4 StartColor = glm::vec4(0.4f, 0.4f, 0.4f, 0.25f);
-        rendering::helper::renderLine(
+        rendering::renderLine(
             _mouseVisualizer.clickPosition,
             _mouseVisualizer.currentPosition,
             global::windowDelegate->currentWindowSize(),
@@ -353,4 +355,4 @@ void InteractionHandler::clearJoystickStates() {
     );
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

@@ -24,7 +24,7 @@
 
 #include <openspace/navigation/orbitalnavigator/scriptcamerastates.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
 ScriptCameraStates::ScriptCameraStates() : OrbitalCameraStates(1.0, 1.0) {}
 
@@ -105,4 +105,4 @@ void ScriptCameraStates::addGlobalRoll(double delta) {
     _globalRoll += delta;
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

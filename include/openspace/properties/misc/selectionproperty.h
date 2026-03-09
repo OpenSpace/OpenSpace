@@ -29,7 +29,7 @@
 
 #include <set>
 
-namespace openspace::properties {
+namespace openspace {
 
 class SelectionProperty : public TemplateProperty<std::set<std::string>> {
 
@@ -123,10 +123,10 @@ private:
 private:
     std::set<std::string> toValue(lua_State* state) const override final;
 
-    // A list of all available options that can be selected
+    /// A list of all available options that can be selected
     std::vector<std::string> _options;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SELECTIONPROPERTY___H__

@@ -50,12 +50,6 @@ struct CameraKeyframe {
     void serialize(std::vector<char>& buffer) const;
     size_t deserialize(const std::vector<char>& buffer, size_t offset = 0);
 
-    void write(std::ostream& out) const;
-    void write(std::stringstream& out) const;
-
-    void read(std::istream* in);
-    void read(std::istringstream& iss);
-
     glm::dvec3 _position = glm::dvec3(0.0);
     glm::dquat _rotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
     bool _followNodeRotation = false;
@@ -72,12 +66,6 @@ struct TimeKeyframe {
     void serialize(std::vector<char>& buffer) const;
     size_t deserialize(const std::vector<char>& buffer, size_t offset = 0);
 
-    void write(std::ostream* out) const;
-    void write(std::stringstream& out) const;
-
-    void read(std::istream* in);
-    void read(std::istringstream& iss);
-
     double _time = 0.0;
     double _dt = 0.0;
     bool _paused = false;
@@ -92,25 +80,13 @@ struct TimeTimeline {
     void serialize(std::vector<char>& buffer) const;
     size_t deserialize(const std::vector<char>& buffer, size_t offset = 0);
 
-    void write(std::ostream* out) const;
-    void read(std::istream* in);
-
     bool _clear = true;
     std::vector<TimeKeyframe> _keyframes;
 };
 
 struct ScriptMessage {
-    ScriptMessage() = default;
-
     void serialize(std::vector<char>& buffer) const;
     void deserialize(const std::vector<char>& buffer);
-
-    void write(std::ostream* out) const;
-    void write(unsigned char* buf, size_t& idx, std::ofstream& file) const;
-    void write(std::stringstream& ss) const;
-
-    void read(std::istream* in);
-    void read(std::istringstream& iss);
 
     std::string _script;
     double _timestamp = 0.0;

@@ -49,5 +49,4 @@ private:
 
 } // namespace openspace
 
-
 #endif // __OPENSPACE_CORE___DEFERREDCASTERMANAGER___H__

@@ -31,11 +31,9 @@
 #include <vector>
 
 namespace openspace {
-    class Camera;
-    class SceneGraphNode;
-}
 
-namespace openspace::interaction {
+class Camera;
+class SceneGraphNode;
 
 /**
  * The DirectInputSolver is used to minimize the L2 error of touch input to 3D camera
@@ -45,7 +43,7 @@ class DirectInputSolver {
 public:
     /**
      * Stores the selected node, the cursor ID as well as the surface coordinates the
-     * cursor touched
+     * cursor touched.
      */
     struct SelectedBody {
         size_t id = 0;
@@ -80,7 +78,7 @@ private:
     ghoul::LMstat _lmstat;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___DIRECTINPUT_SOLVER___H__
 

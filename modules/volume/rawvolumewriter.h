@@ -29,7 +29,7 @@
 #include <filesystem>
 #include <functional>
 
-namespace openspace::volume {
+namespace openspace {
 
 template <typename T> class RawVolume;
 
@@ -53,7 +53,7 @@ private:
     size_t _bufferSize = 0;
 };
 
-} // namespace openspace::volume
+} // namespace openspace
 
 #include "rawvolumewriter.inl"
 

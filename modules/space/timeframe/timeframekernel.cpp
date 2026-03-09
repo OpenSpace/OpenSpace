@@ -40,14 +40,15 @@
 #include <variant>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "TimeFrameKernel";
     constexpr unsigned SpiceErrorBufferSize = 1841;
 
-    std::vector<openspace::TimeRange> extractTimeFramesSPK(
+    std::vector<TimeRange> extractTimeFramesSPK(
                                         const std::vector<std::filesystem::path>& kernels,
                                              const std::variant<std::string, int>& object)
     {
-        using namespace openspace;
         std::vector<TimeRange> res;
 
         // Load the kernel to be able to resolve the provided object name
@@ -174,11 +175,10 @@ namespace {
         return res;
     }
 
-    std::vector<openspace::TimeRange> extractTimeFramesCK(
+    std::vector<TimeRange> extractTimeFramesCK(
                                         const std::vector<std::filesystem::path>& kernels,
                                              const std::variant<std::string, int>& object)
     {
-        using namespace openspace;
         std::vector<TimeRange> res;
 
         std::filesystem::path lsk = SpiceManager::leapSecondKernel();
@@ -241,7 +241,7 @@ namespace {
             if (std::string_view(type.data()) != "CK") {
                 // Since SCLK kernels are allowed as well we can't throw an exception
                 // here. We can't even warn about it since the tested spacecraft clock
-                // kernels report a type and architecture of '?' which is not helpful.
+                // kernels report a type and architecture of '?' which is not helpful
                 continue;
             }
 
@@ -311,16 +311,14 @@ namespace {
         return res;
     }
 
-    void normalizeTimeRanges(std::vector<openspace::TimeRange>& ranges) {
-        using namespace openspace;
-
+    void normalizeTimeRanges(std::vector<TimeRange>& ranges) {
         if (ranges.size() <= 1) {
             // Nothing to do here if there is 0 or 1 elements in the vector
             return;
         }
 
         // 1. Sort time frames based on their beginning time. If the beginning times are
-        // the same, sort by the end date instead
+        //    the same, sort by the end date instead
         std::sort(
             ranges.begin(),
             ranges.end(),
@@ -363,18 +361,17 @@ namespace {
     // kernel to the CK struct in this class.
     //
     // The resulting validity of the time frame is based on the following conditions:
-    //
     //   1. If either SPK or CK (but not both) are specified, the time frame depends on
     //      the union of all windows within all kernels that were provided. This means
     //      that if the simulation time is within any time where the kernel has data for
-    //      the provided object, the TimeFrame will be valid.
+    //      the provided object, the TimeFrame will be valid
     //   2. If SPK and CK kernels are both specified, the time range validity for SPK and
     //      CK kernels are calculated separately, but both results must be valid to result
     //      in a valid time frame. This means that if only position data is available but
     //      not orientation data, the time frame is invalid. Only if positional and
-    //      orientation data is available, then the TimeFrame will be valid.
+    //      orientation data is available, then the TimeFrame will be valid
     //   3. If neither SPK nor CK kernels are specified, the creation of the `TimeFrame`
-    //      will fail.
+    //      will fail
     struct [[codegen::Dictionary(TimeFrameKernel)]] Parameters {
         // Specifies information about the kernels and object name used to extract the
         // times when positional information for the provided object is available.
@@ -387,7 +384,7 @@ namespace {
             > kernels;
 
             // The NAIF name of the object for which the positional information should be
-            // extracted
+            // extracted.
             std::variant<std::string, int> object;
         };
         std::optional<SPK> spk [[codegen::key("SPK")]];
@@ -402,17 +399,17 @@ namespace {
             std::vector<std::filesystem::path> kernels;
 
             // The NAIF name of the reference frame for which the times are extacted at
-            // which this reference frame has data in the provided kernels
+            // which this reference frame has data in the provided kernels.
             std::variant<std::string, int> reference;
         };
         std::optional<CK> ck [[codegen::key("CK")]];
     };
-#include "timeframekernel_codegen.cpp"
 } // namespace
+#include "timeframekernel_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation TimeFrameKernel::Documentation() {
+Documentation TimeFrameKernel::Documentation() {
     return codegen::doc<Parameters>("space_time_frame_kernel");
 }
 

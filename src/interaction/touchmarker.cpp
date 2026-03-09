@@ -30,39 +30,41 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo VisibilityInfo = {
         "Enabled",
         "Show touch markers",
         "Decides whether to show circular markers on touch interaction.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
+    constexpr Property::PropertyInfo RadiusInfo = {
         "Size",
         "Marker size",
         "Controls the size of the touch input markers.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
+    constexpr Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Marker opacity",
         "The opacity of the touch markers.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr Property::PropertyInfo ColorInfo = {
         "MarkerColor",
         "Marker color",
         "The color of the touch markers.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 } // namespace
 
 namespace openspace {
 
 TouchMarker::TouchMarker()
-    : properties::PropertyOwner({ "TouchMarkers", "Touch Markers" })
+    : PropertyOwner({ "TouchMarkers", "Touch Markers" })
     , _enabled(VisibilityInfo, true)
     , _radiusSize(RadiusInfo, 30.f, 0.f, 100.f)
     , _opacity(OpacityInfo, 0.6f, 0.f, 1.f)
@@ -71,7 +73,7 @@ TouchMarker::TouchMarker()
     addProperty(_enabled);
     addProperty(_radiusSize);
     addProperty(_opacity);
-    _color.setViewOption(properties::Property::ViewOptions::Color);
+    _color.setViewOption(Property::ViewOptions::Color);
     addProperty(_color);
 }
 
@@ -134,9 +136,9 @@ void TouchMarker::createVertexList(
     vertexData.resize(touchPoints.size() * 2);
 
     int i = 0;
-    for (const openspace::TouchInputHolder& touchPoint : touchPoints) {
-        vertexData[i] = 2.f * (touchPoint.latestInput().x - 0.5f);
-        vertexData[i + 1] = -2.f * (touchPoint.latestInput().y - 0.5f);
+    for (const TouchInputHolder& touchPoint : touchPoints) {
+        vertexData[i] = 2.f * (touchPoint.latestInput().pos.x - 0.5f);
+        vertexData[i + 1] = -2.f * (touchPoint.latestInput().pos.y - 0.5f);
         i += 2;
     }
 

@@ -50,9 +50,9 @@
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/socket/socket.h>
-#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <exception>
 #include <locale>
@@ -172,14 +172,14 @@ void Connection::handleJson(const nlohmann::json& json) {
         return;
     }
 
-    // The topic id may be an already discussed topic, or a new one.
+    // The topic id may be an already discussed topic, or a new one
     const TopicId topicId = topicJson->get<TopicId>();
     auto topicIt = _topics.find(topicId);
 
     if (topicIt == _topics.end()) {
         ZoneScopedN("New Topic");
 
-        // The topic id is not registered: Initialize a new topic.
+        // The topic id is not registered: Initialize a new topic
         auto typeJson = json.find(MessageKeyType);
         if (typeJson == json.end() || !typeJson->is_string()) {
             LERROR("Type must be specified as a string when a new topic is initialized");
@@ -220,7 +220,7 @@ void Connection::handleJson(const nlohmann::json& json) {
 void Connection::sendMessage(const std::string& message) {
     ZoneScoped;
 
-    std::lock_guard lock(_mutex);
+    const std::unique_lock lock(_mutex);
     _socket->putMessage(message);
 }
 

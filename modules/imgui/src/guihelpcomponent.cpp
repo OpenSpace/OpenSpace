@@ -30,9 +30,11 @@ namespace {
     const ImVec2 Size = ImVec2(350, 500);
 } // namespace
 
-namespace openspace::gui {
+namespace openspace {
 
-GuiHelpComponent::GuiHelpComponent() : GuiComponent("Help") {}
+GuiHelpComponent::GuiHelpComponent()
+    : GuiComponent("Help")
+{}
 
 void GuiHelpComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
@@ -47,4 +49,4 @@ void GuiHelpComponent::render() {
     ImGui::End();
 }
 
-} // namespace openspace::gui
+} // namespace openspace

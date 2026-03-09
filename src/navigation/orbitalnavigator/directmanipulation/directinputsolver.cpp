@@ -35,24 +35,26 @@
 #include <cstdlib>
 
 namespace {
+    using namespace openspace;
+
     // Used in the LM algorithm
     struct FunctionData {
         std::vector<glm::dvec3> selectedPoints;
         std::vector<glm::dvec2> screenPoints;
         int nDOF;
-        const openspace::Camera* camera;
-        const openspace::SceneGraphNode* node;
+        const Camera* camera;
+        const SceneGraphNode* node;
         ghoul::LMstat stats;
     };
 
     // Project back a 3D point in model view to clip space [-1,1] coordinates on the view
     // plane
-    glm::dvec2 castToNDC(const glm::dvec3& vec, openspace::Camera& camera,
-                         const openspace::SceneGraphNode* node)
+    glm::dvec2 castToNDC(const glm::dvec3& vec, Camera& camera,
+                         const SceneGraphNode* node)
     {
         glm::dvec3 posInCamSpace = glm::inverse(camera.rotationQuaternion()) *
             (node->worldRotationMatrix() * vec +
-                (node->worldPosition() - camera.positionVec3()));
+                (node->worldPosition() - camera.position()));
 
         glm::dvec4 clipspace = camera.projectionMatrix() * glm::dvec4(posInCamSpace, 1.0);
         return (glm::dvec2(clipspace) / clipspace.w);
@@ -70,7 +72,6 @@ namespace {
             q[i] = par[i];
         }
 
-        using DirectManipulation = openspace::interaction::DirectManipulation;
         DirectManipulation::VelocityStates velocities = {
             .orbit = glm::dvec2(q[0], q[1]),
             .zoom = q[2],
@@ -80,14 +81,14 @@ namespace {
 
         // @TODO (emmbr, 2026-01-19): Maybe it would be better to put this function
         // somewhere else, to avoid the circular dependency
-        openspace::CameraPose pose = DirectManipulation::cameraPoseFromVelocities(
+        CameraPose pose = DirectManipulation::cameraPoseFromVelocities(
             velocities,
             ptr->camera,
             ptr->node
         );
 
         // Update the camera state (for a local copy of the camera)
-        openspace::Camera cam = *ptr->camera;
+        Camera cam = *ptr->camera;
         cam.setPose(pose);
 
         // We now have a new position and orientation of camera, project surfacePoint to
@@ -169,7 +170,7 @@ namespace {
     }
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
 DirectInputSolver::DirectInputSolver() {
     ghoul::initializeLevmarqStats(&_lmstat);
@@ -230,5 +231,5 @@ int DirectInputSolver::nDof() const {
     return _nDof;
 }
 
-} // namespace openspace::interaction
+} // namespace openspace
 

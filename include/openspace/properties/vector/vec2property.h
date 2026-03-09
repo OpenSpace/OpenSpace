@@ -30,11 +30,11 @@
 #include <ghoul/glm.h>
 #include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 class Vec2Property : public NumericalProperty<glm::vec2> {
 public:
-    explicit Vec2Property(Property::PropertyInfo info, glm::vec2 value = glm::vec2(0.f),
+    explicit Vec2Property(PropertyInfo info, glm::vec2 value = glm::vec2(0.f),
         glm::vec2 minValue = glm::vec2(std::numeric_limits<float>::lowest()),
         glm::vec2 maxValue = glm::vec2(std::numeric_limits<float>::max()),
         glm::vec2 stepValue = glm::vec2(0.01f));
@@ -51,6 +51,6 @@ private:
     glm::vec2 toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___VEC2PROPERTY___H__

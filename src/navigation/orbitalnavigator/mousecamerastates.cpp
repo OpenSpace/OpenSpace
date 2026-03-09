@@ -38,7 +38,7 @@ namespace {
     constexpr double SensitivityAdjustmentDecrease = 0.5;
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
 MouseCameraStates::MouseCameraStates(double sensitivity, double velocityScaleFactor)
     : OrbitalCameraStates(sensitivity, velocityScaleFactor)
@@ -137,4 +137,4 @@ void MouseCameraStates::updateVelocitiesFromInput(const MouseInputState& mouseSt
     updateVelocities(updateStates, deltaTime);
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

@@ -43,18 +43,16 @@
 #include <utility>
 
 namespace openspace {
-    namespace scripting { struct LuaLibrary; }
-    class Camera;
-    struct CameraPose;
-    struct CameraRotationDecomposition;
-    class SceneGraphNode;
-    struct SurfacePositionHandle;
-    class Syncable;
-} // namespace openspace
 
-namespace openspace::interaction {
+class Camera;
+struct CameraPose;
+struct CameraRotationDecomposition;
+struct LuaLibrary;
+class SceneGraphNode;
+struct SurfacePositionHandle;
+class Syncable;
 
-class OrbitalNavigator : public properties::PropertyOwner {
+class OrbitalNavigator : public PropertyOwner {
 public:
     OrbitalNavigator();
 
@@ -67,7 +65,7 @@ public:
     /**
      * This function should be called on every camera interaction: for example when
      * navigating using an input device, changing the focus node or starting a path or a
-     * session recording playback
+     * session recording playback.
      */
     void markCameraInteraction();
     void tickMovementTimer(float deltaTime);
@@ -111,7 +109,7 @@ public:
 
     /**
      * Compute a camera position that pushed the camera position to a valid position over
-     * the anchor node, accounting for the minimal allowed distance
+     * the anchor node, accounting for the minimal allowed distance.
      */
     glm::dvec3 pushToSurfaceOfAnchor(const glm::dvec3& cameraPosition) const;
 
@@ -124,19 +122,19 @@ public:
      * \return The Lua library that contains all Lua functions available to affect the
      *         OrbitalNavigator
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     using Displacement = std::pair<glm::dvec3, glm::dvec3>;
 
-    struct Friction : public properties::PropertyOwner {
+    struct Friction : public PropertyOwner {
         Friction();
 
-        properties::BoolProperty roll;
-        properties::BoolProperty rotational;
-        properties::BoolProperty zoom;
+        BoolProperty roll;
+        BoolProperty rotational;
+        BoolProperty zoom;
 
-        properties::FloatProperty friction;
+        FloatProperty friction;
     };
 
     void updateAnchorNode(const SceneGraphNode* anchorNode);
@@ -150,54 +148,54 @@ private:
     Friction _friction;
 
     /// Anchor: Node to follow and orbit
-    properties::StringProperty _anchor;
+    StringProperty _anchor;
 
     /// Aim: Node to look at (when camera direction is reset), empty string means same as
     /// anchor. If these are the same node we call it the `focus` node
-    properties::StringProperty _aim;
+    StringProperty _aim;
 
     // Reset camera direction to the anchor node.
-    properties::TriggerProperty _retargetAnchor;
+    TriggerProperty _retargetAnchor;
     // Reset camera direction to the aim node.
-    properties::TriggerProperty _retargetAim;
+    TriggerProperty _retargetAim;
 
-    properties::BoolProperty _followAnchorNodeRotation;
-    properties::FloatProperty _followAnchorNodeRotationDistance;
+    BoolProperty _followAnchorNodeRotation;
+    FloatProperty _followAnchorNodeRotationDistance;
 
 
-    struct LimitZoom : public properties::PropertyOwner {
+    struct LimitZoom : public PropertyOwner {
         LimitZoom();
 
-        properties::BoolProperty enableZoomInLimit;
-        properties::FloatProperty minimumAllowedDistance;
+        BoolProperty enableZoomInLimit;
+        FloatProperty minimumAllowedDistance;
 
-        properties::BoolProperty enableZoomOutLimit;
-        properties::FloatProperty maximumAllowedDistance;
+        BoolProperty enableZoomOutLimit;
+        FloatProperty maximumAllowedDistance;
     };
 
     LimitZoom _limitZoom;
 
-    properties::BoolProperty _disableZoom;
-    properties::BoolProperty _disableRoll;
+    BoolProperty _disableZoom;
+    BoolProperty _disableRoll;
 
-    properties::BoolProperty _useAdaptiveStereoscopicDepth;
-    properties::FloatProperty _stereoscopicDepthOfFocusSurface;
-    properties::FloatProperty _staticViewScaleExponent;
+    BoolProperty _useAdaptiveStereoscopicDepth;
+    FloatProperty _stereoscopicDepthOfFocusSurface;
+    FloatProperty _staticViewScaleExponent;
 
-    properties::BoolProperty _constantVelocityFlight;
+    BoolProperty _constantVelocityFlight;
 
-    properties::FloatProperty _retargetInterpolationTime;
-    properties::FloatProperty _stereoInterpolationTime;
-    properties::FloatProperty _followRotationInterpolationTime;
+    FloatProperty _retargetInterpolationTime;
+    FloatProperty _stereoInterpolationTime;
+    FloatProperty _followRotationInterpolationTime;
 
-    properties::BoolProperty _shouldRotateAroundUp;
+    BoolProperty _shouldRotateAroundUp;
 
     enum class UpDirectionChoice {
         XAxis = 0,
         YAxis,
         ZAxis
     };
-    properties::OptionProperty _upToUseForRotation;
+    OptionProperty _upToUseForRotation;
 
     OrbitalInputHandler _inputHandler;
 
@@ -345,6 +343,6 @@ private:
         const SurfacePositionHandle& positionHandle) const;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___ORBITALNAVIGATOR___H__

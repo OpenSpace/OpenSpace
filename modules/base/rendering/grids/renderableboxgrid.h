@@ -45,7 +45,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     struct Vertex {
@@ -54,9 +54,9 @@ protected:
 
     ghoul::opengl::ProgramObject* _gridProgram = nullptr;
 
-    properties::Vec3Property _color;
-    properties::FloatProperty _lineWidth;
-    properties::Vec3Property _size;
+    Vec3Property _color;
+    FloatProperty _lineWidth;
+    Vec3Property _size;
 
     bool _gridIsDirty = true;
 

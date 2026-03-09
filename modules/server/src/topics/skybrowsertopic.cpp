@@ -35,12 +35,12 @@
 #include <string_view>
 #include <vector>
 
+using nlohmann::json;
+
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
     constexpr std::string_view UnsubscribeEvent = "stop_subscription";
 } // namespace
-
-using nlohmann::json;
 
 namespace openspace {
 
@@ -91,8 +91,6 @@ bool SkyBrowserTopic::isDone() const {
 }
 
 void SkyBrowserTopic::sendBrowserData() {
-    using namespace openspace;
-
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     ghoul::Dictionary data;
 
@@ -119,9 +117,9 @@ void SkyBrowserTopic::sendBrowserData() {
     }
 
     // @TODO (2022-04-28, emmbr) The message is still sent very often; every time the
-    // camera moves or the time is changes, because this changes the "roll" parameter
-    // of the browser. This is the update that occurs most often. Maybe it could be
-    // separated into it's own topic?
+    // camera moves or the time is changes, because this changes the "roll" parameter of
+    // the browser. This is the update that occurs most often. Maybe it could be separated
+    // into it's own topic?
 
     _lastUpdateJsonString = jsonString;
 }

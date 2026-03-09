@@ -33,17 +33,19 @@
 #include <variant>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TargetInfo = {
         "Target",
         "Target",
         "This is the SPICE name for the body whose translation is to be computed by the "
         "SpiceTranslation. It can either be a fully qualified name (such as 'EARTH') or "
         "a NAIF integer id code (such as '399'). The resulting translation will be a "
         "vector leading from the `Target` to the `Observer`.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ObserverInfo = {
+    constexpr Property::PropertyInfo ObserverInfo = {
         "Observer",
         "Observer",
         "This is the SPICE name for the parent of the body whose translation is to be "
@@ -51,35 +53,34 @@ namespace {
         "as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0'). The "
         "resulting translation will be a vector leading from the `Target` to the "
         "`Observer`.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FrameInfo = {
+    constexpr Property::PropertyInfo FrameInfo = {
         "Frame",
         "Reference frame",
         "This is the SPICE name of the reference frame in which the position should be "
         "calculated. The default value is GALACTIC.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FixedDateInfo = {
+    constexpr Property::PropertyInfo FixedDateInfo = {
         "FixedDate",
         "Fixed date",
         "If this value is specified, the position will be locked to a specific time "
         "rather than following the in-game in the system. Setting this to an empty "
         "string will unlock the time and return to position based on current simulation "
         "time.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TimeOffsetInfo = {
+    constexpr Property::PropertyInfo TimeOffsetInfo = {
         "TimeOffset",
         "Time offset",
         "A time offset, in seconds, added to the simulation time (or Fixed Date if any), "
         "at which to compute the rotation.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
-
 
     // This `Translation` type uses [SPICE](https://naif.jpl.nasa.gov/naif/) kernels to
     // provide translational information for the attached scene graph node. SPICE is a
@@ -106,12 +107,12 @@ namespace {
         // [[codegen::verbatim(TimeOffsetInfo.description)]]
         std::optional<float> timeOffset;
     };
-#include "spicetranslation_codegen.cpp"
 } // namespace
+#include "spicetranslation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation SpiceTranslation::Documentation() {
+Documentation SpiceTranslation::Documentation() {
     return codegen::doc<Parameters>("space_translation_spicetranslation");
 }
 

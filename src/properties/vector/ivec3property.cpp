@@ -26,11 +26,10 @@
 
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
-IVec3Property::IVec3Property(Property::PropertyInfo info, glm::ivec3 value,
-                             glm::ivec3 minValue, glm::ivec3 maxValue,
-                             glm::ivec3 stepValue)
+IVec3Property::IVec3Property(PropertyInfo info, glm::ivec3 value, glm::ivec3 minValue,
+                             glm::ivec3 maxValue, glm::ivec3 stepValue)
     : NumericalProperty<glm::ivec3>(
         std::move(info),
         std::move(value),
@@ -60,4 +59,4 @@ std::string IVec3Property::stringValue() const {
     return formatJson(_value);
 }
 
-} // namespace openspace::properties
+} // namespace openspace

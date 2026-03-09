@@ -27,7 +27,7 @@
 
 #include <openspace/properties/property.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 /**
  * This subclass of Property handles a single parameter value that is of type `T`. It
@@ -58,7 +58,7 @@ public:
      * \p info and and the default value \p value.
      *
      * \param info The PropertyInfo structure that contains all the required static
-     *        information for initializing this Property.
+     *        information for initializing this Property
      * \param value The default value of the Property
      *
      * \pre \p info.identifier must not be empty
@@ -129,7 +129,7 @@ protected:
     T _value;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #include "openspace/properties/templateproperty.inl"
 

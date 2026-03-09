@@ -32,12 +32,11 @@
 #include <vector>
 
 namespace ghoul { class Dictionary; }
-namespace openspace {
-    namespace documentation { struct Documentation; }
-    class SceneGraphNode;
-} // namespace openspace
 
-namespace openspace::shadowmapping {
+namespace openspace {
+
+struct Documentation;
+class SceneGraphNode;
 
 struct ShadowInfo {
     const SceneGraphNode* lightSource = nullptr;
@@ -50,8 +49,10 @@ struct ShadowInfo {
     glm::dmat4 viewProjectionMatrix = glm::dmat4(1.0);
 };
 
-// This drop-in class is representing that an object is capable of shadowing another
-// object
+/**
+ * This drop - in class is representing that an object is capable of shadowing another
+ * object.
+ */
 class Shadower {
 public:
     explicit Shadower(const ghoul::Dictionary& dictionary);
@@ -68,19 +69,21 @@ public:
 
     virtual void renderForDepthMap(const glm::dmat4& vp) const = 0;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    properties::BoolProperty _castShadow;
+    BoolProperty _castShadow;
     const SceneGraphNode* _lightSource = nullptr;
     std::string _shadowGroup;
 
-    properties::FloatProperty _frustumSize;
+    FloatProperty _frustumSize;
     bool _hasFrustumSize = false;
 };
 
-// This drop-in class is representing that an object can be shadowed by other another
-// object
+/**
+ * This drop - in class is representing that an object can be shadowed by other another
+ * object.
+ */
 class Shadowee {
 public:
     void addShadower(const Shadower* shadower);
@@ -91,6 +94,6 @@ protected:
     bool _isShadowersDirty = false;
 };
 
-} // namespace openspace::shadowmapping
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SHADOWMAPPING___H__

@@ -32,38 +32,37 @@ namespace ghoul::fontrendering { class FontManager; }
 
 namespace openspace {
 
-namespace interaction {
-    class ActionManager;
-    class InteractionHandler;
-    class KeybindingManager;
-    class KeyframeRecordingHandler;
-    class NavigationHandler;
-    class SessionRecordingHandler;
-} // namespace interaction
-namespace properties { class PropertyOwner; }
-namespace scripting {
-    class ScriptEngine;
-    class ScriptScheduler;
-} // namespace scripting
+class ActionManager;
 struct Configuration;
 class Dashboard;
 class DeferredcasterManager;
 class DownloadEventEngine;
 class DownloadManager;
 class EventEngine;
+class InteractionHandler;
+class InteractionMonitor;
+struct JoystickInputStates;
+class KeybindingManager;
+class KeyframeRecordingHandler;
 class LuaConsole;
 class MemoryManager;
 class MissionManager;
 class ModuleEngine;
+class NavigationHandler;
 class OpenSpaceEngine;
 class ParallelPeer;
 class Profile;
+class PropertyOwner;
 class RaycasterManager;
 class RenderEngine;
 class ScreenSpaceRenderable;
+class ScriptEngine;
+class ScriptScheduler;
+class SessionRecordingHandler;
 class SyncEngine;
 class TimeManager;
 class VersionChecker;
+struct WebsocketInputStates;
 struct WindowDelegate;
 
 namespace global {
@@ -88,17 +87,20 @@ inline TimeManager* timeManager;
 inline VersionChecker* versionChecker;
 inline WindowDelegate* windowDelegate;
 inline Configuration* configuration;
-inline interaction::ActionManager* actionManager;
-inline interaction::InteractionHandler* interactionHandler;
-inline interaction::KeybindingManager* keybindingManager;
-inline interaction::KeyframeRecordingHandler* keyframeRecording;
-inline interaction::NavigationHandler* navigationHandler;
-inline interaction::SessionRecordingHandler* sessionRecordingHandler;
-inline properties::PropertyOwner* rootPropertyOwner;
-inline properties::PropertyOwner* screenSpaceRootPropertyOwner;
-inline properties::PropertyOwner* userPropertyOwner;
-inline scripting::ScriptEngine* scriptEngine;
-inline scripting::ScriptScheduler* scriptScheduler;
+inline ActionManager* actionManager;
+inline InteractionHandler* interactionHandler;
+inline InteractionMonitor* interactionMonitor;
+inline JoystickInputStates* joystickInputStates;
+inline WebsocketInputStates* websocketInputStates;
+inline KeybindingManager* keybindingManager;
+inline KeyframeRecordingHandler* keyframeRecording;
+inline NavigationHandler* navigationHandler;
+inline SessionRecordingHandler* sessionRecordingHandler;
+inline PropertyOwner* rootPropertyOwner;
+inline PropertyOwner* screenSpaceRootPropertyOwner;
+inline PropertyOwner* userPropertyOwner;
+inline ScriptEngine* scriptEngine;
+inline ScriptScheduler* scriptScheduler;
 inline Profile* profile;
 
 void create();

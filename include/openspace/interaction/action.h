@@ -30,7 +30,7 @@
 #include <optional>
 #include <string>
 
-namespace openspace::interaction {
+namespace openspace {
 
 struct Action {
     BooleanType(IsLocal);
@@ -78,6 +78,6 @@ struct Action {
     IsLocal isLocal = IsLocal::No;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___ACTION___H__

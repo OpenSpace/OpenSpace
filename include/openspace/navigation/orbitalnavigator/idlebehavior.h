@@ -35,12 +35,10 @@
 #include <string_view>
 
 namespace openspace {
-    class SceneGraphNode;
-} // namespace openspace
 
-namespace openspace::interaction {
+class SceneGraphNode;
 
-class IdleBehavior : public properties::PropertyOwner {
+class IdleBehavior : public PropertyOwner {
 public:
     enum class Behavior {
         Orbit = 0,
@@ -108,15 +106,15 @@ public:
         double angle, glm::dvec3& position, glm::dquat& globalRotation);
 
 private:
-    properties::BoolProperty _apply;
-    properties::BoolProperty _shouldTriggerWhenIdle;
-    properties::FloatProperty _idleWaitTime;
-    properties::BoolProperty _abortOnCameraInteraction;
-    properties::BoolProperty _invert;
-    properties::FloatProperty _speedScaleFactor;
-    properties::FloatProperty _dampenInterpolationTime;
+    BoolProperty _apply;
+    BoolProperty _shouldTriggerWhenIdle;
+    FloatProperty _idleWaitTime;
+    BoolProperty _abortOnCameraInteraction;
+    BoolProperty _invert;
+    FloatProperty _speedScaleFactor;
+    FloatProperty _dampenInterpolationTime;
 
-    properties::OptionProperty _defaultBehavior;
+    OptionProperty _defaultBehavior;
     std::optional<Behavior> _chosenBehavior;
 
     Interpolator<double> _dampenInterpolator;
@@ -125,6 +123,6 @@ private:
     float _triggerTimer = 0.f;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___IDLEBEHAVIOR___H__

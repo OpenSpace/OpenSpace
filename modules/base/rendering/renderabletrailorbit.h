@@ -51,7 +51,7 @@ public:
 
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     /**
@@ -80,6 +80,7 @@ private:
         /// oldest
         int nUpdated;
     };
+
     /**
      * Updates the trail based on the new incoming UpdateData information. This function
      * might update an arbitrary number of values in the vertex buffer and returns an
@@ -91,12 +92,12 @@ private:
     UpdateReport updateTrails(const UpdateData& data);
 
     /// The orbital period of the RenderableTrail in days
-    properties::DoubleProperty _period;
+    DoubleProperty _period;
     /// The number of points that should be sampled between _period and now
-    properties::IntProperty _resolution;
+    IntProperty _resolution;
 
-    /// A dirty flag that determines whether a full sweep (recomputing of all values)
-    /// is necessary
+    /// A dirty flag that determines whether a full sweep (recomputing of all values) is
+    /// necessary
     bool _needsFullSweep = true;
     /// A dirty flag to determine whether the index buffer needs to be regenerated and
     /// then reuploaded
@@ -106,7 +107,7 @@ private:
     double _firstPointTime = 0.0;
     /// The time stamp of the newest fixed point in the array
     double _lastPointTime = 0.0;
-    /// The time stamp of when the last valid trail was generated.
+    /// The time stamp of when the last valid trail was generated
     double _previousTime = 0.0;
 };
 

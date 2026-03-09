@@ -28,7 +28,7 @@
 #include <algorithm>
 #include <numeric>
 
-namespace openspace::interaction {
+namespace openspace {
 
 float WebsocketInputStates::axis(int axis) const {
     ghoul_precondition(axis >= 0, "axis must be 0 or positive");
@@ -60,12 +60,10 @@ bool WebsocketInputStates::button(int button, WebsocketAction action) const {
         end(),
         [button, action](const std::pair<const size_t, const WebsocketInputState *> state)
         {
-            return state.second->isConnected ?
-                (state.second->buttons[button] == action)
-                : false;
+            return state.second->isConnected && (state.second->buttons[button] == action);
         }
     );
     return res;
 }
 
-} // namespace openspace::interaction
+} // namespace openspace
