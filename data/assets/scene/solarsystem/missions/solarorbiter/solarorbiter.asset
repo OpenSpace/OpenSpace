@@ -8,7 +8,7 @@ local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local models = asset.resource({
   Name = "Solar Orbiter Models",
   Type = "HttpSynchronization",
-  Identifier = "solar_orbiter_models",
+  Identifier = "solarorbiter_models",
   Version = 1
 })
 

@@ -1,7 +1,7 @@
 local solarOrbiter = asset.resource({
   Name = "Solar Orbiter Kernels",
   Type = "HttpSynchronization",
-  Identifier = "solar_orbiter_kernels",
+  Identifier = "solarorbiter_kernels",
   Version = 1
 })
 
