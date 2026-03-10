@@ -34,8 +34,8 @@ class CameraInteractionStates {
 public:
     /**
      * \param sensitivity Interaction sensitivity
-     * \param velocityScaleFactor Can be set to 60 to remove the inertia of the
-     *        interaction. Lower value will make it harder to move the camera
+     * \param velocityScale Can be set to 60 to remove the inertia of the interaction.
+     *        Lower value will make it harder to move the camera
      */
     CameraInteractionStates(double sensitivity, double velocityScale);
     virtual ~CameraInteractionStates() = default;

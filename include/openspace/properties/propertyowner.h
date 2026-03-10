@@ -62,11 +62,11 @@ public:
      * The constructor of PropertyOwner.
      *
      * \param info The PropertyOwnerInfo struct that contains the
-     *        #PropertyOwnerInfo::identifier, #PropertyOwnerInfo::guiName, and
-     *        #PropertyOwnerInfo::description of this PropertyOwner
+     *        PropertyOwnerInfo::identifier, PropertyOwnerInfo::guiName, and
+     *        PropertyOwnerInfo::description of this PropertyOwner
      *
-     * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any whitespaces
-     * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any `.`
+     * \pre The \p info 's PropertyOwnerInfo::identifier must not contain any whitespaces
+     * \pre The \p info 's PropertyOwnerInfo::identifier must not contain any `.`
      */
     explicit PropertyOwner(PropertyOwnerInfo info);
 

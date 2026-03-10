@@ -335,7 +335,7 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 
     /// Whether the camera movement for the axis is reversed. In the case of a
     /// `\"JoystickLike\"` axis, this is the same as inverting the axis. However, in the
-    /// case of a `\"TriggerLike\" axis, this can reverse the camera movement for the
+    /// case of a `\"TriggerLike\"` axis, this can reverse the camera movement for the
     /// trigger.
     bool flip;
 
