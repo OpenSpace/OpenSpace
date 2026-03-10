@@ -152,7 +152,8 @@ struct DataSettings {
             Or
         } type;
 
-        bool showOnSameLine = false;
+        // Filter checkboxes to show per line (-1 or unset means no limitation)
+        int itemsPerLine = -1;
 
         std::vector<QuickFilter> quickFilters;
     };

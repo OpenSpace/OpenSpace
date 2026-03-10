@@ -33,7 +33,7 @@
 namespace openspace::exoplanets {
 
 FilteringView::FilteringView(DataViewer& dataViewer,
-    const DataSettings& dataSettings)
+                             const DataSettings& dataSettings)
     : _dataViewer(dataViewer)
     , _quickFilterGroups(dataSettings.quickFilterGroups)
 {
@@ -472,7 +472,9 @@ bool FilteringView::renderColumnFilterSettings() {
                     view::helper::renderHelpMarker(filter.description.c_str());
                 }
 
-                if (group.showOnSameLine && (i != group.quickFilters.size() - 1)) {
+                bool shouldAddSameLine = group.itemsPerLine != -1 && ((i + 1) % group.itemsPerLine != 0);
+                bool isLastInGroup = (i == group.quickFilters.size() - 1);
+                if (shouldAddSameLine && !isLastInGroup) {
                     ImGui::SameLine();
                 }
             }

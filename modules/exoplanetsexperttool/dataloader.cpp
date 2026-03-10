@@ -139,7 +139,9 @@ namespace {
                     }
 
                 }
-                groupInfo.at("same_line").get_to(group.showOnSameLine);
+                if (groupInfo.contains("per_line")) {
+                    groupInfo.at("per_line").get_to(group.itemsPerLine);
+                }
 
                 const std::vector<nlohmann::json> quickFilters =
                     groupInfo.at("filters").get<std::vector<nlohmann::json>>();

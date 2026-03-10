@@ -155,7 +155,7 @@
         {
             "group_title": "",
             "type": "AND",
-            "same_line": true,
+            "per_line": 2,
             "filters": [
                 {
                     "name": "Hide null ESM",
@@ -194,7 +194,7 @@
         {
             "group_title": "Planet bin",
             "type": "OR",
-            "same_line": false,
+            "per_line": 1,
             "filters": [
                 {
                     "name": "Terrestrial",
@@ -261,7 +261,7 @@
         {
             "group_title": "Discovery method",
             "type": "OR",
-            "same_line": true,
+            "per_line": 2,
             "filters": [
                 {
                     "name": "Transit",
@@ -282,11 +282,29 @@
                     ]
                 },
                 {
+                    "name": "Imaging",
+                    "filter": [
+                        {
+                            "column": "discoverymethod",
+                            "query": "imaging"
+                        }
+                    ]
+                },
+                {
+                    "name": "Microlensing",
+                    "filter": [
+                        {
+                            "column": "discoverymethod",
+                            "query": "microlensing"
+                        }
+                    ]
+                },
+                {
                     "name": "Other",
                     "filter": [
                         {
                             "column": "discoverymethod",
-                            "query": "-transit, -radial"
+                            "query": "-transit, -radial -imaging -microlensing"
                         }
                     ]
                 }
