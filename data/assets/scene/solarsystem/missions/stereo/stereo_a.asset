@@ -55,7 +55,7 @@ local StereoA = {
     Type = "RenderableModel",
     GeometryFile = models .. "STEREO.fbx",
     -- Arbitrarily chose 260 degree as it results in slightly better visuals when rolling
-    RotationVector = { 0, 260.0, 0 },
+    RotationVector = { 0.0, 260.0, 0.0 },
     LightSources = { sunTransforms.LightSource },
     AmbientIntensity = 0.2,
     SpecularIntensity = 0.0,
@@ -69,7 +69,7 @@ local StereoA = {
 local StereoTrail = {
   Identifier = "STEREO_A_Trail",
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    TimeFrame = {
+  TimeFrame = {
     Type = "TimeFrameInterval",
     Start = MissionBegin,
     End = MissionEnd
@@ -86,13 +86,11 @@ local StereoTrail = {
     Resolution = 5000,
     EnableFade = true,
   },
-
   GUI = {
     Name = "STEREO A Trail",
     Path = "/Solar System/Missions/STEREO A"
   }
 }
-
 
 
 asset.onInitialize(function()
