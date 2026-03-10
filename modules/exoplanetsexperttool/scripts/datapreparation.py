@@ -492,8 +492,8 @@ df.loc[rows, 'hz_score'] = 1.0 - (df['hz_orbsmax'] - df['hz_outer_opt']) / (df['
 
 # If under acceptable line => keep value. If over completely unecceptable ratio, multiply by zero
 df['hz_score_scale'] = np.nan
-df.loc[(df['st_lum_solar']  < -2.5 * df['pl_orbeccen'] + 2.25), 'hz_score_scale'] = 1.0;
-df.loc[(df['st_lum_solar']  > -2.5 * df['pl_orbeccen'] + 2.5), 'hz_score_scale'] = 0.0;
+df.loc[(df['st_lum_solar']  < -2.5 * df['pl_orbeccen'] + 2.25), 'hz_score_scale'] = 1.0
+df.loc[(df['st_lum_solar']  > -2.5 * df['pl_orbeccen'] + 2.5), 'hz_score_scale'] = 0.0
 
 # For everything in between, linearly interpolate between the lines to decide the scaling factor.
 # => reduce value with highet eccentricity and luminosity
