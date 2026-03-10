@@ -241,6 +241,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
 /**
  * Directory must exist. File is created (or overwritten if already existing).
  * File is structured like this: (for version 0)
+ * ```
  *  0. int                    - version number of binary state file! (in case something
  *                              needs to be altered in the future, then increase
  *                              CurrentVersion)
@@ -254,15 +255,16 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
  *                                                           == _extraQuantities[i].size()
  *  6. size_t                 - Number of extra quantites     == _extraQuantities.size()
  *                                                           == _extraQuantityNames.size()
- *  7. site_t                 - Number of total bytes that ALL _extraQuantityNames
+ *  7. size_t                 - Number of total bytes that ALL _extraQuantityNames
  *                              consists of (Each such name is stored as a c_str which
  *                              means it ends with the null char '\0' )
- *  7. std::vector<GLint>     - _lineStart
- *  8. std::vector<GLsizei>   - _lineCount
- *  9. std::vector<glm::vec3> - _vertexPositions
- * 10. std::vector<float>     - _extraQuantities
- * 11. array of c_str         - Strings naming the extra quantities (elements of
+ *  8. std::vector<GLint>     - _lineStart
+ *  9. std::vector<GLsizei>   - _lineCount
+ * 10. std::vector<glm::vec3> - _vertexPositions
+ * 11. std::vector<float>     - _extraQuantities
+ * 12. array of c_str         - Strings naming the extra quantities (elements of
  *                              _extraQuantityNames). Each string ends with null char '\0'
+ * ```
  *
  * \param absPath Must be the path to the folder to save to
  */
@@ -453,7 +455,7 @@ const std::vector<GLint>& FieldlinesState::lineStart() const {
     return _lineStart;
 }
 
-Model FieldlinesState::FieldlinesState::model() const {
+Model FieldlinesState::model() const {
     return _model;
 }
 

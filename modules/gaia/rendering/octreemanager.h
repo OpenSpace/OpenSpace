@@ -93,14 +93,14 @@ public:
     /**
      * Slices LOD data so only the MAX_STARS_PER_NODE brightest stars are stored in inner
      * nodes. If \p branchIndex is defined then only that branch will be sliced. Calls
-     * #sliceNodeLodCache internally.
+     * sliceNodeLodCache internally.
      */
     void sliceLodData(size_t branchIndex = 8);
 
     /**
      * Prints the whole tree structure, including number of stars per node, number of
      * nodes, tree depth and if node is a leaf. Calls
-     * #printStarsPerNode(const OctreeNode&, const std::string&) const internally.
+     * printStarsPerNode(const OctreeNode&, const std::string&) const internally.
      */
     void printStarsPerNode() const;
 
@@ -142,7 +142,7 @@ public:
      *
      * \param outFileStream The stream to which the file will be written
      * \param writeData Defines if data should be included or if only structure should be
-     *        written to the file. Calls #writeNodeToFile which recursively writes all
+     *        written to the file. Calls writeNodeToFile which recursively writes all
      *        nodes
      */
     void writeToFile(std::ofstream& outFileStream, bool writeData);
@@ -297,7 +297,7 @@ private:
     /**
     * Loops though all nodes in \p nodesToRemove and clears them from RAM. Also checks if
     * any ancestor should change the `hasLoadedDescendant` flag by calling
-    * #propagateUnloadedNodes() with all ancestors.
+    * propagateUnloadedNodes() with all ancestors.
     *
     * \param nodesToRemove List of the nodes that should be deleted
     */

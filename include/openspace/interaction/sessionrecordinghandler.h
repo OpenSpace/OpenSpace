@@ -115,6 +115,10 @@ public:
      * and all keyframes deleted from memory.
      *
      * \param filename File saved with recorded keyframes
+     * \param dataMode Determines whether the recording is stored as an ASCII or as a
+     *        binary file
+     * \param overwrite Specifies whether an existing file should be overwritten if it
+     *        already exists
      */
     void stopRecording(const std::filesystem::path& filename, DataMode dataMode,
         bool overwrite = false);
