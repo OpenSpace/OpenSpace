@@ -88,13 +88,7 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
                 nodeName
             ));
         }
-        _solarImageryDependencies.push_back(dependentNode);
-    }
-}
-
-void RenderableSolarImageryProjection::initialize() {
-    for (SceneGraphNode* node : _solarImageryDependencies) {
-        parent()->addDependency(*node);
+        _solarImageryDependencyNames.push_back(nodeName);
     }
 }
 
@@ -134,6 +128,22 @@ bool RenderableSolarImageryProjection::isReady() const {
 void RenderableSolarImageryProjection::update(const UpdateData&) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
+    }
+
+    // @TODO (anden88 2026-03-09): Temporary safety check:
+    // If a SolarImagery node is added as a dependent but not as a required asset, and
+    // later removed, stale dependencies may remain. Previously we added dependent nodes
+    // as dependencies, but this caused an issue where a time-framed solar imagery would
+    // stop this projection renderable from rendering. For now we manually verify each
+    // dependency still exists in the scene.
+    _solarImageryDependencies.clear();
+    for (const std::string& nodeName : _solarImageryDependencyNames) {
+        SceneGraphNode* dependentNode =
+            global::renderEngine->scene()->sceneGraphNode(nodeName);
+
+        if (dependentNode) {
+            _solarImageryDependencies.push_back(dependentNode);
+        }
     }
 }
 

@@ -101,6 +101,7 @@ private:
     FloatProperty _contrastValue;
     BoolProperty _enableBorder;
     BoolProperty _enableFrustum;
+    OptionProperty _faceMode;
     FloatProperty _gammaValue;
     DoubleProperty _moveFactor;
     IntProperty _downsamplingLevel;
@@ -130,7 +131,7 @@ private:
     // Image plane and frustum
     UniformCache(isCoronaGraph, scale, centerPixel, imageryTexture, planeOpacity,
         gammaValue, contrastValue, modelViewProjectionTransform, hasLut,
-        lut) _uniformCachePlane;
+        lut, faceMode) _uniformCachePlane;
 
     UniformCache(planeOpacity, modelViewProjectionTransform,
         modelViewProjectionTransformPlane, scale, centerPixel) _uniformCacheFrustum;

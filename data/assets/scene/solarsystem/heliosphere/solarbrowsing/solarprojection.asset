@@ -10,8 +10,8 @@ local SolarImageryProjection = {
   Renderable = {
     Type = "RenderableSolarImageryProjection",
     DependentNodes = {
-      sdoImagery.Imagery.Identifier,
-      stereoImagery.Imagery.Identifier
+      stereoImagery.Imagery.Identifier,
+      sdoImagery.Imagery.Identifier
     }
   },
   GUI = {
