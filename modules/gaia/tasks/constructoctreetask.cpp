@@ -403,7 +403,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
     if (std::filesystem::is_directory(_inFileOrFolderPath)) {
         namespace fs = std::filesystem;
         for (const fs::directory_entry& e : fs::directory_iterator(_inFileOrFolderPath)) {
-            if (!e.is_regular_file()) {
+            if (e.is_regular_file()) {
                 allInputFiles.push_back(e.path());
             }
         }
