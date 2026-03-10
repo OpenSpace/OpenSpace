@@ -98,6 +98,8 @@ namespace {
     std::vector<float> constructInsertData(const OctreeManager::OctreeNode& node,
                                            RenderMode mode, int& deltaStars)
     {
+        ZoneScoped;
+
         // Return early if node doesn't contain any stars
         if (node.numStars == 0) {
             return std::vector<float>();
@@ -469,6 +471,7 @@ void OctreeManager::fetchSurroundingNodes(const glm::dvec3& cameraPos,
                                           size_t chunkSizeInBytes,
                                           const glm::ivec2& additionalNodes)
 {
+    ZoneScoped;
 
     // If entire dataset fits in RAM then load the entire dataset asynchronously now.
     // Nodes will be rendered when they've been made available
@@ -672,13 +675,15 @@ void OctreeManager::findAndFetchNeighborNode(unsigned long long firstParentId, i
     }).detach();
 }
 
-std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& mvp,
+std::unordered_map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& mvp,
                                                               const glm::vec2& screenSize,
                                                               int& deltaStars,
                                                               RenderMode mode,
                                                               float lodPixelThreshold)
 {
-    std::map<int, std::vector<float>> renderData;
+    ZoneScoped;
+
+    std::unordered_map<int, std::vector<float>> renderData;
     bool innerRebuild = false;
     _minTotalPixelsLod = lodPixelThreshold;
 
@@ -705,6 +710,8 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& 
     if ((_biggestChunkIndexInUse > _maxStackSize * 4 / 5) &&
         (_freeSpotsInBuffer.size() > _maxStackSize * 5 / 6))
     {
+        ZoneScopedN("Rebuild Buffer Stack");
+
         LDEBUG(std::format(
             "Rebuilding VBO. Biggest Chunk: {}  4/5: {} FreeSpotsInVBO: {} 5/6: {}",
             _biggestChunkIndexInUse, _maxStackSize * 4 / 5, _freeSpotsInBuffer.size(),
@@ -715,7 +722,7 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& 
     }
 
     // Check if entire tree is too small to see, and if so remove it
-    std::vector<glm::dvec4> corners(8);
+    std::array<glm::dvec4, 8> corners;
     const float fMaxDist = static_cast<float>(MAX_DIST);
     for (int i = 0; i < 8; i++) {
         const float x = (i % 2 == 0) ? fMaxDist : -fMaxDist;
@@ -732,7 +739,7 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& 
     if (totalPixels < _minTotalPixelsLod * 2) {
         // Remove LOD from first layer of children
         for (const std::shared_ptr<OctreeNode>& child : _root->children) {
-            std::map<int, std::vector<float>> tmpData = removeNodeFromCache(
+            std::unordered_map<int, std::vector<float>> tmpData = removeNodeFromCache(
                 *child,
                 deltaStars
             );
@@ -746,7 +753,7 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& 
             continue;
         }
 
-        std::map<int, std::vector<float>> tmpData = checkNodeIntersection(
+        std::unordered_map<int, std::vector<float>> tmpData = checkNodeIntersection(
             *_root->children[i],
             mvp,
             screenSize,
@@ -1142,16 +1149,16 @@ bool OctreeManager::insertInNode(OctreeNode& node, const std::vector<float>& sta
     return insertInNode(*node.children[index], starValues, depth + 1);
 }
 
-std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNode& node,
+std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNode& node,
                                                                     const glm::dmat4& mvp,
                                                               const glm::vec2& screenSize,
                                                                           int& deltaStars,
                                                                           RenderMode mode)
 {
-    std::map<int, std::vector<float>> fetchedData;
+    ZoneScoped;
 
     // Calculate the corners of the node
-    std::vector<glm::dvec4> corners(8);
+    std::array<glm::dvec4, 8> corners;
     for (int i = 0; i < 8; i++) {
         const float x = (i % 2 == 0) ?
             node.originX + node.halfDimension :
@@ -1167,23 +1174,25 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNod
     }
 
     // Check if node is visible from camera. If not then return early
-    if (!(_culler->isVisible(corners, mvp))) {
+    if (!_culler->isVisible(corners, mvp)) {
+        ZoneScopedN("Not visible");
         // Check if this node or any of its children existed in cache previously. If so,
         // then remove them from cache and add those indices to stack
-        fetchedData = removeNodeFromCache(node, deltaStars);
-        return fetchedData;
+        return removeNodeFromCache(node, deltaStars);
     }
 
     // Remove node if it has been unloaded while still in view and while streaming
     if (node.bufferIndex != OctreeNode::DefaultIndex && !node.isLoaded &&
         _streamOctree && !_datasetFitInMemory)
     {
-        fetchedData = removeNodeFromCache(node, deltaStars);
-        return fetchedData;
+        ZoneScopedN("Unloaded");
+        return removeNodeFromCache(node, deltaStars);
     }
 
     // Take care of inner nodes
-    if (!(node.isLeaf)) {
+    if (!node.isLeaf) {
+        ZoneScopedN("!leaf");
+
         const glm::vec2 nodeSize = _culler->getNodeSizeInPixels(corners, mvp, screenSize);
         const float totalPixels = nodeSize.x * nodeSize.y;
 
@@ -1196,38 +1205,44 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNod
         {
             // Get correct insert index from stack if node didn't exist already. Otherwise
             // we will overwrite the old data. Key merging is not a problem here
-            if ((node.bufferIndex == OctreeNode::DefaultIndex) || _rebuildBuffer) {
-                // Return empty if we couldn't claim a buffer stream index
-                if (!updateBufferIndex(node)) {
-                    return fetchedData;
-                }
+            if ((node.bufferIndex != OctreeNode::DefaultIndex) && !_rebuildBuffer) {
+                return std::unordered_map<int, std::vector<float>>();
+            }
 
-                // We're in an inner node, remove indices from potential children in cache
-                for (const std::shared_ptr<OctreeNode>& child : node.children) {
-                    std::map<int, std::vector<float>> tmpData = removeNodeFromCache(
-                        *child,
-                        deltaStars
-                    );
-                    fetchedData.insert(tmpData.begin(), tmpData.end());
-                }
+            // Return empty if we couldn't claim a buffer stream index
+            if (!updateBufferIndex(node)) {
+                return std::unordered_map<int, std::vector<float>>();
+            }
 
-                // Insert data and adjust stars added in this frame
-                fetchedData[node.bufferIndex] = constructInsertData(
-                    node,
-                    mode,
+            std::unordered_map<int, std::vector<float>> fetchedData;
+            // We're in an inner node, remove indices from potential children in cache
+            for (const std::shared_ptr<OctreeNode>& child : node.children) {
+                std::unordered_map<int, std::vector<float>> tmpData = removeNodeFromCache(
+                    *child,
                     deltaStars
                 );
+                fetchedData.insert(tmpData.begin(), tmpData.end());
             }
+
+            // Insert data and adjust stars added in this frame
+            fetchedData[node.bufferIndex] = constructInsertData(
+                node,
+                mode,
+                deltaStars
+            );
             return fetchedData;
         }
     }
     // Return node data if node is a leaf
     else {
+        ZoneScopedN("leaf");
+
+        std::unordered_map<int, std::vector<float>> fetchedData;
         // If node already is in cache then skip it, otherwise store it
         if ((node.bufferIndex == OctreeNode::DefaultIndex) || _rebuildBuffer) {
             // Return empty if we couldn't claim a buffer stream index
             if (!updateBufferIndex(node)) {
-                return fetchedData;
+                return std::unordered_map<int, std::vector<float>>();
             }
 
             // Insert data and adjust stars added in this frame
@@ -1238,13 +1253,16 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNod
 
     // We're in a big, visible inner node -> remove it from cache if it existed. But not
     // its children -> set recursive check to false
-    fetchedData = removeNodeFromCache(node, deltaStars, false);
+    std::unordered_map<int, std::vector<float>> fetchedData =
+        removeNodeFromCache(node, deltaStars, false);
 
     // Recursively check if children should be rendered
     for (const std::shared_ptr<OctreeNode>& child : node.children) {
+        ZoneScopedN("child");
+
         // Observe that if there exists identical keys in fetchedData then those values in
         // tmpData will be ignored! Thus we store the removed keys until next render call
-        std::map<int, std::vector<float>> tmpData = checkNodeIntersection(
+        std::unordered_map<int, std::vector<float>> tmpData = checkNodeIntersection(
             *child,
             mvp,
             screenSize,
@@ -1256,11 +1274,13 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNod
     return fetchedData;
 }
 
-std::map<int, std::vector<float>> OctreeManager::removeNodeFromCache(OctreeNode& node,
+std::unordered_map<int, std::vector<float>> OctreeManager::removeNodeFromCache(OctreeNode& node,
                                                                      int& deltaStars,
                                                                      bool recursive)
 {
-    std::map<int, std::vector<float>> keysToRemove;
+    ZoneScoped;
+
+    std::unordered_map<int, std::vector<float>> keysToRemove;
 
     // If we're in rebuilding mode then there is no need to remove any nodes
 
@@ -1280,7 +1300,7 @@ std::map<int, std::vector<float>> OctreeManager::removeNodeFromCache(OctreeNode&
     // Check children recursively if we're in an inner node
     if (!node.isLeaf && recursive) {
         for (const std::shared_ptr<OctreeNode>& child : node.children) {
-            std::map<int, std::vector<float>> tmpData = removeNodeFromCache(
+            std::unordered_map<int, std::vector<float>> tmpData = removeNodeFromCache(
                 *child,
                 deltaStars
             );
@@ -1317,6 +1337,8 @@ void OctreeManager::createNodeChildren(OctreeNode& node) {
 }
 
 bool OctreeManager::updateBufferIndex(OctreeNode& node) {
+    ZoneScoped;
+
     if (node.bufferIndex != OctreeNode::DefaultIndex) {
         // If we're rebuilding Buffer Index Cache then store indices to overwrite later
         _removedKeysInPrevCall.insert(node.bufferIndex);
