@@ -664,6 +664,10 @@ void RenderableGaiaStars::deinitializeGL() {
 }
 
 void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
+    ZoneScoped;
+    TracyGpuZone("RenderableGaiaStars");
+    
+
     // Wait until camera has stabilized before we traverse the Octree/stream from files
     if (_firstDrawCalls) {
         _firstDrawCalls = false;
@@ -675,6 +679,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
     // Update which nodes are stored in memory as the camera moves around (if streaming)
     if (_fileReaderOption == FileReaderOption::StreamOctree) {
+        ZoneScopedN("Fetch nodes");
+
         const glm::dvec3 cameraPos = data.camera.position();
         const size_t chunkSizeBytes = _chunkSize * sizeof(GLfloat);
         _octreeManager.fetchSurroundingNodes(cameraPos, chunkSizeBytes, _additionalNodes);
@@ -687,7 +693,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4 modelViewProjMat = calcModelViewProjectionTransform(data, model);
     const glm::vec2 screenSize = glm::vec2(global::renderEngine->renderingResolution());
     int deltaStars = 0;
-    const std::map<int, std::vector<float>> updateData = _octreeManager.traverseData(
+    const std::unordered_map<int, std::vector<float>> updateData = _octreeManager.traverseData(
         modelViewProjMat,
         screenSize,
         deltaStars,

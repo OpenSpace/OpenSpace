@@ -48,17 +48,20 @@ OctreeCuller::OctreeCuller(AABB3 viewFrustum)
     : _viewFrustum(std::move(viewFrustum))
 {}
 
-bool OctreeCuller::isVisible(const std::vector<glm::dvec4>& corners,
+bool OctreeCuller::isVisible(const std::array<glm::dvec4, 8>& corners,
                              const glm::dmat4& mvp)
 {
+    ZoneScoped;
+
     createNodeBounds(corners, mvp);
     return intersects(_viewFrustum, _nodeBounds);
 }
 
-glm::vec2 OctreeCuller::getNodeSizeInPixels(const std::vector<glm::dvec4>& corners,
+glm::vec2 OctreeCuller::getNodeSizeInPixels(const std::array<glm::dvec4, 8>& corners,
                                             const glm::dmat4& mvp,
                                             const glm::vec2& screenSize)
 {
+    ZoneScoped;
 
     createNodeBounds(corners, mvp);
 
@@ -68,7 +71,7 @@ glm::vec2 OctreeCuller::getNodeSizeInPixels(const std::vector<glm::dvec4>& corne
     return glm::vec2(size.x * screenSize.x, size.y * screenSize.y);
 }
 
-void OctreeCuller::createNodeBounds(const std::vector<glm::dvec4>& corners,
+void OctreeCuller::createNodeBounds(const std::array<glm::dvec4, 8>& corners,
                                     const glm::dmat4& mvp)
 {
     // Create a bounding box in clipping space from node boundaries

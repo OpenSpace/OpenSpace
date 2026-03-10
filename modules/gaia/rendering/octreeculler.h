@@ -51,19 +51,19 @@ public:
     /**
      * \return `true` if any part of the node is visible in the current view
      */
-    bool isVisible(const std::vector<glm::dvec4>& corners, const glm::dmat4& mvp);
+    bool isVisible(const std::array<glm::dvec4, 8>& corners, const glm::dmat4& mvp);
 
     /**
      * \return The size [in pixels] of the node in clipping space
      */
-    glm::vec2 getNodeSizeInPixels(const std::vector<glm::dvec4>& corners,
+    glm::vec2 getNodeSizeInPixels(const std::array<glm::dvec4, 8>& corners,
         const glm::dmat4& mvp, const glm::vec2& screenSize);
 
 private:
     /**
      * Creates an axis-aligned bounding box containing all \p corners in clipping space.
      */
-    void createNodeBounds(const std::vector<glm::dvec4>& corners, const glm::dmat4& mvp);
+    void createNodeBounds(const std::array<glm::dvec4, 8>& corners, const glm::dmat4& mvp);
 
     const AABB3 _viewFrustum;
     AABB3 _nodeBounds;
