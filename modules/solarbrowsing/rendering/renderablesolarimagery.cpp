@@ -55,6 +55,12 @@ namespace {
     constexpr double SunRadius = 1391600000.0 * 0.5;
     constexpr unsigned int DefaultTextureSize = 32;
 
+    enum FaceMode {
+        FrontOnly = 0,
+        SolidBack,
+        DoubleSided
+    };
+
     constexpr Property::PropertyInfo ActiveInstrumentsInfo = {
         "ActiveInstrument",
         "Active instrument",
@@ -74,6 +80,14 @@ namespace {
         "Enable frustum",
         "Enables frustum around the current spacecraft imagery.",
         Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo FaceModeInfo = {
+        "FaceMode",
+        "Face Mode",
+        "Specifies how the plane is rendered: front side only, with a solid backside, "
+        "or textured on both sides.",
+        Property::Visibility::AdvancedUser
     };
 
     constexpr Property::PropertyInfo MoveFactorInfo = {
@@ -164,6 +178,11 @@ namespace {
             DynamicDownloading
         };
 
+        enum class [[codegen::map(FaceMode)]] FaceMode {
+            FrontOnly [[codgen::key("Front Only")]],
+            SolidBack [[codegen::key("Solid Back")]],
+            DoubleSided [[codegen::key("Double Sided")]]
+        };
         // The root directory containing solar imagery organized by instrument. Each
         // subdirectory represents an instrument and contains its observation images.
         std::optional<std::filesystem::path> imageDirectory [[codegen::directory()]];
@@ -204,6 +223,9 @@ namespace {
 
         // [[codegen::verbatim(EnableFrustumInfo.description)]]
         std::optional<bool> enableFrustum;
+
+        // [[codegen::verbatim(FaceModeInfo.description)]]
+        std::optional<FaceMode> faceMode;
 
         // [[codegen::verbatim(MoveFactorInfo.description)]]
         std::optional<float> moveFactor;
@@ -269,6 +291,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     , _contrastValue(ContrastValueInfo, 0.f, -15.f, 15.f)
     , _enableBorder(EnableBorderInfo, false)
     , _enableFrustum(EnableFrustumInfo, false)
+    , _faceMode(FaceModeInfo)
     , _gammaValue(GammaValueInfo, 0.9f, 0.1f, 10.f)
     , _moveFactor(MoveFactorInfo, 1.0, 0.0, 1.0)
     , _downsamplingLevel(DownsamplingLevelInfo, 2, 0, 5)
@@ -291,6 +314,16 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         _enableBorder = _enableFrustum.value();
     });
     addProperty(_enableFrustum);
+
+    _faceMode.addOption(FaceMode::FrontOnly, "Front only");
+    _faceMode.addOption(FaceMode::SolidBack, "Solid back");
+    _faceMode.addOption(FaceMode::DoubleSided, "Double sided");
+    _faceMode = FaceMode::SolidBack;
+
+    if (p.faceMode.has_value()) {
+        _faceMode = codegen::map<FaceMode>(*p.faceMode);
+    }
+    addProperty(_faceMode);
 
     // Add Instrument GUI names
     unsigned int guiNameCount = 0;
@@ -668,7 +701,18 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     updateImageryTexture();
     const glm::dvec3& sunPositionWorld = sceneGraphNode("Sun")->worldPosition();
 
-    glEnable(GL_CULL_FACE);
+    switch (_faceMode) {
+        case FaceMode::FrontOnly:
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+            break;
+        case FaceMode::SolidBack:
+        case FaceMode::DoubleSided:
+            glDisable(GL_CULL_FACE);
+            break;
+        default:
+            throw ghoul::MissingCaseException();
+    }
 
     // Perform necessary transforms
     const glm::dmat4& viewMatrix = data.camera.combinedViewMatrix();
@@ -757,6 +801,7 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     }
     // Must bind all sampler2D, otherwise undefined behaviour
     _planeShader->setUniform(_uniformCachePlane.lut, tfUnit);
+    _planeShader->setUniform(_uniformCachePlane.faceMode, _faceMode);
 
     glBindVertexArray(_quadVao);
     glDrawArrays(GL_TRIANGLES, 0, 6);

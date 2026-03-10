@@ -131,6 +131,7 @@ private:
     FloatProperty _contrastValue;
     BoolProperty _enableBorder;
     BoolProperty _enableFrustum;
+    OptionProperty _faceMode;
     FloatProperty _gammaValue;
     DoubleProperty _moveFactor;
     IntProperty _downsamplingLevel;
