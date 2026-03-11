@@ -608,7 +608,7 @@ LuaLibrary NavigationHandler::luaLibrary() {
             codegen::lua::AddTruckMovement,
             codegen::lua::AddLocalRoll,
             codegen::lua::AddGlobalRoll,
-            codegen::lua::TriggerIdleBehavior,
+            codegen::lua::TriggerIdleMotion,
             codegen::lua::ListAllJoysticks,
             codegen::lua::TargetNextInterestingAnchor,
             codegen::lua::TargetPreviousInterestingAnchor,

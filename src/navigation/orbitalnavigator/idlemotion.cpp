@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/navigation/orbitalnavigator/idlebehavior.h>
+#include <openspace/navigation/orbitalnavigator/idlemotion.h>
 
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -38,26 +38,26 @@ namespace {
 
     constexpr double AngleEpsilon = 1e-7;
 
-    constexpr Property::PropertyInfo ApplyIdleBehaviorInfo = {
-        "ApplyIdleBehavior",
-        "Apply idle behavior",
-        "When set to true, the chosen idle behavior will be applied to the camera, "
+    constexpr Property::PropertyInfo ApplyInfo = {
+        "Apply",
+        "Apply idle motion",
+        "When set to true, the chosen idle motion will be applied to the camera, "
         "moving the camera accordingly.",
         Property::Visibility::User
     };
 
-    constexpr Property::PropertyInfo IdleBehaviorInfo = {
-        "IdleBehavior",
-        "Idle behavior",
-        "The chosen camera behavior that will be triggered when the idle behavior is "
-        "applied. Each option represents a predefined camera behavior.",
+    constexpr Property::PropertyInfo IdleMotionInfo = {
+        "Motion",
+        "Motion",
+        "The chosen camera motion that will be triggered when the idle motion is "
+        "applied. Each option represents a predefined camera motion.",
         Property::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ShouldTriggerIdleBehaviorWhenIdleInfo = {
+    constexpr Property::PropertyInfo ShouldTriggerIdleMotionWhenIdleInfo = {
         "ShouldTriggerWhenIdle",
         "Should trigger when idle",
-        "If true, the chosen idle behavior will trigger automatically after a certain "
+        "If true, the chosen idle motion will trigger automatically after a certain "
         "time (see 'IdleWaitTime' property).",
         Property::Visibility::User
     };
@@ -65,24 +65,24 @@ namespace {
     constexpr Property::PropertyInfo IdleWaitTimeInfo = {
         "IdleWaitTime",
         "Idle wait time",
-        "The time (seconds) until idle behavior starts, if no camera interaction "
+        "The time (seconds) until idle motion starts, if no camera interaction "
         "has been performed. Note that friction counts as camera interaction.",
         Property::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo IdleBehaviorSpeedInfo = {
+    constexpr Property::PropertyInfo IdleMotionSpeedInfo = {
         "SpeedFactor",
         "Speed factor",
         "A factor that can be used to increase or slow down the speed of an applied "
-        "idle behavior. A negative value will invert the direction. Note that a speed "
+        "idle motion. A negative value will invert the direction. Note that a speed "
         "of exactly 0 leads to no movement at all.",
         Property::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo InvertIdleBehaviorInfo = {
+    constexpr Property::PropertyInfo InvertIdleMotionInfo = {
         "Invert",
         "Invert",
-        "If true, the direction of the idle behavior motion will be inverted compared "
+        "If true, the direction of the idle motion motion will be inverted compared "
         "to the default. For example, the 'Orbit' option rotates to the right per "
         "default, and will rotate to the left when inverted.",
         Property::Visibility::AdvancedUser
@@ -91,17 +91,17 @@ namespace {
     constexpr Property::PropertyInfo AbortOnCameraInteractionInfo = {
         "AbortOnCameraInteraction",
         "Abort on camera interaction",
-        "If set to true, the idle behavior is aborted on camera interaction. If false, "
-        "the behavior will be reapplied after the interaction. Examples of camera "
+        "If set to true, the idle motion is aborted on camera interaction. If false, "
+        "the motion will be reapplied after the interaction. Examples of camera "
         "interaction are: changing the anchor node, starting a camera path or session "
         "recording playback, or navigating manually using an input device.",
         Property::Visibility::User
     };
 
-    constexpr Property::PropertyInfo IdleBehaviorDampenInterpolationTimeInfo = {
+    constexpr Property::PropertyInfo IdleMotionDampenInterpolationTimeInfo = {
         "DampenInterpolationTime",
         "Start/end dampen interpolation time",
-        "The time to interpolate to/from full speed when an idle behavior is triggered "
+        "The time to interpolate to/from full speed when an idle motion is triggered "
         "or canceled, in seconds.",
         Property::Visibility::AdvancedUser
     };
@@ -109,21 +109,21 @@ namespace {
 
 namespace openspace {
 
-IdleBehavior::IdleBehavior()
+IdleMotion::IdleMotion()
     : PropertyOwner({
-        "IdleBehavior",
-        "Idle Behavior",
+        "IdleMotion",
+        "Idle Motion",
         "Triggers a chosen type of automatic camera motion, which is aborted when the "
         "user starts navigating."
     })
-    , _apply(ApplyIdleBehaviorInfo, false)
-    , _shouldTriggerWhenIdle(ShouldTriggerIdleBehaviorWhenIdleInfo, false)
+    , _apply(ApplyInfo, false)
+    , _shouldTriggerWhenIdle(ShouldTriggerIdleMotionWhenIdleInfo, false)
     , _idleWaitTime(IdleWaitTimeInfo, 5.f, 0.f, 3600.f, 1.f)
     , _abortOnCameraInteraction(AbortOnCameraInteractionInfo, true)
-    , _invert(InvertIdleBehaviorInfo, false)
-    , _speedScaleFactor(IdleBehaviorSpeedInfo, 1.f, -5.f, 5.f)
-    , _dampenInterpolationTime(IdleBehaviorDampenInterpolationTimeInfo, 0.5f, 0.f, 10.f)
-    , _defaultBehavior(IdleBehaviorInfo)
+    , _invert(InvertIdleMotionInfo, false)
+    , _speedScaleFactor(IdleMotionSpeedInfo, 1.f, -5.f, 5.f)
+    , _dampenInterpolationTime(IdleMotionDampenInterpolationTimeInfo, 0.5f, 0.f, 10.f)
+    , _defaultMotion(IdleMotionInfo)
 {
     _apply.onChange([this]() {
         if (_apply) {
@@ -139,22 +139,22 @@ IdleBehavior::IdleBehavior()
     });
     addProperty(_apply);
 
-    _defaultBehavior.addOptions({
+    _defaultMotion.addOptions({
         {
-            static_cast<int>(Behavior::Orbit),
+            static_cast<int>(Motion::Orbit),
             std::string(IdleKeyOrbit)
         },
         {
-            static_cast<int>(Behavior::OrbitAtConstantLat),
+            static_cast<int>(Motion::OrbitAtConstantLat),
             std::string(IdleKeyOrbitAtConstantLat)
         },
         {
-            static_cast<int>(Behavior::OrbitAroundUp),
+            static_cast<int>(Motion::OrbitAroundUp),
             std::string(IdleKeyOrbitAroundUp)
         }
     });
-    _defaultBehavior = static_cast<int>(IdleBehavior::Behavior::Orbit);
-    addProperty(_defaultBehavior);
+    _defaultMotion = static_cast<int>(IdleMotion::Motion::Orbit);
+    addProperty(_defaultMotion);
 
     _shouldTriggerWhenIdle.onChange([this]() {
         _triggerTimer = _idleWaitTime;
@@ -181,17 +181,17 @@ IdleBehavior::IdleBehavior()
     );
 }
 
-void IdleBehavior::resetIdleBehaviorOnCamera() {
+void IdleMotion::resetIdleMotionOnCamera() {
     if (_apply && _abortOnCameraInteraction) {
         _apply = false;
-        _chosenBehavior = std::nullopt;
+        _chosenMotion = std::nullopt;
         // Prevent interpolating stop, to avoid weirdness when changing anchor, etc
         _dampenInterpolator.setInterpolationTime(0.f);
         _triggerTimer = _idleWaitTime;
     }
 }
 
-void IdleBehavior::tickIdleBehaviorTimer(double deltaTime) {
+void IdleMotion::tickIdleMotionTimer(double deltaTime) {
     if (!_shouldTriggerWhenIdle) {
         return;
     }
@@ -200,12 +200,12 @@ void IdleBehavior::tickIdleBehaviorTimer(double deltaTime) {
         _triggerTimer -= static_cast<float>(deltaTime);
     }
     else {
-        // If timer is finished, trigger the default behavior
-        triggerIdleBehavior();
+        // If timer is finished, trigger the default motion
+        triggerIdleMotion();
     }
 }
 
-void IdleBehavior::applyIdleBehavior(const SceneGraphNode* anchor, double deltaTime,
+void IdleMotion::apply(const SceneGraphNode* anchor, double deltaTime,
                                      double speedScale, glm::dvec3& position,
                                      glm::dquat& globalRotation)
 {
@@ -229,25 +229,25 @@ void IdleBehavior::applyIdleBehavior(const SceneGraphNode* anchor, double deltaT
 
     const double angle = deltaTime * speedScale;
 
-    // Apply the chosen behavior
-    const IdleBehavior::Behavior choice = _chosenBehavior.value_or(
-        static_cast<IdleBehavior::Behavior>(_defaultBehavior.value())
+    // Apply the chosen motion
+    const IdleMotion::Motion choice = _chosenMotion.value_or(
+        static_cast<IdleMotion::Motion>(_defaultMotion.value())
     );
 
     switch (choice) {
-        case IdleBehavior::Behavior::Orbit:
+        case IdleMotion::Motion::Orbit:
             orbitAnchor(anchor, angle, position, globalRotation);
             break;
-        case IdleBehavior::Behavior::OrbitAtConstantLat: {
+        case IdleMotion::Motion::OrbitAtConstantLat: {
             // Assume that "north" coincides with the local z-direction
             // @TODO (2021-07-09, emmbr) Make each scene graph node aware of its own
             // north/up, so that we can query this information rather than assuming it.
-            // The we could also combine this idle behavior with the next
+            // The we could also combine this idle motion with the next
             const glm::dvec3 north = glm::dvec3(0.0, 0.0, 1.0);
             orbitAroundAxis(anchor, north, angle, position, globalRotation);
             break;
         }
-        case IdleBehavior::Behavior::OrbitAroundUp: {
+        case IdleMotion::Motion::OrbitAroundUp: {
             // Assume that "up" coincides with the local y-direction
             const glm::dvec3 up = glm::dvec3(0.0, 1.0, 0.0);
             orbitAroundAxis(anchor, up, angle, position, globalRotation);
@@ -258,34 +258,34 @@ void IdleBehavior::applyIdleBehavior(const SceneGraphNode* anchor, double deltaT
     }
 }
 
-void IdleBehavior::triggerIdleBehavior(std::string_view choice) {
+void IdleMotion::triggerIdleMotion(std::string_view choice) {
     if (choice.empty()) {
-        // Triggers the default behavior
-        _chosenBehavior = std::nullopt;
+        // Triggers the default motion
+        _chosenMotion = std::nullopt;
     }
     else {
-        IdleBehavior::Behavior behavior = IdleBehavior::Behavior::Orbit;
+        IdleMotion::Motion motion = IdleMotion::Motion::Orbit;
         if (choice == IdleKeyOrbit) {
-            behavior = IdleBehavior::Behavior::Orbit;
+            motion = IdleMotion::Motion::Orbit;
         }
         else if (choice == IdleKeyOrbitAtConstantLat) {
-            behavior = IdleBehavior::Behavior::OrbitAtConstantLat;
+            motion = IdleMotion::Motion::OrbitAtConstantLat;
         }
         else if (choice == IdleKeyOrbitAroundUp) {
-            behavior = IdleBehavior::Behavior::OrbitAroundUp;
+            motion = IdleMotion::Motion::OrbitAroundUp;
         }
         else {
             throw ghoul::RuntimeError(std::format(
-                "No existing IdleBehavior with identifier '{}'", choice
+                "No existing IdleMotion with identifier '{}'", choice
             ));
         }
-        _chosenBehavior = behavior;
+        _chosenMotion = motion;
     }
 
     _apply = true;
 }
 
-void IdleBehavior::orbitAnchor(const SceneGraphNode* anchor, double angle,
+void IdleMotion::orbitAnchor(const SceneGraphNode* anchor, double angle,
                                glm::dvec3& position,
                                glm::dquat& globalRotation)
 {
@@ -309,7 +309,7 @@ void IdleBehavior::orbitAnchor(const SceneGraphNode* anchor, double angle,
     position += rotationDiffVec3;
 }
 
-void IdleBehavior::orbitAroundAxis(const SceneGraphNode* anchor, const glm::dvec3& axis,
+void IdleMotion::orbitAroundAxis(const SceneGraphNode* anchor, const glm::dvec3& axis,
                                    double angle, glm::dvec3& position,
                                    glm::dquat& globalRotation)
 {

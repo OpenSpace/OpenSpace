@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___IDLEBEHAVIOR___H__
-#define __OPENSPACE_CORE___IDLEBEHAVIOR___H__
+#ifndef __OPENSPACE_CORE___IDLEMOTION___H__
+#define __OPENSPACE_CORE___IDLEMOTION___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -38,21 +38,21 @@ namespace openspace {
 
 class SceneGraphNode;
 
-class IdleBehavior : public PropertyOwner {
+class IdleMotion : public PropertyOwner {
 public:
-    enum class Behavior {
+    enum class Motion {
         Orbit = 0,
         OrbitAtConstantLat,
         OrbitAroundUp
     };
 
-    IdleBehavior();
+    IdleMotion();
 
-    void resetIdleBehaviorOnCamera();
-    void tickIdleBehaviorTimer(double deltaTime);
+    void resetIdleMotionOnCamera();
+    void tickIdleMotionTimer(double deltaTime);
 
     /**
-     * Apply one time step of the currently chosen idle behavior.
+     * Apply one time step of the currently chosen idle motion.
      *
      * \param anchor The current anchor node
      * \param deltaTime The time step to apply
@@ -62,23 +62,23 @@ public:
      * \param globalRotation The current global rotation of the camera. Will be changed by
      *        the function
      */
-    void applyIdleBehavior(const SceneGraphNode* anchor, double deltaTime,
-        double speedScale, glm::dvec3& position, glm::dquat& globalRotation);
+    void apply(const SceneGraphNode* anchor, double deltaTime, double speedScale,
+        glm::dvec3& position, glm::dquat& globalRotation);
 
     /**
-     * Trigger an idle behavior based on a given string, or the default behavior if the
-     * string is empty.
+     * Trigger an idle motion based on a given string, or the default motion if the string
+     * is empty.
      *
-     * \param choice A string corresponding to the idle behavior to trigger, or empty for
-     *        default behavior
+     * \param choice A string corresponding to the idle motion to trigger, or empty for
+     *        default motion
      */
-    void triggerIdleBehavior(std::string_view choice = "");
+    void triggerIdleMotion(std::string_view choice = "");
 
     /**
      * Orbit the current anchor node, in a right-bound orbit, by updating the position
      * and global rotation of the camera.
      *
-     * Used for IdleBehavior::Behavior::Orbit
+     * Used for IdleMotion::Motion::Orbit
      *
      * \param angle The rotation angle to use for the motion
      * \param position The position of the camera. Will be changed by the function
@@ -94,8 +94,8 @@ public:
      * vector coincides with the axis, and should be used with care.
      *
      * Used for:
-     *   - IdleBehavior::Behavior::OrbitAtConstantLat (axis = north = z-axis) and
-     *   - IdleBehavior::Behavior::OrbitAroundUp (axis = up = y-axis)
+     *   - IdleMotion::Motion::OrbitAtConstantLat (axis = north = z-axis) and
+     *   - IdleMotion::Motion::OrbitAroundUp (axis = up = y-axis)
      *
      * \param axis The axis to arbit around, given in model coordinates of the anchor
      * \param angle The rotation angle to use for the motion
@@ -114,8 +114,8 @@ private:
     FloatProperty _speedScaleFactor;
     FloatProperty _dampenInterpolationTime;
 
-    OptionProperty _defaultBehavior;
-    std::optional<Behavior> _chosenBehavior;
+    OptionProperty _defaultMotion;
+    std::optional<Motion> _chosenMotion;
 
     Interpolator<double> _dampenInterpolator;
     bool _invertInterpolation = false;
@@ -125,4 +125,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___IDLEBEHAVIOR___H__
+#endif // __OPENSPACE_CORE___IDLEMOTION___H__

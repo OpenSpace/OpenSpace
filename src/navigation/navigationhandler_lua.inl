@@ -591,12 +591,12 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 }
 
 /**
- * Immediately start applying the chosen IdleBehavior. If none is specified, use the one
+ * Immediately start applying the chosen IdleMotion. If none is specified, use the one
  * set to default in the OrbitalNavigator.
  */
-[[codegen::luawrap]] void triggerIdleBehavior(std::string choice = "") {
+[[codegen::luawrap]] void triggerIdleMotion(std::string choice = "") {
     try {
-        global::navigationHandler->orbitalNavigator().triggerIdleBehavior(choice);
+        global::navigationHandler->orbitalNavigator().triggerIdleMotion(choice);
     }
     catch (const ghoul::RuntimeError& e) {
         throw ghoul::lua::LuaError(e.message);

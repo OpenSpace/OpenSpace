@@ -28,7 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/navigation/orbitalnavigator/directmanipulation/directmanipulation.h>
-#include <openspace/navigation/orbitalnavigator/idlebehavior.h>
+#include <openspace/navigation/orbitalnavigator/idlemotion.h>
 #include <openspace/navigation/orbitalnavigator/orbitalinputhandler.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
@@ -113,7 +113,7 @@ public:
      */
     glm::dvec3 pushToSurfaceOfAnchor(const glm::dvec3& cameraPosition) const;
 
-    void triggerIdleBehavior(std::string_view choice);
+    void triggerIdleMotion(std::string_view choice);
 
     void updateAnchorOnSync();
     std::vector<Syncable*> syncables();
@@ -216,7 +216,7 @@ private:
     Interpolator<double> _cameraToSurfaceDistanceInterpolator;
     Interpolator<double> _followRotationInterpolator;
 
-    IdleBehavior _idleBehavior;
+    IdleMotion _idleMotion;
 
     DirectManipulation _directManipulation;
 

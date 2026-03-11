@@ -79,10 +79,10 @@ namespace {
         Property::Visibility::User
     };
 
-    constexpr Property::PropertyInfo IdleBehaviorOnFinishInfo = {
-        "ApplyIdleBehaviorOnFinish",
-        "Apply idle behavior on finish",
-        "If set to true, the chosen IdleBehavior of the OrbitalNavigator will be "
+    constexpr Property::PropertyInfo IdleMotionOnFinishInfo = {
+        "ApplyIdleMotionOnFinish",
+        "Apply idle motion on finish",
+        "If set to true, the chosen IdleMotion of the OrbitalNavigator will be "
         "triggered once the path has reached its target.",
         Property::Visibility::User
     };
@@ -131,7 +131,7 @@ PathNavigator::PathNavigator()
     , _defaultPathType(DefaultCurveOptionInfo)
     , _includeRoll(IncludeRollInfo, false)
     , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
-    , _applyIdleBehaviorOnFinish(IdleBehaviorOnFinishInfo, false)
+    , _applyIdleMotionOnFinish(IdleMotionOnFinishInfo, false)
     , _arrivalDistanceFactor(ArrivalDistanceFactorInfo, 2.0, 0.1, 20.0)
     , _linearRotationSpeedFactor(RotationSpeedFactorInfo, 2.f, 0.1f, 3.f)
     , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
@@ -150,7 +150,7 @@ PathNavigator::PathNavigator()
 
     addProperty(_includeRoll);
     addProperty(_speedScale);
-    addProperty(_applyIdleBehaviorOnFinish);
+    addProperty(_applyIdleMotionOnFinish);
     addProperty(_arrivalDistanceFactor);
     addProperty(_linearRotationSpeedFactor);
     addProperty(_minValidBoundingSphere);
@@ -469,10 +469,10 @@ void PathNavigator::handlePathEnd() {
         _startSimulationTimeOnFinish = false;
     }
 
-    if (_applyIdleBehaviorOnFinish) {
+    if (_applyIdleMotionOnFinish) {
         global::scriptEngine->queueScript(
             "openspace.setPropertyValueSingle("
-                "'NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior',"
+                "'NavigationHandler.OrbitalNavigator.IdleMotion.Apply',"
                 "true"
             ");"
         );

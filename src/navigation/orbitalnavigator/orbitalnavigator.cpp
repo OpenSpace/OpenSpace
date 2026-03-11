@@ -475,7 +475,7 @@ OrbitalNavigator::OrbitalNavigator()
 
     addPropertySubOwner(_inputHandler);
     addPropertySubOwner(_friction);
-    addPropertySubOwner(_idleBehavior);
+    addPropertySubOwner(_idleMotion);
     addPropertySubOwner(_limitZoom);
 
     addProperty(_anchor);
@@ -583,7 +583,7 @@ void OrbitalNavigator::updateCamera(double deltaTime) {
         markCameraInteraction();
     }
     else {
-        _idleBehavior.tickIdleBehaviorTimer(deltaTime);
+        _idleMotion.tickIdleMotionTimer(deltaTime);
     }
 
     const bool cameraLocationChanged = _inputHandler.hasTranslationalVelocity();
@@ -716,10 +716,10 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         posHandle
     );
 
-    // Apply any automatic idle behavior. Note that the idle behavior is aborted if there
-    // is no input from interaction. So, it assumes that all the other effects from user
-    // input results in no change
-    _idleBehavior.applyIdleBehavior(
+    // Apply any automatic idle motion. Note that the motion is aborted if there is no
+    // input from interaction. So, it assumes that all the other effects from user input
+    // results in no change
+    _idleMotion.apply(
         _anchorNode,
         deltaTime,
         horizontalTranslationSpeedScale, // Same speed scale as horizontal translation
@@ -824,8 +824,7 @@ void OrbitalNavigator::updateCameraScalingFromAnchor(double deltaTime) {
 }
 
 void OrbitalNavigator::markCameraInteraction() {
-    // Disable idle behavior if camera interaction happened
-    _idleBehavior.resetIdleBehaviorOnCamera();
+    _idleMotion.resetIdleMotionOnCamera();
 }
 
 void OrbitalNavigator::tickMovementTimer(float deltaTime) {
@@ -1348,7 +1347,7 @@ void OrbitalNavigator::rotateAroundAnchorUp(double deltaTime, double speedScale,
     const double combinedXInput = _inputHandler.globalRotationVelocity().x;
 
     const double angle = combinedXInput * deltaTime * speedScale;
-    IdleBehavior::orbitAroundAxis(
+    IdleMotion::orbitAroundAxis(
         _anchorNode,
         axis,
         angle,
@@ -1516,16 +1515,16 @@ glm::dvec3 OrbitalNavigator::pushToSurface(const glm::dvec3& cameraPosition,
     return cameraPosition + referenceSurfaceOutDirection * adjustment;
 }
 
-void OrbitalNavigator::triggerIdleBehavior(std::string_view choice) {
+void OrbitalNavigator::triggerIdleMotion(std::string_view choice) {
     const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
     if (mode != OpenSpaceEngine::Mode::UserControl) {
         LERROR(
-            "Could not start idle behavior. The camera is being controlled "
+            "Could not start idle motion. The camera is being controlled "
             "by some other part of the system"
         );
         return;
     }
-    _idleBehavior.triggerIdleBehavior(choice);
+    _idleMotion.triggerIdleMotion(choice);
 }
 
 glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,
