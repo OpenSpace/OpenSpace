@@ -81,7 +81,7 @@ namespace {
 namespace openspace {
 
 Documentation TimeFrameInterval::Documentation() {
-    return codegen::doc<Parameters>("base_time_frame_interval");
+    return codegen::doc<Parameters>("base_timeframe_interval");
 }
 
 TimeFrameInterval::TimeFrameInterval(const ghoul::Dictionary& dictionary)

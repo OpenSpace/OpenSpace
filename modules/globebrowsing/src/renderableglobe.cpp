@@ -571,10 +571,10 @@ namespace {
 
         // Details about the rings of the globe, if it has any.
         std::optional<ghoul::Dictionary> rings
-            [[codegen::reference("globebrowsing_rings_component")]];
+            [[codegen::reference("globebrowsing_ringscomponent")]];
 
         std::optional<ghoul::Dictionary> shadows
-            [[codegen::reference("globebrowsing_shadows_component")]];
+            [[codegen::reference("globebrowsing_shadowscomponent")]];
     };
 } // namespace
 #include "renderableglobe_codegen.cpp"
@@ -588,7 +588,7 @@ Chunk::Chunk(const TileIndex& ti)
 {}
 
 Documentation RenderableGlobe::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_renderableglobe");
+    return codegen::doc<Parameters>("globebrowsing_renderable_globe");
 }
 
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)

@@ -74,7 +74,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableCrawlingLine::Documentation() {
-    return codegen::doc<Parameters>("spacecraftinstruments_renderablecrawlingline");
+    return codegen::doc<Parameters>("spacecraftinstruments_renderable_crawlingline");
 }
 
 RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictionary)

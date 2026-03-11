@@ -42,7 +42,7 @@ namespace {
         // The time frame in which this `Scale` is applied. If the in-game time is outside
         // this range, no scaling will be applied.
         std::optional<ghoul::Dictionary> timeFrame
-            [[codegen::reference("core_time_frame")]];
+            [[codegen::reference("core_timeframe")]];
     };
 } // namespace
 #include "scale_codegen.cpp"
@@ -50,7 +50,7 @@ namespace {
 namespace openspace {
 
 Documentation Scale::Documentation() {
-    return codegen::doc<Parameters>("core_transform_scale");
+    return codegen::doc<Parameters>("core_scale");
 }
 
 ghoul::mm_unique_ptr<Scale> Scale::createFromDictionary(

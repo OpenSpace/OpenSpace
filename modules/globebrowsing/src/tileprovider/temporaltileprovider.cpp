@@ -172,7 +172,7 @@ namespace {
 namespace openspace {
 
 Documentation TemporalTileProvider::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_temporaltileprovider");
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_temporal");
 }
 
 TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)

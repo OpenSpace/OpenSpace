@@ -71,7 +71,7 @@ namespace {
 namespace openspace {
 
 Documentation HorizonsTranslation::Documentation() {
-    return codegen::doc<Parameters>("base_transform_translation_horizons");
+    return codegen::doc<Parameters>("space_translation_horizons");
 }
 
 HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)

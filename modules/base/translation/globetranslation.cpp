@@ -107,8 +107,8 @@ namespace {
     // renderable or a non-globe renderable, the latitude/longitude grid used is the
     // node's interaction sphere.
     // This class is useful in conjunction with the
-    // [GlobeRotation](#base_rotation_globerotation) rotation to orient a scene graph node
-    // away from the center of the body.
+    // [GlobeRotation](#base_rotation_globe) rotation to orient a scene graph node away
+    // from the center of the body.
     //
     // If the `UseCamera` value is set, the object's position automatically updates based
     // on the current camera location.
@@ -140,7 +140,7 @@ namespace {
 namespace openspace {
 
 Documentation GlobeTranslation::Documentation() {
-    return codegen::doc<Parameters>("base_translation_globetranslation");
+    return codegen::doc<Parameters>("base_translation_globe");
 }
 
 GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)

@@ -155,7 +155,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableShadowCylinder::Documentation() {
-    return codegen::doc<Parameters>("spacecraftinstruments_renderableshadowcylinder");
+    return codegen::doc<Parameters>("spacecraftinstruments_renderable_shadowcylinder");
 }
 
 RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dictionary)

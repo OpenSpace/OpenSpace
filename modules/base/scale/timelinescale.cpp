@@ -51,7 +51,7 @@ namespace {
         // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
         // that are valid Scale objects.
         std::map<std::string, ghoul::Dictionary> keyframes
-            [[codegen::reference("core_transform_scale")]];
+            [[codegen::reference("core_scale")]];
 
         // [[codegen::verbatim(ShouldInterpolateInfo.description)]]
         std::optional<bool> shouldInterpolate;
@@ -62,7 +62,7 @@ namespace {
 namespace openspace {
 
 Documentation TimelineScale::Documentation() {
-    return codegen::doc<Parameters>("base_transform_scale_keyframe");
+    return codegen::doc<Parameters>("base_scale_keyframe");
 }
 
 TimelineScale::TimelineScale(const ghoul::Dictionary& dictionary)

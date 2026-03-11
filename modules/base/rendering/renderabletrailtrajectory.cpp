@@ -144,7 +144,7 @@ namespace openspace {
 
 Documentation RenderableTrailTrajectory::Documentation() {
     return codegen::doc<Parameters>(
-        "base_renderable_renderabletrailtrajectory",
+        "base_renderable_trailtrajectory",
         RenderableTrail::Documentation()
     );
 }

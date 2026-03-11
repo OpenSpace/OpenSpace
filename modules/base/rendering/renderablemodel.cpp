@@ -289,7 +289,7 @@ namespace {
 
         // [[codegen::verbatim(LightSourcesInfo.description)]]
         std::optional<std::vector<ghoul::Dictionary>> lightSources
-            [[codegen::reference("core_light_source")]];
+            [[codegen::reference("core_lightsource")]];
 
         // [[codegen::verbatim(EnableDepthTestInfo.description)]]
         std::optional<bool> enableDepthTest;

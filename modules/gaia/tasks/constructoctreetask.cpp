@@ -213,7 +213,7 @@ namespace {
 namespace openspace {
 
 Documentation ConstructOctreeTask::Documentation() {
-    return codegen::doc<Parameters>("gaia_constructoctreefrombin");
+    return codegen::doc<Parameters>("gaia_task_constructoctree");
 }
 
 ConstructOctreeTask::ConstructOctreeTask(const ghoul::Dictionary& dictionary) {

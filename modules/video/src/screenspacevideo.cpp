@@ -47,12 +47,10 @@ namespace {
 namespace openspace {
 
 Documentation ScreenSpaceVideo::Documentation() {
-    openspace::Documentation doc = codegen::doc<Parameters>("video_screenspacevideo");
-
-    openspace::Documentation vp = VideoPlayer::Documentation();
-    doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
-
-    return doc;
+    return codegen::doc<Parameters>(
+        "video_screenspace_video",
+        VideoPlayer::Documentation()
+    );
 }
 
 ScreenSpaceVideo::ScreenSpaceVideo(const ghoul::Dictionary& dictionary)

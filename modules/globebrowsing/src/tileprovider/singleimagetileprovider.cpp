@@ -54,7 +54,7 @@ namespace {
 namespace openspace {
 
 Documentation SingleImageProvider::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_singleimageprovider");
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_singleimage");
 }
 
 SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)

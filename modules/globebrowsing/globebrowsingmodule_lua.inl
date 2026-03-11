@@ -43,7 +43,7 @@ namespace {
  *
  * \param globeIdentifier The identifier of the scene graph node of which to add the
  *        layer. The renderable of the scene graph node must be a
- *        [RenderableGlobe](#globebrowsing_renderableglobe)
+ *        [RenderableGlobe](#globebrowsing_renderable_globe)
  * \param layerGroup The identifier of the layer group in which to add the layer
  * \param layer A dictionary defining the layer. See [this page](#globebrowsing_layer) for
  *        details on what fields and settings the dictionary may contain
@@ -84,7 +84,7 @@ namespace {
  *
  * \param globeIdentifier The identifier of the scene graph node of which to remove the
  *        layer. The renderable of the scene graph node must be a
- *        [RenderableGlobe](#globebrowsing_renderableglobe)
+ *        [RenderableGlobe](#globebrowsing_renderable_globe)
  * \param layerGroup The identifier of the layer group from which to remove the layer
  * \param layerOrName Either the identifier for the layer or a dictionary with the
  *        `Identifier` key that is used instead

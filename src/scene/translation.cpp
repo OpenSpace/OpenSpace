@@ -45,7 +45,7 @@ namespace {
         // The time frame in which this `Translation` is applied. If the in-game time is
         // outside this range, no translation will be applied.
         std::optional<ghoul::Dictionary> timeFrame
-            [[codegen::reference("core_time_frame")]];
+            [[codegen::reference("core_timeframe")]];
     };
 } // namespace
 #include "translation_codegen.cpp"
@@ -53,7 +53,7 @@ namespace {
 namespace openspace {
 
 Documentation Translation::Documentation() {
-    return codegen::doc<Parameters>("core_transform_translation");
+    return codegen::doc<Parameters>("core_translation");
 }
 
 ghoul::mm_unique_ptr<Translation> Translation::createFromDictionary(

@@ -63,7 +63,7 @@ namespace {
 namespace openspace {
 
 Documentation ConstantRotation::Documentation() {
-    return codegen::doc<Parameters>("base_transform_rotation_constant");
+    return codegen::doc<Parameters>("base_rotation_constant");
 }
 
 ConstantRotation::ConstantRotation(const ghoul::Dictionary& dictionary)

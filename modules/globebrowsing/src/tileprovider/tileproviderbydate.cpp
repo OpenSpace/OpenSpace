@@ -55,7 +55,7 @@ namespace {
 namespace openspace {
 
 Documentation TileProviderByDate::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_tileproviderbydate");
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_bydate");
 }
 
 TileProviderByDate::TileProviderByDate(const ghoul::Dictionary& dictionary) {

@@ -361,7 +361,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableGaiaStars::Documentation() {
-    return codegen::doc<Parameters>("gaia_renderablegaiastars");
+    return codegen::doc<Parameters>("gaia_renderable_gaiastars");
 }
 
 RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)

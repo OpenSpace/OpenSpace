@@ -51,7 +51,7 @@ namespace {
     // This `ScreenSpaceRenderable` can be used to display an image from a web URL.
     //
     // To load an image from a local file on disk, see
-    // [`ScreenSpaceImageLocal`](#base_screenspace_image_local).
+    // [`ScreenSpaceImageLocal`](#base_screenspace_imagelocal).
     struct [[codegen::Dictionary(ScreenSpaceImageOnline)]] Parameters {
         std::optional<std::string> identifier;
 
@@ -64,7 +64,7 @@ namespace {
 namespace openspace {
 
 Documentation ScreenSpaceImageOnline::Documentation() {
-    return codegen::doc<Parameters>("base_screenspace_image_online");
+    return codegen::doc<Parameters>("base_screenspace_imageonline");
 }
 
 ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary)

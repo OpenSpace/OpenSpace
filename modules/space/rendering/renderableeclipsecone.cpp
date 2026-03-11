@@ -204,7 +204,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableEclipseCone::Documentation() {
-    return codegen::doc<Parameters>("space_renderableeclipsecone");
+    return codegen::doc<Parameters>("space_renderable_eclipsecone");
 }
 
 RenderableEclipseCone::RenderableEclipseCone(const ghoul::Dictionary& dictionary)

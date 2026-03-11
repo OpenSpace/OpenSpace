@@ -58,8 +58,8 @@ namespace {
     };
 
     // Similarly to the
-    // [RenderablePlaneProjection](spacecraftinstruments_renderableplaneprojection) and
-    // [RenderablePlanetProjection](spacecraftinstruments_renderableplanetprojection),
+    // [RenderablePlaneProjection](spacecraftinstruments_renderable_planeprojection) and
+    // [RenderablePlanetProjection](spacecraftinstruments_renderable_planetprojection),
     // this Renderable type servers as a potential target for image projections from a
     // spacecraft's instrument. This renderable will determine whenever an image in a
     // currently loaded image sequence is projected whether that instrument's field of
@@ -110,7 +110,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableModelProjection::Documentation() {
-    return codegen::doc<Parameters>("spacecraftinstruments_renderablemodelprojection");
+    return codegen::doc<Parameters>("spacecraftinstruments_renderable_modelprojection");
 }
 
 RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& dictionary)

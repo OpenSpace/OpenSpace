@@ -247,7 +247,7 @@ namespace {
 
         // A list of light sources that this object should accept light from.
         std::optional<std::vector<ghoul::Dictionary>> lightSources
-            [[codegen::reference("core_light_source")]];
+            [[codegen::reference("core_lightsource")]];
     };
 } // namespace
 #include "geojsoncomponent_codegen.cpp"

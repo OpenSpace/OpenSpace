@@ -43,7 +43,7 @@ namespace {
 namespace openspace {
 
 Documentation TimeRange::Documentation() {
-    return codegen::doc<Parameters>("core_util_timerange");
+    return codegen::doc<Parameters>("core_timerange");
 }
 
 TimeRange::TimeRange(double startTime, double endTime)

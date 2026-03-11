@@ -77,7 +77,7 @@ namespace {
 namespace openspace {
 
 Documentation HttpSynchronization::Documentation() {
-    return codegen::doc<Parameters>("http_synchronization");
+    return codegen::doc<Parameters>("sync_synchronization_http");
 }
 
 HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict,
