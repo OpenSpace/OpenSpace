@@ -411,7 +411,7 @@ JoystickCameraStates::findOrAddJoystickMapping(const std::string& joystickName)
             joystick->name = joystickName;
         }
         else {
-            // @TODO (emmbr, 2025-12-16): It's super weird that we add a joystick mapping
+            // @TODO (emmbr, 2025-12-16): It's a bit weird that we add a joystick mapping
             // the JoystickCameraStates, but check the maximum number of joysticks in the
             // JoystickInputStates. This should be refactored to be more intuitive.
             //

@@ -69,8 +69,8 @@ void MouseCameraStates::updateVelocitiesFromInput(const MouseInputState& mouseSt
         keyboardState.isKeyPressed(Key::LeftAlt) ||
         keyboardState.isKeyPressed(Key::RightAlt);
 
-    // @TODO (2025-12-19, emmbr) make this into a keybinding somehow? Or even break
-    // out into the orbital navigator settings so that it can be applied to other input methods
+    // @TODO (2025-12-19, emmbr) make this into a keybinding somehow? Or even break out
+    // into the orbital navigator settings so that it can be applied to other input methods
     if (keyboardState.isKeyPressed(Key::Z)) {
         // Increase sensitivity ramp when Z is pressed
         _currentSensitivityRamp += deltaTime;
@@ -87,6 +87,7 @@ void MouseCameraStates::updateVelocitiesFromInput(const MouseInputState& mouseSt
             _currentSensitivityRamp = 0.0;
         }
     }
+
     _currentSensitivityRamp = std::clamp(_currentSensitivityRamp, -1.0, 1.0);
 
     const double totalSensitivity =

@@ -177,7 +177,8 @@ glm::dvec2 OrbitalInputHandler::localRotationVelocity() const {
     return _mouseStates.localRotationVelocity() +
         _joystickStates.localRotationVelocity() +
         _websocketStates.localRotationVelocity() +
-        _scriptStates.localRotationVelocity();
+        _scriptStates.localRotationVelocity() +
+        _touchStates.localRotationVelocity();
 }
 
 glm::dvec2 OrbitalInputHandler::globalRotationVelocity() const {

@@ -31,7 +31,7 @@
 #include <ghoul/glm.h>
 #include <array>
 
-#define TOUCH_DEBUG_MODE
+//#define TOUCH_DEBUG_MODE
 
 namespace openspace {
 

@@ -290,8 +290,6 @@ void IdleMotion::orbitAnchor(const SceneGraphNode* anchor, double angle,
     ghoul_assert(anchor != nullptr, "Node to orbit must be set");
 
     // Apply a rotation to the right, in camera space
-    // (Maybe we should also let the user decide which direction to rotate?
-    // Or provide a few different orbit options)
     const glm::dvec3 eulerAngles = glm::dvec3(0.0, -1.0, 0.0) * angle;
     const glm::dquat rotationDiffCameraSpace = glm::dquat(eulerAngles);
 
