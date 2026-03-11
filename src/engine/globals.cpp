@@ -140,7 +140,7 @@ void create() {
     downloadEventEngine = new (currentPos) DownloadEventEngine;
     ghoul_assert(downloadEventEngine, "No downloadEventEngine");
     currentPos += sizeof(DownloadEventEngine);
-#else // ^^^^^ WIN32 / !WIN32 vvvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     downloadEventEngine = new DownloadEventEngine;
 #endif // WIN32
 
@@ -261,7 +261,7 @@ void create() {
     versionChecker = new (currentPos) VersionChecker;
     ghoul_assert(versionChecker, "No versionChecker");
     currentPos += sizeof(VersionChecker);
-#else
+#else // ^^^^ WIN32 / !WIN32 vvvv
     versionChecker = new VersionChecker;
 #endif // WIN32
 

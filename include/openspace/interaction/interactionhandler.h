@@ -102,7 +102,7 @@ private:
     JoystickInputStates _joystickInputStates;
     TouchInputState _touchInputState;
 
-    // Keeps track of when interaction has happened
+    /// Keeps track of when interaction has happened
     InteractionMonitor _interactionMonitor;
 
     BoolProperty _invertMouseButtons;

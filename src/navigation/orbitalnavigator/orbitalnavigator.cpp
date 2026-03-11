@@ -421,9 +421,7 @@ OrbitalNavigator::OrbitalNavigator()
         }
     });
 
-    _retargetAnchor.onChange([this]() {
-        startRetargetAnchor();
-    });
+    _retargetAnchor.onChange([this]() { startRetargetAnchor(); });
 
     _retargetAim.onChange([this]() {
         if (_aimNode && _aimNode != _anchorNode) {
@@ -436,7 +434,7 @@ OrbitalNavigator::OrbitalNavigator()
 
     _followRotationInterpolator.setTransferFunction([](double t) {
         const double res = 3.0 * t*t - 2.0 * t*t*t;
-        return glm::clamp(res, 0.0, 1.0);
+        return std::clamp(res, 0.0, 1.0);
     });
 
     // The transfer function is used here to get a different interpolation than the one
@@ -596,7 +594,6 @@ void OrbitalNavigator::updateCamera(double deltaTime) {
         tickMovementTimer(static_cast<float>(deltaTime));
     }
 
-    // TODO: Make sure the variables above are also updates for direct manipulation
     _directManipulation.updateCameraFromInput();
 
     updateCameraStateFromStates(deltaTime);
@@ -1129,22 +1126,21 @@ CameraPose OrbitalNavigator::followAim(CameraPose pose, const glm::dvec3& camera
         glm::length(anchorToAim.second);
 
     // Equation has no solution if ratio > 1.
-    // To avoid a discontinuity in the camera behavior,
-    // fade out the distance correction influence when ratio approaches 1.
-    // CorrectionFactorExponent = 50.0 is picked arbitrarily,
-    // and gives a smooth result.
-    ratio = glm::clamp(ratio, -1.0, 1.0);
+    // To avoid a discontinuity in the camera behavior, fade out the distance correction
+    // influence when ratio approaches 1.
+    // CorrectionFactorExponent = 50.0 is picked arbitrarily, and gives a smooth result
+    ratio = std::clamp(ratio, -1.0, 1.0);
     const double CorrectionFactorExponent = 50.0;
     const double correctionFactor =
-        glm::clamp(1.0 - glm::pow(ratio, CorrectionFactorExponent), 0.0, 1.0);
+        std::clamp(1.0 - glm::pow(ratio, CorrectionFactorExponent), 0.0, 1.0);
 
-    // newCameraAnchorAngle has two solutions, depending on whether the camera is
-    // in the half-space closest to the anchor or aim.
-    double newCameraAnchorAngle = glm::asin(ratio);
+    // `newCameraAnchorAngle` has two solutions, depending on whether the camera is in
+    // the half-space closest to the anchor or aim
+    double newCameraAnchorAngle = std::asin(ratio);
     if (glm::dot(intermediateCameraToAnchor, anchorToAim.second) <= 0 &&
         glm::dot(intermediateCameraToProjectedAim, anchorToAim.second) <= 0)
     {
-        newCameraAnchorAngle = -glm::asin(ratio) + glm::pi<double>();
+        newCameraAnchorAngle = -std::asin(ratio) + glm::pi<double>();
     }
 
     const double prevCameraAimAngle = glm::angle(
@@ -1155,8 +1151,8 @@ CameraPose OrbitalNavigator::followAim(CameraPose pose, const glm::dvec3& camera
     const double newCameraAimAngle =
         glm::pi<double>() - anchorAimAngle - newCameraAnchorAngle;
 
-    const double distanceRotationAngle = correctionFactor *
-                                    (newCameraAimAngle - prevCameraAimAngle);
+    const double distanceRotationAngle =
+        correctionFactor * (newCameraAimAngle - prevCameraAimAngle);
 
     if (glm::abs(distanceRotationAngle) > AngleEpsilon) {
         const glm::dvec3 distanceRotationAxis = glm::normalize(
@@ -1166,15 +1162,13 @@ CameraPose OrbitalNavigator::followAim(CameraPose pose, const glm::dvec3& camera
             glm::angleAxis(distanceRotationAngle, distanceRotationAxis);
 
         pose.position =
-            _anchorNode->worldPosition() -
-            orbitRotation * intermediateCameraToAnchor;
+            _anchorNode->worldPosition() - orbitRotation * intermediateCameraToAnchor;
 
         const glm::dquat aimAdjustRotation =
             glm::angleAxis(distanceRotationAngle, distanceRotationAxis);
 
         anchorDecomp.globalRotation = aimAdjustRotation * anchorDecomp.globalRotation;
     }
-    // End of step 2.
 
     pose.rotation = composeCameraRotation(anchorDecomp);
 
@@ -1184,10 +1178,8 @@ CameraPose OrbitalNavigator::followAim(CameraPose pose, const glm::dvec3& camera
 glm::dquat OrbitalNavigator::roll(double deltaTime,
                                   const glm::dquat& localCameraRotation) const
 {
-    const glm::dquat mouseRollQuat = glm::angleAxis(
-        _inputHandler.localRollVelocity() * deltaTime,
-        glm::dvec3(0.0, 0.0, 1.0)
-    );
+    const double angle = _inputHandler.localRollVelocity() * deltaTime;
+    const glm::dquat mouseRollQuat = glm::angleAxis(angle, glm::dvec3(0.0, 0.0, 1.0));
     return localCameraRotation * mouseRollQuat;
 }
 
@@ -1204,7 +1196,7 @@ glm::dquat OrbitalNavigator::rotateLocally(double deltaTime,
 }
 
 glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
-                                                   const glm::dquat& localCameraRotation)
+                                                    const glm::dquat& localCameraRotation)
 {
     if (!_retargetAnchorInterpolator.isInterpolating()) {
         return localCameraRotation;
@@ -1214,24 +1206,23 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
     _retargetAnchorInterpolator.setDeltaTime(static_cast<float>(deltaTime));
     _retargetAnchorInterpolator.step();
 
-    const glm::dvec3 localUp =
-        localCameraRotation * Camera::UpDirectionCameraSpace;
+    const glm::dvec3 localUp = localCameraRotation * Camera::UpDirectionCameraSpace;
 
     const glm::dquat targetRotation = ghoul::lookAtQuaternion(
         glm::dvec3(0.0),
         Camera::ViewDirectionCameraSpace,
-        normalize(localUp)
+        glm::normalize(localUp)
     );
 
     const glm::dquat result = glm::slerp(
         localCameraRotation,
         targetRotation,
-        glm::min(t * _retargetAnchorInterpolator.deltaTimeScaled(), 1.0));
+        std::min(t * _retargetAnchorInterpolator.deltaTimeScaled(), 1.0));
 
     // Retrieving the angle of a quaternion uses acos on the w component, which can have
     // numerical instability for values close to 1.0
     constexpr double Epsilon = 1.0e-13;
-    if (std::fabs((std::fabs(result.w) - 1.0)) < Epsilon || angle(result) < 0.01) {
+    if (std::abs((std::abs(result.w) - 1.0)) < Epsilon || glm::angle(result) < 0.01) {
         _retargetAnchorInterpolator.end();
     }
     return result;
@@ -1275,10 +1266,8 @@ OrbitalNavigator::interpolateRetargetAim(double deltaTime, const CameraPose& pos
 
     if (requestedAngle <= maxAngle) {
         const glm::dvec3 aimPos = pose.position + prevCameraToAnchor + anchorToAim.second;
-        const CameraRotationDecomposition aimDecomp = decomposeCameraRotation(
-            pose,
-            aimPos
-        );
+        const CameraRotationDecomposition aimDecomp =
+            decomposeCameraRotation(pose, aimPos);
 
         const glm::dquat interpolatedRotation = glm::slerp(
             prevRotation,

@@ -177,7 +177,8 @@ void InteractionHandler::initialize() {
 void InteractionHandler::preSynchronization() {
     _interactionMonitor.updateActivityState();
 
-    // TODO: Move to orbital or navigation handler?
+    // @TODO (2026-03-11 emmbr) Move to orbital or navigation handler? Would be good
+    // to not have ot deal with the engine mode here too
     OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
     if (mode == OpenSpaceEngine::Mode::CameraPath ||
         mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
@@ -272,7 +273,7 @@ void InteractionHandler::mouseButtonCallback(MouseButton button, MouseAction act
         }
     }
 
-    _interactionMonitor.markInteraction();
+    markInteraction();
 }
 
 void InteractionHandler::mousePositionCallback(double x, double y) {
@@ -290,7 +291,7 @@ void InteractionHandler::mousePositionCallback(double x, double y) {
         _mouseVisualizer.currentPosition = glm::vec2(x, y);
     }
 
-    _interactionMonitor.markInteraction();
+    markInteraction();
 }
 
 void InteractionHandler::mouseScrollWheelCallback(double pos) {
@@ -299,7 +300,7 @@ void InteractionHandler::mouseScrollWheelCallback(double pos) {
     }
     _mouseInputState.mouseScrollWheelCallback(pos);
 
-    _interactionMonitor.markInteraction();
+    markInteraction();
 }
 
 void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
@@ -308,21 +309,21 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
     // majority of input is coming through Lua scripts anyway which are not blocked here
     _keyboardInputState.keyboardCallback(key, modifier, action);
 
-    _interactionMonitor.markInteraction();
+    markInteraction();
 }
 
 bool InteractionHandler::touchDetectedCallback(TouchInput i) {
-    _interactionMonitor.markInteraction();
+    markInteraction();
     return _touchInputState.touchDetectedCallback(i);
 }
 
 bool InteractionHandler::touchUpdatedCallback(TouchInput i) {
-    _interactionMonitor.markInteraction();
+    markInteraction();
     return _touchInputState.touchUpdatedCallback(i);
 }
 
 void InteractionHandler::touchExitCallback(TouchInput i) {
-    _interactionMonitor.markInteraction();
+    markInteraction();
     _touchInputState.touchExitCallback(i);
 }
 
