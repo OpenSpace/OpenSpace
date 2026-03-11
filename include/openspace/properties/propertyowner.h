@@ -264,7 +264,9 @@ public:
      */
     void addProperty(Property* prop);
 
-    /// \see Property::addProperty(Property*)
+    /**
+     * \see Property::addProperty(Property*).
+     */
     void addProperty(Property& prop);
 
     /**
@@ -277,7 +279,9 @@ public:
      */
     void addPropertySubOwner(PropertyOwner* owner);
 
-    /// \see PropertyOwner::addPropertySubOwner(PropertyOwner*)
+    /**
+     * \see PropertyOwner::addPropertySubOwner(PropertyOwner*).
+     */
     void addPropertySubOwner(PropertyOwner& owner);
 
     /**
@@ -289,7 +293,9 @@ public:
      */
     void removeProperty(Property* prop);
 
-    /// \see PropertyOwner::removeProperty(Property*)
+    /**
+     * \see PropertyOwner::removeProperty(Property*).
+     */
     void removeProperty(Property& prop);
 
     /**
@@ -299,7 +305,9 @@ public:
      */
     void removePropertySubOwner(PropertyOwner* owner);
 
-    /// \see PropertyOwner::removePropertySubOwner(PropertyOwner*)
+    /**
+     * \see PropertyOwner::removePropertySubOwner(PropertyOwner*).
+     */
     void removePropertySubOwner(PropertyOwner& owner);
 
     /**

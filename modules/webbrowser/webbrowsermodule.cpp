@@ -270,7 +270,9 @@ std::vector<Documentation> WebBrowserModule::documentations() const {
     };
 }
 
-/// Logic for the webbrowser performance hotfix, described in globalscallbacks.h
+/**
+ * Logic for the webbrowser performance hotfix, described in globalscallbacks.h.
+ */
 namespace webbrowser {
 
 /**

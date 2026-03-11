@@ -318,45 +318,45 @@ namespace {
 }
 
 struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
-    /// The current type of axis binding.
+    // The current type of axis binding.
     std::string type;
 
-    /// Whether the values are inverted.
+    // Whether the values are inverted.
     bool invert;
 
-    /// The type of joystick that this axis represents on the controller - either
-    /// `\"JoystickLike\"` or `\"TriggerLike\"`. A joystick is `\"TriggerLike\"` if it
-    /// can only be pressed or pushed in one direction. A `\"JoystickLike\"` axis can
-    /// be pushed in two directions; for example, left and right, or up and down.
+    // The type of joystick that this axis represents on the controller - either
+    // `\"JoystickLike\"` or `\"TriggerLike\"`. A joystick is `\"TriggerLike\"` if it can
+    // only be pressed or pushed in one direction. A `\"JoystickLike\"` axis can be pushed
+    // in two directions; for example, left and right, or up and down.
     std::string joystickType;
 
-    /// Whether or not this axis is “sticky”. An axis is “sticky” if, when you let go of
-    /// it, the values it represents in the software do not go back to the default.
+    // Whether or not this axis is “sticky”. An axis is “sticky” if, when you let go of
+    // it, the values it represents in the software do not go back to the default.
     bool isSticky;
 
-    /// Whether the camera movement for the axis is reversed. In the case of a
-    /// `\"JoystickLike\"` axis, this is the same as inverting the axis. However, in the
-    /// case of a `\"TriggerLike\"` axis, this can reverse the camera movement for the
-    /// trigger.
+    // Whether the camera movement for the axis is reversed. In the case of a
+    // `\"JoystickLike\"` axis, this is the same as inverting the axis. However, in the
+    // case of a `\"TriggerLike\"` axis, this can reverse the camera movement for the
+    // trigger.
     bool flip;
 
-    /// Sensitivity value for this axis.
+    // Sensitivity value for this axis.
     double sensitivity;
 
-    /// The identifier (URI) of the property that is bound to this axes, if one is.
+    // The identifier (URI) of the property that is bound to this axes, if one is.
     std::optional<std::string> propertyUri;
 
-    /// If a property is bound to this axis, this is the min value that can be set using
-    /// the joystick input.
+    // If a property is bound to this axis, this is the min value that can be set using
+    // the joystick input.
     std::optional<float> minValue;
 
-    /// If a property is bound to this axis, this is the max value that can be set using
-    /// the joystick input.
+    // If a property is bound to this axis, this is the max value that can be set using
+    // the joystick input.
     std::optional<float> maxValue;
 
-    /// If a property is bound to this axis, this says whether the property changes should
-    /// be forwarded to other connected nodes or sessions (similarly to \"isLocal\" for
-    /// actions).
+    // If a property is bound to this axis, this says whether the property changes should
+    // be forwarded to other connected nodes or sessions (similarly to \"isLocal\" for
+    // actions).
     std::optional<bool> isRemote;
 };
 

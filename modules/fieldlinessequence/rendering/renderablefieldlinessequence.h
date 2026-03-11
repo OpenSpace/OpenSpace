@@ -225,7 +225,7 @@ private:
     Vec2Property _selectedMaskingRange;
     /// Index of the extra quantity to use for masking
     OptionProperty _maskingQuantity;
-    /// used to save property for later initialization
+    /// Used to save property for later initialization
     int _maskingQuantityTemp = 0;
 
     /// Line width for the line rendering part

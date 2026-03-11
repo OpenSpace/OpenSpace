@@ -756,7 +756,9 @@ public:
         const std::string& destinationFrame, double ephemerisTimeFrom,
         double ephemerisTimeTo) const;
 
-    /// The structure returned by the #fieldOfView methods
+    /**
+     * The structure returned by the #fieldOfView methods.
+     */
     struct FieldOfViewResult {
         /**
          * The rough shape of the returned field of view.
@@ -821,8 +823,8 @@ public:
      * The structure retuned by the #terminatorEllipse method.
      */
     struct TerminatorEllipseResult {
-        /// The vector from the target body at #targetEphemerisTime to the observer at
-        /// the original time
+        /// The vector from the target body at #targetEphemerisTime to the observer at the
+        /// original time
         glm::dvec3 observerPosition = glm::dvec3(0.0);
 
         /// The full list of terminator points specified in the original reference frame

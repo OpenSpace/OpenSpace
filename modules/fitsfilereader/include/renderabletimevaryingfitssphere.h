@@ -84,7 +84,7 @@ private:
     void updateDynamicDownloading(double currentTime, double deltaTime);
 
     OptionProperty _fitsLayerName;
-    /// An option to keep or delete the downloads from dynamic downloader on shutdown
+    /// An option to keep or delete the downloads from dynamic downloader on shutdown.
     /// Deletes on default
     BoolProperty _saveDownloadsOnShutdown;
     OptionProperty _textureFilterProperty;
@@ -112,8 +112,8 @@ private:
     bool _renderForever = true;
     bool _inInterval = false;
 
-    /// DynamicFileSequenceDownloader downloads and updates the renderable with
-    /// data downloaded from the web
+    /// DynamicFileSequenceDownloader downloads and updates the renderable with data
+    /// downloaded from the web
     std::unique_ptr<DynamicFileSequenceDownloader> _dynamicFileDownloader;
     std::deque<File> _files;
     int _activeTriggerTimeIndex = 0;

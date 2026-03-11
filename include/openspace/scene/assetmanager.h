@@ -229,7 +229,9 @@ private:
     // ResourceSynchronizations
     //
 
-    /// Collection that stores the assets that have requested each ResourceSynchronization
+    /**
+     * Collection that stores the assets that have requested each ResourceSynchronization.
+     */
     struct SyncItem {
         std::unique_ptr<ResourceSynchronization> synchronization;
         std::vector<Asset*> assets;
