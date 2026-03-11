@@ -52,7 +52,7 @@ namespace {
         // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
         // that are valid Translation objects.
         std::map<std::string, ghoul::Dictionary> keyframes
-            [[codegen::reference("core_transform_translation")]];
+            [[codegen::reference("core_translation")]];
 
         // [[codegen::verbatim(ShouldInterpolateInfo.description)]]
         std::optional<bool> shouldInterpolate;
@@ -63,7 +63,7 @@ namespace {
 namespace openspace {
 
 Documentation TimelineTranslation::Documentation() {
-    return codegen::doc<Parameters>("base_transform_translation_keyframe");
+    return codegen::doc<Parameters>("base_translation_keyframe");
 }
 
 TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary)

@@ -54,11 +54,11 @@ namespace {
         // The renderable to show when the camera is closer to the object than the
         // threshold.
         std::optional<ghoul::Dictionary>
-            renderableNear [[codegen::reference("renderable")]];
+            renderableNear [[codegen::reference("core_renderable")]];
 
         // The renderable to show when the camera is further away than the threshold.
         std::optional<ghoul::Dictionary>
-            renderableFar [[codegen::reference("renderable")]];
+            renderableFar [[codegen::reference("core_renderable")]];
 
         // [[codegen::verbatim(DistanceThresholdInfo.description)]]
         std::optional<double> distanceThreshold [[codegen::greater(0.f)]];
@@ -69,9 +69,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableSwitch::Documentation() {
-    return codegen::doc<Parameters>(
-        "base_renderable_switch"
-    );
+    return codegen::doc<Parameters>("base_renderable_switch");
 }
 
 RenderableSwitch::RenderableSwitch(const ghoul::Dictionary& dictionary)

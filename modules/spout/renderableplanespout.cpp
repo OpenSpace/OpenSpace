@@ -44,7 +44,7 @@ namespace openspace {
 
 Documentation RenderablePlaneSpout::Documentation() {
     return codegen::doc<Parameters>(
-        "spout_renderableplanespout",
+        "spout_renderable_planespout",
         SpoutReceiverPropertyProxy::Documentation()
     );
 }

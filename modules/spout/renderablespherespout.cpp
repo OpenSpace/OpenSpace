@@ -44,7 +44,7 @@ namespace openspace {
 
 Documentation RenderableSphereSpout::Documentation() {
     return codegen::doc<Parameters>(
-        "spout_renderablespherespout",
+        "spout_renderable_spherespout",
         SpoutReceiverPropertyProxy::Documentation()
     );
 }

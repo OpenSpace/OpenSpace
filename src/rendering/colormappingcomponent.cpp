@@ -153,7 +153,7 @@ namespace {
 
     // This component handles settings for dynamic color mapping of data points based on
     // the columns in a dataset. It is for example utilized by the
-    // [RenderablePointCloud](#base_renderablepointcloud) renderable type.
+    // [RenderablePointCloud](#base_renderable_pointcloud) renderable type.
     //
     // The option for the parameters will be initialized based on the dataset used for
     // the specific renderable. The value range will be set based on the min and max
@@ -232,7 +232,7 @@ namespace {
 namespace openspace {
 
 Documentation ColorMappingComponent::Documentation() {
-    return codegen::doc<Parameters>("colormappingcomponent");
+    return codegen::doc<Parameters>("core_colormappingcomponent");
 }
 
 ColorMappingComponent::ColorMappingComponent()

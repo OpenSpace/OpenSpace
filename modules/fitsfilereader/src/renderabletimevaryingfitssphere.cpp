@@ -213,7 +213,7 @@ namespace openspace {
 
 Documentation RenderableTimeVaryingFitsSphere::Documentation() {
     return codegen::doc<Parameters>(
-        "fitsfilereader_renderable_time_varying_fits_sphere",
+        "fitsfilereader_renderable_timevaryingfitssphere",
         RenderableSphere::Documentation()
     );
 }

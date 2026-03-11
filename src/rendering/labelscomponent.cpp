@@ -152,7 +152,7 @@ namespace {
 namespace openspace {
 
 Documentation LabelsComponent::Documentation() {
-    return codegen::doc<Parameters>("labelscomponent");
+    return codegen::doc<Parameters>("core_labelscomponent");
 }
 
 LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)

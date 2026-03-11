@@ -89,7 +89,7 @@ namespace {
 namespace openspace {
 
 Documentation TileProviderByIndex::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_tileproviderbyindex");
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_byindex");
 }
 
 TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {

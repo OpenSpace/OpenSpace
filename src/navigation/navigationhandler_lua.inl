@@ -47,7 +47,7 @@ using namespace openspace;
 namespace {
 
 /**
- * Set the camera position by loading a [NavigationState](#core_navigation_state) from
+ * Set the camera position by loading a [NavigationState](#core_navigationstate) from
  * file. The file should be in json format, such as the output files of
  * `saveNavigationState`.
  *
@@ -67,7 +67,7 @@ namespace {
 }
 
 /**
- * Return the current [NavigationState](#core_navigation_state) as a Lua table.
+ * Return the current [NavigationState](#core_navigationstate) as a Lua table.
  *
  * By default, the reference frame will be picked based on whether the orbital navigator
  * is currently following the anchor node rotation. If it is, the anchor will be chosen as
@@ -98,7 +98,7 @@ namespace {
 }
 
 /**
- * Set the camera position from a provided [NavigationState](#core_navigation_state).
+ * Set the camera position from a provided [NavigationState](#core_navigationstate).
  *
  * \param navigationState A table describing the NavigationState to set
  * \param useTimeStamp If true, and the provided NavigationState includes a timestamp, the
@@ -116,8 +116,8 @@ namespace {
 }
 
 /**
- * Save the current [NavigationState](#core_navigation_state) to a file with the path
- * given by the first argument.
+ * Save the current [NavigationState](#core_navigationstate) to a file with the path given
+ * by the first argument.
  *
  * By default, the reference frame will be picked based on whether the orbital navigator
  * is currently following the anchor node rotation. If it is, the anchor will be chosen as
@@ -977,7 +977,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
  * be included for the target up direction in the navigation state to be taken into
  * account.
  *
- * \param navigationState A [NavigationState](#core_navigation_state) to fly to
+ * \param navigationState A [NavigationState](#core_navigationstate) to fly to
  * \param duration An optional duration for the motion to take, in seconds. For example, a
  *        value of 5 means "fly to this position over a duration of 5 seconds"
  */
@@ -1133,7 +1133,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
  * Fade rendering to black, jump to the specified node, and then fade in. This is done by
  * triggering another script that handles the logic.
  *
- * \param navigationState A [NavigationState](#core_navigation_state) to jump to
+ * \param navigationState A [NavigationState](#core_navigationstate) to jump to
  * \param useTimeStamp if true, and the provided NavigationState includes a timestamp, the
  *        time will be set as well
  * \param fadeDuration An optional duration for the fading. If not included, the property

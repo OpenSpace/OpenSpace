@@ -94,7 +94,7 @@ namespace openspace {
 
 Documentation RenderableHabitableZone::Documentation() {
     return codegen::doc<Parameters>(
-        "space_renderablehabitablezone",
+        "space_renderable_habitablezone",
         RenderableDisc::Documentation()
     );
 }

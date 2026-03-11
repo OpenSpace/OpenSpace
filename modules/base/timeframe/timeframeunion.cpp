@@ -53,7 +53,7 @@ namespace {
     struct [[codegen::Dictionary(TimeFrameUnion)]] Parameters {
         // [[codegen::verbatim(TimeFramesInfo.description)]]
         std::vector<ghoul::Dictionary> timeFrames
-            [[codegen::reference("core_time_frame")]];
+            [[codegen::reference("core_timeframe")]];
     };
 } // namespace
 #include "timeframeunion_codegen.cpp"

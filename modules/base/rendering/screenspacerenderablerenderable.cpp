@@ -101,26 +101,25 @@ namespace {
         // The [Renderable](#renderable) object that is shown in this ScreenSpace object.
         // See the list of creatable renderable objects for options that can be used for
         // this type.
-        ghoul::Dictionary renderable [[codegen::reference("renderable")]];
+        ghoul::Dictionary renderable [[codegen::reference("core_renderable")]];
 
         struct Transform {
             // The [Translation](#core_transform_translation) object that is used for the
             // provided [Renderable](#renderable). If no value is specified, a
-            // [StaticTranslation](#base_transform_translation_static) is created instead.
+            // [StaticTranslation](#base_translation_static) is created instead.
             std::optional<ghoul::Dictionary> translation
-                [[codegen::reference("core_transform_translation")]];
+                [[codegen::reference("core_translation")]];
 
             // The [Rotation](#core_transform_rotation) object that is used for the
             // provided [Renderable](#renderable). If no value is specified, a
-            // [StaticRotation](#base_transform_rotation_static) is created instead.
+            // [StaticRotation](#base_rotation_static) is created instead.
             std::optional<ghoul::Dictionary> rotation
-                [[codegen::reference("core_transform_rotation")]];
+                [[codegen::reference("core_rotation")]];
 
             // The [Scale](#core_transform_scale) object that is used for the provided
             // [Renderable](#renderable). If no value is specified, a
-            // [StaticScale](#base_transform_scale_static) is created instead.
-            std::optional<ghoul::Dictionary> scale
-                [[codegen::reference("core_transform_scale")]];
+            // [StaticScale](#base_scale_static) is created instead.
+            std::optional<ghoul::Dictionary> scale [[codegen::reference("core_scale")]];
         };
         // The collection of transformations that are applied to the
         // [Renderable](#renderable) before it is shown on screen.

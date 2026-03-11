@@ -66,7 +66,7 @@ namespace openspace {
 
 Documentation RenderablePlaneTimeVaryingImage::Documentation() {
     return codegen::doc<Parameters>(
-        "base_renderable_plane_time_varying_image",
+        "base_renderable_planetimevaryingimage",
         RenderablePlane::Documentation()
     );
 }

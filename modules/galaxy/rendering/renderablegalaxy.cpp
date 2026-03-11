@@ -243,7 +243,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableGalaxy::Documentation() {
-    return codegen::doc<Parameters>("galaxy_renderablegalaxy");
+    return codegen::doc<Parameters>("galaxy_renderable_galaxy");
 }
 
 RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)

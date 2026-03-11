@@ -171,7 +171,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
  *
  * \param starName The name of the star to get the information for
  *
- * \return An object of the type [ExoplanetSystemData](#exoplanets_exoplanet_system_data)
+ * \return An object of the type [ExoplanetSystemData](#exoplanets_data_exoplanetsystem)
  *         that can be used to create the scene graph nodes for the exoplanet system
  */
 [[codegen::luawrap]] ghoul::Dictionary systemData(std::string starName){
@@ -246,7 +246,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
   * \param csvFile A path to the CSV file to load the data from
   *
   * \return A list of objects of the type
-  *         [ExoplanetSystemData](#exoplanets_exoplanet_system_data), that can be used to
+  *         [ExoplanetSystemData](#exoplanets_data_exoplanetsystem), that can be used to
   *         create the scene graph nodes for the exoplanet systems
   */
 [[codegen::luawrap]] std::vector<ghoul::Dictionary> loadSystemDataFromCsv(

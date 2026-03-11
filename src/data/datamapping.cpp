@@ -151,7 +151,7 @@ namespace {
 namespace openspace::dataloader {
 
 Documentation DataMapping::Documentation() {
-    return codegen::doc<Parameters>("dataloader_datamapping");
+    return codegen::doc<Parameters>("core_dataloader_datamapping");
 }
 
 DataMapping DataMapping::createFromDictionary(const ghoul::Dictionary& dictionary) {

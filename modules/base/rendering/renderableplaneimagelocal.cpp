@@ -67,7 +67,7 @@ namespace openspace {
 
 Documentation RenderablePlaneImageLocal::Documentation() {
     return codegen::doc<Parameters>(
-        "base_renderable_plane_image_local",
+        "base_renderable_planeimagelocal",
         RenderablePlane::Documentation()
     );
 }

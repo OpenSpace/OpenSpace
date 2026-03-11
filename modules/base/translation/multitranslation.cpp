@@ -36,7 +36,7 @@ namespace {
     struct [[codegen::Dictionary(MultiTranslation)]] Parameters {
         // The list of translations that are applied one after the other.
         std::vector<ghoul::Dictionary> translations
-            [[codegen::reference("core_transform_translation")]];
+            [[codegen::reference("core_translation")]];
     };
 } // namespace
 #include "multitranslation_codegen.cpp"
@@ -44,7 +44,7 @@ namespace {
 namespace openspace {
 
 Documentation MultiTranslation::Documentation() {
-    return codegen::doc<Parameters>("base_transform_translation_multi");
+    return codegen::doc<Parameters>("base_translation_multi");
 }
 
 MultiTranslation::MultiTranslation(const ghoul::Dictionary& dictionary)

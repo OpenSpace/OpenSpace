@@ -228,7 +228,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableSimulationBox::Documentation() {
-    return codegen::doc<Parameters>("molecule_renderablesimulationbox");
+    return codegen::doc<Parameters>("molecule_renderable_simulationbox");
 }
 
 RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictionary)

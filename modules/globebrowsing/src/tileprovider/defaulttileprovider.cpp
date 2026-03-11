@@ -121,7 +121,7 @@ namespace {
 namespace openspace {
 
 Documentation DefaultTileProvider::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_defaulttileprovider");
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_default");
 }
 
 DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)

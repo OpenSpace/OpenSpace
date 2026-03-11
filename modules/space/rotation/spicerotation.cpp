@@ -96,7 +96,7 @@ namespace {
 namespace openspace {
 
 Documentation SpiceRotation::Documentation() {
-    return codegen::doc<Parameters>("space_transform_rotation_spice");
+    return codegen::doc<Parameters>("space_rotation_spice");
 }
 
 SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)

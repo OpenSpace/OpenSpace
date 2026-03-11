@@ -335,7 +335,7 @@ ghoul::Dictionary ExoplanetSystem::toDataDictionary() const {
 }
 
 Documentation ExoplanetSystem::Documentation() {
-    return codegen::doc<Parameters>("exoplanets_exoplanet_system_data");
+    return codegen::doc<Parameters>("exoplanets_data_exoplanetsystem");
 }
 
 } // namespace openspace

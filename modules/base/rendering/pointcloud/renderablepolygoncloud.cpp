@@ -58,7 +58,7 @@ namespace openspace {
 
 Documentation RenderablePolygonCloud::Documentation() {
     return codegen::doc<Parameters>(
-        "base_renderablepolygoncloud",
+        "base_renderable_polygoncloud",
         RenderablePointCloud::Documentation()
     );
 }

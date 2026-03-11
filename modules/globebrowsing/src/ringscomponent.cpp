@@ -212,7 +212,7 @@ namespace {
 namespace openspace {
 
 Documentation RingsComponent::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_rings_component");
+    return codegen::doc<Parameters>("globebrowsing_ringscomponent");
 }
 
 RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)

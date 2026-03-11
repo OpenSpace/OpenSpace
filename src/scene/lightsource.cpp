@@ -69,7 +69,7 @@ bool LightSource::isEnabled() const {
 }
 
 Documentation LightSource::Documentation() {
-    return codegen::doc<Parameters>("core_light_source");
+    return codegen::doc<Parameters>("core_lightsource");
 }
 
 std::unique_ptr<LightSource> LightSource::createFromDictionary(
