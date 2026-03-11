@@ -77,34 +77,34 @@ namespace {
 }
 
 struct [[codegen::Dictionary(Action)]] Action {
-    /// The identifier under which the action is registered.
+    // The identifier under which the action is registered.
     std::string identifier;
 
-    /// The Lua script that is to be executed when the action is triggered.
+    // The Lua script that is to be executed when the action is triggered.
     std::string command;
 
-    /// The user-facing name of the action.
+    // The user-facing name of the action.
     std::optional<std::string> name;
 
-    /// A documentation that explains what the action does.
+    // A documentation that explains what the action does.
     std::optional<std::string> documentation;
 
-    /// The path in the GUI under which the action is shown to the user. If the value is
-    /// not provided, the default value is /.
+    // The path in the GUI under which the action is shown to the user. If the value is
+    // not provided, the default value is /.
     std::optional<std::string> guiPath;
 
-    /// This parameter, if specified, will be used as a hint to any potential user
-    /// interface as a desired background color. This can be used, for example, to
-    /// visually group similar Actions together.
+    // This parameter, if specified, will be used as a hint to any potential user
+    // interface as a desired background color. This can be used, for example, to visually
+    // group similar Actions together.
     std::optional<glm::vec4> color [[codegen::color()]];
 
-    /// This parameter, if specified, will be used as a hint to any potential user
-    /// interface as a desired text color. This can be used, for example, to visually
-    /// group similar Actions together.
+    // This parameter, if specified, will be used as a hint to any potential user
+    // interface as a desired text color. This can be used, for example, to visually group
+    // similar Actions together.
     std::optional<glm::vec4> textColor [[codegen::color()]];
 
-    /// Determines whether the provided command will be executed locally or will be sent
-    /// to connected computers in a cluster or parallel connection environment.
+    // Determines whether the provided command will be executed locally or will be sent to
+    // connected computers in a cluster or parallel connection environment.
     std::optional<bool> isLocal;
 };
 

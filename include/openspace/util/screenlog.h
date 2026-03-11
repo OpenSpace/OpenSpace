@@ -125,7 +125,7 @@ private:
     LogLevel _logLevel;
 
     /// A mutex to ensure thread-safety since the logging and the removal of expired
-    /// entires can occur on different threads
+    /// entries can occur on different threads
     mutable TracyLockable(std::mutex, _mutex);
 };
 

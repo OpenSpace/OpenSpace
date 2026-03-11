@@ -54,7 +54,9 @@ public:
      */
     explicit OpenSpaceModule(std::string name);
 
-    /// Default destructor
+    /**
+     * Default destructor.
+     */
     ~OpenSpaceModule() override = default;
 
     /**

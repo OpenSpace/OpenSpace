@@ -279,8 +279,10 @@ public:
     std::optional<MetaInformation> metaInformation() const;
 
 private:
-    /// All of the (internal) states that the Asset can move through. The externally
-    /// visible states (Loaded, Synchronized, Initialized) are a subset of these states
+    /**
+     * All of the (internal) states that the Asset can move through. The externally
+     * visible states (Loaded, Synchronized, Initialized) are a subset of these states.
+     */
     enum class State {
         /// The asset is created, but the Lua file has not been executed yet
         Unloaded,

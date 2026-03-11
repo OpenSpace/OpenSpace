@@ -221,9 +221,11 @@ private:
     bool _automaticallyUpdateRenderBin = true;
     bool _hasOverrideRenderBin = false;
 
-    /// We only want the SceneGraphNode to be able manipulate the parent, so we don't want
-    /// to provide a set method for this. Otherwise, anyone might mess around with our
-    /// parentage and that's no bueno
+    /**
+     * We only want the SceneGraphNode to be able manipulate the parent, so we don't want
+     * to provide a set method for this. Otherwise, anyone might mess around with our
+     * parentage and that's no bueno.
+     */
     friend ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         const ghoul::Dictionary&);
 };

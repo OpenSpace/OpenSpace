@@ -473,7 +473,9 @@ public:
      */
     virtual std::string jsonValue() const;
 
-    /// Interpolation methods
+    /**
+     * Interpolation methods.
+     */
     virtual void setLuaInterpolationTarget(lua_State* state);
 
     virtual void interpolateValue(float t,
@@ -530,7 +532,7 @@ protected:
      */
     void notifyMetaDataChangeListeners();
 
-    /// The PropetyOwner this Property belongs to, or `nullptr`
+    /// The PropertyOwner this Property belongs to, or `nullptr`
     PropertyOwner* _owner = nullptr;
 
     /// The identifier for this Property
@@ -542,7 +544,9 @@ protected:
     /// The user-facing description of this Property
     std::string _description;
 
-    /// The meta data necessary for external applications
+    /**
+     * The meta data necessary for external applications.
+     */
     struct {
         std::optional<std::string> group;
         Visibility visibility = Visibility::Default;

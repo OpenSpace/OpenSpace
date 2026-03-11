@@ -183,7 +183,7 @@ private:
     };
     std::vector<ScheduledScriptInfo> _scheduledScripts;
 
-    /// Logging variables
+    // Logging variables
     bool _logFileExists = false;
     bool _logScripts = true;
     std::filesystem::path _logFilename;
