@@ -46,7 +46,7 @@ namespace {
         Property::Visibility::User
     };
 
-    constexpr Property::PropertyInfo IdleMotionInfo = {
+    constexpr Property::PropertyInfo MotionInfo = {
         "Motion",
         "Motion",
         "The chosen camera motion that will be triggered when the idle motion is "
@@ -54,7 +54,7 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ShouldTriggerIdleMotionWhenIdleInfo = {
+    constexpr Property::PropertyInfo ShouldTriggerWhenIdleInfo = {
         "ShouldTriggerWhenIdle",
         "Should trigger when idle",
         "If true, the chosen idle motion will trigger automatically after a certain "
@@ -70,7 +70,7 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo IdleMotionSpeedInfo = {
+    constexpr Property::PropertyInfo SpeedFactorInfo = {
         "SpeedFactor",
         "Speed factor",
         "A factor that can be used to increase or slow down the speed of an applied "
@@ -79,7 +79,7 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo InvertIdleMotionInfo = {
+    constexpr Property::PropertyInfo InvertInfo = {
         "Invert",
         "Invert",
         "If true, the direction of the idle motion motion will be inverted compared "
@@ -98,7 +98,7 @@ namespace {
         Property::Visibility::User
     };
 
-    constexpr Property::PropertyInfo IdleMotionDampenInterpolationTimeInfo = {
+    constexpr Property::PropertyInfo DampenInterpolationTimeInfo = {
         "DampenInterpolationTime",
         "Start/end dampen interpolation time",
         "The time to interpolate to/from full speed when an idle motion is triggered "
@@ -117,13 +117,13 @@ IdleMotion::IdleMotion()
         "user starts navigating."
     })
     , _apply(ApplyInfo, false)
-    , _shouldTriggerWhenIdle(ShouldTriggerIdleMotionWhenIdleInfo, false)
+    , _shouldTriggerWhenIdle(ShouldTriggerWhenIdleInfo, false)
     , _idleWaitTime(IdleWaitTimeInfo, 5.f, 0.f, 3600.f, 1.f)
     , _abortOnCameraInteraction(AbortOnCameraInteractionInfo, true)
-    , _invert(InvertIdleMotionInfo, false)
-    , _speedScaleFactor(IdleMotionSpeedInfo, 1.f, -5.f, 5.f)
-    , _dampenInterpolationTime(IdleMotionDampenInterpolationTimeInfo, 0.5f, 0.f, 10.f)
-    , _defaultMotion(IdleMotionInfo)
+    , _invert(InvertInfo, false)
+    , _speedScaleFactor(SpeedFactorInfo, 1.f, -5.f, 5.f)
+    , _dampenInterpolationTime(DampenInterpolationTimeInfo, 0.5f, 0.f, 10.f)
+    , _defaultMotion(MotionInfo)
 {
     _apply.onChange([this]() {
         if (_apply) {
@@ -173,7 +173,7 @@ IdleMotion::IdleMotion()
 
     _dampenInterpolationTime.onChange([this]() {
         _dampenInterpolator.setInterpolationTime(_dampenInterpolationTime);
-     });
+    });
     addProperty(_dampenInterpolationTime);
 
     _dampenInterpolator.setTransferFunction(
@@ -205,9 +205,8 @@ void IdleMotion::tickIdleMotionTimer(double deltaTime) {
     }
 }
 
-void IdleMotion::apply(const SceneGraphNode* anchor, double deltaTime,
-                                     double speedScale, glm::dvec3& position,
-                                     glm::dquat& globalRotation)
+void IdleMotion::apply(const SceneGraphNode* anchor, double deltaTime, double speedScale,
+                       glm::dvec3& position, glm::dquat& globalRotation)
 {
     _dampenInterpolator.setDeltaTime(static_cast<float>(deltaTime));
     _dampenInterpolator.step();
@@ -286,8 +285,7 @@ void IdleMotion::triggerIdleMotion(std::string_view choice) {
 }
 
 void IdleMotion::orbitAnchor(const SceneGraphNode* anchor, double angle,
-                               glm::dvec3& position,
-                               glm::dquat& globalRotation)
+                             glm::dvec3& position, glm::dquat& globalRotation)
 {
     ghoul_assert(anchor != nullptr, "Node to orbit must be set");
 
@@ -310,8 +308,8 @@ void IdleMotion::orbitAnchor(const SceneGraphNode* anchor, double angle,
 }
 
 void IdleMotion::orbitAroundAxis(const SceneGraphNode* anchor, const glm::dvec3& axis,
-                                   double angle, glm::dvec3& position,
-                                   glm::dquat& globalRotation)
+                                 double angle, glm::dvec3& position,
+                                 glm::dquat& globalRotation)
 {
     ghoul_assert(anchor != nullptr, "Node to orbit must be set");
 
