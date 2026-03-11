@@ -81,7 +81,7 @@ namespace {
 
     constexpr Property::PropertyInfo InvertInfo = {
         "Invert",
-        "Invert",
+        "Invert direction",
         "If true, the direction of the idle motion motion will be inverted compared "
         "to the default. For example, the 'Orbit' option rotates to the right per "
         "default, and will rotate to the left when inverted.",
@@ -128,11 +128,13 @@ IdleMotion::IdleMotion()
     _apply.onChange([this]() {
         if (_apply) {
             // Reset velocities to ensure that abort on interaction works correctly
-            global::navigationHandler->orbitalNavigator().resetVelocities(); // TODO: Remove this dependency on orbitalnavigator
+            global::navigationHandler->orbitalNavigator().resetVelocities();
+
             _invertInterpolation = false;
         }
         else {
             _invertInterpolation = true;
+            resetTriggerTimer();
         }
         _dampenInterpolator.start();
         _dampenInterpolator.setInterpolationTime(_dampenInterpolationTime);
@@ -157,12 +159,12 @@ IdleMotion::IdleMotion()
     addProperty(_defaultMotion);
 
     _shouldTriggerWhenIdle.onChange([this]() {
-        _triggerTimer = _idleWaitTime;
+        resetTriggerTimer();
     });
     addProperty(_shouldTriggerWhenIdle);
 
     _idleWaitTime.onChange([this]() {
-        _triggerTimer = _idleWaitTime;
+        resetTriggerTimer();
     });
     _idleWaitTime.setExponent(2.2f);
     addProperty(_idleWaitTime);
@@ -176,9 +178,7 @@ IdleMotion::IdleMotion()
     });
     addProperty(_dampenInterpolationTime);
 
-    _dampenInterpolator.setTransferFunction(
-        ghoul::quadraticEaseInOut<double>
-    );
+    _dampenInterpolator.setTransferFunction(ghoul::quadraticEaseInOut<double>);
 }
 
 void IdleMotion::resetIdleMotionOnCamera() {
@@ -187,7 +187,7 @@ void IdleMotion::resetIdleMotionOnCamera() {
         _chosenMotion = std::nullopt;
         // Prevent interpolating stop, to avoid weirdness when changing anchor, etc
         _dampenInterpolator.setInterpolationTime(0.f);
-        _triggerTimer = _idleWaitTime;
+        resetTriggerTimer();
     }
 }
 
@@ -338,6 +338,10 @@ void IdleMotion::orbitAroundAxis(const SceneGraphNode* anchor, const glm::dvec3&
     // Also apply the rotation to the global rotation, so the camera up vector is
     // rotated around the axis as well
     globalRotation = spinRotation * globalRotation;
+}
+
+void IdleMotion::resetTriggerTimer() {
+    _triggerTimer = _idleWaitTime;
 }
 
 } // namespace openspace

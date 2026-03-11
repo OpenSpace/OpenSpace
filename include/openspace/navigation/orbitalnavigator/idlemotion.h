@@ -106,6 +106,8 @@ public:
         double angle, glm::dvec3& position, glm::dquat& globalRotation);
 
 private:
+    void resetTriggerTimer();
+
     BoolProperty _apply;
     BoolProperty _shouldTriggerWhenIdle;
     FloatProperty _idleWaitTime;
