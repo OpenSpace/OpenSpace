@@ -95,15 +95,14 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
 
     const TouchInputHolder& currentInput = touchPoints.at(0);
 
-    const glm::ivec2 windowSize = global::windowDelegate->currentWindowSize();
-    const float aspectRatio =
-        static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y);
+    const glm::vec2 windowSize = glm::vec2(global::windowDelegate->currentWindowSize());
+    const float aspectRatio = windowSize.x / windowSize.y;
 
     switch (action) {
         case InteractionType::ROTATION: {
             // Add rotation velocity
-            glm::dvec2 scale = glm::dvec2(5.0);
-            updateVelocities.globalRotation = scale * _sensitivity * -glm::dvec2(
+            const glm::dvec2 Scale = glm::dvec2(5.0);
+            updateVelocities.globalRotation = Scale * _sensitivity * -glm::dvec2(
                 currentInput.speedX(),
                 currentInput.speedY()
             );
@@ -138,11 +137,8 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
 
             double zoomFactor = distToCentroidEnd - distToCentroidStart;
 
-            // @TODO: Update so zoom keeps going when fingers are held?
-            // Now, no movement => interpreted as roll
-
-            double scale = 100.0;
-            updateVelocities.zoom = scale * zoomFactor * _sensitivity;
+            const double Scale = 100.0;
+            updateVelocities.zoom = Scale * zoomFactor * _sensitivity;
 
             break;
         }
@@ -163,19 +159,18 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
             }
             double avgRollFactor = rollFactor / static_cast<double>(touchPoints.size());
 
-            //double scale = 2.75; // From old sensitivity settings
-            double scale = 100.0;
-            updateVelocities.globalRoll = scale * -avgRollFactor * _sensitivity;
-            // TODO: Local roll?
-
+            const double Scale = 100.0;
+            updateVelocities.globalRoll = Scale * -avgRollFactor * _sensitivity;
             break;
         }
         case InteractionType::PAN: {
             // Add local rotation velocity
-            glm::dvec2 scale = glm::dvec2(10.0);
+            const glm::dvec2 Scale = glm::dvec2(10.0);
 
-            // TODO: Update scale and gesture
-            updateVelocities.localRotation = _sensitivity * glm::dvec2(
+            // @TODO (2026-03-11, emmbr) Update scaling and gesture. Panning is currently
+            // triggered using a three-finger gesture, which is often reserved for other
+            // windows-related interaction, so I could not test it
+            updateVelocities.localRotation = _sensitivity * Scale * glm::dvec2(
                 currentInput.speedX(),
                 currentInput.speedY()
             );
@@ -199,8 +194,8 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
 
     if (inputs.size() != lastProcessed.size() || inputs.empty() || lastProcessed.empty()) {
         // Not a valid gesture. Probably just a tap.
-        // @TODO: Update code so that we dont have to do this check (currently there is a
-        // risk of crashing below)
+        // @TODO (2026-03-11, emmbr) This code prevents a crash from happening, but
+        // ideally we should instea dchange the code below so this check is not needed
         return InteractionType::NONE;
     }
 
@@ -282,15 +277,15 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
 
         const float RollAngleThreshold = 0.025f;
         if (std::abs(res) < RollAngleThreshold) {
-            rollFactor = 1000.0; // @TOD: Figure out this magic number
+            rollFactor = 1000.0; // @TODO: Figure out this magic number
         }
         else {
             rollFactor += res;
         }
     }
 
-    float normalizedCentroidDistance = glm::distance(_centroid, lastCentroid);
-    normalizedCentroidDistance /= static_cast<float>(inputs.size());
+    float normalizedCentroidDist = glm::distance(_centroid, lastCentroid);
+    normalizedCentroidDist /= static_cast<float>(inputs.size());
 
     const float InputStillThreshold = 0.0005f;
     const float CentroidStillThreshold = 0.0018f;
@@ -299,7 +294,7 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
     // centroid is over RollAngleThreshold (CentroidStillThreshold is used to void
     // misinterpretations)
     if (std::abs(minDiff) < InputStillThreshold ||
-        (std::abs(rollFactor) < 100.0 && normalizedCentroidDistance < CentroidStillThreshold))
+        (std::abs(rollFactor) < 100.0 && normalizedCentroidDist < CentroidStillThreshold))
     {
         return InteractionType::ROLL;
     }
