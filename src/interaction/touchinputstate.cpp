@@ -111,7 +111,7 @@ void TouchInputState::clearInputs() {
     }
     _deferredRemovals.clear();
 
-    // Reset tap detected state (TODO Can this relly be done here? every frame..?)
+    // Reset tap detected state (TODO Can this really be done here? every frame..?)
     _doubleTap = false;
     _tap = false;
 }

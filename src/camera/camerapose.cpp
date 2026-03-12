@@ -46,7 +46,10 @@ CameraRotationDecomposition decomposeCameraRotation(const CameraPose& cameraPose
     const glm::dquat localCameraRotation = glm::inverse(globalCameraRotation) *
         cameraPose.rotation;
 
-    return { localCameraRotation, globalCameraRotation };
+    return {
+        .localRotation = localCameraRotation,
+        .globalRotation = globalCameraRotation
+    };
 }
 
 CameraRotationDecomposition
@@ -89,7 +92,10 @@ decomposeCameraRotationSurface(const CameraPose& cameraPose,
     const glm::dquat localCameraRotation = glm::inverse(globalCameraRotation) *
         cameraPose.rotation;
 
-    return { localCameraRotation, globalCameraRotation };
+    return {
+        .localRotation = localCameraRotation,
+        .globalRotation = globalCameraRotation
+    };
 }
 
 glm::dquat composeCameraRotation(const CameraRotationDecomposition& decomposition) {

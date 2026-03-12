@@ -107,7 +107,7 @@ void TouchMarker::deinitializeGL() {
     }
 }
 
-void TouchMarker::render(const std::vector<openspace::TouchInputHolder>& touchPoints) {
+void TouchMarker::render(const std::vector<TouchInputHolder>& touchPoints) {
     if (!_enabled || touchPoints.empty()) {
         return;
     }
@@ -151,4 +151,4 @@ void TouchMarker::createVertexList(
     _count = static_cast<GLsizei>(touchPoints.size());
 }
 
-} // openspace namespace
+} // namespace openspace

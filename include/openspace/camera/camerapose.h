@@ -56,16 +56,16 @@ CameraRotationDecomposition decomposeCameraRotation(const CameraPose& cameraPose
  * Decomposes the camera's rotation in to a global and a local rotation defined by
  * CameraRotationDecomposition. The global rotation defines the rotation so that the
  * camera points towards the reference node in the direction opposite to the direction
- * out from the surface of the object. The local rotation defines the differential
- * from the global to the current total rotation so that
+ * out from the surface of the object. The local rotation defines the differential from
+ * the global to the current total rotation so that
  * `cameraRotation = globalRotation * localRotation`.
  */
 CameraRotationDecomposition decomposeCameraRotationSurface(
     const CameraPose& cameraPose, const SceneGraphNode& reference);
 
 /**
- * Composes a pair of global and local rotations into a quaternion that can be used as
- * the world rotation for a camera.
+ * Composes a pair of global and local rotations into a quaternion that can be used as the
+ * world rotation for a camera.
  */
 glm::dquat composeCameraRotation(const CameraRotationDecomposition& decomposition);
 

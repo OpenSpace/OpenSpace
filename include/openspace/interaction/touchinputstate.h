@@ -38,9 +38,9 @@ class TouchInputState {
 public:
     void initialize();
 
-    bool touchDetectedCallback(TouchInput i);
-    bool touchUpdatedCallback(TouchInput i);
-    void touchExitCallback(TouchInput i);
+    bool touchDetectedCallback(TouchInput input);
+    bool touchUpdatedCallback(TouchInput input);
+    void touchExitCallback(TouchInput input);
 
     bool touchHappened() const;
 

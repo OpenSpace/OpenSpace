@@ -32,13 +32,13 @@ namespace openspace {
  * friction is enabled, a decelleration can also be applied over time.
  *
  * The filter has a step response on a form that resembles the function
- * y = 1-e^(-t/scale). The variable will be updated as soon as it is set to a value
+ * `y = 1-e^(-t/scale)`. The variable will be updated as soon as it is set to a value
  * (calling the set() function).
  */
 template <typename T>
 class DampenedVelocity {
 public:
-    DampenedVelocity(double scaleFactor, bool useFriction = true);
+    explicit DampenedVelocity(double scaleFactor, bool useFriction = true);
 
     void set(T value, double dt);
     void decelerate(double dt);

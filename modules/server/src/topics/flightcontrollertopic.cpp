@@ -152,7 +152,7 @@ namespace openspace {
 FlightControllerTopic::FlightControllerTopic() {
     for (auto it = AxisIndexMap.begin(); it != AxisIndexMap.end(); it++) {
         global::navigationHandler->orbitalNavigator().websocketStates().setAxisMapping(
-            int(std::distance(AxisIndexMap.begin(), it)),
+            static_cast<int>(std::distance(AxisIndexMap.begin(), it)),
             it->second
         );
     }
@@ -365,7 +365,7 @@ void FlightControllerTopic::setFriction(bool all) const {
     setFriction(all, all, all);
 }
 
-// @TODO (emmbr, 2025-12-17) Consier removing this function form the topic. It is just
+// @TODO (emmbr, 2025-12-17) Consider removing this function from the topic. It is just
 // setting the properties in orbitalnavigator
 void FlightControllerTopic::setFriction(bool roll, bool rotation, bool zoom) const {
     const OrbitalNavigator& navigator = global::navigationHandler->orbitalNavigator();

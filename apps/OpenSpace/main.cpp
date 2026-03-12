@@ -242,7 +242,8 @@ void checkJoystickStatus() {
     for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; i++) {
         ZoneScopedN("Joystick state");
 
-        JoystickInputState& joystick = global::interactionHandler->joystickInputStates().at(i);
+        JoystickInputState& joystick =
+            global::interactionHandler->joystickInputStates().at(i);
 
         const int isPresent = glfwJoystickPresent(i);
         if (isPresent == GLFW_FALSE) {

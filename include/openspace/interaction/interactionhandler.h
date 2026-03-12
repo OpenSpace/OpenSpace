@@ -81,15 +81,15 @@ public:
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
 
-    bool touchDetectedCallback(TouchInput i);
-    bool touchUpdatedCallback(TouchInput i);
-    void touchExitCallback(TouchInput i);
+    bool touchDetectedCallback(TouchInput input);
+    bool touchUpdatedCallback(TouchInput input);
+    void touchExitCallback(TouchInput input);
 
     void renderOverlay();
 
     /**
-     * Signal to the InteractionMonitor that an interaction happened. Should be called
-     * in any function representing an interaction that is not handled by this handler.
+     * Signal to the InteractionMonitor that an interaction happened. Should be called in
+     * any function representing an interaction that is not handled by this handler.
      */
     void markInteraction();
 
@@ -123,8 +123,8 @@ private:
 
         bool isMouseFirstPress = false;
         bool isMousePressed = false;
-        glm::vec2 clickPosition;
-        glm::vec2 currentPosition;
+        glm::vec2 clickPosition = glm::vec2(0.f);
+        glm::vec2 currentPosition = glm::vec2(0.f);
     } _mouseVisualizer;
 };
 

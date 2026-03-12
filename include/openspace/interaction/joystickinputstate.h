@@ -73,8 +73,8 @@ struct JoystickInputState {
     std::vector<JoystickAction> buttons;
 
     /**
-     * Initialize the aces and buttons vectors based on the currently set number of
-     * axes and buttons.
+     * Initialize the aces and buttons vectors based on the currently set number of axes
+     * and buttons.
      */
     void initializeAxesAndButtons();
 

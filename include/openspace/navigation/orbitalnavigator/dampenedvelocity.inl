@@ -37,7 +37,7 @@ template <typename T>
 void DampenedVelocity<T>::set(T value, double dt) {
     _targetValue = value;
     _currentValue += (_targetValue - _currentValue) * glm::min(_scaleFactor * dt, 1.0);
-    // less or equal to 1.0 keeps it stable
+    // Less or equal to 1.0 keeps it stable
 }
 
 template <typename T>
@@ -46,7 +46,7 @@ void DampenedVelocity<T>::decelerate(double dt) {
         return;
     }
     _currentValue *= (1.0 - glm::min(_scaleFactor * dt, 1.0));
-    // less or equal to 1.0 keeps it stable
+    // Less or equal to 1.0 keeps it stable
 }
 
 template <typename T>

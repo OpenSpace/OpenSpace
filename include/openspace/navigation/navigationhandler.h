@@ -70,7 +70,6 @@ public:
 
     void resetNavigationUpdateVariables();
 
-    // Accessors
     Camera* camera() const;
     const SceneGraphNode* anchorNode() const;
 

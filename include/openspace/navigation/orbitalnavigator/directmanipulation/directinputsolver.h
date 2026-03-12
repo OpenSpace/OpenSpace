@@ -52,7 +52,7 @@ public:
     };
 
     /**
-     * Represents touched screenspace coordinates (normalized to [0, 1])
+     * Represents touched screenspace coordinates (normalized to [0, 1]).
      */
     struct TouchPoint {
         size_t id = 0;

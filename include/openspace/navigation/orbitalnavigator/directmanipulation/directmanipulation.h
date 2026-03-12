@@ -60,7 +60,6 @@ public:
         const Camera* camera, const SceneGraphNode* anchor);
 
 private:
-
     /**
      * Calculates the new camera state such that it minimizes the L2 error in screenspace
      * between contact points and surface coordinates projected to clip space using LMA.

@@ -178,7 +178,7 @@ void InteractionHandler::preSynchronization() {
     _interactionMonitor.updateActivityState();
 
     // @TODO (2026-03-11 emmbr) Move to orbital or navigation handler? Would be good
-    // to not have ot deal with the engine mode here too
+    // to not have to deal with the engine mode here too
     OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
     if (mode == OpenSpaceEngine::Mode::CameraPath ||
         mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
@@ -190,7 +190,7 @@ void InteractionHandler::preSynchronization() {
 }
 
 void InteractionHandler::postDraw() {
-    // Once the fram is finished, reset the touch interaction information
+    // Once the frame is finished, reset the touch interaction information
     _touchInputState.updateLastTouchPoints();
     _touchInputState.clearInputs();
 }

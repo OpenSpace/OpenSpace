@@ -37,7 +37,9 @@
 namespace {
     using namespace openspace;
 
-    // Used in the LM algorithm
+    /**
+     * Used in the LM algorithm.
+     */
     struct FunctionData {
         std::vector<glm::dvec3> selectedPoints;
         std::vector<glm::dvec2> screenPoints;
@@ -104,7 +106,9 @@ namespace {
         return glm::length(ptr->screenPoints.at(x) - newScreenPoint);
     }
 
-    // Gradient of distToMinimize w.r.t par (using forward difference)
+    /**
+     * Gradient of distToMinimize w.r.t par (using forward difference).
+     */
     void gradient(double* g, double* par, int x, void* fdata, ghoul::LMstat* lmstat) {
         FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
         double f0 = distToMinimize(par, x, fdata, lmstat);

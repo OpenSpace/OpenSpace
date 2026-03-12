@@ -165,7 +165,7 @@ private:
      *
      * \param joystickName The name of the joystick to find or add
      * \return The joystick mapping information for either the found or added joystick,
-     *         or nullptr if the joystick could not be added
+     *         or `nullptr` if the joystick could not be added
      */
     JoystickMapping* findOrAddJoystickMapping(const std::string& joystickName);
 };
