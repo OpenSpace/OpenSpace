@@ -48,7 +48,7 @@ local SolarImagery = {
   },
   GUI = {
     Name = "SDO Imagery",
-    Path = "/Solar System/Solar Imagery",
+    Path = "/Solar System/Sun/Solar Imagery",
     Description = [[Time-resolved solar imagery from NASA's Solar Dynamics Observatory
       (SDO). Images from multiple instruments can be browsed over time and are projected
       onto a plane positioned relative to the Sun. Instrument-specific color mappings help
