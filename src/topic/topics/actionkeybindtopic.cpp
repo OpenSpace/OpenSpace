@@ -24,12 +24,12 @@
 
 #include <openspace/topic/topics/actionkeybindtopic.h>
 
-#include <openspace/topic/connection.h>
-#include <openspace/topic/jsonconverters.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/topic/connection.h>
+#include <openspace/topic/jsonconverters.h>
 #include <openspace/util/keys.h>
 #include <ghoul/misc/stringconversion.h>
 #include <algorithm>

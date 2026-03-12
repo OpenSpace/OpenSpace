@@ -24,8 +24,8 @@
 
 #include "openspace/topic/topics/sessionrecordingtopic.h"
 
-#include <openspace/topic/connection.h>
 #include <openspace/engine/globals.h>
+#include <openspace/topic/connection.h>
 #include <ghoul/logging/logmanager.h>
 #include <string_view>
 

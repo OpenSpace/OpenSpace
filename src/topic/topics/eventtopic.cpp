@@ -24,10 +24,10 @@
 
 #include <openspace/topic/topics/eventtopic.h>
 
-#include <openspace/topic/connection.h>
-#include <openspace/topic/jsonconverters.h>
 #include <openspace/engine/globals.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/topic/connection.h>
+#include <openspace/topic/jsonconverters.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>

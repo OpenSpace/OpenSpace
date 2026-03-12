@@ -24,8 +24,6 @@
 
 #include <openspace/topic/topics/getpropertytopic.h>
 
-#include <openspace/topic/connection.h>
-#include <openspace/topic/jsonconverters.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -35,6 +33,8 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
+#include <openspace/topic/connection.h>
+#include <openspace/topic/jsonconverters.h>
 #include <ghoul/logging/logmanager.h>
 
 using nlohmann::json;

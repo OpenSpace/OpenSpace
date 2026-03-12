@@ -24,8 +24,6 @@
 
 #include <openspace/topic/topics/flightcontrollertopic.h>
 
-#include <openspace/topic/connection.h>
-#include <openspace/topic/jsonconverters.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/websocketcamerastates.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -35,6 +33,8 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/topic/connection.h>
+#include <openspace/topic/jsonconverters.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>

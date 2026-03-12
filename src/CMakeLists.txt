@@ -196,9 +196,9 @@ set(OPENSPACE_SOURCE
   topic/topics/propertytreetopic.cpp
   topic/topics/sessionrecordingtopic.cpp
   topic/topics/setpropertytopic.cpp
+  topic/topics/skybrowsertopic.cpp
   topic/topics/subscriptiontopic.cpp
   topic/topics/timetopic.cpp
-  topic/topics/skybrowsertopic.cpp
   topic/topics/topic.cpp
   topic/topics/triggerpropertytopic.cpp
   topic/topics/versiontopic.cpp

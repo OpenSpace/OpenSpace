@@ -24,10 +24,10 @@
 
 #include <modules/webgui/webguimodule.h>
 
-#include <openspace/topic/topicmanager.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/topic/topicmanager.h>
 #include <openspace/util/json_helper.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>

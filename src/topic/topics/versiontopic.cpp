@@ -24,7 +24,6 @@
 
 #include "openspace/topic/topics/versiontopic.h"
 
-#include <openspace/openspace.h>
 #include <openspace/engine/globals.h>
 #include <openspace/openspace.h>
 #include <openspace/topic/connection.h>

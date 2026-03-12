@@ -25,10 +25,10 @@
 #include <openspace/topic/topics/propertytreetopic.h>
 
 #include <openspace/engine/globals.h>
-#include <openspace/topic/connection.h>
-#include <openspace/topic/jsonconverters.h>
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>
+#include <openspace/topic/connection.h>
+#include <openspace/topic/jsonconverters.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>

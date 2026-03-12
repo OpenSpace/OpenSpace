@@ -24,14 +24,14 @@
 
 #include <openspace/topic/topics/camerapathtopic.h>
 
-#include <openspace/topic/connection.h>
-#include <openspace/topic/topicmanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/path.h>
 #include <openspace/navigation/pathnavigator.h>
+#include <openspace/topic/connection.h>
+#include <openspace/topic/topicmanager.h>
 #include <ghoul/misc/assert.h>
 #include <algorithm>
 #include <cmath>

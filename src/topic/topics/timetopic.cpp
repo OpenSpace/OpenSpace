@@ -24,8 +24,8 @@
 
 #include "openspace/topic/topics/timetopic.h"
 
-#include <openspace/topic/connection.h>
 #include <openspace/engine/globals.h>
+#include <openspace/topic/connection.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/misc/profiling.h>
 #include <optional>

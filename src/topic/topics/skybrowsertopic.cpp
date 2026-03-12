@@ -24,13 +24,12 @@
 
 #include "openspace/topic/topics/skybrowsertopic.h"
 
-#include <openspace/engine/globals.h>
-#include <openspace/topic/connection.h>
-#include <openspace/topic/topicmanager.h>
 #include <modules/skybrowser/skybrowsermodule.h>
 #include <modules/skybrowser/include/targetbrowserpair.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
+#include <openspace/topic/connection.h>
+#include <openspace/topic/topicmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
 #include <string_view>
