@@ -61,9 +61,7 @@ namespace {
     // this implementation should be improved in order not to search the entire buffer for
     // XML data. There is an issue here:
     // (https://github.com/uclouvain/openjpeg/issues/929)
-    std::optional<ImageMetadata> parseJ2kMetadata(
-                                                    const std::filesystem::path& filePath)
-    {
+    std::optional<ImageMetadata> parseJ2kMetadata(const std::filesystem::path& filePath) {
         ImageMetadata im;
         im.filePath = filePath;
 
@@ -349,7 +347,8 @@ namespace {
             if (!std::filesystem::is_directory(subDirectory)) {
                 LWARNING(std::format(
                     "Could not find subdirectory '{}' for cache file '{}'",
-                    subDirectory, cacheFile));
+                    subDirectory, cacheFile
+                ));
                 continue;
             }
 
@@ -432,7 +431,7 @@ namespace {
 
                 if (myfile.bad()) {
                     LERROR(std::format(
-                        "Failed to read metadata state : isCoronaGraph, file : '{}'",
+                        "Failed to read metadata state: isCoronaGraph, file: '{}'",
                         cacheFile
                     ));
                     subDirectoriesMap[subDirectory] = false;

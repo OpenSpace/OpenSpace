@@ -165,8 +165,7 @@ void J2kCodec::decodeIntoBuffer(const std::filesystem::path& path, unsigned char
     if (_verboseMode) {
         LINFO(std::format(
             "Decode time of {}: {} ms",
-            path,
-            std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
+            path, std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
         ));
     }
 }
@@ -185,8 +184,7 @@ void J2kCodec::createInfileStream(const std::filesystem::path& path) {
     }
 }
 
-void J2kCodec::setupDecoder(int downsamplingLevel)
-{
+void J2kCodec::setupDecoder(int downsamplingLevel) {
     opj_set_default_decoder_parameters(&_decoderParams);
     _decoderParams.decod_format = infileFormat(_filePath.string());
     _decoderParams.cp_reduce = downsamplingLevel;

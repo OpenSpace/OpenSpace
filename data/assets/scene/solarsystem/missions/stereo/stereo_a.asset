@@ -29,6 +29,7 @@ local StereoPosition = {
   GUI = {
     Name = "STEREO A Position",
     Path = "/Solar System/Missions/STEREO A",
+    Description = "The position of the STEREO-A spacecraft",
     Hidden = true,
     Focusable = false
   }
@@ -62,7 +63,8 @@ local StereoA = {
   },
   GUI = {
     Name = "STEREO A",
-    Path = "/Solar System/Missions/STEREO A"
+    Path = "/Solar System/Missions/STEREO A",
+    Description = "The STEREO-A (Solar TErrestrial RElations Obervatory) spacecraft"
   }
 }
 
@@ -88,7 +90,8 @@ local StereoTrail = {
   },
   GUI = {
     Name = "STEREO A Trail",
-    Path = "/Solar System/Missions/STEREO A"
+    Path = "/Solar System/Missions/STEREO A",
+    Description = "The trajectory of the STEREO-A spacecraft"
   }
 }
 
@@ -115,8 +118,8 @@ asset.export("MissionEnd", MissionEnd)
 
 asset.meta = {
   Name = "STEREO",
-  Description = [[This asset adds the STEREO (Solar TErrestrial RElations Obervatory)
-    Model, including the trajectory for the entire duration of the STEREO mission.]],
+  Description = [[This asset adds the STEREO-A (Solar TErrestrial RElations Obervatory)
+    model, including the trajectory for the entire duration of the STEREO mission.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"
