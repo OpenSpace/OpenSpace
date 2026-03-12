@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,19 +25,22 @@
 #include <modules/base/scale/luascale.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/dictionary.h>
 #include <chrono>
+#include <filesystem>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ScriptInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ScriptInfo = {
         "Script",
         "Script",
         "This value is the path to the Lua script that will be executed to compute the "
@@ -47,7 +50,7 @@ namespace {
         "the last frame as the second argument, and the current wall time as "
         "milliseconds past the J2000 epoch the third argument and computes the three "
         "scaling factors returned as a table.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `Scale` type generates the scale values for the attached scene graph node by
@@ -58,13 +61,13 @@ namespace {
         // [[codegen::verbatim(ScriptInfo.description)]]
         std::filesystem::path script;
     };
-#include "luascale_codegen.cpp"
 } // namespace
+#include "luascale_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation LuaScale::Documentation() {
-    return codegen::doc<Parameters>("base_transform_scale_lua");
+Documentation LuaScale::Documentation() {
+    return codegen::doc<Parameters>("base_scale_lua");
 }
 
 LuaScale::LuaScale(const ghoul::Dictionary& dictionary)

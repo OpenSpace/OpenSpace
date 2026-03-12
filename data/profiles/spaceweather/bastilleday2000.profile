@@ -45,60 +45,6 @@
     315360000.0,
     630720000.0
   ],
-  "keybindings": [
-    {
-      "action": "os.bastilleday.setup.StartOfCme",
-      "key": "R"
-    },
-    {
-      "action": "os.bastilleday.setup.ShortLoop",
-      "key": "CTRL+1"
-    },
-    {
-      "action": "os.bastilleday.setup.StandardLoop",
-      "key": "CTRL+2"
-    },
-    {
-      "action": "os.bastilleday.setup.FastLoop",
-      "key": "CTRL+3"
-    },
-    {
-      "action": "os.bastilleday.setup.LongLoop",
-      "key": "CTRL+4"
-    },
-    {
-      "action": "os.bastilleday.densityvolume.ToggleVolume",
-      "key": "D"
-    },
-    {
-      "action": "os.bastilleday.fluxnodelegend.ToggleLegend",
-      "key": "N"
-    },
-    {
-      "action": "os.bastilleday.magnetogramtexture.SwitchColorLayer",
-      "key": "I"
-    },
-    {
-      "action": "os.solarsystem.sun.ToggleEuv",
-      "key": "E"
-    },
-    {
-      "action": "os.bastilleday.fluxnodes.ToggleFluxnodes",
-      "key": "O"
-    },
-    {
-      "action": "os.bastilleday.fieldlines.ToggleFieldlines",
-      "key": "U"
-    },
-    {
-      "action": "os.bastilleday.fluxnodescutplane.ToggleEquatorial",
-      "key": "P"
-    },
-    {
-      "action": "os.bastilleday.fluxnodescutplane.ToggleMeridial",
-      "key": "LEFTBRACKET"
-    }
-  ],
   "mark_nodes": [
     "Earth",
     "Mars",

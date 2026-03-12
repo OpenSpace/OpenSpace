@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,8 +24,10 @@
 
 #include <modules/base/task/convertmodeltask.h>
 
+#include <openspace/documentation/documentation.h>
 #include <ghoul/io/model/modelgeometry.h>
 #include <ghoul/io/model/modelreaderassimp.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
     // This task converts a 3D model format from a format that is natively supported both
@@ -45,13 +47,13 @@ namespace {
         // The path to the output file
         std::filesystem::path outputFilePath [[codegen::mustexist(false)]];
     };
-#include "convertmodeltask_codegen.cpp"
 } // namespace
+#include "convertmodeltask_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ConvertModelTask::Documentation() {
-    return codegen::doc<Parameters>("base_convert_model_task");
+Documentation ConvertModelTask::Documentation() {
+    return codegen::doc<Parameters>("base_task_convertmodel");
 }
 
 ConvertModelTask::ConvertModelTask(const ghoul::Dictionary& dictionary) {
@@ -66,7 +68,7 @@ std::string ConvertModelTask::description() {
         "supported both by OpenSpace and common 3D modelling tools and converts it into "
         "an OpenSpace proprietary format that can be loaded more efficiently, but more "
         "important can be distributed without violating terms of service for various 3D "
-        "model hosting websites";
+        "model hosting websites.";
 }
 
 void ConvertModelTask::perform(const Task::ProgressCallback&) {

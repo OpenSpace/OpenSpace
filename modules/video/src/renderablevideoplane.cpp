@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,11 @@
 #include <modules/video/include/renderablevideoplane.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/textureunit.h>
+#include <cstdlib>
+#include <limits>
 
 namespace {
     // This `Renderable` creates a textured 3D plane where the texture is a video.
@@ -38,18 +42,18 @@ namespace {
     // Note that, unless playback is mapped to simulation time, the video must be started
     // manually via the user interface.
     struct [[codegen::Dictionary(RenderableVideoPlane)]] Parameters {};
-#include "renderablevideoplane_codegen.cpp"
 } // namespace
+#include "renderablevideoplane_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableVideoPlane::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>(
-        "video_renderablevideoplane",
+Documentation RenderableVideoPlane::Documentation() {
+    openspace::Documentation doc = codegen::doc<Parameters>(
+        "video_renderable_videoplane",
         RenderablePlane::Documentation()
     );
 
-    documentation::Documentation vp = VideoPlayer::Documentation();
+    openspace::Documentation vp = VideoPlayer::Documentation();
     doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
 
     return doc;
@@ -110,8 +114,8 @@ void RenderableVideoPlane::update(const UpdateData& data) {
     RenderablePlane::update(data);
 }
 
-void RenderableVideoPlane::bindTexture() {
-    _videoPlayer.frameTexture()->bind();
+void RenderableVideoPlane::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(*_videoPlayer.frameTexture());
 }
 
 } // namespace openspace

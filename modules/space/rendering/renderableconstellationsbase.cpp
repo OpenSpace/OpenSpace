@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,46 +24,49 @@
 
 #include <modules/space/rendering/renderableconstellationsbase.h>
 
+#include <openspace/data/dataloader.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
-#include <ghoul/opengl/programobject.h>
+#include <filesystem>
 #include <fstream>
-#include <optional>
+#include <sstream>
+#include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableConstellationsBase";
 
-    constexpr openspace::properties::Property::PropertyInfo NamesFileInfo = {
+    constexpr Property::PropertyInfo NamesFileInfo = {
         "NamesFile",
         "Constellation names file path",
         "Specifies the file that contains the mapping between constellation "
         "abbreviations and full names of the constellations. If this value is empty, the "
         "abbreviations are used as the full names.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The line width used for the constellation shape.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
+    constexpr Property::PropertyInfo SelectionInfo = {
         "ConstellationSelection",
         "Constellation selection",
         "The selected constellations are displayed on the celestial sphere.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+    const PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the constellations."
@@ -82,14 +85,14 @@ namespace {
 
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("labelscomponent")]];
+            [[codegen::reference("core_labelscomponent")]];
     };
-#include "renderableconstellationsbase_codegen.cpp"
 } // namespace
+#include "renderableconstellationsbase_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableConstellationsBase::Documentation() {
+Documentation RenderableConstellationsBase::Documentation() {
     return codegen::doc<Parameters>("space_renderable_constellationsbase");
 }
 

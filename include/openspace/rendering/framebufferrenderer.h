@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,19 +28,21 @@
 #include <openspace/rendering/raycasterlistener.h>
 #include <openspace/rendering/deferredcasterlistener.h>
 
+#include <openspace/rendering/shadowmapping.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <map>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::filesystem { class File; }
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+namespace ghoul {
+    namespace filesystem { class File; }
+    namespace opengl {
+        class ProgramObject;
+        class Texture;
+    } // namespace ghoul::opengl
+    class Dictionary;
+} // namespace ghoul
 
 namespace openspace {
 
@@ -50,6 +52,7 @@ struct DeferredcasterTask;
 struct RaycastData;
 struct RaycasterTask;
 class Scene;
+class SceneGraphNode;
 struct UpdateStructures;
 
 class FramebufferRenderer final : public RaycasterListener, public DeferredcasterListener
@@ -100,10 +103,6 @@ public:
      */
     GLuint additionalDepthTexture() const;
 
-    //=============================//
-    //=====  Access G-buffer  =====//
-    //=============================//
-    // Functions to access the G-buffer textures
     /**
      * Gives access to the color texture of the G-buffer. NOTE: This texture is used for
      * the majority of rendering the scene and might be already in use. Use CAUTION when
@@ -167,14 +166,21 @@ public:
     void render(Scene* scene, Camera* camera, float blackoutFactor);
 
     /**
-     * Update render data. Responsible for calling renderEngine::setRenderData
+     * Update render data. Responsible for calling RenderEngine::setRenderData.
      */
     virtual void updateRendererData();
 
-    virtual void raycastersChanged(VolumeRaycaster& raycaster,
+    void raycastersChanged(VolumeRaycaster& raycaster,
         RaycasterListener::IsAttached attached) override;
-    virtual void deferredcastersChanged(Deferredcaster& deferredcaster,
+    void deferredcastersChanged(Deferredcaster& deferredcaster,
         DeferredcasterListener::IsAttached isAttached) override;
+
+    void registerShadowCaster(const std::string& shadowGroup,
+        const SceneGraphNode* lightSource, const SceneGraphNode* target);
+    void removeShadowCaster(const std::string& shadowGroup, const SceneGraphNode* target);
+
+    ShadowInfo shadowInformation(const std::string& shadowGroup) const;
+    std::vector<std::string> shadowGroups() const;
 
 private:
     using RaycasterProgObjMap = std::map<
@@ -186,12 +192,11 @@ private:
         std::unique_ptr<ghoul::opengl::ProgramObject>
     >;
 
-    void resolveMSAA(float blackoutFactor);
     void applyTMO(float blackoutFactor, const glm::ivec4& viewport);
     void applyFXAA(const glm::ivec4& viewport);
     void updateDownscaleTextures() const;
-    void updateExitVolumeTextures();
     void writeDownscaledVolume(const glm::ivec4& viewport);
+    void renderDepthMaps();
 
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
     RaycasterProgObjMap _exitPrograms;
@@ -207,52 +212,54 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _downscaledVolumeProgram;
 
     UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
-        Hue, Saturation, Value, Viewport, Resolution) _hdrUniformCache;
-    UniformCache(renderedTexture, inverseScreenSize, Viewport,
-        Resolution) _fxaaUniformCache;
+        hue, saturation, value, viewport, resolution) _hdrUniformCache;
+    UniformCache(renderedTexture, inverseScreenSize, viewport,
+        resolution) _fxaaUniformCache;
     UniformCache(downscaledRenderedVolume, downscaledRenderedVolumeDepth, viewport,
         resolution) _writeDownscaledVolumeUniformCache;
 
     GLint _defaultFBO = 0;
-    GLuint _screenQuad = 0;
-    GLuint _vertexPositionBuffer = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
     GLuint _exitColorTexture = 0;
     GLuint _exitDepthTexture = 0;
     GLuint _exitFramebuffer = 0;
 
     struct {
-        GLuint colorTexture;
-        GLuint positionTexture;
-        GLuint normalTexture;
-        GLuint depthTexture;
-        GLuint framebuffer;
+        GLuint colorTexture = 0;
+        GLuint positionTexture = 0;
+        GLuint normalTexture = 0;
+        GLuint depthTexture = 0;
+        GLuint framebuffer = 0;
     } _gBuffers;
 
     struct {
-        GLuint framebuffer;
-        GLuint colorTexture[2];
+        GLuint framebuffer = 0;
+        GLuint colorTexture[2] = { 0, 0 };
     } _pingPongBuffers;
 
     struct {
-        GLuint fxaaFramebuffer;
-        GLuint fxaaTexture;
+        GLuint fxaaFramebuffer = 0;
+        GLuint fxaaTexture = 0;
     } _fxaaBuffers;
 
     struct {
-        GLuint framebuffer;
-        GLuint colorTexture;
-        GLuint depthbuffer;
+        GLuint framebuffer = 0;
+        GLuint colorTexture = 0;
+        GLuint depthbuffer = 0;
         float currentDownscaleFactor  = 1.f;
     } _downscaleVolumeRendering;
 
+    std::map<std::string, ShadowInfo> _shadowMaps;
+
     unsigned int _pingPongIndex = 0u;
 
-    bool _dirtyDeferredcastData;
-    bool _dirtyRaycastData;
-    bool _dirtyResolution;
+    bool _dirtyDeferredcastData = false;
+    bool _dirtyRaycastData = false;
+    bool _dirtyResolution = false;
 
     glm::ivec2 _resolution = glm::ivec2(0);
-    int _nAaSamples;
+    int _nAaSamples = 1;
     bool _enableFXAA = true;
     bool _disableHDR = false;
 
@@ -261,6 +268,8 @@ private:
     float _hue = 1.f;
     float _saturation = 1.f;
     float _value = 1.f;
+
+    bool _renderedDepthMapsThisFrame = false;
 
     ghoul::Dictionary _rendererData;
 };

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,14 +35,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 
-namespace ghoul::opengl { class ProgramObject; }
-
 namespace openspace {
-
-namespace documentation { struct Documentation; }
-
-struct RenderData;
-struct UpdateData;
 
 class RenderableShadowCylinder : public Renderable {
 public:
@@ -55,7 +48,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     struct CylinderVBOLayout {
@@ -67,15 +60,15 @@ private:
 
     void createCylinder(double time);
 
-    properties::IntProperty _numberOfPoints;
-    properties::FloatProperty _shadowLength;
-    properties::Vec3Property _shadowColor;
-    properties::OptionProperty _terminatorType;
-    properties::StringProperty _lightSource;
-    properties::StringProperty _observer;
-    properties::StringProperty _body;
-    properties::StringProperty _bodyFrame;
-    properties::OptionProperty _aberration;
+    IntProperty _numberOfPoints;
+    FloatProperty _shadowLength;
+    Vec3Property _shadowColor;
+    OptionProperty _terminatorType;
+    StringProperty _lightSource;
+    StringProperty _observer;
+    StringProperty _body;
+    StringProperty _bodyFrame;
+    OptionProperty _aberration;
 
     ghoul::opengl::ProgramObject* _shader = nullptr;
     UniformCache(modelViewProjectionTransform, shadowColor, opacity) _uniformCache;
@@ -85,7 +78,7 @@ private:
     GLuint _vao = 0;
     GLuint _vbo = 0;
 
-    std::vector<CylinderVBOLayout> _vertices;
+    GLsizei _count = 0;
 };
 
 } // namespace openspace

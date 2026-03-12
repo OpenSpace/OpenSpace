@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,11 +25,10 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___ATLASMANAGER___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___ATLASMANAGER___H__
 
-#include <ghoul/glm.h>
 #include <glm/gtx/std_based_type.hpp>
+#include <limits>
 #include <map>
 #include <set>
-#include <string>
 #include <vector>
 
 namespace ghoul::opengl { class Texture; }
@@ -51,7 +50,6 @@ public:
     void updateAtlas(BufferIndex bufferIndex, std::vector<int>& brickIndices);
     void addToAtlas(int firstBrickIndex, int lastBrickIndex, float* mappedBuffer);
     void removeFromAtlas(int brickIndex);
-    bool initialize();
     const std::vector<unsigned int>& atlasMap() const;
     unsigned int atlasMapBuffer() const;
 
@@ -71,18 +69,12 @@ private:
     unsigned int _pboHandle[2];
     unsigned int _atlasMapBuffer;
 
-    std::vector<unsigned int> _atlasMap;
-    std::map<unsigned int, unsigned int> _brickMap;
-    std::vector<unsigned int> _freeAtlasCoords;
-    std::set<unsigned int> _requiredBricks;
-    std::set<unsigned int> _prevRequiredBricks;
-
-    ghoul::opengl::Texture* _textureAtlas;
+    ghoul::opengl::Texture* _textureAtlas = nullptr;
 
     // Stats
-    unsigned int _nUsedBricks;
-    unsigned int _nStreamedBricks;
-    unsigned int _nDiskReads;
+    unsigned int _nUsedBricks = 0;
+    unsigned int _nStreamedBricks = 0;
+    unsigned int _nDiskReads = 0;
 
     unsigned int _nBricksPerDim;
     unsigned int _nOtLeaves;
@@ -95,6 +87,12 @@ private:
     unsigned int _nBricksInAtlas;
     unsigned int _nBricksInMap;
     unsigned int _atlasDim;
+
+    std::vector<unsigned int> _atlasMap;
+    std::map<unsigned int, unsigned int> _brickMap;
+    std::vector<unsigned int> _freeAtlasCoords;
+    std::set<unsigned int> _requiredBricks;
+    std::set<unsigned int> _prevRequiredBricks;
 
     void fillVolume(float* in, float* out, unsigned int linearAtlasCoords);
 };

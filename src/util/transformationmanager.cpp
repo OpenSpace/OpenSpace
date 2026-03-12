@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@
 #ifdef WIN32
 #pragma warning (pop)
 #endif // WIN32
-#endif
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
 namespace openspace {
 
@@ -48,22 +48,22 @@ TransformationManager* TransformationManager::_instance = nullptr;
 TransformationManager::TransformationManager() {
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     _kameleon = std::make_shared<ccmc::Kameleon>();
-#else
+#else // ^^^^ OPENSPACE_MODULE_KAMELEON_ENABLED // !OPENSPACE_MODULE_KAMELEON_ENABLED vvvv
     LWARNINGC(
         "TransformationManager",
         "Kameleon module needed for transformations with dynamic frames"
     );
-#endif
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
     _kameleonFrames = {
-        "J2000", "GEI", "GEO", "MAG", "GSE", "GSM", "SM", "RTN", "GSEQ",   //geocentric
-        "HEE", "HAE", "HEEQ"                                              //heliocentric
+        "J2000", "GEI", "GEO", "MAG", "GSE", "GSM", "SM", "RTN", "GSEQ", // geocentric
+        "HEE", "HAE", "HEEQ"                                             // heliocentric
     };
 }
 
 TransformationManager::~TransformationManager() {
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     _kameleon = nullptr;
-#endif
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 }
 
 void TransformationManager::initialize() {
@@ -85,7 +85,6 @@ TransformationManager& TransformationManager::ref() {
     ghoul_assert(isInitialized(), "TransformationManager is not initialized");
     return *_instance;
 }
-
 
 glm::dmat3 TransformationManager::kameleonTransformationMatrix(
                                                  [[maybe_unused]] const std::string& from,
@@ -110,9 +109,9 @@ glm::dmat3 TransformationManager::kameleonTransformationMatrix(
         out1.c0, out1.c1, out1.c2,
         out2.c0, out2.c1, out2.c2
     );
-#else
+#else // ^^^^ OPENSPACE_MODULE_KAMELEON_ENABLED // !OPENSPACE_MODULE_KAMELEON_ENABLED vvvv
     return glm::dmat3(0.0);
-#endif
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 }
 
 glm::dmat3 TransformationManager::frameTransformationMatrix(
@@ -122,13 +121,13 @@ glm::dmat3 TransformationManager::frameTransformationMatrix(
 {
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     auto fromit = _kameleonFrames.find(from);
-    auto toit   = _kameleonFrames.find(to);
+    auto toit = _kameleonFrames.find(to);
 
-    bool fromKameleon   = (fromit != _kameleonFrames.end());
-    bool toKameleon     = (toit   != _kameleonFrames.end());
+    bool fromKameleon = (fromit != _kameleonFrames.end());
+    bool toKameleon = (toit != _kameleonFrames.end());
 
     if (!fromKameleon && !toKameleon) {
-        return  SpiceManager::ref().frameTransformationMatrix(from, to, ephemerisTime);
+        return SpiceManager::ref().frameTransformationMatrix(from, to, ephemerisTime);
     }
 
     if (fromKameleon && toKameleon) {
@@ -162,12 +161,12 @@ glm::dmat3 TransformationManager::frameTransformationMatrix(
 
         return kameleonTransformation*spiceTransformation;
     }
-#else
+#else // ^^^^ OPENSPACE_MODULE_KAMELEON_ENABLED // !OPENSPACE_MODULE_KAMELEON_ENABLED vvvv
     LERRORC(
         "TransformationManager",
         "Can not transform dynamic frames without kameleon module enabled"
     );
-#endif
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
     return glm::dmat3(1.0);
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,46 +24,49 @@
 
 #include <modules/telemetry/include/general/timetelemetry.h>
 
+#include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 #include <openspace/engine/globals.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/camera/camera.h>
+#include <cstdlib>
 
 namespace {
+    using namespace openspace;
+
     // Indices for data items
     constexpr int NumDataItems = 3;
     constexpr int TimeSpeedIndex = 0;
     constexpr int TimeSpeedUnitIndex = 1;
     constexpr int CurrentTimeIndex = 2;
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        TimeTelemetryInfo =
-    {
+    static const PropertyOwner::PropertyOwnerInfo TimeTelemetryInfo = {
         "TimeTelemetry",
         "Time Telemetry",
         "Telemetry that sends out time information to the Open Sound Control receiver."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TimeUnitOptionInfo = {
+    constexpr Property::PropertyInfo TimeUnitOptionInfo = {
         "TimeUnit",
         "Time unit",
         "The time unit that the telemetry should use for the time speed. For example, if "
         "the unit is set to 'Hour' then the unit for the time speed is simulation hours "
         "per real life second.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
+    const PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
         "Precision",
         "Precision",
         "Settings for the precision of the telemetry information."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TimePrecisionInfo = {
+    constexpr Property::PropertyInfo TimePrecisionInfo = {
         "TimePrecision",
         "Time precision",
         "The precision in seconds used to determine when to send updated time data to "
         "the Open Sound Control receiver.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 } // namespace
 
@@ -85,8 +88,8 @@ TimeTelemetry::TimeTelemetry(const std::string& ip, int port)
 }
 
 TimeTelemetry::PrecisionProperties::PrecisionProperties(
-                               properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
-    : properties::PropertyOwner(precisionInfo)
+                                           PropertyOwner::PropertyOwnerInfo precisionInfo)
+    : PropertyOwner(precisionInfo)
     , timePrecision(TimePrecisionInfo, 0.0001, 0.0, 1.0e8)
 {
     timePrecision.setExponent(10.f);

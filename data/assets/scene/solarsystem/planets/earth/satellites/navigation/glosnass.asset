@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Glosnass)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_glo-ops",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=glo-ops&FORMAT=kvn",
+  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=glo-ops&FORMAT=kvn",
   Filename = "glo-ops.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })

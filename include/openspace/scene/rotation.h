@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,14 +30,14 @@
 #include <openspace/scene/timeframe.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
+#include <limits>
 
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
+struct Documentation;
 struct UpdateData;
-
-namespace documentation { struct Documentation; }
 
 /**
  * This class represents a configurable rotation which may or may not be time-dependent.
@@ -55,14 +55,13 @@ namespace documentation { struct Documentation; }
  * matrix(const UpdateDate&) verison needs to be implemented as this base class will
  * handle the caching.
  */
-class Rotation : public properties::PropertyOwner {
+class Rotation : public PropertyOwner {
 public:
     static ghoul::mm_unique_ptr<Rotation> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
-
     explicit Rotation(const ghoul::Dictionary& dictionary);
-    virtual ~Rotation() override = default;
+    ~Rotation() override = default;
 
     virtual void initialize();
 
@@ -70,7 +69,7 @@ public:
     const glm::dmat3& matrix() const;
     virtual glm::dmat3 matrix(const UpdateData& time) const = 0;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     void requireUpdate();
@@ -82,6 +81,6 @@ private:
     glm::dmat3 _cachedMatrix = glm::dmat3(1.0);
 };
 
-}  // namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___ROTATION___H__

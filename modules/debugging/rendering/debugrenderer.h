@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -119,7 +119,7 @@ public:
 
     /**
      * \param data Defines position and camera that we will see the other cameras view
-     *             frustum from
+     *        frustum from
      * \param otherCamera The camera who's view frustum is to be rendered
      * \param rgba Color to draw the view frustum with
      */

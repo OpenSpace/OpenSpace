@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,36 +26,30 @@
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/filesystem/file.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/glm.h>
+#include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/crc32.h>
-#include <ghoul/misc/templatefactory.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureconversion.h>
 #include <ghoul/opengl/textureunit.h>
-#include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/vector_angle.hpp>
-#include <array>
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
-#include <filesystem>
-#include <fstream>
-#include <locale>
-#include <optional>
-#include <string>
+#include <utility>
+#include <variant>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderablePointCloud";
 
     enum RenderOption {
@@ -70,73 +64,72 @@ namespace {
         Bottom
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextureEnabledInfo = {
+    constexpr Property::PropertyInfo TextureEnabledInfo = {
         "Enabled",
         "Enabled",
-        "If true, use a provided sprite texture to render the point. If false, draw "
-        "the points using the default point shape.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "If true, use a provided sprite texture to render the point. If false, draw the "
+        "points using the default point shape.",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AllowTextureCompressionInfo =
-    {
+    constexpr Property::PropertyInfo AllowTextureCompressionInfo = {
         "AllowCompression",
         "Allow compression",
         "If true, the textures will be compressed to preserve graphics card memory. This "
         "is enabled per default, but may lead to visible artefacts for certain images, "
         "especially up close. Set this to false to disable any hardware compression of "
         "the textures, and represent each color channel with 8 bits.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseAlphaInfo = {
+    constexpr Property::PropertyInfo UseAlphaInfo = {
         "UseAlphaChannel",
         "Use alpha channel",
-        "If true, include transparency information in the loaded textures, if there "
-        "is any. If false, all loaded textures will be converted to RGB format. \n"
-        "This setting can be used if you have textures with transparency, but do not "
-        "need the transparency information. This may be the case when using additive "
-        "blending, for example. Converting the files to RGB on load may then reduce the "
-        "memory footprint and/or lead to some optimization in terms of rendering speed.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "If true, include transparency information in the loaded textures, if there is "
+        "any. If false, all loaded textures will be converted to RGB format. \nThis "
+        "setting can be used if you have textures with transparency, but do not need the "
+        "transparency information. This may be the case when using additive blending, "
+        "for example. Converting the files to RGB on load may then reduce the memory "
+        "footprint and/or lead to some optimization in terms of rendering speed.",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
+    constexpr Property::PropertyInfo SpriteTextureInfo = {
         "File",
         "Point sprite texture file",
         "The path to the texture of the point sprite. Note that if multiple textures "
         "option is set in the asset, by providing a texture folder, this value will be "
         "ignored.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextureModeInfo = {
+    constexpr Property::PropertyInfo TextureModeInfo = {
         "TextureMode",
         "Texture mode",
         "This tells which texture mode is being used for this renderable. There are "
         "three different texture modes: 1) One single sprite texture used for all "
         "points, 2) Multiple textures, that are mapped to the points based on a column "
         "in the dataset, and 3) Other, which is used for specific subtypes where the "
-        "texture is internally controlled by the renderable and can't be set from a "
-        "file (such as the RenderablePolygonCloud).",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "texture is internally controlled by the renderable and can't be set from a file "
+        "(such as the RenderablePolygonCloud).",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointColorInfo = {
+    constexpr Property::PropertyInfo PointColorInfo = {
         "FixedColor",
         "Fixed color",
         "The color of the points, when no color map is used.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
+    constexpr Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw elements",
         "Enables/Disables the drawing of the points.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+    const PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the points. If no label file is provided, the labels will be "
@@ -145,86 +138,85 @@ namespace {
         "the labels are created from the comment at the end of each line."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
+    constexpr Property::PropertyInfo FadeInDistancesInfo = {
         "FadeInDistances",
         "Fade-in start and end distances",
         "Determines the initial and final distances from the origin of the dataset at "
         "which the points will start and end fading-in. The distances are specified in "
         "the same unit as the points, that is, the one provodied as the Unit, or meters. "
         "With normal fading the points are fully visible once the camera is outside this "
-        "range and fully invisible when inside the range. With inverted fading the "
-        "case is the opposite: the points are visible inside when closer than the min "
-        "value of the range and invisible when further away.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "range and fully invisible when inside the range. With inverted fading the case "
+        "is the opposite: the points are visible inside when closer than the min value "
+        "of the range and invisible when further away.",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableDistanceFadeInfo = {
+    constexpr Property::PropertyInfo EnableDistanceFadeInfo = {
         "Enabled",
         "Enable distance-based fading",
         "Enables/disables the Fade-in effect based on camera distance. Automatically set "
         "to true if FadeInDistances are specified in the asset.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InvertFadeInfo = {
+    constexpr Property::PropertyInfo InvertFadeInfo = {
         "Invert",
         "Invert",
-        "If true, inverts the fading so that the points are invisible when the camera "
-        "is further away than the max fade distance and fully visible when it is closer "
-        "than the min distance.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "If true, inverts the fading so that the points are invisible when the camera is "
+        "further away than the max fade distance and fully visible when it is closer "
+        "than the minimum distance.",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseAdditiveBlendingInfo = {
+    constexpr Property::PropertyInfo UseAdditiveBlendingInfo = {
         "UseAdditiveBlending",
         "Use additive blending",
-        "If true (default), the color of points rendered on top of each other is "
-        "blended additively, resulting in a brighter color where points overlap. "
-        "If false, no such blending will take place and the color of the point "
-        "will not be modified by blending. Note that this may lead to weird behaviors "
-        "when the points are rendered with transparency.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "If true (default), the color of points rendered on top of each other is blended "
+        "additively, resulting in a brighter color where points overlap. If false, no "
+        "such blending will take place and the color of the point will not be modified "
+        "by blending. Note that this may lead to weird behaviors when the points are "
+        "rendered with transparency.",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseOrientationDataInfo = {
+    constexpr Property::PropertyInfo UseOrientationDataInfo = {
         "UseOrientationData",
         "Use orientation data",
         "If true, the orientation data in the dataset is included when rendering the "
         "points, if there is any. To see the rotation, you also need to set the "
         "\"Orientation Render Option\" to \"Fixed Rotation\".",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OrientationRenderOptionInfo =
-    {
+    constexpr Property::PropertyInfo OrientationRenderOptionInfo = {
         "OrientationRenderOption",
         "Orientation render option",
         "Controls how the planes for the points will be oriented. \"Camera View "
         "Direction\" rotates the points so that the plane is orthogonal to the viewing "
         "direction of the camera (useful for planar displays), and \"Camera Position "
         "Normal\" rotates the points towards the position of the camera (useful for "
-        "spherical displays, like dome theaters). In both these cases the points will "
-        "be billboarded towards the camera. In contrast, \"Fixed Rotation\" does not "
-        "rotate the points at all based on the camera and should be used when the "
-        "dataset contains orientation information for the points.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "spherical displays, like dome theaters). In both these cases the points will be "
+        "billboarded towards the camera. In contrast, \"Fixed Rotation\" does not rotate "
+        "the points at all based on the camera and should be used when the dataset "
+        "contains orientation information for the points.",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NumShownDataPointsInfo = {
+    constexpr Property::PropertyInfo NumShownDataPointsInfo = {
         "NumberOfDataPoints",
         "Number of shown data points",
         "Information about how many points are being rendered.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HasOrientationDataInfo = {
+    constexpr Property::PropertyInfo HasOrientationDataInfo = {
         "HasOrientationData",
         "Has orientation data",
         "Set to true if orientation data was read from the dataset.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScaleExponentInfo = {
+    constexpr Property::PropertyInfo ScaleExponentInfo = {
         "ScaleExponent",
         "Scale exponent",
         "An exponential scale value used to set the absolute size of the point. In "
@@ -234,77 +226,77 @@ namespace {
         "likely want to change it to something that looks good. Note that a scale "
         "exponent of 0 leads to the points having a diameter of 1 meter, i.e. no "
         "exponential scaling.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
+    constexpr Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale factor",
         "A multiplicative factor used to adjust the size of the points, after the "
         "exponential scaling and any max size control effects. Simply just increases "
         "or decreases the visual size of the points.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseMaxSizeControlInfo = {
+    constexpr Property::PropertyInfo UseMaxSizeControlInfo = {
         "EnableMaxSizeControl",
         "Enable max size control",
         "If true, the Max Size property will be used as an upper limit for the size of "
         "the point. This reduces the size of the points when approaching them, so that "
         "they stick to a maximum visual size depending on the Max Size value.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MaxSizeInfo = {
+    constexpr Property::PropertyInfo MaxSizeInfo = {
         "MaxSize",
         "Max size",
         "Controls the maximum allowed size for the points, when the max size control "
         "feature is enabled. This limits the visual size of the points based on the "
-        "distance to the camera. The larger the value, the larger the points may be. "
-        "In the background, the computations are made by limiting the size to a certain "
+        "distance to the camera. The larger the value, the larger the points may be. In "
+        "the background, the computations are made by limiting the size to a certain "
         "angle based on the field of view of the camera. So a value of 1 limits the "
         "point size to take up a maximum of one degree of the view space.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableOutlineInfo = {
+    constexpr Property::PropertyInfo EnableOutlineInfo = {
         "EnableOutline",
         "Enable point outline",
         "Determines whether each point should have an outline or not.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OutlineColorInfo = {
+    constexpr Property::PropertyInfo OutlineColorInfo = {
         "OutlineColor",
         "Outline color",
         "The color of the outline. Darker colors will be less visible if \"Additive "
         "Blending\" is enabled.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OutlineWidthInfo = {
+    constexpr Property::PropertyInfo OutlineWidthInfo = {
         "OutlineWidth",
         "Outline width",
         "The thickness of the outline, given as a value relative to the size of the "
         "point. A value of 0 will not show any outline, while a value of 1 will cover "
         "the whole point.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OutlineStyleInfo = {
+    constexpr Property::PropertyInfo OutlineStyleInfo = {
         "OutlineStyle",
         "Outline style",
         "Decides the style of the outline (round, square, or a line at the bottom). "
         "The style also affects the shape of the points.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ApplyColorMapToOutlineInfo = {
+    constexpr Property::PropertyInfo ApplyColorMapToOutlineInfo = {
         "ApplyColorMapToOutline",
         "Apply color map to outline",
         "If true and the outline is enabled, the color map will be applied to the "
         "outline rather than the point body. Only works if color mapping is enabled.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // A RenderablePointCloud can be used to render point-based datasets in 3D space,
@@ -316,23 +308,22 @@ namespace {
     // The points are rendered as planes whose size depends on a few different things:
     //
     // - At the core, scaling is done based on an exponential value, the `ScaleExponent`.
-    //   A relatively small change to this value will lead to a large change in size.
-    //   When no exponent is set, one will be created based on the coordinates in the
-    //   dataset. The points will be visible, but may be appeared as too large or small.
-    //   One option is to not specify the exponent when loading the dataset for the the,
-    //   first time, to make sure the points are visual, and then adapt the value
-    //   interactively when OpenSpace is running until you find a value that you find
-    //   suitable.
+    //   A relatively small change to this value will lead to a large change in size. When
+    //   no exponent is set, one will be created based on the coordinates in the dataset.
+    //   The points will be visible, but may be appeared as too large or small. One option
+    //   is to not specify the exponent when loading the dataset for the first time, to
+    //   make sure the points are visual, and then adapt the value interactively when
+    //   OpenSpace is running until you find a value that you find suitable.
     //
-    // - There is also an option to limit the size of the points based on a given max
-    //   size value.
+    // - There is also an option to limit the size of the points based on a given max size
+    //   value.
     //
     // - And an option to scale the points based on a data value (see `SizeMapping` in
     //   `SizeSettings`)
     //
     // - To easily change the visual size of the points, the multiplicative `ScaleFactor`
-    //   may be used. A value of 2 makes the points twice as large, visually, compared
-    //   to 1.
+    //   may be used. A value of 2 makes the points twice as large, visually, compared to
+    //   1.
     struct [[codegen::Dictionary(RenderablePointCloud)]] Parameters {
         // The path to the data file that contains information about the point to be
         // rendered. Can be either a CSV or SPECK file.
@@ -349,7 +340,7 @@ namespace {
         // A dictionary specifying details on how to load the dataset. Updating the data
         // mapping will lead to a new cached version of the dataset.
         std::optional<ghoul::Dictionary> dataMapping
-            [[codegen::reference("dataloader_datamapping")]];
+            [[codegen::reference("core_dataloader_datamapping")]];
 
         struct Texture {
             // [[codegen::verbatim(TextureEnabledInfo.description)]]
@@ -362,8 +353,8 @@ namespace {
             // textures to render the points. Setting this value means that multiple
             // textures shall be used and any single sprite texture file is ignored.
             //
-            // Note that the textures can be any format, but rendering efficiency will
-            // be best if using textures with the exact same resolution.
+            // Note that the textures can be any format, but rendering efficiency will be
+            // best if using textures with the exact same resolution.
             std::optional<std::filesystem::path> folder [[codegen::directory()]];
 
             // [[codegen::verbatim(AllowTextureCompressionInfo.description)]]
@@ -423,7 +414,7 @@ namespace {
 
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("labelscomponent")]];
+            [[codegen::reference("core_labelscomponent")]];
 
         struct SizeSettings {
             // Settings related to scaling the points based on data.
@@ -442,8 +433,8 @@ namespace {
             // [[codegen::verbatim(MaxSizeInfo.description)]]
             std::optional<float> maxSize;
         };
-        // Settings related to the scale of the points, whether they should limit to
-        // a certain max size, etc.
+        // Settings related to the scale of the points, whether they should limit to a
+        // certain max size, etc.
         std::optional<SizeSettings> sizeSettings;
 
         struct ColorSettings {
@@ -452,7 +443,7 @@ namespace {
 
             // Settings related to the choice of color map, parameters, etc.
             std::optional<ghoul::Dictionary> colorMapping
-                [[codegen::reference("colormappingcomponent")]];
+                [[codegen::reference("core_colormappingcomponent")]];
 
             // [[codegen::verbatim(EnableOutlineInfo.description)]]
             std::optional<bool> enableOutline;
@@ -474,8 +465,8 @@ namespace {
             // [[codegen::verbatim(ApplyColorMapToOutlineInfo.description)]]
             std::optional<bool> applyColorMapToOutline;
         };
-        // Settings related to the coloring of the points, such as a fixed color,
-        // color map, etc.
+        // Settings related to the coloring of the points, such as a fixed color, color
+        // map, etc.
         std::optional<ColorSettings> coloring;
 
         struct Fading {
@@ -488,26 +479,25 @@ namespace {
             // [[codegen::verbatim(InvertFadeInfo.description)]]
             std::optional<bool> invert;
         };
-        // Settings related to fading based on camera distance. Can be used to either
-        // fade away or fade in the points when reaching a certain distance from the
-        // origin of the dataset.
+        // Settings related to fading based on camera distance. Can be used to either fade
+        // away or fade in the points when reaching a certain distance from the origin of
+        // the dataset.
         std::optional<Fading> fading;
 
         // Transformation matrix to be applied to the position of each object.
         std::optional<glm::dmat4x4> transformationMatrix;
     };
-
+} // namespace
 #include "renderablepointcloud_codegen.cpp"
-}  // namespace
 
 namespace openspace {
 
-documentation::Documentation RenderablePointCloud::Documentation() {
-    return codegen::doc<Parameters>("base_renderablepointcloud");
+Documentation RenderablePointCloud::Documentation() {
+    return codegen::doc<Parameters>("base_renderable_pointcloud");
 }
 
 RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "Sizing", "Sizing", ""})
+    : PropertyOwner({ "Sizing", "Sizing", ""})
     , scaleExponent(ScaleExponentInfo, 1.f, 0.f, 25.f)
     , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 100.f)
     , useMaxSizeControl(UseMaxSizeControlInfo, false)
@@ -538,7 +528,7 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
 }
 
 RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "Coloring", "Coloring", "" })
+    : PropertyOwner({ "Coloring", "Coloring", "" })
     , pointColor(PointColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , enableOutline(EnableOutlineInfo, false)
     , outlineColor(OutlineColorInfo, glm::vec3(0.23f), glm::vec3(0.f), glm::vec3(1.f))
@@ -548,12 +538,12 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    pointColor.setViewOption(properties::Property::ViewOptions::Color);
+    pointColor.setViewOption(Property::ViewOptions::Color);
     addProperty(pointColor);
 
     addProperty(enableOutline);
 
-    outlineColor.setViewOption(properties::Property::ViewOptions::Color);
+    outlineColor.setViewOption(Property::ViewOptions::Color);
     addProperty(outlineColor);
 
     addProperty(outlineWidth);
@@ -593,7 +583,7 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
 }
 
 RenderablePointCloud::Texture::Texture()
-    : properties::PropertyOwner({ "Texture", "Texture", "" })
+    : PropertyOwner({ "Texture", "Texture", "" })
     , enabled(TextureEnabledInfo, true)
     , allowCompression(AllowTextureCompressionInfo, true)
     , useAlphaChannel(UseAlphaInfo, true)
@@ -610,7 +600,7 @@ RenderablePointCloud::Texture::Texture()
 }
 
 RenderablePointCloud::Fading::Fading(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "Fading", "Fading", "" })
+    : PropertyOwner({ "Fading", "Fading", "" })
     , fadeInDistances(
         FadeInDistancesInfo,
         glm::vec2(0.f),
@@ -637,7 +627,7 @@ RenderablePointCloud::Fading::Fading(const ghoul::Dictionary& dictionary)
     }
 
     addProperty(enabled);
-    fadeInDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    fadeInDistances.setViewOption(Property::ViewOptions::MinMaxRange);
     addProperty(fadeInDistances);
     addProperty(invert);
 }
@@ -796,8 +786,8 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
     _skipFirstDataPoint = p.skipFirstDataPoint.value_or(_skipFirstDataPoint);
 
-    // If no scale exponent was specified, compute one that will at least show the
-    // points based on the scale of the positions in the dataset
+    // If no scale exponent was specified, compute one that will at least show the points
+    // based on the scale of the positions in the dataset
     if (!p.sizeSettings.has_value() || !p.sizeSettings->scaleExponent.has_value()) {
         _shouldComputeScaleExponent = true;
     }
@@ -809,7 +799,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         _labels = std::make_unique<LabelsComponent>(*p.labels);
         _hasLabels = true;
         addPropertySubOwner(_labels.get());
-        // Fading of the labels should depend on the fading of the renderable
+        // Fading of the labels should depend on the fading of the Renderable
         _labels->setParentFadeable(this);
     }
 
@@ -910,10 +900,8 @@ void RenderablePointCloud::initializeGL() {
 }
 
 void RenderablePointCloud::deinitializeGL() {
-    glDeleteBuffers(1, &_vbo);
-    _vbo = 0;
     glDeleteVertexArrays(1, &_vao);
-    _vao = 0;
+    glDeleteBuffers(1, &_vbo);
 
     deinitializeShaders();
 
@@ -932,6 +920,9 @@ void RenderablePointCloud::initializeShadersAndGlExtras() {
             );
         }
     );
+
+    glCreateVertexArrays(1, &_vao);
+    glCreateBuffers(1, &_vbo);
 }
 
 void RenderablePointCloud::deinitializeShaders() {
@@ -981,7 +972,6 @@ void RenderablePointCloud::clearTextureDataStructures() {
     _textureNameToIndex.clear();
     _indexInDataToTextureIndex.clear();
     _textureMapByFormat.clear();
-    // Unload texture arrays from GPU memory
     for (const TextureArrayInfo& arrayInfo : _textureArrays) {
         glDeleteTextures(1, &arrayInfo.renderId);
     }
@@ -1008,19 +998,10 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
 
     bool useAlpha = (t->numberOfChannels() > 3) && _texture.useAlphaChannel;
 
-    if (t) {
-        LINFOC("RenderablePlanesCloud", std::format("Loaded texture {}", path));
-        // Do not upload the loaded texture to the GPU, we just want it to hold the data.
-        // However, convert textures make sure they all use the same format
-        ghoul::opengl::Texture::Format targetFormat = glFormat(useAlpha);
-        convertTextureFormat(*t, targetFormat);
-    }
-    else {
-        throw ghoul::RuntimeError(std::format("Could not find image file {}", path));
-    }
+    LINFOC("RenderablePlanesCloud", std::format("Loaded texture {}", path));
 
     TextureFormat format = {
-        .resolution = glm::uvec2(t->width(), t->height()),
+        .resolution = glm::uvec2(t->dimensions().x, t->dimensions().y),
         .useAlpha = useAlpha
     };
 
@@ -1033,8 +1014,7 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
 
 void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
                                                        glm::uvec2 resolution,
-                                                       size_t nLayers,
-                                                       bool useAlpha)
+                                                       size_t nLayers, bool useAlpha)
 {
     float w = static_cast<float>(resolution.x);
     float h = static_cast<float>(resolution.y);
@@ -1049,8 +1029,7 @@ void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
     gl::GLenum format = gl::GLenum(glFormat(useAlpha));
 
     // Create storage for the texture
-    // The nicer way would be to use glTexStorage3D, but that is only available in OpenGl
-    // 4.2 and above
+    // The nicer way would be to use glTexStorage3D
     glTexImage3D(
         GL_TEXTURE_2D_ARRAY,
         0,
@@ -1064,18 +1043,17 @@ void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
         nullptr
     );
 
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(textureId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(textureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(textureId, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(textureId, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 void RenderablePointCloud::fillAndUploadTextureLayer(unsigned int arrayIndex,
                                                      unsigned int layer,
                                                      size_t textureIndex,
-                                                     glm::uvec2 resolution,
-                                                     bool useAlpha,
-                                                     const void* pixelData)
+                                                     glm::uvec2 resolution, bool useAlpha,
+                                                  const std::vector<std::byte>& pixelData)
 {
     gl::GLenum format = gl::GLenum(glFormat(useAlpha));
 
@@ -1090,7 +1068,7 @@ void RenderablePointCloud::fillAndUploadTextureLayer(unsigned int arrayIndex,
         1, // depth
         format,
         GL_UNSIGNED_BYTE, // type
-        pixelData
+        pixelData.data()
     );
 
     // Keep track of which layer in which texture array corresponds to the texture with
@@ -1112,7 +1090,7 @@ void RenderablePointCloud::generateArrayTextures() {
 
         // Generate an array texture storage
         unsigned int id = 0;
-        glGenTextures(1, &id);
+        glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &id);
         glBindTexture(GL_TEXTURE_2D_ARRAY, id);
 
         initAndAllocateTextureArray(id, res, nLayers, useAlpha);
@@ -1130,10 +1108,6 @@ void RenderablePointCloud::generateArrayTextures() {
                 texture->pixelData()
             );
             layer++;
-
-            // At this point we don't need the keep the texture data around anymore. If
-            // the textures need updating, we will reload them from file
-            texture->purgeFromRAM();
         }
 
         int nMaxTextureLayers = 0;
@@ -1159,11 +1133,11 @@ float RenderablePointCloud::computeDistanceFadeValue(const RenderData& data) con
         return 1.f;
     }
 
-    float fadeValue = 1.f;
+    constexpr float FadeValue = 1.f;
     glm::dmat4 invModelMatrix = glm::inverse(calcModelTransform(data));
 
     glm::dvec3 cameraPosModelSpace = glm::dvec3(
-        invModelMatrix * glm::dvec4(data.camera.positionVec3(), 1.0)
+        invModelMatrix * glm::dvec4(data.camera.position(), 1.0)
     );
 
     float distCamera = static_cast<float>(
@@ -1173,13 +1147,13 @@ float RenderablePointCloud::computeDistanceFadeValue(const RenderData& data) con
     const glm::vec2 fadeRange = _fading.fadeInDistances;
     const float fadeRangeWidth = (fadeRange.y - fadeRange.x);
     float funcValue = (distCamera - fadeRange.x) / fadeRangeWidth;
-    funcValue = glm::clamp(funcValue, 0.f, 1.f);
+    funcValue = std::clamp(funcValue, 0.f, 1.f);
 
     if (_fading.invert) {
         funcValue = 1.f - funcValue;
     }
 
-    return fadeValue * funcValue;
+    return FadeValue * funcValue;
 }
 
 void RenderablePointCloud::setExtraUniforms() {}
@@ -1187,8 +1161,7 @@ void RenderablePointCloud::setExtraUniforms() {}
 void RenderablePointCloud::renderPoints(const RenderData& data,
                                         const glm::dmat4& modelMatrix,
                                         const glm::dvec3& orthoRight,
-                                        const glm::dvec3& orthoUp,
-                                        float fadeInVariable)
+                                        const glm::dvec3& orthoUp, float fadeInVariable)
 {
     if (!_hasDataFile || _dataset.entries.empty()) {
         return;
@@ -1208,7 +1181,7 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
 
     _program->activate();
 
-    _program->setUniform(_uniformCache.cameraPosition, data.camera.positionVec3());
+    _program->setUniform(_uniformCache.cameraPosition, data.camera.position());
     _program->setUniform(
         _uniformCache.cameraLookUp,
         glm::vec3(data.camera.lookUpVectorWorldSpace())
@@ -1244,7 +1217,6 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
 
     bool useSizeMapping = _hasDatavarSize && _sizeSettings.sizeMapping &&
         _sizeSettings.sizeMapping->enabled;
-
     _program->setUniform(_uniformCache.hasDvarScaling, useSizeMapping);
 
     if (useSizeMapping) {
@@ -1270,8 +1242,7 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
     _program->setUniform(_uniformCache.colorMapTexture, colorMapTextureUnit);
 
     if (useColorMap) {
-        colorMapTextureUnit.activate();
-        _colorSettings.colorMapping->texture()->bind();
+        colorMapTextureUnit.bind(*_colorSettings.colorMapping->texture());
 
         const glm::vec2 range = _colorSettings.colorMapping->valueRange;
         _program->setUniform(_uniformCache.cmapRangeMin, range.x);
@@ -1322,20 +1293,18 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
     glBindVertexArray(_vao);
 
     if (useTexture && !_textureArrays.empty()) {
-        spriteTextureUnit.activate();
         for (const TextureArrayInfo& arrayInfo : _textureArrays) {
+            spriteTextureUnit.bind(arrayInfo.renderId);
             _program->setUniform(
                 _uniformCache.aspectRatioScale,
                 arrayInfo.aspectRatioScale
             );
-            glBindTexture(GL_TEXTURE_2D_ARRAY, arrayInfo.renderId);
             glDrawArrays(
                 GL_POINTS,
                 arrayInfo.startOffset,
                 static_cast<GLsizei>(arrayInfo.nPoints)
             );
         }
-        glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     }
     else {
         _program->setUniform(_uniformCache.aspectRatioScale, glm::vec2(1.f));
@@ -1439,7 +1408,7 @@ glm::quat RenderablePointCloud::orientationQuaternion(
     ));
 
     // Get the quaternion that represents the rotation from XY plane to the plane that is
-    // spanned by the UV vectors.
+    // spanned by the UV vectors
 
     // First rotate to align the z-axis with plane normal
     const glm::vec3 planeNormal = glm::normalize(glm::cross(u, v));
@@ -1455,11 +1424,11 @@ glm::quat RenderablePointCloud::orientationQuaternion(
 }
 
 int RenderablePointCloud::nAttributesPerPoint() const {
-    int n = 3; // position
+    int n = 3; // Position
     n += hasColorData() ? 1 : 0;
     n += hasSizeData() ? 1 : 0;
     n += useOrientationData() ? 4 : 0;
-    n += _hasSpriteTexture ? 1 : 0; // texture id
+    n += _hasSpriteTexture ? 1 : 0; // Texture id
     return n;
 }
 
@@ -1467,7 +1436,7 @@ int RenderablePointCloud::bufferVertexAttribute(const std::string& name, GLint n
                                                 int nAttributesPerPoint, int offset) const
 {
     GLint attrib = _program->attributeLocation(name);
-    glEnableVertexAttribArray(attrib);
+    glEnableVertexArrayAttrib(_vao, attrib);
     glVertexAttribPointer(
         attrib,
         nValues,
@@ -1493,18 +1462,9 @@ void RenderablePointCloud::updateBufferData() {
 
     int size = static_cast<int>(slice.size());
 
-    if (_vao == 0) {
-        glGenVertexArrays(1, &_vao);
-        LDEBUG(std::format("Generating Vertex Array id '{}'", _vao));
-    }
-    if (_vbo == 0) {
-        glGenBuffers(1, &_vbo);
-        LDEBUG(std::format("Generating Vertex Buffer Object id '{}'", _vbo));
-    }
-
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), slice.data(), GL_STATIC_DRAW);
+    glNamedBufferData(_vbo, size * sizeof(float), slice.data(), GL_STATIC_DRAW);
 
     const int attibsPerPoint = nAttributesPerPoint();
     int offset = 0;
@@ -1573,8 +1533,7 @@ void RenderablePointCloud::updateSpriteTexture() {
 }
 
 int RenderablePointCloud::currentColorParameterIndex() const {
-    const properties::OptionProperty& property =
-        _colorSettings.colorMapping->dataColumn;
+    const OptionProperty& property = _colorSettings.colorMapping->dataColumn;
 
     if (!_hasColorMapFile || property.options().empty()) {
         return -1;
@@ -1584,8 +1543,7 @@ int RenderablePointCloud::currentColorParameterIndex() const {
 }
 
 int RenderablePointCloud::currentSizeParameterIndex() const {
-    const properties::OptionProperty& property =
-        _sizeSettings.sizeMapping->parameterOption;
+    const OptionProperty& property = _sizeSettings.sizeMapping->parameterOption;
 
     if (!_hasDatavarSize || property.options().empty()) {
         return -1;
@@ -1642,9 +1600,9 @@ void RenderablePointCloud::addColorAndSizeDataForPoint(unsigned int index,
 
     if (hasSizeData()) {
         const int sizeParamIndex = currentSizeParameterIndex();
-        // @TODO: Consider more detailed control over the scaling. Currently the value
-        // is multiplied with the value as is. Should have similar mapping properties
-        // as the color mapping
+        // @TODO: Consider more detailed control over the scaling. Currently the value is
+        // multiplied with the value as is. Should have similar mapping properties as the
+        // color mapping
 
         // Convert to diameter if data is given as radius
         float multiplier = _sizeSettings.sizeMapping->isRadius ? 2.f : 1.f;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/format.h>
 #include <ghoul/lua/lua_helper.h>
+#include <algorithm>
+#include <map>
+#include <string>
+#include <utility>
+#include <variant>
+#include <vector>
+
+using namespace openspace;
 
 namespace {
 
@@ -30,22 +39,34 @@ namespace {
  * Binds a key to Lua command to both execute locally and broadcast to all clients if this
  * node is hosting a parallel connection.
  */
-[[codegen::luawrap]] void bindKey(std::string key, std::string action) {
-    using namespace openspace;
+[[codegen::luawrap]] void bindKey(std::string key,
+                                  std::variant<std::string, ghoul::Dictionary> action)
+{
+    std::string identifier;
+    if (std::holds_alternative<ghoul::Dictionary>(action)) {
+        const ghoul::Dictionary& d = std::get<ghoul::Dictionary>(action);
+        if (!d.hasValue<std::string>("Identifier")) {
+            throw ghoul::lua::LuaError("Provided action table must have an Identifer");
+        }
+        identifier = d.value<std::string>("Identifier");
+    }
+    else {
+        identifier = std::get<std::string>(action);
+    }
 
-    if (action.empty()) {
+    if (identifier.empty()) {
         throw ghoul::lua::LuaError("Action must not be empty");
     }
-    if (!global::actionManager->hasAction(action)) {
-        throw ghoul::lua::LuaError(std::format("Action '{}' does not exist", action));
+    if (!global::actionManager->hasAction(identifier)) {
+        throw ghoul::lua::LuaError(std::format("Action '{}' does not exist", identifier));
     }
 
-    openspace::KeyWithModifier iKey = openspace::stringToKey(key);
-    if (iKey.key == openspace::Key::Unknown) {
+    KeyWithModifier iKey = stringToKey(key);
+    if (iKey.key == Key::Unknown) {
         throw ghoul::lua::LuaError(std::format("Could not find key '{}'", key));
     }
 
-    global::keybindingManager->bindKey(iKey.key, iKey.modifier, std::move(action));
+    global::keybindingManager->bindKey(iKey.key, iKey.modifier, std::move(identifier));
 }
 
 /**
@@ -58,8 +79,6 @@ namespace {
  */
 [[codegen::luawrap]] std::vector<std::string> keyBindings(std::optional<std::string> key)
 {
-    using namespace openspace;
-
     std::vector<std::string> res;
     if (key.has_value()) {
         using K = KeyWithModifier;
@@ -90,11 +109,9 @@ namespace {
 
 /**
  * Returns the keybinds to which the provided action is bound. As actions can be bound to
- * multiple keys, this function returns a list of all keys
+ * multiple keys, this function returns a list of all keys.
  */
 [[codegen::luawrap]] std::vector<std::string> keyBindingsForAction(std::string action) {
-    using namespace openspace;
-
     const std::multimap<KeyWithModifier, std::string>& keybinds =
         global::keybindingManager->keyBindings();
 
@@ -114,8 +131,6 @@ namespace {
 [[codegen::luawrap]] void clearKey(
                                   std::variant<std::string, std::vector<std::string>> key)
 {
-    using namespace openspace;
-
     if (std::holds_alternative<std::string>(key)) {
         KeyWithModifier k = stringToKey(std::get<std::string>(key));
         global::keybindingManager->removeKeyBinding(k);
@@ -127,11 +142,13 @@ namespace {
     }
 }
 
-// Clear all key bindings
+/**
+ * Clear all key bindings.
+ */
 [[codegen::luawrap]] void clearKeys() {
-    openspace::global::keybindingManager->resetKeyBindings();
+    global::keybindingManager->resetKeyBindings();
 }
 
-#include "keybindingmanager_lua_codegen.cpp"
-
 } // namespace
+
+#include "keybindingmanager_lua_codegen.cpp"

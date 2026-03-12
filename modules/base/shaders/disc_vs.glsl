@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,25 +24,24 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec2 in_st;
+layout(location = 1) in vec2 in_texCoords;
 
-out vec2 vs_st;
-out float vs_screenSpaceDepth;
+out Data {
+  vec2 texCoords;
+  float screenSpaceDepth;
+} out_data;
 
 uniform mat4 modelViewProjectionTransform;
 
 
 void main() {
   vec4 position = vec4(in_position.xy, 0.0, 1.0);
-  vec4 positionScreenSpace = z_normalization(modelViewProjectionTransform * position);
+  gl_Position = z_normalization(modelViewProjectionTransform * position);
 
   // Moving the origin to the center
-  vs_st = (in_st - vec2(0.5)) * 2.0;
-
-  vs_screenSpaceDepth = positionScreenSpace.w;
-
-  gl_Position = positionScreenSpace;
+  out_data.texCoords = (in_texCoords - vec2(0.5)) * 2.0;
+  out_data.screenSpaceDepth = gl_Position.w;
 }

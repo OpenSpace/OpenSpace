@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,18 +25,22 @@
 #include <modules/galaxy/tasks/milkywaypointsconversiontask.h>
 
 #include <openspace/documentation/documentation.h>
-
+#include <ghoul/misc/dictionary.h>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <vector>
 
+namespace {
+    struct [[codegen::Dictionary(MilkywayPointsConversionTask)]] Parameters {};
+} // namespace
+#include "milkywaypointsconversiontask_codegen.cpp"
+
 namespace openspace {
 
-/*MilkywayPointsConversionTask::MilkywayPointsConversionTask(
-    const std::string& inFilename,
-    const std::string& outFilename)
-    : _inFilename(inFilename)
-    , _outFilename(outFilename) {}*/
+Documentation MilkywayPointsConversionTask::Documentation() {
+    return codegen::doc<Parameters>("galaxy_task_milkywaypointsconversion");
+}
 
 MilkywayPointsConversionTask::MilkywayPointsConversionTask(const ghoul::Dictionary&) {}
 
@@ -46,8 +50,8 @@ std::string MilkywayPointsConversionTask::description() {
 
 void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progressCallback)
 {
-    std::ifstream in(_inFilename, std::ios::in);
-    std::ofstream out(_outFilename, std::ios::out | std::ios::binary);
+    std::ifstream in = std::ifstream(_inFilename, std::ios::in);
+    std::ofstream out = std::ofstream(_outFilename, std::ios::out | std::ios::binary);
 
     std::string format;
     int64_t nPoints = 0;
@@ -55,7 +59,7 @@ void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progres
 
     const size_t nFloats = nPoints * 7;
 
-    std::vector<float> pointData(nFloats);
+    std::vector<float> pointData = std::vector<float>(nFloats);
 
     float x = 0.f;
     float y = 0.f;
@@ -67,36 +71,22 @@ void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progres
 
     for (int64_t i = 0; i < nPoints; i++) {
         in >> x >> y >> z >> r >> g >> b >> a;
-        if (in.good()) {
-            pointData[i * 7 + 0] = x;
-            pointData[i * 7 + 1] = y;
-            pointData[i * 7 + 2] = z;
-            pointData[i * 7 + 3] = r;
-            pointData[i * 7 + 4] = g;
-            pointData[i * 7 + 5] = b;
-            pointData[i * 7 + 6] = a;
-            progressCallback(static_cast<float>(i + 1) / nPoints);
+        if (!in.good()) {
+            throw ghoul::RuntimeError("Failed to convert point data");
         }
-        else {
-            std::cout << "Failed to convert point data";
-            return;
-        }
+
+        pointData[i * 7 + 0] = x;
+        pointData[i * 7 + 1] = y;
+        pointData[i * 7 + 2] = z;
+        pointData[i * 7 + 3] = r;
+        pointData[i * 7 + 4] = g;
+        pointData[i * 7 + 5] = b;
+        pointData[i * 7 + 6] = a;
+        progressCallback(static_cast<float>(i + 1) / nPoints);
     }
 
     out.write(reinterpret_cast<char*>(&nPoints), sizeof(int64_t));
     out.write(reinterpret_cast<char*>(pointData.data()), nFloats * sizeof(float));
-
-    in.close();
-    out.close();
-}
-
-documentation::Documentation MilkywayPointsConversionTask::Documentation() {
-    return {
-        "MilkywayPointsConversionTask",
-        "galaxy_milkywaypointsconversiontask",
-        "",
-        {}
-    };
 }
 
 } // namespace openspace

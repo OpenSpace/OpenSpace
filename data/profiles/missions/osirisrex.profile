@@ -40,36 +40,6 @@
     315360000.0,
     630720000.0
   ],
-  "keybindings": [
-    {
-      "action": "os.osirisrex.FocusOsirisRex",
-      "key": "A"
-    },
-    {
-      "action": "os.osirisrex.FocusBennu",
-      "key": "S"
-    },
-    {
-      "action": "os.osirisrex.SetupBennuApproach",
-      "key": "F8"
-    },
-    {
-      "action": "os.osirisrex.SetupBennuSurvey",
-      "key": "F9"
-    },
-    {
-      "action": "os.osirisrex.SetupBennuEventB",
-      "key": "F10"
-    },
-    {
-      "action": "os.osirisrex.SetupBennuReconEvent",
-      "key": "F11"
-    },
-    {
-      "action": "os.osirisrex.ToggleSunMarker",
-      "key": "Q"
-    }
-  ],
   "mark_nodes": [
     "OsirisRex",
     "BennuBarycenter",

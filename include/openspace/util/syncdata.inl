@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -63,25 +63,22 @@ const T& SyncData<T>::data() const {
 
 template <class T>
 void SyncData<T>::encode(SyncBuffer* syncBuffer) {
-    _mutex.lock();
+    const std::unique_lock lock(_mutex);
     syncBuffer->encode(_data);
-    _mutex.unlock();
 }
 
 template <class T>
 void SyncData<T>::decode(SyncBuffer* syncBuffer) {
-    _mutex.lock();
+    const std::unique_lock lock(_mutex);
     syncBuffer->decode(_doubleBufferedData);
-    _mutex.unlock();
 }
 
 template <class T>
 void SyncData<T>::postSync(bool isMaster) {
-    // apply synced update
+    // Apply synced update
     if (!isMaster) {
-        _mutex.lock();
+        const std::unique_lock lock(_mutex);
         _data = _doubleBufferedData;
-        _mutex.unlock();
     }
 }
 

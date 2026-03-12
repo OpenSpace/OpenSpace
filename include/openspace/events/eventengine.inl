@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@ namespace openspace {
 template <typename T, typename... Args>
 void EventEngine::publishEvent(Args&&... args) {
     static_assert(
-        std::is_base_of<events::Event, T>::value,
+        std::is_base_of<Event, T>::value,
         "T must be a subclass of Event"
     );
 

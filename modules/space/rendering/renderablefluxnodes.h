@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,14 +29,17 @@
 
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/misc/triggerproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/transferfunction.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <atomic>
+#include <cstdint>
 #include <filesystem>
+#include <memory>
 
 namespace openspace {
 
@@ -53,7 +56,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void definePropertyCallbackFunctions();
@@ -69,33 +72,40 @@ private:
 
     std::vector<GLsizei> _lineCount;
     std::vector<GLint> _lineStart;
-    // Used to determine if lines should be colored UNIFORMLY or by Flux Value
+
+    /**
+     * Used to determine if lines should be colored UNIFORMLY or by Flux Value.
+     */
     enum class ColorMethod {
         ByFluxValue = 0,
-        Uniform = 1
+        Uniform
     };
+
     enum class GoesEnergyBins {
         Emin01 = 0,
-        Emin03 = 1
+        Emin03
     };
+
     enum class ScalingMethod {
         Flux = 0,
-        RFlux = 1,
-        R2Flux = 2,
-        Log10RFlux = 3,
-        LnRFlux = 4
+        RFlux,
+        R2Flux,
+        Log10RFlux,
+        LnRFlux
     };
+
     enum class NodeSkipMethod {
         Uniform = 0,
-        Flux = 1,
-        Radius = 2,
-        Streamnumber = 3
+        Flux,
+        Radius,
+        Streamnumber
     };
+
     enum class EnhanceMethod {
         SizeScaling = 0,
-        ColorTables = 1,
-        SizeAndColor = 2,
-        Illuminance = 3,
+        ColorTables,
+        SizeAndColor,
+        Illuminance
     };
 
     UniformCache(streamColor, nodeSize, proximityNodesSize,
@@ -108,109 +118,108 @@ private:
 
     std::filesystem::path _binarySourceFolderPath;
 
-    // Active index of _startTimes
+    /// Active index of _startTimes
     int _activeTriggerTimeIndex = -1;
-    // Number of states in the sequence
+    /// Number of states in the sequence
     uint32_t _nStates = 0;
 
-    // Estimated end of sequence.
+    /// Estimated end of sequence
     double _sequenceEndTime;
-    // OpenGL Vertex Array Object
-    GLuint _vertexArrayObject = 0;
-    // OpenGL Vertex Buffer Object containing the vertex positions
-    GLuint _vertexPositionBuffer = 0;
-    // OpenGL Vertex Buffer Object containing the Flux values used for coloring
-    // the nodes
-    GLuint _vertexColorBuffer = 0;
-    // OpenGL Vertex Buffer Object containing the positions to filter the nodes
-    GLuint _vertexFilteringBuffer = 0;
+    /// OpenGL Vertex Array Object
+    GLuint _vao = 0;
+    /// OpenGL Vertex Buffer Object containing the vertex positions
+    GLuint _vboPosition = 0;
+    /// OpenGL Vertex Buffer Object containing the Flux values used for coloring the nodes
+    GLuint _vboColor = 0;
+    /// OpenGL Vertex Buffer Object containing the positions to filter the nodes
+    GLuint _vboFilter = 0;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
 
-    // Transfer function used to color lines when _colorMethod is set to by_flux_value
+    /// Transfer function used to color lines when _colorMethod is set to by_flux_value
     std::unique_ptr<TransferFunction> _transferFunction;
 
     std::vector<std::filesystem::path> _binarySourceFiles;
-    // Contains the _triggerTimes for all streams in the sequence
+    /// Contains the _triggerTimes for all streams in the sequence
     std::vector<double> _startTimes;
-    // Contains vertexPositions
+    /// Contains vertexPositions
     std::vector<glm::vec3> _vertexPositions;
-    // Contains vertex flux values for color
+    /// Contains vertex flux values for color
     std::vector<float> _vertexColor;
-    // Contains radius of vertices
+    /// Contains radius of vertices
     std::vector<float> _vertexRadius;
-    // Stores the states position
+    /// Stores the states position
     std::vector<std::vector<glm::vec3>> _statesPos;
-    // Stores the states color
+    /// Stores the states color
     std::vector<std::vector<float>> _statesColor;
-    // Stores the states radius
+    /// Stores the states radius
     std::vector<std::vector<float>> _statesRadius;
 
-    // Group to hold properties regarding distance to earth
-    properties::PropertyOwner _earthdistGroup;
+    /// Group to hold properties regarding distance to earth
+    PropertyOwner _earthdistGroup;
 
-    // Property to show different energybins
-    properties::OptionProperty _goesEnergyBins;
-    // Group to hold the color properties
-    properties::PropertyOwner _styleGroup;
-    // Uniform/transfer function
-    properties::OptionProperty _colorMode;
-    // Uniform stream Color
-    properties::Vec4Property _streamColor;
-    // Path to transferfunction
-    properties::StringProperty _colorTablePath;
-    // Valid range for the color table
-    properties::Vec2Property _colorTableRange;
-    // The value of alpha for the flux color mode
-    properties::FloatProperty _fluxColorAlpha;
-    // Group to hold the particle properties
-    properties::PropertyOwner _streamGroup;
-    // Scaling options
-    properties::OptionProperty _scalingMethod;
-    // Group for how many nodes to render dependent on radius and flux
-    properties::PropertyOwner _nodesAmountGroup;
-    // Size of simulated node particles
-    properties::FloatProperty _nodeSize;
-    // Threshold from earth to decide the distance for which the nodeSize gets larger
-    properties::FloatProperty _distanceThreshold;
-    // Change size of nodes close to earth
-    properties::FloatProperty _proximityNodesSize;
-    // Maximum size of nodes at a certin distance
-    properties::FloatProperty _maxNodeDistanceSize;
+    /// Property to show different energybins
+    OptionProperty _goesEnergyBins;
+    /// Group to hold the color properties
+    PropertyOwner _styleGroup;
+    /// Uniform/transfer function
+    OptionProperty _colorMode;
+    /// Uniform stream Color
+    Vec4Property _streamColor;
+    /// Path to transferfunction
+    StringProperty _colorTablePath;
+    /// Valid range for the color table
+    Vec2Property _colorTableRange;
+    /// The value of alpha for the flux color mode
+    FloatProperty _fluxColorAlpha;
+    /// Group to hold the particle properties
+    PropertyOwner _streamGroup;
+    /// Scaling options
+    OptionProperty _scalingMethod;
+    /// Group for how many nodes to render dependent on radius and flux
+    PropertyOwner _nodesAmountGroup;
+    /// Size of simulated node particles
+    FloatProperty _nodeSize;
+    /// Threshold from earth to decide the distance for which the nodeSize gets larger
+    FloatProperty _distanceThreshold;
+    /// Change size of nodes close to earth
+    FloatProperty _proximityNodesSize;
+    /// Maximum size of nodes at a certin distance
+    FloatProperty _maxNodeDistanceSize;
 
-    properties::Vec2Property _minMaxNodeSize;
+    Vec2Property _minMaxNodeSize;
 
-    // Valid range along the Z-axis
-    properties::Vec2Property _domainZ;
-    // Threshold flux value
-    properties::FloatProperty _thresholdFlux;
-    // Filtering nodes within a range
-    properties::FloatProperty _filteringLower;
-    // Filtering nodes with a upper range
-    properties::FloatProperty _filteringUpper;
-    // Amount of nodes to show
-    properties::IntProperty _amountofNodes;
-    // Nodeskipping options
-    properties::OptionProperty _nodeskipMethod;
-    // amount of nodes to show outside of filterrange
-    properties::IntProperty _defaultNodeSkip;
-    // The Flux threshold to decide the line between
-    //_pDefaultNodeSkip and _pAmountofNodes
-    properties::FloatProperty _fluxNodeskipThreshold;
-    //The nodeskip for values within the range of the radius threshold to Earth
-    properties::IntProperty _earthNodeSkip;
-    // The Radius threshold to decide the line between
-    //_pDefaultNodeSkip and _pAmountofNodes
-    properties::FloatProperty _radiusNodeSkipThreshold;
+    /// Valid range along the Z-axis
+    Vec2Property _domainZ;
+    /// Threshold flux value
+    FloatProperty _thresholdFlux;
+    /// Filtering nodes within a range
+    FloatProperty _filteringLower;
+    /// Filtering nodes with a upper range
+    FloatProperty _filteringUpper;
+    /// Amount of nodes to show
+    IntProperty _amountofNodes;
+    /// Nodeskipping options
+    OptionProperty _nodeskipMethod;
+    /// amount of nodes to show outside of filterrange
+    IntProperty _defaultNodeSkip;
+    /// The Flux threshold to decide the line between _pDefaultNodeSkip and
+    /// _pAmountofNodes
+    FloatProperty _fluxNodeskipThreshold;
+    /// The nodeskip for values within the range of the radius threshold to Earth
+    IntProperty _earthNodeSkip;
+    /// The Radius threshold to decide the line between _pDefaultNodeSkip and
+    /// _pAmountofNodes
+    FloatProperty _radiusNodeSkipThreshold;
 
-    properties::PropertyOwner _cameraPerspectiveGroup;
-    properties::BoolProperty _cameraPerspectiveEnabled;
-    properties::BoolProperty _drawingCircles;
-    properties::BoolProperty _drawingHollow;
-    properties::BoolProperty _gaussianAlphaFilter;
-    properties::FloatProperty _perspectiveDistanceFactor;
-    properties::BoolProperty _pulseEnabled;
-    properties::BoolProperty _gaussianPulseEnabled;
+    PropertyOwner _cameraPerspectiveGroup;
+    BoolProperty _cameraPerspectiveEnabled;
+    BoolProperty _drawingCircles;
+    BoolProperty _drawingHollow;
+    BoolProperty _gaussianAlphaFilter;
+    FloatProperty _perspectiveDistanceFactor;
+    BoolProperty _pulseEnabled;
+    BoolProperty _gaussianPulseEnabled;
 };
 
 } // namespace openspace

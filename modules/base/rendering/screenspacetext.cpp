@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,15 +24,18 @@
 
 #include <modules/base/rendering/screenspacetext.h>
 
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/documentation/documentation.h>
+#include <ghoul/misc/dictionary.h>
+#include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TextInfo = {
         "Text",
         "Text",
         "The text to be displayed.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `ScreenSpaceRenderable` shows a static text that can be changed via a
@@ -41,12 +44,12 @@ namespace {
         // [[codegen::verbatim(TextInfo.description)]]
         std::optional<std::string> text;
     };
-#include "screenspacetext_codegen.cpp"
 } // namespace
+#include "screenspacetext_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceText::Documentation() {
+Documentation ScreenSpaceText::Documentation() {
     return codegen::doc<Parameters>(
         "base_screenspace_text",
         ScreenSpaceRenderableText::Documentation()

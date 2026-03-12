@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/dictionary.h>
+
+using namespace openspace;
 
 namespace {
 
@@ -30,45 +32,43 @@ namespace {
  * Continue playing a paused camera path.
  */
 [[codegen::luawrap]] void continuePath() {
-    openspace::global::navigationHandler->pathNavigator().continuePath();
+    global::navigationHandler->pathNavigator().continuePath();
 }
 
 /**
  * Pause a playing camera path.
  */
 [[codegen::luawrap]] void pausePath() {
-    openspace::global::navigationHandler->pathNavigator().pausePath();
+    global::navigationHandler->pathNavigator().pausePath();
 }
 
 /**
  * Stops a path, if one is being played.
  */
 [[codegen::luawrap]] void stopPath() {
-    openspace::global::navigationHandler->pathNavigator().abortPath();
+    global::navigationHandler->pathNavigator().abortPath();
 }
 
 /**
  * Immediately skips to the end of the current camera path, if one is being played.
  */
 [[codegen::luawrap]] void skipToEnd() {
-    openspace::global::navigationHandler->pathNavigator().skipToEnd();
+    global::navigationHandler->pathNavigator().skipToEnd();
 }
 
 /**
  * Create a camera path as described by the instruction in the input argument.
  *
- * \param pathInstruction A table representing a
- *                        [PathInstruction](#core_path_instruction) that describes a
- *                        camera path to be created
+ * \param pathInstruction A table representing a [PathInstruction](#core_path_instruction)
+ *        that describes a camera path to be created
  */
 [[codegen::luawrap]] void createPath(ghoul::Dictionary pathInstruction) {
-    using namespace openspace;
     global::navigationHandler->pathNavigator().createPath(pathInstruction);
     if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
         global::navigationHandler->pathNavigator().startPath();
     }
 }
 
-#include "pathnavigator_lua_codegen.cpp"
-
 } // namespace
+
+#include "pathnavigator_lua_codegen.cpp"

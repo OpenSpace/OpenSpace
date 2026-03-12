@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,11 +30,7 @@
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class DashboardItemFramerate : public DashboardTextItem {
 public:
@@ -42,11 +38,11 @@ public:
 
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::OptionProperty _frametimeType;
-    properties::TriggerProperty _clearCache;
+    OptionProperty _frametimeType;
+    TriggerProperty _clearCache;
 
     double _minDeltaTimeCache = 1.0;
     double _maxDeltaTimeCache = -1.0;

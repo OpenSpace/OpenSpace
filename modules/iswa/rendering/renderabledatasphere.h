@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,6 @@
 namespace openspace {
 
 class Sphere;
-namespace documentation { struct Documentation; }
 
 /**
  * DataSphere is a concrete IswaCygnet with data files as its input source. The class
@@ -45,17 +44,14 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    /**
-     * Creates a sphere geometry.
-     */
-    bool createGeometry() override;
-    bool destroyGeometry() override;
+    void createGeometry() override;
+    void destroyGeometry() override;
     void renderGeometry() const override;
     void setUniforms() override;
-    std::vector<float*> textureData() override;
+    std::vector<std::vector<float>> textureData() override;
 
     std::unique_ptr<Sphere> _sphere;
     float _radius;

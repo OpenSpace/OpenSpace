@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,13 +27,12 @@
 
 #include <modules/space/rendering/renderableconstellationsbase.h>
 
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 
-namespace ghoul::opengl { class ProgramObject; }
-
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 /**
  * This class renders the constellation bounds as defined in
@@ -57,7 +56,7 @@ public:
 
     void render(const RenderData& data, RendererTasks& tasks) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     /**
@@ -69,9 +68,9 @@ private:
         std::string constellationFullName;
         bool isEnabled = false;
         /// The index of the first vertex describing the bounds
-        GLsizei startIndex;
+        GLsizei startIndex = 0;
         /// The number of vertices describing the bounds
-        GLsizei nVertices;
+        GLsizei nVertices = 0;
     };
 
     /**
@@ -90,10 +89,10 @@ private:
     void selectionPropertyHasChanged() override;
 
     /// The filename containing the constellation bounds
-    properties::StringProperty _vertexFilename;
+    StringProperty _vertexFilename;
 
     /// Determines the color of the constellation lines
-    properties::Vec3Property _color;
+    Vec3Property _color;
 
     /// The list of all loaded constellation bounds
     std::vector<ConstellationBound> _constellationBounds;
@@ -105,11 +104,12 @@ private:
         float y;
         float z;
     };
-    std::vector<Vertex> _vertexValues; ///< A list of all vertices of all bounds
+    /// A list of all vertices of all bounds
+    std::vector<Vertex> _vertexValues;
 
     GLuint _vao = 0;
     GLuint _vbo = 0;
-    UniformCache(campos, objpos, camrot, scaling, ViewProjection, ModelTransform, color,
+    UniformCache(campos, objpos, camrot, scaling, viewProjection, modelTransform, color,
         opacity) _uniformCache;
 };
 

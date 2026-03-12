@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,26 +25,25 @@
 #include <modules/base/scale/multiscale.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <optional>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
+#include <utility>
 
 namespace {
     // This Scale type combines multiple individual scale operations that are applied one
     // after the other.
     struct [[codegen::Dictionary(MultiScale)]] Parameters {
-        // The list of scales that are applied one after the other
-        std::vector<ghoul::Dictionary> scales
-            [[codegen::reference("core_transform_scale")]];
+        // The list of scales that are applied one after the other.
+        std::vector<ghoul::Dictionary> scales [[codegen::reference("core_scale")]];
     };
-#include "multiscale_codegen.cpp"
 } // namespace
+#include "multiscale_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation MultiScale::Documentation() {
-    return codegen::doc<Parameters>("base_transform_scale_multi");
+Documentation MultiScale::Documentation() {
+    return codegen::doc<Parameters>("base_scale_multi");
 }
 
 MultiScale::MultiScale(const ghoul::Dictionary& dictionary)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,12 @@
 
 #include <openspace/util/json_helper.h>
 
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
+#include <functional>
+#include <utility>
 
 namespace openspace {
 
@@ -78,8 +83,8 @@ std::string escapedJson(const std::vector<std::string>& list) {
 }
 
 std::string formatJsonNumber(double d) {
-    // to_string will represent infinite values with 'inf' and NaNs with 'nan'.
-    // These are not valid in JSON, so use 'null' instead
+    // `to_string` will represent infinite values with 'inf' and NaNs with 'nan'. These
+    // are not valid in JSON, so use 'null' instead
     if (!std::isfinite(d)) {
         return "null";
     }
@@ -93,7 +98,6 @@ void sortJson(nlohmann::json& json, std::string_view key) {
         [&key](const nlohmann::json& lhs, const nlohmann::json& rhs) {
             const std::string lhsString = ghoul::toLowerCase(lhs[key].get<std::string>());
             const std::string rhsString = ghoul::toLowerCase(rhs[key].get<std::string>());
-
             return rhsString > lhsString;
         }
     );
@@ -158,4 +162,4 @@ ghoul::Dictionary jsonToDictionary(const nlohmann::json& json) {
     return result;
 }
 
-}  // namespace openspace
+} // namespace openspace

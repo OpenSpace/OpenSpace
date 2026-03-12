@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace::properties {
+namespace openspace {
 
 template <typename T>
 ListProperty<T>::ListProperty(Property::PropertyInfo info, std::vector<T> values)
@@ -32,5 +32,4 @@ ListProperty<T>::ListProperty(Property::PropertyInfo info, std::vector<T> values
 template <typename T>
 ListProperty<T>::~ListProperty() {}
 
-} // namespace openspace::properties
-
+} // namespace openspace

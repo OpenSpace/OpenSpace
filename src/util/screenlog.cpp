@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,7 +36,7 @@ ScreenLog::ScreenLog(std::chrono::seconds timeToLive, LogLevel logLevel)
 }
 
 void ScreenLog::removeExpiredEntries() {
-    const std::lock_guard guard(_mutex);
+    const std::unique_lock lock(_mutex);
     const auto t = std::chrono::steady_clock::now();
 
     const auto rit = std::remove_if(
@@ -51,7 +51,7 @@ void ScreenLog::removeExpiredEntries() {
 void ScreenLog::log(LogLevel level, std::string_view category, std::string_view message) {
     ZoneScoped;
 
-    const std::lock_guard guard(_mutex);
+    const std::unique_lock lock(_mutex);
     if (level >= _logLevel) {
         _entries.push_back({
             level,

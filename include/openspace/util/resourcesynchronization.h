@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,13 +27,14 @@
 
 #include <atomic>
 #include <filesystem>
+#include <memory>
 #include <string>
 
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 
 /**
  * The ResourceSynchronization class handles the download of persistent datasets, meaning
@@ -71,7 +72,7 @@ public:
         const ghoul::Dictionary& dictionary);
 
     /**
-     * Generates a unique identifying string for ResourceSynchronizaiton.
+     * Generates a unique identifying string for ResourceSynchronization.
      */
     virtual std::string generateUid() = 0;
 
@@ -172,7 +173,7 @@ public:
      */
     bool isRejected() const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     /**

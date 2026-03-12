@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,6 @@
 #include <modules/multiresvolume/rendering/brickselector.h>
 
 #include <modules/multiresvolume/rendering/brickcover.h>
-#include <vector>
 
 namespace openspace {
 
@@ -43,10 +42,6 @@ public:
     void selectBricks(int timestep, std::vector<int>& bricks) override;
 
 private:
-    TSP* _tsp;
-    float _spatialTolerance;
-    float _temporalTolerance;
-
     void traverseOT(int timestep, unsigned int brickIndex, BrickCover coveredBricks,
         std::vector<int>& bricks);
 
@@ -62,6 +57,10 @@ private:
 
     void selectCover(BrickCover coveredBricks, unsigned int brickIndex,
         std::vector<int>& bricks) const;
+
+    TSP* _tsp;
+    float _spatialTolerance;
+    float _temporalTolerance;
 };
 
 } // namespace openspace

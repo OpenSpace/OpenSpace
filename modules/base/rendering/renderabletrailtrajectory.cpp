@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,52 +25,46 @@
 #include <modules/base/rendering/renderabletrailtrajectory.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
 #include <openspace/util/timeconstants.h>
 #include <openspace/util/updatestructures.h>
+#include <algorithm>
+#include <cmath>
+#include <iterator>
+#include <limits>
 #include <optional>
 
-// This class creates the entire trajectory at once and keeps it in memory the entire
-// time. This means that there is no need for updating the trail at runtime, but also that
-// the whole trail has to fit in memory.
-// Opposed to the RenderableTrailOrbit, no index buffer is needed as the vertex can be
-// written into the vertex buffer object continuously and then selected by using the
-// count variable from the RenderInformation struct to toggle rendering of the entire path
-// or subpath.
-// In addition, this RenderableTrail implementation uses an additional RenderInformation
-// bucket that contains the line from the last shown point to the current location of the
-// object iff not the entire path is shown and the object is between _startTime and
-// _endTime. This buffer is updated every frame.
-
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo StartTimeInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo StartTimeInfo = {
         "StartTime",
         "Start time",
         "The start time for the range of this trajectory. The date must be in ISO 8601 "
         "format: YYYY MM DD HH:mm:ss.xxx.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EndTimeInfo = {
+    constexpr Property::PropertyInfo EndTimeInfo = {
         "EndTime",
         "End time",
         "The end time for the range of this trajectory. The date must be in ISO 8601 "
         "format: YYYY MM DD HH:mm:ss.xxx.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SampleIntervalInfo = {
+    constexpr Property::PropertyInfo SampleIntervalInfo = {
         "SampleInterval",
         "Sample interval",
         "The interval between samples of the trajectory. This value (together with "
         "'TimeStampSubsampleFactor') determines how far apart (in seconds) the samples "
         "are spaced along the trajectory.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TimeSubSampleInfo = {
+    constexpr Property::PropertyInfo TimeSubSampleInfo = {
         "TimeStampSubsampleFactor",
         "Time stamp subsampling factor",
         "The factor that is used to create subsamples along the trajectory. This value "
@@ -78,32 +72,31 @@ namespace {
         "samples are spaced along the trajectory. Subsamples are rendered as smaller "
         "points compared to normal samples (from 'SampleInterval') when rendering the "
         "trail as points.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderFullPathInfo = {
+    constexpr Property::PropertyInfo RenderFullPathInfo = {
         "ShowFullTrail",
         "Render full trail",
-        "If true, the entire trail will be rendered. If false, only the trail until "
-        "the current time in the application will be shown.",
-        openspace::properties::Property::Visibility::NoviceUser
+        "If true, the entire trail will be rendered. If false, only the trail until the "
+        "current time in the application will be shown.",
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AccurateTrailInfo = {
+    constexpr Property::PropertyInfo AccurateTrailInfo = {
         "AccurateTrail",
         "Use accurate trail",
         "If true, the trail around the spacecraft will be recalculated to present a "
         "smoother trail. If false, the original trail will be used.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AccurateTrailPositionsInfo = {
+    constexpr Property::PropertyInfo AccurateTrailPositionsInfo = {
         "AccurateTrailPositions",
         "Number of accurate trail points",
-        "The number of vertices, each side of the object, that will be recalculated "
-        "for greater accuracy. This also ensures that the object connects with the "
-        "trail.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "The number of vertices, each side of the object, that will be recalculated for "
+        "greater accuracy.This also ensures that the object connects with the trail.",
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrailTrajectory)]] Parameters {
@@ -114,9 +107,9 @@ namespace {
         std::string endTime [[codegen::annotation("A valid date in ISO 8601 format")]];
 
         // [[codegen::verbatim(SampleIntervalInfo.description)]]
-        // The final interval is calculated as SampleInterval/TimeStampSubsampleFactor.
-        // If SampleInterval is not specified, it will be automatically calculated to
-        // produce two samples per day between the 'StartTime' and 'EndTime'.
+        // The final interval is calculated as SampleInterval/TimeStampSubsampleFactor. If
+        // SampleInterval is not specified, it will be automatically calculated to produce
+        // two samples per day between the 'StartTime' and 'EndTime'.
         std::optional<double> sampleInterval;
 
         // [[codegen::verbatim(TimeSubSampleInfo.description)]]
@@ -132,14 +125,26 @@ namespace {
         // [[codegen::verbatim(AccurateTrailPositionsInfo.description)]]
         std::optional<int> accurateTrailPositions;
     };
-#include "renderabletrailtrajectory_codegen.cpp"
 } // namespace
+#include "renderabletrailtrajectory_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableTrailTrajectory::Documentation() {
+// This class creates the entire trajectory at once and keeps it in memory the entire
+// time. This means that there is no need for updating the trail at runtime, but also that
+// the whole trail has to fit in memory.
+// Opposed to the RenderableTrailOrbit, no index buffer is needed as the vertex can be
+// written into the vertex buffer object continuously and then selected by using the count
+// variable from the RenderInformation struct to toggle rendering of the entire path or
+// subpath.
+// In addition, this RenderableTrail implementation uses an additional RenderInformation
+// bucket that contains the line from the last shown point to the current location of the
+// object iff not the entire path is shown and the object is between _startTime and
+// _endTime. This buffer is updated every frame
+
+Documentation RenderableTrailTrajectory::Documentation() {
     return codegen::doc<Parameters>(
-        "base_renderable_renderabletrailtrajectory",
+        "base_renderable_trailtrajectory",
         RenderableTrail::Documentation()
     );
 }
@@ -148,12 +153,7 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     : RenderableTrail(dictionary)
     , _startTime(StartTimeInfo)
     , _endTime(EndTimeInfo)
-    , _sampleInterval(
-        SampleIntervalInfo,
-        openspace::timeconstants::SecondsPerDay / 2.0,
-        1.0,
-        1e6
-    )
+    , _sampleInterval(SampleIntervalInfo, timeconstants::SecondsPerDay / 2.0, 1.0, 1e6)
     , _timeStampSubsamplingFactor(TimeSubSampleInfo, 1, 1, 100)
     , _renderFullTrail(RenderFullPathInfo, false)
     , _useAccurateTrail(AccurateTrailInfo, true)
@@ -207,25 +207,62 @@ void RenderableTrailTrajectory::initializeGL() {
     RenderableTrail::initializeGL();
 
     // We don't need an index buffer, so we keep it at the default value of 0
-    glGenVertexArrays(1, &_primaryRenderInformation._vaoID);
-    glGenBuffers(1, &_primaryRenderInformation._vBufferID);
+    glCreateBuffers(1, &_primaryRenderInformation._vbo);
+    glCreateVertexArrays(1, &_primaryRenderInformation._vao);
+    glVertexArrayVertexBuffer(
+        _primaryRenderInformation._vao,
+        0,
+        _primaryRenderInformation._vbo,
+        0,
+        sizeof(TrailVBOLayout<float>)
+    );
+
+    glEnableVertexArrayAttrib(_primaryRenderInformation._vao, 0);
+    glVertexArrayAttribFormat(
+        _primaryRenderInformation._vao,
+        0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        0
+    );
+    glVertexArrayAttribBinding(_primaryRenderInformation._vao, 0, 0);
 
     // We do need an additional render information bucket for the additional line from the
     // last shown permanent line to the current position of the object
-    glGenVertexArrays(1, &_floatingRenderInformation._vaoID);
-    glGenBuffers(1, &_floatingRenderInformation._vBufferID);
+    glCreateBuffers(1, &_floatingRenderInformation._vbo);
+    glCreateVertexArrays(1, &_floatingRenderInformation._vao);
+    glVertexArrayVertexBuffer(
+        _floatingRenderInformation._vao,
+        0,
+        _floatingRenderInformation._vbo,
+        0,
+        sizeof(TrailVBOLayout<float>)
+    );
+
+    glEnableVertexArrayAttrib(_floatingRenderInformation._vao, 0);
+    glVertexArrayAttribFormat(
+        _floatingRenderInformation._vao,
+        0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        0
+    );
+    glVertexArrayAttribBinding(_floatingRenderInformation._vao, 0, 0);
+
     _floatingRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
 
-    _secondaryRenderInformation._vaoID = _primaryRenderInformation._vaoID;
-    _secondaryRenderInformation._vBufferID = _primaryRenderInformation._vBufferID;
+    _secondaryRenderInformation._vao = _primaryRenderInformation._vao;
+    _secondaryRenderInformation._vbo = _primaryRenderInformation._vbo;
 }
 
 void RenderableTrailTrajectory::deinitializeGL() {
-    glDeleteVertexArrays(1, &_primaryRenderInformation._vaoID);
-    glDeleteBuffers(1, &_primaryRenderInformation._vBufferID);
+    glDeleteVertexArrays(1, &_primaryRenderInformation._vao);
+    glDeleteBuffers(1, &_primaryRenderInformation._vbo);
 
-    glDeleteVertexArrays(1, &_floatingRenderInformation._vaoID);
-    glDeleteBuffers(1, &_floatingRenderInformation._vBufferID);
+    glDeleteVertexArrays(1, &_floatingRenderInformation._vao);
+    glDeleteBuffers(1, &_floatingRenderInformation._vbo);
 
     RenderableTrail::deinitializeGL();
 }
@@ -269,8 +306,8 @@ void RenderableTrailTrajectory::updateBuffer() {
     }
 
     // Full sweep is complete here.
-    // Adds the last point in time to the _vertexArray so that we
-    // ensure that points for _start and _end always exists
+    // Adds the last point in time to the _vertexArray so that we ensure that points for
+    // _start and _end always exists
     const glm::dvec3 dp = translationPosition(Time(_end));
     const glm::vec3 p = dp;
     _vertexArray[_nVertices] = { p.x, p.y, p.z };
@@ -280,20 +317,15 @@ void RenderableTrailTrajectory::updateBuffer() {
     setBoundingSphere(glm::distance(_maxVertex, _minVertex) / 2.0);
 
     // Upload vertices to the GPU
-    glBindVertexArray(_primaryRenderInformation._vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _primaryRenderInformation._vBufferID);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _primaryRenderInformation._vbo,
         _vertexArray.size() * sizeof(TrailVBOLayout<float>),
         _vertexArray.data(),
         GL_STATIC_DRAW
     );
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    // We clear the indexArray just in case. The base class will take care not to use
-    // it if it is empty
+    // We clear the indexArray just in case. The base class will take care not to use it
+    // if it is empty
     _indexArray.clear();
 
     _primaryRenderInformation.stride = _timeStampSubsamplingFactor;
@@ -334,7 +366,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             );
         }
         else {
-            // If we don't render full trail there's no trail after the object
+            // If we don't render full, trail there's no trail after the object
             _secondaryRenderInformation.first = 0;
             _secondaryRenderInformation.count = 0;
 
@@ -384,7 +416,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             const double mult = (i == prePaddingDelta - 1 && i > 0) ?
                 0.0 : (prePaddingDelta - i) / static_cast<double>(prePaddingDelta);
 
-            newPoint += dv * pow(mult, 2.0);
+            newPoint += dv * std::pow(mult, 2.0);
             _replacementPoints.push_back({
                 static_cast<float>(newPoint.x),
                 static_cast<float>(newPoint.y),
@@ -462,16 +494,12 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             _primaryRenderInformation.count += 1;
         }
 
-        glBindVertexArray(_floatingRenderInformation._vaoID);
-        glBindBuffer(GL_ARRAY_BUFFER, _floatingRenderInformation._vBufferID);
-        glBufferData(
-            GL_ARRAY_BUFFER,
+        glNamedBufferData(
+            _floatingRenderInformation._vbo,
             _replacementPoints.size() * sizeof(TrailVBOLayout<float>),
             _replacementPoints.data(),
             GL_DYNAMIC_DRAW
         );
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     }
     else {
         _primaryRenderInformation.first = 0;

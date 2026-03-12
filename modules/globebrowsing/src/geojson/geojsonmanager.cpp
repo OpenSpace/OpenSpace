@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,20 +24,26 @@
 
 #include <modules/globebrowsing/src/geojson/geojsonmanager.h>
 
+#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/rendering/helper.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
-
+#include <algorithm>
+#include <functional>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "GeoJsonManager";
 } // namespace
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 GeoJsonManager::GeoJsonManager()
-    : properties::PropertyOwner({ "GeographicOverlays", "Geographic Overlays" })
+    : PropertyOwner({ "GeographicOverlays", "Geographic Overlays" })
 {}
 
 void GeoJsonManager::initialize(RenderableGlobe* globe) {
@@ -65,7 +71,9 @@ void GeoJsonManager::addGeoJsonLayer(const ghoul::Dictionary& layerDict) {
     try {
         const std::string identifier = layerDict.value<std::string>("Identifier");
         if (hasPropertySubOwner(identifier)) {
-            LERROR("GeoJson layer with identifier '" + identifier + "' already exists");
+            LERROR(std::format(
+                "GeoJson layer with identifier '{}' already exists", identifier
+            ));
             return;
         }
 
@@ -79,7 +87,7 @@ void GeoJsonManager::addGeoJsonLayer(const ghoul::Dictionary& layerDict) {
         _geoJsonObjects.push_back(std::move(geo));
         addPropertySubOwner(ptr);
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const SpecificationError& e) {
         logError(e);
     }
     catch (const ghoul::RuntimeError& e) {
@@ -92,14 +100,14 @@ void GeoJsonManager::deleteLayer(const std::string& layerIdentifier) {
 
     for (auto it = _geoJsonObjects.begin(); it != _geoJsonObjects.end(); it++) {
         if (it->get()->identifier() == layerIdentifier) {
-            LINFO("Deleting GeoJson layer: " + layerIdentifier);
+            LINFO(std::format("Deleting GeoJson layer: {}", layerIdentifier));
             removePropertySubOwner(it->get());
             (*it)->deinitializeGL();
             _geoJsonObjects.erase(it);
             return;
         }
     }
-    LERROR("Could not find GeoJson layer " + layerIdentifier);
+    LERROR(std::format("Could not find GeoJson layer {}", layerIdentifier));
 }
 
 void GeoJsonManager::update() {
@@ -122,4 +130,4 @@ void GeoJsonManager::render(const RenderData& data) {
     }
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

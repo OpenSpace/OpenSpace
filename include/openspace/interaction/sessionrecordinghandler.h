@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,10 +30,21 @@
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scripting/lualibrary.h>
+#include <chrono>
+#include <filesystem>
+#include <functional>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
-namespace openspace::interaction {
+namespace openspace {
 
-class SessionRecordingHandler : public properties::PropertyOwner {
+class Property;
+
+class SessionRecordingHandler : public PropertyOwner {
 public:
     enum class SessionState {
         Idle = 0,
@@ -102,7 +113,12 @@ public:
     /**
      * Used to stop a recording in progress. If open, the recording file will be closed,
      * and all keyframes deleted from memory.
+     *
      * \param filename File saved with recorded keyframes
+     * \param dataMode Determines whether the recording is stored as an ASCII or as a
+     *        binary file
+     * \param overwrite Specifies whether an existing file should be overwritten if it
+     *        already exists
      */
     void stopRecording(const std::filesystem::path& filename, DataMode dataMode,
         bool overwrite = false);
@@ -153,18 +169,6 @@ public:
     void setPlaybackPause(bool pause);
 
     /**
-     * Enables that rendered frames should be saved during playback.
-     *
-     * \param fps Number of frames per second.
-     */
-    //void enableTakeScreenShotDuringPlayback(int fps);
-
-    /**
-     * Used to disable that renderings are saved during playback.
-     */
-    //void disableTakeScreenShotDuringPlayback();
-
-    /**
      * Used to check if a session playback is in progress.
      *
      * \return `true` if playback is in progress
@@ -183,7 +187,7 @@ public:
     /**
      * Used to obtain the state of idle/recording/playback.
      *
-     * \return int value of state as defined by struct SessionState
+     * \return The current session state
      */
     SessionState state() const;
 
@@ -199,7 +203,7 @@ public:
      * \return The Lua library that contains all Lua functions available to affect the
      *         interaction
      */
-    static openspace::scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
     /**
      * Used to request a callback for notification of playback state change.
@@ -233,7 +237,7 @@ public:
      *
      * \param prop The property being set
      */
-    void savePropertyBaseline(properties::Property& prop);
+    void savePropertyBaseline(Property& prop);
 
 private:
     void tickPlayback(double dt);
@@ -246,9 +250,9 @@ private:
     void checkIfScriptUsesScenegraphNode(std::string_view script) const;
 
 
-    properties::BoolProperty _renderPlaybackInformation;
-    properties::BoolProperty _ignoreRecordedScale;
-    properties::BoolProperty _addModelMatrixinAscii;
+    BoolProperty _renderPlaybackInformation;
+    BoolProperty _ignoreRecordedScale;
+    BoolProperty _addModelMatrixinAscii;
 
     struct {
         double elapsedTime = 0.0;
@@ -282,6 +286,6 @@ private:
     std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SESSIONRECORDINGHANDLER___H__

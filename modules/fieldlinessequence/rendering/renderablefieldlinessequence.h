@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,17 +27,21 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/fieldlinessequence/util/commons.h>
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/dynamicfilesequencedownloader.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <deque>
-#include <vector>
+#include <memory>
 
 namespace openspace {
 
@@ -73,7 +77,7 @@ public:
     void firstUpdate();
     void computeSequenceEndTime();
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     struct File {
         enum class FileStatus {
@@ -96,55 +100,55 @@ private:
     void setModelDependentConstants();
 
     int updateActiveIndex(double currentTime);
-    void updateVertexPositionBuffer();
-    void updateVertexColorBuffer();
-    void updateVertexMaskingBuffer();
 
     void staticallyLoadFiles(const std::optional<std::filesystem::path>& seed,
         const std::optional<std::string>& traceVariable);
 
     std::deque<File> _files;
-    // The function loads the file in the sense that it creates the FieldlineState object
-    // in the File object. The function also deletes the oldest file if the loadedFiles
-    // queue is full.
+
+    /**
+     * The function loads the file in the sense that it creates the FieldlineState object
+     *  in the File object. The function also deletes the oldest file if the loadedFiles
+     *  queue is full.
+     */
     void loadFile(File& file);
     void trackOldest(File& file);
 
-    // Not optional, but initialized with osfls because that is what we expect to be used
+    /// Not optional, but initialized with osfls because that is what we expect to be used
     SourceFileType _inputFileType = SourceFileType::Osfls;
-    // Static Loading on default if not specified
+    /// Static Loading on default if not specified
     LoadingType _loadingType = LoadingType::StaticLoading;
-    // path to directory with seed point files
+    /// path to directory with seed point files
     std::filesystem::path _seedPointDirectory;
-    // Which tracing variable to trace. Often 'b' is for magnetic field
+    /// Which tracing variable to trace. Often 'b' is for magnetic field
     std::string _tracingVariable;
-    // Extra variables such as rho, p or t for density, pressure or temperature
+    /// Extra variables such as rho, p or t for density, pressure or temperature
     std::vector<std::string> _extraVars;
     float _manualTimeOffset = 0.0;
-    // Estimated / calculated end of sequence
+    /// Estimated / calculated end of sequence
     double _sequenceEndTime = 0.0;
-    // If there's just one state it should never disappear
+    /// If there's just one state it should never disappear
     bool _renderForever = true;
     bool _inInterval = false;
 
-    // Data ID that corresponds to what dataset to use if using DynamicDownloading
+    /// Data ID that corresponds to what dataset to use if using DynamicDownloading
     int _dataID;
-    // Number of files to queue up at a time
+    /// Number of files to queue up at a time
     size_t _nFilesToQueue = 10;
-    // To keep track of oldest file
+    /// To keep track of oldest file
     std::deque<File*> _loadedFiles;
-    // The max number of files loaded at once
+    /// The max number of files loaded at once
     size_t _maxLoadedFiles = 100;
     std::string _infoURL;
     std::string _dataURL;
-    // DynamicFileSequenceDownloader downloads and updates renderable field lines with
-    // field lines downloaded from the web.
+    /// DynamicFileSequenceDownloader downloads and updates renderable field lines with
+    /// field lines downloaded from the web
     std::unique_ptr<DynamicFileSequenceDownloader> _dynamicFileDownloader;
 
-    // In setup it is used to scale JSON coordinates. During runtime it is used to scale
-    // domain limits.
+    /// In setup it is used to scale JSON coordinates. During runtime it is used to scale
+    /// domain limits
     float _scalingFactor = 1.f;
-    fls::Model _model = fls::Model::Invalid;
+    Model _model = Model::Invalid;
     bool _shouldUpdateMaskingBuffer = false;
     bool _shouldUpdateColorBuffer = false;
     int _activeIndex = -1;
@@ -153,82 +157,82 @@ private:
     bool _isLoadingStateFromDisk = false;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
-    // Transfer function used to color lines when _pColorMethod is set to BY_QUANTITY
+    /// Transfer function used to color lines when _pColorMethod is set to BY_QUANTITY
     std::unique_ptr<TransferFunction> _transferFunction;
 
-    // OpenGL Vertex Array Object
-    GLuint _vertexArrayObject = 0;
-    // OpenGL Vertex Buffer Object containing the extraQuantity values used for coloring
-    // the lines
-    GLuint _vertexColorBuffer = 0;
-    // OpenGL Vertex Buffer Object containing the extraQuantity values used for masking
-    // out segments of the lines
-    GLuint _vertexMaskingBuffer = 0;
-    // OpenGL Vertex Buffer Object containing the vertex positions
-    GLuint _vertexPositionBuffer = 0;
+    /// OpenGL Vertex Array Object
+    GLuint _vao = 0;
+    /// OpenGL Vertex Buffer Object containing the extraQuantity values used for coloring
+    /// the lines
+    GLuint _vboColor = 0;
+    /// OpenGL Vertex Buffer Object containing the extraQuantity values used for masking
+    /// out segments of the lines
+    GLuint _vboMasking = 0;
+    /// OpenGL Vertex Buffer Object containing the vertex positions
+    GLuint _vboPosition = 0;
 
-    // Group to hold the color properties
-    properties::PropertyOwner _colorGroup;
-    // Uniform/transfer function/topology?
-    properties::OptionProperty _colorMethod;
-    // Index of the extra quantity to color lines by
-    properties::OptionProperty _colorQuantity;
-    // Used to save property for later initialization, because firstUpdate needs to run
-    // first, to populate _colorQuantity with options
+    /// Group to hold the color properties
+    PropertyOwner _colorGroup;
+    /// Uniform/transfer function/topology?
+    OptionProperty _colorMethod;
+    /// Index of the extra quantity to color lines by
+    OptionProperty _colorQuantity;
+    /// Used to save property for later initialization, because firstUpdate needs to run
+    /// first, to populate _colorQuantity with options
     int _colorQuantityTemp;
     std::vector<glm::vec2> _colorTableRanges;
-    // Color table/transfer function selected min and max range
-    properties::Vec2Property _selectedColorRange;
-    // Paths to color tables. One for each 'extraQuantity'
+    /// Color table/transfer function selected min and max range
+    Vec2Property _selectedColorRange;
+    /// Paths to color tables. One for each 'extraQuantity'
     std::vector<std::filesystem::path> _colorTablePaths;
-    // Color table/transfer function for "By Quantity" coloring
-    properties::StringProperty _colorTablePath;
-    // Uniform Field Line Color
-    properties::Vec4Property _colorUniform;
-    // Whether or not to use additive blending
-    properties::BoolProperty _colorABlendEnabled;
+    /// Color table/transfer function for "By Quantity" coloring
+    StringProperty _colorTablePath;
+    /// Uniform Field Line Color
+    Vec4Property _colorUniform;
+    /// Whether or not to use additive blending
+    BoolProperty _colorABlendEnabled;
 
-    // Whether or not to use Domain limits
-    properties::BoolProperty _domainEnabled;
-    // Group to hold the Domain properties
-    properties::PropertyOwner _domainGroup;
-    properties::Vec2Property _domainX;
-    properties::Vec2Property _domainY;
-    properties::Vec2Property _domainZ;
-    properties::Vec2Property _domainR;
+    /// Whether or not to use Domain limits
+    BoolProperty _domainEnabled;
+    /// Group to hold the Domain properties
+    PropertyOwner _domainGroup;
+    Vec2Property _domainX;
+    Vec2Property _domainY;
+    Vec2Property _domainZ;
+    Vec2Property _domainR;
 
-    // Toggle flow [ON/OFF]
-    properties::BoolProperty _flowEnabled;
-    // Group to hold the flow/particle properties
-    properties::PropertyOwner _flowGroup;
-    // Simulated particles' color
-    properties::Vec4Property _flowColor;
-    // Size of simulated flow particles
-    properties::IntProperty _flowParticleSize;
-    // Size of simulated flow particles
-    properties::IntProperty _flowParticleSpacing;
-    // Toggle flow direction [FORWARDS/BACKWARDS]
-    properties::BoolProperty _flowReversed;
-    // Speed of simulated flow
-    properties::IntProperty _flowSpeed;
+    /// Toggle flow [ON/OFF]
+    BoolProperty _flowEnabled;
+    /// Group to hold the flow/particle properties
+    PropertyOwner _flowGroup;
+    /// Simulated particles' color
+    Vec4Property _flowColor;
+    /// Size of simulated flow particles
+    IntProperty _flowParticleSize;
+    /// Size of simulated flow particles
+    IntProperty _flowParticleSpacing;
+    /// Toggle flow direction [FORWARDS/BACKWARDS]
+    BoolProperty _flowReversed;
+    /// Speed of simulated flow
+    IntProperty _flowSpeed;
 
-    // Whether or not to use masking
-    properties::BoolProperty _maskingEnabled;
-    // Group to hold the masking properties
-    properties::PropertyOwner _maskingGroup;
+    /// Whether or not to use masking
+    BoolProperty _maskingEnabled;
+    /// Group to hold the masking properties
+    PropertyOwner _maskingGroup;
     std::vector<glm::vec2> _maskingRanges;
-    // Selected lower and upper range limits for masking
-    properties::Vec2Property _selectedMaskingRange;
-    // Index of the extra quantity to use for masking
-    properties::OptionProperty _maskingQuantity;
-    // used to save property for later initialization
+    /// Selected lower and upper range limits for masking
+    Vec2Property _selectedMaskingRange;
+    /// Index of the extra quantity to use for masking
+    OptionProperty _maskingQuantity;
+    /// Used to save property for later initialization
     int _maskingQuantityTemp = 0;
 
-    // Line width for the line rendering part
-    properties::FloatProperty _lineWidth;
-    // Button which executes a time jump to start of sequence
-    properties::TriggerProperty _jumpToStart;
-    properties::BoolProperty _saveDownloadsOnShutdown;
+    /// Line width for the line rendering part
+    FloatProperty _lineWidth;
+    /// Button which executes a time jump to start of sequence
+    TriggerProperty _jumpToStart;
+    BoolProperty _saveDownloadsOnShutdown;
 
     bool _isFirstLoad = true;
 };

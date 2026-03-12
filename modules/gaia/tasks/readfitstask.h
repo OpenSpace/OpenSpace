@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,14 +27,10 @@
 
 #include <openspace/util/task.h>
 
-#include <openspace/util/threadpool.h>
-#include <openspace/util/concurrentjobmanager.h>
-#include <modules/fitsfilereader/include/fitsfilereader.h>
 #include <filesystem>
+#include <vector>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class ReadFitsTask : public Task {
 public:
@@ -43,7 +39,7 @@ public:
 
     std::string description() override;
     void perform(const Task::ProgressCallback& onProgress) override;
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     const size_t MAX_SIZE_BEFORE_WRITE = 48000000; // ~183MB -> 2M stars with 24 values
@@ -55,8 +51,8 @@ private:
     void readSingleFitsFile(const Task::ProgressCallback& progressCallback);
 
     /**
-     * Reads all FITS files in a folder with multiple threads and stores ordered star
-     * data into 8 binary files.
+     * Reads all FITS files in a folder with multiple threads and stores ordered star data
+     * into 8 binary files.
      */
     void readAllFitsFilesFromFolder(const Task::ProgressCallback& progressCallback);
 

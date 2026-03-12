@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,15 +27,15 @@
 
 #include <openspace/navigation/pathcurve.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
-class WayPoint;
+class Waypoint;
 
 class ZoomOutOverviewCurve : public PathCurve {
 public:
     ZoomOutOverviewCurve(const Waypoint& start, const Waypoint& end);
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___ZOOMOUTOVERVIEWCURVE___H__

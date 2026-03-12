@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/interaction/joystickcamerastates.h>
+#include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/interaction/mouseinputstate.h>
 #include <openspace/interaction/websocketcamerastates.h>
@@ -38,27 +39,27 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
+#include <openspace/util/mouse.h>
+#include <ghoul/glm.h>
+#include <filesystem>
+#include <functional>
+#include <optional>
+#include <variant>
 
 namespace openspace {
-    class Camera;
-    class SceneGraphNode;
-} // namespace openspace
 
-namespace openspace::scripting { struct LuaLibrary; }
-
-namespace openspace::interaction {
-
+class Camera;
 struct JoystickInputStates;
-struct NavigationState;
+struct LuaLibrary;
 struct NodeCameraStateSpec;
+class SceneGraphNode;
 struct WebsocketInputStates;
 
-class NavigationHandler : public properties::PropertyOwner {
+class NavigationHandler : public PropertyOwner {
 public:
     NavigationHandler();
-    virtual ~NavigationHandler() override;
+    ~NavigationHandler() override;
 
     void initialize();
     void deinitialize();
@@ -72,7 +73,6 @@ public:
 
     void resetNavigationUpdateVariables();
 
-    // Accessors
     Camera* camera() const;
     const SceneGraphNode* anchorNode() const;
     const MouseInputState& mouseInputState() const;
@@ -86,7 +86,6 @@ public:
     float jumpToFadeDuration() const;
     float interpolationTime() const;
 
-    // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
     bool disabledKeybindings() const;
@@ -132,7 +131,6 @@ public:
     std::vector<std::string> joystickButtonCommand(const std::string& joystickName,
         int button) const;
 
-    // Websockets
     void setWebsocketAxisMapping(int axis, WebsocketCameraStates::AxisType mapping,
         WebsocketCameraStates::AxisInvert shouldInvert =
         WebsocketCameraStates::AxisInvert::No,
@@ -158,21 +156,21 @@ public:
     /**
      * Set camera state from a provided node based camera specification structure, next
      * frame. The camera position will be computed to look at the node provided in the
-     * node info. The actual position will computed from the scene in the same frame as
-     * it is set.
+     * node info. The actual position will computed from the scene in the same frame as it
+     * is set.
      *
      * \param spec The node specification from which to compute the resulting camera pose
      */
     void setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec);
 
     /**
-     * Trigger a transition script after first fading out the rendering, and fading in
-     * the rendering when the script is finished. One example use case could be to fade
-     * out, move the camera to another focus node, and then fade in
+     * Trigger a transition script after first fading out the rendering, and fading in the
+     * rendering when the script is finished. One example use case could be to fade out,
+     * move the camera to another focus node, and then fade in.
      *
      * \param transitionScript The Lua script to handle the transition. Can be anything
      * \param fadeDuration An optional duration for the fading. If unspecified, use the
-     *                     JumpToFadeDuration property
+     *        JumpToFadeDuration property
      */
     void triggerFadeToTransition(std::string transitionScript,
         std::optional<float> fadeDuration = std::nullopt);
@@ -181,7 +179,7 @@ public:
      * \return The Lua library that contains all Lua functions available to affect the
      *         interaction
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     void applyPendingState();
@@ -203,24 +201,24 @@ private:
 
     std::optional<std::variant<NodeCameraStateSpec, NavigationState>> _pendingState;
 
-    properties::BoolProperty _disableKeybindings;
-    properties::BoolProperty _disableMouseInputs;
-    properties::BoolProperty _disableJoystickInputs;
-    properties::BoolProperty _useKeyFrameInteraction;
-    properties::FloatProperty _jumpToFadeDuration;
+    BoolProperty _disableKeybindings;
+    BoolProperty _disableMouseInputs;
+    BoolProperty _disableJoystickInputs;
+    BoolProperty _useKeyFrameInteraction;
+    FloatProperty _jumpToFadeDuration;
 
     struct {
-        properties::PropertyOwner owner;
-        properties::BoolProperty enable;
-        properties::Vec4Property color;
+        PropertyOwner owner;
+        BoolProperty enable;
+        Vec4Property color;
 
         bool isMouseFirstPress = false;
         bool isMousePressed = false;
-        glm::vec2 clickPosition;
-        glm::vec2 currentPosition;
+        glm::vec2 clickPosition = glm::vec2(0.f);
+        glm::vec2 currentPosition = glm::vec2(0.f);
     } _mouseVisualizer;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___NAVIGATIONHANDLER___H__

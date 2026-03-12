@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,26 +25,27 @@
 #include <modules/base/rendering/screenspacedashboard.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <optional>
+#include <utility>
 
 #include "screenspacedashboard_lua.inl"
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo UseMainInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo UseMainInfo = {
         "UseMainDashboard",
         "Use main dashboard",
         "If true, this ScreenSpaceDashboard will use the main dashboard instead of "
         "creating an independent one.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(ScreenSpaceDashboard)]] Parameters {
@@ -59,12 +60,12 @@ namespace {
         std::optional<std::vector<ghoul::Dictionary>>
             items [[codegen::reference("dashboarditem")]];
     };
-#include "screenspacedashboard_codegen.cpp"
 } // namespace
+#include "screenspacedashboard_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceDashboard::Documentation() {
+Documentation ScreenSpaceDashboard::Documentation() {
     return codegen::doc<Parameters>("base_screenspace_dashboard");
 }
 
@@ -128,7 +129,7 @@ const Dashboard& ScreenSpaceDashboard::dashboard() const {
     return _dashboard;
 }
 
-scripting::LuaLibrary ScreenSpaceDashboard::luaLibrary() {
+LuaLibrary ScreenSpaceDashboard::luaLibrary() {
     return {
         "dashboard",
         {
@@ -137,4 +138,5 @@ scripting::LuaLibrary ScreenSpaceDashboard::luaLibrary() {
         }
     };
 }
+
 } // namespace openspace

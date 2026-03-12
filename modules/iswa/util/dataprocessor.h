@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_ISWA___DATAPROCESSOR___H__
 #define __OPENSPACE_MODULE_ISWA___DATAPROCESSOR___H__
 
+#include <openspace/util/histogram.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/std_based_type.hpp>
 #include <memory>
@@ -34,9 +35,7 @@
 
 namespace openspace {
 
-namespace properties { class SelectionProperty; }
-
-class Histogram;
+class SelectionProperty;
 
 class DataProcessor {
 public:
@@ -47,10 +46,10 @@ public:
         glm::size3_t& dimensions) = 0;
 
     virtual void addDataValues(const std::string& data,
-        properties::SelectionProperty& dataOptions) = 0;
+        SelectionProperty& dataOptions) = 0;
 
-    virtual std::vector<float*> processData(const std::string& data,
-        properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) = 0;
+    virtual std::vector<std::vector<float>> processData(const std::string& data,
+        SelectionProperty& dataOptions, glm::size3_t& dimensions) = 0;
 
     void useLog(bool useLog);
     void useHistogram(bool useHistogram);
@@ -62,12 +61,6 @@ public:
 
 protected:
     float processDataPoint(float value, int option);
-
-    float normalizeWithStandardScore(float value, float mean, float sd,
-        const glm::vec2& normalizationValues = glm::vec2(1.f, 1.f));
-
-    float unnormalizeWithStandardScore(float value, float mean, float sd,
-        const glm::vec2& normalizationValues = glm::vec2(1.f, 1.f));
 
     void initializeVectors(int numOptions);
     void calculateFilterValues(const std::vector<int>& selectedOptions);

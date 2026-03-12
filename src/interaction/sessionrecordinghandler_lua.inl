@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/format.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/exception.h>
+#include <filesystem>
+#include <optional>
+#include <string>
+#include <utility>
+
+using namespace openspace;
 
 namespace {
 
@@ -31,7 +39,7 @@ namespace {
  * the recorded keyframes are saved.
  */
 [[codegen::luawrap]] void startRecording() {
-    openspace::global::sessionRecordingHandler->startRecording();
+    global::sessionRecordingHandler->startRecording();
 }
 
 /**
@@ -50,8 +58,7 @@ namespace {
         throw ghoul::lua::LuaError(std::format("Invalid data mode {}", dataMode));
     }
 
-    using DataMode = openspace::interaction::DataMode;
-    openspace::global::sessionRecordingHandler->stopRecording(
+    global::sessionRecordingHandler->stopRecording(
         recordFilePath,
         dataMode == "Ascii" ? DataMode::Ascii : DataMode::Binary,
         overwrite.value_or(false)
@@ -62,16 +69,13 @@ namespace {
  * Starts a playback session with keyframe times that are relative to the time since the
  * recording was started (the same relative time applies to the playback). When playback
  * starts, the simulation time is automatically set to what it was at recording time. The
- * file argument is the filename to the session recording file. If a second input
- * value of true is given, then playback will continually loop until it is manually
- * stopped.
+ * file argument is the filename to the session recording file. If a second input value of
+ * true is given, then playback will continually loop until it is manually stopped.
  */
 [[codegen::luawrap]] void startPlayback(std::filesystem::path file, bool loop = false,
                                         bool shouldWaitForTiles = true,
                                         std::optional<int> screenshotFps = std::nullopt)
 {
-    using namespace openspace;
-
     if (file.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
@@ -82,7 +86,7 @@ namespace {
         ));
     }
 
-    interaction::SessionRecording timeline = interaction::loadSessionRecording(file);
+    SessionRecording timeline = loadSessionRecording(file);
     global::sessionRecordingHandler->startPlayback(
         std::move(timeline),
         loop,
@@ -91,14 +95,18 @@ namespace {
     );
 }
 
-// Stops a playback session before playback of all keyframes is complete.
+/**
+ * Stops a playback session before playback of all keyframes is complete.
+ */
 [[codegen::luawrap]] void stopPlayback() {
-    openspace::global::sessionRecordingHandler->stopPlayback();
+    global::sessionRecordingHandler->stopPlayback();
 }
 
-// Pauses or resumes the playback progression through keyframes.
+/**
+ * Pauses or resumes the playback progression through keyframes.
+ */
 [[codegen::luawrap]] void setPlaybackPause(bool pause) {
-    openspace::global::sessionRecordingHandler->setPlaybackPause(pause);
+    global::sessionRecordingHandler->setPlaybackPause(pause);
 }
 
 /**
@@ -106,22 +114,24 @@ namespace {
  * it afterwards.
  */
 [[codegen::luawrap]] void togglePlaybackPause() {
-    using namespace openspace;
-
     bool isPlaybackPaused = global::sessionRecordingHandler->isPlaybackPaused();
     global::sessionRecordingHandler->setPlaybackPause(!isPlaybackPaused);
 }
 
-// Returns true if session recording is currently playing back a recording.
+/**
+ * Returns true if session recording is currently playing back a recording.
+ */
 [[codegen::luawrap]] bool isPlayingBack() {
-    return openspace::global::sessionRecordingHandler->isPlayingBack();
+    return global::sessionRecordingHandler->isPlayingBack();
 }
 
-// Returns true if session recording is currently recording a recording.
+/**
+ * Returns true if session recording is currently recording a recording.
+ */
 [[codegen::luawrap]] bool isRecording() {
-    return openspace::global::sessionRecordingHandler->isRecording();
+    return global::sessionRecordingHandler->isRecording();
 }
-
-#include "sessionrecordinghandler_lua_codegen.cpp"
 
 } // namespace
+
+#include "sessionrecordinghandler_lua_codegen.cpp"

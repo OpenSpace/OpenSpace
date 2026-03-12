@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,11 @@
 
 #include <modules/telemetry/include/telemetrybase.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
+
+namespace osc { struct Blob; }
 
 namespace openspace {
 
@@ -75,8 +78,8 @@ private:
      * \param otherPlanet The other planet selection that was NOT changed
      * \param prevChangedPlanet The previous value of the planet that was changed
      */
-    void onPlanetSelectionChanged(properties::OptionProperty& changedPlanet,
-        properties::OptionProperty& otherPlanet, std::string& prevChangedPlanet);
+    void onPlanetSelectionChanged(OptionProperty& changedPlanet,
+        OptionProperty& otherPlanet, std::string& prevChangedPlanet);
 
     /**
      * Function that scales the given planet by the given amount over the given amount of
@@ -88,26 +91,25 @@ private:
      * \param interpolationTime The amount of time in seconds to interpolate to the new
      *        scale for the planet
      */
-    void scalePlanet(const std::string& planet, double scale,
-        double interpolationTime);
+    void scalePlanet(const std::string& planet, double scale, double interpolationTime);
 
     void onUpscaleChanged();
     void onFirstChanged();
     void onSecondChanged();
     void onToggleAllChanged();
 
-    properties::DoubleProperty _selectedUpscale;
-    properties::DoubleProperty _selectedScaleInterpolationTime;
-    properties::OptionProperty _firstPlanet;
-    properties::OptionProperty _secondPlanet;
+    DoubleProperty _selectedUpscale;
+    DoubleProperty _selectedScaleInterpolationTime;
+    OptionProperty _firstPlanet;
+    OptionProperty _secondPlanet;
 
-    properties::BoolProperty _toggleAll;
-    properties::BoolProperty _sizeDayEnabled;
-    properties::BoolProperty _gravityEnabled;
-    properties::BoolProperty _temperatureEnabled;
-    properties::BoolProperty _atmosphereEnabled;
-    properties::BoolProperty _moonsEnabled;
-    properties::BoolProperty _ringsEnabled;
+    BoolProperty _toggleAll;
+    BoolProperty _sizeDayEnabled;
+    BoolProperty _gravityEnabled;
+    BoolProperty _temperatureEnabled;
+    BoolProperty _atmosphereEnabled;
+    BoolProperty _moonsEnabled;
+    BoolProperty _ringsEnabled;
 
     std::string _oldFirst;
     std::string _oldSecond;

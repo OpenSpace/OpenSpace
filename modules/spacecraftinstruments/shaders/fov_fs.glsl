@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,13 +24,15 @@
 
 #include "fragment.glsl"
 
-in vec4 vs_color;
-in float vs_depth;
+in Data {
+  vec4 color;
+  float depth;
+} in_data;
 
 
 Fragment getFragment() {
   Fragment frag;
-  frag.color = vs_color;
-  frag.depth = vs_depth;
+  frag.color = in_data.color;
+  frag.depth = in_data.depth;
   return frag;
 }

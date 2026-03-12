@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,31 +24,24 @@
 
 #include <modules/base/rendering/renderablelabel.h>
 
-#include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/glm.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/crc32.h>
-#include <ghoul/misc/defer.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
 #include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <glm/gtx/string_cast.hpp>
+#include <algorithm>
+#include <cmath>
 #include <optional>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view MeterUnit = "m";
     constexpr std::string_view KilometerUnit = "Km";
     constexpr std::string_view MegameterUnit = "Mm";
@@ -87,96 +80,94 @@ namespace {
         GigaLightyear
     };
 
-    constexpr double PARSEC = 0.308567756E17;
-
-    constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
+    constexpr Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending mode",
         "This determines the blending mode that is applied to the renderable.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The label text color.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
+    constexpr Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font size",
         "The font size (in points) for the label.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "Scales the size of the label, exponentially. The value is used as the exponent "
         "in a 10^x computation to scale the label size.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextInfo = {
+    constexpr Property::PropertyInfo TextInfo = {
         "Text",
         "Text",
         "The text that will be displayed on screen.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MinMaxSizeInfo = {
+    constexpr Property::PropertyInfo MinMaxSizeInfo = {
         "MinMaxSize",
         "Min and max size",
         "The minimum and maximum size (in pixels) of the label.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
+    constexpr Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation matrix",
         "Transformation matrix to be applied to the label.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OrientationOptionInfo = {
+    constexpr Property::PropertyInfo OrientationOptionInfo = {
         "OrientationOption",
         "Orientation option",
         "Label orientation rendering mode.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableFadingEffectInfo = {
+    constexpr Property::PropertyInfo EnableFadingEffectInfo = {
         "EnableFading",
         "Enable/disable fade-in effect",
         "Enable/Disable the Fade-in effect.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeWidthsInfo = {
+    constexpr Property::PropertyInfo FadeWidthsInfo = {
         "FadeWidths",
         "Fade widths",
         "The distances over which the fading takes place, given in the specified unit. "
-        "The first value is the distance before the closest distance and the second "
-        "the one after the furthest distance. For example, with the unit Parsec (pc), "
-        "a value of {1, 2} will make the label being fully faded out 1 Parsec before "
-        "the closest distance and 2 Parsec away from the furthest distance.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "The first value is the distance before the closest distance and the second the "
+        "one after the furthest distance. For example, with the unit Parsec (pc), a "
+        "value of {1, 2} will make the label being fully faded out 1 Parsec before the "
+        "closest distance and 2 Parsec away from the furthest distance.",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeDistancesInfo = {
+    constexpr Property::PropertyInfo FadeDistancesInfo = {
         "FadeDistances",
         "Fade distances",
-        "The distance range in which the labels should be fully opaque, specified in "
-        "the chosen unit. The distance from the position of the label to the camera.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "The distance range in which the labels should be fully opaque, specified in the "
+        "chosen unit. The distance from the position of the label to the camera.",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeUnitOptionInfo = {
+    constexpr Property::PropertyInfo FadeUnitOptionInfo = {
         "FadeUnit",
         "Fade distance Unit",
         "Distance unit for fade-in/-out distance calculations. Defaults to \"au\".",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableLabel)]] Parameters {
@@ -241,12 +232,12 @@ namespace {
         // [[codegen::verbatim(FadeWidthsInfo.description)]]
         std::optional<glm::vec2> fadeWidths;
     };
-#include "renderablelabel_codegen.cpp"
 } // namespace
+#include "renderablelabel_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableLabel::Documentation() {
+Documentation RenderableLabel::Documentation() {
     return codegen::doc<Parameters>("base_renderable_labels");
 }
 
@@ -302,7 +293,7 @@ RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
     addProperty(_text);
 
     _color = p.color.value_or(_color);
-    _color.setViewOption(properties::Property::ViewOptions::Color);
+    _color.setViewOption(Property::ViewOptions::Color);
     addProperty(_color);
 
     _fontSize = p.fontSize.value_or(_fontSize);
@@ -324,7 +315,7 @@ RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
     addProperty(_size);
 
     _minMaxSize = p.minMaxSize.value_or(_minMaxSize);
-    _minMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _minMaxSize.setViewOption(Property::ViewOptions::MinMaxRange);
     addProperty(_minMaxSize);
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
@@ -345,16 +336,12 @@ RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
     _fadeUnitOption.addOption(GigaParsec, std::string(GigaparsecUnit));
     _fadeUnitOption.addOption(GigaLightyear, std::string(GigalightyearUnit));
 
-    if (p.fadeUnit.has_value()) {
-        _fadeUnitOption = codegen::map<Unit>(*p.fadeUnit);
-    }
-    else {
-        _fadeUnitOption = AstronomicalUnit;
-    }
+    _fadeUnitOption =
+        codegen::map<Unit>(p.fadeUnit.value_or(Parameters::Unit::AstronomicalUnit));
     addProperty(_fadeUnitOption);
 
     _fadeDistances = p.fadeDistances.value_or(_fadeDistances);
-    _fadeDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _fadeDistances.setViewOption(Property::ViewOptions::MinMaxRange);
     addProperty(_fadeDistances);
 
     _fadeWidths = p.fadeWidths.value_or(_fadeWidths);
@@ -380,8 +367,6 @@ void RenderableLabel::initializeGL() {
     );
 }
 
-void RenderableLabel::deinitializeGL() {}
-
 void RenderableLabel::render(const RenderData& data, RendererTasks&) {
     glDepthMask(true);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -390,7 +375,7 @@ void RenderableLabel::render(const RenderData& data, RendererTasks&) {
 
     if (_enableFadingEffect) {
         const float distanceNodeToCamera = static_cast<float>(
-            glm::distance(data.camera.positionVec3(), data.modelTransform.translation)
+            glm::distance(data.camera.position(), data.modelTransform.translation)
         );
         fadeInVariable = computeFadeFactor(distanceNodeToCamera);
     }
@@ -422,40 +407,35 @@ void RenderableLabel::render(const RenderData& data, RendererTasks&) {
     global::renderEngine->openglStateCache().resetDepthState();
 }
 
-
 void RenderableLabel::setLabelText(const std::string & newText) {
     _text = newText;
 }
 
 void RenderableLabel::renderLabels(const RenderData& data,
-                                    const glm::dmat4& modelViewProjectionMatrix,
-                                    const glm::dvec3& orthoRight,
-                                    const glm::dvec3& orthoUp, float fadeInVariable)
+                                   const glm::dmat4& modelViewProjectionMatrix,
+                                   const glm::dvec3& orthoRight,
+                                   const glm::dvec3& orthoUp, float fadeInVariable)
 {
-    glm::vec4 textColor = glm::vec4(glm::vec3(_color), 1.f);
+    ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo = {
+        .enableDepth = true,
+        .enableFalseDepth = false,
+        .scale = std::pow(10.f, _size),
+        .renderType = _orientationOption,
+        .minSize = _minMaxSize.value().x,
+        .maxSize = _minMaxSize.value().y,
+        .mvpMatrix = modelViewProjectionMatrix,
+        .orthoRight = orthoRight,
+        .orthoUp = orthoUp,
+        .cameraPos = data.camera.position(),
+        .cameraLookUp = data.camera.lookUpVectorWorldSpace()
+    };
 
-    textColor.a *= fadeInVariable;
-    textColor.a *= opacity();
-
-    ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
-
-    labelInfo.orthoRight = orthoRight;
-    labelInfo.orthoUp = orthoUp;
-    labelInfo.minSize = _minMaxSize.value().x;
-    labelInfo.maxSize = _minMaxSize.value().y;
-    labelInfo.cameraPos = data.camera.positionVec3();
-    labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
-    labelInfo.renderType = _orientationOption;
-    labelInfo.mvpMatrix = modelViewProjectionMatrix;
-    labelInfo.scale = powf(10.f, _size);
-    labelInfo.enableDepth = true;
-    labelInfo.enableFalseDepth = false;
-
-    // We don't use spice rotation and scale
+    // We don't use SPICE rotation and scale
     const glm::vec3 transformedPos = glm::vec3(
         _transformationMatrix * glm::dvec4(data.modelTransform.translation, 1.0)
     );
 
+    glm::vec4 textColor = glm::vec4(glm::vec3(_color), fadeInVariable * opacity());
     ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
         *_font,
         transformedPos,
@@ -481,28 +461,32 @@ float RenderableLabel::computeFadeFactor(float distanceNodeToCamera) const {
         return std::clamp(f1, 0.f, 1.f);
     }
     else if (x > startX && x < endX) {
-        return 1.f; // not faded
+        // Not faded
+        return 1.f;
     }
-    else { // x >= endX
+    else {
+        // x >= endX
         const float f2 = 1.f - (x - endX) / fadingEndDistance;
         return std::clamp(f2, 0.f, 1.f);
     }
 }
 
 float RenderableLabel::unit(int unit) const {
+    constexpr double Prsec = 0.308567756E17;
+
     switch (static_cast<Unit>(unit)) {
-        case Meter:           return 1.f;
+        case Meter:            return 1.f;
         case Kilometer:        return 1e3f;
-        case Megameter:        return  1e6f;
+        case Megameter:        return 1e6f;
         case Gigameter:        return 1e9f;
         case AstronomicalUnit: return 149597870700.f;
         case Terameter:        return 1e12f;
         case Petameter:        return 1e15f;
-        case Parsec:           return static_cast<float>(PARSEC);
-        case KiloParsec:       return static_cast<float>(1e3 * PARSEC);
-        case MegaParsec:       return static_cast<float>(1e6 * PARSEC);
-        case GigaParsec:       return static_cast<float>(1e9 * PARSEC);
-        case GigaLightyear:    return static_cast<float>(306391534.73091 * PARSEC);
+        case Parsec:           return static_cast<float>(Prsec);
+        case KiloParsec:       return static_cast<float>(1e3 * Prsec);
+        case MegaParsec:       return static_cast<float>(1e6 * Prsec);
+        case GigaParsec:       return static_cast<float>(1e9 * Prsec);
+        case GigaLightyear:    return static_cast<float>(306391534.73091 * Prsec);
         default:               throw ghoul::MissingCaseException();
     }
 }

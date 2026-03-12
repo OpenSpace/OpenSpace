@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,10 +27,10 @@
 
 #include <openspace/interaction/camerainteractionstates.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
-class MouseInputState;
 class KeyboardInputState;
+class MouseInputState;
 
 class MouseCameraStates : public CameraInteractionStates {
 public:
@@ -43,10 +43,9 @@ public:
 
 private:
     bool _isMouseButtonInverted = false;
-
     double _currentSensitivityRamp = 1.0;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___MOUSECAMERASTATES___H__

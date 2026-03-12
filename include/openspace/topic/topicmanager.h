@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,8 +31,10 @@
 #include <openspace/topic/serverinterface.h>
 
 #include <deque>
+#include <functional>
 #include <memory>
 #include <mutex>
+#include <utility>
 
 namespace openspace {
 
@@ -47,13 +49,13 @@ struct Message {
     std::string messageString;
 };
 
-class TopicManager : public properties::PropertyOwner {
+class TopicManager : public PropertyOwner {
 public:
     using CallbackHandle = int;
     using CallbackFunction = std::function<void()>;
 
     TopicManager();
-    virtual ~TopicManager() override;
+    ~TopicManager() override;
 
     void initialize(const ghoul::Dictionary& configuration);
 
@@ -68,9 +70,14 @@ public:
 
     void passDataToTopic(const std::string& topic, const nlohmann::json& jsonData);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
+    struct Message {
+        std::weak_ptr<Connection> connection;
+        std::string messageString;
+    };
+
     struct ConnectionData {
         std::shared_ptr<Connection> connection;
         bool isMarkedForRemoval = false;
@@ -86,10 +93,10 @@ private:
 
     std::vector<ConnectionData> _connections;
     std::vector<std::unique_ptr<ServerInterface>> _interfaces;
-    properties::PropertyOwner _interfaceOwner;
+    PropertyOwner _interfaceOwner;
     int _skyBrowserUpdateTime = 100;
 
-    // Callbacks for tiggering topic
+    /// Callbacks for triggering topic
     int _nextCallbackHandle = 0;
     std::vector<std::pair<CallbackHandle, CallbackFunction>> _preSyncCallbacks;
 };

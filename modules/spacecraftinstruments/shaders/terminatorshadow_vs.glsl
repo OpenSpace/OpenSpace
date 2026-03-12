@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,29 +24,24 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
-layout(location = 0) in vec4 in_point_position;
+layout(location = 0) in vec4 in_position;
 
-out vec3 vs_color;
-out float vs_depth;
+out Data {
+  vec3 color;
+  float depth;
+} out_data;
 
 uniform mat4 modelViewProjectionTransform;
 uniform vec3 shadowColor;
 
 
 void main() {
-  if (mod(gl_VertexID, 2) == 0.0) {
-    vs_color = shadowColor;
-  }
-  else {
-    vs_color = vec3(0.0);
-  }
-
-  // Transform the damn psc to homogenous coordinate
-  vec4 position = vec4(in_point_position.xyz * pow(10, in_point_position.w), 1.0);
+  vec4 position = vec4(in_position.xyz * pow(10.0, in_position.w), 1.0);
   vec4 positionClipSpace = modelViewProjectionTransform * position;
   vec4 p = z_normalization(positionClipSpace);
-  vs_depth = p.w;
+  out_data.color = mod(gl_VertexID, 2) == 0.0 ? shadowColor : vec3(0.0);
+  out_data.depth = p.w;
   gl_Position = p;
 }

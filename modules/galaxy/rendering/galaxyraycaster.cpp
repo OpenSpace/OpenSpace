@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,22 +24,26 @@
 
 #include <modules/galaxy/rendering/galaxyraycaster.h>
 
-#include <openspace/rendering/renderable.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/texture.h>
+#include <algorithm>
+#include <optional>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view GlslRaycastPath =
-        "${MODULES}/galaxy/shaders/galaxyraycast.glsl";
+        "${MODULE_GALAXY}/shaders/galaxyraycast.glsl";
     constexpr std::string_view GlslBoundsVsPath =
-        "${MODULES}/galaxy/shaders/raycasterbounds_vs.glsl";
+        "${MODULE_GALAXY}/shaders/raycasterbounds_vs.glsl";
     constexpr std::string_view GlslBoundsFsPath =
-        "${MODULES}/galaxy/shaders/raycasterbounds_fs.glsl";
+        "${MODULE_GALAXY}/shaders/raycasterbounds_fs.glsl";
 } // namespace
 
 namespace openspace {
@@ -75,7 +79,6 @@ void GalaxyRaycaster::renderEntryPoints(const RenderData& data,
 void GalaxyRaycaster::renderExitPoints(const RenderData& data,
                                        ghoul::opengl::ProgramObject& program)
 {
-    // Uniforms
     program.setUniform("modelViewTransform", modelViewTransform(data));
     program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
@@ -110,13 +113,12 @@ void GalaxyRaycaster::preRaycast(const RaycastData& data,
     program.setUniform(std::format("emissionMultiply{}", data.id), _emissionMultiply);
 
     _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
-    _textureUnit->activate();
-    _texture.bind();
+    _textureUnit->bind(_texture);
     program.setUniform(std::format("galaxyTexture{}", data.id), *_textureUnit);
 }
 
 void GalaxyRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&) {
-    _textureUnit = nullptr; // release texture unit.
+    _textureUnit = nullptr;
 }
 
 bool GalaxyRaycaster::isCameraInside(const RenderData& data, glm::vec3& localPosition) {
@@ -125,9 +127,9 @@ bool GalaxyRaycaster::isCameraInside(const RenderData& data, glm::vec3& localPos
 
     localPosition = (glm::vec3(modelPos) + glm::vec3(0.5f));
 
-    return (localPosition.x > 0 && localPosition.x < 1 &&
-        localPosition.y > 0 && localPosition.y < 1 &&
-        localPosition.z > 0 && localPosition.z < 1);
+    return (localPosition.x > 0.f && localPosition.x < 1.f &&
+        localPosition.y > 0.f && localPosition.y < 1.f &&
+        localPosition.z > 0.f && localPosition.z < 1.f);
 }
 
 std::filesystem::path GalaxyRaycaster::boundsVertexShaderPath() const {
@@ -143,7 +145,7 @@ std::filesystem::path GalaxyRaycaster::raycasterPath() const {
 }
 
 std::filesystem::path GalaxyRaycaster::helperPath() const {
-    return ""; // no helper file
+    return "";
 }
 
 void GalaxyRaycaster::setAspect(const glm::vec3& aspect) {

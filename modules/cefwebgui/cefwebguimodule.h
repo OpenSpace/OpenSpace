@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,7 @@
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <memory>
 
 namespace openspace {
 
@@ -45,16 +46,16 @@ public:
 
     void internalInitialize(const ghoul::Dictionary& configuration) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void startOrStopGui();
 
-    properties::BoolProperty _enabled;
-    properties::BoolProperty _visible;
-    properties::TriggerProperty _reload;
-    properties::StringProperty _url;
-    properties::FloatProperty _guiScale;
+    BoolProperty _enabled;
+    BoolProperty _visible;
+    TriggerProperty _reload;
+    StringProperty _url;
+    FloatProperty _guiScale;
     std::unique_ptr<BrowserInstance> _instance;
 
     WebGuiModule::CallbackHandle _endpointCallback = -1;

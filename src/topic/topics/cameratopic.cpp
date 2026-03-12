@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,21 +27,18 @@
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
-#include <openspace/topic/connection.h>
-#include <openspace/topic/topicmanager.h>
-#include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
-#include <openspace/properties/property.h>
+#include <openspace/topic/connection.h>
+#include <openspace/topic/topicmanager.h>
 #include <openspace/util/distanceconversion.h>
 #include <openspace/util/geodetic.h>
-#include <ghoul/logging/logmanager.h>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
 } // namespace
-
-using nlohmann::json;
 
 namespace openspace {
 

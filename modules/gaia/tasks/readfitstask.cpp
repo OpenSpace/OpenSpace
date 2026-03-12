@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,18 +24,22 @@
 
 #include <modules/gaia/tasks/readfitstask.h>
 
+#include <modules/fitsfilereader/include/fitsfilereader.h>
 #include <modules/gaia/tasks/readfilejob.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-
 #include <ghoul/logging/logmanager.h>
+#include <openspace/util/concurrentjobmanager.h>
+#include <openspace/util/threadpool.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
-#include <filesystem>
+#include <algorithm>
+#include <cstdint>
 #include <fstream>
-#include <set>
 #include <optional>
+#include <set>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "ReadFitsTask";
@@ -43,39 +47,43 @@ namespace {
     struct [[codegen::Dictionary(ReadFitsTask)]] Parameters {
         // If SingleFileProcess is set to true then this specifies the path to a single
         // FITS file that will be read. Otherwise it specifies the path to a folder with
-        // multiple FITS files that are to be read
+        // multiple FITS files that are to be read.
         std::string inFileOrFolderPath;
 
         // If SingleFileProcess is set to true then this specifies the name (including
         // entire path) to the output file. Otherwise it specifies the path to the output
-        // folder which to export binary star data to
+        // folder which to export binary star data to.
         std::string outFileOrFolderPath;
 
         // If true then task will read from a single FITS file and output a single binary
         // file. If false then task will read all files in specified folder and output
-        // multiple files sorted by location
+        // multiple files sorted by location.
         std::optional<bool> singleFileProcess;
 
-        // Defines how many threads to use when reading from multiple files
+        // Defines how many threads to use when reading from multiple files.
         std::optional<int> threadsToUse [[codegen::greater(1)]];
 
         // Defines the first row that will be read from the specified FITS file(s). If not
-        // defined then reading will start at first row
+        // defined then reading will start at first row.
         std::optional<int> firstRow;
 
         // Defines the last row that will be read from the specified FITS file(s). If not
-        // defined (or less than FirstRow) then full file(s) will be read
+        // defined (or less than FirstRow) then full file(s) will be read.
         std::optional<int> lastRow;
 
         // A list of strings with the names of all the additional columns that are to be
         // read from the specified FITS file(s). These columns can be used for filtering
-        // while constructing Octree later
+        // while constructing Octree later.
         std::optional<ghoul::Dictionary> filterColumnNames;
     };
-#include "readfitstask_codegen.cpp"
 } // namespace
+#include "readfitstask_codegen.cpp"
 
 namespace openspace {
+
+Documentation ReadFitsTask::Documentation() {
+    return codegen::doc<Parameters>("gaia_task_readfits");
+}
 
 ReadFitsTask::ReadFitsTask(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -90,7 +98,7 @@ ReadFitsTask::ReadFitsTask(const ghoul::Dictionary& dictionary) {
     if (p.filterColumnNames.has_value()) {
         const ghoul::Dictionary d = *p.filterColumnNames;
 
-        // Ugly fix for ASCII sorting when there are more columns read than 10.
+        // Ugly fix for ASCII sorting when there are more columns read than 10
         std::set<int> intKeys;
         for (const std::string_view key : d.keys()) {
             intKeys.insert(std::stoi(std::string(key)));
@@ -125,9 +133,8 @@ void ReadFitsTask::perform(const Task::ProgressCallback& onProgress) {
 }
 
 void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCallback) {
+    FitsFileReader fileReader = FitsFileReader(false);
     int32_t nValuesPerStar = 0;
-
-    FitsFileReader fileReader(false);
     std::vector<float> fullData = fileReader.readFitsFile(
         _inFileOrFolderPath,
         nValuesPerStar,
@@ -138,49 +145,39 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
 
     progressCallback(0.8f);
 
-    std::ofstream outFileStream(_outFileOrFolderPath, std::ofstream::binary);
-    if (outFileStream.good()) {
-        int32_t nValues = static_cast<int32_t>(fullData.size());
-        LINFO(std::format(
-            "Writing {} values to file '{}'", nValues, _outFileOrFolderPath
-        ));
-        LINFO("Number of values per star: " + std::to_string(nValuesPerStar));
-
-        if (nValues == 0) {
-            LERROR("Error writing file - No values were read from file");
-        }
-        outFileStream.write(
-            reinterpret_cast<const char*>(&nValues),
-            sizeof(int32_t)
-        );
-        outFileStream.write(
-            reinterpret_cast<const char*>(&nValuesPerStar),
-            sizeof(int32_t)
-        );
-
-        const size_t nBytes = nValues * sizeof(fullData[0]);
-        outFileStream.write(reinterpret_cast<const char*>(fullData.data()), nBytes);
-
-        outFileStream.close();
-    }
-    else {
+    std::ofstream outFile = std::ofstream(_outFileOrFolderPath, std::ofstream::binary);
+    if (!outFile.good()) {
         LERROR(std::format(
             "Error opening file '{}' as output data file", _outFileOrFolderPath
         ));
+        return;
     }
+
+    int32_t nValues = static_cast<int32_t>(fullData.size());
+    LINFO(std::format("Writing {} values to file '{}'", nValues, _outFileOrFolderPath));
+    LINFO(std::format("Number of values per star: {}", nValuesPerStar));
+
+    if (nValues == 0) {
+        LERROR("Error writing file - No values were read from file");
+    }
+    outFile.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
+    outFile.write(reinterpret_cast<const char*>(&nValuesPerStar), sizeof(int32_t));
+
+    const size_t nBytes = nValues * sizeof(float);
+    outFile.write(reinterpret_cast<const char*>(fullData.data()), nBytes);
 }
 
 void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
-    std::vector<std::vector<float>> octants(8);
-    std::vector<bool> isFirstWrite(8, true);
+    std::vector<std::vector<float>> octants = std::vector<std::vector<float>>(8);
+    std::vector<bool> isFirstWrite = std::vector<bool>(8, true);
     size_t finishedJobs = 0;
     int totalStars = 0;
 
     _firstRow = std::max(_firstRow, 1);
 
     // Create Threadpool and JobManager
-    LINFO("Threads in pool: " + std::to_string(_threadsToUse));
-    ThreadPool threadPool(_threadsToUse);
+    LINFO(std::format("Threads in pool: {}", _threadsToUse));
+    ThreadPool threadPool = ThreadPool(_threadsToUse);
     ConcurrentJobManager<std::vector<std::vector<float>>> jobManager(
         std::move(threadPool)
     );
@@ -197,7 +194,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
     }
 
     const size_t nInputFiles = allInputFiles.size();
-    LINFO("Files to read: " + std::to_string(nInputFiles));
+    LINFO(std::format("Files to read: {}", nInputFiles));
 
     // Define what columns to read
     _allColumnNames.clear();
@@ -227,7 +224,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
         defaultColumnNames.begin(),
         defaultColumnNames.end()
     );
-    // Append additional filter parameters to default rendering parameters.
+    // Append additional filter parameters to default rendering parameters
     _allColumnNames.insert(
         _allColumnNames.end(),
         _filterColumnNames.begin(),
@@ -240,18 +237,18 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
     }
     LINFO(allNames);
 
-    // Declare how many values to save for each star.
+    // Declare how many values to save for each star
     constexpr int32_t NValuesPerStar = 24;
     const size_t nDefaultColumns = defaultColumnNames.size();
     auto fitsFileReader = std::make_shared<FitsFileReader>(false);
 
-    // Divide all files into ReadFilejobs and then delegate them onto several threads!
+    // Divide all files into ReadFilejobs and then delegate them onto several threads
     while (!allInputFiles.empty()) {
         const std::filesystem::path fileToRead = allInputFiles.back();
         allInputFiles.erase(allInputFiles.end() - 1);
 
-        // Add reading of file to jobmanager, which will distribute it to our threadpool.
-        auto readFileJob = std::make_shared<gaia::ReadFileJob>(
+        // Add reading of file to jobmanager, which will distribute it to our threadpool
+        auto readFileJob = std::make_shared<ReadFileJob>(
             fileToRead,
             _allColumnNames,
             _firstRow,
@@ -265,7 +262,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
 
     LINFO("All files added to queue");
 
-    // Check for finished jobs.
+    // Check for finished jobs
     while (finishedJobs < nInputFiles) {
         if (jobManager.numFinishedJobs() > 0) {
             std::vector<std::vector<float>> newOctant =
@@ -274,7 +271,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
             finishedJobs++;
 
             for (int i = 0; i < 8; i++) {
-                // Add read values to global octant and check if it's time to write!
+                // Add read values to global octant and check if it's time to write
                 octants[i].insert(
                     octants[i].end(),
                     newOctant[i].begin(),
@@ -283,7 +280,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
                 if ((octants[i].size() > MAX_SIZE_BEFORE_WRITE) ||
                     (finishedJobs == nInputFiles))
                 {
-                    // Write to file!
+                    // Write to file
                     totalStars += writeOctantToFile(
                         octants[i],
                         i,
@@ -305,39 +302,29 @@ int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int in
 {
     std::string outPath = std::format("{}octant_{}.bin", _outFileOrFolderPath, index);
     std::ofstream fileStream(outPath, std::ofstream::binary | std::ofstream::app);
-    if (fileStream.good()) {
-        int32_t nValues = static_cast<int32_t>(octantData.size());
-        LINFO(std::format("Write {} values to {}", nValues, outPath));
-
-        if (nValues == 0) {
-            LERROR("Error writing file - No values were read from file");
-        }
-        // If this is the first write then write number of values per star!
-        if (isFirstWrite[index]) {
-            LINFO(std::format("First write for Octant_{}", index));
-            fileStream.write(
-                reinterpret_cast<const char*>(&nValuesPerStar),
-                sizeof(int32_t)
-            );
-            isFirstWrite[index] = false;
-        }
-
-        const size_t nBytes = nValues * sizeof(octantData[0]);
-        fileStream.write(reinterpret_cast<const char*>(octantData.data()), nBytes);
-
-        fileStream.close();
-
-        // Return number of stars written.
-        return nValues / nValuesPerStar;
-    }
-    else {
+    if (!fileStream.good()) {
         LERROR(std::format("Error opening file '{}' as output data file", outPath));
         return 0;
     }
-}
 
-documentation::Documentation ReadFitsTask::Documentation() {
-    return codegen::doc<Parameters>("gaiamission_fitsfiletorawdata");
+    int32_t nValues = static_cast<int32_t>(octantData.size());
+    LINFO(std::format("Write {} values to {}", nValues, outPath));
+
+    if (nValues == 0) {
+        LERROR("Error writing file - No values were read from file");
+    }
+    // If this is the first write then write number of values per star
+    if (isFirstWrite[index]) {
+        LINFO(std::format("First write for Octant_{}", index));
+        fileStream.write(reinterpret_cast<const char*>(&nValuesPerStar), sizeof(int32_t));
+        isFirstWrite[index] = false;
+    }
+
+    const size_t nBytes = nValues * sizeof(octantData[0]);
+    fileStream.write(reinterpret_cast<const char*>(octantData.data()), nBytes);
+
+    // Return number of stars written
+    return nValues / nValuesPerStar;
 }
 
 } // namespace openspace

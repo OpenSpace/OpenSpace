@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Tracking and Data Relay Satellite System (TDRSS))",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_tdrss",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=tdrss&FORMAT=kvn",
+  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=tdrss&FORMAT=kvn",
   Filename = "tdrss.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })

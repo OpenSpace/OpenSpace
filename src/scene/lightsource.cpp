@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,21 +25,19 @@
 #include <openspace/scene/lightsource.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "Whether the light source is enabled or not.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This is the base class of all `LightSource` types, which are components that can be
@@ -61,8 +59,8 @@ namespace {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
     };
-#include "lightsource_codegen.cpp"
 } // namespace
+#include "lightsource_codegen.cpp"
 
 namespace openspace {
 
@@ -70,8 +68,8 @@ bool LightSource::isEnabled() const {
     return _enabled;
 }
 
-documentation::Documentation LightSource::Documentation() {
-    return codegen::doc<Parameters>("core_light_source");
+Documentation LightSource::Documentation() {
+    return codegen::doc<Parameters>("core_lightsource");
 }
 
 std::unique_ptr<LightSource> LightSource::createFromDictionary(
@@ -89,7 +87,7 @@ std::unique_ptr<LightSource> LightSource::createFromDictionary(
 }
 
 LightSource::LightSource(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "LightSource", "Light Source" })
+    : PropertyOwner({ "LightSource", "Light Source" })
     , _enabled(EnabledInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,101 +27,112 @@
 #include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/defer.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/opengl/programobject.h>
 #include <glm/gtx/projection.hpp>
 #include <optional>
+#include <algorithm>
+#include <cstddef>
+#include <iterator>
+#include <limits>
+#include <memory>
 
 namespace {
+    using namespace openspace;
+
     constexpr int InterpolationSteps = 5;
     constexpr double Epsilon = 1e-4;
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the lines that connect the instrument to the corners of the field "
         "of view.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StandoffDistanceInfo = {
+    constexpr Property::PropertyInfo StandoffDistanceInfo = {
         "StandOffDistance",
         "Standoff distance factor",
         "A standoff distance factor which influences the distance of the plane to the "
         "focus object. If the value is 1, the field of view will be rendered exactly on "
         "the surface of, for example, a planet. With a value of smaller than 1, the "
         "field of view will hover of the surface, thus making it more visible.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AlwaysDrawFovInfo = {
+    constexpr Property::PropertyInfo AlwaysDrawFovInfo = {
         "AlwaysDrawFov",
         "Always draw FOV",
         "If enabled, the field of view will always be drawn, regardless of whether image "
         "information is currently available or not.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DefaultStartColorInfo = {
+    constexpr Property::PropertyInfo DefaultStartColorInfo = {
         "DefaultStart",
         "Default start",
         "The color that is used for the field of view frustum close to the instrument. "
         "The final colors are interpolated between this value and the end color.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorDefaultEndInfo = {
+    constexpr Property::PropertyInfo ColorDefaultEndInfo = {
         "DefaultEnd",
         "Default end",
         "The color that is used for the field of view frustum close to the target. The "
         "final colors are interpolated between this value and the start color.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorActiveInfo = {
+    constexpr Property::PropertyInfo ColorActiveInfo = {
         "Active",
         "Active",
         "The color that is used when the instrument's field of view is active.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorTargetInFovInfo = {
+    constexpr Property::PropertyInfo ColorTargetInFovInfo = {
         "TargetInFieldOfView",
         "Target in field of view",
         "The color that is used if the target is inside the field of view of the "
         "instrument but the instrument is not yet active.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorIntersectionStartInfo = {
+    constexpr Property::PropertyInfo ColorIntersectionStartInfo = {
         "IntersectionStart",
         "Intersection start",
         "The color that is used close to the instrument if one of the field of view "
-        "corners are intersecting the target object. The final color is an "
-        "interpolation of this color and the intersection end color.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "corners are intersecting the target object. The final color is an interpolation "
+        "of this color and the intersection end color.",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorIntersectionEndInfo = {
+    constexpr Property::PropertyInfo ColorIntersectionEndInfo = {
         "IntersectionEnd",
         "Intersection end",
         "The color that is used close to the target if one of the field of view corners "
         "is intersecting the target object. The final color is an interpolation of this "
         "color and the intersection begin color.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SquareColorInfo = {
+    constexpr Property::PropertyInfo SquareColorInfo = {
         "Square",
         "Orthogonal square",
         "The color that is used for the field of view square when there is no "
         "intersection and that the instrument is not currently active.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     template <typename Func>
@@ -189,13 +200,13 @@ namespace {
         // two neighboring vectors. This value is disabled by default.
         std::optional<bool> simplifyBounds;
     };
-#include "renderablefov_codegen.cpp"
 } // namespace
+#include "renderablefov_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableFov::Documentation() {
-    return codegen::doc<Parameters>("spacecraftinstruments_renderablefieldofview");
+Documentation RenderableFov::Documentation() {
+    return codegen::doc<Parameters>("spacecraftinstruments_renderable_fieldofview");
 }
 
 RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
@@ -204,29 +215,49 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     , _standOffDistance(StandoffDistanceInfo, 0.9999, 0.99, 1.0, 0.000001)
     , _alwaysDrawFov(AlwaysDrawFovInfo, false)
     , _colors({
-        properties::PropertyOwner({"Colors", "Colors"}),
-        { DefaultStartColorInfo, glm::vec3(0.4f), glm::vec3(0.f), glm::vec3(1.f) },
-        { ColorDefaultEndInfo, glm::vec3(0.85f), glm::vec3(0.f), glm::vec3(1.f) },
-        { ColorActiveInfo, glm::vec3(0.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f) },
-        {
+        .container = PropertyOwner({"Colors", "Colors"}),
+        .defaultStart = Vec3Property(
+            DefaultStartColorInfo,
+            glm::vec3(0.4f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        ),
+        .defaultEnd = Vec3Property(
+            ColorDefaultEndInfo,
+            glm::vec3(0.85f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        ),
+        .active = Vec3Property(
+            ColorActiveInfo,
+            glm::vec3(0.f, 1.f, 0.f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        ),
+        .targetInFieldOfView = Vec3Property(
             ColorTargetInFovInfo,
             glm::vec3(0.f, 0.5f, 0.7f),
             glm::vec3(0.f),
             glm::vec3(1.f)
-        },
-        {
+        ),
+        .intersectionStart = Vec3Property(
             ColorIntersectionStartInfo,
             glm::vec3(1.f, 0.89f, 0.f),
             glm::vec3(0.f),
             glm::vec3(1.f)
-        },
-        {
+        ),
+        .intersectionEnd = Vec3Property(
             ColorIntersectionEndInfo,
             glm::vec3(1.f, 0.29f, 0.f),
             glm::vec3(0.f),
             glm::vec3(1.f)
-        },
-        { SquareColorInfo, glm::vec3(0.85f), glm::vec3(0.f), glm::vec3(1.f) }
+        ),
+        .square = Vec3Property(
+            SquareColorInfo,
+            glm::vec3(0.85f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        )
     })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -262,22 +293,13 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 
     _simplifyBounds = p.simplifyBounds.value_or(_simplifyBounds);
 
-    _colors.defaultStart.setViewOption(properties::Property::ViewOptions::Color, true);
-    _colors.defaultEnd.setViewOption(properties::Property::ViewOptions::Color, true);
-    _colors.active.setViewOption(properties::Property::ViewOptions::Color, true);
-    _colors.targetInFieldOfView.setViewOption(
-        properties::Property::ViewOptions::Color,
-        true
-    );
-    _colors.intersectionStart.setViewOption(
-        properties::Property::ViewOptions::Color,
-        true
-    );
-    _colors.intersectionEnd.setViewOption(properties::Property::ViewOptions::Color, true);
-    _colors.square.setViewOption(
-        properties::Property::ViewOptions::Color,
-        true
-    );
+    _colors.defaultStart.setViewOption(Property::ViewOptions::Color, true);
+    _colors.defaultEnd.setViewOption(Property::ViewOptions::Color, true);
+    _colors.active.setViewOption(Property::ViewOptions::Color, true);
+    _colors.targetInFieldOfView.setViewOption(Property::ViewOptions::Color, true);
+    _colors.intersectionStart.setViewOption(Property::ViewOptions::Color, true);
+    _colors.intersectionEnd.setViewOption(Property::ViewOptions::Color, true);
+    _colors.square.setViewOption(Property::ViewOptions::Color, true);
     _colors.container.addProperty(_colors.defaultStart);
     _colors.container.addProperty(_colors.defaultEnd);
     _colors.container.addProperty(_colors.active);
@@ -376,65 +398,68 @@ void RenderableFov::initializeGL() {
     _fieldOfViewBounds.data.resize(2 * _instrument.bounds.size());
 
     // Field of view boundaries
-    glGenVertexArrays(1, &_fieldOfViewBounds.vao);
-    glBindVertexArray(_fieldOfViewBounds.vao);
-    glGenBuffers(1, &_fieldOfViewBounds.vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, _fieldOfViewBounds.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glCreateBuffers(1, &_fieldOfViewBounds.vbo);
+    glNamedBufferData(
+        _fieldOfViewBounds.vbo,
         _fieldOfViewBounds.data.size() * sizeof(RenderInformation::VBOData),
         nullptr,
         GL_STREAM_DRAW
     );
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
+
+    glCreateVertexArrays(1, &_fieldOfViewBounds.vao);
+    glVertexArrayVertexBuffer(
+        _fieldOfViewBounds.vao,
         0,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(RenderInformation::VBOData),
-        nullptr
+        _fieldOfViewBounds.vbo,
+        0,
+        sizeof(RenderInformation::VBOData)
     );
-    glEnableVertexAttribArray(1);
-    glVertexAttribIPointer(
+
+    glEnableVertexArrayAttrib(_fieldOfViewBounds.vao, 0);
+    glVertexArrayAttribFormat(_fieldOfViewBounds.vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_fieldOfViewBounds.vao, 0, 0);
+
+    glEnableVertexArrayAttrib(_fieldOfViewBounds.vao, 1);
+    glVertexArrayAttribIFormat(
+        _fieldOfViewBounds.vao,
         1,
         1,
         GL_INT,
-        sizeof(RenderInformation::VBOData),
-        reinterpret_cast<void*>(offsetof(RenderInformation::VBOData, color))
+        offsetof(RenderInformation::VBOData, color)
     );
+    glVertexArrayAttribBinding(_fieldOfViewBounds.vao, 1, 0);
 
     // Orthogonal Plane
-    glGenVertexArrays(1, &_orthogonalPlane.vao);
-    glGenBuffers(1, &_orthogonalPlane.vbo);
-    glBindVertexArray(_orthogonalPlane.vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _orthogonalPlane.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glCreateBuffers(1, &_orthogonalPlane.vbo);
+    glNamedBufferData(
+        _orthogonalPlane.vbo,
         _orthogonalPlane.data.size() * sizeof(RenderInformation::VBOData),
         nullptr,
         GL_STREAM_DRAW
     );
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
+    glCreateVertexArrays(1, &_orthogonalPlane.vao);
+    glVertexArrayVertexBuffer(
+        _orthogonalPlane.vao,
         0,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(RenderInformation::VBOData),
-        nullptr
+        _orthogonalPlane.vbo,
+        0,
+        sizeof(RenderInformation::VBOData)
     );
-    glEnableVertexAttribArray(1);
-    glVertexAttribIPointer(
+
+    glEnableVertexArrayAttrib(_orthogonalPlane.vao, 0);
+    glVertexArrayAttribFormat(_orthogonalPlane.vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_orthogonalPlane.vao, 0, 0);
+
+    glEnableVertexArrayAttrib(_orthogonalPlane.vao, 1);
+    glVertexArrayAttribIFormat(
+        _orthogonalPlane.vao,
         1,
         1,
         GL_INT,
-        sizeof(RenderInformation::VBOData),
-        reinterpret_cast<void*>(offsetof(RenderInformation::VBOData, color))
+        offsetof(RenderInformation::VBOData, color)
     );
-
-    glBindVertexArray(0);
+    glVertexArrayAttribBinding(_orthogonalPlane.vao, 1, 0);
 }
 
 void RenderableFov::deinitializeGL() {
@@ -457,7 +482,9 @@ bool RenderableFov::isReady() const {
     return _program && !_instrument.bounds.empty();
 }
 
-// Orthogonal projection next to planets surface
+/**
+ * Orthogonal projection next to planets surface.
+ */
 glm::dvec3 RenderableFov::orthogonalProjection(const glm::dvec3& vecFov, double time,
                                                const std::string& target) const
 {
@@ -489,14 +516,14 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
     auto makeBodyFixedReferenceFrame =
         [&target](const std::string& ref) -> std::pair<std::string, bool>
     {
-        const bool convert = (ref.find("IAU_") == std::string::npos);
+        const bool convert = !ref.contains("IAU_");
         if (convert) {
             SpacecraftInstrumentsModule* m =
                 global::moduleEngine->module<SpacecraftInstrumentsModule>();
-            return { m->frameFromBody(target), true };
+            return std::pair(m->frameFromBody(target), true);
         }
         else {
-            return { ref, false };
+            return std::pair(ref, false);
         }
     };
 
@@ -548,7 +575,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
                 first.color = RenderInformation::VertexColorTypeIntersectionStart;
 
                 // If we had to convert the reference frame into a body-fixed frame, we
-                // need to apply this change here:
+                // need to apply this change here
                 if (ref.second) {
                     r.surfaceVector = SpiceManager::ref().frameTransformationMatrix(
                         ref.first,
@@ -624,8 +651,8 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
                 ).interceptFound;
             };
 
-            // Computes the intercept vector between the 'probe' and the target
-            // the intercept vector is in meter and contains a standoff distance offset
+            // Computes the intercept vector between the 'probe' and the target the
+            // intercept vector is in meter and contains a standoff distance offset
             auto interceptVector = [&](const glm::dvec3& probe) -> glm::dvec3 {
                 auto ref = makeBodyFixedReferenceFrame(_instrument.referenceFrame);
                 SpiceManager::SurfaceInterceptResult r =
@@ -647,8 +674,8 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
                     ) * r.surfaceVector;
                 }
 
+                // Standoff distance, we would otherwise end up *exactly* on the surface.
                 // Convert the KM scale that SPICE uses to meter
-                // Standoff distance, we would otherwise end up *exactly* on the surface
                 return r.surfaceVector * 1000.0 * _standOffDistance.value();
             };
 
@@ -710,14 +737,13 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
 
                 const glm::dvec3 half = glm::mix(iBound, jBound, 0.5);
                 if (intercepts(half)) {
-                    // The two outer points do not intersect, but the middle point
-                    // does; so we need to find the intersection points
+                    // The two outer points do not intersect, but the middle point does;
+                    // so we need to find the intersection points
                     const double t1 = bisect(half, iBound, intercepts);
                     const double t2 = 0.5 + bisect(half, jBound, intercepts);
 
-                    //
-                    // The target is sticking out somewhere between i and j, so we
-                    // have three regions here:
+                    // The target is sticking out somewhere between i and j, so we have
+                    // three regions here:
                     // The first (0,t1) and second (t2,1) are not intersecting
                     // The third between (t1,t2) is intersecting
                     //
@@ -751,11 +777,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
                     }
                 }
                 else {
-                    copyFieldOfViewValues(
-                        i,
-                        indexForBounds(i),
-                        indexForBounds(i + 1)
-                    );
+                    copyFieldOfViewValues(i, indexForBounds(i), indexForBounds(i + 1));
                 }
                 break;
             }
@@ -830,7 +852,7 @@ void RenderableFov::update(const UpdateData& data) {
         const double t2 = ImageSequencer::ref().nextCaptureTime(data.time.j2000Seconds());
         const double diff = (t2 - data.time.j2000Seconds());
         _interpolationTime = 0.f;
-        const float interpolationStart = 7.f; // seconds before
+        const float interpolationStart = 7.f;
         if (diff <= interpolationStart) {
             _interpolationTime = static_cast<float>(1.f - (diff / interpolationStart));
         }
@@ -866,7 +888,7 @@ std::pair<std::string, bool> RenderableFov::determineTarget(double time) {
 
         if (inFOV) {
             _previousTarget = pt;
-            return { pt, true };
+            return std::pair(pt, true);
         }
     }
 
@@ -904,22 +926,20 @@ std::pair<std::string, bool> RenderableFov::determineTarget(double time) {
         ];
     }
 
-    return { _previousTarget, false };
+    return std::pair(_previousTarget, false);
 }
 
 void RenderableFov::updateGPU() {
     // @SPEEDUP:  Only upload the part of the data that has changed ---abock
-    glBindBuffer(GL_ARRAY_BUFFER, _fieldOfViewBounds.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _fieldOfViewBounds.vbo,
         _fieldOfViewBounds.data.size() * sizeof(RenderInformation::VBOData),
         _fieldOfViewBounds.data.data(),
         GL_STREAM_DRAW
     );
 
-    glBindBuffer(GL_ARRAY_BUFFER, _orthogonalPlane.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _orthogonalPlane.vbo,
         _orthogonalPlane.data.size() * sizeof(RenderInformation::VBOData),
         _orthogonalPlane.data.data(),
         GL_STREAM_DRAW

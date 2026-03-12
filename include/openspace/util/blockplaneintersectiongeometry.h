@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,12 +33,11 @@ namespace openspace {
 
 class BlockPlaneIntersectionGeometry {
 public:
-    // initializers
     BlockPlaneIntersectionGeometry(glm::vec3 blockSize, glm::vec3 planeNormal,
         float planeDistance);
     ~BlockPlaneIntersectionGeometry();
 
-    bool initialize();
+    void initialize();
     void render();
 
     void setBlockSize(glm::vec3 size);
@@ -46,9 +45,9 @@ public:
 
 private:
     void updateVertices();
-    std::vector<float> _vertices;
-    GLuint _vaoId = 0;
-    GLuint _vBufferId = 0;
+    GLsizei _nVertices = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
     glm::vec3 _size = glm::vec3(0.f);
     glm::vec3 _normal = glm::vec3(0.f);
     float _planeDistance = 0.f;

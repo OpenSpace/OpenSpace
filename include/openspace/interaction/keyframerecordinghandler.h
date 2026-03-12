@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,14 +28,15 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/interaction/sessionrecording.h>
-#include <openspace/scripting/lualibrary.h>
 #include <filesystem>
-#include <string>
-#include <vector>
 
-namespace openspace::interaction {
+namespace ghoul { class Dictionary; }
 
-class KeyframeRecordingHandler : public properties::PropertyOwner {
+namespace openspace {
+
+struct LuaLibrary;
+
+class KeyframeRecordingHandler : public PropertyOwner {
 public:
     KeyframeRecordingHandler();
 
@@ -45,13 +46,13 @@ public:
     void removeKeyframe(int index);
     void updateKeyframe(int index);
     void moveKeyframe(int index, double sequenceTime);
-    void saveSequence(std::filesystem::path filename);
+    void saveSequence(std::filesystem::path filename) const;
     void loadSequence(std::filesystem::path filename);
     void play();
     bool hasKeyframeRecording() const;
     std::vector<ghoul::Dictionary> keyframes() const;
 
-    static openspace::scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     SessionRecording _timeline;

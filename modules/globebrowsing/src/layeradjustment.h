@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,12 +31,15 @@
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <functional>
 
-namespace openspace::documentation { struct Documentation; }
+namespace ghoul { class Dictionary; }
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-class LayerAdjustment : public properties::PropertyOwner {
+struct Documentation;
+
+class LayerAdjustment : public PropertyOwner {
 public:
     LayerAdjustment();
     ~LayerAdjustment() override = default;
@@ -50,20 +53,20 @@ public:
 
     void onChange(std::function<void(void)> callback);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void addVisibleProperties();
 
-    properties::Vec3Property _chromaKeyColor;
-    properties::FloatProperty _chromaKeyTolerance;
+    Vec3Property _chromaKeyColor;
+    FloatProperty _chromaKeyTolerance;
 
-    properties::OptionProperty _typeOption;
+    OptionProperty _typeOption;
     layers::Adjustment::ID _typeId;
 
     std::function<void(void)> _onChangeCallback;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__

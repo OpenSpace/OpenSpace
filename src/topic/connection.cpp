@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,8 +53,8 @@
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/socket/socket.h>
-#include <ghoul/io/socket/tcpsocketserver.h>
-#include <ghoul/io/socket/websocketserver.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 
 namespace {
@@ -63,7 +63,6 @@ namespace {
     constexpr std::string_view MessageKeyType = "type";
     constexpr std::string_view MessageKeyPayload = "payload";
     constexpr std::string_view MessageKeyTopic = "topic";
-
 } // namespace
 
 namespace openspace {
@@ -170,14 +169,14 @@ void Connection::handleJson(const nlohmann::json& json) {
         return;
     }
 
-    // The topic id may be an already discussed topic, or a new one.
+    // The topic id may be an already discussed topic, or a new one
     const TopicId topicId = topicJson->get<TopicId>();
     auto topicIt = _topics.find(topicId);
 
     if (topicIt == _topics.end()) {
         ZoneScopedN("New Topic");
 
-        // The topic id is not registered: Initialize a new topic.
+        // The topic id is not registered: Initialize a new topic
         auto typeJson = json.find(MessageKeyType);
         if (typeJson == json.end() || !typeJson->is_string()) {
             LERROR("Type must be specified as a string when a new topic is initialized");
@@ -218,7 +217,7 @@ void Connection::handleJson(const nlohmann::json& json) {
 void Connection::sendMessage(const std::string& message) {
     ZoneScoped;
 
-    std::lock_guard lock(_mutex);
+    const std::unique_lock lock(_mutex);
     _socket->putMessage(message);
 }
 

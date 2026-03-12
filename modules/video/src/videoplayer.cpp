@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,74 +24,83 @@
 
 #include <modules/video/include/videoplayer.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/syncengine.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/openglstatecache.h>
+#include <render_gl.h>
+#include <ghoul/opengl/texture.h>
+#include <cstdlib>
+#include <optional>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "VideoPlayer";
 
-    constexpr openspace::properties::Property::PropertyInfo VideoInfo = {
+    constexpr Property::PropertyInfo VideoInfo = {
         "Video",
         "Video",
         "The video file that is played."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PlayInfo = {
+    constexpr Property::PropertyInfo PlayInfo = {
         "Play",
         "Play",
         "Play video."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PauseInfo = {
+    constexpr Property::PropertyInfo PauseInfo = {
         "Pause",
         "Pause",
         "Pause video."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GoToStartInfo = {
+    constexpr Property::PropertyInfo GoToStartInfo = {
         "GoToStart",
         "Go To start",
         "Sets the time to the beginning of the video and pauses it."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
+    constexpr Property::PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
         "Reloads the video and creates a new texture. This might be useful in case there "
         "was an error loading the video."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AudioInfo = {
+    constexpr Property::PropertyInfo AudioInfo = {
         "PlayAudio",
         "Play audio",
         "Decides whether to play audio when playing back the video."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StartTimeInfo = {
+    constexpr Property::PropertyInfo StartTimeInfo = {
         "StartTime",
         "Start time",
         "The date and time that the video should start in the format "
         "'YYYY MM DD hh:mm:ss'."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EndTimeInfo = {
+    constexpr Property::PropertyInfo EndTimeInfo = {
         "EndTime",
         "End time",
         "The date and time that the video should end in the format "
         "'YYYY MM DD hh:mm:ss'."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LoopVideoInfo = {
+    constexpr Property::PropertyInfo LoopVideoInfo = {
         "LoopVideo",
         "Loop video",
         "If checked, the video is continues playing from the start when it reaches the "
@@ -104,12 +113,6 @@ namespace {
             return false;
         }
         return true;
-    }
-
-    void* getOpenGLProcAddress(void*, const char* name) {
-        return reinterpret_cast<void*>(
-            openspace::global::windowDelegate->openGLProcedureAddress(name)
-        );
     }
 
     struct [[codegen::Dictionary(VideoPlayer)]] Parameters {
@@ -133,13 +136,13 @@ namespace {
             RealTimeLoop
         };
 
-        // The mode of how the video is played back. The Default is `RealTimeLoop`,
-        // which means that the video is played in realtime using the `Play` command
-        // in the user interface.
+        // The mode of how the video is played back. The Default is `RealTimeLoop`, which
+        // means that the video is played in realtime using the `Play` command in the user
+        // interface.
         std::optional<PlaybackMode> playbackMode;
     };
-#include "videoplayer_codegen.cpp"
 } // namespace
+#include "videoplayer_codegen.cpp"
 
 namespace openspace {
 
@@ -231,7 +234,7 @@ void VideoPlayer::commandAsyncMpv(const char* cmd[], MpvKey key) {
     }
 }
 
-documentation::Documentation VideoPlayer::Documentation() {
+Documentation VideoPlayer::Documentation() {
     return codegen::doc<Parameters>("video_videoplayer");
 }
 
@@ -407,7 +410,11 @@ void VideoPlayer::initializeMpv() {
     }
 
     mpv_opengl_init_params glInitParams;
-    glInitParams.get_proc_address = getOpenGLProcAddress;
+    glInitParams.get_proc_address = [](void*, const char* name) -> void* {
+        return reinterpret_cast<void*>(
+            global::windowDelegate->openGLProcedureAddress(name)
+        );
+    };
     glInitParams.get_proc_address_ctx = nullptr;
     int adv = 1; // Use libmpv advanced mode since we will use the update callback
     // Decouple mpv from waiting to get the correct fps. Use with flag video-timing-offset
@@ -429,10 +436,9 @@ void VideoPlayer::initializeMpv() {
         LINFO("Failed to initialize libmpv OpenGL context");
     }
 
-    // When there is a need to call mpv_render_context_update(), which can
-    // request a new frame to be rendered.
-    // (Separate from the normal event handling mechanism for the sake of
-    //  users which run OpenGL on a different thread.)
+    // When there is a need to call mpv_render_context_update(), which can request a new
+    // frame to be rendered. (Separate from the normal event handling mechanism for the
+    // sake of users which run OpenGL on a different thread.)
     mpv_render_context_set_update_callback(_mpvRenderContext, onMpvRenderUpdate, this);
 
     // Load file
@@ -444,7 +450,7 @@ void VideoPlayer::initializeMpv() {
         return;
     }
 
-    glGenFramebuffers(1, &_fbo);
+    glCreateFramebuffers(1, &_fbo);
     // Create FBO to render video into
     createTexture(_videoResolution);
 
@@ -529,12 +535,12 @@ void VideoPlayer::renderMpv() {
 }
 
 void VideoPlayer::renderFrame() {
-    // Save the currently bound fbo
+    // Save the currently bound FBO
     const GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
 
-    // See render_gl.h on what OpenGL environment mpv expects, and other API
-    // details. This function fills the fbo and texture with data, after it
-    // we can get the data on the GPU, not the CPU
+    // See render_gl.h on what OpenGL environment mpv expects, and other API details. This
+    // function fills the fbo and texture with data, after it we can get the data on the
+    // GPU, not the CPU
     const int fboInt = static_cast<int>(_fbo);
     mpv_opengl_fbo mpfbo = {
         fboInt,
@@ -549,8 +555,7 @@ void VideoPlayer::renderFrame() {
         { MPV_RENDER_PARAM_FLIP_Y, &flipY },
         { MPV_RENDER_PARAM_INVALID, nullptr }
     };
-    // This "renders" to the video_framebuffer "linked by ID" in the
-    // params_fbo
+    // This "renders" to the video_framebuffer "linked by ID" in the params_fbo
     mpv_render_context_render(_mpvRenderContext, params);
 
     // We have to set the Viewport on every cycle because
@@ -611,7 +616,7 @@ void VideoPlayer::handleMpvEvents() {
                 break;
             }
             default: {
-                // Ignore uninteresting or unknown events.
+                // Ignore uninteresting or unknown events
                 break;
             }
         }
@@ -631,9 +636,9 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
     if (formats[key] == MPV_FORMAT_NODE) {
         const int result = mpv_event_to_node(&node, event);
         if (!checkMpvError(result)) {
-            LWARNING(
-                std::format("Error getting data from libmpv property: {}", keys[key])
-            );
+            LWARNING(std::format(
+                "Error getting data from libmpv property: {}", keys[key]
+            ));
         }
     }
     else {
@@ -772,8 +777,8 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
 
 void VideoPlayer::destroy() {
     _isDestroying = true;
-    // Destroy the GL renderer and all of the GL objects it allocated. If video
-    // is still running, the video track will be deselected.
+    // Destroy the GL renderer and all of the GL objects it allocated. If video is still
+    // running, the video track will be deselected
     mpv_render_context_free(_mpvRenderContext);
     _mpvRenderContext = nullptr;
     mpv_destroy(_mpvHandle);
@@ -852,36 +857,25 @@ void VideoPlayer::createTexture(glm::ivec2 size) {
     LINFO(std::format("Creating new FBO with width: {} and height: {}", size.x, size.y));
 
     if (size.x <= 0 || size.y <= 0) {
-        LERROR("Cannot create empty fbo");
+        LERROR("Cannot create empty FBO");
         return;
     }
 
     // Update resolution of video
     _videoResolution = size;
 
-    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-
     _frameTexture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(size, 1),
-        GL_TEXTURE_2D
+        ghoul::opengl::Texture::FormatInit {
+            .dimensions = glm::uvec3(size, 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::RGBA,
+            .dataType = GL_UNSIGNED_BYTE
+        },
+        ghoul::opengl::Texture::SamplerInit {}
     );
-    _frameTexture->uploadTexture();
-
-    // Disable mipmaps
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 
     // Bind texture to framebuffer
-    glFramebufferTexture2D(
-        GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT0,
-        GL_TEXTURE_2D,
-        *_frameTexture,
-        0
-    );
-
-    // Unbind FBO
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_frameTexture, 0);
 }
 
 void VideoPlayer::resizeTexture(glm::ivec2 size) {

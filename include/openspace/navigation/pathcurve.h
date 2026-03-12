@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,9 +27,10 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/exception.h>
+#include <string>
 #include <vector>
 
-namespace openspace::interaction {
+namespace openspace {
 
 class Waypoint;
 
@@ -51,9 +52,9 @@ public:
     double length() const;
 
     /**
-     * Compute and return the position along the path at the specified relative
-     * distance. The input parameter should be in range [0, 1], where 1 correspond to
-     * the full length of the path.
+     * Compute and return the position along the path at the specified relative distance.
+     * The input parameter should be in range [0, 1], where 1 correspond to the full
+     * length of the path.
      *
      * Can be overridden by subclasses that want more control over the position
      * interpolation.
@@ -101,8 +102,10 @@ protected:
     double _totalLength = 0.0; // meters
 
     struct ParameterPair {
-        double u; // curve parameter
-        double s; // arc length parameter
+        /// Curve parameter
+        double u;
+        /// Arc length parameter
+        double s;
     };
 
     std::vector<ParameterPair> _parameterSamples;
@@ -116,6 +119,6 @@ public:
     glm::dvec3 interpolate(double u) const override;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___PATHCURVE___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,67 +25,68 @@
 #include <openspace/topic/serverinterface.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/io/socket/socketserver.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/io/socket/websocketserver.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "This setting determines whether this server interface is enabled or not.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
+    constexpr Property::PropertyInfo TypeInfo = {
         "Type",
         "Type",
         "Whether the interface is using a Socket or a WebSocket.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PortInfo = {
+    constexpr Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
         "The network port to use for this sevrer interface.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DefaultAccessInfo = {
+    constexpr Property::PropertyInfo DefaultAccessInfo = {
         "DefaultAccess",
         "Default access",
         "Sets the default access policy: Allow, RequirePassword or Deny.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AllowAddressesInfo = {
+    constexpr Property::PropertyInfo AllowAddressesInfo = {
         "AllowAddresses",
         "Allow addresses",
         "IP addresses or domains that should always be allowed access to this interface.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        RequirePasswordAddressesInfo = {
+    constexpr Property::PropertyInfo RequirePasswordAddressesInfo = {
         "RequirePasswordAddresses",
         "Require password addresses",
         "IP addresses or domains that should be allowed access if they provide a "
         "password.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DenyAddressesInfo = {
+    constexpr Property::PropertyInfo DenyAddressesInfo = {
         "DenyAddresses",
         "Deny addresses",
         "IP addresses or domains that should never be allowed access to this interface.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PasswordInfo = {
+    constexpr Property::PropertyInfo PasswordInfo = {
         "Password",
         "Password",
         "Password for connecting to this interface.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ServerInterface)]] Parameters {
@@ -125,8 +126,8 @@ namespace {
         // [[codegen::verbatim(EnabledInfo.description)]]
         bool enabled;
     };
-#include "serverinterface_codegen.cpp"
 } // namespace
+#include "serverinterface_codegen.cpp"
 
 namespace openspace {
 
@@ -139,7 +140,7 @@ std::unique_ptr<ServerInterface> ServerInterface::createFromDictionary(
 }
 
 ServerInterface::ServerInterface(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "", "", "" })
+    : PropertyOwner({ "", "", "" })
     , _socketType(TypeInfo)
     , _port(PortInfo, 0)
     , _enabled(EnabledInfo)
@@ -151,27 +152,15 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _socketType.addOption(
-        static_cast<int>(InterfaceType::TcpSocket),
-        "TcpSocket"
-    );
-    _socketType.addOption(
-        static_cast<int>(InterfaceType::WebSocket),
-        "WebSocket"
-    );
+    _socketType.addOption(static_cast<int>(InterfaceType::TcpSocket), "TcpSocket");
+    _socketType.addOption(static_cast<int>(InterfaceType::WebSocket), "WebSocket");
 
-    _defaultAccess.addOption(
-        static_cast<int>(Access::Deny),
-        "Deny"
-    );
+    _defaultAccess.addOption(static_cast<int>(Access::Deny), "Deny");
     _defaultAccess.addOption(
         static_cast<int>(Access::RequirePassword),
         "RequirePassword"
     );
-    _defaultAccess.addOption(
-        static_cast<int>(Access::Allow),
-        "Allow"
-    );
+    _defaultAccess.addOption(static_cast<int>(Access::Allow), "Allow");
 
     if (p.defaultAccess.has_value()) {
         switch (*p.defaultAccess) {
@@ -267,7 +256,7 @@ std::string ServerInterface::password() const {
 }
 
 bool ServerInterface::clientHasAccessWithoutPassword(
-    const std::string& clientAddress) const
+                                                   const std::string& clientAddress) const
 {
     for (const std::string& address : _allowAddresses.value()) {
         if (clientAddress == address) {

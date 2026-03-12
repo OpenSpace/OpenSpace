@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,35 +24,38 @@
 
 #include <openspace/util/resourcesynchronization.h>
 
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
 #include <fstream>
+#include <utility>
 
 namespace {
     struct [[codegen::Dictionary(ResourceSynchronization)]] Parameters {
         // This key specifies the type of ResourceSyncrhonization that gets created. It
         // has to be one of the valid ResourceSyncrhonizations that are available for
         // creation (see the FactoryDocumentation for a list of possible
-        // ResourceSyncrhonizations), which depends on the configration of the application
+        // ResourceSyncrhonizations), which depends on the configration of the
+        // application.
         std::string type
             [[codegen::annotation("A ResourceSynchronization created by a factory")]];
 
         // A unique identifier that is used to reference this specific
-        // ResourceSynchronization object
+        // ResourceSynchronization object.
         std::string identifier [[codegen::identifier()]];
 
-        // A user readable name of this synchronization
+        // A user readable name of this synchronization.
         std::string name;
     };
-#include "resourcesynchronization_codegen.cpp"
 } // namespace
+#include "resourcesynchronization_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ResourceSynchronization::Documentation() {
-    return codegen::doc<Parameters>("resourceSynchronization");
+Documentation ResourceSynchronization::Documentation() {
+    return codegen::doc<Parameters>("core_synchronization");
 }
 
 std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDictionary(

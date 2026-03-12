@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,11 +30,11 @@
 #include <ghoul/glm.h>
 #include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 class Mat4Property : public NumericalProperty<glm::mat4> {
 public:
-    Mat4Property(Property::PropertyInfo info, glm::mat4 value = glm::mat4(),
+    explicit Mat4Property(PropertyInfo info, glm::mat4 value = glm::mat4(0.f),
         glm::mat4 minValue =
             ghoul::createFillMat4x4<float>(std::numeric_limits<float>::lowest()),
         glm::mat4 maxValue =
@@ -53,6 +53,6 @@ private:
     glm::mat4 toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___MAT4PROPERTY___H__

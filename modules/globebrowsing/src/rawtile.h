@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,15 +28,12 @@
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/tileindex.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
-#include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <cstddef>
 #include <memory>
 #include <optional>
 
-namespace openspace::globebrowsing {
-
-class TileTextureInitData;
+namespace openspace {
 
 struct RawTile {
     enum class ReadError {
@@ -55,6 +52,6 @@ struct RawTile {
     GLuint pbo = 0;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___RAWTILE___H__

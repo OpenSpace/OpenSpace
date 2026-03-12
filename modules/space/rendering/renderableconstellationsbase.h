@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,22 +27,13 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/selectionproperty.h>
-#include <openspace/properties/vector/vec3property.h>
-#include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/rendering/labelscomponent.h>
-#include <openspace/util/distanceconversion.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <map>
-#include <vector>
-
-namespace ghoul::opengl { class ProgramObject; }
+#include <memory>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 /**
  * This is a base class for constellation lines and bounds.
@@ -51,15 +42,15 @@ class RenderableConstellationsBase : public Renderable {
 public:
     virtual ~RenderableConstellationsBase() override = default;
 
-    virtual void initialize() override;
-    virtual void initializeGL() override = 0;
-    virtual void deinitializeGL() override = 0;
+    void initialize() override;
+    void initializeGL() override = 0;
+    void deinitializeGL() override = 0;
 
-    virtual bool isReady() const override;
+    bool isReady() const override;
 
-    virtual void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     explicit RenderableConstellationsBase(const ghoul::Dictionary& dictionary);
@@ -75,10 +66,10 @@ protected:
     std::string constellationFullName(const std::string& identifier) const;
 
     /// Width for the rendered lines
-    properties::FloatProperty _lineWidth;
+    FloatProperty _lineWidth;
 
     /// Property that stores all constellations chosen by the user to be drawn
-    properties::SelectionProperty _selection;
+    SelectionProperty _selection;
 
     /// Temporary storage of which constellations should be rendered as stated in the
     /// asset file
@@ -86,6 +77,7 @@ protected:
 
     /// Labels
     bool _hasLabels = false;
+
     /// Everything related to the labels is handled by LabelsComponent
     std::unique_ptr<LabelsComponent> _labels;
 
@@ -106,7 +98,7 @@ private:
     void fillSelectionProperty();
 
     /// The file containing constellation names and abbreviations
-    properties::StringProperty _namesFilename;
+    StringProperty _namesFilename;
 };
 
 } // namespace openspace

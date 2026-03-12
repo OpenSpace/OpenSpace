@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,20 +24,19 @@
 
 #include <openspace/properties/misc/selectionproperty.h>
 
-#include <openspace/json.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
-#include <string>
+#include <algorithm>
 
 namespace {
     constexpr std::string_view _loggerCat = "SelectionProperty";
     constexpr std::string_view OptionsKey = "options";
 } // namespace
 
-namespace openspace::properties {
+namespace openspace {
 
-SelectionProperty::SelectionProperty(Property::PropertyInfo info)
+SelectionProperty::SelectionProperty(PropertyInfo info)
     : TemplateProperty(std::move(info), std::set<std::string>())
 {}
 
@@ -171,4 +170,4 @@ nlohmann::json SelectionProperty::generateAdditionalJsonDescription() const {
     return { { OptionsKey, optionsJson } };
 }
 
-} // namespace openspace::properties
+} // namespace openspace

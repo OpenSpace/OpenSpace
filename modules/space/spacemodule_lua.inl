@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,7 +23,10 @@
  ****************************************************************************************/
 
 #include <modules/space/kepler.h>
+#include <openspace/util/coordinateconversion.h>
 #include <ghoul/lua/lua_helper.h>
+
+using namespace openspace;
 
 namespace {
 
@@ -37,8 +40,6 @@ namespace {
                                             std::variant<double, std::string> declination,
                                                                           double distance)
 {
-    using namespace openspace;
-
     glm::dvec2 degrees = glm::dvec2(0.0);
     if (std::holds_alternative<double>(rightAscension) &&
         std::holds_alternative<double>(declination))
@@ -74,7 +75,6 @@ namespace {
                                                                                  double y,
                                                                                  double z)
 {
-    using namespace openspace;
     glm::dvec3 deg = galacticCartesianToIcrs(x, y, z);
     std::pair<std::string, std::string> raDecPair = decimalDegreesToIcrs(deg.x, deg.y);
     return { raDecPair.first, raDecPair.second, deg.z };
@@ -83,24 +83,24 @@ namespace {
 [[codegen::luawrap]]
 std::vector<ghoul::Dictionary> readKeplerFile(std::filesystem::path p, std::string type)
 {
-    openspace::kepler::Format f;
+    kepler::Format f;
     if (type == "TLE") {
-        f = openspace::kepler::Format::TLE;
+        f = kepler::Format::TLE;
     }
     else if (type == "OMM") {
-        f = openspace::kepler::Format::OMM;
+        f = kepler::Format::OMM;
     }
     else if (type == "SBDB") {
-        f = openspace::kepler::Format::SBDB;
+        f = kepler::Format::SBDB;
     }
     else {
         throw ghoul::lua::LuaError(std::format("Unsupported format '{}'", type));
     }
 
-    std::vector<openspace::kepler::Parameters> params = openspace::kepler::readFile(p, f);
+    std::vector<kepler::Parameters> params = kepler::readFile(p, f);
     std::vector<ghoul::Dictionary> res;
     res.reserve(params.size());
-    for (const openspace::kepler::Parameters& param : params) {
+    for (const kepler::Parameters& param : params) {
         ghoul::Dictionary d;
         d.setValue("Name", param.name);
         d.setValue("ID", param.id);
@@ -117,6 +117,6 @@ std::vector<ghoul::Dictionary> readKeplerFile(std::filesystem::path p, std::stri
     return res;
 }
 
-#include "spacemodule_lua_codegen.cpp"
-
 } // namespace
+
+#include "spacemodule_lua_codegen.cpp"

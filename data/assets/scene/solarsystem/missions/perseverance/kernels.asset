@@ -1,4 +1,5 @@
 local coreKernels = asset.require("spice/core")
+local marsKernels = asset.require("scene/solarsystem/planets/mars/kernels")
 
 
 
@@ -28,7 +29,7 @@ local Kernels = {
 local ID = {
   Perseverance = -168,
 
-  Mars = coreKernels.ID.Mars,
+  Mars = marsKernels.ID.Mars,
   MarsBarycenter = coreKernels.ID.MarsBarycenter
 }
 

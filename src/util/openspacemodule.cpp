@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>
 #include <filesystem>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "OpenSpaceModule";
@@ -42,7 +43,7 @@ namespace {
 namespace openspace {
 
 OpenSpaceModule::OpenSpaceModule(std::string name)
-    : properties::PropertyOwner({ std::move(name) })
+    : PropertyOwner({ std::move(name) })
 {}
 
 void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
@@ -51,7 +52,7 @@ void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
 
     const std::string upperIdentifier = ghoul::toUpperCase(identifier());
 
-    std::string moduleToken = "${" + std::string(ModuleBaseToken) + upperIdentifier + "}";
+    std::string moduleToken = std::format("${{{}{}}}", ModuleBaseToken, upperIdentifier);
 
     std::filesystem::path path = modulePath();
     if (!path.empty()) {
@@ -84,19 +85,19 @@ void OpenSpaceModule::deinitializeGL() {
     internalDeinitializeGL();
 }
 
-std::vector<documentation::Documentation> OpenSpaceModule::documentations() const {
+std::vector<Documentation> OpenSpaceModule::documentations() const {
     return {};
 }
 
-documentation::Documentation OpenSpaceModule::Documentation() {
+Documentation OpenSpaceModule::Documentation() {
     return {};
 }
 
-scripting::LuaLibrary OpenSpaceModule::luaLibrary() const {
+LuaLibrary OpenSpaceModule::luaLibrary() const {
     return {};
 }
 
-std::vector<scripting::LuaLibrary> OpenSpaceModule::luaLibraries() const {
+std::vector<LuaLibrary> OpenSpaceModule::luaLibraries() const {
     return {};
 }
 

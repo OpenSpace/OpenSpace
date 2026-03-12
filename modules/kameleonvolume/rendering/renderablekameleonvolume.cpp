@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,115 +24,114 @@
 
 #include <modules/kameleonvolume/rendering/renderablekameleonvolume.h>
 
-#include <modules/volume/rendering/basicvolumeraycaster.h>
-#include <modules/volume/rawvolume.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/kameleonvolume/kameleonvolumereader.h>
+#include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
 #include <modules/volume/rendering/basicvolumeraycaster.h>
 #include <modules/volume/rendering/volumeclipplanes.h>
-#include <modules/volume/transferfunctionhandler.h>
 #include <modules/volume/volumegridtype.h>
-#include <openspace/engine/globals.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
-#include <filesystem>
+#include <array>
+#include <optional>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableKameleonVolume";
 
-    constexpr openspace::properties::Property::PropertyInfo DimensionsInfo = {
+    constexpr Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
         "Dimensions",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo VariableInfo = {
+    constexpr Property::PropertyInfo VariableInfo = {
         "Variable",
         "Variable",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LowerDomainBoundInfo = {
+    constexpr Property::PropertyInfo LowerDomainBoundInfo = {
         "LowerDomainBound",
         "Lower domain bound",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UpperDomainBoundInfo = {
+    constexpr Property::PropertyInfo UpperDomainBoundInfo = {
         "UpperDomainBound",
         "Upper domain bound",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DomainScaleInfo = {
+    constexpr Property::PropertyInfo DomainScaleInfo = {
         "DomainScale",
         "Domain scale",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LowerValueBoundInfo = {
+    constexpr Property::PropertyInfo LowerValueBoundInfo = {
         "LowerValueBound",
         "Lower value bound",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UpperValueBoundInfo = {
+    constexpr Property::PropertyInfo UpperValueBoundInfo = {
         "UpperValueBound",
         "Upper value bound",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GridTypeInfo = {
+    constexpr Property::PropertyInfo GridTypeInfo = {
         "GridType",
         "Grid type",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    constexpr Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SourcePathInfo = {
+    constexpr Property::PropertyInfo SourcePathInfo = {
         "SourcePath",
         "Source path",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
+    constexpr Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunctionPath",
         "Transfer function path",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CacheInfo = {
+    constexpr Property::PropertyInfo CacheInfo = {
         "Cache",
         "Cache",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(RenderableKameleonVolume)]] Parameters {
@@ -177,10 +176,10 @@ namespace {
         };
         std::optional<GridType> gridType;
     };
-#include "renderablekameleonvolume_codegen.cpp"
 } // namespace
+#include "renderablekameleonvolume_codegen.cpp"
 
-namespace openspace::kameleonvolume {
+namespace openspace {
 
 RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -204,7 +203,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
 
     if (p.transferFunction.has_value()) {
         _transferFunctionPath = p.transferFunction->string();
-        _transferFunction = std::make_shared<openspace::TransferFunction>(
+        _transferFunction = std::make_shared<TransferFunction>(
             _transferFunctionPath.value()
         );
     }
@@ -226,7 +225,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     _autoValueBounds = !p.lowerValueBound.has_value() || !p.upperValueBound.has_value();
 
 
-    _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(
+    _clipPlanes = std::make_shared<VolumeClipPlanes>(
         p.clipPlanes.value_or(ghoul::Dictionary())
     );
     _clipPlanes->setIdentifier("clipPlanes");
@@ -234,22 +233,16 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
 
     _cache = p.cache.value_or(_cache);
 
-    _gridType.addOption(
-        static_cast<int>(volume::VolumeGridType::Cartesian),
-        "Cartesian grid"
-    );
-    _gridType.addOption(
-        static_cast<int>(volume::VolumeGridType::Spherical),
-        "Spherical grid"
-    );
+    _gridType.addOption(static_cast<int>(VolumeGridType::Cartesian), "Cartesian grid");
+    _gridType.addOption(static_cast<int>(VolumeGridType::Spherical), "Spherical grid");
 
     Parameters::GridType type = p.gridType.value_or(Parameters::GridType::Cartesian);
     switch (type) {
         case Parameters::GridType::Cartesian:
-            _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
+            _gridType.setValue(static_cast<int>(VolumeGridType::Cartesian));
             break;
         case Parameters::GridType::Spherical:
-            _gridType.setValue(static_cast<int>(volume::VolumeGridType::Spherical));
+            _gridType.setValue(static_cast<int>(VolumeGridType::Spherical));
             break;
     }
     _autoGridType = !p.gridType.has_value();
@@ -260,9 +253,7 @@ RenderableKameleonVolume::~RenderableKameleonVolume() {}
 void RenderableKameleonVolume::initializeGL() {
     load();
 
-    _volumeTexture->uploadTexture();
-
-    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
+    _raycaster = std::make_unique<BasicVolumeRaycaster>(
         _volumeTexture,
         _transferFunction,
         _clipPlanes
@@ -270,9 +261,9 @@ void RenderableKameleonVolume::initializeGL() {
 
     _raycaster->setStepSize(_stepSize);
     _gridType.onChange([this]() { _raycaster->setStepSize(_stepSize); });
-    _raycaster->setGridType(static_cast<volume::VolumeGridType>(_gridType.value()));
+    _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
     _gridType.onChange([this]() {
-        _raycaster->setGridType(static_cast<volume::VolumeGridType>(_gridType.value()));
+        _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
     });
 
     updateRaycasterModelTransform();
@@ -367,13 +358,13 @@ void RenderableKameleonVolume::loadFromPath(const std::string& path) {
 }
 
 void RenderableKameleonVolume::loadRaw(const std::filesystem::path& path) {
-    volume::RawVolumeReader<float> reader(path, _dimensions);
+    RawVolumeReader<float> reader = RawVolumeReader<float>(path, _dimensions);
     _rawVolume = reader.read();
     updateTextureFromVolume();
 }
 
 void RenderableKameleonVolume::loadCdf(const std::string& path) {
-    KameleonVolumeReader reader(path);
+    KameleonVolumeReader reader = KameleonVolumeReader(path);
 
     if (_autoValueBounds) {
         _lowerValueBound = static_cast<float>(reader.minValue(_variable));
@@ -398,10 +389,10 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
 
     if (_autoGridType) {
         if (variables[0] == "r" && variables[1] == "theta" && variables[2] == "phi") {
-            _gridType.setValue(static_cast<int>(volume::VolumeGridType::Spherical));
+            _gridType.setValue(static_cast<int>(VolumeGridType::Spherical));
         }
         else {
-            _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
+            _gridType.setValue(static_cast<int>(VolumeGridType::Cartesian));
         }
     }
 
@@ -416,32 +407,30 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
 }
 
 void RenderableKameleonVolume::updateTextureFromVolume() {
-    _normalizedVolume = std::make_unique<volume::RawVolume<GLfloat>>(_dimensions);
+    _normalizedVolume = std::make_unique<RawVolume<GLfloat>>(_dimensions);
     float* in = _rawVolume->data();
     GLfloat* out = _normalizedVolume->data();
     float min = _lowerValueBound;
     float diff = _upperValueBound - _lowerValueBound;
 
     for (size_t i = 0; i < _normalizedVolume->nCells(); i++) {
-        out[i] = glm::clamp((in[i] - min) / diff, 0.f, 1.f);
+        out[i] = std::clamp((in[i] - min) / diff, 0.f, 1.f);
     }
 
     _volumeTexture = std::make_shared<ghoul::opengl::Texture>(
-        _dimensions,
-        GL_TEXTURE_3D,
-        ghoul::opengl::Texture::Format::Red,
-        GL_RED,
-        GL_FLOAT,
-        ghoul::opengl::Texture::FilterMode::Linear,
-        ghoul::opengl::Texture::WrappingMode::Repeat
+        ghoul::opengl::Texture::FormatInit {
+            .dimensions = _dimensions,
+            .type = GL_TEXTURE_3D,
+            .format = ghoul::opengl::Texture::Format::Red,
+            .dataType = GL_FLOAT
+        },
+        ghoul::opengl::Texture::SamplerInit {},
+        reinterpret_cast<std::byte*>(_normalizedVolume->data())
     );
-
-    void* data = reinterpret_cast<void*>(_normalizedVolume->data());
-    _volumeTexture->setPixelData(data, ghoul::opengl::Texture::TakeOwnership::No);
 }
 
 void RenderableKameleonVolume::storeRaw(const std::filesystem::path& path) {
-    volume::RawVolumeWriter<float> writer(path);
+    RawVolumeWriter<float> writer = RawVolumeWriter<float>(path);
     writer.write(*_rawVolume);
 }
 
@@ -463,7 +452,7 @@ void RenderableKameleonVolume::update(const UpdateData&) {
 }
 
 void RenderableKameleonVolume::render(const RenderData& data, RendererTasks& tasks) {
-    tasks.raycasterTasks.push_back({ _raycaster.get(), data });
+    tasks.raycasterTasks.push_back({ .raycaster = _raycaster.get(), .renderData = data });
 }
 
-}  // openspace::kameleonvolume
+} // namespace openspace

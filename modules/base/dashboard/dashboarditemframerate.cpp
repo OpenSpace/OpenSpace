@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,16 +25,18 @@
 #include <modules/base/dashboard/dashboarditemframerate.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <ghoul/font/font.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <optional>
+#include <algorithm>
 
 namespace {
+    using namespace openspace;
+
     enum FrametimeType {
         DtTime = 0,
         DtTimeAvg,
@@ -45,19 +47,19 @@ namespace {
         FPSAvg
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FrametimeInfo = {
+    constexpr Property::PropertyInfo FrametimeInfo = {
         "FrametimeType",
         "Type of the frame time display",
         "This value determines the units in which the frame time is displayed.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ClearCacheInfo = {
+    constexpr Property::PropertyInfo ClearCacheInfo = {
         "ClearCache",
         "Clear cache",
         "Clears the cache of this DashboardItemFramerate item. If the selected option "
         "does not use any caching, this trigger does not do anything.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     [[nodiscard]] char* formatDt(std::vector<char>& buffer) {
@@ -84,8 +86,8 @@ namespace {
             buffer.data(),
             "Last frametimes between: {:.2f} and {:.2f} ms\n"
             "Overall between: {:.2f} and {:.2f} ms\0",
-            openspace::global::windowDelegate->minDeltaTime() * 1000.0,
-            openspace::global::windowDelegate->maxDeltaTime() * 1000.0,
+            global::windowDelegate->minDeltaTime() * 1000.0,
+            global::windowDelegate->maxDeltaTime() * 1000.0,
             minFrametimeCache,
             maxFrametimeCache
         );
@@ -95,7 +97,7 @@ namespace {
         return std::format_to(
             buffer.data(),
             "Frametime standard deviation : {:.2f} ms\0",
-            openspace::global::windowDelegate->deltaTimeStandardDeviation() * 1000.0
+            global::windowDelegate->deltaTimeStandardDeviation() * 1000.0
         );
     }
 
@@ -103,8 +105,8 @@ namespace {
         return std::format_to(
             buffer.data(),
             "Frametime coefficient of variation : {:.2f} %\0",
-            openspace::global::windowDelegate->deltaTimeStandardDeviation() /
-            openspace::global::windowDelegate->averageDeltaTime() * 100.0
+            global::windowDelegate->deltaTimeStandardDeviation() /
+            global::windowDelegate->averageDeltaTime() * 100.0
         );
     }
 
@@ -112,7 +114,7 @@ namespace {
         return std::format_to(
             buffer.data(),
             "FPS: {:3.2f}\0",
-            1.0 / openspace::global::windowDelegate->deltaTime()
+            1.0 / global::windowDelegate->deltaTime()
         );
     }
 
@@ -120,14 +122,13 @@ namespace {
         return std::format_to(
             buffer.data(),
             "Avg. FPS: {:3.2f}\0",
-            1.0 / openspace::global::windowDelegate->averageDeltaTime()
+            1.0 / global::windowDelegate->averageDeltaTime()
         );
     }
 
     [[nodiscard]] char* format(std::vector<char>& buffer, FrametimeType frametimeType,
                                        double minFrametimeCache, double maxFrametimeCache)
     {
-        using namespace openspace;
         switch (frametimeType) {
             case FrametimeType::DtTime:
                 return formatDt(buffer);
@@ -153,21 +154,19 @@ namespace {
     // different statistical aspects of the framerate.
     //
     //   - `Deltatime`: Shows the time in milliseconds it took to render the previous
-    //                  frame
+    //     frame
     //   - `Average Deltatime`: Shows the time that it took to render in milliseconds
-    //                          averaged over the last 100 or so frames
+    //     averaged over the last 100 or so frames
     //   - `Deltatime extremes`: Shows the minimum and maximum values of the render time
-    //                           in milliseconds over the last 100 or so frames
+    //     in milliseconds over the last 100 or so frames
     //  - `Deltatime standard deviation`: Shows the standard deviation of the render time
-    //                                    in milliseconds over the last 100 or so frames
+    //    in milliseconds over the last 100 or so frames
     //  - `Deltatime coefficient of variation`: Shows the normalized root-mean-square
-    //                                          deviation of the render time in
-    //                                          milliseconds over the last 100 or so
-    //                                          frames
+    //    deviation of the render time in milliseconds over the last 100 or so frames
     //  - `Frames per second`: Shows the inverse of the delta time it took the render the
-    //                         last frame.
+    //    last frame
     //  - `Average frames per second`: Shows average number of frames that have been
-    //                                 presented over the last 100 or so frames
+    //    presented over the last 100 or so frames
     struct [[codegen::Dictionary(DashboardItemFramerate)]] Parameters {
         enum class [[codegen::map(FrametimeType)]] Type {
             DtTime [[codegen::key("Deltatime")]],
@@ -183,12 +182,12 @@ namespace {
         // [[codegen::verbatim(FrametimeInfo.description)]]
         std::optional<Type> frametimeType;
     };
-#include "dashboarditemframerate_codegen.cpp"
 } // namespace
+#include "dashboarditemframerate_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemFramerate::Documentation() {
+Documentation DashboardItemFramerate::Documentation() {
     return codegen::doc<Parameters>(
         "base_dashboarditem_framerate",
         DashboardTextItem::Documentation()
@@ -226,9 +225,7 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
     }
     addProperty(_frametimeType);
 
-    _clearCache.onChange([this]() {
-        _shouldClearCache = true;
-    });
+    _clearCache.onChange([this]() { _shouldClearCache = true; });
     addProperty(_clearCache);
     _localBuffer.resize(128);
 }

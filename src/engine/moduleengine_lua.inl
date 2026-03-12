@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,14 +24,14 @@
 
 #include <openspace/engine/globals.h>
 
+using namespace openspace;
+
 namespace {
 
 /**
  * Checks whether the passed OpenSpaceModule is loaded.
  */
 [[codegen::luawrap]] bool isLoaded(std::string moduleName) {
-    using namespace openspace;
-
     for (OpenSpaceModule* module : global::moduleEngine->modules()) {
         if (module->identifier() == moduleName) {
             return true;
@@ -40,6 +40,6 @@ namespace {
     return false;
 }
 
-#include "moduleengine_lua_codegen.cpp"
-
 } // namespace
+
+#include "moduleengine_lua_codegen.cpp"

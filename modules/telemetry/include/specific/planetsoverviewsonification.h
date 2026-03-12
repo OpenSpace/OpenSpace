@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,10 @@
 #define __OPENSPACE_MODULE_TELEMETRY___PLANETSOVERVIEWSONIFICATION___H__
 
 #include <modules/telemetry/include/telemetrybase.h>
+
+#include <openspace/properties/scalar/boolproperty.h>
+
+namespace osc { struct Blob; }
 
 namespace openspace {
 
@@ -65,15 +69,15 @@ private:
 
     void onToggleAllChanged();
 
-    properties::BoolProperty _toggleAll;
-    properties::BoolProperty _mercuryEnabled;
-    properties::BoolProperty _venusEnabled;
-    properties::BoolProperty _earthEnabled;
-    properties::BoolProperty _marsEnabled;
-    properties::BoolProperty _jupiterEnabled;
-    properties::BoolProperty _saturnEnabled;
-    properties::BoolProperty _uranusEnabled;
-    properties::BoolProperty _neptuneEnabled;
+    BoolProperty _toggleAll;
+    BoolProperty _mercuryEnabled;
+    BoolProperty _venusEnabled;
+    BoolProperty _earthEnabled;
+    BoolProperty _marsEnabled;
+    BoolProperty _jupiterEnabled;
+    BoolProperty _saturnEnabled;
+    BoolProperty _uranusEnabled;
+    BoolProperty _neptuneEnabled;
 };
 
 } // namespace openspace

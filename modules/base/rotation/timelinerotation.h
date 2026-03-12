@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,10 +32,6 @@
 
 namespace openspace {
 
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
-
 class TimelineRotation : public Rotation {
 public:
     explicit TimelineRotation(const ghoul::Dictionary& dictionary);
@@ -44,11 +40,11 @@ public:
 
     void update(const UpdateData& data) override;
     glm::dmat3 matrix(const UpdateData& data) const override;
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     Timeline<ghoul::mm_unique_ptr<Rotation>> _timeline;
-    properties::BoolProperty _shouldInterpolate;
+    BoolProperty _shouldInterpolate;
 };
 
 } // namespace openspace

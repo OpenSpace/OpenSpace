@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,30 +27,34 @@
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/navigationstate.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/ellipsoid.h>
 #include <openspace/util/updatestructures.h>
+#include <utility>
 
 namespace openspace {
 
 void goToGeodetic2(const SceneGraphNode& globe, Geodetic2 geo) {
     const double altitude = altitudeFromCamera(globe);
-
-    goToGeodetic3(globe, { std::move(geo), altitude });
+    goToGeodetic3(globe, { .geodetic2 = std::move(geo), .height = altitude });
 }
 
 void goToGeodetic3(const SceneGraphNode& sgn, Geodetic3 geo) {
     const glm::dvec3 positionModelSpace = sgn.ellipsoid().cartesianPosition(geo);
 
-    interaction::NavigationState state;
-    state.anchor = sgn.identifier();
-    state.referenceFrame = sgn.identifier();
-    state.position = positionModelSpace;
-    // For globes, we know that the up-direction will always be positive Z.
-    // @TODO (2023-12-06 emmbr) Eventually, we want each scene graph node to be aware of
-    // its own preferred up-direction. At that time, this should no longer be hardcoded
-    state.up = glm::dvec3(0.0, 0.0, 1.0);
-
+    NavigationState state = NavigationState(
+        sgn.identifier(),
+        "",
+        sgn.identifier(),
+        positionModelSpace,
+        // For globes, we know that the up-direction will always be positive Z
+        // @TODO (2023-12-06 emmbr) Eventually, we want each scene graph node to be aware
+        // of its own preferred up-direction. At that time, this should no longer be
+        // hardcoded
+        glm::dvec3(0.0, 0.0, 1.0)
+    );
     global::navigationHandler->setNavigationStateNextFrame(state);
 }
 
@@ -58,8 +62,8 @@ glm::vec3 cartesianCoordinatesFromGeo(const SceneGraphNode& sgn, double latitude
                                       double longitude, std::optional<double> altitude)
 {
     const Geodetic3 pos = {
-        {.lat = glm::radians(latitude), .lon = glm::radians(longitude) },
-        altitude.value_or(altitudeFromCamera(sgn))
+        .geodetic2 = { .lat = glm::radians(latitude), .lon = glm::radians(longitude) },
+        .height = altitude.value_or(altitudeFromCamera(sgn))
     };
     return glm::vec3(sgn.ellipsoid().cartesianPosition(pos));
 }
@@ -74,7 +78,7 @@ glm::dvec3 geoPositionFromCamera() {
         return glm::dvec3(0.0);
     }
 
-    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
+    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->position();
     const glm::dmat4 inverseModelTransform = glm::inverse(n->modelTransform());
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
@@ -111,7 +115,7 @@ glm::dvec3 geoViewFromCamera() {
     const glm::dmat4 inverseModelTransform = glm::inverse(n->modelTransform());
 
     // Get the position of the camera in model space
-    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
+    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->position();
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
 
@@ -173,7 +177,7 @@ glm::dvec2 subSolarCoordinates() {
 }
 
 double altitudeFromCamera(const SceneGraphNode& sgn, bool useHeightMap) {
-    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
+    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->position();
 
     const glm::dmat4 inverseModelTransform = glm::inverse(sgn.modelTransform());
 

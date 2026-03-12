@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,6 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/stringhelper.h>
+
+using namespace openspace;
+
 namespace {
 
 /**
@@ -33,7 +40,6 @@ namespace {
                                              ghoul::Dictionary transitions,
                                              std::optional<std::string> startState)
 {
-    using namespace openspace;
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     module->initializeStateMachine(
         std::move(states),
@@ -42,9 +48,10 @@ namespace {
     );
 }
 
-// Destroys the current state machine and deletes all the memory.
+/**
+ * Destroys the current state machine and deletes all the memory.
+ */
 [[codegen::luawrap]] void destroyStateMachine() {
-    using namespace openspace;
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     module->deinitializeStateMachine();
 }
@@ -55,7 +62,6 @@ namespace {
  * transition between the two states exists.
  */
 [[codegen::luawrap]] void goToState(std::string newState) {
-    using namespace openspace;
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     module->transitionTo(newState);
     LINFOC("StateMachine", "Transitioning to " + newState);
@@ -66,15 +72,15 @@ namespace {
  * is done without doing a transition and completely ignores the previous state.
  */
 [[codegen::luawrap]] void setInitialState(std::string startState) {
-    using namespace openspace;
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     module->setInitialState(startState);
     LINFOC("StateMachine", "Initial state set to: " + startState);
 }
 
-// Returns the string name of the current state that the statemachine is in.
+/**
+ * Returns the string name of the current state that the statemachine is in.
+ */
 [[codegen::luawrap]] std::string currentState() {
-    using namespace openspace;
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     std::string currentState = module->currentState();
     return currentState;
@@ -85,7 +91,6 @@ namespace {
  * the current state.
  */
 [[codegen::luawrap]] std::vector<std::string> possibleTransitions() {
-    using namespace openspace;
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     std::vector<std::string> transitions = module->possibleTransitions();
     return transitions;
@@ -96,7 +101,6 @@ namespace {
  * string name of a state, otherwise false.
  */
 [[codegen::luawrap]] bool canGoToState(std::string state) {
-    using namespace openspace;
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     bool canTransition = module->canGoToState(state);
     return canTransition;
@@ -106,7 +110,6 @@ namespace {
  * Prints information about the current state and possible transitions to the log.
  */
 [[codegen::luawrap]] void printCurrentStateInfo() {
-    using namespace openspace;
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     if (module->hasStateMachine()) {
         std::string currentState = module->currentState();
@@ -134,7 +137,6 @@ namespace {
 [[codegen::luawrap]] void saveToDotFile(std::string filename,
                                         std::optional<std::string> directory)
 {
-    using namespace openspace;
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     if (directory.has_value()) {
         module->saveToFile(filename, *directory);
@@ -144,6 +146,6 @@ namespace {
     }
 }
 
-#include "statemachinemodule_lua_codegen.cpp"
-
 } // namespace
+
+#include "statemachinemodule_lua_codegen.cpp"

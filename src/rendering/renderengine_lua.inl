@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,6 +23,11 @@
  ****************************************************************************************/
 
 #include <ghoul/lua/lua_helper.h>
+#include <string>
+#include <utility>
+#include <variant>
+
+using namespace openspace;
 
 namespace {
 
@@ -30,7 +35,6 @@ namespace {
  * Will create a ScreenSpaceRenderable from a lua Table and add it in the RenderEngine.
  */
 [[codegen::luawrap]] void addScreenSpaceRenderable(ghoul::Dictionary screenSpace) {
-    using namespace openspace;
     std::unique_ptr<ScreenSpaceRenderable> s =
         ScreenSpaceRenderable::createFromDictionary(screenSpace);
     global::renderEngine->addScreenSpaceRenderable(std::move(s));
@@ -44,7 +48,6 @@ namespace {
 [[codegen::luawrap]] void removeScreenSpaceRenderable(
                                   std::variant<std::string, ghoul::Dictionary> identifier)
 {
-    using namespace openspace;
     std::string identifierStr;
     if (std::holds_alternative<std::string>(identifier)) {
         identifierStr = std::get<std::string>(identifier);
@@ -65,7 +68,6 @@ namespace {
  * the ${SCREENSHOTS} folder.
  */
 [[codegen::luawrap]] int takeScreenshot() {
-    using namespace openspace;
     global::renderEngine->takeScreenshot();
     unsigned int screenshotNumber = global::renderEngine->latestScreenshotNumber();
     return static_cast<int>(screenshotNumber);
@@ -75,7 +77,6 @@ namespace {
  * Reset screenshot index to 0.
  */
 [[codegen::luawrap]] void resetScreenshotNumber() {
-    using namespace openspace;
     global::renderEngine->resetScreenshotNumber();
 }
 
@@ -84,9 +85,9 @@ namespace {
  * window, the first window.
  */
 [[codegen::luawrap]] float dpiScaling() {
-    return openspace::global::windowDelegate->osDpiScaling();
+    return global::windowDelegate->osDpiScaling();
 }
 
-#include "renderengine_lua_codegen.cpp"
-
 } // namespace
+
+#include "renderengine_lua_codegen.cpp"

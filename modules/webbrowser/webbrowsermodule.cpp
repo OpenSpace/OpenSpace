@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,54 +29,53 @@
 #include <modules/webbrowser/include/eventhandler.h>
 #include <modules/webbrowser/include/screenspacebrowser.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/windowdelegate.h>
+#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/templatefactory.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
-#include <filesystem>
+#include <algorithm>
+#include <optional>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "WebBrowser";
 
-    constexpr openspace::properties::Property::PropertyInfo
-        UpdateBrowserBetweenRenderablesInfo =
-    {
+    constexpr Property::PropertyInfo UpdateBrowserBetweenRenderablesInfo = {
         "UpdateBrowserBetweenRenderables",
         "Update browser between renderables",
         "Run the message loop of the browser between calls to render individual "
         "renderables. When disabled, the browser message loop only runs once per frame.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BrowserUpdateIntervalInfo = {
+    constexpr Property::PropertyInfo BrowserUpdateIntervalInfo = {
         "BrowserUpdateInterval",
         "Browser update interval",
         "The time in microseconds between running the message loop of the browser. Only "
         "used if UpdateBrowserBetweenRenderables is true.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
     /**
      * Try to find the CEF Helper executable. It looks in the bin/openspace folder.
      * Therefore, if you change that this might cause a crash here.
      *
-     * \return the absolute path to the file
+     * \return The absolute path to the file
      */
     std::filesystem::path findHelperExecutable() {
 #ifdef WIN32
         constexpr std::string_view SubprocessPath = "OpenSpace_Helper.exe";
-#elif defined(__APPLE__)
-        constexpr std::string_view SubprocessPath =
-            "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace Helper";
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
         constexpr std::string_view SubprocessPath = "OpenSpace_Helper";
-#endif
+#endif // WIN32
 
         const std::filesystem::path execLocation = absPath(std::format(
             "${{BIN}}/{}", SubprocessPath
@@ -90,10 +89,10 @@ namespace {
     }
 
     struct [[codegen::Dictionary(WebBrowserModule)]] Parameters {
-        // The location of the web helper application
+        // The location of the web helper application.
         std::optional<std::filesystem::path> webHelperLocation;
 
-        // Determines whether the WebBrowser module is enabled
+        // Determines whether the WebBrowser module is enabled.
         std::optional<bool> enabled;
 
         // [[codegen::verbatim(UpdateBrowserBetweenRenderablesInfo.description)]]
@@ -102,18 +101,18 @@ namespace {
         // [[codegen::verbatim(BrowserUpdateIntervalInfo.description)]]
         std::optional<float> browserUpdateInterval;
 
-        // Forcably disables accelerated rendering, even if other preconditions
-        // would otherwise allow the use of it to speed up the rendering of the
-        // user interface. This setting can be used to circumvent an otherwise
-        // fatal crash that is caused by the accelerated rendering.
+        // Forcably disables accelerated rendering, even if other preconditions would
+        // otherwise allow the use of it to speed up the rendering of the user interface.
+        // This setting can be used to circumvent an otherwise fatal crash that is caused
+        // by the accelerated rendering.
         std::optional<bool> disableAcceleratedRendering;
     };
-#include "webbrowsermodule_codegen.cpp"
 } // namespace
+#include "webbrowsermodule_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation WebBrowserModule::Documentation() {
+Documentation WebBrowserModule::Documentation() {
     return codegen::doc<Parameters>("module_webbrowser");
 }
 
@@ -171,7 +170,7 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 
     _eventHandler->initialize();
 
-    // register ScreenSpaceBrowser
+    // Register ScreenSpaceBrowser
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
@@ -243,7 +242,7 @@ bool WebBrowserModule::isEnabled() const {
 }
 
 bool WebBrowserModule::canUseAcceleratedRendering() {
-// Linux doesn't have a problem with the rendering, Apple doesn't support OpenGL 4.5
+// Linux doesn't have a problem with the rendering
 #ifdef WIN32
     ghoul::systemcapabilities::Version acceleratedVersion = {
         .major = 4, .minor = 5, .release = 0
@@ -265,13 +264,15 @@ bool WebBrowserModule::canUseAcceleratedRendering() {
 #endif // WIN32
 }
 
-std::vector<documentation::Documentation> WebBrowserModule::documentations() const {
+std::vector<Documentation> WebBrowserModule::documentations() const {
     return {
         ScreenSpaceBrowser::Documentation()
     };
 }
 
-/// Logic for the webbrowser performance hotfix, described in globalscallbacks.h
+/**
+ * Logic for the webbrowser performance hotfix, described in globalscallbacks.h.
+ */
 namespace webbrowser {
 
 /**

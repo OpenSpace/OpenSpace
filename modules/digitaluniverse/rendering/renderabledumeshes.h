@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,6 @@
 
 #include <openspace/data/dataloader.h>
 #include <openspace/properties/misc/optionproperty.h>
-#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
@@ -38,18 +37,12 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <filesystem>
+#include <memory>
 #include <unordered_map>
 
-namespace ghoul::filesystem { class File; }
 namespace ghoul::fontrendering { class Font; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class RenderableDUMeshes : public Renderable {
 public:
@@ -65,7 +58,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     enum MeshType {
@@ -76,9 +69,9 @@ private:
     };
 
     struct RenderingMesh {
-        int meshIndex;
-        int colorIndex;
-        int textureIndex;
+        int meshIndex = 0;
+        int colorIndex = 0;
+        int textureIndex = 0;
         // From: Partiview User's Guide
         // Brian Abbott
         // Hayden Planetarium American Museum of Natural History New York, USA
@@ -87,8 +80,8 @@ private:
         // numV will equal the number of points to connect.
         // If you want a square, 4000×4000 grid with lines every 200 units,
         // then numU numV will both equal 21
-        int numU;
-        int numV;
+        int numU = 0;
+        int numV = 0;
         MeshType style;
         std::vector<GLuint> vaoArray;
         std::vector<GLuint> vboArray;
@@ -109,16 +102,16 @@ private:
     bool _textColorIsDirty = true;
     bool _hasLabel = false;
 
-    properties::Vec3Property _textColor;
-    properties::FloatProperty _textOpacity;
-    properties::FloatProperty _textSize;
-    properties::BoolProperty _drawElements;
-    properties::BoolProperty _drawLabels;
-    properties::IVec2Property _textMinMaxSize;
-    properties::FloatProperty _lineWidth;
+    Vec3Property _textColor;
+    FloatProperty _textOpacity;
+    FloatProperty _textSize;
+    BoolProperty _drawElements;
+    BoolProperty _drawLabels;
+    IVec2Property _textMinMaxSize;
+    FloatProperty _lineWidth;
 
-    // DEBUG:
-    properties::OptionProperty _renderOption;
+    // Debug
+    OptionProperty _renderOption;
 
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, alphaValue,

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,11 +24,7 @@
 
 #include <openspace/data/csvloader.h>
 
-#include <openspace/data/datamapping.h>
 #include <openspace/util/progressbar.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
@@ -36,12 +32,15 @@
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
 #include <algorithm>
+#include <charconv>
 #include <cmath>
-#include <cctype>
+#include <limits>
 #include <fstream>
 #include <functional>
 #include <sstream>
+#include <string>
 #include <string_view>
+#include <system_error>
 
 namespace {
     constexpr std::string_view _loggerCat = "DataLoader: CSV";
@@ -185,8 +184,8 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         entry.data.reserve(nDataColumns);
 
         for (size_t i = 0; i < row.size(); i++) {
-            // Check if column should be exluded. Note that list of indices is sorted
-            // so we can do a binary search
+            // Check if column should be excluded. Note that list of indices is sorted so
+            // we can do a binary search
             if (hasExcludeColumns &&
                 std::binary_search(skipColumns.begin(), skipColumns.end(), i))
             {
@@ -247,11 +246,11 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
 }
 
 std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path,
-                                          const std::set<int>& texturesInData)
+                                                 const std::set<int>& texturesInData)
 {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
-    std::ifstream file(path);
+    std::ifstream file = std::ifstream(path);
     if (!file.good()) {
         throw ghoul::RuntimeError(std::format(
             "Failed to open texture map file {}", path
@@ -286,7 +285,7 @@ std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path,
             ));
         }
 
-        std::stringstream str(line);
+        std::stringstream str = std::stringstream(line);
 
         // Each line is following the template:
         // <idx> <file name>

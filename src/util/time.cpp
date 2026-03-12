@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,18 +25,18 @@
 #include <openspace/util/time.h>
 
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timeconversion.h>
-#include <openspace/util/timemanager.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>
+#include <algorithm>
 #include <cctype>
+#include <cstring>
 #include <ctime>
 #include <string_view>
 
@@ -77,9 +77,7 @@ Time Time::now() {
     const double secondsSince2000 = static_cast<double>(
         secondsSince1970 - 30 * secondsInAYear
     );
-    Time now;
-    now.setTime(secondsSince2000);
-    return now;
+    return Time(secondsSince2000);
 }
 
 void Time::setTime(double j2000Seconds) {
@@ -179,9 +177,7 @@ std::string Time::advancedTime(const std::string& base, std::string change) {
         else if (uName == "d") { unit = TimeUnit::Day; }
         else if (uName == "M") { unit = TimeUnit::Month; }
         else if (uName == "y") { unit = TimeUnit::Year; }
-        else {
-            throw ghoul::RuntimeError(std::format("Unknown unit '{}'", uName));
-        }
+        else {       throw ghoul::RuntimeError(std::format("Unknown unit '{}'", uName)); }
 
         dt = openspace::convertTime(value, unit, TimeUnit::Second);
         if (isNegative) {
@@ -198,7 +194,7 @@ std::string Time::advancedTime(const std::string& base, std::string change) {
     return std::string(ret);
 }
 
-scripting::LuaLibrary Time::luaLibrary() {
+LuaLibrary Time::luaLibrary() {
     return {
         "time",
         {

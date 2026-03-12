@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,7 @@
 
 #include <algorithm>
 
-namespace openspace::interaction {
+namespace openspace {
 
 void MouseInputState::mouseButtonCallback(MouseButton button, MouseAction action) {
     if (action == MouseAction::Press) {
@@ -65,4 +65,4 @@ bool MouseInputState::isMouseButtonPressed(MouseButton mouseButton) const {
     return it != _mouseButtonsDown.end();
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

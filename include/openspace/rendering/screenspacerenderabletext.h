@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,23 +29,12 @@
 
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <ghoul/font/font.h>
 #include <ghoul/font/fontrenderer.h>
-
-namespace ghoul {
-
-class Dictionary;
-
-namespace fontrendering { class Font; }
-namespace opengl {
-    class FramebufferObject;
-    class Texture;
-} // namespace opengl
-
-} // namespace ghoul
+#include <ghoul/opengl/framebufferobject.h>
+#include <ghoul/opengl/texture.h>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class ScreenSpaceRenderableText : public ScreenSpaceRenderable {
 public:
@@ -58,17 +47,17 @@ public:
     void update() override;
     void render(const RenderData& renderData) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     std::string _buffer;
 
 private:
     void updateFramebuffer();
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
-    properties::StringProperty _fontName;
-    properties::FloatProperty _fontSize;
+    StringProperty _fontName;
+    FloatProperty _fontSize;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
     std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
@@ -77,6 +66,6 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 };
 
-} //namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SCREENSPACERENDERABLETEXT___H__

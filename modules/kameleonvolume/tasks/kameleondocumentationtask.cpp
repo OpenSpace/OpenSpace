@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,34 +26,42 @@
 
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <openspace/openspace.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/util/task.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
-#include <filesystem>
+#include <algorithm>
 #include <fstream>
+#include <iostream>
+#include <iterator>
+#include <sstream>
+#include <utility>
 
 namespace {
     constexpr std::string_view MainTemplateFilename =
         "${WEB}/kameleondocumentation/main.hbs";
-    constexpr std::string_view HandlebarsFilename = "${WEB}/common/handlebars-v4.0.5.js";
+    constexpr std::string_view HandlebarsFilename =
+        "${WEB}/documentation/handlebars-v4.0.5.js";
     constexpr std::string_view JsFilename = "${WEB}/kameleondocumentation/script.js";
     constexpr std::string_view BootstrapFilename = "${WEB}/common/bootstrap.min.css";
-    constexpr std::string_view CssFilename = "${WEB}/common/style.css";
+    constexpr std::string_view CssFilename = "${WEB}/documentation/style.css";
 
     struct [[codegen::Dictionary(KameleonDocumentationTask)]] Parameters {
-        // The CDF file to extract data from
+        // The CDF file to extract data from.
         std::filesystem::path input;
 
-        // The HTML file to write documentation to
+        // The HTML file to write documentation to.
         std::string output [[codegen::annotation("A valid filepath")]];
     };
-#include "kameleondocumentationtask_codegen.cpp"
 } // namespace
+#include "kameleondocumentationtask_codegen.cpp"
 
-namespace openspace::kameleonvolume {
+namespace openspace {
 
-documentation::Documentation KameleonDocumentationTask::documentation() {
-    return codegen::doc<Parameters>("kameleon_documentation_task");
+Documentation KameleonDocumentationTask::documentation() {
+    return codegen::doc<Parameters>("kameleon_task_documentation");
 }
 
 KameleonDocumentationTask::KameleonDocumentationTask(const ghoul::Dictionary& dictionary)
@@ -83,11 +91,12 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
     std::string json = ghoul::formatJson(dictionary);
     progressCallback(0.66f);
 
-    std::ifstream handlebarsInput(absPath(HandlebarsFilename));
-    std::ifstream jsInput(absPath(JsFilename));
+    std::ifstream handlebarsInput = std::ifstream(absPath(HandlebarsFilename));
+    std::ifstream jsInput = std::ifstream(absPath(JsFilename));
 
     std::string jsContent;
-    std::back_insert_iterator<std::string> jsInserter(jsContent);
+    std::back_insert_iterator<std::string> jsInserter =
+        std::back_insert_iterator<std::string>(jsContent);
 
     std::copy(
         std::istreambuf_iterator<char>{handlebarsInput},
@@ -100,11 +109,12 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
         jsInserter
     );
 
-    std::ifstream bootstrapInput(absPath(BootstrapFilename));
-    std::ifstream cssInput(absPath(CssFilename));
+    std::ifstream bootstrapInput = std::ifstream(absPath(BootstrapFilename));
+    std::ifstream cssInput = std::ifstream(absPath(CssFilename));
 
     std::string cssContent;
-    std::back_insert_iterator<std::string> cssInserter(cssContent);
+    std::back_insert_iterator<std::string> cssInserter =
+        std::back_insert_iterator<std::string>(cssContent);
 
     std::copy(
         std::istreambuf_iterator<char>{bootstrapInput},
@@ -117,7 +127,7 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
         cssInserter
     );
 
-    std::ifstream mainTemplateInput(absPath(MainTemplateFilename));
+    std::ifstream mainTemplateInput = std::ifstream(absPath(MainTemplateFilename));
     std::string mainTemplateContent{
         std::istreambuf_iterator<char>{mainTemplateInput},
         std::istreambuf_iterator<char>{}
@@ -126,8 +136,7 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
     std::ofstream file;
     file.exceptions(~std::ofstream::goodbit);
     file.open(_outputPath);
-
-     std::stringstream html;
+    std::stringstream html;
         html << "<!DOCTYPE html>\n"
             << "<html>\n"
             << "\t<head>\n"
@@ -154,4 +163,4 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
     progressCallback(1.f);
 }
 
-} // namespace openspace::kameleonvolume
+} // namespace openspace

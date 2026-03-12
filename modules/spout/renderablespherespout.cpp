@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,25 +27,25 @@
 #include <modules/spout/renderablespherespout.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/sphere.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/textureunit.h>
 
 namespace {
     // This `Renderable` type can be used to render a sphere with a texture that is
     // provided by another application on the same computer using the SPOUT library.
     // Note: The Spout library is only available on Windows.
-    struct [[codegen::Dictionary(RenderableSphereSpout)]] Parameters {
-    };
-#include "renderablespherespout_codegen.cpp"
+    struct [[codegen::Dictionary(RenderableSphereSpout)]] Parameters {};
 } // namespace
+#include "renderablespherespout_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableSphereSpout::Documentation() {
+Documentation RenderableSphereSpout::Documentation() {
     return codegen::doc<Parameters>(
-        "spout_renderablespherespout",
-        spout::SpoutReceiverPropertyProxy::Documentation()
+        "spout_renderable_spherespout",
+        SpoutReceiverPropertyProxy::Documentation()
     );
 }
 
@@ -85,22 +85,9 @@ void RenderableSphereSpout::update(const UpdateData& data) {
     _spoutReceiver.updateReceiver();
 }
 
-void RenderableSphereSpout::bindTexture() {
+void RenderableSphereSpout::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_spoutReceiver.isReceiving()) {
-        _spoutReceiver.saveGLTextureState();
-        glBindTexture(GL_TEXTURE_2D, _spoutReceiver.spoutTexture());
-    }
-    else {
-        RenderableSphere::unbindTexture();
-    }
-}
-
-void RenderableSphereSpout::unbindTexture() {
-    if (_spoutReceiver.isReceiving()) {
-        _spoutReceiver.restoreGLTextureState();
-    }
-    else {
-        RenderableSphere::unbindTexture();
+        unit.bind(_spoutReceiver.spoutTexture());
     }
 }
 

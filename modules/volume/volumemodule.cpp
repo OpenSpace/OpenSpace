@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,18 +25,18 @@
 #include <modules/volume/volumemodule.h>
 
 #include <modules/volume/rendering/renderabletimevaryingvolume.h>
+#include <modules/volume/rendering/renderablevectorfield.h>
 #include <modules/volume/tasks/generaterawvolumetask.h>
 #include <modules/volume/tasks/generaterawvolumefromfiletask.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/util/task.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/task.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
-
-using namespace volume;
 
 VolumeModule::VolumeModule() : OpenSpaceModule(Name) {}
 
@@ -45,6 +45,7 @@ void VolumeModule::internalInitialize(const ghoul::Dictionary&) {
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(rFactory, "No renderable factory existed");
     rFactory->registerClass<RenderableTimeVaryingVolume>("RenderableTimeVaryingVolume");
+    rFactory->registerClass<RenderableVectorField>("RenderableVectorField");
 
     ghoul::TemplateFactory<Task>* tFactory = FactoryManager::ref().factory<Task>();
     ghoul_assert(tFactory, "No task factory existed");
@@ -54,9 +55,10 @@ void VolumeModule::internalInitialize(const ghoul::Dictionary&) {
     );
 }
 
-std::vector<documentation::Documentation> VolumeModule::documentations() const {
+std::vector<Documentation> VolumeModule::documentations() const {
     return {
         RenderableTimeVaryingVolume::Documentation(),
+        RenderableVectorField::Documentation(),
         GenerateRawVolumeTask::Documentation()
     };
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,14 +24,18 @@
 
 #include <openspace/topic/topics/luascripttopic.h>
 
-#include <openspace/topic/jsonconverters.h>
-#include <openspace/topic/connection.h>
 #include <openspace/json.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/topic/connection.h>
+#include <openspace/topic/jsonconverters.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionary.h>
+#include <stdexcept>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view KeyScript = "script";
@@ -130,8 +134,6 @@ namespace {
         }
         return script + ")";
     }
-
-
 } // namespace
 
 namespace openspace {
@@ -191,8 +193,6 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
 void LuaScriptTopic::runScript(std::string script, bool shouldReturn,
                                bool shouldBeSynchronized)
 {
-    using namespace scripting;
-
     ScriptEngine::Script::Callback callback;
     if (shouldReturn) {
         callback = [this](const ghoul::Dictionary& data) {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,23 +34,28 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <ghoul/glm.h>
 #include <ghoul/opengl/texture.h>
+#include <memory>
+#include <optional>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 
 /**
- * This is a component that can be used to consistently hold parameters and properties
- * for controlling color mapping in different types of renderables. This includes things
- * like the color map file itself (converted to a texture), colors to use for missing
- * values and the available data columns and value ranges.
+ * This is a component that can be used to consistently hold parameters and properties for
+ * controlling color mapping in different types of renderables. This includes things like
+ * the color map file itself (converted to a texture), colors to use for missing values
+ * and the available data columns and value ranges.
  *
  * \todo Also provide a small shader snippet that can be included in fragment shaders that
- * use this color mapping. As well as a set of uniforms? Now every renderable needs to
- * handle this separately.  (emmbr, 2023-10-13)
+ *       use this color mapping. As well as a set of uniforms? Now every renderable needs
+ *       to handle this separately (emmbr, 2023-10-13)
  */
-class ColorMappingComponent : public properties::PropertyOwner {
+class ColorMappingComponent : public PropertyOwner {
 public:
     ColorMappingComponent();
     explicit ColorMappingComponent(const ghoul::Dictionary& dictionary);
@@ -73,26 +78,26 @@ public:
 
     void update(const dataloader::Dataset& dataset, bool useCaching = true);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     glm::vec4 colorFromColorMap(float valueToColorFrom) const;
 
-    properties::BoolProperty enabled;
-    properties::BoolProperty invert;
-    properties::OptionProperty dataColumn;
-    properties::StringProperty colorMapFile;
-    properties::Vec2Property valueRange;
-    properties::TriggerProperty setRangeFromData;
+    BoolProperty enabled;
+    BoolProperty invert;
+    OptionProperty dataColumn;
+    StringProperty colorMapFile;
+    Vec2Property valueRange;
+    TriggerProperty setRangeFromData;
 
-    properties::BoolProperty hideOutsideRange;
-    properties::BoolProperty useNanColor;
-    properties::Vec4Property nanColor;
+    BoolProperty hideOutsideRange;
+    BoolProperty useNanColor;
+    Vec4Property nanColor;
 
-    properties::BoolProperty useAboveRangeColor;
-    properties::Vec4Property aboveRangeColor;
+    BoolProperty useAboveRangeColor;
+    Vec4Property aboveRangeColor;
 
-    properties::BoolProperty useBelowRangeColor;
-    properties::Vec4Property belowRangeColor;
+    BoolProperty useBelowRangeColor;
+    Vec4Property belowRangeColor;
 
 private:
     /**
@@ -101,7 +106,7 @@ private:
      */
     void initializeParameterData(const dataloader::Dataset& dataset);
 
-    // One item per color parameter option
+    /// One item per color parameter option
     std::vector<glm::vec2> _colorRangeData;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;

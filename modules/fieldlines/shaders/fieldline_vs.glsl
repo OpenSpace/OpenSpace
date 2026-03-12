@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,18 +24,17 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec4 in_color;
 
-out vec4 vs_color;
-
-uniform mat4 modelViewProjection;
-uniform mat4 modelTransform;
+out Data {
+  vec4 color;
+} out_data;
 
 
 void main() {
-  vs_color = in_color;
-  gl_Position = vec4(in_position, 0);
+  out_data.color = in_color;
+  gl_Position = vec4(in_position, 0.0);
 }

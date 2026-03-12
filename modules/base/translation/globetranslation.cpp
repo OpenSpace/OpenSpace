@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,79 +24,80 @@
 
 #include <modules/base/translation/globetranslation.h>
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
+#include <openspace/query/query.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/query/query.h>
 #include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <optional>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "GlobeTranslation";
 
-    constexpr openspace::properties::Property::PropertyInfo GlobeInfo = {
+    constexpr Property::PropertyInfo GlobeInfo = {
         "Globe",
         "Attached globe",
         "The node on which the longitude/latitude is specified. If the node is a globe, "
         "the correct height information for the globe is used. Otherwise, the position "
         "is specified based on the longitude and latitude on the node's interaction "
         "sphere",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LatitudeInfo = {
+    constexpr Property::PropertyInfo LatitudeInfo = {
         "Latitude",
         "Latitude",
         "The latitude of the location on the globe's surface. The value can range from "
         "-90 to 90, with negative values representing the southern hemisphere of the "
         "globe. The default value is 0.0.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LongitudeInfo = {
+    constexpr Property::PropertyInfo LongitudeInfo = {
         "Longitude",
         "Longitude",
         "The longitude of the location on the globe's surface. The value can range from "
         "-180 to 180, with negative values representing the western hemisphere of the "
         "globe. The default value is 0.0.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AltitudeInfo = {
+    constexpr Property::PropertyInfo AltitudeInfo = {
         "Altitude",
         "Altitude",
         "The altitude in meters. If the 'UseHeightmap' property is 'true', this is an "
         "offset from the actual surface of the globe. If not, this is an offset from the "
         "reference ellipsoid. The default value is 0.0.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseHeightmapInfo = {
+    constexpr Property::PropertyInfo UseHeightmapInfo = {
         "UseHeightmap",
         "Use heightmap",
         "If this value is 'true', the altitude specified in 'Altitude' will be treated "
         "as an offset from the heightmap. Otherwise, it will be an offset from the "
         "globe's reference ellipsoid. The default value is 'false'.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseCameraInfo = {
+    constexpr Property::PropertyInfo UseCameraInfo = {
         "UseCamera",
         "Use camera",
         "If this value is 'true', the lat and lon are updated to match the camera.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseCameraAltitudeInfo = {
+    constexpr Property::PropertyInfo UseCameraAltitudeInfo = {
         "UseCameraAltitude",
         "Use camera altitude",
         "If this value is 'true', the altitude is updated to match the camera.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `Translation` places the scene graph node at a specific location relative to
@@ -106,8 +107,8 @@ namespace {
     // renderable or a non-globe renderable, the latitude/longitude grid used is the
     // node's interaction sphere.
     // This class is useful in conjunction with the
-    // [GlobeRotation](#base_rotation_globerotation) rotation to orient a scene graph node
-    // away from the center of the body.
+    // [GlobeRotation](#base_rotation_globe) rotation to orient a scene graph node away
+    // from the center of the body.
     //
     // If the `UseCamera` value is set, the object's position automatically updates based
     // on the current camera location.
@@ -133,13 +134,13 @@ namespace {
         // [[codegen::verbatim(UseCameraAltitudeInfo.description)]]
         std::optional<bool> useCameraAltitude;
     };
-#include "globetranslation_codegen.cpp"
 } // namespace
+#include "globetranslation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation GlobeTranslation::Documentation() {
-    return codegen::doc<Parameters>("base_translation_globetranslation");
+Documentation GlobeTranslation::Documentation() {
+    return codegen::doc<Parameters>("base_translation_globe");
 }
 
 GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
@@ -239,16 +240,8 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
     }
 
     if (_useHeightmap) {
-        const glm::vec3 groundPos = cartesianCoordinatesFromGeo(
-            *_attachedNode,
-            lat,
-            lon,
-            0.0
-        );
-
-        const SurfacePositionHandle h = _attachedNode->calculateSurfacePositionHandle(
-            groundPos
-        );
+        const glm::vec3 p = cartesianCoordinatesFromGeo(*_attachedNode, lat, lon, 0.0);
+        const SurfacePositionHandle h = _attachedNode->calculateSurfacePositionHandle(p);
 
         _position = cartesianCoordinatesFromGeo(
             *_attachedNode,
@@ -258,12 +251,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
         );
     }
     else {
-        _position = cartesianCoordinatesFromGeo(
-            *_attachedNode,
-            lat,
-            lon,
-            alt
-        );
+        _position = cartesianCoordinatesFromGeo(*_attachedNode, lat, lon, alt);
         _positionIsDirty = false;
     }
     return _position;

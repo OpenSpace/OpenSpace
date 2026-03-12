@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef _INSIDE___GLSL_
+#define _INSIDE___GLSL_
+
 void getEntry(inout vec3 entryPos, inout float entryDepth) {
   entryPos = cameraPosInRaycaster;
   entryDepth = 0;
 }
+
+#endif // _INSIDE___GLSL_

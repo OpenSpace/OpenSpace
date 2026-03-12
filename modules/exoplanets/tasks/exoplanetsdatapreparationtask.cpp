@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,9 +24,7 @@
 
 #include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
 
-#include <modules/exoplanets/exoplanetshelper.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/coordinateconversion.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
@@ -35,20 +33,23 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
 #include <charconv>
-#include <filesystem>
-#include <fstream>
+#include <cmath>
+#include <limits>
+#include <sstream>
+#include <string_view>
+#include <system_error>
 
 namespace {
     constexpr std::string_view _loggerCat = "ExoplanetsDataPreparationTask";
 
     // This task is used for generating the binary data files that are used for the
-    // exoplanet system loading in OpenSpace. Using this binary file allows efficient
-    // data loading of an arbitrary exoplanet system during runtime, without keeping all
-    // data in memory.
+    // exoplanet system loading in OpenSpace. Using this binary file allows efficient data
+    // loading of an arbitrary exoplanet system during runtime, without keeping all data
+    // in memory.
     //
     // Two output files are generated, whose paths have to be specified: One binary with
-    // the data for the exoplanets (OutputBIN) and one look-up table that is used to
-    // find where in the binary file a particular system is located (OutputLUT).
+    // the data for the exoplanets (OutputBIN) and one look-up table that is used to find
+    // where in the binary file a particular system is located (OutputLUT).
     //
     // Additionally, the task uses three different files as input: 1) a CSV file with the
     // data from the NASA Exoplanet Archive, 2) A SPECK file that contains star positions,
@@ -63,29 +64,34 @@ namespace {
     // be correct. Use the accompanying python script to download the datafile, or make
     // sure to include all columns in your download.
     struct [[codegen::Dictionary(ExoplanetsDataPreparationTask)]] Parameters {
-        // The csv file to extract data from
+        // The csv file to extract data from.
         std::string inputDataFile;
 
-        // The speck file with star locations
+        // The speck file with star locations.
         std::string inputSPECK;
 
-        // The bin file to export data into
-        std::string outputBIN [[codegen::annotation("A valid filepath")]];
+        // The directory to store the output files in.
+        std::string outputDirectory [[codegen::annotation("A valid filepath")]];
 
-        // The txt file to write look-up table into
-        std::string outputLUT [[codegen::annotation("A valid filepath")]];
+        // The name of the .bin file to export data into, inluding the .bin extension,
+        // e.g. 'exoplanets.bin'.
+        std::string outputBIN [[codegen::annotation("A valid filename")]];
+
+        // The name of the .txt file to write look-up table into, including the .txt
+        // extension, e.g. 'exoplanets_lut.txt'.
+        std::string outputLUT [[codegen::annotation("A valid filename")]];
 
         // The path to a teff to bv conversion file. Should be a txt file where each line
-        // has the format 'teff,bv'
+        // has the format 'teff,bv'.
         std::string teffToBvFile;
     };
-#include "exoplanetsdatapreparationtask_codegen.cpp"
 } // namespace
+#include "exoplanetsdatapreparationtask_codegen.cpp"
 
-namespace openspace::exoplanets {
+namespace openspace {
 
-documentation::Documentation ExoplanetsDataPreparationTask::documentation() {
-    return codegen::doc<Parameters>("exoplanets_data_preparation_task");
+Documentation ExoplanetsDataPreparationTask::documentation() {
+    return codegen::doc<Parameters>("exoplanets_task_datapreparation");
 }
 
 ExoplanetsDataPreparationTask::ExoplanetsDataPreparationTask(
@@ -95,9 +101,27 @@ ExoplanetsDataPreparationTask::ExoplanetsDataPreparationTask(
 
     _inputDataPath = absPath(p.inputDataFile);
     _inputSpeckPath = absPath(p.inputSPECK);
-    _outputBinPath = absPath(p.outputBIN);
-    _outputLutPath = absPath(p.outputLUT);
+
     _teffToBvFilePath = absPath(p.teffToBvFile);
+
+    // The output paths are created by combining the output directory with the specified
+    std::filesystem::path outputDir = absPath(p.outputDirectory);
+
+    // Create output directory if it doesn't exist
+    if (!std::filesystem::exists(outputDir)) {
+        std::error_code ec;
+        if (!std::filesystem::create_directories(outputDir, ec)) {
+            LERROR(std::format(
+                "Failed to create output directory '{}': {}",
+                outputDir, ec.message()
+            ));
+            return;
+        }
+        LINFO(std::format("Created output directory '{}'", outputDir));
+    }
+
+    _outputBinPath = outputDir / p.outputBIN;
+    _outputLutPath = outputDir / p.outputLUT;
 }
 
 std::string ExoplanetsDataPreparationTask::description() {
@@ -118,8 +142,11 @@ void ExoplanetsDataPreparationTask::perform(
         return;
     }
 
-    std::ofstream binFile(_outputBinPath, std::ios::out | std::ios::binary);
-    std::ofstream lutFile(_outputLutPath);
+    std::ofstream binFile = std::ofstream(
+        _outputBinPath,
+        std::ios::out | std::ios::binary
+    );
+    std::ofstream lutFile = std::ofstream(_outputLutPath);
 
     if (!binFile.good()) {
         LERROR(std::format("Error when writing to '{}'",_outputBinPath));
@@ -140,8 +167,7 @@ void ExoplanetsDataPreparationTask::perform(
     int version = 1;
     binFile.write(reinterpret_cast<char*>(&version), sizeof(int));
 
-    // Read until the first line contaning the column names, and save them for
-    // later access
+    // Read until the first line containing the column names and save them for later
     const std::vector<std::string> columnNames = readFirstDataRow(inputDataFile);
 
     // Read total number of items
@@ -153,8 +179,8 @@ void ExoplanetsDataPreparationTask::perform(
     inputDataFile.clear();
     inputDataFile.seekg(0);
 
-    // The reading is restarted, so we need to read past the first line,
-    // containing the data names, again
+    // The reading is restarted, so we need to read past the first line containing the
+    // data names, again
     readFirstDataRow(inputDataFile);
 
     LINFO(std::format("Loading {} exoplanets", total));
@@ -198,7 +224,7 @@ ExoplanetsDataPreparationTask::readFirstDataRow(std::ifstream& file)
         }
     }
 
-    // The identified line should contain the column names. Return them!
+    // The identified line should contain the column names
     std::vector<std::string> columnNames;
     std::stringstream sStream(line);
     std::string colName;
@@ -223,10 +249,10 @@ ExoplanetsDataPreparationTask::parseDataRow(const std::string& row,
             return result;
         }
         return std::numeric_limits<float>::quiet_NaN();
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
         // clang is missing float support for std::from_chars
         return !str.empty() ? std::stof(str, nullptr) : NAN;
-#endif
+#endif // WIN32
 };
 
     auto readDoubleData = [](const std::string& str) -> double {
@@ -237,10 +263,10 @@ ExoplanetsDataPreparationTask::parseDataRow(const std::string& row,
             return result;
         }
         return std::numeric_limits<double>::quiet_NaN();
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
         // clang is missing double support for std::from_chars
         return !str.empty() ? std::stod(str, nullptr) : NAN;
-#endif
+#endif // WIN32
     };
 
     auto readIntegerData = [](const std::string& str) -> int {
@@ -459,10 +485,9 @@ glm::vec3 ExoplanetsDataPreparationTask::starPosition(const std::string& starNam
 
     std::string line;
     while (ghoul::getline(exoplanetsFile, line)) {
-        const bool shouldSkipLine = (
+        const bool shouldSkipLine =
             line.empty() || line[0] == '#' || line.substr(0, 7) == "datavar" ||
-            line.substr(0, 10) == "texturevar" || line.substr(0, 7) == "texture"
-        );
+            line.substr(0, 10) == "texturevar" || line.substr(0, 7) == "texture";
 
         if (shouldSkipLine) {
             continue;
@@ -470,7 +495,7 @@ glm::vec3 ExoplanetsDataPreparationTask::starPosition(const std::string& starNam
 
         std::string data;
         std::string name;
-        std::istringstream linestream(line);
+        std::istringstream linestream = std::istringstream(line);
         ghoul::getline(linestream, data, '#');
         ghoul::getline(linestream, name);
         name.erase(0, 1);
@@ -479,11 +504,11 @@ glm::vec3 ExoplanetsDataPreparationTask::starPosition(const std::string& starNam
         if (name == starName) {
             std::stringstream dataStream(data);
             ghoul::getline(dataStream, coord, ' ');
-            position[0] = std::stof(coord, nullptr);
+            position.x = std::stof(coord, nullptr);
             ghoul::getline(dataStream, coord, ' ');
-            position[1] = std::stof(coord, nullptr);
+            position.y = std::stof(coord, nullptr);
             ghoul::getline(dataStream, coord, ' ');
-            position[2] = std::stof(coord, nullptr);
+            position.z = std::stof(coord, nullptr);
             break;
         }
     }
@@ -504,8 +529,8 @@ float ExoplanetsDataPreparationTask::bvFromTeff(float teff,
         return std::numeric_limits<float>::quiet_NaN();
     }
 
-    // Find the line in the file that most closely corresponds to the specified teff,
-    // and finally interpolate the value
+    // Find the line in the file that most closely corresponds to the specified teff, and
+    // finally interpolate the value
     float bv = 0.f;
     float bvUpper = 0.f;
     float bvLower = 0.f;
@@ -543,4 +568,4 @@ float ExoplanetsDataPreparationTask::bvFromTeff(float teff,
     return bv;
 }
 
-} // namespace openspace::exoplanets
+} // namespace openspace

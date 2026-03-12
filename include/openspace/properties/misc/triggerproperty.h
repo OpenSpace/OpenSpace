@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 #include <openspace/properties/property.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 /**
  * TriggerProperty that can be used to fire events into your code using the callback
@@ -44,7 +44,7 @@ public:
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
      */
-    TriggerProperty(PropertyInfo info);
+    explicit TriggerProperty(PropertyInfo info);
 
     /**
      * Returns the class name `TriggerProperty`.
@@ -73,6 +73,6 @@ public:
     std::string jsonValue() const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___TRIGGERPROPERTY___H__

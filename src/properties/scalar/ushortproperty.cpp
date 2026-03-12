@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,12 +24,11 @@
 
 #include <openspace/properties/scalar/ushortproperty.h>
 
-#include <ghoul/glm.h>
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
-UShortProperty::UShortProperty(Property::PropertyInfo info, unsigned short value,
+UShortProperty::UShortProperty(PropertyInfo info, unsigned short value,
                                unsigned short minValue, unsigned short maxValue,
                                unsigned short stepValue)
     : NumericalProperty<unsigned short>(
@@ -61,5 +60,4 @@ std::string UShortProperty::stringValue() const {
     return formatJson(_value);
 }
 
-
-} // namespace openspace::properties
+} // namespace openspace

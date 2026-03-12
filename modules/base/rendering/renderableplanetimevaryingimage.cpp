@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,26 +26,29 @@
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
+#include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
-#include <optional>
+#include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
+#include <algorithm>
+#include <iterator>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderablePlaneTimeVaryingImage";
 
-    constexpr openspace::properties::Property::PropertyInfo SourceFolderInfo = {
+    constexpr Property::PropertyInfo SourceFolderInfo = {
         "SourceFolder",
         "Source folder",
         "An image directory that is loaded from disk and contains the textures to use "
         "for this plane.",
-       openspace::properties::Property::Visibility::AdvancedUser
+       Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderablePlaneTimeVaryingImage)]] Parameters {
@@ -53,17 +56,17 @@ namespace {
         std::string sourceFolder;
 
         // If set to `true` the images are only loaded when it is about to be shown
-        // instead of preloading them
+        // instead of preloading them.
         std::optional<bool> lazyLoading;
     };
-#include "renderableplanetimevaryingimage_codegen.cpp"
 } // namespace
+#include "renderableplanetimevaryingimage_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderablePlaneTimeVaryingImage::Documentation() {
+Documentation RenderablePlaneTimeVaryingImage::Documentation() {
     return codegen::doc<Parameters>(
-        "base_renderable_plane_time_varying_image",
+        "base_renderable_planetimevaryingimage",
         RenderablePlane::Documentation()
     );
 }
@@ -78,8 +81,7 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
     _sourceFolder = p.sourceFolder;
     if (!std::filesystem::is_directory(absPath(_sourceFolder))) {
         LERROR(std::format(
-            "Time varying image, '{}' is not a valid directory",
-            _sourceFolder.value()
+            "Time varying image, '{}' is not a valid directory", _sourceFolder.value()
         ));
     }
 
@@ -119,10 +121,6 @@ void RenderablePlaneTimeVaryingImage::initializeGL() {
             absPath(_sourceFiles[i]),
             2
         );
-        _textureFiles[i]->setInternalFormat(GL_COMPRESSED_RGBA);
-        _textureFiles[i]->uploadTexture();
-        _textureFiles[i]->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        _textureFiles[i]->purgeFromRAM();
     }
     if (!_isLoadingLazily) {
         _texture = loadTexture();
@@ -130,8 +128,8 @@ void RenderablePlaneTimeVaryingImage::initializeGL() {
 }
 
 bool RenderablePlaneTimeVaryingImage::extractMandatoryInfoFromDictionary() {
-    // Ensure that the source folder exists and then extract
-    // the files with the same extension as <inputFileTypeString>
+    // Ensure that the source folder exists and then extract the files with the same
+    // extension as <inputFileTypeString>
     namespace fs = std::filesystem;
     const fs::path sourceFolder = absPath(_sourceFolder);
     // Extract all file paths from the provided folder
@@ -162,9 +160,9 @@ void RenderablePlaneTimeVaryingImage::deinitializeGL() {
     RenderablePlane::deinitializeGL();
 }
 
-void RenderablePlaneTimeVaryingImage::bindTexture() {
+void RenderablePlaneTimeVaryingImage::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_texture && !_textureIsDirty) {
-        _texture->bind();
+        unit.bind(*_texture);
     }
 }
 
@@ -194,7 +192,7 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
         } // else we're still in same state as previous frame (no changes needed)
     }
     else {
-        // not in interval => set everything to false
+        // Not in interval => set everything to false
         _activeTriggerTimeIndex = -1;
         needsUpdate = false;
     }
@@ -269,4 +267,5 @@ ghoul::opengl::Texture* RenderablePlaneTimeVaryingImage::loadTexture() const {
     }
     return texture;
 }
+
 } // namespace openspace

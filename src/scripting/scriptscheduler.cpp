@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,62 +25,66 @@
 #include <openspace/scripting/scriptscheduler.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
+#include <ghoul/misc/dictionary.h>
+#include <algorithm>
+#include <iterator>
+#include <utility>
 
 #include "scriptscheduler_lua.inl"
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "This enables or disables the ScriptScheduler. If disabled, no scheduled scripts "
         "will be executed. If enabled, scheduled scripts will be executed at their given "
         "time as normal.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShouldRunAllTimeJumpInfo = {
+    constexpr Property::PropertyInfo ShouldRunAllTimeJumpInfo = {
         "ShouldRunAllTimeJump",
         "Should run all time jump",
         "If 'true': In a time jump, all scheduled scripts between the old time and the "
         "new time is executed. If 'false': In a time jump, no scripts scheduled between "
         "the new time and the old time is executed.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ScheduledScript)]] Parameters {
-        // The time at which, when the in game time passes it, the two scripts will
-        // be executed. If the traversal is forwards (towards + infinity), the
-        // ForwardScript will be executed, otherwise the BackwardScript will be
-        // executed instead
+        // The time at which, when the in game time passes it, the two scripts will be
+        // executed. If the traversal is forwards (towards + infinity), the ForwardScript
+        // will be executed, otherwise the BackwardScript will be executed instead.
         std::string time;
 
         // The Lua script that will be executed when the specified time is passed
-        // independent of its direction. This script will be executed before the
-        // specific scripts if both versions are specified
+        // independent of its direction. This script will be executed before the specific
+        // scripts if both versions are specified.
         std::optional<std::string> script;
 
-        // The Lua script that is executed when OpenSpace passes the time in a
-        // forward direction
+        // The Lua script that is executed when OpenSpace passes the time in a forward
+        // direction.
         std::optional<std::string> forwardScript;
 
-        // The Lua script that is executed when OpenSpace passes the time in a
-        // backward direction
+        // The Lua script that is executed when OpenSpace passes the time in a backward
+        // direction.
         std::optional<std::string> backwardScript;
 
-        // The group that this script belongs to, default group is 0
+        // The group that this script belongs to, default group is 0.
         std::optional<int> group;
     };
-
-#include "scriptscheduler_codegen.cpp"
 } // namespace
+#include "scriptscheduler_codegen.cpp"
 
-namespace openspace::scripting {
+namespace openspace {
 
-documentation::Documentation ScriptScheduler::Documentation() {
+Documentation ScriptScheduler::Documentation() {
     // @TODO (abock, 2021-03-25)  This is not really correct. This function currently
     // returns the documentation for the ScheduledScript, not for the ScriptScheduler
     // itself. This should be cleaned up a bit
@@ -88,7 +92,7 @@ documentation::Documentation ScriptScheduler::Documentation() {
 }
 
 ScriptScheduler::ScriptScheduler()
-    : properties::PropertyOwner({ "ScriptScheduler" })
+    : PropertyOwner({ "ScriptScheduler" })
     , _enabled(EnabledInfo, true)
     , _shouldRunAllTimeJump(ShouldRunAllTimeJumpInfo, true)
 {
@@ -172,8 +176,8 @@ std::vector<std::string> ScriptScheduler::progressTo(double newTime) {
     }
 
     if (newTime > _currentTime) {
-        // Moving forward in time; we need to find the highest entry in the timings
-        // vector that is still smaller than the newTime
+        // Moving forward in time; we need to find the highest entry in the timings vector
+        // that is still smaller than the newTime
         const size_t prevIndex = _currentIndex;
         const auto it = std::upper_bound(
             _scripts.begin() + prevIndex, // We only need to start at the previous time
@@ -283,4 +287,4 @@ LuaLibrary ScriptScheduler::luaLibrary() {
     };
 }
 
-} // namespace openspace::scripting
+} // namespace openspace

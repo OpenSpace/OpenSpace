@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,16 +25,18 @@
 #include <modules/base/dashboard/dashboarditemspacing.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
+#include <ghoul/misc/dictionary.h>
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo SpacingInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo SpacingInfo = {
         "Spacing",
         "Spacing",
         "This value determines the spacing (in pixels) that this item represents. The "
         "default value is 15.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `DashboardItem` adds a variable amount of spacing between two other
@@ -43,12 +45,12 @@ namespace {
         // [[codegen::verbatim(SpacingInfo.description)]]
         std::optional<float> spacing;
     };
-#include "dashboarditemspacing_codegen.cpp"
 } // namespace
+#include "dashboarditemspacing_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemSpacing::Documentation() {
+Documentation DashboardItemSpacing::Documentation() {
     return codegen::doc<Parameters>(
         "base_dashboarditem_spacing",
         DashboardItem::Documentation()

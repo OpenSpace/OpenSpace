@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace::luascriptfunctions {
+#include <ghoul/ext/assimp/contrib/zip/src/zip.h>
+#include <ghoul/misc/stringhelper.h>
+#include <vector>
+
+using namespace openspace;
+
+namespace {
 
 int printInternal(ghoul::logging::LogLevel level, lua_State* L) {
     const int nArguments = lua_gettop(L);
@@ -57,10 +63,6 @@ int printFatal(lua_State* L) {
     return printInternal(ghoul::logging::LogLevel::Fatal, L);
 }
 
-} // namespace openspace::luascriptfunctions
-
-namespace {
-
 /**
  * Passes the argument to FileSystem::absolutePath, which resolves occuring path tokens
  * and returns the absolute path.
@@ -83,13 +85,17 @@ namespace {
     );
 }
 
-// Checks whether the provided file exists.
+/**
+ * Checks whether the provided file exists.
+ */
 [[codegen::luawrap]] bool fileExists(std::string file) {
     const bool e = std::filesystem::is_regular_file(absPath(std::move(file)));
     return e;
 }
 
-// Reads a file from disk and return its contents.
+/**
+ * Reads a file from disk and return its contents.
+ */
 [[codegen::luawrap]] std::string readFile(std::filesystem::path file) {
     std::filesystem::path p = absPath(file);
     if (!std::filesystem::is_regular_file(p)) {
@@ -103,7 +109,9 @@ namespace {
     return contents;
 }
 
-// Reads a file from disk and return its as a list of lines.
+/**
+ * Reads a file from disk and return its as a list of lines.
+ */
 [[codegen::luawrap]] std::vector<std::string> readFileLines(std::filesystem::path file) {
     std::filesystem::path p = absPath(file);
     if (!std::filesystem::is_regular_file(p)) {
@@ -121,7 +129,9 @@ namespace {
     return contents;
 }
 
-// Checks whether the provided directory exists.
+/**
+ * Checks whether the provided directory exists.
+ */
 [[codegen::luawrap]] bool directoryExists(std::filesystem::path file) {
     const bool e = std::filesystem::is_directory(absPath(std::move(file)));
     return e;
@@ -130,10 +140,10 @@ namespace {
 /**
  * Creates a directory at the provided path, returns true if directory was newly created
  * and false otherwise. If `recursive` flag is set to true, it will automatically create
- * any missing parent folder as well
+ * any missing parent folder as well.
  */
 [[codegen::luawrap]] bool createDirectory(std::filesystem::path path,
-    bool recursive = false)
+                                          bool recursive = false)
 {
     if (recursive) {
         return std::filesystem::create_directories(std::move(path));
@@ -209,12 +219,11 @@ namespace {
         return std::vector<std::filesystem::path>();
     }
 
-    namespace fs = std::filesystem;
     return ghoul::filesystem::walkDirectory(
         path,
         ghoul::filesystem::Recursive(recursive),
         ghoul::filesystem::Sorted(sorted),
-        [](const fs::path& p) { return fs::is_directory(p); }
+        [](const std::filesystem::path& p) { return std::filesystem::is_directory(p); }
     );
 }
 
@@ -280,7 +289,7 @@ namespace {
                                                  std::string preScript = "",
                                                  std::string postScript = "")
 {
-    openspace::global::scriptEngine->registerRepeatedScript(
+    global::scriptEngine->registerRepeatedScript(
         std::move(identifier),
         std::move(script),
         timeout,
@@ -290,10 +299,10 @@ namespace {
 }
 
 /**
- * Removes a previously registered repeated script (see #registerRepeatedScript)
+ * Removes a previously registered repeated script (see #registerRepeatedScript).
  */
 [[codegen::luawrap]] void removeRepeatedScript(std::string identifier) {
-    openspace::global::scriptEngine->removeRepeatedScript(identifier);
+    global::scriptEngine->removeRepeatedScript(identifier);
 }
 
 /**
@@ -302,9 +311,9 @@ namespace {
  * time.
  */
 [[codegen::luawrap]] void scheduleScript(std::string script, double delay) {
-    openspace::global::scriptEngine->scheduleScript(std::move(script), delay);
+    global::scriptEngine->scheduleScript(std::move(script), delay);
 }
 
-#include "scriptengine_lua_codegen.cpp"
-
 } // namespace
+
+#include "scriptengine_lua_codegen.cpp"

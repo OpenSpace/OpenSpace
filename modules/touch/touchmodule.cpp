@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,61 +26,69 @@
 
 #include <modules/touch/include/tuioear.h>
 #include <modules/touch/include/win32_touch.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/templatefactory.h>
+#include <algorithm>
+#include <functional>
+#include <optional>
+#include <utility>
 
 using namespace TUIO;
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "TouchModule";
 
-    constexpr openspace::properties::Property::PropertyInfo TuioPortInfo = {
+    constexpr Property::PropertyInfo TuioPortInfo = {
         "TuioPort",
         "TUIO Port",
         "TUIO UDP port, by default 3333. The port cannot be changed after startup.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableTouchInfo = {
+    constexpr Property::PropertyInfo EnableTouchInfo = {
         "EnableTouchInteraction",
         "Enable touch interaction",
         "Use this property to turn on/off touch input navigation in the 3D scene. "
         "Disabling will reset all current touch inputs to the navigation.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
+    constexpr Property::PropertyInfo EventsInfo = {
         "DetectedTouchEvent",
         "Detected touch event",
         "True when there is an active touch event.",
-        openspace::properties::Property::Visibility::Hidden
+        Property::Visibility::Hidden
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        DefaultDirectTouchRenderableTypesInfo =
-    {
+    constexpr Property::PropertyInfo DefaultDirectTouchRenderableTypesInfo = {
         "DefaultDirectTouchRenderableTypes",
         "Default direct touch renderable types",
         "A list of renderable types that will automatically use the \'direct "
         "manipulation\' scheme when interacted with, keeping the finger on a static "
         "position on the interaction sphere of the object when touching. Good for "
         "relatively spherical objects.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(TouchModule)]] Parameters {
         // [[codegen::verbatim(TuioPortInfo.description)]]
         std::optional<int> tuioPort [[codegen::inrange(1, 65535)]];
     };
-
-    #include "touchmodule_codegen.cpp"
 } // namespace
+#include "touchmodule_codegen.cpp"
 
 namespace openspace {
 
@@ -143,8 +151,8 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& dict) {
         LDEBUG("Initializing TouchMarker OpenGL");
         _markers.initialize();
 #ifdef WIN32
-        // We currently only support one window of touch input internally
-        // so here we grab the first window-handle and use it.
+        // We currently only support one window of touch input internally so here we grab
+        // the first window-handle and use it.
         void* nativeWindowHandle = global::windowDelegate->getNativeWindowHandle(0);
         if (nativeWindowHandle) {
             _win32TouchHook = std::make_unique<Win32TouchHook>(nativeWindowHandle);
@@ -214,9 +222,12 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& dict) {
         clearInputs();
     });
 
-    global::callback::render->push_back([this]() {
-        _markers.render(_touchPoints);
-    });
+    global::callback::render->push_back(
+        [this](const glm::mat4&, const glm::mat4&, const glm::mat4&) {
+            _markers.render(_touchPoints);
+
+        }
+    );
 }
 
 bool TouchModule::processNewInput() {
@@ -328,7 +339,7 @@ void TouchModule::removeTouchInput(TouchInput input) {
             inputHolder.tryAddInput(input);
             const double totalTime = inputHolder.gestureTime();
             const float totalDistance = inputHolder.gestureDistance();
-            // Magic values taken from tuioear.cpp:
+            // Magic values taken from tuioear.cpp
             const bool isWithinTapTime = totalTime < 0.18;
             const bool wasStationary = totalDistance < 0.0004f;
             if (isWithinTapTime && wasStationary && _touchPoints.size() == 1 &&

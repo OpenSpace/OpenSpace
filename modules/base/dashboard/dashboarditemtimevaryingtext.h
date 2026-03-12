@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,12 +27,11 @@
 
 #include <openspace/rendering/dashboardtextitem.h>
 
-#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/json.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <unordered_map>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class DashboardItemTimeVaryingText : public DashboardTextItem {
 public:
@@ -41,15 +40,15 @@ public:
 
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void loadDataFromJson(const std::string& filePath);
     void computeSequenceEndTime();
     int updateActiveTriggerTimeIndex(double currentTime) const;
 
-    properties::StringProperty _formatString;
-    properties::StringProperty _dataFile;
+    StringProperty _formatString;
+    StringProperty _dataFile;
 
     std::unordered_map<double, nlohmann::json> _data;
     std::vector<double> _startTimes;

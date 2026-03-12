@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_UI_LAUNCHER___ASSETTREEITEM___H__
 #define __OPENSPACE_UI_LAUNCHER___ASSETTREEITEM___H__
 
+#include <QString>
 #include <QVariant>
 #include <vector>
 
@@ -123,7 +124,7 @@ public:
       * Set data at column \p column.
       *
       * \param column The data column number to set
-      * \param value The #QVariant data element to store at column \p column
+      * \param value The QVariant data element to store at column \p column
       * \return `true` if the data set was successful
       */
     bool setData(int column, const QVariant& value);

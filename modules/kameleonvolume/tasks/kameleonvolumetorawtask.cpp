@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,51 +25,60 @@
 #include <modules/kameleonvolume/tasks/kameleonvolumetorawtask.h>
 
 #include <modules/kameleonvolume/kameleonvolumereader.h>
+#include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumewriter.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <array>
-#include <filesystem>
+#include <fstream>
 #include <optional>
+#include <variant>
 
 namespace {
     struct [[codegen::Dictionary(KameleonVolumeToRawTask)]] Parameters {
-        // The cdf file to extract data from
+        // The cdf file to extract data from.
         std::filesystem::path input;
 
-        // The raw volume file to export data to
+        // The raw volume file to export data to.
         std::string rawVolumeOutput [[codegen::annotation("A valid filepath")]];
 
-        // The Lua dictionary file to export metadata to
+        // The Lua dictionary file to export metadata to.
         std::string dictionaryOutput [[codegen::annotation("A valid filepath")]];
 
-        // The variable name to read from the kameleon dataset
-        std::string variable [[codegen::annotation("A valid kameleon variable")]];
+        // The variable name or names to read from the kameleon dataset.
+        std::variant<std::string, std::vector<std::string>> variable;
 
-        // A vector representing the number of cells in each dimension
+        // Says whether or not to multiply the variable value with the first coordinate of
+        // the volume coords squared.
+        std::optional<bool> factorRSquared;
+
+        // A vector representing the number of cells in each dimension.
         glm::ivec3 dimensions;
 
         // A vector representing the lower bound of the domain, in the native kameleon
-        // grid units
+        // grid units.
         std::optional<glm::vec3> lowerDomainBound;
 
         // A vector representing the lower bound of the domain, in the native kameleon
-        // grid units
+        // grid units.
         std::optional<glm::vec3> upperDomainBound;
 
-        // The unit of the data
+        std::optional<float> innerRadialLimit;
+
+        // The unit of the data.
         std::optional<std::string> visUnit
             [[codegen::annotation("A valid kameleon unit")]];
     };
-#include "kameleonvolumetorawtask_codegen.cpp"
 } // namespace
+#include "kameleonvolumetorawtask_codegen.cpp"
 
-namespace openspace::kameleonvolume {
+namespace openspace {
 
-documentation::Documentation KameleonVolumeToRawTask::documentation() {
-    return codegen::doc<Parameters>("kameleon_metadata_to_json_task");
+Documentation KameleonVolumeToRawTask::documentation() {
+    return codegen::doc<Parameters>("kameleon_task_kameleonvolumetoraw");
 }
 
 KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictionary) {
@@ -78,8 +87,15 @@ KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictio
     _inputPath = p.input;
     _rawVolumeOutputPath = absPath(p.rawVolumeOutput);
     _dictionaryOutputPath = absPath(p.dictionaryOutput);
-    _variable = p.variable;
+    if (std::holds_alternative<std::string>(p.variable)) {
+        _variable = std::get<std::string>(p.variable);
+    }
+    else {
+        _variableVector = std::get<std::vector<std::string>>(p.variable);
+    }
     _dimensions = p.dimensions;
+
+    _factorRSquared = p.factorRSquared.value_or(_factorRSquared);
 
     if (p.lowerDomainBound.has_value()) {
         _lowerDomainBound = *p.lowerDomainBound;
@@ -94,12 +110,14 @@ KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictio
     else {
         _autoDomainBounds = true;
     }
+
+    _innerRadialLimit = p.innerRadialLimit.value_or(_innerRadialLimit);
 }
 
 std::string KameleonVolumeToRawTask::description() {
     return std::format(
-        "Extract volumetric data from CDF file '{}'. Write raw volume data into '{}' "
-        "and dictionary with metadata to '{}'",
+        "Extract volumetric data from CDF file '{}'. Write raw volume data into '{}' and "
+        "dictionary with metadata to '{}'",
         _inputPath, _rawVolumeOutputPath, _dictionaryOutputPath
     );
 }
@@ -123,22 +141,25 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
         );
     }
 
-    std::unique_ptr<volume::RawVolume<float>> rawVolume = reader.readFloatVolume(
+    reader.setReaderCallback(progressCallback);
+
+    float volumeMinValue;
+    float volumeMaxValue;
+    std::unique_ptr<RawVolume<float>> rawVolume = reader.readFloatVolume(
         _dimensions,
         _variable,
         _lowerDomainBound,
-        _upperDomainBound
+        _upperDomainBound,
+        _variableVector,
+        volumeMinValue,
+        volumeMaxValue,
+        _factorRSquared,
+        _innerRadialLimit
     );
 
-    progressCallback(0.5f);
-
-    volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath);
+    RawVolumeWriter<float> writer = RawVolumeWriter<float>(_rawVolumeOutputPath);
     writer.write(*rawVolume);
 
-    progressCallback(0.9f);
-
-    ghoul::Dictionary inputMetadata = reader.readMetaData();
-    ghoul::Dictionary outputMetadata;
 
     std::string time = reader.time();
 
@@ -147,6 +168,7 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
         time.pop_back();
     }
 
+    ghoul::Dictionary outputMetadata;
     outputMetadata.setValue("Time", time);
     outputMetadata.setValue("Dimensions", glm::dvec3(_dimensions));
     outputMetadata.setValue("LowerDomainBound", glm::dvec3(_lowerDomainBound));
@@ -164,4 +186,4 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
     progressCallback(1.f);
 }
 
-} // namespace openspace::kameleonvolume
+} // namespace openspace

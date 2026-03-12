@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,10 +28,7 @@
 #include <openspace/scene/translation.h>
 
 #include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/util/time.h>
 #include <ghoul/glm.h>
-#include <ghoul/misc/exception.h>
-#include <openspace/util/time.h>
 
 namespace openspace {
 
@@ -54,14 +51,13 @@ public:
      */
     explicit KeplerTranslation(const ghoul::Dictionary& dictionary);
 
-    /// Default destructor
     ~KeplerTranslation() override = default;
 
     /**
-    * Method returning the translation vector at a given time.
-    *
-    * \param data Provides information from the engine about, for example, the time
-    */
+     * Method returning the translation vector at a given time.
+     *
+     * \param data Provides information from the engine about, for example, the time
+     */
     glm::dvec3 position(const UpdateData& data) const override;
 
     /**
@@ -71,7 +67,7 @@ public:
      * \return The openspace::Documentation that describes the ghoul::Dicitonary that can
      *         be passed to the constructor
      */
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     /**
      * Sets the internal values for the Keplerian elements and the epoch as a string of
@@ -136,22 +132,22 @@ public:
 
 private:
     /// The eccentricity of the orbit in [0, 1)
-    properties::DoubleProperty _eccentricity;
+    DoubleProperty _eccentricity;
     /// The semi-major axis in km
-    properties::DoubleProperty _semiMajorAxis;
+    DoubleProperty _semiMajorAxis;
     /// The inclination of the orbit in [0, 360]
-    properties::DoubleProperty _inclination;
+    DoubleProperty _inclination;
     /// The right ascension of the ascending node in [0, 360]
-    properties::DoubleProperty _ascendingNode;
+    DoubleProperty _ascendingNode;
     /// The argument of periapsis in [0, 360]
-    properties::DoubleProperty _argumentOfPeriapsis;
+    DoubleProperty _argumentOfPeriapsis;
     /// The mean anomaly at the epoch in [0, 360]
-    properties::DoubleProperty _meanAnomalyAtEpoch;
+    DoubleProperty _meanAnomalyAtEpoch;
 
     /// The epoch in seconds relative to the J2000 epoch
-    properties::DoubleProperty _epoch;
+    DoubleProperty _epoch;
     /// The period of the orbit in seconds
-    properties::DoubleProperty _period;
+    DoubleProperty _period;
 
     /// Dirty flag for the _orbitPlaneRotation parameters
     mutable bool _orbitPlaneDirty = true;
@@ -164,9 +160,9 @@ private:
 
 class KeplerCalculator {
 public:
-    KeplerCalculator(double eccentricity, double semiMajorAxis,
-        double inclination, double ascendingNode, double argumentOfPeriapsis,
-        double meanAnomalyAtEpoch, double orbitalPeriod, double epoch);
+    KeplerCalculator(double eccentricity, double semiMajorAxis, double inclination,
+        double ascendingNode, double argumentOfPeriapsis, double meanAnomalyAtEpoch,
+        double orbitalPeriod, double epoch);
 
     glm::dvec3 position(double time) const;
 

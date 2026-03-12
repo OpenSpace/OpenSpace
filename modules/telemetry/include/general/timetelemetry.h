@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,8 @@
 
 namespace openspace {
 
+class Camera;
+
 class TimeTelemetry : public TelemetryBase {
 public:
     TimeTelemetry(const std::string& ip, int port);
@@ -53,13 +55,13 @@ private:
      */
     void sendData() override;
 
-    struct PrecisionProperties : properties::PropertyOwner {
-        PrecisionProperties(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
+    struct PrecisionProperties : PropertyOwner {
+        PrecisionProperties(PropertyOwner::PropertyOwnerInfo precisionInfo);
 
-        properties::DoubleProperty timePrecision;
+        DoubleProperty timePrecision;
     };
 
-    properties::OptionProperty _timeUnitOption;
+    OptionProperty _timeUnitOption;
     PrecisionProperties _precisionProperties;
 
     double _timeSpeed = 0.0;

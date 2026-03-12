@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,9 @@
 
 #include <modules/globebrowsing/src/tileindex.h>
 
-namespace openspace::globebrowsing {
+#include <ghoul/misc/assert.h>
+
+namespace openspace {
 
 bool operator==(const TileIndex& lhs, const TileIndex& rhs) {
     return (lhs.x == rhs.x) && (lhs.y == rhs.y) && (lhs.level == rhs.level);
@@ -90,4 +92,4 @@ TileIndex::TileHashKey TileIndex::hashKey() const {
     return key;
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

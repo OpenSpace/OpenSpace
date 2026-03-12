@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,21 +27,28 @@
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/misc/thread.h>
 #include <curl/curl.h>
-#include <chrono>
-#include <filesystem>
+#include <cerrno>
+#include <cstdio>
+#include <cstring>
+#include <malloc.h>
 #include <sstream>
+#include <string_view>
 #include <thread>
+#include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "DownloadManager";
 
     struct ProgressInformation {
-        std::shared_ptr<openspace::DownloadManager::FileFuture> future;
+        std::shared_ptr<DownloadManager::FileFuture> future;
         std::chrono::system_clock::time_point startTime;
-        const openspace::DownloadManager::DownloadProgressCallback* callback;
+        const DownloadManager::DownloadProgressCallback* callback;
     };
 
     size_t writeData(void* ptr, size_t size, size_t nmemb, FILE* stream) {
@@ -51,7 +58,7 @@ namespace {
 
     size_t writeMemoryCallback(void* contents, size_t size, size_t nmemb, void* userp) {
         const size_t realsize = size * nmemb;
-        auto* mem = static_cast<openspace::DownloadManager::MemoryFile*>(userp);
+        auto* mem = static_cast<DownloadManager::MemoryFile*>(userp);
 
         // @TODO(abock): Remove this and replace mem->buffer with std::vector<char>
         mem->buffer = reinterpret_cast<char*>(
@@ -87,11 +94,11 @@ namespace {
 
         auto now = std::chrono::system_clock::now();
 
-        // Compute time spent transferring.
+        // Compute time spent transferring
         auto transferTime = now - i->startTime;
-        // Compute estimated transfer time.
+        // Compute estimated transfer time
         auto estimatedTime = transferTime / i->future->progress;
-        // Compute estimated time remaining.
+        // Compute estimated time remaining
         auto timeRemaining = estimatedTime - transferTime;
 
         i->future->secondsRemaining = static_cast<float>(
@@ -142,9 +149,9 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
     if (error != 0) {
         LERROR(std::format("Could not open/create file: {}. Errno: {}", file, errno));
     }
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
     const std::string f = file.string();
-    FILE* fp = fopen(f.c_str(), "wb"); // write binary
+    FILE* fp = fopen(f.c_str(), "wb");
 #endif // WIN32
     if (!fp) {
         LERROR(std::format("Could not open/create file: {}. Errno: {}", file, errno));
@@ -178,7 +185,7 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
             // progress will not be shown for downloads on the splash screen
             curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo);
             curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &p);
-            #endif
+            #endif // LIBCURL_VERSION_NUM >= 0x072000
             curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
             const CURLcode res = curl_easy_perform(curl);
@@ -229,10 +236,11 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
     auto downloadFunction = [url, successCb = std::move(successCallback),
                              errorCb = std::move(errorCallback)]()
     {
-        DownloadManager::MemoryFile file;
-        file.buffer = reinterpret_cast<char*>(malloc(1));
-        file.size = 0;
-        file.corrupted = false;
+        DownloadManager::MemoryFile file = {
+            .buffer = reinterpret_cast<char*>(malloc(1)),
+            .size = 0,
+            .corrupted = false
+        };
 
         CURL* curl = curl_easy_init();
         if (!curl) {
@@ -252,10 +260,10 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
 
         CURLcode res = curl_easy_perform(curl);
         if (res == CURLE_OK) {
-            // ask for the content-type
+            // Ask for the content-type
             char* ct = nullptr;
             res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
-            if (res == CURLE_OK) {
+            if (res == CURLE_OK && ct) {
                 std::string extension = std::string(ct);
                 std::stringstream ss(extension);
                 ghoul::getline(ss, extension ,'/');
@@ -278,10 +286,9 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
                 LWARNING(std::format("Error downloading '{}': {}", url, err));
             }
             curl_easy_cleanup(curl);
-            // Set a boolean variable in MemoryFile to determine if it is
-            // valid/corrupted or not.
-            // Return MemoryFile even if it is not valid, and check if it is after
-            // future.get() call.
+            // Set a boolean variable in MemoryFile to determine if it is valid/corrupted
+            // or not. Return MemoryFile even if it is not valid, and check if it is after
+            // future.get() call
             file.corrupted = true;
             return file;
         }
@@ -297,12 +304,11 @@ void DownloadManager::fileExtension(const std::string& url,
         CURL* curl = curl_easy_init();
         if (curl) {
             curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-            //USING CURLOPT NOBODY
             curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
             CURLcode res = curl_easy_perform(curl);
             if (CURLE_OK == res) {
                 char* ct = nullptr;
-                // ask for the content-type
+                // Ask for the content-type
                 res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
                 if ((res == CURLE_OK) && ct && finishedCb) {
                     finishedCb(std::string(ct));

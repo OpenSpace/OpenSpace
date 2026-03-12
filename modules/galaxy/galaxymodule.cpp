@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,12 +30,16 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/task.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 
-GalaxyModule::GalaxyModule() : OpenSpaceModule(Name) {}
+GalaxyModule::GalaxyModule()
+    : OpenSpaceModule(Name)
+{}
 
 void GalaxyModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul::TemplateFactory<Renderable>* fRenderable =
@@ -49,7 +53,7 @@ void GalaxyModule::internalInitialize(const ghoul::Dictionary&) {
     fTask->registerClass<MilkywayPointsConversionTask>("MilkywayPointsConversionTask");
 }
 
-std::vector<documentation::Documentation> GalaxyModule::documentations() const {
+std::vector<Documentation> GalaxyModule::documentations() const {
     return {
         RenderableGalaxy::Documentation(),
         MilkywayConversionTask::Documentation(),

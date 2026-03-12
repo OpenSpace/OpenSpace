@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,13 +26,17 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
 #include <optional>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view KeyType = "Type";
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "If this value is set to 'true' this dashboard item is shown in the dashboard. "
@@ -59,13 +63,13 @@ namespace {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
     };
-#include "dashboarditem_codegen.cpp"
 } // namespace
+#include "dashboarditem_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItem::Documentation() {
-    return codegen::doc<Parameters>("dashboarditem");
+Documentation DashboardItem::Documentation() {
+    return codegen::doc<Parameters>("core_dashboarditem");
 }
 
 std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
@@ -84,7 +88,7 @@ std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
 }
 
 DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "", "" })
+    : PropertyOwner({ "", "" })
     , _enabled(EnabledInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

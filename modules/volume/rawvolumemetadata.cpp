@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,42 +24,42 @@
 
 #include <modules/volume/rawvolumemetadata.h>
 
-#include <openspace/documentation/verifier.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/time.h>
 #include <ghoul/misc/dictionary.h>
 #include <optional>
+#include <string_view>
 
 namespace {
     struct [[codegen::Dictionary(RawVolumeMetaData)]] Parameters {
-        // Specifies the number of grid cells in each dimension
+        // Specifies the number of grid cells in each dimension.
         glm::ivec3 dimensions;
 
-        // Specifies the unit used to specity the domain
+        // Specifies the unit used to specity the domain.
         std::optional<std::string> domainUnit;
 
-        // Specifies the lower domain bounds in the model coordinate system
+        // Specifies the lower domain bounds in the model coordinate system.
         std::optional<glm::vec3> lowerDomainBound;
 
-        // Specifies the upper domain bounds in the model coordinate system
+        // Specifies the upper domain bounds in the model coordinate system.
         std::optional<glm::vec3> upperDomainBound;
 
-        // Specifies the time on the format YYYY-MM-DDTHH:MM:SS.000Z
+        // Specifies the time on the format YYYY-MM-DDTHH:MM:SS.000Z.
         std::optional<std::string> time;
 
-        // Specifies the unit used to specity the value
+        // Specifies the unit used to specity the value.
         std::optional<std::string> valueUnit;
 
-        // Specifies the minimum value stored in the volume
+        // Specifies the minimum value stored in the volume.
         std::optional<float> minValue;
 
-        // Specifies the maximum value stored in the volume
+        // Specifies the maximum value stored in the volume.
         std::optional<float> maxValue;
    };
-#include "rawvolumemetadata_codegen.cpp"
 } // namespace
+#include "rawvolumemetadata_codegen.cpp"
 
-namespace openspace::volume {
+namespace openspace {
 
 RawVolumeMetadata RawVolumeMetadata::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
@@ -132,8 +132,8 @@ ghoul::Dictionary RawVolumeMetadata::dictionary() const {
     return dict;
 }
 
-documentation::Documentation RawVolumeMetadata::Documentation() {
+Documentation RawVolumeMetadata::Documentation() {
     return codegen::doc<Parameters>("volume_rawvolumemetadata");
 }
 
-} // namespace openspace::volume
+} // namespace openspace

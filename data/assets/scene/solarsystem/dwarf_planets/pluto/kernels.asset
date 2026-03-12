@@ -17,13 +17,13 @@ local kernels = {
 }
 
 local ID = {
-  PlutoBarycenter = coreKernels.ID.PlutoBarycenter,
+  PlutoBarycenter = "PLUTO BARYCENTER",
+  Pluto = "PLUTO",
   Charon = "CHARON",
   Hydra = "HYDRA",
   Styx = "STYX",
   Nix = "NIX",
-  Kerberos = "KERBEROS",
-  Pluto = coreKernels.ID.Pluto
+  Kerberos = "KERBEROS"
 }
 
 local Frame = {

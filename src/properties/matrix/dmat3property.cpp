@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,14 +24,12 @@
 
 #include <openspace/properties/matrix/dmat3property.h>
 
-#include <ghoul/glm.h>
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
-DMat3Property::DMat3Property(Property::PropertyInfo info, glm::dmat3x3 value,
-                             glm::dmat3x3 minValue, glm::dmat3x3 maxValue,
-                             glm::dmat3x3 stepValue)
+DMat3Property::DMat3Property(PropertyInfo info, glm::dmat3x3 value, glm::dmat3x3 minValue,
+                             glm::dmat3x3 maxValue, glm::dmat3x3 stepValue)
     : NumericalProperty<glm::dmat3x3>(
         std::move(info),
         std::move(value),
@@ -61,4 +59,4 @@ std::string DMat3Property::stringValue() const {
     return formatJson(_value);
 }
 
-}  // namespace openspace::properties
+} // namespace openspace

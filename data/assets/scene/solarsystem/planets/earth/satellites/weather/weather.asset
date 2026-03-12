@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Weather)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_weather",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=weather&FORMAT=kvn",
+  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=weather&FORMAT=kvn",
   Filename = "weather.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })

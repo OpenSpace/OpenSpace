@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,13 +27,13 @@
 #include <modules/webbrowser/include/defaultbrowserlauncher.h>
 #include <modules/webbrowser/include/webrenderhandler.h>
 #include <modules/webbrowser/include/webkeyboardhandler.h>
-#include <ghoul/misc/assert.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
 
-bool BrowserClient::_hasFocus = false; // Define the static member variable
+bool BrowserClient::_hasFocus = false;
 
 BrowserClient::BrowserClient(WebRenderHandler* handler,
                              WebKeyboardHandler* keyboardHandler)
@@ -90,7 +90,7 @@ bool BrowserClient::NoContextMenuHandler::RunContextMenu(CefRefPtr<CefBrowser>,
                                                          CefRefPtr<CefMenuModel>,
                                                      CefRefPtr<CefRunContextMenuCallback>)
 {
-    // Disable the context menu.
+    // Disable the context menu
     return true;
 }
 
@@ -161,7 +161,7 @@ bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser>, CefCur
         case cef_cursor_type_t::CT_GRAB:
         case cef_cursor_type_t::CT_GRABBING:
             // There is no "grabbing" cursors in GLFW, so for now the pointing hand to
-            // make web objects that use drag-n-drop look more interactive.
+            // make web objects that use drag-n-drop look more interactive
             // @TODO (emmbr, 2024-12-09) Add custom cursors for these cases
             newCursor = WindowDelegate::Cursor::PointingHand;
             break;

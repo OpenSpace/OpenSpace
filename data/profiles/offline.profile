@@ -6,7 +6,6 @@
     "nightsky/nightsky",
     "scene/digitaluniverse/digitaluniverse",
     "scene/milkyway/constellations/constellation_art",
-    "scene/milkyway/constellations/constellation_keybinds",
     "scene/milkyway/milkyway/volume",
     "scene/solarsystem/dwarf_planets/pluto/system",
     "scene/solarsystem/planets/earth/earth",
@@ -71,13 +70,6 @@
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
-  "properties": [
-    {
-      "name": "Modules.SkyBrowser.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    }
-  ],
   "time": {
     "is_paused": false,
     "type": "relative",

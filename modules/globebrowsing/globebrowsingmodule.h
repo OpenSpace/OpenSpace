@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,24 +30,14 @@
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
-#include <openspace/util/ellipsoid.h>
-#include <ghoul/glm.h>
+#include <filesystem>
 #include <future>
 #include <memory>
-#include <optional>
-
-namespace openspace::globebrowsing {
-    class RenderableGlobe;
-    struct TileIndex;
-
-    namespace cache { class MemoryAwareTileCache; }
-} // namespace openspace::globebrowsing
 
 namespace openspace {
 
-class Camera;
-struct Geodetic2;
-struct Geodetic3;
+class MemoryAwareTileCache;
+class RenderableGlobe;
 class SceneGraphNode;
 
 class GlobeBrowsingModule : public OpenSpaceModule {
@@ -58,12 +48,12 @@ public:
 
     void goToChunk(const SceneGraphNode& globe, int x, int y, int level);
 
-    globebrowsing::cache::MemoryAwareTileCache* tileCache();
-    scripting::LuaLibrary luaLibrary() const override;
-    std::vector<documentation::Documentation> documentations() const override;
-    static documentation::Documentation Documentation();
+    MemoryAwareTileCache* tileCache();
+    LuaLibrary luaLibrary() const override;
+    std::vector<openspace::Documentation> documentations() const override;
+    static openspace::Documentation Documentation();
 
-    const globebrowsing::RenderableGlobe* castFocusNodeRenderableToGlobe();
+    const RenderableGlobe* castFocusNodeRenderableToGlobe();
 
     struct Layer {
         std::string name;
@@ -71,13 +61,17 @@ public:
     };
     using Capabilities = std::vector<Layer>;
 
-    // Stores the mapping between globe to names
+    /**
+     * Stores the mapping between globe to names.
+     */
     struct UrlInfo {
         std::string name;
         std::string url;
     };
 
-    // Registers then user-usable name
+    /**
+     * Registers then user - usable name.
+     */
     void loadWMSCapabilities(std::string name, std::string globe, std::string url);
     Capabilities capabilities(const std::string& name);
 
@@ -96,13 +90,13 @@ protected:
     void internalInitialize(const ghoul::Dictionary&) override;
 
 private:
-    properties::UIntProperty _tileCacheSizeMB;
+    UIntProperty _tileCacheSizeMB;
 
-    properties::StringProperty _defaultGeoPointTexturePath;
-    properties::BoolProperty _mrfCacheEnabled;
-    properties::StringProperty _mrfCacheLocation;
+    StringProperty _defaultGeoPointTexturePath;
+    BoolProperty _mrfCacheEnabled;
+    StringProperty _mrfCacheLocation;
 
-    std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
+    std::unique_ptr<MemoryAwareTileCache> _tileCache;
 
     // name -> capabilities
     std::map<std::string, std::future<Capabilities>> _inFlightCapabilitiesMap;

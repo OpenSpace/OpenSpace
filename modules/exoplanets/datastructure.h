@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,14 +25,15 @@
 #ifndef __OPENSPACE_MODULE_EXOPLANETS___DATASTRUCTURE___H__
 #define __OPENSPACE_MODULE_EXOPLANETS___DATASTRUCTURE___H__
 
-#include <openspace/documentation/documentation.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/dictionary.h>
-#include <optional>
+#include <limits>
 #include <string>
 #include <vector>
 
-namespace openspace::exoplanets {
+namespace openspace {
+
+struct Documentation;
 
 struct ExoplanetDataEntry {
     /// Orbital semi-major axis in AU
@@ -147,9 +148,9 @@ struct ExoplanetSystem {
     std::vector<ExoplanetDataEntry> planetsData;
 
     ghoul::Dictionary toDataDictionary() const;
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 };
 
-} // namespace openspace::exoplanets
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_EXOPLANETS___DATASTRUCTURE___H__

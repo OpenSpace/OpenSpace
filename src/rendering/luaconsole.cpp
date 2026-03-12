@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,15 +34,22 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/clipboard.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view HistoryFile = "ConsoleHistory";
     constexpr std::string_view JumpCharacters = ".,'/()\\";
     constexpr std::string_view PathStartIdentifier = "\"'[";
@@ -52,9 +59,8 @@ namespace {
 
     constexpr int MaximumHistoryLength = 1000;
 
-    // A high number is chosen since we didn't have a version number before
-    // any small number might also be equal to the console history length
-
+    // A high number is chosen since we didn't have a version number before any small
+    // number might also be equal to the console history length
     constexpr uint64_t CurrentVersion = 0xFEEE'FEEE'0000'0001;
 
     constexpr std::string_view FontName = "Console";
@@ -64,91 +70,87 @@ namespace {
     // Additional space between the entry text and the history (in pixels)
     constexpr float SeparatorSpace = 30.f;
 
-    // Determines at which speed the console opens.
+    // Determines at which speed the console opens
     constexpr float ConsoleOpenSpeed = 2.5;
 
-    constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
+    constexpr Property::PropertyInfo VisibleInfo = {
         "IsVisible",
         "Is visible",
         "Determines whether the Lua console is shown on the screen or not. Toggling it "
         "will fade the console in and out.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShouldBeSynchronizedInfo = {
+    constexpr Property::PropertyInfo ShouldBeSynchronizedInfo = {
        "ShouldBeSynchronized",
        "Should be synchronized",
        "Determines whether the entered commands will only be executed locally (if this "
        "is disabled), or whether they will be send to other connected nodes, for "
        "example in a cluster environment.",
-       openspace::properties::Property::Visibility::AdvancedUser
+       Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShouldSendToRemoteInfo = {
+    constexpr Property::PropertyInfo ShouldSendToRemoteInfo = {
         "ShouldSendToRemote",
         "Should send to remote",
         "Determines whether the entered commands will only be executed locally (if this "
         "is disabled), or whether they will be send to connected remote instances (other "
         "peers through a parallel connection).",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BackgroundColorInfo = {
+    constexpr Property::PropertyInfo BackgroundColorInfo = {
         "BackgroundColor",
         "Background color",
         "Sets the background color of the console.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EntryTextColorInfo = {
+    constexpr Property::PropertyInfo EntryTextColorInfo = {
         "EntryTextColor",
         "Entry text color",
         "Sets the text color of the entry area of the console.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HistoryTextColorInfo = {
+    constexpr Property::PropertyInfo HistoryTextColorInfo = {
         "HistoryTextColor",
         "History text color",
         "Sets the text color of the history area of the console.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HistoryLengthInfo = {
+    constexpr Property::PropertyInfo HistoryLengthInfo = {
         "HistoryLength",
         "History length",
         "Determines the length of the history in number of lines.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     std::string sanitizeInput(std::string str) {
         // Remove carriage returns
         str.erase(std::remove(str.begin(), str.end(), '\r'), str.end());
 
-        std::transform(
-            str.begin(),
-            str.end(),
-            str.begin(),
-            [](char c) {
-                // Replace newlines with spaces
-                if (c == '\n') {
-                    return ' ';
-                }
-
-                // The documentation contains “ and ” which we convert to " to make them
-                // copy-and-pastable
-                if (c == -109 || c == -108) {
-                    return '"';
-                }
-
-                // Convert \ into / to make paths pastable
-                if (c == '\\') {
-                    return '/';
-                }
-
-                return c;
+        for (size_t i = 0; i < str.size(); i++) {
+            // Replace newlines with spaces
+            if (str[i] == '\n') {
+                str[i] = ' ';
             }
-        );
+
+            // The documentation contains “ and ” which we convert to " to make them
+            // copy-and-pastable
+            if (str[i] == -109 || str[i] == -108) {
+                str[i] = '"';
+            }
+
+            // Convert \ into / to make paths pastable. Unless the \ is followed by a " in
+            // which case we do want to keep it. The check against .size() - 1 is there so
+            // that we don't access the string out of bounds if the \ is the last
+            // character in the pasted string
+            if (str[i] == '\\' && (i == str.size() - 1 || str[i + 1] != '"')) {
+                str[i] = '/';
+            }
+        }
 
         return str;
     }
@@ -156,20 +158,8 @@ namespace {
 
 namespace openspace {
 
-
-LuaConsole::AutoCompleteState::AutoCompleteState()
-    : context{ Context::None }
-    , isDataDirty{ true }
-    , input{ "" }
-    , suggestions{ }
-    , currentIndex{ NoAutoComplete }
-    , suggestion{ "" }
-    , cycleReverse{ false }
-    , insertPosition{ 0 }
-{}
-
 LuaConsole::LuaConsole()
-    : properties::PropertyOwner({ "LuaConsole", "Lua Console" })
+    : PropertyOwner({ "LuaConsole", "Lua Console" })
     , _isVisible(VisibleInfo, false)
     , _shouldBeSynchronized(ShouldBeSynchronizedInfo, true)
     , _shouldSendToRemote(ShouldSendToRemoteInfo, false)
@@ -199,13 +189,13 @@ LuaConsole::LuaConsole()
     addProperty(_shouldSendToRemote);
     addProperty(_historyLength);
 
-    _backgroundColor.setViewOption(properties::Property::ViewOptions::Color);
+    _backgroundColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_backgroundColor);
 
-    _entryTextColor.setViewOption(properties::Property::ViewOptions::Color);
+    _entryTextColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_entryTextColor);
 
-    _historyTextColor.setViewOption(properties::Property::ViewOptions::Color);
+    _historyTextColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_historyTextColor);
 }
 
@@ -288,8 +278,8 @@ void LuaConsole::deinitialize() {
         ""
     );
 
-    // We want to limit the command history to a realistic value, so that it doesn't
-    // grow without bounds
+    // We want to limit the command history to a realistic value, so that it doesn't grow
+    // without bounds
     if (_commandsHistory.size() > MaximumHistoryLength) {
         _commandsHistory = std::vector<std::string>(
             _commandsHistory.end() - MaximumHistoryLength,
@@ -297,7 +287,7 @@ void LuaConsole::deinitialize() {
         );
     }
 
-    std::ofstream file(filename, std::ios::binary);
+    std::ofstream file = std::ofstream(filename, std::ios::binary);
     if (file.good()) {
         const uint64_t version = CurrentVersion;
         file.write(reinterpret_cast<const char*>(&version), sizeof(uint64_t));
@@ -321,11 +311,11 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         return false;
     }
 
-    const bool modifierShift = (modifier == KeyModifier::Shift);
-    const bool modifierControl = (modifier == KeyModifier::Control);
+    const bool modifierShift = hasKeyModifier(modifier, KeyModifier::Shift);
+    const bool modifierControl = hasKeyModifier(modifier, KeyModifier::Control);
 
     // Button left of 1 and above TAB (default)
-    // Can be changed to any other key with the setCommandInputButton funciton
+    // Can be changed to any other key with the setCommandInputButton function
     if (key == _commandInputButton) {
         if (_isVisible) {
             if (modifierShift) {
@@ -369,8 +359,8 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         it->second();
     }
 
-    // If any other key is pressed, we want to remove our previous findings
-    // The special case for Shift is necessary as we want to allow Shift+TAB
+    // If any other key is pressed, we want to remove our previous findings. The special
+    // case for Shift is necessary as we want to allow Shift+TAB
     const bool isShiftModifierOnly = (key == Key::LeftShift || key == Key::RightShift);
     if (key != Key::Tab && !isShiftModifierOnly) {
         _autoCompleteState = AutoCompleteState();
@@ -409,7 +399,7 @@ void LuaConsole::charCallback(unsigned int codepoint,
     if (modifierControl && (codepoint == codepoint_C || codepoint == codepoint_V)) {
         return;
     }
-#endif
+#endif // WIN32
 
     // Disallow all non ASCII characters for now
     if (codepoint > 0x7f) {
@@ -419,11 +409,29 @@ void LuaConsole::charCallback(unsigned int codepoint,
     addToCommand(std::string(1, static_cast<char>(codepoint)));
 }
 
+bool LuaConsole::mouseActivationCallback(glm::vec2, MouseButton button,
+                                         MouseAction action, KeyModifier)
+{
+    const bool isMiddleMouseButton = button == MouseButton::Button3;
+    const bool isPress = action == MouseAction::Press;
+
+    if (_isVisible && isMiddleMouseButton && isPress) {
+        // Using the Primary selection area as that is more akin to the behavior on Linux
+        // where the middle mouse button pastes the currently selected text that comes
+        // from the primary selection area. On Windows, specifying this selection area
+        // doesn't change anything as there is only a single clipboard
+        addToCommand(sanitizeInput(ghoul::clipboardText(ghoul::SelectionArea::Primary)));
+        return true;
+    }
+
+    return false;
+}
+
 void LuaConsole::update() {
     ZoneScoped;
 
-    // Compute the height by simulating _historyFont number of lines and checking
-    // what the bounding box for that text would be.
+    // Compute the height by simulating _historyFont number of lines and checking what the
+    // bounding box for that text would be
     using namespace ghoul::fontrendering;
 
     const float height =
@@ -431,7 +439,7 @@ void LuaConsole::update() {
         (std::min(static_cast<int>(_commandsHistory.size()), _historyLength.value()) + 1);
 
     // Update the full height and the target height.
-    // Add the height of the entry line and space for a separator.
+    // Add the height of the entry line and space for a separator
     const float dpi = global::windowDelegate->osDpiScaling();
     _fullHeight = (height + EntryFontSize * dpi + SeparatorSpace);
     _targetHeight = _isVisible ? _fullHeight : 0;
@@ -442,8 +450,7 @@ void LuaConsole::update() {
     const double frametime = std::max(global::windowDelegate->deltaTime(), Epsilon);
 
     // Update the current height.
-    // The current height is the offset that is used to slide
-    // the console in from the top.
+    // The current height is the offset that is used to slide the console in from the top
     const glm::ivec2 res = global::windowDelegate->currentSubwindowSize();
     const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
     const double dHeight = (_targetHeight - _currentHeight) *
@@ -462,7 +469,7 @@ void LuaConsole::render() {
 
     const ghoul::GLDebugGroup group("LuaConsole");
 
-    // Don't render the console if it's collapsed.
+    // Don't render the console if it's collapsed
     if (_currentHeight < 1.f) {
         return;
     }
@@ -478,7 +485,7 @@ void LuaConsole::render() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);
 
-    rendering::helper::renderBox(
+    rendering::renderBox(
         glm::vec2(0.f),
         glm::vec2(1.f, _currentHeight / res.y),
         _backgroundColor
@@ -509,14 +516,14 @@ void LuaConsole::render() {
     size_t nCommandRows = static_cast<size_t>(
         std::ceil(static_cast<double>(totalCommandSize) / nCharactersPerRow)
     );
-    // We're intrested in the zero based index when computing the input position
+    // We're intrested in the zero based index when computing the input position.
     // If the characters fit on one line we should not add any extra rows
     nCommandRows = nCommandRows > 1 ? nCommandRows - 1 : 0;
 
     // The command is split in 3 parts to render the suggestion in a different color:
     // the part before the suggestion, the suggestion, and the part after the suggestion
     std::string beforeSuggestion =  currentCommand;
-    std::string afterSuggestion = "";
+    std::string afterSuggestion;
 
     if (_autoCompleteState.insertPosition != 0) {
         beforeSuggestion = currentCommand.substr(0, _autoCompleteState.insertPosition);
@@ -524,7 +531,7 @@ void LuaConsole::render() {
     }
 
     // We pad the strings with empty spaces so that each part is rendered in their correct
-    // positions, even if linebreaks are added
+    // positions, even if linebreaks are added.
     // Pad suggestion before and after with ' '
     const std::string suggestion = std::string(beforeSuggestion.size() + 2, ' ') +
         _autoCompleteState.suggestion + std::string(afterSuggestion.size(), ' ');
@@ -883,7 +890,7 @@ void LuaConsole::registerKeyHandlers() {
         }
     );
 
-    // Remove characters before _inputPosition until the previous JumpCharacter.
+    // Remove characters before _inputPosition until the previous JumpCharacter
     registerKeyHandler(
         Key::BackSpace,
         KeyModifier::Control,
@@ -896,7 +903,7 @@ void LuaConsole::registerKeyHandlers() {
 
             // If the previous character is a JumpCharacter, remove just that one. This
             // behavior results in abc.de -> abc. -> abc -> 'empty string'
-            if (JumpCharacters.find(command[_inputPosition - 1]) != std::string::npos) {
+            if (JumpCharacters.contains(command[_inputPosition - 1])) {
                 command.erase(_inputPosition - 1, 1);
                 _inputPosition--;
                 return;
@@ -905,7 +912,7 @@ void LuaConsole::registerKeyHandlers() {
             // Find the position of the last JumpCharacter before _inputPosition
             size_t start = 0;
             for (size_t i = _inputPosition; i > 0; i--) {
-                if (JumpCharacters.find(command[i - 1]) != std::string::npos) {
+                if (JumpCharacters.contains(command[i - 1])) {
                     start = i;
                     break;
                 }
@@ -940,7 +947,7 @@ void LuaConsole::registerKeyHandlers() {
 
             // If the next character after _inputPosition is a JumpCharacter, delete just
             // that
-            if (JumpCharacters.find(command[_inputPosition]) != std::string::npos) {
+            if (JumpCharacters.contains(command[_inputPosition])) {
                 command.erase(_inputPosition, 1);
                 return;
             }
@@ -997,15 +1004,15 @@ void LuaConsole::registerKeyHandlers() {
 
         const std::string cmd = _commands[_activeCommand];
         if (!cmd.empty()) {
-            using Script = scripting::ScriptEngine::Script;
+            using Script = ScriptEngine::Script;
             global::scriptEngine->queueScript({
                 .code = cmd,
                 .synchronized = Script::ShouldBeSynchronized(_shouldBeSynchronized),
                 .sendToRemote = Script::ShouldSendToRemote(_shouldSendToRemote)
             });
 
-            // Only add the current command to the history if it hasn't been
-            // executed before. We don't want two of the same commands in a row
+            // Only add the current command to the history if it hasn't been executed
+            // before. We don't want two of the same commands in a row
             if (_commandsHistory.empty() || (cmd != _commandsHistory.back())) {
                 _commandsHistory.push_back(_commands[_activeCommand]);
             }
@@ -1033,11 +1040,11 @@ void LuaConsole::registerKeyHandlers() {
 }
 
 void LuaConsole::autoCompleteCommand() {
-    // We get a list of all the available commands or paths and initially find the
-    // first match that starts with how much we typed so far. We store the index so
-    // that in subsequent "tab" presses, we will discard previous matches. This
-    // implements the 'hop-over' behavior. As soon as another key is pressed,
-    // everything is set back to normal
+    // We get a list of all the available commands or paths and initially find the first
+    // match that starts with how much we typed so far. We store the index so that in
+    // subsequent "tab" presses, we will discard previous matches. This implements the
+    // 'hop-over' behavior. As soon as another key is pressed, everything is set back to
+    // normal
 
     const std::string currentCommand = _commands[_activeCommand];
     // Determine if we are currently in a function or path context
@@ -1069,17 +1076,17 @@ size_t LuaConsole::detectContext(std::string_view command) {
     // Find the path starting point which can start with either " ' or [
     size_t pathStartIndex = 0;
     for (size_t i = _inputPosition; i > 0; i--) {
-        if (PathStartIdentifier.find(command[i - 1]) != std::string::npos) {
+        if (PathStartIdentifier.contains(command[i - 1])) {
             pathStartIndex = i;
             break;
         }
     }
 
     // @TODO (anden88, 2025-08-08): Detect functions in a smarter way that allows nested
-    // function calls. The following example currently does not work.
-    // If the user typed e.g., "openspace.printInfo(open", we will not be able to
-    // autocomplete the last openspace. since the first instance we find is at the
-    // beginning, resulting in the fragment being wrongly assumed as "printInfo(open"
+    // function calls. The following example currently does not work. If the user typed
+    // e.g., "openspace.printInfo(open", we will not be able to autocomplete the last
+    // openspace. since the first instance we find is at the beginning, resulting in the
+    // fragment being wrongly assumed as "printInfo(open"
     size_t functionStartIndex = command.rfind("openspace.");
 
     if (functionStartIndex == std::string::npos) {
@@ -1163,9 +1170,8 @@ void LuaConsole::gatherFunctionSuggestions(size_t contextStart) {
     _autoCompleteState.suggestions = std::move(allCommands);
 
     std::string possibleFunction = currentCommand.substr(contextStart);
-    // Find the nearest parenthesis if any exists, which marks the end of the
-    // function. Otherwise the rest of the string is assumed to be part of
-    // the function
+    // Find the nearest parenthesis if any exists, which marks the end of the function.
+    // Otherwise the rest of the string is assumed to be part of the function
     size_t functionEnd = possibleFunction.find_first_of("()");
     _autoCompleteState.input = possibleFunction.substr(0, functionEnd);
 
@@ -1189,7 +1195,7 @@ void LuaConsole::filterSuggestions() {
 
 #ifdef WIN32
         // On Windows, file paths are generally case-insensitive. For example,
-        // "C:/User/Desktop/Foo" refers to the same location as "c:/user/desktop/foo"
+        // "C:/User/Desktop/Foo" refers to the same location as "c:/user/desktop/foo".
         // Normalize paths to lowercase so they are treated equivalently
         if (_autoCompleteState.context == Context::Path) {
             out = ghoul::toLowerCase(sanitizeInput(out));

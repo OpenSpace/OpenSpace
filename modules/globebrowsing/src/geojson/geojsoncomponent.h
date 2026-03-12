@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,11 +28,9 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/fadeable.h>
 
-#include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/geojson/geojsonproperties.h>
 #include <modules/globebrowsing/src/geojson/globegeometryfeature.h>
 #include <openspace/properties/misc/optionproperty.h>
-#include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -40,33 +38,33 @@
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/helper.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/glm.h>
+#include <memory>
 #include <optional>
-#include <vector>
+
+namespace geos {
+    namespace geom { class Geometry; }
+    namespace io { class GeoJSONFeature; }
+} // namespace geos
+namespace ghoul {
+    namespace opengl { class ProgramObject; }
+    class Dictionary;
+} // namespace ghoul
 
 namespace openspace {
-    struct RenderData;
-    class LightSource;
-    namespace documentation { struct Documentation; }
-    namespace rendering::helper { struct VertexXYZNormal; }
-} // namespace::openspace
 
-namespace ghoul::opengl { class ProgramObject; }
-namespace geos::io { class GeoJSONFeature; }
-
-namespace openspace::globebrowsing {
-
+struct Documentation;
+class LightSource;
+struct RenderData;
 class RenderableGlobe;
 
 /**
- * A component representing a collection of globe geometry features, whose details
- * are read from a GeoJson file.
+ * A component representing a collection of globe geometry features, whose details are
+ * read from a GeoJson file.
  */
-class GeoJsonComponent : public properties::PropertyOwner, public Fadeable {
+class GeoJsonComponent : public PropertyOwner, public Fadeable {
 public:
     GeoJsonComponent(const ghoul::Dictionary& dictionary, RenderableGlobe& globe);
-    virtual ~GeoJsonComponent() override;
+    ~GeoJsonComponent() override;
 
     void initialize();
     void initializeGL();
@@ -78,7 +76,7 @@ public:
     void render(const RenderData& data);
     void update();
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     /**
@@ -86,14 +84,14 @@ private:
      * geomoetry feature, and allow things like flying to or fadin out individual
      * subfeatures.
      */
-    class SubFeatureProps : public properties::PropertyOwner, public Fadeable {
+    class SubFeatureProps : public PropertyOwner, public Fadeable {
     public:
-        SubFeatureProps(properties::PropertyOwner::PropertyOwnerInfo info);
+        SubFeatureProps(PropertyOwner::PropertyOwnerInfo info);
 
-        properties::BoolProperty enabled;
-        properties::Vec2Property centroidLatLong;
-        properties::Vec4Property boundingboxLatLong;
-        properties::TriggerProperty flyToFeature;
+        BoolProperty enabled;
+        Vec2Property centroidLatLong;
+        Vec4Property boundingboxLatLong;
+        TriggerProperty flyToFeature;
         float boundingBoxDiagonal = 0.f;
     };
 
@@ -119,21 +117,21 @@ private:
 
     std::vector<GlobeGeometryFeature> _geometryFeatures;
 
-    properties::BoolProperty _enabled;
-    properties::StringProperty _geoJsonFile;
-    properties::FloatProperty _heightOffset;
-    properties::Vec2Property _latLongOffset;
+    BoolProperty _enabled;
+    StringProperty _geoJsonFile;
+    FloatProperty _heightOffset;
+    Vec2Property _latLongOffset;
 
-    properties::FloatProperty _pointSizeScale;
-    properties::FloatProperty _lineWidthScale;
+    FloatProperty _pointSizeScale;
+    FloatProperty _lineWidthScale;
 
     GeoJsonProperties _defaultProperties;
 
-    properties::OptionProperty _pointRenderModeOption;
+    OptionProperty _pointRenderModeOption;
 
-    properties::BoolProperty _drawWireframe;
-    properties::BoolProperty _preventUpdatesFromHeightMap;
-    properties::TriggerProperty _forceUpdateHeightData;
+    BoolProperty _drawWireframe;
+    BoolProperty _preventUpdatesFromHeightMap;
+    TriggerProperty _forceUpdateHeightData;
 
     RenderableGlobe& _globeNode;
 
@@ -143,26 +141,26 @@ private:
     bool _heightOffsetIsDirty = false;
     bool _textureIsDirty = false;
 
-    properties::Vec2Property _centerLatLong;
+    Vec2Property _centerLatLong;
     float _bboxDiagonalSize = 0.f;
-    properties::TriggerProperty _flyToFeature;
+    TriggerProperty _flyToFeature;
 
-    properties::PropertyOwner _deletePropertyOwner;
-    properties::TriggerProperty _deleteThisComponent;
+    PropertyOwner _deletePropertyOwner;
+    TriggerProperty _deleteThisComponent;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;
     std::unique_ptr<LightSource> _defaultLightSource;
 
-    rendering::helper::LightSourceRenderData _lightsourceRenderData;
+    rendering::LightSourceRenderData _lightsourceRenderData;
 
-    properties::PropertyOwner _lightSourcePropertyOwner;
-    properties::PropertyOwner _featuresPropertyOwner;
+    PropertyOwner _lightSourcePropertyOwner;
+    PropertyOwner _featuresPropertyOwner;
     std::vector<std::unique_ptr<SubFeatureProps>> _features;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _linesAndPolygonsProgram = nullptr;
     std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram = nullptr;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GEOJSONCOMPONENT___H__

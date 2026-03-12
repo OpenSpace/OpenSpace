@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,8 +33,8 @@ class InstrumentDecoder : public Decoder {
 public:
     explicit InstrumentDecoder(const ghoul::Dictionary& dictionary);
 
-    virtual std::string_view decoderType() const override;
-    virtual const std::vector<std::string>& translations() const override;
+    std::string_view decoderType() const override;
+    const std::vector<std::string>& translations() const override;
     const std::string& stopCommand();
 
 private:

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,9 +27,9 @@
 
 #include <modules/globebrowsing/src/basictypes.h>
 #include <ghoul/glm.h>
-#include <stdint.h>
+#include <cstdint>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 struct TileIndex {
     using TileHashKey = uint64_t;
@@ -48,6 +48,6 @@ struct TileIndex {
 
 bool operator==(const TileIndex& lhs, const TileIndex& rhs);
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_INDEX___H__

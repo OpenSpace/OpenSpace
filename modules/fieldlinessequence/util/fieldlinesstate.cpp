@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,14 +28,21 @@
 #include <openspace/util/time.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/exception.h>
 #include <cerrno>
+#include <cmath>
+#include <cstdint>
+#include <cstring>
 #include <fstream>
 #include <iomanip>
+#include <iterator>
+#include <ostream>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "FieldlinesState";
     constexpr int CurrentVersion = 0;
-    using json = nlohmann::json;
 } // namespace
 
 namespace openspace {
@@ -92,40 +99,40 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
 
     switch (binFileVersion) {
         case 0:
-            // No need to put everything in this scope now, as only version 0 exists!
+            // No need to put everything in this scope now, as only version 0 exists
             break;
         default:
-            LERROR("VERSION OF BINARY FILE WAS NOT RECOGNIZED");
+            LERROR("Version of binary file was not recognized");
             return false;
     }
-
-    // Define tmp variables to store meta data in
-    size_t nLines;
-    size_t nPoints;
-    size_t nExtras;
-    size_t byteSizeAllNames;
 
     // Read single value variables
     ifs.read(reinterpret_cast<char*>(&_triggerTime), sizeof(double));
     ifs.read(reinterpret_cast<char*>(&_model), sizeof(int32_t));
     ifs.read(reinterpret_cast<char*>(&_isMorphable), sizeof(uint8_t));
+    size_t nLines;
     ifs.read(reinterpret_cast<char*>(&nLines), sizeof(uint64_t));
-    ifs.read(reinterpret_cast<char*>(&nPoints), sizeof(uint64_t));
-    ifs.read(reinterpret_cast<char*>(&nExtras), sizeof(uint64_t));
-    ifs.read(reinterpret_cast<char*>(&byteSizeAllNames), sizeof(uint64_t));
-
     _lineStart.resize(nLines);
     _lineCount.resize(nLines);
+
+    size_t nPoints;
+    ifs.read(reinterpret_cast<char*>(&nPoints), sizeof(uint64_t));
     _vertexPositions.resize(nPoints);
+
+    size_t nExtras;
+    ifs.read(reinterpret_cast<char*>(&nExtras), sizeof(uint64_t));
     _extraQuantities.resize(nExtras);
     _extraQuantityNames.resize(nExtras);
 
+    size_t byteSizeAllNames;
+    ifs.read(reinterpret_cast<char*>(&byteSizeAllNames), sizeof(uint64_t));
+
     // Read vertex position data
-    ifs.read(reinterpret_cast<char*>(_lineStart.data()), sizeof(int32_t) * nLines);
-    ifs.read(reinterpret_cast<char*>(_lineCount.data()), sizeof(uint32_t) * nLines);
+    ifs.read(reinterpret_cast<char*>(_lineStart.data()), nLines * sizeof(int32_t));
+    ifs.read(reinterpret_cast<char*>(_lineCount.data()), nLines * sizeof(uint32_t));
     ifs.read(
         reinterpret_cast<char*>(_vertexPositions.data()),
-        3 * sizeof(float) * nPoints
+        3 * nPoints * sizeof(float)
     );
 
     // Read all extra quantities
@@ -153,41 +160,41 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
 }
 
 bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
-                                        fls::Model Model, float coordToMeters)
+                                        Model Model, float coordToMeters)
 {
-    // --------------------- ENSURE FILE IS VALID, THEN PARSE IT --------------------- //
-    std::ifstream ifs(pathToJsonFile);
+    // Ensure file is valid, then parse it
+    std::ifstream ifs = std::ifstream(pathToJsonFile);
 
     if (!ifs.is_open()) {
         LERROR(std::format("Failed to open file '{}'", pathToJsonFile));
         return false;
     }
 
-    json jFile;
+    nlohmann::json jFile;
     ifs >> jFile;
-    // -------------------------------------------------------------------------------- //
 
     _model = Model;
 
-    const char* sData  = "data";
-    const char* sTrace = "trace";
+    constexpr std::string_view Trace = "trace";
 
-    // ----- EXTRACT THE EXTRA QUANTITY NAMES & TRIGGER TIME (same for all lines) ----- //
+    // Extract the extra quantity names & trigger time (same for all lines)
     {
-        const char* sTime = "time";
-        const json& jTmp = *(jFile.begin()); // First field line in the file
-        _triggerTime = Time::convertTime(jTmp[sTime].get<std::string>());
+        constexpr std::string_view Time = "time";
+        // First field line in the file
+        const nlohmann::json& jTmp = *(jFile.begin());
+        _triggerTime = Time::convertTime(jTmp[Time].get<std::string>());
 
         const char* sColumns = "columns";
-        const json::value_type& variableNameVec = jTmp[sTrace][sColumns];
+        const nlohmann::json::value_type& variableNameVec = jTmp[Trace][sColumns];
         const size_t nVariables = variableNameVec.size();
         const size_t nPosComponents = 3; // x,y,z
 
         if (nVariables < nPosComponents) {
-            LERROR(
-                pathToJsonFile + ": Each field '" + sColumns +
-                "' must contain the variables: 'x', 'y' and 'z' (order is important)"
-            );
+            LERROR(std::format(
+                "{}: Each field '{}' must contain the variables: 'x', 'y' and 'z' "
+                "(order is important)",
+                pathToJsonFile, sColumns
+            ));
             return false;
         }
 
@@ -201,26 +208,21 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
 
     size_t lineStartIdx = 0;
     // Loop through all fieldlines
-    for (json::iterator lineIter = jFile.begin(); lineIter != jFile.end(); lineIter++) {
+    for (auto lineIter = jFile.begin(); lineIter != jFile.end(); lineIter++) {
+        constexpr std::string_view Data = "data";
+
         // The 'data' field in the 'trace' variable contains all vertex positions and the
-        // extra quantities. Each element is an array related to one vertex point.
+        // extra quantities. Each element is an array related to one vertex point
         const std::vector<std::vector<float>>& jData =
-            (*lineIter)[sTrace][sData].get<std::vector<std::vector<float>>>();
+            (*lineIter)[Trace][Data].get<std::vector<std::vector<float>>>();
         const size_t nPoints = jData.size();
 
         for (size_t j = 0; j < nPoints; j++) {
             const std::vector<float>& variables = jData[j];
 
-            // Expects the x, y and z variables to be stored first!
-            const size_t xIdx = 0;
-            const size_t yIdx = 1;
-            const size_t zIdx = 2;
+            // Expects the x, y and z variables to be stored first
             _vertexPositions.push_back(
-                coordToMeters * glm::vec3(
-                    variables[xIdx],
-                    variables[yIdx],
-                    variables[zIdx]
-                )
+                coordToMeters * glm::vec3(variables[0], variables[1], variables[2])
             );
 
             // Add the extra quantites. Stored in the same array as the x,y,z variables.
@@ -237,9 +239,9 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
 }
 
 /**
- * \param absPath must be the path to the file (incl. filename but excl. extension!)
- * Directory must exist! File is created (or overwritten if already existing).
+ * Directory must exist. File is created (or overwritten if already existing).
  * File is structured like this: (for version 0)
+ * ```
  *  0. int                    - version number of binary state file! (in case something
  *                              needs to be altered in the future, then increase
  *                              CurrentVersion)
@@ -253,18 +255,21 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
  *                                                           == _extraQuantities[i].size()
  *  6. size_t                 - Number of extra quantites     == _extraQuantities.size()
  *                                                           == _extraQuantityNames.size()
- *  7. site_t                 - Number of total bytes that ALL _extraQuantityNames
+ *  7. size_t                 - Number of total bytes that ALL _extraQuantityNames
  *                              consists of (Each such name is stored as a c_str which
  *                              means it ends with the null char '\0' )
- *  7. std::vector<GLint>     - _lineStart
- *  8. std::vector<GLsizei>   - _lineCount
- *  9. std::vector<glm::vec3> - _vertexPositions
- * 10. std::vector<float>     - _extraQuantities
- * 11. array of c_str         - Strings naming the extra quantities (elements of
+ *  8. std::vector<GLint>     - _lineStart
+ *  9. std::vector<GLsizei>   - _lineCount
+ * 10. std::vector<glm::vec3> - _vertexPositions
+ * 11. std::vector<float>     - _extraQuantities
+ * 12. array of c_str         - Strings naming the extra quantities (elements of
  *                              _extraQuantityNames). Each string ends with null char '\0'
+ * ```
+ *
+ * \param absPath Must be the path to the folder to save to
  */
 void FieldlinesState::saveStateToOsfls(const std::string& absPath) {
-    // ------------------------------- Create the file ------------------------------- //
+    // Create the file
     std::string pathSafeTimeString = std::string(Time(_triggerTime).ISO8601());
     pathSafeTimeString.replace(13, 1, "-");
     pathSafeTimeString.replace(16, 1, "-");
@@ -279,10 +284,11 @@ void FieldlinesState::saveStateToOsfls(const std::string& absPath) {
         return;
     }
 
-    // --------- Add each string of _extraQuantityNames into one long string --------- //
+    // Add each string of _extraQuantityNames into one long string
     std::string allExtraQuantityNamesInOne = "";
     for (const std::string& str : _extraQuantityNames) {
-        allExtraQuantityNamesInOne += str + '\0'; // Add null char '\0' for easier reading
+        // Add null char '\0' for easier reading
+        allExtraQuantityNamesInOne += str + '\0';
     }
 
     const size_t nLines = _lineStart.size();
@@ -290,11 +296,9 @@ void FieldlinesState::saveStateToOsfls(const std::string& absPath) {
     const size_t nExtras = _extraQuantities.size();
     const size_t nStringBytes = allExtraQuantityNamesInOne.size();
 
-    //----------------------------- WRITE EVERYTHING TO FILE -----------------------------
-    // VERSION OF BINARY FIELDLINES STATE FILE - IN CASE STRUCTURE CHANGES IN THE FUTURE
+    // Write everything to file
     ofs.write(reinterpret_cast<const char*>(&CurrentVersion), sizeof(int));
 
-    //-------------------- WRITE META DATA FOR STATE --------------------------------
     ofs.write(reinterpret_cast<const char*>(&_triggerTime), sizeof(_triggerTime));
     ofs.write(reinterpret_cast<const char*>(&_model), sizeof(int32_t));
     ofs.write(reinterpret_cast<const char*>(&_isMorphable), sizeof(uint8_t));
@@ -304,12 +308,11 @@ void FieldlinesState::saveStateToOsfls(const std::string& absPath) {
     ofs.write(reinterpret_cast<const char*>(&nExtras), sizeof(uint64_t));
     ofs.write(reinterpret_cast<const char*>(&nStringBytes), sizeof(uint64_t));
 
-    //---------------------- WRITE ALL ARRAYS OF DATA --------------------------------
     ofs.write(reinterpret_cast<char*>(_lineStart.data()), sizeof(int32_t) * nLines);
     ofs.write(reinterpret_cast<char*>(_lineCount.data()), sizeof(uint32_t) * nLines);
     ofs.write(
         reinterpret_cast<char*>(_vertexPositions.data()),
-        3 * sizeof(float) * nPoints
+        nPoints * 3 * sizeof(float)
     );
     // Write the data for each vector in _extraQuantities
     for (std::vector<float>& vec : _extraQuantities) {
@@ -320,34 +323,10 @@ void FieldlinesState::saveStateToOsfls(const std::string& absPath) {
     LINFO(std::format("Saving fieldline state to: {}", absPath));
 }
 
-// TODO: This should probably be rewritten, but this is the way the files were structured
-// by CCMC
-// Structure of File! NO TRAILING COMMAS ALLOWED!
-// Additional info can be stored within each line as the code only extracts the keys it
-// needs (time, trace & data)
-// The key/name of each line ("0" & "1" in the example below) is arbitrary
-// {
-//     "0":{
-//         "time": "YYYY-MM-DDTHH:MM:SS.XXX",
-//         "trace": {
-//             "columns": ["x","y","z","s","temperature","rho","j_para"],
-//             "data": [[8.694,127.853,115.304,0.0,0.047,9.249,-5e-10],...,
-//                     [8.698,127.253,114.768,0.800,0.0,9.244,-5e-10]]
-//         },
-//     },
-//     "1":{
-//         "time": "YYYY-MM-DDTHH:MM:SS.XXX
-//         "trace": {
-//             "columns": ["x","y","z","s","temperature","rho","j_para"],
-//             "data": [[8.694,127.853,115.304,0.0,0.047,9.249,-5e-10],...,
-//                     [8.698,127.253,114.768,0.800,0.0,9.244,-5e-10]]
-//         },
-//     }
-// }
 void FieldlinesState::saveStateToJson(const std::string& absPath) {
     // Create the file
-    const char* ext = ".json";
-    std::ofstream ofs(absPath + ext, std::ofstream::trunc);
+    std::string ext = ".json";
+    std::ofstream ofs = std::ofstream(absPath + ext, std::ofstream::trunc);
     if (!ofs.is_open()) {
         LERROR(std::format(
             "Failed to save state to json file at location: {}{}", absPath, ext
@@ -356,24 +335,23 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
     }
     LINFO(std::format("Saving fieldline state to: {}{}", absPath, ext));
 
-    json jColumns = { "x", "y", "z" };
+    nlohmann::json jColumns = { "x", "y", "z" };
     for (const std::string& s : _extraQuantityNames) {
         jColumns.push_back(s);
     }
 
-    json jFile;
+    nlohmann::json jFile;
 
     std::string_view timeStr = Time(_triggerTime).ISO8601();
     const size_t nLines = _lineStart.size();
-    // const size_t nPoints      = _vertexPositions.size();
     const size_t nExtras = _extraQuantities.size();
 
     size_t pointIndex = 0;
     for (size_t lineIndex = 0; lineIndex < nLines; lineIndex++) {
-        json jData = json::array();
+        nlohmann::json jData = nlohmann::json::array();
         for (GLsizei i = 0; i < _lineCount[lineIndex]; i++, pointIndex++) {
             const glm::vec3 pos = _vertexPositions[pointIndex];
-            json jDataElement = { pos.x, pos.y, pos.z };
+            nlohmann::json jDataElement = { pos.x, pos.y, pos.z };
 
             for (size_t extraIndex = 0; extraIndex < nExtras; extraIndex++) {
                 jDataElement.push_back(_extraQuantities[extraIndex][pointIndex]);
@@ -390,7 +368,7 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
         };
     }
 
-    //----------------------------- WRITE EVERYTHING TO FILE -----------------------------
+    // Write everything to file
     const int indentationSpaces = 2;
     ofs << std::setw(indentationSpaces) << jFile << std::endl;
 
@@ -400,7 +378,7 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
 void FieldlinesState::clear() {
     _isMorphable = 0;
     _triggerTime = -1.0;
-    _model = fls::Model::Invalid;
+    _model = Model::Invalid;
 
     _extraQuantities.clear();
     _extraQuantityNames.clear();
@@ -409,7 +387,7 @@ void FieldlinesState::clear() {
     _vertexPositions.clear();
 }
 
-void FieldlinesState::setModel(fls::Model m) {
+void FieldlinesState::setModel(Model m) {
     _model = m;
 }
 
@@ -417,8 +395,10 @@ void FieldlinesState::setTriggerTime(double t) {
     _triggerTime = t;
 }
 
-// Returns one of the extra quantity vectors, _extraQuantities[index].
-// If index is out of scope an empty vector is returned and the referenced bool is false.
+/**
+ * Returns one of the extra quantity vectors, _extraQuantities[index]. If index is out of
+ * scope an empty vector is returned and the referenced bool is false.
+ */
 std::vector<float> FieldlinesState::extraQuantity(size_t index, bool& isSuccessful) const
 {
     if (index < _extraQuantities.size()) {
@@ -432,8 +412,10 @@ std::vector<float> FieldlinesState::extraQuantity(size_t index, bool& isSuccessf
     }
 }
 
-// Moves the points in @param line over to _vertexPositions and updates
-// _lineStart & _lineCount accordingly.
+/**
+ * Moves the points in \p line over to _vertexPositions and updates _lineStart &
+ * _lineCount accordingly.
+ */
 void FieldlinesState::addLine(std::vector<glm::vec3>& line) {
     const size_t nNewPoints = line.size();
     const size_t nOldPoints = _vertexPositions.size();
@@ -473,7 +455,7 @@ const std::vector<GLint>& FieldlinesState::lineStart() const {
     return _lineStart;
 }
 
-fls::Model FieldlinesState::FieldlinesState::model() const {
+Model FieldlinesState::model() const {
     return _model;
 }
 

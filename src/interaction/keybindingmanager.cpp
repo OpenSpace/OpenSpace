@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,15 +28,18 @@
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <string>
 
 #include "keybindingmanager_lua.inl"
 
-namespace openspace::interaction {
+namespace openspace {
 
 void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
 {
     if (action == KeyAction::Press || action == KeyAction::Repeat) {
-        // iterate over key bindings
+        // Iterate over key bindings
         auto ret = _keyLua.equal_range({ key, modifier });
         for (auto it = ret.first; it != ret.second; it++) {
             ghoul_assert(!it->second.empty(), "Action must not be empty");
@@ -48,8 +51,8 @@ void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyActio
             global::actionManager->triggerAction(
                 it->second,
                 ghoul::Dictionary(),
-                interaction::ActionManager::ShouldBeSynchronized::Yes,
-                interaction::ActionManager::ShouldBeLogged::Yes
+                ActionManager::ShouldBeSynchronized::Yes,
+                ActionManager::ShouldBeLogged::Yes
             );
         }
     }
@@ -109,7 +112,7 @@ const std::multimap<KeyWithModifier, std::string>& KeybindingManager::keyBinding
     return _keyLua;
 }
 
-scripting::LuaLibrary KeybindingManager::luaLibrary() {
+LuaLibrary KeybindingManager::luaLibrary() {
     return {
         "",
         {
@@ -122,4 +125,4 @@ scripting::LuaLibrary KeybindingManager::luaLibrary() {
     };
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,9 @@
 #define __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMEREADER___H__
 
 #include <ghoul/glm.h>
+#include <array>
 #include <filesystem>
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -35,26 +37,29 @@ namespace ccmc {
     class Attribute;
     class Interpolator;
     class Kameleon;
-} // namespce ccmc
-
+} // namespace ccmc
 namespace ghoul { class Dictionary; }
-namespace openspace::volume { template <typename T> class RawVolume; }
 
-namespace openspace::kameleonvolume {
+namespace openspace {
+
+template <typename T> class RawVolume;
 
 class KameleonVolumeReader {
 public:
+    using Callback = std::function<void(float)>;
+
     explicit KameleonVolumeReader(std::filesystem::path path);
     ~KameleonVolumeReader();
 
-    std::unique_ptr<volume::RawVolume<float>> readFloatVolume(
-        const glm::uvec3& dimensions, const std::string& variable,
-        const glm::vec3& lowerDomainBound, const glm::vec3& upperDomainBound) const;
+    std::unique_ptr<RawVolume<float>> readFloatVolume(const glm::uvec3& dimensions,
+        const std::string& variable, const glm::vec3& lowerDomainBound,
+        const glm::vec3& upperDomainBound) const;
 
-    std::unique_ptr<volume::RawVolume<float>> readFloatVolume(
-        const glm::uvec3& dimensions, const std::string& variable,
-        const glm::vec3& lowerBound, const glm::vec3& upperBound, float& minValue,
-        float& maxValue) const;
+    std::unique_ptr<RawVolume<float>> readFloatVolume(const glm::uvec3& dimensions,
+        const std::string& variable, const glm::vec3& lowerBound,
+        const glm::vec3& upperBound, std::vector<std::string>& variableVector,
+        float& minValue, float& maxValue, bool factorRSquared = false,
+        float innerRadialLimit = -1.f) const;
 
     ghoul::Dictionary readMetaData() const;
 
@@ -72,6 +77,8 @@ public:
     std::vector<std::string> globalAttributeNames() const;
     std::array<std::string, 3> gridVariableNames() const;
 
+    void setReaderCallback(Callback cb);
+
 private:
     static void addAttributeToDictionary(ghoul::Dictionary& dictionary,
         const std::string& key, ccmc::Attribute& attr);
@@ -79,8 +86,11 @@ private:
     std::filesystem::path _path;
     std::unique_ptr<ccmc::Kameleon> _kameleon;
     std::unique_ptr<ccmc::Interpolator> _interpolator;
+
+    Callback _readerCallback;
+    float _progress = 0.f;
 };
 
-} // namespace openspace::kameleonvolume
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMEREADER___H__

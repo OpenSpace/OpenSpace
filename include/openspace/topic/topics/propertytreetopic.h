@@ -27,9 +27,9 @@
 
 #include <openspace/topic/topics/topic.h>
 
-namespace openspace::properties { class Property; }
-
 namespace openspace {
+
+class Property;
 
 class PropertyTreeTopic : public Topic {
 public:
@@ -50,7 +50,7 @@ private:
     int _onChangeHandle = UnsetCallbackHandle;
     int _onDeleteHandle = UnsetCallbackHandle;
     int _onMetaDataChangeHandle = UnsetCallbackHandle;
-    properties::Property* _property = nullptr;
+    Property* _property = nullptr;
 };
 
 } // namespace openspace

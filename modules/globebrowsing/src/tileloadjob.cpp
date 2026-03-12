@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,8 +25,9 @@
 #include <modules/globebrowsing/src/tileloadjob.h>
 
 #include <modules/globebrowsing/src/rawtiledatareader.h>
+#include <utility>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 TileLoadJob::TileLoadJob(RawTileDataReader& rawTileDataReader, TileIndex tileIndex)
     : _rawTileDataReader(rawTileDataReader)
@@ -49,4 +50,4 @@ RawTile TileLoadJob::product() {
     return std::move(_rawTile);
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

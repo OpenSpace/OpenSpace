@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2025                                                                #
+# Copyright (c) 2014-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -85,6 +85,7 @@ set(OPENSPACE_SOURCE
   navigation/pathnavigator.cpp
   navigation/pathnavigator_lua.inl
   navigation/waypoint.cpp
+  network/messagestructures.cpp
   network/messagestructureshelper.cpp
   network/parallelconnection.cpp
   network/parallelpeer.cpp
@@ -132,6 +133,7 @@ set(OPENSPACE_SOURCE
   rendering/dashboarditem.cpp
   rendering/dashboardtextitem.cpp
   rendering/framebufferrenderer.cpp
+  rendering/deferredcaster.cpp
   rendering/deferredcastermanager.cpp
   rendering/fadeable.cpp
   rendering/helper.cpp
@@ -145,6 +147,7 @@ set(OPENSPACE_SOURCE
   rendering/screenspacerenderableframebuffer.cpp
   rendering/screenspacerenderable.cpp
   rendering/screenspacerenderabletext.cpp
+  rendering/shadowmapping.cpp
   rendering/texturecomponent.cpp
   rendering/transferfunction.cpp
   rendering/volumeraycaster.cpp
@@ -220,6 +223,7 @@ set(OPENSPACE_SOURCE
   util/sphere.cpp
   util/spicemanager.cpp
   util/spicemanager_lua.inl
+  util/syncable.cpp
   util/syncbuffer.cpp
   util/tstring.cpp
   util/histogram.cpp
@@ -238,16 +242,6 @@ set(OPENSPACE_SOURCE
   util/versionchecker.cpp
 )
 
-if (APPLE)
-  set(OPENSPACE_SOURCE
-    ${OPENSPACE_SOURCE}
-    interaction/touchbar.mm
-  )
-  set_source_files_properties(
-    interaction/touchbar.mm
-    PROPERTIES SKIP_PRECOMPILE_HEADERS ON
-  )
-endif ()
 set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/json.h
   ${PROJECT_SOURCE_DIR}/include/openspace/camera/camera.h
@@ -375,6 +369,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/screenspacerenderableframebuffer.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/screenspacerenderable.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/screenspacerenderabletext.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/rendering/shadowmapping.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/texturecomponent.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/transferfunction.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/volumeraycaster.h
@@ -477,12 +472,35 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/util/histogram.h
 )
 
-if (APPLE)
-  set(OPENSPACE_HEADER
-    ${OPENSPACE_HEADER}
-    ${PROJECT_SOURCE_DIR}/include/openspace/interaction/touchbar.h
-  )
-endif ()
+set(OPENSPACE_SHADERS
+  ${PROJECT_SOURCE_DIR}/shaders/blending.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/core/screenspace_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/core/screenspace_vs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/core/xyzuvrgba_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/core/xyzuvrgba_vs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/exitframebuffer_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/fxaa_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/fxaa_vs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/hdr_and_filtering_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/hdr_and_filtering_vs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/inside.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/mergedownscaledvolume_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/mergedownscaledvolume_vs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/outside.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/raycastframebuffer_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/renderframebuffer_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/resolveframebuffer_vs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/powerscaling/powerscaling_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/powerscaling/powerscaling_vs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/powerscaling/powerscalingmath.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/floatoperations.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/fragment.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/hdr.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/rand.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/render_fs.glsl
+)
+source_group("Shader Files" FILES ${OPENSPACE_SHADERS})
+
 
 # Place files into source groups
 foreach (file ${OPENSPACE_SOURCE} ${OPENSPACE_HEADER})
@@ -510,7 +528,11 @@ endforeach ()
 ##########################################################################################
 # Create OpenSpace target
 ##########################################################################################
-add_library(openspace-core STATIC ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
+add_library(
+  openspace-core
+  STATIC
+  ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE} ${OPENSPACE_SHADERS}
+)
 target_include_directories(openspace-core SYSTEM
   PUBLIC
     # In order to use the date library
@@ -586,9 +608,6 @@ configure_file(
   @ONLY
 )
 
-if (APPLE)
-  target_link_libraries(openspace-core INTERFACE external-system-apple)
-endif ()
 if (WIN32)
   target_link_libraries(openspace-core PUBLIC "pdh")
 endif ()

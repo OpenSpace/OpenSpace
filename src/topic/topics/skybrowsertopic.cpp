@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,17 +31,17 @@
 #include <modules/skybrowser/include/targetbrowserpair.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
-#include <openspace/properties/property.h>
-#include <openspace/query/query.h>
-#include <openspace/util/json_helper.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/dictionaryjsonformatter.h>
+#include <string_view>
+#include <vector>
+
+using nlohmann::json;
 
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
     constexpr std::string_view UnsubscribeEvent = "stop_subscription";
 } // namespace
-
-using nlohmann::json;
 
 namespace openspace {
 
@@ -56,10 +56,6 @@ SkyBrowserTopic::~SkyBrowserTopic() {
     if (_targetDataCallbackHandle != UnsetOnChangeHandle) {
         global::topicManager->removePreSyncCallback(_targetDataCallbackHandle);
     }
-}
-
-bool SkyBrowserTopic::isDone() const {
-    return _isDone;
 }
 
 void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
@@ -85,9 +81,11 @@ void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
     );
 }
 
-void SkyBrowserTopic::sendBrowserData() {
-    using namespace openspace;
+bool SkyBrowserTopic::isDone() const {
+    return _isDone;
+}
 
+void SkyBrowserTopic::sendBrowserData() {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     ghoul::Dictionary data;
 
@@ -114,9 +112,9 @@ void SkyBrowserTopic::sendBrowserData() {
     }
 
     // @TODO (2022-04-28, emmbr) The message is still sent very often; every time the
-    // camera moves or the time is changes, because this changes the "roll" parameter
-    // of the browser. This is the update that occurs most often. Maybe it could be
-    // separated into it's own topic?
+    // camera moves or the time is changes, because this changes the "roll" parameter of
+    // the browser. This is the update that occurs most often. Maybe it could be separated
+    // into it's own topic?
 
     _lastUpdateJsonString = jsonString;
 }

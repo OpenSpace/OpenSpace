@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,13 +35,12 @@
 #include <functional>
 #include <optional>
 #include <utility>
-#include <vector>
 
 namespace openspace {
 
 class Profile;
 
-class TimeManager : public properties::PropertyOwner {
+class TimeManager : public PropertyOwner {
 public:
     using CallbackHandle = int;
     using TimeChangeCallback = std::function<void()>;
@@ -156,10 +155,10 @@ private:
     std::vector<double> _deltaTimeSteps;
     std::vector<KeyWithModifier> _deltaTimeStepKeybindings;
 
-    properties::FloatProperty _defaultTimeInterpolationDuration;
-    properties::FloatProperty _defaultDeltaTimeInterpolationDuration;
-    properties::FloatProperty _defaultPauseInterpolationDuration;
-    properties::FloatProperty _defaultUnpauseInterpolationDuration;
+    FloatProperty _defaultTimeInterpolationDuration;
+    FloatProperty _defaultDeltaTimeInterpolationDuration;
+    FloatProperty _defaultPauseInterpolationDuration;
+    FloatProperty _defaultUnpauseInterpolationDuration;
 
     bool _shouldSetTime = false;
     Time _timeNextFrame;

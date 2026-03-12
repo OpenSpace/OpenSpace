@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,24 +25,21 @@
 #ifndef __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__
 #define __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__
 
-#include <openspace/rendering/renderable.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/misc/stringproperty.h>
+
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/util/touch.h>
-#include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
-#include <vector>
 
 namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
-class TouchMarker : public properties::PropertyOwner {
+class TouchMarker : public PropertyOwner {
 public:
     TouchMarker();
     virtual ~TouchMarker();
@@ -50,25 +47,25 @@ public:
     void initialize();
     void deinitialize();
 
-    void render(const std::vector<openspace::TouchInputHolder>& list);
+    void render(const std::vector<TouchInputHolder>& list);
 
 private:
-    void createVertexList(const std::vector<openspace::TouchInputHolder>& list);
+    void createVertexList(const std::vector<TouchInputHolder>& list);
 
-    properties::BoolProperty _visible;
-    properties::FloatProperty _radiusSize;
-    properties::FloatProperty _opacity;
-    properties::FloatProperty _thickness;
-    properties::Vec3Property _color;
+    BoolProperty _visible;
+    FloatProperty _radiusSize;
+    FloatProperty _opacity;
+    FloatProperty _thickness;
+    Vec3Property _color;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     UniformCache(radius, opacity, thickness, color) _uniformCache;
 
-    std::vector<GLfloat> _vertexData;
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
+    GLsizei _count = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 };
 
-} // openspace namespace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__

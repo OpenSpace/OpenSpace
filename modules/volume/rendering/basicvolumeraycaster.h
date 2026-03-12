@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,23 +27,15 @@
 
 #include <openspace/rendering/volumeraycaster.h>
 
-#include <openspace/util/boxgeometry.h>
 #include <modules/volume/volumegridtype.h>
+#include <openspace/util/boxgeometry.h>
+#include <memory>
 
-namespace ghoul::opengl {
-    class Texture;
-    class ProgramObject;
-    class TextureUnit;
-} // namespace ghoul::opengl
+namespace ghoul::opengl { class TextureUnit; }
 
 namespace openspace {
-    struct RenderData;
-    struct RaycastData;
-    class TransferFunction;
-} // namespace openspace
 
-namespace openspace::volume {
-
+class TransferFunction;
 class TransferFunctionHandler;
 class VolumeClipPlanes;
 
@@ -51,7 +43,7 @@ class BasicVolumeRaycaster : public VolumeRaycaster {
 public:
     BasicVolumeRaycaster(
         std::shared_ptr<ghoul::opengl::Texture> texture,
-        std::shared_ptr<openspace::TransferFunction> transferFunction,
+        std::shared_ptr<TransferFunction> transferFunction,
         std::shared_ptr<VolumeClipPlanes> clipPlanes);
     ~BasicVolumeRaycaster() override;
 
@@ -76,7 +68,7 @@ public:
 
     void setVolumeTexture(std::shared_ptr<ghoul::opengl::Texture> texture);
     std::shared_ptr<ghoul::opengl::Texture> volumeTexture() const;
-    void setTransferFunction(std::shared_ptr<openspace::TransferFunction>
+    void setTransferFunction(std::shared_ptr<TransferFunction>
         transferFunction);
 
     void setStepSize(float stepSize);
@@ -95,7 +87,7 @@ private:
 
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
-    std::shared_ptr<openspace::TransferFunction> _transferFunction;
+    std::shared_ptr<TransferFunction> _transferFunction;
     BoxGeometry _boundingBox;
     VolumeGridType _gridType = VolumeGridType::Cartesian;
     glm::mat4 _modelTransform = glm::mat4(1.f);
@@ -108,6 +100,6 @@ private:
     float _stepSize = 0.f;
 };
 
-} // namespace openspace::volume
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME___BASICVOLUMERAYCASTER___H__

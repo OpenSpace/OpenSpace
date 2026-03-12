@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,18 +25,16 @@
 #include <modules/statemachine/statemachinemodule.h>
 
 #include <modules/statemachine/include/state.h>
-#include <modules/statemachine/include/statemachine.h>
 #include <modules/statemachine/include/transition.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/stringhelper.h>
+#include <ghoul/misc/dictionary.h>
+#include <filesystem>
 #include <string>
-#include <optional>
+#include <utility>
 
 #include "statemachinemodule_lua.inl"
 
@@ -48,7 +46,7 @@ namespace openspace {
 
 StateMachineModule::StateMachineModule()
     : OpenSpaceModule(Name)
-{ }
+{}
 
 void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& states,
                                                 const ghoul::Dictionary& transitions,
@@ -68,7 +66,7 @@ void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& states,
             "State machine was created with start state: {}", currentState()
         ));
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const SpecificationError& e) {
         LERROR(std::format("Error loading state machine: {}", e.what()));
         logError(e);
     }
@@ -144,24 +142,24 @@ void StateMachineModule::saveToFile(const std::string& filename,
     _machine->saveToDotFile(outputFile);
 }
 
-scripting::LuaLibrary StateMachineModule::luaLibrary() const {
+LuaLibrary StateMachineModule::luaLibrary() const {
     return {
         "statemachine",
         {
-        codegen::lua::CreateStateMachine,
-        codegen::lua::DestroyStateMachine,
-        codegen::lua::GoToState,
-        codegen::lua::SetInitialState,
-        codegen::lua::CurrentState,
-        codegen::lua::PossibleTransitions,
-        codegen::lua::CanGoToState,
-        codegen::lua::PrintCurrentStateInfo,
-        codegen::lua::SaveToDotFile
+            codegen::lua::CreateStateMachine,
+            codegen::lua::DestroyStateMachine,
+            codegen::lua::GoToState,
+            codegen::lua::SetInitialState,
+            codegen::lua::CurrentState,
+            codegen::lua::PossibleTransitions,
+            codegen::lua::CanGoToState,
+            codegen::lua::PrintCurrentStateInfo,
+            codegen::lua::SaveToDotFile
         }
     };
 }
 
-std::vector<documentation::Documentation> StateMachineModule::documentations() const {
+std::vector<Documentation> StateMachineModule::documentations() const {
     return {
         State::Documentation(),
         StateMachine::Documentation(),

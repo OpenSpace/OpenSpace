@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,17 +31,29 @@
 #include <modules/spacecraftinstruments/rendering/renderableplaneprojection.h>
 #include <modules/spacecraftinstruments/rendering/renderableplanetprojection.h>
 #include <modules/spacecraftinstruments/rendering/renderableshadowcylinder.h>
+#include <modules/spacecraftinstruments/util/decoder.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <modules/spacecraftinstruments/util/instrumentdecoder.h>
+#include <modules/spacecraftinstruments/util/projectioncomponent.h>
 #include <modules/spacecraftinstruments/util/targetdecoder.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/rendering/dashboarditem.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/objectmanager.h>
+#include <ghoul/misc/profiling.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 
 ghoul::opengl::ProgramObjectManager SpacecraftInstrumentsModule::ProgramObjectManager;
 
-SpacecraftInstrumentsModule::SpacecraftInstrumentsModule() : OpenSpaceModule(Name) {}
+SpacecraftInstrumentsModule::SpacecraftInstrumentsModule()
+    : OpenSpaceModule(Name)
+{}
 
 void SpacecraftInstrumentsModule::internalInitialize(const ghoul::Dictionary&) {
     ZoneScoped;
@@ -80,9 +92,7 @@ void SpacecraftInstrumentsModule::internalDeinitializeGL() {
     ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
 }
 
-std::vector<documentation::Documentation>
-SpacecraftInstrumentsModule::documentations() const
-{
+std::vector<Documentation> SpacecraftInstrumentsModule::documentations() const {
     return {
         DashboardItemInstruments::Documentation(),
         RenderableCrawlingLine::Documentation(),
@@ -113,7 +123,7 @@ std::string SpacecraftInstrumentsModule::frameFromBody(const std::string& body) 
     }
 
     constexpr std::string_view unionPrefix = "IAU_";
-    if (body.find(unionPrefix) == std::string::npos) {
+    if (!body.contains(unionPrefix)) {
         return std::format("{}{}", unionPrefix, body);
     }
     else {

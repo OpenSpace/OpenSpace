@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,40 +24,42 @@
 
 #include <openspace/scene/profile.h>
 
-#include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/json.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
-#include <openspace/scripting/lualibrary.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/propertyowner.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
+#include <algorithm>
 #include <filesystem>
+#include <fstream>
+#include <ios>
+#include <iterator>
 #include <set>
+#include <utility>
 
 #include "profile_lua.inl"
 
-namespace openspace {
-
 namespace {
+    using namespace openspace;
+
     // Helper structs for the visitor pattern of the std::variant
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-    std::vector<properties::Property*> changedProperties(
-                                                      const properties::PropertyOwner& po)
-    {
-        std::vector<properties::Property*> res;
-        for (properties::PropertyOwner* subOwner : po.propertySubOwners()) {
-            std::vector<properties::Property*> ps = changedProperties(*subOwner);
+    std::vector<Property*> changedProperties(const PropertyOwner& po) {
+        std::vector<Property*> res;
+        for (PropertyOwner* subOwner : po.propertySubOwners()) {
+            std::vector<Property*> ps = changedProperties(*subOwner);
             res.insert(res.end(), ps.begin(), ps.end());
         }
-        for (properties::Property* p : po.properties()) {
+        for (Property* p : po.properties()) {
             if (p->hasChanged()) {
                 res.push_back(p);
             }
@@ -86,9 +88,7 @@ namespace {
                     else if (c == &nlohmann::json::is_object) { return "an object"; }
                     else if (c == &nlohmann::json::is_array) { return "an array"; }
                     else if (c == &nlohmann::json::is_boolean) { return "a boolean"; }
-                    else {
-                        throw ghoul::MissingCaseException();
-                    }
+                    else { throw ghoul::MissingCaseException(); }
                 }(checkFunc);
 
                 throw Profile::ParsingError(
@@ -113,16 +113,18 @@ namespace {
     }
 } // namespace
 
+namespace openspace {
+
 //
 // Current version:
 //
 
-void to_json(nlohmann::json& j, const Profile::Version& v) {
+static void to_json(nlohmann::json& j, const Profile::Version& v) {
     j["major"] = v.major;
     j["minor"] = v.minor;
 }
 
-void from_json(const nlohmann::json& j, Profile::Version& v) {
+static void from_json(const nlohmann::json& j, Profile::Version& v) {
     checkValue(j, "major", &nlohmann::json::is_number, "version", false);
     checkValue(j, "minor", &nlohmann::json::is_number, "version", false);
     checkExtraKeys(j, "version", { "major", "minor" });
@@ -131,7 +133,7 @@ void from_json(const nlohmann::json& j, Profile::Version& v) {
     j["minor"].get_to(v.minor);
 }
 
-void to_json(nlohmann::json& j, const Profile::Module& v) {
+static void to_json(nlohmann::json& j, const Profile::Module& v) {
     j["name"] = v.name;
     if (v.loadedInstruction.has_value()) {
         j["loadedInstruction"] = *v.loadedInstruction;
@@ -141,7 +143,7 @@ void to_json(nlohmann::json& j, const Profile::Module& v) {
     }
 }
 
-void from_json(const nlohmann::json& j, Profile::Module& v) {
+static void from_json(const nlohmann::json& j, Profile::Module& v) {
     checkValue(j, "name", &nlohmann::json::is_string, "module", false);
     checkValue(j, "loadedInstruction", &nlohmann::json::is_string, "module", true);
     checkValue(j, "notLoadedInstruction", &nlohmann::json::is_string, "module", true);
@@ -156,7 +158,7 @@ void from_json(const nlohmann::json& j, Profile::Module& v) {
     }
 }
 
-void to_json(nlohmann::json& j, const Profile::Meta& v) {
+static void to_json(nlohmann::json& j, const Profile::Meta& v) {
     if (v.name.has_value()) {
         j["name"] = *v.name;
     }
@@ -177,7 +179,7 @@ void to_json(nlohmann::json& j, const Profile::Meta& v) {
     }
 }
 
-void from_json(const nlohmann::json& j, Profile::Meta& v) {
+static void from_json(const nlohmann::json& j, Profile::Meta& v) {
     checkValue(j, "name", &nlohmann::json::is_string, "meta", true);
     checkValue(j, "version", &nlohmann::json::is_string, "meta", true);
     checkValue(j, "description", &nlohmann::json::is_string, "meta", true);
@@ -210,7 +212,7 @@ void from_json(const nlohmann::json& j, Profile::Meta& v) {
     }
 }
 
-void to_json(nlohmann::json& j, const Profile::Property::SetType& v) {
+static void to_json(nlohmann::json& j, const Profile::Property::SetType& v) {
     j = [](Profile::Property::SetType t) {
         switch (t) {
             case Profile::Property::SetType::SetPropertyValue:
@@ -223,7 +225,7 @@ void to_json(nlohmann::json& j, const Profile::Property::SetType& v) {
     }(v);
 }
 
-void from_json(const nlohmann::json& j, Profile::Property::SetType& v) {
+static void from_json(const nlohmann::json& j, Profile::Property::SetType& v) {
     const std::string value = j.get<std::string>();
     if (value == "setPropertyValue") {
         v = Profile::Property::SetType::SetPropertyValue;
@@ -233,18 +235,19 @@ void from_json(const nlohmann::json& j, Profile::Property::SetType& v) {
     }
     else {
         throw Profile::ParsingError(
-            Profile::ParsingError::Severity::Error, "Unknown property set type"
+            Profile::ParsingError::Severity::Error,
+            "Unknown property set type"
         );
     }
 }
 
-void to_json(nlohmann::json& j, const Profile::Property& v) {
+static void to_json(nlohmann::json& j, const Profile::Property& v) {
     j["type"] = v.setType;
     j["name"] = v.name;
     j["value"] = v.value;
 }
 
-void from_json(const nlohmann::json& j, Profile::Property& v) {
+static void from_json(const nlohmann::json& j, Profile::Property& v) {
     checkValue(j, "type", &nlohmann::json::is_string, "property", false);
     checkValue(j, "name", &nlohmann::json::is_string, "property", false);
     checkValue(j, "value", &nlohmann::json::is_string, "property", false);
@@ -255,7 +258,7 @@ void from_json(const nlohmann::json& j, Profile::Property& v) {
     j["value"].get_to(v.value);
 }
 
-void to_json(nlohmann::json& j, const Profile::Action& v) {
+static void to_json(nlohmann::json& j, const Profile::Action& v) {
     j["identifier"] = v.identifier;
     j["documentation"] = v.documentation;
     j["name"] = v.name;
@@ -264,7 +267,7 @@ void to_json(nlohmann::json& j, const Profile::Action& v) {
     j["script"] = v.script;
 }
 
-void from_json(const nlohmann::json& j, Profile::Action& v) {
+static void from_json(const nlohmann::json& j, Profile::Action& v) {
     checkValue(j, "identifier", &nlohmann::json::is_string, "action", false);
     checkValue(j, "documentation", &nlohmann::json::is_string, "action", false);
     checkValue(j, "name", &nlohmann::json::is_string, "action", false);
@@ -285,12 +288,12 @@ void from_json(const nlohmann::json& j, Profile::Action& v) {
     j["script"].get_to(v.script);
 }
 
-void to_json(nlohmann::json& j, const Profile::Keybinding& v) {
+static void to_json(nlohmann::json& j, const Profile::Keybinding& v) {
     j["key"] = keyToString(v.key);
     j["action"] = v.action;
 }
 
-void from_json(const nlohmann::json& j, Profile::Keybinding& v) {
+static void from_json(const nlohmann::json& j, Profile::Keybinding& v) {
     checkValue(j, "key", &nlohmann::json::is_string, "keybinding", false);
     checkValue(j, "action", &nlohmann::json::is_string, "keybinding", false);
     checkExtraKeys(j, "keybinding", { "key", "action" });
@@ -299,7 +302,7 @@ void from_json(const nlohmann::json& j, Profile::Keybinding& v) {
     j["action"].get_to(v.action);
 }
 
-void to_json(nlohmann::json& j, const Profile::Time::Type& v) {
+static void to_json(nlohmann::json& j, const Profile::Time::Type& v) {
     j = [](Profile::Time::Type t) {
         switch (t) {
             case Profile::Time::Type::Absolute: return "absolute";
@@ -309,7 +312,7 @@ void to_json(nlohmann::json& j, const Profile::Time::Type& v) {
     }(v);
 }
 
-void from_json(const nlohmann::json& j, Profile::Time::Type& v) {
+static void from_json(const nlohmann::json& j, Profile::Time::Type& v) {
     const std::string value = j.get<std::string>();
     if (value == "absolute") {
         v = Profile::Time::Type::Absolute;
@@ -319,18 +322,19 @@ void from_json(const nlohmann::json& j, Profile::Time::Type& v) {
     }
     else {
         throw Profile::ParsingError(
-            Profile::ParsingError::Severity::Error, "Unknown time type"
+            Profile::ParsingError::Severity::Error,
+            "Unknown time type"
         );
     }
 }
 
-void to_json(nlohmann::json& j, const Profile::Time& v) {
+static void to_json(nlohmann::json& j, const Profile::Time& v) {
     j["type"] = v.type;
     j["value"] = v.value;
     j["is_paused"] = v.startPaused;
 }
 
-void from_json(const nlohmann::json& j, Profile::Time& v) {
+static void from_json(const nlohmann::json& j, Profile::Time& v) {
     checkValue(j, "type", &nlohmann::json::is_string, "time", false);
     checkValue(j, "value", &nlohmann::json::is_string, "time", false);
     checkValue(j, "is_paused", &nlohmann::json::is_boolean, "time", false);
@@ -341,7 +345,7 @@ void from_json(const nlohmann::json& j, Profile::Time& v) {
     j["is_paused"].get_to(v.startPaused);
 }
 
-void to_json(nlohmann::json& j, const Profile::CameraGoToNode& v) {
+static void to_json(nlohmann::json& j, const Profile::CameraGoToNode& v) {
     j["type"] = Profile::CameraGoToNode::Type;
     j["anchor"] = v.anchor;
     if (v.height.has_value()) {
@@ -349,7 +353,7 @@ void to_json(nlohmann::json& j, const Profile::CameraGoToNode& v) {
     }
 }
 
-void from_json(const nlohmann::json& j, Profile::CameraGoToNode& v) {
+static void from_json(const nlohmann::json& j, Profile::CameraGoToNode& v) {
     ghoul_assert(
         j.at("type").get<std::string>() == Profile::CameraGoToNode::Type,
         "Wrong type for Camera"
@@ -369,7 +373,7 @@ void from_json(const nlohmann::json& j, Profile::CameraGoToNode& v) {
     }
 }
 
-void to_json(nlohmann::json& j, const Profile::CameraNavState& v) {
+static void to_json(nlohmann::json& j, const Profile::CameraNavState& v) {
     j["type"] = Profile::CameraNavState::Type;
     j["anchor"] = v.anchor;
     if (v.aim.has_value()) {
@@ -398,7 +402,7 @@ void to_json(nlohmann::json& j, const Profile::CameraNavState& v) {
     }
 }
 
-void from_json(const nlohmann::json& j, Profile::CameraNavState& v) {
+static void from_json(const nlohmann::json& j, Profile::CameraNavState& v) {
     ghoul_assert(
         j.at("type").get<std::string>() == Profile::CameraNavState::Type,
         "Wrong type for Camera"
@@ -455,7 +459,7 @@ void from_json(const nlohmann::json& j, Profile::CameraNavState& v) {
     }
 }
 
-void to_json(nlohmann::json& j, const Profile::CameraGoToGeo& v) {
+static void to_json(nlohmann::json& j, const Profile::CameraGoToGeo& v) {
     j["type"] = Profile::CameraGoToGeo::Type;
     j["anchor"] = v.anchor;
     j["latitude"] = v.latitude;
@@ -465,7 +469,7 @@ void to_json(nlohmann::json& j, const Profile::CameraGoToGeo& v) {
     }
 }
 
-void from_json(const nlohmann::json& j, Profile::CameraGoToGeo& v) {
+static void from_json(const nlohmann::json& j, Profile::CameraGoToGeo& v) {
     ghoul_assert(
         j.at("type").get<std::string>() == Profile::CameraGoToGeo::Type,
         "Wrong type for Camera"
@@ -503,7 +507,7 @@ struct Keybinding {
     std::string script;
 };
 
-void from_json(const nlohmann::json& j, version10::Keybinding& v) {
+static void from_json(const nlohmann::json& j, version10::Keybinding& v) {
     checkValue(j, "key", &nlohmann::json::is_string, "keybinding", false);
     checkValue(j, "documentation", &nlohmann::json::is_string, "keybinding", false);
     checkValue(j, "name", &nlohmann::json::is_string, "keybinding", false);
@@ -556,7 +560,7 @@ void from_json(const nlohmann::json& j, version10::Keybinding& v) {
     j["script"].get_to(v.script);
 }
 
-void convertVersion10to11(nlohmann::json& profile) {
+static void convertVersion10to11(nlohmann::json& profile) {
     // Version 1.1 introduced actions and remove Lua function calling from keybindings
     profile["version"] = Profile::Version{ 1, 1 };
 
@@ -574,18 +578,20 @@ void convertVersion10to11(nlohmann::json& profile) {
         version10::Keybinding& kb = kbs[i];
         const std::string identifier = std::format("profile.keybind.{}", i);
 
-        Profile::Action action;
-        action.identifier = identifier;
-        action.documentation = std::move(kb.documentation);
-        action.name = std::move(kb.name);
-        action.guiPath = std::move(kb.guiPath);
-        action.isLocal = kb.isLocal;
-        action.script = std::move(kb.script);
+        Profile::Action action = {
+            .identifier = identifier,
+            .documentation = std::move(kb.documentation),
+            .name = std::move(kb.name),
+            .guiPath = std::move(kb.guiPath),
+            .isLocal = kb.isLocal,
+            .script = std::move(kb.script)
+        };
         actions.push_back(std::move(action));
 
-        Profile::Keybinding keybinding;
-        keybinding.key = kb.key;
-        keybinding.action = identifier;
+        Profile::Keybinding keybinding = {
+            .key = kb.key,
+            .action = identifier
+        };
         keybindings.push_back(keybinding);
     }
 
@@ -597,7 +603,7 @@ void convertVersion10to11(nlohmann::json& profile) {
 
 namespace version11 {
 
-void convertVersion11to12(nlohmann::json& profile) {
+static void convertVersion11to12(nlohmann::json& profile) {
     // Version 1.2 introduced a state whether the delta time starts out as paused
     profile["version"] = Profile::Version{ 1, 2 };
 
@@ -611,7 +617,7 @@ void convertVersion11to12(nlohmann::json& profile) {
 
 namespace version12 {
 
-void convertVersion12to13(nlohmann::json& profile) {
+static void convertVersion12to13(nlohmann::json& profile) {
     // Version 1.3 introduced to GoToNode camera initial position
     profile["version"] = Profile::Version{ 1, 3 };
 }
@@ -620,7 +626,7 @@ void convertVersion12to13(nlohmann::json& profile) {
 
 namespace version13 {
 
-void convertVersion13to14(nlohmann::json& profile) {
+static void convertVersion13to14(nlohmann::json& profile) {
     // Version 1.4 introduced the ui panel view
     profile["version"] = Profile::Version{ 1, 4 };
 }
@@ -632,42 +638,44 @@ Profile::ParsingError::ParsingError(Severity severity_, std::string msg)
     , severity(severity_)
 {}
 
-void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& rootOwner,
+void Profile::saveCurrentSettingsToProfile(const PropertyOwner& rootOwner,
                                            std::string currentTime,
-                                           interaction::NavigationState navState)
+                                           NavigationState navState)
 {
     version = Profile::CurrentVersion;
 
     // Update properties
-    const std::vector<properties::Property*> ps = changedProperties(rootOwner);
+    const std::vector<openspace::Property*> ps = changedProperties(rootOwner);
 
-    for (properties::Property* prop : ps) {
-        Property p;
-        p.setType = Property::SetType::SetPropertyValueSingle;
-        p.name = prop->uri();
-        p.value = prop->stringValue();
+    for (openspace::Property* prop : ps) {
+        Property p = {
+            .setType = Property::SetType::SetPropertyValueSingle,
+            .name = std::string(prop->uri()),
+            .value = prop->stringValue()
+        };
         properties.push_back(std::move(p));
     }
 
     // Add current time to profile file
-    Time t;
-    t.value = std::move(currentTime);
-    t.type = Time::Type::Absolute;
-    time = t;
+    time = {
+        .type = Time::Type::Absolute,
+        .value = std::move(currentTime)
+    };
 
     // Delta times
     std::vector<double> dts = global::timeManager->deltaTimeSteps();
     deltaTimes = std::move(dts);
 
     // Camera
-    CameraNavState c;
-    c.anchor = navState.anchor;
-    c.aim = navState.aim;
-    c.referenceFrame = navState.referenceFrame;
-    c.position = navState.position;
-    c.up = navState.up;
-    c.yaw = navState.yaw;
-    c.pitch = navState.pitch;
+    CameraNavState c = {
+        .anchor = navState.anchor,
+        .aim = navState.aim,
+        .referenceFrame = navState.referenceFrame,
+        .position = navState.position,
+        .up = navState.up,
+        .yaw = navState.yaw,
+        .pitch = navState.pitch
+    };
     camera = std::move(c);
 }
 
@@ -751,13 +759,10 @@ std::string Profile::serialize() const {
 Profile::Profile(const std::filesystem::path& path) {
     ghoul_assert(std::filesystem::is_regular_file(path), "Path must exist");
 
-    std::ifstream inFile;
-    try {
-        inFile.open(path, std::ifstream::in);
-    }
-    catch (const std::ifstream::failure& e) {
+    std::ifstream inFile = std::ifstream(path, std::ifstream::in);
+    if (!inFile.is_open()) {
         throw ghoul::RuntimeError(std::format(
-            "Exception opening profile file for read '{}': {}", path, e.what()
+            "Exception opening profile file for read '{}'", path
         ));
     }
 
@@ -849,7 +854,7 @@ Profile::Profile(const std::filesystem::path& path) {
     }
 }
 
-scripting::LuaLibrary Profile::luaLibrary() {
+LuaLibrary Profile::luaLibrary() {
     return {
         "",
         {
@@ -860,4 +865,4 @@ scripting::LuaLibrary Profile::luaLibrary() {
     };
 }
 
-}  // namespace openspace
+} // namespace openspace

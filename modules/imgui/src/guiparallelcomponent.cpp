@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,16 +28,16 @@
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <openspace/network/parallelconnection.h>
 #include <openspace/network/parallelpeer.h>
-#include <openspace/network/messagestructures.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/format.h>
-#include <algorithm>
-#include <numeric>
 
 namespace {
+    using namespace openspace;
+
     void renderHost() {
-        const size_t nConnections = openspace::global::parallelPeer->nConnections();
+        const size_t nConnections = global::parallelPeer->nConnections();
 
         std::string connectionInfo;
         const size_t nClients = nConnections - 1;
@@ -52,17 +52,16 @@ namespace {
 
         const bool resignHostship = ImGui::Button("Resign hostship");
         if (resignHostship) {
-            openspace::global::parallelPeer->resignHostship();
+            global::parallelPeer->resignHostship();
         }
     }
 } // namespace
 
-namespace openspace::gui {
+namespace openspace {
 
 GuiParallelComponent::GuiParallelComponent()
     : GuiPropertyComponent("Parallel", "Parallel Connection")
-{
-}
+{}
 
 void GuiParallelComponent::renderDisconnected() {
     ImGui::Text("Not connected");
@@ -197,4 +196,4 @@ void GuiParallelComponent::render() {
     ImGui::End();
 }
 
-} // namespace openspace::gui
+} // namespace openspace

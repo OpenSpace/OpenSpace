@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,13 +26,12 @@
 #define __OPENSPACE_CORE___MISSIONMANAGER___H__
 
 #include <openspace/mission/mission.h>
-
 #include <map>
 #include <string>
 
 namespace openspace {
 
-namespace scripting { struct LuaLibrary; }
+struct LuaLibrary;
 
 /**
  * Class keeping track of space missions.
@@ -42,12 +41,12 @@ public:
     MissionManager();
 
     /**
-    * Loads the provided mission. If this is the first mission to be loaded, the mission
-    * will also be set as the current active mission.
-    *
-    * \param mission The file that contains the mission that is to be loaded
-    * \return The name of the mission that was loaded
-    */
+     * Loads the provided mission. If this is the first mission to be loaded, the mission
+     * will also be set as the current active mission.
+     *
+     * \param mission The file that contains the mission that is to be loaded
+     * \return The name of the mission that was loaded
+     */
     std::string loadMission(Mission mission);
 
     /**
@@ -69,11 +68,11 @@ public:
     bool hasMission(const std::string& missionName);
 
     /**
-    * Sets the mission with the name \p missionName as the current mission. The current
-    * mission is what is return by `currentMission()`.
-    *
-    * \pre \p missionName must not be empty
-    */
+     * Sets the mission with the name \p missionName as the current mission. The current
+     * mission is what is return by `currentMission()`.
+     *
+     * \pre \p missionName must not be empty
+     */
     void setCurrentMission(const std::string& missionName);
 
     /**
@@ -93,7 +92,7 @@ public:
      */
     const std::map<std::string, Mission>& missionMap();
 
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     std::map<std::string, Mission> _missionMap;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,14 +27,16 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <ghoul/glm.h>
 #include <filesystem>
 
 namespace openspace {
+
+struct Documentation;
 
 class ExoplanetsModule : public OpenSpaceModule {
 public:
@@ -61,29 +63,29 @@ public:
     bool useOptimisticZone() const;
     float habitableZoneOpacity() const;
 
-    scripting::LuaLibrary luaLibrary() const override;
-    std::vector<documentation::Documentation> documentations() const override;
-    static documentation::Documentation Documentation();
+    LuaLibrary luaLibrary() const override;
+    std::vector<openspace::Documentation> documentations() const override;
+    static openspace::Documentation Documentation();
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;
 
-    properties::StringProperty _exoplanetsDataFolder;
-    properties::StringProperty _bvColorMapPath;
-    properties::StringProperty _starTexturePath;
-    properties::StringProperty _starGlareTexturePath;
-    properties::StringProperty _noDataTexturePath;
-    properties::StringProperty _planetDefaultTexturePath;
-    properties::StringProperty _orbitDiscTexturePath;
-    properties::StringProperty _habitableZoneTexturePath;
+    StringProperty _exoplanetsDataFolder;
+    StringProperty _bvColorMapPath;
+    StringProperty _starTexturePath;
+    StringProperty _starGlareTexturePath;
+    StringProperty _noDataTexturePath;
+    StringProperty _planetDefaultTexturePath;
+    StringProperty _orbitDiscTexturePath;
+    StringProperty _habitableZoneTexturePath;
 
-    properties::Vec3Property _comparisonCircleColor;
-    properties::BoolProperty _showComparisonCircle;
-    properties::BoolProperty _showOrbitUncertainty;
-    properties::BoolProperty _showHabitableZone;
-    properties::BoolProperty _useOptimisticZone;
+    Vec3Property _comparisonCircleColor;
+    BoolProperty _showComparisonCircle;
+    BoolProperty _showOrbitUncertainty;
+    BoolProperty _showHabitableZone;
+    BoolProperty _useOptimisticZone;
 
-    properties::FloatProperty _habitableZoneOpacity;
+    FloatProperty _habitableZoneOpacity;
 };
 
 } // namespace openspace

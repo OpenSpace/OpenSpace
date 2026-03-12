@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2025                                                                #
+# Copyright (c) 2014-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -46,10 +46,8 @@ begin_dependency("SoLoud")
 set(SOLOUD_BACKEND_SDL2 OFF CACHE BOOL "")
 if (WIN32)
   set(SOLOUD_BACKEND_WINMM ON CACHE BOOL "")
-elseif (UNIX AND NOT APPLE)
+elseif (UNIX)
   set(SOLOUD_BACKEND_ALSA ON CACHE BOOL "")
-elseif (APPLE)
-  set(SOLOUD_BACKEND_COREAUDIO ON CACHE BOOL "")
 endif ()
 add_subdirectory(ext/soloud/contrib SYSTEM)
 

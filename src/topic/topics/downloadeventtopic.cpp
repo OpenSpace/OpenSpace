@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,7 @@
 #include <openspace/topic/connection.h>
 #include <openspace/util/downloadeventengine.h>
 #include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
+#include <string_view>
 
 namespace {
     constexpr std::string_view StartSubscription = "start_subscription";
@@ -45,21 +45,17 @@ DownloadEventTopic::~DownloadEventTopic() {
     }
 }
 
-bool DownloadEventTopic::isDone() const {
-    return !_isSubscribedTo;
-}
-
 void DownloadEventTopic::handleJson(const nlohmann::json& json) {
     const std::string& event = json.at("event").get<std::string>();
 
     if (event == StartSubscription) {
         _isSubscribedTo = true;
 
-        auto callback = [this](const DownloadEventEngine::DownloadEvent& event) {
+        auto callback = [this](const DownloadEventEngine::DownloadEvent& e) {
             // Limit how often we send data to frontend to reduce traffic
-            if (event.type == DownloadEventEngine::DownloadEvent::Type::Progress) {
+            if (e.type == DownloadEventEngine::DownloadEvent::Type::Progress) {
                 const auto now = std::chrono::steady_clock::now();
-                auto& last = _lastCallBack[event.id];
+                auto& last = _lastCallback[e.id];
 
                 if (now - last >= CallbackUpdateInterval) {
                     last = now;
@@ -70,11 +66,11 @@ void DownloadEventTopic::handleJson(const nlohmann::json& json) {
             }
 
             nlohmann::json payload;
-            payload["type"] = event.type;
-            payload["id"] = event.id;
-            payload["downloadedBytes"] = event.downloadedBytes;
-            if (event.totalBytes.has_value()) {
-                payload["totalBytes"] = event.totalBytes.value();
+            payload["type"] = e.type;
+            payload["id"] = e.id;
+            payload["downloadedBytes"] = e.downloadedBytes;
+            if (e.totalBytes.has_value()) {
+                payload["totalBytes"] = e.totalBytes.value();
             }
 
             _connection->sendJson(wrappedPayload(payload));
@@ -86,6 +82,10 @@ void DownloadEventTopic::handleJson(const nlohmann::json& json) {
         global::downloadEventEngine->unsubscribe(_subscriptionID);
         _isSubscribedTo = false;
     }
+}
+
+bool DownloadEventTopic::isDone() const {
+    return !_isSubscribedTo;
 }
 
 } // namespace openspace

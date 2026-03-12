@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,27 +24,34 @@
 
 #include <modules/globebrowsing/src/geojson/geojsoncomponent.h>
 
-#include <modules/globebrowsing/src/geojson/globegeometryhelper.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/json.h>
-#include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/lightsource.h>
 #include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/ellipsoid.h>
+#include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
+#include <ghoul/misc/defer.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
+#include <geos/geom/CoordinateSequence.h>
+#include <geos/geom/Point.h>
+#include <geos/util/GEOSException.h>
+#include <algorithm>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <functional>
-#include <optional>
+#include <iterator>
+#include <utility>
 
 namespace geos_nlohmann = nlohmann;
 #include <geos/geom/Geometry.h>
@@ -53,134 +60,136 @@ namespace geos_nlohmann = nlohmann;
 #include <geos/operation/valid/MakeValid.h>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "GeoJsonComponent";
 
     constexpr std::string_view KeyIdentifier = "Identifier";
     constexpr std::string_view KeyName = "Name";
     constexpr std::string_view KeyDesc = "Description";
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "This setting determines whether this object will be visible or not.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FileInfo = {
+    constexpr Property::PropertyInfo FileInfo = {
         "File",
         "File",
         "Path to the GeoJSON file to base the rendering on.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HeightOffsetInfo = {
+    constexpr Property::PropertyInfo HeightOffsetInfo = {
         "HeightOffset",
         "Height offset",
         "A height offset value, in meters. Useful for moving a feature closer to or "
         "farther away from the surface.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CoordinateOffsetInfo = {
+    constexpr Property::PropertyInfo CoordinateOffsetInfo = {
         "CoordinateOffset",
         "Geographic coordinate offset",
-        "A latitude and longitude offset value, in decimal degrees. Can be used to "
-        "move the object on the surface and correct potential mismatches with other "
+        "A latitude and longitude offset value, in decimal degrees. Can be used to move "
+        "the object on the surface and correct potential mismatches with other "
         "renderings. Note that changing it during runtime leads to all positions being "
         "recomputed.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DrawWireframeInfo = {
+    constexpr Property::PropertyInfo DrawWireframeInfo = {
         "DrawWireframe",
         "Wireframe",
         "If true, draw the wire frame of the polygons. Used for testing and to "
         "investigate tessellation results.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PreventHeightUpdateInfo = {
+    constexpr Property::PropertyInfo PreventHeightUpdateInfo = {
         "PreventHeightUpdate",
         "Prevent update from heightmap",
         "If true, the polygon mesh will not be automatically updated based on the "
         "heightmap, even if the 'RelativeToGround' altitude option is set and the "
         "heightmap updates. The data can still be force updated.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ForceUpdateHeightDataInfo = {
+    constexpr Property::PropertyInfo ForceUpdateHeightDataInfo = {
         "ForceUpdateHeightData",
         "Force update height data",
         "Triggering this leads to a recomputation of the heights based on the globe "
         "height map value at the geometry's positions.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointRenderModeInfo = {
+    constexpr Property::PropertyInfo PointRenderModeInfo = {
         "PointRenderMode",
         "Points aligned to",
         "Decides how the billboards for the points should be rendered in terms of up "
         "direction and whether the plane should face the camera. See details on the "
         "different options in the wiki.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FlyToFeatureInfo = {
+    constexpr Property::PropertyInfo FlyToFeatureInfo = {
         "FlyToFeature",
         "Fly to feature",
         "Triggering this leads to the camera flying to a position that show the GeoJson "
         "feature. The flight will account for any lat, long or height offset.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CentroidCoordinateInfo = {
+    constexpr Property::PropertyInfo CentroidCoordinateInfo = {
         "CentroidCoordinate",
         "Centroid coordinate",
         "The lat long coordinate of the centroid position of the read geometry. Note "
         "that this value does not incude the offset.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BoundingBoxInfo = {
+    constexpr Property::PropertyInfo BoundingBoxInfo = {
         "BoundingBox",
         "Bounding box",
         "The lat long coordinates of the lower and upper corner of the bounding box of "
         "the read geometry. Note that this value does not incude the offset.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointSizeScaleInfo = {
+    constexpr Property::PropertyInfo PointSizeScaleInfo = {
         "PointSizeScale",
         "Point size scale",
         "An extra scale value that can be used to increase or decrease the scale of any "
         "rendered points in the component, even if a value is set from the GeoJson file.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthScaleInfo = {
+    constexpr Property::PropertyInfo LineWidthScaleInfo = {
         "LineWidthScale",
         "Line width scale",
         "An extra scale value that can be used to increase or decrease the width of any "
         "rendered lines in the component, even if a value is set from the GeoJson file. "
         "Note that there is a max limit for how wide lines can be.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
+    constexpr Property::PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
         "Triggering this will remove this GeoJson component from its globe. Note that "
         "the GUI may have to be reloaded for the change to be reflect in the user "
         "interface.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(GeoJsonComponent)]] Parameters {
-        // The unique identifier for this layer. May not contain '.' or spaces
+        // The unique identifier for this layer. May not contain '.' or spaces.
         std::string identifier;
 
         // A human-readable name for the user interface. If this is omitted, the
-        // identifier is used instead
+        // identifier is used instead.
         std::optional<std::string> name;
 
         // [[codegen::verbatim(EnabledInfo.description)]]
@@ -190,11 +199,11 @@ namespace {
         std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
 
         // A human-readable description of the layer to be used in informational texts
-        // presented to the user
+        // presented to the user.
         std::optional<std::string> description;
 
         // If true, ignore any height values that are given in the file. Coordinates with
-        // three values will then be treated as coordinates with only two values
+        // three values will then be treated as coordinates with only two values.
         std::optional<bool> ignoreHeights;
 
         // [[codegen::verbatim(PreventHeightUpdateInfo.description)]]
@@ -216,7 +225,7 @@ namespace {
         std::optional<glm::vec2> coordinateOffset;
 
         enum class
-        [[codegen::map(openspace::globebrowsing::GlobeGeometryFeature::PointRenderMode)]]
+        [[codegen::map(openspace::GlobeGeometryFeature::PointRenderMode)]]
         PointRenderMode
         {
             AlignToCameraDir [[codegen::key("Camera Direction")]],
@@ -232,26 +241,25 @@ namespace {
 
         // These properties will be used as default values for the geoJson rendering,
         // meaning that they will be used when there is no value given for the
-        // individual geoJson features
+        // individual geoJson features.
         std::optional<ghoul::Dictionary> defaultProperties
             [[codegen::reference("globebrowsing_geojsonproperties")]];
 
-        // A list of light sources that this object should accept light from
+        // A list of light sources that this object should accept light from.
         std::optional<std::vector<ghoul::Dictionary>> lightSources
-            [[codegen::reference("core_light_source")]];
+            [[codegen::reference("core_lightsource")]];
     };
-#include "geojsoncomponent_codegen.cpp"
 } // namespace
+#include "geojsoncomponent_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation GeoJsonComponent::Documentation() {
+Documentation GeoJsonComponent::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_geojsoncomponent");
 }
 
-GeoJsonComponent::SubFeatureProps::SubFeatureProps(
-                                       properties::PropertyOwner::PropertyOwnerInfo info)
-    : properties::PropertyOwner(std::move(info))
+GeoJsonComponent::SubFeatureProps::SubFeatureProps(PropertyOwner::PropertyOwnerInfo info)
+    : PropertyOwner(std::move(info))
     , enabled(EnabledInfo, true)
     , centroidLatLong(
         CentroidCoordinateInfo,
@@ -267,7 +275,7 @@ GeoJsonComponent::SubFeatureProps::SubFeatureProps(
     )
     , flyToFeature(FlyToFeatureInfo)
 {
-    _opacity.setVisibility(openspace::properties::Property::Visibility::AdvancedUser);
+    _opacity.setVisibility(Property::Visibility::AdvancedUser);
     addProperty(Fadeable::_opacity);
     addProperty(Fadeable::_fade);
 
@@ -284,7 +292,7 @@ GeoJsonComponent::SubFeatureProps::SubFeatureProps(
 
 GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
                                    RenderableGlobe& globe)
-    : properties::PropertyOwner({
+    : PropertyOwner({
         dictionary.value<std::string>(KeyIdentifier),
         dictionary.hasKey(KeyName) ? dictionary.value<std::string>(KeyName) : "",
         dictionary.hasKey(KeyDesc) ? dictionary.value<std::string>(KeyDesc) : ""
@@ -394,10 +402,10 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
 
     using PointRenderMode = GlobeGeometryFeature::PointRenderMode;
     _pointRenderModeOption.addOptions({
-        { static_cast<int>(PointRenderMode::AlignToCameraDir), "Camera Direction"},
-        { static_cast<int>(PointRenderMode::AlignToCameraPos), "Camera Position"},
-        { static_cast<int>(PointRenderMode::AlignToGlobeNormal), "Globe Normal"},
-        { static_cast<int>(PointRenderMode::AlignToGlobeSurface), "Globe Surface"}
+        { static_cast<int>(PointRenderMode::AlignToCameraDir), "Camera Direction" },
+        { static_cast<int>(PointRenderMode::AlignToCameraPos), "Camera Position" },
+        { static_cast<int>(PointRenderMode::AlignToGlobeNormal), "Globe Normal" },
+        { static_cast<int>(PointRenderMode::AlignToGlobeSurface), "Globe Surface" }
     });
     if (p.pointRenderMode.has_value()) {
         _pointRenderModeOption =
@@ -510,7 +518,6 @@ void GeoJsonComponent::render(const RenderData& data) {
     // this code should use the same light source as the globe
     _lightsourceRenderData.updateBasedOnLightSources(data, _lightSources);
 
-    // Change GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
@@ -551,7 +558,6 @@ void GeoJsonComponent::render(const RenderData& data) {
 
     glBindVertexArray(0);
 
-    // Restore GL State
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
@@ -623,7 +629,7 @@ void GeoJsonComponent::readFile() {
         if (_geometryFeatures.empty()) {
             LWARNING(std::format(
                 "No GeoJson features could be successfully created for GeoJson layer "
-                "with identifier '{}'. Disabling layer.", identifier()
+                "with identifier '{}'. Disabling layer", identifier()
             ));
             _enabled = false;
         }
@@ -648,7 +654,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
             "Feature {} in GeoJson file '{}' has invalid geometry (for example due to "
             "self-intersections or other non-simple geometry). If possible, the feature "
             "will be split into separate features with valid geometry. However, note "
-            "that this may introduce artifacts.", indexInFile, _geoJsonFile.value()
+            "that this may introduce artifacts", indexInFile, _geoJsonFile.value()
         ));
     }
     geos::operation::valid::MakeValid makeValid;
@@ -694,13 +700,13 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
             std::string name = _geometryFeatures.back().key();
             std::string identifier = makeIdentifier(name);
 
-            // If there is already an owner with that name as an identifier, make a
-            // unique one
+            // If there is already an owner with that name as an identifier, make a unique
+            // one
             if (_featuresPropertyOwner.hasPropertySubOwner(identifier)) {
                 identifier = std::format("Feature{}-", index, identifier);
             }
 
-            const properties::PropertyOwner::PropertyOwnerInfo info = {
+            const PropertyOwner::PropertyOwnerInfo info = {
                 std::move(identifier),
                 std::move(name)
                 // @TODO: Use description from file, if any
@@ -714,7 +720,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
         catch (const ghoul::RuntimeError& error) {
             LERROR(std::format(
                 "Error creating GeoJson layer with identifier '{}'. Problem reading "
-                "feature {} in GeoJson file '{}'.",
+                "feature {} in GeoJson file '{}'",
                 identifier(), indexInFile, _geoJsonFile.value()
             ));
             LERRORC(error.component, error.message);
@@ -727,11 +733,7 @@ void GeoJsonComponent::addMetaPropertiesToFeature(SubFeatureProps& feature, int 
                                                   const geos::geom::Geometry* geometry)
 {
     std::unique_ptr<geos::geom::Point> centroid = geometry->getCentroid();
-    // Using `auto` here as on MacOS `getCoordinate` returns:
-    // geos::geom::Coordinate
-    // but on Windows it returns
-    // geos::geom::CoordinateXY
-    auto centroidCoord = *centroid->getCoordinate();
+    const geos::geom::CoordinateXY centroidCoord = *centroid->getCoordinate();
     const glm::vec2 centroidLatLong = glm::vec2(centroidCoord.y, centroidCoord.x);
     feature.centroidLatLong = centroidLatLong;
 
@@ -749,8 +751,8 @@ void GeoJsonComponent::addMetaPropertiesToFeature(SubFeatureProps& feature, int 
         );
     }
     else {
-        // Invalid boundingbox. Can happen e.g. for single points.
-        // Just add a degree to every direction from the centroid
+        // Invalid boundingbox. Can happen e.g. for single points. Just add a degree to
+        // every direction from the centroid
         boundingboxLatLong = glm::vec4(
             centroidLatLong.x - 1.f,
             centroidLatLong.y - 1.f,
@@ -783,14 +785,14 @@ void GeoJsonComponent::computeMainFeatureMetaPropeties() {
         return;
     }
 
-    glm::vec2 bboxLowerCorner = {
+    glm::vec2 bboxLowerCorner = glm::vec2(
         _features.front()->boundingboxLatLong.value().x,
         _features.front()->boundingboxLatLong.value().y
-    };
-    glm::vec2 bboxUpperCorner = {
+    );
+    glm::vec2 bboxUpperCorner = glm::vec2(
         _features.front()->boundingboxLatLong.value().z,
         _features.front()->boundingboxLatLong.value().w
-    };
+    );
 
     for (const std::unique_ptr<SubFeatureProps>& f : _features) {
         // Update bbox corners
@@ -813,13 +815,13 @@ void GeoJsonComponent::computeMainFeatureMetaPropeties() {
 
     // Compute the diagonal distance (size) of the bounding box
     const Geodetic2 pos0 = {
-        glm::radians(bboxLowerCorner.x),
-        glm::radians(bboxLowerCorner.y)
+        .lat = glm::radians(bboxLowerCorner.x),
+        .lon = glm::radians(bboxLowerCorner.y)
     };
 
     const Geodetic2 pos1 = {
-        glm::radians(bboxUpperCorner.x),
-        glm::radians(bboxUpperCorner.y)
+        .lat = glm::radians(bboxUpperCorner.x),
+        .lon = glm::radians(bboxUpperCorner.y)
     };
     _bboxDiagonalSize = static_cast<float>(
         std::abs(_globeNode.ellipsoid().greatCircleDistance(pos0, pos1))
@@ -839,8 +841,8 @@ void GeoJsonComponent::flyToFeature(std::optional<int> index) const {
         centroidLon = f->centroidLatLong.value().y;
     }
 
-    // Compute a good distance to travel to based on the feature's size.
-    // Assumes 80 degree FOV
+    // Compute a good distance to travel to based on the feature's size. Assumes 80 degree
+    // FOV
     constexpr float Angle = glm::radians(40.f);
     float d = diagonal / glm::tan(Angle);
     d += _heightOffset;
@@ -863,4 +865,4 @@ void GeoJsonComponent::triggerDeletion() const {
     global::scriptEngine->queueScript(script);
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

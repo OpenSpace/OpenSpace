@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,7 @@
 
 #include <ghoul/misc/assert.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
 template <typename T>
 Interpolator<T>::Interpolator()
@@ -77,4 +77,4 @@ bool Interpolator<T>::isInterpolating() const {
     return (_t < 1.f) && (_t >= 0.f);
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

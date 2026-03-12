@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,16 +23,12 @@
  ****************************************************************************************/
 
 #include <openspace/interaction/tasks/convertrecformattask.h>
-#include <openspace/interaction/sessionrecording.h>
-#include <openspace/documentation/verifier.h>
 
-#include <openspace/engine/globals.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/stringhelper.h>
-#include <filesystem>
-#include <iomanip>
+#include <openspace/documentation/documentation.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "ConvertRecFormatTask";
@@ -47,14 +43,13 @@ namespace {
         };
         DataMode outputMode;
     };
-
-#include "convertrecformattask_codegen.cpp"
 } // namespace
+#include "convertrecformattask_codegen.cpp"
 
-namespace openspace::interaction {
+namespace openspace {
 
-documentation::Documentation ConvertRecFormatTask::documentation() {
-    return codegen::doc<Parameters>("convert_format_task");
+Documentation ConvertRecFormatTask::documentation() {
+    return codegen::doc<Parameters>("core_task_convertrecformat");
 }
 
 ConvertRecFormatTask::ConvertRecFormatTask(const ghoul::Dictionary& dictionary) {
@@ -86,4 +81,4 @@ void ConvertRecFormatTask::perform(const Task::ProgressCallback&) {
     saveSessionRecording(_outFilePath, sessionRecording, _dataMode);
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

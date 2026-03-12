@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,30 +25,30 @@
 #ifndef __OPENSPACE_MODULE_GAIA___GAIAOPTIONS___H__
 #define __OPENSPACE_MODULE_GAIA___GAIAOPTIONS___H__
 
-namespace openspace::gaia {
+namespace openspace {
 
 enum RenderMode {
     Static = 0,
-    Color = 1,
-    Motion = 2
+    Color,
+    Motion
 };
 
 enum FileReaderOption {
     Fits = 0,
-    Speck = 1,
-    BinaryRaw = 2,
-    BinaryOctree = 3,
-    StreamOctree = 4
+    Speck,
+    BinaryRaw,
+    BinaryOctree,
+    StreamOctree
 };
 
 enum ShaderOption {
     PointSSBO = 0,
-    PointVBO = 1,
-    BillboardSSBO = 2,
-    BillboardVBO = 3,
-    BillboardSSBONoFBO = 4
+    PointVBO,
+    BillboardSSBO,
+    BillboardVBO,
+    BillboardSSBONoFBO
 };
 
-} // namespace openspace::gaiamission
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GAIA___GAIAOPTIONS___H__

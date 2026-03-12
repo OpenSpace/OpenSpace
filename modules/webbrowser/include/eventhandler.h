@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -72,9 +72,9 @@ private:
      * Detect if there is a special event that should be caught by the GUI before it is
      * sent to CEF.
      *
-     * \param key the pressed key
-     * \param mods the key modifier that was pressed
-     * \param action the action that was performed that triggered this event
+     * \param key The pressed key
+     * \param mods The key modifier that was pressed
+     * \param action The action that was performed that triggered this event
      * \return `true` if event found, `false` otherwise
      */
     bool specialKeyEvent(Key key, KeyModifier mods, KeyAction action);
@@ -89,8 +89,8 @@ private:
      * Build a CEF touch event based on our internal structure.
      *
      * Note: As of 2020-02-21 we are using an older version of CEF on OSX than WIN32. This
-     * version does not handle the CefTouchEvent type and does not have any internal
-     * touch handling
+     * version does not handle the CefTouchEvent type and does not have any internal touch
+     * handling.
      */
     CefTouchEvent touchEvent(const TouchInput& input,
         const cef_touch_event_type_t eventType) const;
@@ -114,7 +114,7 @@ private:
     std::vector<TouchInput> _validTouchStates;
 
     /**
-     * Determines if a click should be sent as a double click or not
+     * Determines if a click should be sent as a double click or not.
      */
     bool isDoubleClick(const MouseButtonState& button) const;
 };

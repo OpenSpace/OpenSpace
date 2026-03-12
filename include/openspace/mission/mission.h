@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,8 +25,9 @@
 #ifndef __OPENSPACE_CORE___MISSION___H__
 #define __OPENSPACE_CORE___MISSION___H__
 
-#include <openspace/util/timerange.h>
 #include <openspace/util/time.h>
+#include <openspace/util/timerange.h>
+#include <functional>
 #include <optional>
 #include <string>
 #include <vector>
@@ -35,7 +36,7 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation {  struct Documentation; }
+struct Documentation;
 
 struct Milestone {
     std::string name;
@@ -121,14 +122,12 @@ public:
      */
     const std::vector<MissionPhase>& phases() const;
 
-
     /**
      * Returns all important dates.
      *
      * \return All important dates
      */
     const std::vector<Milestone>& milestones() const;
-
 
     /**
      * Returns all actions.
@@ -146,7 +145,7 @@ public:
      * \param time The time in which the subphases have to be active in order to be
      *        included
      * \param maxDepth The maximum levels of subphases that will be considered. If this
-     *        value is equal to `-1`, an infinite depth will be considered.
+     *        value is equal to `-1`, an infinite depth will be considered
      * \return A list of MissionPhases that cover the provided \p time
      */
     Trace phaseTrace(double time, int maxDepth = -1) const;
@@ -157,7 +156,7 @@ public:
      *
      * \return The Documentation that describes the required structure for a Dictionary
      */
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     /**

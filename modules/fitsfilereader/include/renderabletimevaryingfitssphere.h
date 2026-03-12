@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,15 +27,17 @@
 
 #include <modules/base/rendering/renderablesphere.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/util/dynamicfilesequencedownloader.h>
+#include <ghoul/glm.h>
 #include <deque>
+#include <filesystem>
+#include <limits>
+#include <utility>
 
 namespace openspace {
-
-struct RenderData;
-struct UpdateData;
-namespace documentation { struct Documentation; }
 
 class RenderableTimeVaryingFitsSphere : public RenderableSphere {
 public:
@@ -51,10 +53,10 @@ public:
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
 private:
     struct File {
@@ -81,24 +83,24 @@ private:
     void computeSequenceEndTime();
     void updateDynamicDownloading(double currentTime, double deltaTime);
 
-    properties::OptionProperty _fitsLayerName;
-    // An option to keep or delete the downloads from dynamic downloader on shutdown
-    // Deletes on default
-    properties::BoolProperty _saveDownloadsOnShutdown;
-    properties::OptionProperty _textureFilterProperty;
-    properties::StringProperty _textureSource;
+    OptionProperty _fitsLayerName;
+    /// An option to keep or delete the downloads from dynamic downloader on shutdown.
+    /// Deletes on default
+    BoolProperty _saveDownloadsOnShutdown;
+    OptionProperty _textureFilterProperty;
+    StringProperty _textureSource;
 
-    // If there's just one state it should never disappear!
+    /// If there's just one state it should never disappear
     double _sequenceEndTime = std::numeric_limits<double>::max();
-    // Static Loading on default / if not specified
+    /// Static Loading on default / if not specified
     LoadingType _loadingType = LoadingType::StaticLoading;
-    // A data ID that corresponds to what dataset to use if using DynamicDownloading
+    /// A data ID that corresponds to what dataset to use if using DynamicDownloading
     int _dataID = -1;
-    // Number of files to queue up at a time
+    /// Number of files to queue up at a time
     int _nFilesToQueue = 10;
-    // To keep track of oldest file
+    /// To keep track of oldest file
     std::deque<File*> _loadedFiles;
-    // Max number of files loaded at once
+    /// Max number of files loaded at once
     size_t _maxLoadedFiles = 100;
     std::string _infoUrl;
     std::string _dataUrl;
@@ -106,12 +108,12 @@ private:
     std::map<int, std::pair<float, float>> _layerMinMaxCaps;
 
     int _fitsLayerTemp = -1;
-    // If there's just one state it should never disappear
+    /// If there's just one state it should never disappear
     bool _renderForever = true;
     bool _inInterval = false;
 
-    // DynamicFileSequenceDownloader downloads and updates the renderable with
-    // data downloaded from the web
+    /// DynamicFileSequenceDownloader downloads and updates the renderable with data
+    /// downloaded from the web
     std::unique_ptr<DynamicFileSequenceDownloader> _dynamicFileDownloader;
     std::deque<File> _files;
     int _activeTriggerTimeIndex = 0;

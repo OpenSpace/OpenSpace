@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,15 +28,11 @@
 #include <openspace/rendering/screenspacerenderable.h>
 
 #include <openspace/properties/vector/vec2property.h>
-
-namespace ghoul::opengl {
-    class FramebufferObject;
-    class Texture;
-} // namespace ghoul::opengl
+#include <ghoul/opengl/framebufferobject.h>
+#include <ghoul/opengl/texture.h>
+#include <functional>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 /**
  * Creates a texture by rendering to a framebuffer, this is then used on a screen space
@@ -49,7 +45,7 @@ public:
     using RenderFunction = std::function<void()>;
 
     explicit ScreenSpaceRenderableFramebuffer(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceRenderableFramebuffer() override;
+    ~ScreenSpaceRenderableFramebuffer() override;
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -59,14 +55,14 @@ public:
     void addRenderFunction(RenderFunction renderFunction);
     void removeAllRenderFunctions();
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     void createFramebuffer();
-    properties::Vec2Property _size;
+    Vec2Property _size;
 
 private:
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
     static int id();
 
@@ -76,6 +72,6 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 };
 
-} //namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SCREENSPACERENDERABLEFRAMEBUFFER___H__

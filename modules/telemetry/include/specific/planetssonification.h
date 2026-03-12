@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,11 +28,15 @@
 #include <modules/telemetry/include/telemetrybase.h>
 
 #include <modules/telemetry/telemetrymodule.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
+
+namespace ghoul { class Dictionary; }
+namespace osc { struct Blob; }
 
 namespace openspace {
 
-namespace scripting { struct LuaLibrary; }
+struct LuaLibrary;
 
 class PlanetsSonification : public TelemetryBase {
 public:
@@ -68,30 +72,30 @@ public:
      * \return The Lua library that contains all Lua functions available to change the
      *         planets sonification
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
-    // To hold all the data for a planet or a moon, including a list of data for the
-    // moons of the planet. However, in the case of a moon, then the list of moons
-    // is empty
+    /**
+     * To hold all the data for a planet or a moon, including a list of data for the moons
+     * of the planet. However, in the case of a moon, then the list of moons is empty.
+     */
     struct DataBody {
-        DataBody(std::string inName);
+        explicit DataBody(std::string inName);
 
         std::string name;
         double distance = 0.0;
         double horizontalAngle = 0.0;
         double verticalAngle = 0.0;
 
-        // List of moons that orbit this planet (in the case that this is a moon, then
-        // this list is empty)
+        /// List of moons that orbit this planet (in the case that this is a moon, then
+        /// this list is empty)
         std::vector<DataBody> moons;
     };
 
     /**
      * Create an osc::Blob object with the current sonification settings for the indicated
-     * planet.
-     * Order of settings: Size/day, gravity, temperature, and optionally atmosphere,
-     *                    moons, and rings.
+     * planet. Order of settings: Size/day, gravity, temperature, and optionally
+     * atmosphere, moons, and rings.
      *
      * \param planetIndex The index of the planet to create the settings blob for
      * \return An osc::Blob object with current sonification settings for the indicated
@@ -123,9 +127,8 @@ private:
      * \param planetIndex The index to the internally stored planet data that should be
      *        updated
      * \param angleCalculationMode The angle calculation mode to use. This determines
-     *        which method to use when calculating the angle.
+     *        which method to use when calculating the angle
      * \param includeElevation Whether the additional elevation angle should be calculated
-     *
      * \return `true` if the data is new compared to before, otherwise `false`
      */
     bool updateData(const Camera* camera, int planetIndex,
@@ -158,37 +161,37 @@ private:
     void onNeptuneAllChanged();
     void onNeptuneSettingChanged();
 
-    struct PlanetProperties : properties::PropertyOwner {
-        PlanetProperties(properties::PropertyOwner::PropertyOwnerInfo planetInfo);
+    struct PlanetProperties : PropertyOwner {
+        explicit PlanetProperties(PropertyOwner::PropertyOwnerInfo planetInfo);
 
         // All planets have these settings
-        properties::BoolProperty toggleAll;
-        properties::BoolProperty sizeDayEnabled;
-        properties::BoolProperty gravityEnabled;
-        properties::BoolProperty temperatureEnabled;
+        BoolProperty toggleAll;
+        BoolProperty sizeDayEnabled;
+        BoolProperty gravityEnabled;
+        BoolProperty temperatureEnabled;
 
         // Only some planets have some of these settings
-        properties::BoolProperty atmosphereEnabled;
-        properties::BoolProperty moonsEnabled;
-        properties::BoolProperty ringsEnabled;
+        BoolProperty atmosphereEnabled;
+        BoolProperty moonsEnabled;
+        BoolProperty ringsEnabled;
     };
 
-    struct PrecisionProperties : properties::PropertyOwner {
-        PrecisionProperties(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
+    struct PrecisionProperties : PropertyOwner {
+        explicit PrecisionProperties(PropertyOwner::PropertyOwnerInfo precisionInfo);
 
         // The low and high precision values are used in different situations. When the
         // planet is the current focus node, then the high precision value is used. This
         // is due to the sonification and planet being in the current focus and should
         // therefore have better precision. If the planet is not the current focus node,
         // then the low precision value is used to save performance, both on the
-        // OpenSpace side and the receiving side.
-        properties::DoubleProperty lowDistancePrecision;
-        properties::DoubleProperty highDistancePrecision;
-        properties::DoubleProperty lowAnglePrecision;
-        properties::DoubleProperty highAnglePrecision;
+        // OpenSpace side and the receiving side
+        DoubleProperty lowDistancePrecision;
+        DoubleProperty highDistancePrecision;
+        DoubleProperty lowAnglePrecision;
+        DoubleProperty highAnglePrecision;
     };
 
-    properties::BoolProperty _toggleAll;
+    BoolProperty _toggleAll;
     PlanetProperties _mercuryProperty;
     PlanetProperties _venusProperty;
     PlanetProperties _earthProperty;

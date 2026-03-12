@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,49 +24,51 @@
 
 #include <openspace/rendering/dashboard.h>
 
-#include <openspace/engine/globals.h>
-#include <openspace/rendering/dashboarditem.h>
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <utility>
 
 #include "dashboard_lua.inl"
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo EnabledInfo = {
         "IsEnabled",
         "Enabled",
         "If this value is 'false', this dashboard will be invisible, regardless of the "
         "state of the individual components.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StartPositionOffsetInfo = {
+    constexpr Property::PropertyInfo StartPositionOffsetInfo = {
         "StartPositionOffset",
         "Start position offset",
         "A 2D vector controlling where the dashboard rendering starts. Adding an offset "
         "in x and y-direction on screen.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RefreshRateInfo = {
+    constexpr Property::PropertyInfo RefreshRateInfo = {
         "RefreshRate",
         "Refresh rate (in ms)",
         "The number of milliseconds between refreshes of the dashboard items. If the "
         "value is 0 the dashboard is refreshed at the same rate as the main rendering.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 } // namespace
 
 namespace openspace {
 
 Dashboard::Dashboard()
-    : properties::PropertyOwner({ "Dashboard" })
+    : PropertyOwner({ "Dashboard" })
     , _isEnabled(EnabledInfo, true)
     , _startPositionOffset(
         StartPositionOffsetInfo,
-        glm::ivec2(10, 10),
+        glm::ivec2(10),
         glm::ivec2(0),
         glm::ivec2(8192)
     )
@@ -182,7 +184,7 @@ std::vector<DashboardItem*> Dashboard::dashboardItems() const {
     return result;
 }
 
-scripting::LuaLibrary Dashboard::luaLibrary() {
+LuaLibrary Dashboard::luaLibrary() {
     return {
         "dashboard",
         {

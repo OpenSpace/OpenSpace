@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,22 +27,14 @@
 
 #include <openspace/rendering/deferredcaster.h>
 
-#include <modules/atmosphere/rendering/renderableatmosphere.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <string>
 #include <vector>
-
-namespace ghoul::opengl {
-    class Texture;
-    class ProgramObject;
-} // namespace ghoul::opengl
 
 namespace openspace {
 
-struct RenderData;
-struct DeferredcastData;
+class SceneGraphNode;
 struct ShadowConfiguration;
 
 struct ShadowRenderingStruct {
@@ -99,7 +91,7 @@ private:
     GLuint calculateDeltaE();
     std::pair<GLuint, GLuint> calculateDeltaS();
     void calculateIrradiance();
-    void calculateInscattering(GLuint deltaSRayleigh, GLuint deltaSMie);
+    void calculateInscattering(GLuint deltaSRayleigh, GLuint deltaSMie) const;
     void calculateDeltaJ(int scatteringOrder,
         ghoul::opengl::ProgramObject& program, GLuint deltaJ, GLuint deltaE,
         GLuint deltaSRayleigh, GLuint deltaSMie);
@@ -111,16 +103,15 @@ private:
     void calculateIrradiance(int scatteringOrder,
         ghoul::opengl::ProgramObject& program, GLuint deltaE);
     void calculateInscattering(int scatteringOrder,
-        ghoul::opengl::ProgramObject& program, GLuint deltaSRayleigh);
+        ghoul::opengl::ProgramObject& program, GLuint deltaSRayleigh) const;
 
-
-    UniformCache(cullAtmosphere, opacity, Rg, Rt, groundRadianceEmission, HR,
-        betaRayleigh, HM, betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled, HO,
-        betaOzoneExtinction, SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU,
-        inverseModelTransformMatrix, modelTransformMatrix,
-        projectionToModelTransformMatrix, viewToWorldMatrix, camPosObj, sunDirectionObj,
-        hardShadows, transmittanceTexture, irradianceTexture, inscatterTexture,
-        sunAngularSize) _uniformCache;
+    UniformCache(cullAtmosphere, opacity, rPlanet, rAtmosphere, groundRadianceEmission,
+        rayleighHeightScale, betaRayleigh, mieHeightScale, betaMieExtinction, mieG,
+        sunRadiance, ozoneLayerEnabled, ozoneHeightScale, betaOzoneExtinction, rSamples,
+        muSamples, muSSamples, nuSamples, inverseModelTransformMatrix,
+        modelTransformMatrix, projectionToModelTransformMatrix, viewToWorldMatrix,
+        camPosObj, sunDirectionObj, hardShadows, transmittanceTexture, irradianceTexture,
+        inscatterTexture, sunAngularSize) _uniformCache;
 
     ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit _irradianceTableTextureUnit;

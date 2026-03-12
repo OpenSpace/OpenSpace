@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,16 +28,16 @@
 #include <openspace/interaction/delayedvariable.h>
 #include <ghoul/glm.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
 class CameraInteractionStates {
 public:
     /**
      * \param sensitivity Interaction sensitivity
-     * \param velocityScaleFactor Can be set to 60 to remove the inertia of the
-     *        interaction. Lower value will make it harder to move the camera
+     * \param velocityScale Can be set to 60 to remove the inertia of the interaction.
+     *        Lower value will make it harder to move the camera
      */
-    CameraInteractionStates(double sensitivity, double velocityScaleFactor);
+    CameraInteractionStates(double sensitivity, double velocityScale);
     virtual ~CameraInteractionStates() = default;
 
     void setRotationalFriction(double friction);
@@ -80,6 +80,6 @@ protected:
     InteractionState<double> _globalRollState;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__

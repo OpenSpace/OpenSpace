@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,12 +34,14 @@
 #include <openspace/topic/topics/topic.h>
 #include <ghoul/format.h>
 #include <ghoul/io/socket/socket.h>
-#include <ghoul/io/socket/tcpsocketserver.h>
+#include <ghoul/io/socket/socketserver.h>
 #include <ghoul/io/socket/websocket.h>
-#include <ghoul/io/socket/websocketserver.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
+#include <algorithm>
+#include <optional>
+#include <thread>
 
 namespace {
     struct [[codegen::Dictionary(TopicManager)]] Parameters {
@@ -52,22 +54,21 @@ namespace {
 
 namespace openspace {
 
-documentation::Documentation TopicManager::Documentation() {
+Documentation TopicManager::Documentation() {
     return codegen::doc<Parameters>("core_topicmanager");
 }
 
 TopicManager::TopicManager()
-    : properties::PropertyOwner( { "TopicManager", "Topic Manager" })
-    , _interfaceOwner({"Interfaces", "Interfaces", "Server Interfaces"})
+    : PropertyOwner({ "TopicManager", "Topic Manager" })
+    , _interfaceOwner({ "Interfaces", "Interfaces", "Server Interfaces" })
 {
     addPropertySubOwner(_interfaceOwner);
 
     global::callback::preSync->emplace_back([this]() {
-        // Trigger callbacks
         using K = CallbackHandle;
         using V = CallbackFunction;
         for (const std::pair<K, V>& it : _preSyncCallbacks) {
-            it.second(); // call function
+            it.second();
         }
     });
 }
@@ -144,7 +145,7 @@ void TopicManager::preSync() {
         while ((socket = socketServer->nextPendingSocket())) {
             const std::string address = socket->address();
             if (serverInterface->clientIsBlocked(address)) {
-                // Drop connection if the address is blocked.
+                // Drop connection if the address is blocked
                 continue;
             }
             socket->startStreams();
@@ -164,10 +165,10 @@ void TopicManager::preSync() {
         }
     }
 
-    // Consume all messages put into the message queue by the socket threads.
+    // Consume all messages put into the message queue by the socket threads
     consumeMessages();
 
-    // Join threads for sockets that disconnected.
+    // Join threads for sockets that disconnected
     cleanUpFinishedThreads();
 }
 
@@ -221,7 +222,7 @@ void TopicManager::handleConnection(const std::shared_ptr<Connection>& connectio
     std::string messageString;
     messageString.reserve(256);
     while (connection->socket()->getMessage(messageString)) {
-        const std::lock_guard lock(_messageQueueMutex);
+        const std::unique_lock lock(_messageQueueMutex);
         _messageQueue.push_back({ connection, messageString });
     }
 }
@@ -229,7 +230,7 @@ void TopicManager::handleConnection(const std::shared_ptr<Connection>& connectio
 void TopicManager::consumeMessages() {
     ZoneScoped;
 
-    const std::lock_guard lock(_messageQueueMutex);
+    const std::unique_lock lock(_messageQueueMutex);
     while (!_messageQueue.empty()) {
         const Message& m = _messageQueue.front();
         if (const std::shared_ptr<Connection>& c = m.connection.lock()) {

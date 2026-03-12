@@ -7,7 +7,7 @@ local modelFolder = asset.resource({
   Name = "Scale Model Big Ben",
   Type = "HttpSynchronization",
   Identifier = "scale_model_big_ben",
-  Version = 1
+  Version = 2
 })
 
 

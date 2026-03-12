@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,31 +24,36 @@
 
 #include <modules/base/rendering/screenspacedate.h>
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/opengl/texture.h>
+#include <ghoul/misc/dictionary.h>
+#include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo FormatStringInfo = {
         "FormatString",
         "Format string",
         "The format text describing how this dashboard item renders its text. This text "
         "must contain exactly one {} which is a placeholder that will contain the date "
         "in the format as specified by `TimeFormat`.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TimeFormatInfo = {
+    constexpr Property::PropertyInfo TimeFormatInfo = {
         "TimeFormat",
         "Time format",
         "The format string used for formatting the date/time before being passed to the "
         "string in FormatString. See "
         "https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html for full "
         "information about how to structure this format.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `ScreenSpaceRenderable` shows the current in-game simulation time. The
@@ -62,12 +67,12 @@ namespace {
         // [[codegen::verbatim(TimeFormatInfo.description)]]
         std::optional<std::string> timeFormat;
     };
-#include "screenspacedate_codegen.cpp"
 } // namespace
+#include "screenspacedate_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceDate::Documentation() {
+Documentation ScreenSpaceDate::Documentation() {
     return codegen::doc<Parameters>(
         "base_screenspace_date",
         ScreenSpaceRenderableText::Documentation()

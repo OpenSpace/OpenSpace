@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,13 +32,16 @@
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/path.h>
 #include <openspace/navigation/pathnavigator.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <algorithm>
+#include <cmath>
+#include <string_view>
+
+using nlohmann::json;
 
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
 } // namespace
-
-using nlohmann::json;
 
 namespace openspace {
 
@@ -50,10 +53,6 @@ CameraPathTopic::~CameraPathTopic() {
     if (_dataCallbackHandle != UnsetOnChangeHandle) {
         global::topicManager->removePreSyncCallback(_dataCallbackHandle);
     }
-}
-
-bool CameraPathTopic::isDone() const {
-    return _isDone;
 }
 
 void CameraPathTopic::handleJson(const nlohmann::json& json) {
@@ -78,19 +77,22 @@ void CameraPathTopic::handleJson(const nlohmann::json& json) {
     );
 }
 
-void CameraPathTopic::sendCameraPathData() {
-    const interaction::PathNavigator& pathNavigator =
-        global::navigationHandler->pathNavigator();
+bool CameraPathTopic::isDone() const {
+    return _isDone;
+}
 
-    const interaction::Path* path = pathNavigator.currentPath();
+void CameraPathTopic::sendCameraPathData() {
+    const PathNavigator& pathNavigator = global::navigationHandler->pathNavigator();
+
+    const Path* path = pathNavigator.currentPath();
 
     if (!path) {
         ghoul_assert(path, "Path must exist");
         return;
     }
 
-    // The time is not exact, and we only care about the number of seconds. Also,
-    // any negative values should be interpreted as positive
+    // The time is not exact, and we only care about the number of seconds. Also, any
+    // negative values should be interpreted as positive
     int seconds = static_cast<int>(
         std::round(pathNavigator.estimatedRemainingTimeInPath())
     );

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,10 +29,6 @@
 
 namespace openspace {
 
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
-
 class MultiTranslation : public Translation {
 public:
     explicit MultiTranslation(const ghoul::Dictionary& dictionary);
@@ -41,7 +37,7 @@ public:
 
     void update(const UpdateData& data) override;
     glm::dvec3 position(const UpdateData& data) const override;
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     std::vector<ghoul::mm_unique_ptr<Translation>> _translations;

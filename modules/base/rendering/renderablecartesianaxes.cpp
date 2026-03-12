@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,49 +25,52 @@
 #include <modules/base/rendering/renderablecartesianaxes.h>
 
 #include <modules/base/basemodule.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/documentation/verifier.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <optional>
+#include <array>
+#include <memory>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo XColorInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo XColorInfo = {
         "XColor",
         "X color",
         "The color of the x-axis.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo YColorInfo = {
+    constexpr Property::PropertyInfo YColorInfo = {
         "YColor",
         "Y color",
         "The color of the y-axis.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ZColorInfo = {
+    constexpr Property::PropertyInfo ZColorInfo = {
         "ZColor",
         "Z color",
         "The color of the z-axis.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
     // The RenderableCartesianAxes can be used to render the local Cartesian coordinate
-    // system, or reference frame, of another scene graph node. The colors of the axes
-    // can be customized but are per default set to Red, Green and Blue, for the X-, Y-
-    // and Z-axis, respectively.
+    // system, or reference frame, of another scene graph node. The colors of the axes can
+    // be customized but are per default set to Red, Green and Blue, for the X-, Y- and
+    // Z-axis, respectively.
     //
     // To add the axes, create a scene graph node with the RenderableCartesianAxes
     // renderable and add it as a child to the other scene graph node, i.e. specify the
     // other node as the `Parent` of the node with this renderable. Also, the axes have to
     // be scaled to match the parent object for the axes to be visible in the scene, for
-    // example using a [StaticScale](#base_transform_scale_static).
+    // example using a [StaticScale](#base_scale_static).
     struct [[codegen::Dictionary(RenderableCartesianAxes)]] Parameters {
         // [[codegen::verbatim(XColorInfo.description)]]
         std::optional<glm::vec3> xColor [[codegen::color()]];
@@ -78,12 +81,12 @@ namespace {
         // [[codegen::verbatim(ZColorInfo.description)]]
         std::optional<glm::vec3> zColor [[codegen::color()]];
     };
-#include "renderablecartesianaxes_codegen.cpp"
 } // namespace
+#include "renderablecartesianaxes_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableCartesianAxes::Documentation() {
+Documentation RenderableCartesianAxes::Documentation() {
     return codegen::doc<Parameters>("base_renderable_cartesianaxes");
 }
 
@@ -99,15 +102,15 @@ RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictio
     addProperty(Fadeable::_opacity);
 
     _xColor = p.xColor.value_or(_xColor);
-    _xColor.setViewOption(properties::Property::ViewOptions::Color);
+    _xColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_xColor);
 
     _yColor = p.yColor.value_or(_yColor);
-    _yColor.setViewOption(properties::Property::ViewOptions::Color);
+    _yColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_yColor);
 
     _zColor = p.zColor.value_or(_zColor);
-    _zColor.setViewOption(properties::Property::ViewOptions::Color);
+    _zColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_zColor);
 }
 
@@ -129,54 +132,38 @@ void RenderableCartesianAxes::initializeGL() {
         }
     );
 
-    glGenVertexArrays(1, &_vaoId);
-    glBindVertexArray(_vaoId);
-
-    constexpr std::array<Vertex, 4> vertices = {
-        Vertex{0.f, 0.f, 0.f},
-        Vertex{1.f, 0.f, 0.f},
-        Vertex{0.f, 1.f, 0.f},
-        Vertex{0.f, 0.f, 1.f}
+    glCreateBuffers(1, &_vbo);
+    constexpr std::array<Vertex, 4> Vertices = {
+        Vertex{ 0.f, 0.f, 0.f },
+        Vertex{ 1.f, 0.f, 0.f },
+        Vertex{ 0.f, 1.f, 0.f },
+        Vertex{ 0.f, 0.f, 1.f }
     };
-
-    constexpr std::array<int, 6> indices = {
-        0, 1,
-        0, 2,
-        0, 3
-    };
-
-    glGenBuffers(1, &_vBufferId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        vertices.size() * sizeof(Vertex),
-        vertices.data(),
-        GL_STATIC_DRAW
+    glNamedBufferStorage(
+        _vbo,
+        Vertices.size() * sizeof(Vertex),
+        Vertices.data(),
+        GL_NONE_BIT
     );
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+    glCreateBuffers(1, &_ibo);
+    constexpr std::array<int, 6> Indices = { 0, 1, 0, 2, 0, 3 };
+    glNamedBufferStorage(_ibo, Indices.size() * sizeof(int), Indices.data(), GL_NONE_BIT);
 
-    glGenBuffers(1, &_iBufferId);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferId);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
-        indices.size() * sizeof(int),
-        indices.data(),
-        GL_STATIC_DRAW
-    );
-    glBindVertexArray(0);
+    glCreateVertexArrays(1, &_vao);
+    glBindVertexArray(_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
+    glVertexArrayElementBuffer(_vao, _ibo);
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 }
 
 void RenderableCartesianAxes::deinitializeGL() {
-    glDeleteVertexArrays(1, &_vaoId);
-    _vaoId = 0;
-
-    glDeleteBuffers(1, &_vBufferId);
-    _vBufferId = 0;
-
-    glDeleteBuffers(1, &_iBufferId);
-    _iBufferId = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
+    glDeleteBuffers(1, &_ibo);
 
     BaseModule::ProgramObjectManager.release(
         "CartesianAxesProgram",
@@ -200,23 +187,17 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&) {
     _program->setUniform("zColor", _zColor);
     _program->setUniform("opacity", opacity());
 
-    // Changes GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
     glEnable(GL_LINE_SMOOTH);
-#ifndef __APPLE__
     glLineWidth(3.f);
-#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
-    glLineWidth(1.f);
-#endif // __APPLE__
 
-    glBindVertexArray(_vaoId);
+    glBindVertexArray(_vao);
     glDrawElements(GL_LINES, 6, GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
 
     _program->deactivate();
 
-    // Restores GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
 }

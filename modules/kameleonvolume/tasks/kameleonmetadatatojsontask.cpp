@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,28 +25,30 @@
 #include <modules/kameleonvolume/tasks/kameleonmetadatatojsontask.h>
 
 #include <modules/kameleonvolume/kameleonvolumereader.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/util/task.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
-#include <filesystem>
 #include <fstream>
+#include <utility>
 
 namespace {
     struct [[codegen::Dictionary(KameleonMetadataToJsonTask)]] Parameters {
-        // The CDF file to extract data from
+        // The CDF file to extract data from.
         std::filesystem::path input;
 
-        // The JSON file to export data into
+        // The JSON file to export data into.
         std::string output [[codegen::annotation("A valid filepath")]];
     };
-#include "kameleonmetadatatojsontask_codegen.cpp"
 } // namespace
+#include "kameleonmetadatatojsontask_codegen.cpp"
 
-namespace openspace::kameleonvolume {
+namespace openspace {
 
-documentation::Documentation KameleonMetadataToJsonTask::documentation() {
-    return codegen::doc<Parameters>("kameleon_metadata_to_json_task");
+Documentation KameleonMetadataToJsonTask::documentation() {
+    return codegen::doc<Parameters>("kameleon_task_metadatatojson");
 }
 
 KameleonMetadataToJsonTask::KameleonMetadataToJsonTask(
@@ -70,9 +72,9 @@ void KameleonMetadataToJsonTask::perform(const Task::ProgressCallback& progressC
     progressCallback(0.5f);
 
     std::string json = ghoul::formatJson(dictionary);
-    std::ofstream output(_outputPath);
+    std::ofstream output = std::ofstream(_outputPath);
     output << std::move(json);
     progressCallback(1.f);
 }
 
-} // namespace openspace::kameleonvolume
+} // namespace openspace

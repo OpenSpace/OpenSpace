@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,22 +33,20 @@ namespace openspace {
 class PlaneGeometry {
 public:
     explicit PlaneGeometry(glm::vec2 size);
-    explicit PlaneGeometry(float size);
 
     ~PlaneGeometry() = default;
 
     void initialize();
-    void deinitialize();
+    void deinitialize() const;
     void render() const;
 
     void updateSize(const glm::vec2& size);
-    void updateSize(float size);
 
 private:
     void updateGeometry() const;
 
-    GLuint _vaoId = 0;
-    GLuint _vBufferId = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
     glm::vec2 _size = glm::vec2(0.f);
 };
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,10 +28,11 @@
 #include <openspace/topic/topics/topic.h>
 
 #include <openspace/events/event.h>
-
-namespace openspace::properties { class Property; }
+#include <unordered_map>
 
 namespace openspace {
+
+class Property;
 
 class EventTopic : public Topic {
 public:
@@ -42,10 +43,12 @@ public:
     bool isDone() const override;
 
 private:
-    // Returns true if there is at least one subscription active, false otherwise
+    /**
+     * Returns `true` if there is at least one subscription active, `false` otherwise.
+     */
     bool isSubscribed() const;
 
-    std::unordered_map<events::Event::Type, bool> _subscribedEvents;
+    std::unordered_map<Event::Type, bool> _subscribedEvents;
 };
 
 } // namespace openspace

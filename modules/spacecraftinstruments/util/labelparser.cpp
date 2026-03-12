@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,16 +24,19 @@
 
 #include <modules/spacecraftinstruments/util/labelparser.h>
 
+#include <modules/spacecraftinstruments/util/decoder.h>
+#include <modules/spacecraftinstruments/util/image.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/file.h>
+#include <openspace/util/timerange.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
-#include <filesystem>
+#include <algorithm>
 #include <fstream>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "LabelParser";
@@ -49,8 +52,8 @@ LabelParser::LabelParser(std::filesystem::path fileName,
 {
     using ghoul::Dictionary;
 
-    // get the different instrument types
-    // for each decoder (assuming might have more if hong makes changes)
+    // Get the different instrument types. For each decoder (assuming might have more if
+    // hong makes changes)
     for (const std::string_view decoderStr : dictionary.keys()) {
         if (!dictionary.hasValue<Dictionary>(decoderStr)) {
             continue;
@@ -58,9 +61,9 @@ LabelParser::LabelParser(std::filesystem::path fileName,
 
         const Dictionary typeDict = dictionary.value<Dictionary>(decoderStr);
 
-        // create dictionary containing all {playbookKeys , spice IDs}
+        // Create dictionary containing all {playbookKeys , spice IDs}
         if (decoderStr == "Instrument") {
-            // for each playbook call -> create a Decoder object
+            // For each playbook call -> create a Decoder object
             for (const std::string_view key : typeDict.keys()) {
                 if (!typeDict.hasValue<Dictionary>(key)) {
                     continue;
@@ -71,15 +74,13 @@ LabelParser::LabelParser(std::filesystem::path fileName,
                     decoderDict,
                     std::string(decoderStr)
                 );
-                // insert decoder to map - this will be used in the parser to determine
+                // Insert decoder to map - this will be used in the parser to determine
                 // behavioral characteristics of each instrument
                 _fileTranslation[std::string(key)] = std::move(decoder);
             }
         }
         if (decoderStr == "Target") {
-            if (!typeDict.hasValue<Dictionary>(KeySpecs) ||
-                !typeDict.hasValue<Dictionary>(KeySpecs))
-            {
+            if (!typeDict.hasValue<Dictionary>(KeySpecs)) {
                 continue;
             }
 
@@ -105,7 +106,7 @@ LabelParser::LabelParser(std::filesystem::path fileName,
                     item,
                     std::string(decoderStr)
                 );
-                // insert decoder to map - this will be used in the parser to determine
+                // Insert decoder to map - this will be used in the parser to determine
                 // behavioral characteristics of each instrument
                 _fileTranslation[std::string(key)] = std::move(decoder);
             }
@@ -167,7 +168,7 @@ bool LabelParser::create() {
 
         int count = 0;
 
-        // open up label files
+        // Open up label files
         double startTime = 0.0;
         double stopTime = 0.0;
         std::string line;

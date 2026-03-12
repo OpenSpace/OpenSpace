@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,40 +27,35 @@
 #include <modules/sync/syncs/httpsynchronization.h>
 #include <modules/sync/syncs/urlsynchronization.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/resourcesynchronization.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/memorypool.h>
 #include <ghoul/misc/templatefactory.h>
+#include <memory_resource>
 #include <optional>
+#include <string>
+#include <vector>
 
 #include "syncmodule_lua.inl"
 
 namespace {
     struct [[codegen::Dictionary(SyncModule)]] Parameters {
         // The list of all repository URLs that are used to fetch data from for
-        // HTTPSynchronizations
+        // HTTPSynchronizations.
         std::optional<std::vector<std::string>> httpSynchronizationRepositories;
 
-        // The folder where all of the synchronizations are stored
+        // The folder where all of the synchronizations are stored.
         std::string synchronizationRoot;
     };
-#include "syncmodule_codegen.cpp"
 } // namespace
+#include "syncmodule_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation SyncModule::Documentation() {
+Documentation SyncModule::Documentation() {
     return codegen::doc<Parameters>("module_sync");
 }
 
@@ -118,14 +113,14 @@ std::filesystem::path SyncModule::synchronizationRoot() const {
     return _synchronizationRoot;
 }
 
-std::vector<documentation::Documentation> SyncModule::documentations() const {
+std::vector<Documentation> SyncModule::documentations() const {
     return {
         HttpSynchronization::Documentation(),
         UrlSynchronization::Documentation()
     };
 }
 
-scripting::LuaLibrary SyncModule::luaLibrary() const {
+LuaLibrary SyncModule::luaLibrary() const {
     return {
         "sync",
         {

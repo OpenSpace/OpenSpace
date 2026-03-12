@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,8 +24,6 @@
 
 #include <openspace/util/factorymanager.h>
 
-#include <openspace/documentation/documentationengine.h>
-#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -36,6 +34,8 @@
 #include <openspace/scene/translation.h>
 #include <openspace/util/resourcesynchronization.h>
 #include <openspace/util/task.h>
+#include <ghoul/misc/assert.h>
+#include <utility>
 
 namespace openspace {
 
@@ -79,7 +79,6 @@ bool FactoryManager::isInitialized() {
 
 FactoryManager& FactoryManager::ref() {
     ghoul_assert(_manager, "Factory Manager must have been initialized");
-
     return *_manager;
 }
 
@@ -87,4 +86,4 @@ const std::vector<FactoryManager::FactoryInfo>& FactoryManager::factories() cons
     return _factories;
 }
 
-}  // namespace openspace
+} // namespace openspace

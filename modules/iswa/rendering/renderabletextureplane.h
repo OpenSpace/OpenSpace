@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,8 +31,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 /**
  * TexturePlane is a "concrete" IswaCygnet with texture as its input source. It handles
  * the creation, destruction and rendering of a plane geometry. It also specifies which
@@ -46,16 +44,16 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    bool createGeometry() override;
+    void createGeometry() override;
+    void destroyGeometry() override;
     void setUniforms() override;
-    bool destroyGeometry() override;
     void renderGeometry() const override;
 
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 };
 
  } // namespace openspace

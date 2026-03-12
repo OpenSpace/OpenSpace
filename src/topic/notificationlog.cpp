@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,8 @@
 
 #include <openspace/topic/notificationlog.h>
 
+#include <utility>
+
 namespace openspace {
 
 NotificationLog::NotificationLog(CallbackFunction callbackFunction,
@@ -43,7 +45,7 @@ void NotificationLog::log(ghoul::logging::LogLevel level, std::string_view categ
 {
     ZoneScoped;
 
-    const std::lock_guard lock(_mutex);
+    const std::unique_lock lock(_mutex);
     const std::string timeStamp = timeString();
     const std::string dateStamp = dateString();
     _callbackFunction(timeStamp, dateStamp, category, level, message);

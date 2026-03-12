@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,20 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/joystickinputstate.h>
 #include <openspace/util/geodetic.h>
+#include <openspace/util/time.h>
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
+#include <ghoul/misc/stringconversion.h>
+#include <algorithm>
+#include <numeric>
+#include <tuple>
+#include <variant>
+#include <string>
+#include <optional>
+#include <utility>
+#include <vector>
+
+using namespace openspace;
 
 namespace {
 
 /**
- * Set the camera position by loading a [NavigationState](#core_navigation_state) from
+ * Set the camera position by loading a [NavigationState](#core_navigationstate) from
  * file. The file should be in json format, such as the output files of
  * `saveNavigationState`.
  *
- * \param filePath the path to the file, including the file name (and extension, if it is
- *                 anything other than `.navstate`)
- * \param useTimeStamp if true, and the provided NavigationState includes a timestamp,
- *                     the time will be set as well.
+ * \param filePath The path to the file, including the file name (and extension, if it is
+ *        anything other than `.navstate`)
+ * \param useTimeStamp If `true`, and the provided NavigationState includes a timestamp,
+ *        the time will be set as well
  */
 [[codegen::luawrap]] void loadNavigationState(std::string filePath,
                                               bool useTimeStamp = false)
@@ -44,30 +63,24 @@ namespace {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
 
-    openspace::global::navigationHandler->loadNavigationState(
-        filePath,
-        useTimeStamp
-    );
+    global::navigationHandler->loadNavigationState(filePath, useTimeStamp);
 }
 
 /**
- * Return the current [NavigationState](#core_navigation_state) as a Lua table.
+ * Return the current [NavigationState](#core_navigationstate) as a Lua table.
  *
  * By default, the reference frame will be picked based on whether the orbital navigator
  * is currently following the anchor node rotation. If it is, the anchor will be chosen as
  * reference frame. If not, the reference frame will be set to the scene graph root.
  *
- * \param frame the identifier of an optional scene graph node to use as reference frame
- *              for the NavigationState
- *
- * \return a Lua table representing the current NavigationState of the camera
+ * \param frame The identifier of an optional scene graph node to use as reference frame
+ *        for the NavigationState
+ * \return A Lua table representing the current NavigationState of the camera
  */
 [[codegen::luawrap]] ghoul::Dictionary getNavigationState(
                                                          std::optional<std::string> frame)
 {
-    using namespace openspace;
-
-    interaction::NavigationState state;
+    NavigationState state;
     if (frame.has_value()) {
         const SceneGraphNode* referenceFrame = sceneGraphNode(*frame);
         if (!referenceFrame) {
@@ -85,19 +98,16 @@ namespace {
 }
 
 /**
- * Set the camera position from a provided [NavigationState](#core_navigation_state).
+ * Set the camera position from a provided [NavigationState](#core_navigationstate).
  *
- * \param navigationState a table describing the NavigationState to set
- * \param useTimeStamp if true, and the provided NavigationState includes a timestamp,
- *                     the time will be set as well
+ * \param navigationState A table describing the NavigationState to set
+ * \param useTimeStamp If true, and the provided NavigationState includes a timestamp, the
+ *        time will be set as well
  */
 [[codegen::luawrap]] void setNavigationState(ghoul::Dictionary navigationState,
                                              bool useTimeStamp = false)
 {
-    using namespace openspace;
-
-    interaction::NavigationState ns = interaction::NavigationState(navigationState);
-
+    NavigationState ns = NavigationState(navigationState);
     global::navigationHandler->setNavigationStateNextFrame(ns);
 
     if (useTimeStamp && ns.timestamp.has_value()) {
@@ -106,46 +116,45 @@ namespace {
 }
 
 /**
- * Save the current [NavigationState](#core_navigation_state) to a file with the path
- * given by the first argument.
+ * Save the current [NavigationState](#core_navigationstate) to a file with the path given
+ * by the first argument.
  *
  * By default, the reference frame will be picked based on whether the orbital navigator
  * is currently following the anchor node rotation. If it is, the anchor will be chosen as
  * reference frame. If not, the reference frame will be set to the scene graph root.
  *
- * \param path the file path for where to save the NavigationState, including the file
- *             name. If no extension is added, the file is saved as a `.navstate` file.
- * \param frame the identifier of the scene graph node which coordinate system should be
- *              used as a reference frame for the NavigationState.
+ * \param path The file path for where to save the NavigationState, including the file
+ *        name. If no extension is added, the file is saved as a `.navstate` file
+ * \param frame The identifier of the scene graph node which coordinate system should be
+ *        used as a reference frame for the NavigationState
  */
 [[codegen::luawrap]] void saveNavigationState(std::string path, std::string frame = "") {
     if (path.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
-    openspace::global::navigationHandler->saveNavigationState(path, frame);
+    global::navigationHandler->saveNavigationState(path, frame);
 }
 
 /**
  * Reset the camera direction to point at the anchor node.
  */
 [[codegen::luawrap]] void retargetAnchor() {
-    openspace::global::navigationHandler->orbitalNavigator().startRetargetAnchor();
+    global::navigationHandler->orbitalNavigator().startRetargetAnchor();
 }
 
 /**
  * Reset the camera direction to point at the aim node.
  */
 [[codegen::luawrap]] void retargetAim() {
-    openspace::global::navigationHandler->orbitalNavigator().startRetargetAim();
+    global::navigationHandler->orbitalNavigator().startRetargetAim();
 }
 
 /**
- * Picks the next node from the interesting nodes out of the profile and selects that.
- * If the current anchor is not an interesting node, the first node in the list will be
+ * Picks the next node from the interesting nodes out of the profile and selects that. If
+ * the current anchor is not an interesting node, the first node in the list will be
  * selected.
  */
 [[codegen::luawrap]] void targetNextInterestingAnchor() {
-    using namespace openspace;
     if (global::profile->markNodes.empty()) {
         LWARNINGC(
             "targetNextInterestingAnchor",
@@ -178,7 +187,6 @@ namespace {
  * selected.
  */
 [[codegen::luawrap]] void targetPreviousInterestingAnchor() {
-    using namespace openspace;
     if (global::profile->markNodes.empty()) {
         LWARNINGC(
             "targetPreviousInterestingAnchor",
@@ -218,14 +226,11 @@ namespace {
  * \param identifier The identifier of the scene graph node to focus
  * \param shouldRetarget If true, retarget the camera to look at the focus node
  * \param shouldResetVelocities If true, reset the camera velocities so that the camera
- *                              stops after its done retargeting (or immediately if
- *                              retargeting is not done)
- *
+ *        stops after its done retargeting (or immediately if retargeting is not done)
  */
 [[codegen::luawrap]] void setFocus(std::string identifier, bool shouldRetarget = true,
                                    bool shouldResetVelocities = true)
 {
-    using namespace openspace;
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
         throw ghoul::lua::LuaError("Unknown node: " + identifier);
@@ -242,31 +247,28 @@ namespace {
 }
 
 /**
- * Bind an axis of a joystick to be used as a certain type, and optionally define
- * detailed settings for the axis.
+ * Bind an axis of a joystick to be used as a certain type, and optionally define detailed
+ * settings for the axis.
  *
- * \param joystickName the name for the joystick or game controller that should be bound
- * \param axis the axis of the joystick that should be bound
- * \param axisType the type of movement that the axis should be mapped to
- * \param shouldInvert decides if the joystick axis movement should be inverted or not
- * \param joystickType what type of joystick or axis this is. Decides if the joystick
- *                     behaves more like a joystick or a trigger. Either `"JoystickLike"`
- *                     or `"TriggerLike"`, where `"JoystickLike"` is default
- * \param isSticky if true, the value is calculated relative to the previous value.
- *                 If false, the value is used as is
- * \param shouldFlip reverses the movement of the camera that the joystick produces
- * \param sensitivity sensitivity for this axis, in addition to the global sensitivity
+ * \param joystickName The name for the joystick or game controller that should be bound
+ * \param axis The axis of the joystick that should be bound
+ * \param axisType The type of movement that the axis should be mapped to
+ * \param shouldInvert Decides if the joystick axis movement should be inverted or not
+ * \param joystickType What type of joystick or axis this is. Decides if the joystick
+ *        behaves more like a joystick or a trigger. Either `"JoystickLike"` or
+ *        `"TriggerLike"`, where `"JoystickLike"` is default
+ * \param isSticky If true, the value is calculated relative to the previous value. If
+ *        false, the value is used as is
+ * \param shouldFlip Reverses the movement of the camera that the joystick produces
+ * \param sensitivity Sensitivity for this axis, in addition to the global sensitivity
  */
 [[codegen::luawrap]] void bindJoystickAxis(std::string joystickName, int axis,
                                            std::string axisType,
                                            bool shouldInvert = false,
                                            std::string joystickType = "JoystickLike",
-                                           bool isSticky = false,
-                                           bool shouldFlip = false,
+                                           bool isSticky = false, bool shouldFlip = false,
                                            double sensitivity = 0.0)
 {
-    using namespace openspace;
-    using JoystickCameraStates = interaction::JoystickCameraStates;
     global::navigationHandler->setJoystickAxisMapping(
         std::move(joystickName),
         axis,
@@ -287,15 +289,15 @@ namespace {
  * The axis value will be rescaled from [-1, 1] to the provided [min, max] range
  * (default is [0, 1]).
  *
- * \param joystickName the name for the joystick or game controller that should be bound
- * \param axis the axis of the joystick that should be bound
- * \param propertyUri the identifier (URI) of the property that this joystick axis should
- *                    modify
- * \param min the minimum value that this axis can set for the property
- * \param max the maximum value that this axis can set for the property
- * \param shouldInvert if the joystick movement should be inverted or not
- * \param isRemote if true, the property change will also be executed on connected nodes.
- *                 If false, the property change will only affect the master node
+ * \param joystickName The name for the joystick or game controller that should be bound
+ * \param axis The axis of the joystick that should be bound
+ * \param propertyUri The identifier (URI) of the property that this joystick axis should
+ *        modify
+ * \param min The minimum value that this axis can set for the property
+ * \param max The maximum value that this axis can set for the property
+ * \param shouldInvert If the joystick movement should be inverted or not
+ * \param isRemote If true, the property change will also be executed on connected nodes.
+ *        If false, the property change will only affect the master node
  */
 [[codegen::luawrap]] void bindJoystickAxisProperty(std::string joystickName, int axis,
                                                    std::string propertyUri,
@@ -303,8 +305,6 @@ namespace {
                                                    bool shouldInvert = false,
                                                    bool isRemote = true)
 {
-    using namespace openspace;
-    using JoystickCameraStates = interaction::JoystickCameraStates;
     global::navigationHandler->setJoystickAxisMappingProperty(
         std::move(joystickName),
         axis,
@@ -317,16 +317,16 @@ namespace {
 }
 
 struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
-    // The current type of axis binding
+    // The current type of axis binding.
     std::string type;
 
-    // Whether the values are inverted
+    // Whether the values are inverted.
     bool invert;
 
     // The type of joystick that this axis represents on the controller - either
-    // `\"JoystickLike\"` or `\"TriggerLike\"`. A joystick is `\"TriggerLike\"` if it
-    // can only be pressed or pushed in one direction. A `\"JoystickLike\"` axis can
-    // be pushed in two directions; for example, left and right, or up and down.
+    // `\"JoystickLike\"` or `\"TriggerLike\"`. A joystick is `\"TriggerLike\"` if it can
+    // only be pressed or pushed in one direction. A `\"JoystickLike\"` axis can be pushed
+    // in two directions; for example, left and right, or up and down.
     std::string joystickType;
 
     // Whether or not this axis is “sticky”. An axis is “sticky” if, when you let go of
@@ -335,43 +335,40 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 
     // Whether the camera movement for the axis is reversed. In the case of a
     // `\"JoystickLike\"` axis, this is the same as inverting the axis. However, in the
-    // case of a `\"TriggerLike\" axis, this can reverse the camera movement for the
+    // case of a `\"TriggerLike\"` axis, this can reverse the camera movement for the
     // trigger.
     bool flip;
 
-    // Sensitivity value for this axis
+    // Sensitivity value for this axis.
     double sensitivity;
 
-    // The identifier (URI) of the property that is bound to this axes, if one is
+    // The identifier (URI) of the property that is bound to this axes, if one is.
     std::optional<std::string> propertyUri;
 
     // If a property is bound to this axis, this is the min value that can be set using
-    // the joystick input
+    // the joystick input.
     std::optional<float> minValue;
 
     // If a property is bound to this axis, this is the max value that can be set using
-    // the joystick input
+    // the joystick input.
     std::optional<float> maxValue;
 
     // If a property is bound to this axis, this says whether the property changes should
     // be forwarded to other connected nodes or sessions (similarly to \"isLocal\" for
-    // actions)
+    // actions).
     std::optional<bool> isRemote;
 };
 
 /**
  * Return all the information bound to a certain joystick axis.
  *
- * \param joystickName the name for the joystick or game controller with the axis for
- *                     which to find the information
- * \param axis the joystick axis for which to find the information
- *
- * \return an object with information about the joystick axis
+ * \param joystickName The name for the joystick or game controller with the axis for
+ *        which to find the information
+ * \param axis The joystick axis for which to find the information
+ * \return An object with information about the joystick axis
  */
 [[codegen::luawrap]] ghoul::Dictionary joystickAxis(std::string joystickName, int axis) {
-    using namespace openspace;
-
-    interaction::JoystickCameraStates::AxisInformation info =
+    JoystickCameraStates::AxisInformation info =
         global::navigationHandler->joystickAxisMapping(joystickName, axis);
 
     ghoul::Dictionary dict;
@@ -397,53 +394,48 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * Set the deadzone value for a particular joystick axis, which means that any input less
  * than this value is completely ignored.
  *
- * \param joystickName the name for the joystick or game controller
- * \param axis the joystick axis for which to set the deadzone
- * \param deadzone the new deadzone value
+ * \param joystickName The name for the joystick or game controller
+ * \param axis The joystick axis for which to set the deadzone
+ * \param deadzone The new deadzone value
  */
 [[codegen::luawrap("setAxisDeadZone")]] void setJoystickAxisDeadZone(
                                                                  std::string joystickName,
                                                                                  int axis,
                                                                            float deadzone)
 {
-    using namespace openspace;
     global::navigationHandler->setJoystickAxisDeadzone(joystickName, axis, deadzone);
 }
 
 /**
  * Returns the deadzone for the desired axis of the provided joystick.
  *
- * \param joystickName the name for the joystick or game controller which information
- *                     should be returned
- * \param axis the joystick axis for which to get the deadzone value
- *
- * \return the deadzone value
+ * \param joystickName The name for the joystick or game controller which information
+ *        should be returned
+ * \param axis The joystick axis for which to get the deadzone value
+ * \return The deadzone value
  */
 [[codegen::luawrap("axisDeadzone")]] float joystickAxisDeadzone(std::string joystickName,
                                                                 int axis)
 {
-    float deadzone = openspace::global::navigationHandler->joystickAxisDeadzone(
-        joystickName,
-        axis
-    );
+    float deadzone = global::navigationHandler->joystickAxisDeadzone(joystickName, axis);
     return deadzone;
 }
 
 /**
  * Bind a Lua script to one of the buttons for a joystick.
  *
- * \param joystickName the name for the joystick or game controller
- * \param button the button to which to bind the script
- * \param command the script that should be executed on button trigger
- * \param documentation the documentation for the provided script/command
- * \param action the action for when the script should be executed. This defaults to
- *               `"Press"`, which means that the script is run when the user presses the
- *               button. Alternatives are `"Idle"` (if the button is unpressed and has
- *               been unpressed since the last frame), `"Repeat"` (if the button has been
- *               pressed since longer than the last frame), and `"Release"` (if the button
- *               was released since the last frame)
- * \param isRemote a value saying whether the command is going to be executable
- *                 locally or remotely, where the latter is the default
+ * \param joystickName The name for the joystick or game controller
+ * \param button The button to which to bind the script
+ * \param command The script that should be executed on button trigger
+ * \param documentation The documentation for the provided script/command
+ * \param action The action for when the script should be executed. This defaults to
+ *        `"Press"`, which means that the script is run when the user presses the button.
+ *        Alternatives are `"Idle"` (if the button is unpressed and has been unpressed
+ *        since the last frame), `"Repeat"` (if the button has been pressed since longer
+ *        than the last frame), and `"Release"` (if the button was released since the last
+ *        frame)
+ * \param isRemote A value saying whether the command is going to be executable locally or
+ *        remotely, where the latter is the default
  */
 [[codegen::luawrap]] void bindJoystickButton(std::string joystickName, int button,
                                              std::string command,
@@ -451,45 +443,38 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
                                              std::string action = "Press",
                                              bool isRemote = true)
 {
-    using namespace openspace;
-    interaction::JoystickAction act =
-        ghoul::from_string<interaction::JoystickAction>(action);
+    JoystickAction act = ghoul::from_string<JoystickAction>(action);
 
     global::navigationHandler->bindJoystickButtonCommand(
         joystickName,
         button,
         command,
         act,
-        interaction::JoystickCameraStates::ButtonCommandRemote(isRemote),
+        JoystickCameraStates::ButtonCommandRemote(isRemote),
         documentation
     );
 }
 
 /**
  * Remove all commands that are currently bound to a button of a joystick or game
- * controller
+ * controller.
  *
- * \param joystickName the name for the joystick or game controller
- * \param button the button for which to clear the commands
+ * \param joystickName The name for the joystick or game controller
+ * \param button The button for which to clear the commands
  */
 [[codegen::luawrap]] void clearJoystickButton(std::string joystickName, int button) {
-    openspace::global::navigationHandler->clearJoystickButtonCommand(
-        joystickName,
-        button
-    );
+    global::navigationHandler->clearJoystickButtonCommand(joystickName, button);
 }
 
 /**
  * Get the Lua script that is currently bound to be executed when the provided button is
  * pressed/triggered.
  *
- * \param joystickName the name for the joystick or game controller
- * \param button the button for which to get the command
- *
- * \return the currently bound Lua script
+ * \param joystickName The name for the joystick or game controller
+ * \param button The button for which to get the command
+ * \return The currently bound Lua script
  */
 [[codegen::luawrap]] std::string joystickButton(std::string joystickName, int button) {
-    using namespace openspace;
     const std::vector<std::string>& cmds =
         global::navigationHandler->joystickButtonCommand(joystickName, button);
 
@@ -513,12 +498,11 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * produces reasonable results.
  *
  * \param horizontal The value to add in the x-direction (a positive value rotates to the
- *                   right and a negative value to the left)
+ *        right and a negative value to the left)
  * \param vertical The value to add in the y-direction (a positive value rotates the focus
- *                 upwards and a negative value downwards)
+ *        upwards and a negative value downwards)
  */
 [[codegen::luawrap]] void addGlobalRotation(double horizontal, double vertical) {
-    using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addGlobalRotation(
         glm::dvec2(horizontal, vertical)
     );
@@ -533,12 +517,11 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * impulse), but typically a range of [-250, 250] produces reasonable results.
  *
  * \param horizontal The value to add in the x-direction (a positive value rotates to the
- *                   left and a negative value to the right)
+ *        left and a negative value to the right)
  * \param vertical The value to add in the y-direction (a positive value rotates the
- *                 camera upwards and a negative value downwards)
+ *        camera upwards and a negative value downwards)
  */
 [[codegen::luawrap]] void addLocalRotation(double horizontal, double vertical) {
-    using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addLocalRotation(
         glm::dvec2(horizontal, vertical)
     );
@@ -553,10 +536,9 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * [-1000, 1000] produces reasonable results.
  *
  * \param value A positive value moves the camera closer to the focus node, and a negative
- *              value moves the camera further away.
+ *        value moves the camera further away
  */
 [[codegen::luawrap]] void addTruckMovement(double value) {
-    using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addTruckMovement(value);
 }
 
@@ -569,10 +551,9 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * impulse), but typically a range of [-250, 250] produces reasonable results.
  *
  * \param value A positive value rolls the camera to the left and a negative value rolls
- *              the camera to the right
+ *        the camera to the right
  */
 [[codegen::luawrap]] void addLocalRoll(double value) {
-    using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addLocalRoll(value);
 }
 
@@ -587,10 +568,9 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * produces reasonable results.
  *
  * \param value A positive value rolls the camera to the left and a negative value rolls
- *              the camera to the right
+ *        the camera to the right
  */
 [[codegen::luawrap]] void addGlobalRoll(double value) {
-    using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addGlobalRoll(value);
 }
 
@@ -599,11 +579,10 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * set to default in the OrbitalNavigator.
  */
 [[codegen::luawrap]] void triggerIdleBehavior(std::string choice = "") {
-    using namespace openspace;
     try {
         global::navigationHandler->orbitalNavigator().triggerIdleBehavior(choice);
     }
-    catch (ghoul::RuntimeError& e) {
+    catch (const ghoul::RuntimeError& e) {
         throw ghoul::lua::LuaError(e.message);
     }
 }
@@ -611,56 +590,47 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 /**
  * Return the complete list of connected joysticks.
  *
- * \return a list of joystick names
+ * \return A list of joystick names
  */
 [[codegen::luawrap]] std::vector<std::string> listAllJoysticks() {
-    using namespace openspace;
     return global::navigationHandler->listAllJoysticks();
 }
 
 /**
  * Return the distance to the current focus node.
  *
- * \return the distance, in meters
+ * \return The distance, in meters
  */
 [[codegen::luawrap]] double distanceToFocus() {
-    using namespace openspace;
+    const SceneGraphNode* focus = global::navigationHandler->anchorNode();
+    Camera* camera = global::navigationHandler->camera();
 
-    const SceneGraphNode * focus = global::navigationHandler->anchorNode();
-    Camera * camera = global::navigationHandler->camera();
-
-    return glm::distance(camera->positionVec3(), focus->worldPosition());
+    return glm::distance(camera->position(), focus->worldPosition());
 }
 
 /**
  * Return the distance to the current focus node's bounding sphere.
  *
- * \return the distance, in meters
+ * \return The distance, in meters
  */
 [[codegen::luawrap]] double distanceToFocusBoundingSphere() {
-    using namespace openspace;
-
     const SceneGraphNode* focus = global::navigationHandler->anchorNode();
     Camera* camera = global::navigationHandler->camera();
 
-    double distance = glm::distance(camera->positionVec3(), focus->worldPosition());
-
+    double distance = glm::distance(camera->position(), focus->worldPosition());
     return distance - focus->boundingSphere();
 }
 
 /**
  * Return the distance to the current focus node's interaction sphere.
  *
- * \return the distance, in meters
+ * \return The distance, in meters
  */
 [[codegen::luawrap]] double distanceToFocusInteractionSphere() {
-    using namespace openspace;
-
     const SceneGraphNode* focus = global::navigationHandler->anchorNode();
     Camera* camera = global::navigationHandler->camera();
 
-    double distance = glm::distance(camera->positionVec3(), focus->worldPosition());
-
+    double distance = glm::distance(camera->position(), focus->worldPosition());
     return distance - focus->interactionSphere();
 }
 
@@ -677,18 +647,16 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  *        current anchor node is used
  * \param latitude The latitude of the target coordinate, in degrees
  * \param longitude The longitude of the target coordinate, in degrees
- * \param altitude An optional altitude, given in meters over the reference surface of
- *                 the globe. If no altitude is provided, the altitude will be kept as
- *                 the current distance to the reference surface of the specified node
- * \param fadeDuration An optional duration for the fading. If not included, the
- *                     property in Navigation Handler will be used
+ * \param altitude An optional altitude, given in meters over the reference surface of the
+ *        globe. If no altitude is provided, the altitude will be kept as the current
+ *        distance to the reference surface of the specified node
+ * \param fadeDuration An optional duration for the fading. If not included, the property
+ *        in Navigation Handler will be used
  */
 [[codegen::luawrap]] void jumpToGeo(std::string node, double latitude, double longitude,
                                     std::optional<double> altitude,
                                     std::optional<double> fadeDuration)
 {
-    using namespace openspace;
-
     std::string script;
 
     if (altitude.has_value()) {
@@ -719,8 +687,6 @@ void flyToGeoInternal(std::string node, double latitude, double longitude,
                       std::optional<double> altitude, std::optional<double> duration,
                       std::optional<bool> shouldUseUpVector)
 {
-    using namespace openspace;
-
     const SceneGraphNode* n;
     if (!node.empty()) {
         n = sceneGraphNode(node);
@@ -742,11 +708,11 @@ void flyToGeoInternal(std::string node, double latitude, double longitude,
         altitude
     );
 
-    const glm::dvec3 currentPosW = global::navigationHandler->camera()->positionVec3();
+    const glm::dvec3 currentPosW = global::navigationHandler->camera()->position();
     const glm::dvec3 currentPosModelCoords =
         glm::inverse(n->modelTransform()) * glm::dvec4(currentPosW, 1.0);
 
-    constexpr double LengthEpsilon = 10.0; // meters
+    constexpr double LengthEpsilon = 10.0; // in Meters
     if (glm::distance(currentPosModelCoords, positionModelCoords) < LengthEpsilon) {
         LINFOC("GlobeBrowsing", "flyToGeo: Already at the requested position");
         return;
@@ -784,28 +750,25 @@ void flyToGeoInternal(std::string node, double latitude, double longitude,
  * the target object, or the default distance from the path navigation system.
  *
  * \param node The identifier of a scene graph node. If an empty string is provided, the
- *             current anchor node is used
+ *        current anchor node is used
  * \param latitude The latitude of the target coordinate, in degrees
  * \param longitude The longitude of the target coordinate, in degrees
- * \param useCurrentDistance If true, use the current distance of the camera to the
- *                           target globe when going to the specified position. If false,
- *                           or not specified, set the distance based on the bounding
- *                           sphere and the distance factor setting in Path Navigator
- * \param duration An optional duration for the motion to take, in seconds. For example,
- *                 a value of 5 means "fly to this position over a duration of 5 seconds"
+ * \param useCurrentDistance If true, use the current distance of the camera to the target
+ *        globe when going to the specified position. If false, or not specified, set the
+ *        distance based on the bounding sphere and the distance factor setting in Path
+ *        Navigator
+ * \param duration An optional duration for the motion to take, in seconds. For example, a
+ *        value of 5 means "fly to this position over a duration of 5 seconds"
  * \param shouldUseUpVector If true, try to use the up-direction when computing the
- *                          target position for the camera. For globes, this means that
- *                          North should be up, in relation to the camera's view
- *                          direction. Note that for this to take effect, rolling motions
- *                          must be enabled in the Path Navigator settings.
+ *        target position for the camera. For globes, this means that North should be up,
+ *        in relation to the camera's view direction. Note that for this to take effect,
+ *        rolling motions must be enabled in the Path Navigator settings
  */
 [[codegen::luawrap]] void flyToGeo2(std::string node, double latitude, double longitude,
                                     std::optional<bool> useCurrentDistance,
                                     std::optional<double> duration,
                                     std::optional<bool> shouldUseUpVector)
 {
-    using namespace openspace;
-
     std::optional<double> altitude;
     if (useCurrentDistance.has_value() && *useCurrentDistance) {
         altitude = std::nullopt;
@@ -836,12 +799,11 @@ void flyToGeoInternal(std::string node, double latitude, double longitude,
   * \param longitude The longitude of the target coordinate, in degrees
   * \param altitude The altitude of the target coordinate, in meters
   * \param duration An optional duration for the motion to take, in seconds. For example,
-  *                 a value of 5 means "fly to this position over a duration of 5 seconds"
+  *        a value of 5 means "fly to this position over a duration of 5 seconds"
   * \param shouldUseUpVector If true, try to use the up-direction when computing the
-  *                          target position for the camera. For globes, this means that
-  *                          North should be up, in relation to the camera's view
-  *                          direction. Note that for this to take effect, rolling motions
-  *                          must be enabled in the Path Navigator settings.
+  *        target position for the camera. For globes, this means that North should be up,
+  *        in relation to the camera's view direction. Note that for this to take effect,
+  *        rolling motions must be enabled in the Path Navigator settings
   */
 [[codegen::luawrap]] void flyToGeo(std::string node, double latitude,
                                    double longitude, double altitude,
@@ -868,8 +830,6 @@ std::tuple<double, double, double>
 localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitude,
                      double altitude)
 {
-    using namespace openspace;
-
     SceneGraphNode* n = sceneGraphNode(nodeIdentifier);
     if (!n) {
         throw ghoul::lua::LuaError("Unknown globe identifier: " + nodeIdentifier);
@@ -885,7 +845,6 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
  * \return Whether a camera path is currently active, or not
  */
 [[codegen::luawrap]] bool isFlying() {
-    using namespace openspace;
     return global::openSpaceEngine->currentMode() == OpenSpaceEngine::Mode::CameraPath;
 }
 
@@ -908,7 +867,6 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
                       std::optional<std::variant<bool, double>> useUpFromTargetOrDuration,
                                                            std::optional<double> duration)
 {
-    using namespace openspace;
     if (useUpFromTargetOrDuration.has_value() &&
         std::holds_alternative<double>(*useUpFromTargetOrDuration) &&
         duration.has_value())
@@ -963,7 +921,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
  * \param nodeIdentifier The identifier of the node to which we want to fly
  * \param height The height (in meters) to which we want to fly. The way the height is
  *        defined specifically determines on the type of node to which the fly-to command
- *        is pointed.
+ *        is pointed
  * \param useUpFromTargetOrDuration If this value is a boolean value (`true` or `false`),
  *        this value determines whether we want to end up with the camera facing along the
  *        selected node's up direction. If this value is a numerical value, refer to the
@@ -976,9 +934,8 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
                       std::optional<std::variant<bool, double>> useUpFromTargetOrDuration,
                                                            std::optional<double> duration)
 {
-    using namespace openspace;
     if (!sceneGraphNode(nodeIdentifier)) {
-        throw ghoul::lua::LuaError("Unknown node name: " + nodeIdentifier);
+        throw ghoul::lua::LuaError(std::format("Unknown node name: {}", nodeIdentifier));
     }
 
     ghoul::Dictionary insDict;
@@ -1020,22 +977,21 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
  * be included for the target up direction in the navigation state to be taken into
  * account.
  *
- * \param navigationState A [NavigationState](#core_navigation_state) to fly to
- * \param duration An optional duration for the motion to take, in seconds. For example,
- *                 a value of 5 means "fly to this position over a duration of 5 seconds"
+ * \param navigationState A [NavigationState](#core_navigationstate) to fly to
+ * \param duration An optional duration for the motion to take, in seconds. For example, a
+ *        value of 5 means "fly to this position over a duration of 5 seconds"
  */
 [[codegen::luawrap]] void flyToNavigationState(ghoul::Dictionary navigationState,
                                                std::optional<double> duration)
 {
-    using namespace openspace;
     try {
-        documentation::testSpecificationAndThrow(
-            interaction::NavigationState::Documentation(),
+        testSpecificationAndThrow(
+            NavigationState::Documentation(),
             navigationState,
             "NavigationState"
         );
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const SpecificationError& e) {
         logError(e, "flyToNavigationState");
         throw ghoul::lua::LuaError(std::format("Unable to create a path: {}", e.what()));
     }
@@ -1062,11 +1018,10 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
 /**
  * Zoom linearly to the current focus node, using the default distance.
  *
- * \param duration An optional duration for the motion to take, in seconds. For example,
- *                 a value of 5 means "zoom in over 5 seconds"
+ * \param duration An optional duration for the motion to take, in seconds. For example, a
+ *        value of 5 means "zoom in over 5 seconds"
  */
 [[codegen::luawrap]] void zoomToFocus(std::optional<double> duration) {
-    using namespace openspace;
     const SceneGraphNode* node = global::navigationHandler->anchorNode();
     if (!node) {
         throw ghoul::lua::LuaError("Could not determine current focus node");
@@ -1100,7 +1055,6 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
  */
 [[codegen::luawrap]] void zoomToDistance(double distance, std::optional<double> duration)
 {
-    using namespace openspace;
     if (distance <= 0.0) {
         throw ghoul::lua::LuaError("The distance must be larger than zero");
     }
@@ -1136,15 +1090,13 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
  * value based on the size of the object rather than in meters.
  *
  * \param distance The distance to fly to, given as a multiple of the bounding sphere of
- *                 the current focus node bounding sphere. A value of 1 will result in a
- *                 position at a distance of one times the size of the bounding
- *                 sphere away from the object
+ *        the current focus node bounding sphere. A value of 1 will result in a position
+ *        at a distance of one times the size of the bounding sphere away from the object
  * \param duration An optional duration for the motion, in seconds
  */
 [[codegen::luawrap]] void zoomToDistanceRelative(double distance,
                                                  std::optional<double> duration)
 {
-    using namespace openspace;
     if (distance <= 0.0) {
         throw ghoul::lua::LuaError("The distance must be larger than zero");
     }
@@ -1181,25 +1133,24 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
  * Fade rendering to black, jump to the specified node, and then fade in. This is done by
  * triggering another script that handles the logic.
  *
- * \param navigationState A [NavigationState](#core_navigation_state) to jump to
- * \param useTimeStamp if true, and the provided NavigationState includes a timestamp,
- *                     the time will be set as well
- * \param fadeDuration An optional duration for the fading. If not included, the
- *                     property in Navigation Handler will be used
+ * \param navigationState A [NavigationState](#core_navigationstate) to jump to
+ * \param useTimeStamp if true, and the provided NavigationState includes a timestamp, the
+ *        time will be set as well
+ * \param fadeDuration An optional duration for the fading. If not included, the property
+ *        in Navigation Handler will be used
  */
 [[codegen::luawrap]] void jumpToNavigationState(ghoul::Dictionary navigationState,
                                                 std::optional<bool> useTimeStamp,
                                                 std::optional<double> fadeDuration)
 {
-    using namespace openspace;
     try {
-        documentation::testSpecificationAndThrow(
-            interaction::NavigationState::Documentation(),
+        testSpecificationAndThrow(
+            NavigationState::Documentation(),
             navigationState,
             "NavigationState"
         );
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const SpecificationError& e) {
         logError(e, "jumpToNavigationState");
         throw ghoul::lua::LuaError(std::format(
             "Unable to jump to navigation state: {}", e.what()
@@ -1211,7 +1162,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
     // dictionary directly, due to the number keys for arrays. We solve this by first
     // creating an object of the correct datatype
     // (@TODO emmbr 2024-04-03, This formatting problem should probably be fixed)
-    interaction::NavigationState ns = interaction::NavigationState(navigationState);
+    NavigationState ns = NavigationState(navigationState);
 
     bool setTime = (ns.timestamp.has_value() && useTimeStamp.value_or(false));
 
@@ -1232,17 +1183,16 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
 }
 
 /**
- * Fade rendering to black, jump to the specified navigation state, and then fade in.
- * This is done by triggering another script that handles the logic.
+ * Fade rendering to black, jump to the specified navigation state, and then fade in. This
+ * is done by triggering another script that handles the logic.
  *
  * \param nodeIdentifier The identifier of the scene graph node to jump to
- * \param fadeDuration An optional duration for the fading. If not included, the
- *                     property in Navigation Handler will be used
+ * \param fadeDuration An optional duration for the fading. If not included, the property
+ *        in Navigation Handler will be used
  */
 [[codegen::luawrap]] void jumpTo(std::string nodeIdentifier,
                                  std::optional<double> fadeDuration)
 {
-    using namespace openspace;
     if (SceneGraphNode* n = sceneGraphNode(nodeIdentifier);  !n) {
         throw ghoul::lua::LuaError("Unknown node name: " + nodeIdentifier);
     }
@@ -1262,6 +1212,6 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
     }
 }
 
-#include "navigationhandler_lua_codegen.cpp"
-
 } // namespace
+
+#include "navigationhandler_lua_codegen.cpp"

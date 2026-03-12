@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,22 +24,24 @@
 
 #include <openspace/util/downloadeventengine.h>
 
+#include <utility>
+
 namespace openspace {
 
 int DownloadEventEngine::subscribe(Callback cb) {
-    std::lock_guard lock(_mutex);
+    const std::unique_lock lock(_mutex);
     int id = _id++;
     _subscribers[id] = std::move(cb);
     return id;
 }
 
 void DownloadEventEngine::unsubscribe(int id) {
-    std::lock_guard lock(_mutex);
+    const std::unique_lock lock(_mutex);
     _subscribers.erase(id);
 }
 
 void DownloadEventEngine::publish(const DownloadEvent& event) {
-    std::lock_guard lock(_mutex);
+    const std::unique_lock lock(_mutex);
     for (auto& [_, callback] : _subscribers) {
         callback(event);
     }
@@ -55,7 +57,6 @@ void DownloadEventEngine::publish(const std::string& id, DownloadEvent::Type typ
         .downloadedBytes = downloadedBytes,
         .totalBytes = totalBytes
     };
-
     publish(event);
 }
 

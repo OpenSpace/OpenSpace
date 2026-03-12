@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,8 @@
 
 #include <openspace/openspace.h>
 #include <openspace/engine/settings.h>
-#include <openspace/util/httprequest.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/loglevel.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/stringhelper.h>
@@ -34,6 +35,11 @@
 #include <QTimer>
 #include <scn/scan.h>
 #include <date/date.h>
+#include <chrono>
+#include <numeric>
+#include <string>
+#include <thread>
+#include <utility>
 #include <vector>
 
 using namespace openspace;

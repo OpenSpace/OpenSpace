@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,10 +27,16 @@
 #include <openspace/topic/connection.h>
 #include <openspace/topic/jsonconverters.h>
 #include <openspace/engine/globals.h>
-#include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <algorithm>
+#include <cstdint>
+#include <string_view>
+#include <utility>
+
+using nlohmann::json;
 
 namespace {
     constexpr std::string_view _loggerCat = "EventTopic";
@@ -39,13 +45,7 @@ namespace {
     constexpr std::string_view StopSubscription = "stop_subscription";
 } // namespace
 
-using nlohmann::json;
-
 namespace openspace {
-
-bool EventTopic::isDone() const {
-    return !isSubscribed();
-}
 
 void EventTopic::handleJson(const nlohmann::json& json) {
     std::vector<std::string> events;
@@ -70,11 +70,11 @@ void EventTopic::handleJson(const nlohmann::json& json) {
         const std::string& event = json.at("event").get<std::string>();
         if (event == "*" || event == "all") {
             // Iterate over all event types and add them to list
-            const uint8_t lastEvent = static_cast<uint8_t>(events::Event::Type::Last);
+            const uint8_t lastEvent = static_cast<uint8_t>(Event::Type::Last);
 
             for (uint8_t i = 0; i < lastEvent; i++) {
-                auto type = static_cast<events::Event::Type>(i);
-                events.emplace_back(events::toString(type));
+                auto type = static_cast<Event::Type>(i);
+                events.emplace_back(toString(type));
             }
         }
         else {
@@ -86,7 +86,7 @@ void EventTopic::handleJson(const nlohmann::json& json) {
 
     for (const std::string& event : events) {
         if (status == StartSubscription) {
-            const events::Event::Type type = events::fromString(event);
+            const Event::Type type = fromString(event);
 
             _subscribedEvents[type] = true;
 
@@ -99,11 +99,15 @@ void EventTopic::handleJson(const nlohmann::json& json) {
             global::eventEngine->registerEventTopic(_topicId, type, onCallback);
         }
         else if (status == StopSubscription) {
-            const events::Event::Type type = events::fromString(event);
+            const Event::Type type = fromString(event);
             _subscribedEvents.erase(type);
             global::eventEngine->unregisterEventTopic(_topicId, type);
         }
     }
+}
+
+bool EventTopic::isDone() const {
+    return !isSubscribed();
 }
 
 bool EventTopic::isSubscribed() const {
@@ -114,7 +118,7 @@ bool EventTopic::isSubscribed() const {
     const bool hasActiveSubscription = std::any_of(
         _subscribedEvents.begin(),
         _subscribedEvents.end(),
-        [](const std::pair<const events::Event::Type, bool>& subscription) {
+        [](const std::pair<const Event::Type, bool>& subscription) {
             return subscription.second;
     });
 

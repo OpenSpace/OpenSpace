@@ -1,5 +1,6 @@
 local trail = asset.require("./trail")
 local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
+local marsKernels = asset.require("scene/solarsystem/planets/mars/kernels")
 local sun = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
@@ -18,39 +19,39 @@ local TranslationKeyframes = {
   ["1850 JAN 01 00:00:00"] = {
     Type = "SpiceTranslation",
     Target = kernels.ID.Perseverance,
-    Observer = kernels.ID.Mars,
+    Observer = marsKernels.ID.Mars,
     Frame = kernels.Frame.Mars,
     FixedDate = "2020 JUL 17 13:56:43"
   },
   ["2020 JUL 17 13:56:42"] = {
     Type = "SpiceTranslation",
     Target = kernels.ID.Perseverance,
-    Observer = kernels.ID.Mars,
+    Observer = marsKernels.ID.Mars,
     Frame = kernels.Frame.Mars,
     FixedDate = "2020 JUL 17 13:56:43"
   },
   ["2020 JUL 17 13:56:43"] = {
     Type = "SpiceTranslation",
     Target = kernels.ID.Perseverance,
-    Observer = kernels.ID.Mars,
+    Observer = marsKernels.ID.Mars,
     Frame = kernels.Frame.Mars
   },
   ["2020 JUL 17 13:56:44"] = {
     Type = "SpiceTranslation",
     Target = kernels.ID.Perseverance,
-    Observer = kernels.ID.Mars,
+    Observer = marsKernels.ID.Mars,
     Frame = kernels.Frame.Mars
   },
   ["2021 FEB 18 20:43:48"] = {
     Type = "SpiceTranslation",
     Target = kernels.ID.Perseverance,
-    Observer = kernels.ID.Mars,
+    Observer = marsKernels.ID.Mars,
     Frame = kernels.Frame.Mars
   },
   ["2021 FEB 18 20:43:49"] = {
     Type = "SpiceTranslation",
     Target = kernels.ID.Perseverance,
-    Observer = kernels.ID.Mars,
+    Observer = marsKernels.ID.Mars,
     Frame = kernels.Frame.Mars,
     FixedDate = "2021 FEB 18 20:43:48"
   }
@@ -62,12 +63,12 @@ local PerseveranceNode = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels.ID.Mars,
+      Target = marsKernels.ID.Mars,
       Observer = kernels.ID.MarsBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = kernels.Frame.Mars,
+      SourceFrame = marsKernels.Frame.Mars,
       DestinationFrame = coreKernels.Frame.Galactic
     }
   },

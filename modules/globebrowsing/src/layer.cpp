@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,20 +24,21 @@
 
 #include <modules/globebrowsing/src/layer.h>
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/engine/globals.h>
-#include <openspace/scripting/scriptengine.h>
 #include <modules/globebrowsing/src/layergroup.h>
-#include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/tileindex.h>
-#include <modules/globebrowsing/src/tiletextureinitdata.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
+#include <openspace/documentation/documentation.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
-
-namespace openspace::globebrowsing {
+#include <ghoul/misc/stringconversion.h>
+#include <algorithm>
+#include <optional>
+#include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "Layer";
 
     constexpr std::string_view KeyIdentifier = "Identifier";
@@ -45,70 +46,70 @@ namespace {
     constexpr std::string_view KeyDesc = "Description";
     constexpr std::string_view KeyLayerGroupID = "LayerGroupID";
 
-    constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
+    constexpr Property::PropertyInfo TypeInfo = {
         "Type",
         "Type",
         "The type of this Layer. This value is a read-only property and thus cannot be "
         "changed.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
+    constexpr Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blend mode",
         "This value specifies the blend mode that is applied to this layer. The blend "
         "mode determines how this layer is added to the underlying layers beneath.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "If this value is enabled, the layer will be used for the final composition of "
         "the planet. If this value is disabled, the layer will be ignored in the "
         "composition.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ResetInfo = {
+    constexpr Property::PropertyInfo ResetInfo = {
         "Reset",
         "Reset",
         "If this value is triggered, this layer will be reset. This will delete the "
         "local cache for this layer and will trigger a fresh load of all tiles.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RemoveInfo = {
+    constexpr Property::PropertyInfo RemoveInfo = {
         "Remove",
         "Remove",
         "If this value is triggered, a script will be executed that will remove this "
         "layer before the next frame.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "If the 'Type' of this layer is a solid color, this value determines what this "
         "solid color is.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ZIndexInfo = {
+    constexpr Property::PropertyInfo ZIndexInfo = {
         "ZIndex",
         "Z-Index",
         "Determines where the layer is placed in the list of available layers. Layers "
         "are applied in the order of their Z indices, with higher indices obscuring "
         "layers with lower values.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GuiDescriptionInfo = {
+    constexpr Property::PropertyInfo GuiDescriptionInfo = {
         "GuiDescription",
         "Gui description",
-        "This is the description for the scene graph node to be shown in the gui "
-        "example: Earth is a special place.",
-        openspace::properties::Property::Visibility::Hidden
+        "This is the description for the scene graph node to be shown in the GUI. "
+        "Example: Earth is a special place.",
+        Property::Visibility::Hidden
     };
 
     struct [[codegen::Dictionary(Layer), codegen::noexhaustive()]] Parameters {
@@ -120,14 +121,14 @@ namespace {
         std::optional<std::string> name;
 
         // A human-readable description of the layer to be used in informational texts
-        // presented to the user
+        // presented to the user.
         std::optional<std::string> description;
 
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
 
         // Specifies the type of layer that is to be added. If this value is not
-        // specified, the layer is a DefaultTileProvider
+        // specified, the layer is a DefaultTileProvider.
         std::optional<std::string> type [[codegen::inlist("DefaultTileProvider",
             "SingleImageProvider", "ImageSequenceTileProvider",
             "SizeReferenceTileProvider", "TemporalTileProvider", "TileIndexTileProvider",
@@ -135,52 +136,55 @@ namespace {
             "SolidColor", "SpoutImageProvider", "VideoTileProvider")]];
 
         // Determine whether the layer is enabled or not. If this value is not specified,
-        // the layer is disabled
+        // the layer is disabled.
         std::optional<bool> enabled;
 
         // [[codegen::verbatim(ZIndexInfo.description)]]
         std::optional<int> zIndex [[codegen::greater(0)]];
 
-        // The opacity value of the layer
+        // The opacity value of the layer.
         std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
 
         struct Settings {
-            // The gamma value that is applied to each pixel of the layer
+            // The gamma value that is applied to each pixel of the layer.
             std::optional<float> gamma;
 
-            // The multiplicative factor that is applied to each pixel of the layer
+            // The multiplicative factor that is applied to each pixel of the layer.
             std::optional<float> multiplier;
 
-            // An additive offset that is applied to each pixel of the layer
+            // An additive offset that is applied to each pixel of the layer.
             std::optional<float> offset;
         };
-        // Specifies the render settings that should be applied to this layer
+        // Specifies the render settings that should be applied to this layer.
         std::optional<Settings> settings;
 
-        // Parameters that set individual adjustment parameters for this layer
+        // Parameters that set individual adjustment parameters for this layer.
         std::optional<ghoul::Dictionary> adjustment
             [[codegen::reference("globebrowsing_layeradjustment")]];
 
         enum class BlendMode {
             Normal,
             Multiply,
+            MultiplyMix,
             Add,
             Subtract,
             Color
         };
         // Sets the blend mode of this layer to determine how it interacts with other
-        // layers on top of this
+        // layers on top of this.
         std::optional<BlendMode> blendMode;
     };
-#include "layer_codegen.cpp"
 } // namespace
+#include "layer_codegen.cpp"
 
-documentation::Documentation Layer::Documentation() {
+namespace openspace {
+
+Documentation Layer::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_layer");
 }
 
 Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGroup& parent)
-    : properties::PropertyOwner({
+    : PropertyOwner({
         layerDict.value<std::string>(KeyIdentifier),
         layerDict.hasKey(KeyName) ? layerDict.value<std::string>(KeyName) : "",
         layerDict.hasKey(KeyDesc) ? layerDict.value<std::string>(KeyDesc) : ""
@@ -270,6 +274,9 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
                 break;
             case Parameters::BlendMode::Multiply:
                 _blendModeOption = static_cast<int>(layers::Blend::ID::Multiply);
+                break;
+            case Parameters::BlendMode::MultiplyMix:
+                _blendModeOption = static_cast<int>(layers::Blend::ID::MultiplyMix);
                 break;
             case Parameters::BlendMode::Add:
                 _blendModeOption = static_cast<int>(layers::Blend::ID::Add);
@@ -366,7 +373,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
     addProperty(_reset);
     addProperty(_remove);
 
-    _solidColor.setViewOption(properties::Property::ViewOptions::Color);
+    _solidColor.setViewOption(Property::ViewOptions::Color);
 
     addVisibleProperties();
 
@@ -400,7 +407,10 @@ ChunkTilePile Layer::chunkTilePile(const TileIndex& tileIndex, int pileSize) con
         std::fill(chunkTilePile.begin(), chunkTilePile.end(), std::nullopt);
         for (int i = 0; i < pileSize; i++) {
             ChunkTile tile;
-            tile.uvTransform = TileUvTransform{ { 0, 0 }, { 1, 1 } };
+            tile.uvTransform = TileUvTransform {
+                .uvOffset = glm::vec2(0.f),
+                .uvScale = glm::vec2(1.f)
+            };
             chunkTilePile[i] = tile;
         }
         return chunkTilePile;
@@ -408,9 +418,7 @@ ChunkTilePile Layer::chunkTilePile(const TileIndex& tileIndex, int pileSize) con
 }
 
 Tile::Status Layer::tileStatus(const TileIndex& index) const {
-    return _tileProvider ?
-        _tileProvider->tileStatus(index) :
-        Tile::Status::Unavailable;
+    return _tileProvider ? _tileProvider->tileStatus(index) : Tile::Status::Unavailable;
 }
 
 layers::Layer::ID Layer::type() const {
@@ -500,8 +508,8 @@ void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDi
         case layers::Layer::ID::TileProviderByIndex:
         case layers::Layer::ID::TileProviderByLevel:
         case layers::Layer::ID::VideoTileProvider:
-            // We add the id to the dictionary since it needs to be known by
-            // the tile provider
+            // We add the id to the dictionary since it needs to be known by the tile
+            // provider
             initDict.setValue(
                 std::string(KeyLayerGroupID),
                 static_cast<int>(_layerGroupId)
@@ -544,4 +552,4 @@ void Layer::addVisibleProperties() {
     }
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

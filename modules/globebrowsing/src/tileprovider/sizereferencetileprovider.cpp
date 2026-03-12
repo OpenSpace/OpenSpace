@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,10 +25,15 @@
 #include <modules/globebrowsing/src/tileprovider/sizereferencetileprovider.h>
 
 #include <modules/globebrowsing/src/geodeticpatch.h>
+#include <modules/globebrowsing/src/layergroupid.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
+#include <cmath>
+#include <limits>
 #include <optional>
 #include <variant>
 
@@ -36,13 +41,13 @@ namespace {
     struct [[codegen::Dictionary(SizeReferenceTileProvider)]] Parameters {
         std::optional<std::variant<glm::dvec3, double>> radii;
     };
-#include "sizereferencetileprovider_codegen.cpp"
 } // namespace
+#include "sizereferencetileprovider_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation SizeReferenceTileProvider::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_sizereferencetileprovider");
+Documentation SizeReferenceTileProvider::Documentation() {
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_sizereference");
 }
 
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
@@ -97,9 +102,7 @@ Tile SizeReferenceTileProvider::tile(const TileIndex& tileIndex) {
     const std::string text = std::format("{:.0f} {:s}", tileLongitudalLength, unit);
     const glm::vec2 textPosition = glm::vec2(
         0.f,
-        aboveEquator ?
-            fontSize / 2.f :
-            initData.dimensions.y - 3.f * fontSize / 2.f
+        aboveEquator ? fontSize / 2.f : initData.dimensions.y - 3.f * fontSize / 2.f
     );
 
     return TextTileProvider::renderTile(tileIndex, text, textPosition, glm::vec4(1.f));
@@ -110,7 +113,7 @@ Tile::Status SizeReferenceTileProvider::tileStatus(const TileIndex&) {
 }
 
 TileDepthTransform SizeReferenceTileProvider::depthTransform() {
-    return { 0.f, 1.f };
+    return { .scale = 0.f, .offset = 1.f };
 }
 
 void SizeReferenceTileProvider::update() {}
@@ -127,4 +130,4 @@ float SizeReferenceTileProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

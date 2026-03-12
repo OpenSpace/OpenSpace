@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,9 +26,12 @@
 #include <modules/volume/volumeutils.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/exception.h>
+#include <algorithm>
 #include <fstream>
+#include <utility>
+#include <vector>
 
-namespace openspace::volume {
+namespace openspace {
 
 template <typename VoxelType>
 RawVolumeWriter<VoxelType>::RawVolumeWriter(std::filesystem::path path, size_t bufferSize)
@@ -38,12 +41,12 @@ RawVolumeWriter<VoxelType>::RawVolumeWriter(std::filesystem::path path, size_t b
 
 template <typename VoxelType>
 size_t RawVolumeWriter<VoxelType>::coordsToIndex(const glm::uvec3& cartesian) const {
-    return coordsToIndex(cartesian, dimensions());
+    return openspace::coordsToIndex(cartesian, dimensions());
 }
 
 template <typename VoxelType>
 glm::ivec3 RawVolumeWriter<VoxelType>::indexToCoords(size_t linear) const {
-    return volume::indexToCoords(linear, dimensions());
+    return openspace::indexToCoords(linear, dimensions());
 }
 
 template <typename VoxelType>
@@ -59,15 +62,15 @@ glm::uvec3 RawVolumeWriter<VoxelType>::dimensions() const {
 template <typename VoxelType>
 void RawVolumeWriter<VoxelType>::write(
                                     const std::function<VoxelType(const glm::uvec3&)>& fn,
-                                           const std::function<void(float t)>& onProgress)
+                                             const std::function<void(float)>& onProgress)
 {
     const glm::uvec3 dims = dimensions();
 
     const size_t size = static_cast<size_t>(dims.x) * static_cast<size_t>(dims.y) *
                   static_cast<size_t>(dims.z);
 
-    std::vector<VoxelType> buffer(_bufferSize);
-    std::ofstream file(_path, std::ios::binary);
+    std::vector<VoxelType> buffer = std::vector<VoxelType>(_bufferSize);
+    std::ofstream file = std::ofstream(_path, std::ios::binary);
 
     int nChunks = static_cast<int>(size / _bufferSize);
     if (size % _bufferSize > 0) {
@@ -87,7 +90,6 @@ void RawVolumeWriter<VoxelType>::write(
         );
         onProgress(static_cast<float>(c + 1) / nChunks);
     }
-    file.close();
 }
 
 template <typename VoxelType>
@@ -106,4 +108,4 @@ void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
     file.write(buffer, length);
 }
 
-} // namespace openspace::volume
+} // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___DELAYEDVARIABLE___H__
 #define __OPENSPACE_CORE___DELAYEDVARIABLE___H__
 
-namespace openspace::interaction {
+namespace openspace {
 
 /**
  * Class that acts as a smoothing filter to a variable. The filter has a step response on
@@ -36,6 +36,7 @@ template <typename T, typename ScaleType>
 class DelayedVariable {
 public:
     DelayedVariable(ScaleType scaleFactor, ScaleType friction);
+
     void set(T value, double dt);
     void decelerate(double dt);
     void setHard(T value);
@@ -50,7 +51,7 @@ private:
     T _currentValue = T(0);
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #include "delayedvariable.inl"
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,10 @@
 #define __OPENSPACE_CORE___ERRORLOGTOPIC____H__
 
 #include <openspace/topic/topics/topic.h>
-#include <ghoul/logging/log.h>
+
+#include <ghoul/logging/loglevel.h>
+
+namespace ghoul::logging { class Log; }
 
 namespace openspace {
 
@@ -41,12 +44,13 @@ public:
 private:
     /**
      * Creates a log object and register it to the `LogManager`, does nothing if an active
-     * log already exists
+     * log already exists.
      */
     void createLog(ghoul::logging::LogLevel logLevel);
 
     bool _isSubscribedTo = false;
-    // Non owning but we remove the log from LogManager on destruction
+
+    /// Non-owning but we remove the log from LogManager on destruction
     ghoul::logging::Log* _log = nullptr;
 };
 

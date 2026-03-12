@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,18 +24,14 @@
 
 #include <openspace/topic/topics/profiletopic.h>
 
-#include <openspace/topic/connection.h>
-#include <openspace/topic/jsonconverters.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/settings.h>
 #include <openspace/scene/profile.h>
+#include <openspace/topic/connection.h>
+#include <openspace/topic/jsonconverters.h>
 
 namespace openspace {
-
-bool ProfileTopic::isDone() const {
-    return true;
-}
 
 void ProfileTopic::handleJson(const nlohmann::json&) {
     // @TODO (2025-04-30, emmbr) If we expose the json converters from profile.cpp, we
@@ -63,6 +59,10 @@ void ProfileTopic::handleJson(const nlohmann::json&) {
     }
 
     _connection->sendJson(wrappedPayload(data));
+}
+
+bool ProfileTopic::isDone() const {
+    return true;
 }
 
 } // namespace openspace

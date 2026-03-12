@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,82 +26,84 @@
 
 #include <openspace/topic/topicmanager.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/util/json_helper.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <algorithm>
 #include <filesystem>
 #include <optional>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "WebGuiModule";
 
-    constexpr openspace::properties::Property::PropertyInfo ServerProcessEnabledInfo = {
+    constexpr Property::PropertyInfo ServerProcessEnabledInfo = {
         "ServerProcessEnabled",
         "Enable server process",
         "Enable the node js based process used to serve the Web GUI.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AddressInfo = {
+    constexpr Property::PropertyInfo AddressInfo = {
         "Address",
         "Address",
         "The network address to use when connecting to OpenSpace from the Web GUI.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PortInfo = {
+    constexpr Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
         "The network port to use when serving the Web GUI over HTTP.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo WebSocketInterfaceInfo = {
+    constexpr Property::PropertyInfo WebSocketInterfaceInfo = {
         "WebSocketInterface",
         "WebSocket interface",
         "The identifier of the websocket interface to use when communicating.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ServerProcessEntryPointInfo =
-    {
+    constexpr Property::PropertyInfo ServerProcessEntryPointInfo = {
         "ServerProcessEntryPoint",
         "Server process entry point",
         "The node js command to invoke.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DirectoriesInfo = {
+    constexpr Property::PropertyInfo DirectoriesInfo = {
         "Directories",
         "Directories",
         "Directories from which to to serve static content, as a string list "
         "with entries expressed as pairs, where every odd is the endpoint name and every "
         "even is the directory.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DefaultEndpointInfo = {
+    constexpr Property::PropertyInfo DefaultEndpointInfo = {
         "DefaultEndpoint",
         "Default endpoint",
         "The 'default' endpoint. The server will redirect http requests from / to "
         "/<DefaultEndpoint>.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ServedDirectoriesInfo = {
+    constexpr Property::PropertyInfo ServedDirectoriesInfo = {
         "ServedDirectories",
         "Served directories",
         "Directories that are currently served. This value is set by the server process, "
         "as a verification of the actually served directories. For example, an onChange "
         "callback can be registered to this, to reload browsers when the server is "
         "ready. Manual changes to this property have no effect.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(WebGuiModule)]] Parameters {
@@ -114,12 +116,12 @@ namespace {
         // [[codegen::verbatim(WebSocketInterfaceInfo.description)]]
         std::optional<std::string> webSocketInterface;
     };
-#include "webguimodule_codegen.cpp"
 } // namespace
+#include "webguimodule_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation WebGuiModule::Documentation() {
+Documentation WebGuiModule::Documentation() {
     return codegen::doc<Parameters>("module_webgui");
 }
 
@@ -208,7 +210,7 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
         }
         for (const std::pair<const std::string, std::string>& e : _endpoints) {
             if (newEndpoints.find(e.first) == newEndpoints.end()) {
-                // This endpoint existed before but does not exist anymore.
+                // This endpoint existed before but does not exist anymore
                 notifyEndpointListeners(e.first, false);
             }
         }
@@ -216,8 +218,8 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
             if (_endpoints.find(e.first) == _endpoints.end() ||
                 newEndpoints[e.first] != e.second)
             {
-                // This endpoint exists now but did not exist before,
-                // or the directory has changed.
+                // This endpoint exists now but did not exist before, or the directory has
+                // changed
                 notifyEndpointListeners(e.first, true);
             }
         }

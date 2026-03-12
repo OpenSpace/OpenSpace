@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,13 +24,12 @@
 
 #include <openspace/properties/scalar/intproperty.h>
 
-#include <ghoul/glm.h>
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
-IntProperty::IntProperty(Property::PropertyInfo info, int value,
-                         int minValue, int maxValue, int stepValue)
+IntProperty::IntProperty(PropertyInfo info, int value, int minValue, int maxValue,
+                         int stepValue)
     : NumericalProperty<int>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
@@ -62,4 +61,4 @@ std::string IntProperty::stringValue() const {
     return formatJson(_value);
 }
 
-} // namespace openspace::properties
+} // namespace openspace

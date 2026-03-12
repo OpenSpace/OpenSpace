@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,25 +25,25 @@
 #include <modules/base/rendering/renderablesphereimagelocal.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/sphere.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
-#include <optional>
+#include <ghoul/opengl/textureunit.h>
+#include <filesystem>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "The path to an image on disk to use as a texture for this sphere. The image is "
         "expected to be an equirectangular projection.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `Renderable` shows a sphere with an image provided by a local file on disk. To
     // show a sphere with an image from an online source, see
-    // [RenderableSphereImageOnline](#base_screenspace_image_online).
+    // [RenderableSphereImageOnline](#base_screenspace_imageonline).
     //
     // Per default, the sphere uses an equirectangular projection for the image mapping
     // and hence expects an equirectangular image. However, it can also be used to show
@@ -52,14 +52,14 @@ namespace {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::filesystem::path texture;
     };
-#include "renderablesphereimagelocal_codegen.cpp"
 } // namespace
+#include "renderablesphereimagelocal_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableSphereImageLocal::Documentation() {
+Documentation RenderableSphereImageLocal::Documentation() {
     return codegen::doc<Parameters>(
-        "base_renderable_sphere_image_local",
+        "base_renderable_sphereimagelocal",
         RenderableSphere::Documentation()
     );
 }
@@ -89,7 +89,6 @@ void RenderableSphereImageLocal::initialize() {
 void RenderableSphereImageLocal::initializeGL() {
     RenderableSphere::initializeGL();
     _texture->loadFromFile(_texturePath.value());
-    _texture->uploadToGpu();
 }
 
 void RenderableSphereImageLocal::deinitializeGL() {
@@ -103,8 +102,8 @@ void RenderableSphereImageLocal::update(const UpdateData& data) {
     _texture->update();
 }
 
-void RenderableSphereImageLocal::bindTexture() {
-    _texture->bind();
+void RenderableSphereImageLocal::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(*_texture->texture());
 }
 
 } // namespace openspace

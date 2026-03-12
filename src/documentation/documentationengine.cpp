@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,30 +26,47 @@
 
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/globals.h>
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
-#include <openspace/json.h>
+#include <openspace/properties/property.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
+#include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/json_helper.h>
+#include <openspace/util/keys.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>
+#include <ghoul/misc/templatefactory.h>
+#include <algorithm>
 #include <fstream>
 #include <future>
+#include <map>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <unordered_map>
+#include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "DocumentationEngine";
 
     // General keys
@@ -128,11 +145,7 @@ namespace {
     constexpr std::string_view FiltersKey = "filters";
     constexpr std::string_view ActionsKey = "actions";
 
-    nlohmann::json documentationToJson(
-                             const openspace::documentation::Documentation& documentation)
-    {
-        using namespace openspace::documentation;
-
+    nlohmann::json documentationToJson(const Documentation& documentation) {
         nlohmann::json json;
 
         json[NameKey] = documentation.name;
@@ -176,8 +189,8 @@ namespace {
                 // Since this is a table we need to recurse this function to extract data
                 nlohmann::json tableDocs = documentationToJson(doc);
 
-                // Set the members entry to the members of the table
-                // to remove unnecessary nestling
+                // Set the members entry to the members of the table to remove unnecessary
+                // nestling
                 entry[MembersKey] = tableDocs[MembersKey];
             }
             else {
@@ -185,15 +198,14 @@ namespace {
             }
             json[MembersKey].push_back(entry);
         }
-        openspace::sortJson(json[MembersKey], NameKey);
+        sortJson(json[MembersKey], NameKey);
 
         return json;
     }
 
-    nlohmann::json propertyOwnerToJson(openspace::properties::PropertyOwner* owner) {
+    nlohmann::json propertyOwnerToJson(PropertyOwner* owner) {
         ZoneScoped;
 
-        using namespace openspace;
         nlohmann::json json;
         json[NameKey] =
             !owner->guiName().empty() ? owner->guiName() : owner->identifier();
@@ -204,7 +216,7 @@ namespace {
         json[TypeKey] = owner->type();
         json[TagsKey] = owner->tags();
 
-        for (properties::Property* p : owner->properties()) {
+        for (Property* p : owner->properties()) {
             nlohmann::json propertyJson;
             std::string name = !p->guiName().empty() ? p->guiName() : p->identifier();
             propertyJson[NameKey] = name;
@@ -217,7 +229,7 @@ namespace {
         }
         sortJson(json[PropertiesKeys], NameKey);
 
-        for (properties::PropertyOwner* o : owner->propertySubOwners()) {
+        for (PropertyOwner* o : owner->propertySubOwners()) {
             nlohmann::json propertyOwner;
             json[PropertyOwnersKey].push_back(propertyOwnerToJson(o));
         }
@@ -226,11 +238,9 @@ namespace {
         return json;
     }
 
-    nlohmann::json luaFunctionToJson(const openspace::scripting::LuaLibrary::Function& f,
+    nlohmann::json luaFunctionToJson(const LuaLibrary::Function& f,
                                      bool includeSourceLocation)
     {
-        using namespace openspace::scripting;
-
         nlohmann::json function;
         function[NameKey] = f.name;
         nlohmann::json arguments = nlohmann::json::array();
@@ -269,7 +279,7 @@ namespace {
     }
 } // namespace
 
-namespace openspace::documentation {
+namespace openspace {
 
 DocumentationEngine* DocumentationEngine::_instance = nullptr;
 
@@ -301,7 +311,6 @@ DocumentationEngine& DocumentationEngine::ref() {
 nlohmann::json DocumentationEngine::generateScriptEngineJson() const {
     ZoneScoped;
 
-    using namespace openspace::scripting;
     const std::vector<LuaLibrary> libraries = global::scriptEngine->allLuaLibraries();
     nlohmann::json json;
 
@@ -311,7 +320,7 @@ nlohmann::json DocumentationEngine::generateScriptEngineJson() const {
         // Keep the library key for backwards compatability
         library[LibraryKey] = libraryName;
         library[NameKey] = libraryName;
-        std::string_view os = OpenSpaceScriptingKey;
+        std::string os = std::string(OpenSpaceScriptingKey);
         library[FullNameKey] =
             libraryName.empty() ? os : std::format("{}.{}", os, libraryName);
 
@@ -438,7 +447,7 @@ nlohmann::json DocumentationEngine::generateLicenseListJson() const {
 }
 
 nlohmann::json DocumentationEngine::generateEventJson() const {
-    using Type = events::Event::Type;
+    using Type = Event::Type;
     const std::unordered_map<Type, std::vector<EventEngine::ActionInfo>>& eventActions =
         global::eventEngine->eventActions();
     nlohmann::json events;
@@ -449,7 +458,7 @@ nlohmann::json DocumentationEngine::generateEventJson() const {
     for (const auto& [eventType, actions] : eventActions) {
         nlohmann::json eventJson;
 
-        eventJson[NameKey] = std::string(events::toString(eventType));
+        eventJson[NameKey] = std::string(toString(eventType));
         nlohmann::json actionsJson = nlohmann::json::array();
 
         for (const EventEngine::ActionInfo& action : actions) {
@@ -529,7 +538,7 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
         // Add documentation about derived classes
         const std::vector<std::string>& registeredClasses = f->registeredClasses();
         for (const std::string& c : registeredClasses) {
-            if (c == "") {
+            if (c.empty()) {
                 LERROR("Factory documentation, derived class, without identifier");
                 continue;
             }
@@ -554,13 +563,14 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
         sortJson(factory[ClassesKey], NameKey);
         json.push_back(factory);
     }
+
     // Add all leftover docs
     nlohmann::json leftovers;
     leftovers[NameKey] = OtherName;
     leftovers[IdentifierKey] = OtherIdentifierName;
 
     for (const Documentation& doc : docs) {
-        if (doc.id == "") {
+        if (doc.id.empty()) {
             LERROR("Documentation without identifier");
             continue;
         }
@@ -594,16 +604,15 @@ nlohmann::json DocumentationEngine::generateKeybindingsJson() const {
     return result;
 }
 
-nlohmann::json DocumentationEngine::generatePropertyOwnerJson(
-                                                   properties::PropertyOwner* owner) const
+nlohmann::json DocumentationEngine::generatePropertyOwnerJson(PropertyOwner* owner) const
 {
     ZoneScoped;
 
     ghoul_assert(owner, "Owner must not be nullptr");
 
     nlohmann::json json;
-    std::vector<properties::PropertyOwner*> subOwners = owner->propertySubOwners();
-    for (properties::PropertyOwner* o : subOwners) {
+    std::vector<PropertyOwner*> subOwners = owner->propertySubOwners();
+    for (PropertyOwner* o : subOwners) {
         if (o->identifier() != SceneTitle) {
             nlohmann::json jsonOwner = propertyOwnerToJson(o);
 
@@ -624,7 +633,7 @@ void DocumentationEngine::writeJavascriptDocumentation() const {
 
     // Write documentation to json files if config file supplies path for doc files
     if (global::configuration->documentation.path.empty()) {
-        // if path was empty, that means that no documentation is requested
+        // If path was empty, that means that no documentation is requested
         return;
     }
 
@@ -658,7 +667,7 @@ void DocumentationEngine::writeJavascriptDocumentation() const {
     nlohmann::json result;
     result[DocumentationKey] = documentation;
 
-    // Make into a javascript variable so that it is possible to open with static html
+    // Make into a JavaScript variable so that it is possible to open with static HTML
     std::ofstream out = std::ofstream(absPath("${DOCUMENTATION}/documentationData.js"));
     out << "var data = " << result.dump();
 }
@@ -667,7 +676,7 @@ void DocumentationEngine::writeJsonDocumentation() const {
     nlohmann::json factory = generateFactoryManagerJson();
     nlohmann::json scripting = generateScriptEngineJson();
 
-    // Write two json files for the static docs page - asset components and scripting api
+    // Write two json files for the static docs page - asset components and scripting API
     std::ofstream out = std::ofstream(absPath("${DOCUMENTATION}/assetComponents.json"));
     if (out) {
         out << factory.dump();
@@ -682,8 +691,6 @@ void DocumentationEngine::writeJsonDocumentation() const {
 }
 
 nlohmann::json DocumentationEngine::generateActionJson() const {
-    using namespace interaction;
-
     nlohmann::json res;
     res[NameKey] = ActionTitle;
     res[DataKey] = nlohmann::json::array();
@@ -691,7 +698,7 @@ nlohmann::json DocumentationEngine::generateActionJson() const {
 
     for (const Action& action : actions) {
         nlohmann::json d;
-        // Use identifier as name to make it more similar to scripting api
+        // Use identifier as name to make it more similar to the scripting API
         d[NameKey] = action.identifier;
         d[GuiNameKey] = action.name;
         d[DocumentationKey] = action.documentation;
@@ -735,4 +742,4 @@ std::vector<Documentation> DocumentationEngine::documentations() const {
     return _documentations;
 }
 
-} // namespace openspace::documentation
+} // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,6 @@
 
 #include <openspace/topic/connection.h>
 #include <openspace/topic/jsonconverters.h>
-#include <modules/volume/transferfunctionhandler.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -56,7 +55,7 @@ void GetPropertyTopic::handleJson(const nlohmann::json& json) {
 
     const std::string requestedKey = json.at("property").get<std::string>();
     ZoneText(requestedKey.c_str(), requestedKey.size());
-    LDEBUG("Getting property '" + requestedKey + "'...");
+    LDEBUG(std::format("Getting property '{}'...", requestedKey));
     nlohmann::json response;
     if (requestedKey == AllPropertiesValue) {
         response = allProperties();
@@ -99,11 +98,11 @@ json GetPropertyTopic::allProperties() {
 }
 
 json GetPropertyTopic::propertyFromKey(const std::string& key) {
-    properties::Property* prop = property(key);
+    Property* prop = property(key);
     if (prop) {
         return wrappedPayload(prop);
     }
-    properties::PropertyOwner* node = propertyOwner(key);
+    PropertyOwner* node = propertyOwner(key);
     if (node) {
         return wrappedPayload(node);
     }

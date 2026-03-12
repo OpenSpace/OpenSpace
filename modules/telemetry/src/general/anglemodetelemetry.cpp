@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,11 +24,14 @@
 
 #include <modules/telemetry/include/general/anglemodetelemetry.h>
 
+#include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "AngleModeTelemetry";
 
     // Indices for data items
@@ -36,9 +39,7 @@ namespace {
     constexpr int AngleModeIndex = 0;
     constexpr int IncludeElevationIndex = 1;
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        AngleModeTelemetryInfo =
-    {
+    static const PropertyOwner::PropertyOwnerInfo AngleModeTelemetryInfo = {
         "AngleModeTelemetry",
         "Angle Mode Telemetry",
         "Telemetry that gathers data of what angle calculation mode is currently used "

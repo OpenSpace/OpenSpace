@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,30 +26,40 @@
 
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconversion.h>
+#include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/model/modelgeometry.h>
 #include <ghoul/io/model/modelreader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <filesystem>
+#include <utility>
+#include <variant>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo PerformShadingInfo = {
         "PerformShading",
         "Perform shading",
         "If true, the model will be shaded based on the location of the Sun. If false, "
         "shading is disabled and the model is fully illuminated.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
     // Similarly to the
-    // [RenderablePlaneProjection](spacecraftinstruments_renderableplaneprojection) and
-    // [RenderablePlanetProjection](spacecraftinstruments_renderableplanetprojection),
+    // [RenderablePlaneProjection](spacecraftinstruments_renderable_planeprojection) and
+    // [RenderablePlanetProjection](spacecraftinstruments_renderable_planetprojection),
     // this Renderable type servers as a potential target for image projections from a
     // spacecraft's instrument. This renderable will determine whenever an image in a
     // currently loaded image sequence is projected whether that instrument's field of
@@ -94,13 +104,13 @@ namespace {
         // [[codegen::verbatim(PerformShadingInfo.description)]]
         std::optional<bool> performShading;
     };
-#include "renderablemodelprojection_codegen.cpp"
 } // namespace
+#include "renderablemodelprojection_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableModelProjection::Documentation() {
-    return codegen::doc<Parameters>("spacecraftinstruments_renderablemodelprojection");
+Documentation RenderableModelProjection::Documentation() {
+    return codegen::doc<Parameters>("spacecraftinstruments_renderable_modelprojection");
 }
 
 RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& dictionary)
@@ -153,8 +163,8 @@ bool RenderableModelProjection::isReady() const {
 void RenderableModelProjection::initializeGL() {
     _programObject = global::renderEngine->buildRenderProgram(
         "ModelShader",
-        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_vs.glsl"),
-        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_fs.glsl")
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablemodel_vs.glsl"),
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablemodel_fs.glsl")
     );
 
     ghoul::opengl::updateUniformLocations(*_programObject, _mainUniformCache);
@@ -162,10 +172,10 @@ void RenderableModelProjection::initializeGL() {
     _fboProgramObject = ghoul::opengl::ProgramObject::Build(
         "ProjectionPass",
         absPath(
-            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelProjection_vs.glsl"
+            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablemodelprojection_vs.glsl"
         ),
         absPath(
-            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelProjection_fs.glsl"
+            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablemodelprojection_fs.glsl"
         )
     );
 
@@ -173,8 +183,8 @@ void RenderableModelProjection::initializeGL() {
 
     _depthFboProgramObject = ghoul::opengl::ProgramObject::Build(
         "DepthPass",
-        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelDepth_vs.glsl"),
-        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelDepth_fs.glsl")
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablemodeldepth_vs.glsl"),
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablemodeldepth_fs.glsl")
     );
 
     ghoul::opengl::updateUniformLocations(*_depthFboProgramObject, _depthFboUniformCache);
@@ -272,12 +282,10 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
     );
 
     ghoul::opengl::TextureUnit baseUnit;
-    baseUnit.activate();
     _programObject->setUniform(_mainUniformCache.baseTexture, baseUnit);
 
     ghoul::opengl::TextureUnit projectionUnit;
-    projectionUnit.activate();
-    _projectionComponent.projectionTexture().bind();
+    projectionUnit.bind(_projectionComponent.projectionTexture());
     _programObject->setUniform(_mainUniformCache.projectionTexture, projectionUnit);
 
     _geometry->render(*_programObject, false);
@@ -312,7 +320,7 @@ void RenderableModelProjection::update(const UpdateData& data) {
     const double time = data.time.j2000Seconds();
     const double integrateFromTime = data.previousFrameTime.j2000Seconds();
 
-    // Only project new images if time changed since last update.
+    // Only project new images if time changed since last update
     if (time > integrateFromTime && ImageSequencer::ref().isReady() &&
         _projectionComponent.doesPerformProjection())
     {
@@ -350,11 +358,11 @@ void RenderableModelProjection::imageProjectGPU(
         _projectionComponent.depthMapRenderBegin();
         _depthFboProgramObject->activate();
         _depthFboProgramObject->setUniform(
-            _depthFboUniformCache.ProjectorMatrix,
+            _depthFboUniformCache.projectorMatrix,
             projectorMatrix
         );
         _depthFboProgramObject->setUniform(
-            _depthFboUniformCache.ModelTransform,
+            _depthFboUniformCache.modelTransform,
             _transform
         );
 
@@ -368,8 +376,7 @@ void RenderableModelProjection::imageProjectGPU(
     _fboProgramObject->activate();
 
     ghoul::opengl::TextureUnit unitFbo;
-    unitFbo.activate();
-    projectionTexture.bind();
+    unitFbo.bind(projectionTexture);
     _fboProgramObject->setUniform(_fboUniformCache.projectionTexture, unitFbo);
 
     _fboProgramObject->setUniform(
@@ -379,13 +386,12 @@ void RenderableModelProjection::imageProjectGPU(
 
     ghoul::opengl::TextureUnit unitDepthFbo;
     if (_projectionComponent.needsShadowMap()) {
-        unitDepthFbo.activate();
-        _projectionComponent.depthTexture().bind();
+        unitDepthFbo.bind(_projectionComponent.depthTexture());
         _fboProgramObject->setUniform(_fboUniformCache.depthTexture, unitDepthFbo);
     }
 
-    _fboProgramObject->setUniform(_fboUniformCache.ProjectorMatrix, projectorMatrix);
-    _fboProgramObject->setUniform(_fboUniformCache.ModelTransform, _transform);
+    _fboProgramObject->setUniform(_fboUniformCache.projectorMatrix, projectorMatrix);
+    _fboProgramObject->setUniform(_fboUniformCache.modelTransform, _transform);
     _fboProgramObject->setUniform(_fboUniformCache.boresight, _boresight);
 
     _geometry->render(*_fboProgramObject, false, true);
@@ -434,4 +440,4 @@ glm::mat4 RenderableModelProjection::attitudeParameters(double time, const glm::
     );
 }
 
-}  // namespace openspace
+} // namespace openspace

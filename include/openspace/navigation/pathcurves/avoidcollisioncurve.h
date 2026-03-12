@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,11 +29,10 @@
 
 #include <vector>
 
-namespace openspace { class SceneGraphNode; }
+namespace openspace {
 
-namespace openspace::interaction {
-
-class WayPoint;
+class SceneGraphNode;
+class Waypoint;
 
 class AvoidCollisionCurve : public PathCurve {
 public:
@@ -45,6 +44,6 @@ private:
     std::vector<SceneGraphNode*> _relevantNodes;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___AVOIDCOLLISIONCURVE___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,28 +25,36 @@
 #include <modules/base/rendering/screenspacerenderablerenderable.h>
 
 #include <openspace/camera/camera.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/scene/translation.h>
+#include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/misc/dictionary.h>
+#include <limits>
+#include <optional>
+#include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TimeInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TimeInfo = {
         "Time",
         "Time",
         "The time (in J2000 seconds) that is used to calculate transformations and the "
         "renderable's data."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CameraPositionInfo = {
+    constexpr Property::PropertyInfo CameraPositionInfo = {
         "CameraPosition",
         "Camera position",
         "Specifies the location of the virtual camera that is showing the renderable "
         "class. This position is provided in meters."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CameraCenterInfo = {
+    constexpr Property::PropertyInfo CameraCenterInfo = {
         "CameraCenter",
         "Camera center",
         "The location of the camera's focal point. The camera's view direction will "
@@ -54,20 +62,20 @@ namespace {
         "in meters."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CameraUpInfo = {
+    constexpr Property::PropertyInfo CameraUpInfo = {
         "CameraUp",
         "Camera up",
         "The direction that is 'up' for the provided camera. This value does not have "
         "any units."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CameraFovInfo = {
+    constexpr Property::PropertyInfo CameraFovInfo = {
         "CameraFov",
         "Camera field of view",
         "The camera's field of view in degrees."
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo TransformInfo = {
+    const PropertyOwner::PropertyOwnerInfo TransformInfo = {
         "Transform",
         "Transform",
         "The Translation, Rotation, and Scale that are applied to the rendered "
@@ -93,26 +101,25 @@ namespace {
         // The [Renderable](#renderable) object that is shown in this ScreenSpace object.
         // See the list of creatable renderable objects for options that can be used for
         // this type.
-        ghoul::Dictionary renderable [[codegen::reference("renderable")]];
+        ghoul::Dictionary renderable [[codegen::reference("core_renderable")]];
 
         struct Transform {
             // The [Translation](#core_transform_translation) object that is used for the
             // provided [Renderable](#renderable). If no value is specified, a
-            // [StaticTranslation](#base_transform_translation_static) is created instead.
+            // [StaticTranslation](#base_translation_static) is created instead.
             std::optional<ghoul::Dictionary> translation
-                [[codegen::reference("core_transform_translation")]];
+                [[codegen::reference("core_translation")]];
 
             // The [Rotation](#core_transform_rotation) object that is used for the
             // provided [Renderable](#renderable). If no value is specified, a
-            // [StaticRotation](#base_transform_rotation_static) is created instead.
+            // [StaticRotation](#base_rotation_static) is created instead.
             std::optional<ghoul::Dictionary> rotation
-                [[codegen::reference("core_transform_rotation")]];
+                [[codegen::reference("core_rotation")]];
 
             // The [Scale](#core_transform_scale) object that is used for the provided
             // [Renderable](#renderable). If no value is specified, a
-            // [StaticScale](#base_transform_scale_static) is created instead.
-            std::optional<ghoul::Dictionary> scale
-                [[codegen::reference("core_transform_scale")]];
+            // [StaticScale](#base_scale_static) is created instead.
+            std::optional<ghoul::Dictionary> scale [[codegen::reference("core_scale")]];
         };
         // The collection of transformations that are applied to the
         // [Renderable](#renderable) before it is shown on screen.
@@ -135,12 +142,12 @@ namespace {
         // [[codegen::verbatim(CameraFovInfo.description)]]
         std::optional<float> cameraFov;
     };
-#include "screenspacerenderablerenderable_codegen.cpp"
 } // namespace
+#include "screenspacerenderablerenderable_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceRenderableRenderable::Documentation() {
+Documentation ScreenSpaceRenderableRenderable::Documentation() {
     return codegen::doc<Parameters>(
         "base_screenspace_renderable",
         ScreenSpaceRenderableFramebuffer::Documentation()
@@ -189,8 +196,8 @@ ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
     _renderable = Renderable::createFromDictionary(p.renderable);
     addPropertySubOwner(_renderable.get());
 
-    _transform.parent = ghoul::mm_unique_ptr<properties::PropertyOwner>(
-        new properties::PropertyOwner(TransformInfo)
+    _transform.parent = ghoul::mm_unique_ptr<PropertyOwner>(
+        new PropertyOwner(TransformInfo)
     );
     addPropertySubOwner(_transform.parent.get());
 
@@ -251,8 +258,8 @@ void ScreenSpaceRenderableRenderable::initializeGL() {
 
         Camera camera;
         // @TODO (2025-03-24, abock): These two lines can be removed once #3573 is fixed
-        camera.setPositionVec3(glm::dvec3(0.0, 0.0, 0.0));
-        camera.setRotation(glm::dvec3(0.0, 0.0, 0.0));
+        camera.setPosition(glm::dvec3(0.0));
+        camera.setRotation(glm::dvec3(0.0));
 
         glm::mat4 view = glm::lookAt(
             _cameraPosition.value(),
@@ -270,7 +277,7 @@ void ScreenSpaceRenderableRenderable::initializeGL() {
         );
         camera.sgctInternal.setProjectionMatrix(proj);
 
-        openspace::RenderData renderData = {
+        const openspace::RenderData renderData = {
             .camera = camera,
             .time = Time(_time),
             .modelTransform = {

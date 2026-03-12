@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,13 +25,16 @@
 #ifndef __OPENSPACE_CORE___ASSET___H__
 #define __OPENSPACE_CORE___ASSET___H__
 
-#include <openspace/util/resourcesynchronization.h>
+#include <atomic>
 #include <filesystem>
 #include <optional>
+#include <string>
+#include <vector>
 
 namespace openspace {
 
 class AssetManager;
+class ResourceSynchronization;
 
 /**
  * This class represents a successfully loaded Asset. Each Lua asset file results in
@@ -50,7 +53,7 @@ class AssetManager;
  * Asset transitions into the Synchronized state (#isLoaded = true,
  * #isSynchronized = true, #isInitialized = false) and after the final initialization
  * step, the asset is initialized (#isLoaded = true, #isSynchronized = true and
- * #isInitialized = true)
+ * #isInitialized = true).
  */
 class Asset {
 public:
@@ -102,7 +105,8 @@ public:
      *
      * \param synchronization The resource synchronization object that is bound to this
      *        Asset
-     * \pre \p synchronization must not be nullptr
+     *
+     * \pre \p synchronization must not be `nullptr`
      * \pre \p synchronization must not have been added to this Asset before
      */
     void addSynchronization(ResourceSynchronization* synchronization);
@@ -149,7 +153,7 @@ public:
     bool hasLoadedParent();
 
     /**
-     * Returns `true` if this Asset has been successfully #load ed.
+     * Returns `true` if this Asset has been successfully #load%ed.
      *
      * /return `true` if this Asset has been successfully loaded
      */
@@ -191,9 +195,9 @@ public:
     void initialize();
 
     /**
-     * Returns `true` if this Asset has been #initialize d successfully.
+     * Returns `true` if this Asset has been #initialize%d successfully.
      *
-     * \return `true` if this Asset has been #initialize d successfully. It returns
+     * \return `true` if this Asset has been #initialize%d successfully. It returns
      *         `false` both if this initialization failed as well as if thie #initialize
      *         function has not been called on this Asset
      */
@@ -228,7 +232,7 @@ public:
      *
      * \param dependency The asset that is required by this asset
      *
-     * \pre \p dependency must not be nullptr
+     * \pre \p dependency must not be `nullptr`
      */
     void require(Asset* dependency);
 
@@ -275,8 +279,10 @@ public:
     std::optional<MetaInformation> metaInformation() const;
 
 private:
-    /// All of the (internal) states that the Asset can move through. The externally
-    /// visible states (Loaded, Synchronized, Initialized) are a subset of these states
+    /**
+     * All of the (internal) states that the Asset can move through. The externally
+     * visible states (Loaded, Synchronized, Initialized) are a subset of these states.
+     */
     enum class State {
         /// The asset is created, but the Lua file has not been executed yet
         Unloaded,

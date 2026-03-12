@@ -15,7 +15,7 @@ local data = asset.resource({
 local video = data .. "examplevideo_fisheye.mp4"
 
 local Node = {
-  Identifier = "RenderableVideoSphere_Example",
+  Identifier = "RenderableVideoSphere_Example_FisheyeMapping",
   Renderable = {
     Type = "RenderableVideoSphere",
     Video = video,

@@ -31,6 +31,7 @@ local Moon = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 1738140,
+    ModelSpaceRenderingCutoffLevel = 12,
     ShadowGroup = {
       Sources = {
         { Name = sunAsset.Sun.Identifier, Radius = 696300000 },

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,11 +26,15 @@
 
 #include <openspace/documentation/documentation.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/loglevel.h>
 #include <ghoul/logging/htmllog.h>
+#include <ghoul/logging/log.h>
+#include <ghoul/logging/loglevel.h>
 #include <ghoul/logging/textlog.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
+#include <filesystem>
 #include <optional>
+#include <string_view>
 
 namespace {
     constexpr std::string_view BootstrapPath = "${WEB}/common/bootstrap.min.css";
@@ -42,33 +46,33 @@ namespace {
             Html [[codegen::key("html")]],
             Text
         };
-        // The type of the new log to be generated
+        // The type of the new log to be generated.
         Type type;
 
-        // The filename to which the log will be written
+        // The filename to which the log will be written.
         std::string file;
 
         // Determines whether the file will be cleared at startup or if the contents will
-        // be appended to previous runs
+        // be appended to previous runs.
         std::optional<bool> append;
 
-        // The number of files that should be kept around for this Log
+        // The number of files that should be kept around for this Log.
         std::optional<int> logRotation [[codegen::greater(0)]];
 
         // Determines whether the log entires should be stamped with the time at which the
-        // message was logged
+        // message was logged.
         std::optional<bool> timeStamping;
 
         // Determines whether the log entries should be stamped with the date at which the
-        // message was logged
+        // message was logged.
         std::optional<bool> dateStamping;
 
         // Determines whether the log entries should be stamped with the category that
-        // creates the log message
+        // creates the log message.
         std::optional<bool> categoryStamping;
 
         // Determines whether the log entries should be stamped with the log level that
-        // was used to create the log message
+        // was used to create the log message.
         std::optional<bool> logLevelStamping;
 
         enum class [[codegen::map(ghoul::logging::LogLevel)]] LogLevel {
@@ -81,15 +85,15 @@ namespace {
             Fatal,
             NoLogging
         };
-        // The log level for this specific text-based log
+        // The log level for this specific text-based log.
         std::optional<LogLevel> logLevel;
     };
-#include "logfactory_codegen.cpp"
 } // namespace
+#include "logfactory_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation LogFactoryDocumentation() {
+Documentation LogFactoryDocumentation() {
     return codegen::doc<Parameters>("core_logfactory");
 }
 

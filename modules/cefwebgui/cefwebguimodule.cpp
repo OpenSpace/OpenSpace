@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,10 +24,10 @@
 
 #include <modules/cefwebgui/cefwebguimodule.h>
 
-#include <modules/webbrowser/webbrowsermodule.h>
 #include <modules/cefwebgui/include/guirenderhandler.h>
 #include <modules/cefwebgui/include/guikeyboardhandler.h>
 #include <modules/webbrowser/include/browserinstance.h>
+#include <modules/webbrowser/webbrowsermodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
@@ -37,41 +37,44 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "This setting determines whether the browser should be enabled or not.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
+    constexpr Property::PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
         "Trigger this property to reload the browser.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
+    constexpr Property::PropertyInfo VisibleInfo = {
         "Visible",
         "Is visible",
         "This setting determines whether the browser should be visible or not.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GuiUrlInfo = {
+    constexpr Property::PropertyInfo GuiUrlInfo = {
         "GuiUrl",
         "Gui URL",
         "The URL of the webpage that is used to load the WebGUI from.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GuiScaleInfo = {
+    constexpr Property::PropertyInfo GuiScaleInfo = {
         "GuiScale",
         "Gui scale",
         "GUI scale multiplier.",
-        openspace::properties::Property::Visibility::Always
+        Property::Visibility::Always
     };
 
     struct [[codegen::Dictionary(CefWebGuiModule)]] Parameters {
@@ -83,14 +86,13 @@ namespace {
 
         // [[codegen::verbatim(VisibleInfo.description)]]
         std::optional<bool> visible;
-
     };
-#include "cefwebguimodule_codegen.cpp"
 } // namespace
+#include "cefwebguimodule_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation CefWebGuiModule::Documentation() {
+Documentation CefWebGuiModule::Documentation() {
     return codegen::doc<Parameters>("module_cefwebgui");
 }
 
@@ -201,12 +203,12 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         }
     });
 
-    // We need this to make sure that the browser is reloaded
-    // once the endpoint comes online, on OpenSpace startup.
+    // We need this to make sure that the browser is reloaded once the endpoint comes
+    // online, on OpenSpace startup
 
     // TODO: See if the hardcoded endpoint `gui` below can be removed.
-    // Possible fix: Reload browser if cefwebgui is routed to localhost
-    // and the same endpoint that just came online.
+    // Possible fix: Reload browser if cefwebgui is routed to localhost and the same
+    // endpoint that just came online.
     WebGuiModule* webGuiModule = global::moduleEngine->module<WebGuiModule>();
 
     _endpointCallback = webGuiModule->addEndpointChangeCallback(

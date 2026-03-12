@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,8 +31,18 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
+#include <numeric>
+#include <utility>
 
 #ifdef WIN32
 #pragma warning (push)
@@ -46,207 +56,200 @@
 #endif // WIN32
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "TouchInteraction";
 
-    constexpr openspace::properties::Property::PropertyInfo UnitTestInfo = {
+    constexpr Property::PropertyInfo UnitTestInfo = {
         "UnitTest",
         "Take a unit test saving the LM data into file",
-        "LM - least-squares minimization using Levenberg-Marquardt algorithm."
-        "Used to find a new camera state from touch points when doing direct "
-        "manipulation.",
-        openspace::properties::Property::Visibility::Developer
+        "LM - least-squares minimization using Levenberg-Marquardt algorithm. Used to "
+        "find a new camera state from touch points when doing direct manipulation.",
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableZoomInfo = {
+    constexpr Property::PropertyInfo DisableZoomInfo = {
         "DisableZoom",
         "Disable zoom navigation",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableRollInfo = {
+    constexpr Property::PropertyInfo DisableRollInfo = {
         "DisableRoll",
         "Disable roll navigation",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SetDefaultInfo = {
+    constexpr Property::PropertyInfo SetDefaultInfo = {
         "SetDefault",
         "Reset all properties to default",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MaxTapTimeInfo = {
+    constexpr Property::PropertyInfo MaxTapTimeInfo = {
         "MaxTapTime",
         "Max tap delay (in ms) for double tap",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DecelatesPerSecondInfo = {
+    constexpr Property::PropertyInfo DecelatesPerSecondInfo = {
         "DeceleratesPerSecond",
         "Number of times velocity is decelerated per second",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TouchScreenSizeInfo = {
+    constexpr Property::PropertyInfo TouchScreenSizeInfo = {
         "TouchScreenSize",
         "Touch screen size in inches",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TapZoomFactorInfo = {
+    constexpr Property::PropertyInfo TapZoomFactorInfo = {
         "TapZoomFactor",
         "Scaling distance travelled on tap",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PinchZoomFactorInfo = {
+    constexpr Property::PropertyInfo PinchZoomFactorInfo = {
         "PinchZoomFactor",
         "Scaling distance travelled on pinch",
         "This value is used to reduce the amount of pinching needed. A linear kind of "
         "sensitivity that will alter the pinch-zoom speed.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RollThresholdInfo = {
+    constexpr Property::PropertyInfo RollThresholdInfo = {
         "RollThreshold",
         "Threshold for min angle for roll interpret",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ZoomSensitivityExpInfo = {
+    constexpr Property::PropertyInfo ZoomSensitivityExpInfo = {
         "ZoomSensitivityExp",
         "Sensitivity of exponential zooming in relation to distance from focus node",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ZoomSensitivityPropInfo = {
+    constexpr Property::PropertyInfo ZoomSensitivityPropInfo = {
         "ZoomSensitivityProp",
         "Sensitivity of zooming proportional to distance from focus node",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        ZoomSensitivityDistanceThresholdInfo =
-    {
+    constexpr Property::PropertyInfo ZoomSensitivityDistanceThresholdInfo = {
         "ZoomSensitivityDistanceThreshold",
         "Threshold of distance to target node for whether or not to use exponential "
         "zooming",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        ZoomInBoundarySphereMultiplierInfo =
-    {
+    constexpr Property::PropertyInfo ZoomInBoundarySphereMultiplierInfo = {
         "ZoomInBoundarySphereMultiplier",
         "Multiplies a node's boundary sphere by this in order to limit zoom in & prevent "
         "surface collision.",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        ZoomOutBoundarySphereMultiplierInfo =
-    {
+    constexpr Property::PropertyInfo ZoomOutBoundarySphereMultiplierInfo = {
         "ZoomOutBoundarySphereMultiplier",
         "Multiplies a node's boundary sphere by this in order to limit zoom out",
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ConstantTimeDecaySecsInfo = {
+    constexpr Property::PropertyInfo ConstantTimeDecaySecsInfo = {
         "ConstantTimeDecaySecs",
         "Time duration that a pitch/roll/zoom/pan should take to decay to zero (seconds)",
         "",  // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InputSensitivityInfo = {
+    constexpr Property::PropertyInfo InputSensitivityInfo = {
         "InputSensitivity",
         "Threshold for interpreting input as still",
         "",  // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StationaryCentroidInfo = {
+    constexpr Property::PropertyInfo StationaryCentroidInfo = {
         "CentroidStationary",
         "Threshold for stationary centroid",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PanModeInfo = {
+    constexpr Property::PropertyInfo PanModeInfo = {
         "PanMode",
         "Allow panning gesture",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PanDeltaDistanceInfo = {
+    constexpr Property::PropertyInfo PanDeltaDistanceInfo = {
         "PanDeltaDistance",
         "Delta distance between fingers allowed for interpreting pan interaction",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FrictionInfo = {
+    constexpr Property::PropertyInfo FrictionInfo = {
         "Friction",
         "Friction for different interactions (orbit, zoom, roll, pan)",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ZoomOutLimitInfo = {
+    constexpr Property::PropertyInfo ZoomOutLimitInfo = {
         "ZoomOutLimit",
         "Zoom out Limit",
-        "The maximum distance you are allowed to navigate away from the anchor. "
-        "This should always be larger than the zoom in value if you want to be able "
-        "to zoom. Defaults to maximum allowed double.",
-        openspace::properties::Property::Visibility::User
+        "The maximum distance you are allowed to navigate away from the anchor. This "
+        "should always be larger than the zoom in value if you want to be able to zoom. "
+        "Defaults to maximum allowed double.",
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ZoomInLimitInfo = {
+    constexpr Property::PropertyInfo ZoomInLimitInfo = {
         "ZoomInLimit",
         "Zoom in Limit",
-        "The minimum distance from the anchor that you are allowed to navigate to. "
-        "Its purpose is to limit zooming in on a node. If this value is not set it "
-        "defaults to the surface of the current anchor.",
-        openspace::properties::Property::Visibility::User
+        "The minimum distance from the anchor that you are allowed to navigate to. Its "
+        "purpose is to limit zooming in on a node. If this value is not set it defaults "
+        "to the surface of the current anchor.",
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        EnableDirectManipulationInfo =
-    {
+    constexpr Property::PropertyInfo EnableDirectManipulationInfo = {
         "EnableDirectManipulation",
         "Enable direct manipulation",
         "Decides whether the direct manipulation mode should be enabled or not.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        DirectManipulationThresholdInfo =
-    {
+    constexpr Property::PropertyInfo DirectManipulationThresholdInfo = {
         "DirectManipulationThreshold",
         "Direct manipulation threshold",
         "This threshold affects the distance from the interaction sphere at which the "
-        "direct manipulation interaction mode starts being active. The value is given "
-        "as a factor times the interaction sphere.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "direct manipulation interaction mode starts being active. The value is given as "
+        "a factor times the interaction sphere.",
+        Property::Visibility::AdvancedUser
     };
 
-    // Compute coefficient of decay based on current frametime; if frametime has been
-    // longer than usual then multiple decay steps may be applied to keep the decay
-    // relative to user time
-    double computeDecayCoeffFromFrametime(double coeff, int times) {
+    /**
+     * Compute coefficient of decay based on current frametime; if frametime has been
+     * longer than usual then multiple decay steps may be applied to keep the decay
+     * relative to user time.
+     */
+    constexpr double computeDecayCoeffFromFrametime(double coeff, int times) {
         if (coeff > 0.00001) {
             return std::pow(coeff, times);
         }
@@ -259,7 +262,7 @@ namespace {
 namespace openspace {
 
 TouchInteraction::TouchInteraction()
-    : properties::PropertyOwner({ "TouchInteraction", "Touch Interaction" })
+    : PropertyOwner({ "TouchInteraction", "Touch Interaction" })
     , _unitTest(UnitTestInfo, false)
     , _disableZoom(DisableZoomInfo, false)
     , _disableRoll(DisableRollInfo, false)
@@ -310,10 +313,13 @@ TouchInteraction::TouchInteraction()
     )
     , _constTimeDecay_secs(ConstantTimeDecaySecsInfo, 1.75f, 0.1f, 4.f)
     // Calculated with two vectors with known diff in length, then
-    // projDiffLength/diffLength.
+    // projDiffLength/diffLength
     , _enableDirectManipulation(EnableDirectManipulationInfo, true)
     , _directTouchDistanceThreshold(DirectManipulationThresholdInfo, 5.f, 0.f, 10.f)
-    , _pinchInputs({ TouchInput(0, 0, 0.f, 0.f, 0.0), TouchInput(0, 0, 0.f, 0.f, 0.0) })
+    , _pinchInputs({
+        TouchInputHolder(TouchInput(0, 0, glm::vec2(0.f), 0.0)),
+        TouchInputHolder(TouchInput(0, 0, glm::vec2(0.f), 0.0))
+    })
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
     , _sensitivity{ glm::dvec2(0.08, 0.045), 12.0, 2.75, glm::dvec2(0.08, 0.045) }
 {
@@ -374,8 +380,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
     }
 
     if (_tap) {
-        // @TODO (2023-02-01, emmbr) This if is not triggered on every touch tap.
-        // Why?
+        // @TODO (2023-02-01, emmbr) This if is not triggered on every touch tap. Why?
 
         // Check for doubletap
         std::chrono::milliseconds timestamp = duration_cast<std::chrono::milliseconds>(
@@ -417,8 +422,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
         resetAfterInput();
     }
 
-    _directTouchMode = _enableDirectManipulation &&
-        _isWithinDirectTouchDistance &&
+    _directTouchMode = _enableDirectManipulation && _isWithinDirectTouchDistance &&
         !_selectedNodeSurfacePoints.empty() &&
         numFingers == _selectedNodeSurfacePoints.size();
 
@@ -452,7 +456,8 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
 
     // Find best transform values for the new camera state and store them in par
     std::vector<double> par(6, 0.0);
-    par[0] = _lastVel.orbit.x; // use _lastVel for orbit
+    // Use _lastVel for orbit
+    par[0] = _lastVel.orbit.x;
     par[1] = _lastVel.orbit.y;
     bool lmSuccess = _directInputSolver.solve(
         list,
@@ -509,21 +514,21 @@ void TouchInteraction::updateNodeSurfacePoints(const std::vector<TouchInputHolde
     }
 
     glm::dquat camToWorldSpace = _camera->rotationQuaternion();
-    glm::dvec3 camPos = _camera->positionVec3();
+    glm::dvec3 camPos = _camera->position();
     std::vector<DirectInputSolver::SelectedBody> surfacePoints;
 
     for (const TouchInputHolder& inputHolder : list) {
         // Normalized -1 to 1 coordinates on screen
-        const double xCo = 2 * (inputHolder.latestInput().x - 0.5);
-        const double yCo = -2 * (inputHolder.latestInput().y - 0.5);
+        const double xCo = 2.f * (inputHolder.latestInput().pos.x - 0.5f);
+        const double yCo = -2.f * (inputHolder.latestInput().pos.y - 0.5f);
         const glm::dvec3 cursorInWorldSpace = camToWorldSpace *
             glm::dvec3(glm::inverse(_camera->projectionMatrix()) *
             glm::dvec4(xCo, yCo, -1.0, 1.0));
         const glm::dvec3 raytrace = glm::normalize(cursorInWorldSpace);
         const size_t id = inputHolder.fingerId();
 
-        // Compute positions on anchor node, by checking if touch input
-        // intersect interaction sphere
+        // Compute positions on anchor node, by checking if touch input intersect
+        // interaction sphere
         double intersectionDist = 0.0;
         const bool intersected = glm::intersectRaySphere(
             camPos,
@@ -536,11 +541,15 @@ void TouchInteraction::updateNodeSurfacePoints(const std::vector<TouchInputHolde
         if (intersected) {
             glm::dvec3 intersectionPos = camPos + raytrace * intersectionDist;
             glm::dvec3 pointInModelView = glm::inverse(node->worldRotationMatrix()) *
-                                            (intersectionPos - node->worldPosition());
+                                          (intersectionPos - node->worldPosition());
 
             // Note that node is saved as the direct input solver was initially
             // implemented to handle touch contact points on multiple nodes
-            surfacePoints.push_back({ id, node, pointInModelView });
+            surfacePoints.push_back({
+                .id = id,
+                .node = node,
+                .coordinates = pointInModelView
+            });
         }
     }
 
@@ -556,10 +565,7 @@ TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list
     glm::fvec2 lastCentroid = _centroid;
     _centroid = glm::vec2(0.f, 0.f);
     for (const TouchInputHolder& inputHolder : list) {
-        _centroid += glm::vec2(
-            inputHolder.latestInput().x,
-            inputHolder.latestInput().y
-        );
+        _centroid += inputHolder.latestInput().pos;
     }
     _centroid /= static_cast<float>(list.size());
 
@@ -569,16 +575,12 @@ TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list
     TouchInput distInput = list[0].latestInput();
     for (const TouchInputHolder& inputHolder : list) {
         const TouchInput& latestInput = inputHolder.latestInput();
-        dist += glm::length(
-            glm::dvec2(latestInput.x, latestInput.y) -
-            glm::dvec2(distInput.x, distInput.y)
-        );
+        dist += glm::length(glm::dvec2(latestInput.pos) - glm::dvec2(distInput.pos));
         distInput = latestInput;
     }
     distInput = lastProcessed[0];
     for (const TouchInput& p : lastProcessed) {
-        lastDist += glm::length(glm::dvec2(p.x, p.y) -
-                    glm::dvec2(distInput.x, distInput.y));
+        lastDist += glm::length(glm::dvec2(p.pos) - glm::dvec2(distInput.pos));
         distInput = p;
     }
     // Find the slowest moving finger - used in roll interpretation
@@ -597,7 +599,8 @@ TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list
         const TouchInput& latestInput = inputHolder.latestInput();
         const TouchInput& prevInput = *it;
 
-        double diff = latestInput.x - prevInput.x + latestInput.y - prevInput.y;
+        const glm::vec2 d = latestInput.pos - prevInput.pos;
+        const double diff = d.x + d.y;
 
         if (!inputHolder.isMoving()) {
             minDiff = 0.0;
@@ -621,9 +624,9 @@ TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list
             );
 
             double res = 0.0;
-            float lastAngle = lastPoint.angleToPos(_centroid.x, _centroid.y);
+            float lastAngle = lastPoint.angleToPos(_centroid);
             float currentAngle =
-                inputHolder.latestInput().angleToPos(_centroid.x, _centroid.y);
+                inputHolder.latestInput().angleToPos(_centroid);
 
             if (lastAngle > currentAngle + 1.5f * glm::pi<float>()) {
                 res = currentAngle + (2.f * glm::pi<float>() - lastAngle);
@@ -751,14 +754,20 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
             using namespace glm;
             const TouchInput& startFinger0 = _pinchInputs[0].firstInput();
             const TouchInput& startFinger1 = _pinchInputs[1].firstInput();
-            const dvec2 startVec0 = dvec2(startFinger0.x * aspectRatio, startFinger0.y);
-            const dvec2 startVec1 = dvec2(startFinger1.x * aspectRatio, startFinger1.y);
+            const dvec2 startVec0 = dvec2(
+                startFinger0.pos.x * aspectRatio,
+                startFinger0.pos.y
+            );
+            const dvec2 startVec1 = dvec2(
+                startFinger1.pos.x * aspectRatio,
+                startFinger1.pos.y
+            );
             double distToCentroidStart = length(startVec0 - startVec1) / 2.0;
 
             const TouchInput& endFinger0 = _pinchInputs[0].latestInput();
             const TouchInput& endFinger1 = _pinchInputs[1].latestInput();
-            const dvec2 endVec0 = dvec2(endFinger0.x * aspectRatio, endFinger0.y);
-            const dvec2 endVec1 = dvec2(endFinger1.x * aspectRatio, endFinger1.y);
+            const dvec2 endVec0 = dvec2(endFinger0.pos.x * aspectRatio, endFinger0.pos.y);
+            const dvec2 endVec1 = dvec2(endFinger1.pos.x * aspectRatio, endFinger1.pos.y);
             double distToCentroidEnd = length(endVec0 - endVec1) / 2.0;
 
             double zoomFactor = distToCentroidEnd - distToCentroidStart;
@@ -791,11 +800,8 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
                         }
                     );
                     double res = diff;
-                    float lastAngle = point.angleToPos(_centroid.x, _centroid.y);
-                    float currentAngle = holder.latestInput().angleToPos(
-                        _centroid.x,
-                        _centroid.y
-                    );
+                    float lastAngle = point.angleToPos(_centroid);
+                    float currentAngle = holder.latestInput().angleToPos(_centroid);
                     // Ifs used to set angles 359 + 1 = 0 and 0 - 1 = 359
                     if (lastAngle > currentAngle + 1.5 * glm::pi<float>()) {
                         res += currentAngle + (2 * glm::pi<float>() - lastAngle);
@@ -855,7 +861,7 @@ double TouchInteraction::computeTapZoomDistance(double zoomGain) {
         return 0.0;
     }
 
-    double dist = glm::distance(_camera->positionVec3(), anchor->worldPosition());
+    double dist = glm::distance(_camera->position(), anchor->worldPosition());
     dist -= anchor->interactionSphere();
 
     double newVelocity = dist * _tapZoomFactor;
@@ -867,13 +873,15 @@ double TouchInteraction::computeTapZoomDistance(double zoomGain) {
 
 bool TouchInteraction::hasNonZeroVelocities() const {
     glm::dvec2 sum = _vel.orbit + glm::dvec2(_vel.zoom + _vel.roll, 0.0) + _vel.pan;
-    // Epsilon size based on that even if no interaction is happening,
-    // there might still be some residual velocity in the
+    // Epsilon size based on that even if no interaction is happening, there might still
+    // be some residual velocity in the
     return glm::length(sum) > 0.001;
 }
 
-// Main update call, calculates the new orientation and position for the camera depending
-// on _vel and dt. Called every frame
+/**
+ * Main update call, calculates the new orientation and position for the camera depending
+ * on _vel and dt. Called every frame.
+ */
 void TouchInteraction::step(double dt, bool directTouch) {
     using namespace glm;
 
@@ -887,7 +895,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
 
     if (anchor && _camera) {
         // Create variables from current state
-        dvec3 camPos = _camera->positionVec3();
+        dvec3 camPos = _camera->position();
         const dvec3 centerPos = anchor->worldPosition();
 
         dvec3 directionToCenter = normalize(centerPos - camPos);
@@ -955,8 +963,8 @@ void TouchInteraction::step(double dt, bool directTouch) {
         {
             // Zooming
 
-            // This is a rough estimate of the node surface
-            // If nobody has set another zoom in limit, use this as default zoom in bounds
+            // This is a rough estimate of the node surface. If nobody has set another
+            // zoom in limit, use this as default zoom in bounds
             double zoomInBounds = interactionSphere * _zoomInBoundarySphereMultiplier;
             bool isZoomInLimitSet = (_zoomInLimit.value() >= 0.0);
 
@@ -1060,12 +1068,12 @@ void TouchInteraction::step(double dt, bool directTouch) {
 
         decelerate(dt);
 
-        // @TODO (emmbr, 2023-02-08) This is ugly, but for now prevents jittering
-        // when zooming in closer than the orbital navigator allows. Long term, we
-        // should make the touch interaction tap into the orbitalnavigator and let that
-        // do the updating of the camera, instead of handling them separately. Then we
-        // would keep them in sync and avoid duplicated camera updating code.
-        interaction::OrbitalNavigator& orbitalNavigator =
+        // @TODO (emmbr, 2023-02-08) This is ugly, but for now prevents jittering when
+        // zooming in closer than the orbital navigator allows. Long term, we should make
+        // the touch interaction tap into the orbitalnavigator and let that do the
+        // updating of the camera, instead of handling them separately. Then we would keep
+        // them in sync and avoid duplicated camera updating code
+        OrbitalNavigator& orbitalNavigator =
             global::navigationHandler->orbitalNavigator();
         camPos = orbitalNavigator.pushToSurfaceOfAnchor(camPos);
 
@@ -1074,7 +1082,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
         // OrbitalNavigator is actually needed, and don't have duplicates
 
         // Update the camera state
-        _camera->setPositionVec3(camPos);
+        _camera->setPosition(camPos);
         _camera->setRotation(globalCamRot * localCamRot);
 
         // Mark that a camera interaction happened
@@ -1098,12 +1106,15 @@ void TouchInteraction::step(double dt, bool directTouch) {
     }
 }
 
-// Decelerate velocities, called a set number of times per second to dereference it from
-// frame time
-// Example:
-// Assume: frequency = 0.01, dt = 0.05 (200 fps), _timeSlack = 0.0001
-// times = floor((0.05 + 0.0001) / 0.01) = 5
-// _timeSlack = 0.0501 % 0.01 = 0.01
+/**
+ * Decelerate velocities, called a set number of times per second to dereference it from
+ * frame time.
+ *
+ * Example:
+ * Assume: frequency = 0.01, dt = 0.05 (200 fps), _timeSlack = 0.0001
+ *  times = floor((0.05 + 0.0001) / 0.01) = 5
+ * _timeSlack = 0.0501 % 0.01 = 0.01
+ */
 void TouchInteraction::decelerate(double dt) {
     _frameTimeAvg.updateWithNewFrame(dt);
     double expectedFrameTime = _frameTimeAvg.averageFrameTime();
@@ -1123,17 +1134,19 @@ void TouchInteraction::decelerate(double dt) {
     _vel.zoom *= computeDecayCoeffFromFrametime(_constTimeDecayCoeff.zoom,  times);
 }
 
-// Called if all fingers are off the screen
+/**
+ * Called if all fingers are off the screen.
+ */
 void TouchInteraction::resetAfterInput() {
 #ifdef TOUCH_DEBUG_PROPERTIES
     _debugProperties.nFingers = 0;
     _debugProperties.interactionMode = "None";
 #endif // TOUCH_DEBUG_PROPERTIES
-    // @TODO (emmbr 2023-02-03) Bring back feature that allows node to spin when
-    // the direct manipulaiton finger is let go. Should implement this using the
-    // orbitalnavigator's friction values. This also implies passing velocities to
-    // the orbitalnavigator, instead of setting the camera directly as is currently
-    // done in this class.
+    // @TODO (emmbr 2023-02-03) Bring back feature that allows node to spin when the
+    // direct manipulaiton finger is let go. Should implement this using the
+    // orbitalnavigator's friction values. This also implies passing velocities to the
+    // orbitalnavigator, instead of setting the camera directly as is currently done in
+    // this class
 
     // Reset variables
     _lastVel.orbit = glm::dvec2(0.0);
@@ -1148,7 +1161,9 @@ void TouchInteraction::resetAfterInput() {
     _selectedNodeSurfacePoints.clear();
 }
 
-// Reset all property values to default
+/**
+ * Reset all property values to default.
+ */
 void TouchInteraction::resetPropertiesToDefault() {
     _unitTest = false;
     _disableZoom = false;
@@ -1208,7 +1223,7 @@ double FrameTimeAverage::averageFrameTime() const {
 
 #ifdef TOUCH_DEBUG_PROPERTIES
 TouchInteraction::DebugProperties::DebugProperties()
-    : properties::PropertyOwner({ "TouchDebugProperties", "Touch Debug Properties"})
+    : PropertyOwner({ "TouchDebugProperties", "Touch Debug Properties"})
     , interactionMode(
         { "interactionMode", "Current interaction mode", "" },
         "Unknown"
@@ -1243,4 +1258,4 @@ TouchInteraction::DebugProperties::DebugProperties()
 }
 #endif // TOUCH_DEBUG_PROPERTIES
 
-} // openspace namespace
+} // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,12 +33,12 @@ struct BrickCover {
 
     BrickCover split(bool x, bool y, bool z) const;
 
-    int lowX;
-    int highX;
-    int lowY;
-    int highY;
-    int lowZ;
-    int highZ;
+    int lowX = 0;
+    int highX = 0;
+    int lowY = 0;
+    int highY = 0;
+    int lowZ = 0;
+    int highZ = 0;
 };
 
 } // namespace openspace

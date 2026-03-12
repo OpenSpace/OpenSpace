@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,6 +37,9 @@
 #include "profile/timedialog.h"
 #include "profile/uipanelsdialog.h"
 #include <openspace/scene/profile.h>
+#include <openspace/util/keys.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/stringconversion.h>
 #include <QDialogButtonBox>
 #include <QFileDialog>
 #include <QKeyEvent>
@@ -47,9 +50,10 @@
 #include <QVBoxLayout>
 #include <QWidget>
 #include <algorithm>
-#include <filesystem>
 #include <fstream>
 #include <ios>
+#include <utility>
+#include <vector>
 
 #ifdef WIN32
 #include <Windows.h>
@@ -95,7 +99,7 @@ namespace {
 
     std::string summarizeProperties(const std::vector<Profile::Property>& properties) {
         std::string results;
-        for (openspace::Profile::Property p : properties) {
+        for (Profile::Property p : properties) {
             results += std::format("{} = {}<br>", p.name, p.value);
         }
         return results;

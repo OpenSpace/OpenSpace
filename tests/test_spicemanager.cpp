@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -76,81 +76,7 @@ namespace {
         );
         CHECK(k8 == 10);
     }
-
-    int loadPCKKernel() {
-        const int kernelID = SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/cpck05Mar2004.tpc")
-        );
-        CHECK(kernelID == 3);
-        return kernelID;
-    }
 } // namespace
-
-TEST_CASE("SpiceManager: Has Value", "[spicemanager]") {
-    SpiceManager::initialize();
-
-    loadPCKKernel();
-
-    const int naifId = 399; // Earth
-    const std::string kernelPoolValue = "RADII";
-    const bool found = SpiceManager::ref().hasValue(naifId, kernelPoolValue);
-    CHECK(found);
-
-    SpiceManager::deinitialize();
-}
-
-TEST_CASE("SpiceManager: Get Value From ID 1D", "[spicemanager]") {
-    SpiceManager::initialize();
-
-    loadPCKKernel();
-
-    const std::string target  = "EARTH";
-    const std::string value1D = "MAG_NORTH_POLE_LAT";
-    double return1D = 0.0;
-    CHECK_NOTHROW(SpiceManager::ref().getValue(target, value1D, return1D));
-    CHECK(return1D == 78.565);
-
-    SpiceManager::deinitialize();
-}
-
-TEST_CASE("SpiceManager: Get Value From ID 3D", "[spicemanager]") {
-    SpiceManager::initialize();
-
-    loadPCKKernel();
-
-    const std::string target  = "EARTH";
-    const std::string value3D = "RADII";
-    glm::dvec3 return3D = glm::dvec3(0.0);
-    CHECK_NOTHROW(SpiceManager::ref().getValue(target, value3D, return3D));
-
-    CHECK(return3D.x == 6378.14);
-    CHECK(return3D.y == 6378.14);
-    CHECK(return3D.z == 6356.75);
-
-    SpiceManager::deinitialize();
-}
-
-TEST_CASE("SpiceManager: Get Value From ID ND", "[spicemanager]") {
-    SpiceManager::initialize();
-
-    loadPCKKernel();
-
-    const std::string target = "SATURN";
-    const std::string valueND = "RING6_A";
-    std::vector<double> returnND;
-    returnND.resize(5);
-    CHECK_NOTHROW(SpiceManager::ref().getValue(target, valueND, returnND));
-
-    std::vector<double> controlVec = { 189870.0, 256900.0, 9000.0, 9000.0, 0.000003 };
-
-    CHECK(controlVec.size() == returnND.size());
-
-    for (unsigned int i = 0; i < returnND.size(); i++) {
-        CHECK(controlVec[i] == returnND[i]);
-    }
-
-    SpiceManager::deinitialize();
-}
 
 TEST_CASE("SpiceManager: String To Ephemeris Time", "[spicemanager]") {
     SpiceManager::initialize();
@@ -308,7 +234,7 @@ TEST_CASE("SpiceManager: Get Position Transform Matrix", "[spicemanager]") {
 #elif defined __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-#endif
+#endif // __clang__
 
     // transform reference position into new frame
     std::array<double, 3> stateTransformed;
@@ -318,7 +244,7 @@ TEST_CASE("SpiceManager: Get Position Transform Matrix", "[spicemanager]") {
 #pragma clang diagnostic pop
 #elif defined __GNUC__
 #pragma GCC diagnostic pop
-#endif
+#endif // __clang__
 
     position = positionMatrix * position;
     // check transformed values match

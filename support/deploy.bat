@@ -109,7 +109,7 @@ exit /b 0
 echo ### Dealing with some files
 :: Remove unnecessary files of our own making
 del bin\RelWithDebInfo\*.pdb
-del bin\RelWithDebInfo\codegen.exe
+del bin\RelWithDebInfo\codegen-tool.exe
 del bin\RelWithDebInfo\Qt6Svg.dll
 
 :: Remove unnecessary Qt files

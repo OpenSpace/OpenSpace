@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,13 +31,10 @@
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/glm.h>
 
 namespace openspace {
 
 class SceneGraphNode;
-
-namespace documentation { struct Documentation; }
 
 class FixedRotation : public Rotation {
 public:
@@ -48,7 +45,7 @@ public:
     void update(const UpdateData& data) override;
     glm::dmat3 matrix(const UpdateData& data) const override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     glm::vec3 xAxis() const;
@@ -64,22 +61,22 @@ private:
             CoordinateSystemCompletion
         };
 
-        properties::OptionProperty type;
-        properties::StringProperty object;
-        properties::BoolProperty invertObject;
-        properties::Vec3Property vector;
-        properties::BoolProperty isOrthogonal;
+        OptionProperty type;
+        StringProperty object;
+        BoolProperty invertObject;
+        Vec3Property vector;
+        BoolProperty isOrthogonal;
 
-        SceneGraphNode* node;
+        SceneGraphNode* node = nullptr;
     };
 
-    properties::BoolProperty _enabled;
+    BoolProperty _enabled;
 
     Axis _xAxis;
     Axis _yAxis;
     Axis _zAxis;
 
-    properties::StringProperty _attachedObject;
+    StringProperty _attachedObject;
     SceneGraphNode* _attachedNode = nullptr;
 
     ghoul::Dictionary _constructorDictionary;

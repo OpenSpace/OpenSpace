@@ -10,10 +10,15 @@ local kernels = asset.resource({
 })
 
 local ID = {
+  Jupiter = "JUPITER",
   Callisto = "CALLISTO",
   Europa = "EUROPA",
   Ganymede = "GANYMEDE",
-  Io = "IO"
+  Io = "IO",
+  Amalthea = "AMALTHEA",
+  Thebe = "THEBE",
+  Adrastea = "ADRASTEA",
+  Metis = "METIS"
 }
 
 local Frame = {

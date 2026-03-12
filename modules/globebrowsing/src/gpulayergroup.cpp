@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,13 +24,19 @@
 
 #include <modules/globebrowsing/src/gpulayergroup.h>
 
+#include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
-#include <modules/globebrowsing/src/layermanager.h>
+#include <modules/globebrowsing/src/layergroupid.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
+#include <string>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                              const LayerGroup& layerGroup, const TileIndex& tileIndex)
@@ -86,9 +92,8 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                     ghoul_assert(ctp[j].has_value(), "Wrong ChunkTiles number in pile");
                     const ChunkTile& ct = *ctp[j];
 
-                    t.texUnit.activate();
                     if (ct.tile.texture) {
-                        ct.tile.texture->bind();
+                        t.texUnit.bind(*ct.tile.texture);
                     }
                     program.setUniform(t.uniformCache.texture, t.texUnit);
 
@@ -177,9 +182,9 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p, const LayerGroup& laye
 void GPULayerGroup::deactivate() {
     for (GPULayer& gal : _gpuActiveLayers) {
         for (GPULayer::GPUChunkTile& t : gal.gpuChunkTiles) {
-            t.texUnit.deactivate();
+            t.texUnit.unassign();
         }
     }
 }
 
-}  // namespace openspace::globebrowsing
+} // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,15 +25,25 @@
 #include <modules/sync/syncs/httpsynchronization.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/util/downloadeventengine.h>
 #include <openspace/util/httprequest.h>
 #include <ghoul/ext/assimp/contrib/zip/src/zip.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
+#include <algorithm>
+#include <chrono>
+#include <cstdint>
 #include <fstream>
+#include <istream>
+#include <mutex>
+#include <sstream>
+#include <string_view>
+#include <system_error>
 #include <unordered_map>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "HttpSynchronization";
@@ -45,29 +55,29 @@ namespace {
 
     struct [[codegen::Dictionary(HttpSynchronization)]] Parameters {
         // The unique identifier for this resource that is used to request a set of files
-        // from the synchronization servers
+        // from the synchronization servers.
         std::string identifier [[codegen::identifier()]];
 
-        // The version of this resource that should be requested
+        // The version of this resource that should be requested.
         int version;
 
         // Determines whether .zip files that are downloaded should automatically be
-        // unzipped. If this value is not specified, no unzipping is performed
+        // unzipped. If this value is not specified, no unzipping is performed.
         std::optional<bool> unzipFiles;
 
         // The destination for the unzipping. If this value is specified, all zip files
         // contained in the synchronization will be unzipped into the same specified
         // folder. If this value is specified, but 'unzipFiles' is false, no extaction
-        // will be performed
+        // will be performed.
         std::optional<std::string> unzipFilesDestination;
     };
-#include "httpsynchronization_codegen.cpp"
 } // namespace
+#include "httpsynchronization_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation HttpSynchronization::Documentation() {
-    return codegen::doc<Parameters>("http_synchronization");
+Documentation HttpSynchronization::Documentation() {
+    return codegen::doc<Parameters>("sync_synchronization_http");
 }
 
 HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict,
@@ -122,7 +132,7 @@ void HttpSynchronization::start() {
             for (const std::string& url : _syncRepositories) {
                 const SynchronizationState syncState = trySyncFromUrl(url + q);
 
-                // Could not get this sync repository list of files.
+                // Could not get this sync repository list of files
                 if (syncState == SynchronizationState::ListDownloadFail) {
                     continue;
                 }
@@ -200,25 +210,23 @@ bool HttpSynchronization::isEachFileDownloaded() {
 
     file >> line;
     // Ossync files that does not have a version number are already resolved
-    // As they are of the previous format.
     if (line == SynchronizationToken) {
         return true;
     }
-    // Otherwise first line is the version number.
+
     std::string ossyncVersion = line;
 
-    //Format of 1.0 ossync:
-    //Version number: E.g., 1.0
-    //Synchronization status: Synchronized or Partial Synchronized
-    //Optionally list of already synched files
+    // Format of 1.0 ossync:
+    // Version number: E.g., 1.0
+    // Synchronization status: Synchronized or Partial Synchronized
+    // Optionally list of already synched files
 
     if (ossyncVersion == OssyncVersionNumber) {
-        ghoul::getline(file >> std::ws, line); // Read synchronization status
+        ghoul::getline(file >> std::ws, line);
         if (line == SynchronizationToken) {
             return true;
         }
-        // File is only partially synchronized,
-        // store file urls that have been synched already
+        // File is only partially synchronized: store file URLS that are already synced
         while (file >> line) {
             if (line.empty() || line[0] == '#') {
                 // Skip all empty lines and commented out lines
@@ -231,9 +239,7 @@ bool HttpSynchronization::isEachFileDownloaded() {
         LERROR(std::format(
             "{}: Unknown ossync version number read."
             "Got {} while {} and below are valid.",
-            _identifier,
-            ossyncVersion,
-            OssyncVersionNumber
+            _identifier, ossyncVersion, OssyncVersionNumber
         ));
         _state = State::Rejected;
     }
@@ -271,9 +277,9 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
 
     std::atomic_bool startedAllDownloads = false;
 
-    // Yes, it should be possible to store this in a std::vector<HttpFileDownload> but
-    // C++ really doesn't like that even though all of the move constructors, move
-    // assignments and everything is automatically constructed
+    // Yes, it should be possible to store this in a std::vector<HttpFileDownload> but C++
+    // really doesn't like that even though all of the move constructors, move assignments
+    // and everything is automatically constructed
     std::vector<std::unique_ptr<HttpFileDownload>> downloads;
 
     std::string line;
@@ -321,9 +327,12 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
                 return !_shouldCancel;
             }
 
-            const std::lock_guard guard(mutex);
+            const std::unique_lock lock(mutex);
 
-            sizeData[line] = { downloadedBytes, totalBytes };
+            sizeData[line] = {
+                .downloadedBytes = downloadedBytes,
+                .totalBytes = totalBytes
+            };
 
             _nTotalBytesKnown = true;
             _nTotalBytes = 0;

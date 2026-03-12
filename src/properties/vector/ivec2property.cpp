@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,14 +24,12 @@
 
 #include <openspace/properties/vector/ivec2property.h>
 
-#include <ghoul/glm.h>
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
-IVec2Property::IVec2Property(Property::PropertyInfo info, glm::ivec2 value,
-                             glm::ivec2 minValue, glm::ivec2 maxValue,
-                             glm::ivec2 stepValue)
+IVec2Property::IVec2Property(PropertyInfo info, glm::ivec2 value, glm::ivec2 minValue,
+                             glm::ivec2 maxValue, glm::ivec2 stepValue)
     : NumericalProperty<glm::ivec2>(
         std::move(info),
         std::move(value),
@@ -61,4 +59,4 @@ std::string IVec2Property::stringValue() const {
     return formatJson(_value);
 }
 
-} // namespace openspace::properties
+} // namespace openspace

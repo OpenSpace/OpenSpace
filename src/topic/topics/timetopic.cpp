@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,18 +26,18 @@
 
 #include <openspace/topic/connection.h>
 #include <openspace/engine/globals.h>
-#include <openspace/properties/property.h>
-#include <openspace/query/query.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
+#include <optional>
+#include <string_view>
+
+using nlohmann::json;
 
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
     constexpr std::string_view UnsubscribeEvent = "stop_subscription";
     constexpr std::chrono::milliseconds TimeUpdateInterval(50);
 } // namespace
-
-using nlohmann::json;
 
 namespace openspace {
 
@@ -57,10 +57,6 @@ TimeTopic::~TimeTopic() {
             _deltaTimeStepsCallbackHandle
         );
     }
-}
-
-bool TimeTopic::isDone() const {
-    return _isDone;
 }
 
 void TimeTopic::handleJson(const nlohmann::json& json) {
@@ -86,8 +82,8 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
     });
 
     _deltaTimeCallbackHandle = global::timeManager->addDeltaTimeChangeCallback([this]() {
-        // Throttle by last update,
-        // but force update if pause state or target delta changes.
+        // Throttle by last update, but force update if pause state or target delta
+        // changes
 
         const auto now = std::chrono::system_clock::now();
         const double targetDeltaTime = global::timeManager->targetDeltaTime();
@@ -108,6 +104,10 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
             }
         }
     );
+}
+
+bool TimeTopic::isDone() const {
+    return _isDone;
 }
 
 json TimeTopic::getNextPrevDeltaTimeStepJson() {

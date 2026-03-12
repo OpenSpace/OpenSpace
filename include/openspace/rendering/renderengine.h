@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,37 +34,39 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/framebufferrenderer.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <cstdint>
 #include <chrono>
 #include <filesystem>
+#include <memory>
 
 namespace ghoul {
-namespace fontrendering { class Font; }
-namespace opengl {
-    class ProgramObject;
-    class OpenGLStateCache;
-} // namespace opengl
-
-class Dictionary;
-class SharedMemory;
-} // ghoul
+    namespace fontrendering { class Font; }
+    namespace opengl {
+        class ProgramObject;
+        class OpenGLStateCache;
+    } // namespace opengl
+    class Dictionary;
+    class SharedMemory;
+} // namespace ghoul
 
 namespace openspace {
 
-namespace scripting { struct LuaLibrary; }
-
 class Camera;
-class RaycasterManager;
 class DeferredcasterManager;
+struct LuaLibrary;
+class RaycasterManager;
 class Scene;
+class SceneGraphNode;
 class SceneManager;
 class ScreenLog;
 class ScreenSpaceRenderable;
 struct ShutdownInformation;
 
-class RenderEngine : public properties::PropertyOwner {
+class RenderEngine : public PropertyOwner {
 public:
     RenderEngine();
-    virtual ~RenderEngine() override;
+    ~RenderEngine() override;
 
     const FramebufferRenderer& renderer() const;
 
@@ -117,14 +119,14 @@ public:
     void setCamera(Camera* camera);
 
     /**
-     * Lets the renderer update the data to be brought into the rendererer programs
-     * as a 'rendererData' variable in the dictionary.
+     * Lets the renderer update the data to be brought into the rendererer programs as a
+     * 'rendererData' variable in the dictionary.
      */
     void setRendererData(ghoul::Dictionary rendererData);
 
     /**
-    * Lets the renderer update the data to be brought into the post rendererer programs
-    * as a 'resolveData' variable in the dictionary.
+    * Lets the renderer update the data to be brought into the post rendererer programs as
+    * a 'resolveData' variable in the dictionary.
     */
     void setResolveData(ghoul::Dictionary resolveData);
 
@@ -147,7 +149,7 @@ public:
      * Returns the Lua library that contains all Lua functions available to affect the
      * rendering.
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
     glm::ivec2 renderingResolution() const;
     glm::ivec2 fontResolution() const;
@@ -157,6 +159,12 @@ public:
     glm::mat4 nodeRotation() const;
 
     uint64_t frameNumber() const;
+
+    void registerShadowCaster(const std::string& shadowGroup,
+        const SceneGraphNode* lightSource, SceneGraphNode* shadower,
+        SceneGraphNode* shadowee);
+    void removeShadowCaster(const std::string& shadowGroup, SceneGraphNode* shadower,
+        SceneGraphNode* shadowee);
 
 private:
     void renderScreenLog();
@@ -176,45 +184,45 @@ private:
 
     ghoul::opengl::OpenGLStateCache* _openglStateCache = nullptr;
 
-    properties::BoolProperty _showOverlayOnClients;
-    properties::BoolProperty _showLog;
-    properties::FloatProperty _verticalLogOffset;
-    properties::BoolProperty _showVersionInfo;
-    properties::BoolProperty _showCameraInfo;
+    BoolProperty _showOverlayOnClients;
+    BoolProperty _showLog;
+    FloatProperty _verticalLogOffset;
+    BoolProperty _showVersionInfo;
+    BoolProperty _showCameraInfo;
 
-    properties::IntListProperty _screenshotWindowIds;
-    properties::BoolProperty _applyWarping;
-    properties::BoolProperty _screenshotUseDate;
-    properties::BoolProperty _disableMasterRendering;
+    IntListProperty _screenshotWindowIds;
+    BoolProperty _applyWarping;
+    BoolProperty _screenshotUseDate;
+    BoolProperty _disableMasterRendering;
 
-    properties::FloatProperty _globalBlackOutFactor;
-    properties::BoolProperty _applyBlackoutToMaster;
+    FloatProperty _globalBlackOutFactor;
+    BoolProperty _applyBlackoutToMaster;
 
-    properties::BoolProperty _enableFXAA;
+    BoolProperty _enableFXAA;
 
-    properties::BoolProperty _disableHDRPipeline;
-    properties::FloatProperty _hdrExposure;
-    properties::FloatProperty _gamma;
+    BoolProperty _disableHDRPipeline;
+    FloatProperty _hdrExposure;
+    FloatProperty _gamma;
 
-    properties::FloatProperty _hue;
-    properties::FloatProperty _saturation;
-    properties::FloatProperty _value;
+    FloatProperty _hue;
+    FloatProperty _saturation;
+    FloatProperty _value;
 
-    properties::IntProperty _framerateLimit;
+    IntProperty _framerateLimit;
     std::chrono::high_resolution_clock::time_point _lastFrameTime;
 
-    struct Window : properties::PropertyOwner {
+    struct Window : PropertyOwner {
         Window(PropertyOwnerInfo info, size_t id);
 
-        properties::FloatProperty horizFieldOfView;
+        FloatProperty horizFieldOfView;
     };
 
-    properties::PropertyOwner _windowing;
+    PropertyOwner _windowing;
     std::vector<std::unique_ptr<Window>> _windows;
 
-    properties::Vec3Property _globalRotation;
-    properties::Vec3Property _screenSpaceRotation;
-    properties::Vec3Property _masterRotation;
+    Vec3Property _globalRotation;
+    Vec3Property _screenSpaceRotation;
+    Vec3Property _masterRotation;
 
     uint64_t _frameNumber = 0;
     unsigned int _latestScreenshotNumber = 0;
@@ -232,8 +240,8 @@ private:
         glm::ivec4 roll = glm::ivec4(0);
     } _cameraButtonLocations;
 
-    properties::Vec4Property _enabledFontColor;
-    properties::Vec4Property _disabledFontColor;
+    Vec4Property _enabledFontColor;
+    Vec4Property _disabledFontColor;
 };
 
 } // namespace openspace

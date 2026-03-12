@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,26 +28,32 @@
 #include <openspace/json.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
+#include <algorithm>
+#include <exception>
 #include <fstream>
+#include <utility>
 
 namespace {
-    constexpr std::string_view _loggerCat = "IswaDataGroup";
-    using json = nlohmann::json;
+    using namespace openspace;
 
-    constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
+    constexpr std::string_view _loggerCat = "IswaDataGroup";
+
+    constexpr Property::PropertyInfo ResolutionInfo = {
         "Resolution",
         "Resolution",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FieldlineSeedInfo = {
+    constexpr Property::PropertyInfo FieldlineSeedInfo = {
         "FieldlineSeedsIndexFile",
         "Fieldline seedpoints",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 } // namespace
 
@@ -91,7 +97,7 @@ void IswaKameleonGroup::setFieldlineInfo(std::filesystem::path fieldlineIndexFil
 
 void IswaKameleonGroup::registerProperties() {
     _resolution.onChange([this]() {
-        LDEBUG("Group " + identifier() + " published resolutionChanged");
+        LDEBUG(std::format("Group {} published resolutionChanged", identifier()));
         ghoul::Dictionary d;
         d.setValue("resolution", static_cast<double>(_resolution));
         _groupEvent.publish("resolutionChanged", d);
@@ -104,38 +110,38 @@ void IswaKameleonGroup::readFieldlinePaths(const std::filesystem::path& indexFil
     LINFO(std::format("Reading seed points paths from file '{}'", indexFile));
 
     // Read the index file from disk
-    std::ifstream seedFile(indexFile);
+    std::ifstream seedFile = std::ifstream(indexFile);
     if (!seedFile.good()) {
         LERROR(std::format("Could not open seed points file '{}'", indexFile));
+        return;
     }
-    else {
-        std::string line;
-        std::string fileContent;
-        while (ghoul::getline(seedFile, line)) {
-            fileContent += line;
-        }
 
-        try {
-            //Parse and add each fieldline as an selection
-            json fieldlines = json::parse(fileContent);
-            int i = 0;
+    std::string line;
+    std::string fileContent;
+    while (ghoul::getline(seedFile, line)) {
+        fileContent += line;
+    }
 
-            for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); it++) {
-                _fieldlines.addOption(it.key());
-                _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
-                    identifier() + "/" + it.key(),
-                    it->get<std::string>(),
-                    false
-                );
-                i++;
-            }
+    try {
+        // Parse and add each fieldline as an selection
+        nlohmann::json fieldlines = nlohmann::json::parse(fileContent);
+        int i = 0;
 
-        } catch (const std::exception& e) {
-            LERROR(
-                "Error when reading json file with paths to seedpoints: " +
-                std::string(e.what())
+        for (auto it = fieldlines.begin(); it != fieldlines.end(); it++) {
+            _fieldlines.addOption(it.key());
+            _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
+                identifier() + "/" + it.key(),
+                it->get<std::string>(),
+                false
             );
+            i++;
         }
+
+    }
+    catch (const std::exception& e) {
+        LERROR(std::format(
+            "Error when reading json file with paths to seedpoints: {}", e.what()
+        ));
     }
 }
 
@@ -147,7 +153,7 @@ void IswaKameleonGroup::updateFieldlineSeeds() {
     using K = int;
     using V = std::tuple<std::string, std::string, bool>;
     for (std::pair<const K, V>& seedPath : _fieldlineState) {
-        // if this option was turned off
+        // If this option was turned off
         std::string o = opts[seedPath.first];
         const auto it = std::find(options.begin(), options.end(), o);
         if (it == options.end() && std::get<2>(seedPath.second)) {
@@ -158,9 +164,9 @@ void IswaKameleonGroup::updateFieldlineSeeds() {
             );
             global::scriptEngine->queueScript(script);
             std::get<2>(seedPath.second) = false;
-        // if this option was turned on
         }
         else if (it != options.end() && !std::get<2>(seedPath.second)) {
+            // If this option was turned on
             LDEBUG("Created fieldlines: " + std::get<0>(seedPath.second));
 
             IswaManager::ref().createFieldline(
@@ -199,4 +205,4 @@ void IswaKameleonGroup::changeCdf(std::string path) {
     _groupEvent.publish("cdfChanged", d);
 }
 
-} //namespace openspace
+} // namespace openspace

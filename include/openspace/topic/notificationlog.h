@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 
 #include <ghoul/misc/profiling.h>
 #include <functional>
+#include <mutex>
 
 namespace openspace {
 
@@ -39,7 +40,9 @@ namespace openspace {
  */
 class NotificationLog : public ghoul::logging::Log {
 public:
-    /// The type of function that is used as a callback in this log
+    /**
+     * The type of function that is used as a callback in this log.
+     */
     using CallbackFunction = std::function<void(
         std::string_view timeString,
         std::string_view dateString,

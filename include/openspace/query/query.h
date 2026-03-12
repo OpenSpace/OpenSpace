@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,21 +30,21 @@
 
 namespace openspace {
 
-namespace properties { class Property; }
-
+class IswaGroup;
+class Property;
+class PropertyOwner;
 class Renderable;
 class Scene;
 class SceneGraphNode;
-class IswaGroup;
 class ScreenSpaceRenderable;
 
 Scene* sceneGraph();
 SceneGraphNode* sceneGraphNode(std::string_view name);
 const Renderable* renderable(std::string_view name);
-properties::Property* property(std::string_view uri);
-properties::PropertyOwner* propertyOwner(std::string_view uri);
-const std::vector<properties::Property*>& allProperties();
-const std::vector<properties::PropertyOwner*>& allPropertyOwners();
+Property* property(std::string_view uri);
+PropertyOwner* propertyOwner(std::string_view uri);
+const std::vector<Property*>& allProperties();
+const std::vector<PropertyOwner*>& allPropertyOwners();
 
 } // namespace openspace
 

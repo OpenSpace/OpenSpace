@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/glm.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
 template <typename T, typename ScaleType>
 DelayedVariable<T, ScaleType>::DelayedVariable(ScaleType scaleFactor, ScaleType friction)
@@ -39,14 +39,15 @@ template <typename T, typename ScaleType>
 void DelayedVariable<T, ScaleType>::set(T value, double dt) {
     _targetValue = value;
     _currentValue = _currentValue + (_targetValue - _currentValue) *
-        glm::min(_scaleFactor * dt, 1.0); // less or equal to 1.0 keeps it stable
+        // Less or equal to 1.0 keeps it stable
+        glm::min(_scaleFactor * dt, 1.0);
 }
 
 template <typename T, typename ScaleType>
 void DelayedVariable<T, ScaleType>::decelerate(double dt) {
     _currentValue = _currentValue + (- _currentValue) *
+        // Less or equal to 1.0 keeps it stable
         glm::min(_scaleFactor * _friction * dt, 1.0);
-        // less or equal to 1.0 keeps it stable
 }
 
 template <typename T, typename ScaleType>
@@ -71,4 +72,4 @@ T DelayedVariable<T, ScaleType>::get() const {
     return _currentValue;
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

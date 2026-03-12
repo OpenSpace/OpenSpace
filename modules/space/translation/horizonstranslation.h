@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,20 +29,18 @@
 
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/util/timeline.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/lua/luastate.h>
-#include <modules/space/horizonsfile.h>
-#include <memory>
+#include <array>
+#include <filesystem>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
+class HorizonsFile;
 
 /**
  * The HorizonsTranslation is based on text files generated from NASA JPL HORIZONS Website
- * (https://ssd.jpl.nasa.gov/horizons.cgi). The implementation supports both Vector
- * and Observer as Horizons data table.
+ * (https://ssd.jpl.nasa.gov/horizons.cgi). The implementation supports both Vector and
+ * Observer as Horizons data table.
  *
  * In case of Vector table data the implementation expects a file with format:
  * TIME(JulianDayNumber = A.D. YYYY-MM-DD HH:MM:SS TDB)
@@ -73,7 +71,7 @@ public:
 
     glm::dvec3 position(const UpdateData& data) const override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     struct CacheKeyframe {
@@ -86,7 +84,7 @@ private:
     bool loadCachedFile(const std::filesystem::path& file);
     void saveCachedFile(const std::filesystem::path& file) const;
 
-    properties::StringListProperty _horizonsFiles;
+    StringListProperty _horizonsFiles;
     ghoul::lua::LuaState _state;
     Timeline<glm::dvec3> _timeline;
 };

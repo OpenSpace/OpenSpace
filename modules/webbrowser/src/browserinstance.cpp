@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,13 +30,15 @@
 #include <modules/webbrowser/webbrowsermodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
+#include <cmath>
 #include <filesystem>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "CEF BrowserInstance";
@@ -183,7 +185,7 @@ void BrowserInstance::setZoom(float ratio) {
 
     // Zooming in CEF is non-linear according to this:
     // https://www.magpcss.org/ceforum/viewtopic.php?f=6&t=11491
-    _zoomLevel = glm::log(ratio * dpiScaling) / glm::log(1.2);
+    _zoomLevel = std::log(ratio * dpiScaling) / glm::log(1.2);
     _browser->GetHost()->SetZoomLevel(_zoomLevel);
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,14 +33,22 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <ghoul/glm.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
 
-namespace ghoul::opengl { class ProgramObject; }
+namespace ghoul {
+    namespace opengl {
+        class ProgramObject;
+        class TextureUnit;
+    } // namespace opengl
+    class Dictionary;
+} // namespace ghoul
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
+struct RenderData;
 
 /**
  * The base class for screen space images and screen space framebuffers. This base class
@@ -49,7 +57,7 @@ namespace documentation { struct Documentation; }
  * Spherical to Cartesian coordinates and back. It also specifies the interface that its
  * children need to implement.
  */
-class ScreenSpaceRenderable : public properties::PropertyOwner, public Fadeable {
+class ScreenSpaceRenderable : public PropertyOwner, public Fadeable {
 public:
     static std::unique_ptr<ScreenSpaceRenderable> createFromDictionary(
         const ghoul::Dictionary& dictionary);
@@ -58,7 +66,7 @@ public:
     static constexpr std::string_view KeyIdentifier = "Identifier";
 
     explicit ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceRenderable() override;
+    ~ScreenSpaceRenderable() override;
 
     struct RenderData {
         float blackoutFactor;
@@ -94,7 +102,7 @@ public:
     void setRaeFromCartesianPosition(const glm::vec3& position);
     glm::vec3 raePosition() const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     void createShaders(ghoul::Dictionary dict = ghoul::Dictionary());
@@ -105,48 +113,53 @@ protected:
     glm::mat4 translationMatrix();
     glm::mat4 localRotationMatrix();
 
+    /**
+     * Radius, azimiuth, elevation to spherical coordinates.
+     */
     glm::vec3 raeToCartesian(const glm::vec3& rae) const;
     glm::vec3 cartesianToRae(const glm::vec3& cartesian) const;
 
     void draw(const glm::mat4& modelTransform, const RenderData& renderData,
         bool useAcceleratedRendering = false);
 
-    virtual void bindTexture() = 0;
+    virtual void bindTexture(ghoul::opengl::TextureUnit& unit) = 0;
     virtual void unbindTexture();
 
+    /**
+     * Spherical coordinates to radius, azimuth and elevation.
+     */
     glm::vec3 sphericalToRae(const glm::vec3& spherical) const;
     glm::vec3 raeToSpherical(const glm::vec3& rae) const;
     glm::vec3 cartesianToSpherical(const glm::vec3& cartesian) const;
     glm::vec3 sphericalToCartesian(glm::vec3 spherical) const;
     glm::vec3 sanitizeSphericalCoordinates(glm::vec3 spherical) const;
 
-    properties::BoolProperty _enabled;
-    properties::BoolProperty _renderDuringBlackout;
-    properties::BoolProperty _usePerspectiveProjection;
-    properties::BoolProperty _useRadiusAzimuthElevation;
-    properties::BoolProperty _faceCamera;
+    BoolProperty _enabled;
+    BoolProperty _renderDuringBlackout;
+    BoolProperty _usePerspectiveProjection;
+    BoolProperty _useRadiusAzimuthElevation;
+    BoolProperty _faceCamera;
 
     // x, y, z
-    properties::Vec3Property _cartesianPosition;
+    Vec3Property _cartesianPosition;
 
-    // Radius, azimuth, elevation,
-    // where azimuth is relative to negative y axis and
+    // Radius, azimuth, elevation, where azimuth is relative to negative y axis and
     // elevation is angle from plane with normal z.
-    properties::Vec3Property _raePosition;
+    Vec3Property _raePosition;
 
     // Local rotation (roll, pitch, yaw)
-    properties::Vec3Property _localRotation;
+    Vec3Property _localRotation;
 
     // Border
-    properties::FloatProperty _borderWidth;
-    properties::Vec3Property _borderColor;
-    properties::BoolProperty _borderFeather;
+    FloatProperty _borderWidth;
+    Vec3Property _borderColor;
+    BoolProperty _borderFeather;
 
-    properties::FloatProperty _scale;
-    properties::FloatProperty _gammaOffset;
-    properties::Vec3Property _multiplyColor;
-    properties::Vec4Property _backgroundColor;
-    properties::TriggerProperty _delete;
+    FloatProperty _scale;
+    FloatProperty _gammaOffset;
+    Vec3Property _multiplyColor;
+    Vec4Property _backgroundColor;
+    TriggerProperty _delete;
 
     glm::ivec2 _objectSize = glm::ivec2(0);
 

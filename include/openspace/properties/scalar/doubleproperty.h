@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,17 +26,17 @@
 #define __OPENSPACE_CORE___DOUBLEPROPERTY___H__
 
 #include <openspace/properties/numericalproperty.h>
+
 #include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 /**
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type `double`.
+ * This class is a concrete implementation of TemplateProperty with the type `double`.
  */
 class DoubleProperty : public NumericalProperty<double> {
 public:
-    DoubleProperty(Property::PropertyInfo info, double value = 0.0,
+    explicit DoubleProperty(PropertyInfo info, double value = 0.0,
         double minValue = std::numeric_limits<double>::lowest(),
         double maxValue = std::numeric_limits<double>::max(), double stepValue = 0.01);
 
@@ -52,6 +52,6 @@ private:
     double toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___DOUBLEPROPERTY___H__

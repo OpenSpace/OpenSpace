@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2025                                                                #
+# Copyright (c) 2014-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -157,23 +157,6 @@ set_target_properties(codegen-lib PROPERTIES FOLDER "support")
 set_target_properties(codegen-tool PROPERTIES FOLDER "support")
 set_target_properties(run_codegen PROPERTIES FOLDER "support")
 
-
-# Qt
-# Unfortunately, we have to set this value manually; sigh
-# In the future, if the Qt version is updated, just add to this variable ---abock
-if (APPLE)
-  set(CMAKE_PREFIX_PATH
-    "~/Qt/5.6/clang_64/lib/cmake"
-    "~/Qt/5.7/clang_64/lib/cmake"
-    "~/Qt/5.8/clang_64/lib/cmake"
-    "~/Qt/5.9/clang_64/lib/cmake"
-    "~/Qt/5.10/clang_64/lib/cmake"
-    "~/Qt/5.11/clang_64/lib/cmake"
-    "~/Qt/5.12/clang_64/lib/cmake"
-    "~/Qt/5.15.1/clang_64/lib/cmake"
-    "~/Qt/6.2.3/macos/lib/cmake"
-  )
-endif ()
 
 begin_header("Configuring Modules")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/modules")

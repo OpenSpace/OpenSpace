@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,9 @@
 #include "profile/horizonsdialog.h"
 
 #include "profile/line.h"
+#include <modules/space/horizonsfile.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <QComboBox>
 #include <QDateTimeEdit>
@@ -41,9 +43,14 @@
 #include <QProgressBar>
 #include <QPushButton>
 #include <QScrollBar>
-#include <filesystem>
+#include <cstdint>
 #include <istream>
+#include <limits>
 #include <sstream>
+#include <string_view>
+#include <vector>
+
+using namespace openspace;
 
 namespace {
     constexpr std::string_view _loggerCat = "HorizonsDialog";
@@ -89,7 +96,7 @@ HorizonsDialog::HorizonsDialog(QWidget* parent)
 std::filesystem::path HorizonsDialog::file() const {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
     return _horizonsFile.file();
-#else // OPENSPACE_MODULE_SPACE_ENABLED
+#else // ^^^^ OPENSPACE_MODULE_SPACE_ENABLED // !OPENSPACE_MODULE_SPACE_ENABLED vvvv
     return std::filesystem::path();
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
 }
@@ -104,7 +111,7 @@ void HorizonsDialog::openSaveAs() {
 #ifdef __linux__
         // Linux in Qt5 and Qt6 crashes when trying to access the native dialog here
         , QFileDialog::DontUseNativeDialog
-#endif
+#endif // __linux__
     );
     _fileEdit->setText(filename);
 }
@@ -847,9 +854,7 @@ std::string HorizonsDialog::constructUrl() {
     );
 }
 
-openspace::HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
-    using namespace openspace;
-
+HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
     auto it = answer.find("error");
     if (it != answer.end()) {
         _latestHorizonsError = it->get<std::string>();
@@ -865,7 +870,7 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
         // Special case with ErrorTimeRange since it is detected as an error
         // but could be nice to display the available time range of target to the user
         handleResult(isValid);
-        return openspace::HorizonsFile();
+        return HorizonsFile();
     }
 
     // Create a text file and write reply to it
@@ -878,7 +883,7 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
             "Malformed answer received '{}'", answer.dump()
         );
         appendLog(msg, HorizonsDialog::LogLevel::Error);
-        return openspace::HorizonsFile();
+        return HorizonsFile();
     }
 
     // Check if the file already exists
@@ -902,21 +907,19 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
                     "File already exist, try another file path"
                 );
                 styleLabel(_fileLabel, true);
-                return openspace::HorizonsFile();
+                return HorizonsFile();
             default:
                 QMessageBox::critical(this, "Error", "Invalid answer");
                 styleLabel(_fileLabel, true);
-                return openspace::HorizonsFile();
+                return HorizonsFile();
         }
     }
 
     // Return a new file with the result
-    return openspace::HorizonsFile(filePath, result->get<std::string>());
+    return HorizonsFile(filePath, result->get<std::string>());
 }
 
-bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
-    using namespace openspace;
-
+bool HorizonsDialog::handleResult(HorizonsResultCode& result) {
     switch (result) {
         case HorizonsResultCode::Valid: {
             // If the request worked then delete the corresponding error file if it exist

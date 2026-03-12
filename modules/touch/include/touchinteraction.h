@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,31 +28,35 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/touch/include/directinputsolver.h>
-#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <openspace/util/touch.h>
+#include <ghoul/glm.h>
 #include <array>
 #include <chrono>
-#include <memory>
 
 // #define TOUCH_DEBUG_PROPERTIES
 
 namespace openspace {
 
 class Camera;
-class SceneGraphNode;
 
-// Class used for keeping track of the recent average frame time
+/**
+ * Class used for keeping track of the recent average frame time.
+ */
 class FrameTimeAverage {
 public:
-    // Update the circular buffer with the most recent frame time
+    /**
+     * Update the circular buffer with the most recent frame time.
+     */
     void updateWithNewFrame(double sample);
-    // Get the value of the most recent average frame time (seconds)
+    /**
+     * Get the value of the most recent average frame time(seconds).
+     */
     double averageFrameTime() const;
 
 private:
@@ -62,10 +66,8 @@ private:
     int _index = 0;
 };
 
-class TouchInteraction : public properties::PropertyOwner {
+class TouchInteraction : public PropertyOwner {
 public:
-    TouchInteraction();
-
     enum class InteractionType {
         ROTATION = 0,
         PINCH,
@@ -74,7 +76,9 @@ public:
         ZOOM_OUT
     };
 
-    // Stores the velocity in all 6 DOF
+    /**
+     * Stores the velocity in all 6 DOF.
+     */
     struct VelocityStates {
         glm::dvec2 orbit = glm::dvec2(0.0);
         double zoom = 0.0;
@@ -82,20 +86,21 @@ public:
         glm::dvec2 pan = glm::dvec2(0.0);
     };
 
+    TouchInteraction();
+
     /**
      * Main function call:
      *   1. Checks if doubleTap occured
      *   2. If the node in focus is large enough and all contact points have selected it,
-     *     calls directControl() function for direct-manipulation
+     *      calls directControl() function for direct-manipulation
      *   3. Updates std::vector<SelectedBody> _selectedContactPoints (only if LMA
-     *     successfully converged, avoids interaction to snap on LMA fails)
+     *      successfully converged, avoids interaction to snap on LMA fails)
      *   4. If directControl() wasn't called this frame, interpret the incoming
      *      list and decide what type of interaction this frame should do
      *   5. Compute the new total velocities after interaction
      *   6. Evaluate if directControl should be called next frame- true if all contact
      *      points select the same node and said node is larger than _nodeRadiusThreshold
      */
-
     void updateStateFromInput(const std::vector<TouchInputHolder>& list,
         std::vector<TouchInput>& lastProcessed);
 
@@ -158,7 +163,7 @@ private:
 
     /**
      * Decelerate the velocities. Function is called in step() but is dereferenced from
-     * frame time to assure same behaviour on all systems
+     * frame time to assure same behavior on all systems.
      */
     void decelerate(double dt);
 
@@ -175,42 +180,42 @@ private:
     Camera* _camera = nullptr;
 
     // Property variables
-    properties::BoolProperty _unitTest;
-    properties::BoolProperty _disableZoom;
-    properties::BoolProperty _disableRoll;
-    properties::TriggerProperty _reset;
-    properties::IntProperty _maxTapTime;
-    properties::IntProperty _deceleratesPerSecond;
-    properties::FloatProperty _touchScreenSize;
-    properties::FloatProperty _tapZoomFactor;
-    properties::FloatProperty _pinchZoomFactor;
-    properties::FloatProperty _rollAngleThreshold;
-    properties::FloatProperty _zoomSensitivityExponential;
-    properties::FloatProperty _zoomSensitivityProportionalDist;
-    properties::FloatProperty _zoomSensitivityDistanceThreshold;
-    properties::FloatProperty _zoomInBoundarySphereMultiplier;
-    properties::FloatProperty _zoomOutBoundarySphereMultiplier;
-    properties::DoubleProperty _zoomInLimit;
-    properties::DoubleProperty _zoomOutLimit;
-    properties::FloatProperty _inputStillThreshold;
-    properties::FloatProperty _centroidStillThreshold;
-    properties::BoolProperty  _panEnabled;
-    properties::FloatProperty _interpretPan;
-    properties::Vec4Property _friction;
-    properties::FloatProperty _constTimeDecay_secs;
+    BoolProperty _unitTest;
+    BoolProperty _disableZoom;
+    BoolProperty _disableRoll;
+    TriggerProperty _reset;
+    IntProperty _maxTapTime;
+    IntProperty _deceleratesPerSecond;
+    FloatProperty _touchScreenSize;
+    FloatProperty _tapZoomFactor;
+    FloatProperty _pinchZoomFactor;
+    FloatProperty _rollAngleThreshold;
+    FloatProperty _zoomSensitivityExponential;
+    FloatProperty _zoomSensitivityProportionalDist;
+    FloatProperty _zoomSensitivityDistanceThreshold;
+    FloatProperty _zoomInBoundarySphereMultiplier;
+    FloatProperty _zoomOutBoundarySphereMultiplier;
+    DoubleProperty _zoomInLimit;
+    DoubleProperty _zoomOutLimit;
+    FloatProperty _inputStillThreshold;
+    FloatProperty _centroidStillThreshold;
+    BoolProperty  _panEnabled;
+    FloatProperty _interpretPan;
+    Vec4Property _friction;
+    FloatProperty _constTimeDecay_secs;
 
-    properties::BoolProperty _enableDirectManipulation;
-    properties::FloatProperty _directTouchDistanceThreshold;
+    BoolProperty _enableDirectManipulation;
+    FloatProperty _directTouchDistanceThreshold;
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     struct DebugProperties : PropertyOwner {
         DebugProperties();
-        properties::StringProperty interactionMode;
-        properties::IntProperty nFingers;
-        properties::StringProperty interpretedInteraction;
-        properties::FloatProperty normalizedCentroidDistance;
-        properties::FloatProperty minDiff;
-        properties::FloatProperty rollOn;
+        StringProperty interactionMode;
+        IntProperty nFingers;
+        StringProperty interpretedInteraction;
+        FloatProperty normalizedCentroidDistance;
+        FloatProperty minDiff;
+        FloatProperty rollOn;
     } _debugProperties;
 
     int pinchConsecCt = 0;
@@ -219,7 +224,6 @@ private:
 #endif
     std::array<TouchInputHolder, 2> _pinchInputs;
 
-    // Class variables
     VelocityStates _vel;
     VelocityStates _lastVel;
     VelocityStates _sensitivity;
@@ -248,6 +252,6 @@ private:
     ConstantTimeDecayCoefficients _constTimeDecayCoeff;
 };
 
-} // openspace namespace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_TOUCH___TOUCH_INTERACTION___H__

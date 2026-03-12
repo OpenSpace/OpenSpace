@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,6 @@
 
 #include <modules/skybrowser/include/renderableskytarget.h>
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
-#include <modules/skybrowser/include/utility.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
 #include <modules/skybrowser/skybrowsermodule.h>
 #include <openspace/camera/camera.h>
@@ -34,22 +33,27 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
-#include <glm/gtc/constants.hpp>
-#include <functional>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/stringconversion.h>
 #include <chrono>
+#include <cstdlib>
+#include <string_view>
 
 namespace {
+    using namespace openspace;
+
     void aimTargetGalactic(std::string_view id, const glm::dvec3& direction) {
-        const glm::dvec3 positionCelestial = glm::normalize(direction) *
-            openspace::skybrowser::CelestialSphereRadius;
+        const glm::dvec3 posCelestial = glm::normalize(direction) * CelestialSphereRadius;
 
         const std::string script = std::format(
             "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
-            id, ghoul::to_string(positionCelestial)
+            id, ghoul::to_string(posCelestial)
         );
-        openspace::global::scriptEngine->queueScript(script);
+        global::scriptEngine->queueScript(script);
     }
 } // namespace
 
@@ -71,13 +75,14 @@ void TargetBrowserPair::setImageOrder(const std::string& imageUrl, int order) {
 }
 
 void TargetBrowserPair::startFinetuningTarget() {
-
     _startTargetPosition = _targetNode->worldPosition();
 }
 
-// The fine tune of the target is a way to "drag and drop" the target with click
-// drag on the sky browser window. This is to be able to drag the target around when it
-// has a very small field of view
+/**
+ * The fine tune of the target is a way to "drag and drop" the target with click drag on
+ * the sky browser window. This is to be able to drag the target around when it has a very
+ * small field of view.
+ */
 void TargetBrowserPair::fineTuneTarget(const glm::vec2& translation) {
     const glm::dvec2 percentage = glm::dvec2(translation);
     const glm::dvec3 right = _targetRenderable->rightVector() * percentage.x;
@@ -100,8 +105,8 @@ void TargetBrowserPair::synchronizeAim() {
 
 void TargetBrowserPair::setEnabled(bool enable) {
     _browser->setEnabled(enable);
-    properties::Property* prop = _targetRenderable->property("Enabled");
-    properties::BoolProperty* boolProp = dynamic_cast<properties::BoolProperty*>(prop);
+    Property* prop = _targetRenderable->property("Enabled");
+    BoolProperty* boolProp = dynamic_cast<BoolProperty*>(prop);
     ghoul_assert(boolProp, "Enabled is not a boolean property");
     *boolProp = enable;
 }
@@ -124,10 +129,10 @@ glm::ivec3 TargetBrowserPair::borderColor() const {
 }
 
 glm::dvec2 TargetBrowserPair::targetDirectionEquatorial() const {
-    const glm::dvec3 cartesian = skybrowser::galacticToEquatorial(
+    const glm::dvec3 cartesian = galacticToEquatorial(
         glm::normalize(_targetNode->worldPosition())
     );
-    return skybrowser::cartesianToSpherical(cartesian);
+    return cartesianToSpherical(cartesian);
 }
 
 glm::dvec3 TargetBrowserPair::targetDirectionGalactic() const {
@@ -164,7 +169,7 @@ std::vector<std::string> TargetBrowserPair::selectedImages() const {
 
 ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     const glm::dvec2 spherical = targetDirectionEquatorial();
-    const glm::dvec3 cartesian = skybrowser::sphericalToCartesian(spherical);
+    const glm::dvec3 cartesian = sphericalToCartesian(spherical);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     std::vector<std::string> selectedImagesIndices;
 
@@ -184,7 +189,6 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     res.setValue("dec", spherical.y);
     res.setValue("cartesianDirection", cartesian);
     res.setValue("selectedImages", selectedImagesIndices);
-
     return res;
 }
 
@@ -195,10 +199,8 @@ void TargetBrowserPair::selectImage(const ImageData& image) {
     // If the image has coordinates, move the target
     if (image.hasCelestialCoords) {
         // Animate the target to the image coordinate position
-        const glm::dvec3 galactic = skybrowser::equatorialToGalactic(
-            image.equatorialCartesian
-        );
-        startAnimation(galactic * skybrowser::CelestialSphereRadius, image.fov);
+        const glm::dvec3 galactic = equatorialToGalactic(image.equatorialCartesian);
+        startAnimation(galactic * CelestialSphereRadius, image.fov);
     }
 }
 
@@ -225,6 +227,7 @@ void TargetBrowserPair::hideChromeInterface() {
 void TargetBrowserPair::sendIdToBrowser() const {
     _browser->setIdInBrowser();
 }
+
 std::vector<std::pair<std::string, glm::dvec3>> TargetBrowserPair::displayCopies() const {
     return _browser->displayCopies();
 }
@@ -245,7 +248,7 @@ void TargetBrowserPair::setVerticalFov(double vfov) {
 void TargetBrowserPair::setEquatorialAim(const glm::dvec2& aim) {
     aimTargetGalactic(
         _targetNode->identifier(),
-        skybrowser::equatorialToGalactic(skybrowser::sphericalToCartesian(aim))
+        equatorialToGalactic(sphericalToCartesian(aim))
     );
     _browser->setEquatorialAim(aim);
 }
@@ -320,7 +323,6 @@ void TargetBrowserPair::startFading(float goal, float fadeTime) {
         "openspace.setPropertyValueSingle('ScreenSpace.{1}.Fade', {2}, {3});",
         _targetNode->identifier(), _browser->identifier(), goal, fadeTime
     );
-
     global::scriptEngine->queueScript(script);
 }
 
@@ -330,18 +332,16 @@ void TargetBrowserPair::stopAnimations() {
 }
 
 void TargetBrowserPair::startAnimation(glm::dvec3 galacticCoords, double fovEnd) {
-    using namespace skybrowser;
-
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     const double fovSpeed = module->browserAnimationSpeed();
     // The speed is given degrees /sec
     const double fovTime = std::abs(_browser->verticalFov() - fovEnd) / fovSpeed;
     // Fov animation
-    _fovAnimation = skybrowser::Animation(_browser->verticalFov(), fovEnd, fovTime);
+    _fovAnimation = Animation(_browser->verticalFov(), fovEnd, fovTime);
 
     // Target animation
     const glm::dvec3 start = glm::normalize(_targetNode->worldPosition()) *
-        skybrowser::CelestialSphereRadius;
+        CelestialSphereRadius;
     const double targetSpeed = module->targetAnimationSpeed();
     const double angle = angleBetweenVectors(start, galacticCoords);
     _targetAnimation = Animation(start, std::move(galacticCoords), angle / targetSpeed);
@@ -351,22 +351,21 @@ void TargetBrowserPair::startAnimation(glm::dvec3 galacticCoords, double fovEnd)
 
 void TargetBrowserPair::centerTargetOnScreen() {
     // Get camera direction in celestial spherical coordinates
-    const glm::dvec3 viewDirection = skybrowser::cameraDirectionGalactic();
+    const glm::dvec3 viewDirection = cameraDirectionGalactic();
     // Keep the current fov
     const double currentFov = verticalFov();
     startAnimation(viewDirection, currentFov);
 }
 
 double TargetBrowserPair::targetRoll() const {
-    // To remove the lag effect when moving the camera while having a locked
-    // target, send the locked coordinates to wwt
+    // To remove the lag effect when moving the camera while having a locked target, send
+    // the locked coordinates to wwt
     const glm::dvec3 normal = glm::normalize(
-        _targetNode->worldPosition() -
-        global::navigationHandler->camera()->positionVec3()
+        _targetNode->worldPosition() - global::navigationHandler->camera()->position()
     );
     const glm::dvec3 right = _targetRenderable->rightVector();
     const glm::dvec3 up = glm::normalize(glm::cross(right, normal));
-    return skybrowser::targetRoll(up, normal);
+    return ::targetRoll(up, normal);
 }
 
 bool TargetBrowserPair::isFacingCamera() const {

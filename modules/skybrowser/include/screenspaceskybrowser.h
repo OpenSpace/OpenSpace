@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,12 +26,13 @@
 #define __OPENSPACE_MODULE_SKYBROWSER___SCREENSPACESKYBROWSER___H__
 
 #include <modules/webbrowser/include/screenspacebrowser.h>
-#include <modules/skybrowser/include/wwtcommunicator.h>
 
-#include <openspace/documentation/documentation.h>
+#include <modules/skybrowser/include/wwtcommunicator.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <chrono>
+#include <utility>
 
 namespace openspace {
 
@@ -81,17 +82,18 @@ public:
 
     WwtCommunicator* worldWideTelescope();
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    static constexpr int RadiusTimeOut = 25;
-    properties::BoolProperty _isHidden;
-    properties::BoolProperty _isPointingSpacecraft;
-    properties::BoolProperty _updateDuringTargetAnimation;
-    std::vector<std::unique_ptr<properties::Vec3Property>> _displayCopies;
-    std::vector<std::unique_ptr<properties::BoolProperty>> _showDisplayCopies;
+    static constexpr int RadiusTimeout = 25;
 
-    properties::DoubleProperty _verticalFov;
+    BoolProperty _isHidden;
+    BoolProperty _isPointingSpacecraft;
+    BoolProperty _updateDuringTargetAnimation;
+    std::vector<std::unique_ptr<Vec3Property>> _displayCopies;
+    std::vector<std::unique_ptr<BoolProperty>> _showDisplayCopies;
+
+    DoubleProperty _verticalFov;
 
     double _borderRadius = 0.0;
     glm::ivec3 _wwtBorderColor = glm::ivec3(70);

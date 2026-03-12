@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,41 +27,33 @@
 
 #include <openspace/json.h>
 #include <ghoul/glm.h>
-#include <ghoul/misc/dictionary.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 class Property;
 class PropertyOwner;
-
 void to_json(nlohmann::json& j, const Property& p);
 void to_json(nlohmann::json& j, const Property* pP);
 void to_json(nlohmann::json& j, const PropertyOwner& p);
 void to_json(nlohmann::json& j, const PropertyOwner* p);
 
-} // namespace openspace::properties
+struct Action;
+void to_json(nlohmann::json& j, const Action& a);
+void to_json(nlohmann::json& j, const Action* pA);
 
-namespace openspace::interaction {
-    struct Action;
-
-    void to_json(nlohmann::json& j, const Action& a);
-    void to_json(nlohmann::json& j, const Action* pA);
-} // namespace openspace::interaction
-
-namespace openspace {
-
-class Renderable;
 class SceneGraphNode;
-
 void to_json(nlohmann::json& j, const SceneGraphNode& n);
 void to_json(nlohmann::json& j, const SceneGraphNode* pN);
 
+class Renderable;
 void to_json(nlohmann::json& j, const Renderable& r);
 void to_json(nlohmann::json& j, const Renderable* pR);
 
 } // namespace openspace
 
 namespace ghoul {
+
+class Dictionary;
 
 void to_json(nlohmann::json& j, const Dictionary& d);
 void to_json(nlohmann::json& j, const Dictionary* d);

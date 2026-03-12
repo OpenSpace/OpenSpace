@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,24 +29,12 @@
 
 #include <modules/spacecraftinstruments/util/image.h>
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/vector/vec3property.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/opengl/uniformcache.h>
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+#include <memory>
 
 namespace ghoul::modelgeometry { class ModelGeometry; }
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
-
-struct RenderData;
-struct UpdateData;
 
 class RenderableModelProjection : public Renderable {
 public:
@@ -59,11 +47,11 @@ public:
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
-    virtual void update(const UpdateData& data) final override;
+    void update(const UpdateData& data) final override;
 
     ghoul::opengl::Texture& baseTexture() const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     glm::mat4 attitudeParameters(double time, const glm::vec3& up);
@@ -78,11 +66,11 @@ private:
         projectionTexture) _mainUniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
-    UniformCache(projectionTexture, depthTexture, needShadowMap, ProjectorMatrix,
-        ModelTransform, boresight) _fboUniformCache;
+    UniformCache(projectionTexture, depthTexture, needShadowMap, projectorMatrix,
+        modelTransform, boresight) _fboUniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _depthFboProgramObject;
-    UniformCache(ProjectorMatrix, ModelTransform) _depthFboUniformCache;
+    UniformCache(projectorMatrix, modelTransform) _depthFboUniformCache;
 
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
     double _modelScale = 1.0;
@@ -99,7 +87,7 @@ private:
     bool _shouldCapture = false;
 
     glm::vec3 _sunPosition = glm::vec3(0.f);
-    properties::BoolProperty _performShading;
+    BoolProperty _performShading;
 };
 
 } // namespace openspace

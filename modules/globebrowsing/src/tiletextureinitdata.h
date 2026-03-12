@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,8 +30,9 @@
 #include <ghoul/misc/boolean.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
+#include <cstdint>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 /**
  * All information needed to create a texture used for a Tile.
@@ -68,6 +69,6 @@ public:
 TileTextureInitData tileTextureInitData(layers::Group::ID id,
     size_t preferredTileSize = 0);
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_TEXTURE_INIT_DATA___H__

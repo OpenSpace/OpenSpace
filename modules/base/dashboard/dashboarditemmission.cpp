@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,16 +25,18 @@
 #include <modules/base/dashboard/dashboarditemmission.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/font/font.h>
-#include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <algorithm>
 #include <stack>
+#include <utility>
 
 namespace {
     std::string progressToStr(int size, double t) {
@@ -56,12 +58,12 @@ namespace {
     // includes information about the currently active mission phase, the next phase, and
     // all subphases of the currently active phase.
     struct [[codegen::Dictionary(DashboardItemMission)]] Parameters {};
-#include "dashboarditemmission_codegen.cpp"
 } // namespace
+#include "dashboarditemmission_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemMission::Documentation() {
+Documentation DashboardItemMission::Documentation() {
     return codegen::doc<Parameters>(
         "base_dashboarditem_mission",
         DashboardTextItem::Documentation()
@@ -175,9 +177,8 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
         penPosition.x -= depth * PixelIndentation;
 
         if (isCurrentPhase || ShowAllPhases) {
-            // phases are sorted increasingly by start time, and will be
-            // popped last-in-first-out from the stack, so add them in
-            // reversed order.
+            // Phases are sorted increasingly by start time, and will be popped
+            // last-in-first-out from the stack, so add them in reversed order
             const int indexLastPhase = static_cast<int>(phase->phases().size()) - 1;
             for (int i = indexLastPhase; 0 <= i; --i) {
                 S.emplace(&phase->phases()[i], depth + 1);

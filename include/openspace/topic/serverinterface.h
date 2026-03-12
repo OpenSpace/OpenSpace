@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,22 +26,26 @@
 #define __OPENSPACE_CORE___SERVERINTERFACE___H__
 
 #include <openspace/properties/propertyowner.h>
+
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <ghoul/io/socket/socketserver.h>
+#include <memory>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-class ServerInterface : public properties::PropertyOwner {
+class ServerInterface : public PropertyOwner {
 public:
     static std::unique_ptr<ServerInterface> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
     explicit ServerInterface(const ghoul::Dictionary& dictionary);
-    virtual ~ServerInterface() override = default;
+    ~ServerInterface() override = default;
 
     void initialize();
     void deinitialize();
@@ -66,14 +70,14 @@ private:
         Allow
     };
 
-    properties::OptionProperty _socketType;
-    properties::IntProperty _port;
-    properties::BoolProperty _enabled;
-    properties::StringListProperty _allowAddresses;
-    properties::StringListProperty _requirePasswordAddresses;
-    properties::StringListProperty _denyAddresses;
-    properties::OptionProperty _defaultAccess;
-    properties::StringProperty _password;
+    OptionProperty _socketType;
+    IntProperty _port;
+    BoolProperty _enabled;
+    StringListProperty _allowAddresses;
+    StringListProperty _requirePasswordAddresses;
+    StringListProperty _denyAddresses;
+    OptionProperty _defaultAccess;
+    StringProperty _password;
 
     std::unique_ptr<ghoul::io::SocketServer> _socketServer;
 };

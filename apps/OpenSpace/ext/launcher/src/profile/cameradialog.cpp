@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,13 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <fstream>
+#include <iterator>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <variant>
+
+using namespace openspace;
 
 namespace {
     constexpr int CameraTypeNode = 0;
@@ -63,8 +70,7 @@ namespace {
     }
 } // namespace
 
-CameraDialog::CameraDialog(QWidget* parent,
-                           std::optional<openspace::Profile::CameraType>* camera)
+CameraDialog::CameraDialog(QWidget* parent, std::optional<Profile::CameraType>* camera)
     : QDialog(parent)
     , _camera(camera)
 {
@@ -72,9 +78,9 @@ CameraDialog::CameraDialog(QWidget* parent,
     createWidgets();
 
     if (_camera->has_value()) {
-        const openspace::Profile::CameraType& type = **_camera;
+        const Profile::CameraType& type = **_camera;
         std::visit(overloaded {
-            [this](const openspace::Profile::CameraGoToNode& node) {
+            [this](const Profile::CameraGoToNode& node) {
                 _tabWidget->setCurrentIndex(CameraTypeNode);
                 _nodeState.anchor->setText(QString::fromStdString(node.anchor));
                 if (node.height.has_value()) {
@@ -82,7 +88,7 @@ CameraDialog::CameraDialog(QWidget* parent,
                 }
                 tabSelect(CameraTypeNode);
             },
-            [this](const openspace::Profile::CameraNavState& nav) {
+            [this](const Profile::CameraNavState& nav) {
                 _tabWidget->setCurrentIndex(CameraTypeNav);
                 _navState.anchor->setText(QString::fromStdString(nav.anchor));
                 _navState.aim->setText(QString::fromStdString(*nav.aim));
@@ -114,7 +120,7 @@ CameraDialog::CameraDialog(QWidget* parent,
                 }
                 tabSelect(CameraTypeNav);
             },
-            [this](const openspace::Profile::CameraGoToGeo& geo) {
+            [this](const Profile::CameraGoToGeo& geo) {
                 _tabWidget->setCurrentIndex(CameraTypeGeo);
                 _geoState.anchor->setText(QString::fromStdString(geo.anchor));
                 _geoState.latitude->setText(QString::number(geo.latitude, 'g', 17));
@@ -357,7 +363,6 @@ QWidget* CameraDialog::createNavStateWidget() {
             );
             const nlohmann::json json = nlohmann::json::parse(contents);
 
-            using namespace openspace::interaction;
             NavigationState state = NavigationState(json);
 
             _navState.anchor->setText(QString::fromStdString(state.anchor));
@@ -537,7 +542,7 @@ void CameraDialog::approved() {
     }
 
     if (_tabWidget->currentIndex() == CameraTypeNode) {
-        openspace::Profile::CameraGoToNode node;
+        Profile::CameraGoToNode node;
         node.anchor = _nodeState.anchor->text().toStdString();
         if (!_nodeState.height->text().isEmpty()) {
             node.height = _nodeState.height->text().toDouble();
@@ -545,7 +550,7 @@ void CameraDialog::approved() {
         *_camera = std::move(node);
     }
     else if (_tabWidget->currentIndex() == CameraTypeNav) {
-        openspace::Profile::CameraNavState nav;
+        Profile::CameraNavState nav;
         nav.anchor = _navState.anchor->text().toStdString();
         nav.aim = _navState.aim->text().toStdString();
         nav.referenceFrame = _navState.refFrame->text().toStdString();
@@ -581,7 +586,7 @@ void CameraDialog::approved() {
         *_camera = std::move(nav);
     }
     else if (_tabWidget->currentIndex() == CameraTypeGeo) {
-        openspace::Profile::CameraGoToGeo geo;
+        Profile::CameraGoToGeo geo;
         geo.anchor = _geoState.anchor->text().toStdString();
         geo.latitude = _geoState.latitude->text().toDouble();
         geo.longitude = _geoState.longitude->text().toDouble();

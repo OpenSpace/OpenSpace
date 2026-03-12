@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,8 +25,10 @@
 #include "profile/assetsdialog.h"
 
 #include "profile/assetedit.h"
+#include <profile/assettreeitem.h>
 #include "profile/line.h"
 #include <openspace/scene/profile.h>
+#include <ghoul/format.h>
 #include <QDialogButtonBox>
 #include <QHeaderView>
 #include <QLabel>
@@ -34,7 +36,10 @@
 #include <QVBoxLayout>
 #include <QTextEdit>
 #include <QTreeView>
-#include <filesystem>
+#include <string>
+#include <vector>
+
+using namespace openspace;
 
 namespace {
     bool traverseToExpandSelectedItems(QTreeView& tree, AssetTreeModel& model, int rows,
@@ -124,7 +129,7 @@ namespace {
     }
 } // namespace
 
-AssetsDialog::AssetsDialog(QWidget* parent, openspace::Profile* profile,
+AssetsDialog::AssetsDialog(QWidget* parent, Profile* profile,
                            const std::filesystem::path& assetBasePath,
                            const std::filesystem::path& userAssetBasePath)
     : QDialog(parent)

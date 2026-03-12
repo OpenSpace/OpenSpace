@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,17 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
-namespace openspace::globebrowsing {
+#include <modules/globebrowsing/src/tiletextureinitdata.h>
+#include <ghoul/opengl/ghoul_gl.h>
+
+namespace ghoul::fontrendering {
+    class Font;
+    class FontRenderer;
+} // namespace ghoul::fontrendering
+
+namespace openspace {
+
+class MemoryAwareTileCache;
 
 class TextTileProvider : public TileProvider {
 public:
@@ -49,13 +59,13 @@ protected:
 
     GLuint fbo = 0;
 
-    cache::MemoryAwareTileCache* tileCache;
+    MemoryAwareTileCache* tileCache;
 
 private:
     void internalInitialize() override final;
     void internalDeinitialize() override final;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__TEXTTILEPROVIDER___H__

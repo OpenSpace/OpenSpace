@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,8 @@
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <filesystem>
+#include <memory>
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::opengl {
@@ -42,9 +44,9 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 
-class ProjectionComponent : public properties::PropertyOwner {
+class ProjectionComponent : public PropertyOwner {
 public:
     ProjectionComponent();
 
@@ -92,19 +94,19 @@ public:
     float fieldOfViewY() const;
     float aspectRatio() const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     bool generateProjectionLayerTexture(const glm::ivec2& size);
     bool generateDepthTexture(const glm::ivec2& size);
 
 protected:
-    properties::BoolProperty _performProjection;
-    properties::TriggerProperty _clearAllProjections;
-    properties::FloatProperty _projectionFading;
+    BoolProperty _performProjection;
+    TriggerProperty _clearAllProjections;
+    FloatProperty _projectionFading;
 
-    properties::IVec2Property _textureSize;
-    properties::TriggerProperty _applyTextureSize;
+    IVec2Property _textureSize;
+    TriggerProperty _applyTextureSize;
     bool _textureSizeDirty = false;
     bool _mipMapDirty = false;
 

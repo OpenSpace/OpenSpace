@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -120,7 +120,7 @@ namespace {
 
         // Initialize SpiceManager and load leap second kernel
         SpiceManager::initialize();
-        openspace::SpiceManager::ref().loadKernel(kernel);
+        SpiceManager::ref().loadKernel(kernel);
 
         // Read the file
         HorizonsResult result = readHorizonsFile(filePath);
@@ -150,8 +150,8 @@ namespace {
         CHECK(data[2].position.z == Catch::Approx(z2));
 
         // Clean up
-        openspace::SpiceManager::ref().unloadKernel(kernel);
-        openspace::SpiceManager::deinitialize();
+        SpiceManager::ref().unloadKernel(kernel);
+        SpiceManager::deinitialize();
     }
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
 }
@@ -161,7 +161,7 @@ TEST_CASE("HorizonsFile: Space module", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
     CHECK(true);
     LINFOC("test_horizons", "Downloading Horizons test data ...");
-#else
+#else // ^^^^ OPENSPACE_MODULE_SPACE_ENABLED // !OPENSPACE_MODULE_SPACE_ENABLED vvvv
     LERRORC("test_horizons", "These tests requires the Space module to be enabled");
     CHECK(false);
 #endif // OPENSPACE_MODULE_SPACE_ENABLED

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,18 +26,22 @@
 
 #include <openspace/properties/property.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
+#include <algorithm>
+#include <functional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TimeFramesInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TimeFramesInfo = {
         "TimeFrames",
         "Time frames",
         "A vector of time frames to combine into one. The time frame is active when any "
         "of the contained time frames are, but not in gaps between contained time "
         "frames.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `TimeFrame` class will accept the union of all passed-in TimeFrames. This
@@ -49,14 +53,14 @@ namespace {
     struct [[codegen::Dictionary(TimeFrameUnion)]] Parameters {
         // [[codegen::verbatim(TimeFramesInfo.description)]]
         std::vector<ghoul::Dictionary> timeFrames
-            [[codegen::reference("core_time_frame")]];
+            [[codegen::reference("core_timeframe")]];
     };
-#include "timeframeunion_codegen.cpp"
 } // namespace
+#include "timeframeunion_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation TimeFrameUnion::Documentation() {
+Documentation TimeFrameUnion::Documentation() {
     return codegen::doc<Parameters>("base_timeframe_union");
 }
 

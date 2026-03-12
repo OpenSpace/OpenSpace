@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,13 +29,18 @@
 
 #include <sgct/config.h>
 #include <QIcon>
+#include <string>
 #include <vector>
 
 class QCheckBox;
 class QComboBox;
 class QDoubleSpinBox;
+class QFrame;
 class QLabel;
 class QLineEdit;
+class QPushButton;
+class QRect;
+class QRectF;
 class QSpinBox;
 
 class WindowControl final : public QWidget {
@@ -94,7 +99,7 @@ public:
      * Sets the window's decoration status. If set to true, then the window has a border.
      * If false it is borderless.
      *
-     * \param hasWindowDecoration boolean for if window has decoration (border)
+     * \param hasWindowDecoration Boolean for if window has decoration (border)
      */
     void setDecorationState(bool hasWindowDecoration);
 
@@ -178,7 +183,7 @@ public:
      * This function must be called by users of this class whenever the total number of
      * windows has changed.
      *
-     * \param newWindowCount the number of windows after the change
+     * \param newWindowCount The number of windows after the change
      */
     void updateWindowCount(int newWindowCount);
 

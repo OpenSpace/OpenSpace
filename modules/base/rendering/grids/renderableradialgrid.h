@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,10 +35,7 @@
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/labelscomponent.h>
 #include <ghoul/opengl/ghoul_gl.h>
-
-namespace ghoul::opengl { class ProgramObject; }
-
-namespace openspace::documentation { struct Documentation; }
+#include <memory>
 
 namespace openspace {
 
@@ -56,7 +53,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     struct GeometryData {
@@ -66,33 +63,33 @@ protected:
         GeometryData& operator=(GeometryData&& other) noexcept;
         ~GeometryData();
 
-        void update() const;
+        void update(const std::vector<rendering::VertexXYZ>& data);
         void render() const;
 
-        std::vector<rendering::helper::VertexXYZ> varray;
+        GLsizei size = 0;
         GLuint vao = 0;
         GLuint vbo = 0;
         GLenum mode = GL_LINE_STRIP;
     };
 
-    ghoul::opengl::ProgramObject* _gridProgram;
+    ghoul::opengl::ProgramObject* _gridProgram = nullptr;
 
-    properties::Vec3Property _color;
-    properties::IVec2Property _gridSegments;
-    properties::IntProperty _circleSegments;
-    properties::FloatProperty _lineWidth;
-    properties::Vec2Property _radii;
+    Vec3Property _color;
+    IVec2Property _gridSegments;
+    IntProperty _circleSegments;
+    FloatProperty _lineWidth;
+    Vec2Property _radii;
 
     bool _gridIsDirty = true;
 
     std::vector<GeometryData> _circles;
-    GeometryData _lines{GL_LINES};
+    GeometryData _lines = GeometryData(GL_LINES);
 
     // Labels
     bool _hasLabels = false;
     std::unique_ptr<LabelsComponent> _labels;
 };
 
-}// namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_BASE___RENDERABLERADIALGRID___H__

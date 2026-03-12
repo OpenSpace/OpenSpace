@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,36 +33,46 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/designpattern/event.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
+#include <nlohmann/json.hpp>
+#include <algorithm>
+#include <exception>
 #include <fstream>
+#include <optional>
+#include <set>
 
 namespace {
-    using json = nlohmann::json;
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "KameleonPlane";
 
-    constexpr openspace::properties::Property::PropertyInfo FieldLineSeedsInfo = {
+    constexpr Property::PropertyInfo FieldLineSeedsInfo = {
         "FieldlineSeedsIndexFile",
         "Fieldline seedpoints",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
+    constexpr Property::PropertyInfo ResolutionInfo = {
         "Resolution",
         "Resolution%",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SliceInfo = {
+    constexpr Property::PropertyInfo SliceInfo = {
         "Slice",
         "Slice",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableKameleonPlane)]] Parameters {
@@ -77,12 +87,12 @@ namespace {
         };
         std::optional<AxisCut> axisCut [[codegen::key("axisCut")]];
     };
-#include "renderablekameleonplane_codegen.cpp"
 } // namespace
+#include "renderablekameleonplane_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableKameleonPlane::Documentation() {
+Documentation RenderableKameleonPlane::Documentation() {
     return codegen::doc<Parameters>(
         "iswa_renderable_kameleonplane",
         RenderableDataCygnet::Documentation()
@@ -124,8 +134,8 @@ RenderableKameleonPlane::RenderableKameleonPlane(const ghoul::Dictionary& dictio
     _origOffset = _data.offset;
 
     _scale = _data.scale[_cut];
-    _data.scale[_cut] = 0;
-    _data.offset[_cut] = 0;
+    _data.scale[_cut] = 0.f;
+    _data.offset[_cut] = 0.f;
 
     _slice = (_data.offset[_cut] -_data.gridMin[_cut]) / _scale;
 
@@ -166,19 +176,17 @@ void RenderableKameleonPlane::initializeGL() {
     else {
         _dataProcessor = std::make_shared<DataProcessorKameleon>();
 
-        //If autofiler is on, background values property should be hidden
+        // If autofiler is on, background values property should be hidden
         _autoFilter.onChange([this]() {
-            // If autofiler is selected, use _dataProcessor to set backgroundValues
-            // and unregister backgroundvalues property.
+            // If autofiler is selected, use _dataProcessor to set backgroundValues and
+            // unregister backgroundvalues property
             if (_autoFilter) {
                 _backgroundValues = _dataProcessor->filterValues();
-                _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
-                //_backgroundValues.setVisible(false);
-            // else if autofilter is turned off, register backgroundValues
+                _backgroundValues.setVisibility(Property::Visibility::Hidden);
             }
             else {
-                _backgroundValues.setVisibility(properties::Property::Visibility::Always);
-                //_backgroundValues.setVisible(true);
+                // Else if autofilter is turned off, register backgroundValues
+                _backgroundValues.setVisibility(Property::Visibility::Always);
             }
         });
     }
@@ -209,72 +217,59 @@ void RenderableKameleonPlane::initializeGL() {
         _dimensions
     );
     _dataProcessor->addDataValues(_kwPath, _dataOptions);
-    // if this datacygnet has added new values then reload texture
-    // for the whole group, including this datacygnet, and return after.
+    // If this datacygnet has added new values then reload texture for the whole group,
+    // including this datacygnet, and return after
     if (_group) {
         _group->updateGroup();
     }
     updateTextureResource();
 }
 
-bool RenderableKameleonPlane::createGeometry() {
-    glGenVertexArrays(1, &_quad); // generate array
-    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+void RenderableKameleonPlane::createGeometry() {
+    struct Vertex {
+        glm::vec4 position;
+        glm::vec2 texCoords;
+    };
 
-    // ============================
-    //         GEOMETRY (quad)
-    // ============================
-    // GLfloat x,y, z;
+    glCreateBuffers(1, &_vbo);
     float s = _data.spatialScale.x;
     const GLfloat x = s * _data.scale.x / 2.f;
     const GLfloat y = s * _data.scale.y / 2.f;
     const GLfloat z = s * _data.scale.z / 2.f;
     const GLfloat w = _data.spatialScale.w;
-
-    const GLfloat vertex_data[] = { // square of two triangles (sigh)
-        //      x      y     z     w     s     t
-        -x, -y,             -z,  w, 0, 1,
-         x,  y,              z,  w, 1, 0,
-        -x,  ((x>0)?y:-y),   z,  w, 0, 0,
-        -x, -y,             -z,  w, 0, 1,
-         x,  ((x>0)?-y:y),  -z,  w, 1, 1,
-         x,  y,              z,  w, 1, 0,
+    const Vertex VertexData[] = {
+        { glm::vec4(-x, -y,                  -z,  w), glm::vec2(0.f, 1.f) },
+        { glm::vec4( x,  y,                   z,  w), glm::vec2(1.f, 0.f) },
+        { glm::vec4(-x, ((x > 0) ? y : -y),   z,  w), glm::vec2(0.f, 0.f) },
+        { glm::vec4(-x, -y,                  -z,  w), glm::vec2(0.f, 1.f) },
+        { glm::vec4( x,  ((x > 0) ? -y : y), -z,  w), glm::vec2(1.f, 1.f) },
+        { glm::vec4( x,  y,                   z,  w), glm::vec2(1.f, 0.f) }
     };
+    glNamedBufferStorage(_vbo, sizeof(VertexData), VertexData, GL_NONE_BIT);
 
-    glBindVertexArray(_quad); // bind array
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
-    );
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
 
-    return true;
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
+
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4);
+    glVertexArrayAttribBinding(_vao, 1, 0);
 }
 
-bool RenderableKameleonPlane::destroyGeometry() {
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
-
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
-
-    return true;
+void RenderableKameleonPlane::destroyGeometry() {
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 }
 
 void RenderableKameleonPlane::renderGeometry() const {
-    glBindVertexArray(_quad);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-std::vector<float*> RenderableKameleonPlane::textureData() {
+std::vector<std::vector<float>> RenderableKameleonPlane::textureData() {
     DataProcessorKameleon* p = dynamic_cast<DataProcessorKameleon*>(_dataProcessor.get());
     p->setSlice(_slice);
     return p->processData(_kwPath, _dataOptions, _dimensions);
@@ -282,7 +277,6 @@ std::vector<float*> RenderableKameleonPlane::textureData() {
 
 bool RenderableKameleonPlane::updateTextureResource() {
     _data.offset[_cut] = _slice * _scale + _data.gridMin[_cut];
-    // _textureDirty = true;
     updateTexture();
     return true;
 }
@@ -301,7 +295,7 @@ void RenderableKameleonPlane::updateFieldlineSeeds() {
     using K = int;
     using V = std::tuple<std::string, std::string, bool>;
     for (std::pair<const K, V>& seedPath : _fieldlineState) {
-        // if this option was turned off
+        // If this option was turned off
         std::string o = opts[seedPath.first];
         const auto it = std::find(selectedOptions.begin(), selectedOptions.end(), o);
         if (it == selectedOptions.end() && std::get<2>(seedPath.second)) {
@@ -318,9 +312,9 @@ void RenderableKameleonPlane::updateFieldlineSeeds() {
             );
             global::scriptEngine->queueScript(script);
             std::get<2>(seedPath.second) = false;
-        // if this option was turned on
         }
         else if (it != selectedOptions.end() && !std::get<2>(seedPath.second)) {
+            // If this option was turned on
             SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(
                 std::get<0>(seedPath.second)
             );
@@ -342,10 +336,7 @@ void RenderableKameleonPlane::updateFieldlineSeeds() {
 void RenderableKameleonPlane::readFieldlinePaths(const std::filesystem::path& indexFile) {
     LINFO(std::format("Reading seed points paths from file '{}'", indexFile));
     if (_group) {
-        dynamic_cast<IswaKameleonGroup*>(_group)->setFieldlineInfo(
-            indexFile,
-            _kwPath
-        );
+        dynamic_cast<IswaKameleonGroup*>(_group)->setFieldlineInfo(indexFile, _kwPath);
         return;
     }
 
@@ -353,37 +344,37 @@ void RenderableKameleonPlane::readFieldlinePaths(const std::filesystem::path& in
     std::ifstream seedFile(indexFile);
     if (!seedFile.good()) {
         LERROR(std::format("Could not open seed points file '{}'", indexFile));
+        return;
     }
-    else {
-        try {
-            //Parse and add each fieldline as an selection
-            json fieldlines = json::parse(seedFile);
-            int i = 0;
-            const std::string& fullName = identifier();
-            std::string partName = fullName.substr(0,fullName.find_last_of("-"));
-            for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); it++) {
-                _fieldlines.addOption(it.key());
-                _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
-                    partName + "/" + it.key(),
-                    it->get<std::string>(),
-                    false
-                );
-                i++;
-            }
-        } catch (const std::exception& e) {
-            LERROR(
-                "Error when reading json file with paths to seedpoints: " +
-                std::string(e.what())
+
+    try {
+        // Parse and add each fieldline as an selection
+        nlohmann::json fieldlines = nlohmann::json::parse(seedFile);
+        int i = 0;
+        const std::string& fullName = identifier();
+        std::string partName = fullName.substr(0, fullName.find_last_of("-"));
+        for (auto it = fieldlines.begin(); it != fieldlines.end(); it++) {
+            _fieldlines.addOption(it.key());
+            _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
+                partName + "/" + it.key(),
+                it->get<std::string>(),
+                false
             );
+            i++;
         }
-   }
+    }
+    catch (const std::exception& e) {
+        LERROR(std::format(
+            "Error when reading JSON file with paths to seedpoints: {}", e.what()
+        ));
+    }
 }
 
 void RenderableKameleonPlane::subscribeToGroup() {
     // Subscribe to DataCygnet events
     RenderableDataCygnet::subscribeToGroup();
 
-    //Add additional Events specific to KameleonPlane
+    // Add additional Events specific to KameleonPlane
     ghoul::Event<ghoul::Dictionary>& groupEvent = _group->groupEvent();
     groupEvent.subscribe(
         identifier(),
@@ -411,8 +402,8 @@ void RenderableKameleonPlane::subscribeToGroup() {
 }
 
 void RenderableKameleonPlane::setDimensions() {
-    // the cdf files has an offset of 0.5 in normali resolution.
-    // with lower resolution the offset increases.
+    // The cdf files has an offset of 0.5 in normal resolution. With lower resolution the
+    // offset increases
     _data.offset = _origOffset - 0.5f * (100.f / _resolution);
     _dimensions = glm::size3_t(_data.scale * (_resolution / 100.f));
     _dimensions[_cut] = 1;
@@ -432,4 +423,4 @@ void RenderableKameleonPlane::changeKwPath(std::string kwPath) {
     _kwPath = std::move(kwPath);
 }
 
-}// namespace openspace
+} // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,38 +25,40 @@
 #include <modules/webbrowser/include/screenspacebrowser.h>
 
 #include <modules/webbrowser/webbrowsermodule.h>
-#include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <modules/webbrowser/include/browserinstance.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/engine/windowdelegate.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/texture.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/textureunit.h>
 #include <optional>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "ScreenSpaceBrowser";
 
-    constexpr openspace::properties::Property::PropertyInfo DimensionsInfo = {
+    constexpr Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
         "Browser dimensions",
         "The dimensions of the web browser window in pixels.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UrlInfo = {
+    constexpr Property::PropertyInfo UrlInfo = {
         "Url",
         "URL",
         "The URL to load.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
+    constexpr Property::PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
         "Reload the web browser.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
     // This `ScreenSpaceRenderable` can be used to render a webpage in front of the
@@ -75,9 +77,8 @@ namespace {
         // [[codegen::verbatim(DimensionsInfo.description)]]
         std::optional<glm::vec2> dimensions [[codegen::greater({ 0, 0 })]];
     };
-#include "screenspacebrowser_codegen.cpp"
-
 } // namespace
+#include "screenspacebrowser_codegen.cpp"
 
 namespace openspace {
 
@@ -89,8 +90,8 @@ void ScreenSpaceBrowser::ScreenSpaceRenderHandler::setTexture(GLuint t) {
     _texture = t;
 }
 
-documentation::Documentation ScreenSpaceBrowser::Documentation() {
-    return codegen::doc<Parameters>("core_screenspace_browser");
+Documentation ScreenSpaceBrowser::Documentation() {
+    return codegen::doc<Parameters>("webbrowser_screenspace_browser");
 }
 
 ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
@@ -184,8 +185,8 @@ bool ScreenSpaceBrowser::isReady() const {
     return _shader != nullptr;
 }
 
-void ScreenSpaceBrowser::bindTexture() {
-    _renderHandler->bindTexture();
+void ScreenSpaceBrowser::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    _renderHandler->bindTexture(unit);
 }
 
 } // namespace openspace

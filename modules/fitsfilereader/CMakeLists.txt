@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2025                                                                #
+# Copyright (c) 2014-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -63,9 +63,6 @@ if (MSVC)
   target_compile_options(CCfits PRIVATE "/W0")
   target_compile_definitions(CCfits PRIVATE "_SCL_SECURE_NO_WARNINGS")
 else ()
-  if (APPLE)
-    target_compile_options(cfitsio PRIVATE "-Wno-implicit-function-declaration")
-  endif ()
   target_compile_options(cfitsio PRIVATE "-w")
   target_compile_options(CCfits PRIVATE "-w")
 endif ()

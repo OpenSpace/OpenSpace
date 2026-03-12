@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Other comm)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_other-comm",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=other-comm&FORMAT=kvn",
+  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=other-comm&FORMAT=kvn",
   Filename = "other-comm.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })

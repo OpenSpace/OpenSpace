@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,14 +27,11 @@
 
 #include <openspace/properties/misc/listproperty.h>
 
-#include <string>
-#include <vector>
-
-namespace openspace::properties {
+namespace openspace {
 
 class StringListProperty : public ListProperty<std::string> {
 public:
-    StringListProperty(Property::PropertyInfo info,
+    explicit StringListProperty(PropertyInfo info,
         std::vector<std::string> values = std::vector<std::string>());
 
     std::string_view className() const override final;
@@ -50,6 +47,6 @@ private:
     std::vector< std::string> toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___STRINGLISTPROPERTY___H__

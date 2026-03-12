@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,13 +30,14 @@
 #include <filesystem>
 #include <string>
 #include <vector>
+#include <utility>
 
 namespace openspace {
 
 /**
  * A Horizons file is a text file generated from NASA JPL HORIZONS Website
- * (https://ssd.jpl.nasa.gov/horizons.cgi). The implementation supports both Vector
- * and Observer as Horizons data table.
+ * (https://ssd.jpl.nasa.gov/horizons.cgi). The implementation supports both Vector and
+ * Observer as Horizons data table.
  *
  * In case of Vector table data the implementation expects a file with format:
  * TIME(JulianDayNumber = A.D. YYYY-MM-DD HH:MM:SS TDB)
@@ -65,7 +66,7 @@ enum class HorizonsResultCode {
     Valid,
     Empty,
 
-    // Errors caught by the error field in the json output
+    // Errors caught by the error field in the JSON output
     ErrorSize,
     ErrorSpan,
     ErrorTimeRange,
@@ -75,7 +76,7 @@ enum class HorizonsResultCode {
     MultipleObserverStations,
     News,
 
-    // Errors/problems NOT caught by the error field in the json output
+    // Errors/problems NOT caught by the error field in the JSON output
     MultipleObserver,
     ErrorNoTarget,
     MultipleTarget,
@@ -90,8 +91,8 @@ enum class HorizonsType {
 };
 
 struct HorizonsKeyframe {
-    double time;            // J2000 seconds
-    glm::dvec3 position;    // GALACTIC cartesian coordinates in meters
+    double time = 0.0;   // J2000 seconds
+    glm::dvec3 position; // GALACTIC cartesian coordinates in meters
 };
 
 struct HorizonsResult {
@@ -123,11 +124,9 @@ private:
     std::filesystem::path _file;
 };
 
-// Free functions
 std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
     const std::string& observer, const std::string& startTime,
-    const std::string& stopTime, const std::string& stepSize,
-    const std::string& unit);
+    const std::string& stopTime, const std::string& stepSize, const std::string& unit);
 nlohmann::json sendHorizonsRequest(const std::string& url,
     const std::filesystem::path& filePath);
 nlohmann::json convertHorizonsDownloadToJson(const std::filesystem::path& filePath);
