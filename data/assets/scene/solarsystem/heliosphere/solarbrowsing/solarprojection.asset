@@ -16,7 +16,7 @@ local SolarImageryProjection = {
   },
   GUI = {
     Name = "Sun Projection",
-    Path = "/Solar System/Solar Imagery",
+    Path = "/Solar System/Sun/Solar Imagery",
     Description = [[Projects solar imagery from spacecraft observatories such as SDO and
       STEREO onto the surface of the Sun. Images are mapped from their observing
       spacecraft perspectives, allowing solar features captured by different instruments
