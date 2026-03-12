@@ -61,7 +61,7 @@ namespace {
         DoubleSided
     };
 
-    constexpr Property::PropertyInfo ActiveInstrumentsInfo = {
+    constexpr Property::PropertyInfo ActiveInstrumentInfo = {
         "ActiveInstrument",
         "Active instrument",
         "The active instrument of the current spacecraft imagery.",
@@ -93,14 +93,14 @@ namespace {
     constexpr Property::PropertyInfo MoveFactorInfo = {
         "MoveFactor",
         "Move factor",
-        "How close to the Sun to render the imagery.",
+        "Controls how close to the Sun to render the imagery.",
         Property::Visibility::User
     };
 
     constexpr Property::PropertyInfo DownsamplingLevelInfo = {
         "DownsamplingLevel",
         "Downsampling level",
-        "How much to downsample the original data. 0 is original resolution.",
+        "Controls how much to downsample the original data (0 is original resolution).",
         Property::Visibility::AdvancedUser
     };
 
@@ -170,7 +170,7 @@ namespace {
     // progressively reduce the resolution (1 = half, 2 = quarter, etc.).
     //
     // Visual adjustments can be made via color mapping (transfer functions), gamma,
-    // and contrast controls. Coronagraph instruments can optionally display frustum
+    // and contrast controls. Coronagraph instruments can optionally display a frustum
     // visualization.
     struct [[codegen::Dictionary(RenderableSolarImagery)]] Parameters {
         enum class LoadingType {
@@ -223,6 +223,12 @@ namespace {
 
         // [[codegen::verbatim(EnableFrustumInfo.description)]]
         std::optional<bool> enableFrustum;
+
+        enum class [[codegen::map(FaceMode)]] FaceMode {
+            FrontOnly [[codgen::key("Front Only")]],
+            SolidBack [[codegen::key("Solid Back")]],
+            DoubleSided [[codegen::key("Double Sided")]]
+        };
 
         // [[codegen::verbatim(FaceModeInfo.description)]]
         std::optional<FaceMode> faceMode;
@@ -287,7 +293,7 @@ openspace::Documentation RenderableSolarImagery::Documentation() {
 
 RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _activeInstruments(ActiveInstrumentsInfo)
+    , _activeInstruments(ActiveInstrumentInfo)
     , _contrastValue(ContrastValueInfo, 0.f, -15.f, 15.f)
     , _enableBorder(EnableBorderInfo, false)
     , _enableFrustum(EnableFrustumInfo, false)
@@ -682,7 +688,6 @@ void RenderableSolarImagery::deinitializeGL() {
     );
     _planeShader = nullptr;
 
-
     BaseModule::ProgramObjectManager.release(
         "SpacecraftFrustumProgram",
         [](ghoul::opengl::ProgramObject* p) {
@@ -690,7 +695,6 @@ void RenderableSolarImagery::deinitializeGL() {
         }
     );
     _frustumShader = nullptr;
-
 }
 
 bool RenderableSolarImagery::isReady() const {
@@ -763,16 +767,14 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), _position) *
         _rotation *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))
-    );
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
     const glm::dmat4 modelViewTransform = viewMatrix * modelTransform;
 
     // For frustum
     const glm::dmat4 spacecraftModelTransform =
         glm::translate(glm::dmat4(1.0), spacecraftPosWorld) *
         _rotation *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))
-    );
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     _planeShader->activate();
     ghoul::opengl::TextureUnit imageUnit;
@@ -844,7 +846,7 @@ void RenderableSolarImagery::update(const UpdateData& data) {
         _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(
             global::timeManager->time().j2000Seconds(),
             true
-    );
+        );
 
     requestPredictiveFrames(keyframe, data);
 
@@ -892,7 +894,7 @@ void RenderableSolarImagery::updateImageryTexture() {
         _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(
             global::timeManager->time().j2000Seconds(),
             true
-    );
+        );
 
     if (!keyframe) {
         // No keyframe avaialble so we clear the texture

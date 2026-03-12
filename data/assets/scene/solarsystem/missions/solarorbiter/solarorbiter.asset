@@ -28,6 +28,7 @@ local SolarOrbiterPosition = {
   GUI = {
     Name = "Solar Orbiter Position",
     Path = "/Solar System/Missions/Solar Orbiter",
+    Description = "The position of the Solar Orbiter spacecraft",
     Hidden = true,
     Focusable = false
   }
@@ -59,7 +60,8 @@ local SolarOrbiter = {
   },
   GUI = {
     Name = "Solar Orbiter",
-    Path = "/Solar System/Missions/Solar Orbiter"
+    Path = "/Solar System/Missions/Solar Orbiter",
+    Description = "The Solar Orbiter spacecraft"
   }
 }
 
@@ -85,7 +87,8 @@ local SolarOrbiterTrail = {
   },
   GUI = {
     Name = "Solar Orbiter Trail",
-    Path = "/Solar System/Missions/Solar Orbiter"
+    Path = "/Solar System/Missions/Solar Orbiter",
+    Description = "The trajectory of the Solar Orbiter spacecraft"
   }
 }
 

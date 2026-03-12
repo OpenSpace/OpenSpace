@@ -51,8 +51,8 @@ AsyncImageDecoder::~AsyncImageDecoder() {
 void AsyncImageDecoder::requestDecode(DecodeRequest request) {
     {
         std::lock_guard<std::mutex> lock(_queueMutex);
-        const std::string key = std::format("{}_ds_{}",
-            request.metadata.filePath, request.downsamplingLevel
+        const std::string key = std::format(
+            "{}_ds_{}", request.metadata.filePath, request.downsamplingLevel
         );
         if (_activeRequests.contains(key)) {
             // Request is already being processed
@@ -121,8 +121,8 @@ void AsyncImageDecoder::decodeRequest(const DecodeRequest& request) {
     // Once the callback is finished we're done with the request and can remove it
     {
         std::lock_guard lock(_queueMutex);
-        const std::string key = std::format("{}_ds_{}",
-            request.metadata.filePath, request.downsamplingLevel
+        const std::string key = std::format(
+            "{}_ds_{}", request.metadata.filePath, request.downsamplingLevel
         );
         _activeRequests.erase(key);
     }

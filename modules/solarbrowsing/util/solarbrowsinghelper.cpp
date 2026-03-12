@@ -57,6 +57,192 @@ namespace {
         return (ext == ".jp2") || (ext == ".j2k");
     }
 
+    // @TODO emiax: If openjpeg ever starts supporting reading XML metadata,
+    // this implementation should be improved in order not to search the entire buffer for
+    // XML data. There is an issue here:
+    // (https://github.com/uclouvain/openjpeg/issues/929)
+    std::optional<ImageMetadata> parseJ2kMetadata(const std::filesystem::path& filePath) {
+        ImageMetadata im;
+        im.filePath = filePath;
+
+        std::ifstream stream(filePath, std::ios::binary | std::ios::ate);
+        std::streamsize size = stream.tellg();
+        stream.seekg(0, std::ios::beg);
+        std::vector<char> buffer(size);
+        if (!stream.read(buffer.data(), size)) {
+            LERROR(std::format("Failed to read data from '{}' ", filePath));
+            return im;
+        }
+        std::string_view bufferView(buffer.data(), size);
+
+        auto extractInnerXml =
+            [](std::string_view view, const std::string& elementName) ->
+                                                           std::optional<std::string_view>
+        {
+            const std::string startTag = std::format("<{}>", elementName);
+            const std::string endTag = std::format("</{}>", elementName);
+
+            const auto begin = std::search(
+                view.begin(),
+                view.end(),
+                startTag.begin(),
+                startTag.end()
+            );
+
+            if (begin == view.end()) {
+                return std::nullopt;
+            }
+
+            const auto afterBeginTag = begin + startTag.size();
+
+            const auto end = std::search(
+                afterBeginTag,
+                view.end(),
+                endTag.begin(),
+                endTag.end()
+            );
+
+            if (end == view.end()) {
+                return std::nullopt;
+            }
+
+            return std::string_view(&*afterBeginTag, end - afterBeginTag);
+        };
+
+        std::optional<std::string_view> metaData = extractInnerXml(bufferView, "meta");
+
+        if (!metaData.has_value()) {
+            LERROR(std::format("Could not find metadata in {}", filePath));
+            return std::nullopt;
+        }
+
+        std::optional<std::string_view> telescop = extractInnerXml(*metaData, "TELESCOP");
+
+        if (!telescop.has_value()) {
+            LERROR(std::format("Could not find TELESCOP tag {}", filePath));
+            return std::nullopt;
+        }
+
+        std::optional<std::string_view> naxis = extractInnerXml(*metaData, "NAXIS1");
+
+        if (!naxis.has_value()) {
+            LERROR(std::format("Could not find NAXIS1 tag {}", filePath));
+            return std::nullopt;
+        }
+
+        std::optional<std::string_view> centerPixelX = extractInnerXml(
+            bufferView,
+            "CRPIX1"
+        );
+
+        if (!centerPixelX.has_value()) {
+            LERROR(std::format("Could not find CRPIX1 tag {}", filePath));
+            return std::nullopt;
+        }
+
+        std::optional<std::string_view> centerPixelY = extractInnerXml(
+            bufferView,
+            "CRPIX2"
+        );
+
+        if (!centerPixelY.has_value()) {
+            LERROR(std::format("Could not find CRPIX2 tag {}", filePath));
+            return std::nullopt;
+        }
+
+        im.fullResolution = std::stoi(std::string(*naxis));
+        const float halfRes = im.fullResolution / 2.f;
+
+        glm::vec2 centerPixel = glm::vec2(
+            std::stof(std::string(*centerPixelX)),
+            std::stof(std::string(*centerPixelY))
+        );
+        const glm::vec2 offset =
+            ((halfRes - centerPixel) / halfRes) * glm::vec2(SunRadius);
+        im.centerPixel = offset;
+
+        if (*telescop == "SOHO") {
+            std::optional<std::string_view> plateScl = extractInnerXml(
+                *metaData,
+                "PLATESCL"
+            );
+
+            if (!plateScl.has_value()) {
+                LERROR(std::format("Could not find NAXIS1 tag {}", filePath));
+                return std::nullopt;
+            }
+
+            const float plateScale = std::stof(std::string(*plateScl));
+            im.scale = 1.f / (plateScale / 2.f);
+            im.isCoronaGraph = true;
+        }
+        else if (*telescop == "SDO") {
+            std::optional<std::string_view> rsunObs = extractInnerXml(
+                bufferView,
+                "RSUN_OBS"
+            );
+            std::optional<std::string_view> cDelt1 = extractInnerXml(
+                bufferView,
+                "CDELT1"
+            );
+
+            if (!rsunObs.has_value()) {
+                LERROR(std::format("Could not find RSUN_OBS tag {}", filePath));
+                return std::nullopt;
+            }
+            if (!cDelt1.has_value()) {
+                LERROR(std::format("Could not find CDELT1 tag {}", filePath));
+                return std::nullopt;
+            }
+
+            const float rSunObsValue = std::stof(std::string(*rsunObs));
+            const float cDelt1Value = std::stof(std::string(*cDelt1));
+            im.scale = (rSunObsValue / cDelt1Value) / (im.fullResolution / 2.f);
+            im.isCoronaGraph = false;
+        }
+        else if (*telescop == "STEREO") {
+            std::optional<std::string_view> rsun = extractInnerXml(bufferView, "RSUN");
+            std::optional<std::string_view> cDelt1 = extractInnerXml(
+                bufferView,
+                "CDELT1"
+            );
+
+            if (!rsun.has_value()) {
+                LERROR(std::format("Could not find RSUN_OBS tag {}", filePath));
+                return std::nullopt;
+            }
+            if (!cDelt1.has_value()) {
+                LERROR(std::format("Could not find CDELT1 tag {}", filePath));
+                return std::nullopt;
+            }
+
+            const float rSunvalue = std::stof(std::string(*rsun));
+            const float cDelt1Value = std::stof(std::string(*cDelt1));
+            im.scale = (rSunvalue / cDelt1Value) / (im.fullResolution / 2.f);
+            im.isCoronaGraph = false;
+
+            std::optional<std::string_view> detector = extractInnerXml(
+                bufferView,
+                "DETECTOR"
+            );
+
+            if (detector.has_value()) {
+                im.isCoronaGraph = *detector == "COR1" || *detector == "COR2";
+            }
+            else {
+                LWARNING(std::format("Could not find DETECTOR tag {}", filePath));
+            }
+        }
+        else {
+            LERROR(std::format(
+                "Recieved unknown spacecraft image '{}'. Supported spacecrafts are {}, "
+                "{}, {}", *telescop, "SOHO", "SDO", "STEREO"
+            ));
+            return std::nullopt;
+        }
+        return im;
+    }
+
     // Conversion needed before passing dates into the spice manager
     std::string ISO8601(std::string& datetime) {
         std::string month = datetime.substr(5, 3);
@@ -161,7 +347,8 @@ namespace {
             if (!std::filesystem::is_directory(subDirectory)) {
                 LWARNING(std::format(
                     "Could not find subdirectory '{}' for cache file '{}'",
-                    subDirectory, cacheFile));
+                    subDirectory, cacheFile
+                ));
                 continue;
             }
 
@@ -244,7 +431,7 @@ namespace {
 
                 if (myfile.bad()) {
                     LERROR(std::format(
-                        "Failed to read metadata state : isCoronaGraph, file : '{}'",
+                        "Failed to read metadata state: isCoronaGraph, file: '{}'",
                         cacheFile
                     ));
                     subDirectoriesMap[subDirectory] = false;
