@@ -410,13 +410,13 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
         const Parameters p = codegen::bake<Parameters>(metaDict);
 
         Asset::MetaInformation meta = {
-            .name = p.name.value_or(meta.name),
-            .version = p.version.value_or(meta.version),
-            .description = p.description.value_or(meta.description),
-            .author = p.author.value_or(meta.author),
-            .url = p.url.value_or(meta.url),
-            .license = p.license.value_or(meta.license),
-            .identifiers = p.identifiers.value_or(meta.identifiers)
+            .name = p.name.value_or(""),
+            .version = p.version.value_or(""),
+            .description = p.description.value_or(""),
+            .author = p.author.value_or(""),
+            .url = p.url.value_or(""),
+            .license = p.license.value_or(""),
+            .identifiers = p.identifiers.value_or({})
         };
 
         // We need to do this as the asset might have 'export'ed identifiers before
