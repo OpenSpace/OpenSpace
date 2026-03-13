@@ -33,6 +33,7 @@ uniform sampler2D imageryTexture;
 uniform sampler1D lut;
 uniform bool additiveBlending;
 
+uniform float blackTransparencyThreshold;
 uniform float contrastValue;
 uniform float gammaValue;
 uniform float planeOpacity;
@@ -51,6 +52,12 @@ Fragment getFragment() {
     imageryTexture,
     vec2(in_data.textCoords.s, 1.0 - in_data.textCoords.t)
   ).r;
+
+  // Remove black background completely
+  if (intensityOrg <= blackTransparencyThreshold) {
+    discard;
+  }
+
   intensityOrg = contrast(intensityOrg);
 
   vec4 outColor;

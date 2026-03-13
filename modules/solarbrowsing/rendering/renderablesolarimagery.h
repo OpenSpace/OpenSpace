@@ -68,6 +68,7 @@ public:
 
     TransferFunction* transferFunction();
     const std::unique_ptr<ghoul::opengl::Texture>& imageryTexture() const;
+    float blackTransparencyThreshold() const;
     float contrastValue() const;
     float gammaValue() const;
     float scale() const;
@@ -99,6 +100,7 @@ private:
     void createFrustum() const;
 
     OptionProperty _activeInstruments;
+    FloatProperty _blackTransparencyThreshold;
     FloatProperty _contrastValue;
     BoolProperty _enableBorder;
     BoolProperty _enableFrustum;
@@ -130,8 +132,8 @@ private:
 
     // Image plane and frustum
     UniformCache(isCoronaGraph, scale, centerPixel, imageryTexture, planeOpacity,
-        gammaValue, contrastValue, modelViewProjectionTransform, hasLut,
-        lut) _uniformCachePlane;
+        blackTransparencyThreshold, gammaValue, contrastValue,
+        modelViewProjectionTransform, hasLut, lut) _uniformCachePlane;
 
     UniformCache(planeOpacity, modelViewProjectionTransform,
         modelViewProjectionTransformPlane, scale, centerPixel) _uniformCacheFrustum;

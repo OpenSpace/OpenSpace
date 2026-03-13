@@ -89,6 +89,13 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
+    constexpr Property::PropertyInfo BlackTransparencyThresholdInfo = {
+        "BlackTransparencyThreshold",
+        "Black transparency threshold",
+        "Pixels with intensity below this threshold are discarded.",
+        Property::Visibility::AdvancedUser
+    };
+
     constexpr Property::PropertyInfo ContrastValueInfo = {
         "ContrastValue",
         "Contrast",
@@ -164,6 +171,9 @@ namespace {
         // [[codegen::verbatim(DownsamplingLevelInfo.description)]]
         std::optional<int> downsamplingLevel;
 
+        // [[codegen::verbatim(BlackTransparencyThresholdInfo.description)]]
+        std::optional<float> blackTransparencyThreshold;
+
         // [[codegen::verbatim(ContrastValueInfo.description)]]
         std::optional<float> contrast;
 
@@ -191,6 +201,7 @@ openspace::Documentation RenderableSolarImagery::Documentation() {
 RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _activeInstruments(ActiveInstrumentsInfo)
+    , _blackTransparencyThreshold(BlackTransparencyThresholdInfo, 0.01f, 0.0f, 0.1f)
     , _contrastValue(ContrastValueInfo, 0.f, -15.f, 15.f)
     , _enableBorder(EnableBorderInfo, false)
     , _enableFrustum(EnableFrustumInfo, false)
@@ -267,6 +278,11 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     _moveFactor = p.moveFactor.value_or(_moveFactor);
     _moveFactor.onChange([this]() { createPlaneAndFrustum(_moveFactor); });
     addProperty(_moveFactor);
+
+    _blackTransparencyThreshold = p.blackTransparencyThreshold.value_or(
+        _blackTransparencyThreshold
+    );
+    addProperty(_blackTransparencyThreshold);
 
     _gammaValue = p.gamma.value_or(_gammaValue);
     addProperty(_gammaValue);
@@ -477,6 +493,8 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     _planeShader->setUniform(_uniformCachePlane.centerPixel, _currentCenterPixel);
     _planeShader->setUniform(_uniformCachePlane.imageryTexture, imageUnit);
     _planeShader->setUniform(_uniformCachePlane.planeOpacity, opacity());
+    _planeShader->setUniform(
+              _uniformCachePlane.blackTransparencyThreshold, _blackTransparencyThreshold);
     _planeShader->setUniform(_uniformCachePlane.gammaValue, _gammaValue);
     _planeShader->setUniform(_uniformCachePlane.contrastValue, _contrastValue);
     _planeShader->setUniform(
@@ -556,6 +574,10 @@ const std::unique_ptr<ghoul::opengl::Texture>&
 RenderableSolarImagery::imageryTexture() const
 {
     return _imageryTexture;
+}
+
+float RenderableSolarImagery::blackTransparencyThreshold() const {
+    return _blackTransparencyThreshold;
 }
 
 float RenderableSolarImagery::contrastValue() const {
