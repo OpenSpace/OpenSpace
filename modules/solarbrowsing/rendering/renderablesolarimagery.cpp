@@ -36,6 +36,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/cachemanager.h>
@@ -50,7 +51,6 @@
 namespace {
     using namespace openspace;
 
-    constexpr double SunRadius = 1391600000.0 * 0.5;
     constexpr unsigned int DefaultTextureSize = 32;
 
     enum FaceMode {
@@ -801,7 +801,7 @@ void RenderableSolarImagery::createPlaneAndFrustum(double moveDistance) {
     // tuning movement near the Sun. A Gaussian function* (3.1) is used to address this
     // issue: *https://www.diva-portal.org/smash/get/diva2:1147161/FULLTEXT01.pdf
     _gaussianMoveFactor = exp(-(pow((moveDistance - 1), 2.0)) / (2.0));
-    _size = static_cast<float>(_gaussianMoveFactor * SunRadius);
+    _size = static_cast<float>(_gaussianMoveFactor * distanceconstants::SolarRadius);
     createPlane();
     createFrustum();
 }

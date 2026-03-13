@@ -137,7 +137,7 @@ void J2kCodec::decodeIntoBuffer(const std::filesystem::path& path, unsigned char
     createInfileStream(path);
     setupDecoder(downsamplingLevel);
 
-    // TODO(mnoven): It's a waste of resources having to decode into the image object and
+    // @TODO (mnoven): It's a waste of resources having to decode into the image object and
     // then copy over the data to our buffer. Would be better if we could decode directly
     // into the buffer
     // See: https://github.com/uclouvain/openjpeg/issues/837
@@ -153,7 +153,7 @@ void J2kCodec::decodeIntoBuffer(const std::filesystem::path& path, unsigned char
         return;
     }
 
-    // TODO(mnoven): This is a waste. Can't specify decode precision in
+    // @TODO (mnoven): This is a waste. Can't specify decode precision in
     // openjpeg. See: https://github.com/uclouvain/openjpeg/issues/836)
     std::copy(
         _image->comps[0].data,

@@ -43,7 +43,8 @@ namespace openspace {
 class TransferFunction;
 class AsyncImageDecoder;
 
-// @TODO (anden88 2026-02-04): Steps for streaming new image data from HelioViewer
+// @TODO (anden88 2026-02-04): Steps to check off when implementing data streaming from
+// HelioViewer
 // 1. Check if image exists in cache (since this will be at runtime we check the ram
 // _imageMetadataMap)
 // 2. If not -> spawn a thread to download data from HelioViewer
