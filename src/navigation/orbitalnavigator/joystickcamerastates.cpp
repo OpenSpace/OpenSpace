@@ -278,7 +278,7 @@ void JoystickCameraStates::setAxisMappingProperty(const std::string& joystickNam
 
 JoystickCameraStates::AxisInformation JoystickCameraStates::axisMapping(
                                                           const std::string& joystickName,
-                                                                        int axis) const
+                                                                           int axis) const
 {
     const JoystickMapping* joystick = joystickMapping(joystickName);
 
