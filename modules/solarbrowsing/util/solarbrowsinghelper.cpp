@@ -534,7 +534,8 @@ std::unordered_map<std::string, std::shared_ptr<TransferFunction>> loadTransferF
         }
 
         if (!found) {
-            LERROR(std::format("Unable to load a color map for instrument '{}'",
+            LERROR(std::format(
+                "Unable to find and load a color map for instrument '{}'",
                 instrument.first
             ));
         }
