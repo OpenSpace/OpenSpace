@@ -793,7 +793,7 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     );
 
     ghoul::opengl::TextureUnit tfUnit;
-    TransferFunction* lut = _tfMap[_currentActiveInstrument].get();
+    TransferFunction* lut = transferFunction();
     if (lut) {
         tfUnit.bind(lut->texture());
         _planeShader->setUniform(_uniformCachePlane.hasLut, true);
@@ -840,7 +840,10 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableSolarImagery::update(const UpdateData& data) {
-    _tfMap[_currentActiveInstrument]->update();
+    TransferFunction* tf = transferFunction();
+    if (tf) {
+        tf->update();
+    }
 
     const Keyframe<ImageMetadata>* keyframe =
         _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(
