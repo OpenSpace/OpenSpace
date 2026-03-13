@@ -320,9 +320,8 @@ float JoystickCameraStates::deadzone(const std::string& joystickName, int axis) 
     return joystick->axisMapping[axis].deadzone;
 }
 
-void JoystickCameraStates::bindButtonCommand(const std::string& joystickName,
-                                             int button, std::string command,
-                                             JoystickAction action,
+void JoystickCameraStates::bindButtonCommand(const std::string& joystickName, int button,
+                                             std::string command, JoystickAction action,
                                              ButtonCommandRemote remote,
                                              std::string documentation)
 {
@@ -333,7 +332,12 @@ void JoystickCameraStates::bindButtonCommand(const std::string& joystickName,
 
     joystickMapping->buttonMapping.insert({
         button,
-        { std::move(command), action, remote, std::move(documentation) }
+        {
+            .command = std::move(command),
+            .action = action,
+            .synchronization = remote,
+            .documentation = std::move(documentation)
+        }
     });
 }
 
@@ -361,7 +365,7 @@ void JoystickCameraStates::clearButtonCommand(const std::string& joystickName,
 
 std::vector<std::string> JoystickCameraStates::buttonCommand(
                                                           const std::string& joystickName,
-                                                             int button) const
+                                                                         int button) const
 {
     std::vector<std::string> result;
     const JoystickMapping* joystick = joystickMapping(joystickName);
@@ -417,7 +421,7 @@ JoystickCameraStates::findOrAddJoystickMapping(const std::string& joystickName)
             //
             // Maybe we should have some type of joystick handler? That handles all added
             // joysticks, and each joystick can be of a given type (e.g. orbital camera,
-            // as in this case, or maybe something else like "free flight" in the future).
+            // as in this case, or maybe something else like "free flight" in the future)
             LWARNING(std::format(
                 "Cannot add more joysticks, only {} joysticks are supported",
                 JoystickInputStates::MaxNumJoysticks
