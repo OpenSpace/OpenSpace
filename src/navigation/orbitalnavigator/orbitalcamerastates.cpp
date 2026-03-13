@@ -62,8 +62,8 @@ void OrbitalCameraStates::setVelocityScaleFactor(double scaleFactor) {
 }
 
 void OrbitalCameraStates::resetVelocities() {
-    _globalRotationVelocity.setImmediate({ 0.0, 0.0 });
-    _localRotationVelocity.setImmediate({ 0.0, 0.0 });
+    _globalRotationVelocity.setImmediate(glm::dvec2(0.0));
+    _localRotationVelocity.setImmediate(glm::dvec2(0.0)});
     _truckMovementVelocity.setImmediate(0.0);
     _localRollVelocity.setImmediate(0.0);
     _globalRollVelocity.setImmediate(0.0);
@@ -79,8 +79,8 @@ bool OrbitalCameraStates::hasNonZeroVelocities(bool checkOnlyMovement) const {
         sum += localRollVelocity();
         sum += globalRollVelocity();
     }
-    // Epsilon size based on that even if no interaction is happening,
-    // there might still be some residual velocity in the variables
+    // Epsilon size based on that even if no interaction is happening, there might still
+    // be some residual velocity in the variables
     return glm::length(sum) > 0.001;
 }
 

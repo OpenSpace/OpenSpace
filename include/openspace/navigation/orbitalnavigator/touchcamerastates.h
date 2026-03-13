@@ -40,11 +40,11 @@ class TouchInputState;
 class TouchCameraStates : public OrbitalCameraStates {
 public:
     enum class InteractionType {
-        ROTATION = 0,
-        PINCH,
-        PAN,
-        ROLL,
-        NONE
+        Rotation = 0,
+        Pinch,
+        Pan,
+        Roll,
+        None
     };
 
     TouchCameraStates(double sensitivity, double velocityScaleFactor);

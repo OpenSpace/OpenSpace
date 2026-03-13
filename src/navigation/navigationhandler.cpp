@@ -265,12 +265,12 @@ void NavigationHandler::updateCameraTransitions() {
     // scenarios are handled;  SceneGraphNodes can have attached actions for each
     // transition, which are automatically triggered. Additionally, an
     // EventCameraTransition event is fired that contains information about the focus node
-    // and the transition state that caused the vent to fire.
+    // and the transition state that caused the vent to fire
 
     // Diagram of events for a camera moving from right-to-left.
     // Interaction sphere is 'O' in middle, and ')' are spherical boundaries. The approach
     // factor, reach factor, and interaction sphere radius are all taken from the current
-    // focus node.
+    // focus node
     //
     // |<------------------->|  Approach factor * Interaction sphere
     //              |<------>|  Reach Factor * Interaction sphere
@@ -395,9 +395,9 @@ void NavigationHandler::updateCameraTransitions() {
 
     const bool anchorWasChanged = anchorNode() != _lastAnchor;
     if (anchorWasChanged) {
-        // The anchor was changed between frames, so the transitions we have to check
-        // are a bit different. Just directly trigger the relevant events for the
-        // respective node
+        // The anchor was changed between frames, so the transitions we have to check are
+        // a bit different. Just directly trigger the relevant events for the respective
+        // node
         if (wasInReachSphere) {
             triggerRecedeEvent(_lastAnchor);
         }
@@ -486,7 +486,7 @@ NavigationState NavigationHandler::navigationState(
     const double pitch = eulerAngles.x;
     const double yaw = -eulerAngles.y;
 
-    // Need to compensate by redisual roll left in local rotation:
+    // Need to compensate by residual roll left in local rotation:
     const glm::dquat unroll = glm::angleAxis(eulerAngles.z, glm::dvec3(0.0, 0.0, 1.0));
     const glm::dvec3 neutralUp =
         glm::inverse(invNeutralRotation) * unroll * _camera->lookUpVectorCameraSpace();

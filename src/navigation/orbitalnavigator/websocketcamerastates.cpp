@@ -70,13 +70,13 @@ void WebsocketCameraStates::updateVelocitiesFromInput(
                     break;
                 case AxisType::OrbitX:
                     if (!updateStates.globalRotation.has_value()) {
-                        updateStates.globalRotation = glm::dvec2(0.0, 0.0);
+                        updateStates.globalRotation = glm::dvec2(0.0);
                     }
                     (*updateStates.globalRotation).x = value;
                     break;
                 case AxisType::OrbitY:
                     if (!updateStates.globalRotation.has_value()) {
-                        updateStates.globalRotation = glm::dvec2(0.0, 0.0);
+                        updateStates.globalRotation = glm::dvec2(0.0);
                     }
                     (*updateStates.globalRotation).y = value;
                     break;
@@ -108,13 +108,13 @@ void WebsocketCameraStates::updateVelocitiesFromInput(
                     break;
                 case AxisType::PanX:
                     if (!updateStates.localRotation.has_value()) {
-                        updateStates.localRotation = glm::dvec2(0.0, 0.0);
+                        updateStates.localRotation = glm::dvec2(0.0);
                     }
                     (*updateStates.localRotation).x = value;
                     break;
                 case AxisType::PanY:
                     if (!updateStates.localRotation.has_value()) {
-                        updateStates.localRotation = glm::dvec2(0.0, 0.0);
+                        updateStates.localRotation = glm::dvec2(0.0);
                     }
                     (*updateStates.localRotation).y = value;
                     break;

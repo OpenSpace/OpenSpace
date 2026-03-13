@@ -336,12 +336,7 @@ OrbitalNavigator::LimitZoom::LimitZoom()
     , enableZoomInLimit(EnableMinimumAllowedDistanceInfo, true)
     , minimumAllowedDistance(MinimumDistanceInfo, 10.f, 0.f, 10000.f)
     , enableZoomOutLimit(EnableMaximumDistanceInfo, false)
-    , maximumAllowedDistance(
-        MaximumDistanceInfo,
-        4e+27f,
-        50.f,
-        4e+27f
-    )
+    , maximumAllowedDistance(MaximumDistanceInfo, 4e+27f, 50.f, 4e+27f)
 {
     // Min
     addProperty(enableZoomInLimit);
@@ -372,9 +367,9 @@ OrbitalNavigator::OrbitalNavigator()
     , _useAdaptiveStereoscopicDepth(UseAdaptiveStereoscopicDepthInfo, true)
     , _stereoscopicDepthOfFocusSurface(
         StereoscopicDepthOfFocusSurfaceInfo,
-        21500,
-        0.25,
-        500000
+        21500.f,
+        0.25f,
+        500000.f
     )
     , _staticViewScaleExponent(StaticViewScaleExponentInfo, 0.f, -30, 10)
     , _constantVelocityFlight(ConstantVelocityFlight, false)
@@ -760,11 +755,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             posHandle
         );
 
-        pose.position = pushToSurface(
-            pose.position,
-            anchorPos,
-            posHandle
-        );
+        pose.position = pushToSurface(pose.position, anchorPos, posHandle);
     }
 
     pose.rotation = composeCameraRotation(camRot);
@@ -1114,15 +1105,14 @@ CameraPose OrbitalNavigator::followAim(CameraPose pose, const glm::dvec3& camera
     const glm::dvec3 intermediateCameraToAnchor =
         _anchorNode->worldPosition() - pose.position;
 
-    const glm::dvec3 intermediateCameraToProjectedAim =
-        projectedAim - pose.position;
+    const glm::dvec3 intermediateCameraToProjectedAim = projectedAim - pose.position;
 
     const double anchorAimAngle = glm::angle(
         glm::normalize(intermediateCameraToAnchor),
         glm::normalize(intermediateCameraToProjectedAim)
     );
     double ratio =
-        glm::sin(anchorAimAngle) * glm::length(intermediateCameraToAnchor) /
+        std::sin(anchorAimAngle) * glm::length(intermediateCameraToAnchor) /
         glm::length(anchorToAim.second);
 
     // Equation has no solution if ratio > 1.
@@ -1132,13 +1122,13 @@ CameraPose OrbitalNavigator::followAim(CameraPose pose, const glm::dvec3& camera
     ratio = std::clamp(ratio, -1.0, 1.0);
     const double CorrectionFactorExponent = 50.0;
     const double correctionFactor =
-        std::clamp(1.0 - glm::pow(ratio, CorrectionFactorExponent), 0.0, 1.0);
+        std::clamp(1.0 - std::pow(ratio, CorrectionFactorExponent), 0.0, 1.0);
 
     // `newCameraAnchorAngle` has two solutions, depending on whether the camera is in
     // the half-space closest to the anchor or aim
     double newCameraAnchorAngle = std::asin(ratio);
-    if (glm::dot(intermediateCameraToAnchor, anchorToAim.second) <= 0 &&
-        glm::dot(intermediateCameraToProjectedAim, anchorToAim.second) <= 0)
+    if (glm::dot(intermediateCameraToAnchor, anchorToAim.second) <= 0.0 &&
+        glm::dot(intermediateCameraToProjectedAim, anchorToAim.second) <= 0.0)
     {
         newCameraAnchorAngle = -std::asin(ratio) + glm::pi<double>();
     }

@@ -45,8 +45,8 @@ MouseCameraStates::MouseCameraStates(double sensitivity, double velocityScaleFac
 {}
 
 void MouseCameraStates::updateVelocitiesFromInput(const MouseInputState& mouseState,
-                                             const KeyboardInputState& keyboardState,
-                                             double deltaTime)
+                                                  const KeyboardInputState& keyboardState,
+                                                  double deltaTime)
 {
     const MouseButton primary = global::interactionHandler->primaryMouseButton();
     const MouseButton secondary = global::interactionHandler->secondaryMouseButton();

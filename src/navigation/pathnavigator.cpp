@@ -82,8 +82,8 @@ namespace {
     constexpr Property::PropertyInfo IdleMotionOnFinishInfo = {
         "ApplyIdleMotionOnFinish",
         "Apply idle motion on finish",
-        "If set to true, the chosen IdleMotion of the OrbitalNavigator will be "
-        "triggered once the path has reached its target.",
+        "If set to true, the chosen IdleMotion of the OrbitalNavigator will be triggered "
+        "once the path has reached its target.",
         Property::Visibility::User
     };
 

@@ -81,7 +81,7 @@ OrbitalInputHandler::OrbitalInputHandler(double friction)
     , _touchStates(_touchSensitivity, velocityScaleFromFriction(friction))
 {
     _mouseSensitivity.onChange([this]() {
-        _mouseStates.setSensitivity(_mouseSensitivity * pow(10.0, -4));
+        _mouseStates.setSensitivity(_mouseSensitivity * std::pow(10.0, -4));
     });
     addProperty(_mouseSensitivity);
 

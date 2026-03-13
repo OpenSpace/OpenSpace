@@ -84,11 +84,11 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
 
 #ifdef TOUCH_DEBUG_MODE
     const std::map<InteractionType, std::string> interactionNames = {
-        { InteractionType::ROTATION, "Rotation" },
-        { InteractionType::PINCH, "Pinch" },
-        { InteractionType::PAN, "Pan" },
-        { InteractionType::ROLL, "Roll" },
-        { InteractionType::NONE, "None" }
+        { InteractionType::Rotation, "Rotation" },
+        { InteractionType::Pinch, "Pinch" },
+        { InteractionType::Pan, "Pan" },
+        { InteractionType::Roll, "Roll" },
+        { InteractionType::None, "None" }
     };
     LDEBUG(std::format("Interpreted interaction: {}", interactionNames.at(action)));
 #endif // TOUCH_DEBUG_MODE
@@ -99,16 +99,16 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
     const float aspectRatio = windowSize.x / windowSize.y;
 
     switch (action) {
-        case InteractionType::ROTATION: {
+        case InteractionType::Rotation: {
             // Add rotation velocity
-            const glm::dvec2 Scale = glm::dvec2(5.0);
+            constexpr glm::dvec2 Scale = glm::dvec2(5.0);
             updateVelocities.globalRotation = Scale * _sensitivity * -glm::dvec2(
                 currentInput.speedX(),
                 currentInput.speedY()
             );
             break;
         }
-        case InteractionType::PINCH: {
+        case InteractionType::Pinch: {
             // Add zooming velocity - dependent on distance difference between contact
             // points this/first frame
             const TouchInput& startFinger0 = _pinchInputs[0].firstInput();
@@ -142,7 +142,7 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
 
             break;
         }
-        case InteractionType::ROLL: {
+        case InteractionType::Roll: {
             // Add global roll rotation velocity
             double rollFactor = 0.0;
             for (const TouchInputHolder& touchPoint : touchPoints) {
@@ -163,7 +163,7 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
             updateVelocities.globalRoll = Scale * -avgRollFactor * _sensitivity;
             break;
         }
-        case InteractionType::PAN: {
+        case InteractionType::Pan: {
             // Add local rotation velocity
             const glm::dvec2 Scale = glm::dvec2(10.0);
 
@@ -178,7 +178,6 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
             break;
         }
         case InteractionType::NONE:
-            break;
         default:
             break;
     }
@@ -196,19 +195,19 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
         // Not a valid gesture. Probably just a tap.
         // @TODO (2026-03-11, emmbr) This code prevents a crash from happening, but
         // ideally we should instea dchange the code below so this check is not needed
-        return InteractionType::NONE;
+        return InteractionType::None;
     }
 
     // A one finger gesture is always interpreted as a rotation
     if (inputs.size() == 1) {
-        return InteractionType::ROTATION;
+        return InteractionType::Rotation;
     }
 
     // Handle multi-finger gestures
 
     // Compute centroid of current touch points
     glm::vec2 lastCentroid = _centroid;
-    _centroid = glm::vec2(0.f, 0.f);
+    _centroid = glm::vec2(0.f);
     for (const TouchInputHolder& inputHolder : inputs) {
         _centroid += inputHolder.latestInput().pos;
     }
@@ -290,13 +289,13 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
     const float InputStillThreshold = 0.0005f;
     const float CentroidStillThreshold = 0.0018f;
 
-    // We have roll if one finger is still, or the total roll angles around the
-    // centroid is over RollAngleThreshold (CentroidStillThreshold is used to void
+    // We have roll if one finger is still, or the total roll angles around the centroid
+    // is over RollAngleThreshold (CentroidStillThreshold is used to avoid
     // misinterpretations)
     if (std::abs(minDiff) < InputStillThreshold ||
         (std::abs(rollFactor) < 100.0 && normalizedCentroidDist < CentroidStillThreshold))
     {
-        return InteractionType::ROLL;
+        return InteractionType::Roll;
     }
     else {
         // Check for pinch gesture
@@ -310,7 +309,7 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
             _pinchInputs[0] = TouchInputHolder(inputs[0].latestInput());
             _pinchInputs[1] = TouchInputHolder(inputs[1].latestInput());
         }
-        return InteractionType::PINCH;
+        return InteractionType::Pinch;
     }
 }
 
