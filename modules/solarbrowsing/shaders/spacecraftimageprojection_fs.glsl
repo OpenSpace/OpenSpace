@@ -45,7 +45,7 @@ uniform float scale[MaxSpacecraftObservatories];
 uniform vec2 centerPixel[MaxSpacecraftObservatories];
 uniform float opacity;
 
-const float HalfSunRadius = 1391600000 * 0.5;
+const float SunRadius = 6.95700E8;
 
 float contrast(float intensity, int i) {
   return min(
@@ -66,11 +66,11 @@ Fragment getFragment() {
 
     if (planePositionSpacecraft[i].z < in_data.vUv[i].z) {
       vec3 uv = in_data.vUv[i].xyz;
-      uv /= (HalfSunRadius / scale[i]) * 2.0;
+      uv /= (SunRadius / scale[i]) * 2.0;
       uv += 0.5;
 
-      uv.x += (centerPixel[i].x / HalfSunRadius) / 2.0;
-      uv.y -= (centerPixel[i].y /  HalfSunRadius) / 2.0;
+      uv.x += (centerPixel[i].x / SunRadius) / 2.0;
+      uv.y -= (centerPixel[i].y /  SunRadius) / 2.0;
 
       float intensityOrg = texture(imageryTexture[i], vec2(uv.x, 1.0 - uv.y)).r;
       intensityOrg = contrast(intensityOrg, i);

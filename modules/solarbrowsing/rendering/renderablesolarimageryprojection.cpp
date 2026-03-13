@@ -33,6 +33,7 @@
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -47,7 +48,6 @@
 namespace {
     // This number MUST match the constant specified in the shader
     constexpr int MaxSpacecraftObservatories = 7;
-    constexpr float SunRadius = 1391600000.0 * 0.5;
 
     struct [[codegen::Dictionary(RenderableSolarImageryProjection)]] Parameters {
         // List of spacecraft identifiers that will be projected on the sphere (Sun)
@@ -66,7 +66,7 @@ openspace::Documentation RenderableSolarImageryProjection::Documentation() {
 RenderableSolarImageryProjection::RenderableSolarImageryProjection(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _sphere(SunRadius * 1.001f, 100)
+    , _sphere(static_cast<float>(distanceconstants::SolarRadius), 100)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     addProperty(Fadeable::_opacity);

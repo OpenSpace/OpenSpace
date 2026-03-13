@@ -37,6 +37,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/cachemanager.h>
@@ -52,7 +53,6 @@
 namespace {
     using namespace openspace;
 
-    constexpr double SunRadius = 1391600000.0 * 0.5;
     constexpr unsigned int DefaultTextureSize = 32;
 
     enum FaceMode {
@@ -1476,5 +1476,89 @@ void RenderableSolarImagery::updateImageryTexture() {
             ingestDownloadedFile(p);
         }
     }
+
+    std::deque<Keyframe<ImageMetadata>>::const_iterator beforeIt = currentIt;
+    for (int i = 0; i < framesBefore && beforeIt != keyframes.begin(); i++) {
+        beforeIt--;
+        requestFrameIfNeeded(*beforeIt);
+    }
+
+    _lastPredictedKeyframe = keyframe->id;
+    _predictionIsDirty = false;
+}
+
+void RenderableSolarImagery::createPlaneAndFrustum(double moveDistance) {
+    // Computing the image plane position using linear scale is not sufficient for fine
+    // tuning movement near the Sun. A Gaussian function* (3.1) is used to address this
+    // issue: *https://www.diva-portal.org/smash/get/diva2:1147161/FULLTEXT01.pdf
+    _gaussianMoveFactor = exp(-(pow((moveDistance - 1), 2.0)) / (2.0));
+    _size = static_cast<float>(_gaussianMoveFactor * distanceconstants::SolarRadius);
+    createPlane();
+    createFrustum();
+}
+
+void RenderableSolarImagery::createPlane() const {
+    const std::array<PlaneVertex, 6> vertexData = {
+        PlaneVertex{ glm::vec2(-_size, -_size), glm::vec2(0.f, 0.f) },
+        PlaneVertex{ glm::vec2( _size,  _size), glm::vec2(1.f, 1.f) },
+        PlaneVertex{ glm::vec2(-_size,  _size), glm::vec2(0.f, 1.f) },
+        PlaneVertex{ glm::vec2(-_size, -_size), glm::vec2(0.f, 0.f) },
+        PlaneVertex{ glm::vec2( _size, -_size), glm::vec2(1.f, 0.f) },
+        PlaneVertex{ glm::vec2( _size,  _size), glm::vec2(1.f, 1.f) },
+    };
+
+    glNamedBufferData(
+        _vertexPositionBuffer,
+        sizeof(vertexData),
+        vertexData.data(),
+        GL_STATIC_DRAW
+    );
+}
+
+void RenderableSolarImagery::createFrustum() const {
+    // Vertex orders x, y, z, w
+    // Where w indicates if vertex should be drawn in spacecraft or planes coordinate
+    // system
+    const std::array<FrustumVertex, 16> vertexData = {
+        FrustumVertex{ glm::vec4( 0.f,    0.f,   0.f, 0.f) },
+        FrustumVertex{ glm::vec4( _size,  _size, 0.f, 1.f) },
+        FrustumVertex{ glm::vec4( 0.f,    0.f,   0.f, 0.f) },
+        FrustumVertex{ glm::vec4(-_size, -_size, 0.f, 1.f) },
+        FrustumVertex{ glm::vec4( 0.f,    0.f,   0.f, 0.f) },
+        FrustumVertex{ glm::vec4( _size, -_size, 0.f, 1.f) },
+        FrustumVertex{ glm::vec4( 0.f,    0.f,   0.f, 0.f) },
+        FrustumVertex{ glm::vec4(-_size,  _size, 0.f, 1.f) },
+        // Borders
+        // Left
+        FrustumVertex{ glm::vec4(-_size, -_size, 0.f, 1.f) },
+        FrustumVertex{ glm::vec4(-_size,  _size, 0.f, 1.f) },
+        // Top
+        FrustumVertex{ glm::vec4(-_size,  _size, 0.f, 1.f) },
+        FrustumVertex{ glm::vec4( _size,  _size, 0.f, 1.f) },
+        // Right
+        FrustumVertex{ glm::vec4( _size,  _size, 0.f, 1.f) },
+        FrustumVertex{ glm::vec4( _size, -_size, 0.f, 1.f) },
+        // Bottom
+        FrustumVertex{ glm::vec4( _size, -_size, 0.f, 1.f) },
+        FrustumVertex{ glm::vec4(-_size, -_size, 0.f, 1.f) },
+    };
+
+    glNamedBufferData(
+        _frustumPositionBuffer,
+        sizeof(vertexData),
+        vertexData.data(),
+        GL_STATIC_DRAW
+    );
+}
+
+const glm::vec3& RenderableSolarImagery::planeNormal() const {
+    return _normal;
+}
+const glm::dvec3& RenderableSolarImagery::planeWorldPosition() const {
+    return _position;
+}
+const glm::dmat4& RenderableSolarImagery::planeWorldRotation() const {
+    return _rotation;
+}
 
 } // namespace openspace

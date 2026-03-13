@@ -4,8 +4,8 @@
 
 -- Manually download the color maps from the OpenSpace data servers since we cannot use
 -- asset.resource or similar functions to fetch data
-local SavePathBase = openspace.absPath("${SYNC}/http/solarbrowsing/")
-openspace.createDirectory(SavePathBase, true);
+local savePathBase = openspace.absPath("${SYNC}/http/solarbrowsing/")
+openspace.createDirectory(savePathBase, true);
 
 local Downloads = {
   SDO = {
@@ -35,7 +35,7 @@ local Downloads = {
 for _, spacecraft in pairs(Downloads) do
   for _, file in ipairs(spacecraft.Files) do
     local url = spacecraft.BaseUrl .. file
-    local savePath = SavePathBase .. file
+    local savePath = savePathBase .. file
     openspace.downloadFile(url, savePath, true, false)
   end
 end
@@ -45,7 +45,7 @@ return {{
 	Name = "SDO",
 	SourceId = 10,
 	Instrument = "AIA-171",
-	ColorMap = SavePathBase.. "AIA-171.txt",
+	ColorMap = savePathBase.. "AIA-171.txt",
 	StartTime = "2024-05-06T00:00:00.000Z",
 	EndTime = "2024-05-14T00:00:00.000Z",
 	TimeStep = 60*60, -- Download an image every hour
@@ -57,7 +57,7 @@ return {{
 	Name = "STEREO",
 	SourceId = 20,
 	Instrument = "EUVI-A 171",
-	ColorMap = SavePathBase .. "EUVI-A-171.txt",
+	ColorMap = savePathBase .. "EUVI-A-171.txt",
 	StartTime = "2024-05-06T00:00:00.000Z",
 	EndTime = "2024-05-14T00:00:00.000Z",
 	TimeStep = 60*60, -- Download an image every hour

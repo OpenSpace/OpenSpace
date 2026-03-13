@@ -28,6 +28,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/transferfunction.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/progressbar.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timemanager.h>
@@ -46,7 +47,6 @@ namespace {
     using namespace openspace;
 
     constexpr std::string_view _loggerCat = "SolarBrowsingHelper";
-    constexpr double SunRadius = 1391600000.0 * 0.5;
     using IsValidCacheFile = bool;
 
     bool isValidJ2000ImageFile(const std::filesystem::path& path) {
@@ -157,8 +157,8 @@ namespace {
             std::stof(std::string(*centerPixelX)),
             std::stof(std::string(*centerPixelY))
         );
-        const glm::vec2 offset =
-            ((halfRes - centerPixel) / halfRes) * glm::vec2(SunRadius);
+        const glm::vec2 offset = ((halfRes - centerPixel) / halfRes) *
+            glm::vec2(static_cast<float>(distanceconstants::SolarRadius));
         im.centerPixel = offset;
 
         if (*telescop == "SOHO") {

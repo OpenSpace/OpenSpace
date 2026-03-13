@@ -33,7 +33,7 @@
 namespace openspace {
 
 /**
- * TODO(mnoven): A simple wrapper around openjpeg. As of 08/24/17 openjpeg has 3 major
+ * @TODO (mnoven): A simple wrapper around openjpeg. As of 08/24/17 openjpeg has 3 major
  * bottlenecks which are listed below:
  *
  * 1. We can't perform decoding on multiple threads, this feature is not stable and
