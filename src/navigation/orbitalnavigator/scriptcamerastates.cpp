@@ -27,7 +27,7 @@
 namespace openspace {
 
 ScriptCameraStates::ScriptCameraStates()
-    : CameraInteractionStates(1.0, 1.0)
+    : OrbitalCameraStates(1.0, 1.0)
 {}
 
 void ScriptCameraStates::updateVelocitiesFromInput(double deltaTime) {

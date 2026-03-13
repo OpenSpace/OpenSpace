@@ -177,7 +177,7 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
 
             break;
         }
-        case InteractionType::NONE:
+        case InteractionType::None:
         default:
             break;
     }
@@ -234,7 +234,7 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
 
     // If average distance between 3 fingers are constant we have panning
     if (avgDistance < InterpretPanDistance && inputs.size() == 3) {
-        return InteractionType::PAN;
+        return InteractionType::Pan;
     }
 
     // Find the slowest moving finger - used in roll interpretation

@@ -63,7 +63,7 @@ void OrbitalCameraStates::setVelocityScaleFactor(double scaleFactor) {
 
 void OrbitalCameraStates::resetVelocities() {
     _globalRotationVelocity.setImmediate(glm::dvec2(0.0));
-    _localRotationVelocity.setImmediate(glm::dvec2(0.0)});
+    _localRotationVelocity.setImmediate(glm::dvec2(0.0));
     _truckMovementVelocity.setImmediate(0.0);
     _localRollVelocity.setImmediate(0.0);
     _globalRollVelocity.setImmediate(0.0);
