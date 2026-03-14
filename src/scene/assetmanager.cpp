@@ -416,7 +416,7 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
             .author = p.author.value_or(""),
             .url = p.url.value_or(""),
             .license = p.license.value_or(""),
-            .identifiers = p.identifiers.value_or({})
+            .identifiers = p.identifiers.value_or(std::vector<std::string>())
         };
 
         // We need to do this as the asset might have 'export'ed identifiers before
