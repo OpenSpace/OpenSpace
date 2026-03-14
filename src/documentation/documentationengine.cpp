@@ -571,7 +571,6 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
 
     for (const Documentation& doc : docs) {
         if (doc.id.empty()) {
-            LERROR("Documentation without identifier");
             continue;
         }
         leftovers[ClassesKey].push_back(documentationToJson(doc));
@@ -673,21 +672,19 @@ void DocumentationEngine::writeJavascriptDocumentation() const {
 }
 
 void DocumentationEngine::writeJsonDocumentation() const {
-    nlohmann::json factory = generateFactoryManagerJson();
-    nlohmann::json scripting = generateScriptEngineJson();
-
     // Write two json files for the static docs page - asset components and scripting API
-    std::ofstream out = std::ofstream(absPath("${DOCUMENTATION}/assetComponents.json"));
-    if (out) {
-        out << factory.dump();
-    }
-    out.close();
 
-    out.open(absPath("${DOCUMENTATION}/scriptingApi.json"));
-    if (out) {
-        out << scripting.dump();
+    std::ofstream outFactory(absPath("${DOCUMENTATION}/assetComponents.json"));
+    if (outFactory.good()) {
+        nlohmann::json factory = generateFactoryManagerJson();
+        outFactory << factory.dump();
     }
-    out.close();
+
+    std::ofstream outScription(absPath("${DOCUMENTATION}/scriptingApi.json"));
+    if (outScription.good()) {
+        nlohmann::json scripting = generateScriptEngineJson();
+        outScription << scripting.dump();
+    }
 }
 
 nlohmann::json DocumentationEngine::generateActionJson() const {
