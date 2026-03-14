@@ -16,8 +16,7 @@ local PlutoBarycenterTrail = {
     },
     Color = { 0.3, 0.7, 0.3 },
     Period = 90560,
-    Resolution = 368,
-    LineLength = 0.03
+    Resolution = 368
   },
   Tag = { "planetTrail_dwarf" },
   GUI = {
