@@ -28,7 +28,7 @@ local SohoPosition = {
   GUI = {
     Name = "SOHO Position",
     Path = "/Solar System/Missions/SOHO",
-    Description = "The position of the SOHO spacecraft",
+    Description = "The position of the SOHO spacecraft.",
     Hidden = true,
     Focusable = false
   }
@@ -64,7 +64,7 @@ local Soho = {
   GUI = {
     Name = "SOHO",
     Path = "/Solar System/Missions/SOHO",
-    Description = "The SOHO (Solar and Heliospheric Observatory) spacecraft"
+    Description = "The SOHO (Solar and Heliospheric Observatory) spacecraft."
   }
 }
 
@@ -91,7 +91,7 @@ local SohoTrail = {
   GUI = {
     Name = "SOHO Trail",
     Path = "/Solar System/Missions/SOHO",
-    Description = "The trajectory of the SOHO spacecraft"
+    Description = "The trajectory of the SOHO spacecraft."
   }
 }
 

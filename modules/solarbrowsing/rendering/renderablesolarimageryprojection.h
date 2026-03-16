@@ -36,7 +36,6 @@ namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
-
 class SceneGraphNode;
 
 class RenderableSolarImageryProjection : public Renderable {

@@ -53,7 +53,8 @@ local SolarImagery = {
       (SDO). Images from multiple instruments can be browsed over time and are projected
       onto a plane positioned relative to the Sun. Instrument-specific color mappings help
       highlight different solar phenomena such as active regions, flares, and coronal
-      structures.]]
+      structures.]],
+      Focusable = false
   }
 }
 
