@@ -29,6 +29,7 @@
 #include <openspace/util/time.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
@@ -47,6 +48,24 @@ using namespace openspace;
 namespace {
 
 /**
+ * Loads [NavigationState](#core_navigationstate) from file and returns the result. The
+ * file should be in json format, such as the output files of `saveNavigationState`.
+ *
+ * \param filePath The path to the file, including the file name (and extension, if it is
+ *        anything other than `.navstate`)
+ *
+ * \return A Lua table representing the loaded NavigationState
+ */
+[[codegen::luawrap]] ghoul::Dictionary loadNavigationState(std::string filePath) {
+    if (filePath.empty()) {
+        throw ghoul::lua::LuaError("Filepath string is empty");
+    }
+
+    NavigationState ns = global::navigationHandler->loadNavigationState(filePath);
+    return ns.dictionary();
+}
+
+/**
  * Set the camera position by loading a [NavigationState](#core_navigationstate) from
  * file. The file should be in json format, such as the output files of
  * `saveNavigationState`.
@@ -55,16 +74,34 @@ namespace {
  *        anything other than `.navstate`)
  * \param useTimeStamp If `true`, and the provided NavigationState includes a timestamp,
  *        the time will be set as well
+ * \param shouldFade If `true`, OpenSpace will fade to black before setting the
+ *        navigation state. If `false`, camera state will be set immediately
  */
-[[codegen::luawrap]] void loadNavigationState(std::string filePath,
-                                              bool useTimeStamp = false)
+[[codegen::luawrap]] void loadAndSetNavigationState(std::string filePath,
+                                                    bool useTimeStamp = false,
+                                                    bool shouldFade = true)
 {
     if (filePath.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
 
-    global::navigationHandler->loadNavigationState(filePath, useTimeStamp);
+    NavigationState ns = global::navigationHandler->loadNavigationState(filePath);
+
+    if (shouldFade) {
+        global::scriptEngine->queueScript({
+            .code = std::format(
+                "openspace.navigation.jumpToNavigationState({},{});",
+                ghoul::formatLua(ns.dictionary()), useTimeStamp
+            ),
+            .synchronized = ScriptEngine::Script::ShouldBeSynchronized::No,
+            .sendToRemote = ScriptEngine::Script::ShouldSendToRemote::No
+        });
+    }
+    else {
+        global::navigationHandler->setNavigationStateNextFrame(ns, useTimeStamp);
+    }
 }
+
 
 /**
  * Return the current [NavigationState](#core_navigationstate) as a Lua table.
@@ -108,11 +145,7 @@ namespace {
                                              bool useTimeStamp = false)
 {
     NavigationState ns = NavigationState(navigationState);
-    global::navigationHandler->setNavigationStateNextFrame(ns);
-
-    if (useTimeStamp && ns.timestamp.has_value()) {
-        global::timeManager->setTimeNextFrame(Time(*ns.timestamp));
-    }
+    global::navigationHandler->setNavigationStateNextFrame(ns, useTimeStamp);
 }
 
 /**
