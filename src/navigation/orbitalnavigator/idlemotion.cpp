@@ -34,75 +34,75 @@ namespace {
 
     constexpr std::string_view IdleKeyOrbit = "Orbit";
     constexpr std::string_view IdleKeyOrbitAtConstantLat = "OrbitAtConstantLatitude";
-    constexpr std::string_view IdleKeyOrbitAroundUp = "OrbitAroundUp";
+    constexpr std::string_view IdleKeyOrbitAroundUp = "OrbitAroundUpVector";
 
     constexpr double AngleEpsilon = 1e-7;
 
     constexpr Property::PropertyInfo ApplyInfo = {
         "Apply",
         "Apply idle motion",
-        "When set to true, the chosen idle motion will be applied to the camera, "
-        "moving the camera accordingly.",
+        "When set to true, the chosen idle motion will be applied to the camera, moving "
+        "the camera accordingly.",
         Property::Visibility::User
     };
 
     constexpr Property::PropertyInfo MotionInfo = {
         "Motion",
         "Motion",
-        "The chosen camera motion that will be triggered when the idle motion is "
-        "applied. Each option represents a predefined camera motion.",
+        "The chosen camera motion that will be triggered when the idle motion is applied. "
+        "Each option represents a predefined camera motion.",
         Property::Visibility::AdvancedUser
     };
 
     constexpr Property::PropertyInfo ShouldTriggerWhenIdleInfo = {
         "ShouldTriggerWhenIdle",
         "Should trigger when idle",
-        "If true, the chosen idle motion will trigger automatically after a certain "
-        "time (see 'IdleWaitTime' property).",
+        "If true, the chosen idle motion will trigger automatically after a certain time "
+        "(see 'IdleWaitTime' property).",
         Property::Visibility::User
     };
 
     constexpr Property::PropertyInfo IdleWaitTimeInfo = {
         "IdleWaitTime",
         "Idle wait time",
-        "The time (seconds) until idle motion starts, if no camera interaction "
-        "has been performed. Note that friction counts as camera interaction.",
+        "The time (seconds) until idle motion starts, if no camera interaction has been "
+        "performed. Note that friction counts as camera interaction.",
         Property::Visibility::AdvancedUser
     };
 
     constexpr Property::PropertyInfo SpeedFactorInfo = {
         "SpeedFactor",
         "Speed factor",
-        "A factor that can be used to increase or slow down the speed of an applied "
-        "idle motion. A negative value will invert the direction. Note that a speed "
-        "of exactly 0 leads to no movement at all.",
+        "A factor that can be used to increase or slow down the speed of an applied idle "
+        "motion. A negative value will invert the direction. Note that a speed of exactly "
+        "0 leads to no movement at all.",
         Property::Visibility::AdvancedUser
     };
 
     constexpr Property::PropertyInfo InvertInfo = {
         "Invert",
         "Invert direction",
-        "If true, the direction of the idle motion motion will be inverted compared "
-        "to the default. For example, the 'Orbit' option rotates to the right per "
-        "default, and will rotate to the left when inverted.",
+        "If true, the direction of the idle motion motion will be inverted compared to "
+        "the default. For example, the 'Orbit' option rotates to the right per default, "
+        "and will rotate to the left when inverted.",
         Property::Visibility::AdvancedUser
     };
 
     constexpr Property::PropertyInfo AbortOnCameraInteractionInfo = {
         "AbortOnCameraInteraction",
         "Abort on camera interaction",
-        "If set to true, the idle motion is aborted on camera interaction. If false, "
-        "the motion will be reapplied after the interaction. Examples of camera "
-        "interaction are: changing the anchor node, starting a camera path or session "
-        "recording playback, or navigating manually using an input device.",
+        "If set to true, the idle motion is aborted on camera interaction. If false, the "
+        "motion will be reapplied after the interaction. Examples of camera interaction "
+        "are: changing the anchor node, starting a camera path or session recording "
+        "playback, or navigating manually using an input device.",
         Property::Visibility::User
     };
 
     constexpr Property::PropertyInfo DampenInterpolationTimeInfo = {
         "DampenInterpolationTime",
         "Start/end dampen interpolation time",
-        "The time to interpolate to/from full speed when an idle motion is triggered "
-        "or canceled, in seconds.",
+        "The time to interpolate to/from full speed when an idle motion is triggered or "
+        "canceled, in seconds.",
         Property::Visibility::AdvancedUser
     };
 } // namespace
@@ -147,11 +147,11 @@ IdleMotion::IdleMotion()
             std::string(IdleKeyOrbit)
         },
         {
-            static_cast<int>(Motion::OrbitAtConstantLat),
+            static_cast<int>(Motion::OrbitAtConstantLatitude),
             std::string(IdleKeyOrbitAtConstantLat)
         },
         {
-            static_cast<int>(Motion::OrbitAroundUp),
+            static_cast<int>(Motion::OrbitAroundUpVector),
             std::string(IdleKeyOrbitAroundUp)
         }
     });
@@ -216,7 +216,8 @@ void IdleMotion::apply(const SceneGraphNode* anchor, double deltaTime, double sp
     }
 
     speedScale *= _speedScaleFactor;
-    speedScale *= 0.05; // without this scaling, the motion is way too fast
+    // Without this scaling, the motion is way too fast
+    speedScale *= 0.05;
 
     if (_invert) {
         speedScale *= -1.0;
@@ -237,18 +238,18 @@ void IdleMotion::apply(const SceneGraphNode* anchor, double deltaTime, double sp
         case IdleMotion::Motion::Orbit:
             orbitAnchor(anchor, angle, position, globalRotation);
             break;
-        case IdleMotion::Motion::OrbitAtConstantLat: {
+        case IdleMotion::Motion::OrbitAtConstantLatitude: {
             // Assume that "north" coincides with the local z-direction
             // @TODO (2021-07-09, emmbr) Make each scene graph node aware of its own
             // north/up, so that we can query this information rather than assuming it.
             // The we could also combine this idle motion with the next
-            const glm::dvec3 north = glm::dvec3(0.0, 0.0, 1.0);
+            constexpr glm::dvec3 north = glm::dvec3(0.0, 0.0, 1.0);
             orbitAroundAxis(anchor, north, angle, position, globalRotation);
             break;
         }
-        case IdleMotion::Motion::OrbitAroundUp: {
+        case IdleMotion::Motion::OrbitAroundUpVector: {
             // Assume that "up" coincides with the local y-direction
-            const glm::dvec3 up = glm::dvec3(0.0, 1.0, 0.0);
+            constexpr glm::dvec3 up = glm::dvec3(0.0, 1.0, 0.0);
             orbitAroundAxis(anchor, up, angle, position, globalRotation);
             break;
         }
@@ -257,25 +258,25 @@ void IdleMotion::apply(const SceneGraphNode* anchor, double deltaTime, double sp
     }
 }
 
-void IdleMotion::triggerIdleMotion(std::string_view choice) {
-    if (choice.empty()) {
+void IdleMotion::triggerIdleMotion(std::string_view motionKey) {
+    if (motionKey.empty()) {
         // Triggers the default motion
         _chosenMotion = std::nullopt;
     }
     else {
         IdleMotion::Motion motion = IdleMotion::Motion::Orbit;
-        if (choice == IdleKeyOrbit) {
+        if (motionKey == IdleKeyOrbit) {
             motion = IdleMotion::Motion::Orbit;
         }
-        else if (choice == IdleKeyOrbitAtConstantLat) {
-            motion = IdleMotion::Motion::OrbitAtConstantLat;
+        else if (motionKey == IdleKeyOrbitAtConstantLat) {
+            motion = IdleMotion::Motion::OrbitAtConstantLatitude;
         }
-        else if (choice == IdleKeyOrbitAroundUp) {
-            motion = IdleMotion::Motion::OrbitAroundUp;
+        else if (motionKey == IdleKeyOrbitAroundUp) {
+            motion = IdleMotion::Motion::OrbitAroundUpVector;
         }
         else {
             throw ghoul::RuntimeError(std::format(
-                "No existing IdleMotion with identifier '{}'", choice
+                "No existing IdleMotion with identifier '{}'", motionKey
             ));
         }
         _chosenMotion = motion;
@@ -311,7 +312,7 @@ void IdleMotion::orbitAroundAxis(const SceneGraphNode* anchor, const glm::dvec3&
 {
     ghoul_assert(anchor != nullptr, "Node to orbit must be set");
 
-    if (glm::abs(angle) < AngleEpsilon) {
+    if (std::abs(angle) < AngleEpsilon) {
         return;
     }
 

@@ -204,8 +204,8 @@ bool DirectInputSolver::solve(const std::vector<TouchPoint>& touchPoints,
         const SelectedBody& sb = selectedBodies.at(i);
         selectedPoints.push_back(sb.coordinates);
         screenPoints.emplace_back(
-            2.0 * (touchPoints[i].x - 0.5),
-            -2.0 * (touchPoints[i].y - 0.5)
+            2.0 * (touchPoints[i].position.x - 0.5),
+            -2.0 * (touchPoints[i].position.y - 0.5)
         );
     }
 

@@ -46,7 +46,7 @@ JoystickCameraStates::JoystickCameraStates(double sensitivity, double velocitySc
 
 void JoystickCameraStates::updateVelocitiesFromInput(
                                            const JoystickInputStates& joystickInputStates,
-                                                double deltaTime)
+                                                                         double deltaTime)
 {
     // TODO: Move this. The joystick camera state thing should not have to care about this mode
     const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
@@ -126,13 +126,13 @@ void JoystickCameraStates::updateVelocitiesFromInput(
                     break;
                 case AxisType::OrbitX:
                     if (!deltaStates.globalRotation.has_value()) {
-                        deltaStates.globalRotation = glm::dvec2(0.0, 0.0);
+                        deltaStates.globalRotation = glm::dvec2(0.0);
                     }
                     (*deltaStates.globalRotation).x += value;
                     break;
                 case AxisType::OrbitY:
                     if (!deltaStates.globalRotation.has_value()) {
-                        deltaStates.globalRotation = glm::dvec2(0.0, 0.0);
+                        deltaStates.globalRotation = glm::dvec2(0.0);
                     }
                     (*deltaStates.globalRotation).y += value;
                     break;
@@ -163,13 +163,13 @@ void JoystickCameraStates::updateVelocitiesFromInput(
                     break;
                 case AxisType::PanX:
                     if (!deltaStates.localRotation.has_value()) {
-                        deltaStates.localRotation = glm::dvec2(0.0, 0.0);
+                        deltaStates.localRotation = glm::dvec2(0.0);
                     }
                     (*deltaStates.localRotation).x += value;
                     break;
                 case AxisType::PanY:
                     if (!deltaStates.localRotation.has_value()) {
-                        deltaStates.localRotation = glm::dvec2(0.0, 0.0);
+                        deltaStates.localRotation = glm::dvec2(0.0);
                     }
                     (*deltaStates.localRotation).y += value;
                     break;
@@ -217,13 +217,10 @@ void JoystickCameraStates::updateVelocitiesFromInput(
     updateVelocities(deltaStates, deltaTime);
 }
 
-void JoystickCameraStates::setAxisMapping(const std::string& joystickName,
-                                          int axis, AxisType mapping,
-                                          AxisInvert shouldInvert,
-                                          JoystickType joystickType,
-                                          bool isSticky,
-                                          AxisFlip shouldFlip,
-                                          double sensitivity)
+void JoystickCameraStates::setAxisMapping(const std::string& joystickName, int axis,
+                                          AxisType mapping, AxisInvert shouldInvert,
+                                          JoystickType joystickType, bool isSticky,
+                                          AxisFlip shouldFlip, double sensitivity)
 {
     JoystickMapping* joystickMapping = findOrAddJoystickMapping(joystickName);
     if (!joystickMapping) {
@@ -248,11 +245,9 @@ void JoystickCameraStates::setAxisMapping(const std::string& joystickName,
 }
 
 void JoystickCameraStates::setAxisMappingProperty(const std::string& joystickName,
-                                                  int axis,
-                                                  std::string propertyUri,
+                                                  int axis, std::string propertyUri,
                                                   float min, float max,
-                                                  AxisInvert shouldInvert,
-                                                  bool isRemote)
+                                                  AxisInvert shouldInvert, bool isRemote)
 {
     JoystickMapping* joystickMapping = findOrAddJoystickMapping(joystickName);
     if (!joystickMapping) {

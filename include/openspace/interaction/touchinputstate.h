@@ -67,8 +67,8 @@ private:
     std::vector<TouchInput> _deferredRemovals;
     std::vector<TouchInput> _lastTouchInputs;
 
-    bool _tap = false;
-    bool _doubleTap = false;
+    bool _isTap = false;
+    bool _isDoubleTap = false;
 
     std::chrono::milliseconds _time;
     unsigned int _maxDoubleTapTimeInterval = 300; // milliseconds

@@ -111,19 +111,15 @@ InteractionHandler::InteractionHandler()
     , _disableTouchInputs(DisableTouchInputInfo, false)
     , _maxDoubleTapTime(MaxDoubleTapTimeInfo, 300, 10, 1000)
     , _mouseVisualizer({
-        PropertyOwner(MouseVisualizerInfo),
-        BoolProperty(MouseVisualizerEnabledInfo, false),
-        Vec4Property(
+        .owner = PropertyOwner(MouseVisualizerInfo),
+        .enable = BoolProperty(MouseVisualizerEnabledInfo, false),
+        .color = Vec4Property(
             MouseVisualizerColorInfo,
             glm::vec4(1.f),
             glm::vec4(0.f),
             glm::vec4(1.f)
-        ),
-        false,
-        false,
-        glm::vec2(0.f),
-        glm::vec2(0.f)
-     })
+        )
+    })
 {
     addProperty(_invertMouseButtons);
 

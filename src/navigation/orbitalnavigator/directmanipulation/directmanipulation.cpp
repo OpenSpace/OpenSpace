@@ -87,18 +87,18 @@ namespace {
         "DistanceThreshold",
         "Distance threshold factor",
         "This threshold affects the distance from the interaction sphere at which the "
-        "direct manipulation interaction mode starts being active. The value is given "
-        "as a factor times the interaction sphere.",
+        "direct manipulation interaction mode starts being active. The value is given as "
+        "a factor times the interaction sphere.",
         Property::Visibility::AdvancedUser
     };
 
     constexpr Property::PropertyInfo DefaultRenderableTypesInfo = {
         "DefaultRenderableTypes",
         "Default renderable types",
-        "A list of renderable types that will automatically use the direct "
-        "manipulation scheme when interacted with, keeping the finger on a static "
-        "position on the interaction sphere of the object when touching. Good for "
-        "relatively spherical objects.",
+        "A list of renderable types that will automatically use the direct manipulation "
+        "scheme when interacted with, keeping the finger on a static position on the "
+        "interaction sphere of the object when touching. Good for relatively spherical "
+        "objects.",
         Property::Visibility::AdvancedUser
     };
 
@@ -163,8 +163,7 @@ void DirectManipulation::updateCameraFromInput() {
     for (const TouchInputHolder& input : touchInputs) {
         touchPoints.push_back({
             .id = input.latestInput().fingerId,
-            .x = input.latestInput().pos.x,
-            .y = input.latestInput().pos.y
+            .position = glm::dvec2(input.latestInput().pos)
         });
     }
 
@@ -178,7 +177,7 @@ void DirectManipulation::updateCameraFromInput() {
             const glm::ivec2 screenSize = global::windowDelegate->currentWindowSize();
             mousePos.x /= static_cast<double>(screenSize.x);
             mousePos.y /= static_cast<double>(screenSize.y);
-            touchPoints.push_back({ .x = mousePos.x, .y = mousePos.y });
+            touchPoints.push_back({ .position = mousePos });
         }
     }
 
@@ -269,8 +268,8 @@ void DirectManipulation::updateNodeSurfacePoints(
     for (const TouchPoint& touchPoint : touchPoints) {
         const size_t id = touchPoint.id;
         // Normalized -1 to 1 coordinates on screen
-        const double xCo = 2.0 * (touchPoint.x - 0.5);
-        const double yCo = -2.0 * (touchPoint.y - 0.5);
+        const double xCo = 2.0 * (touchPoint.position.x - 0.5);
+        const double yCo = -2.0 * (touchPoint.position.y - 0.5);
 
         const glm::dvec3 cursorInWorldSpace = camRotation *
             glm::dvec3(glm::inverse(camera->projectionMatrix()) *
@@ -278,8 +277,8 @@ void DirectManipulation::updateNodeSurfacePoints(
 
         const glm::dvec3 rayDirection = glm::normalize(cursorInWorldSpace);
 
-        // Compute positions on anchor node, by checking if touch input
-        // intersect interaction sphere
+        // Compute positions on anchor node, by checking if touch input intersect
+        // interaction sphere
         double intersectionDist = 0.0;
         const double interactionSphere = anchor->interactionSphere();
         const bool intersected = glm::intersectRaySphere(
@@ -293,11 +292,15 @@ void DirectManipulation::updateNodeSurfacePoints(
         if (intersected) {
             glm::dvec3 intersectionPos = camPos + rayDirection * intersectionDist;
             glm::dvec3 pointInModelView = glm::inverse(anchor->worldRotationMatrix()) *
-                                            (intersectionPos - anchor->worldPosition());
+                (intersectionPos - anchor->worldPosition());
 
             // Note that node is saved as the direct input solver was initially
             // implemented to handle touch contact points on multiple nodes
-            surfacePoints.push_back({ id, anchor, pointInModelView });
+            surfacePoints.push_back({
+                .id = id,
+                .node = anchor,
+                .coordinates = pointInModelView
+            });
         }
     }
 
@@ -326,7 +329,9 @@ CameraPose DirectManipulation::cameraPoseFromVelocities(const VelocityStates& ve
     }
     {
         // Panning (local rotation)
-        const glm::dvec3 eulerAngles = glm::dvec3(velocities.pan.y, velocities.pan.x, 0.0);
+        const glm::dvec3 eulerAngles =
+            glm::dvec3(velocities.pan.y, velocities.pan.x, 0.0);
+
         const glm::dquat rotationDiff = glm::dquat(eulerAngles);
         rot.localRotation = rot.localRotation * rotationDiff;
     }
@@ -334,7 +339,9 @@ CameraPose DirectManipulation::cameraPoseFromVelocities(const VelocityStates& ve
         // Orbit (global rotation)
 
         // Rotate position
-        const glm::dvec3 eulerAngles = glm::dvec3(velocities.orbit.y, velocities.orbit.x, 0.0);
+        const glm::dvec3 eulerAngles =
+            glm::dvec3(velocities.orbit.y, velocities.orbit.x, 0.0);
+
         const glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles);
         const glm::dquat rotationDiffWorldSpace =
             rot.globalRotation * rotationDiffCamSpace * glm::inverse(rot.globalRotation);
@@ -348,7 +355,7 @@ CameraPose DirectManipulation::cameraPoseFromVelocities(const VelocityStates& ve
         // Rotate camera to look at center again
         const glm::dvec3 newPositionToCenter = anchorPos - pose.position;
         const glm::dvec3 lookUpWhenFacingCenter = rot.globalRotation *
-            glm::dvec3(camera->lookUpVectorCameraSpace());
+            camera->lookUpVectorCameraSpace();
 
         rot.globalRotation = ghoul::lookAtQuaternion(
             glm::dvec3(0.0),

@@ -56,8 +56,7 @@ public:
      */
     struct TouchPoint {
         size_t id = 0;
-        double x = 0.0; // normalized screenspace
-        double y = 0.0; // normalized screenspace
+        glm::dvec2 position; // normalized screenspace
     };
 
     DirectInputSolver();

@@ -42,8 +42,8 @@ class IdleMotion : public PropertyOwner {
 public:
     enum class Motion {
         Orbit = 0,
-        OrbitAtConstantLat,
-        OrbitAroundUp
+        OrbitAtConstantLatitude,
+        OrbitAroundUpVector
     };
 
     IdleMotion();
@@ -69,10 +69,10 @@ public:
      * Trigger an idle motion based on a given string, or the default motion if the string
      * is empty.
      *
-     * \param choice A string corresponding to the idle motion to trigger, or empty for
+     * \param motionKey A string corresponding to the idle motion to trigger, or empty for
      *        default motion
      */
-    void triggerIdleMotion(std::string_view choice = "");
+    void triggerIdleMotion(std::string_view motionKey = "");
 
     /**
      * Orbit the current anchor node, in a right-bound orbit, by updating the position
@@ -94,8 +94,8 @@ public:
      * vector coincides with the axis, and should be used with care.
      *
      * Used for:
-     *   - IdleMotion::Motion::OrbitAtConstantLat (axis = north = z-axis) and
-     *   - IdleMotion::Motion::OrbitAroundUp (axis = up = y-axis)
+     *   - IdleMotion::Motion::OrbitAtConstantLatitude (axis = north = z-axis) and
+     *   - IdleMotion::Motion::OrbitAroundUpVector (axis = up = y-axis)
      *
      * \param axis The axis to arbit around, given in model coordinates of the anchor
      * \param angle The rotation angle to use for the motion

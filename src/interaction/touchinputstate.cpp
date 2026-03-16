@@ -51,11 +51,11 @@ bool TouchInputState::touchHappened() const {
 }
 
 bool TouchInputState::isTap() const {
-    return _tap;
+    return _isTap;
 }
 
 bool TouchInputState::isDoubleTap() const {
-    return _doubleTap;
+    return _isDoubleTap;
 }
 
 void TouchInputState::setMaxDoubleTapTime(unsigned int milliseconds)  {
@@ -112,8 +112,8 @@ void TouchInputState::clearInputs() {
     _deferredRemovals.clear();
 
     // Reset tap detected state (TODO Can this really be done here? every frame..?)
-    _doubleTap = false;
-    _tap = false;
+    _isDoubleTap = false;
+    _isTap = false;
 }
 
 void TouchInputState::updateLastTouchPoints() {
@@ -164,10 +164,10 @@ void TouchInputState::removeTouchInput(TouchInput input) {
                     );
 
                 if ((timestamp - _time).count() < _maxDoubleTapTimeInterval) {
-                    _doubleTap = true;
+                    _isDoubleTap = true;
                 }
                 else {
-                    _tap = true;
+                    _isTap = true;
                 }
                 _time = timestamp;
             }
