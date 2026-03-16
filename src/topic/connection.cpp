@@ -44,7 +44,6 @@
 #include <openspace/topic/topics/propertytreetopic.h>
 #include <openspace/topic/topics/sessionrecordingtopic.h>
 #include <openspace/topic/topics/setpropertytopic.h>
-#include <openspace/topic/topics/skybrowsertopic.h>
 #include <openspace/topic/topics/subscriptiontopic.h>
 #include <openspace/topic/topics/timetopic.h>
 #include <openspace/topic/topics/topic.h>
@@ -104,7 +103,6 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
     _topicFactory.registerClass<SessionRecordingTopic>("sessionRecording");
     _topicFactory.registerClass<SetPropertyTopic>("set");
     _topicFactory.registerClass<ActionKeybindTopic>("actionsKeybinds");
-    _topicFactory.registerClass<SkyBrowserTopic>("skybrowser");
     _topicFactory.registerClass<SubscriptionTopic>("subscribe");
     _topicFactory.registerClass<TimeTopic>("time");
     _topicFactory.registerClass<TriggerPropertyTopic>("trigger");

@@ -196,7 +196,6 @@ set(OPENSPACE_SOURCE
   topic/topics/propertytreetopic.cpp
   topic/topics/sessionrecordingtopic.cpp
   topic/topics/setpropertytopic.cpp
-  topic/topics/skybrowsertopic.cpp
   topic/topics/subscriptiontopic.cpp
   topic/topics/timetopic.cpp
   topic/topics/topic.cpp
@@ -414,7 +413,6 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/subscriptiontopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/propertytreetopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/timetopic.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/skybrowsertopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/topic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/triggerpropertytopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/versiontopic.h

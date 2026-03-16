@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "openspace/topic/topics/skybrowsertopic.h"
+#include <modules/skybrowser/include/skybrowsertopic.h>
 
 #include <modules/skybrowser/skybrowsermodule.h>
 #include <modules/skybrowser/include/targetbrowserpair.h>
