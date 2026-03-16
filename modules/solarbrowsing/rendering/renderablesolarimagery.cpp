@@ -661,9 +661,9 @@ void RenderableSolarImagery::updateImageryTexture() {
         return;
     }
 
-    unsigned int imageSize = static_cast<unsigned int>(
-        keyframe->data.fullResolution /
-        std::pow(2, static_cast<unsigned int>(_downsamplingLevel))
+    const float fullRes = static_cast<float>(keyframe->data.fullResolution);
+    const unsigned int imageSize = static_cast<unsigned int>(
+        fullRes / std::pow(2.f, static_cast<float>(_downsamplingLevel))
     );
 
     SolarBrowsingModule* module = global::moduleEngine->module<SolarBrowsingModule>();
