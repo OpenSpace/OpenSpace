@@ -126,7 +126,7 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
 
     // @TODO (anden88 2026-03-05): Due to how the progress bar uses the '\r' carriage
     // return, we do a new line before printing to the log so that we get slightly more
-    // readable and nicer output, this should be removed when progress bar is fixed
+    // readable and nicer output. This should be removed when the progress bar is fixed
     LDEBUG("\nFetching Helioviewer JPX data");
     LINFO(std::format("Requesting {}", jpxRequest));
 
@@ -205,7 +205,7 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
 
     // @TODO (anden88 2026-03-05): Due to how the progress bar uses the '\r' carriage
     // return, we do a new line before printing to the log so that we get slightly more
-    // readable and nicer output, this should be removed when progress bar is fixed
+    // readable and nicer output. This should be removed when the progress bar is fixed
     LDEBUG("\nDownloading image data from Helioviewer");
     std::for_each(
         std::execution::par,

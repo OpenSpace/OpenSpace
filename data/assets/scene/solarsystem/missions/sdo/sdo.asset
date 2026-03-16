@@ -32,7 +32,7 @@ local SdoPosition = {
   GUI = {
     Name = "SDO Position",
     Path = "/Solar System/Missions/SDO",
-    Description = "The position of the SDO spacecraft",
+    Description = "The position of the SDO spacecraft.",
     Hidden = true,
     Focusable = false
   }
@@ -66,7 +66,7 @@ local Sdo = {
   GUI = {
     Name = "SDO",
     Path = "/Solar System/Missions/SDO",
-    Description = "The SDO (Solar Dynamics Observatory) spacecraft"
+    Description = "The SDO (Solar Dynamics Observatory) spacecraft."
   }
 }
 
@@ -94,7 +94,7 @@ local SdoTrail = {
   GUI = {
       Name = "SDO Trail",
       Path = "/Solar System/Missions/SDO",
-      Description = "The trajectory of the SDO spacecraft"
+      Description = "The trajectory of the SDO spacecraft."
   }
 }
 

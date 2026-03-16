@@ -18,8 +18,8 @@ local SolarImageryProjection = {
   GUI = {
     Name = "Sun Projection",
     Path = "/Solar System/Sun/Solar Imagery",
-    Description = [[Projects solar imagery from spacecraft observatories such as SDO and
-      STEREO onto the surface of the Sun. Images are mapped from their observing
+    Description = [[Projects solar imagery from the spacecraft observatories SDO and
+      STEREO-A onto the surface of the Sun. Images are mapped from their observing
       spacecraft perspectives, allowing solar features captured by different instruments
       and viewpoints to be visualized directly on the solar sphere.]]
   }
@@ -38,7 +38,7 @@ end)
 
 asset.meta = {
   Name = "Solar Imagery Projection",
-  Description = [[Projects solar imagery from spacecraft observatories such as SDO and
+  Description = [[Projects solar imagery from the spacecraft observatories SDO and
     STEREO-A onto the surface of the Sun, mapping images from their observing viewpoints
     onto the solar sphere.]],
   Author = "OpenSpace Team",

@@ -53,7 +53,7 @@
 namespace {
     using namespace openspace;
 
-    constexpr unsigned int DefaultTextureSize = 32;
+    constexpr size_t DefaultTextureSize = 32;
 
     enum FaceMode {
         FrontOnly = 0,
@@ -288,7 +288,7 @@ namespace {
 namespace openspace {
 
 openspace::Documentation RenderableSolarImagery::Documentation() {
-    return codegen::doc<Parameters>("solarbrowsing_renderablesolarimegary");
+    return codegen::doc<Parameters>("solarbrowsing_renderable_solarimegary");
 }
 
 RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictionary)
@@ -321,9 +321,9 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     });
     addProperty(_enableFrustum);
 
-    _faceMode.addOption(FaceMode::FrontOnly, "Front only");
-    _faceMode.addOption(FaceMode::SolidBack, "Solid back");
-    _faceMode.addOption(FaceMode::DoubleSided, "Double sided");
+    _faceMode.addOption(FaceMode::FrontOnly, "Front Only");
+    _faceMode.addOption(FaceMode::SolidBack, "Solid Back");
+    _faceMode.addOption(FaceMode::DoubleSided, "Double Sided");
     _faceMode = FaceMode::SolidBack;
 
     if (p.faceMode.has_value()) {
@@ -910,7 +910,8 @@ void RenderableSolarImagery::updateImageryTexture() {
 
             // Create some dummy data that will be uploaded to the GPU to avoid UB
             std::vector<unsigned char> buffer;
-            buffer.resize(static_cast<size_t>(DefaultTextureSize) * DefaultTextureSize *
+            buffer.resize(
+                DefaultTextureSize * DefaultTextureSize *
                 sizeof(ImagePrecision)
             );
             _imageryTexture->resize(

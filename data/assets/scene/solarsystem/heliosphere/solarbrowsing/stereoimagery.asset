@@ -44,10 +44,11 @@ local SolarImagery = {
     Name = "STEREO A Imagery",
     Path = "/Solar System/Sun/Solar Imagery",
     Description = [[Time-resolved solar imagery from NASA's Solar TErrestrial RElations
-      Obervatory (STEREO-A). Images from multiple instruments can be browsed over time and
+      Observatory (STEREO-A). Images from multiple instruments can be browsed over time and
       are projected onto a plane positioned relative to the Sun. Instrument-specific color
       mappings help highlight different solar phenomena such as active regions, flares,
-      and coronal structures.]]
+      and coronal structures.]],
+      Focusable = false
   }
 }
 

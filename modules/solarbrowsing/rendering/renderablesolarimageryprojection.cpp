@@ -49,9 +49,23 @@ namespace {
     // This number MUST match the constant specified in the shader
     constexpr int MaxSpacecraftObservatories = 7;
 
+    // A RenderableSolarImageryProjection projects solar observations from spacecraft
+    // instruments onto the surface of the Sun. The renderable uses one or more
+    // RenderableSolarImagery nodes as input and maps their imagery onto a solar sphere
+    // from the observing spacecraft's perspective.
+    //
+    // Each dependent RenderableSolarImagery provides the image texture, spacecraft
+    // position, and viewing geometry needed for the projection. This allows imagery
+    // captured from different spacecraft and instruments (e.g., SDO or STEREO) to be
+    // visualized directly on the Sun simultaneously.
+    //
+    // Multiple observatories can be projected at once, allowing solar features
+    // observed from different viewpoints to be compared on the solar surface.
     struct [[codegen::Dictionary(RenderableSolarImageryProjection)]] Parameters {
-        // List of spacecraft identifiers that will be projected on the sphere (Sun)
-        // surface.
+        // List of scene graph node identifiers that reference
+        // [RenderableSolarImagery](solarbrowsing_renderable_solarimegary) nodes. The
+        // imagery from these nodes is projected onto the solar surface from the
+        // perspective of the observing spacecraft.
         std::vector<std::string> dependentNodes;
     };
 } // namespace
@@ -60,7 +74,7 @@ namespace {
 namespace openspace {
 
 openspace::Documentation RenderableSolarImageryProjection::Documentation() {
-    return codegen::doc<Parameters>("solarbrowsing_renderablesolarimageryprojection");
+    return codegen::doc<Parameters>("solarbrowsing_renderable_solarimageryprojection");
 }
 
 RenderableSolarImageryProjection::RenderableSolarImageryProjection(
@@ -90,6 +104,8 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
         }
         _solarImageryDependencyNames.push_back(nodeName);
     }
+
+    setBoundingSphere(distanceconstants::SolarRadius);
 }
 
 void RenderableSolarImageryProjection::initializeGL() {
