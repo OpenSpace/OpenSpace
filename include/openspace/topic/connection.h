@@ -62,6 +62,7 @@ public:
     void sendJson(const nlohmann::json& json);
     void setAuthorized(bool status);
     Topic* findTopicByType(const std::string& type);
+    ghoul::TemplateFactory<Topic>& topicFactory();
 
     bool isAuthorized() const;
 

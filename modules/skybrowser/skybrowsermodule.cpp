@@ -27,9 +27,12 @@
 #include <modules/skybrowser/include/renderableskytarget.h>
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/targetbrowserpair.h>
+#include <modules/skybrowser/include/skybrowsertopic.h>
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/topic/topicmanager.h>
+#include <openspace/topic/connection.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/properties/property.h>
@@ -267,6 +270,14 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<RenderableSkyTarget>("RenderableSkyTarget");
+
+    // @TODO (ylvse, 2026-03-16) This needs to happen after the connections have been
+    // instiated somehow. That happens in presync. Should not merge before that is fixed.
+    std::vector<std::shared_ptr<Connection>> connections =
+        global::topicManager->connections();
+    for (const std::shared_ptr<Connection> connection : connections) {
+        connection->topicFactory().registerClass<SkyBrowserTopic>("skybrowser");
+    }
 }
 
 void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId,

@@ -273,4 +273,13 @@ void TopicManager::passDataToTopic(const std::string& topicType,
     }
 }
 
+std::vector<std::shared_ptr<Connection>> TopicManager::connections() {
+    std::vector<std::shared_ptr<Connection>> connections;
+
+    for (const ConnectionData& connectionData : _connections) {
+        connections.push_back(connectionData.connection);
+    }
+    return connections;
+}
+
 } // namespace openspace

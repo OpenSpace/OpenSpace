@@ -69,6 +69,7 @@ public:
     void removePreSyncCallback(CallbackHandle handle);
 
     void passDataToTopic(const std::string& topic, const nlohmann::json& jsonData);
+    std::vector<std::shared_ptr<Connection>> connections();
 
     static openspace::Documentation Documentation();
 

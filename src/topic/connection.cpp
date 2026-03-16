@@ -260,4 +260,8 @@ Topic* Connection::findTopicByType(const std::string& type) {
     return it->second.get();
 }
 
+ghoul::TemplateFactory<Topic>& Connection::topicFactory() {
+    return _topicFactory;
+}
+
 } // namespace openspace
