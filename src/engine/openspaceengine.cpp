@@ -554,19 +554,6 @@ void OpenSpaceEngine::initializeGL() {
         global::versionChecker->requestLatestVersion(versionCheckUrl);
     }
 
-    // Check the required OpenGL versions of the registered modules
-    const ghoul::systemcapabilities::Version version =
-        global::moduleEngine->requiredOpenGLVersion();
-    LINFO(std::format("Required OpenGL version: {}", ghoul::to_string(version)));
-
-    if (OpenGLCap.openGLVersion() < version) {
-        throw ghoul::RuntimeError(
-            "An included module required a higher OpenGL version than is supported on "
-            "this system",
-            "OpenSpaceEngine"
-        );
-    }
-
     // Check the available OpenGL extensions against the required extensions
     for (OpenSpaceModule* m : global::moduleEngine->modules()) {
         for (const std::string& ext : m->requiredOpenGLExtensions()) {

@@ -101,10 +101,6 @@ std::vector<LuaLibrary> OpenSpaceModule::luaLibraries() const {
     return {};
 }
 
-ghoul::systemcapabilities::Version OpenSpaceModule::requiredOpenGLVersion() const {
-    return { 3, 3, 0 };
-}
-
 std::vector<std::string> OpenSpaceModule::requiredOpenGLExtensions() const {
     return {};
 }
