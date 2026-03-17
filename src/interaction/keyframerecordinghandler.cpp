@@ -160,10 +160,10 @@ void KeyframeRecordingHandler::loadCameraFBX(const std::filesystem::path& path,
                                              double sequenceTime, double scale)
 {
     using namespace ghoul::io;
-    auto [cameraNodes, cameraAnimation] = CameraReader::loadCameraPath(
+     CameraReader::CameraPathData cameraPathData = CameraReader::loadCameraPath(
         path
     );
-    ModelAnimation::NodeAnimation cameraPath = cameraAnimation->nodeAnimations()[0];
+    ModelAnimation::NodeAnimation cameraPath = cameraPathData.animation->nodeAnimations()[0];
     SessionRecording timeline = SessionRecording();
 
     // It is not certain position, rotation and scale will have the same number of
@@ -211,8 +211,11 @@ void KeyframeRecordingHandler::loadCameraFBX(const std::filesystem::path& path,
         SessionRecording::Entry::Camera camera;
         camera.focusNode = focusNode;
         camera.followFocusNodeRotation = false;
-        camera.position =
-            scale * static_cast<glm::dvec3>(cameraPath.positions[i].position);
+        glm::dvec3 pos =
+            cameraPathData.unitScale *
+            scale *
+            static_cast<glm::dvec3>(cameraPath.positions[i].position);
+        camera.position = pos;
         camera.rotation = cameraPath.rotations[i].rotation;
         camera.scale = cameraPath.scales[i].scale.x;
 
