@@ -36,6 +36,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/cachemanager.h>
@@ -51,10 +52,15 @@ namespace {
     using namespace openspace;
 
     constexpr std::string_view _loggerCat = "RenderableSolarImagery";
-    constexpr double SunRadius = 1391600000.0 * 0.5;
-    constexpr unsigned int DefaultTextureSize = 32;
+    constexpr size_t DefaultTextureSize = 32;
 
-    constexpr Property::PropertyInfo ActiveInstrumentsInfo = {
+    enum FaceMode {
+        FrontOnly = 0,
+        SolidBack,
+        DoubleSided
+    };
+
+    constexpr Property::PropertyInfo ActiveInstrumentInfo = {
         "ActiveInstrument",
         "Active instrument",
         "The active instrument of the current spacecraft imagery.",
@@ -75,17 +81,25 @@ namespace {
         Property::Visibility::User
     };
 
+    constexpr Property::PropertyInfo FaceModeInfo = {
+        "FaceMode",
+        "Face Mode",
+        "Specifies how the plane is rendered: front side only, with a solid backside, "
+        "or textured on both sides.",
+        Property::Visibility::AdvancedUser
+    };
+
     constexpr Property::PropertyInfo MoveFactorInfo = {
         "MoveFactor",
         "Move factor",
-        "How close to the Sun to render the imagery.",
+        "Controls how close to the Sun to render the imagery.",
         Property::Visibility::User
     };
 
     constexpr Property::PropertyInfo DownsamplingLevelInfo = {
         "DownsamplingLevel",
         "Downsampling level",
-        "How much to downsample the original data. 0 is original resolution.",
+        "Controls how much to downsample the original data (0 is original resolution).",
         Property::Visibility::AdvancedUser
     };
 
@@ -141,7 +155,7 @@ namespace {
     // progressively reduce the resolution (1 = half, 2 = quarter, etc.).
     //
     // Visual adjustments can be made via color mapping (transfer functions), gamma,
-    // and contrast controls. Coronagraph instruments can optionally display frustum
+    // and contrast controls. Coronagraph instruments can optionally display a frustum
     // visualization.
     struct [[codegen::Dictionary(RenderableSolarImagery)]] Parameters {
         // The root directory containing solar imagery organized by instrument. Each
@@ -157,6 +171,15 @@ namespace {
 
         // [[codegen::verbatim(EnableFrustumInfo.description)]]
         std::optional<bool> enableFrustum;
+
+        enum class [[codegen::map(FaceMode)]] FaceMode {
+            FrontOnly [[codgen::key("Front Only")]],
+            SolidBack [[codegen::key("Solid Back")]],
+            DoubleSided [[codegen::key("Double Sided")]]
+        };
+
+        // [[codegen::verbatim(FaceModeInfo.description)]]
+        std::optional<FaceMode> faceMode;
 
         // [[codegen::verbatim(MoveFactorInfo.description)]]
         std::optional<float> moveFactor;
@@ -185,15 +208,16 @@ namespace {
 namespace openspace {
 
 openspace::Documentation RenderableSolarImagery::Documentation() {
-    return codegen::doc<Parameters>("solarbrowsing_renderablesolarimegary");
+    return codegen::doc<Parameters>("solarbrowsing_renderable_solarimegary");
 }
 
 RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _activeInstruments(ActiveInstrumentsInfo)
+    , _activeInstruments(ActiveInstrumentInfo)
     , _contrastValue(ContrastValueInfo, 0.f, -15.f, 15.f)
     , _enableBorder(EnableBorderInfo, false)
     , _enableFrustum(EnableFrustumInfo, false)
+    , _faceMode(FaceModeInfo)
     , _gammaValue(GammaValueInfo, 0.9f, 0.1f, 10.f)
     , _moveFactor(MoveFactorInfo, 1.0, 0.0, 1.0)
     , _downsamplingLevel(DownsamplingLevelInfo, 2, 0, 5)
@@ -208,6 +232,22 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     _imageMetadataMap = loadImageMetadata(p.imageDirectory);
     _tfMap = loadTransferFunctions(p.imageDirectory, _imageMetadataMap);
 
+    const bool hasData = std::any_of(
+        _imageMetadataMap.begin(),
+        _imageMetadataMap.end(),
+        [](const std::pair<const InstrumentName, Timeline<ImageMetadata>>& p) {
+            return p.second.nKeyframes() > 0;
+        }
+    );
+
+    if (!hasData) {
+        LWARNING(std::format(
+            "Could not find any image data in '{}'. Image data can be downloaded using "
+            "the HelioviewerDownloadTask. See the solar browsing documentation for more "
+            "information", p.imageDirectory
+        ));
+    }
+
     _enableBorder = p.enableBorder.value_or(_enableBorder);
     addProperty(_enableBorder);
 
@@ -217,10 +257,20 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     });
     addProperty(_enableFrustum);
 
+    _faceMode.addOption(FaceMode::FrontOnly, "Front Only");
+    _faceMode.addOption(FaceMode::SolidBack, "Solid Back");
+    _faceMode.addOption(FaceMode::DoubleSided, "Double Sided");
+    _faceMode = FaceMode::SolidBack;
+
+    if (p.faceMode.has_value()) {
+        _faceMode = codegen::map<FaceMode>(*p.faceMode);
+    }
+    addProperty(_faceMode);
+
     // Add Instrument GUI names
     unsigned int guiNameCount = 0;
     using T = Timeline<ImageMetadata>;
-    for (const std::pair<InstrumentName, T>& instrument : _imageMetadataMap) {
+    for (const std::pair<const InstrumentName, T>& instrument : _imageMetadataMap) {
         _activeInstruments.addOption(guiNameCount++, instrument.first);
     }
 
@@ -387,7 +437,6 @@ void RenderableSolarImagery::deinitializeGL() {
     );
     _planeShader = nullptr;
 
-
     BaseModule::ProgramObjectManager.release(
         "SpacecraftFrustumProgram",
         [](ghoul::opengl::ProgramObject* p) {
@@ -395,7 +444,6 @@ void RenderableSolarImagery::deinitializeGL() {
         }
     );
     _frustumShader = nullptr;
-
 }
 
 bool RenderableSolarImagery::isReady() const {
@@ -406,7 +454,18 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     updateImageryTexture();
     const glm::dvec3& sunPositionWorld = sceneGraphNode("Sun")->worldPosition();
 
-    glEnable(GL_CULL_FACE);
+    switch (_faceMode) {
+        case FaceMode::FrontOnly:
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+            break;
+        case FaceMode::SolidBack:
+        case FaceMode::DoubleSided:
+            glDisable(GL_CULL_FACE);
+            break;
+        default:
+            throw ghoul::MissingCaseException();
+    }
 
     // Perform necessary transforms
     const glm::dmat4& viewMatrix = data.camera.combinedViewMatrix();
@@ -457,16 +516,14 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), _position) *
         _rotation *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))
-    );
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
     const glm::dmat4 modelViewTransform = viewMatrix * modelTransform;
 
     // For frustum
     const glm::dmat4 spacecraftModelTransform =
         glm::translate(glm::dmat4(1.0), spacecraftPosWorld) *
         _rotation *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))
-    );
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     _planeShader->activate();
     ghoul::opengl::TextureUnit imageUnit;
@@ -485,7 +542,7 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     );
 
     ghoul::opengl::TextureUnit tfUnit;
-    TransferFunction* lut = _tfMap[_currentActiveInstrument].get();
+    TransferFunction* lut = transferFunction();
     if (lut) {
         tfUnit.bind(lut->texture());
         _planeShader->setUniform(_uniformCachePlane.hasLut, true);
@@ -495,6 +552,7 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     }
     // Must bind all sampler2D, otherwise undefined behaviour
     _planeShader->setUniform(_uniformCachePlane.lut, tfUnit);
+    _planeShader->setUniform(_uniformCachePlane.faceMode, _faceMode);
 
     glBindVertexArray(_quadVao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -531,11 +589,16 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableSolarImagery::update(const UpdateData& data) {
+    TransferFunction* tf = transferFunction();
+    if (tf) {
+        tf->update();
+    }
+
     const Keyframe<ImageMetadata>* keyframe =
         _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(
             global::timeManager->time().j2000Seconds(),
             true
-    );
+        );
 
     requestPredictiveFrames(keyframe, data);
 
@@ -583,7 +646,7 @@ void RenderableSolarImagery::updateImageryTexture() {
         _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(
             global::timeManager->time().j2000Seconds(),
             true
-    );
+        );
 
     if (!keyframe) {
         // No keyframe avaialble so we clear the texture
@@ -596,7 +659,8 @@ void RenderableSolarImagery::updateImageryTexture() {
 
             // Create some dummy data that will be uploaded to the GPU to avoid UB
             std::vector<unsigned char> buffer;
-            buffer.resize(static_cast<size_t>(DefaultTextureSize) * DefaultTextureSize *
+            buffer.resize(
+                DefaultTextureSize * DefaultTextureSize *
                 sizeof(ImagePrecision)
             );
             _imageryTexture->resize(
@@ -614,15 +678,17 @@ void RenderableSolarImagery::updateImageryTexture() {
         return;
     }
 
-    unsigned int imageSize = static_cast<unsigned int>(
-        keyframe->data.fullResolution /
-        std::pow(2, static_cast<unsigned int>(_downsamplingLevel))
+    const float fullRes = static_cast<float>(keyframe->data.fullResolution);
+    const unsigned int imageSize = static_cast<unsigned int>(
+        fullRes / std::pow(2.f, static_cast<float>(_downsamplingLevel))
     );
 
-    std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
-        keyframe->data.filePath,
-        std::format("{}x{}", imageSize, imageSize),
-        "solarbrowsing"
+    SolarBrowsingModule* module = global::moduleEngine->module<SolarBrowsingModule>();
+
+    std::filesystem::path path = keyframe->data.filePath;
+    std::filesystem::path cached = module->cacheManager()->cachedFilename(
+        path.replace_extension(".bin"),
+        std::format("{}x{}", imageSize, imageSize)
     );
 
     // If the current keyframe image has not yet been decoded and cached we'll just wait
@@ -708,10 +774,12 @@ void RenderableSolarImagery::requestPredictiveFrames(
             static_cast<int>(std::pow(2, _downsamplingLevel.value())
         );
 
-        std::filesystem::path cacheFile = FileSys.cacheManager()->cachedFilename(
-            kf.data.filePath,
-            std::format("{}x{}", imageSize, imageSize),
-            "solarbrowsing"
+        SolarBrowsingModule* module = global::moduleEngine->module<SolarBrowsingModule>();
+
+        std::filesystem::path path = kf.data.filePath;
+        std::filesystem::path cacheFile = module->cacheManager()->cachedFilename(
+            path.replace_extension(".bin"),
+            std::format("{}x{}", imageSize, imageSize)
         );
 
         // Skip if file is already cached
@@ -754,7 +822,7 @@ void RenderableSolarImagery::createPlaneAndFrustum(double moveDistance) {
     // tuning movement near the Sun. A Gaussian function* (3.1) is used to address this
     // issue: *https://www.diva-portal.org/smash/get/diva2:1147161/FULLTEXT01.pdf
     _gaussianMoveFactor = exp(-(pow((moveDistance - 1), 2.0)) / (2.0));
-    _size = static_cast<float>(_gaussianMoveFactor * SunRadius);
+    _size = static_cast<float>(_gaussianMoveFactor * distanceconstants::SolarRadius);
     createPlane();
     createFrustum();
 }

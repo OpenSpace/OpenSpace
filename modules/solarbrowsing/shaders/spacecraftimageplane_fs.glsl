@@ -31,13 +31,17 @@ in Data {
 
 uniform sampler2D imageryTexture;
 uniform sampler1D lut;
-uniform bool additiveBlending;
 
 uniform float contrastValue;
 uniform float gammaValue;
 uniform float planeOpacity;
 uniform bool hasLut;
 uniform bool isCoronaGraph;
+uniform int faceMode;
+
+const int FrontOnly = 0;
+const int SolidBack = 1;
+const int DoubleSided = 2;
 
 float contrast(float intensity) {
   return min(
@@ -61,6 +65,13 @@ Fragment getFragment() {
     outColor = vec4(intensityOrg, intensityOrg, intensityOrg, 1.0);
   }
 
+  if (!gl_FrontFacing) {
+    if (faceMode == SolidBack) {
+      outColor = vec4(vec3(0.2), planeOpacity);
+    }
+    // Doublesided, do nothing as we want the same image on the back side
+  }
+
   outColor.r = pow(outColor.r, gammaValue);
   outColor.g = pow(outColor.g, gammaValue);
   outColor.b = pow(outColor.b, gammaValue);
@@ -81,8 +92,6 @@ Fragment getFragment() {
   Fragment frag;
   frag.color = vec4(outColor.xyz, planeOpacity);
   frag.depth = in_data.depth;
-  if (additiveBlending) {
-    frag.blend = BlendModeAdditive;
-  }
+  frag.blend = BlendModeAdditive;
   return frag;
 }

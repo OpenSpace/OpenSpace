@@ -36,15 +36,12 @@ namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
-
 class SceneGraphNode;
 
 class RenderableSolarImageryProjection : public Renderable {
 public:
     RenderableSolarImageryProjection(const ghoul::Dictionary& dictionary);
     ~RenderableSolarImageryProjection() override = default;
-
-    void initialize() override;
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -60,7 +57,8 @@ private:
     void loadTexture();
 
     std::vector<SceneGraphNode*> _solarImageryDependencies;
-    ghoul::opengl::ProgramObject* _shader;
+    std::vector<std::string> _solarImageryDependencyNames;
+    ghoul::opengl::ProgramObject* _shader  = nullptr;
     Sphere _sphere;
 };
 

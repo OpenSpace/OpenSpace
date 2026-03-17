@@ -29,6 +29,7 @@ local StereoPosition = {
   GUI = {
     Name = "STEREO A Position",
     Path = "/Solar System/Missions/STEREO A",
+    Description = "The position of the STEREO-A spacecraft.",
     Hidden = true,
     Focusable = false
   }
@@ -55,21 +56,22 @@ local StereoA = {
     Type = "RenderableModel",
     GeometryFile = models .. "STEREO.fbx",
     -- Arbitrarily chose 260 degree as it results in slightly better visuals when rolling
-    RotationVector = { 0, 260.0, 0 },
+    RotationVector = { 0.0, 260.0, 0.0 },
     LightSources = { sunTransforms.LightSource },
     AmbientIntensity = 0.2,
-    SpecularIntensity = 0.0,
+    SpecularIntensity = 0.0
   },
   GUI = {
     Name = "STEREO A",
-    Path = "/Solar System/Missions/STEREO A"
+    Path = "/Solar System/Missions/STEREO A",
+    Description = "The STEREO-A (Solar TErrestrial RElations Observatory) spacecraft."
   }
 }
 
 local StereoTrail = {
   Identifier = "STEREO_A_Trail",
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    TimeFrame = {
+  TimeFrame = {
     Type = "TimeFrameInterval",
     Start = MissionBegin,
     End = MissionEnd
@@ -84,15 +86,14 @@ local StereoTrail = {
     Color = { 0.33, 0.75, 0.52 },
     Period = 346.0,
     Resolution = 5000,
-    EnableFade = true,
+    EnableFade = true
   },
-
   GUI = {
     Name = "STEREO A Trail",
-    Path = "/Solar System/Missions/STEREO A"
+    Path = "/Solar System/Missions/STEREO A",
+    Description = "The trajectory of the STEREO-A spacecraft."
   }
 }
-
 
 
 asset.onInitialize(function()
@@ -117,8 +118,8 @@ asset.export("MissionEnd", MissionEnd)
 
 asset.meta = {
   Name = "STEREO",
-  Description = [[This asset adds the STEREO (Solar TErrestrial RElations Obervatory)
-    Model, including the trajectory for the entire duration of the STEREO mission.]],
+  Description = [[This asset adds the STEREO-A (Solar TErrestrial RElations Observatory)
+    model, including the trajectory for the entire duration of the STEREO mission.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

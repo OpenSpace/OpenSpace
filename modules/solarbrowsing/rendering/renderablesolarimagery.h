@@ -43,7 +43,8 @@ namespace openspace {
 class TransferFunction;
 class AsyncImageDecoder;
 
-// @TODO (anden88 2026-02-04): Steps for streaming new image data from HelioViewer
+// @TODO (anden88 2026-02-04): Steps to check off when implementing data streaming from
+// HelioViewer
 // 1. Check if image exists in cache (since this will be at runtime we check the ram
 // _imageMetadataMap)
 // 2. If not -> spawn a thread to download data from HelioViewer
@@ -91,8 +92,7 @@ private:
 
     void updateImageryTexture();
     void requestPredictiveFrames(const Keyframe<ImageMetadata>* keyframe,
-        const UpdateData& data
-    );
+        const UpdateData& data);
 
     void createPlaneAndFrustum(double moveDistance);
     void createPlane() const;
@@ -102,6 +102,7 @@ private:
     FloatProperty _contrastValue;
     BoolProperty _enableBorder;
     BoolProperty _enableFrustum;
+    OptionProperty _faceMode;
     FloatProperty _gammaValue;
     DoubleProperty _moveFactor;
     IntProperty _downsamplingLevel;
@@ -131,7 +132,7 @@ private:
     // Image plane and frustum
     UniformCache(isCoronaGraph, scale, centerPixel, imageryTexture, planeOpacity,
         gammaValue, contrastValue, modelViewProjectionTransform, hasLut,
-        lut) _uniformCachePlane;
+        lut, faceMode) _uniformCachePlane;
 
     UniformCache(planeOpacity, modelViewProjectionTransform,
         modelViewProjectionTransformPlane, scale, centerPixel) _uniformCacheFrustum;

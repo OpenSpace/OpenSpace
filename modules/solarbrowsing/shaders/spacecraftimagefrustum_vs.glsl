@@ -43,8 +43,7 @@ void main() {
   vec4 positionScreenSpace = vec4(0.0);
   if (in_position.w == 1.0) {
     vec4 position = in_position;
-    position.x += centerPixel.x;
-    position.y += centerPixel.y;
+    position.xy += centerPixel;
     position.xy *= 1.0 / scale;
     vec4 positionClipSpace = modelViewProjectionTransformPlane * vec4(position.xyz, 1.0);
     positionScreenSpace = z_normalization(positionClipSpace);

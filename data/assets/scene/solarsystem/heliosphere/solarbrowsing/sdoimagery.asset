@@ -27,6 +27,8 @@ local SdoPosition = {
   GUI = {
     Name = "SDO Position",
     Path = "/Solar System/Missions/SDO",
+    Description = [[The position of the SDO spacecraft with an added rotation to reduce
+      wobble effects.]],
     Hidden = true,
     Focusable = false
   }
@@ -35,7 +37,7 @@ local SdoPosition = {
 local SolarImagery = {
   Identifier = "SolarImagery_SDO",
   Parent = SdoPosition.Identifier,
-    TimeFrame = {
+  TimeFrame = {
     Type = "TimeFrameInterval",
     Start = sdo.MissionBegin,
     End = sdo.MissionEnd
@@ -46,7 +48,13 @@ local SolarImagery = {
   },
   GUI = {
     Name = "SDO Imagery",
-    Path = "/Solar System/Solar Imagery"
+    Path = "/Solar System/Sun/Solar Imagery",
+    Description = [[Time-resolved solar imagery from NASA's Solar Dynamics Observatory
+      (SDO). Images from multiple instruments can be browsed over time and are projected
+      onto a plane positioned relative to the Sun. Instrument-specific color mappings help
+      highlight different solar phenomena such as active regions, flares, and coronal
+      structures.]],
+      Focusable = false
   }
 }
 
@@ -67,8 +75,8 @@ asset.export("Imagery", SolarImagery)
 
 asset.meta = {
   Name = "SDO Solar Imagery",
-  Description = [[The SDO spacecraft imagery, showing images of the Sun in different
-    wavelengths.]],
+  Description = [[Time-resolved solar imagery from NASA's Solar Dynamics Observatory
+    (SDO), showing the Sun in multiple wavelengths captured by its onboard instruments.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

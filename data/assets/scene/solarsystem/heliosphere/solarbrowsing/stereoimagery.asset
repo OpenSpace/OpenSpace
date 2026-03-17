@@ -2,7 +2,8 @@ local stereo_a = asset.require('scene/solarsystem/missions/stereo/stereo_a')
 local coreKernels = asset.require("spice/core")
 local kernels = asset.require("scene/solarsystem/missions/stereo/kernels")
 
-print(stereo_a)
+
+
 -- We use the Stereo position with an added rotation to stabilize the image and remove
 -- any wobble effect since we don't have the CK kernels
 local StereoPosition = {
@@ -19,6 +20,8 @@ local StereoPosition = {
   GUI = {
     Name = "STEREO A Position",
     Path = "/Solar System/Missions/STEREO A",
+    Description = [[The position of the STEREO-A spacecraft with an added rotation to
+      reduce wobble effects.]],
     Hidden = true,
     Focusable = false
   }
@@ -27,7 +30,7 @@ local StereoPosition = {
 local SolarImagery = {
   Identifier = "SolarImagery_STEREO_A",
   Parent = StereoPosition.Identifier,
-    TimeFrame = {
+  TimeFrame = {
     Type = "TimeFrameInterval",
     Start = stereo_a.MissionBegin,
     End = stereo_a.MissionEnd
@@ -39,7 +42,13 @@ local SolarImagery = {
   },
   GUI = {
     Name = "STEREO A Imagery",
-    Path = "/Solar System/Solar Imagery"
+    Path = "/Solar System/Sun/Solar Imagery",
+    Description = [[Time-resolved solar imagery from NASA's Solar TErrestrial RElations
+      Observatory (STEREO-A). Images from multiple instruments can be browsed over time and
+      are projected onto a plane positioned relative to the Sun. Instrument-specific color
+      mappings help highlight different solar phenomena such as active regions, flares,
+      and coronal structures.]],
+      Focusable = false
   }
 }
 
@@ -62,8 +71,8 @@ asset.export("Imagery", SolarImagery)
 
 asset.meta = {
   Name = "STEREO Solar Imagery",
-  Description = [[The STEREO spacecraft imagery, showing images of the Sun in different
-    wavelengths.]],
+  Description = [[Time-resolved solar imagery from NASA's STEREO-A spacecraft,
+    showing the Sun in multiple wavelengths captured by its onboard instruments.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

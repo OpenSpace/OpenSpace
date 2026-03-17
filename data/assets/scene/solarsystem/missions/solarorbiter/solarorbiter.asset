@@ -1,0 +1,123 @@
+local coreKernels = asset.require("spice/core")
+local kernels = asset.require("./kernels")
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+
+
+
+--model from https://scifleet.esa.int/model/solar_orbiter/
+local models = asset.resource({
+  Name = "Solar Orbiter Models",
+  Type = "HttpSynchronization",
+  Identifier = "solarorbiter_models",
+  Version = 1
+})
+
+local MissionBegin = "2020 FEB 10 04:56:58"
+local MissionEnd = "2030 NOV 20 04:05:16"
+
+local SolarOrbiterPosition = {
+  Identifier = "Solar_Orbiter_Position",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.SolarOrbiter,
+      Observer = coreKernels.ID.SolarSystemBarycenter,
+    }
+  },
+  GUI = {
+    Name = "Solar Orbiter Position",
+    Path = "/Solar System/Missions/Solar Orbiter",
+    Description = "The position of the Solar Orbiter spacecraft.",
+    Hidden = true,
+    Focusable = false
+  }
+}
+
+local SolarOrbiter = {
+  Identifier = "Solar_Orbiter_Model",
+  Parent = SolarOrbiterPosition.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = MissionBegin,
+    End = MissionEnd
+  },
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.SolarOrbiter,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Body = "Solar_Orbiter_Model",
+    GeometryFile = models .. "solar_orbiter.fbx",
+    RotationVector = { 90.0, 0.0, 0.0 },
+    LightSources = { sunTransforms.LightSource },
+    AmbientIntensity = 0.2,
+    SpecularIntensity = 0.0
+  },
+  GUI = {
+    Name = "Solar Orbiter",
+    Path = "/Solar System/Missions/Solar Orbiter",
+    Description = "The Solar Orbiter spacecraft."
+  }
+}
+
+local SolarOrbiterTrail = {
+  Identifier = "Solar_Orbiter_Trail",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = MissionBegin,
+    End = MissionEnd
+  },
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.SolarOrbiter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
+    },
+    Color = { 0.33, 0.15, 0.52 },
+    Period = 168.0,
+    Resolution = 10000,
+    EnableFade = true
+  },
+  GUI = {
+    Name = "Solar Orbiter Trail",
+    Path = "/Solar System/Missions/Solar Orbiter",
+    Description = "The trajectory of the Solar Orbiter spacecraft."
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SolarOrbiterPosition)
+  openspace.addSceneGraphNode(SolarOrbiter)
+  openspace.addSceneGraphNode(SolarOrbiterTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SolarOrbiterTrail)
+  openspace.removeSceneGraphNode(SolarOrbiter)
+  openspace.removeSceneGraphNode(SolarOrbiterPosition)
+end)
+
+asset.export("Position", SolarOrbiterPosition)
+asset.export("StereoA", SolarOrbiter)
+asset.export("Trail", SolarOrbiterTrail)
+asset.export("MissionBegin", MissionBegin)
+asset.export("MissionEnd", MissionEnd)
+
+
+
+asset.meta = {
+  Name = "Solar Orbiter",
+  Description = [[This asset adds the Solar Orbiter model, including the trajectory for
+    the entire duration of the Solar Orbiter mission.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

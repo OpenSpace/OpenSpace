@@ -34,7 +34,6 @@ layout(location = 1) in vec2 in_st;
 out Data {
   vec4 positionScreenSpace;
   vec3 vUv[MaxSpacecraftObservatories];
-  vec3 positionModelSpace;
 } out_data;
 
 uniform mat4 modelViewProjectionTransform;
@@ -45,7 +44,6 @@ uniform int numSpacecraftCameraPlanes;
 
 void main() {
   vec4 position = vec4(in_position.xyz, 1.0);
-  out_data.positionModelSpace = position.xyz;
 
   // Transform the positions to the reference frame of the spacecraft to get tex coords
   for (int i = 0; i < numSpacecraftCameraPlanes; i++) {

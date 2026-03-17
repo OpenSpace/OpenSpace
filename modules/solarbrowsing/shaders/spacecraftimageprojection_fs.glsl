@@ -29,7 +29,6 @@ const int MaxSpacecraftObservatories = 7;
 in Data {
   vec4 positionScreenSpace;
   vec3 vUv[MaxSpacecraftObservatories];
-  vec3 positionModelSpace;
 } in_data;
 
 uniform int numSpacecraftCameraPlanes;
@@ -38,15 +37,15 @@ uniform sampler1D lut[MaxSpacecraftObservatories];
 uniform sampler2D imageryTexture[MaxSpacecraftObservatories];
 uniform bool hasLut[MaxSpacecraftObservatories];
 uniform float contrastValue[MaxSpacecraftObservatories];
-uniform float opacityValue[MaxSpacecraftObservatories];
 uniform float gammaValue[MaxSpacecraftObservatories];
 uniform float imageSize[MaxSpacecraftObservatories];
 uniform bool isEnabled[MaxSpacecraftObservatories];
 uniform bool isCoronaGraph[MaxSpacecraftObservatories];
 uniform float scale[MaxSpacecraftObservatories];
 uniform vec2 centerPixel[MaxSpacecraftObservatories];
+uniform float opacity;
 
-const float HalfSunRadius = 1391600000 * 0.5;
+const float SunRadius = 6.95700E8;
 
 float contrast(float intensity, int i) {
   return min(
@@ -56,7 +55,8 @@ float contrast(float intensity, int i) {
 }
 
 Fragment getFragment() {
-  vec4 outColor = vec4(0.0);
+  vec4 NoDataColor = vec4(vec3(0.3), 1.0);
+  vec4 outColor = NoDataColor;
   bool renderSurface = true;
 
   for (int i = 0; i < numSpacecraftCameraPlanes; i++) {
@@ -66,11 +66,11 @@ Fragment getFragment() {
 
     if (planePositionSpacecraft[i].z < in_data.vUv[i].z) {
       vec3 uv = in_data.vUv[i].xyz;
-      uv /= (HalfSunRadius / scale[i]) * 2.0;
+      uv /= (SunRadius / scale[i]) * 2.0;
       uv += 0.5;
 
-      uv.x += (centerPixel[i].x / HalfSunRadius) / 2.0;
-      uv.y -= (centerPixel[i].y /  HalfSunRadius) / 2.0;
+      uv.x += (centerPixel[i].x / SunRadius) / 2.0;
+      uv.y -= (centerPixel[i].y /  SunRadius) / 2.0;
 
       float intensityOrg = texture(imageryTexture[i], vec2(uv.x, 1.0 - uv.y)).r;
       intensityOrg = contrast(intensityOrg, i);
@@ -87,26 +87,33 @@ Fragment getFragment() {
       res.g = pow(res.g, gammaValue[i]);
       res.b = pow(res.b, gammaValue[i]);
 
-      // Not initialized
-      if (outColor == vec4(0.0)) {
-          float factor2 = smoothstep(0.5, uv.x, uv.z);
-          outColor = mix(res, res, factor2);
-      }
-      else {
-          // Blend between
-          float factor = smoothstep(0.5, 1.0 - uv.x, uv.z);
-          float factor2 = smoothstep(0.5, uv.x, uv.z);
-          outColor = mix(outColor, res, factor + factor2);
-      }
+      // @TODO (anden 2026-03-05): After discussion with Abock we've decided to remove
+      // the blending since two spacecrafts will probably not display images at with
+      // the same timestamp. Thus, we would blend two different timestamps which makes
+      // little to no sense
+      // if (outColor == NoDataColor) { // Not initialized
+      //     outColor = res;
+      // }
+      // else {
+      //     // Blend between
+      //     float factor = smoothstep(0.5, 1.0 - uv.x, uv.z);
+      //     float factor2 = smoothstep(0.5, uv.x, uv.z);
+      //     outColor = mix(outColor, res, factor + factor2);
+      // }
+
+      // We'll always project the color of the last spacecraft for this pixel. The order
+      // of the spacecrafts is determined by the order they are loaded by the renderable
+      outColor = res;
       renderSurface = false;
     }
   }
 
   if (renderSurface) {
     // Arbitrary default shading
-    vec3 diffuse = vec3((in_data.positionModelSpace.y) / HalfSunRadius) * 0.18;
-    outColor = vec4(clamp(diffuse, vec3(-1.0), vec3(1.0)) + vec3(0.2, 0.21, 0.22), 1.0);
+    outColor = NoDataColor;
   }
+
+  outColor.a *= opacity;
 
   Fragment frag;
   frag.color = outColor;

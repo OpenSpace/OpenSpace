@@ -32,6 +32,7 @@ local SdoPosition = {
   GUI = {
     Name = "SDO Position",
     Path = "/Solar System/Missions/SDO",
+    Description = "The position of the SDO spacecraft.",
     Hidden = true,
     Focusable = false
   }
@@ -57,21 +58,22 @@ local Sdo = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = models .. "sdo.glb",
-    RotationVector = { 90.0, 0, 0 },
+    RotationVector = { 90.0, 0.0, 0.0 },
     LightSources = { sunTransforms.LightSource },
     AmbientIntensity = 0.2,
     SpecularIntensity = 0.0
   },
   GUI = {
     Name = "SDO",
-    Path = "/Solar System/Missions/SDO"
+    Path = "/Solar System/Missions/SDO",
+    Description = "The SDO (Solar Dynamics Observatory) spacecraft."
   }
 }
 
 local SdoTrail = {
   Identifier = "SDO_Trail",
   Parent = earthTransform.EarthInertial.Identifier,
-    TimeFrame = {
+  TimeFrame = {
     Type = "TimeFrameInterval",
     Start = MissionBegin,
     End = MissionEnd
@@ -91,7 +93,8 @@ local SdoTrail = {
   },
   GUI = {
       Name = "SDO Trail",
-      Path = "/Solar System/Missions/SDO"
+      Path = "/Solar System/Missions/SDO",
+      Description = "The trajectory of the SDO spacecraft."
   }
 }
 

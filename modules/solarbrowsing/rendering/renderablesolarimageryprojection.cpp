@@ -28,10 +28,12 @@
 #include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -44,14 +46,26 @@
 #include <memory>
 
 namespace {
-    constexpr char* _loggerCat = "RendearbleSpacecraftCameraSphere";
     // This number MUST match the constant specified in the shader
     constexpr int MaxSpacecraftObservatories = 7;
-    constexpr float SunRadius = 1391600000.0 * 0.5;
 
+    // A RenderableSolarImageryProjection projects solar observations from spacecraft
+    // instruments onto the surface of the Sun. The renderable uses one or more
+    // [RenderableSolarImagery](#solarbrowsing_renderable_solarimegary) nodes as input and
+    // maps their imagery onto a solar sphere from the observing spacecraft's perspective.
+    //
+    // Each dependent RenderableSolarImagery provides the image texture, spacecraft
+    // position, and viewing geometry needed for the projection. This allows imagery
+    // captured from different spacecraft and instruments (e.g., SDO or STEREO) to be
+    // visualized directly on the Sun simultaneously.
+    //
+    // Multiple observatories can be projected at once, allowing solar features
+    // observed from different viewpoints to be compared on the solar surface.
     struct [[codegen::Dictionary(RenderableSolarImageryProjection)]] Parameters {
-        // List of spacecraft identifiers that will be projected on the sphere (Sun)
-        // surface.
+        // List of scene graph node identifiers that reference
+        // [RenderableSolarImagery](#solarbrowsing_renderable_solarimegary) nodes. The
+        // imagery from these nodes is projected onto the solar surface from the
+        // perspective of the observing spacecraft.
         std::vector<std::string> dependentNodes;
     };
 } // namespace
@@ -60,19 +74,19 @@ namespace {
 namespace openspace {
 
 openspace::Documentation RenderableSolarImageryProjection::Documentation() {
-    return codegen::doc<Parameters>("solarbrowsing_renderablesolarimageryprojection");
+    return codegen::doc<Parameters>("solarbrowsing_renderable_solarimageryprojection");
 }
 
 RenderableSolarImageryProjection::RenderableSolarImageryProjection(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _sphere(SunRadius * 1.001f, 100)
+    , _sphere(static_cast<float>(distanceconstants::SolarRadius), 100)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
+    addProperty(Fadeable::_opacity);
 
     for (const std::string& nodeName : p.dependentNodes) {
-        SceneGraphNode* dependentNode =
-            global::renderEngine->scene()->sceneGraphNode(nodeName);
+        SceneGraphNode* dependentNode = sceneGraphNode(nodeName);
 
         if (!dependentNode) {
             throw ghoul::RuntimeError(std::format(
@@ -88,14 +102,10 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
                 nodeName
             ));
         }
-        _solarImageryDependencies.push_back(dependentNode);
+        _solarImageryDependencyNames.push_back(nodeName);
     }
-}
 
-void RenderableSolarImageryProjection::initialize() {
-    for (SceneGraphNode* node : _solarImageryDependencies) {
-        parent()->addDependency(*node);
-    }
+    setBoundingSphere(distanceconstants::SolarRadius);
 }
 
 void RenderableSolarImageryProjection::initializeGL() {
@@ -103,6 +113,7 @@ void RenderableSolarImageryProjection::initializeGL() {
         absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageprojection_vs.glsl");
     std::filesystem::path fragmentShader =
         absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageprojection_fs.glsl");
+
     _shader = BaseModule::ProgramObjectManager.request(
         "SpacecraftImageSphereProgram",
         [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -121,8 +132,8 @@ void RenderableSolarImageryProjection::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         "SpacecraftImageSphereProgram",
         [](ghoul::opengl::ProgramObject* p) {
-        global::renderEngine->removeRenderProgram(p);
-    }
+            global::renderEngine->removeRenderProgram(p);
+        }
     );
     _shader = nullptr;
 }
@@ -134,6 +145,21 @@ bool RenderableSolarImageryProjection::isReady() const {
 void RenderableSolarImageryProjection::update(const UpdateData&) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
+    }
+
+    // @TODO (anden88 2026-03-09): Temporary safety check:
+    // If a SolarImagery node is added as a dependent but not as a required asset, and
+    // later removed, stale dependencies may remain. Previously we added dependent nodes
+    // as dependencies, but this caused an issue where a time-framed solar imagery would
+    // stop this projection renderable from rendering. For now we manually verify each
+    // dependency still exists in the scene.
+    _solarImageryDependencies.clear();
+    for (const std::string& nodeName : _solarImageryDependencyNames) {
+        SceneGraphNode* dependentNode = sceneGraphNode(nodeName);
+
+        if (dependentNode) {
+            _solarImageryDependencies.push_back(dependentNode);
+        }
     }
 }
 
@@ -147,6 +173,7 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
         "modelViewProjectionTransform",
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
+    _shader->setUniform("opacity", opacity());
 
     const int numPlanes = static_cast<int>(_solarImageryDependencies.size());
     int solarImageryCount = 0;
@@ -169,57 +196,51 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
             planeRot * glm::dvec4(planePos - data.modelTransform.translation, 1.0)
         );
 
-        _shader->setUniform("isCoronaGraph[" + std::to_string(i) + "]", isCoronaGraph);
-        _shader->setUniform("isEnabled[" + std::to_string(i) + "]", solarImageryEnabled);
-        _shader->setUniform("scale[" + std::to_string(i) + "]", solarImagery->scale());
+        _shader->setUniform(std::format("isCoronaGraph[{}]", i), isCoronaGraph);
+        _shader->setUniform(std::format("isEnabled[{}]", i), solarImageryEnabled);
+        _shader->setUniform(std::format("scale[{}]", i), solarImagery->scale());
         _shader->setUniform(
-            "sunToSpacecraftReferenceFrame[" + std::to_string(i) + "]",
+            std::format("sunToSpacecraftReferenceFrame[{}]", i),
             planeRot * glm::dmat4(data.modelTransform.rotation)
         );
         _shader->setUniform(
-            "planePositionSpacecraft[" + std::to_string(i) + "]",
+            std::format("planePositionSpacecraft[{}]", i),
             planePosSpacecraft
         );
+        _shader->setUniform(std::format("gammaValue[{}]", i), solarImagery->gammaValue());
         _shader->setUniform(
-            "gammaValue[" + std::to_string(i) + "]",
-            solarImagery->gammaValue()
-        );
-        _shader->setUniform(
-            "contrastValue[" + std::to_string(i) + "]",
+            std::format("contrastValue[{}]", i),
             solarImagery->contrastValue()
         );
         _shader->setUniform(
-            "centerPixel[" + std::to_string(i) + "]",
+            std::format("centerPixel[{}]", i),
             solarImagery->centerPixel()
         );
 
         // Imagery texture
         textureImageryUnits[i].bind(*solarImagery->imageryTexture());
         _shader->setUniform(
-            "imageryTexture[" + std::to_string(i) + "]",
+            std::format("imageryTexture[{}]", i),
             textureImageryUnits[i]
         );
         // Transfer function texture
         TransferFunction* transferFunction = solarImagery->transferFunction();
         if (transferFunction && solarImageryEnabled) {
             transferFunctionUnits[i].bind(transferFunction->texture());
-            _shader->setUniform("hasLut[" + std::to_string(i) + "]", true);
+            _shader->setUniform(std::format("hasLut[{}]", i), true);
         } else {
-            _shader->setUniform("hasLut[" + std::to_string(i) + "]", false);
+            _shader->setUniform(std::format("hasLut[{}]", i), false);
         }
         // Must bind all sampler2D, otherwise undefined behaviour
-        _shader->setUniform("lut[" + std::to_string(i) + "]", transferFunctionUnits[i]);
+        _shader->setUniform(std::format("lut[{}]", i), transferFunctionUnits[i]);
 
         solarImageryCount++;
     }
 
     // Set the rest of the texture units for well defined behaviour
     for (int i = solarImageryCount; i < MaxSpacecraftObservatories; i++) {
-        _shader->setUniform(
-            "imageryTexture[" + std::to_string(i) + "]",
-            textureImageryUnits[i]
-        );
-        _shader->setUniform("lut[" + std::to_string(i) + "]", transferFunctionUnits[i]);
+        _shader->setUniform(std::format("imageryTexture[{}]", i),textureImageryUnits[i]);
+        _shader->setUniform(std::format("lut[{}]", i), transferFunctionUnits[i]);
     }
 
     _shader->setUniform("numSpacecraftCameraPlanes", numPlanes);

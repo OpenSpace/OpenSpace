@@ -31,6 +31,8 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/task.h>
+#include <ghoul/filesystem/cachemanager.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 
 namespace openspace {
@@ -51,6 +53,27 @@ void SolarBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fTask, "No task factory existed");
 
     fTask->registerClass<HelioviewerDownloadTask>("HelioviewerDownloadTask");
+
+    const std::filesystem::path CacheDirectory = absPath(
+        "${SYNC_DYNAMIC}/solarbrowsing/cache"
+    );
+
+    if (!std::filesystem::is_directory(CacheDirectory)) {
+        std::filesystem::create_directories(CacheDirectory);
+    }
+
+    ghoul_assert(
+        std::filesystem::is_directory(CacheDirectory),
+        "Cache directory did not exist"
+    );
+    ghoul_assert(!_cacheManager, "CacheManager was already created");
+
+    _cacheManager = std::make_unique<ghoul::filesystem::CacheManager>(CacheDirectory);
+    ghoul_assert(_cacheManager, "CacheManager creation failed");
+}
+
+ghoul::filesystem::CacheManager* SolarBrowsingModule::cacheManager() const {
+    return _cacheManager.get();
 }
 
 std::vector<openspace::Documentation> SolarBrowsingModule::documentations() const {

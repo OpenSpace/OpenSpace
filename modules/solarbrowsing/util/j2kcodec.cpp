@@ -25,10 +25,10 @@
 #include <modules/solarbrowsing/util/j2kcodec.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <format_defs.h>
 #include <chrono>
 #include <cstring>
 #include <format>
-#include <format_defs.h>
 #include <fstream>
 #include <memory>
 #include <vector>
@@ -137,7 +137,7 @@ void J2kCodec::decodeIntoBuffer(const std::filesystem::path& path, unsigned char
     createInfileStream(path);
     setupDecoder(downsamplingLevel);
 
-    // TODO(mnoven): It's a waste of resources having to decode into the image object and
+    // @TODO (mnoven): It's a waste of resources having to decode into the image object and
     // then copy over the data to our buffer. Would be better if we could decode directly
     // into the buffer
     // See: https://github.com/uclouvain/openjpeg/issues/837
@@ -153,7 +153,7 @@ void J2kCodec::decodeIntoBuffer(const std::filesystem::path& path, unsigned char
         return;
     }
 
-    // TODO(mnoven): This is a waste. Can't specify decode precision in
+    // @TODO (mnoven): This is a waste. Can't specify decode precision in
     // openjpeg. See: https://github.com/uclouvain/openjpeg/issues/836)
     std::copy(
         _image->comps[0].data,
@@ -165,8 +165,7 @@ void J2kCodec::decodeIntoBuffer(const std::filesystem::path& path, unsigned char
     if (_verboseMode) {
         LINFO(std::format(
             "Decode time of {}: {} ms",
-            path,
-            std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
+            path, std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
         ));
     }
 }
@@ -185,8 +184,7 @@ void J2kCodec::createInfileStream(const std::filesystem::path& path) {
     }
 }
 
-void J2kCodec::setupDecoder(int downsamplingLevel)
-{
+void J2kCodec::setupDecoder(int downsamplingLevel) {
     opj_set_default_decoder_parameters(&_decoderParams);
     _decoderParams.decod_format = infileFormat(_filePath.string());
     _decoderParams.cp_reduce = downsamplingLevel;

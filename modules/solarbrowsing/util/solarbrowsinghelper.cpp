@@ -24,8 +24,11 @@
 
 #include <modules/solarbrowsing/util/solarbrowsinghelper.h>
 
+#include <modules/solarbrowsing/solarbrowsingmodule.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/transferfunction.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/progressbar.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timemanager.h>
@@ -44,7 +47,6 @@ namespace {
     using namespace openspace;
 
     constexpr std::string_view _loggerCat = "SolarBrowsingHelper";
-    constexpr double SunRadius = 1391600000.0 * 0.5;
     using IsValidCacheFile = bool;
 
     bool isValidJ2000ImageFile(const std::filesystem::path& path) {
@@ -59,9 +61,7 @@ namespace {
     // this implementation should be improved in order not to search the entire buffer for
     // XML data. There is an issue here:
     // (https://github.com/uclouvain/openjpeg/issues/929)
-    std::optional<ImageMetadata> parseJ2kMetadata(
-                                                    const std::filesystem::path& filePath)
-    {
+    std::optional<ImageMetadata> parseJ2kMetadata(const std::filesystem::path& filePath) {
         ImageMetadata im;
         im.filePath = filePath;
 
@@ -157,8 +157,8 @@ namespace {
             std::stof(std::string(*centerPixelX)),
             std::stof(std::string(*centerPixelY))
         );
-        const glm::vec2 offset =
-            ((halfRes - centerPixel) / halfRes) * glm::vec2(SunRadius);
+        const glm::vec2 offset = ((halfRes - centerPixel) / halfRes) *
+            glm::vec2(static_cast<float>(distanceconstants::SolarRadius));
         im.centerPixel = offset;
 
         if (*telescop == "SOHO") {
@@ -260,7 +260,7 @@ namespace {
         else if (month == "OCT") { MM = "10"; }
         else if (month == "NOV") { MM = "11"; }
         else if (month == "DEC") { MM = "12"; }
-        else { ghoul_assert(false, "Bad month") };
+        else { ghoul_assert(false, "Bad month"); };
 
         datetime.replace(4, 5, "-" + MM + "-");
         return datetime;
@@ -347,7 +347,8 @@ namespace {
             if (!std::filesystem::is_directory(subDirectory)) {
                 LWARNING(std::format(
                     "Could not find subdirectory '{}' for cache file '{}'",
-                    subDirectory, cacheFile));
+                    subDirectory, cacheFile
+                ));
                 continue;
             }
 
@@ -430,7 +431,7 @@ namespace {
 
                 if (myfile.bad()) {
                     LERROR(std::format(
-                        "Failed to read metadata state : isCoronaGraph, file : '{}'",
+                        "Failed to read metadata state: isCoronaGraph, file: '{}'",
                         cacheFile
                     ));
                     subDirectoriesMap[subDirectory] = false;
@@ -517,7 +518,7 @@ std::unordered_map<std::string, std::shared_ptr<TransferFunction>> loadTransferF
     );
 
     using T = Timeline<ImageMetadata>;
-    for (const std::pair<InstrumentName, T>& instrument : imageMetadataMap) {
+    for (const std::pair<const InstrumentName, T>& instrument : imageMetadataMap) {
         // The subdirectories might have a different name than the instrument name so we
         // have to search the directories for the correct texture map
         bool found = false;
@@ -533,7 +534,8 @@ std::unordered_map<std::string, std::shared_ptr<TransferFunction>> loadTransferF
         }
 
         if (!found) {
-            LERROR(std::format("Unable to load a color map for instrument '{}'",
+            LERROR(std::format(
+                "Unable to find and load a color map for instrument '{}'",
                 instrument.first
             ));
         }
@@ -689,8 +691,9 @@ DecodedImageData loadDecodedDataFromCache(const std::filesystem::path& path,
 {
     std::ifstream file = std::ifstream(path, std::ifstream::binary);
     if (!file.good()) {
-        FileSys.cacheManager()->removeCacheFile(
-            metadata.filePath,
+        SolarBrowsingModule* module = global::moduleEngine->module<SolarBrowsingModule>();
+        module->cacheManager()->removeCacheFile(
+            path,
             std::format("{}x{}", imageSize, imageSize)
         );
         throw ghoul::RuntimeError(std::format(
@@ -707,9 +710,10 @@ DecodedImageData loadDecodedDataFromCache(const std::filesystem::path& path,
     file.read(reinterpret_cast<char*>(data.buffer.data()), nEntries * sizeof(uint8_t));
 
     if (!file) {
+        SolarBrowsingModule* module = global::moduleEngine->module<SolarBrowsingModule>();
         file.close();
-        FileSys.cacheManager()->removeCacheFile(
-            metadata.filePath,
+        module->cacheManager()->removeCacheFile(
+            path,
             std::format("{}x{}", imageSize, imageSize)
         );
         throw ghoul::RuntimeError(std::format(
