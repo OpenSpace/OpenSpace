@@ -442,7 +442,6 @@ void OpenSpaceEngine::initialize() {
             DocEng.addDocumentation(doc);
         }
     }
-    DocEng.addDocumentation(TopicManager::Documentation());
     DocEng.addDocumentation(Configuration::Documentation());
 
     // Register the provided shader directories

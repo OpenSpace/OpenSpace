@@ -39,8 +39,12 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
+struct Documentation;
+
 class ServerInterface : public PropertyOwner {
 public:
+    static Documentation Documentation();
+
     static std::unique_ptr<ServerInterface> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 

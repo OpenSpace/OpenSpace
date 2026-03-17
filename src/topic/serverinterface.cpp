@@ -32,6 +32,13 @@
 namespace {
     using namespace openspace;
 
+    constexpr Property::PropertyInfo IdentifierInfo = {
+        "Identifier",
+        "Identifier",
+        "The identifier for this interface.",
+        Property::Visibility::AdvancedUser
+    };
+
     constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
@@ -49,14 +56,14 @@ namespace {
     constexpr Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
-        "The network port to use for this sevrer interface.",
+        "The network port to use for this server interface.",
         Property::Visibility::AdvancedUser
     };
 
     constexpr Property::PropertyInfo DefaultAccessInfo = {
         "DefaultAccess",
         "Default access",
-        "Sets the default access policy: Allow, RequirePassword or Deny.",
+        "Sets the default access policy.",
         Property::Visibility::AdvancedUser
     };
 
@@ -99,6 +106,7 @@ namespace {
         // [[codegen::verbatim(DefaultAccessInfo.description)]]
         std::optional<Access> defaultAccess;
 
+        // [[codegen::verbatim(IdentifierInfo.description)]]
         std::string identifier;
 
         // [[codegen::verbatim(AllowAddressesInfo.description)]]
@@ -130,6 +138,10 @@ namespace {
 #include "serverinterface_codegen.cpp"
 
 namespace openspace {
+
+Documentation ServerInterface::Documentation() {
+    return codegen::doc<Parameters>("core_serverinterface");
+}
 
 std::unique_ptr<ServerInterface> ServerInterface::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)

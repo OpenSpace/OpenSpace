@@ -26,35 +26,15 @@
 
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
-#include <openspace/topic/topics/authorizationtopic.h>
-#include <openspace/topic/topics/actionkeybindtopic.h>
-#include <openspace/topic/topics/bouncetopic.h>
-#include <openspace/topic/topics/camerapathtopic.h>
-#include <openspace/topic/topics/cameratopic.h>
-#include <openspace/topic/topics/documentationtopic.h>
-#include <openspace/topic/topics/downloadeventtopic.h>
-#include <openspace/topic/topics/enginemodetopic.h>
-#include <openspace/topic/topics/errorlogtopic.h>
-#include <openspace/topic/topics/eventtopic.h>
-#include <openspace/topic/topics/flightcontrollertopic.h>
-#include <openspace/topic/topics/getpropertytopic.h>
-#include <openspace/topic/topics/luascripttopic.h>
-#include <openspace/topic/topics/missiontopic.h>
-#include <openspace/topic/topics/profiletopic.h>
-#include <openspace/topic/topics/propertytreetopic.h>
-#include <openspace/topic/topics/sessionrecordingtopic.h>
-#include <openspace/topic/topics/setpropertytopic.h>
-#include <openspace/topic/topics/subscriptiontopic.h>
-#include <openspace/topic/topics/timetopic.h>
+#include <openspace/util/factorymanager.h>
 #include <openspace/topic/topics/topic.h>
-#include <openspace/topic/topics/triggerpropertytopic.h>
-#include <openspace/topic/topics/versiontopic.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/socket/socket.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "ServerModule: Connection";
@@ -73,41 +53,6 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
     , _isAuthorized(authorized)
 {
     ghoul_assert(_socket, "Socket must not be nullptr");
-
-    _topicFactory.registerClass(
-        "authorize",
-        [password](bool, const ghoul::Dictionary&, pmr::memory_resource* pool) {
-            if (pool) {
-                void* ptr = pool->allocate(sizeof(AuthorizationTopic));
-                return new (ptr) AuthorizationTopic(password);
-            }
-            else {
-                return new AuthorizationTopic(password);
-            }
-        }
-    );
-
-    _topicFactory.registerClass<BounceTopic>("bounce");
-    _topicFactory.registerClass<CameraTopic>("camera");
-    _topicFactory.registerClass<CameraPathTopic>("cameraPath");
-    _topicFactory.registerClass<DocumentationTopic>("documentation");
-    _topicFactory.registerClass<DownloadEventTopic>("downloadEvent");
-    _topicFactory.registerClass<EngineModeTopic>("engineMode");
-    _topicFactory.registerClass<ErrorLogTopic>("errorLog");
-    _topicFactory.registerClass<EventTopic>("event");
-    _topicFactory.registerClass<FlightControllerTopic>("flightcontroller");
-    _topicFactory.registerClass<GetPropertyTopic>("get");
-    _topicFactory.registerClass<LuaScriptTopic>("luascript");
-    _topicFactory.registerClass<MissionTopic>("missions");
-    _topicFactory.registerClass<ProfileTopic>("profile");
-    _topicFactory.registerClass<SessionRecordingTopic>("sessionRecording");
-    _topicFactory.registerClass<SetPropertyTopic>("set");
-    _topicFactory.registerClass<ActionKeybindTopic>("actionsKeybinds");
-    _topicFactory.registerClass<SubscriptionTopic>("subscribe");
-    _topicFactory.registerClass<TimeTopic>("time");
-    _topicFactory.registerClass<TriggerPropertyTopic>("trigger");
-    _topicFactory.registerClass<VersionTopic>("version");
-    _topicFactory.registerClass<PropertyTreeTopic>("propertyTree");
 }
 
 void Connection::handleMessage(const std::string& message) {
@@ -188,7 +133,9 @@ void Connection::handleJson(const nlohmann::json& json) {
             return;
         }
 
-        std::unique_ptr<Topic> topic = std::unique_ptr<Topic>(_topicFactory.create(type));
+        ghoul::TemplateFactory<Topic>* fTopic = FactoryManager::ref().factory<Topic>();
+
+        std::unique_ptr<Topic> topic = std::unique_ptr<Topic>(fTopic->create(type));
         topic->initialize(shared_from_this(), topicId);
         topic->handleJson(*payloadJson);
         if (!topic->isDone()) {
@@ -258,10 +205,6 @@ Topic* Connection::findTopicByType(const std::string& type) {
     }
 
     return it->second.get();
-}
-
-ghoul::TemplateFactory<Topic>& Connection::topicFactory() {
-    return _topicFactory;
 }
 
 } // namespace openspace

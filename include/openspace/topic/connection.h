@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___CONNECTION___H__
 #define __OPENSPACE_CORE___CONNECTION___H__
 
-#include <ghoul/misc/templatefactory.h>
 #include <openspace/json.h>
 #include <map>
 #include <memory>
@@ -62,7 +61,6 @@ public:
     void sendJson(const nlohmann::json& json);
     void setAuthorized(bool status);
     Topic* findTopicByType(const std::string& type);
-    ghoul::TemplateFactory<Topic>& topicFactory();
 
     bool isAuthorized() const;
 
@@ -71,7 +69,6 @@ public:
     void setThread(std::thread&& thread);
 
 private:
-    ghoul::TemplateFactory<Topic> _topicFactory;
     std::map<TopicId, std::unique_ptr<Topic>> _topics;
     std::unique_ptr<ghoul::io::Socket> _socket;
     std::thread _thread;

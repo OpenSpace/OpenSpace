@@ -243,6 +243,7 @@ namespace {
         // used if this is left out.
         std::optional<HttpProxy> httpProxy;
 
+        // Defines the connections (WebSocket or TcpSocket) that are allowed
         std::optional<ghoul::Dictionary> server [[codegen::reference("core_topicmanager")]];
 
         struct OpenGLDebugContext {
@@ -634,7 +635,9 @@ void parseLuaState(Configuration& configuration) {
         }
     }
 
-    c.server = p.server;
+    if (p.server.has_value()) {
+        c.server = *p.server;
+    }
 
     if (p.openGLDebugContext.has_value()) {
         const Parameters::OpenGLDebugContext& l = *p.openGLDebugContext;

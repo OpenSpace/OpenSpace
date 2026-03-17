@@ -31,7 +31,30 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/topic/connection.h>
 #include <openspace/topic/serverinterface.h>
+#include <openspace/topic/topics/authorizationtopic.h>
+#include <openspace/topic/topics/actionkeybindtopic.h>
+#include <openspace/topic/topics/bouncetopic.h>
+#include <openspace/topic/topics/camerapathtopic.h>
+#include <openspace/topic/topics/cameratopic.h>
+#include <openspace/topic/topics/documentationtopic.h>
+#include <openspace/topic/topics/downloadeventtopic.h>
+#include <openspace/topic/topics/enginemodetopic.h>
+#include <openspace/topic/topics/errorlogtopic.h>
+#include <openspace/topic/topics/eventtopic.h>
+#include <openspace/topic/topics/flightcontrollertopic.h>
+#include <openspace/topic/topics/getpropertytopic.h>
+#include <openspace/topic/topics/luascripttopic.h>
+#include <openspace/topic/topics/missiontopic.h>
+#include <openspace/topic/topics/profiletopic.h>
+#include <openspace/topic/topics/propertytreetopic.h>
+#include <openspace/topic/topics/sessionrecordingtopic.h>
+#include <openspace/topic/topics/setpropertytopic.h>
+#include <openspace/topic/topics/subscriptiontopic.h>
+#include <openspace/topic/topics/timetopic.h>
 #include <openspace/topic/topics/topic.h>
+#include <openspace/topic/topics/triggerpropertytopic.h>
+#include <openspace/topic/topics/versiontopic.h>
+#include <openspace/util/factorymanager.h>
 #include <ghoul/format.h>
 #include <ghoul/io/socket/socket.h>
 #include <ghoul/io/socket/socketserver.h>
@@ -39,13 +62,21 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/templatefactory.h>
 #include <algorithm>
 #include <optional>
 #include <thread>
 
 namespace {
+
+    // Settings for controlling socket connection (WebSocket or TcpSocket).
+    // This basically acts as a whitelist for the specified connections.
     struct [[codegen::Dictionary(TopicManager)]] Parameters {
-        std::optional<ghoul::Dictionary> interfaces;
+
+        // The interfaces that are allowed to connect.
+        std::optional<std::vector<ghoul::Dictionary>> interfaces [[codegen::reference("core_serverinterface")]];
+
+        // The IP addresses that are allowed to connect.
         std::optional<std::vector<std::string>> allowAddresses;
     };
 #include "topicmanager_codegen.cpp"
@@ -92,13 +123,32 @@ ServerInterface* TopicManager::serverInterfaceByIdentifier(const std::string& id
     return si->get();
 }
 
-
 void TopicManager::initialize(const ghoul::Dictionary& configuration) {
-    global::callback::preSync->emplace_back([this]() {
-        ZoneScopedN("Topic Manager");
 
-        preSync();
-    });
+    // Add the topics to the topic factory
+    ghoul::TemplateFactory<Topic>* fTopic = FactoryManager::ref().factory<Topic>();
+
+    fTopic->registerClass<BounceTopic>("bounce");
+    fTopic->registerClass<CameraTopic>("camera");
+    fTopic->registerClass<CameraPathTopic>("cameraPath");
+    fTopic->registerClass<DocumentationTopic>("documentation");
+    fTopic->registerClass<DownloadEventTopic>("downloadEvent");
+    fTopic->registerClass<EngineModeTopic>("engineMode");
+    fTopic->registerClass<ErrorLogTopic>("errorLog");
+    fTopic->registerClass<EventTopic>("event");
+    fTopic->registerClass<FlightControllerTopic>("flightcontroller");
+    fTopic->registerClass<GetPropertyTopic>("get");
+    fTopic->registerClass<LuaScriptTopic>("luascript");
+    fTopic->registerClass<MissionTopic>("missions");
+    fTopic->registerClass<ProfileTopic>("profile");
+    fTopic->registerClass<SessionRecordingTopic>("sessionRecording");
+    fTopic->registerClass<SetPropertyTopic>("set");
+    fTopic->registerClass<ActionKeybindTopic>("actionsKeybinds");
+    fTopic->registerClass<SubscriptionTopic>("subscribe");
+    fTopic->registerClass<TimeTopic>("time");
+    fTopic->registerClass<TriggerPropertyTopic>("trigger");
+    fTopic->registerClass<VersionTopic>("version");
+    fTopic->registerClass<PropertyTreeTopic>("propertyTree");
 
     const Parameters p = codegen::bake<Parameters>(configuration);
     if (!p.interfaces.has_value()) {
@@ -106,9 +156,7 @@ void TopicManager::initialize(const ghoul::Dictionary& configuration) {
     }
 
 
-    for (const std::string_view key : p.interfaces->keys()) {
-        ghoul::Dictionary interface = p.interfaces->value<ghoul::Dictionary>(key);
-
+    for (const ghoul::Dictionary interface : p.interfaces.value()) {
         std::unique_ptr<ServerInterface> serverInterface =
             ServerInterface::createFromDictionary(interface);
 
@@ -117,6 +165,23 @@ void TopicManager::initialize(const ghoul::Dictionary& configuration) {
         _interfaceOwner.addPropertySubOwner(serverInterface.get());
 
         if (serverInterface) {
+            std::string password = serverInterface->password();
+            // Register the authorized topics
+            fTopic->registerClass(
+                "authorize",
+                [password] (bool, const ghoul::Dictionary&,
+                    pmr::memory_resource* pool)
+                {
+                    if (pool) {
+                        void* ptr = pool->allocate(sizeof(AuthorizationTopic));
+                        return new (ptr) AuthorizationTopic(password);
+                    }
+                    else {
+                        return new AuthorizationTopic(password);
+                    }
+                }
+            );
+
             _interfaces.push_back(std::move(serverInterface));
         }
     }
