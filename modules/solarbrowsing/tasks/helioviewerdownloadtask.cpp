@@ -90,7 +90,7 @@ namespace {
 namespace openspace {
 
 openspace::Documentation HelioviewerDownloadTask::documentation() {
-    return codegen::doc<Parameters>("solarbrowsing_helioviewerdownload_task");
+    return codegen::doc<Parameters>("solarbrowsing_task_helioviewerdownload");
 }
 
 HelioviewerDownloadTask::HelioviewerDownloadTask(const ghoul::Dictionary& dictionary) {
@@ -135,7 +135,8 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
     fileListing.wait();
 
     if (!fileListing.hasSucceeded()) {
-        throw ghoul::RuntimeError(std::format("Request to Helioviewer API failed."));
+       LERROR(std::format("Request to Helioviewer API failed."));
+       return;
     }
 
     const std::vector<char>& listingData = fileListing.downloadedData();

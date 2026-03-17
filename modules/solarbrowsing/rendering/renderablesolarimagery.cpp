@@ -53,6 +53,7 @@
 namespace {
     using namespace openspace;
 
+    constexpr std::string_view _loggerCat = "RenderableSolarImagery";
     constexpr size_t DefaultTextureSize = 32;
 
     enum FaceMode {
@@ -311,6 +312,22 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
 
     _imageMetadataMap = loadImageMetadata(p.imageDirectory);
     _tfMap = loadTransferFunctions(p.imageDirectory, _imageMetadataMap);
+
+    const bool hasData = std::any_of(
+        _imageMetadataMap.begin(),
+        _imageMetadataMap.end(),
+        [](const std::pair<const InstrumentName, Timeline<ImageMetadata>>& p) {
+            return p.second.nKeyframes() > 0;
+        }
+    );
+
+    if (!hasData) {
+        LWARNING(std::format(
+            "Could not find any image data in '{}'. Image data can be downloaded using "
+            "the HelioviewerDownloadTask. See the solar browsing documentation for more "
+            "information", p.imageDirectory
+        ));
+    }
 
     _enableBorder = p.enableBorder.value_or(_enableBorder);
     addProperty(_enableBorder);
