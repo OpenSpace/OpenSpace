@@ -125,9 +125,11 @@ ServerInterface* TopicManager::serverInterfaceByIdentifier(const std::string& id
 
 void TopicManager::initialize(const ghoul::Dictionary& configuration) {
 
-    // Add the topics to the topic factory
     ghoul::TemplateFactory<Topic>* fTopic = FactoryManager::ref().factory<Topic>();
 
+    // Add the topics to the topic factory
+    fTopic->registerClass<ActionKeybindTopic>("actionsKeybinds");
+    fTopic->registerClass<AuthorizationTopic>("authorize");
     fTopic->registerClass<BounceTopic>("bounce");
     fTopic->registerClass<CameraTopic>("camera");
     fTopic->registerClass<CameraPathTopic>("cameraPath");
@@ -141,21 +143,18 @@ void TopicManager::initialize(const ghoul::Dictionary& configuration) {
     fTopic->registerClass<LuaScriptTopic>("luascript");
     fTopic->registerClass<MissionTopic>("missions");
     fTopic->registerClass<ProfileTopic>("profile");
+    fTopic->registerClass<PropertyTreeTopic>("propertyTree");
     fTopic->registerClass<SessionRecordingTopic>("sessionRecording");
     fTopic->registerClass<SetPropertyTopic>("set");
-    fTopic->registerClass<ActionKeybindTopic>("actionsKeybinds");
     fTopic->registerClass<SubscriptionTopic>("subscribe");
     fTopic->registerClass<TimeTopic>("time");
     fTopic->registerClass<TriggerPropertyTopic>("trigger");
     fTopic->registerClass<VersionTopic>("version");
-    fTopic->registerClass<PropertyTreeTopic>("propertyTree");
-    fTopic->registerClass<AuthorizationTopic>("authorize");
 
     const Parameters p = codegen::bake<Parameters>(configuration);
     if (!p.interfaces.has_value()) {
         return;
     }
-
 
     for (const ghoul::Dictionary interface : p.interfaces.value()) {
         std::unique_ptr<ServerInterface> serverInterface =
