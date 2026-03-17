@@ -45,34 +45,14 @@ using nlohmann::json;
 
 namespace openspace {
 
-PropertyTreeTopic::~PropertyTreeTopic() {
-    resetCallbacks();
-}
+PropertyTreeTopic::~PropertyTreeTopic() {}
 
 bool PropertyTreeTopic::isDone() const {
-    return !_requestedResourceIsSubscribable || !_isSubscribedTo;
+    return !_isSubscribedTo;
 }
 
 std::string PropertyTreeTopic::type() const {
     return "propertyTree";
-}
-
-void PropertyTreeTopic::resetCallbacks() {
-    if (!_property) {
-        return;
-    }
-    if (_onChangeHandle != UnsetCallbackHandle) {
-        _property->removeOnChange(_onChangeHandle);
-        _onChangeHandle = UnsetCallbackHandle;
-    }
-    if (_onMetaDataChangeHandle != UnsetCallbackHandle) {
-        _property->removeOnMetaDataChange(_onMetaDataChangeHandle);
-        _onMetaDataChangeHandle = UnsetCallbackHandle;
-    }
-    if (_onDeleteHandle != UnsetCallbackHandle) {
-        _property->removeOnDelete(_onDeleteHandle);
-        _onDeleteHandle = UnsetCallbackHandle;
-    }
 }
 
 void PropertyTreeTopic::handleJson(const nlohmann::json& json) {
@@ -80,11 +60,9 @@ void PropertyTreeTopic::handleJson(const nlohmann::json& json) {
 
     if (event == StartSubscription) {
         _isSubscribedTo = true;
-        _requestedResourceIsSubscribable = true;
     }
     if (event == StopSubscription) {
         _isSubscribedTo = false;
-        resetCallbacks();
     }
     if (event == PropertyChanged) {
         const nlohmann::json& payload = json.at("payload").get<nlohmann::json>();

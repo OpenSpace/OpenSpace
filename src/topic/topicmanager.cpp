@@ -99,7 +99,7 @@ int TopicManager::skyBrowserUpdateTime() const {
 
 void TopicManager::initialize(const ghoul::Dictionary& configuration) {
     global::callback::preSync->emplace_back([this]() {
-        ZoneScopedN("ServerModule");
+        ZoneScopedN("Topic Manager");
 
         preSync();
     });
@@ -129,7 +129,7 @@ void TopicManager::initialize(const ghoul::Dictionary& configuration) {
 }
 
 void TopicManager::preSync() {
-    // Set up new connections.
+    // Set up new connections
     for (std::unique_ptr<ServerInterface>& serverInterface : _interfaces) {
         if (!serverInterface->isEnabled()) {
             continue;

@@ -243,8 +243,7 @@ namespace {
         // used if this is left out.
         std::optional<HttpProxy> httpProxy;
 
-        //ghoul::Dictionary server [[codegen::reference("core_topicmanager")]];
-        ghoul::Dictionary server;
+        std::optional<ghoul::Dictionary> server [[codegen::reference("core_topicmanager")]];
 
         struct OpenGLDebugContext {
             // Determines whether the OpenGL context should be a debug context.

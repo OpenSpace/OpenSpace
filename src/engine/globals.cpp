@@ -91,7 +91,6 @@ namespace {
         sizeof(std::vector<std::unique_ptr<ScreenSpaceRenderable>>) +
         sizeof(SyncEngine) +
         sizeof(TimeManager) +
-        sizeof(TopicManager) +
         sizeof(VersionChecker) +
         sizeof(WindowDelegate) +
         sizeof(Configuration) +
@@ -139,7 +138,7 @@ void create() {
     topicManager = new (currentPos) TopicManager;
     ghoul_assert(topicManager, "No topicManager");
     currentPos += sizeof(TopicManager);
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     topicManager = new TopicManager;
 #endif // WIN32
 
@@ -670,7 +669,7 @@ void destroy() {
     LDEBUGC("Globals", "Destroying 'TopicManager'");
 #ifdef WIN32
     topicManager->~TopicManager();
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     delete topicManager;
 #endif // WIN32
 

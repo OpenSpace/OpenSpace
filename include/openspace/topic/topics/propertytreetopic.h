@@ -41,16 +41,7 @@ public:
     std::string type() const override;
 
 private:
-    void resetCallbacks();
-
-    const int UnsetCallbackHandle = -1;
-
-    bool _requestedResourceIsSubscribable = false;
     bool _isSubscribedTo = false;
-    int _onChangeHandle = UnsetCallbackHandle;
-    int _onDeleteHandle = UnsetCallbackHandle;
-    int _onMetaDataChangeHandle = UnsetCallbackHandle;
-    Property* _property = nullptr;
 };
 
 } // namespace openspace
