@@ -154,8 +154,10 @@ namespace {
         // [[codegen::verbatim(SpaceCraftTimeInfo.description)]]
         std::optional<std::string> wwtImageCollectionUrl;
 
-        // How often the SkyBrowser module should send updates to the UI
-        std::optional<int> skyBrowserUpdateTime;    
+        // How often the SkyBrowser module should send updates to the UI.
+        // Set in milliseconds, so for example a value of 100 will result in
+        //  an update sent every 0.1 second (10 updates per second).
+        std::optional<int> updateInterval;
     };
 } // namespace
 #include "skybrowsermodule_codegen.cpp"
@@ -263,6 +265,7 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     _spaceCraftAnimationTime = p.spaceCraftAnimationTime.value_or(
         _spaceCraftAnimationTime
     );
+    _topicUpdateInterval = p.updateInterval.value_or(_topicUpdateInterval);
 
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
