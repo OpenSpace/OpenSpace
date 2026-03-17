@@ -31,7 +31,7 @@ namespace openspace {
 
 class AuthorizationTopic : public Topic {
 public:
-    explicit AuthorizationTopic(std::string password);
+    explicit AuthorizationTopic();
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;

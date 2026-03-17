@@ -43,9 +43,7 @@ namespace {
 
 namespace openspace {
 
-AuthorizationTopic::AuthorizationTopic(std::string password)
-    : _password(std::move(password))
-{}
+AuthorizationTopic::AuthorizationTopic() {}
 
 bool AuthorizationTopic::isDone() const {
     return _isAuthenticated;
@@ -77,7 +75,7 @@ void AuthorizationTopic::handleJson(const nlohmann::json& json) {
 }
 
 bool AuthorizationTopic::authorize(const std::string& key) {
-    _isAuthenticated = (key == _password);
+    _isAuthenticated = (key == _connection->password());
     return _isAuthenticated;
 }
 

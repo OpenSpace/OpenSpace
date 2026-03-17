@@ -149,6 +149,7 @@ void TopicManager::initialize(const ghoul::Dictionary& configuration) {
     fTopic->registerClass<TriggerPropertyTopic>("trigger");
     fTopic->registerClass<VersionTopic>("version");
     fTopic->registerClass<PropertyTreeTopic>("propertyTree");
+    fTopic->registerClass<AuthorizationTopic>("authorize");
 
     const Parameters p = codegen::bake<Parameters>(configuration);
     if (!p.interfaces.has_value()) {
@@ -165,23 +166,6 @@ void TopicManager::initialize(const ghoul::Dictionary& configuration) {
         _interfaceOwner.addPropertySubOwner(serverInterface.get());
 
         if (serverInterface) {
-            std::string password = serverInterface->password();
-            // Register the authorized topics
-            fTopic->registerClass(
-                "authorize",
-                [password] (bool, const ghoul::Dictionary&,
-                    pmr::memory_resource* pool)
-                {
-                    if (pool) {
-                        void* ptr = pool->allocate(sizeof(AuthorizationTopic));
-                        return new (ptr) AuthorizationTopic(password);
-                    }
-                    else {
-                        return new AuthorizationTopic(password);
-                    }
-                }
-            );
-
             _interfaces.push_back(std::move(serverInterface));
         }
     }

@@ -51,6 +51,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
     : _socket(std::move(s))
     , _address(std::move(address))
     , _isAuthorized(authorized)
+    , _password(password)
 {
     ghoul_assert(_socket, "Socket must not be nullptr");
 }
@@ -190,6 +191,10 @@ ghoul::io::Socket* Connection::socket() {
 
 void Connection::setAuthorized(bool status) {
     _isAuthorized = status;
+}
+
+const std::string& Connection::password() const {
+    return _password;
 }
 
 Topic* Connection::findTopicByType(const std::string& type) {

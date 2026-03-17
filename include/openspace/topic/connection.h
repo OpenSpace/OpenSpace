@@ -68,6 +68,8 @@ public:
     std::thread& thread();
     void setThread(std::thread&& thread);
 
+    const std::string& password() const;
+
 private:
     std::map<TopicId, std::unique_ptr<Topic>> _topics;
     std::unique_ptr<ghoul::io::Socket> _socket;
@@ -76,6 +78,7 @@ private:
 
     std::string _address;
     bool _isAuthorized = false;
+    std::string _password;
 };
 
 } // namespace openspace
