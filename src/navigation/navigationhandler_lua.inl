@@ -32,7 +32,6 @@
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/format.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/stringconversion.h>
 #include <algorithm>
 #include <numeric>
@@ -47,16 +46,30 @@ using namespace openspace;
 
 namespace {
 
+// @TODO (emmbr, 2026-03-17): The line breaks for the code exmample are not parsed
+// correctly when generating the documentation. This sould be fixed, and then we should
+// also update this to use lua parsing
 /**
  * Loads [NavigationState](#core_navigationstate) from file and returns the result. The
  * file should be in json format, such as the output files of `saveNavigationState`.
  *
+ * After loading a navigation state, the camera will not automatically be set to that
+ * state. To do that, use the returned table in combination with another function, such as
+ * `jumpToNavigationState` or `setNavigationState`.
+ *
+ * Example:
+ * ```
+ * openspace.navigation.jumpToNavigationState(
+ *   openspace.navigation.loadNavigationStateFromFile("path to file")
+ * )
+ *```
+ *
  * \param filePath The path to the file, including the file name (and extension, if it is
  *        anything other than `.navstate`)
  *
- * \return A Lua table representing the loaded NavigationState
+ * \return A Lua table representing the loaded navigation state
  */
-[[codegen::luawrap]] ghoul::Dictionary loadNavigationState(std::string filePath) {
+[[codegen::luawrap]] ghoul::Dictionary loadNavigationStateFromFile(std::string filePath) {
     if (filePath.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
@@ -70,38 +83,33 @@ namespace {
  * file. The file should be in json format, such as the output files of
  * `saveNavigationState`.
  *
+ * Deprecated in favor of `loadNavigationStateFromFile`. Use this function in combination
+ * with `jumpToNavigationState` or `setNavigationState` to load the navigation and set the
+ * camera position in two steps.
+ *
  * \param filePath The path to the file, including the file name (and extension, if it is
  *        anything other than `.navstate`)
  * \param useTimeStamp If `true`, and the provided NavigationState includes a timestamp,
  *        the time will be set as well
- * \param shouldFade If `true`, OpenSpace will fade to black before setting the
- *        navigation state. If `false`, camera state will be set immediately
  */
-[[codegen::luawrap]] void loadAndSetNavigationState(std::string filePath,
-                                                    bool useTimeStamp = false,
-                                                    bool shouldFade = true)
+[[codegen::luawrap("loadNavigationState")]] void loadNavigationStateDeprecated(
+                                                                     std::string filePath,
+                                                                bool useTimeStamp = false)
 {
+    LWARNINGC(
+        "Deprecation",
+        "'loadNavigationState' function is deprecated and should be replaced with "
+        "'loadNavigationStateFromFile'. Use it together with 'setNavigationState' to "
+        "reproduce the old behavior"
+    );
+
     if (filePath.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
 
     NavigationState ns = global::navigationHandler->loadNavigationState(filePath);
-
-    if (shouldFade) {
-        global::scriptEngine->queueScript({
-            .code = std::format(
-                "openspace.navigation.jumpToNavigationState({},{});",
-                ghoul::formatLua(ns.dictionary()), useTimeStamp
-            ),
-            .synchronized = ScriptEngine::Script::ShouldBeSynchronized::No,
-            .sendToRemote = ScriptEngine::Script::ShouldSendToRemote::No
-        });
-    }
-    else {
-        global::navigationHandler->setNavigationStateNextFrame(ns, useTimeStamp);
-    }
+    global::navigationHandler->setNavigationStateNextFrame(ns, useTimeStamp);
 }
-
 
 /**
  * Return the current [NavigationState](#core_navigationstate) as a Lua table.

@@ -867,8 +867,8 @@ LuaLibrary NavigationHandler::luaLibrary() {
     return {
         "navigation",
         {
-            codegen::lua::LoadNavigationState,
-            codegen::lua::LoadAndSetNavigationState,
+            codegen::lua::LoadNavigationStateFromFile,
+            codegen::lua::LoadNavigationStateDeprecated,
             codegen::lua::GetNavigationState,
             codegen::lua::SetNavigationState,
             codegen::lua::SaveNavigationState,
