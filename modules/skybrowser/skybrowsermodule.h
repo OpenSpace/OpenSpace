@@ -55,7 +55,7 @@ public:
     int uniqueIdentifierCounter() const;
 
     void setSelectedBrowser(std::string_view id);
-    void setHoverCircle(SceneGraphNode* circle);
+    void setHoverIndicator(SceneGraphNode* circle);
 
     // Rotation, animation, placement
     void lookAtTarget(const std::string& id);
@@ -76,9 +76,9 @@ public:
     void removeTargetBrowserPair(const std::string& id);
     void addTargetBrowserPair(const std::string& targetId, const std::string& browserId);
 
-    // Hover circle
-    void moveHoverCircle(const std::string& imageUrl, bool useScript = true);
-    void disableHoverCircle(bool useScript = true);
+    // Hover indicator
+    void moveHoverIndicator(const std::string& imageUrl, bool useScript = true);
+    void disableHoverIndicator(bool useScript = true);
 
     // Image collection handling
     void loadImages(const std::string& root, const std::filesystem::path& directory);
@@ -107,7 +107,7 @@ private:
 
     // The browsers and targets
     std::vector<std::unique_ptr<TargetBrowserPair>> _targetsBrowsers;
-    SceneGraphNode* _hoverCircle = nullptr;
+    SceneGraphNode* _hoverIndicator = nullptr;
     /// Currently selected browser
     std::string _selectedBrowser;
     int _uniqueIdentifierCounter = 0;

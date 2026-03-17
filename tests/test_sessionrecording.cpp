@@ -645,7 +645,7 @@ TEST_CASE("SessionRecording: 02.00 Ascii Linux", "[sessionrecording]") {
         CHECK(e.simulationTime == 0.0);
         REQUIRE(std::holds_alternative<SessionRecording::Entry::Script>(e.value));
         const auto& script = std::get<SessionRecording::Entry::Script>(e.value);
-        CHECK(script == "openspace.setPropertyValueSingle(\"Scene.hoverCircle.Renderable.Fade\", 0)");
+        CHECK(script == "openspace.setPropertyValueSingle(\"Scene.HoverIndicator.Renderable.Fade\", 0)");
     }
     {
         const SessionRecording::Entry& e = rec.entries[2];
@@ -689,7 +689,7 @@ TEST_CASE("SessionRecording: 02.00 Ascii Linux", "[sessionrecording]") {
         CHECK(e.simulationTime == 779267331.4449104);
         REQUIRE(std::holds_alternative<SessionRecording::Entry::Script>(e.value));
         const auto& script = std::get<SessionRecording::Entry::Script>(e.value);
-        CHECK(script == "openspace.setPropertyValueSingle('Scene.hoverCircle.Renderable.Fade', 0.0);");
+        CHECK(script == "openspace.setPropertyValueSingle('Scene.HoverIndicator.Renderable.Fade', 0.0);");
     }
     {
         const SessionRecording::Entry& e = rec.entries[5];

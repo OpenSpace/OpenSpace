@@ -3,15 +3,15 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 local imageFolder = asset.resource({
-  Name = "Hover Circle Image",
+  Name = "Hover Indicator Image",
   Type = "HttpSynchronization",
   Identifier = "misc_ring_image",
   Version = 1
 })
 
 
-local circle = {
-  Identifier = "hoverCircle",
+local Indicator = {
+  Identifier = "HoverIndicator",
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
@@ -21,10 +21,10 @@ local circle = {
     Texture = imageFolder .. "ring.png"
   },
   GUI = {
-    Name = "Hover Circle",
-    Description = [[A circular marker that shows the position on the night sky
-      of the object hovered in the sky browser UI. The circle will hide/show up
-      dynamically, depending on the interaction with the items in the UI]],
+    Name = "Hover Indicator",
+    Description = [[A marker that shows the position on the night sky of the object
+      hovered in the sky browser UI. The circle will hide/show up dynamically, depending
+      on the interaction with the items in the UI]],
     Path = "/SkyBrowser",
     Hidden = true
   }
@@ -32,20 +32,19 @@ local circle = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(circle)
-  openspace.skybrowser.setHoverCircle("hoverCircle")
+  openspace.addSceneGraphNode(Indicator)
+  openspace.skybrowser.setHoverIndicator("HoverIndicator")
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(circle)
+  openspace.removeSceneGraphNode(Indicator)
 end)
 
-asset.export(circle)
-
+asset.export(Indicator)
 
 
 asset.meta = {
-  Name = "SkyBrowser Hover Circle",
+  Name = "SkyBrowser Hover Indicator",
   Description = [[Includes a circular marker that shows the position on the night sky
     of the object hovered in the sky browser UI]],
   Author = "OpenSpace Team",
