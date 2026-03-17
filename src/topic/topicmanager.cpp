@@ -47,7 +47,6 @@ namespace {
     struct [[codegen::Dictionary(TopicManager)]] Parameters {
         std::optional<ghoul::Dictionary> interfaces;
         std::optional<std::vector<std::string>> allowAddresses;
-        std::optional<int> skyBrowserUpdateTime;
     };
 #include "topicmanager_codegen.cpp"
 } // namespace
@@ -93,9 +92,6 @@ ServerInterface* TopicManager::serverInterfaceByIdentifier(const std::string& id
     return si->get();
 }
 
-int TopicManager::skyBrowserUpdateTime() const {
-    return _skyBrowserUpdateTime;
-}
 
 void TopicManager::initialize(const ghoul::Dictionary& configuration) {
     global::callback::preSync->emplace_back([this]() {
@@ -124,8 +120,6 @@ void TopicManager::initialize(const ghoul::Dictionary& configuration) {
             _interfaces.push_back(std::move(serverInterface));
         }
     }
-
-    _skyBrowserUpdateTime = p.skyBrowserUpdateTime.value_or(_skyBrowserUpdateTime);
 }
 
 void TopicManager::preSync() {

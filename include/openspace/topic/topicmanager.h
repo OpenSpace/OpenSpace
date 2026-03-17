@@ -95,7 +95,6 @@ private:
     std::vector<ConnectionData> _connections;
     std::vector<std::unique_ptr<ServerInterface>> _interfaces;
     PropertyOwner _interfaceOwner;
-    int _skyBrowserUpdateTime = 100;
 
     /// Callbacks for triggering topic
     int _nextCallbackHandle = 0;

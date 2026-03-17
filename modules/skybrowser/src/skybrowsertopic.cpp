@@ -47,8 +47,10 @@ namespace openspace {
 SkyBrowserTopic::SkyBrowserTopic()
     : _lastUpdateTime(std::chrono::system_clock::now())
 {
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+
     _skyBrowserUpdateTime =
-        std::chrono::milliseconds(global::topicManager->skyBrowserUpdateTime());
+        std::chrono::milliseconds(module->topicUpdateInterval());
 }
 
 SkyBrowserTopic::~SkyBrowserTopic() {

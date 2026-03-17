@@ -153,6 +153,9 @@ namespace {
 
         // [[codegen::verbatim(SpaceCraftTimeInfo.description)]]
         std::optional<std::string> wwtImageCollectionUrl;
+
+        // How often the SkyBrowser module should send updates to the UI
+        std::optional<int> skyBrowserUpdateTime;    
     };
 } // namespace
 #include "skybrowsermodule_codegen.cpp"
@@ -271,13 +274,9 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     ghoul_assert(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<RenderableSkyTarget>("RenderableSkyTarget");
 
-    // @TODO (ylvse, 2026-03-16) This needs to happen after the connections have been
-    // instiated somehow. That happens in presync. Should not merge before that is fixed.
-    std::vector<std::shared_ptr<Connection>> connections =
-        global::topicManager->connections();
-    for (const std::shared_ptr<Connection> connection : connections) {
-        connection->topicFactory().registerClass<SkyBrowserTopic>("skybrowser");
-    }
+    ghoul::TemplateFactory<Topic>* fTopic = FactoryManager::ref().factory<Topic>();
+    ghoul_assert(fTopic, "Topic factory was not created");
+    fTopic->registerClass<SkyBrowserTopic>("skybrowser");
 }
 
 void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId,
@@ -399,6 +398,10 @@ void SkyBrowserModule::loadImages(const std::string& root,
 
 int SkyBrowserModule::nLoadedImages() const {
     return _dataHandler.nLoadedImages();
+}
+
+int SkyBrowserModule::topicUpdateInterval() const {
+    return _topicUpdateInterval;
 }
 
 const WwtDataHandler& SkyBrowserModule::wwtDataHandler() const {
