@@ -998,7 +998,7 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
 
     bool useAlpha = (t->numberOfChannels() > 3) && _texture.useAlphaChannel;
 
-    LINFOC("RenderablePlanesCloud", std::format("Loaded texture {}", path));
+    LINFO(std::format("Loaded texture {}", path));
 
     TextureFormat format = {
         .resolution = glm::uvec2(t->dimensions().x, t->dimensions().y),
