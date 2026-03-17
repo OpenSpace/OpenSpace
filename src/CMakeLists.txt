@@ -408,10 +408,10 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/luascripttopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/missiontopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/profiletopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/propertytreetopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/sessionrecordingtopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/setpropertytopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/subscriptiontopic.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/propertytreetopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/timetopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/topic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/triggerpropertytopic.h

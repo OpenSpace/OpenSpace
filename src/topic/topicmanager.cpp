@@ -74,7 +74,8 @@ namespace {
     struct [[codegen::Dictionary(TopicManager)]] Parameters {
 
         // The interfaces that are allowed to connect.
-        std::optional<std::vector<ghoul::Dictionary>> interfaces [[codegen::reference("core_serverinterface")]];
+        std::optional<std::vector<ghoul::Dictionary>> interfaces
+            [[codegen::reference("core_serverinterface")]];
 
         // The IP addresses that are allowed to connect.
         std::optional<std::vector<std::string>> allowAddresses;

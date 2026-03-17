@@ -39,7 +39,6 @@ public:
 private:
     bool authorize(const std::string& key);
 
-    std::string _password;
     bool _isAuthenticated = false;
 };
 

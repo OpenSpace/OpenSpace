@@ -26,7 +26,6 @@
 #define __OPENSPACE_CORE___TOPICMANAGER___H__
 
 #include <openspace/properties/propertyowner.h>
-#include <openspace/util/openspacemodule.h>
 
 #include <openspace/topic/serverinterface.h>
 
@@ -44,11 +43,6 @@ constexpr int SOCKET_API_VERSION_PATCH = 0;
 
 class Connection;
 
-struct Message {
-    std::weak_ptr<Connection> connection;
-    std::string messageString;
-};
-
 class TopicManager : public PropertyOwner {
 public:
     using CallbackHandle = int;
@@ -62,8 +56,6 @@ public:
     void preSync();
 
     ServerInterface* serverInterfaceByIdentifier(const std::string& identifier);
-
-    int skyBrowserUpdateTime() const;
 
     CallbackHandle addPreSyncCallback(CallbackFunction cb);
     void removePreSyncCallback(CallbackHandle handle);
