@@ -46,9 +46,6 @@ using namespace openspace;
 
 namespace {
 
-// @TODO (emmbr, 2026-03-17): The line breaks for the code exmample are not parsed
-// correctly when generating the documentation. This sould be fixed, and then we should
-// also update this to use lua parsing
 /**
  * Loads [NavigationState](#core_navigationstate) from file and returns the result. The
  * file should be in json format, such as the output files of `saveNavigationState`.
