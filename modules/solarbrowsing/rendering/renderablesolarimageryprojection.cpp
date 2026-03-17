@@ -51,8 +51,8 @@ namespace {
 
     // A RenderableSolarImageryProjection projects solar observations from spacecraft
     // instruments onto the surface of the Sun. The renderable uses one or more
-    // RenderableSolarImagery nodes as input and maps their imagery onto a solar sphere
-    // from the observing spacecraft's perspective.
+    // [RenderableSolarImagery](#solarbrowsing_renderable_solarimegary) nodes as input and
+    // maps their imagery onto a solar sphere from the observing spacecraft's perspective.
     //
     // Each dependent RenderableSolarImagery provides the image texture, spacecraft
     // position, and viewing geometry needed for the projection. This allows imagery
@@ -63,7 +63,7 @@ namespace {
     // observed from different viewpoints to be compared on the solar surface.
     struct [[codegen::Dictionary(RenderableSolarImageryProjection)]] Parameters {
         // List of scene graph node identifiers that reference
-        // [RenderableSolarImagery](solarbrowsing_renderable_solarimegary) nodes. The
+        // [RenderableSolarImagery](#solarbrowsing_renderable_solarimegary) nodes. The
         // imagery from these nodes is projected onto the solar surface from the
         // perspective of the observing spacecraft.
         std::vector<std::string> dependentNodes;

@@ -76,7 +76,6 @@ ghoul::filesystem::CacheManager* SolarBrowsingModule::cacheManager() const {
     return _cacheManager.get();
 }
 
-
 std::vector<openspace::Documentation> SolarBrowsingModule::documentations() const {
     return {
         RenderableSolarImagery::Documentation(),
@@ -84,6 +83,5 @@ std::vector<openspace::Documentation> SolarBrowsingModule::documentations() cons
         HelioviewerDownloadTask::documentation()
     };
 }
-
 
 } // namespace openspace
