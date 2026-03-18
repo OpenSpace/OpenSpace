@@ -138,10 +138,8 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     // Create array from data, size and format
     unsigned int id = 0;
     glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &id);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, id);
     initAndAllocateTextureArray(id, glm::uvec2(TexSize), 1, useAlpha);
-    fillAndUploadTextureLayer(0, 0, 0, glm::uvec2(TexSize), useAlpha, pixels);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+    fillAndUploadTextureLayer(id, 0, 0, 0, glm::uvec2(TexSize), useAlpha, pixels);
 
     _textureIsInitialized = true;
 }

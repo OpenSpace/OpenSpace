@@ -1029,18 +1029,13 @@ void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
     gl::GLenum format = gl::GLenum(glFormat(useAlpha));
 
     // Create storage for the texture
-    // The nicer way would be to use glTexStorage3D
-    glTexImage3D(
-        GL_TEXTURE_2D_ARRAY,
-        0,
+    glTextureStorage3D(
+        textureId,
+        1, // levels of mipmaps, we don't use mipmaps for the textures so just 1
         internalFormat,
         resolution.x,
         resolution.y,
-        static_cast<gl::GLsizei>(nLayers),
-        0,
-        format,
-        GL_UNSIGNED_BYTE,
-        nullptr
+        static_cast<gl::GLsizei>(nLayers)
     );
 
     glTextureParameteri(textureId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -1049,7 +1044,8 @@ void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
     glTextureParameteri(textureId, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
-void RenderablePointCloud::fillAndUploadTextureLayer(unsigned int arrayIndex,
+void RenderablePointCloud::fillAndUploadTextureLayer(unsigned int textureId,
+                                                     unsigned int arrayIndex,
                                                      unsigned int layer,
                                                      size_t textureIndex,
                                                      glm::uvec2 resolution, bool useAlpha,
@@ -1057,8 +1053,8 @@ void RenderablePointCloud::fillAndUploadTextureLayer(unsigned int arrayIndex,
 {
     gl::GLenum format = gl::GLenum(glFormat(useAlpha));
 
-    glTexSubImage3D(
-        GL_TEXTURE_2D_ARRAY,
+    glTextureSubImage3D(
+        textureId,
         0, // Mipmap number
         0, // xoffset
         0, // yoffset
@@ -1091,7 +1087,6 @@ void RenderablePointCloud::generateArrayTextures() {
         // Generate an array texture storage
         unsigned int id = 0;
         glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &id);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, id);
 
         initAndAllocateTextureArray(id, res, nLayers, useAlpha);
 
@@ -1099,7 +1094,9 @@ void RenderablePointCloud::generateArrayTextures() {
         unsigned int layer = 0;
         for (const size_t& i : textureListIndices) {
             ghoul::opengl::Texture* texture = _textures[i].get();
+
             fillAndUploadTextureLayer(
+                id,
                 arrayIndex,
                 layer,
                 i,
