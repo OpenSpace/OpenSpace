@@ -998,6 +998,9 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
 
     bool useAlpha = (t->numberOfChannels() > 3) && _texture.useAlphaChannel;
 
+    // For debugging purposes, we keep the name of the file in the texture
+    t->setName(filename);
+
     LINFO(std::format("Loaded texture {}", path));
 
     TextureFormat format = {
@@ -1026,7 +1029,7 @@ void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
     });
 
     gl::GLenum internalFormat = internalGlFormat(useAlpha);
-    gl::GLenum format = gl::GLenum(glFormat(useAlpha));
+    //gl::GLenum format = gl::GLenum(glFormat(useAlpha));
 
     // Create storage for the texture
     glTextureStorage3D(
@@ -1094,6 +1097,28 @@ void RenderablePointCloud::generateArrayTextures() {
         unsigned int layer = 0;
         for (const size_t& i : textureListIndices) {
             ghoul::opengl::Texture* texture = _textures[i].get();
+
+            ghoul_assert(texture != nullptr, "Texture pointer was null");
+
+            //// Add validation before upload
+            glm::uvec3 actualDims = texture->dimensions();
+            size_t actualChannels = texture->numberOfChannels();
+
+            // Calculate expected vs actual buffer sizes
+            size_t expectedChannels = useAlpha ? 4 : 3;
+            size_t expectedSize = res.x * res.y * expectedChannels;
+            size_t actualSize = texture->pixelData().size();
+
+            if ((expectedSize != actualSize) || (actualChannels != expectedChannels)) {
+                LERROR(std::format("Buffer size mismatch for texture {}: {}", i, texture->name()));
+                LERROR(std::format(
+                    "Texture {}: Expected {}x{}x{} channels ({}bytes), "
+                    "Actual {}x{}x{} channels ({}bytes)",
+                    i, res.x, res.y, expectedChannels, expectedSize,
+                    actualDims.x, actualDims.y, actualChannels, actualSize
+                ));
+                continue;
+            }
 
             fillAndUploadTextureLayer(
                 id,
