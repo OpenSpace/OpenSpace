@@ -64,7 +64,7 @@ void PropertyTreeTopic::handleJson(const nlohmann::json& json) {
     if (event == StopSubscription) {
         _isSubscribedTo = false;
     }
-    if (event == PropertyChanged) {
+    if (event == PropertyChanged && _isSubscribedTo) {
         const nlohmann::json& payload = json.at("payload").get<nlohmann::json>();
         _connection->sendJson(wrappedPayload(payload));
     }
