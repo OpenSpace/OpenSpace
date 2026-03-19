@@ -27,6 +27,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/json.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/topic/topicmanager.h>
 #include <ghoul/misc/profiling.h>
@@ -265,6 +266,13 @@ void Property::notifyMetaDataChangeListeners() {
     for (Callback& p : _onMetaDataChangeCallbacks) {
         p.second();
     }
+    nlohmann::json payload;
+    payload["event"] = "property_changed";
+    payload["payload"] = {
+        { "property", uri() },
+        { "metaData", generateJsonDescription() }
+    };
+    global::topicManager->passDataToTopic("propertyTree", payload);
 }
 
 bool Property::hasChanged() const {
