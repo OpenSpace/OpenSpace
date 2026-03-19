@@ -252,6 +252,9 @@ void Property::notifyChangeListeners() {
     for (const std::pair<OnChangeHandle, std::function<void()>>& p : _onChangeCallbacks) {
         p.second();
     }
+    if (uri().empty()) {
+        return;
+    }
     nlohmann::json payload;
     payload["event"] = "property_changed";
     payload["payload"] = {
@@ -265,6 +268,11 @@ void Property::notifyMetaDataChangeListeners() {
     using Callback = const std::pair<OnMetaDataChangeHandle, std::function<void()>>;
     for (Callback& p : _onMetaDataChangeCallbacks) {
         p.second();
+    }
+    if (uri().empty()) {
+        // Property has no owner yet (still being constructed), so there is nothing to
+        // notify
+        return;
     }
     nlohmann::json payload;
     payload["event"] = "property_changed";
