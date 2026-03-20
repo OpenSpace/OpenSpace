@@ -244,7 +244,7 @@ namespace {
         std::optional<HttpProxy> httpProxy;
 
         // Defines the connections (WebSocket or TcpSocket) that are allowed
-        std::optional<ghoul::Dictionary> server [[codegen::reference("core_topicmanager")]];
+        std::optional<ghoul::Dictionary> server [[codegen::reference("core_server")]];
 
         struct OpenGLDebugContext {
             // Determines whether the OpenGL context should be a debug context.

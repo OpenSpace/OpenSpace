@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/topic/topicmanager.h>
+#include <openspace/topic/server.h>
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <openspace/engine/globals.h>
@@ -71,7 +71,7 @@ namespace {
 
     // Settings for controlling socket connection (WebSocket or TcpSocket).
     // This basically acts as a whitelist for the specified connections.
-    struct [[codegen::Dictionary(TopicManager)]] Parameters {
+    struct [[codegen::Dictionary(Server)]] Parameters {
 
         // The interfaces that are allowed to connect.
         std::optional<std::vector<ghoul::Dictionary>> interfaces
@@ -80,17 +80,17 @@ namespace {
         // The IP addresses that are allowed to connect.
         std::optional<std::vector<std::string>> allowAddresses;
     };
-#include "topicmanager_codegen.cpp"
+#include "server_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
-Documentation TopicManager::Documentation() {
-    return codegen::doc<Parameters>("core_topicmanager");
+Documentation Server::Documentation() {
+    return codegen::doc<Parameters>("core_server");
 }
 
-TopicManager::TopicManager()
-    : PropertyOwner({ "TopicManager", "Topic Manager" })
+Server::Server()
+    : PropertyOwner({ "Server", "Server" })
     , _interfaceOwner({ "Interfaces", "Interfaces", "Server Interfaces" })
 {
     addPropertySubOwner(_interfaceOwner);
@@ -104,12 +104,12 @@ TopicManager::TopicManager()
     });
 }
 
-TopicManager::~TopicManager() {
+Server::~Server() {
     disconnectAll();
     cleanUpFinishedThreads();
 }
 
-ServerInterface* TopicManager::serverInterfaceByIdentifier(const std::string& identifier)
+ServerInterface* Server::serverInterfaceByIdentifier(const std::string& identifier)
 {
     const auto si = std::find_if(
         _interfaces.begin(),
@@ -124,7 +124,7 @@ ServerInterface* TopicManager::serverInterfaceByIdentifier(const std::string& id
     return si->get();
 }
 
-void TopicManager::initialize(const ghoul::Dictionary& configuration) {
+void Server::initialize(const ghoul::Dictionary& configuration) {
 
     ghoul::TemplateFactory<Topic>* fTopic = FactoryManager::ref().factory<Topic>();
 
@@ -171,7 +171,7 @@ void TopicManager::initialize(const ghoul::Dictionary& configuration) {
     }
 }
 
-void TopicManager::preSync() {
+void Server::preSync() {
     // Set up new connections
     for (std::unique_ptr<ServerInterface>& serverInterface : _interfaces) {
         if (!serverInterface->isEnabled()) {
@@ -215,7 +215,7 @@ void TopicManager::preSync() {
     cleanUpFinishedThreads();
 }
 
-void TopicManager::cleanUpFinishedThreads() {
+void Server::cleanUpFinishedThreads() {
     ZoneScoped;
 
     for (ConnectionData& connectionData : _connections) {
@@ -242,7 +242,7 @@ void TopicManager::cleanUpFinishedThreads() {
     }
 }
 
-void TopicManager::disconnectAll() {
+void Server::disconnectAll() {
     ZoneScoped;
 
     for (std::unique_ptr<ServerInterface>& serverInterface : _interfaces) {
@@ -259,7 +259,7 @@ void TopicManager::disconnectAll() {
     }
 }
 
-void TopicManager::handleConnection(const std::shared_ptr<Connection>& connection) {
+void Server::handleConnection(const std::shared_ptr<Connection>& connection) {
     ZoneScoped;
 
     std::string messageString;
@@ -270,7 +270,7 @@ void TopicManager::handleConnection(const std::shared_ptr<Connection>& connectio
     }
 }
 
-void TopicManager::consumeMessages() {
+void Server::consumeMessages() {
     ZoneScoped;
 
     const std::unique_lock lock(_messageQueueMutex);
@@ -283,13 +283,13 @@ void TopicManager::consumeMessages() {
     }
 }
 
-TopicManager::CallbackHandle TopicManager::addPreSyncCallback(CallbackFunction cb) {
+Server::CallbackHandle Server::addPreSyncCallback(CallbackFunction cb) {
     const CallbackHandle handle = _nextCallbackHandle++;
     _preSyncCallbacks.emplace_back(handle, std::move(cb));
     return handle;
 }
 
-void TopicManager::removePreSyncCallback(CallbackHandle handle) {
+void Server::removePreSyncCallback(CallbackHandle handle) {
     const auto it = std::find_if(
         _preSyncCallbacks.begin(),
         _preSyncCallbacks.end(),
@@ -306,7 +306,7 @@ void TopicManager::removePreSyncCallback(CallbackHandle handle) {
     _preSyncCallbacks.erase(it);
 }
 
-void TopicManager::passDataToTopic(const std::string& topicType,
+void Server::passDataToTopic(const std::string& topicType,
                                    const nlohmann::json& jsonData)
 {
     for (const ConnectionData& connectionData : _connections) {
@@ -316,7 +316,7 @@ void TopicManager::passDataToTopic(const std::string& topicType,
     }
 }
 
-std::vector<std::shared_ptr<Connection>> TopicManager::connections() {
+std::vector<std::shared_ptr<Connection>> Server::connections() {
     std::vector<std::shared_ptr<Connection>> connections;
 
     for (const ConnectionData& connectionData : _connections) {

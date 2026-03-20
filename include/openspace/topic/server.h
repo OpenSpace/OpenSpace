@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___TOPICMANAGER___H__
-#define __OPENSPACE_CORE___TOPICMANAGER___H__
+#ifndef __OPENSPACE_CORE___SERVER___H__
+#define __OPENSPACE_CORE___SERVER___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -43,13 +43,13 @@ constexpr int SOCKET_API_VERSION_PATCH = 0;
 
 class Connection;
 
-class TopicManager : public PropertyOwner {
+class Server : public PropertyOwner {
 public:
     using CallbackHandle = int;
     using CallbackFunction = std::function<void()>;
 
-    TopicManager();
-    ~TopicManager() override;
+    Server();
+    ~Server() override;
 
     void initialize(const ghoul::Dictionary& configuration);
 
@@ -95,4 +95,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___TOPICMANAGER___H__
+#endif // __OPENSPACE_CORE___SERVER___H__

@@ -64,8 +64,8 @@
 #include <openspace/util/task.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timerange.h>
+#include <openspace/topic/server.h>
 #include <openspace/topic/serverinterface.h>
-#include <openspace/topic/topicmanager.h>
 
 namespace openspace {
 
@@ -93,7 +93,7 @@ void registerCoreClasses(DocumentationEngine& engine) {
     engine.addDocumentation(NavigationState::Documentation());
     engine.addDocumentation(Path::Documentation());
     engine.addDocumentation(ServerInterface::Documentation());
-    engine.addDocumentation(TopicManager::Documentation());
+    engine.addDocumentation(Server::Documentation());
 }
 
 // NOTE: should this be in the documentation/core_reg.cpp file? Seems to be here just

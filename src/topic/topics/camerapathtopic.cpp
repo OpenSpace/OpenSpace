@@ -31,7 +31,7 @@
 #include <openspace/navigation/path.h>
 #include <openspace/navigation/pathnavigator.h>
 #include <openspace/topic/connection.h>
-#include <openspace/topic/topicmanager.h>
+#include <openspace/topic/server.h>
 #include <ghoul/misc/assert.h>
 #include <algorithm>
 #include <cmath>
@@ -51,7 +51,7 @@ CameraPathTopic::CameraPathTopic()
 
 CameraPathTopic::~CameraPathTopic() {
     if (_dataCallbackHandle != UnsetOnChangeHandle) {
-        global::topicManager->removePreSyncCallback(_dataCallbackHandle);
+        global::server->removePreSyncCallback(_dataCallbackHandle);
     }
 }
 
@@ -63,7 +63,7 @@ void CameraPathTopic::handleJson(const nlohmann::json& json) {
         return;
     }
 
-    _dataCallbackHandle = global::topicManager->addPreSyncCallback(
+    _dataCallbackHandle = global::server->addPreSyncCallback(
         [this]() {
             const bool isInPath =(global::openSpaceEngine->currentMode()
                 == OpenSpaceEngine::Mode::CameraPath);

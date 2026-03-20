@@ -29,7 +29,7 @@
 #include <openspace/events/eventengine.h>
 #include <openspace/json.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/topic/topicmanager.h>
+#include <openspace/topic/server.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
 
@@ -261,7 +261,7 @@ void Property::notifyChangeListeners() {
         { "property", uri() },
         { "value", nlohmann::json::parse(jsonValue()) }
     };
-    global::topicManager->passDataToTopic("propertyTree", payload);
+    global::server->passDataToTopic("propertyTree", payload);
 }
 
 void Property::notifyMetaDataChangeListeners() {
@@ -280,7 +280,7 @@ void Property::notifyMetaDataChangeListeners() {
         { "property", uri() },
         { "metaData", generateJsonDescription() }
     };
-    global::topicManager->passDataToTopic("propertyTree", payload);
+    global::server->passDataToTopic("propertyTree", payload);
 }
 
 bool Property::hasChanged() const {

@@ -31,7 +31,7 @@
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/topic/topicmanager.h>
+#include <openspace/topic/server.h>
 #include <openspace/topic/connection.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/navigation/navigationhandler.h>

@@ -25,7 +25,7 @@
 #include <openspace/topic/topics/topic.h>
 
 #include <openspace/json.h>
-#include <openspace/topic/topicmanager.h>
+#include <openspace/topic/server.h>
 #include <ghoul/misc/profiling.h>
 #include <utility>
 

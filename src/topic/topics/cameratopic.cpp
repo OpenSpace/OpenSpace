@@ -30,7 +30,7 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/topic/connection.h>
-#include <openspace/topic/topicmanager.h>
+#include <openspace/topic/server.h>
 #include <openspace/util/distanceconversion.h>
 #include <openspace/util/geodetic.h>
 #include <string_view>
@@ -48,7 +48,7 @@ CameraTopic::CameraTopic()
 
 CameraTopic::~CameraTopic() {
     if (_dataCallbackHandle != UnsetOnChangeHandle) {
-        global::topicManager->removePreSyncCallback(_dataCallbackHandle);
+        global::server->removePreSyncCallback(_dataCallbackHandle);
     }
 }
 
@@ -64,7 +64,7 @@ void CameraTopic::handleJson(const nlohmann::json& json) {
         return;
     }
 
-    _dataCallbackHandle = global::topicManager->addPreSyncCallback(
+    _dataCallbackHandle = global::server->addPreSyncCallback(
         [this]() {
             const auto now = std::chrono::system_clock::now();
             if (now - _lastUpdateTime > _cameraPositionUpdateTime) {

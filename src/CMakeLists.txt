@@ -177,7 +177,7 @@ set(OPENSPACE_SOURCE
   topic/jsonconverters.cpp
   topic/notificationlog.cpp
   topic/serverinterface.cpp
-  topic/topicmanager.cpp
+  topic/server.cpp
   topic/topics/actionkeybindtopic.cpp
   topic/topics/authorizationtopic.cpp
   topic/topics/bouncetopic.cpp
@@ -392,7 +392,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/jsonconverters.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/notificationlog.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/serverinterface.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topicmanager.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/server.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/actionkeybindtopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/authorizationtopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/bouncetopic.h

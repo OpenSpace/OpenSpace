@@ -29,7 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/topic/connection.h>
-#include <openspace/topic/topicmanager.h>
+#include <openspace/topic/server.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
 #include <string_view>
@@ -55,7 +55,7 @@ SkyBrowserTopic::SkyBrowserTopic()
 
 SkyBrowserTopic::~SkyBrowserTopic() {
     if (_targetDataCallbackHandle != UnsetOnChangeHandle) {
-        global::topicManager->removePreSyncCallback(_targetDataCallbackHandle);
+        global::server->removePreSyncCallback(_targetDataCallbackHandle);
     }
 }
 
@@ -71,7 +71,7 @@ void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
         return;
     }
 
-    _targetDataCallbackHandle = global::topicManager->addPreSyncCallback(
+    _targetDataCallbackHandle = global::server->addPreSyncCallback(
         [this]() {
             const auto now = std::chrono::system_clock::now();
             if (now - _lastUpdateTime > _skyBrowserUpdateTime) {

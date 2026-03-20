@@ -52,7 +52,7 @@
 #include <openspace/scene/profile.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
-#include <openspace/topic/topicmanager.h>
+#include <openspace/topic/server.h>
 #include <openspace/util/downloadeventengine.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/timemanager.h>
@@ -74,7 +74,7 @@ namespace {
 #ifdef WIN32
     constexpr int TotalSize =
         sizeof(MemoryManager) +
-        sizeof(TopicManager) +
+        sizeof(Server) +
         sizeof(OpenSpaceEngine) +
         sizeof(DownloadEventEngine) +
         sizeof(EventEngine) +
@@ -135,11 +135,11 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    topicManager = new (currentPos) TopicManager;
-    ghoul_assert(topicManager, "No topicManager");
-    currentPos += sizeof(TopicManager);
+    server = new (currentPos) Server;
+    ghoul_assert(server, "No server");
+    currentPos += sizeof(Server);
 #else // ^^^^ WIN32 / !WIN32 vvvv
-    topicManager = new TopicManager;
+    server = new Server;
 #endif // WIN32
 
 #ifdef WIN32
@@ -425,7 +425,7 @@ void initialize() {
     rootPropertyOwner->addPropertySubOwner(global::renderEngine);
     rootPropertyOwner->addPropertySubOwner(global::screenSpaceRootPropertyOwner);
 
-    rootPropertyOwner->addPropertySubOwner(global::topicManager);
+    rootPropertyOwner->addPropertySubOwner(global::server);
 
     rootPropertyOwner->addPropertySubOwner(global::parallelPeer);
     rootPropertyOwner->addPropertySubOwner(global::luaConsole);
@@ -666,11 +666,11 @@ void destroy() {
     delete openSpaceEngine;
 #endif // WIN32
 
-    LDEBUGC("Globals", "Destroying 'TopicManager'");
+    LDEBUGC("Globals", "Destroying 'Server'");
 #ifdef WIN32
-    topicManager->~TopicManager();
+    server->~Server();
 #else // ^^^^ WIN32 / !WIN32 vvvv
-    delete topicManager;
+    delete server;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'MemoryManager'");
