@@ -36,150 +36,143 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
-#include <unordered_set>
-#include <filesystem>
+#include <optional>
 
 namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
-class TransferFunction;
-class AsyncImageDecoder;
+    class TransferFunction;
+    class AsyncImageDecoder;
 
-// @TODO (anden88 2026-02-04): Steps to check off when implementing data streaming from
-// HelioViewer
-// 1. Check if image exists in cache (since this will be at runtime we check the ram
-// _imageMetadataMap)
-// 2. If not -> spawn a thread to download data from HelioViewer
-// 3. Once downloaded put it through the normal pipeline of storing the file in
-// correct folder
-// 4. Add the image data to the cache (file and in memory)
+    // @TODO (anden88 2026-02-04): Steps to check off when implementing data streaming from
+    // HelioViewer
+    // 1. Check if image exists in cache (since this will be at runtime we check the ram
+    // _imageMetadataMap)
+    // 2. If not -> spawn a thread to download data from HelioViewer
+    // 3. Once downloaded put it through the normal pipeline of storing the file in
+    // correct folder
+    // 4. Add the image data to the cache (file and in memory)
 
-class RenderableSolarImagery : public Renderable {
-public:
-    enum class LoadingType {
-        StaticLoading,
-        DynamicDownloading
+    class RenderableSolarImagery : public Renderable {
+    public:
+        explicit RenderableSolarImagery(const ghoul::Dictionary& dictionary);
+        ~RenderableSolarImagery() override = default;
+
+        void initializeGL() override;
+        void deinitializeGL() override;
+        void deinitialize() override;
+
+        bool isReady() const override;
+
+        void render(const RenderData& data, RendererTasks& rendererTask) override;
+        void update(const UpdateData& data) override;
+
+        static openspace::Documentation Documentation();
+
+        TransferFunction* transferFunction();
+        const std::unique_ptr<ghoul::opengl::Texture>& imageryTexture() const;
+        float blackTransparencyThreshold() const;
+        float contrastValue() const;
+        float gammaValue() const;
+        float scale() const;
+        bool isCoronaGraph() const;
+        glm::vec2 centerPixel() const;
+        const glm::vec3& planeNormal() const;
+        const glm::dvec3& planeWorldPosition() const;
+        const glm::dmat4& planeWorldRotation() const;
+
+    private:
+        constexpr static inline size_t NoActiveKeyframe = std::numeric_limits<size_t>::max();
+
+        struct PlaneVertex {
+            glm::vec2 position;
+            glm::vec2 texCoords;
+        };
+
+        struct FrustumVertex {
+            glm::vec4 position;
+        };
+
+        void updateImageryTexture();
+        void ensureDynamicDownloader();
+        void ingestDownloadedFiles();
+        void requestPredictiveFrames(const Keyframe<ImageMetadata>* keyframe,
+            const UpdateData& data);
+
+        void createPlaneAndFrustum(double moveDistance);
+        void createPlane() const;
+        void createFrustum() const;
+
+        OptionProperty _activeInstruments;
+        FloatProperty _blackTransparencyThreshold;
+        FloatProperty _contrastValue;
+        BoolProperty _enableBorder;
+        BoolProperty _enableFrustum;
+        OptionProperty _faceMode;
+        FloatProperty _gammaValue;
+        DoubleProperty _moveFactor;
+        IntProperty _downsamplingLevel;
+
+        BoolProperty _verboseMode;
+        IntProperty _predictFramesAfter;
+        IntProperty _predictFramesBefore;
+
+        // The decoded image texture
+        std::unique_ptr<ghoul::opengl::Texture> _imageryTexture;
+        size_t _currentKeyframe = NoActiveKeyframe;
+        // Data for the currently shown image
+        float _currentScale = 0.f;
+        bool _isCoronaGraph = false;
+        glm::vec2 _currentCenterPixel = glm::vec2(2.f);
+
+        // Image metadata
+        InstrumentName _currentActiveInstrument;
+        ImageMetadataMap _imageMetadataMap;
+        std::unordered_map<InstrumentName, std::shared_ptr<TransferFunction>> _tfMap;
+
+        // Decoder
+        std::unique_ptr<AsyncImageDecoder> _asyncDecoder;
+        size_t _lastPredictedKeyframe = NoActiveKeyframe;
+        bool _predictionIsDirty = true;
+
+        // Image plane and frustum
+        UniformCache(isCoronaGraph, scale, centerPixel, imageryTexture, planeOpacity,
+            gammaValue, blackTransparencyThreshold, contrastValue, modelViewProjectionTransform, hasLut,
+            lut, faceMode) _uniformCachePlane;
+
+        UniformCache(planeOpacity, modelViewProjectionTransform,
+            modelViewProjectionTransformPlane, scale, centerPixel) _uniformCacheFrustum;
+
+        ghoul::opengl::ProgramObject* _frustumShader = nullptr;
+        ghoul::opengl::ProgramObject* _planeShader = nullptr;
+        GLuint _frustumVao = 0;
+        GLuint _frustumPositionBuffer = 0;
+        GLuint _quadVao = 0;
+        GLuint _vertexPositionBuffer = 0;
+        double _gaussianMoveFactor = 0.0;
+        float _size = 0.f;
+
+        glm::dvec3 _position;
+        glm::dmat4 _rotation;
+        glm::vec3 _normal;
+
+        std::filesystem::path _imageDirectory;
+        std::optional<std::filesystem::path> _downloadDirectory;
+        std::optional<std::string> _dynamicInstrument;
+        std::string _dynamicDownloaderInstrument;
+        std::string _dynamicSpacecraftName;
+        int _dynamicSourceId = -1;
+        double _dynamicCadenceSeconds = 3600.0;
+        int _dynamicPrefetchBefore = 1;
+        int _dynamicPrefetchAfter = 3;
+        int _dynamicMaxConcurrentDownloads = 2;
+        double _dynamicRetryBackoffSeconds = 30.0;
+        int _dynamicMaxRetries = 2;
+        bool _enableDynamicDownload = false;
+        bool _saveDownloadsOnShutdown = true;
+        std::unique_ptr<DynamicHelioviewerImageDownloader> _dynamicDownloader;
     };
-
-    explicit RenderableSolarImagery(const ghoul::Dictionary& dictionary);
-    ~RenderableSolarImagery() override = default;
-
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
-
-    static openspace::Documentation Documentation();
-
-    TransferFunction* transferFunction();
-    const std::unique_ptr<ghoul::opengl::Texture>& imageryTexture() const;
-    float blackTransparencyThreshold() const;
-    float contrastValue() const;
-    float gammaValue() const;
-    float scale() const;
-    float planeOpacity() const;
-    bool isCoronaGraph() const;
-    glm::vec2 centerPixel() const;
-    const glm::vec3& planeNormal() const;
-    const glm::dvec3& planeWorldPosition() const;
-    const glm::dmat4& planeWorldRotation() const;
-
-    BoolProperty _cacheData;
-
-    LoadingType _loadingType = LoadingType::StaticLoading;
-
-    std::filesystem::path _imageDirectory;
-    std::filesystem::path _downloadFolder;
-    std::filesystem::path _colorMapPath;
-
-    std::string _spacecraftName;
-    int _sourceId = -1;
-    double _cadence = 3600.0;
-    int _nFilesToQueue = 20;
-
-    std::unique_ptr<DynamicHelioviewerImageDownloader> _dynamicDownloader;
-    std::unordered_set<std::string> _ingestedFiles;
-
-private:
-    constexpr static inline size_t NoActiveKeyframe = std::numeric_limits<size_t>::max();
-
-    void ingestDownloadedFile(const std::filesystem::path& path);
-    void ingestExistingDynamicFiles();
-
-    struct PlaneVertex {
-        glm::vec2 position;
-        glm::vec2 texCoords;
-    };
-
-    struct FrustumVertex {
-        glm::vec4 position;
-    };
-
-    void updateImageryTexture();
-    void requestPredictiveFrames(const Keyframe<ImageMetadata>* keyframe,
-        const UpdateData& data);
-
-    void createPlaneAndFrustum(double moveDistance);
-    void createPlane() const;
-    void createFrustum() const;
-
-    OptionProperty _activeInstruments;
-    FloatProperty _blackTransparencyThreshold;
-    FloatProperty _contrastValue;
-    BoolProperty _enableBorder;
-    BoolProperty _enableFrustum;
-    OptionProperty _faceMode;
-    FloatProperty _gammaValue;
-    DoubleProperty _moveFactor;
-    IntProperty _downsamplingLevel;
-
-    BoolProperty _verboseMode;
-    IntProperty _predictFramesAfter;
-    IntProperty _predictFramesBefore;
-
-    // The decoded image texture
-    std::unique_ptr<ghoul::opengl::Texture> _imageryTexture;
-    size_t _currentKeyframe = NoActiveKeyframe;
-    // Data for the currently shown image
-    float _currentScale = 0.f;
-    bool _isCoronaGraph = false;
-    glm::vec2 _currentCenterPixel = glm::vec2(2.f);
-
-    // Image metadata
-    InstrumentName _currentActiveInstrument;
-    ImageMetadataMap _imageMetadataMap;
-    std::unordered_map<InstrumentName, std::shared_ptr<TransferFunction>> _tfMap;
-
-    // Decoder
-    std::unique_ptr<AsyncImageDecoder> _asyncDecoder;
-    size_t _lastPredictedKeyframe = NoActiveKeyframe;
-    bool _predictionIsDirty = true;
-
-    // Image plane and frustum
-    UniformCache(isCoronaGraph, scale, centerPixel, imageryTexture, planeOpacity,
-        blackTransparencyThreshold, gammaValue, contrastValue,
-        modelViewProjectionTransform, hasLut, lut) _uniformCachePlane;
-
-    UniformCache(planeOpacity, modelViewProjectionTransform,
-        modelViewProjectionTransformPlane, scale, centerPixel) _uniformCacheFrustum;
-
-    ghoul::opengl::ProgramObject* _frustumShader = nullptr;
-    ghoul::opengl::ProgramObject* _planeShader = nullptr;
-    GLuint _frustumVao = 0;
-    GLuint _frustumPositionBuffer = 0;
-    GLuint _quadVao = 0;
-    GLuint _vertexPositionBuffer = 0;
-    double _gaussianMoveFactor = 0.0;
-    float _size = 0.f;
-
-    glm::dvec3 _position;
-    glm::dmat4 _rotation;
-    glm::vec3 _normal;
-};
 
 } // namespace openspace
 

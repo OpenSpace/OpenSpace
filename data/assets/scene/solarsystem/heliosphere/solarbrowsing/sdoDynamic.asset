@@ -40,25 +40,31 @@ local SolarImagery = {
   },
   Renderable = {
     Type = "RenderableSolarImagery",
-
-    LoadingType = "DynamicDownloading",
-
-    -- Phase 1 only supports one instrument stream
+    ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing_runtime/sdo"),
     StartInstrument = "AIA-193",
 
-    -- Folder where runtime-downloaded JP2 files will be stored
-    DownloadFolder = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing_runtime/sdo_aia193"),
-    SpacecraftName = "SDO",
-    SourceId = 11,
-    -- Colormap copied into the download folder and used for the transfer function
-    ColorMap = openspace.absPath("C:/Users/alundkvi/Documents/work/OpenSpace/data/assets/scene/solarsystem/heliosphere/solarbrowsing/colortables/AIA-193.txt"),
-    -- Desired spacing between requested frames, in seconds
-    Cadence = 3600.0,
-    -- Keep downloaded files when OpenSpace shuts down
-    CacheData = true,
-    -- Phase 1 downloader bookkeeping limit
-    NumberOfFilesToQueue = 20,
-    -- Optional normal imagery settings
+    -- DynamicDownload streams one instrument at a time for this renderable.
+    -- If `Instrument` is omitted, the downloader follows the currently selected
+    -- `StartInstrument` / active instrument and rebuilds itself when the user switches.
+    -- Downloaded JP2 files are written into the same folder layout that the normal
+    -- SolarBrowsing metadata/texture pipeline expects.
+    DynamicDownload = {
+      Enable = true,
+      SourceId = 11,
+      SpacecraftName = "SDO",
+      Instrument = "AIA-193",
+      CadenceSeconds = 3600.0,
+      DownloadDirectory = openspace.absPath(
+        "${SYNC_DYNAMIC}/solarbrowsing_runtime/sdo/AIA-193"
+      ),
+      PrefetchFramesBefore = 1,
+      PrefetchFramesAfter = 3,
+      MaxConcurrentDownloads = 2,
+      SaveDownloadsOnShutdown = true,
+      RetryBackoffSeconds = 30.0,
+      MaxRetries = 2
+    },
+
     DownsamplingLevel = 2,
     BlackTransparencyThreshold = 0.01,
     Contrast = 0.0,
@@ -84,7 +90,8 @@ asset.export("Imagery", SolarImagery)
 
 asset.meta = {
   Name = "SDO AIA 193 Solar Imagery",
-  Description = [[Runtime-downloaded SDO AIA 193 imagery from Helioviewer.]],
+  Description = [[Runtime-streamed SDO AIA 193 imagery from Helioviewer using the
+    RenderableSolarImagery DynamicDownload pipeline.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"
