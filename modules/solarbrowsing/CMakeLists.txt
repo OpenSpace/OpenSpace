@@ -32,6 +32,7 @@ set(HEADER_FILES
   tasks/helioviewerdownloadtask.h
   util/asyncimagedecoder.h
   util/j2kcodec.h
+  util/dynamichelioviewerimagedownloader.h
   util/solarbrowsinghelper.h
   util/structs.h
 )
@@ -44,6 +45,7 @@ set(SOURCE_FILES
   tasks/helioviewerdownloadtask.cpp
   util/asyncimagedecoder.cpp
   util/j2kcodec.cpp
+  util/dynamichelioviewerimagedownloader.cpp
   util/solarbrowsinghelper.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

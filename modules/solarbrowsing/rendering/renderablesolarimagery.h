@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/solarbrowsing/util/dynamichelioviewerimagedownloader.h>
 #include <modules/solarbrowsing/util/structs.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -35,6 +36,8 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
+#include <unordered_set>
+#include <filesystem>
 
 namespace ghoul::opengl { class Texture; }
 
@@ -53,6 +56,11 @@ class AsyncImageDecoder;
 
 class RenderableSolarImagery : public Renderable {
 public:
+    enum class LoadingType {
+        StaticLoading,
+        DynamicDownloading
+    };
+
     explicit RenderableSolarImagery(const ghoul::Dictionary& dictionary);
     ~RenderableSolarImagery() override = default;
 
@@ -72,14 +80,34 @@ public:
     float contrastValue() const;
     float gammaValue() const;
     float scale() const;
+    float planeOpacity() const;
     bool isCoronaGraph() const;
     glm::vec2 centerPixel() const;
     const glm::vec3& planeNormal() const;
     const glm::dvec3& planeWorldPosition() const;
     const glm::dmat4& planeWorldRotation() const;
 
+    BoolProperty _cacheData;
+
+    LoadingType _loadingType = LoadingType::StaticLoading;
+
+    std::filesystem::path _imageDirectory;
+    std::filesystem::path _downloadFolder;
+    std::filesystem::path _colorMapPath;
+
+    std::string _spacecraftName;
+    int _sourceId = -1;
+    double _cadence = 3600.0;
+    int _nFilesToQueue = 20;
+
+    std::unique_ptr<DynamicHelioviewerImageDownloader> _dynamicDownloader;
+    std::unordered_set<std::string> _ingestedFiles;
+
 private:
     constexpr static inline size_t NoActiveKeyframe = std::numeric_limits<size_t>::max();
+
+    void ingestDownloadedFile(const std::filesystem::path& path);
+    void ingestExistingDynamicFiles();
 
     struct PlaneVertex {
         glm::vec2 position;

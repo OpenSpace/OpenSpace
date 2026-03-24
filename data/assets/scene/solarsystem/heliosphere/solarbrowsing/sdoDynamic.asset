@@ -1,0 +1,91 @@
+local sdo = asset.require("scene/solarsystem/missions/sdo/sdo")
+local coreKernels = asset.require("spice/core")
+local kernels = asset.require("scene/solarsystem/missions/sdo/kernels")
+local earthTransform = asset.require("scene/solarsystem/planets/earth/transforms")
+
+-- We use the SDO position relative to the inertial to get less wobbly image. Adding
+-- the rotation further removes any small variations visible when increasing the
+-- simulation time
+local SdoPosition = {
+  Identifier = "SDO_Position_Inertial",
+  Parent = earthTransform.EarthInertial.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.SDO,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.J2000
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.EclipJ2000,
+      DestinationFrame = coreKernels.Frame.J2000
+    }
+  },
+  GUI = {
+    Name = "SDO Position",
+    Path = "/Solar System/Missions/SDO",
+    Hidden = true,
+    Focusable = false
+  }
+}
+
+local SolarImagery = {
+  Identifier = "SolarImagery_SDO_AIA193",
+  Parent = SdoPosition.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = sdo.MissionBegin,
+    End = sdo.MissionEnd
+  },
+  Renderable = {
+    Type = "RenderableSolarImagery",
+
+    LoadingType = "DynamicDownloading",
+
+    -- Phase 1 only supports one instrument stream
+    StartInstrument = "AIA-193",
+
+    -- Folder where runtime-downloaded JP2 files will be stored
+    DownloadFolder = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing_runtime/sdo_aia193"),
+    SpacecraftName = "SDO",
+    SourceId = 11,
+    -- Colormap copied into the download folder and used for the transfer function
+    ColorMap = openspace.absPath("C:/Users/alundkvi/Documents/work/OpenSpace/data/assets/scene/solarsystem/heliosphere/solarbrowsing/colortables/AIA-193.txt"),
+    -- Desired spacing between requested frames, in seconds
+    Cadence = 3600.0,
+    -- Keep downloaded files when OpenSpace shuts down
+    CacheData = true,
+    -- Phase 1 downloader bookkeeping limit
+    NumberOfFilesToQueue = 20,
+    -- Optional normal imagery settings
+    DownsamplingLevel = 2,
+    BlackTransparencyThreshold = 0.01,
+    Contrast = 0.0,
+    Gamma = 0.9
+  },
+  GUI = {
+    Name = "SDO AIA 193 Imagery",
+    Path = "/Solar System/Solar Imagery"
+  }
+}
+
+asset.onInitialize(function ()
+  openspace.addSceneGraphNode(SdoPosition)
+  openspace.addSceneGraphNode(SolarImagery)
+end)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(SolarImagery)
+  openspace.removeSceneGraphNode(SdoPosition)
+end)
+
+asset.export("Imagery", SolarImagery)
+
+asset.meta = {
+  Name = "SDO AIA 193 Solar Imagery",
+  Description = [[Runtime-downloaded SDO AIA 193 imagery from Helioviewer.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
