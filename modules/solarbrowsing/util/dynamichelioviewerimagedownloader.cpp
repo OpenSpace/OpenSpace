@@ -12,6 +12,7 @@
 #include <ctime>
 #include <format>
 #include <fstream>
+#include <optional>
 #include <string_view>
 
 namespace {
@@ -21,6 +22,33 @@ namespace {
     bool isJp2File(const std::filesystem::path& path) {
         const std::string ext = path.extension().string();
         return ext == ".jp2" || ext == ".j2k";
+    }
+
+    std::optional<double> timestampFromHelioviewerStem(const std::string& stem) {
+        const size_t suffixSeparator = stem.find("__", 24);
+        const std::string timestampStem =
+            (suffixSeparator == std::string::npos) ? stem : stem.substr(0, suffixSeparator);
+
+        auto r = scn::scan<int, int, int, int, int, int, int>(
+            timestampStem,
+            "{}_{}_{}__{}_{}_{}_{}"
+        );
+        if (!r) {
+            return std::nullopt;
+        }
+
+        auto& [year, month, day, hour, minute, second, millisecond] = r->values();
+        const std::string timestamp = std::format(
+            "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{:03d}",
+            year,
+            month,
+            day,
+            hour,
+            minute,
+            second,
+            millisecond
+        );
+        return openspace::Time::convertTime(timestamp);
     }
 } // namespace
 
@@ -155,37 +183,19 @@ void DynamicHelioviewerImageDownloader::scanForNewLocalFiles() {
         }
 
         const std::string stem = file.stem().string();
-        auto r = scn::scan<
-            int, int, int, int, int, int, int, std::string, std::string
-        >(
-            stem,
-            "{}_{}_{}__{}_{}_{}_{}__{}_{}"
-        );
-        if (!r) {
-            LDEBUG(std::format("Ignoring file with unexpected name '{}'", file));
+        const std::optional<double> j2000 = timestampFromHelioviewerStem(stem);
+        if (!j2000.has_value()) {
+            LERROR(std::format("Ignoring file with unexpected name '{}'", file));
             continue;
         }
 
-        auto& [year, month, day, hour, minute, second, millisecond, _, __] = r->values();
-        const std::string timestamp = std::format(
-            "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{:03d}",
-            year,
-            month,
-            day,
-            hour,
-            minute,
-            second,
-            millisecond
-        );
-
-        const double j2000 = Time::convertTime(timestamp);
-        const RequestKey key = requestKeyForTime(j2000);
+        const RequestKey key = requestKeyForTime(*j2000);
 
         _knownFiles.insert(filename);
         _knownLocalKeys.insert(key);
         _availableFrames[key] = {
-            .unixTimestamp = j2000 + J2000UnixOffset,
-            .j2000Timestamp = j2000,
+            .unixTimestamp = *j2000 + J2000UnixOffset,
+            .j2000Timestamp = *j2000,
             .destinationPath = file
         };
         _downloadedFiles.push_back(file);

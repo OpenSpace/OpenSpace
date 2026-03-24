@@ -97,6 +97,8 @@ namespace openspace {
         void updateImageryTexture();
         void ensureDynamicDownloader();
         void ingestDownloadedFiles();
+        void ingestFile(const std::filesystem::path& filePath,
+            bool& activeInstrumentChanged, bool& transferFunctionsMayNeedRefresh);
         void requestPredictiveFrames(const Keyframe<ImageMetadata>* keyframe,
             const UpdateData& data);
 

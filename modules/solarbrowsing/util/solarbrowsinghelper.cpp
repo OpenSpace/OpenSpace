@@ -57,192 +57,6 @@ namespace {
         return (ext == ".jp2") || (ext == ".j2k");
     }
 
-    // @TODO emiax: If openjpeg ever starts supporting reading XML metadata,
-    // this implementation should be improved in order not to search the entire buffer for
-    // XML data. There is an issue here:
-    // (https://github.com/uclouvain/openjpeg/issues/929)
-    std::optional<ImageMetadata> parseJ2kMetadata(const std::filesystem::path& filePath) {
-        ImageMetadata im;
-        im.filePath = filePath;
-
-        std::ifstream stream(filePath, std::ios::binary | std::ios::ate);
-        std::streamsize size = stream.tellg();
-        stream.seekg(0, std::ios::beg);
-        std::vector<char> buffer(size);
-        if (!stream.read(buffer.data(), size)) {
-            LERROR(std::format("Failed to read data from '{}' ", filePath));
-            return im;
-        }
-        std::string_view bufferView(buffer.data(), size);
-
-        auto extractInnerXml =
-            [](std::string_view view, const std::string& elementName) ->
-                                                           std::optional<std::string_view>
-        {
-            const std::string startTag = std::format("<{}>", elementName);
-            const std::string endTag = std::format("</{}>", elementName);
-
-            const auto begin = std::search(
-                view.begin(),
-                view.end(),
-                startTag.begin(),
-                startTag.end()
-            );
-
-            if (begin == view.end()) {
-                return std::nullopt;
-            }
-
-            const auto afterBeginTag = begin + startTag.size();
-
-            const auto end = std::search(
-                afterBeginTag,
-                view.end(),
-                endTag.begin(),
-                endTag.end()
-            );
-
-            if (end == view.end()) {
-                return std::nullopt;
-            }
-
-            return std::string_view(&*afterBeginTag, end - afterBeginTag);
-        };
-
-        std::optional<std::string_view> metaData = extractInnerXml(bufferView, "meta");
-
-        if (!metaData.has_value()) {
-            LERROR(std::format("Could not find metadata in {}", filePath));
-            return std::nullopt;
-        }
-
-        std::optional<std::string_view> telescop = extractInnerXml(*metaData, "TELESCOP");
-
-        if (!telescop.has_value()) {
-            LERROR(std::format("Could not find TELESCOP tag {}", filePath));
-            return std::nullopt;
-        }
-
-        std::optional<std::string_view> naxis = extractInnerXml(*metaData, "NAXIS1");
-
-        if (!naxis.has_value()) {
-            LERROR(std::format("Could not find NAXIS1 tag {}", filePath));
-            return std::nullopt;
-        }
-
-        std::optional<std::string_view> centerPixelX = extractInnerXml(
-            bufferView,
-            "CRPIX1"
-        );
-
-        if (!centerPixelX.has_value()) {
-            LERROR(std::format("Could not find CRPIX1 tag {}", filePath));
-            return std::nullopt;
-        }
-
-        std::optional<std::string_view> centerPixelY = extractInnerXml(
-            bufferView,
-            "CRPIX2"
-        );
-
-        if (!centerPixelY.has_value()) {
-            LERROR(std::format("Could not find CRPIX2 tag {}", filePath));
-            return std::nullopt;
-        }
-
-        im.fullResolution = std::stoi(std::string(*naxis));
-        const float halfRes = im.fullResolution / 2.f;
-
-        glm::vec2 centerPixel = glm::vec2(
-            std::stof(std::string(*centerPixelX)),
-            std::stof(std::string(*centerPixelY))
-        );
-        const glm::vec2 offset = ((halfRes - centerPixel) / halfRes) *
-            glm::vec2(static_cast<float>(distanceconstants::SolarRadius));
-        im.centerPixel = offset;
-
-        if (*telescop == "SOHO") {
-            std::optional<std::string_view> plateScl = extractInnerXml(
-                *metaData,
-                "PLATESCL"
-            );
-
-            if (!plateScl.has_value()) {
-                LERROR(std::format("Could not find NAXIS1 tag {}", filePath));
-                return std::nullopt;
-            }
-
-            const float plateScale = std::stof(std::string(*plateScl));
-            im.scale = 1.f / (plateScale / 2.f);
-            im.isCoronaGraph = true;
-        }
-        else if (*telescop == "SDO") {
-            std::optional<std::string_view> rsunObs = extractInnerXml(
-                bufferView,
-                "RSUN_OBS"
-            );
-            std::optional<std::string_view> cDelt1 = extractInnerXml(
-                bufferView,
-                "CDELT1"
-            );
-
-            if (!rsunObs.has_value()) {
-                LERROR(std::format("Could not find RSUN_OBS tag {}", filePath));
-                return std::nullopt;
-            }
-            if (!cDelt1.has_value()) {
-                LERROR(std::format("Could not find CDELT1 tag {}", filePath));
-                return std::nullopt;
-            }
-
-            const float rSunObsValue = std::stof(std::string(*rsunObs));
-            const float cDelt1Value = std::stof(std::string(*cDelt1));
-            im.scale = (rSunObsValue / cDelt1Value) / (im.fullResolution / 2.f);
-            im.isCoronaGraph = false;
-        }
-        else if (*telescop == "STEREO") {
-            std::optional<std::string_view> rsun = extractInnerXml(bufferView, "RSUN");
-            std::optional<std::string_view> cDelt1 = extractInnerXml(
-                bufferView,
-                "CDELT1"
-            );
-
-            if (!rsun.has_value()) {
-                LERROR(std::format("Could not find RSUN_OBS tag {}", filePath));
-                return std::nullopt;
-            }
-            if (!cDelt1.has_value()) {
-                LERROR(std::format("Could not find CDELT1 tag {}", filePath));
-                return std::nullopt;
-            }
-
-            const float rSunvalue = std::stof(std::string(*rsun));
-            const float cDelt1Value = std::stof(std::string(*cDelt1));
-            im.scale = (rSunvalue / cDelt1Value) / (im.fullResolution / 2.f);
-            im.isCoronaGraph = false;
-
-            std::optional<std::string_view> detector = extractInnerXml(
-                bufferView,
-                "DETECTOR"
-            );
-
-            if (detector.has_value()) {
-                im.isCoronaGraph = *detector == "COR1" || *detector == "COR2";
-            }
-            else {
-                LWARNING(std::format("Could not find DETECTOR tag {}", filePath));
-            }
-        }
-        else {
-            LERROR(std::format(
-                "Recieved unknown spacecraft image '{}'. Supported spacecrafts are {}, "
-                "{}, {}", *telescop, "SOHO", "SDO", "STEREO"
-            ));
-            return std::nullopt;
-        }
-        return im;
-    }
-
     // Conversion needed before passing dates into the spice manager
     std::string ISO8601(std::string& datetime) {
         std::string month = datetime.substr(5, 3);
@@ -555,12 +369,25 @@ std::optional<ImageMetadata> parseJ2kMetadata(const std::filesystem::path& fileP
     im.filePath = filePath;
 
     std::ifstream stream(filePath, std::ios::binary | std::ios::ate);
+    if (!stream) {
+        LERROR(std::format("Failed to open '{}' for metadata parsing", filePath));
+        return std::nullopt;
+    }
+
     std::streamsize size = stream.tellg();
+    if (size <= 0) {
+        LERROR(std::format(
+            "Failed to determine metadata file size for '{}'",
+            filePath
+        ));
+        return std::nullopt;
+    }
+
     stream.seekg(0, std::ios::beg);
     std::vector<char> buffer(size);
     if (!stream.read(buffer.data(), size)) {
         LERROR(std::format("Failed to read data from '{}' ", filePath));
-        return im;
+        return std::nullopt;
     }
     std::string_view bufferView(buffer.data(), size);
 
@@ -750,60 +577,11 @@ std::optional<ImageMetadata> parseJ2kMetadata(const std::filesystem::path& fileP
     const float cxDst = cxSrc + padLeft;
     const float cyDst = cySrc + padTop;
 
-    // Compute offset in SunRadius units (same formula you already use)
+    // Compute offset in SunRadius units
     glm::vec2 centerPixel(cxDst, cyDst);
-    glm::vec2 offset = ((dstHalf - centerPixel) / dstHalf) * glm::vec2(SunRadius);
+    glm::vec2 offset = ((dstHalf - centerPixel) / dstHalf) *
+        glm::vec2(static_cast<float>(distanceconstants::SolarRadius));
     im.centerPixel = offset;
-    //else
-    //{
-    //    std::optional<std::string_view> centerpixelx = extractinnerxml(bufferview, "crpix1");
-
-    //    if (!centerpixelx.has_value()) {
-    //        lerror(std::format("could not find crpix1 tag {}", filepath));
-    //        return std::nullopt;
-    //    }
-
-    //    std::optional<std::string_view> centerpixely = extractinnerxml(bufferview, "crpix2");
-
-    //    if (!centerpixely.has_value()) {
-    //        lerror(std::format("could not find crpix2 tag {}", filepath));
-    //        return std::nullopt;
-    //    }
-
-    //    std::optional<std::string_view> naxis1sv = extractinnerxml(*metadata, "naxis1");
-    //    std::optional<std::string_view> naxis2sv = extractinnerxml(*metadata, "naxis2");
-
-    //    if (!naxis1sv.has_value()) {
-    //        lerror(std::format("could not find naxis1 tag {}", filepath));
-    //        return std::nullopt;
-    //    }
-    //    if (!naxis2sv.has_value()) {
-    //        lerror(std::format("could not find naxis2 tag {}", filepath));
-    //        return std::nullopt;
-    //    }
-
-    //    const int naxis1 = std::stoi(std::string(*naxis1sv)); // width
-    //    const int naxis2 = std::stoi(std::string(*naxis2sv)); // height
-
-    //    im.fullresolution = std::max(naxis1, naxis2);
-    //    const float halfx = static_cast<float>(naxis1) / 2.f;
-    //    const float halfy = static_cast<float>(naxis2) / 2.f;
-
-    //    glm::vec2 centerpixel(
-    //        std::stof(std::string(*centerpixelx)),
-    //        std::stof(std::string(*centerpixely))
-    //    );
-
-    //     normalize each axis by its own half-size, then map to sunradius
-    //    glm::vec2 offset(
-    //        ((halfx - centerpixel.x) / halfx) * static_cast<float>(sunradius),
-    //        ((halfy - centerpixel.y) / halfy) * static_cast<float>(sunradius)
-    //    );
-
-    //    im.centerpixel = offset;
-    //}
-
-
 
     if (*telescop == "SOHO") {
         std::optional<std::string_view> plateScl = extractInnerXml(

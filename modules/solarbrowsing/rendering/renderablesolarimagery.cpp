@@ -243,17 +243,20 @@ namespace {
     std::optional<double> timestampFromHelioviewerFilename(
         const std::filesystem::path& path)
     {
-        auto r = scn::scan<
-            int, int, int, int, int, int, int, std::string, std::string
-        >(
-            path.stem().string(),
-            "{}_{}_{}__{}_{}_{}_{}__{}_{}"
+        const std::string stem = path.stem().string();
+        const size_t suffixSeparator = stem.find("__", 24);
+        const std::string timestampStem =
+            (suffixSeparator == std::string::npos) ? stem : stem.substr(0, suffixSeparator);
+
+        auto r = scn::scan<int, int, int, int, int, int, int>(
+            timestampStem,
+            "{}_{}_{}__{}_{}_{}_{}"
         );
         if (!r) {
             return std::nullopt;
         }
 
-        auto& [year, month, day, hour, minute, second, millisecond, _, __] = r->values();
+        auto& [year, month, day, hour, minute, second, millisecond] = r->values();
         const std::string timestamp = std::format(
             "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{:03d}",
             year,
@@ -390,7 +393,6 @@ namespace openspace {
 
         _imageMetadataMap = loadImageMetadata(p.imageDirectory);
         _tfMap = loadTransferFunctions(p.imageDirectory, _imageMetadataMap);
-
         const bool hasData = std::any_of(
             _imageMetadataMap.begin(),
             _imageMetadataMap.end(),
@@ -851,45 +853,7 @@ namespace openspace {
         bool transferFunctionsMayNeedRefresh = false;
 
         for (const std::filesystem::path& filePath : _dynamicDownloader->downloadedFiles()) {
-            const std::optional<ImageMetadata> metadata = parseJ2kMetadata(filePath);
-            if (!metadata.has_value()) {
-                LERROR(std::format(
-                    "Failed to parse metadata for streamed Helioviewer image '{}'",
-                    filePath
-                ));
-                continue;
-            }
-
-            const std::optional<double> timestamp = timestampFromHelioviewerFilename(filePath);
-            if (!timestamp.has_value()) {
-                LERROR(std::format(
-                    "Failed to derive timestamp from streamed Helioviewer image '{}'",
-                    filePath
-                ));
-                continue;
-            }
-
-            const std::string instrument = instrumentFromHelioviewerFilename(filePath).value_or(
-                _dynamicDownloaderInstrument
-            );
-            const bool hadInstrument = _imageMetadataMap.contains(instrument);
-            _imageMetadataMap[instrument].addKeyframe(*timestamp, *metadata);
-
-            if (!hadInstrument) {
-                const int optionValue = static_cast<int>(_activeInstruments.options().size());
-                _activeInstruments.addOption(optionValue, instrument);
-                transferFunctionsMayNeedRefresh = true;
-
-                if (_activeInstruments.options().size() == 1) {
-                    _activeInstruments = optionValue;
-                    _currentActiveInstrument = instrument;
-                    activeInstrumentChanged = true;
-                }
-            }
-
-            if (instrument == _currentActiveInstrument) {
-                activeInstrumentChanged = true;
-            }
+            ingestFile(filePath, activeInstrumentChanged, transferFunctionsMayNeedRefresh);
         }
 
         if (transferFunctionsMayNeedRefresh) {
@@ -902,6 +866,52 @@ namespace openspace {
         }
 
         _dynamicDownloader->clearDownloaded();
+    }
+
+    void RenderableSolarImagery::ingestFile(
+        const std::filesystem::path& filePath,
+        bool& activeInstrumentChanged,
+        bool& transferFunctionsMayNeedRefresh)
+    {
+        const std::optional<ImageMetadata> metadata = parseJ2kMetadata(filePath);
+        if (!metadata.has_value()) {
+            LERROR(std::format(
+                "Failed to parse metadata for streamed Helioviewer image '{}'",
+                filePath
+            ));
+            return;
+        }
+
+        const std::optional<double> timestamp = timestampFromHelioviewerFilename(filePath);
+        if (!timestamp.has_value()) {
+            LERROR(std::format(
+                "Failed to derive timestamp from streamed Helioviewer image '{}'",
+                filePath
+            ));
+            return;
+        }
+
+        const std::string instrument = instrumentFromHelioviewerFilename(filePath).value_or(
+            _dynamicDownloaderInstrument
+        );
+        const bool hadInstrument = _imageMetadataMap.contains(instrument);
+        _imageMetadataMap[instrument].addKeyframe(*timestamp, *metadata);
+
+        if (!hadInstrument) {
+            const int optionValue = static_cast<int>(_activeInstruments.options().size());
+            _activeInstruments.addOption(optionValue, instrument);
+            transferFunctionsMayNeedRefresh = true;
+
+            if (_activeInstruments.options().size() == 1) {
+                _activeInstruments = optionValue;
+                _currentActiveInstrument = instrument;
+                activeInstrumentChanged = true;
+            }
+        }
+
+        if (instrument == _currentActiveInstrument) {
+            activeInstrumentChanged = true;
+        }
     }
 
     TransferFunction* RenderableSolarImagery::transferFunction() {
