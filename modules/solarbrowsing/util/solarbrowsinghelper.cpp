@@ -626,10 +626,6 @@ std::optional<ImageMetadata> parseJ2kMetadata(const std::filesystem::path& fileP
         // For EUI etc we can use RSUN_OBS + CDELT1 just like SDO
         auto rsunObs = extractInnerXml(bufferView, "RSUN_OBS");
         auto cdelt1 = extractInnerXml(bufferView, "CDELT1");
-        /*LDEBUG(std::format(
-            "SOLO JP2 dimensions: NAXIS1={} NAXIS2={} fullResolution={}",
-            naxis1, naxis2, im.fullResolution
-        ));*/
         if (!rsunObs.has_value() || !cdelt1.has_value()) {
             LERROR(std::format("Solar Orbiter: missing RSUN_OBS or CDELT1 in {}", filePath));
             return std::nullopt;

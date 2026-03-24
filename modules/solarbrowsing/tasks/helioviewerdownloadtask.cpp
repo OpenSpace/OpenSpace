@@ -27,7 +27,6 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/json.h>
 #include <openspace/util/httprequest.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -169,12 +168,6 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
 
     size_t count = 0;
     for (double unixTimestamp : frames) {
-        // @TODO (anden88 2026-02-23): Previously used SPICE to convert the timestamp we
-        // got back from HelioViewer, but, this produced an offset of ~12 hours
-        //const double j2000InEpoch = 946684800.0;
-        //const Time time(unixTimestamp - j2000InEpoch);
-        //epochAsIsoString.emplace_back(time.ISO8601());
-
         std::time_t timestamp = static_cast<std::time_t>(unixTimestamp);
         std::tm* utcTime = std::gmtime(&timestamp);
         std::string utcTimeString = std::format(
