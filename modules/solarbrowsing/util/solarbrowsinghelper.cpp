@@ -36,6 +36,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <scn/scan.h>
+#include <ctime>
 #include <execution>
 #include <format>
 #include <fstream>
@@ -49,12 +50,38 @@ namespace {
     constexpr std::string_view _loggerCat = "SolarBrowsingHelper";
     using IsValidCacheFile = bool;
 
+    std::optional<double> j2000FromHelioviewerStem(const std::string& stem) {
+        const size_t suffixSeparator = stem.find("__", 24);
+        const std::string timestampStem =
+            (suffixSeparator == std::string::npos) ? stem : stem.substr(0, suffixSeparator);
+
+        auto r = scn::scan<int, int, int, int, int, int, int>(
+            timestampStem,
+            "{}_{}_{}__{}_{}_{}_{}"
+        );
+        if (!r) {
+            return std::nullopt;
+        }
+
+        auto& [year, month, day, hour, minute, second, millisecond] = r->values();
+        const std::string timestamp = std::format(
+            "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{:03d}",
+            year,
+            month,
+            day,
+            hour,
+            minute,
+            second,
+            millisecond
+        );
+        return Time::convertTime(timestamp);
+    }
+
     bool isValidJ2000ImageFile(const std::filesystem::path& path) {
         if (!std::filesystem::is_regular_file(path)) {
             return false;
         }
-        const std::string& ext = path.extension().string();
-        return (ext == ".jp2") || (ext == ".j2k");
+        return isJp2ImageFile(path);
     }
 
     // Conversion needed before passing dates into the spice manager
@@ -312,8 +339,54 @@ namespace {
 
 namespace openspace {
 
+bool isJp2ImageFile(const std::filesystem::path& path) {
+    const std::string ext = path.extension().string();
+    return (ext == ".jp2") || (ext == ".j2k");
+}
+
+std::optional<double> j2000FromHelioviewerFilename(const std::filesystem::path& path) {
+    return j2000FromHelioviewerStem(path.stem().string());
+}
+
+std::optional<std::string> instrumentFromHelioviewerFilename(
+    const std::filesystem::path& path)
+{
+    const std::string stem = path.stem().string();
+    const size_t separator = stem.rfind("__");
+    if (separator == std::string::npos) {
+        return std::nullopt;
+    }
+
+    const std::string spacecraftAndInstrument = stem.substr(separator + 2);
+    const size_t firstUnderscore = spacecraftAndInstrument.find('_');
+    if (firstUnderscore == std::string::npos ||
+        firstUnderscore + 1 >= spacecraftAndInstrument.size())
+    {
+        return std::nullopt;
+    }
+
+    return spacecraftAndInstrument.substr(firstUnderscore + 1);
+}
+
+std::string isoStringFromUnixTimestamp(double unixTimestamp, bool includeMilliseconds) {
+    std::time_t timestamp = static_cast<std::time_t>(unixTimestamp);
+    std::tm* utcTime = std::gmtime(&timestamp);
+    const char* suffix = includeMilliseconds ? ".000" : "";
+
+    return std::format(
+        "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}{}",
+        utcTime->tm_year + 1900,
+        utcTime->tm_mon + 1,
+        utcTime->tm_mday,
+        utcTime->tm_hour,
+        utcTime->tm_min,
+        utcTime->tm_sec,
+        suffix
+    );
+}
+
 std::unordered_map<std::string, std::shared_ptr<TransferFunction>> loadTransferFunctions(
-                                                     const std::filesystem::path& rootDir,
+    const std::filesystem::path& rootDir,
                                                  const ImageMetadataMap& imageMetadataMap)
 {
     std::unordered_map<std::string, std::shared_ptr<TransferFunction>> tfMap;

@@ -45,6 +45,15 @@ class TransferFunction;
 std::unordered_map<std::string, std::shared_ptr<TransferFunction>> loadTransferFunctions(
     const std::filesystem::path& rootDir, const ImageMetadataMap& imageMetadataMap);
 
+bool isJp2ImageFile(const std::filesystem::path& path);
+
+std::optional<double> j2000FromHelioviewerFilename(const std::filesystem::path& path);
+
+std::optional<std::string> instrumentFromHelioviewerFilename(
+    const std::filesystem::path& path);
+
+std::string isoStringFromUnixTimestamp(double unixTimestamp, bool includeMilliseconds);
+
 std::optional<ImageMetadata> parseJ2kMetadata(const std::filesystem::path& filePath);
 
 /**

@@ -38,7 +38,6 @@
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconstants.h>
-#include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/cachemanager.h>
@@ -47,7 +46,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-#include <scn/scan.h>
 #include <fstream>
 #include <optional>
 #include <string_view>
@@ -240,55 +238,6 @@ namespace {
         std::optional<ghoul::Dictionary> dynamicDownload;
     };
 
-    std::optional<double> timestampFromHelioviewerFilename(
-        const std::filesystem::path& path)
-    {
-        const std::string stem = path.stem().string();
-        const size_t suffixSeparator = stem.find("__", 24);
-        const std::string timestampStem =
-            (suffixSeparator == std::string::npos) ? stem : stem.substr(0, suffixSeparator);
-
-        auto r = scn::scan<int, int, int, int, int, int, int>(
-            timestampStem,
-            "{}_{}_{}__{}_{}_{}_{}"
-        );
-        if (!r) {
-            return std::nullopt;
-        }
-
-        auto& [year, month, day, hour, minute, second, millisecond] = r->values();
-        const std::string timestamp = std::format(
-            "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{:03d}",
-            year,
-            month,
-            day,
-            hour,
-            minute,
-            second,
-            millisecond
-        );
-        return Time::convertTime(timestamp);
-    }
-
-    std::optional<std::string> instrumentFromHelioviewerFilename(
-        const std::filesystem::path& path)
-    {
-        const std::string stem = path.stem().string();
-        const size_t separator = stem.rfind("__");
-        if (separator == std::string::npos) {
-            return std::nullopt;
-        }
-
-        const std::string spacecraftAndInstrument = stem.substr(separator + 2);
-        const size_t firstUnderscore = spacecraftAndInstrument.find('_');
-        if (firstUnderscore == std::string::npos ||
-            firstUnderscore + 1 >= spacecraftAndInstrument.size())
-        {
-            return std::nullopt;
-        }
-
-        return spacecraftAndInstrument.substr(firstUnderscore + 1);
-    }
 } // namespace
 #include "renderablesolarimagery_codegen.cpp"
 
@@ -882,7 +831,7 @@ namespace openspace {
             return;
         }
 
-        const std::optional<double> timestamp = timestampFromHelioviewerFilename(filePath);
+        const std::optional<double> timestamp = j2000FromHelioviewerFilename(filePath);
         if (!timestamp.has_value()) {
             LERROR(std::format(
                 "Failed to derive timestamp from streamed Helioviewer image '{}'",

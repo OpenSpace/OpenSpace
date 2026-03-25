@@ -1,55 +1,21 @@
 #include <modules/solarbrowsing/util/dynamichelioviewerimagedownloader.h>
 
+#include <modules/solarbrowsing/util/solarbrowsinghelper.h>
 #include <openspace/json.h>
 #include <openspace/util/time.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
 #include <scn/scan.h>
-
 #include <algorithm>
 #include <cmath>
-#include <ctime>
 #include <format>
 #include <fstream>
-#include <optional>
 #include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "DynamicHelioviewerImageDownloader";
     constexpr double J2000UnixOffset = 946684800.0;
-
-    bool isJp2File(const std::filesystem::path& path) {
-        const std::string ext = path.extension().string();
-        return ext == ".jp2" || ext == ".j2k";
-    }
-
-    std::optional<double> timestampFromHelioviewerStem(const std::string& stem) {
-        const size_t suffixSeparator = stem.find("__", 24);
-        const std::string timestampStem =
-            (suffixSeparator == std::string::npos) ? stem : stem.substr(0, suffixSeparator);
-
-        auto r = scn::scan<int, int, int, int, int, int, int>(
-            timestampStem,
-            "{}_{}_{}__{}_{}_{}_{}"
-        );
-        if (!r) {
-            return std::nullopt;
-        }
-
-        auto& [year, month, day, hour, minute, second, millisecond] = r->values();
-        const std::string timestamp = std::format(
-            "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{:03d}",
-            year,
-            month,
-            day,
-            hour,
-            minute,
-            second,
-            millisecond
-        );
-        return openspace::Time::convertTime(timestamp);
-    }
 } // namespace
 
 namespace openspace {
@@ -173,7 +139,7 @@ void DynamicHelioviewerImageDownloader::scanForNewLocalFiles() {
         _outputFolder,
         ghoul::filesystem::Recursive::No,
         ghoul::filesystem::Sorted::Yes,
-        isJp2File
+        isJp2ImageFile
     );
 
     for (const std::filesystem::path& file : files) {
@@ -183,7 +149,7 @@ void DynamicHelioviewerImageDownloader::scanForNewLocalFiles() {
         }
 
         const std::string stem = file.stem().string();
-        const std::optional<double> j2000 = timestampFromHelioviewerStem(stem);
+        const std::optional<double> j2000 = j2000FromHelioviewerFilename(file);
         if (!j2000.has_value()) {
             LERROR(std::format("Ignoring file with unexpected name '{}'", file));
             continue;
@@ -231,7 +197,9 @@ void DynamicHelioviewerImageDownloader::pollListingRequest(double currentTimeJ20
                 RemoteFrame candidate = {
                     .unixTimestamp = unixTimestamp,
                     .j2000Timestamp = j2000,
-                    .destinationPath = expectedFilename(unixToIso(unixTimestamp))
+                    .destinationPath = expectedFilename(
+                        isoStringFromUnixTimestamp(unixTimestamp, true)
+                    )
                 };
 
                 auto it = _availableFrames.find(key);
@@ -514,21 +482,6 @@ std::string DynamicHelioviewerImageDownloader::j2000ToIso(double j2000) const {
     return std::string(Time(j2000).ISO8601());
 }
 
-std::string DynamicHelioviewerImageDownloader::unixToIso(double unixTimestamp) const {
-    std::time_t timestamp = static_cast<std::time_t>(unixTimestamp);
-    std::tm* utcTime = std::gmtime(&timestamp);
-
-    return std::format(
-        "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.000",
-        utcTime->tm_year + 1900,
-        utcTime->tm_mon + 1,
-        utcTime->tm_mday,
-        utcTime->tm_hour,
-        utcTime->tm_min,
-        utcTime->tm_sec
-    );
-}
-
 std::string DynamicHelioviewerImageDownloader::frameListingUrl(double beginJ2000,
                                                                double endJ2000) const
 {
@@ -545,7 +498,7 @@ std::string DynamicHelioviewerImageDownloader::frameListingUrl(double beginJ2000
 std::string DynamicHelioviewerImageDownloader::imageUrl(double unixTimestamp) const {
     return std::format(
         "https://api.helioviewer.org/v2/getJP2Image/?date={}Z&sourceId={}",
-        unixToIso(unixTimestamp),
+        isoStringFromUnixTimestamp(unixTimestamp, true),
         _sourceId
     );
 }

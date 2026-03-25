@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/solarbrowsing/tasks/helioviewerdownloadtask.h>
+#include <modules/solarbrowsing/util/solarbrowsinghelper.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/json.h>
@@ -32,7 +33,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <scn/scan.h>
 #include <atomic>
-#include <ctime>
 #include <execution>
 #include <format>
 #include <mutex>
@@ -168,20 +168,7 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
 
     size_t count = 0;
     for (double unixTimestamp : frames) {
-        std::time_t timestamp = static_cast<std::time_t>(unixTimestamp);
-        std::tm* utcTime = std::gmtime(&timestamp);
-        std::string utcTimeString = std::format(
-            "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}",
-            utcTime->tm_year + 1900,
-            utcTime->tm_mon + 1,
-            utcTime->tm_mday,
-            utcTime->tm_hour,
-            utcTime->tm_min,
-            utcTime->tm_sec
-        );
-        const Time time = Time(utcTimeString);
-
-        epochAsIsoString.emplace_back(time.ISO8601());
+        epochAsIsoString.emplace_back(isoStringFromUnixTimestamp(unixTimestamp, true));
         count++;
         progressCallback(static_cast<float>(count) / static_cast<float>(frames.size()));
     }

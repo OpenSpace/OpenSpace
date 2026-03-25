@@ -95,7 +95,6 @@ private:
     double j2000FromUnix(double unixTimestamp) const;
     std::filesystem::path expectedFilename(const std::string& isoTime) const;
     std::string j2000ToIso(double j2000) const;
-    std::string unixToIso(double unixTimestamp) const;
     std::string frameListingUrl(double beginJ2000, double endJ2000) const;
     std::string imageUrl(double unixTimestamp) const;
 
