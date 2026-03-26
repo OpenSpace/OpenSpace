@@ -30,7 +30,7 @@
 #include <openspace/navigation/orbitalnavigator/joystickcamerastates.h>
 #include <openspace/navigation/orbitalnavigator/mousecamerastates.h>
 #include <openspace/navigation/orbitalnavigator/scriptcamerastates.h>
-#include <openspace/navigation/orbitalnavigator//touchcamerastates.h>
+#include <openspace/navigation/orbitalnavigator/touchcamerastates.h>
 #include <openspace/navigation/orbitalnavigator/websocketcamerastates.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
