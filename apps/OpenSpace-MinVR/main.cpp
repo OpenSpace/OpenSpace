@@ -43,9 +43,11 @@
 
 // @TODO:  Add Spout support
 // @TODO:  Reintroduce commandline-parsing
+// @TODO:  Implement time navigation feature
 // @TODO:  Prevent a third window to open that immediately crashes
 
 // @TODO:  Proper check if the current instance is the master:
+// @TODO:  Implement time navigation feature
 
 using namespace MinVR;
 using namespace openspace;
@@ -87,11 +89,17 @@ struct {
 } keyboardState;
 
 bool HasInitializedGL = false;
-std::array<float, 30> LastFrametimes = { 1.f / 60.f }; // we can be optimistic here
+bool HasInitializedTimeNavigation = false;
+std::array<float, 30> LastFrametimes = { 1.f / 60.f };
+std::array<float, 4> LastTimeNavigationFrametimes = { 1.f / 60.f }; // we can be optimistic here
 constexpr std::string_view MasterNode = "/MinVR/Desktop1";
+constexpr std::string_view TimeNavigationNode = "/MinVR/TimeNavigation";
 bool IsMasterNode = false;
+bool IsTimeNavigationNode = false;
 uint64_t FrameNumber = 0;
+uint64_t TimeNavigationFrameNumber = 0;
 std::chrono::time_point<std::chrono::high_resolution_clock> lastFrameTime;
+std::chrono::time_point<std::chrono::high_resolution_clock> lastTimeNavigationTime;
 
 } // namespace
 
