@@ -259,7 +259,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridType(GridTypeInfo)
-    , _stepSize(StepSizeInfo, 0.01f, 0.001f, 0.001f)
+    , _stepSize(StepSizeInfo, 0.01f, 0.001f, 0.01f, 0.001)
     , _brightness(BrightnessInfo, 0.33f, 0.f, 1.f)
     , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
     , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
