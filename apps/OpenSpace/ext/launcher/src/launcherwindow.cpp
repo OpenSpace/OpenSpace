@@ -38,13 +38,14 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
 #include <sgct/config.h>
-#include <QCheckbox>
+#include <QComboBox>
 #include <QFile>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QStandardItemModel>
 #include <QVBoxLayout>
 #include <cassert>
 #include <iostream>
@@ -81,17 +82,22 @@ namespace {
         constexpr QRect EditProfileButton(
             LeftRuler, TopRuler + 180, SmallItemWidth, SmallItemHeight
         );
-        constexpr QRect AddonBox(LeftRuler + ItemWidth + 10, TopRuler + 110, 160, 100);
-        constexpr QRect OptionsLabel(LeftRuler + 10, TopRuler + 230, 151, 24);
-        constexpr QRect WindowConfigBox(LeftRuler, TopRuler + 260, ItemWidth, ItemHeight);
+        constexpr QRect AddonBox(
+            LeftRuler + 10,
+            TopRuler + 215,
+            SmallItemWidth,
+            SmallItemHeight
+        );
+        constexpr QRect OptionsLabel(LeftRuler + 10, TopRuler + 255, 151, 24);
+        constexpr QRect WindowConfigBox(LeftRuler, TopRuler + 285, ItemWidth, ItemHeight);
         constexpr QRect NewWindowButton(
-            LeftRuler + 160, TopRuler + 330, SmallItemWidth, SmallItemHeight
+            LeftRuler + 160, TopRuler + 355, SmallItemWidth, SmallItemHeight
         );
         constexpr QRect EditWindowButton(
-            LeftRuler, TopRuler + 330, SmallItemWidth, SmallItemHeight
+            LeftRuler, TopRuler + 355, SmallItemWidth, SmallItemHeight
         );
         constexpr QRect StartButton(
-            LeftRuler, TopRuler + 400, ItemWidth, ItemHeight
+            LeftRuler, TopRuler + 425, ItemWidth, ItemHeight
         );
         constexpr QRect VersionString(
             5, MainScreenHeight - SmallItemHeight, ItemWidth, SmallItemHeight
@@ -240,28 +246,6 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         this, &LauncherWindow::updateStartButton
     );
 
-    _addonBox.container = new QWidget(centralWidget);
-    _addonBox.container->setObjectName("addons");
-    _addonBox.container->move(geometry::AddonBox.x(), geometry::AddonBox.top());
-    _addonBox.container->setMinimumWidth(geometry::AddonBox.width());
-    _addonBox.container->setMaximumWidth(geometry::AddonBox.width());
-    _addonBox.container->setAccessibleName("Select Add-Ons");
-    _addonBox.layout = new QVBoxLayout(_addonBox.container);
-    _addonBox.layout->setSpacing(0);
-    _addonBox.title = new QLabel("Add-Ons");
-    _addonBox.title->setObjectName("title");
-    _addonBox.layout->addWidget(_addonBox.title);
-    updateAddonsBox(globalConfig.profile.profile + ".profile");
-    for (const std::string& addon : globalConfig.profile.addons) {
-        for (QCheckBox* cb : _addonBox.elements) {
-            std::string id = cb->property("id").toString().toStdString();
-            if (id == addon) {
-                cb->setChecked(true);
-            }
-        }
-    }
-
-
     _editProfileButton = new QPushButton("Edit", centralWidget);
     _editProfileButton->setObjectName("small");
     _editProfileButton->setGeometry(geometry::EditProfileButton);
@@ -313,6 +297,23 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         );
         menu->addActions({ newEmpty, newFromCurrent });
         newProfileButton->setMenu(menu);
+    }
+
+    _addonBox.combobox = new QComboBox(centralWidget);
+    _addonBox.combobox->setObjectName("addons");
+    _addonBox.combobox->setGeometry(geometry::AddonBox);
+    _addonBox.combobox->setAccessibleName("Select Add-Ons");
+    _addonBox.model = new QStandardItemModel;
+    _addonBox.combobox->setModel(_addonBox.model);
+    updateAddonsBox(globalConfig.profile.profile + ".profile");
+    for (const std::string& addon : globalConfig.profile.addons) {
+        for (int i = 0; i < _addonBox.model->rowCount(); i++) {
+            QStandardItem* item = _addonBox.model->item(i);
+            std::string id = item->data().toString().toStdString();
+            if (id == addon) {
+                item->setData(Qt::Checked, Qt::CheckStateRole);
+            }
+        }
     }
 
 
@@ -729,11 +730,8 @@ void LauncherWindow::updateStartButton() const {
 }
 
 void LauncherWindow::updateAddonsBox(const std::string& profile) {
-    // First delete the old addons
-    for (QCheckBox* cb : _addonBox.elements) {
-        delete cb;
-    }
-    _addonBox.elements.clear();
+    _addonBox.model->clear();
+    _addonBox.combobox->setPlaceholderText("Addons");
 
     // Then recreate the new ones
     const std::filesystem::path coreCandidate = _profilePath / profile;
@@ -749,24 +747,33 @@ void LauncherWindow::updateAddonsBox(const std::string& profile) {
         std::filesystem::exists(userCandidate) ? userCandidate : coreCandidate
     );
 
-    if (p.addons.empty()) {
-        _addonBox.container->hide();
-        return;
+    auto toItem = [](const Addon& addon) {
+        QStandardItem* item = new QStandardItem(QString::fromStdString(addon.name));
+        item->setData(QString::fromStdString(addon.identifier));
+        item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+        item->setData(Qt::Unchecked, Qt::CheckStateRole);
+        return item;
+    };
+
+    const bool hasAddons = !p.addons.custom.empty() || !p.addons.recommended.empty();
+
+    if (hasAddons) {
+        QStandardItem* header = new QStandardItem("Recommended");
+        header->setEnabled(false);
+        _addonBox.model->appendRow(header);
+    }
+    // First the custom
+    for (const Addon& addon : p.addons.custom) {
+        QStandardItem* i = toItem(addon);
+        _addonBox.model->appendRow(i);
+    }
+    // Then the recommended
+    for (const Addon& addon : p.addons.recommended) {
+        QStandardItem* i = toItem(addon);
+        _addonBox.model->appendRow(i);
     }
 
-    for (auto& [key, variant] : p.addons) {
-        QCheckBox* cb = new QCheckBox(QString::fromStdString(variant.name));
-        cb->setChecked(variant.isEnabled);
-        cb->setToolTip(QString::fromStdString(variant.description));
-        cb->setProperty("id", QString::fromStdString(key));
-
-        _addonBox.layout->addWidget(cb);
-        _addonBox.elements.push_back(cb);
-    }
-
-    _addonBox.layout->addStretch();
-    // We show it at the end as the call to `show` will cause the layout recalculation
-    _addonBox.container->show();
+    _addonBox.combobox->setEnabled(hasAddons);
 }
 
 bool LauncherWindow::wasLaunchSelected() const {
@@ -776,9 +783,12 @@ bool LauncherWindow::wasLaunchSelected() const {
 std::pair<std::string, std::vector<std::string>> LauncherWindow::selectedProfile() const {
     const std::string profile = std::get<1>(_profileBox->currentSelection());
     std::vector<std::string> variants;
-    for (QCheckBox* cb : _addonBox.elements) {
-        if (cb->isChecked()) {
-            const std::string id = cb->property("id").toString().toStdString();
+    for (int i = 0; i < _addonBox.model->rowCount(); i++) {
+        QStandardItem* item = _addonBox.model->item(i);
+        const int state = item->data(Qt::CheckStateRole).toInt();
+        const bool checked = state == Qt::Checked;
+        if (checked) {
+            const std::string id = item->data().toString().toStdString();
             variants.push_back(id);
         }
     }

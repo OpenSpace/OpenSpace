@@ -119,6 +119,75 @@ namespace openspace {
 // Current version:
 //
 
+static void to_json(nlohmann::json& j, const Addon::Version& v) {
+    j["major"] = v.major;
+    j["minor"] = v.minor;
+}
+
+static void from_json(const nlohmann::json& j, Addon::Version& v) {
+    checkValue(j, "major", &nlohmann::json::is_number, "version", false);
+    checkValue(j, "minor", &nlohmann::json::is_number, "version", false);
+    checkExtraKeys(j, "version", { "major", "minor" });
+
+    j["major"].get_to(v.major);
+    j["minor"].get_to(v.minor);
+}
+
+static void from_json(const nlohmann::json& j, Addon& v) {
+    checkValue(j, "version", &nlohmann::json::is_object, "version", false);
+    checkValue(j, "identifier", &nlohmann::json::is_string, "identifier", false);
+    checkValue(j, "name", &nlohmann::json::is_string, "name", false);
+    checkValue(j, "assets", &nlohmann::json::is_array, "assets", false);
+    checkValue(j, "description", &nlohmann::json::is_string, "description", true);
+
+    j["version"].get_to(v.version);
+    j["identifier"].get_to(v.identifier);
+    j["name"].get_to(v.name);
+    if (j.find("description") != j.end()) {
+        j["description"].get_to(v.description);
+    }
+    j["assets"].get_to(v.assets);
+}
+
+static void to_json(nlohmann::json& j, const Addon& v) {
+    j["version"] = Addon::CurrentVersion;
+    j["identifier"] = v.identifier;
+    j["name"] = v.name;
+    if (!v.description.empty()) {
+        j["description"] = v.description;
+    }
+    j["assets"] = v.assets;
+}
+
+static Addon loadAddon(const std::filesystem::path& path) {
+    ghoul_assert(std::filesystem::is_regular_file(path), "Path must exist");
+
+    std::ifstream inFile = std::ifstream(path, std::ifstream::in);
+    if (!inFile.is_open()) {
+        throw ghoul::RuntimeError(std::format(
+            "Exception opening profile file for read '{}'", path
+        ));
+    }
+
+    const std::string content = std::string(
+        std::istreambuf_iterator<char>(inFile),
+        std::istreambuf_iterator<char>()
+    );
+
+    try {
+        nlohmann::json addon = nlohmann::json::parse(content);
+        Addon res = addon.get<Addon>();
+        return res;
+    }
+    catch (const nlohmann::json::exception& e) {
+        std::string err = e.what();
+        throw Profile::ParsingError(
+            Profile::ParsingError::Severity::Error,
+            std::move(err)
+        );
+    }
+}
+
 static void to_json(nlohmann::json& j, const Profile::Version& v) {
     j["major"] = v.major;
     j["minor"] = v.minor;
@@ -402,24 +471,43 @@ static void to_json(nlohmann::json& j, const Profile::CameraNavState& v) {
     }
 }
 
-static void from_json(const nlohmann::json& j, Profile::Addon& v) {
-    checkValue(j, "name", &nlohmann::json::is_string, "name", false);
-    checkValue(j, "assets", &nlohmann::json::is_array, "assets", false);
-    checkValue(j, "description", &nlohmann::json::is_string, "description", true);
+static void from_json(const nlohmann::json& j, Profile::Addons& v) {
+    checkValue(j, "recommended", &nlohmann::json::is_array, "recommended", true);
+    checkValue(j, "custom", &nlohmann::json::is_array, "custom", true);
 
-    j["name"].get_to(v.name);
-    if (j.find("description") != j.end()) {
-        j["description"].get_to(v.description);
+    if (j.find("recommended") != j.end()) {
+        j["recommended"].get_to(v.recommendedPaths);
+        // The recommended list in the profile is just a list of paths but we want to have
+        // the addons as a fully loaded entity
+        for (const std::string& r : v.recommendedPaths) {
+            const std::filesystem::path p =
+                absPath(std::format("${{PROFILES}}/{}.addon", r));
+            if (!std::filesystem::exists(p)) {
+                LERRORC(
+                    "Profile",
+                    std::format("Unable to find recommended addon '{}'", p)
+                );
+                continue;
+            }
+            Addon addon = loadAddon(p);
+            v.recommended.push_back(std::move(addon));
+        }
     }
-    j["assets"].get_to(v.assets);
+    if (j.find("custom") != j.end()) {
+        j["custom"].get_to(v.custom);
+    }
 }
 
-static void to_json(nlohmann::json& j, const Profile::Addon& v) {
-    j["name"] = v.name;
-    if (!v.description.empty()) {
-        j["description"] = v.description;
+static void to_json(nlohmann::json& j, const Profile::Addons& v) {
+    if (!v.custom.empty()) {
+        j["custom"] = v.custom;
     }
-    j["assets"] = v.assets;
+    if (!v.recommendedPaths.empty()) {
+        j["recommended"] = v.recommendedPaths;
+    }
+
+    // We don't serialize the realized Addon struct that come from the recommended paths
+    // on purpose
 }
 
 static void from_json(const nlohmann::json& j, Profile::CameraNavState& v) {
@@ -782,7 +870,7 @@ std::string Profile::serialize() const {
         r["panel_visibility"] = uiPanelVisibility;
     }
 
-    if (!addons.empty()) {
+    if (!addons.recommended.empty() || !addons.custom.empty()) {
         r["addons"] = addons;
     }
 

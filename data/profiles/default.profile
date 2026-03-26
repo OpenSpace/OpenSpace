@@ -8,67 +8,12 @@
     "scene/solarsystem/planets/earth/noaa-sos/overlays/latlon_grid-white"
   ],
   "addons": {
-    "minor_moons": {
-      "name": "Minor Moons",
-      "description": "Includes the minor moons of the outer solar system planets Jupiter, Saturn, Uranus, and Neptune.",
-      "assets": [
-        "scene/solarsystem/planets/jupiter/minor_moons",
-        "scene/solarsystem/planets/saturn/minor_moons",
-        "scene/solarsystem/planets/uranus/minor_moons",
-        "scene/solarsystem/planets/neptune/minor_moons"
-      ]
-    },
-    "dwarf_planets": {
-      "name": "Dwarf Planets",
-      "description": "Includes the various dwarf planets such as Ceres, Gonggong, Sedna, Vesta, etc.",
-      "assets": [
-        "scene/solarsystem/dwarf_planets/ceres/ceres",
-        "scene/solarsystem/dwarf_planets/ceres/default_layers",
-        "scene/solarsystem/dwarf_planets/eris/eris",
-        "scene/solarsystem/dwarf_planets/gonggong/gonggong",
-        "scene/solarsystem/dwarf_planets/haumea/haumea",
-        "scene/solarsystem/dwarf_planets/makemake/makemake",
-        "scene/solarsystem/dwarf_planets/orcus/orcus",
-        "scene/solarsystem/dwarf_planets/pluto/pluto",
-        "scene/solarsystem/dwarf_planets/pluto/default_layers",
-        "scene/solarsystem/dwarf_planets/pluto/charon/charon",
-        "scene/solarsystem/dwarf_planets/pluto/charon/default_layers",
-        "scene/solarsystem/dwarf_planets/quaoar/quaoar",
-        "scene/solarsystem/dwarf_planets/sedna/sedna",
-        "scene/solarsystem/dwarf_planets/vesta/vesta"
-      ]
-    },
-    "asteroids": {
-      "name": "Asteroids",
-      "description": "Includes asteroids from the JPL Horizons Small-Body Database and using their categories.",
-      "assets": [
-        "scene/solarsystem/sssb/amor_asteroid",
-        "scene/solarsystem/sssb/apollo_asteroid",
-        "scene/solarsystem/sssb/aten_asteroid",
-        "scene/solarsystem/sssb/atira_asteroid",
-        "scene/solarsystem/sssb/centaur_asteroid",
-        "scene/solarsystem/sssb/chiron-type_comet",
-        "scene/solarsystem/sssb/encke-type_comet",
-        "scene/solarsystem/sssb/halley-type_comet",
-        "scene/solarsystem/sssb/inner_main_belt_asteroid",
-        "scene/solarsystem/sssb/jupiter-family_comet",
-        "scene/solarsystem/sssb/jupiter_trojan_asteroid",
-        "scene/solarsystem/sssb/main_belt_asteroid",
-        "scene/solarsystem/sssb/mars-crossing_asteroid",
-        "scene/solarsystem/sssb/outer_main_belt_asteroid",
-        "scene/solarsystem/sssb/pha",
-        "scene/solarsystem/sssb/transneptunian_object_asteroid"
-      ]
-    },
-    "interstellar": {
-      "name": "Interstellar",
-      "description": "Includes the interstellar objects that passed through the solar system.",
-      "assets": [
-        "scene/solarsystem/interstellar/c-2019_q4_borisov",
-        "scene/solarsystem/interstellar/oumuamua",
-        "scene/solarsystem/interstellar/3i_atlas"
-      ]
-    }
+    "recommended": [
+      "addons/asteroids",
+      "addons/dwarf_planets",
+      "addons/interstellar",
+      "addons/minor_moons"
+    ]
   },
   "camera": {
     "altitude": 17000000.0,

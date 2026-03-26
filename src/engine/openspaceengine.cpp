@@ -495,13 +495,34 @@ void OpenSpaceEngine::initialize() {
 
     // Enable the add-ons
     for (const std::string& addon : global::configuration->profile.addons) {
-        auto it = global::profile->addons.find(addon);
-        if (it == global::profile->addons.end()) {
+        auto findIdentifier = [&addon](const Addon& a) {
+            return a.identifier == addon;
+        };
+
+        auto iRecommended = std::find_if(
+            global::profile->addons.recommended.begin(),
+            global::profile->addons.recommended.end(),
+            findIdentifier
+        );
+        if (iRecommended != global::profile->addons.recommended.end()) {
+            iRecommended->isEnabled = true;
+        }
+
+        auto iCustom = std::find_if(
+            global::profile->addons.custom.begin(),
+            global::profile->addons.custom.end(),
+            findIdentifier
+        );
+        if (iCustom != global::profile->addons.custom.end()) {
+            iCustom->isEnabled = true;
+        }
+
+        if (iRecommended == global::profile->addons.recommended.end() &&
+            iCustom == global::profile->addons.custom.end())
+        {
             LWARNING(std::format("Could find requested variant '{}'", addon));
             continue;
         }
-
-        it->second.isEnabled = true;
     }
 
 
@@ -860,7 +881,16 @@ void OpenSpaceEngine::loadAssets() {
     }
 
     // Load all assets in enabled add-ons
-    for (auto& [_, addon] : global::profile->addons) {
+    for (const Addon& addon : global::profile->addons.custom) {
+        if (!addon.isEnabled) {
+            continue;
+        }
+
+        for (const std::string& a : addon.assets) {
+            _assetManager->add(a);
+        }
+    }
+    for (const Addon& addon : global::profile->addons.recommended) {
         if (!addon.isEnabled) {
             continue;
         }

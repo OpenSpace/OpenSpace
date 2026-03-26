@@ -33,10 +33,11 @@
 #include <string>
 
 class QBoxLayout;
-class QCheckBox;
+class QComboBox;
 class QKeyEvent;
 class QLabel;
 class QPushButton;
+class QStandardItemModel;
 class SplitComboBox;
 
 namespace openspace { struct Configuration; }
@@ -133,10 +134,8 @@ private:
 
     SplitComboBox* _profileBox = nullptr;
     struct {
-        QWidget* container = nullptr;
-        QBoxLayout* layout = nullptr;
-        QLabel* title = nullptr;
-        std::vector<QCheckBox*> elements;
+        QComboBox* combobox = nullptr;
+        QStandardItemModel* model = nullptr;
     } _addonBox;
     SplitComboBox* _windowConfigBox = nullptr;
     QPushButton* _editProfileButton = nullptr;
