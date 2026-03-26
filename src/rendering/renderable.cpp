@@ -124,7 +124,7 @@ namespace {
 namespace openspace {
 
 Documentation Renderable::Documentation() {
-    return codegen::doc<Parameters>("renderable");
+    return codegen::doc<Parameters>("core_renderable");
 }
 
 ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(

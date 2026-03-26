@@ -265,8 +265,8 @@ protected:
     /// Texture index in dataset to index in vector of textures
     std::unordered_map<int, size_t> _indexInDataToTextureIndex;
 
-    /// Resolution/format to index in textures vector (used to generate one texture
-    /// array per unique format)
+    /// Resolution/format to index in textures vector (used to generate one texture array
+    /// per unique format)
     std::unordered_map<TextureFormat, std::vector<size_t>, TextureFormatHash>
         _textureMapByFormat;
 

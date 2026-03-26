@@ -79,7 +79,7 @@ namespace {
 namespace openspace {
 
 Documentation ImageSequenceTileProvider::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_imagesequencetileprovider");
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_imagesequence");
 }
 
 ImageSequenceTileProvider::ImageSequenceTileProvider(const ghoul::Dictionary& dictionary)

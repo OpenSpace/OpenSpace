@@ -450,6 +450,7 @@ public:
      * \p url into memory.
      *
      * \param url The URL whose contents should be downloaded
+     * \param failureVerbosity The level at which error should be logged if they appear
      */
     explicit HttpMemoryDownload(std::string url,
         ghoul::logging::LogLevel failureVerbosity = ghoul::logging::LogLevel::Error);

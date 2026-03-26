@@ -340,7 +340,7 @@ namespace {
         // A dictionary specifying details on how to load the dataset. Updating the data
         // mapping will lead to a new cached version of the dataset.
         std::optional<ghoul::Dictionary> dataMapping
-            [[codegen::reference("dataloader_datamapping")]];
+            [[codegen::reference("core_dataloader_datamapping")]];
 
         struct Texture {
             // [[codegen::verbatim(TextureEnabledInfo.description)]]
@@ -414,7 +414,7 @@ namespace {
 
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("labelscomponent")]];
+            [[codegen::reference("core_labelscomponent")]];
 
         struct SizeSettings {
             // Settings related to scaling the points based on data.
@@ -443,7 +443,7 @@ namespace {
 
             // Settings related to the choice of color map, parameters, etc.
             std::optional<ghoul::Dictionary> colorMapping
-                [[codegen::reference("colormappingcomponent")]];
+                [[codegen::reference("core_colormappingcomponent")]];
 
             // [[codegen::verbatim(EnableOutlineInfo.description)]]
             std::optional<bool> enableOutline;
@@ -493,7 +493,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderablePointCloud::Documentation() {
-    return codegen::doc<Parameters>("base_renderablepointcloud");
+    return codegen::doc<Parameters>("base_renderable_pointcloud");
 }
 
 RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictionary)
@@ -998,7 +998,7 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
 
     bool useAlpha = (t->numberOfChannels() > 3) && _texture.useAlphaChannel;
 
-    LINFOC("RenderablePlanesCloud", std::format("Loaded texture {}", path));
+    LINFO(std::format("Loaded texture {}", path));
 
     TextureFormat format = {
         .resolution = glm::uvec2(t->dimensions().x, t->dimensions().y),

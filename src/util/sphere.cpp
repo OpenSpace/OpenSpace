@@ -104,18 +104,18 @@ void Sphere::initialize() {
     for (int i = 1; i <= _nSegments; i++) {
         for (int j = 0; j < _nSegments; j++) {
             const int t = _nSegments + 1;
-            indices[nr] = t * (i - 1) + j + 0; //1
+            indices[nr] = t * (i - 1) + j + 0; // 1
             nr++;
-            indices[nr] = t * (i + 0) + j + 0; //2
+            indices[nr] = t * (i + 0) + j + 0; // 2
             nr++;
-            indices[nr] = t * (i + 0) + j + 1; //3
+            indices[nr] = t * (i + 0) + j + 1; // 3
             nr++;
 
-            indices[nr] = t * (i - 1) + j + 0; //4
+            indices[nr] = t * (i - 1) + j + 0; // 4
             nr++;
-            indices[nr] = t * (i + 0) + j + 1; //5
+            indices[nr] = t * (i + 0) + j + 1; // 5
             nr++;
-            indices[nr] = t * (i - 1) + j + 1; //6
+            indices[nr] = t * (i - 1) + j + 1; // 6
             nr++;
         }
     }

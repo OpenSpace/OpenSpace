@@ -163,7 +163,7 @@ private:
 
     /**
      * Decelerate the velocities. Function is called in step() but is dereferenced from
-     * frame time to assure same behaviour on all systems.
+     * frame time to assure same behavior on all systems.
      */
     void decelerate(double dt);
 

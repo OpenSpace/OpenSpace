@@ -656,7 +656,7 @@ check_files(
 )
 check_files(
   [basePath + 'modules/**/*.inl'],
-  [basePath + 'modules/**/ext/**/*.h'],
+  [basePath + 'modules/**/ext/**/*.inl'],
   'openspace_module',
   check_inline_file
 )
@@ -696,7 +696,9 @@ check_files(
 )
 check_files(
   [basePath + 'ext/ghoul/src/**/*.cpp'],
-  [],
+  [
+    basePath + 'ext/ghoul/src/misc/levmarqsolver.cpp'
+  ],
   'ghoul',
   check_source_file
 )

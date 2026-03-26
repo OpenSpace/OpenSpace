@@ -142,7 +142,7 @@ private:
     /// `true`: This angle determines where the object is placed within a vertical plane
     /// of reference in relation to the camera, i.e the height in relation to the
     /// horizontal plane of reference.
-    /// 
+    ///
     /// `false`: The elevation angle sent to the Open Sound Control receiver is always set
     /// to 0.0
     BoolProperty _includeElevationAngle;

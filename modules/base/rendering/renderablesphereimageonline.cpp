@@ -67,7 +67,7 @@ namespace {
     // This `Renderable` shows a sphere with an image provided by an online URL. The image
     // will be downloaded when the `Renderable` is added to a scene graph node. To show a
     // sphere with an image from a local file, see
-    // [RenderableSphereImageLocal](#base_screenspace_image_local).
+    // [RenderableSphereImageLocal](#base_screenspace_imagelocal).
     //
     // Per default, the sphere uses an equirectangular projection for the image mapping
     // and hence expects an equirectangular image. However, it can also be used to show
@@ -83,7 +83,7 @@ namespace openspace {
 
 Documentation RenderableSphereImageOnline::Documentation() {
     return codegen::doc<Parameters>(
-        "base_renderable_sphere_image_online",
+        "base_renderable_sphereimageonline",
         RenderableSphere::Documentation()
     );
 }

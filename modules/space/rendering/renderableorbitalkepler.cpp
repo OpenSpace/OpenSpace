@@ -282,7 +282,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableOrbitalKepler::Documentation() {
-    return codegen::doc<Parameters>("space_renderableorbitalkepler");
+    return codegen::doc<Parameters>("space_renderable_orbitalkepler");
 }
 
 RenderableOrbitalKepler::Appearance::Appearance()

@@ -62,11 +62,11 @@ public:
      * The constructor of PropertyOwner.
      *
      * \param info The PropertyOwnerInfo struct that contains the
-     *        #PropertyOwnerInfo::identifier, #PropertyOwnerInfo::guiName, and
-     *        #PropertyOwnerInfo::description of this PropertyOwner
+     *        PropertyOwnerInfo::identifier, PropertyOwnerInfo::guiName, and
+     *        PropertyOwnerInfo::description of this PropertyOwner
      *
-     * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any whitespaces
-     * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any `.`
+     * \pre The \p info 's PropertyOwnerInfo::identifier must not contain any whitespaces
+     * \pre The \p info 's PropertyOwnerInfo::identifier must not contain any `.`
      */
     explicit PropertyOwner(PropertyOwnerInfo info);
 
@@ -264,7 +264,9 @@ public:
      */
     void addProperty(Property* prop);
 
-    /// \see Property::addProperty(Property*)
+    /**
+     * \see Property::addProperty(Property*).
+     */
     void addProperty(Property& prop);
 
     /**
@@ -277,7 +279,9 @@ public:
      */
     void addPropertySubOwner(PropertyOwner* owner);
 
-    /// \see PropertyOwner::addPropertySubOwner(PropertyOwner*)
+    /**
+     * \see PropertyOwner::addPropertySubOwner(PropertyOwner*).
+     */
     void addPropertySubOwner(PropertyOwner& owner);
 
     /**
@@ -289,7 +293,9 @@ public:
      */
     void removeProperty(Property* prop);
 
-    /// \see PropertyOwner::removeProperty(Property*)
+    /**
+     * \see PropertyOwner::removeProperty(Property*).
+     */
     void removeProperty(Property& prop);
 
     /**
@@ -299,7 +305,9 @@ public:
      */
     void removePropertySubOwner(PropertyOwner* owner);
 
-    /// \see PropertyOwner::removePropertySubOwner(PropertyOwner*)
+    /**
+     * \see PropertyOwner::removePropertySubOwner(PropertyOwner*).
+     */
     void removePropertySubOwner(PropertyOwner& owner);
 
     /**

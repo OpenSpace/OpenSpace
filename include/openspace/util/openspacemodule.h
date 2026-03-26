@@ -54,7 +54,9 @@ public:
      */
     explicit OpenSpaceModule(std::string name);
 
-    /// Default destructor
+    /**
+     * Default destructor.
+     */
     ~OpenSpaceModule() override = default;
 
     /**
@@ -112,14 +114,6 @@ public:
      * \return A list of libraries defined by items contained in this OpenSpaceModule
      */
     virtual std::vector<LuaLibrary> luaLibraries() const;
-
-    /**
-     * Returns the minimum required OpenGL version of this OpenSpaceModule. Unless
-     * overwritten, it returns an OpenGL version of `3.3`.
-     *
-     * \return The minimum required OpenGL version of this OpenSpaceModule
-     */
-    virtual ghoul::systemcapabilities::Version requiredOpenGLVersion() const;
 
     /**
      * Returns the list of required OpenGL extensions for this OpenSpaceModule. Unless

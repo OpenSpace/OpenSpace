@@ -130,8 +130,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableTrail)]] Parameters {
         // A translation used to compute locations along the path.
-        ghoul::Dictionary translation
-            [[codegen::reference("core_transform_translation")]];
+        ghoul::Dictionary translation [[codegen::reference("core_translation")]];
 
         // [[codegen::verbatim(LineColorInfo.description)]]
         glm::vec3 color [[codegen::color()]];
@@ -166,7 +165,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableTrail::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_renderabletrail");
+    return codegen::doc<Parameters>("base_renderable_trail");
 }
 
 RenderableTrail::Appearance::Appearance()

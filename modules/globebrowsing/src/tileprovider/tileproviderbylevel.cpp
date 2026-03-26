@@ -69,7 +69,7 @@ namespace {
 namespace openspace {
 
 Documentation TileProviderByLevel::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_tileproviderbylevel");
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_bylevel");
 }
 
 TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {

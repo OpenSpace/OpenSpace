@@ -177,7 +177,7 @@ namespace openspace {
 
 Documentation RenderableInterpolatedPoints::Documentation() {
     return codegen::doc<Parameters>(
-        "base_renderableinterpolatedpoints",
+        "base_renderable_interpolatedpoints",
         RenderablePointCloud::Documentation()
     );
 }

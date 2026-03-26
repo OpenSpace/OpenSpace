@@ -259,7 +259,8 @@ namespace {
         // Renderable is specified, this scene graph node is an internal node and can be
         // used for either group children, or apply common transformations to a group of
         // children.
-        std::optional<ghoul::Dictionary> renderable [[codegen::reference("renderable")]];
+        std::optional<ghoul::Dictionary> renderable
+            [[codegen::reference("core_renderable")]];
 
         // [[codegen::verbatim(BoundingSphereInfo.description)]]
         std::optional<double> boundingSphere;
@@ -275,19 +276,18 @@ namespace {
             // and all its children. Depending on the 'Type' of the translation, this can
             // either be a static translation or a time-varying one.
             std::optional<ghoul::Dictionary> translation
-                [[codegen::reference("core_transform_translation")]];
+                [[codegen::reference("core_translation")]];
 
             // This nodes describes a rotation that is applied to the scene graph node and
             // all its children. Depending on the 'Type' of the rotation, this can either
             // be a static rotation or a time-varying one.
             std::optional<ghoul::Dictionary> rotation
-                [[codegen::reference("core_transform_rotation")]];
+                [[codegen::reference("core_rotation")]];
 
             // This node describes a scaling that is applied to the scene graph node and
             // all its children. Depending on the 'Type' of the scaling, this can either
             // be a static scaling or a time-varying one.
-            std::optional<ghoul::Dictionary> scale
-                [[codegen::reference("core_transform_scale")]];
+            std::optional<ghoul::Dictionary> scale [[codegen::reference("core_scale")]];
         };
 
         // This describes a set of transformations that are applied to this scene graph
@@ -329,7 +329,7 @@ namespace {
 
         // Specifies the time frame for when this node should be active.
         std::optional<ghoul::Dictionary> timeFrame
-            [[codegen::reference("core_time_frame")]];
+            [[codegen::reference("core_timeframe")]];
 
         // A tag or list of tags that can be used to reference to a group of scene graph
         // nodes.

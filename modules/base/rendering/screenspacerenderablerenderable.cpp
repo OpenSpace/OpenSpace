@@ -83,9 +83,9 @@ namespace {
     };
 
     // This [ScreenSpaceRenderable](#core_screenspacerenderable) object can render any
-    // [Renderable](#renderable) type into an image that is shown in screen space. This
-    // can be used to display a rendered object as an overlay in front of the regular 3D
-    // rendering of the scene.
+    // [Renderable](#core_renderable) type into an image that is shown in screen space.
+    // This can be used to display a rendered object as an overlay in front of the regular
+    // 3D rendering of the scene.
     //
     // Note that to use this `ScreenSpaceRenderable`, it might be necessary to specify the
     // `size` parameter, which determines the resolution of the inset window into which
@@ -98,32 +98,31 @@ namespace {
     struct [[codegen::Dictionary(ScreenSpaceRenderableRenderable)]] Parameters {
         std::optional<std::string> identifier [[codegen::private()]];
 
-        // The [Renderable](#renderable) object that is shown in this ScreenSpace object.
-        // See the list of creatable renderable objects for options that can be used for
-        // this type.
-        ghoul::Dictionary renderable [[codegen::reference("renderable")]];
+        // The [Renderable](#core_renderable) object that is shown in this ScreenSpace
+        // object. See the list of creatable renderable objects for options that can be
+        // used for this type.
+        ghoul::Dictionary renderable [[codegen::reference("core_renderable")]];
 
         struct Transform {
-            // The [Translation](#core_transform_translation) object that is used for the
-            // provided [Renderable](#renderable). If no value is specified, a
-            // [StaticTranslation](#base_transform_translation_static) is created instead.
+            // The [Translation](#core_translation) object that is used for the provided
+            // [Renderable](#core_renderable). If no value is specified, a
+            // [StaticTranslation](#base_translation_static) is created instead.
             std::optional<ghoul::Dictionary> translation
-                [[codegen::reference("core_transform_translation")]];
+                [[codegen::reference("core_translation")]];
 
-            // The [Rotation](#core_transform_rotation) object that is used for the
-            // provided [Renderable](#renderable). If no value is specified, a
-            // [StaticRotation](#base_transform_rotation_static) is created instead.
+            // The [Rotation](#core_rotation) object that is used for the provided
+            // [Renderable](#core_renderable). If no value is specified, a
+            // [StaticRotation](#base_rotation_static) is created instead.
             std::optional<ghoul::Dictionary> rotation
-                [[codegen::reference("core_transform_rotation")]];
+                [[codegen::reference("core_rotation")]];
 
-            // The [Scale](#core_transform_scale) object that is used for the provided
-            // [Renderable](#renderable). If no value is specified, a
-            // [StaticScale](#base_transform_scale_static) is created instead.
-            std::optional<ghoul::Dictionary> scale
-                [[codegen::reference("core_transform_scale")]];
+            // The [Scale](#core_scale) object that is used for the provided
+            // [Renderable](#core_renderable). If no value is specified, a
+            // [StaticScale](#base_scale_static) is created instead.
+            std::optional<ghoul::Dictionary> scale [[codegen::reference("core_scale")]];
         };
         // The collection of transformations that are applied to the
-        // [Renderable](#renderable) before it is shown on screen.
+        // [Renderable](#core_renderable) before it is shown on screen.
         std::optional<Transform> transform;
 
         // Specifies the start date that is used to control the renderable and the

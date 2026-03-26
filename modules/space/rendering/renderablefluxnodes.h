@@ -123,7 +123,7 @@ private:
     /// Number of states in the sequence
     uint32_t _nStates = 0;
 
-    /// Estimated end of sequence.
+    /// Estimated end of sequence
     double _sequenceEndTime;
     /// OpenGL Vertex Array Object
     GLuint _vao = 0;

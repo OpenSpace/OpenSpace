@@ -47,7 +47,7 @@ using namespace openspace;
 namespace {
 
 /**
- * Set the camera position by loading a [NavigationState](#core_navigation_state) from
+ * Set the camera position by loading a [NavigationState](#core_navigationstate) from
  * file. The file should be in json format, such as the output files of
  * `saveNavigationState`.
  *
@@ -67,7 +67,7 @@ namespace {
 }
 
 /**
- * Return the current [NavigationState](#core_navigation_state) as a Lua table.
+ * Return the current [NavigationState](#core_navigationstate) as a Lua table.
  *
  * By default, the reference frame will be picked based on whether the orbital navigator
  * is currently following the anchor node rotation. If it is, the anchor will be chosen as
@@ -98,7 +98,7 @@ namespace {
 }
 
 /**
- * Set the camera position from a provided [NavigationState](#core_navigation_state).
+ * Set the camera position from a provided [NavigationState](#core_navigationstate).
  *
  * \param navigationState A table describing the NavigationState to set
  * \param useTimeStamp If true, and the provided NavigationState includes a timestamp, the
@@ -116,8 +116,8 @@ namespace {
 }
 
 /**
- * Save the current [NavigationState](#core_navigation_state) to a file with the path
- * given by the first argument.
+ * Save the current [NavigationState](#core_navigationstate) to a file with the path given
+ * by the first argument.
  *
  * By default, the reference frame will be picked based on whether the orbital navigator
  * is currently following the anchor node rotation. If it is, the anchor will be chosen as
@@ -317,45 +317,45 @@ namespace {
 }
 
 struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
-    /// The current type of axis binding.
+    // The current type of axis binding.
     std::string type;
 
-    /// Whether the values are inverted.
+    // Whether the values are inverted.
     bool invert;
 
-    /// The type of joystick that this axis represents on the controller - either
-    /// `\"JoystickLike\"` or `\"TriggerLike\"`. A joystick is `\"TriggerLike\"` if it
-    /// can only be pressed or pushed in one direction. A `\"JoystickLike\"` axis can
-    /// be pushed in two directions; for example, left and right, or up and down.
+    // The type of joystick that this axis represents on the controller - either
+    // `\"JoystickLike\"` or `\"TriggerLike\"`. A joystick is `\"TriggerLike\"` if it can
+    // only be pressed or pushed in one direction. A `\"JoystickLike\"` axis can be pushed
+    // in two directions; for example, left and right, or up and down.
     std::string joystickType;
 
-    /// Whether or not this axis is “sticky”. An axis is “sticky” if, when you let go of
-    /// it, the values it represents in the software do not go back to the default.
+    // Whether or not this axis is “sticky”. An axis is “sticky” if, when you let go of
+    // it, the values it represents in the software do not go back to the default.
     bool isSticky;
 
-    /// Whether the camera movement for the axis is reversed. In the case of a
-    /// `\"JoystickLike\"` axis, this is the same as inverting the axis. However, in the
-    /// case of a `\"TriggerLike\" axis, this can reverse the camera movement for the
-    /// trigger.
+    // Whether the camera movement for the axis is reversed. In the case of a
+    // `\"JoystickLike\"` axis, this is the same as inverting the axis. However, in the
+    // case of a `\"TriggerLike\"` axis, this can reverse the camera movement for the
+    // trigger.
     bool flip;
 
-    /// Sensitivity value for this axis.
+    // Sensitivity value for this axis.
     double sensitivity;
 
-    /// The identifier (URI) of the property that is bound to this axes, if one is.
+    // The identifier (URI) of the property that is bound to this axes, if one is.
     std::optional<std::string> propertyUri;
 
-    /// If a property is bound to this axis, this is the min value that can be set using
-    /// the joystick input.
+    // If a property is bound to this axis, this is the min value that can be set using
+    // the joystick input.
     std::optional<float> minValue;
 
-    /// If a property is bound to this axis, this is the max value that can be set using
-    /// the joystick input.
+    // If a property is bound to this axis, this is the max value that can be set using
+    // the joystick input.
     std::optional<float> maxValue;
 
-    /// If a property is bound to this axis, this says whether the property changes should
-    /// be forwarded to other connected nodes or sessions (similarly to \"isLocal\" for
-    /// actions).
+    // If a property is bound to this axis, this says whether the property changes should
+    // be forwarded to other connected nodes or sessions (similarly to \"isLocal\" for
+    // actions).
     std::optional<bool> isRemote;
 };
 
@@ -977,7 +977,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
  * be included for the target up direction in the navigation state to be taken into
  * account.
  *
- * \param navigationState A [NavigationState](#core_navigation_state) to fly to
+ * \param navigationState A [NavigationState](#core_navigationstate) to fly to
  * \param duration An optional duration for the motion to take, in seconds. For example, a
  *        value of 5 means "fly to this position over a duration of 5 seconds"
  */
@@ -1133,7 +1133,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
  * Fade rendering to black, jump to the specified node, and then fade in. This is done by
  * triggering another script that handles the logic.
  *
- * \param navigationState A [NavigationState](#core_navigation_state) to jump to
+ * \param navigationState A [NavigationState](#core_navigationstate) to jump to
  * \param useTimeStamp if true, and the provided NavigationState includes a timestamp, the
  *        time will be set as well
  * \param fadeDuration An optional duration for the fading. If not included, the property

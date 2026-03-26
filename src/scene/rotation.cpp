@@ -46,7 +46,7 @@ namespace {
         // The time frame in which this `Rotation` is applied. If the in-game time is
         // outside this range, no rotation will be applied.
         std::optional<ghoul::Dictionary> timeFrame
-            [[codegen::reference("core_time_frame")]];
+            [[codegen::reference("core_timeframe")]];
     };
 } // namespace
 #include "rotation_codegen.cpp"
@@ -54,7 +54,7 @@ namespace {
 namespace openspace {
 
 Documentation Rotation::Documentation() {
-    return codegen::doc<Parameters>("core_transform_rotation");
+    return codegen::doc<Parameters>("core_rotation");
 }
 
 ghoul::mm_unique_ptr<Rotation> Rotation::createFromDictionary(

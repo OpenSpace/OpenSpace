@@ -126,7 +126,8 @@ namespace {
         std::optional<glm::vec2> size;
 
         // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<ghoul::Dictionary> labels [[codegen::reference("labelscomponent")]];
+        std::optional<ghoul::Dictionary> labels
+            [[codegen::reference("core_labelscomponent")]];
     };
 } // namespace
 #include "renderablegrid_codegen.cpp"

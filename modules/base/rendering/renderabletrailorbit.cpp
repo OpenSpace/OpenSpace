@@ -120,7 +120,7 @@ namespace openspace {
 
 Documentation RenderableTrailOrbit::Documentation() {
     return codegen::doc<Parameters>(
-        "base_renderable_renderabletrailorbit",
+        "base_renderable_trailorbit",
         RenderableTrail::Documentation()
     );
 }

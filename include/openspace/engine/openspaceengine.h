@@ -64,8 +64,7 @@ struct ShutdownInformation {
     bool inShutdown = false;
     /// Total amount of time the application will wait before actually shutting down
     float waitTime = 0.f;
-    /// Current state of the countdown; if it reaches '0', the application will
-    /// close
+    /// Current state of the countdown; if it reaches '0', the application will close
     float timer = 0.f;
 };
 

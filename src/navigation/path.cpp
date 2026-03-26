@@ -140,11 +140,11 @@ namespace {
         // (NavigationState): A navigation state that will be the target of the resulting
         // path.
         std::optional<ghoul::Dictionary> navigationState
-            [[codegen::reference("core_navigation_state")]];
+            [[codegen::reference("core_navigationstate")]];
 
         // A navigation state that determines the start state for the camera path.
         std::optional<ghoul::Dictionary> startState
-            [[codegen::reference("core_navigation_state")]];
+            [[codegen::reference("core_navigationstate")]];
 
         enum class [[codegen::map(openspace::Path::Type)]] PathType {
             AvoidCollision,

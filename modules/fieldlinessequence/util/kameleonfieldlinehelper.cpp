@@ -80,22 +80,6 @@ namespace openspace {
         FieldlinesState& state);
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
-/**
- * Traces field lines from the provided cdf file using kameleon and stores the data in
- * the provided FieldlinesState. Returns `false` if it fails to create a valid state.
- * Requires the kameleon module to be activated.
- *
- * \param state FieldlineState which should hold the extracted data
- * \param cdfPath `std::string` of the absolute path to a .cdf file
- * \param seedPoints Vector of seed points from which to trace field lines
- * \param tracingVar Which quantity to trace lines from. Typically "b" for magnetic field
- *        lines and "u" for velocity flow lines
- * \param extraVars Extra scalar quantities to be stored in the FieldlinesState; e.g. "T"
- *        for temperature, "rho" for density or "P" for pressure
- * \param extraMagVars Variables which should be used for extracting magnitudes, must be
- *        a multiple of 3; e.g. "ux", "uy" & "uz" to get the magnitude of the velocity
- *        vector at each line vertex
- */
 bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
                                  const std::unordered_map<std::string,
                                  std::vector<glm::vec3>>& seedMap,

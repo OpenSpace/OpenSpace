@@ -87,7 +87,7 @@ namespace {
 namespace openspace {
 
 Documentation ShadowComponent::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_shadows_component");
+    return codegen::doc<Parameters>("globebrowsing_shadowscomponent");
 }
 
 ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)

@@ -14,11 +14,10 @@ openspace.gaia.documentation = {
       old one will be removed.
 
       \\param identifier The identifier of the scene graph node with a
-                         [RenderableGaiaStars](#gaiamission_renderablegaiastars) to be
-                         filtered
+              [RenderableGaiaStars](#gaia_renderable_gaiastars) to be filtered
       \\param size The size of each dimension of the box, in Kiloparsec
       \\param position The position of the center of the box, specified in galactic
-                       coordinates in Kiloparsec
+              coordinates in Kiloparsec
     ]]
   },
   {
@@ -41,8 +40,7 @@ openspace.gaia.documentation = {
       the old one will be removed.
 
       \\param identifier The identifier of the scene graph node with a
-                         [RenderableGaiaStars](#gaiamission_renderablegaiastars) to be
-                         filtered
+              [RenderableGaiaStars](#gaia_renderable_gaiastars) to be filtered
       \\param radius The desired radius outside of the clipping sphere, in Kiloparsec
     ]]
   },

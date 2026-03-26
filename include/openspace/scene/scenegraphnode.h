@@ -188,7 +188,9 @@ private:
     BoolProperty _guiFocusable;
     FloatProperty _guiOrderingNumber;
 
-    /// Transformation defined by translation, rotation and scale
+    /**
+     * Transformation defined by translation, rotation and scale.
+     */
     struct {
         ghoul::mm_unique_ptr<Translation> translation;
         ghoul::mm_unique_ptr<Rotation> rotation;

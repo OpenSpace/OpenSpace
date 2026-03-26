@@ -73,7 +73,7 @@ namespace {
         // ScreenSpaceDashboard. This value must not be specified if `UseMainDashboard` is
         // specified.
         std::optional<std::vector<ghoul::Dictionary>>
-            items [[codegen::reference("dashboarditem")]];
+            items [[codegen::reference("core_dashboarditem")]];
     };
 } // namespace
 #include "screenspacedashboard_codegen.cpp"

@@ -172,7 +172,7 @@ bool ErrorHistogramManager::buildFromLeaf(unsigned int bstOffset,
             leafOffset.z += (octreeChild / 4) * childSize;
 
             octreeLevel++;
-        } while (octreeNode != unsigned int(-1));
+        } while (octreeNode != static_cast<unsigned int>(-1));
 
         bstRightOnly &= (bstNode % 2 == 0);
         bstNode = parentOffset(bstNode, 2);

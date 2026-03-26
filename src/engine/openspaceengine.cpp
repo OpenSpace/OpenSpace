@@ -304,6 +304,11 @@ void OpenSpaceEngine::initialize() {
 
     LTRACE("OpenSpaceEngine::initialize(begin)");
 
+    // Remove any previously existing temporary folder
+    if (std::filesystem::exists(absPath("${TEMPORARY}"))) {
+        std::filesystem::remove_all(absPath("${TEMPORARY}"));
+    }
+
     global::initialize();
     // Initialize the general capabilities component
     SysCap.addComponent(
@@ -544,19 +549,6 @@ void OpenSpaceEngine::initializeGL() {
     const std::string versionCheckUrl = global::configuration->versionCheckUrl;
     if (!versionCheckUrl.empty()) {
         global::versionChecker->requestLatestVersion(versionCheckUrl);
-    }
-
-    // Check the required OpenGL versions of the registered modules
-    const ghoul::systemcapabilities::Version version =
-        global::moduleEngine->requiredOpenGLVersion();
-    LINFO(std::format("Required OpenGL version: {}", ghoul::to_string(version)));
-
-    if (OpenGLCap.openGLVersion() < version) {
-        throw ghoul::RuntimeError(
-            "An included module required a higher OpenGL version than is supported on "
-            "this system",
-            "OpenSpaceEngine"
-        );
     }
 
     // Check the available OpenGL extensions against the required extensions

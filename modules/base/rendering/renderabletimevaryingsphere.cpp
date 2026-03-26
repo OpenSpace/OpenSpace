@@ -73,7 +73,7 @@ namespace openspace {
 
 Documentation RenderableTimeVaryingSphere::Documentation() {
     return codegen::doc<Parameters>(
-        "base_renderable_time_varying_sphere",
+        "base_renderable_timevaryingsphere",
         RenderableSphere::Documentation()
     );
 }

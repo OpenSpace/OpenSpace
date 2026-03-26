@@ -866,7 +866,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& sourceFrame,
     if (failed_c()) {
         throwSpiceError("");
     }
-    const SpiceBoolean success = (failed_c() != 0);
+    const SpiceBoolean success = (failed_c() == SPICEFALSE);
     reset_c();
     if (!success) {
         result = getEstimatedTransformMatrix(

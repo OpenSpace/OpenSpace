@@ -85,7 +85,7 @@ namespace {
 
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("labelscomponent")]];
+            [[codegen::reference("core_labelscomponent")]];
     };
 } // namespace
 #include "renderableconstellationsbase_codegen.cpp"

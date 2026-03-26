@@ -55,7 +55,7 @@ namespace {
 namespace openspace {
 
 Documentation ResourceSynchronization::Documentation() {
-    return codegen::doc<Parameters>("core_resourcesynchronization");
+    return codegen::doc<Parameters>("core_synchronization");
 }
 
 std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDictionary(

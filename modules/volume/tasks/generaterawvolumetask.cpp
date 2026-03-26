@@ -74,7 +74,7 @@ namespace {
 namespace openspace {
 
 Documentation GenerateRawVolumeTask::Documentation() {
-    return codegen::doc<Parameters>("generate_raw_volume_task");
+    return codegen::doc<Parameters>("volume_task_generaterawvolume");
 }
 
 GenerateRawVolumeTask::GenerateRawVolumeTask(const ghoul::Dictionary& dictionary) {

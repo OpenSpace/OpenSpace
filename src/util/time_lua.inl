@@ -204,7 +204,7 @@ namespace {
 }
 
 /**
- * Same behaviour as `setPause`, but with interpolation. That is, if it should be paused,
+ * Same behavior as `setPause`, but with interpolation. That is, if it should be paused,
  * the delta time will be interpolated to 0, and if unpausing, the delta time will be
  * interpolated to whatever delta time value is set.
  *

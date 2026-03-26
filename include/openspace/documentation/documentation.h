@@ -55,7 +55,9 @@ struct TestResult {
      * offense.
      */
     struct Offense {
-        /// The Reason for the offense
+        /**
+         * The reason for the offense.
+         */
         enum class Reason {
             /// Unknown reason
             Unknown,
@@ -71,7 +73,7 @@ struct TestResult {
         /// The offending key that caused the Offense. In the case of a nested table, this
         /// value will be the fully qualified name of the key
         std::string offender;
-        /// The Reason that caused this offense
+        /// The reason that caused this offense
         Reason reason = Reason::Unknown;
         /// An optional explanation for when a verification fails
         std::string explanation;
@@ -84,7 +86,9 @@ struct TestResult {
      * might be removed in a latter version.
      */
     struct Warning {
-        /// The reason for the warning
+        /**
+         * The reason for the warning.
+         */
         enum class Reason {
             /// The value is marked as deprecated and should not used
             Deprecated
@@ -93,7 +97,7 @@ struct TestResult {
         /// The offending key that caused the Warning. In the case of a nested table, this
         /// value will be the fully qualified name of the key
         std::string offender;
-        /// The Reason that caused this Warning
+        /// The reason that caused this Warning
         Reason reason;
     };
 

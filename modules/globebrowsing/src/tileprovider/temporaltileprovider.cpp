@@ -97,7 +97,7 @@ namespace {
         SpiceManager::ref().dateFromEphemerisTime(time, OutBuf, BufferSize, FormatBuf);
         return std::string_view(OutBuf, format.size());
     }
-    
+
     struct [[codegen::Dictionary(TemporalTileProvider)]] Parameters {
         // [[codegen::verbatim(UseFixedTimeInfo.description)]]
         std::optional<bool> useFixedTime;
@@ -172,7 +172,7 @@ namespace {
 namespace openspace {
 
 Documentation TemporalTileProvider::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_temporaltileprovider");
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_temporal");
 }
 
 TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)

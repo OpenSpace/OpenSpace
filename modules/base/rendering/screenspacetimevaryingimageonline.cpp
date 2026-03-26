@@ -76,7 +76,7 @@ namespace {
 namespace openspace {
 
 Documentation ScreenSpaceTimeVaryingImageOnline::Documentation() {
-    return codegen::doc<Parameters>("base_screenspace_time_varying_image_online");
+    return codegen::doc<Parameters>("base_screenspace_timevaryingimageonline");
 }
 
 ScreenSpaceTimeVaryingImageOnline::ScreenSpaceTimeVaryingImageOnline(

@@ -49,7 +49,7 @@ namespace openspace {
 
 Documentation RenderableVideoPlane::Documentation() {
     openspace::Documentation doc = codegen::doc<Parameters>(
-        "video_renderablevideoplane",
+        "video_renderable_videoplane",
         RenderablePlane::Documentation()
     );
 

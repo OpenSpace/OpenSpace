@@ -51,7 +51,7 @@ namespace {
         // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
         // that are valid Rotation objects.
         std::map<std::string, ghoul::Dictionary> keyframes
-            [[codegen::reference("core_transform_rotation")]];
+            [[codegen::reference("core_rotation")]];
 
         // [[codegen::verbatim(ShouldInterpolateInfo.description)]]
         std::optional<bool> shouldInterpolate;
@@ -62,7 +62,7 @@ namespace {
 namespace openspace {
 
 Documentation TimelineRotation::Documentation() {
-    return codegen::doc<Parameters>("base_transform_rotation_keyframe");
+    return codegen::doc<Parameters>("base_rotation_keyframe");
 }
 
 TimelineRotation::TimelineRotation(const ghoul::Dictionary& dictionary)

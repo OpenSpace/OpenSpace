@@ -47,7 +47,7 @@ namespace {
 namespace openspace {
 
 Documentation SizeReferenceTileProvider::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_sizereferencetileprovider");
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_sizereference");
 }
 
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)

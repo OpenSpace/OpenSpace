@@ -51,7 +51,7 @@ namespace {
 namespace openspace {
 
 Documentation SpoutImageProvider::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_spoutimageprovider");
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_spoutimage");
 }
 
 SpoutImageProvider::SpoutImageProvider(

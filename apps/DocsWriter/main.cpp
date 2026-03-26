@@ -71,5 +71,7 @@ int main(int, char** argv) {
     // @TODO (ylvse, 2024-05-02) change this directory when integrating with jenkins?
     DocEng.writeJsonDocumentation();
 
+    global::openSpaceEngine->deinitialize();
+
     return 0;
 };

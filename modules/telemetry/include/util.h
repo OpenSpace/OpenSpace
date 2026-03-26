@@ -50,8 +50,8 @@ double calculateDistanceTo(const Camera* camera, const std::string& nodeIdentifi
     DistanceUnit unit = DistanceUnit::Meter);
 
 /**
- * Calculate the distance from the camera to the node with the given position, in the given
- * distance unit.
+ * Calculate the distance from the camera to the node with the given position, in the
+ * given distance unit.
  *
  * \param camera Pointer to the camera in the scene that the distance should be calculated
  *        from
@@ -178,8 +178,8 @@ double calculateElevationAngleFromAToB(const Camera* camera,
     TelemetryModule::AngleCalculationMode angleCalculationMode);
 
 /**
- * Calculate the elevation angle in radians from the first node (A) with the given position
- * to the second node (B) with the given position.
+ * Calculate the elevation angle in radians from the first node (A) with the given
+ * position to the second node (B) with the given position.
  *
  * \param camera Pointer to the camera in the scene
  * \param nodePositionA The position of the first node (A) that the elevation angle should

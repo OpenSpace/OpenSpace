@@ -116,7 +116,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableToyVolume::Documentation() {
-    return codegen::doc<Parameters>("toyvolume_renderabletoyvolume");
+    return codegen::doc<Parameters>("toyvolume_renderable_toyvolume");
 }
 
 RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)

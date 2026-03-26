@@ -124,7 +124,7 @@ public:
       * Set data at column \p column.
       *
       * \param column The data column number to set
-      * \param value The #QVariant data element to store at column \p column
+      * \param value The QVariant data element to store at column \p column
       * \return `true` if the data set was successful
       */
     bool setData(int column, const QVariant& value);

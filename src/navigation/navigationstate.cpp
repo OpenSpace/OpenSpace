@@ -304,7 +304,7 @@ nlohmann::json NavigationState::toJson() const {
 }
 
 Documentation NavigationState::Documentation() {
-    return codegen::doc<Parameters>("core_navigation_state");
+    return codegen::doc<Parameters>("core_navigationstate");
 }
 
 } // namespace openspace

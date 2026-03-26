@@ -52,12 +52,10 @@ namespace {
 namespace openspace {
 
 Documentation VideoTileProvider::Documentation() {
-    openspace::Documentation doc = codegen::doc<Parameters>("video_videotileprovider");
-
-    openspace::Documentation vp = VideoPlayer::Documentation();
-    doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
-
-    return doc;
+    return codegen::doc<Parameters>(
+        "video_tileprovider_video",
+        VideoPlayer::Documentation()
+    );
 }
 
 VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)

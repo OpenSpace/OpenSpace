@@ -145,7 +145,7 @@ namespace {
 namespace openspace {
 
 Documentation ScreenSpaceSkyBrowser::Documentation() {
-    return codegen::doc<Parameters>("skybrowser_screenspaceskybrowser");
+    return codegen::doc<Parameters>("skybrowser_screenspace_skybrowser");
 }
 
 ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary)

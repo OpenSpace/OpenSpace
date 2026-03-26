@@ -601,10 +601,10 @@ namespace {
 
         // Details about the rings of the globe, if it has any.
         std::optional<ghoul::Dictionary> rings
-            [[codegen::reference("globebrowsing_rings_component")]];
+            [[codegen::reference("globebrowsing_ringscomponent")]];
 
         std::optional<ghoul::Dictionary> shadows
-            [[codegen::reference("globebrowsing_shadows_component")]];
+            [[codegen::reference("globebrowsing_shadowscomponent")]];
     };
 } // namespace
 #include "renderableglobe_codegen.cpp"
@@ -618,7 +618,7 @@ Chunk::Chunk(const TileIndex& ti)
 {}
 
 Documentation RenderableGlobe::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_renderableglobe");
+    return codegen::doc<Parameters>("globebrowsing_renderable_globe");
 }
 
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
@@ -1476,7 +1476,10 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     std::vector<std::pair<ghoul::opengl::TextureUnit, GLuint>> depthmapTextureUnits;
     for (const DepthMapData& depthData : depthMapData) {
         lightViewProjections.push_back(depthData.viewProjection);
-        depthmapTextureUnits.emplace_back(ghoul::opengl::TextureUnit(), depthData.depthMap);
+        depthmapTextureUnits.emplace_back(
+            ghoul::opengl::TextureUnit(),
+            depthData.depthMap
+        );
     }
 
     std::vector<GLint> boundUnits;
