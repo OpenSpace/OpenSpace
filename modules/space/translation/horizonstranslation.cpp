@@ -70,11 +70,13 @@ namespace {
     // across the sampled interval. If the requested time falls outside the covered
     // range, it returns the nearest available position at the start or end of the
     // dataset.
+    //
     // This makes HorizonsTranslation well suited for objects whose trajectories come
     // directly from external ephemeris products, such as spacecraft, planets, moons,
     // asteroids, or observational targets generated through Horizons. It is particularly
     // useful when authoritative trajectory samples are preferred over simplified orbital
     // parameterization.
+    //
     // The implementation also supports combining multiple Horizons files into a single
     // translation timeline. New samples are merged while avoiding duplicate timestamps,
     // which allows a trajectory to be assembled from multiple exports or extended over

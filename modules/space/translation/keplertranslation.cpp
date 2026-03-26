@@ -150,8 +150,8 @@ namespace {
     //
     // The implementation is designed for elliptical or circular orbits and explicitly
     // excludes hyperbolic Keplerian trajectories. It also supports epoch input in either
-    // absolute time form or J2000 seconds, making it flexible for authored assets and
-    // external data sources.
+    // absolute time form (ISO 8601, for example 2025-04-01 18:00:00) or J2000 seconds,
+    // making it flexible for authored assets and external data sources.
     //
     // Because the orbital plane and orbital position are handled separately, the class
     // can efficiently respond to changes in either the orbit's geometry or the object's

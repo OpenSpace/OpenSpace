@@ -34,7 +34,7 @@
 
 namespace {
     // GPTranslation is a [Translation](#core_translation) component that defines an
-    // object’s orbit from a general perturbation element source rather than from
+    // object's orbit from a general perturbation ("GP") element source rather than from
     // explicitly authored Keplerian parameters. It is intended for orbit descriptions
     // stored in common external formats such as satellite element sets and similar
     // catalog-style orbital data products.

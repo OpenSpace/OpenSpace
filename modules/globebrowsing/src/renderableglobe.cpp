@@ -531,9 +531,8 @@ namespace {
     // those systems are incorporated into the rendering pipeline as well.
     //
     // Beyond the base surface, the class can host globe-specific secondary content such
-    // as labels and GeoJSON-based overlays. These are rendered as companion systems tied
-    // to the globe, allowing annotations and vector-based geographic content to appear
-    // correctly on or around the planetary body.
+    // as labels and GeoJSON-based overlays. These allow annotations and vector-based
+    // geographic content to appear correctly on or around the planetary body.
     struct [[codegen::Dictionary(RenderableGlobe)]] Parameters {
         // The radii for this planet. If only one value is given, all three radii are set
         // to that value.
