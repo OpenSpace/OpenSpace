@@ -68,8 +68,8 @@ int main(int, char** argv) {
     global::openSpaceEngine->initialize();
 
     // Print out the documentation to the documentation folder
-    // @TODO (ylvse, 2024-05-02) change this directory when integrating with jenkins?
-    DocEng.writeJsonDocumentation();
+    // @TODO (ylvse, 2024-05-02) change this directory when integrating with jenkins? // Add documentation for lightweight version of solar system minor moons
+    DocEng.writeJsonDocumentation(); // Add section on lightweight version of solar system minor moons
 
     global::openSpaceEngine->deinitialize();
 
