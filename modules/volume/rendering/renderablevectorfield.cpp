@@ -715,12 +715,7 @@ void RenderableVectorField::computeVolumeFieldLines() {
         computeArrowInstance
     );
 
-    // The bounding sphere radius is the distance to the furthest corner of the domain
-    float boundingSphereRadius = glm::length(
-        glm::max(glm::abs(_volume.minDomain), glm::abs(_volume.maxDomain))
-    );
-
-    setBoundingSphere(boundingSphereRadius);
+    setBoundingSphere(computeBoundingSphere(_volume.minDomain, _volume.maxDomain));
 
     if (_instances.empty()) {
         throw ghoul::RuntimeError("Couldn't compute vector field segments");
@@ -767,11 +762,7 @@ void RenderableVectorField::computeSparseFieldLines() {
         maxDomain = glm::max(maxDomain, position);
     }
 
-    // The bounding sphere radius is the distance to the furthest corner of the domain
-    float boundingSphereRadius = glm::length(
-        glm::max(glm::abs(minDomain), glm::abs(maxDomain))
-    );
-    setBoundingSphere(boundingSphereRadius);
+    setBoundingSphere(computeBoundingSphere(minDomain, maxDomain));
 
     if (_instances.empty()) {
         throw ghoul::RuntimeError("Couldn't compute vector field segments");
@@ -910,6 +901,16 @@ void RenderableVectorField::loadCSVData(const std::filesystem::path& path) {
             );
         }
     }
+}
+
+double RenderableVectorField::computeBoundingSphere(const glm::vec3& minDomain,
+                                                  const glm::vec3& maxDomain) const
+{
+    // The bounding sphere radius is the distance to the furthest corner of the domain
+    glm::dvec3 min = glm::dvec3(glm::abs(minDomain));
+    glm::dvec3 max = glm::dvec3(glm::abs(maxDomain));
+
+    return glm::length(glm::max(min, max));
 }
 
 } // namespace openspace

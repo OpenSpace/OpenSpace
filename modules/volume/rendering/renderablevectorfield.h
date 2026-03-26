@@ -89,6 +89,9 @@ private:
     void computeSparseFieldLines();
     void loadVolumeData(const std::filesystem::path& path);
     void loadCSVData(const std::filesystem::path& path);
+    // The bounding sphere radius is the distance to the furthest corner of the domain
+    double computeBoundingSphere(const glm::vec3& minDomain,
+        const glm::vec3& maxDomain) const;
 
     Mode _mode = Mode::Volume;
 
