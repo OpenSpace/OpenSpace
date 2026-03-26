@@ -65,9 +65,9 @@ std::string prunedIdentifier(std::string identifier) {
 }
 
 /**
-* Reloads the sky browser display copy for the node index that is sent in.
-* .If no ID is sent in, it will reload all display copies on that node.
-*/
+ * Reloads the sky browser display copy for the node index that is sent in. If no ID is
+ * sent in, it will reload all display copies on that node.
+ */
 [[codegen::luawrap]] void reloadDisplayCopyOnNode(int nodeIndex, std::string id = "all") {
     if (global::windowDelegate->currentNode() != nodeIndex)
         return;
@@ -91,59 +91,53 @@ std::string prunedIdentifier(std::string identifier) {
     }
 }
 
-
 /**
- * Takes an index to an image and selects that image in the currently
- * selected sky browser.
+ * Takes an index to an image and selects that image in the currently selected sky
+ * browser.
  */
 [[codegen::luawrap]] void selectImage(std::string imageUrl) {
     // Load image
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
-    if (module->isCameraInSolarSystem()) {
-        TargetBrowserPair* selected = module->pair(module->selectedBrowserId());
-        if (selected) {
-            std::optional<const ImageData> found = module->wwtDataHandler().image(
-                imageUrl
-            );
-            if (!found.has_value()) {
-                LINFO(std::format(
-                    "No image with identifier '{}' was found in the collection.", imageUrl
-                ));
-                return;
-            }
-            // Load image into browser
-            const ImageData& image = found.value();
-            std::string str = image.name;
-            // Check if character is ASCII - if it isn't, remove
-            str.erase(
-                std::remove_if(
-                    str.begin(), str.end(),
-                    [](char c) {
-                        return c < 0;
-                    }
-                ),
-                str.end()
-            );
-            LINFO("Loading image " + str);
-            selected->selectImage(image);
+    if (!module->isCameraInSolarSystem()) {
+        return;
+    }
 
-            bool isInView = isCoordinateInView(image.equatorialCartesian);
-            // If the coordinate is not in view, rotate camera
-            if (image.hasCelestialCoords && !isInView) {
-                glm::dvec3 dir = equatorialToGalactic(
-                    image.equatorialCartesian * CelestialSphereRadius
-                );
-                module->startRotatingCamera(dir);
-            }
+    TargetBrowserPair* selected = module->pair(module->selectedBrowserId());
+    if (selected) {
+        std::optional<const ImageData> found = module->wwtDataHandler().image(imageUrl);
+        if (!found.has_value()) {
+            LINFO(std::format(
+                "No image with identifier '{}' was found in the collection.", imageUrl
+            ));
+            return;
+        }
+        // Load image into browser
+        const ImageData& image = found.value();
+        std::string str = image.name;
+        // Check if character is ASCII - if it isn't, remove
+        str.erase(
+            std::remove_if(str.begin(), str.end(), [](char c) { return c < 0; }),
+            str.end()
+        );
+        LINFO("Loading image " + str);
+        selected->selectImage(image);
 
-            if (selected->pointSpaceCraft()) {
-                global::eventEngine->publishEvent<EventPointSpacecraft>(
-                    image.equatorialSpherical.x,
-                    image.equatorialSpherical.y,
-                    module->spaceCraftAnimationTime()
-                );
-            }
+        bool isInView = isCoordinateInView(image.equatorialCartesian);
+        // If the coordinate is not in view, rotate camera
+        if (image.hasCelestialCoords && !isInView) {
+            glm::dvec3 dir = equatorialToGalactic(
+                image.equatorialCartesian * CelestialSphereRadius
+            );
+            module->startRotatingCamera(dir);
+        }
+
+        if (selected->pointSpaceCraft()) {
+            global::eventEngine->publishEvent<EventPointSpacecraft>(
+                image.equatorialSpherical.x,
+                image.equatorialSpherical.y,
+                module->spaceCraftAnimationTime()
+            );
         }
     }
 }
@@ -200,11 +194,11 @@ std::string prunedIdentifier(std::string identifier) {
         return;
     }
     std::string prunedId = prunedIdentifier(identifier);
-    // Load images from url
+    // Load images from URL
     LINFO("Connection established to WorldWide Telescope application in " + prunedId);
     LINFO("Loading image collections to " + prunedId);
 
-    // Load the collections here because we know that the browser can execute javascript
+    // Load the collections here because we know that the browser can execute JavaScript
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(prunedId);
     if (pair) {
@@ -231,7 +225,7 @@ std::string prunedIdentifier(std::string identifier) {
                 id, color.r, color.g, color.b
             );
 
-            // No sync or send because this is already inside a Lua script, therefor it
+            // No sync or send because this is already inside a Lua script, therefore it
             // has already been synced and sent to the connected nodes and peers
             global::scriptEngine->queueScript({
                 .code = script,
@@ -240,8 +234,8 @@ std::string prunedIdentifier(std::string identifier) {
             });
         }
     }
-    // To ensure each node in a cluster calls its own instance of the wwt application
-    // Do not send this script to the other nodes. (Note malej 2023-AUG-23: Due to this
+    // To ensure each node in a cluster calls its own instance of the WWT application. Do
+    // not send this script to the other nodes. (Note malej 2023-AUG-23: Due to this
     // already being inside a Lua function that have already been synced out)
     global::scriptEngine->queueScript({
         .code = "openspace.skybrowser.sendOutIdsToBrowsers()",
@@ -291,15 +285,15 @@ std::string prunedIdentifier(std::string identifier) {
 [[codegen::luawrap]] void addPairToSkyBrowserModule(std::string targetId,
                                                     std::string browserId)
 {
-    LINFO("Add browser " + browserId + " to sky browser module");
-    LINFO("Add target " + targetId + " to sky browser module");
+    LINFO(std::format("Add browser {} to sky browser module", browserId));
+    LINFO(std::format("Add target {} to sky browser module", targetId));
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     module->addTargetBrowserPair(targetId, browserId);
 }
 
 /**
- * Returns the AAS WorldWide Telescope image collection url.
+ * Returns the AAS WorldWide Telescope image collection URL.
  */
 [[codegen::luawrap]] ghoul::Dictionary wwtImageCollectionUrl() {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
@@ -310,9 +304,9 @@ std::string prunedIdentifier(std::string identifier) {
 
 /**
  * Returns a list of all the loaded AAS WorldWide Telescope images that have been loaded.
- * Each image has a name, thumbnail url, equatorial spherical coordinates RA and Dec,
+ * Each image has a name, thumbnail URL, equatorial spherical coordinates RA and Dec,
  * equatorial Cartesian coordinates, if the image has celestial coordinates, credits text,
- * credits url and the identifier of the image which is a unique number.
+ * credits URL and the identifier of the image which is a unique number.
  */
 [[codegen::luawrap]] ghoul::Dictionary listOfImages() {
     // Send image list to GUI
@@ -327,7 +321,6 @@ std::string prunedIdentifier(std::string identifier) {
     // Create Lua table to send to the GUI
     ghoul::Dictionary list;
     for (auto const& [id, img] : module->wwtDataHandler().images()) {
-        // Push ("Key", value)
         ghoul::Dictionary image;
         image.setValue("name", img.name);
         image.setValue("thumbnail", img.thumbnailUrl);
@@ -350,7 +343,8 @@ std::string prunedIdentifier(std::string identifier) {
 
 /**
  * Returns a table of data regarding the current view and the sky browsers and targets.
- * returns a table of data regarding the current targets.
+ *
+ * \return A table of data regarding the current targets
  */
 [[codegen::luawrap]] ghoul::Dictionary targetData() {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
@@ -391,7 +385,6 @@ std::string prunedIdentifier(std::string identifier) {
             glm::dvec3 cartesian = sphericalToCartesian(spherical);
 
             ghoul::Dictionary target;
-            // Set ("Key", value)
             target.setValue("id", id);
             target.setValue("name", pair->browserGuiName());
             target.setValue("FOV", static_cast<double>(pair->verticalFov()));
@@ -558,9 +551,9 @@ std::string prunedIdentifier(std::string identifier) {
 
         module->removeTargetBrowserPair(identifier);
 
-        // Remove from engine.
-        // No sync or send because this is already inside a Lua script, therefor it has
-        // already been synced and sent to the connected nodes and peers
+        // Remove from engine. No sync or send because this is already inside a Lua
+        // script, therefor it has already been synced and sent to the connected nodes and
+        // peers
         global::scriptEngine->queueScript({
             .code = "openspace.removeScreenSpaceRenderable('" + browser + "');",
             .synchronized = ScriptEngine::Script::ShouldBeSynchronized::No,
@@ -666,7 +659,7 @@ std::string prunedIdentifier(std::string identifier) {
 
 /**
  * Takes an identifier to a sky browser and a radius value between 0 and 1, where 0 is
- * rectangular and 1 is circular
+ * rectangular and 1 is circular.
  */
 [[codegen::luawrap]] void setBorderRadius(std::string identifier, double radius) {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
@@ -729,8 +722,8 @@ std::string prunedIdentifier(std::string identifier) {
 
 /**
  * Finetunes the target depending on a mouse drag. rendered copy to it. First argument
- * is the identifier of the sky browser, second is the start position of the drag
- * and third is the end position of the drag.
+ * is the identifier of the sky browser, second is the start position of the drag and
+ * third is the end position of the drag.
  */
 [[codegen::luawrap]] void finetuneTargetPosition(std::string identifier,
                                                  glm::dvec2 translation)

@@ -77,7 +77,7 @@ LayerRenderSettings::LayerRenderSettings()
     addProperty(offset);
     addProperty(setDefault);
 
-    setDefault.onChange([this](){
+    setDefault.onChange([this]() {
         gamma = 1.f;
         multiplier = 1.f;
         offset = 0.f;

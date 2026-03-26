@@ -44,8 +44,8 @@ namespace {
         "Texture",
         "Texture",
         "The path to a file with a one-dimensional texture to be used for the disc "
-        "color. The leftmost color will be innermost color when rendering the disc, "
-        "and the rightmost color will be the outermost color.",
+        "color. The leftmost color will be innermost color when rendering the disc, and "
+        "the rightmost color will be the outermost color.",
         Property::Visibility::User
     };
 
@@ -68,8 +68,8 @@ namespace {
     // This renderable can be used to create a circular disc that is colored based on a
     // one-dimensional texture.
     //
-    // The disc will be filled i.e. a full circle, per default, but may also be made
-    // with a hole in the center using the `Width` parameter.
+    // The disc will be filled i.e. a full circle, per default, but may also be made with
+    // a hole in the center using the `Width` parameter.
     struct [[codegen::Dictionary(RenderableDisc)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::filesystem::path texture;
@@ -94,7 +94,7 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
     , _texturePath(TextureInfo)
     , _size(SizeInfo, 1.f, 0.001f, 1e13f)
     , _width(WidthInfo, 1.f, 0.001f, 1.f)
-    , _plane(_size)
+    , _plane(glm::vec2(_size))
     , _planeIsDirty(true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -132,7 +132,6 @@ void RenderableDisc::initializeGL() {
     initializeShader();
 
     _texture->loadFromFile(_texturePath.value());
-
     _plane.initialize();
 }
 
@@ -170,7 +169,6 @@ void RenderableDisc::render(const RenderData& data, RendererTasks&) {
 
     _shader->deactivate();
 
-    // Restores GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();
@@ -183,7 +181,7 @@ void RenderableDisc::update(const UpdateData&) {
     }
 
     if (_planeIsDirty) [[unlikely]] {
-        _plane.updateSize(planeSize());
+        _plane.updateSize(glm::vec2(planeSize()));
         _planeIsDirty = false;
     }
 

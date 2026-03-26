@@ -87,7 +87,7 @@ public:
     /**
      * This function should be called on every camera interaction: for example when
      * navigating using an input device, changing the focus node or starting a path or a
-     * session recording playback
+     * session recording playback.
      */
     void updateOnCameraInteraction();
 
@@ -140,7 +140,7 @@ public:
 
     /**
      * Compute a camera position that pushed the camera position to a valid position over
-     * the anchor node, accounting for the minimal allowed distance
+     * the anchor node, accounting for the minimal allowed distance.
      */
     glm::dvec3 pushToSurfaceOfAnchor(const glm::dvec3& cameraPosition) const;
 
@@ -188,9 +188,9 @@ private:
     /// anchor. If these are the same node we call it the `focus` node
     StringProperty _aim;
 
-    // Reset camera direction to the anchor node.
+    /// Reset camera direction to the anchor node
     TriggerProperty _retargetAnchor;
-    // Reset camera direction to the aim node.
+    /// Reset camera direction to the aim node
     TriggerProperty _retargetAim;
 
     BoolProperty _followAnchorNodeRotation;
@@ -333,8 +333,8 @@ private:
         double targetDistance);
 
     /**
-     * Modify the camera position and global rotation to rotate around the up vector
-     * of the current anchor based on x-wise input.
+     * Modify the camera position and global rotation to rotate around the up vector of
+     * the current anchor based on x-wise input.
      *
      * The up-vector to rotate around is determined by the "_upToUseForRotation" property
      */
@@ -346,7 +346,7 @@ private:
      * result in an orbital rotation around the object. This function does not affect the
      * rotation but only the position.
      *
-     * \return A position vector adjusted in the horizontal direction.
+     * \return A position vector adjusted in the horizontal direction
      */
     glm::dvec3 translateHorizontally(double deltaTime, double speedScale,
         const glm::dvec3& cameraPosition, const glm::dvec3& objectPosition,
@@ -374,7 +374,7 @@ private:
     /**
      * Translates the camera position towards or away from the anchor node.
      *
-     * \return A position vector adjusted in the vertical direction.
+     * \return A position vector adjusted in the vertical direction
      */
     glm::dvec3 translateVertically(double deltaTime, const glm::dvec3& cameraPosition,
         const glm::dvec3& objectPosition,
@@ -423,7 +423,7 @@ private:
      * Orbit the current anchor node, in a right-bound orbit, by updating the position
      * and global rotation of the camera.
      *
-     * Used for IdleBehavior::Behavior::Orbit
+     * Used for IdleBehavior::Behavior::Orbit.
      *
      * \param angle The rotation angle to use for the motion
      * \param position The position of the camera. Will be changed by the function

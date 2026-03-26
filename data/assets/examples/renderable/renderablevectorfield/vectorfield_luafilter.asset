@@ -1,0 +1,49 @@
+-- Lua Filtered
+-- This example creates a vector field where the visibility of individual vectors
+-- is controlled using a Lua filter.
+--
+-- The Lua filter allows custom logic to determine whether a vector should be
+-- rendered or hidden based on its position and direction. This makes it possible to
+-- selectively visualize regions or directional subsets of the vector field, such as
+-- hiding vectors below a magnitude threshold or excluding vectors outside a specific
+-- spatial region.
+--
+-- The filter is provided as a separate Lua script asset. The script is executed
+-- at runtime and changes to the filter logic are applied by updating that asset.
+
+-- Load the volume data from OpenSpace servers
+local volume = asset.resource({
+  Name = "Vector Field - Example",
+  Type = "HttpSynchronization",
+  Identifier = "vectorfield_volume",
+  Version = 1
+})
+
+local Node = {
+  Identifier = "RenderableVectorField_Example_LuaFilter",
+  Renderable = {
+    Type = "RenderableVectorField",
+    Mode = "Volume",
+    VectorFieldScale = 8.0,
+    Volume = {
+      VolumeFile = volume .. "vectorfield_16x16x16.bin",
+      MinDomain = { -5000.0, -5000.0, -5000.0 },
+      MaxDomain = { 5000.0, 5000.0, 5000.0 },
+      Dimensions = { 16, 16, 16 }
+    },
+    FilterByLua = true,
+    Script = asset.resource("script/filter.lua")
+  },
+  GUI = {
+    Name = "RenderableVectorField - Lua Filter",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

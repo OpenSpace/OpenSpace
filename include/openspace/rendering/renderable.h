@@ -143,8 +143,8 @@ protected:
 
     RenderBin _renderBin = RenderBin::Opaque;
 
-    // An optional renderbin that renderables can use for certain components, in cases
-    // where all parts of the renderable should not be rendered in the same bin
+    /// An optional renderbin that renderables can use for certain components, in cases
+    /// where all parts of the renderable should not be rendered in the same bin
     std::optional<RenderBin> _secondaryRenderBin;
 
     struct AlternativeTransform {
@@ -160,8 +160,7 @@ protected:
      *        should be calculated for
      * \param altTransform An object containing alternative transformations to use instead
      *        of those given in data. The transforms can be translation, rotation and
-     *        scale.
-     *
+     *        scale
      * \return The resulting model transformation matrix in double precision
      */
     glm::dmat4 calcModelTransform(const RenderData& data,
@@ -175,7 +174,7 @@ protected:
      * \param data The RenderData for the object that the model view transformation matrix
      *        should be calculated for
      * \param modelTransform An alternative model transformation matrix to use. If not
-     *        provided the function will calculate a new one.
+     *        provided the function will calculate a new one
      * \return The resulting model view transformation matrix in double precision
      */
     glm::dmat4 calcModelViewTransform(const RenderData& data,
@@ -188,7 +187,7 @@ protected:
      * \param data The RenderData for the object that the model view projection
      *        transformation matrix should be calculated for
      * \param modelTransform An alternative model transformation matrix to use. If not
-     *        provided the function will calculate a new one.
+     *        provided the function will calculate a new one
      * \return The resulting model view projection transformation matrix in double
      *         precision
      */
@@ -203,7 +202,7 @@ protected:
      *        calculated for
      * \param altModelTransform An object containing alternative transformations to use
      *        instead of those given in data. The transforms can be translation, rotation
-     *        and scale.
+     *        and scale
      * \return A tuple object containing the resulting model, model view, and the
      *         model view projection transformation matrices
      */
@@ -222,9 +221,11 @@ private:
     bool _automaticallyUpdateRenderBin = true;
     bool _hasOverrideRenderBin = false;
 
-    // We only want the SceneGraphNode to be able manipulate the parent, so we don't want
-    // to provide a set method for this. Otherwise, anyone might mess around with our
-    // parentage and that's no bueno
+    /**
+     * We only want the SceneGraphNode to be able manipulate the parent, so we don't want
+     * to provide a set method for this. Otherwise, anyone might mess around with our
+     * parentage and that's no bueno.
+     */
     friend ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         const ghoul::Dictionary&);
 };

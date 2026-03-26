@@ -34,7 +34,9 @@ using namespace openspace;
 
 namespace {
 
- // Adds a new dashboard item to the main dashboard.
+/**
+ * Adds a new dashboard item to the main dashboard
+ */
 [[codegen::luawrap]] void addDashboardItem(ghoul::Dictionary dashboard) {
     try {
         global::dashboard->addDashboardItem(
@@ -52,7 +54,9 @@ namespace {
     }
 }
 
-// Removes the dashboard item with the specified identifier.
+/**
+ * Removes the dashboard item with the specified identifier.
+ */
 [[codegen::luawrap]] void removeDashboardItem(
                                   std::variant<std::string, ghoul::Dictionary> identifier)
 {
@@ -71,7 +75,9 @@ namespace {
     global::dashboard->removeDashboardItem(identifierStr);
 }
 
-// Removes all dashboard items from the main dashboard.
+/**
+ * Removes all dashboard items from the main dashboard.
+ */
 [[codegen::luawrap]] void clearDashboardItems() {
     global::dashboard->clearDashboardItems();
 }
@@ -80,7 +86,7 @@ namespace {
 /**
  * Returns all loaded dashboard-item identifiers from the main dashboard.
  *
- * \return a list of loaded dashboard-item identifiers from the main dashbaord
+ * \return A list of loaded dashboard-item identifiers from the main dashboard
  */
 [[codegen::luawrap]] std::vector<std::string> dashboardItems() {
     std::vector<std::string> result;

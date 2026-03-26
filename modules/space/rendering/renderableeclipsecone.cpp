@@ -204,7 +204,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableEclipseCone::Documentation() {
-    return codegen::doc<Parameters>("space_renderableeclipsecone");
+    return codegen::doc<Parameters>("space_renderable_eclipsecone");
 }
 
 RenderableEclipseCone::RenderableEclipseCone(const ghoul::Dictionary& dictionary)
@@ -230,10 +230,8 @@ RenderableEclipseCone::RenderableEclipseCone(const ghoul::Dictionary& dictionary
     , _shadower(ShadowerInfo)
     , _shadowerFrame(ShadowerFrameInfo)
     , _shadowee(ShadoweeInfo)
-    //, _test({"ABC", "ABC", ""}, 1, 0, 380)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    //addProperty(_test);
     addProperty(Fadeable::_opacity);
 
     _numberOfPoints = p.numberOfPoints.value_or(_numberOfPoints);
@@ -374,7 +372,7 @@ void RenderableEclipseCone::createCone(double et) {
         et,
         _numberOfPoints
     );
-    // convert to meter
+    // Convert to meter
     for (glm::dvec3& p : resSrc.terminatorPoints) {
         p *= 1000.0;
     }
@@ -405,7 +403,7 @@ void RenderableEclipseCone::createCone(double et) {
         et,
         _numberOfPoints
     );
-    // convert to meter
+    // Convert to meter
     for (glm::dvec3& p : resDst.terminatorPoints) {
         p *= 1000.0;
     }

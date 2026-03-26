@@ -39,13 +39,13 @@ namespace {
     struct [[codegen::Dictionary(Translation)]] Parameters {
         // The type of translation that is described in this element. The available types
         // of translations depend on the configuration of the application and can be
-        // written to disk on application startup into the FactoryDocumentation
+        // written to disk on application startup into the FactoryDocumentation.
         std::string type [[codegen::annotation("Must name a valid Translation type")]];
 
         // The time frame in which this `Translation` is applied. If the in-game time is
         // outside this range, no translation will be applied.
         std::optional<ghoul::Dictionary> timeFrame
-            [[codegen::reference("core_time_frame")]];
+            [[codegen::reference("core_timeframe")]];
     };
 } // namespace
 #include "translation_codegen.cpp"
@@ -53,7 +53,7 @@ namespace {
 namespace openspace {
 
 Documentation Translation::Documentation() {
-    return codegen::doc<Parameters>("core_transform_translation");
+    return codegen::doc<Parameters>("core_translation");
 }
 
 ghoul::mm_unique_ptr<Translation> Translation::createFromDictionary(

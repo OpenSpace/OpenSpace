@@ -40,14 +40,9 @@ namespace openspace {
 
 OpenSoundControlConnection::OpenSoundControlConnection(const std::string& ip, int port)
     : _socket(IpEndpointName(ip.c_str(), port))
-    , _buffer(new char[BufferSize])
-    , _stream(osc::OutboundPacketStream(_buffer, BufferSize))
-{
-}
-
-OpenSoundControlConnection::~OpenSoundControlConnection() {
-    delete[] _buffer;
-}
+    , _buffer(std::vector<char>(BufferSize))
+    , _stream(osc::OutboundPacketStream(_buffer.data(), BufferSize))
+{}
 
 void OpenSoundControlConnection::send(const std::string& label,
                                       const std::vector<OpenSoundControlDataType>& data)

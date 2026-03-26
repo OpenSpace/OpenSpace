@@ -38,14 +38,14 @@ struct TimeKeyframe;
  * properties of the camera from the navigation handler.
  *
  * \return CameraKeyframe with current state from NavigationHandler
-*/
+ */
 CameraKeyframe generateCameraKeyframe();
 
 /**
  * Method that creates a TimeKeyframe object and populates it with the current time values
  * from the application time manager.
  *
- * \return TimeKeyframe The time keyframe
+ * \return The time keyframe
  */
 TimeKeyframe generateTimeKeyframe();
 
@@ -54,7 +54,7 @@ TimeKeyframe generateTimeKeyframe();
  * the ScriptMessage with the script and timestamp of the current application time.
  *
  * \param script The script to execute in std::string form
- * \return ScriptMessage The ScriptMessage data structure with script
+ * \return The ScriptMessage data structure with script
  */
 ScriptMessage generateScriptMessage(std::string script);
 

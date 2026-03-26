@@ -29,7 +29,7 @@ namespace openspace {
 template <typename T>
 CameraInteractionStates::InteractionState<T>::InteractionState(double scaleFactor)
     : previousValue(T(0.0))
-    , velocity(scaleFactor, 1)
+    , velocity(scaleFactor, 1.0)
 {}
 
 template <typename T>
@@ -44,14 +44,13 @@ void CameraInteractionStates::InteractionState<T>::setVelocityScaleFactor(
     velocity.setScaleFactor(scaleFactor);
 }
 
-CameraInteractionStates::CameraInteractionStates(double sensitivity,
-                                                 double velocityScaleFactor)
+CameraInteractionStates::CameraInteractionStates(double sensitivity, double velocityScale)
     : _sensitivity(sensitivity)
-    , _globalRotationState(velocityScaleFactor)
-    , _localRotationState(velocityScaleFactor)
-    , _truckMovementState(velocityScaleFactor)
-    , _localRollState(velocityScaleFactor)
-    , _globalRollState(velocityScaleFactor)
+    , _globalRotationState(velocityScale)
+    , _localRotationState(velocityScale)
+    , _truckMovementState(velocityScale)
+    , _localRollState(velocityScale)
+    , _globalRollState(velocityScale)
 {}
 
 void CameraInteractionStates::setRotationalFriction(double friction) {
@@ -81,8 +80,8 @@ void CameraInteractionStates::setVelocityScaleFactor(double scaleFactor) {
 }
 
 void CameraInteractionStates::resetVelocities() {
-    _globalRotationState.velocity.setHard({ 0.0, 0.0 });
-    _localRotationState.velocity.setHard({ 0.0, 0.0 });
+    _globalRotationState.velocity.setHard(glm::dvec2(0.0, 0.0));
+    _localRotationState.velocity.setHard(glm::dvec2(0.0, 0.0));
     _truckMovementState.velocity.setHard(0.0);
     _localRollState.velocity.setHard(0.0);
     _globalRollState.velocity.setHard(0.0);
@@ -98,8 +97,8 @@ bool CameraInteractionStates::hasNonZeroVelocities(bool checkOnlyMovement) const
         sum += localRollVelocity();
         sum += globalRollVelocity();
     }
-    // Epsilon size based on that even if no interaction is happening,
-    // there might still be some residual velocity in the variables
+    // Epsilon size based on that even if no interaction is happening, there might still
+    // be some residual velocity in the variables
     return glm::length(sum) > 0.001;
 }
 

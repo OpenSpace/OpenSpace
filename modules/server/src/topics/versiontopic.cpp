@@ -26,8 +26,8 @@
 
 #include <modules/server/include/connection.h>
 #include <modules/server/servermodule.h>
-#include <openspace/openspace.h>
 #include <openspace/engine/globals.h>
+#include <openspace/openspace.h>
 #include <openspace/util/versionchecker.h>
 
 namespace openspace {

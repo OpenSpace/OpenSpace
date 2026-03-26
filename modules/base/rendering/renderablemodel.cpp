@@ -35,10 +35,10 @@
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/scene/lightsource.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/io/model/modelgeometry.h>
 #include <ghoul/io/model/modelreader.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
@@ -110,7 +110,7 @@ namespace {
     constexpr Property::PropertyInfo SpecularPowerInfo = {
         "SpecularPower",
         "Specular Power",
-        "Power factor for specular component, higher value gives narrower specularity",
+        "Power factor for specular component, higher value gives narrower specularity.",
         Property::Visibility::User
     };
 
@@ -180,7 +180,7 @@ namespace {
     constexpr Property::PropertyInfo RenderWireframeInfo = {
         "RenderWireframe",
         "Enable Wireframe Rendering",
-        "Enable Wireframe rendering for the Model",
+        "Enable Wireframe rendering for the Model.",
         Property::Visibility::AdvancedUser
     };
 
@@ -222,10 +222,9 @@ namespace {
 
         // The scale of the model. For example, if the model is in centimeters then
         // `ModelScale = 'Centimeter'` or `ModelScale = 0.01`. The value that this needs
-        // to be in order for the model to be in the correct scale relative to the rest
-        // of OpenSpace can be tricky to find. Essentially, it depends on the model
-        // software that the model was created with and the original intention of the
-        // modeler.
+        // to be in order for the model to be in the correct scale relative to the rest of
+        // OpenSpace can be tricky to find. Essentially, it depends on the model software
+        // that the model was created with and the original intention of the modeler.
         std::optional<std::variant<std::string, double>> modelScale;
 
         // By default the given `ModelScale` is used to scale down the model. By setting
@@ -240,8 +239,8 @@ namespace {
         // [[codegen::verbatim(EnableAnimationInfo.description)]]
         std::optional<bool> enableAnimation;
 
-        // The date and time that the model animation should start.
-        // In format `'YYYY MM DD hh:mm:ss'`.
+        // The date and time that the model animation should start. In format
+        // `'YYYY MM DD hh:mm:ss'`.
         std::optional<std::string> animationStartTime [[codegen::datetime()]];
 
         // The time scale for the animation relative to seconds. For example, if the
@@ -290,7 +289,7 @@ namespace {
 
         // [[codegen::verbatim(LightSourcesInfo.description)]]
         std::optional<std::vector<ghoul::Dictionary>> lightSources
-            [[codegen::reference("core_light_source")]];
+            [[codegen::reference("core_lightsource")]];
 
         // [[codegen::verbatim(EnableDepthTestInfo.description)]]
         std::optional<bool> enableDepthTest;
@@ -319,12 +318,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableModel::Documentation() {
-    openspace::Documentation docs = codegen::doc<Parameters>("base_renderable_model");
-
-    openspace::Documentation d = Shadower::Documentation();
-    docs.entries.insert(docs.entries.end(), d.entries.begin(), d.entries.end());
-
-    return docs;
+    return codegen::doc<Parameters>("base_renderable_model", Shadower::Documentation());
 }
 
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
@@ -515,7 +509,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _modelScale.onChange([this]() {
         if (!_geometry) {
             LWARNING(std::format(
-                "Cannot set scale for model '{}': not loaded yet", _file
+                "Cannot set scale for model '{}': Not loaded yet", _file
             ));
             return;
         }
@@ -543,12 +537,12 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _enableAnimation.onChange([this]() {
         if (!_modelHasAnimation) {
             LWARNING(std::format(
-                "Cannot enable animation for model '{}': it does not have any", _file
+                "Cannot enable animation for model '{}': It does not have any", _file
             ));
         }
         else if (_enableAnimation && _animationStart.empty()) {
             LWARNING(std::format(
-                "Cannot enable animation for model '{}': it does not have a start time",
+                "Cannot enable animation for model '{}': It does not have a start time",
                 _file
             ));
             _enableAnimation = false;
@@ -556,7 +550,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         else {
             if (!_geometry) {
                 LWARNING(std::format(
-                    "Cannot enable animation for model '{}': not loaded yet", _file
+                    "Cannot enable animation for model '{}': Not loaded yet", _file
                 ));
                 return;
             }
@@ -631,7 +625,7 @@ void RenderableModel::initializeGL() {
 
         if (_enableAnimation) {
             LWARNING(std::format(
-                "Cannot enable animation for model '{}': it does not have any", _file
+                "Cannot enable animation for model '{}': It does not have any", _file
             ));
             _enableAnimation = false;
         }
@@ -641,7 +635,7 @@ void RenderableModel::initializeGL() {
     else {
         if (_enableAnimation && _animationStart.empty()) {
             LWARNING(std::format(
-                "Cannot enable animation for model '{}': it does not have a start time",
+                "Cannot enable animation for model '{}': It does not have a start time",
                 _file
             ));
         }
@@ -774,12 +768,15 @@ void RenderableModel::initializeGL() {
 
     if (!_hasFrustumSize) {
         const double bounds = _geometry->boundingRadius();
-        const double scale = _modelScale * glm::compMax(parent()->scale());
-        // The *2 is a fudge-factor to make the shadowing work for most cases
-        const float r = static_cast<float>(bounds * scale * 2.f);
-        _frustumSize = r;
-        _frustumSize.setMinValue(r * 0.1f);
-        _frustumSize.setMaxValue(r * 3.f);
+        PropertyOwner* p = owner();
+        if (dynamic_cast<SceneGraphNode*>(p)) {
+            const double scale = _modelScale * glm::compMax(parent()->scale());
+            // The *2 is a fudge-factor to make the shadowing work for most cases
+            const float r = static_cast<float>(bounds * scale * 2.f);
+            _frustumSize = r;
+            _frustumSize.setMinValue(r * 0.1f);
+            _frustumSize.setMaxValue(r * 3.f);
+        }
     }
 
     // Set Interaction sphere size to be 10% of the bounding sphere
@@ -834,7 +831,7 @@ void RenderableModel::createDepthMapResources() {
 
     _depthMapProgram = BaseModule::ProgramObjectManager.request(
         "ModelDepthMapProgram",
-        [&]() -> std::unique_ptr<ProgramObject> {
+        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             std::filesystem::path vs =
                 absPath("${MODULE_BASE}/shaders/model_depth_vs.glsl");
             std::filesystem::path fs =
@@ -860,20 +857,20 @@ void RenderableModel::releaseDepthMapResources() {
 
 void RenderableModel::render(const RenderData& data, RendererTasks&) {
     const double distanceToCamera = glm::distance(
-        data.camera.positionVec3(),
+        data.camera.position(),
         data.modelTransform.translation
     );
 
-    // This distance will be enough to render the model as one pixel if the field of
-    // view is 'fov' radians and the screen resolution is 'res' pixels.
+    // This distance will be enough to render the model as one pixel if the field of view
+    // is 'fov' radians and the screen resolution is 'res' pixels.
     // Formula from RenderableGlobe
-    constexpr double tfov = 0.5773502691896257;
-    constexpr int res = 2880;
+    constexpr double Tfov = 0.5773502691896257;
+    constexpr int Res = 2880;
 
-    // @TODO (malej 13-APR-23): This should only use the boundingSphere function once
-    // that takes the gui scale into account too for all renderables
+    // @TODO (malej 13-APR-23): This should only use the boundingSphere function once that
+    // takes the gui scale into account too for all renderables
     const double maxDistance =
-        res * boundingSphere() * glm::compMax(data.modelTransform.scale) / tfov;
+        Res * boundingSphere() * glm::compMax(data.modelTransform.scale) / Tfov;
 
     // Don't render if model is too far away
     if (distanceToCamera >= maxDistance) {
@@ -907,14 +904,8 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     }
 
     if (_performShading) {
-        _program->setUniform(
-            _uniformCache.nLightSources,
-            nLightSources
-        );
-        _program->setUniform(
-            _uniformCache.lightIntensities,
-            _lightIntensitiesBuffer
-        );
+        _program->setUniform(_uniformCache.nLightSources, nLightSources);
+        _program->setUniform(_uniformCache.lightIntensities, _lightIntensitiesBuffer);
         _program->setUniform(
             _uniformCache.lightDirectionsViewSpace,
             _lightDirectionsViewSpaceBuffer
@@ -926,17 +917,10 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.specularPower, _specularPower);
     }
 
-    _program->setUniform(
-        _uniformCache.modelViewTransform,
-        glm::mat4(modelViewTransform)
-    );
+    _program->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
 
     const glm::dmat4 normalTransform = glm::transpose(glm::inverse(modelViewTransform));
-
-    _program->setUniform(
-        _uniformCache.normalTransform,
-        glm::mat4(normalTransform)
-    );
+    _program->setUniform(_uniformCache.normalTransform, glm::mat4(normalTransform));
 
     _program->setUniform(
         _uniformCache.projectionTransform,
@@ -968,7 +952,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_DEPTH_TEST);
     }
 
-    // does only really need to be set when _castShadow changes
+    // Does only really need to be set when _castShadow changes
     _program->setUniform(_uniformCache.has_shadow_depth_map, _castShadow);
 
     ghoul::opengl::TextureUnit shadowUnit;
@@ -1022,7 +1006,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             global::renderEngine->renderer().additionalColorTexture1(),
             0
         );
-        // Check status
         const GLenum status = glCheckNamedFramebufferStatus(_framebuffer, GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
             LERROR("Framebuffer is not complete");
@@ -1049,8 +1032,8 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         // Use a manuel depth test to make the models aware of the rest of the scene
         _program->setUniform(_uniformCache.performManualDepthTest, _enableDepthTest);
 
-        // Bind the G-buffer depth texture for a manual depth test towards the rest
-        // of the scene
+        // Bind the G-buffer depth texture for a manual depth test towards the rest of the
+        // scene
         ghoul::opengl::TextureUnit gBufferDepthTextureUnit;
         gBufferDepthTextureUnit.bind(
             global::renderEngine->renderer().gBufferDepthTexture()
@@ -1084,8 +1067,8 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         // Render the whole model into the G-buffer with the correct opacity
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
 
-        // Screen-space quad should not be discarded due to depth test,
-        // but we still want to be able to write to the depth buffer -> GL_ALWAYS
+        // Screen-space quad should not be discarded due to depth test, but we still want
+        // to be able to write to the depth buffer -> GL_ALWAYS
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_ALWAYS);
 
@@ -1119,13 +1102,11 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             viewport[3]
         );
 
-        // Draw
         glBindVertexArray(_vao);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         _quadProgram->deactivate();
     }
 
-    // Reset
     if (!_enableFaceCulling) {
         glEnable(GL_CULL_FACE);
     }
@@ -1172,8 +1153,8 @@ void RenderableModel::update(const UpdateData& data) {
         // The animation works in a time range 0 to duration where 0 in the animation is
         // the given _animationStart time in OpenSpace. The time in OpenSpace then has to
         // be converted to the animation time range, so the animation knows which
-        // keyframes it should interpolate between for each frame. The conversion is
-        // done in different ways depending on the animation mode.
+        // keyframes it should interpolate between for each frame. The conversion is done
+        // in different ways depending on the animation mode.
         // Explanation: s indicates start time, / indicates animation is played once
         // forwards, \ indicates animation is played once backwards, time moves to the
         // right.
@@ -1184,11 +1165,11 @@ void RenderableModel::update(const UpdateData& data) {
                 relativeTime = std::fmod(now - startTime, duration);
                 break;
             case AnimationMode::LoopInfinitely:
-                // Loop both before and after the start time where the model is
-                // in the initial position at the start time. std::fmod is not a
-                // true modulo function, it just calculates the remainder of the division
-                // which can be negative. To make it true modulo it is bumped up to
-                // positive values when it is negative
+                // Loop both before and after the start time where the model is in the
+                // initial position at the start time. std::fmod is not a true modulo
+                // function, it just calculates the remainder of the division which can be
+                // negative. To make it true modulo it is bumped up to positive values
+                // when it is negative
                 // //s// ...
                 relativeTime = std::fmod(now - startTime, duration);
                 if (relativeTime < 0.0) {
@@ -1196,18 +1177,18 @@ void RenderableModel::update(const UpdateData& data) {
                 }
                 break;
             case AnimationMode::BounceFromStart:
-                // Bounce from the start position. Bounce means to do the animation
-                // and when it ends, play the animation in reverse to make sure the model
-                // goes back to its initial position before starting again. Avoids a
-                // visible jump from the last position to the first position when loop
-                // starts again
+                // Bounce from the start position. Bounce means to do the animation and
+                // when it ends, play the animation in reverse to make sure the model goes
+                // back to its initial position before starting again. Avoids a visible
+                // jump from the last position to the first position when loop starts
+                // again
                 // s/\/\/\/\ ...
                 relativeTime =
                     duration - std::abs(fmod(now - startTime, 2 * duration) - duration);
                 break;
             case AnimationMode::BounceInfinitely: {
-                // Bounce both before and after the start time where the model is
-                // in the initial position at the start time
+                // Bounce both before and after the start time where the model is in the
+                // initial position at the start time
                 // /\/\s/\/\ ...
                 double modulo = fmod(now - startTime, 2 * duration);
                 if (modulo < 0.0) {

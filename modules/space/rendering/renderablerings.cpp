@@ -269,12 +269,12 @@ void RenderableRings::createPlane() {
     const GLfloat size = _size;
 
     const std::array<VertexData, 6> Data = {
-        VertexData{ -size, -size, 0.f, 0.f },
-        VertexData{  size,  size, 1.f, 1.f },
-        VertexData{ -size,  size, 0.f, 1.f },
-        VertexData{ -size, -size, 0.f, 0.f },
-        VertexData{  size, -size, 1.f, 0.f },
-        VertexData{  size,  size, 1.f, 1.f },
+        VertexData { -size, -size, 0.f, 0.f },
+        VertexData {  size,  size, 1.f, 1.f },
+        VertexData { -size,  size, 0.f, 1.f },
+        VertexData { -size, -size, 0.f, 0.f },
+        VertexData {  size, -size, 1.f, 0.f },
+        VertexData {  size,  size, 1.f, 1.f },
     };
 
     glNamedBufferData(_vbo, Data.size(), Data.data(), GL_STATIC_DRAW);

@@ -72,7 +72,7 @@ public:
         const ghoul::Dictionary& dictionary);
 
     /**
-     * Generates a unique identifying string for ResourceSynchronizaiton.
+     * Generates a unique identifying string for ResourceSynchronization.
      */
     virtual std::string generateUid() = 0;
 

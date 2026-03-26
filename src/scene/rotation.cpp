@@ -40,13 +40,13 @@ namespace {
     struct [[codegen::Dictionary(Rotation)]] Parameters {
         // The type of the rotation that is described in this element. The available types
         // of rotations depend on the configuration of the application and can be written
-        // to disk on application startup into the FactoryDocumentation
+        // to disk on application startup into the FactoryDocumentation.
         std::string type [[codegen::annotation("Must name a valid Rotation type")]];
 
         // The time frame in which this `Rotation` is applied. If the in-game time is
         // outside this range, no rotation will be applied.
         std::optional<ghoul::Dictionary> timeFrame
-            [[codegen::reference("core_time_frame")]];
+            [[codegen::reference("core_timeframe")]];
     };
 } // namespace
 #include "rotation_codegen.cpp"
@@ -54,7 +54,7 @@ namespace {
 namespace openspace {
 
 Documentation Rotation::Documentation() {
-    return codegen::doc<Parameters>("core_transform_rotation");
+    return codegen::doc<Parameters>("core_rotation");
 }
 
 ghoul::mm_unique_ptr<Rotation> Rotation::createFromDictionary(

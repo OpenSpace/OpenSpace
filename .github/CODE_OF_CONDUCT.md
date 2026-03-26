@@ -36,3 +36,43 @@ This Code of Conduct is adapted from the [Contributor Covenant][homepage], versi
 
 [homepage]: http://contributor-covenant.org
 [version]: http://contributor-covenant.org/version/1/4/
+
+
+# AI Code of Conduct
+OpenSpace is a research-driven, production-grade, open-source visualization framework used in scientific, educational, and public dissemination contexts. This document defines the acceptable use of AI-assisted tools within the OpenSpace repositories.
+
+AI is a tool. It is not a contributor, not an author, and not accountable. Humans remain accountable.
+
+Contributors may use AI tools (e.g., code assistants, large language models, refactoring tools) for:
+  - Drafting code
+  - Refactoring
+  - Generating documentation
+  - Creating test scaffolding
+  - Explaining APIs
+  - Prototyping ideas
+  
+AI assistance is treated as a productivity tool, similar to a compiler, linter, or IDE. If you submit code, you are the author. This includes AI-assisted code.
+
+Contributors must:
+  - Fully understand the submitted code
+  - Be able to explain what it does and why
+  - Ensure compliance with licensing and copyright requirements
+  
+If you cannot explain the code, do not submit it.
+
+AI-generated code must meet the same standards as manually written code:
+  - Follows OpenSpace coding conventions
+  - Includes appropriate error handling
+  - Is readable and maintainable
+  - Includes tests where applicable
+  - Does not introduce dead code or unused dependencies
+  - Do not sacrifice maintainability
+  
+Reviewers may request rewriting if AI-generated content does not meet standards.
+
+Contributors must ensure that:
+  - AI-generated code does not violate third-party licenses
+  - No copyrighted material is reproduced improperly
+  - No proprietary code has been inserted into prompts in violation of agreements
+  
+If there is uncertainty regarding origin or licensing, the code must not be merged.

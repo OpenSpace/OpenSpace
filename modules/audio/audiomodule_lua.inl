@@ -118,8 +118,8 @@ namespace {
 }
 
 /**
- * Takes all of the sounds that are currently registers, unpauses them and plays them
- * from their starting points
+ * Takes all of the sounds that are currently registers, unpauses them and plays them from
+ * their starting points.
  */
 [[codegen::luawrap]] void playAllFromStart() {
     global::moduleEngine->module<AudioModule>()->playAllFromStart();
@@ -226,8 +226,8 @@ namespace {
  * be greater or equal to 0.
  *
  * \param identifier The identifier to the track whose volume should be returned
- * \return The volume for the track referred to by the \p handle, which will be
- *         greater or equal to 0
+ * \return The volume for the track referred to by the \p handle, which will be greater or
+ *         equal to 0
  */
 [[codegen::luawrap]] float volume(std::string identifier) {
     return global::moduleEngine->module<AudioModule>()->volume(identifier);
@@ -295,7 +295,7 @@ namespace {
  * used instead. The coordinate system for the tracks and the listener is a meter-based
  * coordinate system.
  *
- * \param position The position of the listener.
+ * \param position The position of the listener
  * \param lookAt The direction vector of the forward direction
  * \param up The up-vector of the coordinate system
  */

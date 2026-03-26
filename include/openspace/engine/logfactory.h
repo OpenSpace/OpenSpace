@@ -48,8 +48,8 @@ struct Documentation;
  * \param dictionary The dictionary from which the ghoul::logging::Log should be created
  * \return The created ghoul::logging::Log
  *
- * \post The return value will not be `nullptr`
  * \throw ghoul::RuntimeError If there was an error creating the ghoul::logging::Log
+ * \post The return value will not be `nullptr`
  *
  * \see ghoul::logging::TextLog
  * \see ghoul::logging::HTMLLog

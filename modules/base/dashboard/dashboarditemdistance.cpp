@@ -43,6 +43,8 @@
 namespace {
     using namespace openspace;
 
+    constexpr std::string_view _loggerCat = "DashboardItemDistance";
+
     enum Type {
         Node = 0,
         NodeSurface,
@@ -72,9 +74,7 @@ namespace {
         Property::Visibility::User
     };
 
-    constexpr Property::PropertyInfo
-        DestinationNodeIdentifierInfo =
-    {
+    constexpr Property::PropertyInfo DestinationNodeIdentifierInfo = {
         "DestinationNodeIdentifier",
         "Destination node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
@@ -198,10 +198,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
             _source.nodeIdentifier = *p.sourceNodeIdentifier;
         }
         else {
-            LERRORC(
-                "DashboardItemDistance",
-                "Node type was selected for source but no node specified"
-            );
+            LERROR("Node type was selected for source but no node specified");
         }
     }
     addProperty(_source.nodeIdentifier);
@@ -227,10 +224,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
             _destination.nodeIdentifier = *p.destinationNodeIdentifier;
         }
         else {
-            LERRORC(
-                "DashboardItemDistance",
-                "Node type was selected for destination but no node specified"
-            );
+            LERROR("Node type was selected for destination but no node specified");
         }
     }
     addProperty(_destination.nodeIdentifier);
@@ -268,18 +262,17 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
             );
 
             if (!mainComp.node) {
-                LERRORC(
-                    "DashboardItemDistance",
-                    "Could not find node '" + mainComp.nodeIdentifier.value() + "'"
-                );
-                return { glm::dvec3(0.0), "Node" };
+                LERROR(std::format(
+                    "Could not find node '{}'", mainComp.nodeIdentifier.value()
+                ));
+                return std::pair(glm::dvec3(0.0), "Node");
             }
         }
     }
 
     switch (mainComp.type) {
         case Type::Node:
-            return { mainComp.node->worldPosition(), mainComp.node->guiName() };
+            return std::pair(mainComp.node->worldPosition(), mainComp.node->guiName());
         case Type::NodeSurface:
         {
             glm::dvec3 otherPos;
@@ -296,22 +289,25 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
             const glm::dvec3 dir = glm::normalize(otherPos - thisPos);
             const glm::dvec3 dirLen = dir * glm::dvec3(mainComp.node->boundingSphere());
 
-            return { thisPos + dirLen, "surface of " + mainComp.node->guiName() };
+            return std::pair(thisPos + dirLen, "surface of " + mainComp.node->guiName());
         }
         case Type::Focus: {
             const SceneGraphNode* anchor =
                 global::navigationHandler->orbitalNavigator().anchorNode();
             if (!anchor) {
-                return { glm::dvec3(0.0), "Unknown" };
+                return std::pair(glm::dvec3(0.0), "Unknown");
             }
             else {
-                return { anchor->worldPosition(), "focus" };
+                return std::pair(anchor->worldPosition(), "focus");
             }
         }
         case Type::Camera:
-            return { global::renderEngine->scene()->camera()->positionVec3(), "camera" };
+            return std::pair(
+                global::renderEngine->scene()->camera()->position(),
+                "camera"
+            );
         default:
-            return { glm::dvec3(0.0), "Unknown" };
+            return std::pair(glm::dvec3(0.0), "Unknown");
     }
 }
 
@@ -355,7 +351,7 @@ void DashboardItemDistance::update() {
         _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
     }
     catch (const std::format_error&) {
-        LERRORC("DashboardItemDate", "Illegal format string");
+        LERROR("Illegal format string");
     }
 }
 

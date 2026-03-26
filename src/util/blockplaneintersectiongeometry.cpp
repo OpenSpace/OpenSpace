@@ -123,7 +123,9 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
     }
 
     // Sort the vectors by angle in the plane
-    std::sort(angles.begin(), angles.end(),
+    std::sort(
+        angles.begin(),
+        angles.end(),
         [](const std::pair<int, float>& a, const std::pair<int, float>& b) -> bool {
             return a.second < b.second;
         }
@@ -145,7 +147,7 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
     );
 }
 
-bool BlockPlaneIntersectionGeometry::initialize() {
+void BlockPlaneIntersectionGeometry::initialize() {
     glCreateBuffers(1, &_vbo);
     glCreateVertexArrays(1, &_vao);
     glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(float));
@@ -155,7 +157,6 @@ bool BlockPlaneIntersectionGeometry::initialize() {
     glVertexArrayAttribBinding(_vao, 0, 0);
 
     updateVertices();
-    return true;
 }
 
 void BlockPlaneIntersectionGeometry::render() {

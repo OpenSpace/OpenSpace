@@ -31,15 +31,15 @@
 
 namespace openspace {
 
-// This class represents the global input state of interaction devices
+/**
+ * This class represents the global input state of interaction devices.
+ */
 class MouseInputState {
 public:
-    // Callback functions
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double mouseX, double mouseY);
     void mouseScrollWheelCallback(double mouseScrollDelta);
 
-    // Accessors
     const std::vector<MouseButton>& pressedMouseButtons() const;
     glm::dvec2 mousePosition() const;
     double mouseScrollDelta() const;

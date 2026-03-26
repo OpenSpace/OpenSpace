@@ -53,8 +53,8 @@ namespace {
  * jumped between. The list will be sorted to be in increasing order. A negative verison
  * of each specified time step will be added per default as well.
  *
- * \param deltaTime The list of delta times, given in seconds per real time second.
- *                  Should only include positive values.
+ * \param deltaTime The list of delta times, given in seconds per real time second. Should
+ *        only include positive values
  */
 [[codegen::luawrap]] void setDeltaTimeSteps(std::vector<double> deltaTime) {
     global::timeManager->setDeltaTimeSteps(deltaTime);
@@ -80,9 +80,9 @@ namespace {
  * Interpolate the simulation speed to the first delta time step in the list that is
  * larger than the current simulation speed, if any.
  *
- * \param interpolationDuration The number of seconds that the interpolation should
- *                              be done over. If excluded, the time is decided based
- *                              on the default value specified in the TimeManager.
+ * \param interpolationDuration The number of seconds that the interpolation should be
+ *        done over. If excluded, the time is decided based on the default value specified
+ *        in the TimeManager
  */
 [[codegen::luawrap]] void interpolateNextDeltaTimeStep(
                                               std::optional<double> interpolationDuration)
@@ -97,9 +97,9 @@ namespace {
  * Interpolate the simulation speed to the first delta time step in the list that is
  * smaller than the current simulation speed, if any.
  *
- * \param interpolationDuration The number of seconds that the interpolation should
- *                              be done over. If excluded, the time is decided based
- *                              on the default value specified in the TimeManager.
+ * \param interpolationDuration The number of seconds that the interpolation should be
+ *        done over. If excluded, the time is decided based on the default value specified
+ *        in the TimeManager
  */
 [[codegen::luawrap]] void interpolatePreviousDeltaTimeStep(
                                               std::optional<double> interpolationDuration)
@@ -115,10 +115,9 @@ namespace {
  * interpolating to that value.
  *
  * \param deltaTime The value to set the speed to, in seconds per real time second
- * \param interpolationDuration The number of seconds that the interpolation should
- *                              be done over. If excluded, the time is decided based
- *                              on the default value for delta time interpolation
- *                              specified in the TimeManager.
+ * \param interpolationDuration The number of seconds that the interpolation should be
+ *        done over. If excluded, the time is decided based on the default value for delta
+ *        time interpolation specified in the TimeManager
  */
 [[codegen::luawrap]] void interpolateDeltaTime(double deltaTime,
                                               std::optional<double> interpolationDuration)
@@ -155,9 +154,8 @@ namespace {
  * (unpause).
  *
  * \param interpolationDuration The number of seconds that the interpolation should be
- *                              done over. If excluded, the time is decided based on the
- *                              default value for pause/unpause specified in the
- *                              TimeManager.
+ *        done over. If excluded, the time is decided based on the default value for
+ *        pause/unpause specified in the TimeManager
  */
 [[codegen::luawrap]] void interpolateTogglePause(
                                               std::optional<double> interpolationDuration)
@@ -199,22 +197,21 @@ namespace {
  * temporarily setting the delta time to 0, and unpausing means restoring it to whatever
  * delta time value is set.
  *
- * \param isPaused True if the simulation should be paused, and false otherwise
+ * \param isPaused `true` if the simulation should be paused, and `false` otherwise
  */
 [[codegen::luawrap]] void setPause(bool isPaused) {
     global::timeManager->setPause(isPaused);
 }
 
 /**
- * Same behaviour as `setPause`, but with interpolation. That is, if it should be paused,
+ * Same behavior as `setPause`, but with interpolation. That is, if it should be paused,
  * the delta time will be interpolated to 0, and if unpausing, the delta time will be
  * interpolated to whatever delta time value is set.
  *
- * \param isPaused True if the simulation should be paused, and false otherwise
+ * \param isPaused `true` if the simulation should be paused, and `false` otherwise
  * \param interpolationDuration The number of seconds that the interpolation should be
- *                              done over. If excluded, the time is decided based on the
- *                              default value for pause/unpause specified in the
- *                              TimeManager.
+ *        done over. If excluded, the time is decided based on the default value for
+ *        pause/unpause specified in the TimeManager
  */
 [[codegen::luawrap]] void interpolatePause(bool isPaused,
                                            std::optional<double> interpolationDuration)
@@ -244,8 +241,8 @@ namespace {
  * Note that providing time zone using the Z format is not supported. UTC is assumed.
  *
  * \param time The time to set. If the parameter is a number, the value is the number of
- *             seconds past the J2000 epoch. If it is a string, it has to be a valid ISO
- *             8601-like date string of the format YYYY-MM-DDTHH:MN:SS.
+ *        seconds past the J2000 epoch. If it is a string, it has to be a valid ISO 8601
+ *        like date string of the format YYYY-MM-DDTHH:MN:SS
  */
 [[codegen::luawrap]] void setTime(std::variant<double, std::string> time) {
     double t;
@@ -267,12 +264,11 @@ namespace {
   * Note that providing time zone using the Z format is not supported. UTC is assumed.
   *
   * \param time The time to set. If the parameter is a number, the value is the number of
-  *             seconds past the J2000 epoch. If it is a string, it has to be a valid ISO
-  *             8601-like date string of the format YYYY-MM-DDTHH:MN:SS.
-  * \param interpolationDuration The number of seconds that the interpolation should
-  *                              be done over. If excluded, the time is decided based
-  *                              on the default value for time interpolation specified in
-  *                              the TimeManager.
+  *        seconds past the J2000 epoch. If it is a string, it has to be a valid ISO 8601
+  *        like date string of the format YYYY-MM-DDTHH:MN:SS
+  * \param interpolationDuration The number of seconds that the interpolation should be
+  *        done over. If excluded, the time is decided based on the default value for time
+  *        interpolation specified in the TimeManager
   */
 [[codegen::luawrap]] void interpolateTime(std::variant<std::string, double> time,
                                           std::optional<double> interpolationDuration)
@@ -299,10 +295,9 @@ namespace {
   * interpolation.
   *
   * \param delta The number of seconds to increase the current simulation time by
-  * \param interpolationDuration The number of seconds that the interpolation should
-  *                              be done over. If excluded, the time is decided based
-  *                              on the default value for time interpolation specified in
-  *                              the TimeManager.
+  * \param interpolationDuration The number of seconds that the interpolation should be
+  *        done over. If excluded, the time is decided based on the default value for time
+  *        interpolation specified in the TimeManager
   */
 [[codegen::luawrap]] void interpolateTimeRelative(double delta,
                                               std::optional<double> interpolationDuration)
@@ -382,14 +377,12 @@ namespace {
  * The returned value will be of the same type as the first argument. That is, either a
  * number of seconds past the J2000 epoch, or an ISO 8601 date string.
  *
- * \param base The timestamp to alter, either given as an ISO 8601 date string or a
- *             number of seconds past the J2000 epoch.
- * \param change The amount of time to add to the specified timestamp. Can be given
- *               either in a number of seconds (including negative), or as a string of
- *               the form [-]XX(s,m,h,d,M,y] with (s)econds, (m)inutes, (h)ours, (d)ays,
- *               (M)onths, and (y)ears as units and an optional - sign to move backwards
- *               in time.
- *
+ * \param base The timestamp to alter, either given as an ISO 8601 date string or a number
+ *        of seconds past the J2000 epoch
+ * \param change The amount of time to add to the specified timestamp. Can be given either
+ *        in a number of seconds (including negative), or as a string of the form
+ *        [-]XX(s,m,h,d,M,y] with (s)econds, (m)inutes, (h)ours, (d)ays, (M)onths, and
+ *        (y)ears as units and an optional - sign to move backwards in time
  * \return The updated timestamp
  */
 [[codegen::luawrap]] std::variant<std::string, double> advancedTime(
@@ -434,8 +427,7 @@ namespace {
  * If the given time is a J2000 seconds value, the function returns a ISO 8601 timestamp.
  *
  * \param time The timestamp to convert, either given as an ISO 8601 date string or a
- *             number of seconds past the J2000 epoch.
- *
+ *        number of seconds past the J2000 epoch
  * \return The converted timestamp
  */
 [[codegen::luawrap]] std::variant<std::string, double> convertTime(
@@ -459,7 +451,6 @@ namespace {
  *
  * \param start The start time for the computation, given as an ISO 8601 date string
  * \param end The end time for the computation, given as an ISO 8601 date string
- *
  * \return The time between the start time and end time
  */
 [[codegen::luawrap]] double duration(std::string start, std::string end) {

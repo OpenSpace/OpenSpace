@@ -37,8 +37,8 @@ namespace openspace {
 class SkirtedGrid {
 public:
     /**
-     * \param xSeg is the number of grid cells in the x direction
-     * \param ySeg is the number of grid cells in the y direction
+     * \param xSeg The number of grid cells in the x direction
+     * \param ySeg The number of grid cells in the y direction
      */
     SkirtedGrid(unsigned int xSeg, unsigned int ySeg);
     ~SkirtedGrid() = default;

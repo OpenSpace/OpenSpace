@@ -55,8 +55,8 @@ struct Parameters {
  * \param file The file to the TLE file. This file must be a valid file
  * \return Information about all of the contained objects in the \p file
  *
- * \pre \p file must be a file and must exist
  * \throw ghoul::RuntimeError If the provided \p file is not a valid TLE file
+ * \pre \p file must be a file and must exist
  */
 std::vector<Parameters> readTleFile(const std::filesystem::path& file);
 
@@ -67,8 +67,8 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file);
  * \param file The file to the OMM file. This file must be a valid file
  * \return Information about all of the contained objects in the \p file
  *
- * \pre \p file must be a file and must exist
  * \throw ghoul::RuntimeError If the provided \p file is not a valid OMM file
+ * \pre \p file must be a file and must exist
  */
 std::vector<Parameters> readOmmFile(const std::filesystem::path& file);
 
@@ -80,8 +80,8 @@ std::vector<Parameters> readOmmFile(const std::filesystem::path& file);
  * \param file The CSV file containing the information about the objects
  * \return Information about all of the contained objects in the \p file
  *
- * \pre \p file must be a file and must exist
  * \throw ghoul::RuntimeError If the provided \p file is not a valid JPL SBDB CSV format
+ * \pre \p file must be a file and must exist
  */
 std::vector<Parameters> readSbdbFile(const std::filesystem::path& file);
 
@@ -92,8 +92,8 @@ std::vector<Parameters> readSbdbFile(const std::filesystem::path& file);
  * \param file The DAT file contained the ephemerides information
  * \return Information about all of the contained objects in the \p file
  *
- * \pre \p file must be a file and must exist
  * \throw ghoul::RuntimeError If the provided \p file is not a valid MPC DAT file
+ * \pre \p file must be a file and must exist
  */
 std::vector<Parameters> readMpcFile(const std::filesystem::path& file);
 
@@ -114,8 +114,8 @@ enum class Format {
  * \param format The format of the provided \p file
  * \return Information about all of the contained objects in the \p file
  *
- * \pre \p file must be a file and must exist
  * \throw ghoul::RuntimeError If the provided \p is not in the provided file
+ * \pre \p file must be a file and must exist
  */
 std::vector<Parameters> readFile(std::filesystem::path file, Format format);
 

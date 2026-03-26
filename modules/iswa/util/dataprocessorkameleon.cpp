@@ -35,10 +35,6 @@
 
 namespace openspace {
 
-DataProcessorKameleon::DataProcessorKameleon() : DataProcessor() {}
-
-DataProcessorKameleon::~DataProcessorKameleon() {}
-
 std::vector<std::string> DataProcessorKameleon::readMetadata(const std::string& path,
                                                              glm::size3_t&)
 {
@@ -56,9 +52,9 @@ std::vector<std::string> DataProcessorKameleon::readMetadata(const std::string& 
             opts.begin(),
             opts.end(),
             [this](const std::string& opt) {
-                    return (opt.size() > 3 ||
-                        _coordinateVariables.find(opt) != _coordinateVariables.end());
-                }
+                return (opt.size() > 3 ||
+                    _coordinateVariables.find(opt) != _coordinateVariables.end());
+            }
         ),
         opts.end()
     );
@@ -80,20 +76,21 @@ void DataProcessorKameleon::addDataValues(const std::string& path,
     }
 
     std::vector<float> sum(numOptions, 0.f);
-    std::vector<std::vector<float>> optionValues(numOptions, std::vector<float>());
+    std::vector<std::vector<float>> optionValues =
+        std::vector<std::vector<float>>(numOptions, std::vector<float>());
     const std::vector<std::string>& options = dataOptions.options();
 
     const int numValues = static_cast<int>(_dimensions.x * _dimensions.y * _dimensions.z);
 
     for (int i = 0; i < numOptions; i++) {
-        //0.5 to gather interesting values for the normalization/histograms.
-        float* values = _kw->uniformSliceValues(
+        // 0.5 to gather interesting values for the normalization/histograms
+        std::vector<float> values = _kw->uniformSliceValues(
             options[i],
             _dimensions,
             0.5f
         );
 
-        for (int j=0; j<numValues; j++) {
+        for (int j = 0; j < numValues; j++) {
             const float value = values[j];
 
             optionValues[i].push_back(value);
@@ -106,14 +103,15 @@ void DataProcessorKameleon::addDataValues(const std::string& path,
     add(optionValues, sum);
 }
 
-std::vector<float*> DataProcessorKameleon::processData(const std::string& path,
-                                                       SelectionProperty& optionProp,
-                                                       glm::size3_t& dimensions)
+std::vector<std::vector<float>> DataProcessorKameleon::processData(
+                                                                  const std::string& path,
+                                                            SelectionProperty& optionProp,
+                                                                 glm::size3_t& dimensions)
 {
     const int numOptions = static_cast<int>(optionProp.options().size());
 
     if (path.empty()) {
-        return std::vector<float*>(numOptions, nullptr);
+        return std::vector<std::vector<float>>(numOptions);
     }
 
     if ((path != _kwPath) || !_kw) {
@@ -132,7 +130,7 @@ std::vector<float*> DataProcessorKameleon::processData(const std::string& path,
 
     const int numValues = static_cast<int>(glm::compMul(dimensions));
 
-    std::vector<float*> dataOptions(numOptions, nullptr);
+    std::vector<std::vector<float>> dataOptions(numOptions);
     for (int option : selectedOptionsIndices) {
         dataOptions[option] = _kw->uniformSliceValues(
             options[option],

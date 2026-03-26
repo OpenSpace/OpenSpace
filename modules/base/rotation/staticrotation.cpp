@@ -84,7 +84,7 @@ namespace {
 namespace openspace {
 
 Documentation StaticRotation::Documentation() {
-    return codegen::doc<Parameters>("base_transform_rotation_static");
+    return codegen::doc<Parameters>("base_rotation_static");
 }
 
 StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary)

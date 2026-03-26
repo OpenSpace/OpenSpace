@@ -29,7 +29,9 @@ using namespace openspace;
 
 namespace {
 
-// Adds a new dashboard item to an existing SceenSpaceDashboard.
+/**
+ * Adds a new dashboard item to an existing SceenSpaceDashboard.
+ */
 [[codegen::luawrap]] void addDashboardItemToScreenSpace(std::string identifier,
                                                         ghoul::Dictionary dashboard)
 {
@@ -48,7 +50,9 @@ namespace {
     dash->dashboard().addDashboardItem(DashboardItem::createFromDictionary(dashboard));
 }
 
-// Removes all dashboard items from an existing ScreenSpaceDashboard.
+/**
+ * Removes all dashboard items from an existing ScreenSpaceDashboard.
+ */
 [[codegen::luawrap]] void removeDashboardItemsFromScreenSpace(std::string identifier) {
     ScreenSpaceRenderable* ssr = global::renderEngine->screenSpaceRenderable(identifier);
     if (!ssr) {

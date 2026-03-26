@@ -32,13 +32,15 @@
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/programobject.h>
 
+namespace {
+    struct [[codegen::Dictionary(RenderableTexturePlane)]] Parameters {};
+} // namespace
+#include "renderabletextureplane_codegen.cpp"
+
 namespace openspace {
 
 Documentation RenderableTexturePlane::Documentation() {
-    openspace::Documentation doc = RenderableTextureCygnet::Documentation();
-    doc.name = "RenderableTexturePlane";
-    doc.id = "iswa_renderable_textureplane";
-    return doc;
+    return codegen::doc<Parameters>("iswa_renderable_textureplane");
 }
 
 RenderableTexturePlane::RenderableTexturePlane(const ghoul::Dictionary& dictionary)

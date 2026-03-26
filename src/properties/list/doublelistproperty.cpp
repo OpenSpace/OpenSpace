@@ -29,8 +29,7 @@
 
 namespace openspace {
 
-DoubleListProperty::DoubleListProperty(Property::PropertyInfo info,
-                                       std::vector<double> values)
+DoubleListProperty::DoubleListProperty(PropertyInfo info, std::vector<double> values)
     : ListProperty(std::move(info), std::move(values))
 {}
 

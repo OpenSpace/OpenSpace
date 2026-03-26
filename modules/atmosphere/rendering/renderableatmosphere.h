@@ -39,12 +39,14 @@ namespace openspace {
 class AtmosphereDeferredcaster;
 struct TransformData;
 
-// Shadow structure
+/**
+ * Shadow structure.
+ */
 struct ShadowConfiguration {
     std::pair<std::string, double> source;
     std::pair<std::string, double> caster;
-    // Set to 'true' if we printed an error because we couldn't find the source or caster.
-    // We only want to print a message once
+    /// Set to 'true' if we printed an error because we couldn't find the source or
+    /// caster. We only want to print a message once
     bool printedSourceError = false;
     bool printedCasterError = false;
 };
@@ -77,7 +79,7 @@ private:
     Vec3Property _ozoneCoeff;
     FloatProperty _mieHeightScale;
     Vec3Property _mieScatteringCoeff;
-    FloatProperty _mieScatteringExtinctionPropCoeff;
+    FloatProperty _mieScatteringExtinctionCoeff;
     FloatProperty _miePhaseConstant;
     FloatProperty _sunIntensity;
     BoolProperty _sunFollowingCameraEnabled;
@@ -91,7 +93,7 @@ private:
     Vec2Property _atmosphereDimmingSunsetAngle;
 
     float _planetRadius = 0.f;
-    float _mieScattExtPropCoefProp = 1.f;
+    float _mieScattExtCoef = 1.f;
 
     glm::vec3 _mieExtinctionCoeff = glm::vec3(0.f);
 

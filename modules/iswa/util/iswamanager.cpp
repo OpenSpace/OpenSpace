@@ -76,7 +76,7 @@ namespace {
     constexpr std::string_view _loggerCat = "IswaManager";
 
     constexpr std::string_view monthNumber(std::string_view month) {
-        if (month == "JAN") return "01";
+        if (month == "JAN")      return "01";
         else if (month == "FEB") return "02";
         else if (month == "MAR") return "03";
         else if (month == "APR") return "04";
@@ -155,32 +155,33 @@ void IswaManager::addIswaCygnet(int id, const std::string& type, std::string gro
         createScreenSpace(id);
     }
     else if (id < 0) {
-        // create metadata object and assign group and id
-        MetadataFuture metaFuture;
-        metaFuture.id = id;
-        metaFuture.group = std::move(group);
+        // Create metadata object and assign group and id
+        MetadataFuture metaFuture = {
+            .id = id,
+            .group = std::move(group)
+        };
 
         // Assign type of cygnet Texture/Data
         if (type == _cygnetType[CygnetType::Texture]) {
             metaFuture.type = CygnetType::Texture;
         }
-        else if (type  == _cygnetType[CygnetType::Data]) {
+        else if (type == _cygnetType[CygnetType::Data]) {
             metaFuture.type = CygnetType::Data;
         }
         else {
-            LERROR("\""+ type + "\" is not a valid type");
+            LERROR(std::format("'{}' is not a valid type", type));
             return;
         }
 
-        // This callback determines what geometry should be used and creates
-        // the right cygnet
+        // This callback determines what geometry should be used and creates the right
+        // cygnet
         auto metadataCallback =
             [this, &metaFuture](const DownloadManager::MemoryFile& file) {
-                //Create a string from downloaded file
+                // Create a string from downloaded file
                 std::string res(file.buffer, file.buffer + file.size);
                 metaFuture.json = res;
 
-                //convert to json
+                // Convert to json
                 nlohmann::json j = nlohmann::json::parse(res);
 
                 // Check what kind of geometry here
@@ -200,17 +201,16 @@ void IswaManager::addIswaCygnet(int id, const std::string& type, std::string gro
             _baseUrl + std::to_string(-id),
             metadataCallback,
             [id](const std::string& err) {
-                LDEBUG(
-                    "Download to memory was aborted for data cygnet with id " +
-                    std::to_string(id) + ": " + err
-                );
+                LDEBUG(std::format(
+                    "Download to memory was aborted for data cygnet with id {}: {}",
+                    id, err
+                ));
             }
         );
     }
 }
 
 void IswaManager::addKameleonCdf(std::string groupName, int pos) {
-    // auto info = _cdfInformation[group][pos];
     IswaBaseGroup* group = iswaGroup(groupName);
     if (group) {
         dynamic_cast<IswaKameleonGroup*>(group)->changeCdf(
@@ -228,46 +228,44 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id,
                                                                        double timestamp)
 {
     return global::downloadManager->fetchFile(
-            iswaUrl(id, timestamp, "image"),
-            [id](const DownloadManager::MemoryFile&) {
-                LDEBUG(
-                    "Download to memory finished for image cygnet with id: " +
-                    std::to_string(id)
-                );
-            },
-            [id](const std::string& err) {
-                LDEBUG(
-                    "Download to memory was aborted for image cygnet with id " +
-                    std::to_string(id) + ": " + err
-                );
-            }
-        );
+        iswaUrl(id, timestamp, "image"),
+        [id](const DownloadManager::MemoryFile&) {
+            LDEBUG(
+                "Download to memory finished for image cygnet with id: " +
+                std::to_string(id)
+            );
+        },
+        [id](const std::string& err) {
+            LDEBUG(
+                "Download to memory was aborted for image cygnet with id " +
+                std::to_string(id) + ": " + err
+            );
+        }
+    );
 }
 
 std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id,
                                                                       double timestamp)
 {
     return global::downloadManager->fetchFile(
-            iswaUrl(id, timestamp, "data"),
-            [id](const DownloadManager::MemoryFile&) {
-                LDEBUG(
-                    "Download to memory finished for data cygnet with id: " +
-                    std::to_string(id)
-                );
-            },
-            [id](const std::string& err) {
-                LDEBUG(
-                    "Download to memory was aborted for data cygnet with id " +
-                    std::to_string(id) + ": " + err
-                );
-            }
-        );
+        iswaUrl(id, timestamp, "data"),
+        [id](const DownloadManager::MemoryFile&) {
+            LDEBUG(std::format(
+                "Download to memory finished for data cygnet with id: {}", id
+            ));
+        },
+        [id](const std::string& err) {
+            LDEBUG(std::format(
+                "Download to memory was aborted for data cygnet with id {}: {}", id, err
+            ));
+        }
+    );
 }
 
 std::string IswaManager::iswaUrl(int id, double timestamp, const std::string& type) {
     std::string url;
     if (id < 0) {
-        url = _baseUrl + type + "/" + std::to_string(-id) + "/";
+        url = std::format("{}{}/{}/", _baseUrl, type, -id);
     }
     else {
         url = "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?"
@@ -291,33 +289,27 @@ std::string IswaManager::iswaUrl(int id, double timestamp, const std::string& ty
 }
 
 void IswaManager::registerGroup(std::string groupName, std::string type) {
-    if (_groups.find(groupName) == _groups.end()) {
-        const bool dataGroup = (type == typeid(RenderableDataPlane).name()) ||
-                               (type == typeid(RenderableDataSphere).name());
-
-        const bool kameleonGroup = (type == typeid(RenderableKameleonPlane).name());
-
-        if (dataGroup) {
-            _groups[groupName] = std::make_shared<IswaDataGroup>(
-                groupName,
-                std::move(type)
-            );
-        }
-        else if (kameleonGroup) {
-            _groups[groupName] = std::make_shared<IswaKameleonGroup>(
-                groupName,
-                std::move(type)
-            );
-        }
-        else {
-            _groups[groupName] = std::make_shared<IswaBaseGroup>(
-                groupName,
-                std::move(type)
-            );
-        }
-    }
-    else if (!_groups[groupName]->isType(type)) {
+    if (_groups.find(groupName) != _groups.end()) {
         LWARNING("Can't add cygnet to groups with diffent type");
+        return;
+    }
+
+    const bool dataGroup = (type == typeid(RenderableDataPlane).name()) ||
+                            (type == typeid(RenderableDataSphere).name());
+
+    const bool kameleonGroup = (type == typeid(RenderableKameleonPlane).name());
+
+    if (dataGroup) {
+        _groups[groupName] = std::make_shared<IswaDataGroup>(groupName, std::move(type));
+    }
+    else if (kameleonGroup) {
+        _groups[groupName] = std::make_shared<IswaKameleonGroup>(
+            groupName,
+            std::move(type)
+        );
+    }
+    else {
+        _groups[groupName] = std::make_shared<IswaBaseGroup>(groupName, std::move(type));
     }
 }
 
@@ -325,6 +317,7 @@ IswaBaseGroup* IswaManager::iswaGroup(const std::string& name) {
     if (_groups.find(name) != _groups.end()) {
         return _groups[name].get();
     }
+
     return nullptr;
 }
 
@@ -360,6 +353,7 @@ std::string IswaManager::jsonPlaneToLuaTable(MetadataFuture& data) {
     if (data.json.empty()) {
         return "";
     }
+
     nlohmann::json j = nlohmann::json::parse(data.json);
 
     std::string parent = j["Central Body"].get<std::string>();
@@ -424,62 +418,60 @@ std::string IswaManager::parseKWToLuaTable(const CdfInfo& info, const std::strin
     }
 
     std::filesystem::path ext = std::filesystem::path(absPath(info.path)).extension();
-    if (ext == ".cdf") {
-        KameleonWrapper kw = KameleonWrapper(absPath(info.path));
-
-        std::string parent = kw.parent();
-        std::string frame = kw.frame();
-        glm::vec3 min = kw.gridMin();
-        glm::vec3 max = kw.gridMax();
-
-
-        std::array<std::string, 3> gridUnits = kw.gridUnits();
-
-        glm::vec4 spatialScale = glm::vec4(0.f);
-        std::string coordinateType;
-        if (gridUnits[0] == "R" && gridUnits[1] == "R" && gridUnits[2] == "R") {
-            spatialScale.x = 6.371f;
-            spatialScale.y = 6.371f;
-            spatialScale.z = 6.371f;
-            spatialScale.w = 6;
-
-            coordinateType = "Cartesian";
-        }
-        else {
-            spatialScale = glm::vec4(1.f);
-            spatialScale.w = 1; //-log10(1.f/max.x);
-            coordinateType = "Polar";
-        }
-
-        std::string table = "{"
-            "Name = '" + info.name + "',"
-            "Parent = '" + parent + "', "
-            "Renderable = {"
-                "Type = 'KameleonPlane', "
-                "Id = 0 ,"
-                "Frame = '" + frame + "' , "
-                "GridMin = " + ghoul::to_string(min) + ", "
-                "GridMax = " + ghoul::to_string(max) + ", "
-                "SpatialScale = " + ghoul::to_string(spatialScale) + ", "
-                "UpdateTime = 0, "
-                "kwPath = '" + info.path + "' ,"
-                "axisCut = '" + cut + "',"
-                "CoordinateType = '" + coordinateType + "', "
-                "Group = '" + info.group + "',"
-                // "Group = '',"
-                "fieldlineSeedsIndexFile = '" + info.fieldlineSeedsIndexFile + "'"
-                "}"
-            "}"
-            ;
-        return table;
-    }
-    else {
+    if (ext != ".cdf") {
         return "";
     }
+
+    KameleonWrapper kw = KameleonWrapper(absPath(info.path));
+
+    std::string parent = kw.parent();
+    std::string frame = kw.frame();
+    glm::vec3 min = kw.gridMin();
+    glm::vec3 max = kw.gridMax();
+
+
+    std::array<std::string, 3> gridUnits = kw.gridUnits();
+
+    glm::vec4 spatialScale = glm::vec4(0.f);
+    std::string coordinateType;
+    if (gridUnits[0] == "R" && gridUnits[1] == "R" && gridUnits[2] == "R") {
+        spatialScale.x = 6.371f;
+        spatialScale.y = 6.371f;
+        spatialScale.z = 6.371f;
+        spatialScale.w = 6;
+
+        coordinateType = "Cartesian";
+    }
+    else {
+        spatialScale = glm::vec4(1.f);
+        spatialScale.w = 1; // -log10(1.f/max.x);
+        coordinateType = "Polar";
+    }
+
+    std::string table = "{"
+        "Name = '" + info.name + "',"
+        "Parent = '" + parent + "', "
+        "Renderable = {"
+            "Type = 'KameleonPlane', "
+            "Id = 0 ,"
+            "Frame = '" + frame + "' , "
+            "GridMin = " + ghoul::to_string(min) + ", "
+            "GridMax = " + ghoul::to_string(max) + ", "
+            "SpatialScale = " + ghoul::to_string(spatialScale) + ", "
+            "UpdateTime = 0, "
+            "kwPath = '" + info.path + "' ,"
+            "axisCut = '" + cut + "',"
+            "CoordinateType = '" + coordinateType + "', "
+            "Group = '" + info.group + "',"
+            // "Group = '',"
+            "fieldlineSeedsIndexFile = '" + info.fieldlineSeedsIndexFile + "'"
+            "}"
+        "}";
+    return table;
 }
 
 std::string IswaManager::jsonSphereToLuaTable(MetadataFuture& data) {
-    if (data.json == "") {
+    if (data.json.empty()) {
         LWARNING("jsonSphereToLuaTable: no content in metadata json");
         return "";
     }
@@ -525,7 +517,7 @@ std::string IswaManager::jsonSphereToLuaTable(MetadataFuture& data) {
 }
 
 void IswaManager::createPlane(MetadataFuture& data) {
-    // check if this plane already exist
+    // Check if this plane already exist
     std::string name = std::format(
         "{}{}{}", _cygnetType[data.type], _geom[data.geom], data.id
     );
@@ -553,7 +545,7 @@ void IswaManager::createPlane(MetadataFuture& data) {
     data.name = name;
 
     if (global::renderEngine->scene()->sceneGraphNode(name)) {
-        LERROR("A node with name \"" + name + "\" already exist");
+        LERROR(std::format("A node with name '{}' already exist", name));
         return;
     }
 
@@ -565,7 +557,7 @@ void IswaManager::createPlane(MetadataFuture& data) {
 }
 
 void IswaManager::createSphere(MetadataFuture& data) {
-    // check if this sphere already exist
+    // Check if this sphere already exist
     std::string name = std::format(
         "{}{}{}", _cygnetType[data.type], _geom[data.geom], data.id
     );
@@ -586,11 +578,11 @@ void IswaManager::createSphere(MetadataFuture& data) {
     data.name = name;
 
     if (global::renderEngine->scene()->sceneGraphNode(name)) {
-        LERROR("A node with name \"" + name +"\" already exist");
+        LERROR(std::format("A node with name '{}' already exists", name));
         return;
     }
     std::string luaTable = jsonSphereToLuaTable(data);
-    if (luaTable != "") {
+    if (!luaTable.empty()) {
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
         global::scriptEngine->queueScript(script);
     }
@@ -598,37 +590,37 @@ void IswaManager::createSphere(MetadataFuture& data) {
 
 void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
     std::filesystem::path ext = std::filesystem::path(absPath(info.path)).extension();
-    if (std::filesystem::is_regular_file(absPath(info.path)) && ext == ".cdf") {
-        if (!info.group.empty()) {
-            std::string type = typeid(RenderableKameleonPlane).name();
-            registerGroup(info.group, type);
-
-            auto it = _groups.find(info.group);
-            if (it == _groups.end() || (*it).second->isType(type)) {
-                info.name = info.group + "_" + info.name;
-            }
-            else {
-                info.group = "";
-            }
-        }
-
-        info.name = info.name + "-" + cut;
-
-        if (global::renderEngine->scene()->sceneGraphNode(info.name)) {
-            LERROR("A node with name \"" + info.name +"\" already exist");
-            return;
-        }
-
-        std::string luaTable = parseKWToLuaTable(info, cut);
-        if (!luaTable.empty()) {
-            std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-            global::scriptEngine->queueScript(script);
-        }
-    }
-    else {
+    if (!std::filesystem::is_regular_file(absPath(info.path)) || ext != ".cdf") {
         LWARNING(
             std::format("'{}' is not a CDF file or cannot be found", absPath(info.path))
         );
+        return;
+    }
+
+    if (!info.group.empty()) {
+        std::string type = typeid(RenderableKameleonPlane).name();
+        registerGroup(info.group, type);
+
+        auto it = _groups.find(info.group);
+        if (it == _groups.end() || (*it).second->isType(type)) {
+            info.name = info.group + "_" + info.name;
+        }
+        else {
+            info.group = "";
+        }
+    }
+
+    info.name = info.name + "-" + cut;
+
+    if (global::renderEngine->scene()->sceneGraphNode(info.name)) {
+        LERROR("A node with name \"" + info.name +"\" already exist");
+        return;
+    }
+
+    std::string luaTable = parseKWToLuaTable(info, cut);
+    if (!luaTable.empty()) {
+        std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
+        global::scriptEngine->queueScript(script);
     }
 }
 
@@ -636,63 +628,63 @@ void IswaManager::createFieldline(std::string name, std::filesystem::path cdfPat
                                   std::string seedPath)
 {
     std::filesystem::path ext = absPath(cdfPath).extension();
-    if (std::filesystem::is_regular_file(absPath(cdfPath)) && ext == ".cdf") {
-        std::string luaTable = "{"
-            "Name = '" + name + "',"
-            "Parent = 'Earth',"
-            "Renderable = {"
-                "Type = 'RenderableFieldlines',"
-                "VectorField = {"
-                    "Type = 'VolumeKameleon',"
-                    "File = '" + cdfPath.string() + "',"
-                    "Model = 'BATSRUS',"
-                    "Variables = {'bx', 'by', 'bz'}"
-                "},"
-                "Fieldlines = {"
-                    "Stepsize = 1,"
-                    "Classification = true"
-                "},"
-                "SeedPoints = {"
-                    "Type = 'File',"
-                    "File = '" + seedPath + "'"
-                "}"
-            "}"
-        "}";
-        if (!luaTable.empty()) {
-            std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-            global::scriptEngine->queueScript(script);
-        }
-    }
-    else {
+    if (!std::filesystem::is_regular_file(absPath(cdfPath)) || ext != ".cdf") {
         LWARNING(std::format("{} is not a CDF file or cannot be found", cdfPath));
+        return;
+    }
+
+    std::string luaTable = "{"
+        "Name = '" + name + "',"
+        "Parent = 'Earth',"
+        "Renderable = {"
+            "Type = 'RenderableFieldlines',"
+            "VectorField = {"
+                "Type = 'VolumeKameleon',"
+                "File = '" + cdfPath.string() + "',"
+                "Model = 'BATSRUS',"
+                "Variables = {'bx', 'by', 'bz'}"
+            "},"
+            "Fieldlines = {"
+                "Stepsize = 1,"
+                "Classification = true"
+            "},"
+            "SeedPoints = {"
+                "Type = 'File',"
+                "File = '" + seedPath + "'"
+            "}"
+        "}"
+    "}";
+    if (!luaTable.empty()) {
+        std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
+        global::scriptEngine->queueScript(script);
     }
 }
 
 void IswaManager::fillCygnetInfo(std::string jsonString) {
-    if (jsonString != "") {
-        nlohmann::json j = nlohmann::json::parse(jsonString);
+    if (jsonString.empty()) {
+        return;
+    }
 
-        std::set<std::string> lists  =  {"listOfPriorityCygnets", "listOfOKCygnets"
-                                        // ,"listOfStaleCygnets", "listOfInactiveCygnets",
-                                        };
+    nlohmann::json j = nlohmann::json::parse(jsonString);
 
-        for (const std::string& list : lists) {
-            nlohmann::json jsonList = j[list];
-            for (size_t i = 0; i < jsonList.size(); i++) {
-                nlohmann::json jCygnet = jsonList.at(i);
+    const std::set<std::string> lists = { "listOfPriorityCygnets", "listOfOKCygnets" };
 
-                std::string name = jCygnet["cygnetDisplayTitle"].get<std::string>();
-                std::replace(name.begin(), name.end(),'.', ',');
+    for (const std::string& list : lists) {
+        nlohmann::json jsonList = j[list];
+        for (size_t i = 0; i < jsonList.size(); i++) {
+            nlohmann::json jCygnet = jsonList.at(i);
 
-                CygnetInfo info = {
-                    name,
-                    jCygnet["cygnetDescription"].get<std::string>(),
-                    jCygnet["cygnetUpdateInterval"].get<int>(),
-                    false
-                };
-                _cygnetInformation[jCygnet["cygnetID"].get<int>()] =
-                    std::make_shared<CygnetInfo>(info);
-            }
+            std::string name = jCygnet["cygnetDisplayTitle"].get<std::string>();
+            std::replace(name.begin(), name.end(),'.', ',');
+
+            CygnetInfo info = {
+                .name = name,
+                .description = jCygnet["cygnetDescription"].get<std::string>(),
+                .updateInterval = jCygnet["cygnetUpdateInterval"].get<int>(),
+                .selected = false
+            };
+            _cygnetInformation[jCygnet["cygnetID"].get<int>()] =
+                std::make_shared<CygnetInfo>(info);
         }
     }
 }
@@ -703,49 +695,46 @@ ghoul::Event<>& IswaManager::iswaEvent() {
 
 void IswaManager::addCdfFiles(std::string cdfpath) {
     std::filesystem::path cdfFile = absPath(cdfpath);
-    if (std::filesystem::is_regular_file(cdfFile)) {
-        //std::string basePath = path.substr(0, path.find_last_of("/\\"));
-        std::ifstream jsonFile(cdfFile);
-
-        if (jsonFile.is_open()) {
-            nlohmann::json cdfGroups = nlohmann::json::parse(jsonFile);
-            for (size_t i = 0; i < cdfGroups.size(); i++) {
-                nlohmann::json cdfGroup = cdfGroups.at(i);
-
-                std::string groupName = cdfGroup["group"].get<std::string>();
-                std::string fieldlineSeedsIndexFile =
-                    cdfGroup["fieldlinefile"].get<std::string>();
-
-                if (_cdfInformation.find(groupName) != _cdfInformation.end()) {
-                    LWARNING("CdfGroup with name" + groupName + " already exists");
-                    return;
-                }
-
-                _cdfInformation[groupName] = std::vector<CdfInfo>();
-
-                nlohmann::json cdfs = cdfGroup["cdfs"];
-                for (size_t j = 0; j < cdfs.size(); j++) {
-                    nlohmann::json cdf = cdfs.at(j);
-
-                    std::string name = cdf["name"].get<std::string>();
-                    std::string path = cdf["path"].get<std::string>();
-                    std::string date = cdf["date"].get<std::string>();
-
-                    _cdfInformation[groupName].push_back({
-                        name,
-                        path,
-                        groupName,
-                        date,
-                        fieldlineSeedsIndexFile
-                    });
-                }
-            }
-
-            jsonFile.close();
-        }
-    }
-    else {
+    if (!std::filesystem::is_regular_file(cdfFile)) {
         LWARNING(std::format("'{}' is not a CDF file or cannot be found", cdfFile));
+        return;
+    }
+
+    std::ifstream jsonFile = std::ifstream(cdfFile);
+    if (!jsonFile.is_open()) {
+        return;
+    }
+
+    nlohmann::json cdfGroups = nlohmann::json::parse(jsonFile);
+    for (size_t i = 0; i < cdfGroups.size(); i++) {
+        nlohmann::json cdfGroup = cdfGroups.at(i);
+
+        std::string groupName = cdfGroup["group"].get<std::string>();
+        std::string fieldlineSeedsIdxFile = cdfGroup["fieldlinefile"].get<std::string>();
+
+        if (_cdfInformation.find(groupName) != _cdfInformation.end()) {
+            LWARNING("CdfGroup with name" + groupName + " already exists");
+            return;
+        }
+
+        _cdfInformation[groupName] = std::vector<CdfInfo>();
+
+        nlohmann::json cdfs = cdfGroup["cdfs"];
+        for (size_t j = 0; j < cdfs.size(); j++) {
+            nlohmann::json cdf = cdfs.at(j);
+
+            std::string name = cdf["name"].get<std::string>();
+            std::string path = cdf["path"].get<std::string>();
+            std::string date = cdf["date"].get<std::string>();
+
+            _cdfInformation[groupName].push_back({
+                .name = name,
+                .path = path,
+                .group = groupName,
+                .date = date,
+                .fieldlineSeedsIndexFile = fieldlineSeedsIdxFile
+            });
+        }
     }
 }
 

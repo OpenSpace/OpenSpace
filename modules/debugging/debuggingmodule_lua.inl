@@ -23,11 +23,11 @@
  ****************************************************************************************/
 
 #include <openspace/scene/scene.h>
-#include <ghoul/lua/lua_helper.h>
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
 
 using namespace openspace;
 
@@ -151,7 +151,9 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
     }
 }
 
-// Removes the currently rendered camera path if there is one.
+/**
+ * Removes the currently rendered camera path if there is one.
+ */
 [[codegen::luawrap]] void removeRenderedCameraPath() {
     const std::string script = std::format(
         "openspace.removeSceneGraphNode('{}');", RenderedPathIdentifier
@@ -222,7 +224,9 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
     }
 }
 
-// Removes the rendered control points.
+/**
+ * Removes the rendered control points.
+ */
 [[codegen::luawrap]] void removePathControlPoints() {
     const std::string script = std::format(
         "openspace.removeSceneGraphNode('{}');", RenderedPointsIdentifier

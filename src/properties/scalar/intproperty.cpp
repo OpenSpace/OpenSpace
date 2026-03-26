@@ -28,8 +28,8 @@
 
 namespace openspace {
 
-IntProperty::IntProperty(Property::PropertyInfo info, int value,
-                         int minValue, int maxValue, int stepValue)
+IntProperty::IntProperty(PropertyInfo info, int value, int minValue, int maxValue,
+                         int stepValue)
     : NumericalProperty<int>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 

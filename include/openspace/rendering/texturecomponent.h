@@ -35,7 +35,9 @@ namespace openspace {
 
 class TextureComponent {
 public:
-    // nDimensions must be 1, 2, 3
+    /**
+     * \param nDimensions Must be 1, 2, 3
+     */
     explicit TextureComponent(int nDimensions);
 
     const ghoul::opengl::Texture* texture() const;
@@ -45,11 +47,15 @@ public:
     void setWrapping(ghoul::opengl::Texture::WrappingMode wrapping);
     void setShouldWatchFileForChanges(bool value);
 
-    // Loads a texture from a file on disk
+    /**
+     * Loads a texture from a file on disk.
+     */
     void loadFromFile(const std::filesystem::path& path);
 
-    // Function to call in a renderable's update function to make sure
-    // the texture is kept up to date
+    /**
+     * Function to call in a renderable's update function to make sure the texture is kept
+     * up to date.
+     */
     void update();
 
 private:

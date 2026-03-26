@@ -28,9 +28,8 @@
 
 namespace openspace {
 
-UVec4Property::UVec4Property(Property::PropertyInfo info, glm::uvec4 value,
-                             glm::uvec4 minValue, glm::uvec4 maxValue,
-                             glm::uvec4 stepValue)
+UVec4Property::UVec4Property(PropertyInfo info, glm::uvec4 value, glm::uvec4 minValue,
+                             glm::uvec4 maxValue, glm::uvec4 stepValue)
     : NumericalProperty<glm::uvec4>(
         std::move(info),
         std::move(value),

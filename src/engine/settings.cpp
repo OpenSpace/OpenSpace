@@ -47,13 +47,15 @@ namespace version1 {
     static Settings parseSettings(nlohmann::json json) {
         ghoul_assert(json.at("version").get<int>() == 1, "Wrong value");
 
-        Settings settings;
-        settings.hasStartedBefore = get_to<bool>(json, "started-before");
-        settings.lastStartedDate = get_to<std::string>(json, "last-started-date");
-        settings.configuration = get_to<std::string>(json, "config");
-        settings.rememberLastConfiguration = get_to<bool>(json, "config-remember");
-        settings.profile = get_to<std::string>(json, "profile");
-        settings.rememberLastProfile = get_to<bool>(json, "profile-remember");
+        Settings settings = {
+            .hasStartedBefore = get_to<bool>(json, "started-before"),
+            .lastStartedDate = get_to<std::string>(json, "last-started-date"),
+            .configuration = get_to<std::string>(json, "config"),
+            .rememberLastConfiguration = get_to<bool>(json, "config-remember"),
+            .profile = get_to<std::string>(json, "profile"),
+            .rememberLastProfile = get_to<bool>(json, "profile-remember"),
+            .bypassLauncher = get_to<bool>(json, "bypass"),
+        };
         std::optional<std::string> visibility = get_to<std::string>(json, "visibility");
         if (visibility.has_value()) {
             if (*visibility == "NoviceUser") {
@@ -74,7 +76,6 @@ namespace version1 {
                 ));
             }
         }
-        settings.bypassLauncher = get_to<bool>(json, "bypass");
 
         std::optional<std::string> layerServer = get_to<std::string>(json, "layerserver");
         if (layerServer.has_value()) {
@@ -85,9 +86,10 @@ namespace version1 {
             if (!it->is_object()) {
                 throw ghoul::RuntimeError("'mrf' is not an object");
             }
-            Settings::MRF mrf;
-            mrf.isEnabled = get_to<bool>(*it, "enabled");
-            mrf.location = get_to<std::string>(*it, "location");
+            Settings::MRF mrf = {
+                .isEnabled = get_to<bool>(*it, "enabled"),
+                .location = get_to<std::string>(*it, "location")
+            };
 
             if (mrf.isEnabled.has_value() || mrf.location.has_value()) {
                 settings.mrf = mrf;

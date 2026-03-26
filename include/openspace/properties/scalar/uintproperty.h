@@ -32,12 +32,12 @@
 namespace openspace {
 
 /**
- * This class is a concrete implementation of TemplateProperty with
- * the type `unsigned int`.
+ * This class is a concrete implementation of TemplateProperty with the type
+ * `unsigned int`.
  */
 class UIntProperty : public NumericalProperty<unsigned int> {
 public:
-    explicit UIntProperty(Property::PropertyInfo info, unsigned int value = 0,
+    explicit UIntProperty(PropertyInfo info, unsigned int value = 0,
         unsigned int minValue = std::numeric_limits<unsigned int>::lowest(),
         unsigned int maxValue = std::numeric_limits<unsigned int>::max(),
         unsigned int stepValue = 1);

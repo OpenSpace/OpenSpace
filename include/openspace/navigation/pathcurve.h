@@ -52,9 +52,9 @@ public:
     double length() const;
 
     /**
-     * Compute and return the position along the path at the specified relative
-     * distance. The input parameter should be in range [0, 1], where 1 correspond to
-     * the full length of the path.
+     * Compute and return the position along the path at the specified relative distance.
+     * The input parameter should be in range [0, 1], where 1 correspond to the full
+     * length of the path.
      *
      * Can be overridden by subclasses that want more control over the position
      * interpolation.
@@ -102,8 +102,10 @@ protected:
     double _totalLength = 0.0; // meters
 
     struct ParameterPair {
-        double u; // curve parameter
-        double s; // arc length parameter
+        /// Curve parameter
+        double u;
+        /// Arc length parameter
+        double s;
     };
 
     std::vector<ParameterPair> _parameterSamples;

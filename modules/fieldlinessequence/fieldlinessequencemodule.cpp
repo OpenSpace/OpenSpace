@@ -55,7 +55,9 @@ namespace openspace {
 
 std::filesystem::path FieldlinesSequenceModule::DefaultTransferFunctionFile = "";
 
-FieldlinesSequenceModule::FieldlinesSequenceModule() : OpenSpaceModule(Name) {
+FieldlinesSequenceModule::FieldlinesSequenceModule()
+    : OpenSpaceModule(Name)
+{
     DefaultTransferFunctionFile = absPath("${TEMPORARY}/default_transfer_function.txt");
 
     std::ofstream file = std::ofstream(DefaultTransferFunctionFile);

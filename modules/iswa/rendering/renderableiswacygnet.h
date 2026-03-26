@@ -83,8 +83,6 @@ protected:
     void initializeTime();
     void initializeGroup();
 
-    // Subclass interface
-    // ==================
     virtual void createGeometry() = 0;
     virtual void destroyGeometry() = 0;
     virtual void renderGeometry() const = 0;
@@ -134,7 +132,7 @@ protected:
 
     Metadata _data;
 
-    // to rotate objects with flipped texture coordinates
+    // To rotate objects with flipped texture coordinates
     glm::mat4 _rotation = glm::mat4(1.f);
 
 private:

@@ -56,8 +56,6 @@ void main() {
   dpos.xyz *= 8.0;
   dpos = modelMatrix * dpos;
   dpos /= Parsec;
-  // It lies about 8 kpc from the center on the Orion Arm of the Milky Way
-  dpos.x += 8000.0;
 
   dvec3 normal = normalize(eyePosition - dpos.xyz);
   dvec3 newRight = normalize(cross(cameraUp, normal));

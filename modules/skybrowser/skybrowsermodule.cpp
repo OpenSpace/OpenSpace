@@ -182,9 +182,9 @@ SkyBrowserModule::SkyBrowserModule()
     addProperty(_hideTargetsBrowsersWithGui);
     addProperty(_inverseZoomDirection);
     addProperty(_spaceCraftAnimationTime);
+    _wwtImageCollectionUrl.setReadOnly(true);
     addProperty(_wwtImageCollectionUrl);
     addProperty(_synchronizeAim);
-    _wwtImageCollectionUrl.setReadOnly(true);
 
     // Set callback functions
     global::callback::mouseButton->emplace(
@@ -202,7 +202,7 @@ SkyBrowserModule::SkyBrowserModule()
 
         // Disable browser and targets when camera is outside of solar system
         const bool camWasInSolarSystem = _isCameraInSolarSystem;
-        const glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
+        const glm::dvec3 cameraPos = global::navigationHandler->camera()->position();
         _isCameraInSolarSystem = glm::length(cameraPos) < SolarSystemRadius;
         const bool vizModeChanged = _isCameraInSolarSystem != camWasInSolarSystem;
 
@@ -261,15 +261,11 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
-
-    // Register ScreenSpaceSkyBrowser
     fScreenSpaceRenderable->registerClass<ScreenSpaceSkyBrowser>("ScreenSpaceSkyBrowser");
 
     ghoul::TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
-
-    // Register ScreenSpaceSkyTarget
     fRenderable->registerClass<RenderableSkyTarget>("RenderableSkyTarget");
 }
 
@@ -351,9 +347,8 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
         }
     }
 
-    // Set the exact target position
-    // Move it slightly outside of the celestial sphere so it doesn't overlap with
-    // the target
+    // Set the exact target position. Move it slightly outside of the celestial sphere so
+    // it doesn't overlap with the target
     glm::dvec3 pos = equatorialToGalactic(image.equatorialCartesian);
     pos *= CelestialSphereRadius * 1.1;
 
@@ -366,20 +361,22 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
 }
 
 void SkyBrowserModule::disableHoverCircle(bool useScript) {
-    if (_hoverCircle && _hoverCircle->renderable()) {
-        if (useScript) {
-            const std::string script = std::format(
-                "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 0.0);",
-                _hoverCircle->identifier()
-            );
-            global::scriptEngine->queueScript(script);
-        }
-        else {
-            Property* prop = _hoverCircle->renderable()->property("Fade");
-            FloatProperty* floatProp = dynamic_cast<FloatProperty*>(prop);
-            ghoul_assert(floatProp, "Fade property is not a float property");
-            *floatProp = 0.f;
-        }
+    if (!_hoverCircle || !_hoverCircle->renderable()) {
+        return;
+    }
+
+    if (useScript) {
+        const std::string script = std::format(
+            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 0.0);",
+            _hoverCircle->identifier()
+        );
+        global::scriptEngine->queueScript(script);
+    }
+    else {
+        Property* prop = _hoverCircle->renderable()->property("Fade");
+        FloatProperty* floatProp = dynamic_cast<FloatProperty*>(prop);
+        ghoul_assert(floatProp, "Fade property is not a float property");
+        *floatProp = 0.f;
     }
 }
 
@@ -417,7 +414,7 @@ TargetBrowserPair* SkyBrowserModule::pair(std::string_view id) const {
         }
     );
     TargetBrowserPair* found = it != _targetsBrowsers.end() ? it->get() : nullptr;
-    if (found == nullptr) {
+    if (!found) {
         LINFO(std::format("Identifier '{}' not found", id));
     }
     return found;
@@ -464,8 +461,7 @@ std::string SkyBrowserModule::wwtImageCollectionUrl() const {
 }
 
 void SkyBrowserModule::setSelectedBrowser(std::string_view id) {
-    TargetBrowserPair* p = pair(id);
-    if (p) {
+    if (TargetBrowserPair* p = pair(id);  p) {
         _selectedBrowser = id;
     }
 }

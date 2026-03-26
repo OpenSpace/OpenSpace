@@ -45,7 +45,7 @@ public:
      *
      * \param parent Pointer to parent Qt widget
      * \param time The #openspace::Profile::Time object containing all data of the new or
-     *        imported profile.
+     *        imported profile
      */
     TimeDialog(QWidget* parent, std::optional<openspace::Profile::Time>* time);
 

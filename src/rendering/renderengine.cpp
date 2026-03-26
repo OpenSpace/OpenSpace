@@ -34,8 +34,8 @@
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/rendering/dashboard.h>
-#include <openspace/rendering/helper.h>
 #include <openspace/rendering/framebufferrenderer.h>
+#include <openspace/rendering/helper.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -74,10 +74,10 @@
 #include <array>
 #include <cmath>
 #include <ctime>
+#include <thread>
 #include <utility>
 
 #include "renderengine_lua.inl"
-#include <thread>
 
 namespace {
     using namespace openspace;
@@ -172,10 +172,9 @@ namespace {
     constexpr Property::PropertyInfo GlobalRotationInfo = {
         "GlobalRotation",
         "Global rotation",
-        "Applies a global view rotation. Use this to rotate the position of the "
-        "focus node away from the default location on the screen. This setting "
-        "persists even when a new focus node is selected. Defined using pitch, yaw, "
-        "roll in radians.",
+        "Applies a global view rotation. Use this to rotate the position of the focus "
+        "node away from the default location on the screen. This setting persists even "
+        "when a new focus node is selected. Defined using pitch, yaw, roll in radians.",
         Property::Visibility::AdvancedUser
     };
 
@@ -217,7 +216,7 @@ namespace {
         "Gamma",
         "Gamma correction",
         "Gamma, is the nonlinear operation used to encode and decode luminance or "
-        "tristimulus values in the image",
+        "tristimulus values in the image.",
         Property::Visibility::AdvancedUser
     };
 
@@ -253,9 +252,8 @@ namespace {
     constexpr Property::PropertyInfo HorizFieldOfViewInfo = {
         "HorizFieldOfView",
         "Horizontal field of view",
-        "Adjusts the degrees of the horizontal field of view. The vertical field of "
-        "view will be automatically adjusted to match, according to the current "
-        "aspect ratio.",
+        "Adjusts the degrees of the horizontal field of view. The vertical field of view "
+        "will be automatically adjusted to match, according to the current aspect ratio.",
         Property::Visibility::User
     };
 
@@ -481,25 +479,12 @@ void RenderEngine::initialize() {
     _disableMasterRendering = global::configuration->isRenderingOnMasterDisabled;
     _screenshotUseDate = global::configuration->shouldUseScreenshotDate;
 
-    ghoul::io::TextureReader::ref().addReader(
-        std::make_unique<ghoul::io::TextureReaderSTB>()
-    );
-
-    ghoul::io::TextureReader::ref().addReader(
-        std::make_unique<ghoul::io::TextureReaderCMAP>()
-    );
-
-    ghoul::io::TextureWriter::ref().addWriter(
-        std::make_unique<ghoul::io::TextureWriterSTB>()
-    );
-
-    ghoul::io::ModelReader::ref().addReader(
-        std::make_unique<ghoul::io::ModelReaderAssimp>()
-    );
-
-    ghoul::io::ModelReader::ref().addReader(
-        std::make_unique<ghoul::io::ModelReaderBinary>()
-    );
+    using namespace ghoul::io;
+    TextureReader::ref().addReader(std::make_unique<TextureReaderSTB>());
+    TextureReader::ref().addReader(std::make_unique<TextureReaderCMAP>());
+    TextureWriter::ref().addWriter(std::make_unique<TextureWriterSTB>());
+    ModelReader::ref().addReader(std::make_unique<ModelReaderAssimp>());
+    ModelReader::ref().addReader(std::make_unique<ModelReaderBinary>());
 }
 
 void RenderEngine::initializeGL() {
@@ -523,7 +508,7 @@ void RenderEngine::initializeGL() {
     _renderer.setHDRExposure(_hdrExposure);
     _renderer.initialize();
 
-    // set the close clip plane and the far clip plane to extreme values while in
+    // Set the close clip plane and the far clip plane to extreme values while in
     // development
     global::windowDelegate->setNearFarClippingPlane(0.001f, 1000.f);
 
@@ -578,9 +563,13 @@ void RenderEngine::updateScene() {
     const Time& integrateFromTime = global::timeManager->integrateFromTime();
 
     _scene->update({
-        TransformData{ glm::dvec3(0.0), glm::dmat3(1.0), glm::dvec3(1.0) },
-        currentTime,
-        integrateFromTime
+        .modelTransform = {
+            .translation = glm::dvec3(0.0),
+            .rotation = glm::dmat3(1.0),
+            .scale = glm::dvec3(1.0)
+        },
+        .time = currentTime,
+        .previousFrameTime = integrateFromTime
     });
 
     LTRACE("RenderEngine::updateSceneGraph(end)");
@@ -994,7 +983,7 @@ bool RenderEngine::isHdrDisabled() const {
 }
 
 /**
- * Build a program object for rendering with the used renderer
+ * Build a program object for rendering with the used renderer.
  */
 std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
                                                                   const std::string& name,
@@ -1004,11 +993,11 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
 {
     ghoul::Dictionary dict = std::move(data);
 
-    // set path to the current renderer's main fragment shader
+    // Set path to the current renderer's main fragment shader
     dict.setValue("rendererData", _rendererData);
-    // parameterize the main fragment shader program with specific contents.
-    // fsPath should point to a shader file defining a Fragment getFragment() function
-    // instead of a void main() setting glFragColor, glFragDepth, etc.
+    // Parameterize the main fragment shader program with specific contents. `fsPath`
+    // should point to a shader file defining a Fragment getFragment() function instead of
+    // a void main() setting glFragColor, glFragDepth, etc
     dict.setValue("fragmentPath", fsPath);
 
     using namespace ghoul::opengl;
@@ -1026,8 +1015,8 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
 }
 
 /**
-* Build a program object for rendering with the used renderer
-*/
+ * Build a program object for rendering with the used renderer.
+ */
 std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
                                                                   const std::string& name,
                                                       const std::filesystem::path& vsPath,
@@ -1038,9 +1027,9 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     ghoul::Dictionary dict = std::move(data);
     dict.setValue("rendererData", _rendererData);
 
-    // parameterize the main fragment shader program with specific contents.
-    // fsPath should point to a shader file defining a Fragment getFragment() function
-    // instead of a void main() setting glFragColor, glFragDepth, etc.
+    // Parameterize the main fragment shader program with specific contents. `fsPath`
+    // should point to a shader file defining a Fragment getFragment() function instead of
+    // a void main() setting glFragColor, glFragDepth, etc
     dict.setValue("fragmentPath", fsPath);
 
     using namespace ghoul::opengl;
@@ -1088,9 +1077,9 @@ void RenderEngine::setResolveData(ghoul::Dictionary resolveData) {
 }
 
 void RenderEngine::takeScreenshot() {
-    // We only create the directory here, as we don't want to spam the users
-    // screenshot folder everytime we start OpenSpace even when we are not taking any
-    // screenshots. So the first time we actually take one, we create the folder:
+    // We only create the directory here, as we don't want to spam the users screenshot
+    // folder everytime we start OpenSpace even when we are not taking any screenshots. So
+    // the first time we actually take one, we create the folder
 
     if (!std::filesystem::is_directory(absPath("${SCREENSHOTS}"))) {
         std::filesystem::create_directories(absPath("${SCREENSHOTS}"));
@@ -1103,7 +1092,7 @@ void RenderEngine::takeScreenshot() {
 }
 
 /**
- * Resets the screenshot index to 0
+ * Resets the screenshot index to 0.
  */
 void RenderEngine::resetScreenshotNumber() {
     _latestScreenshotNumber = 0;
@@ -1201,7 +1190,7 @@ std::vector<ScreenSpaceRenderable*> RenderEngine::screenSpaceRenderables() const
         global::screenSpaceRenderables->begin(),
         global::screenSpaceRenderables->end(),
         res.begin(),
-        [](const std::unique_ptr<ScreenSpaceRenderable>& p) { return p.get(); }
+        std::mem_fn(&std::unique_ptr<ScreenSpaceRenderable>::get)
     );
     return res;
 }
@@ -1288,9 +1277,9 @@ void RenderEngine::renderVersionInformation() {
 
             std::string versionString = std::string(OPENSPACE_VERSION);
             const VersionChecker::SemanticVersion current {
-                OPENSPACE_VERSION_MAJOR,
-                OPENSPACE_VERSION_MINOR,
-                OPENSPACE_VERSION_PATCH
+                .major = OPENSPACE_VERSION_MAJOR,
+                .minor = OPENSPACE_VERSION_MINOR,
+                .patch = OPENSPACE_VERSION_PATCH
             };
             if (current < ver) {
                 versionString += std::format(

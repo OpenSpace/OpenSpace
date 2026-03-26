@@ -33,33 +33,27 @@
 
 namespace openspace {
 
-DataProcessorJson::DataProcessorJson() : DataProcessor() {}
-
-DataProcessorJson::~DataProcessorJson() {}
-
 std::vector<std::string> DataProcessorJson::readMetadata(const std::string& data,
                                                          glm::size3_t& dimensions)
 {
+    if (data.empty()) {
+        return std::vector<std::string>();
+    }
+
     std::vector<std::string> options = std::vector<std::string>();
-    if (!data.empty()) {
-        const nlohmann::json& j = nlohmann::json::parse(data);
-        nlohmann::json variables = j["variables"];
+    const nlohmann::json& j = nlohmann::json::parse(data);
+    nlohmann::json variables = j["variables"];
 
-        for (nlohmann::json::iterator it = variables.begin();
-             it != variables.end();
-             it++)
-        {
-            std::string option = it.key();
-            if (option == "ep") {
-                const nlohmann::json& row = it.value();
-                const nlohmann::json& col = row.at(0);
+    for (nlohmann::json::iterator it = variables.begin(); it != variables.end(); it++) {
+        std::string option = it.key();
+        if (option == "ep") {
+            const nlohmann::json& row = it.value();
+            const nlohmann::json& col = row.at(0);
+            dimensions = glm::size3_t(col.size(), row.size(), 1);
+        }
 
-                dimensions = glm::size3_t(col.size(), row.size(), 1);
-            }
-
-            if (_coordinateVariables.find(option) == _coordinateVariables.end()) {
-                options.push_back(std::move(option));
-            }
+        if (_coordinateVariables.find(option) == _coordinateVariables.end()) {
+            options.push_back(std::move(option));
         }
     }
     return options;
@@ -71,43 +65,45 @@ void DataProcessorJson::addDataValues(const std::string& data,
     int numOptions = static_cast<int>(dataOptions.options().size());
     initializeVectors(numOptions);
 
-    if (!data.empty()) {
-        const nlohmann::json& j = nlohmann::json::parse(data);
-        nlohmann::json variables = j["variables"];
+    if (data.empty()) {
+        return;
+    }
 
-        std::vector<float> sum(numOptions, 0.f);
-        std::vector<std::vector<float>> optionValues(numOptions, std::vector<float>());
-        const std::vector<std::string>& options = dataOptions.options();
+    const nlohmann::json& j = nlohmann::json::parse(data);
+    nlohmann::json variables = j["variables"];
 
-        for (int i = 0; i < numOptions; i++) {
-            const nlohmann::json& row = variables[options[i]];
-//            int rowsize = row.size();
+    std::vector<float> sum(numOptions, 0.f);
+    std::vector<std::vector<float>> optionValues =
+        std::vector<std::vector<float>>(numOptions, std::vector<float>());
+    const std::vector<std::string>& options = dataOptions.options();
 
-            for (size_t y = 0; y < row.size(); y++) {
-                const nlohmann::json& col = row.at(y);
-                const int colsize = static_cast<int>(col.size());
+    for (int i = 0; i < numOptions; i++) {
+        const nlohmann::json& row = variables[options[i]];
 
-                for (int x = 0; x < colsize; x++) {
-                    const float value = col.at(x).get<float>();
-                    optionValues[i].push_back(value);
-                    _min[i] = std::min(_min[i], value);
-                    _max[i] = std::max(_max[i], value);
-                    sum[i] += value;
-                }
+        for (size_t y = 0; y < row.size(); y++) {
+            const nlohmann::json& col = row.at(y);
+
+            for (size_t x = 0; x < col.size(); x++) {
+                const float value = col.at(x).get<float>();
+                optionValues[i].push_back(value);
+                _min[i] = std::min(_min[i], value);
+                _max[i] = std::max(_max[i], value);
+                sum[i] += value;
             }
         }
-
-        add(optionValues, sum);
     }
+
+    add(optionValues, sum);
 }
 
-std::vector<float*> DataProcessorJson::processData(const std::string& data,
-                                                   SelectionProperty& optionProp,
-                                                   glm::size3_t& dimensions)
+std::vector<std::vector<float>> DataProcessorJson::processData(const std::string& data,
+                                                            SelectionProperty& optionProp,
+                                                                 glm::size3_t& dimensions)
 {
     if (data.empty()) {
-        return std::vector<float*>();
+        return std::vector<std::vector<float>>();
     }
+
     const nlohmann::json& j = nlohmann::json::parse(data);
     nlohmann::json variables = j["variables"];
 
@@ -121,22 +117,19 @@ std::vector<float*> DataProcessorJson::processData(const std::string& data,
         selectedOptionsIndices.push_back(idx);
     }
 
-    std::vector<float*> dataOptions(options.size(), nullptr);
+    std::vector<std::vector<float>> dataOptions(options.size());
     for (int option : selectedOptionsIndices) {
-        // @CLEANUP: This memory is very easy to lose and should be replaced by some
-        //           other mechanism (std::vector<float> most likely)
-        dataOptions[option] = new float[dimensions.x * dimensions.y] { 0.f };
+        dataOptions[option] = std::vector<float>(dimensions.x * dimensions.y, 0.f);
 
         nlohmann::json row = variables[options[option]];
         const int rowsize = static_cast<int>(row.size());
 
         for (int y = 0; y < rowsize; y++) {
             nlohmann::json col = row.at(y);
-            const int colsize = static_cast<int>(col.size());
 
-            for (int x = 0; x < colsize; x++) {
+            for (size_t x = 0; x < col.size(); x++) {
                 const float value = col.at(x).get<float>();
-                const int i = x + y * colsize;
+                const size_t i = x + y * col.size();
 
                 dataOptions[option][i] = processDataPoint(value, option);
             }

@@ -123,7 +123,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
 
     penPosition.y -= _font->height();
 
-    constexpr glm::vec4 targetColor(0.f, 0.75f, 1.f, 1.f);
+    constexpr glm::vec4 targetColor = glm::vec4(0.f, 0.75f, 1.f, 1.f);
 
     const double previous = sequencer.prevCaptureTime(currentTime);
     const double next = sequencer.nextCaptureTime(currentTime);

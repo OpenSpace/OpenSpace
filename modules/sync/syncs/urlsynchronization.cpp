@@ -56,26 +56,26 @@ namespace {
     struct [[codegen::Dictionary(UrlSynchronization)]] Parameters {
         // The URL or urls from where the files are downloaded. If multiple URLs are
         // provided, all files will be downloaded to the same directory and the filename
-        // parameter must not be specified simultaneously
+        // parameter must not be specified simultaneously.
         std::variant<std::string, std::vector<std::string>> url;
 
         // This identifier will be part of the used folder structure and, can be used to
-        // manually find the downloaded folder in the synchronization folder
+        // manually find the downloaded folder in the synchronization folder.
         std::string identifier [[codegen::identifier()]];
 
-        // Deprecated, use SecondsUntilResync instead
+        // Deprecated, use SecondsUntilResync instead.
         std::optional<bool> forceOverride [[codegen::key("Override")]];
 
         // If this value is set to 'true' (the default), the hash of the URL is appended
         // to the directory name to produce a unique directory under all circumstances. If
         // this is not desired, the URLSynchronization use the bare directory name alone
         // if this value is 'false'. If this value is 'false', the identifier has to be
-        // specified
+        // specified.
         std::optional<bool> useHash;
 
         // Optional to provide filename to override the one which is otherwise
         // automatically created from the url. If this value is specified, the url
-        // parameter only only contain exactly one URL
+        // parameter only only contain exactly one URL.
         std::optional<std::string> filename;
 
         // This variable determines the validity period of a file(s) in seconds before it
@@ -123,9 +123,9 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dictionary,
     // (anden88 2023-11-03) TODO: When we decide to remove override variable this should
     // be cleaned up.
     // Mimic behavior of time to live if override is specified (true => force download,
-    // false keeps the file permanently (default behavior)).
+    // false keeps the file permanently (default behavior))
     _secondsUntilResync = _forceOverride ? 0 : MaxDateAsJ2000;
-    // Disregard override variable if user specified a specific time to live.
+    // Disregard override variable if user specified a specific time to live
     _secondsUntilResync = p.secondsUntilResync.value_or(_secondsUntilResync);
 
     _identifier = p.identifier;
@@ -214,7 +214,8 @@ bool UrlSynchronization::isEachFileValid() {
     // Update ossync files that does not have a version number to new format
     if (line == SynchronizationToken) {
         if (_secondsUntilResync == 0) {
-            return false; // Force download new file
+            // Force download new file
+            return false;
         }
 
         // We must close file early because createSyncFile writes to it
@@ -223,7 +224,7 @@ bool UrlSynchronization::isEachFileValid() {
         // File is valid until some date
         return true;
     }
-    // Otherwise first line is the version number.
+    // Otherwise first line is the version number
     std::string ossyncVersion = line;
 
     // Format of 1.0 ossync:
@@ -233,7 +234,7 @@ bool UrlSynchronization::isEachFileValid() {
 
     if (ossyncVersion == "1.0") {
         // We need to mutex-protect the access to the time conversion for now
-        std::lock_guard guard(_mutex);
+        const std::unique_lock lock(_mutex);
 
         ghoul::getline(file >> std::ws, line);
         const std::string& fileIsValidToDate = line;
@@ -242,7 +243,7 @@ bool UrlSynchronization::isEachFileValid() {
         const std::string todaysDate = Time::currentWallTime();
         const double todaysDateAsJ2000 = Time::convertTime(todaysDate);
 
-        // Issue warning if file is kept but user changed setting to download on startup.
+        // Issue warning if file is kept but user changed setting to download on startup
         if ((fileValidAsJ2000 > todaysDateAsJ2000) && _secondsUntilResync == 0) {
             LWARNING(std::format(
                 "{}: File is valid to {} but asset specifies SecondsUntilResync = {} "
@@ -252,8 +253,8 @@ bool UrlSynchronization::isEachFileValid() {
             ));
         }
 
-        // Returns true if date in ossync file is 'larger' than todays date,
-        // i.e. no sync needed.
+        // Returns true if date in ossync file is 'larger' than todays date, i.e. no sync
+        // needed
         return fileValidAsJ2000 > todaysDateAsJ2000;
     }
     else if (ossyncVersion.empty()) {
@@ -273,7 +274,7 @@ bool UrlSynchronization::isEachFileValid() {
 
 void UrlSynchronization::createSyncFile(bool) const {
     // We need to mutex-protect the access to the time conversion for now
-    std::lock_guard guard(_mutex);
+    const std::unique_lock lock(_mutex);
 
     std::filesystem::path dir = directory();
     std::filesystem::create_directories(dir);
@@ -315,8 +316,8 @@ bool UrlSynchronization::trySyncUrls() {
         if (_filename.empty() || _urls.size() > 1) {
             std::filesystem::path fn = std::filesystem::path(url).filename();
             if (fn.empty() && url.back() == '/') {
-                // If the user provided a path that ends in / the `filename` will
-                // result in an empty path with causes the downloading to fail
+                // If the user provided a path that ends in / the `filename` will result
+                // in an empty path with causes the downloading to fail
                 fn = std::filesystem::path(url).parent_path().filename();
             }
             std::string name = fn.string();
@@ -351,7 +352,7 @@ bool UrlSynchronization::trySyncUrls() {
                     return !_shouldCancel;
                 }
 
-                const std::lock_guard guard(fileSizeMutex);
+                const std::unique_lock lock(fileSizeMutex);
                 sizeData[url] = { downloadedBytes, totalBytes };
 
                 _nTotalBytesKnown = true;
@@ -402,8 +403,8 @@ bool UrlSynchronization::trySyncUrls() {
             continue;
         }
 
-        // If we are forcing the override, we download to a temporary file first, so
-        // when we are done here, we need to rename the file to the original name
+        // If we are forcing the override, we download to a temporary file first, so when
+        // we are done here, we need to rename the file to the original name
 
         std::filesystem::path tempName = d->destination();
         std::filesystem::path originalName = tempName;

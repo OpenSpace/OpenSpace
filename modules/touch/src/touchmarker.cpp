@@ -117,24 +117,26 @@ void TouchMarker::deinitialize() {
 }
 
 void TouchMarker::render(const std::vector<TouchInputHolder>& list) {
-    if (_visible && !list.empty()) {
-        createVertexList(list);
-        _shader->activate();
-
-        _shader->setUniform(_uniformCache.radius, _radiusSize);
-        _shader->setUniform(_uniformCache.opacity, _opacity);
-        _shader->setUniform(_uniformCache.thickness, _thickness);
-        _shader->setUniform(_uniformCache.color, _color.value());
-
-        glEnable(GL_BLEND);
-        glBlendEquation(GL_FUNC_ADD);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex shader
-        glBindVertexArray(_vao);
-        glDrawArrays(GL_POINTS, 0, _count);
-
-        _shader->deactivate();
+    if (!_visible || list.empty()) {
+        return;
     }
+
+    createVertexList(list);
+    _shader->activate();
+
+    _shader->setUniform(_uniformCache.radius, _radiusSize);
+    _shader->setUniform(_uniformCache.opacity, _opacity);
+    _shader->setUniform(_uniformCache.thickness, _thickness);
+    _shader->setUniform(_uniformCache.color, _color.value());
+
+    glEnable(GL_BLEND);
+    glBlendEquation(GL_FUNC_ADD);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    glBindVertexArray(_vao);
+    glDrawArrays(GL_POINTS, 0, _count);
+
+    _shader->deactivate();
 }
 
 void TouchMarker::createVertexList(const std::vector<TouchInputHolder>& list) {
@@ -143,8 +145,8 @@ void TouchMarker::createVertexList(const std::vector<TouchInputHolder>& list) {
 
     int i = 0;
     for (const TouchInputHolder& inputHolder : list) {
-        vertexData[i] = 2.f * (inputHolder.latestInput().x - 0.5f);
-        vertexData[i + 1] = -2.f * (inputHolder.latestInput().y - 0.5f);
+        vertexData[i] = 2.f * (inputHolder.latestInput().pos.x - 0.5f);
+        vertexData[i + 1] = -2.f * (inputHolder.latestInput().pos.y - 0.5f);
         i += 2;
     }
 

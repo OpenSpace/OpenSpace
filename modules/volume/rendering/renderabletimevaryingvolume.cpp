@@ -35,8 +35,8 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/histogram.h>
 #include <openspace/rendering/transferfunction.h>
+#include <openspace/util/histogram.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
@@ -461,14 +461,14 @@ void RenderableTimeVaryingVolume::initializeGL() {
         }
 
         t.texture = std::make_shared<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit{
+            ghoul::opengl::Texture::FormatInit {
                 .dimensions = t.metadata.dimensions,
                 .type = GL_TEXTURE_3D,
                 .format = ghoul::opengl::Texture::Format::Red,
                 .dataType = GL_FLOAT,
                 .internalFormat = GL_R32F
             },
-            ghoul::opengl::Texture::SamplerInit{
+            ghoul::opengl::Texture::SamplerInit {
                 .wrapping = ghoul::opengl::Texture::WrappingMode::Clamp
             },
             reinterpret_cast<std::byte*>(data)
@@ -587,7 +587,7 @@ RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimes
     // Get the first item with time > currentTime
     auto currentTimestepIt = _volumeTimesteps.upper_bound(currentTime);
     if (currentTimestepIt == _volumeTimesteps.end()) {
-        // No such timestep was found: show last timestep if it is within the time margin.
+        // No such timestep was found: show last timestep if it is within the time margin
         Timestep* lastTimestep = &(_volumeTimesteps.rbegin()->second);
         const double threshold =
             lastTimestep->metadata.time + static_cast<double>(_secondsAfter);

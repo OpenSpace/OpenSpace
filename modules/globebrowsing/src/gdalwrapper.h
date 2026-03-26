@@ -40,9 +40,9 @@ public:
     /**
      * Create the singleton. Must be called before the class can be used.
      *
-     * \param maximumCacheSize is the current maximum cache size GDAL can use for caching
+     * \param maximumCacheSize The current maximum cache size GDAL can use for caching
      *        blocks in memory given in bytes
-     * \param maximumMaximumCacheSize is the maximum cache size GDAL can use for caching
+     * \param maximumMaximumCacheSize The maximum cache size GDAL can use for caching
      *        blocks in memory given in bytes
      */
     static void create(size_t maximumCacheSize, size_t maximumMaximumCacheSize);

@@ -33,4 +33,3 @@ template <typename T>
 ListProperty<T>::~ListProperty() {}
 
 } // namespace openspace
-

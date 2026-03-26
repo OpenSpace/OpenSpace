@@ -45,7 +45,7 @@ void NotificationLog::log(ghoul::logging::LogLevel level, std::string_view categ
 {
     ZoneScoped;
 
-    const std::lock_guard lock(_mutex);
+    const std::unique_lock lock(_mutex);
     const std::string timeStamp = timeString();
     const std::string dateStamp = dateString();
     _callbackFunction(timeStamp, dateStamp, category, level, message);

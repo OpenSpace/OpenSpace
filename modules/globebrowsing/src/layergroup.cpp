@@ -164,27 +164,29 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
          it != _layers.end();
          it++)
     {
-        if (it->get()->identifier() == layerName) {
-            // we need to make a copy as the layername is only a reference
-            // which will no longer be valid once it is deleted
-            removePropertySubOwner(it->get());
-            (*it)->deinitialize();
-
-            // We need to keep the name of the layer since we only get it as a reference
-            // and the name needs to survive the deletion
-            const std::string lName = layerName;
-            _layers.erase(it);
-            update();
-            if (_onChangeCallback) {
-                _onChangeCallback(nullptr);
-            }
-            LINFO(std::format("Deleted layer {}", lName));
-
-            if (_layers.empty()) {
-                _levelBlendingEnabled.setVisibility(Property::Visibility::Hidden);
-            }
-            return;
+        if (it->get()->identifier() != layerName) {
+            continue;
         }
+
+        // We need to make a copy as the layername is only a reference which will no
+        // longer be valid once it is deleted
+        removePropertySubOwner(it->get());
+        (*it)->deinitialize();
+
+        // We need to keep the name of the layer since we only get it as a reference and
+        // the name needs to survive the deletion
+        const std::string lName = layerName;
+        _layers.erase(it);
+        update();
+        if (_onChangeCallback) {
+            _onChangeCallback(nullptr);
+        }
+        LINFO(std::format("Deleted layer {}", lName));
+
+        if (_layers.empty()) {
+            _levelBlendingEnabled.setVisibility(Property::Visibility::Hidden);
+        }
+        return;
     }
     LERROR("Could not find layer " + layerName);
 }

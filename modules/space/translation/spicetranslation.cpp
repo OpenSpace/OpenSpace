@@ -113,7 +113,7 @@ namespace {
 namespace openspace {
 
 Documentation SpiceTranslation::Documentation() {
-    return codegen::doc<Parameters>("space_translation_spicetranslation");
+    return codegen::doc<Parameters>("space_translation_spice");
 }
 
 SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)

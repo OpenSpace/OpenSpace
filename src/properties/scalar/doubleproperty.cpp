@@ -28,8 +28,8 @@
 
 namespace openspace {
 
-DoubleProperty::DoubleProperty(Property::PropertyInfo info, double value,
-                               double minValue, double maxValue, double stepValue)
+DoubleProperty::DoubleProperty(PropertyInfo info, double value, double minValue,
+                               double maxValue, double stepValue)
     : NumericalProperty<double>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 

@@ -50,7 +50,7 @@ namespace openspace {
 
 Documentation RenderableVideoSphere::Documentation() {
     openspace::Documentation doc = codegen::doc<Parameters>(
-        "video_renderablevideosphere",
+        "video_renderable_videosphere",
         RenderableSphere::Documentation()
     );
 

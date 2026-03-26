@@ -42,11 +42,11 @@ namespace {
  * layer.
  *
  * \param globeIdentifier The identifier of the scene graph node of which to add the
- *                        layer. The renderable of the scene graph node must be a
- *                        [RenderableGlobe](#globebrowsing_renderableglobe)
+ *        layer. The renderable of the scene graph node must be a
+ *        [RenderableGlobe](#globebrowsing_renderable_globe)
  * \param layerGroup The identifier of the layer group in which to add the layer
- * \param layer A dictionary defining the layer. See [this page](#globebrowsing_layer)
- *              for details on what fields and settings the dictionary may contain
+ * \param layer A dictionary defining the layer. See [this page](#globebrowsing_layer) for
+ *        details on what fields and settings the dictionary may contain
  */
 [[codegen::luawrap]] void addLayer(std::string globeIdentifier, std::string layerGroup,
                                    ghoul::Dictionary layer)
@@ -81,13 +81,13 @@ namespace {
 
 /**
  * Removes a layer from the specified globe.
-
+ *
  * \param globeIdentifier The identifier of the scene graph node of which to remove the
- *                        layer. The renderable of the scene graph node must be a
- *                        [RenderableGlobe](#globebrowsing_renderableglobe)
+ *        layer. The renderable of the scene graph node must be a
+ *        [RenderableGlobe](#globebrowsing_renderable_globe)
  * \param layerGroup The identifier of the layer group from which to remove the layer
  * \param layerOrName Either the identifier for the layer or a dictionary with the
- *                    `Identifier` key that is used instead
+ *        `Identifier` key that is used instead
  */
 [[codegen::luawrap]] void deleteLayer(std::string globeIdentifier, std::string layerGroup,
                                  std::variant<std::string, ghoul::Dictionary> layerOrName)
@@ -173,9 +173,9 @@ namespace {
  * \param globeIdentifier The identifier of the globe
  * \param layerGroup The identifier of the layer group
  * \param source The original position of the layer that should be moved, either as an
- *               index in the list or the identifier of the layer to be moved
+ *        index in the list or the identifier of the layer to be moved
  * \param destination The new position in the list, either as an index in the list or as
- *                    the identifier of the layer after which to place the moved layer
+ *        the identifier of the layer after which to place the moved layer
  */
 [[codegen::luawrap]] void moveLayer(std::string globeIdentifier, std::string layerGroup,
                                     std::variant<int, std::string> source,
@@ -281,7 +281,7 @@ namespace {
  * (degrees and meters).
  *
  * \param useEyePosition If true, use the view direction of the camera instead of the
- *                       camera position
+ *        camera position
  */
 [[codegen::luawrap]] std::tuple<double, double, double> geoPositionForCamera(
                                                               bool useEyePosition = false)
@@ -294,7 +294,7 @@ namespace {
     }
     Camera* camera = global::navigationHandler->camera();
 
-    glm::dvec3 cameraPosition = camera->positionVec3();
+    glm::dvec3 cameraPosition = camera->position();
 
 
     const SceneGraphNode* anchor =
@@ -304,7 +304,7 @@ namespace {
     glm::dvec3 target;
 
     // @TODO (04-08-2022, micahnyc)
-    // adjust this to use the camera lookat
+    // Adjust this to use the camera lookat
     // once we fix this calculation, then we just add true to the function call in the
     // asset
     if (useEyePosition) {
@@ -338,7 +338,7 @@ namespace {
  * Loads and parses the WMS capabilities XML file from a remote server.
  *
  * \param name The name of the capabilities that can be used to later refer to the set of
- *             capabilities
+ *        capabilities
  * \param globe The identifier of the globe for which this server is applicable
  * \param url The URL at which the capabilities file can be found
  */
@@ -391,8 +391,8 @@ namespace {
  *
  * \param globeIdentifier The identifier of the scene graph node for the globe
  * \param table A table with information about the GeoJson layer. See
- *              [this page](#globebrowsing_geojsoncomponent) for details on what fields
- *              and settings the table may contain
+ *        [this page](#globebrowsing_geojsoncomponent) for details on what fields and
+ *        settings the table may contain
  */
 [[codegen::luawrap]] void addGeoJson(std::string globeIdentifier, ghoul::Dictionary table)
 {
@@ -417,8 +417,8 @@ namespace {
  * specified globe.
  *
  * \param globeIdentifier The identifier of the scene graph node for the globe
- * \param tableOrIdentifier Either an identifier for the GeoJson layer to be removed, or
- *                          a table that includes the identifier
+ * \param tableOrIdentifier Either an identifier for the GeoJson layer to be removed, or a
+ *        table that includes the identifier
  */
 [[codegen::luawrap]] void deleteGeoJson(std::string globeIdentifier,
                           std::variant<std::string, ghoul::Dictionary> tableOrIdentifier)
@@ -454,8 +454,8 @@ namespace {
 
 /**
  * Add a GeoJson layer from the given file name and add it to the current anchor node,
- * if it is a globe. Note that you might have to increase the height offset for the
- * added feature to be visible on the globe, if using a height map.
+ * if it is a globe. Note that you might have to increase the height offset for the added
+ * feature to be visible on the globe, if using a height map.
  *
  * \param filename The path to the GeoJSON file
  * \param name An optional name that the loaded feature will get in the user interface

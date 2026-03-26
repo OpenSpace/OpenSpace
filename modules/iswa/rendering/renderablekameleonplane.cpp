@@ -134,8 +134,8 @@ RenderableKameleonPlane::RenderableKameleonPlane(const ghoul::Dictionary& dictio
     _origOffset = _data.offset;
 
     _scale = _data.scale[_cut];
-    _data.scale[_cut] = 0;
-    _data.offset[_cut] = 0;
+    _data.scale[_cut] = 0.f;
+    _data.offset[_cut] = 0.f;
 
     _slice = (_data.offset[_cut] -_data.gridMin[_cut]) / _scale;
 
@@ -176,19 +176,17 @@ void RenderableKameleonPlane::initializeGL() {
     else {
         _dataProcessor = std::make_shared<DataProcessorKameleon>();
 
-        //If autofiler is on, background values property should be hidden
+        // If autofiler is on, background values property should be hidden
         _autoFilter.onChange([this]() {
-            // If autofiler is selected, use _dataProcessor to set backgroundValues
-            // and unregister backgroundvalues property.
+            // If autofiler is selected, use _dataProcessor to set backgroundValues and
+            // unregister backgroundvalues property
             if (_autoFilter) {
                 _backgroundValues = _dataProcessor->filterValues();
                 _backgroundValues.setVisibility(Property::Visibility::Hidden);
-                //_backgroundValues.setVisible(false);
-            // else if autofilter is turned off, register backgroundValues
             }
             else {
+                // Else if autofilter is turned off, register backgroundValues
                 _backgroundValues.setVisibility(Property::Visibility::Always);
-                //_backgroundValues.setVisible(true);
             }
         });
     }
@@ -219,8 +217,8 @@ void RenderableKameleonPlane::initializeGL() {
         _dimensions
     );
     _dataProcessor->addDataValues(_kwPath, _dataOptions);
-    // if this datacygnet has added new values then reload texture
-    // for the whole group, including this datacygnet, and return after.
+    // If this datacygnet has added new values then reload texture for the whole group,
+    // including this datacygnet, and return after
     if (_group) {
         _group->updateGroup();
     }
@@ -271,7 +269,7 @@ void RenderableKameleonPlane::renderGeometry() const {
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-std::vector<float*> RenderableKameleonPlane::textureData() {
+std::vector<std::vector<float>> RenderableKameleonPlane::textureData() {
     DataProcessorKameleon* p = dynamic_cast<DataProcessorKameleon*>(_dataProcessor.get());
     p->setSlice(_slice);
     return p->processData(_kwPath, _dataOptions, _dimensions);
@@ -279,7 +277,6 @@ std::vector<float*> RenderableKameleonPlane::textureData() {
 
 bool RenderableKameleonPlane::updateTextureResource() {
     _data.offset[_cut] = _slice * _scale + _data.gridMin[_cut];
-    // _textureDirty = true;
     updateTexture();
     return true;
 }
@@ -298,7 +295,7 @@ void RenderableKameleonPlane::updateFieldlineSeeds() {
     using K = int;
     using V = std::tuple<std::string, std::string, bool>;
     for (std::pair<const K, V>& seedPath : _fieldlineState) {
-        // if this option was turned off
+        // If this option was turned off
         std::string o = opts[seedPath.first];
         const auto it = std::find(selectedOptions.begin(), selectedOptions.end(), o);
         if (it == selectedOptions.end() && std::get<2>(seedPath.second)) {
@@ -315,9 +312,9 @@ void RenderableKameleonPlane::updateFieldlineSeeds() {
             );
             global::scriptEngine->queueScript(script);
             std::get<2>(seedPath.second) = false;
-        // if this option was turned on
         }
         else if (it != selectedOptions.end() && !std::get<2>(seedPath.second)) {
+            // If this option was turned on
             SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(
                 std::get<0>(seedPath.second)
             );
@@ -339,10 +336,7 @@ void RenderableKameleonPlane::updateFieldlineSeeds() {
 void RenderableKameleonPlane::readFieldlinePaths(const std::filesystem::path& indexFile) {
     LINFO(std::format("Reading seed points paths from file '{}'", indexFile));
     if (_group) {
-        dynamic_cast<IswaKameleonGroup*>(_group)->setFieldlineInfo(
-            indexFile,
-            _kwPath
-        );
+        dynamic_cast<IswaKameleonGroup*>(_group)->setFieldlineInfo(indexFile, _kwPath);
         return;
     }
 
@@ -350,40 +344,37 @@ void RenderableKameleonPlane::readFieldlinePaths(const std::filesystem::path& in
     std::ifstream seedFile(indexFile);
     if (!seedFile.good()) {
         LERROR(std::format("Could not open seed points file '{}'", indexFile));
+        return;
     }
-    else {
-        try {
-            //Parse and add each fieldline as an selection
-            nlohmann::json fieldlines = nlohmann::json::parse(seedFile);
-            int i = 0;
-            const std::string& fullName = identifier();
-            std::string partName = fullName.substr(0,fullName.find_last_of("-"));
-            for (nlohmann::json::iterator it = fieldlines.begin();
-                 it != fieldlines.end();
-                 it++)
-            {
-                _fieldlines.addOption(it.key());
-                _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
-                    partName + "/" + it.key(),
-                    it->get<std::string>(),
-                    false
-                );
-                i++;
-            }
-        } catch (const std::exception& e) {
-            LERROR(
-                "Error when reading json file with paths to seedpoints: " +
-                std::string(e.what())
+
+    try {
+        // Parse and add each fieldline as an selection
+        nlohmann::json fieldlines = nlohmann::json::parse(seedFile);
+        int i = 0;
+        const std::string& fullName = identifier();
+        std::string partName = fullName.substr(0, fullName.find_last_of("-"));
+        for (auto it = fieldlines.begin(); it != fieldlines.end(); it++) {
+            _fieldlines.addOption(it.key());
+            _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
+                partName + "/" + it.key(),
+                it->get<std::string>(),
+                false
             );
+            i++;
         }
-   }
+    }
+    catch (const std::exception& e) {
+        LERROR(std::format(
+            "Error when reading JSON file with paths to seedpoints: {}", e.what()
+        ));
+    }
 }
 
 void RenderableKameleonPlane::subscribeToGroup() {
     // Subscribe to DataCygnet events
     RenderableDataCygnet::subscribeToGroup();
 
-    //Add additional Events specific to KameleonPlane
+    // Add additional Events specific to KameleonPlane
     ghoul::Event<ghoul::Dictionary>& groupEvent = _group->groupEvent();
     groupEvent.subscribe(
         identifier(),
@@ -411,8 +402,8 @@ void RenderableKameleonPlane::subscribeToGroup() {
 }
 
 void RenderableKameleonPlane::setDimensions() {
-    // the cdf files has an offset of 0.5 in normali resolution.
-    // with lower resolution the offset increases.
+    // The cdf files has an offset of 0.5 in normal resolution. With lower resolution the
+    // offset increases
     _data.offset = _origOffset - 0.5f * (100.f / _resolution);
     _dimensions = glm::size3_t(_data.scale * (_resolution / 100.f));
     _dimensions[_cut] = 1;

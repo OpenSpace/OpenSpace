@@ -64,8 +64,7 @@ struct ShutdownInformation {
     bool inShutdown = false;
     /// Total amount of time the application will wait before actually shutting down
     float waitTime = 0.f;
-    /// Current state of the countdown; if it reaches '0', the application will
-    /// close
+    /// Current state of the countdown; if it reaches '0', the application will close
     float timer = 0.f;
 };
 
@@ -134,8 +133,8 @@ public:
     CallbackHandle addModeChangeCallback(ModeChangeCallback cb);
     void removeModeChangeCallback(CallbackHandle handle);
 
-    // Guaranteed to return a valid pointer
     AssetManager& assetManager();
+    // Guaranteed to return a valid pointer
     LoadingScreen* loadingScreen();
 
     void invalidatePropertyCache();
@@ -195,17 +194,16 @@ private:
 };
 
 /**
- * Sets the camera position using the time contents of a profile. The function will
- * set an absolute position or a go-to-geolocation command using the globebrowsing
- * module.
+ * Sets the camera position using the time contents of a profile. The function will set an
+ * absolute position or a go-to-geolocation command using the globebrowsing module.
  *
  * \param p The Profile to be read
  */
 void setCameraFromProfile(const Profile& p);
 
 /**
- * Reads a list of modules from a profile, and executes scripts based on whether or
- * not the corresponding module is loaded.
+ * Reads a list of modules from a profile, and executes scripts based on whether or not
+ * the corresponding module is loaded.
  *
  * \param p The Profile to be read
  */
@@ -226,18 +224,17 @@ void setActionsFromProfile(const Profile& p);
 void setKeybindingsFromProfile(const Profile& p);
 
 /**
- * Reads list of nodes from profile to be marked as interesting nodes.
- * If any nodes are listed, a script to mark these will be queued with the
- * script engine.
+ * Reads list of nodes from profile to be marked as interesting nodes. If any nodes are
+ * listed, a script to mark these will be queued with the script engine.
  *
  * \param p The Profile to be read
  */
 void setMarkInterestingNodesFromProfile(const Profile& p);
 
 /**
- * Reads list of "additional scripts" that are added to the profile to be run
- * at the end of the initialization. Any openspace lua commands are allowed,
- * and will be added to the script queue.
+ * Reads list of "additional scripts" that are added to the profile to be run at the end
+ * of the initialization. Any openspace lua commands are allowed, and will be added to the
+ * script queue.
  *
  * \param p The Profile to be read
  */

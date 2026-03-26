@@ -32,15 +32,15 @@
 
 namespace {
     struct [[codegen::Dictionary(Transition)]] Parameters {
-        // The identifier of the state that can trigger the transition
+        // The identifier of the state that can trigger the transition.
         std::string from;
 
         // The identifier of the state that the state machine will move to after the
-        // transition
+        // transition.
         std::string to;
 
-        // A string containing a Lua script that will be executed when the transition
-        // is triggered
+        // A string containing a Lua script that will be executed when the transition is
+        // triggered.
         std::optional<std::string> action;
     };
 } // namespace

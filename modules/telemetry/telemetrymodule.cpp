@@ -52,7 +52,7 @@ namespace {
 
     // The default Open Sound Control receiver is SuperCollider with these default values.
     // However, the user can define any receiver in the openspace.cfg file as the
-    // ModuleConfiguration for the Telemetry module.
+    // ModuleConfiguration for the Telemetry module
     constexpr std::string_view DefaultSuperColliderIp = "127.0.0.1";
     constexpr int DefaultSuperColliderPort = 57120;
 
@@ -131,7 +131,7 @@ namespace openspace {
 TelemetryModule::TelemetryModule()
     : OpenSpaceModule("Telemetry")
     , _enabled(EnabledInfo, false)
-    , _ipAddress(IpAddressInfo, DefaultSuperColliderIp.data())
+    , _ipAddress(IpAddressInfo, std::string(DefaultSuperColliderIp))
     , _port(PortInfo, DefaultSuperColliderPort, 1025, 65536)
     , _modeOptions(AngleCalculationModeInfo)
     , _includeElevationAngle(IncludeElevationAngleInfo, false)
@@ -146,8 +146,8 @@ TelemetryModule::TelemetryModule()
 
     // Add options to the drop down menu
     _modeOptions.addOptions({
-        { 0, "Horizontal" },
-        { 1, "Circular" }
+        { static_cast<int>(AngleCalculationMode::Horizontal), "Horizontal" },
+        { static_cast<int>(AngleCalculationMode::Circular), "Circular" }
     });
     _modeOptions.onChange([this]() { guiOnChangeAngleCalculationMode(); });
 
@@ -158,12 +158,7 @@ TelemetryModule::TelemetryModule()
     addProperty(_includeElevationAngle);
 }
 
-TelemetryModule::~TelemetryModule() {
-    // Clear the telemetries list
-    for (TelemetryBase* telemetry : _telemetries) {
-        delete telemetry;
-    }
-}
+TelemetryModule::~TelemetryModule() {}
 
 void TelemetryModule::guiOnChangeAngleCalculationMode() {
     _angleCalculationMode = static_cast<AngleCalculationMode>(_modeOptions.value());
@@ -182,29 +177,53 @@ void TelemetryModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     }
 
     // Fill telemetry list
-    TelemetryBase* telemetry = new AngleModeTelemetry(_ipAddress, _port);
-    addTelemetry(telemetry);
+    {
+        auto telemetry = std::make_unique<AngleModeTelemetry>(_ipAddress, _port);
+        addPropertySubOwner(telemetry.get());
+        _telemetries.push_back(std::move(telemetry));
+    }
 
-    telemetry = new CameraTelemetry(_ipAddress, _port);
-    addTelemetry(telemetry);
+    {
+        auto telemetry = std::make_unique<CameraTelemetry>(_ipAddress, _port);
+        addPropertySubOwner(telemetry.get());
+        _telemetries.push_back(std::move(telemetry));
+    }
 
-    telemetry = new FocusTelemetry(_ipAddress, _port);
-    addTelemetry(telemetry);
+    {
+        auto telemetry = std::make_unique<FocusTelemetry>(_ipAddress, _port);
+        addPropertySubOwner(telemetry.get());
+        _telemetries.push_back(std::move(telemetry));
+    }
 
-    telemetry = new TimeTelemetry(_ipAddress, _port);
-    addTelemetry(telemetry);
+    {
+        auto telemetry = std::make_unique<TimeTelemetry>(_ipAddress, _port);
+        addPropertySubOwner(telemetry.get());
+        _telemetries.push_back(std::move(telemetry));
+    }
 
-    telemetry = new NodesTelemetry(_ipAddress, _port);
-    addTelemetry(telemetry);
+    {
+        auto telemetry = std::make_unique<NodesTelemetry>(_ipAddress, _port);
+        addPropertySubOwner(telemetry.get());
+        _telemetries.push_back(std::move(telemetry));
+    }
 
-    telemetry = new PlanetsCompareSonification(_ipAddress, _port);
-    addTelemetry(telemetry);
+    {
+        auto telemetry = std::make_unique<PlanetsCompareSonification>(_ipAddress, _port);
+        addPropertySubOwner(telemetry.get());
+        _telemetries.push_back(std::move(telemetry));
+    }
 
-    telemetry = new PlanetsOverviewSonification(_ipAddress, _port);
-    addTelemetry(telemetry);
+    {
+        auto telemetry = std::make_unique<PlanetsOverviewSonification>(_ipAddress, _port);
+        addPropertySubOwner(telemetry.get());
+        _telemetries.push_back(std::move(telemetry));
+    }
 
-    telemetry = new PlanetsSonification(_ipAddress, _port);
-    addTelemetry(telemetry);
+    {
+        auto telemetry = std::make_unique<PlanetsSonification>(_ipAddress, _port);
+        addPropertySubOwner(telemetry.get());
+        _telemetries.push_back(std::move(telemetry));
+    }
 
     // Only the master runs the TelemetryModule update thread
     if (global::windowDelegate->isMaster()) {
@@ -217,18 +236,12 @@ void TelemetryModule::internalInitialize(const ghoul::Dictionary& dictionary) {
             syncToMain.notify_one();
         });
 
-        // When the program shuts down, make sure this module turns itself off.
-        // If the module is turned on while the scene is being destroyed, then it will
-        // crash
+        // When the program shuts down, make sure this module turns itself off. If the
+        // module is turned on while the scene is being destroyed, then it will crash
         global::callback::deinitialize->emplace_back([this]() {
             _enabled = false;
         });
     }
-}
-
-void TelemetryModule::addTelemetry(TelemetryBase* telemetry) {
-    _telemetries.push_back(telemetry);
-    addPropertySubOwner(telemetry);
 }
 
 void TelemetryModule::internalDeinitialize() {
@@ -239,23 +252,28 @@ void TelemetryModule::internalDeinitialize() {
     _updateThread.join();
 }
 
-const std::vector<TelemetryBase*>& TelemetryModule::telemetries() const {
-    return _telemetries;
+std::vector<TelemetryBase*> TelemetryModule::telemetries() const {
+    std::vector<TelemetryBase*> res;
+    res.reserve(_telemetries.size());
+    for (const std::unique_ptr<TelemetryBase>& telemetry : _telemetries) {
+        res.push_back(telemetry.get());
+    }
+    return res;
 }
 
 const TelemetryBase* TelemetryModule::telemetry(const std::string_view& id) const {
-    for (const TelemetryBase* t : _telemetries) {
-        if (t->identifier() == id) {
-            return t;
+    for (const std::unique_ptr<TelemetryBase>& telemetry : _telemetries) {
+        if (telemetry->identifier() == id) {
+            return telemetry.get();
         }
     }
     return nullptr;
 }
 
 TelemetryBase* TelemetryModule::telemetry(const std::string_view& id) {
-    for (TelemetryBase* t : _telemetries) {
-        if (t->identifier() == id) {
-            return t;
+    for (const std::unique_ptr<TelemetryBase>& telemetry : _telemetries) {
+        if (telemetry->identifier() == id) {
+            return telemetry.get();
         }
     }
     return nullptr;
@@ -276,8 +294,8 @@ void TelemetryModule::update(std::atomic<bool>& isRunning) {
 
     while (isRunning) {
         // Wait for the main thread
-        std::unique_lock<std::mutex> lk(mutexLock);
-        syncToMain.wait(lk);
+        std::unique_lock lock(mutexLock);
+        syncToMain.wait(lock);
 
         // No need to update if the module isn't currently enabled
         if (!_enabled) {
@@ -300,13 +318,12 @@ void TelemetryModule::update(std::atomic<bool>& isRunning) {
             // Check status
             isInitialized = scene && !scene->isInitializing() &&
                 !scene->root()->children().empty() && camera &&
-                glm::length(camera->positionVec3()) >
-                std::numeric_limits<double>::epsilon();
+                glm::length(camera->position()) > std::numeric_limits<double>::epsilon();
         }
 
         // Process the telemetries
         if (isInitialized) {
-            for (TelemetryBase* telemetry : _telemetries) {
+            for (const std::unique_ptr<TelemetryBase>& telemetry : _telemetries) {
                 if (telemetry) {
                     telemetry->update(camera);
                 }

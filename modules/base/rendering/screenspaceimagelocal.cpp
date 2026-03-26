@@ -53,7 +53,7 @@ namespace {
     // disk.
     //
     // To load an image from a web URL, see
-    // [ScreenSpaceImageOnline](#base_screenspace_image_online).
+    // [ScreenSpaceImageOnline](#base_screenspace_imageonline).
     struct [[codegen::Dictionary(ScreenSpaceImageLocal)]] Parameters {
         std::optional<std::string> identifier;
 
@@ -66,7 +66,7 @@ namespace {
 namespace openspace {
 
 Documentation ScreenSpaceImageLocal::Documentation() {
-    return codegen::doc<Parameters>("base_screenspace_image_local");
+    return codegen::doc<Parameters>("base_screenspace_imagelocal");
 }
 
 ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary)
@@ -107,8 +107,8 @@ void ScreenSpaceImageLocal::deinitializeGL() {
 void ScreenSpaceImageLocal::update() {
     if (_textureIsDirty && !_texturePath.value().empty()) [[unlikely]] {
         // @TODO (2026-02-18, abock): This code was settings the swizzle mask only if the
-        //                            returned image was having a single Red channel. This
-        //                            can't currently be expressed unfortunately
+        // returned image was having a single Red channel. This can't currently be
+        // expressed unfortunately
         ghoul::opengl::Texture::SamplerInit samplerInit = {
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
             //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,

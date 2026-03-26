@@ -51,7 +51,6 @@ public:
      */
     explicit KeplerTranslation(const ghoul::Dictionary& dictionary);
 
-    /// Default destructor
     ~KeplerTranslation() override = default;
 
     /**

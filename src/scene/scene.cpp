@@ -102,16 +102,10 @@ namespace {
     }
 
     using ProfilePropertyLua = std::variant<bool, float, std::string, ghoul::lua::nil_t>;
-    PropertyValueType propertyValueType(const std::string& value);
-    void handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::string& value,
-        bool& isTableValue, std::string_view propertyName);
-    ProfilePropertyLua propertyProcessValue(ghoul::lua::LuaState& L,
-        const std::string& value, bool& valueIsTable, std::string_view propertyName);
     template <typename T>
     void processPropertyValueTableEntries(ghoul::lua::LuaState& L,
         const std::string& value, std::vector<T>& table, bool& valueIsTable,
         std::string_view propertyName);
-
 
     /**
      * Accepts string version of a property value from a profile, and returns the
@@ -211,7 +205,6 @@ namespace {
         }
     }
 
-
     /**
      * Accepts string version of a property value from a profile, and processes it
      * according to the data type of the value.
@@ -260,7 +253,7 @@ namespace {
 
     /**
      * Accepts string version of a property value from a profile, and adds it to a vector
-     * which will later be used to push as a Lua table containing values of type T
+     * which will later be used to push as a Lua table containing values of type T.
      *
      * \param L The Lua state to (eventually) push to
      * \param value String representation of the value with which to set property
@@ -426,10 +419,9 @@ void Scene::sortTopologically() {
 
     std::unordered_map<SceneGraphNode*, size_t> inDegrees;
     for (SceneGraphNode* node : _topologicallySortedNodes) {
-        size_t inDegree = node->dependencies().size();
         if (node->parent()) {
-            inDegree++;
-            inDegrees[node] = inDegree;
+            const size_t inDegree = node->dependencies().size();
+            inDegrees[node] = inDegree + 1;
         }
     }
 
@@ -726,7 +718,7 @@ void Scene::updateInterpolations() {
         const long long us =
             duration_cast<std::chrono::microseconds>(now - i.beginTime).count();
 
-        const float t = glm::clamp(
+        const float t = std::clamp(
             static_cast<float>(
                 static_cast<double>(us) /
                 static_cast<double>(i.durationSeconds * 1000000)
@@ -738,7 +730,7 @@ void Scene::updateInterpolations() {
         // This method might crash if someone deleted the property underneath us. We take
         // care of removing entire PropertyOwners, but we assume that Propertys live as
         // long as their SceneGraphNodes. This is true in general, but if Propertys are
-        // created and destroyed often by the SceneGraphNode, this might become a problem.
+        // created and destroyed often by the SceneGraphNode, this might become a problem
         i.prop->interpolateValue(t, i.easingFunction);
 
         i.isExpired = (t == 1.f);
@@ -765,7 +757,7 @@ void Scene::updateInterpolations() {
         std::remove_if(
             _propertyInterpolationInfos.begin(),
             _propertyInterpolationInfos.end(),
-            [](const PropertyInterpolationInfo& i) { return i.isExpired; }
+            std::mem_fn(&PropertyInterpolationInfo::isExpired)
         ),
         _propertyInterpolationInfos.end()
     );
@@ -808,7 +800,7 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
 }
 
 void Scene::propertyPushProfileValueToLua(ghoul::lua::LuaState& L,
-                                                                 const std::string& value)
+                                          const std::string& value)
 {
     _valueIsTable = false;
     ProfilePropertyLua elem = propertyProcessValue(
@@ -818,20 +810,10 @@ void Scene::propertyPushProfileValueToLua(ghoul::lua::LuaState& L,
         _profilePropertyName
     );
     if (!_valueIsTable) {
-        std::visit(overloaded {
-            [&L](bool v) {
-                ghoul::lua::push(L, v);
-            },
-            [&L](float v) {
-                ghoul::lua::push(L, v);
-            },
-            [&L](const std::string& v) {
-                ghoul::lua::push(L, v);
-            },
-            [&L](ghoul::lua::nil_t v) {
-                ghoul::lua::push(L, v);
-            }
-        }, elem);
+        std::visit(
+            overloaded { [&L](auto v) { ghoul::lua::push(L, v); } },
+            elem
+        );
     }
 }
 
@@ -911,7 +893,7 @@ that identifies a property owner
 should be changed to. The type of this parameter must agree with the type of the selected
 property
 \\param duration The number of seconds over which the change will occur. If not provided
-or the provided value is 0, the change is instantaneously.
+or the provided value is 0, the change is instantaneously
 \\param easing If a duration larger than 0 is provided, this parameter controls the manner
 in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEaseIn",
 "QuadraticEaseOut", "QuadraticEaseInOut", "CubicEaseIn", "CubicEaseOut", "CubicEaseInOut",
@@ -922,7 +904,7 @@ in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEas
 "BounceEaseIn", "BounceEaseOut", "BounceEaseInOut"
 \\param postscript A Lua script that will be executed once the change of property value
 is completed. If a duration larger than 0 was provided, it is at the end of the
-interpolation. If 0 was provided, the script runs immediately.
+interpolation. If 0 was provided, the script runs immediately
 )",
                 {
                     std::source_location::current().file_name(),
@@ -954,7 +936,7 @@ efficiently for individual property values.
 \\param value The new value to which the property identified by the `uri` should be
 changed to. The type of this parameter must agree with the type of the selected property
 \\param duration The number of seconds over which the change will occur. If not provided
-or the provided value is 0, the change is instantaneously.
+or the provided value is 0, the change is instantaneously
 \\param easing If a duration larger than 0 is provided, this parameter controls the manner
 in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEaseIn",
 "QuadraticEaseOut", "QuadraticEaseInOut", "CubicEaseIn", "CubicEaseOut", "CubicEaseInOut",
@@ -965,7 +947,7 @@ in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEas
 "BounceEaseIn", "BounceEaseOut", "BounceEaseInOut"
 \\param postscript This parameter specifies a Lua script that will be executed once the
 change of property value is completed. If a duration larger than 0 was provided, it is
-at the end of the interpolation. If 0 was provided, the script runs immediately.
+at the end of the interpolation. If 0 was provided, the script runs immediately
 )",
                 {
                     std::source_location::current().file_name(),

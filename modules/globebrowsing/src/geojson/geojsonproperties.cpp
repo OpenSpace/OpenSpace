@@ -53,7 +53,7 @@ namespace {
             return true;
         }
 
-        if (propInfo.has_value() && key == (*propInfo).identifier) {
+        if (propInfo.has_value() && key == propInfo->identifier) {
             return true;
         }
 
@@ -138,15 +138,15 @@ namespace {
     constexpr Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Opacity",
-        "This value determines the opacity of this object. A value of 0 means "
-        "completely transparent.",
+        "This value determines the opacity of this object. A value of 0 means completely "
+        "transparent.",
         Property::Visibility::NoviceUser
     };
 
     constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "The color of the rendered geometry. For points it will be used as a multiply"
+        "The color of the rendered geometry. For points it will be used as a multiply "
         "color for any provided texture.",
         Property::Visibility::NoviceUser
     };
@@ -154,8 +154,8 @@ namespace {
     constexpr Property::PropertyInfo FillOpacityInfo = {
         "FillOpacity",
         "Fill opacity",
-        "This value determines the opacity of the filled portion of a polygon. Will "
-        "also be used for extruded features.",
+        "This value determines the opacity of the filled portion of a polygon. Will also "
+        "be used for extruded features.",
         Property::Visibility::NoviceUser
     };
 
@@ -177,8 +177,8 @@ namespace {
     constexpr Property::PropertyInfo PointSizeInfo = {
         "PointSize",
         "Point size",
-        "The size of any rendered points. The size will be scaled based on the "
-        "bounding sphere of the globe.",
+        "The size of any rendered points. The size will be scaled based on the bounding "
+        "sphere of the globe.",
         Property::Visibility::NoviceUser
     };
 
@@ -194,7 +194,7 @@ namespace {
     constexpr Property::PropertyInfo ExtrudeInfo = {
         "Extrude",
         "Extrude",
-        "If true, extrude the geometry to intersect the globe.Lines/polygons will be"
+        "If true, extrude the geometry to intersect the globe.Lines/polygons will be "
         "extruded with polygons,and points with lines.",
         Property::Visibility::User
     };
@@ -222,8 +222,8 @@ namespace {
     constexpr Property::PropertyInfo PointAnchorOptionInfo = {
         "PointTextureAnchor",
         "Point texture anchor",
-        "Decides the placement of the point texture in relation to the position. "
-        "Default is a the bottom of the texture, but it can also be put at the center.",
+        "Decides the placement of the point texture in relation to the position. Default "
+        "is a the bottom of the texture, but it can also be put at the center.",
         Property::Visibility::User
     };
 
@@ -482,13 +482,11 @@ void GeoJsonProperties::createFromDictionary(const ghoul::Dictionary& dictionary
     tessellation.distance.setMaxValue(maxDistance);
 
     if (p.tessellation.has_value()) {
-        const Parameters::Tessellation pTess = (*p.tessellation);
-        tessellation.enabled = pTess.useTessellationLevel.value_or(tessellation.enabled);
-        tessellation.useLevel =
-            pTess.useTessellationLevel.value_or(tessellation.useLevel);
-        tessellation.level = pTess.tessellationLevel.value_or(tessellation.level);
-        tessellation.distance =
-            pTess.tessellationDistance.value_or(tessellation.distance);
+        const Parameters::Tessellation t = *p.tessellation;
+        tessellation.enabled = t.useTessellationLevel.value_or(tessellation.enabled);
+        tessellation.useLevel = t.useTessellationLevel.value_or(tessellation.useLevel);
+        tessellation.level = t.tessellationLevel.value_or(tessellation.level);
+        tessellation.distance = t.tessellationDistance.value_or(tessellation.distance);
     }
 }
 

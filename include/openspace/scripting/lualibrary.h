@@ -63,7 +63,7 @@ struct LuaLibrary {
         std::vector<Argument> arguments;
         /// Information about the type that this function returns
         std::string returnType;
-        /// A help text describing what the function does/
+        /// A help text describing what the function does
         std::string helpText;
         /// The source location where the implementation for this Lua file is located
         struct {

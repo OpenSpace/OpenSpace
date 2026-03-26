@@ -52,8 +52,8 @@ namespace {
     constexpr Property::PropertyInfo FixedDateInfo = {
         "FixedDate",
         "Fixed date",
-        "A time to lock the rotation to. Setting this to an empty string will "
-        "unlock the time and return to rotation based on current simulation time.",
+        "A time to lock the rotation to. Setting this to an empty string will unlock the "
+        "time and return to rotation based on current simulation time.",
         Property::Visibility::AdvancedUser
     };
 
@@ -81,7 +81,7 @@ namespace {
 
         // This value specifies the destination frame that is used for the coordinate
         // transformation. This has to be a valid SPICE name. If this value is not
-        // specified, a reference frame of 'GALACTIC' is used instead
+        // specified, a reference frame of 'GALACTIC' is used instead.
         std::optional<std::string> destinationFrame;
 
         // [[codegen::verbatim(FixedDateInfo.description)]]
@@ -96,7 +96,7 @@ namespace {
 namespace openspace {
 
 Documentation SpiceRotation::Documentation() {
-    return codegen::doc<Parameters>("space_transform_rotation_spice");
+    return codegen::doc<Parameters>("space_rotation_spice");
 }
 
 SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)

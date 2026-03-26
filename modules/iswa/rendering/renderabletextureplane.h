@@ -53,7 +53,7 @@ private:
     void renderGeometry() const override;
 
     GLuint _vao = 0;
-    GLuint _vbo= 0;
+    GLuint _vbo = 0;
 };
 
  } // namespace openspace

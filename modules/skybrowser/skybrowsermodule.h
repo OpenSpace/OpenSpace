@@ -108,11 +108,12 @@ private:
     // The browsers and targets
     std::vector<std::unique_ptr<TargetBrowserPair>> _targetsBrowsers;
     SceneGraphNode* _hoverCircle = nullptr;
-    std::string _selectedBrowser; // Currently selected browser
+    /// Currently selected browser
+    std::string _selectedBrowser;
     int _uniqueIdentifierCounter = 0;
 
     // Flags
-    bool _isCameraInSolarSystem = true; // Visualization modes
+    bool _isCameraInSolarSystem = true;
 
     // Animation of rotation of camera to look at coordinate galactic coordinates
     Animation<glm::dvec3> _cameraRotation =

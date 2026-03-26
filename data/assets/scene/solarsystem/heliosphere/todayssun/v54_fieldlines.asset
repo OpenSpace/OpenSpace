@@ -1,7 +1,6 @@
 local transforms = asset.require("scene/solarsystem/heliosphere/transforms_heliosphere")
 
 
-
 local transferFunctions = asset.resource({
   Type = "HttpSynchronization",
   Name = "Today's Sun Transfer Functions",
@@ -23,6 +22,11 @@ local sunRadius = 695700000.0
 local fieldlinesSCS = {
   Identifier = "WSA_54_Fieldlines_SCS_OI",
   Parent = transforms.WSAOffset60.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2022 DEC 14 16:14:00",
+    End = "2025 DEC 16 10:14:00"
+  },
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -50,7 +54,7 @@ local fieldlinesSCS = {
   },
   GUI = {
     Name = "Fieldlines: Corona SCS (Out-In Tracing)",
-    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Path = "/Solar System/Heliosphere/WSA 5.4 Coronal Model",
     Description = [[WSA 5.4 real-time output of the fieldline trace from the Schatten
       Current Sheet model (SCS) outer boundary at 21.5 Rs to the source surface at 2.5 Rs
       using GONGZ as input.]],
@@ -61,6 +65,11 @@ local fieldlinesSCS = {
 local fieldlinesOI = {
   Identifier = "WSA_54_Fieldlines_PFSS_OI",
   Parent = transforms.WSAOffset60.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2022 DEC 14 16:14:00",
+    End = "2025 DEC 16 10:14:00"
+  },
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -88,7 +97,7 @@ local fieldlinesOI = {
   },
   GUI = {
     Name = "Fieldlines: Corona PFSS (Out-In Tracing)",
-    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Path = "/Solar System/Heliosphere/WSA 5.4 Coronal Model",
     Description = [[WSA 5.4 real-time output of the fieldline trace from the source
       surface to the solar surface using GONGZ as input. PFSS is the Potential Field
       Source Surface model, a part of WSA.]],
@@ -99,6 +108,11 @@ local fieldlinesOI = {
 local fieldlinesIO = {
   Identifier = "WSA_54_Fieldlines_PFSS_IO",
   Parent = transforms.WSAOffset60.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2022 DEC 14 16:14:00",
+    End = "2025 DEC 16 10:14:00"
+  },
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -124,7 +138,7 @@ local fieldlinesIO = {
   },
   GUI = {
     Name = "Fieldlines: Corona PFSS (In-Out Tracing)",
-    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Path = "/Solar System/Heliosphere/WSA 5.4 Coronal Model",
     Description = [[WSA 5.4 real-time output of the fieldline trace from the solar surface
       outwards using GONGZ as input. PFSS is the Potential Field Source Surface model, a
       part of WSA.]],
@@ -135,6 +149,11 @@ local fieldlinesIO = {
 local fieldlinesEarth = {
   Identifier = "WSA_54_Fieldlines_Earth",
   Parent = transforms.WSAOffset60.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2022 DEC 14 16:14:00",
+    End = "2025 DEC 16 10:14:00"
+  },
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -162,7 +181,7 @@ local fieldlinesEarth = {
   },
   GUI = {
     Name = "Fieldlines: Tracing from Earth",
-    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Path = "/Solar System/Heliosphere/WSA 5.4 Coronal Model",
     Description = [[WSA 5.4 real-time output of the field line trace from Earth using GONGZ
       as input.]],
     Focusable = false

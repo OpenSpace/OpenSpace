@@ -34,15 +34,15 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "TextureCygnet";
+
+    struct [[codegen::Dictionary(RenderableTextureCygnet)]] Parameters {};
 } // namespace
+#include "renderabletexturecygnet_codegen.cpp"
 
 namespace openspace {
 
 Documentation RenderableTextureCygnet::Documentation() {
-    openspace::Documentation doc = RenderableIswaCygnet::Documentation();
-    doc.name = "RenderableTextureCygnet";
-    doc.id = "iswa_renderable_texturecygnet";
-    return doc;
+    return codegen::doc<Parameters>("iswa_renderable_texturecygnet");
 }
 
 RenderableTextureCygnet::RenderableTextureCygnet(const ghoul::Dictionary& dictionary)
@@ -92,7 +92,7 @@ bool RenderableTextureCygnet::downloadTextureResource(double timestamp) {
 }
 
 bool RenderableTextureCygnet::updateTextureResource() {
-    // if The future is done then get the new imageFile
+    // If the future is done then get the new imageFile
     DownloadManager::MemoryFile imageFile;
     if (_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
         imageFile = _futureObject.get();

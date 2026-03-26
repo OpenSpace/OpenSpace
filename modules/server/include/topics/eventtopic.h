@@ -43,7 +43,9 @@ public:
     bool isDone() const override;
 
 private:
-    // Returns true if there is at least one subscription active, false otherwise
+    /**
+     * Returns `true` if there is at least one subscription active, `false` otherwise.
+     */
     bool isSubscribed() const;
 
     std::unordered_map<Event::Type, bool> _subscribedEvents;

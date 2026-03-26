@@ -76,7 +76,7 @@ namespace {
 namespace openspace {
 
 Documentation ScreenSpaceTimeVaryingImageOnline::Documentation() {
-    return codegen::doc<Parameters>("base_screenspace_time_varying_image_online");
+    return codegen::doc<Parameters>("base_screenspace_timevaryingimageonline");
 }
 
 ScreenSpaceTimeVaryingImageOnline::ScreenSpaceTimeVaryingImageOnline(
@@ -87,9 +87,7 @@ ScreenSpaceTimeVaryingImageOnline::ScreenSpaceTimeVaryingImageOnline(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _jsonFilePath = p.filePath.string();
-    _jsonFilePath.onChange([this]() {
-        loadJsonData(_jsonFilePath.value());
-    });
+    _jsonFilePath.onChange([this]() { loadJsonData(_jsonFilePath.value()); });
     addProperty(_jsonFilePath);
 }
 
@@ -184,9 +182,8 @@ void ScreenSpaceTimeVaryingImageOnline::update() {
 
         try {
             // @TODO (2026-02-18, abock): This code was settings the swizzle mask only if
-            //                            the returned image was having a single Red
-            //                            channel. This can't currently be expressed
-            //                            unfortunately
+            // the returned image was having a single Red channel. This can't currently be
+            // expressed unfortunately
             ghoul::opengl::Texture::SamplerInit samplerInit = {
                 // TODO: AnisotropicMipMap crashes on ATI cards ---abock
                 //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,

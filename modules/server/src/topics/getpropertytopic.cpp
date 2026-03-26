@@ -55,7 +55,7 @@ void GetPropertyTopic::handleJson(const nlohmann::json& json) {
 
     const std::string requestedKey = json.at("property").get<std::string>();
     ZoneText(requestedKey.c_str(), requestedKey.size());
-    LDEBUG("Getting property '" + requestedKey + "'...");
+    LDEBUG(std::format("Getting property '{}'...", requestedKey));
     nlohmann::json response;
     if (requestedKey == AllPropertiesValue) {
         response = allProperties();

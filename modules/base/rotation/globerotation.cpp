@@ -25,8 +25,8 @@
 #include <modules/base/rotation/globerotation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/ellipsoid.h>
 #include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
@@ -48,7 +48,7 @@ namespace {
         "The node on which the longitude/latitude is specified. If the node is a globe, "
         "the correct height information for the globe is used. Otherwise, the position "
         "is specified based on the longitude and latitude on the node's interaction "
-        "sphere",
+        "sphere.",
         Property::Visibility::User
     };
 
@@ -98,8 +98,8 @@ namespace {
     // This `Rotation` orients the scene graph node in such a way that the y-axis points
     // away from the provided globe, the x-axis points towards the globe's southern pole
     // and the z-axis points in a western direction. Using this rotation generally means
-    // using the [GlobeTranslation](#base_translation_globetranslation) to place the scene
-    // graph node at the same position for which the rotation is calculated.
+    // using the [GlobeTranslation](#base_translation_globe) to place the scene graph node
+    // at the same position for which the rotation is calculated.
     struct [[codegen::Dictionary(GlobeRotation)]] Parameters {
         // [[codegen::verbatim(GlobeInfo.description)]]
         std::string globe [[codegen::identifier()]];
@@ -125,7 +125,7 @@ namespace {
 namespace openspace {
 
 Documentation GlobeRotation::Documentation() {
-    return codegen::doc<Parameters>("base_rotation_globerotation");
+    return codegen::doc<Parameters>("base_rotation_globe");
 }
 
 GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
@@ -251,7 +251,7 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
         const float latitudeRad = glm::radians(static_cast<float>(lat));
         const float longitudeRad = glm::radians(static_cast<float>(lon));
         yAxis = _attachedNode->ellipsoid().geodeticSurfaceNormal(
-            { latitudeRad, longitudeRad }
+            { .lat = latitudeRad, .lon = longitudeRad }
         );
     }
     yAxis = glm::normalize(yAxis);

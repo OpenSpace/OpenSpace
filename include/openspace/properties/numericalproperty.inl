@@ -161,9 +161,9 @@ void NumericalProperty<T>::interpolateValue(float t,
     if (easingFunction) {
         t = easingFunction(t);
     }
-    TemplateProperty<T>::setValue(static_cast<T>(
-        glm::mix(_interpolationStart, _interpolationEnd, t)
-    ));
+    TemplateProperty<T>::setValue(
+        static_cast<T>(glm::mix(_interpolationStart, _interpolationEnd, t))
+    );
 }
 
 } // namespace openspace

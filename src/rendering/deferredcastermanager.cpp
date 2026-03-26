@@ -47,14 +47,16 @@ void DeferredcasterManager::detachDeferredcaster(Deferredcaster& deferredcaster)
         _deferredcasters.end(),
         &deferredcaster
     );
-    if (it != _deferredcasters.end()) {
-        _deferredcasters.erase(it);
-        for (DeferredcasterListener* listener : _listeners) {
-            listener->deferredcastersChanged(
-                deferredcaster,
-                DeferredcasterListener::IsAttached::No
-            );
-        }
+    if (it == _deferredcasters.end()) {
+        return;
+    }
+
+    _deferredcasters.erase(it);
+    for (DeferredcasterListener* listener : _listeners) {
+        listener->deferredcastersChanged(
+            deferredcaster,
+            DeferredcasterListener::IsAttached::No
+        );
     }
 }
 

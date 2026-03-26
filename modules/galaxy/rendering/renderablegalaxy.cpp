@@ -154,28 +154,25 @@ namespace {
                         const std::vector<glm::vec3>& colors, int64_t nPoints,
                         float pointsRatio)
     {
-        std::ofstream fileStream(file, std::ofstream::binary);
+        std::ofstream f = std::ofstream(file, std::ofstream::binary);
 
-        if (!fileStream.good()) {
+        if (!f.good()) {
             LERROR(std::format("Error opening file '{}' for save cache file", file));
             return;
         }
 
-        fileStream.write(
-            reinterpret_cast<const char*>(&CurrentCacheVersion),
-            sizeof(int8_t)
-        );
-        fileStream.write(reinterpret_cast<const char*>(&nPoints), sizeof(int64_t));
-        fileStream.write(reinterpret_cast<const char*>(&pointsRatio), sizeof(float));
+        f.write(reinterpret_cast<const char*>(&CurrentCacheVersion), sizeof(int8_t));
+        f.write(reinterpret_cast<const char*>(&nPoints), sizeof(int64_t));
+        f.write(reinterpret_cast<const char*>(&pointsRatio), sizeof(float));
         uint64_t nPositions = positions.size();
-        fileStream.write(reinterpret_cast<const char*>(&nPositions), sizeof(uint64_t));
-        fileStream.write(
+        f.write(reinterpret_cast<const char*>(&nPositions), sizeof(uint64_t));
+        f.write(
             reinterpret_cast<const char*>(positions.data()),
             positions.size() * sizeof(glm::vec3)
         );
         uint64_t nColors = colors.size();
-        fileStream.write(reinterpret_cast<const char*>(&nColors), sizeof(uint64_t));
-        fileStream.write(
+        f.write(reinterpret_cast<const char*>(&nColors), sizeof(uint64_t));
+        f.write(
             reinterpret_cast<const char*>(colors.data()),
             colors.size() * sizeof(glm::vec3)
         );
@@ -246,7 +243,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableGalaxy::Documentation() {
-    return codegen::doc<Parameters>("galaxy_renderablegalaxy");
+    return codegen::doc<Parameters>("galaxy_renderable_galaxy");
 }
 
 RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
@@ -323,8 +320,8 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     addProperty(_downScaleVolumeRendering);
     addProperty(_numberOfRayCastingSteps);
 
-    // Use max component instead of length, to avoid problems with taking square
-    // of huge value
+    // Use max component instead of length, to avoid problems with taking square of huge
+    // value
     setBoundingSphere(glm::compMax(0.5f * _volumeSize));
 }
 
@@ -386,13 +383,13 @@ void RenderableGalaxy::initializeGL() {
     ZoneScoped;
 
     _texture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = _volumeDimensions,
             .type = GL_TEXTURE_3D,
             .format = ghoul::opengl::Texture::Format::RGBA,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         },
         reinterpret_cast<std::byte*>(_volume->data())
@@ -411,7 +408,7 @@ void RenderableGalaxy::initializeGL() {
 
     global::raycasterManager->attachRaycaster(*_raycaster);
 
-    // initialize points.
+    // Initialize points
     if (_pointsFilename.empty()) {
         return;
     }
@@ -425,7 +422,7 @@ void RenderableGalaxy::initializeGL() {
         "Galaxy billboard",
         absPath("${MODULE_GALAXY}/shaders/billboard_vs.glsl"),
         absPath("${MODULE_GALAXY}/shaders/billboard_fs.glsl"),
-        absPath("${MODULE_GALAXY}/shaders/billboard_ge.glsl")
+        absPath("${MODULE_GALAXY}/shaders/billboard_gs.glsl")
     );
 
     if (!_pointSpreadFunctionTexturePath.empty()) {
@@ -454,6 +451,7 @@ void RenderableGalaxy::initializeGL() {
         _pointPositionsCache.data(),
         GL_NONE_BIT
     );
+    _pointPositionsCache.clear();
 
     glCreateBuffers(1, &_colorVbo);
     glNamedBufferStorage(
@@ -462,6 +460,7 @@ void RenderableGalaxy::initializeGL() {
         _pointColorsCache.data(),
         GL_NONE_BIT
     );
+    _pointColorsCache.clear();
 
     glCreateVertexArrays(1, &_pointsVao);
     glVertexArrayVertexBuffer(_pointsVao, 0, _positionVbo, 0, sizeof(glm::vec3));
@@ -470,12 +469,10 @@ void RenderableGalaxy::initializeGL() {
     glEnableVertexArrayAttrib(_pointsVao, 0);
     glVertexArrayAttribFormat(_pointsVao, 0, 3, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayAttribBinding(_pointsVao, 0, 0);
-    _pointPositionsCache.clear();
 
     glEnableVertexArrayAttrib(_pointsVao, 1);
     glVertexArrayAttribFormat(_pointsVao, 1, 3, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayAttribBinding(_pointsVao, 1, 1);
-    _pointColorsCache.clear();
 }
 
 void RenderableGalaxy::deinitializeGL() {
@@ -503,11 +500,8 @@ void RenderableGalaxy::update(const UpdateData& data) {
         return;
     }
     const glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
-    glm::mat4 transform = glm::rotate(
-        glm::mat4(1.f),
-        eulerRotation.x,
-        glm::vec3(1.f, 0.f, 0.f)
-    );
+    glm::mat4 transform =
+        glm::rotate(glm::mat4(1.f), eulerRotation.x, glm::vec3(1.f, 0.f, 0.f));
     transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0.f, 1.f, 0.f));
     transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0.f, 0.f, 1.f));
 
@@ -525,11 +519,13 @@ void RenderableGalaxy::update(const UpdateData& data) {
 }
 
 void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
-    // Render the volume
     if (_raycaster && _volumeRenderingEnabled) {
-        const RaycasterTask task { _raycaster.get(), data };
+        const RaycasterTask task {
+            .raycaster = _raycaster.get(),
+            .renderData = data
+        };
 
-        const glm::vec3 position = data.camera.positionVec3();
+        const glm::vec3 position = data.camera.position();
         const float length = safeLength(position);
         const glm::vec3 galaxySize = _volumeSize;
 
@@ -543,18 +539,21 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
 
         float opacityCoefficient = 1.f;
         if (length < lowerRampStart) {
-            opacityCoefficient = 0.f; // camera really close
+            // Camera really close
+            opacityCoefficient = 0.f;
         }
         else if (length < lowerRampEnd) {
             opacityCoefficient = (length - lowerRampStart) /
                                  (lowerRampEnd - lowerRampStart);
         }
         else if (length < upperRampStart) {
-            opacityCoefficient = 1.f; // sweet spot (max)
+            // Sweet spot (max)
+            opacityCoefficient = 1.f;
         }
         else if (length < upperRampEnd) {
-            opacityCoefficient = 1.f - (length - upperRampStart) /
-                                 (upperRampEnd - upperRampStart); // fade out
+            // Fade out
+            opacityCoefficient =
+                1.f - (length - upperRampStart) / (upperRampEnd - upperRampStart);
         }
         else {
             opacityCoefficient = 0;
@@ -565,7 +564,7 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
             _opacityCoefficient >= 0.f && _opacityCoefficient <= 1.f,
             "Opacity coefficient was not between 0 and 1"
         );
-        if (opacityCoefficient > 0) {
+        if (opacityCoefficient > 0.f) {
             _raycaster->setOpacityCoefficient(_opacityCoefficient);
             tasks.raycasterTasks.push_back(task);
         }
@@ -597,9 +596,9 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
     const glm::dmat4 rotMatrix = glm::rotate(
         glm::dmat4(1.0),
         glm::pi<double>(),
-        glm::dvec3(1.0, 0.0, 0.0)) *
-            glm::rotate(glm::dmat4(1.0), 3.1248, glm::dvec3(0.0, 1.0, 0.0)) *
-            glm::rotate(glm::dmat4(1.0), 4.45741, glm::dvec3(0.0, 0.0, 1.0)
+        glm::dvec3(1.0, 0.0, 0.0)
+    ) * glm::rotate(glm::dmat4(1.0), 3.1248, glm::dvec3(0.0, 1.0, 0.0)) *
+        glm::rotate(glm::dmat4(1.0), 4.45741, glm::dvec3(0.0, 0.0, 1.0)
     );
 
     const AlternativeTransform altTransform = {
@@ -632,13 +631,11 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
 
     _pointsProgram->deactivate();
 
-    // Restores OpenGL Rendering State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableGalaxy::renderBillboards(const RenderData& data) {
-    // Change OpenGL Blending and Depth states
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(false);
     glDisable(GL_DEPTH_TEST);
@@ -648,9 +645,9 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
     const glm::dmat4 rotMatrix = glm::rotate(
         glm::dmat4(1.0),
         glm::pi<double>(),
-        glm::dvec3(1.0, 0.0, 0.0)) *
-            glm::rotate(glm::dmat4(1.0), 3.1248, glm::dvec3(0.0, 1.0, 0.0)) *
-            glm::rotate(glm::dmat4(1.0), 4.45741, glm::dvec3(0.0, 0.0, 1.0)
+        glm::dvec3(1.0, 0.0, 0.0)
+    ) * glm::rotate(glm::dmat4(1.0), 3.1248, glm::dvec3(0.0, 1.0, 0.0)) *
+        glm::rotate(glm::dmat4(1.0), 4.45741, glm::dvec3(0.0, 0.0, 1.0)
     );
 
     const AlternativeTransform altTransform = {
@@ -686,7 +683,6 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
 
     _billboardsProgram->deactivate();
 
-    // Restores OpenGL Rendering State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
 }
@@ -700,7 +696,7 @@ RenderableGalaxy::Result RenderableGalaxy::loadPointFile() {
 
     // Read point count
     ghoul::getline(pointFile, line);
-    std::istringstream iss(line);
+    std::istringstream iss = std::istringstream(line);
     int64_t nPoints = 0;
     iss >> nPoints;
 
@@ -722,7 +718,7 @@ RenderableGalaxy::Result RenderableGalaxy::loadPointFile() {
         float b = 0.f;
         float a = 0.f;
         ghoul::getline(pointFile, line);
-        std::istringstream issp(line);
+        std::istringstream issp = std::istringstream(line);
         issp >> x >> y >> z >> r >> g >> b >> a;
 
         // Convert kiloparsec to meters
@@ -733,11 +729,11 @@ RenderableGalaxy::Result RenderableGalaxy::loadPointFile() {
         pointColors.emplace_back(r, g, b);
     }
 
-    Result res;
-    res.success = true;
-    res.positions = std::move(pointPositions);
-    res.color = std::move(pointColors);
-    return res;
+    return {
+        .success = true,
+        .positions = std::move(pointPositions),
+        .color = std::move(pointColors)
+    };
 }
 
 RenderableGalaxy::Result RenderableGalaxy::loadCachedFile(
@@ -748,14 +744,14 @@ RenderableGalaxy::Result RenderableGalaxy::loadCachedFile(
     std::ifstream fileStream = std::ifstream(file, std::ifstream::binary);
     if (!fileStream.good()) {
         LERROR(std::format("Error opening file '{}' for loading cache file", file));
-        return { false, {}, {} };
+        return { .success = false };
     }
 
     int8_t cacheVersion = 0;
     fileStream.read(reinterpret_cast<char*>(&cacheVersion), sizeof(int8_t));
     if (cacheVersion != CurrentCacheVersion) {
         LINFO(std::format("Removing cache file '{}' as the version changed", file));
-        return { false, {}, {} };
+        return { .success = false };
     }
 
     int64_t nPoints = 0;
@@ -781,11 +777,11 @@ RenderableGalaxy::Result RenderableGalaxy::loadCachedFile(
     colors.resize(nColors);
     fileStream.read(reinterpret_cast<char*>(colors.data()), nColors * sizeof(glm::vec3));
 
-    Result result;
-    result.success = true;
-    result.positions = std::move(positions);
-    result.color = std::move(colors);
-    return result;
+    return {
+        .success = true,
+        .positions = std::move(positions),
+        .color = std::move(colors)
+    };
 }
 
 } // namespace openspace

@@ -174,16 +174,6 @@ std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
     return result;
 }
 
-ghoul::systemcapabilities::Version ModuleEngine::requiredOpenGLVersion() const {
-    ghoul::systemcapabilities::Version version = { .major = 0, .minor = 0, .release = 0 };
-
-    for (const std::unique_ptr<OpenSpaceModule>& m : _modules) {
-        version = std::max(version, m->requiredOpenGLVersion());
-    }
-
-    return version;
-}
-
 LuaLibrary ModuleEngine::luaLibrary() {
     return {
         "modules",

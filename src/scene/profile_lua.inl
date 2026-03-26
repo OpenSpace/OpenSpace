@@ -50,8 +50,8 @@ namespace {
 }
 
 /**
-* Returns the full path of the profile with which OpenSpace was started.
-*/
+ * Returns the full path of the profile with which OpenSpace was started.
+ */
 [[codegen::luawrap]] std::filesystem::path profilePath() {
     return global::configuration->profile;
 }
@@ -66,7 +66,7 @@ namespace {
  * file that already exists should be overwritten, which is 'false' by default.
  */
 [[codegen::luawrap]] void saveSettingsToProfile(std::optional<std::string> saveFilePath,
-                                                bool overwrite = true)
+                                                bool shouldOverwrite = true)
 {
     if (!saveFilePath.has_value()) {
         std::time_t t = std::time(nullptr);
@@ -114,13 +114,13 @@ namespace {
     global::profile->saveCurrentSettingsToProfile(root, currentTime, navState);
     global::configuration->profile = *saveFilePath;
 
-    if (saveFilePath->find('/') != std::string::npos) {
+    if (saveFilePath->contains('/')) {
         throw ghoul::lua::LuaError("Profile filename must not contain (/) elements");
     }
-    else if (saveFilePath->find(':') != std::string::npos) {
+    else if (saveFilePath->contains(':')) {
         throw ghoul::lua::LuaError("Profile filename must not contain (:) elements");
     }
-    else if (saveFilePath->find('.') != std::string::npos) {
+    else if (saveFilePath->contains('.')) {
         throw ghoul::lua::LuaError(
             "Only provide the filename to save without file extension"
         );
@@ -133,7 +133,7 @@ namespace {
         absFilename = absPath("${USER_PROFILES}/" + *saveFilePath + ".profile").string();
     }
 
-    if (std::filesystem::is_regular_file(absFilename) && !overwrite) {
+    if (std::filesystem::is_regular_file(absFilename) && !shouldOverwrite) {
         throw ghoul::lua::LuaError(
             std::format(
                 "Unable to save profile '{}'. File of same name already exists",
@@ -142,26 +142,20 @@ namespace {
         );
     }
 
-    std::ofstream outFile;
-    // @TODO (abock, 2020-06-15) Replace with non-throwing stream
-    try {
-        outFile.open(absFilename, std::ofstream::out);
-    }
-    catch (const std::ofstream::failure& e) {
-        throw ghoul::lua::LuaError(
-            std::format(
-                "Exception opening profile file for write '{}': {}", absFilename, e.what()
-            )
-        );
+    std::ofstream outFile = std::ofstream(absFilename, std::ofstream::out);
+    if (!outFile.good()) {
+        throw ghoul::lua::LuaError(std::format(
+            "Exception opening profile file for write '{}'", absFilename
+        ));
     }
 
     try {
         outFile << global::profile->serialize();
     }
-    catch (const std::ofstream::failure& e) {
-        throw ghoul::lua::LuaError(
-            std::format("Data write error to file '{}': {}", absFilename, e.what())
-        );
+    catch (const std::ofstream::failure&) {
+        throw ghoul::lua::LuaError(std::format(
+            "Data write error to file '{}'", absFilename
+        ));
     }
 }
 

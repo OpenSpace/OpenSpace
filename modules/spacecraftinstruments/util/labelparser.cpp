@@ -52,8 +52,8 @@ LabelParser::LabelParser(std::filesystem::path fileName,
 {
     using ghoul::Dictionary;
 
-    // get the different instrument types
-    // for each decoder (assuming might have more if hong makes changes)
+    // Get the different instrument types. For each decoder (assuming might have more if
+    // hong makes changes)
     for (const std::string_view decoderStr : dictionary.keys()) {
         if (!dictionary.hasValue<Dictionary>(decoderStr)) {
             continue;
@@ -61,9 +61,9 @@ LabelParser::LabelParser(std::filesystem::path fileName,
 
         const Dictionary typeDict = dictionary.value<Dictionary>(decoderStr);
 
-        // create dictionary containing all {playbookKeys , spice IDs}
+        // Create dictionary containing all {playbookKeys , spice IDs}
         if (decoderStr == "Instrument") {
-            // for each playbook call -> create a Decoder object
+            // For each playbook call -> create a Decoder object
             for (const std::string_view key : typeDict.keys()) {
                 if (!typeDict.hasValue<Dictionary>(key)) {
                     continue;
@@ -74,7 +74,7 @@ LabelParser::LabelParser(std::filesystem::path fileName,
                     decoderDict,
                     std::string(decoderStr)
                 );
-                // insert decoder to map - this will be used in the parser to determine
+                // Insert decoder to map - this will be used in the parser to determine
                 // behavioral characteristics of each instrument
                 _fileTranslation[std::string(key)] = std::move(decoder);
             }
@@ -106,7 +106,7 @@ LabelParser::LabelParser(std::filesystem::path fileName,
                     item,
                     std::string(decoderStr)
                 );
-                // insert decoder to map - this will be used in the parser to determine
+                // Insert decoder to map - this will be used in the parser to determine
                 // behavioral characteristics of each instrument
                 _fileTranslation[std::string(key)] = std::move(decoder);
             }
@@ -168,7 +168,7 @@ bool LabelParser::create() {
 
         int count = 0;
 
-        // open up label files
+        // Open up label files
         double startTime = 0.0;
         double stopTime = 0.0;
         std::string line;

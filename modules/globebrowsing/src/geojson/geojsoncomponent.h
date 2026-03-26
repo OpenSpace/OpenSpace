@@ -58,8 +58,8 @@ struct RenderData;
 class RenderableGlobe;
 
 /**
- * A component representing a collection of globe geometry features, whose details
- * are read from a GeoJson file.
+ * A component representing a collection of globe geometry features, whose details are
+ * read from a GeoJson file.
  */
 class GeoJsonComponent : public PropertyOwner, public Fadeable {
 public:

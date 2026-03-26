@@ -79,7 +79,7 @@ void DashboardItemParallelConnection::update() {
     }
     else if (status == ParallelConnection::Status::ClientWithHost) {
         nClients--;
-        _buffer = "Session hosted by '" + hostName + "'";
+        _buffer = std::format("Session hosted by '{}'", hostName);
     }
     else if (status == ParallelConnection::Status::ClientWithoutHost) {
         _buffer = "Host is disconnected";

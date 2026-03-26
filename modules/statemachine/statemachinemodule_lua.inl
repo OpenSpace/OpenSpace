@@ -48,7 +48,9 @@ namespace {
     );
 }
 
-// Destroys the current state machine and deletes all the memory.
+/**
+ * Destroys the current state machine and deletes all the memory.
+ */
 [[codegen::luawrap]] void destroyStateMachine() {
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     module->deinitializeStateMachine();
@@ -75,7 +77,9 @@ namespace {
     LINFOC("StateMachine", "Initial state set to: " + startState);
 }
 
-// Returns the string name of the current state that the statemachine is in.
+/**
+ * Returns the string name of the current state that the statemachine is in.
+ */
 [[codegen::luawrap]] std::string currentState() {
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     std::string currentState = module->currentState();

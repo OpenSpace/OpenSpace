@@ -51,7 +51,7 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ScriptEngine";
 
-    constexpr int TableOffset = -3; // top-first argument-second argument
+    constexpr int TableOffset = -3; // Top-first argument-second argument
 
     struct [[codegen::Dictionary(Documentation)]] Parameters {
         std::string name;
@@ -142,7 +142,7 @@ void ScriptEngine::addLibrary(LuaLibrary library) {
         return lhs.name < rhs.name;
     };
 
-    // do we have a library with the same name as the incoming one
+    // Do we have a library with the same name as the incoming one
     const auto it = std::find_if(
         _registeredLibraries.begin(),
         _registeredLibraries.end(),
@@ -150,7 +150,7 @@ void ScriptEngine::addLibrary(LuaLibrary library) {
     );
 
     if (it != _registeredLibraries.end()) {
-        // if we found the library, we want to merge them
+        // If we found the library, we want to merge them
         LuaLibrary cpy = *it;
         cpy.merge(std::move(library));
         _registeredLibraries.erase(it);
@@ -337,7 +337,6 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
         // First we run the script to set its values in the current state
         ghoul::lua::runScriptFile(state, script);
 
-
         // Then, we extract the documentation information from the file
         ghoul::lua::push(state, "documentation");
         lua_gettable(state, -2);
@@ -358,11 +357,11 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
 
                 LuaLibrary::Function func;
                 func.name = p.name;
-                for (const std::vector<std::string>& pair : p.arguments)
-                {
-                    LuaLibrary::Function::Argument arg;
-                    arg.name = pair[0];
-                    arg.type = pair[1];
+                for (const std::vector<std::string>& pair : p.arguments) {
+                    LuaLibrary::Function::Argument arg = {
+                        .name = pair[0],
+                        .type = pair[1]
+                    };
                     func.arguments.push_back(arg);
                 }
                 func.returnType = p.returnValue.value_or(func.returnType);
@@ -475,7 +474,7 @@ void ScriptEngine::writeLog(const std::string& script) {
 void ScriptEngine::preSync(bool isMaster) {
     ZoneScoped;
 
-    std::lock_guard guard(_clientScriptsMutex);
+    const std::unique_lock lock(_clientScriptsMutex);
     if (isMaster) {
         while (!_incomingScripts.empty()) {
             Script item = std::move(_incomingScripts.front());
@@ -523,7 +522,7 @@ void ScriptEngine::encode(SyncBuffer* syncBuffer) {
 void ScriptEngine::decode(SyncBuffer* syncBuffer) {
     ZoneScoped;
 
-    std::lock_guard guard(_clientScriptsMutex);
+    const std::unique_lock lock(_clientScriptsMutex);
     size_t nScripts;
     syncBuffer->decode(nScripts);
 
@@ -551,7 +550,7 @@ void ScriptEngine::postSync(bool isMaster) {
         }
     }
     else {
-        std::lock_guard guard(_clientScriptsMutex);
+        const std::unique_lock lock(_clientScriptsMutex);
         while (!_clientScriptQueue.empty()) {
             try {
                 runScript({ _clientScriptQueue.front() });

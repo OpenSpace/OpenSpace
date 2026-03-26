@@ -83,8 +83,7 @@ void GuiGlobeBrowsingComponent::render() {
             nodes.end(),
             [](SceneGraphNode* n) {
                 const Renderable* r = n->renderable();
-                const RenderableGlobe* rg = dynamic_cast<const RenderableGlobe*>(r);
-                return rg == nullptr;
+                return dynamic_cast<const RenderableGlobe*>(r) == nullptr;
             }
         ),
         nodes.end()
@@ -111,9 +110,7 @@ void GuiGlobeBrowsingComponent::render() {
     auto firstWithoutUrl = std::find_if(
         nodes.begin(),
         nodes.end(),
-        [module](SceneGraphNode* n) {
-            return !module->hasUrlInfo(n->identifier());
-        }
+        [module](SceneGraphNode* n) { return !module->hasUrlInfo(n->identifier()); }
     );
     nodes.insert(firstWithoutUrl, nullptr);
 
@@ -171,8 +168,8 @@ void GuiGlobeBrowsingComponent::render() {
     }
 
     if (iNode == -1) {
-        // This should only occur if the Focusnode is not a RenderableGlobe
-        // or if there are no nodes
+        // This should only occur if the Focusnode is not a RenderableGlobe or if there
+        // are no nodes
         return;
     }
 
@@ -371,7 +368,7 @@ void GuiGlobeBrowsingComponent::render() {
         ImGui::PopID();
     }
     ImGui::Columns(1);
-#else
+#else // ^^^^ OPENSPACE_MODULE_GLOBEBROWSING_ENABLED vvvv
     ImGui::Text("%s", "OpenSpace compiled without GlobeBrowsing support");
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 }

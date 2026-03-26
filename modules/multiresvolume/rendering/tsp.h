@@ -59,8 +59,10 @@ public:
     explicit TSP(const std::filesystem::path& filename);
     ~TSP();
 
-    // load performs readHeader, readCache, writeCache and construct
-    // in the correct sequence
+    /**
+     * Load performs readHeader, readCache, writeCache and construct in the correct
+     * sequence.
+     */
     bool load();
 
     bool readHeader();
@@ -113,11 +115,11 @@ private:
     std::ifstream _file;
     std::streampos _dataOffset;
 
-    // Holds the actual structure
+    /// Holds the actual structure
     std::vector<int> _data;
     GLuint _dataSSBO = 0;
 
-    // Data from file
+    /// Data from file
     Header _header;
 
     // Additional metadata

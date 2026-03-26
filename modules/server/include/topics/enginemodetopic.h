@@ -42,7 +42,9 @@ public:
 private:
     static constexpr int UnsetOnChangeHandle = -1;
 
-    // Provides the mode int value in json message
+    /**
+     * Provides the mode int value in JSON message.
+     */
     void sendJsonData();
 
     OpenSpaceEngine::Mode _lastMode = OpenSpaceEngine::Mode::UserControl;

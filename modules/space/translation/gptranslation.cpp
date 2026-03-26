@@ -34,18 +34,18 @@
 
 namespace {
     struct [[codegen::Dictionary(GPTranslation)]] Parameters {
-        // Specifies the filename of the general pertubation file
+        // Specifies the filename of the general pertubation file.
         std::filesystem::path file;
 
         enum class [[codegen::map(openspace::kepler::Format)]] Format {
-            // A NORAD-style Two-Line element
+            // A NORAD-style Two-Line element.
             TLE,
-            // Orbit Mean-Elements Message in the KVN notation
+            // Orbit Mean-Elements Message in the KVN notation.
             OMM,
-            // JPL's Small Bodies Database
+            // JPL's Small Bodies Database.
             SBDB
         };
-        // The file format that is contained in the file
+        // The file format that is contained in the file.
         Format format;
 
         // Specifies the element within the file that should be used in case the file

@@ -46,7 +46,7 @@ public:
     void removeKeyframe(int index);
     void updateKeyframe(int index);
     void moveKeyframe(int index, double sequenceTime);
-    void saveSequence(std::filesystem::path filename);
+    void saveSequence(std::filesystem::path filename) const;
     void loadSequence(std::filesystem::path filename);
     void play();
     bool hasKeyframeRecording() const;

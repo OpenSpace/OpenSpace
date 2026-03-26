@@ -79,7 +79,6 @@ bool FactoryManager::isInitialized() {
 
 FactoryManager& FactoryManager::ref() {
     ghoul_assert(_manager, "Factory Manager must have been initialized");
-
     return *_manager;
 }
 

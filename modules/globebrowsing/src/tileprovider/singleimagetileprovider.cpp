@@ -54,7 +54,7 @@ namespace {
 namespace openspace {
 
 Documentation SingleImageProvider::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_singleimageprovider");
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_singleimage");
 }
 
 SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
@@ -79,7 +79,7 @@ Tile::Status SingleImageProvider::tileStatus(const TileIndex&) {
 }
 
 TileDepthTransform SingleImageProvider::depthTransform() {
-    return { 0.f, 1.f };
+    return { .scale = 0.f, .offset = 1.f };
 }
 
 void SingleImageProvider::update() {}
@@ -100,7 +100,11 @@ void SingleImageProvider::reset() {
         ));
     }
 
-    _tile = Tile{ _tileTexture.get(), std::nullopt, Tile::Status::OK };
+    _tile = {
+        .texture = _tileTexture.get(),
+        .metaData = std::nullopt,
+        .status = Tile::Status::OK
+    };
 }
 
 int SingleImageProvider::minLevel() {

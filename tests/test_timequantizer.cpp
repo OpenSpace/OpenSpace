@@ -54,10 +54,10 @@ namespace {
         }
 
         if (expectFailure) {
-            CHECK(res.find(expectedType) != std::string::npos);
+            CHECK(res.contains(expectedType));
         }
         else {
-            CHECK(res.find(expectedType) == std::string::npos);
+            CHECK(!res.contains(expectedType));
         }
     }
 
@@ -73,10 +73,10 @@ namespace {
         }
 
         if (expectFailure) {
-            CHECK(res.find(expectedErrSubstring) != std::string::npos);
+            CHECK(res.contains(expectedErrSubstring));
         }
         else {
-            CHECK(res.find(expectedErrSubstring) == std::string::npos);
+            CHECK(!res.contains(expectedErrSubstring));
         }
     }
 
@@ -92,10 +92,10 @@ namespace {
         }
 
         if (expectFailure) {
-            CHECK(res.find(expectedErrSubstring) != std::string::npos);
+            CHECK(res.contains(expectedErrSubstring));
         }
         else {
-            CHECK(res.find(expectedErrSubstring) == std::string::npos);
+            CHECK(!res.contains(expectedErrSubstring));
         }
     }
 } // namespace
@@ -132,8 +132,10 @@ TEST_CASE("TimeQuantizer: Test years resolution", "[timequantizer]") {
         t1.setStartEndRange("2020-02-29T00:00:00", "2030-02-29T00:00:00");
     }
     catch (const ghoul::RuntimeError& e) {
-        REQUIRE(e.message.find("Invalid start day value of 29 for the selected month "
-            "on a yearly increment, valid days are 1 - 28") != std::string::npos);
+        REQUIRE(e.message.contains(
+            "Invalid start day value of 29 for the selected month on a yearly increment, "
+            "valid days are 1 - 28"
+        ));
     }
     t1.setStartEndRange("2020-02-28T00:00:00", "2030-02-28T00:00:00");
 
@@ -203,8 +205,9 @@ TEST_CASE("TimeQuantizer: Test months resolution", "[timequantizer]") {
         t1.setStartEndRange("2017-01-30T00:00:00", "2020-09-01T00:00:00");
     }
     catch (const ghoul::RuntimeError& e) {
-        CHECK(e.message.find("Invalid start day value of 30 for monthly increment, "
-                             "valid days are 1 - 28") != std::string::npos);
+        CHECK(e.message.contains(
+            "Invalid start day value of 30 for monthly increment, valid days are 1 - 28"
+        ));
     }
 
     t1.setStartEndRange("2016-01-17T00:00:00", "2020-09-01T00:00:00");

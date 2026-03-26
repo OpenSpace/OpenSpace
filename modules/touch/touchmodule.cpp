@@ -151,8 +151,8 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& dict) {
         LDEBUG("Initializing TouchMarker OpenGL");
         _markers.initialize();
 #ifdef WIN32
-        // We currently only support one window of touch input internally
-        // so here we grab the first window-handle and use it.
+        // We currently only support one window of touch input internally so here we grab
+        // the first window-handle and use it.
         void* nativeWindowHandle = global::windowDelegate->getNativeWindowHandle(0);
         if (nativeWindowHandle) {
             _win32TouchHook = std::make_unique<Win32TouchHook>(nativeWindowHandle);
@@ -339,7 +339,7 @@ void TouchModule::removeTouchInput(TouchInput input) {
             inputHolder.tryAddInput(input);
             const double totalTime = inputHolder.gestureTime();
             const float totalDistance = inputHolder.gestureDistance();
-            // Magic values taken from tuioear.cpp:
+            // Magic values taken from tuioear.cpp
             const bool isWithinTapTime = totalTime < 0.18;
             const bool wasStationary = totalDistance < 0.0004f;
             if (isWithinTapTime && wasStationary && _touchPoints.size() == 1 &&

@@ -29,8 +29,8 @@
 #include <modules/molecule/src/postprocessing.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
@@ -55,7 +55,9 @@ vec2 encode_normal(vec3 n) {
   return n.xy / p + 0.5;
 }
 
-void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color, uint atom_index) {
+void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color,
+                    uint atom_index)
+{
   out_normal = vec4(encode_normal(view_normal), 0, 0);
   out_color = color;
 }
@@ -178,13 +180,13 @@ void MoleculeModule::initializeShaders() {
     const glm::ivec2 size = global::windowDelegate->currentWindowSize();
 
     _colorTex = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(size.x, size.y, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGBA,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
@@ -197,13 +199,13 @@ void MoleculeModule::initializeShaders() {
     );
 
     _normalTex = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(size.x, size.y, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RG,
             .dataType = GL_UNSIGNED_SHORT
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .filter = ghoul::opengl::Texture::FilterMode::Nearest,
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
@@ -217,13 +219,13 @@ void MoleculeModule::initializeShaders() {
     );
 
     _depthTex = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(size.x, size.y, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::DepthComponent,
             .dataType = GL_FLOAT
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
@@ -306,7 +308,7 @@ void MoleculeModule::preDraw() {
 }
 
 void MoleculeModule::render(const glm::mat4&, const glm::mat4& viewMatrix,
-                            const glm::mat4& projectionMatrix)
+                            const glm::mat4& projectionMatrix) const
 {
     if (_initializeCounter == 0) {
         return;
@@ -325,28 +327,39 @@ void MoleculeModule::render(const glm::mat4&, const glm::mat4& viewMatrix,
         lastDrawBuffers[lastDrawBufferCount++] = static_cast<GLenum>(drawBuf);
     }
 
-    postprocessing::Settings settings;
-    settings.background.enabled = false;
-    settings.ambientOcclusion[0].enabled = _ssao.enabled;
-    settings.ambientOcclusion[0].intensity = _ssao.intensity;
-    settings.ambientOcclusion[0].radius = _ssao.radius;
-    settings.ambientOcclusion[0].horizonBias = _ssao.horizonBias;
-    settings.ambientOcclusion[0].normalBias = _ssao.normalBias;
-    settings.ambientOcclusion[1].enabled = _ssao2.enabled;
-    settings.ambientOcclusion[1].intensity = _ssao2.intensity;
-    settings.ambientOcclusion[1].radius = _ssao2.radius;
-    settings.ambientOcclusion[1].horizonBias = _ssao2.horizonBias;
-    settings.ambientOcclusion[1].normalBias = _ssao2.normalBias;
-    settings.bloom.enabled = false;
-    settings.depthOfField.enabled = false;
-    settings.temporalReprojection.enabled = false;
-    settings.tonemapping.enabled = true;
-    settings.tonemapping.mode = postprocessing::Tonemapping::ACES;
-    settings.tonemapping.exposure = _exposure;
-    settings.fxaa.enabled = true;
-    settings.inputTextures.depth = _depthTex.get();
-    settings.inputTextures.color = _colorTex.get();
-    settings.inputTextures.normal = _normalTex.get();
+    const postprocessing::Settings settings = {
+        .background = {.enabled = false },
+        .bloom = { .enabled = false },
+        .tonemapping = {
+            .enabled = true,
+            .mode = postprocessing::Tonemapping::ACES,
+            .exposure = _exposure
+        },
+        .ambientOcclusion = {
+            {
+                .enabled = _ssao.enabled,
+                .radius = _ssao.radius,
+                .intensity = _ssao.intensity,
+                .horizonBias = _ssao.horizonBias,
+                .normalBias = _ssao.normalBias
+            },
+            {
+                .enabled = _ssao2.enabled,
+                .radius = _ssao2.radius,
+                .intensity = _ssao2.intensity,
+                .horizonBias = _ssao2.horizonBias,
+                .normalBias = _ssao2.normalBias
+            }
+        },
+        .depthOfField = { .enabled = false },
+        .temporalReprojection = { .enabled = false },
+        .fxaa = { .enabled = true },
+        .inputTextures = {
+            .color = _colorTex.get(),
+            .depth = _depthTex.get(),
+            .normal = _normalTex.get()
+        }
+    };
 
     postprocessing::postprocess(settings, viewMatrix, projectionMatrix);
 

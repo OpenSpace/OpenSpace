@@ -315,14 +315,12 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4 modelViewProjectionTransform =
         calcModelViewProjectionTransform(data);
 
-    // Uniforms
     _shader->setUniform(
         _uniformCache.modelViewProjectionTransform,
         glm::mat4(modelViewProjectionTransform)
     );
     _shader->setUniform(_uniformCache.color, glm::vec4(_lineColor.value(), opacity()));
 
-    // Render
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(255);
     glLineWidth(_lineWidth);

@@ -59,12 +59,7 @@ void GuiJoystickComponent::render() {
         for (int j = 0; j < state.nAxes; j++) {
             float f = state.axes[j];
             const std::string id = std::to_string(j) + "##" + state.name + "Axis";
-            ImGui::SliderFloat(
-                id.c_str(),
-                &f,
-                -1.f,
-                1.f
-            );
+            ImGui::SliderFloat(id.c_str(), &f, -1.f, 1.f);
         }
         ImGui::Text("%s", "Buttons");
         for (int j = 0; j < state.nButtons; j++) {
@@ -87,12 +82,7 @@ void GuiJoystickComponent::render() {
     for (int i = 0; i < global::joystickInputStates->numAxes(); i++) {
         float f = global::joystickInputStates->axis("", i);
         const std::string id = std::to_string(i) + "##" + "TotalAxis";
-        ImGui::SliderFloat(
-            id.c_str(),
-            &f,
-            -1.f,
-            1.f
-        );
+        ImGui::SliderFloat(id.c_str(), &f, -1.f, 1.f);
     }
     ImGui::Text("%s", "Buttons");
     for (int i = 0; i < global::joystickInputStates->numButtons(); i++) {

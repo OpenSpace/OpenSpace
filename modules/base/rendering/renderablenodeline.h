@@ -46,7 +46,9 @@ public:
 
     static openspace::Documentation Documentation();
 
-    // Get the distance between the start and end node
+    /**
+     * Get the distance between the start and end node.
+     */
     double distance() const;
 
     std::string start() const;

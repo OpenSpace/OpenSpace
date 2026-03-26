@@ -98,8 +98,8 @@ private:
     StringProperty _hostPassword;
     StringProperty _serverName;
 
-    // While the port should in theory be an int,
-    // we use a StringProperty to avoid a slider in the GUI.
+    // While the port should in theory be an int, we use a StringProperty to avoid a
+    // slider in the GUI
     StringProperty _port;
     StringProperty _address;
     StringProperty _name;

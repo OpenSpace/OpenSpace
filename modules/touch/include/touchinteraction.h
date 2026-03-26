@@ -45,12 +45,18 @@ namespace openspace {
 
 class Camera;
 
-// Class used for keeping track of the recent average frame time
+/**
+ * Class used for keeping track of the recent average frame time.
+ */
 class FrameTimeAverage {
 public:
-    // Update the circular buffer with the most recent frame time
+    /**
+     * Update the circular buffer with the most recent frame time.
+     */
     void updateWithNewFrame(double sample);
-    // Get the value of the most recent average frame time (seconds)
+    /**
+     * Get the value of the most recent average frame time(seconds).
+     */
     double averageFrameTime() const;
 
 private:
@@ -70,7 +76,9 @@ public:
         ZOOM_OUT
     };
 
-    // Stores the velocity in all 6 DOF
+    /**
+     * Stores the velocity in all 6 DOF.
+     */
     struct VelocityStates {
         glm::dvec2 orbit = glm::dvec2(0.0);
         double zoom = 0.0;
@@ -84,16 +92,15 @@ public:
      * Main function call:
      *   1. Checks if doubleTap occured
      *   2. If the node in focus is large enough and all contact points have selected it,
-     *     calls directControl() function for direct-manipulation
+     *      calls directControl() function for direct-manipulation
      *   3. Updates std::vector<SelectedBody> _selectedContactPoints (only if LMA
-     *     successfully converged, avoids interaction to snap on LMA fails)
+     *      successfully converged, avoids interaction to snap on LMA fails)
      *   4. If directControl() wasn't called this frame, interpret the incoming
      *      list and decide what type of interaction this frame should do
      *   5. Compute the new total velocities after interaction
      *   6. Evaluate if directControl should be called next frame- true if all contact
      *      points select the same node and said node is larger than _nodeRadiusThreshold
      */
-
     void updateStateFromInput(const std::vector<TouchInputHolder>& list,
         std::vector<TouchInput>& lastProcessed);
 
@@ -156,7 +163,7 @@ private:
 
     /**
      * Decelerate the velocities. Function is called in step() but is dereferenced from
-     * frame time to assure same behaviour on all systems
+     * frame time to assure same behavior on all systems.
      */
     void decelerate(double dt);
 
@@ -217,7 +224,6 @@ private:
 #endif
     std::array<TouchInputHolder, 2> _pinchInputs;
 
-    // Class variables
     VelocityStates _vel;
     VelocityStates _lastVel;
     VelocityStates _sensitivity;

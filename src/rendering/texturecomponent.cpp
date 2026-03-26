@@ -73,7 +73,7 @@ void TextureComponent::loadFromFile(const std::filesystem::path& path) {
     _texture = ghoul::io::TextureReader::ref().loadTexture(
         path,
         _nDimensions,
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .filter = _filterMode,
             .wrapping = _wrappingMode
         }

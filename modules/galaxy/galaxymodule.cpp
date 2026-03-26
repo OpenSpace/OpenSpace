@@ -37,7 +37,9 @@
 
 namespace openspace {
 
-GalaxyModule::GalaxyModule() : OpenSpaceModule(Name) {}
+GalaxyModule::GalaxyModule()
+    : OpenSpaceModule(Name)
+{}
 
 void GalaxyModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul::TemplateFactory<Renderable>* fRenderable =

@@ -61,7 +61,7 @@ namespace {
 
     // This specialized Renderable type is used as a target for projections from a
     // spacecraft instrument. Similarly to the
-    // [RenderablePlanetProject](spacecraftinstruments_renderableplanetprojection) it
+    // [RenderablePlanetProject](spacecraftinstruments_renderable_planetprojection) it
     // uses the spacecraft's position and orientation and information about an instruments
     // field-of-view and set of images to project a captured image. In the case of this
     // renderable the target geometry is a two-dimensional plane that the image is
@@ -88,7 +88,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderablePlaneProjection::Documentation() {
-    return codegen::doc<Parameters>("spacecraftinstruments_renderableplaneprojection");
+    return codegen::doc<Parameters>("spacecraftinstruments_renderable_planeprojection");
 }
 
 RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& dictionary)
@@ -217,8 +217,8 @@ void RenderablePlaneProjection::loadTexture() {
     }
 
     // @TODO (2026-02-18, abock): This code was settings the swizzle mask only if the
-    //                            returned image was having a single Red channel. This
-    //                            can't currently be expressed unfortunately
+    // returned image was having a single Red channel. This can't currently be expressed
+    // unfortunately
     ghoul::opengl::Texture::SamplerInit samplerInit = {
         // TODO: AnisotropicMipMap crashes on ATI cards ---abock
         //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
@@ -285,7 +285,7 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     }
 
     const std::array<Vertex, 6> VertexData = {
-        // square of two triangles drawn within fov in target coordinates
+        // Square of two triangles drawn within fov in target coordinates
         // Lower left 1
         Vertex { projection[1].x, projection[1].y, projection[1].z, 0.f, 0.f },
         // Upper right 2

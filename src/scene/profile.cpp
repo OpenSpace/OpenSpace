@@ -28,9 +28,9 @@
 #include <openspace/json.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
-#include <openspace/scripting/lualibrary.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/propertyowner.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
@@ -88,9 +88,7 @@ namespace {
                     else if (c == &nlohmann::json::is_object) { return "an object"; }
                     else if (c == &nlohmann::json::is_array) { return "an array"; }
                     else if (c == &nlohmann::json::is_boolean) { return "a boolean"; }
-                    else {
-                        throw ghoul::MissingCaseException();
-                    }
+                    else { throw ghoul::MissingCaseException(); }
                 }(checkFunc);
 
                 throw Profile::ParsingError(
@@ -237,7 +235,8 @@ static void from_json(const nlohmann::json& j, Profile::Property::SetType& v) {
     }
     else {
         throw Profile::ParsingError(
-            Profile::ParsingError::Severity::Error, "Unknown property set type"
+            Profile::ParsingError::Severity::Error,
+            "Unknown property set type"
         );
     }
 }
@@ -323,7 +322,8 @@ static void from_json(const nlohmann::json& j, Profile::Time::Type& v) {
     }
     else {
         throw Profile::ParsingError(
-            Profile::ParsingError::Severity::Error, "Unknown time type"
+            Profile::ParsingError::Severity::Error,
+            "Unknown time type"
         );
     }
 }
@@ -578,18 +578,20 @@ static void convertVersion10to11(nlohmann::json& profile) {
         version10::Keybinding& kb = kbs[i];
         const std::string identifier = std::format("profile.keybind.{}", i);
 
-        Profile::Action action;
-        action.identifier = identifier;
-        action.documentation = std::move(kb.documentation);
-        action.name = std::move(kb.name);
-        action.guiPath = std::move(kb.guiPath);
-        action.isLocal = kb.isLocal;
-        action.script = std::move(kb.script);
+        Profile::Action action = {
+            .identifier = identifier,
+            .documentation = std::move(kb.documentation),
+            .name = std::move(kb.name),
+            .guiPath = std::move(kb.guiPath),
+            .isLocal = kb.isLocal,
+            .script = std::move(kb.script)
+        };
         actions.push_back(std::move(action));
 
-        Profile::Keybinding keybinding;
-        keybinding.key = kb.key;
-        keybinding.action = identifier;
+        Profile::Keybinding keybinding = {
+            .key = kb.key,
+            .action = identifier
+        };
         keybindings.push_back(keybinding);
     }
 
@@ -646,32 +648,34 @@ void Profile::saveCurrentSettingsToProfile(const PropertyOwner& rootOwner,
     const std::vector<openspace::Property*> ps = changedProperties(rootOwner);
 
     for (openspace::Property* prop : ps) {
-        Property p;
-        p.setType = Property::SetType::SetPropertyValueSingle;
-        p.name = prop->uri();
-        p.value = prop->stringValue();
+        Property p = {
+            .setType = Property::SetType::SetPropertyValueSingle,
+            .name = std::string(prop->uri()),
+            .value = prop->stringValue()
+        };
         properties.push_back(std::move(p));
     }
 
     // Add current time to profile file
-    Time t;
-    t.value = std::move(currentTime);
-    t.type = Time::Type::Absolute;
-    time = t;
+    time = {
+        .type = Time::Type::Absolute,
+        .value = std::move(currentTime)
+    };
 
     // Delta times
     std::vector<double> dts = global::timeManager->deltaTimeSteps();
     deltaTimes = std::move(dts);
 
     // Camera
-    CameraNavState c;
-    c.anchor = navState.anchor;
-    c.aim = navState.aim;
-    c.referenceFrame = navState.referenceFrame;
-    c.position = navState.position;
-    c.up = navState.up;
-    c.yaw = navState.yaw;
-    c.pitch = navState.pitch;
+    CameraNavState c = {
+        .anchor = navState.anchor,
+        .aim = navState.aim,
+        .referenceFrame = navState.referenceFrame,
+        .position = navState.position,
+        .up = navState.up,
+        .yaw = navState.yaw,
+        .pitch = navState.pitch
+    };
     camera = std::move(c);
 }
 
@@ -755,13 +759,10 @@ std::string Profile::serialize() const {
 Profile::Profile(const std::filesystem::path& path) {
     ghoul_assert(std::filesystem::is_regular_file(path), "Path must exist");
 
-    std::ifstream inFile;
-    try {
-        inFile.open(path, std::ifstream::in);
-    }
-    catch (const std::ifstream::failure& e) {
+    std::ifstream inFile = std::ifstream(path, std::ifstream::in);
+    if (!inFile.is_open()) {
         throw ghoul::RuntimeError(std::format(
-            "Exception opening profile file for read '{}': {}", path, e.what()
+            "Exception opening profile file for read '{}'", path
         ));
     }
 

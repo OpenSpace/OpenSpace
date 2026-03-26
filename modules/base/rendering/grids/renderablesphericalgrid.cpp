@@ -55,7 +55,7 @@ namespace {
         "resolution of the rendered sphere in a left/right direction when looking "
         "straight at the equator. Should be an even value (if an odd value is provided, "
         "the value will be set to the new value minus one). If the `Segments` value is "
-        "provided as well, it will have precedence over this value",
+        "provided as well, it will have precedence over this value.",
         Property::Visibility::User
     };
 
@@ -66,7 +66,7 @@ namespace {
         "resolution of the rendered sphere in a up/down direction when looking "
         "straight at the equator. Should be an even value (if an odd value is provided, "
         "the value will be set to the new value minus one). If the `Segments` value is "
-        "provided as well, it will have precedence over this value",
+        "provided as well, it will have precedence over this value.",
         Property::Visibility::User
     };
 
@@ -85,7 +85,7 @@ namespace {
 
     // This `Renderable` creates a grid in the shape of a sphere. Note that the sphere
     // will always be given a radius of one meter. To change its size, use a `Scale`
-    // transform, such as the [StaticScale](#base_transform_scale_static).
+    // transform, such as the [StaticScale](#base_scale_static).
     //
     // The grid may be split up into equal segments in both directions using the
     // `Segments` parameter, or different number of segments in the latitudal and
@@ -100,12 +100,12 @@ namespace {
         // [[codegen::verbatim(LatSegmentsInfo.description)]]
         std::optional<int> latSegments;
 
-        // The number of segments the sphere is split into. Determines the resolution
-        // of the rendered sphere. Should be an even value (if an odd value is provided,
-        // the value will be set to the new value minus one). Setting this value is equal
-        // to setting `LongSegments` and `LatSegments` to the same value. If this value is
+        // The number of segments the sphere is split into. Determines the resolution of
+        // the rendered sphere. Should be an even value (if an odd value is provided, the
+        // value will be set to the new value minus one). Setting this value is equal to
+        // setting `LongSegments` and `LatSegments` to the same value. If this value is
         // specified, it will overwrite the values provided in `LongSegments` and
-        //`LatSegments`.
+        // `LatSegments`.
         std::optional<int> segments;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
@@ -113,7 +113,7 @@ namespace {
 
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("labelscomponent")]];
+            [[codegen::reference("core_labelscomponent")]];
     };
 } // namespace
 #include "renderablesphericalgrid_codegen.cpp"
@@ -163,7 +163,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
         _labels = std::make_unique<LabelsComponent>(*p.labels);
         _hasLabels = true;
         addPropertySubOwner(_labels.get());
-        // Fading of the labels should also depend on the fading of the renderable
+        // Fading of the labels should also depend on the fading of the Renderable
         _labels->setParentFadeable(this);
     }
 }
@@ -220,7 +220,6 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
-    // Change GL state:
     glLineWidth(_lineWidth);
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -248,7 +247,6 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&) {
 
     _gridProgram->deactivate();
 
-    // Restore GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
     global::renderEngine->openglStateCache().resetDepthState();
@@ -278,7 +276,6 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&) {
         _labels->render(data, modelViewProjectionTransform, orthoRight, orthoUp);
     }
 
-    // Reset
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
     global::renderEngine->openglStateCache().resetDepthState();
@@ -301,12 +298,12 @@ void RenderableSphericalGrid::update(const UpdateData&) {
     vert.reserve(vertSize);
     for (int lat = 0; lat < _latSegments; lat++) {
         for (int lng = 0; lng < _longSegments; lng++) {
-            // inclination angle (north to south)
+            // Inclination angle (north to south)
             const float theta =
                 static_cast<float>(lat) / static_cast<float>(_latSegments - 1) *
                 glm::pi<float>(); // 0 -> PI
 
-            // azimuth angle (east to west)
+            // Azimuth angle (east to west)
             // Dividing by one segment more as the points for 0 and 2*pi are identical
             const float phi =
                 static_cast<float>(lng) / static_cast<float>(_longSegments) *

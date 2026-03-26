@@ -110,7 +110,7 @@ private:
     IVec2Property _textMinMaxSize;
     FloatProperty _lineWidth;
 
-    // DEBUG:
+    // Debug
     OptionProperty _renderOption;
 
     ghoul::opengl::ProgramObject* _program = nullptr;

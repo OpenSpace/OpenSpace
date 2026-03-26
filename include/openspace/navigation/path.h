@@ -70,9 +70,9 @@ public:
     double remainingDistance() const;
 
     /**
-     * Estimate a value for the remaining time to reach the target, based on the
-     * currently progressed time and the estimation for how long the path will
-     * take to traverse. Note that the computation is not exact.
+     * Estimate a value for the remaining time to reach the target, based on the currently
+     * progressed time and the estimation for how long the path will take to traverse.
+     * Note that the computation is not exact.
      *
      * \param speedScale The speed scale factor that may affect how fast the camera moves
      * \return The estimated remaining time
@@ -93,8 +93,8 @@ public:
     CameraPose traversePath(double dt, float speedScale = 1.f);
 
     /**
-     * Function that can be used to permaturely quit a path, for example when skipping
-     * to the end.
+     * Function that can be used to permaturely quit a path, for example when skipping to
+     * the end.
      */
     void quitPath();
 
@@ -111,11 +111,12 @@ public:
     bool hasReachedEnd() const;
 
     /**
-     * Compute the interpolated camera pose at a certain distance along a *linear*
-     * path. Note that the linear path is a special case, to avoid risks of precision
-     * problems for long paths.
+     * Compute the interpolated camera pose at a certain distance along a *linear* path.
+     * Note that the linear path is a special case, to avoid risks of precision problems
+     * for long paths.
      */
-    CameraPose linearInterpolatedPose(double distance, double displacement);
+    CameraPose linearInterpolatedPose(double distance, double displacement,
+        double speedScale);
 
     /**
      * Compute the interpolated camera pose at a certain distance along the path.
@@ -148,18 +149,6 @@ private:
      *        relative traveled distance, in [0, 1]
      */
     glm::dquat easedSlerpRotation(double t) const;
-
-    /**
-     * Compute the interpolated rotation quaternion using a method that is customized for
-     * linear paths. The camera will first interpoalte to look at the targetted node, and
-     * keep doing so for most of the path. At the end, when within a certain distance from
-     * the target, the rotation is interpolated so that the camera ends up in the target
-     * pose at the end of the path.
-     *
-     * \param t The interpolation variable for the rotatation interpolation. Should be the
-     *        relative traveled distance, in [0, 1]
-     */
-    glm::dquat linearPathRotation(double t) const;
 
     /**
      * Compute the interpolated rotation quaternion using an approach that first
@@ -197,8 +186,8 @@ private:
 };
 
 /**
- * Create a path based on an instruction given as a dictionary (see top of cpp file
- * for documentation on keys and values for the dictionary). If \p forceType is specified,
+ * Create a path based on an instruction given as a dictionary (see top of cpp file for
+ * documentation on keys and values for the dictionary). If \p forceType is specified,
  * that type will primarily be used as the type for the created path. Secondly, the type
  * will be read from the dictionary, and lastly it will use the default from
  * PathNavigator.

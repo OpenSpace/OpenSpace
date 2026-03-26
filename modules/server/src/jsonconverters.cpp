@@ -136,7 +136,7 @@ void to_json(json& j, const Action& action) {
 
     // Add the color if we have it
     if (action.color.has_value()) {
-        // Convert to std as nlohmann doesn't understand glm
+        // Convert to std as nlohmann doesn't understand GLM
         glm::vec4 color = action.color.value();
         j["color"] = { color.r, color.g, color.b, color.a };
     }

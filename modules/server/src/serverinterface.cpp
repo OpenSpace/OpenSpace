@@ -152,27 +152,15 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _socketType.addOption(
-        static_cast<int>(InterfaceType::TcpSocket),
-        "TcpSocket"
-    );
-    _socketType.addOption(
-        static_cast<int>(InterfaceType::WebSocket),
-        "WebSocket"
-    );
+    _socketType.addOption(static_cast<int>(InterfaceType::TcpSocket), "TcpSocket");
+    _socketType.addOption(static_cast<int>(InterfaceType::WebSocket), "WebSocket");
 
-    _defaultAccess.addOption(
-        static_cast<int>(Access::Deny),
-        "Deny"
-    );
+    _defaultAccess.addOption(static_cast<int>(Access::Deny), "Deny");
     _defaultAccess.addOption(
         static_cast<int>(Access::RequirePassword),
         "RequirePassword"
     );
-    _defaultAccess.addOption(
-        static_cast<int>(Access::Allow),
-        "Allow"
-    );
+    _defaultAccess.addOption(static_cast<int>(Access::Allow), "Allow");
 
     if (p.defaultAccess.has_value()) {
         switch (*p.defaultAccess) {
@@ -268,7 +256,7 @@ std::string ServerInterface::password() const {
 }
 
 bool ServerInterface::clientHasAccessWithoutPassword(
-    const std::string& clientAddress) const
+                                                   const std::string& clientAddress) const
 {
     for (const std::string& address : _allowAddresses.value()) {
         if (clientAddress == address) {

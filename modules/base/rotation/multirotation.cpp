@@ -35,9 +35,8 @@ namespace {
     // after the other. The rotations are applied in the order in which they are specified
     // in the `Rotations` key.
     struct [[codegen::Dictionary(MultiRotation)]] Parameters {
-        // The list of rotations that are applied one after the other
-        std::vector<ghoul::Dictionary> rotations
-            [[codegen::reference("core_transform_rotation")]];
+        // The list of rotations that are applied one after the other.
+        std::vector<ghoul::Dictionary> rotations [[codegen::reference("core_rotation")]];
     };
 } // namespace
 #include "multirotation_codegen.cpp"
@@ -45,7 +44,7 @@ namespace {
 namespace openspace {
 
 Documentation MultiRotation::Documentation() {
-    return codegen::doc<Parameters>("base_transform_rotation_multi");
+    return codegen::doc<Parameters>("base_rotation_multi");
 }
 
 MultiRotation::MultiRotation(const ghoul::Dictionary& dictionary)

@@ -71,7 +71,7 @@ namespace {
 namespace openspace {
 
 Documentation HorizonsTranslation::Documentation() {
-    return codegen::doc<Parameters>("base_transform_translation_horizons");
+    return codegen::doc<Parameters>("space_translation_horizons");
 }
 
 HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
@@ -115,7 +115,7 @@ glm::dvec3 HorizonsTranslation::position(const UpdateData& data) const {
         _timeline.firstKeyframeAfter(data.time.j2000Seconds(), false);
 
     if (lastBefore && firstAfter) {
-        // We're inbetween first and last value.
+        // We're inbetween first and last value
         const double timelineDiff = firstAfter->timestamp - lastBefore->timestamp;
         const double timeDiff = data.time.j2000Seconds() - lastBefore->timestamp;
         const double diff = (timelineDiff > DBL_EPSILON) ? timeDiff / timelineDiff : 0.0;
@@ -124,11 +124,11 @@ glm::dvec3 HorizonsTranslation::position(const UpdateData& data) const {
         interpolatedPos = lastBefore->data + dir * diff;
     }
     else if (lastBefore) {
-        // Requesting a time after last value. Return last known position.
+        // Requesting a time after last value. Return last known position
         interpolatedPos = lastBefore->data;
     }
     else if (firstAfter) {
-        // Requesting a time before first value. Return last known position.
+        // Requesting a time before first value. Return last known position
         interpolatedPos = firstAfter->data;
     }
 
@@ -284,9 +284,8 @@ void HorizonsTranslation::saveCachedFile(const std::filesystem::path& file) cons
         cachKeyframes.push_back(cacheKeyframe);
     }
 
-    // Write of entire vector will only work if the data is plain old data type,
-    // is_pod is depricated in C++20 and replaced with both is_trivial and
-    // is_standard_layout
+    // Write of entire vector will only work if the data is plain old data type, is_pod is
+    // deprecated in C++20 and replaced with both is_trivial and is_standard_layout
     static_assert(std::is_trivial_v<CacheKeyframe>);
     static_assert(std::is_standard_layout_v<CacheKeyframe>);
 

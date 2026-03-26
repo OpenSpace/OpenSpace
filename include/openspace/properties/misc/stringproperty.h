@@ -31,7 +31,7 @@ namespace openspace {
 
 class StringProperty : public TemplateProperty<std::string> {
 public:
-    explicit StringProperty(Property::PropertyInfo info, std::string value = "");
+    explicit StringProperty(PropertyInfo info, std::string value = "");
 
     std::string_view className() const override final;
     ghoul::lua::LuaTypes typeLua() const override final;

@@ -104,10 +104,10 @@ namespace {
     constexpr Property::PropertyInfo OffsetDistanceInfo = {
         "Offset",
         "Offset distance",
-        "The distance from the center of the start node where the arrow starts. "
-        "If 'UseRelativeOffset' is true, the value should be given as a factor to "
-        "multiply with the bounding sphere of the node. Otherwise, the value is "
-        "specified in meters.",
+        "The distance from the center of the start node where the arrow starts. If "
+        "'UseRelativeOffset' is true, the value should be given as a factor to multiply "
+        "with the bounding sphere of the node. Otherwise, the value is specified in "
+        "meters.",
         Property::Visibility::AdvancedUser
     };
 
@@ -123,9 +123,8 @@ namespace {
     constexpr Property::PropertyInfo LengthInfo = {
         "Length",
         "Length",
-        "The length of the arrow, given either in meters or as a factor to be "
-        "multiplied with the bounding sphere of the start node (if "
-        "'UseRelativeLength' is true).",
+        "The length of the arrow, given either in meters or as a factor to be multiplied "
+        "with the bounding sphere of the start node (if 'UseRelativeLength' is true).",
         Property::Visibility::AdvancedUser
     };
 
@@ -133,8 +132,8 @@ namespace {
         "UseRelativeLength",
         "Use relative length",
         "Decides whether to use relative size for the length of the arrow. This means "
-        "that the arrow length will be computed as the provided 'Length' value times "
-        "the bounding sphere of the start node. If false, meters is used.",
+        "that the arrow length will be computed as the provided 'Length' value times the "
+        "bounding sphere of the start node. If false, meters is used.",
         Property::Visibility::AdvancedUser
     };
 
@@ -174,8 +173,7 @@ namespace {
     };
 
     void updateDistanceBasedOnRelativeValues(const std::string& nodeName,
-                                             bool useRelative,
-                                             FloatProperty& prop)
+                                             bool useRelative, FloatProperty& prop)
     {
         using namespace::openspace;
 
@@ -209,11 +207,11 @@ namespace {
     // A RenderableNodeArrow can be used to create a 3D arrow pointing in the direction
     // of one scene graph node to another.
     //
-    // The arrow will be placed at the `StartNode` at a distance of the provided
-    // `Offset` value. Per default, the `Length` and `Offset` of the arrow is specified
-    // in meters, but they may also be specified as a multiplier of the bounding sphere
-    // of the `StartNode`. The look of the arrow can be customized to change the width
-    // and length of both the arrow body and head.
+    // The arrow will be placed at the `StartNode` at a distance of the provided `Offset`
+    // value. Per default, the `Length` and `Offset` of the arrow is specified in meters,
+    // but they may also be specified as a multiplier of the bounding sphere of the
+    // `StartNode`. The look of the arrow can be customized to change the width and length
+    // of both the arrow body and head.
     struct [[codegen::Dictionary(RenderableNodeArrow)]] Parameters {
         // [[codegen::verbatim(StartNodeInfo.description)]]
         std::string startNode [[codegen::identifier()]];
@@ -269,7 +267,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableNodeArrow::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_renderablenodearrow");
+    return codegen::doc<Parameters>("base_renderable_nodearrow");
 }
 
 RenderableNodeArrow::Shading::Shading()
@@ -492,11 +490,9 @@ void RenderableNodeArrow::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform("specularIntensity", _shading.specularIntensity);
     _shaderProgram->setUniform("performShading", _shading.enabled);
 
-    // Change GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
 
-    // Draw cylinder
     glBindVertexArray(rendering::vertexObjects.cylinder.vao);
     glDrawElements(
         GL_TRIANGLES,
