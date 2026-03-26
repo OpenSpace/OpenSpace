@@ -43,13 +43,7 @@ class SceneGraphNode;
 
 class DirectManipulation : public PropertyOwner {
 public:
-    struct VelocityStates {
-        glm::dvec2 orbit = glm::dvec2(0.0);
-        double zoom = 0.0;
-        double roll = 0.0;
-        glm::dvec2 pan = glm::dvec2(0.0);
-    };
-
+    using VelocityStates = DirectInputSolver::Result;
     using TouchPoint = DirectInputSolver::TouchPoint;
 
     DirectManipulation();

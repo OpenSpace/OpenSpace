@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_CORE___DIRECTINPUT_SOLVER___H__
 #define __OPENSPACE_CORE___DIRECTINPUT_SOLVER___H__
 
-#include <openspace/util/touch.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/levmarqsolver.h>
+#include <optional>
 #include <vector>
 
 namespace openspace {
@@ -37,10 +37,22 @@ class SceneGraphNode;
 
 /**
  * The DirectInputSolver is used to minimize the L2 error of touch input to 3D camera
- * position. It uses the levmarq algorithm in order to do this.
+ * position. It uses the levmarq (Levenberg–Marquardt) algorithm in order to do this.
  */
 class DirectInputSolver {
 public:
+    /**
+     * Result of the optimization process, containing the computed camera manipulation
+     * parameters. These values represent the transformations needed to align the camera
+     * with the touch input.
+     */
+    struct Result {
+        glm::dvec2 orbit = glm::dvec2(0.0);
+        double zoom = 0.0;
+        double roll = 0.0;
+        glm::dvec2 pan = glm::dvec2(0.0);
+    };
+
     /**
      * Stores the selected node, the cursor ID as well as the surface coordinates the
      * cursor touched.
@@ -56,24 +68,20 @@ public:
      */
     struct TouchPoint {
         size_t id = 0;
-        glm::dvec2 position; // normalized screenspace
+        glm::dvec2 position = glm::dvec2(0.0);
     };
 
     DirectInputSolver();
 
     /**
-     * Returns true if the error could be minimized within certain bounds. If the error is
-     * found to be outside the bounds after a certain amount of iterations, this function
-     * fails.
+     * Returns a result if the error could be minimized within certain bounds. If the
+     * error is found to be outside the bounds after a certain amount of iterations,
+     * this function fails and returns `std::nullopt`.
      */
-    bool solve(const std::vector<TouchPoint>& touchPoints,
-        const std::vector<SelectedBody>& selectedBodies,
-        std::vector<double>* calculatedValues, const Camera& camera);
-
-    int nDof() const;
+    std::optional<Result> solve(const std::vector<TouchPoint>& touchPoints,
+        const std::vector<SelectedBody>& selectedBodies, const Camera& camera);
 
 private:
-    int _nDof = 0;
     ghoul::LMstat _lmstat;
 };
 

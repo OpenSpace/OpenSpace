@@ -210,32 +210,19 @@ void DirectManipulation::applyDirectControl(const std::vector<TouchPoint>& touch
         return;
     }
 
-    // Find best transform values for the new camera state and store them in param
-    std::vector<double> param(6, 0.0);
-    bool lmSuccess = _directInputSolver.solve(
+    // Find best transform values for the new camera state
+    std::optional<DirectInputSolver::Result> result = _directInputSolver.solve(
         touchPoints,
         _selectedNodeSurfacePoints,
-        &param,
         *camera
     );
 
-    if (!lmSuccess) {
+    if (!result.has_value()) {
         return;
     }
 
-    int nDof = _directInputSolver.nDof();
-    VelocityStates velocities;
-
     // If good values were found set new camera state
-    velocities.orbit = glm::dvec2(param[0], param[1]);
-    if (nDof > 2) {
-        velocities.zoom = param[2];
-        velocities.roll = param[3];
-        if (nDof > 4) {
-            velocities.roll = 0.0;
-            velocities.pan = glm::dvec2(param[4], param[5]);
-        }
-    }
+    VelocityStates velocities = *result;
 
     CameraPose pose = cameraPoseFromVelocities(velocities, camera, anchor);
 

@@ -50,16 +50,18 @@ namespace {
     };
 
     /**
-     * Project back a 3D point in model view to clip space[-1, 1] coordinates on the view
+     * Project back a 3D point in model view to clip space [-1, 1] coordinates on the view
      * plane.
      */
-    glm::dvec2 castToNDC(const glm::dvec3& vec, Camera& camera, const SceneGraphNode* node) {
+    glm::dvec2 castToNormalizedDeviceCoordinates(const glm::dvec3& pos, Camera& camera,
+                                                 const SceneGraphNode* node)
+    {
         glm::dvec3 posInCamSpace = glm::inverse(camera.rotationQuaternion()) *
-            (node->worldRotationMatrix() * vec +
+            (node->worldRotationMatrix() * pos +
                 (node->worldPosition() - camera.position()));
 
         glm::dvec4 clipspace = camera.projectionMatrix() * glm::dvec4(posInCamSpace, 1.0);
-        return (glm::dvec2(clipspace) / clipspace.w);
+        return glm::dvec2(clipspace) / clipspace.w;
     }
 
     /**
@@ -76,7 +78,7 @@ namespace {
             q[i] = par[i];
         }
 
-        DirectManipulation::VelocityStates velocities = {
+        DirectInputSolver::Result velocities = {
             .orbit = glm::dvec2(q[0], q[1]),
             .zoom = q[2],
             .roll = q[3],
@@ -92,14 +94,14 @@ namespace {
         );
 
         // Update the camera state (for a local copy of the camera)
-        Camera cam = *ptr->camera;
-        cam.setPose(pose);
+        Camera camera = *ptr->camera;
+        camera.setPose(pose);
 
         // We now have a new position and orientation of camera, project surfacePoint to
         // the new screen to get distance to minimize
-        glm::dvec2 newScreenPoint = castToNDC(
+        glm::dvec2 newScreenPoint = castToNormalizedDeviceCoordinates(
             ptr->selectedPoints.at(x),
-            cam,
+            camera,
             ptr->node
         );
         lmstat->pos.push_back(newScreenPoint);
@@ -182,9 +184,10 @@ DirectInputSolver::DirectInputSolver() {
     ghoul::initializeLevmarqStats(&_lmstat);
 }
 
-bool DirectInputSolver::solve(const std::vector<TouchPoint>& touchPoints,
-                              const std::vector<SelectedBody>& selectedBodies,
-                              std::vector<double>* parameters, const Camera& camera)
+std::optional<DirectInputSolver::Result> DirectInputSolver::solve(
+                                               const std::vector<TouchPoint>& touchPoints,
+                                          const std::vector<SelectedBody>& selectedBodies,
+                                                                     const Camera& camera)
 {
     ZoneScopedN("Direct touch input solver");
 
@@ -194,7 +197,7 @@ bool DirectInputSolver::solve(const std::vector<TouchPoint>& touchPoints,
     );
 
     int nFingers = std::min(static_cast<int>(touchPoints.size()), 3);
-    _nDof = std::min(nFingers * 2, 6);
+    int nDof = std::min(nFingers * 2, 6);
 
     // Parse input data to be used in the LM algorithm
     std::vector<glm::dvec3> selectedPoints;
@@ -212,29 +215,44 @@ bool DirectInputSolver::solve(const std::vector<TouchPoint>& touchPoints,
     FunctionData fData = {
         .selectedPoints = selectedPoints,
         .screenPoints = screenPoints,
-        .nDOF = _nDof,
+        .nDOF = nDof,
         .camera = &camera,
         .node = selectedBodies.at(0).node,
         .stats = _lmstat
     };
-    void* dataPtr = reinterpret_cast<void*>(&fData);
 
-    bool result = ghoul::levmarq(
-        _nDof,
-        parameters->data(),
+    // Find best transform values for the new camera state and store them in parameters
+    std::vector<double> param(6, 0.0);
+
+    bool lmSuccess = ghoul::levmarq(
+        nDof,
+        param.data(),
         static_cast<int>(screenPoints.size()),
         nullptr,
         distToMinimize,
         gradient,
-        dataPtr,
+        reinterpret_cast<void*>(&fData),
         &_lmstat
     );
 
-    return result;
-}
+    if (!lmSuccess) {
+        return std::nullopt;
+    }
 
-int DirectInputSolver::nDof() const {
-    return _nDof;
+    Result result;
+
+    // If good values were found set new camera state
+    result.orbit = glm::dvec2(param[0], param[1]);
+    if (nDof > 2) {
+        result.zoom = param[2];
+        result.roll = param[3];
+        if (nDof > 4) {
+            result.roll = 0.0;
+            result.pan = glm::dvec2(param[4], param[5]);
+        }
+    }
+
+    return result;
 }
 
 } // namespace openspace
