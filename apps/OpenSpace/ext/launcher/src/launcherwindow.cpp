@@ -38,11 +38,15 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
 #include <sgct/config.h>
+#include <QComboBox>
 #include <QFile>
 #include <QKeyEvent>
+#include <QLabel>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QStandardItemModel>
+#include <QVBoxLayout>
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
@@ -78,16 +82,22 @@ namespace {
         constexpr QRect EditProfileButton(
             LeftRuler, TopRuler + 180, SmallItemWidth, SmallItemHeight
         );
-        constexpr QRect OptionsLabel(LeftRuler + 10, TopRuler + 230, 151, 24);
-        constexpr QRect WindowConfigBox(LeftRuler, TopRuler + 260, ItemWidth, ItemHeight);
+        constexpr QRect AddonBox(
+            LeftRuler + 10,
+            TopRuler + 215,
+            SmallItemWidth,
+            SmallItemHeight
+        );
+        constexpr QRect OptionsLabel(LeftRuler + 10, TopRuler + 255, 151, 24);
+        constexpr QRect WindowConfigBox(LeftRuler, TopRuler + 285, ItemWidth, ItemHeight);
         constexpr QRect NewWindowButton(
-            LeftRuler + 160, TopRuler + 330, SmallItemWidth, SmallItemHeight
+            LeftRuler + 160, TopRuler + 355, SmallItemWidth, SmallItemHeight
         );
         constexpr QRect EditWindowButton(
-            LeftRuler, TopRuler + 330, SmallItemWidth, SmallItemHeight
+            LeftRuler, TopRuler + 355, SmallItemWidth, SmallItemHeight
         );
         constexpr QRect StartButton(
-            LeftRuler, TopRuler + 400, ItemWidth, ItemHeight
+            LeftRuler, TopRuler + 425, ItemWidth, ItemHeight
         );
         constexpr QRect VersionString(
             5, MainScreenHeight - SmallItemHeight, ItemWidth, SmallItemHeight
@@ -203,9 +213,6 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         labelChoose->setObjectName("label_choose");
     }
 
-    // Creating the profile box _after_ the Edit and New buttons as the comboboxes
-    // `selectionChanged` signal will trigger that will try to make changes to the edit
-    // button
     _profileBox = new SplitComboBox(
         centralWidget,
         _userProfilePath,
@@ -229,7 +236,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     _profileBox->setGeometry(geometry::ProfileBox);
     _profileBox->setAccessibleName("Choose profile");
     _profileBox->setEnabled(profileEnabled);
-    _profileBox->populateList(globalConfig.profile);
+    _profileBox->populateList(globalConfig.profile.profile);
     connect(
         _profileBox, &SplitComboBox::selectionChanged,
         this, &LauncherWindow::selectProfile
@@ -238,7 +245,6 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         _profileBox, &SplitComboBox::selectionChanged,
         this, &LauncherWindow::updateStartButton
     );
-
 
     _editProfileButton = new QPushButton("Edit", centralWidget);
     _editProfileButton->setObjectName("small");
@@ -291,6 +297,23 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         );
         menu->addActions({ newEmpty, newFromCurrent });
         newProfileButton->setMenu(menu);
+    }
+
+    _addonBox.combobox = new QComboBox(centralWidget);
+    _addonBox.combobox->setObjectName("addons");
+    _addonBox.combobox->setGeometry(geometry::AddonBox);
+    _addonBox.combobox->setAccessibleName("Select Add-Ons");
+    _addonBox.model = new QStandardItemModel;
+    _addonBox.combobox->setModel(_addonBox.model);
+    updateAddonsBox(globalConfig.profile.profile + ".profile");
+    for (const std::string& addon : globalConfig.profile.addons) {
+        for (int i = 0; i < _addonBox.model->rowCount(); i++) {
+            QStandardItem* item = _addonBox.model->item(i);
+            std::string id = item->data().toString().toStdString();
+            if (id == addon) {
+                item->setData(Qt::Checked, Qt::CheckStateRole);
+            }
+        }
     }
 
 
@@ -456,6 +479,8 @@ void LauncherWindow::selectProfile(std::optional<std::string> selection) {
                 "Cannot edit the selected profile as it is one of the built-in profiles"
             );
         }
+
+        updateAddonsBox(*selection);
     }
 }
 
@@ -704,13 +729,71 @@ void LauncherWindow::updateStartButton() const {
     _startButton->setEnabled(!profilePath.empty() && !configPath.empty());
 }
 
+void LauncherWindow::updateAddonsBox(const std::string& profile) {
+    _addonBox.model->clear();
+    _addonBox.combobox->setPlaceholderText("Addons");
+
+    // Then recreate the new ones
+    const std::filesystem::path coreCandidate = _profilePath / profile;
+    const std::filesystem::path userCandidate = _userProfilePath / profile;
+
+    ghoul_assert(
+        std::filesystem::exists(coreCandidate) || std::filesystem::exists(userCandidate),
+        "One of the two options must exist"
+    );
+
+    Profile p = Profile(
+        // User path has precedence
+        std::filesystem::exists(userCandidate) ? userCandidate : coreCandidate
+    );
+
+    auto toItem = [](const Addon& addon) {
+        QStandardItem* item = new QStandardItem(QString::fromStdString(addon.name));
+        item->setData(QString::fromStdString(addon.identifier));
+        item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+        item->setData(Qt::Unchecked, Qt::CheckStateRole);
+        return item;
+    };
+
+    const bool hasAddons = !p.addons.custom.empty() || !p.addons.recommended.empty();
+
+    if (hasAddons) {
+        QStandardItem* header = new QStandardItem("Recommended");
+        header->setEnabled(false);
+        _addonBox.model->appendRow(header);
+    }
+    // First the custom
+    for (const Addon& addon : p.addons.custom) {
+        QStandardItem* i = toItem(addon);
+        _addonBox.model->appendRow(i);
+    }
+    // Then the recommended
+    for (const Addon& addon : p.addons.recommended) {
+        QStandardItem* i = toItem(addon);
+        _addonBox.model->appendRow(i);
+    }
+
+    _addonBox.combobox->setEnabled(hasAddons);
+}
+
 bool LauncherWindow::wasLaunchSelected() const {
     return _shouldLaunch;
 }
 
-std::string LauncherWindow::selectedProfile() const {
-    // The user data stores the full path to the profile
-    return std::get<1>(_profileBox->currentSelection());
+std::pair<std::string, std::vector<std::string>> LauncherWindow::selectedProfile() const {
+    const std::string profile = std::get<1>(_profileBox->currentSelection());
+    std::vector<std::string> variants;
+    for (int i = 0; i < _addonBox.model->rowCount(); i++) {
+        QStandardItem* item = _addonBox.model->item(i);
+        const int state = item->data(Qt::CheckStateRole).toInt();
+        const bool checked = state == Qt::Checked;
+        if (checked) {
+            const std::string id = item->data().toString().toStdString();
+            variants.push_back(id);
+        }
+    }
+
+    return std::pair(profile, variants);
 }
 
 std::string LauncherWindow::selectedWindowConfig() const {

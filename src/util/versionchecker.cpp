@@ -59,8 +59,8 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
 
     std::string profile;
     // Remove the .profile extension
-    if (global::configuration->profile.starts_with(builtInProfiles)) {
-        std::filesystem::path path = global::configuration->profile;
+    if (global::configuration->profile.profile.starts_with(builtInProfiles)) {
+        std::filesystem::path path = global::configuration->profile.profile;
         path.replace_extension("");
         profile = path.string().substr(builtInProfiles.size() + 1);
     }

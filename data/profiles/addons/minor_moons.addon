@@ -1,0 +1,12 @@
+{
+  "version": { "major": 1, "minor": 0 },
+  "identifier": "minor_moons",
+  "name": "Minor Moons",
+  "description": "Includes the minor moons of the outer solar system planets Jupiter, Saturn, Uranus, and Neptune.",
+  "assets": [
+    "scene/solarsystem/planets/jupiter/minor_moons",
+    "scene/solarsystem/planets/saturn/minor_moons",
+    "scene/solarsystem/planets/uranus/minor_moons",
+    "scene/solarsystem/planets/neptune/minor_moons"
+  ]
+}

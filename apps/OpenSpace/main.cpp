@@ -1259,6 +1259,15 @@ int main(int argc, char* argv[]) {
         "the profile specified in the `openspace.cfg` and the settings."
     ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        commandlineArguments.profileAddons,
+        "--addons",
+        "-a",
+        "Specifies the add-ons of the profile that should be loaded. The provided "
+        "add-ons must exist on the profile. Multiple add-ons can be specified by "
+        "separating them with a \";\", for example \"--variants abc;def\" specifies the "
+        "add-ons \"abc\" and \"def\"."
+    ));
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
         commandlineArguments.propertyVisibility,
         "--propertyVisibility",
         "",
@@ -1373,7 +1382,11 @@ int main(int argc, char* argv[]) {
                 *commandlineArguments.windowConfig;
         }
         if (commandlineArguments.profile.has_value()) {
-            global::configuration->profile = *commandlineArguments.profile;
+            global::configuration->profile.profile = *commandlineArguments.profile;
+        }
+        if (commandlineArguments.profileAddons.has_value()) {
+            global::configuration->profile.addons =
+                ghoul::tokenizeString(*commandlineArguments.profileAddons, ';');
         }
         if (commandlineArguments.propertyVisibility.has_value()) {
             if (commandlineArguments.propertyVisibility == "NoviceUser") {
@@ -1460,7 +1473,8 @@ int main(int argc, char* argv[]) {
         }
 
         LauncherWindow launcher = LauncherWindow(
-            !commandlineArguments.profile.has_value(),
+            !commandlineArguments.profile.has_value() &&
+                !commandlineArguments.profileAddons.has_value(),
             *global::configuration,
             !commandlineArguments.windowConfig.has_value(),
             std::move(windowCfgPreset)
@@ -1514,7 +1528,9 @@ int main(int argc, char* argv[]) {
             size
         );
 
-        global::configuration->profile = launcher.selectedProfile();
+        auto [profile, addons] = launcher.selectedProfile();
+        global::configuration->profile.profile = profile;
+        global::configuration->profile.addons = addons;
 
         std::string config = windowConfiguration;
         isGeneratedWindowConfig = false;
@@ -1541,7 +1557,7 @@ int main(int argc, char* argv[]) {
     else {
         glfwInit();
     }
-    if (global::configuration->profile.empty()) {
+    if (global::configuration->profile.profile.empty()) {
         LFATAL("Cannot launch without a profile");
         exit(EXIT_FAILURE);
     }
@@ -1550,7 +1566,7 @@ int main(int argc, char* argv[]) {
     {
         Settings settings = loadSettings();
 
-        const std::filesystem::path profile = global::configuration->profile;
+        const std::filesystem::path profile = global::configuration->profile.profile;
 
         const bool isDefaultProfile = ghoul::filesystem::isSubdirectory(
             profile,
@@ -1583,6 +1599,8 @@ int main(int argc, char* argv[]) {
                 "the data/profiles or user/data/profiles folder."
             );
         }
+
+        settings.profileAddons = global::configuration->profile.addons;
 
         settings.configuration =
             isGeneratedWindowConfig ? "" : global::configuration->windowConfiguration;

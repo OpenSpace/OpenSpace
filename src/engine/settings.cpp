@@ -96,6 +96,12 @@ namespace version1 {
             }
         }
 
+        std::optional<std::vector<std::string>> addons =
+            get_to<std::vector<std::string>>(json, "profile-addons");
+        if (addons.has_value()) {
+            settings.profileAddons = *addons;
+        }
+
         return settings;
     }
 } // namespace version1
@@ -154,6 +160,9 @@ void saveSettings(const Settings& settings, const std::filesystem::path& filenam
     }
     if (settings.profile.has_value()) {
         json["profile"] = *settings.profile;
+    }
+    if (settings.profileAddons.has_value()) {
+        json["profile-addons"] = *settings.profileAddons;
     }
     if (settings.rememberLastProfile.has_value()) {
         json["profile-remember"] = *settings.rememberLastProfile;

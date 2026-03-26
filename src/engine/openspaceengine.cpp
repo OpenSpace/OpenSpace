@@ -321,7 +321,9 @@ void OpenSpaceEngine::initialize() {
 
     std::filesystem::path cacheFolder = absPath("${CACHE}");
     if (global::configuration->usePerProfileCache) {
-        cacheFolder = std::format("{}-{}", cacheFolder, global::configuration->profile);
+        cacheFolder = std::format(
+            "{}-{}", cacheFolder, global::configuration->profile.profile
+        );
 
         LINFO(std::format("Old cache: {}", absPath("${CACHE}")));
         LINFO(std::format("New cache: {}", cacheFolder));
@@ -461,12 +463,12 @@ void OpenSpaceEngine::initialize() {
 
     // Process profile file
     std::filesystem::path profile;
-    if (!std::filesystem::is_regular_file(global::configuration->profile)) {
+    if (!std::filesystem::is_regular_file(global::configuration->profile.profile)) {
         const std::filesystem::path userCandidate = absPath(std::format(
-            "${{USER_PROFILES}}/{}.profile", global::configuration->profile
+            "${{USER_PROFILES}}/{}.profile", global::configuration->profile.profile
         ));
         const std::filesystem::path profileCandidate = absPath(std::format(
-            "${{PROFILES}}/{}.profile", global::configuration->profile
+            "${{PROFILES}}/{}.profile", global::configuration->profile.profile
         ));
 
         // Give the user profile priority if there are both
@@ -479,17 +481,50 @@ void OpenSpaceEngine::initialize() {
         else {
             throw ghoul::RuntimeError(std::format(
                 "Could not load profile '{}': File does not exist",
-                global::configuration->profile
+                global::configuration->profile.profile
             ));
         }
     }
     else {
-        profile = global::configuration->profile;
+        profile = global::configuration->profile.profile;
     }
 
     // Load the profile
     LINFO(std::format("Loading profile '{}'", profile));
     *global::profile = Profile(profile);
+
+    // Enable the add-ons
+    for (const std::string& addon : global::configuration->profile.addons) {
+        auto findIdentifier = [&addon](const Addon& a) {
+            return a.identifier == addon;
+        };
+
+        auto iRecommended = std::find_if(
+            global::profile->addons.recommended.begin(),
+            global::profile->addons.recommended.end(),
+            findIdentifier
+        );
+        if (iRecommended != global::profile->addons.recommended.end()) {
+            iRecommended->isEnabled = true;
+        }
+
+        auto iCustom = std::find_if(
+            global::profile->addons.custom.begin(),
+            global::profile->addons.custom.end(),
+            findIdentifier
+        );
+        if (iCustom != global::profile->addons.custom.end()) {
+            iCustom->isEnabled = true;
+        }
+
+        if (iRecommended == global::profile->addons.recommended.end() &&
+            iCustom == global::profile->addons.custom.end())
+        {
+            LWARNING(std::format("Could find requested variant '{}'", addon));
+            continue;
+        }
+    }
+
 
     // Set up asset loader
     _assetManager = std::make_unique<AssetManager>(
@@ -840,8 +875,29 @@ void OpenSpaceEngine::loadAssets() {
         );
     }
 
+    // Load all of the assets specified in the profile
     for (const std::string& a : global::profile->assets) {
         _assetManager->add(a);
+    }
+
+    // Load all assets in enabled add-ons
+    for (const Addon& addon : global::profile->addons.custom) {
+        if (!addon.isEnabled) {
+            continue;
+        }
+
+        for (const std::string& a : addon.assets) {
+            _assetManager->add(a);
+        }
+    }
+    for (const Addon& addon : global::profile->addons.recommended) {
+        if (!addon.isEnabled) {
+            continue;
+        }
+
+        for (const std::string& a : addon.assets) {
+            _assetManager->add(a);
+        }
     }
 
     _loadingScreen->exec(*_assetManager, *_scene);

@@ -61,6 +61,18 @@ LauncherWindow  QComboBox#config:disabled {
   color: rgb(225, 225, 225);
 }
 
+LauncherWindow  QComboBox#addons {
+  background: rgb(96, 96, 96);
+  border: 1px solid rgb(225, 225, 225);
+  border-radius: 2px;
+  padding: 1px 18px 1px 3px;
+  min-width: 14em;
+  font-size: 10pt;
+  font-family: Segoe UI;
+  font-weight: bold;
+  color: white;
+}
+
 LauncherWindow  QMenu#newprofile {
   background: rgb(60, 60, 60);
   min-width: 8em;
