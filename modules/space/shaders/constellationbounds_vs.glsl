@@ -43,5 +43,5 @@ void main() {
   // confusing
   vec4 position = pscTransform(pos, modelTransform);
   out_data.position = pos;
-  gl_Position =  z_normalization(viewProjection * position);
+  gl_Position = z_normalization(viewProjection * position);
 }
