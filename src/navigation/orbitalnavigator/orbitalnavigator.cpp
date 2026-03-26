@@ -28,8 +28,6 @@
 #include <openspace/camera/camerapose.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/mouseinputstate.h>
-#include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -42,8 +40,6 @@
 #include <openspace/events/eventengine.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/misc/easing.h>
-#include <ghoul/misc/exception.h>
 #include <glm/gtx/vector_angle.hpp>
 #include <algorithm>
 #include <cstdlib>

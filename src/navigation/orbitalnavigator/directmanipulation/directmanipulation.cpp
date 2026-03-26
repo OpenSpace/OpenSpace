@@ -33,24 +33,18 @@
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/query/query.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <glm/gtx/intersect.hpp>
 #include <algorithm>
-#include <cmath>
-#include <cstdlib>
-#include <numeric>
+#include <format>
 #include <utility>
 
 #ifdef WIN32
 #pragma warning (push)
 #pragma warning (disable : 4310) // cast truncates constant value
 #endif // WIN32
-
-#include <glm/gtx/intersect.hpp>
 
 #ifdef WIN32
 #pragma warning (pop)
