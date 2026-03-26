@@ -38,8 +38,21 @@ class TouchInputState {
 public:
     void initialize();
 
-    bool touchDetectedCallback(TouchInput input);
-    bool touchUpdatedCallback(TouchInput input);
+    /**
+     * Callback for new touch detection. Use when a touch is first detected (touch down).
+     * For touch movement, use `touchUpdatedCallback` instead.
+     */
+    void touchDetectedCallback(TouchInput input);
+
+    /**
+     * Callback for touch movement or updates. Use when a touch point moves or changes.
+     * For initial touch detection, use `touchDetectedCallback` instead.
+     */
+    void touchUpdatedCallback(TouchInput input);
+
+    /**
+     * Callback for touch end or removal. Use when a touch point is lifted or removed.
+     */
     void touchExitCallback(TouchInput input);
 
     bool touchHappened() const;
@@ -59,7 +72,6 @@ public:
     void updateLastTouchPoints();
 
 private:
-    void addTouchInput(TouchInput input);
     void updateOrAddTouchInput(TouchInput input);
     void removeTouchInput(TouchInput input);
 

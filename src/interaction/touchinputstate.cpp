@@ -32,14 +32,13 @@ void TouchInputState::initialize() {
     );
 }
 
-bool TouchInputState::touchDetectedCallback(TouchInput i) {
-    addTouchInput(std::move(i));
-    return true;
+void TouchInputState::touchDetectedCallback(TouchInput i) {
+    // We know this is a completely new input, so just add it immediately
+    _touchPoints.emplace_back(i);
 }
 
-bool TouchInputState::touchUpdatedCallback(TouchInput i) {
+void TouchInputState::touchUpdatedCallback(TouchInput i) {
     updateOrAddTouchInput(std::move(i));
-    return true;
 }
 
 void TouchInputState::touchExitCallback(TouchInput i) {
@@ -121,10 +120,6 @@ void TouchInputState::updateLastTouchPoints() {
     for (const TouchInputHolder& points : _touchPoints) {
         _lastTouchInputs.emplace_back(points.latestInput());
     }
-}
-
-void TouchInputState::addTouchInput(TouchInput input) {
-    _touchPoints.emplace_back(input);
 }
 
 void TouchInputState::updateOrAddTouchInput(TouchInput input) {
