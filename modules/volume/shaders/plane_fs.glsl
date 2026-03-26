@@ -30,6 +30,7 @@ out vec4 outColor;
 uniform sampler3D volumeTexture;
 uniform sampler1D transferFunction;
 uniform vec3 volumeResolution;
+uniform vec2 valueRange;
 
 Fragment getFragment() {
     // Discard fragments that lie outside the volume bounds
@@ -44,6 +45,9 @@ Fragment getFragment() {
 
     Fragment frag;
     vec4 value = texture(volumeTexture, coords);
+    float minVal = valueRange.x;
+    float maxVal = valueRange.y;
+    value.r = (value.r - minVal) / (maxVal - minVal);
     frag.color = texture(transferFunction, value.r);
 
     vec4 position = positionCameraSpace;
