@@ -84,6 +84,8 @@ public:
     void loadImages(const std::string& root, const std::filesystem::path& directory);
     int nLoadedImages() const;
 
+    int topicUpdateInterval() const;
+
     LuaLibrary luaLibrary() const override;
     std::vector<openspace::Documentation> documentations() const override;
     static openspace::Documentation Documentation();
@@ -111,6 +113,7 @@ private:
     /// Currently selected browser
     std::string _selectedBrowser;
     int _uniqueIdentifierCounter = 0;
+    int _topicUpdateInterval = 100;
 
     // Flags
     bool _isCameraInSolarSystem = true;

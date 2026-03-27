@@ -22,70 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/factorymanager.h>
+#ifndef __OPENSPACE_CORE___FLIGHTCONTROLLER_TOPIC___H__
+#define __OPENSPACE_CORE___FLIGHTCONTROLLER_TOPIC___H__
 
-#include <openspace/rendering/dashboarditem.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scene/lightsource.h>
-#include <openspace/scene/rotation.h>
-#include <openspace/scene/scale.h>
-#include <openspace/scene/timeframe.h>
-#include <openspace/scene/translation.h>
 #include <openspace/topic/topics/topic.h>
-#include <openspace/util/resourcesynchronization.h>
-#include <openspace/util/task.h>
-#include <ghoul/misc/assert.h>
-#include <utility>
+
+#include <openspace/interaction/websocketinputstate.h>
 
 namespace openspace {
 
-FactoryManager* FactoryManager::_manager = nullptr;
+class FlightControllerTopic : public Topic {
+public:
+    FlightControllerTopic();
+    ~FlightControllerTopic() override;
 
-FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
-    : ghoul::RuntimeError("Could not find TemplateFactory for type '" + t + "'")
-    , type(std::move(t))
-{
-    ghoul_assert(!type.empty(), "Type must not be empty");
-}
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 
-FactoryManager::FactoryManager() {}
+    void engageAutopilot(const nlohmann::json &json);
+    void disengageAutopilot() const;
+    void handleAutopilot(const nlohmann::json &json);
 
-void FactoryManager::initialize() {
-    ghoul_assert(!_manager, "Factory Manager must not have been initialized");
+private:
+    void connect();
+    void disconnect();
+    void processInputState(const nlohmann::json& json);
+    void setFocusNodes();
+    void updateView(const nlohmann::json& json) const;
+    void changeFocus(const nlohmann::json& json) const;
+    void setRenderableEnabled(const nlohmann::json& json) const;
+    void processLua(const nlohmann::json& json);
+    void setFriction(const nlohmann::json& json) const;
+    void setFriction(bool roll, bool rotation, bool zoom) const;
+    void setFriction(bool all) const;
 
-    _manager = new FactoryManager;
-    _manager->addFactory<DashboardItem>("DashboardItem");
-    _manager->addFactory<LightSource>("LightSource");
-    _manager->addFactory<Renderable>("Renderable");
-    _manager->addFactory<ResourceSynchronization>("ResourceSynchronization");
-    _manager->addFactory<Rotation>("Rotation");
-    _manager->addFactory<Scale>("Scale");
-    _manager->addFactory<ScreenSpaceRenderable>("ScreenSpaceRenderable");
-    _manager->addFactory<Task>("Task");
-    _manager->addFactory<TimeFrame>("TimeFrame");
-    _manager->addFactory<Translation>("Translation");
-    _manager->addFactory<Topic>("Topic");
-}
+    bool _isDone = false;
+    bool _autopilotEngaged = false;
+    nlohmann::json _payload;
+    nlohmann::json _focusNodes;
+    nlohmann::json _allNodes;
+    nlohmann::json _interestingTimes;
 
-void FactoryManager::deinitialize() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-
-    delete _manager;
-    _manager = nullptr;
-}
-
-bool FactoryManager::isInitialized() {
-    return _manager != nullptr;
-}
-
-FactoryManager& FactoryManager::ref() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-    return *_manager;
-}
-
-const std::vector<FactoryManager::FactoryInfo>& FactoryManager::factories() const {
-    return _factories;
-}
+    WebsocketInputStates _inputStates;
+    WebsocketInputState _inputState;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_CORE___FLIGHTCONTROLLER_TOPIC___H__

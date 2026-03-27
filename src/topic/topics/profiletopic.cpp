@@ -22,70 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/factorymanager.h>
+#include <openspace/topic/topics/profiletopic.h>
 
-#include <openspace/rendering/dashboarditem.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scene/lightsource.h>
-#include <openspace/scene/rotation.h>
-#include <openspace/scene/scale.h>
-#include <openspace/scene/timeframe.h>
-#include <openspace/scene/translation.h>
-#include <openspace/topic/topics/topic.h>
-#include <openspace/util/resourcesynchronization.h>
-#include <openspace/util/task.h>
-#include <ghoul/misc/assert.h>
-#include <utility>
+#include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/settings.h>
+#include <openspace/scene/profile.h>
+#include <openspace/topic/connection.h>
+#include <openspace/topic/jsonconverters.h>
 
 namespace openspace {
 
-FactoryManager* FactoryManager::_manager = nullptr;
+void ProfileTopic::handleJson(const nlohmann::json&) {
+    // @TODO (2025-04-30, emmbr) If we expose the json converters from profile.cpp, we
+    // could use those here instead and minimize the risk of getting the serialization of
+    // the data out of sync
+    nlohmann::json data = {
+        { "uiPanelVisibility", global::profile->uiPanelVisibility },
+        { "markNodes", global::profile->markNodes },
+        { "filePath", global::configuration->profile },
+    };
 
-FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
-    : ghoul::RuntimeError("Could not find TemplateFactory for type '" + t + "'")
-    , type(std::move(t))
-{
-    ghoul_assert(!type.empty(), "Type must not be empty");
+    Settings settings = loadSettings();
+    if (settings.hasStartedBefore.has_value()) {
+        data["hasStartedBefore"] = settings.hasStartedBefore.value();
+    }
+
+    if (global::profile->meta.has_value()) {
+        data["name"] = global::profile->meta->name.value_or("");
+
+        data["author"] = global::profile->meta->author.value_or("");
+        data["description"] = global::profile->meta->description.value_or("");
+        data["license"] = global::profile->meta->license.value_or("");
+        data["url"] = global::profile->meta->url.value_or("");
+        data["version"] = global::profile->meta->version.value_or("");
+    }
+
+    _connection->sendJson(wrappedPayload(data));
 }
 
-FactoryManager::FactoryManager() {}
-
-void FactoryManager::initialize() {
-    ghoul_assert(!_manager, "Factory Manager must not have been initialized");
-
-    _manager = new FactoryManager;
-    _manager->addFactory<DashboardItem>("DashboardItem");
-    _manager->addFactory<LightSource>("LightSource");
-    _manager->addFactory<Renderable>("Renderable");
-    _manager->addFactory<ResourceSynchronization>("ResourceSynchronization");
-    _manager->addFactory<Rotation>("Rotation");
-    _manager->addFactory<Scale>("Scale");
-    _manager->addFactory<ScreenSpaceRenderable>("ScreenSpaceRenderable");
-    _manager->addFactory<Task>("Task");
-    _manager->addFactory<TimeFrame>("TimeFrame");
-    _manager->addFactory<Translation>("Translation");
-    _manager->addFactory<Topic>("Topic");
-}
-
-void FactoryManager::deinitialize() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-
-    delete _manager;
-    _manager = nullptr;
-}
-
-bool FactoryManager::isInitialized() {
-    return _manager != nullptr;
-}
-
-FactoryManager& FactoryManager::ref() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-    return *_manager;
-}
-
-const std::vector<FactoryManager::FactoryInfo>& FactoryManager::factories() const {
-    return _factories;
+bool ProfileTopic::isDone() const {
+    return true;
 }
 
 } // namespace openspace

@@ -22,70 +22,79 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/factorymanager.h>
+#include <openspace/topic/connectionpool.h>
 
-#include <openspace/rendering/dashboarditem.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scene/lightsource.h>
-#include <openspace/scene/rotation.h>
-#include <openspace/scene/scale.h>
-#include <openspace/scene/timeframe.h>
-#include <openspace/scene/translation.h>
-#include <openspace/topic/topics/topic.h>
-#include <openspace/util/resourcesynchronization.h>
-#include <openspace/util/task.h>
-#include <ghoul/misc/assert.h>
+#include <ghoul/io/socket/socket.h>
+#include <ghoul/io/socket/socketserver.h>
+#include <algorithm>
 #include <utility>
 
 namespace openspace {
 
-FactoryManager* FactoryManager::_manager = nullptr;
+ConnectionPool::ConnectionPool(SocketHandleFunc handleSocket)
+    : _handleSocket(std::move(handleSocket))
+{}
 
-FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
-    : ghoul::RuntimeError("Could not find TemplateFactory for type '" + t + "'")
-    , type(std::move(t))
-{
-    ghoul_assert(!type.empty(), "Type must not be empty");
+ConnectionPool::~ConnectionPool() {
+    disconnectAllConnections();
 }
 
-FactoryManager::FactoryManager() {}
-
-void FactoryManager::initialize() {
-    ghoul_assert(!_manager, "Factory Manager must not have been initialized");
-
-    _manager = new FactoryManager;
-    _manager->addFactory<DashboardItem>("DashboardItem");
-    _manager->addFactory<LightSource>("LightSource");
-    _manager->addFactory<Renderable>("Renderable");
-    _manager->addFactory<ResourceSynchronization>("ResourceSynchronization");
-    _manager->addFactory<Rotation>("Rotation");
-    _manager->addFactory<Scale>("Scale");
-    _manager->addFactory<ScreenSpaceRenderable>("ScreenSpaceRenderable");
-    _manager->addFactory<Task>("Task");
-    _manager->addFactory<TimeFrame>("TimeFrame");
-    _manager->addFactory<Translation>("Translation");
-    _manager->addFactory<Topic>("Topic");
+void ConnectionPool::addServer(std::shared_ptr<ghoul::io::SocketServer> server) {
+    _socketServers.push_back(std::move(server));
 }
 
-void FactoryManager::deinitialize() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-
-    delete _manager;
-    _manager = nullptr;
+void ConnectionPool::removeServer(ghoul::io::SocketServer* server) {
+    _socketServers.erase(
+        std::remove_if(
+            _socketServers.begin(),
+            _socketServers.end(),
+            [server](const std::shared_ptr<ghoul::io::SocketServer>& s) {
+                return s.get() == server;
+            }
+        ),
+        _socketServers.end()
+    );
 }
 
-bool FactoryManager::isInitialized() {
-    return _manager != nullptr;
+void ConnectionPool::clearServers() {
+    _socketServers.clear();
 }
 
-FactoryManager& FactoryManager::ref() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-    return *_manager;
+void ConnectionPool::updateConnections() {
+    removeDisconnectedSockets();
+    acceptNewSockets();
 }
 
-const std::vector<FactoryManager::FactoryInfo>& FactoryManager::factories() const {
-    return _factories;
+void ConnectionPool::acceptNewSockets() {
+    for (const std::shared_ptr<ghoul::io::SocketServer>& server : _socketServers) {
+        std::unique_ptr<ghoul::io::Socket> socket;
+        while ((socket = server->nextPendingSocket())) {
+            _handleSocket(*socket);
+            _sockets.push_back(std::move(socket));
+        }
+    }
+}
+
+void ConnectionPool::removeDisconnectedSockets() {
+    _sockets.erase(
+        std::remove_if(
+            _sockets.begin(),
+            _sockets.end(),
+            [](const std::unique_ptr<ghoul::io::Socket>& socket) {
+                return !socket || !socket->isConnected();
+            }
+        ),
+        _sockets.end()
+    );
+}
+
+void ConnectionPool::disconnectAllConnections() {
+    for (const std::unique_ptr<ghoul::io::Socket>& socket : _sockets) {
+        if (socket && socket->isConnected()) {
+            socket->disconnect();
+        }
+    }
+    _sockets.clear();
 }
 
 } // namespace openspace

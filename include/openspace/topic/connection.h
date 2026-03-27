@@ -22,70 +22,65 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/factorymanager.h>
+#ifndef __OPENSPACE_CORE___CONNECTION___H__
+#define __OPENSPACE_CORE___CONNECTION___H__
 
-#include <openspace/rendering/dashboarditem.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scene/lightsource.h>
-#include <openspace/scene/rotation.h>
-#include <openspace/scene/scale.h>
-#include <openspace/scene/timeframe.h>
-#include <openspace/scene/translation.h>
-#include <openspace/topic/topics/topic.h>
-#include <openspace/util/resourcesynchronization.h>
-#include <openspace/util/task.h>
-#include <ghoul/misc/assert.h>
-#include <utility>
+#include <openspace/json.h>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <thread>
+
+namespace ghoul::io { class Socket; }
 
 namespace openspace {
 
-FactoryManager* FactoryManager::_manager = nullptr;
+using TopicId = size_t;
 
-FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
-    : ghoul::RuntimeError("Could not find TemplateFactory for type '" + t + "'")
-    , type(std::move(t))
-{
-    ghoul_assert(!type.empty(), "Type must not be empty");
-}
+class Topic;
 
-FactoryManager::FactoryManager() {}
+// @TODO (abock, 2022-05-06) This is not really elegant as there is no need for a
+// Connection to be held by a shared_ptr, but there was a problem with the LuaScriptTopic
+// otherwise (issue #1940).
+// The problem there is that the LuaScriptTopic is keeping a copy of the _connection in
+// its lambda to return a script back to the caller. The script is only queued, so is
+// executed a bit longer. If the UI gets reloaded in between the creation of the lambda
+// and the execution, the _connection will be an invalid pointer and the program will
+// crash. Making this a shared_ptr circumvents that problem my having the lamdba retain
+// ownership of the _connection and keeping it alive until the message is sent. The
+// message doesn't go anywhere since noone is listening, but it's better than a crash.
+class Connection : public std::enable_shared_from_this<Connection> {
+public:
+    Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address,
+        bool authorized = false, const std::string& password = "");
 
-void FactoryManager::initialize() {
-    ghoul_assert(!_manager, "Factory Manager must not have been initialized");
+    void handleMessage(const std::string& message);
+    void sendMessage(const std::string& message);
+    void handleJson(const nlohmann::json& json);
+    void sendJson(const nlohmann::json& json);
+    void setAuthorized(bool status);
+    Topic* findTopicByType(const std::string& type);
 
-    _manager = new FactoryManager;
-    _manager->addFactory<DashboardItem>("DashboardItem");
-    _manager->addFactory<LightSource>("LightSource");
-    _manager->addFactory<Renderable>("Renderable");
-    _manager->addFactory<ResourceSynchronization>("ResourceSynchronization");
-    _manager->addFactory<Rotation>("Rotation");
-    _manager->addFactory<Scale>("Scale");
-    _manager->addFactory<ScreenSpaceRenderable>("ScreenSpaceRenderable");
-    _manager->addFactory<Task>("Task");
-    _manager->addFactory<TimeFrame>("TimeFrame");
-    _manager->addFactory<Translation>("Translation");
-    _manager->addFactory<Topic>("Topic");
-}
+    bool isAuthorized() const;
 
-void FactoryManager::deinitialize() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
+    ghoul::io::Socket* socket();
+    std::thread& thread();
+    void setThread(std::thread&& thread);
 
-    delete _manager;
-    _manager = nullptr;
-}
+    const std::string& password() const;
 
-bool FactoryManager::isInitialized() {
-    return _manager != nullptr;
-}
+private:
+    std::map<TopicId, std::unique_ptr<Topic>> _topics;
+    std::unique_ptr<ghoul::io::Socket> _socket;
+    std::thread _thread;
+    std::mutex _mutex;
 
-FactoryManager& FactoryManager::ref() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-    return *_manager;
-}
-
-const std::vector<FactoryManager::FactoryInfo>& FactoryManager::factories() const {
-    return _factories;
-}
+    std::string _address;
+    bool _isAuthorized = false;
+    std::string _password;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_CORE___CONNECTION___H__

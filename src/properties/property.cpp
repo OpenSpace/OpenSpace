@@ -27,7 +27,9 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/json.h>
 #include <openspace/properties/propertyowner.h>
+#include <openspace/topic/server.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
 
@@ -250,6 +252,16 @@ void Property::notifyChangeListeners() {
     for (const std::pair<OnChangeHandle, std::function<void()>>& p : _onChangeCallbacks) {
         p.second();
     }
+    if (uri().empty()) {
+        return;
+    }
+    nlohmann::json payload;
+    payload["event"] = "property_changed";
+    payload["payload"] = {
+        { "property", uri() },
+        { "value", nlohmann::json::parse(jsonValue()) }
+    };
+    global::server->passDataToTopic("propertyTree", payload);
 }
 
 void Property::notifyMetaDataChangeListeners() {
@@ -257,6 +269,18 @@ void Property::notifyMetaDataChangeListeners() {
     for (Callback& p : _onMetaDataChangeCallbacks) {
         p.second();
     }
+    if (uri().empty()) {
+        // Property has no owner yet (still being constructed), so there is nothing to
+        // notify
+        return;
+    }
+    nlohmann::json payload;
+    payload["event"] = "property_changed";
+    payload["payload"] = {
+        { "property", uri() },
+        { "metaData", generateJsonDescription() }
+    };
+    global::server->passDataToTopic("propertyTree", payload);
 }
 
 bool Property::hasChanged() const {

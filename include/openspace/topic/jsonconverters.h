@@ -22,70 +22,48 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/factorymanager.h>
+#ifndef __OPENSPACE_CORE___JSON_CONVERTERS___H__
+#define __OPENSPACE_CORE___JSON_CONVERTERS___H__
 
-#include <openspace/rendering/dashboarditem.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scene/lightsource.h>
-#include <openspace/scene/rotation.h>
-#include <openspace/scene/scale.h>
-#include <openspace/scene/timeframe.h>
-#include <openspace/scene/translation.h>
-#include <openspace/topic/topics/topic.h>
-#include <openspace/util/resourcesynchronization.h>
-#include <openspace/util/task.h>
-#include <ghoul/misc/assert.h>
-#include <utility>
+#include <openspace/json.h>
+#include <ghoul/glm.h>
 
 namespace openspace {
 
-FactoryManager* FactoryManager::_manager = nullptr;
+class Property;
+class PropertyOwner;
+void to_json(nlohmann::json& j, const Property& p);
+void to_json(nlohmann::json& j, const Property* pP);
+void to_json(nlohmann::json& j, const PropertyOwner& p);
+void to_json(nlohmann::json& j, const PropertyOwner* p);
 
-FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
-    : ghoul::RuntimeError("Could not find TemplateFactory for type '" + t + "'")
-    , type(std::move(t))
-{
-    ghoul_assert(!type.empty(), "Type must not be empty");
-}
+struct Action;
+void to_json(nlohmann::json& j, const Action& a);
+void to_json(nlohmann::json& j, const Action* pA);
 
-FactoryManager::FactoryManager() {}
+class SceneGraphNode;
+void to_json(nlohmann::json& j, const SceneGraphNode& n);
+void to_json(nlohmann::json& j, const SceneGraphNode* pN);
 
-void FactoryManager::initialize() {
-    ghoul_assert(!_manager, "Factory Manager must not have been initialized");
-
-    _manager = new FactoryManager;
-    _manager->addFactory<DashboardItem>("DashboardItem");
-    _manager->addFactory<LightSource>("LightSource");
-    _manager->addFactory<Renderable>("Renderable");
-    _manager->addFactory<ResourceSynchronization>("ResourceSynchronization");
-    _manager->addFactory<Rotation>("Rotation");
-    _manager->addFactory<Scale>("Scale");
-    _manager->addFactory<ScreenSpaceRenderable>("ScreenSpaceRenderable");
-    _manager->addFactory<Task>("Task");
-    _manager->addFactory<TimeFrame>("TimeFrame");
-    _manager->addFactory<Translation>("Translation");
-    _manager->addFactory<Topic>("Topic");
-}
-
-void FactoryManager::deinitialize() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-
-    delete _manager;
-    _manager = nullptr;
-}
-
-bool FactoryManager::isInitialized() {
-    return _manager != nullptr;
-}
-
-FactoryManager& FactoryManager::ref() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-    return *_manager;
-}
-
-const std::vector<FactoryManager::FactoryInfo>& FactoryManager::factories() const {
-    return _factories;
-}
+class Renderable;
+void to_json(nlohmann::json& j, const Renderable& r);
+void to_json(nlohmann::json& j, const Renderable* pR);
 
 } // namespace openspace
+
+namespace ghoul {
+
+class Dictionary;
+
+void to_json(nlohmann::json& j, const Dictionary& d);
+void to_json(nlohmann::json& j, const Dictionary* d);
+
+} // namespace ghoul
+
+namespace glm {
+
+void to_json(nlohmann::json& j, const dvec3& v);
+
+} // namespace glm
+
+#endif // __OPENSPACE_CORE___JSON_CONVERTERS___H__

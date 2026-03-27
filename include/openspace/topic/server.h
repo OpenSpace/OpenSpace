@@ -22,70 +22,77 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/factorymanager.h>
+#ifndef __OPENSPACE_CORE___SERVER___H__
+#define __OPENSPACE_CORE___SERVER___H__
 
-#include <openspace/rendering/dashboarditem.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scene/lightsource.h>
-#include <openspace/scene/rotation.h>
-#include <openspace/scene/scale.h>
-#include <openspace/scene/timeframe.h>
-#include <openspace/scene/translation.h>
-#include <openspace/topic/topics/topic.h>
-#include <openspace/util/resourcesynchronization.h>
-#include <openspace/util/task.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/properties/propertyowner.h>
+
+#include <openspace/topic/serverinterface.h>
+
+#include <deque>
+#include <functional>
+#include <memory>
+#include <mutex>
 #include <utility>
 
 namespace openspace {
 
-FactoryManager* FactoryManager::_manager = nullptr;
+constexpr int SOCKET_API_VERSION_MAJOR = 0;
+constexpr int SOCKET_API_VERSION_MINOR = 1;
+constexpr int SOCKET_API_VERSION_PATCH = 0;
 
-FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
-    : ghoul::RuntimeError("Could not find TemplateFactory for type '" + t + "'")
-    , type(std::move(t))
-{
-    ghoul_assert(!type.empty(), "Type must not be empty");
-}
+class Connection;
 
-FactoryManager::FactoryManager() {}
+class Server : public PropertyOwner {
+public:
+    using CallbackHandle = int;
+    using CallbackFunction = std::function<void()>;
 
-void FactoryManager::initialize() {
-    ghoul_assert(!_manager, "Factory Manager must not have been initialized");
+    Server();
+    ~Server() override;
 
-    _manager = new FactoryManager;
-    _manager->addFactory<DashboardItem>("DashboardItem");
-    _manager->addFactory<LightSource>("LightSource");
-    _manager->addFactory<Renderable>("Renderable");
-    _manager->addFactory<ResourceSynchronization>("ResourceSynchronization");
-    _manager->addFactory<Rotation>("Rotation");
-    _manager->addFactory<Scale>("Scale");
-    _manager->addFactory<ScreenSpaceRenderable>("ScreenSpaceRenderable");
-    _manager->addFactory<Task>("Task");
-    _manager->addFactory<TimeFrame>("TimeFrame");
-    _manager->addFactory<Translation>("Translation");
-    _manager->addFactory<Topic>("Topic");
-}
+    void initialize(const ghoul::Dictionary& configuration);
 
-void FactoryManager::deinitialize() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
+    void preSync();
 
-    delete _manager;
-    _manager = nullptr;
-}
+    ServerInterface* serverInterfaceByIdentifier(const std::string& identifier);
 
-bool FactoryManager::isInitialized() {
-    return _manager != nullptr;
-}
+    CallbackHandle addPreSyncCallback(CallbackFunction cb);
+    void removePreSyncCallback(CallbackHandle handle);
 
-FactoryManager& FactoryManager::ref() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-    return *_manager;
-}
+    void passDataToTopic(const std::string& topic, const nlohmann::json& jsonData);
+    std::vector<std::shared_ptr<Connection>> connections();
 
-const std::vector<FactoryManager::FactoryInfo>& FactoryManager::factories() const {
-    return _factories;
-}
+    static openspace::Documentation Documentation();
+
+private:
+    struct Message {
+        std::weak_ptr<Connection> connection;
+        std::string messageString;
+    };
+
+    struct ConnectionData {
+        std::shared_ptr<Connection> connection;
+        bool isMarkedForRemoval = false;
+    };
+
+    void handleConnection(const std::shared_ptr<Connection>& connection);
+    void cleanUpFinishedThreads();
+    void consumeMessages();
+    void disconnectAll();
+
+    std::mutex _messageQueueMutex;
+    std::deque<Message> _messageQueue;
+
+    std::vector<ConnectionData> _connections;
+    std::vector<std::unique_ptr<ServerInterface>> _interfaces;
+    PropertyOwner _interfaceOwner;
+
+    /// Callbacks for triggering topic
+    int _nextCallbackHandle = 0;
+    std::vector<std::pair<CallbackHandle, CallbackFunction>> _preSyncCallbacks;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_CORE___SERVER___H__

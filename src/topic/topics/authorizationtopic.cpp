@@ -22,70 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/factorymanager.h>
+#include <openspace/topic/topics/authorizationtopic.h>
 
-#include <openspace/rendering/dashboarditem.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scene/lightsource.h>
-#include <openspace/scene/rotation.h>
-#include <openspace/scene/scale.h>
-#include <openspace/scene/timeframe.h>
-#include <openspace/scene/translation.h>
-#include <openspace/topic/topics/topic.h>
-#include <openspace/util/resourcesynchronization.h>
-#include <openspace/util/task.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
+#include <openspace/topic/connection.h>
+#include <ghoul/logging/logmanager.h>
+#include <stdexcept>
+#include <string_view>
 #include <utility>
+
+namespace {
+    constexpr std::string_view _loggerCat = "AuthorizationTopic";
+
+    constexpr std::string_view KeyStatus = "status";
+    constexpr std::string_view Authorized = "authorized";
+    constexpr std::string_view IncorrectKey = "incorrectKey";
+    constexpr std::string_view BadRequest = "badRequest";
+} // namespace
 
 namespace openspace {
 
-FactoryManager* FactoryManager::_manager = nullptr;
+AuthorizationTopic::AuthorizationTopic() {}
 
-FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
-    : ghoul::RuntimeError("Could not find TemplateFactory for type '" + t + "'")
-    , type(std::move(t))
-{
-    ghoul_assert(!type.empty(), "Type must not be empty");
+bool AuthorizationTopic::isDone() const {
+    return _isAuthenticated;
 }
 
-FactoryManager::FactoryManager() {}
-
-void FactoryManager::initialize() {
-    ghoul_assert(!_manager, "Factory Manager must not have been initialized");
-
-    _manager = new FactoryManager;
-    _manager->addFactory<DashboardItem>("DashboardItem");
-    _manager->addFactory<LightSource>("LightSource");
-    _manager->addFactory<Renderable>("Renderable");
-    _manager->addFactory<ResourceSynchronization>("ResourceSynchronization");
-    _manager->addFactory<Rotation>("Rotation");
-    _manager->addFactory<Scale>("Scale");
-    _manager->addFactory<ScreenSpaceRenderable>("ScreenSpaceRenderable");
-    _manager->addFactory<Task>("Task");
-    _manager->addFactory<TimeFrame>("TimeFrame");
-    _manager->addFactory<Translation>("Translation");
-    _manager->addFactory<Topic>("Topic");
+void AuthorizationTopic::handleJson(const nlohmann::json& json) {
+    if (isDone()) {
+        _connection->sendJson(wrappedPayload({ KeyStatus, Authorized }));
+    }
+    else {
+        try {
+            const std::string providedKey = json.at("key").get<std::string>();
+            if (authorize(providedKey)) {
+                _connection->setAuthorized(true);
+                _connection->sendJson(wrappedPayload({ KeyStatus, Authorized }));
+                LINFO("Client successfully authorized");
+            }
+            else {
+                _connection->sendJson(wrappedPayload({ KeyStatus, IncorrectKey }));
+            }
+        }
+        catch (const std::out_of_range&) {
+            _connection->sendJson(wrappedPayload({ KeyStatus, BadRequest }));
+        }
+        catch (const std::domain_error&) {
+            _connection->sendJson(wrappedPayload({ KeyStatus, BadRequest }));
+        }
+    }
 }
 
-void FactoryManager::deinitialize() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-
-    delete _manager;
-    _manager = nullptr;
-}
-
-bool FactoryManager::isInitialized() {
-    return _manager != nullptr;
-}
-
-FactoryManager& FactoryManager::ref() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-    return *_manager;
-}
-
-const std::vector<FactoryManager::FactoryInfo>& FactoryManager::factories() const {
-    return _factories;
+bool AuthorizationTopic::authorize(const std::string& key) {
+    _isAuthenticated = (key == _connection->password());
+    return _isAuthenticated;
 }
 
 } // namespace openspace

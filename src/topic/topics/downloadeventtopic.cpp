@@ -22,70 +22,70 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/factorymanager.h>
+#include <openspace/topic/topics/downloadeventtopic.h>
 
-#include <openspace/rendering/dashboarditem.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scene/lightsource.h>
-#include <openspace/scene/rotation.h>
-#include <openspace/scene/scale.h>
-#include <openspace/scene/timeframe.h>
-#include <openspace/scene/translation.h>
-#include <openspace/topic/topics/topic.h>
-#include <openspace/util/resourcesynchronization.h>
-#include <openspace/util/task.h>
-#include <ghoul/misc/assert.h>
-#include <utility>
+#include <openspace/engine/globals.h>
+#include <openspace/topic/connection.h>
+#include <openspace/util/downloadeventengine.h>
+#include <ghoul/format.h>
+#include <string_view>
+
+namespace {
+    constexpr std::string_view StartSubscription = "start_subscription";
+    constexpr std::string_view StopSubscription = "stop_subscription";
+    constexpr std::chrono::milliseconds CallbackUpdateInterval(250);
+} // namespace
 
 namespace openspace {
 
-FactoryManager* FactoryManager::_manager = nullptr;
-
-FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
-    : ghoul::RuntimeError("Could not find TemplateFactory for type '" + t + "'")
-    , type(std::move(t))
-{
-    ghoul_assert(!type.empty(), "Type must not be empty");
+DownloadEventTopic::~DownloadEventTopic() {
+    if (_isSubscribedTo) {
+        global::downloadEventEngine->unsubscribe(_subscriptionID);
+        _isSubscribedTo = false;
+    }
 }
 
-FactoryManager::FactoryManager() {}
+void DownloadEventTopic::handleJson(const nlohmann::json& json) {
+    const std::string& event = json.at("event").get<std::string>();
 
-void FactoryManager::initialize() {
-    ghoul_assert(!_manager, "Factory Manager must not have been initialized");
+    if (event == StartSubscription) {
+        _isSubscribedTo = true;
 
-    _manager = new FactoryManager;
-    _manager->addFactory<DashboardItem>("DashboardItem");
-    _manager->addFactory<LightSource>("LightSource");
-    _manager->addFactory<Renderable>("Renderable");
-    _manager->addFactory<ResourceSynchronization>("ResourceSynchronization");
-    _manager->addFactory<Rotation>("Rotation");
-    _manager->addFactory<Scale>("Scale");
-    _manager->addFactory<ScreenSpaceRenderable>("ScreenSpaceRenderable");
-    _manager->addFactory<Task>("Task");
-    _manager->addFactory<TimeFrame>("TimeFrame");
-    _manager->addFactory<Translation>("Translation");
-    _manager->addFactory<Topic>("Topic");
+        auto callback = [this](const DownloadEventEngine::DownloadEvent& e) {
+            // Limit how often we send data to frontend to reduce traffic
+            if (e.type == DownloadEventEngine::DownloadEvent::Type::Progress) {
+                const auto now = std::chrono::steady_clock::now();
+                auto& last = _lastCallback[e.id];
+
+                if (now - last >= CallbackUpdateInterval) {
+                    last = now;
+                }
+                else {
+                    return;
+                }
+            }
+
+            nlohmann::json payload;
+            payload["type"] = e.type;
+            payload["id"] = e.id;
+            payload["downloadedBytes"] = e.downloadedBytes;
+            if (e.totalBytes.has_value()) {
+                payload["totalBytes"] = e.totalBytes.value();
+            }
+
+            _connection->sendJson(wrappedPayload(payload));
+        };
+        _subscriptionID = global::downloadEventEngine->subscribe(callback);
+    }
+
+    else if (event == StopSubscription) {
+        global::downloadEventEngine->unsubscribe(_subscriptionID);
+        _isSubscribedTo = false;
+    }
 }
 
-void FactoryManager::deinitialize() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-
-    delete _manager;
-    _manager = nullptr;
-}
-
-bool FactoryManager::isInitialized() {
-    return _manager != nullptr;
-}
-
-FactoryManager& FactoryManager::ref() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-    return *_manager;
-}
-
-const std::vector<FactoryManager::FactoryInfo>& FactoryManager::factories() const {
-    return _factories;
+bool DownloadEventTopic::isDone() const {
+    return !_isSubscribedTo;
 }
 
 } // namespace openspace

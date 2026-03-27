@@ -22,70 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/factorymanager.h>
+#ifndef __OPENSPACE_CORE___SUBSCRIPTION_TOPIC___H__
+#define __OPENSPACE_CORE___SUBSCRIPTION_TOPIC___H__
 
-#include <openspace/rendering/dashboarditem.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scene/lightsource.h>
-#include <openspace/scene/rotation.h>
-#include <openspace/scene/scale.h>
-#include <openspace/scene/timeframe.h>
-#include <openspace/scene/translation.h>
 #include <openspace/topic/topics/topic.h>
-#include <openspace/util/resourcesynchronization.h>
-#include <openspace/util/task.h>
-#include <ghoul/misc/assert.h>
-#include <utility>
 
 namespace openspace {
 
-FactoryManager* FactoryManager::_manager = nullptr;
+class Property;
 
-FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
-    : ghoul::RuntimeError("Could not find TemplateFactory for type '" + t + "'")
-    , type(std::move(t))
-{
-    ghoul_assert(!type.empty(), "Type must not be empty");
-}
+class SubscriptionTopic : public Topic {
+public:
+    SubscriptionTopic() = default;
+    ~SubscriptionTopic() override;
 
-FactoryManager::FactoryManager() {}
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 
-void FactoryManager::initialize() {
-    ghoul_assert(!_manager, "Factory Manager must not have been initialized");
+private:
+    void resetCallbacks();
 
-    _manager = new FactoryManager;
-    _manager->addFactory<DashboardItem>("DashboardItem");
-    _manager->addFactory<LightSource>("LightSource");
-    _manager->addFactory<Renderable>("Renderable");
-    _manager->addFactory<ResourceSynchronization>("ResourceSynchronization");
-    _manager->addFactory<Rotation>("Rotation");
-    _manager->addFactory<Scale>("Scale");
-    _manager->addFactory<ScreenSpaceRenderable>("ScreenSpaceRenderable");
-    _manager->addFactory<Task>("Task");
-    _manager->addFactory<TimeFrame>("TimeFrame");
-    _manager->addFactory<Translation>("Translation");
-    _manager->addFactory<Topic>("Topic");
-}
+    const int UnsetCallbackHandle = -1;
 
-void FactoryManager::deinitialize() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-
-    delete _manager;
-    _manager = nullptr;
-}
-
-bool FactoryManager::isInitialized() {
-    return _manager != nullptr;
-}
-
-FactoryManager& FactoryManager::ref() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-    return *_manager;
-}
-
-const std::vector<FactoryManager::FactoryInfo>& FactoryManager::factories() const {
-    return _factories;
-}
+    bool _requestedResourceIsSubscribable = false;
+    bool _isSubscribedTo = false;
+    int _onChangeHandle = UnsetCallbackHandle;
+    int _onDeleteHandle = UnsetCallbackHandle;
+    int _onMetaDataChangeHandle = UnsetCallbackHandle;
+    Property* _prop = nullptr;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_CORE___SUBSCRIPTION_TOPIC___H__

@@ -22,70 +22,70 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/factorymanager.h>
+#ifndef __OPENSPACE_CORE___SERVERINTERFACE___H__
+#define __OPENSPACE_CORE___SERVERINTERFACE___H__
 
-#include <openspace/rendering/dashboarditem.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scene/lightsource.h>
-#include <openspace/scene/rotation.h>
-#include <openspace/scene/scale.h>
-#include <openspace/scene/timeframe.h>
-#include <openspace/scene/translation.h>
-#include <openspace/topic/topics/topic.h>
-#include <openspace/util/resourcesynchronization.h>
-#include <openspace/util/task.h>
-#include <ghoul/misc/assert.h>
-#include <utility>
+#include <openspace/properties/propertyowner.h>
+
+#include <openspace/properties/list/stringlistproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <ghoul/io/socket/socketserver.h>
+#include <memory>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-FactoryManager* FactoryManager::_manager = nullptr;
+struct Documentation;
 
-FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
-    : ghoul::RuntimeError("Could not find TemplateFactory for type '" + t + "'")
-    , type(std::move(t))
-{
-    ghoul_assert(!type.empty(), "Type must not be empty");
-}
+class ServerInterface : public PropertyOwner {
+public:
+    static Documentation Documentation();
 
-FactoryManager::FactoryManager() {}
+    static std::unique_ptr<ServerInterface> createFromDictionary(
+        const ghoul::Dictionary& dictionary);
 
-void FactoryManager::initialize() {
-    ghoul_assert(!_manager, "Factory Manager must not have been initialized");
+    explicit ServerInterface(const ghoul::Dictionary& dictionary);
+    ~ServerInterface() override = default;
 
-    _manager = new FactoryManager;
-    _manager->addFactory<DashboardItem>("DashboardItem");
-    _manager->addFactory<LightSource>("LightSource");
-    _manager->addFactory<Renderable>("Renderable");
-    _manager->addFactory<ResourceSynchronization>("ResourceSynchronization");
-    _manager->addFactory<Rotation>("Rotation");
-    _manager->addFactory<Scale>("Scale");
-    _manager->addFactory<ScreenSpaceRenderable>("ScreenSpaceRenderable");
-    _manager->addFactory<Task>("Task");
-    _manager->addFactory<TimeFrame>("TimeFrame");
-    _manager->addFactory<Translation>("Translation");
-    _manager->addFactory<Topic>("Topic");
-}
+    void initialize();
+    void deinitialize();
+    bool isEnabled() const;
+    bool isActive() const;
+    int port() const;
+    std::string password() const;
+    bool clientHasAccessWithoutPassword(const std::string& address) const;
+    bool clientIsBlocked(const std::string& address) const;
 
-void FactoryManager::deinitialize() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
+    ghoul::io::SocketServer* server();
 
-    delete _manager;
-    _manager = nullptr;
-}
+private:
+    enum class InterfaceType : int {
+        TcpSocket = 0,
+        WebSocket
+    };
 
-bool FactoryManager::isInitialized() {
-    return _manager != nullptr;
-}
+    enum class Access : int {
+        Deny = 0,
+        RequirePassword,
+        Allow
+    };
 
-FactoryManager& FactoryManager::ref() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
-    return *_manager;
-}
+    OptionProperty _socketType;
+    IntProperty _port;
+    BoolProperty _enabled;
+    StringListProperty _allowAddresses;
+    StringListProperty _requirePasswordAddresses;
+    StringListProperty _denyAddresses;
+    OptionProperty _defaultAccess;
+    StringProperty _password;
 
-const std::vector<FactoryManager::FactoryInfo>& FactoryManager::factories() const {
-    return _factories;
-}
+    std::unique_ptr<ghoul::io::SocketServer> _socketServer;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_CORE___SERVERINTERFACE___H__

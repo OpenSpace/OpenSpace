@@ -131,6 +131,8 @@ struct Configuration {
 
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
 
+    ghoul::Dictionary server;
+
     struct OpenGLDebugContext {
         bool isActive = false;
         bool printStacktrace = false;
