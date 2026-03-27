@@ -27,6 +27,7 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/set_openspace_compile_settings.cmake
 set(OPENSPACE_SOURCE
   openspace.cpp
   camera/camera.cpp
+  camera/camerapose.cpp
   data/csvloader.cpp
   data/dataloader.cpp
   data/datamapping.cpp
@@ -51,23 +52,21 @@ set(OPENSPACE_SOURCE
   events/eventengine_lua.inl
   interaction/actionmanager.cpp
   interaction/actionmanager_lua.inl
-  interaction/camerainteractionstates.cpp
+  interaction/interactionhandler.cpp
   interaction/interactionmonitor.cpp
-  interaction/mouseinputstate.cpp
   interaction/joystickinputstate.cpp
-  interaction/joystickcamerastates.cpp
   interaction/keybindingmanager.cpp
   interaction/keybindingmanager_lua.inl
   interaction/keyframerecordinghandler.cpp
   interaction/keyframerecordinghandler_lua.inl
   interaction/keyboardinputstate.cpp
-  interaction/mousecamerastates.cpp
-  interaction/scriptcamerastates.cpp
+  interaction/mouseinputstate.cpp
   interaction/sessionrecording.cpp
   interaction/sessionrecordinghandler.cpp
   interaction/sessionrecordinghandler_lua.inl
+  interaction/touchinputstate.cpp
+  interaction/touchmarker.cpp
   interaction/websocketinputstate.cpp
-  interaction/websocketcamerastates.cpp
   interaction/tasks/convertrecformattask.cpp
   mission/mission.cpp
   mission/missionmanager.cpp
@@ -78,8 +77,18 @@ set(OPENSPACE_SOURCE
   navigation/navigationhandler.cpp
   navigation/navigationhandler_lua.inl
   navigation/navigationstate.cpp
-  navigation/orbitalnavigator.cpp
-  navigation/orbitalnavigator_lua.inl
+  navigation/orbitalnavigator/directmanipulation/directinputsolver.cpp
+  navigation/orbitalnavigator/directmanipulation/directmanipulation.cpp
+  navigation/orbitalnavigator/idlemotion.cpp
+  navigation/orbitalnavigator/joystickcamerastates.cpp
+  navigation/orbitalnavigator/mousecamerastates.cpp
+  navigation/orbitalnavigator/orbitalcamerastates.cpp
+  navigation/orbitalnavigator/orbitalinputhandler.cpp
+  navigation/orbitalnavigator/orbitalnavigator.cpp
+  navigation/orbitalnavigator/orbitalnavigator_lua.inl
+  navigation/orbitalnavigator/scriptcamerastates.cpp
+  navigation/orbitalnavigator/touchcamerastates.cpp
+  navigation/orbitalnavigator/websocketcamerastates.cpp
   navigation/path.cpp
   navigation/pathcurve.cpp
   navigation/pathnavigator.cpp
@@ -241,24 +250,18 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/events/eventengine.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/action.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/actionmanager.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/delayedvariable.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/delayedvariable.inl
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/camerainteractionstates.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/mouseinputstate.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/interactionhandler.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/interactionmonitor.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/interpolator.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/interpolator.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/joystickinputstate.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/joystickcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keybindingmanager.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keyboardinputstate.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keyframerecordinghandler.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/mousecamerastates.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/scriptcamerastates.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/mouseinputstate.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/sessionrecording.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/sessionrecordinghandler.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/touchinputstate.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/touchmarker.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/websocketinputstate.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/websocketcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/tasks/convertrecformattask.h
   ${PROJECT_SOURCE_DIR}/include/openspace/mission/mission.h
   ${PROJECT_SOURCE_DIR}/include/openspace/mission/missionmanager.h
@@ -267,7 +270,19 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/keyframenavigator.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/navigationhandler.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/navigationstate.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/directmanipulation/directinputsolver.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/directmanipulation/directmanipulation.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/dampenedvelocity.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/dampenedvelocity.inl
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/idlemotion.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/joystickcamerastates.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/mousecamerastates.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/orbitalcamerastates.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/orbitalinputhandler.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/orbitalnavigator.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/scriptcamerastates.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/touchcamerastates.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/websocketcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/path.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/pathcurve.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/pathnavigator.h
@@ -375,6 +390,8 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/util/factorymanager.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/util/geodetic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/httprequest.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/util/interpolator.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/util/interpolator.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/util/job.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/json_helper.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/json_helper.inl

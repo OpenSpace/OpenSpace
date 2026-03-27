@@ -32,7 +32,7 @@
 namespace openspace {
 
 /**
- * This class represents the global input state of interaction devices.
+ * This class represents the global input state of mouse interaction devices.
  */
 class MouseInputState {
 public:
@@ -46,7 +46,6 @@ public:
     bool isMouseButtonPressed(MouseButton mouseButton) const;
 
 private:
-    // Input from mouse
     std::vector<MouseButton> _mouseButtonsDown;
     glm::dvec2 _mousePosition = glm::dvec2(0.0);
     double _mouseScrollDelta = 0.0;

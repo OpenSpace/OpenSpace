@@ -22,53 +22,57 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
-#define __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+#ifndef __OPENSPACE_CORE___TOUCHCAMERASTATES___H__
+#define __OPENSPACE_CORE___TOUCHCAMERASTATES___H__
 
-#include <openspace/util/openspacemodule.h>
+#include <openspace/navigation/orbitalnavigator/orbitalcamerastates.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/util/touch.h>
-#include <memory>
-#include <set>
+#include <ghoul/glm.h>
+#include <array>
+
+//#define TOUCH_DEBUG_MODE
 
 namespace openspace {
 
-class TuioEar;
+class TouchInputState;
 
-#ifdef WIN32
-class Win32TouchHook;
-#endif // WIN32
-
-class TouchModule : public OpenSpaceModule {
+class TouchCameraStates : public OrbitalCameraStates {
 public:
-    constexpr static const char* Name = "Touch";
+    enum class InteractionType {
+        Rotation = 0,
+        Pinch,
+        Pan,
+        Roll,
+        None
+    };
 
-    TouchModule();
-    ~TouchModule();
+    TouchCameraStates(double sensitivity, double velocityScaleFactor);
+    virtual ~TouchCameraStates() override;
 
-protected:
-    void internalInitialize(const ghoul::Dictionary& dictionary) override;
+    void updateVelocitiesFromInput(const TouchInputState& mouseState,
+        double deltaTime);
 
 private:
     /**
-     * Process TUIO touch input that occured since the last frame.
+     * Compute new velocity according to the interpreted action.
      */
-    void processNewInput();
+    UpdateStates computeVelocities(const std::vector<TouchInputHolder>& touchPoints,
+        const std::vector<TouchInput>& lastProcessed);
 
-    std::unique_ptr<TuioEar> _ear;
+    /**
+     * Returns an enum for what interaction to be used, depending on what input was
+     * received.
+     */
+    InteractionType interpretInteraction(const std::vector<TouchInputHolder>& list,
+        const std::vector<TouchInput>& lastProcessed);
 
-    IntProperty _tuioPort;
-    BoolProperty _hasActiveTouchEvent;
+    void resetAfterInput();
 
-    /// Contains an id and the Point that was processed last frame
-    glm::ivec2 _webPositionCallback = glm::ivec2(0);
-#ifdef WIN32
-    std::unique_ptr<Win32TouchHook> _win32TouchHook;
-#endif // WIN32
+    std::array<TouchInputHolder, 2> _pinchInputs;
+    glm::vec2 _centroid = glm::vec2(0.f);
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+#endif // __OPENSPACE_CORE___TOUCHCAMERASTATES___H__

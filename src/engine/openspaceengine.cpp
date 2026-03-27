@@ -40,12 +40,13 @@
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/interaction/tasks/convertrecformattask.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/network/parallelpeer.h>
@@ -514,6 +515,8 @@ void OpenSpaceEngine::initialize() {
     global::navigationHandler->initialize();
 
     global::renderEngine->initialize();
+
+    global::interactionHandler->initialize();
 
     for (const std::function<void()>& func : *global::callback::initialize) {
         ZoneScopedN("[Module] initialize");
@@ -1140,7 +1143,7 @@ void OpenSpaceEngine::preSynchronization() {
         }
         global::sessionRecordingHandler->preSynchronization(dt);
         global::parallelPeer->preSynchronization();
-        global::interactionMonitor->updateActivityState();
+        global::interactionHandler->preSynchronization();
     }
 
     for (const std::function<void()>& func : *global::callback::preSync) {
@@ -1288,7 +1291,7 @@ void OpenSpaceEngine::drawOverlays() {
     if (isGuiWindow) {
         global::renderEngine->renderOverlays(_shutdown);
         global::sessionRecordingHandler->render();
-        global::navigationHandler->renderOverlay();
+        global::interactionHandler->renderOverlay();
     }
 
     for (const std::function<void()>& func : *global::callback::draw2D) {
@@ -1319,6 +1322,7 @@ void OpenSpaceEngine::postDraw() {
     LTRACE("OpenSpaceEngine::postDraw(begin)");
 
     global::renderEngine->postDraw();
+    global::interactionHandler->postDraw();
 
     for (const std::function<void()>& func : *global::callback::postDraw) {
         ZoneScopedN("[Module] postDraw");
@@ -1393,13 +1397,11 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         }
     }
 
-    global::navigationHandler->keyboardCallback(key, mod, action);
+    global::interactionHandler->keyboardCallback(key, mod, action);
 
-    if (!global::navigationHandler->disabledKeybindings()) {
+    if (!global::interactionHandler->disabledKeybindings()) {
         global::keybindingManager->keyboardCallback(key, mod, action);
     }
-
-    global::interactionMonitor->markInteraction();
 }
 
 void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier,
@@ -1415,7 +1417,7 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier,
     }
 
     global::luaConsole->charCallback(codepoint, modifier);
-    global::interactionMonitor->markInteraction();
+    global::interactionHandler->markInteraction();
 
     if (_shutdown.inShutdown) {
         _shutdown.inShutdown = false;
@@ -1474,8 +1476,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
         }
     }
 
-    global::navigationHandler->mouseButtonCallback(button, action);
-    global::interactionMonitor->markInteraction();
+    global::interactionHandler->mouseButtonCallback(button, action);
 
     if (_shutdown.inShutdown) {
         _shutdown.inShutdown = false;
@@ -1497,8 +1498,7 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y, IsGuiWindow isGu
         func(x, y, isGuiWindow);
     }
 
-    global::navigationHandler->mousePositionCallback(x, y);
-    global::interactionMonitor->markInteraction();
+    global::interactionHandler->mousePositionCallback(x, y);
 
     _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
 }
@@ -1520,8 +1520,7 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY,
         }
     }
 
-    global::navigationHandler->mouseScrollWheelCallback(posY);
-    global::interactionMonitor->markInteraction();
+    global::interactionHandler->mouseScrollWheelCallback(posY);
 }
 
 void OpenSpaceEngine::touchDetectionCallback(TouchInput input) {
@@ -1533,6 +1532,8 @@ void OpenSpaceEngine::touchDetectionCallback(TouchInput input) {
             return;
         }
     }
+
+    global::interactionHandler->touchDetectedCallback(input);
 }
 
 void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
@@ -1544,6 +1545,8 @@ void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
             return;
         }
     }
+
+    global::interactionHandler->touchUpdatedCallback(input);
 }
 
 void OpenSpaceEngine::touchExitCallback(TouchInput input) {
@@ -1552,6 +1555,8 @@ void OpenSpaceEngine::touchExitCallback(TouchInput input) {
     for (const std::function<void(TouchInput)>& func : *global::callback::touchExit) {
         func(input);
     }
+
+    global::interactionHandler->touchExitCallback(input);
 }
 
 void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {

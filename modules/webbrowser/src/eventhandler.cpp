@@ -28,9 +28,9 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keyboardinputstate.h>
-#include <openspace/navigation/navigationhandler.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <algorithm>
@@ -271,7 +271,7 @@ void EventHandler::initialize() {
 
             _validTouchStates.emplace_back(input);
 
-            global::interactionMonitor->markInteraction();
+            global::interactionHandler->markInteraction();
             return true;
         }
     );
@@ -306,7 +306,7 @@ void EventHandler::initialize() {
                 _leftButton.down = true;
                 _browserInstance->sendMouseMoveEvent(mouseEvent());
 #endif // WIN32
-                global::interactionMonitor->markInteraction();
+                global::interactionHandler->markInteraction();
                 return true;
             }
             else if (it != _validTouchStates.cend()) {
@@ -368,7 +368,7 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action,
         return false;
     }
 
-    global::interactionMonitor->markInteraction();
+    global::interactionHandler->markInteraction();
     MouseButtonState& state = (button == MouseButton::Left) ? _leftButton : _rightButton;
 
     int clickCount = BrowserInstance::SingleClick;
@@ -420,7 +420,7 @@ bool EventHandler::mousePositionCallback(double x, double y) {
     _mousePosition =
         global::windowDelegate->mousePositionViewportRelative(_mousePosition);
     _browserInstance->sendMouseMoveEvent(mouseEvent());
-    global::interactionMonitor->markInteraction();
+    global::interactionHandler->markInteraction();
 
     // Let the mouse event trickle on
     return false;
@@ -551,7 +551,7 @@ CefTouchEvent EventHandler::touchEvent(const TouchInput& input,
     event.y = windowPos.y;
     event.type = eventType;
     const std::vector<std::pair<Key, KeyModifier>>& keyMods =
-        global::navigationHandler->keyboardInputState().pressedKeys();
+        global::interactionHandler->keyboardInputState().pressedKeys();
     for (const std::pair<Key, KeyModifier>& p : keyMods) {
         const KeyModifier mods = p.second;
         event.modifiers |= static_cast<uint32_t>(mapToCefModifiers(mods));

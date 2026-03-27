@@ -22,74 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/scriptcamerastates.h>
+#ifndef __OPENSPACE_CORE___MOUSECAMERASTATES___H__
+#define __OPENSPACE_CORE___MOUSECAMERASTATES___H__
+
+#include <openspace/navigation/orbitalnavigator/orbitalcamerastates.h>
 
 namespace openspace {
 
-ScriptCameraStates::ScriptCameraStates()
-    : CameraInteractionStates(1.0, 1.0)
-{}
+class KeyboardInputState;
+class MouseInputState;
 
-void ScriptCameraStates::updateStateFromInput(double deltaTime) {
-    if (_localRotation != glm::dvec2(0.0)) {
-        _localRotationState.velocity.set(_localRotation * _sensitivity, deltaTime);
-        _localRotation = glm::dvec2(0.0);
-    }
-    else {
-        _localRotationState.velocity.decelerate(deltaTime);
-    }
+class MouseCameraStates : public OrbitalCameraStates {
+public:
+    MouseCameraStates(double sensitivity, double velocityScaleFactor);
 
-    if (_globalRotation != glm::dvec2(0.0)) {
-        _globalRotationState.velocity.set(_globalRotation * _sensitivity, deltaTime);
-        _globalRotation = glm::dvec2(0.0);
-    }
-    else {
-        _globalRotationState.velocity.decelerate(deltaTime);
-    }
+    void updateVelocitiesFromInput(const MouseInputState& mouseState,
+        const KeyboardInputState& keyboardState, double deltaTime);
 
-    if (_truckMovement != 0.0) {
-        _truckMovementState.velocity.set(_truckMovement * _sensitivity, deltaTime);
-        _truckMovement = 0.0;
-    }
-    else {
-        _truckMovementState.velocity.decelerate(deltaTime);
-    }
+private:
+    double _currentSensitivityRamp = 1.0;
 
-    if (_localRoll != 0.0) {
-        _localRollState.velocity.set(_localRoll * _sensitivity, deltaTime);
-        _localRoll = 0.0;
-    }
-    else {
-        _localRollState.velocity.decelerate(deltaTime);
-    }
-
-    if (_globalRoll != 0.0) {
-        _globalRollState.velocity.set(_globalRoll * _sensitivity, deltaTime);
-        _globalRoll = 0.0;
-    }
-    else {
-        _globalRollState.velocity.decelerate(deltaTime);
-    }
-}
-
-void ScriptCameraStates::addLocalRotation(const glm::dvec2& delta) {
-    _localRotation += delta;
-}
-
-void ScriptCameraStates::addGlobalRotation(const glm::dvec2& delta) {
-    _globalRotation += delta;
-}
-
-void ScriptCameraStates::addTruckMovement(double delta) {
-    _truckMovement += delta;
-}
-
-void ScriptCameraStates::addLocalRoll(double delta) {
-    _localRoll += delta;
-}
-
-void ScriptCameraStates::addGlobalRoll(double delta) {
-    _globalRoll += delta;
-}
+    // Mouse positions before a certain type of interaction is started
+    struct {
+        glm::dvec2 primary = glm::dvec2(0.0);
+        glm::dvec2 secondary = glm::dvec2(0.0);
+        glm::dvec2 button3 = glm::dvec2(0.0);
+    } _prevMousePos;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_CORE___MOUSECAMERASTATES___H__

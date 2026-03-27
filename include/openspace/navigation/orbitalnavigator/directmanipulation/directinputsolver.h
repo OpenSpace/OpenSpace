@@ -22,54 +22,70 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/misc/assert.h>
+#ifndef __OPENSPACE_CORE___DIRECTINPUT_SOLVER___H__
+#define __OPENSPACE_CORE___DIRECTINPUT_SOLVER___H__
+
 #include <ghoul/glm.h>
+#include <ghoul/misc/levmarqsolver.h>
+#include <optional>
+#include <vector>
 
 namespace openspace {
 
-template <typename T, typename ScaleType>
-DelayedVariable<T, ScaleType>::DelayedVariable(ScaleType scaleFactor, ScaleType friction)
-    : _scaleFactor(std::move(scaleFactor))
-    , _friction(friction)
-{
-    ghoul_assert(_friction >= ScaleType(0.0), "Friction must be positive");
-}
+class Camera;
+class SceneGraphNode;
 
-template <typename T, typename ScaleType>
-void DelayedVariable<T, ScaleType>::set(T value, double dt) {
-    _targetValue = value;
-    _currentValue = _currentValue + (_targetValue - _currentValue) *
-        // Less or equal to 1.0 keeps it stable
-        glm::min(_scaleFactor * dt, 1.0);
-}
+/**
+ * The DirectInputSolver is used to minimize the L2 error of touch input to 3D camera
+ * position. It uses the levmarq (Levenberg–Marquardt) algorithm in order to do this.
+ */
+class DirectInputSolver {
+public:
+    /**
+     * Result of the optimization process, containing the computed camera manipulation
+     * parameters. These values represent the transformations needed to align the camera
+     * with the touch input.
+     */
+    struct Result {
+        glm::dvec2 orbit = glm::dvec2(0.0);
+        double zoom = 0.0;
+        double roll = 0.0;
+        glm::dvec2 pan = glm::dvec2(0.0);
+    };
 
-template <typename T, typename ScaleType>
-void DelayedVariable<T, ScaleType>::decelerate(double dt) {
-    _currentValue = _currentValue + (- _currentValue) *
-        // Less or equal to 1.0 keeps it stable
-        glm::min(_scaleFactor * _friction * dt, 1.0);
-}
+    /**
+     * Stores the selected node, the cursor ID as well as the surface coordinates the
+     * cursor touched.
+     */
+    struct SelectedBody {
+        size_t id = 0;
+        const SceneGraphNode* node = nullptr;
+        glm::dvec3 coordinates = glm::dvec3(0.0);
+    };
 
-template <typename T, typename ScaleType>
-void DelayedVariable<T, ScaleType>::setHard(T value) {
-    _targetValue = value;
-    _currentValue = value;
-}
+    /**
+     * Represents touched screenspace coordinates (normalized to [0, 1]).
+     */
+    struct TouchPoint {
+        size_t id = 0;
+        glm::dvec2 position = glm::dvec2(0.0);
+    };
 
-template <typename T, typename ScaleType>
-void DelayedVariable<T, ScaleType>::setFriction(ScaleType friction) {
-    _friction = friction;
-    ghoul_assert(_friction >= ScaleType(0.0), "Friction must be positive");
-}
+    DirectInputSolver();
 
-template <typename T, typename ScaleType>
-void DelayedVariable<T, ScaleType>::setScaleFactor(ScaleType scaleFactor) {
-    _scaleFactor = scaleFactor;
-}
+    /**
+     * Returns a result if the error could be minimized within certain bounds. If the
+     * error is found to be outside the bounds after a certain amount of iterations,
+     * this function fails and returns `std::nullopt`.
+     */
+    std::optional<Result> solve(const std::vector<TouchPoint>& touchPoints,
+        const std::vector<SelectedBody>& selectedBodies, const Camera& camera);
 
-template <typename T, typename ScaleType>
-T DelayedVariable<T, ScaleType>::get() const {
-    return _currentValue;
-}
+private:
+    ghoul::LMstat _lmstat;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_CORE___DIRECTINPUT_SOLVER___H__
+

@@ -32,7 +32,7 @@
 namespace openspace {
 
 /**
- * This class represents the global input state of interaction devices.
+ * This class represents the global input state of keyboard interaction devices.
  */
 class KeyboardInputState {
 public:
@@ -43,7 +43,6 @@ public:
     bool isKeyPressed(Key key) const;
 
 private:
-    // Input from keyboard
     std::vector<std::pair<Key, KeyModifier>> _keysDown;
 };
 

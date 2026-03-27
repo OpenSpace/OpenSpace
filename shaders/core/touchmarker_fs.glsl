@@ -22,53 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
-#define __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+#include "powerscaling/powerscaling_fs.glsl"
+#include "fragment.glsl"
 
-#include <openspace/util/openspacemodule.h>
+uniform float opacity;
+uniform vec3 color;
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/util/touch.h>
-#include <memory>
-#include <set>
 
-namespace openspace {
+Fragment getFragment() {
+  // Calculate normal from texture coordinates
+  vec3 n;
+  n.xy = gl_PointCoord.st * vec2(2.0, -2.0) + vec2(-1.0, 1.0);
+  float mag = dot(n.xy, n.xy);
 
-class TuioEar;
+  float edgeSmoothing = 1.0;
+  float w = 0.1; // width for smoothing
+  if (mag > 1.0 - w) {
+    // Kill pixels outside circle. Do a smoothstep for soft border
+    float t = (mag - (1.0 - w)) / w;
+    edgeSmoothing = smoothstep(1.0, 0.0, t);
+    if (edgeSmoothing <= 0.0) {
+        discard;
+    }
+  }
+  n.z = sqrt(1.0 - mag);
 
-#ifdef WIN32
-class Win32TouchHook;
-#endif // WIN32
+  // Calculate lighting
+  vec3 light_dir = vec3(0.0, 0.0, 1.0);
+  float diffuse = max(0.0, dot(light_dir, n));
+  float alpha = min(mag, opacity);
+  alpha *= edgeSmoothing;
 
-class TouchModule : public OpenSpaceModule {
-public:
-    constexpr static const char* Name = "Touch";
-
-    TouchModule();
-    ~TouchModule();
-
-protected:
-    void internalInitialize(const ghoul::Dictionary& dictionary) override;
-
-private:
-    /**
-     * Process TUIO touch input that occured since the last frame.
-     */
-    void processNewInput();
-
-    std::unique_ptr<TuioEar> _ear;
-
-    IntProperty _tuioPort;
-    BoolProperty _hasActiveTouchEvent;
-
-    /// Contains an id and the Point that was processed last frame
-    glm::ivec2 _webPositionCallback = glm::ivec2(0);
-#ifdef WIN32
-    std::unique_ptr<Win32TouchHook> _win32TouchHook;
-#endif // WIN32
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+  Fragment frag;
+  frag.color = vec4(color * diffuse, alpha);
+  frag.depth = 1.0;
+  return frag;
+}

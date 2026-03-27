@@ -28,7 +28,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/network/messagestructures.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>

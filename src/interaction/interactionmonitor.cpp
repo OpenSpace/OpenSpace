@@ -50,7 +50,13 @@ namespace {
 namespace openspace {
 
 InteractionMonitor::InteractionMonitor()
-    : PropertyOwner({ "InteractionMonitor", "Interaction Monitor" })
+    : PropertyOwner({
+        "InteractionMonitor",
+        "Interaction Monitor",
+        "Keeps track of the last time any interaction happened in the application and "
+        "whether the software is in an active state. It stays in active state for a "
+        "certain time after the last interaction happened."
+    })
     , _isInActiveState(IsInActiveStateInfo, false)
     , _idleTime(IdleTimeInfo, 120.f, 0.f, 300.f)
 {

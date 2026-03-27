@@ -22,28 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 
 #include <openspace/camera/camera.h>
 #include <openspace/camera/camerapose.h>
-#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/events/event.h>
-#include <openspace/events/eventengine.h>
-#include <openspace/interaction/keyboardinputstate.h>
-#include <openspace/interaction/mouseinputstate.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/syncable.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/query/query.h>
+#include <openspace/engine/globals.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/misc/easing.h>
-#include <ghoul/misc/exception.h>
 #include <glm/gtx/vector_angle.hpp>
 #include <algorithm>
 #include <cstdlib>
@@ -59,10 +55,7 @@ namespace {
 
     constexpr double AngleEpsilon = 1e-7;
     constexpr double DistanceRatioAimThreshold = 1e-4;
-
-    constexpr std::string_view IdleKeyOrbit = "Orbit";
-    constexpr std::string_view IdleKeyOrbitAtConstantLat = "OrbitAtConstantLatitude";
-    constexpr std::string_view IdleKeyOrbitAroundUp = "OrbitAroundUp";
+    constexpr double CameraMovedEventIntervalTime = 5.0;
 
     constexpr Property::PropertyInfo AnchorInfo = {
         "Anchor",
@@ -124,30 +117,6 @@ namespace {
         Property::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo MouseSensitivityInfo = {
-        "MouseSensitivity",
-        "Mouse sensitivity",
-        "Determines the sensitivity of the camera motion thorugh the mouse. The lower "
-        "the sensitivity is the less impact a mouse motion will have.",
-        Property::Visibility::NoviceUser
-    };
-
-    constexpr Property::PropertyInfo JoystickSensitivityInfo = {
-        "JoystickSensitivity",
-        "Joystick sensitivity",
-        "Determines the sensitivity of the camera motion thorugh a joystick. The lower "
-        "the sensitivity is the less impact a joystick motion will have.",
-        Property::Visibility::NoviceUser
-    };
-
-    constexpr Property::PropertyInfo WebsocketSensitivityInfo = {
-        "WebsocketSensitivity",
-        "Websocket Sensitivity",
-        "Determines the sensitivity of the camera motion thorugh a websocket. The lower "
-        "the sensitivity is the less impact a webstick motion will have.",
-        Property::Visibility::NoviceUser
-    };
-
     constexpr Property::PropertyInfo FrictionInfo = {
         "Friction",
         "Friction factor",
@@ -199,15 +168,6 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo InvertMouseButtons = {
-        "InvertMouseButtons",
-        "Invert left and right mouse buttons",
-        "If this value is 'false', the left mouse button causes the camera to rotate "
-        "around the object and the right mouse button causes the zooming motion. If this "
-        "value is 'true', these two functionalities are reversed.",
-        Property::Visibility::NoviceUser
-    };
-
     constexpr Property::PropertyInfo UseAdaptiveStereoscopicDepthInfo = {
         "UseAdaptiveStereoscopicDepth",
         "Adaptive steroscopic depth",
@@ -242,74 +202,6 @@ namespace {
         "distance of the camera to the surface of a planet. When enabling this setting "
         "consider adjusting the mouse sensitivity to a lower value.",
         Property::Visibility::User
-    };
-
-    constexpr Property::PropertyInfo ApplyIdleBehaviorInfo = {
-        "ApplyIdleBehavior",
-        "Apply idle behavior",
-        "When set to true, the chosen idle behavior will be applied to the camera, "
-        "moving the camera accordingly.",
-        Property::Visibility::User
-    };
-
-    constexpr Property::PropertyInfo IdleBehaviorInfo = {
-        "IdleBehavior",
-        "Idle behavior",
-        "The chosen camera behavior that will be triggered when the idle behavior is "
-        "applied. Each option represents a predefined camera behavior.",
-        Property::Visibility::AdvancedUser
-    };
-
-    constexpr Property::PropertyInfo ShouldTriggerIdleBehaviorWhenIdleInfo = {
-        "ShouldTriggerWhenIdle",
-        "Should trigger when idle",
-        "If true, the chosen idle behavior will trigger automatically after a certain "
-        "time (see 'IdleWaitTime' property).",
-        Property::Visibility::User
-    };
-
-    constexpr Property::PropertyInfo IdleWaitTimeInfo = {
-        "IdleWaitTime",
-        "Idle wait time",
-        "The time (seconds) until idle behavior starts, if no camera interaction has "
-        "been performed. Note that friction counts as camera interaction.",
-        Property::Visibility::AdvancedUser
-    };
-
-    constexpr Property::PropertyInfo IdleBehaviorSpeedInfo = {
-        "SpeedFactor",
-        "Speed factor",
-        "A factor that can be used to increase or slow down the speed of an applied idle "
-        "behavior. A negative value will invert the direction. Note that a speed of "
-        "exactly 0 leads to no movement at all.",
-        Property::Visibility::AdvancedUser
-    };
-
-    constexpr Property::PropertyInfo InvertIdleBehaviorInfo = {
-        "Invert",
-        "Invert",
-        "If true, the direction of the idle behavior motion will be inverted compared to "
-        "the default. For example, the 'Orbit' option rotates to the right per default, "
-        "and will rotate to the left when inverted.",
-        Property::Visibility::AdvancedUser
-    };
-
-    constexpr Property::PropertyInfo AbortOnCameraInteractionInfo = {
-        "AbortOnCameraInteraction",
-        "Abort on camera interaction",
-        "If set to true, the idle behavior is aborted on camera interaction. If false, "
-        "the behavior will be reapplied after the interaction. Examples of camera "
-        "interaction are: changing the anchor node, starting a camera path or session "
-        "recording playback, or navigating manually using an input device.",
-        Property::Visibility::User
-    };
-
-    constexpr Property::PropertyInfo IdleBehaviorDampenInterpolationTimeInfo = {
-        "DampenInterpolationTime",
-        "Start/end dampen interpolation time",
-        "The time to interpolate to/from full speed when an idle behavior is triggered "
-        "or canceled, in seconds.",
-        Property::Visibility::AdvancedUser
     };
 
     const PropertyOwner::PropertyOwnerInfo LimitZoomInfo = {
@@ -415,6 +307,7 @@ namespace {
             glm::dvec3(inverseModelTransform * glm::dvec4(cameraPositionWorldSpace, 1.0));
         const SurfacePositionHandle posHandle =
             node.calculateSurfacePositionHandle(cameraPositionModelSpace);
+
         return posHandle;
     }
 } // namespace
@@ -432,43 +325,6 @@ OrbitalNavigator::Friction::Friction()
     addProperty(rotational);
     addProperty(zoom);
     addProperty(friction);
-}
-
-OrbitalNavigator::IdleBehavior::IdleBehavior()
-    : PropertyOwner({ "IdleBehavior", "Idle Behavior" })
-    , apply(ApplyIdleBehaviorInfo, false)
-    , shouldTriggerWhenIdle(ShouldTriggerIdleBehaviorWhenIdleInfo, false)
-    , idleWaitTime(IdleWaitTimeInfo, 5.f, 0.f, 3600.f)
-    , abortOnCameraInteraction(AbortOnCameraInteractionInfo, true)
-    , invert(InvertIdleBehaviorInfo, false)
-    , speedScaleFactor(IdleBehaviorSpeedInfo, 1.f, -5.f, 5.f)
-    , dampenInterpolationTime(IdleBehaviorDampenInterpolationTimeInfo, 0.5f, 0.f, 10.f)
-    , defaultBehavior(IdleBehaviorInfo)
-{
-    addProperty(apply);
-    defaultBehavior.addOptions({
-        {
-            static_cast<int>(Behavior::Orbit),
-            std::string(IdleKeyOrbit)
-        },
-        {
-            static_cast<int>(Behavior::OrbitAtConstantLat),
-            std::string(IdleKeyOrbitAtConstantLat)
-        },
-        {
-            static_cast<int>(Behavior::OrbitAroundUp),
-            std::string(IdleKeyOrbitAroundUp)
-        }
-    });
-    defaultBehavior = static_cast<int>(IdleBehavior::Behavior::Orbit);
-    addProperty(defaultBehavior);
-    addProperty(shouldTriggerWhenIdle);
-    addProperty(idleWaitTime);
-    idleWaitTime.setExponent(2.2f);
-    addProperty(invert);
-    addProperty(speedScaleFactor);
-    addProperty(abortOnCameraInteraction);
-    addProperty(dampenInterpolationTime);
 }
 
 OrbitalNavigator::LimitZoom::LimitZoom()
@@ -489,7 +345,13 @@ OrbitalNavigator::LimitZoom::LimitZoom()
 }
 
 OrbitalNavigator::OrbitalNavigator()
-    : PropertyOwner({ "OrbitalNavigator", "Orbital Navigator" })
+    : PropertyOwner({
+        "OrbitalNavigator",
+        "Orbital Navigator",
+        "Settings related to the \"regular\" navigation, around a focus object. Input "
+        "can be provided using mouse and keyboard, joysticks, scripting, or over the "
+        "websocket."
+     })
     , _anchor(AnchorInfo)
     , _aim(AimInfo)
     , _retargetAnchor(RetargetAnchorInfo)
@@ -498,9 +360,6 @@ OrbitalNavigator::OrbitalNavigator()
     , _followAnchorNodeRotationDistance(FollowAnchorNodeDistanceInfo, 5.f, 0.f, 20.f)
     , _disableZoom(DisableZoomInfo, false)
     , _disableRoll(DisableRollInfo, false)
-    , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
-    , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.f, 50.f)
-    , _websocketSensitivity(WebsocketSensitivityInfo, 5.f, 1.f, 50.f)
     , _useAdaptiveStereoscopicDepth(UseAdaptiveStereoscopicDepthInfo, true)
     , _stereoscopicDepthOfFocusSurface(
         StereoscopicDepthOfFocusSurfaceInfo,
@@ -513,15 +372,9 @@ OrbitalNavigator::OrbitalNavigator()
     , _retargetInterpolationTime(RetargetInterpolationTimeInfo, 2.0, 0.0, 10.0)
     , _stereoInterpolationTime(StereoInterpolationTimeInfo, 8.0, 0.0, 10.0)
     , _followRotationInterpolationTime(FollowRotationInterpTimeInfo, 1.0, 0.0, 10.0)
-    , _invertMouseButtons(InvertMouseButtons, false)
     , _shouldRotateAroundUp(ShouldRotateAroundUpInfo, false)
     , _upToUseForRotation(UpToUseForRotationInfo)
-    , _mouseStates(_mouseSensitivity * 0.0001f, 1.f / (_friction.friction + 0.0000001f))
-    , _joystickStates(
-        _joystickSensitivity * 0.1f,
-        1.f / (_friction.friction + 0.0000001f)
-    )
-    , _websocketStates(_websocketSensitivity, 1.f / (_friction.friction + 0.0000001f))
+    , _inputHandler(_friction.friction)
 {
     _anchor.onChange([this]() {
         if (_anchor.value().empty()) {
@@ -580,7 +433,7 @@ OrbitalNavigator::OrbitalNavigator()
     // exponentially decreasing value but we want to be able to control it. Either as
     // a linear interpolation or a smooth step interpolation. Therefore we use
     // newValue = lerp(0, currentValue * f(t) * dt) where f(t) is the transfer function
-    // and lerp is a linear iterpolation `lerp(end, start, interpolationParameter)`.
+    // and lerp is a linear interpolation `lerp(end, start, interpolationParameter)`.
     //
     // The transfer functions are derived from:
     // f(t) = d/dt (ln(1 / f_orig(t))) where f_orig is the transfer function that would be
@@ -597,68 +450,22 @@ OrbitalNavigator::OrbitalNavigator()
 
     // Define callback functions for changed properties
     _friction.roll.onChange([this]() {
-        _mouseStates.setRotationalFriction(_friction.roll);
-        _joystickStates.setRotationalFriction(_friction.roll);
-        _websocketStates.setRotationalFriction(_friction.roll);
+        _inputHandler.setRollFrictionEnabled(_friction.roll);
     });
     _friction.rotational.onChange([this]() {
-        _mouseStates.setHorizontalFriction(_friction.rotational);
-        _joystickStates.setHorizontalFriction(_friction.rotational);
-        _websocketStates.setHorizontalFriction(_friction.rotational);
+        _inputHandler.setRotationalFrictionEnabled(_friction.rotational);
     });
     _friction.zoom.onChange([this]() {
-        _mouseStates.setVerticalFriction(_friction.zoom);
-        _joystickStates.setVerticalFriction(_friction.zoom);
-        _websocketStates.setVerticalFriction(_friction.zoom);
+        _inputHandler.setZoomFrictionEnabled(_friction.zoom);
     });
     _friction.friction.onChange([this]() {
-        _mouseStates.setVelocityScaleFactor(1 / (_friction.friction + 0.0000001));
-        _joystickStates.setVelocityScaleFactor(1 / (_friction.friction + 0.0000001));
-        _websocketStates.setVelocityScaleFactor(1 / (_friction.friction + 0.0000001));
+        _inputHandler.updateFrictionFactor(_friction.friction);
     });
 
-    _mouseSensitivity.onChange([this]() {
-        _mouseStates.setSensitivity(_mouseSensitivity * pow(10.0, -4));
-    });
-    _joystickSensitivity.onChange([this]() {
-        _joystickStates.setSensitivity(_joystickSensitivity * 0.1);
-    });
-    _websocketSensitivity.onChange([this]() {
-        _websocketStates.setSensitivity(_websocketSensitivity);
-    });
-
+    addPropertySubOwner(_inputHandler);
     addPropertySubOwner(_friction);
-    addPropertySubOwner(_idleBehavior);
+    addPropertySubOwner(_idleMotion);
     addPropertySubOwner(_limitZoom);
-
-    _idleBehaviorDampenInterpolator.setTransferFunction(
-        ghoul::quadraticEaseInOut<double>
-    );
-    _idleBehavior.dampenInterpolationTime.onChange([this]() {
-        _idleBehaviorDampenInterpolator.setInterpolationTime(
-            _idleBehavior.dampenInterpolationTime
-        );
-    });
-    _idleBehavior.apply.onChange([this]() {
-        if (_idleBehavior.apply) {
-            // Reset velocities to ensure that abort on interaction works correctly
-            resetVelocities();
-            _invertIdleBehaviorInterpolation = false;
-        }
-        else {
-            _invertIdleBehaviorInterpolation = true;
-        }
-        _idleBehaviorDampenInterpolator.start();
-        _idleBehaviorDampenInterpolator.setInterpolationTime(
-            _idleBehavior.dampenInterpolationTime
-        );
-    });
-    _idleBehavior.shouldTriggerWhenIdle.onChange([this]() {
-        _idleBehaviorTriggerTimer = _idleBehavior.idleWaitTime;
-    });
-    _idleBehavior.idleWaitTime.onChange([this]() {
-        _idleBehaviorTriggerTimer = _idleBehavior.idleWaitTime;
-    });
 
     addProperty(_anchor);
     addProperty(_aim);
@@ -683,15 +490,6 @@ OrbitalNavigator::OrbitalNavigator()
     });
     _followRotationInterpolator.setInterpolationTime(_followRotationInterpolationTime);
     addProperty(_followRotationInterpolationTime);
-
-    _invertMouseButtons.onChange([this]() {
-        _mouseStates.setInvertMouseButton(_invertMouseButtons);
-    });
-    addProperty(_invertMouseButtons);
-
-    addProperty(_mouseSensitivity);
-    addProperty(_joystickSensitivity);
-    addProperty(_websocketSensitivity);
 
     addProperty(_disableZoom);
     _disableZoom.onChange([this]() {
@@ -726,6 +524,8 @@ OrbitalNavigator::OrbitalNavigator()
     });
     _upToUseForRotation = static_cast<int>(UpDirectionChoice::ZAxis);
     addProperty(_upToUseForRotation);
+
+    addPropertySubOwner(_directManipulation);
 }
 
 glm::dvec3 OrbitalNavigator::anchorNodeToCameraVector() const {
@@ -753,10 +553,7 @@ glm::dvec3 OrbitalNavigator::pushToSurfaceOfAnchor(const glm::dvec3& cameraPosit
 }
 
 void OrbitalNavigator::resetVelocities() {
-    _mouseStates.resetVelocities();
-    _joystickStates.resetVelocities();
-    _websocketStates.resetVelocities();
-    _scriptStates.resetVelocities();
+    _inputHandler.resetVelocities();
 
     if (shouldFollowAnchorRotation(_camera->position())) {
         _followRotationInterpolator.end();
@@ -766,39 +563,31 @@ void OrbitalNavigator::resetVelocities() {
     }
 }
 
-void OrbitalNavigator::updateStatesFromInput(const MouseInputState& mouseInputState,
-                                             const KeyboardInputState& keyboardInputState,
-                                             double deltaTime)
-{
-    _mouseStates.updateStateFromInput(mouseInputState, keyboardInputState, deltaTime);
-    _joystickStates.updateStateFromInput(*global::joystickInputStates, deltaTime);
-    _websocketStates.updateStateFromInput(*global::websocketInputStates, deltaTime);
-    _scriptStates.updateStateFromInput(deltaTime);
+void OrbitalNavigator::updateCamera(double deltaTime) {
+    _inputHandler.updateStatesFromInput(deltaTime);
 
-    const bool interactionHappened =
-        _mouseStates.hasNonZeroVelocities() || _joystickStates.hasNonZeroVelocities() ||
-        _websocketStates.hasNonZeroVelocities() || _scriptStates.hasNonZeroVelocities();
+    const bool interactionHappened = _inputHandler.hasNonZeroVelocity();
 
     if (interactionHappened) {
-        updateOnCameraInteraction();
+        markCameraInteraction();
     }
     else {
-        tickIdleBehaviorTimer(deltaTime);
+        _idleMotion.tickIdleMotionTimer(deltaTime);
     }
 
-    const bool cameraLocationChanged =
-        _mouseStates.hasNonZeroVelocities(true) ||
-        _joystickStates.hasNonZeroVelocities(true) ||
-        _websocketStates.hasNonZeroVelocities(true) ||
-        _scriptStates.hasNonZeroVelocities(true);
+    const bool cameraLocationChanged = _inputHandler.hasTranslationalVelocity();
 
     if (cameraLocationChanged && (_movementTimer < 0.f)) {
         global::eventEngine->publishEvent<EventCameraMovedPosition>();
-        _movementTimer = _idleBehavior.idleWaitTime;
+        _movementTimer = CameraMovedEventIntervalTime;
     }
     else if (!cameraLocationChanged) {
         tickMovementTimer(static_cast<float>(deltaTime));
     }
+
+    _directManipulation.updateCameraFromInput();
+
+    updateCameraStateFromStates(deltaTime);
 }
 
 void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
@@ -915,13 +704,14 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         posHandle
     );
 
-    // Apply any automatic idle behavior. Note that the idle behavior is aborted if there
-    // is no input from interaction. So, it assumes that all the other effects from user
-    // input results in no change
-    applyIdleBehavior(
+    // Apply any automatic idle motion. Note that the motion is aborted if there is no
+    // input from interaction. So, it assumes that all the other effects from user input
+    // results in no change
+    _idleMotion.apply(
+        _anchorNode,
         deltaTime,
+        horizontalTranslationSpeedScale, // Same speed scale as horizontal translation
         pose.position,
-        camRot.localRotation,
         camRot.globalRotation
     );
 
@@ -1017,34 +807,12 @@ void OrbitalNavigator::updateCameraScalingFromAnchor(double deltaTime) {
     }
 }
 
-void OrbitalNavigator::updateOnCameraInteraction() {
-    // Disable idle behavior if camera interaction happened
-    if (_idleBehavior.apply && _idleBehavior.abortOnCameraInteraction) {
-        resetIdleBehavior();
-    }
+void OrbitalNavigator::markCameraInteraction() {
+    _idleMotion.resetIdleMotionOnCamera();
 }
 
 void OrbitalNavigator::tickMovementTimer(float deltaTime) {
     _movementTimer -= deltaTime;
-}
-
-void OrbitalNavigator::tickIdleBehaviorTimer(double deltaTime) {
-    if (!_idleBehavior.shouldTriggerWhenIdle) {
-        return;
-    }
-
-    if (_idleBehaviorTriggerTimer > 0.f) {
-        _idleBehaviorTriggerTimer -= static_cast<float>(deltaTime);
-    }
-    else {
-        triggerIdleBehavior();
-    }
-}
-
-glm::dquat OrbitalNavigator::composeCameraRotation(
-                                   const CameraRotationDecomposition& decomposition) const
-{
-    return decomposition.globalRotation * decomposition.localRotation;
 }
 
 Camera* OrbitalNavigator::camera() const {
@@ -1098,7 +866,7 @@ void OrbitalNavigator::updateAnchorNode(const SceneGraphNode* anchorNode) {
 
     if (changedAnchor) {
         // Mark a changed anchor node as a camera interaction
-        updateOnCameraInteraction();
+        markCameraInteraction();
         updatePreviousAnchorState();
     }
 
@@ -1286,75 +1054,6 @@ double OrbitalNavigator::maxAllowedDistance() const {
     return _limitZoom.maximumAllowedDistance;
 }
 
-OrbitalNavigator::CameraRotationDecomposition
-OrbitalNavigator::decomposeCameraRotationSurface(const CameraPose& cameraPose,
-                                                 const SceneGraphNode& reference)
-{
-    const glm::dvec3 cameraUp = cameraPose.rotation * Camera::UpDirectionCameraSpace;
-    const glm::dvec3 cameraViewDirection = ghoul::viewDirection(cameraPose.rotation);
-
-    glm::dmat4 modelTransform = reference.modelTransform();
-    if (modelTransform[0][0] == 0.0) {
-        modelTransform[0][0] = std::numeric_limits<double>::epsilon();
-    }
-    if (modelTransform[1][1] == 0.0) {
-        modelTransform[1][1] = std::numeric_limits<double>::epsilon();
-    }
-    if (modelTransform[2][2] == 0.0) {
-        modelTransform[2][2] = std::numeric_limits<double>::epsilon();
-    }
-    const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
-    const glm::dvec3 cameraPositionModelSpace =
-        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPose.position, 1));
-
-    const SurfacePositionHandle posHandle =
-        reference.calculateSurfacePositionHandle(cameraPositionModelSpace);
-
-    const glm::dvec3 directionFromSurfaceToCameraModelSpace =
-        posHandle.referenceSurfaceOutDirection;
-    const glm::dvec3 directionFromSurfaceToCamera = glm::normalize(
-        glm::dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace
-    );
-
-    // To avoid problem with lookup in up direction we adjust is with the view direction
-    const glm::dquat globalCameraRotation = ghoul::lookAtQuaternion(
-        glm::dvec3(0.0),
-        -directionFromSurfaceToCamera,
-        normalize(cameraViewDirection + cameraUp)
-    );
-
-    const glm::dquat localCameraRotation =
-        glm::inverse(globalCameraRotation) * cameraPose.rotation;
-
-    return {
-        .localRotation = localCameraRotation,
-        .globalRotation = globalCameraRotation
-    };
-}
-
-OrbitalNavigator::CameraRotationDecomposition
-OrbitalNavigator::decomposeCameraRotation(const CameraPose& cameraPose,
-                                          const glm::dvec3& reference)
-{
-    const glm::dvec3 cameraUp = cameraPose.rotation * glm::dvec3(0.0, 1.0, 0.0);
-    const glm::dvec3 cameraViewDirection = ghoul::viewDirection(cameraPose.rotation);
-
-    // To avoid problem with lookup in up direction we adjust is with the view direction
-    const glm::dquat globalCameraRotation = ghoul::lookAtQuaternion(
-        glm::dvec3(0.0),
-        reference - cameraPose.position,
-        normalize(cameraViewDirection + cameraUp)
-    );
-
-    const glm::dquat localCameraRotation = glm::inverse(globalCameraRotation) *
-        cameraPose.rotation;
-
-    return {
-        .localRotation = localCameraRotation,
-        .globalRotation = globalCameraRotation
-    };
-}
-
 CameraPose OrbitalNavigator::followAim(CameraPose pose, const glm::dvec3& cameraToAnchor,
                                        const Displacement& anchorToAim)
 {
@@ -1465,11 +1164,7 @@ CameraPose OrbitalNavigator::followAim(CameraPose pose, const glm::dvec3& camera
 glm::dquat OrbitalNavigator::roll(double deltaTime,
                                   const glm::dquat& localCameraRotation) const
 {
-    const double angle =
-        _mouseStates.localRollVelocity() * deltaTime +
-        _joystickStates.localRollVelocity() * deltaTime +
-        _websocketStates.localRollVelocity() * deltaTime +
-        _scriptStates.localRollVelocity() * deltaTime;
+    const double angle = _inputHandler.localRollVelocity() * deltaTime;
     const glm::dquat mouseRollQuat = glm::angleAxis(angle, glm::dvec3(0.0, 0.0, 1.0));
     return localCameraRotation * mouseRollQuat;
 }
@@ -1477,32 +1172,13 @@ glm::dquat OrbitalNavigator::roll(double deltaTime,
 glm::dquat OrbitalNavigator::rotateLocally(double deltaTime,
                                            const glm::dquat& localCameraRotation) const
 {
-    const glm::dquat mouseRotationDiff = glm::dquat(glm::dvec3(
-        _mouseStates.localRotationVelocity().y,
-        _mouseStates.localRotationVelocity().x,
+    const glm::dquat rotationDiff = glm::dquat(glm::dvec3(
+        _inputHandler.localRotationVelocity().y,
+        _inputHandler.localRotationVelocity().x,
         0.0
     ) * deltaTime);
 
-    const glm::dquat joystickRotationDiff = glm::dquat(glm::dvec3(
-        _joystickStates.localRotationVelocity().y,
-        _joystickStates.localRotationVelocity().x,
-        0.0
-    ) * deltaTime);
-
-    const glm::dquat websocketRotationDiff = glm::dquat(glm::dvec3(
-        _websocketStates.localRotationVelocity().y,
-        _websocketStates.localRotationVelocity().x,
-        0.0
-    ) * deltaTime);
-
-    const glm::dquat scriptRotationDiff = glm::dquat(glm::dvec3(
-        _scriptStates.localRotationVelocity().y,
-        _scriptStates.localRotationVelocity().x,
-        0.0
-    ) * deltaTime);
-
-    return localCameraRotation * joystickRotationDiff * mouseRotationDiff *
-           websocketRotationDiff * scriptRotationDiff;
+    return localCameraRotation * rotationDiff;
 }
 
 glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
@@ -1576,10 +1252,8 @@ OrbitalNavigator::interpolateRetargetAim(double deltaTime, const CameraPose& pos
 
     if (requestedAngle <= maxAngle) {
         const glm::dvec3 aimPos = pose.position + prevCameraToAnchor + anchorToAim.second;
-        const CameraRotationDecomposition aimDecomp = decomposeCameraRotation(
-          pose,
-            aimPos
-        );
+        const CameraRotationDecomposition aimDecomp =
+            decomposeCameraRotation(pose, aimPos);
 
         const glm::dquat interpolatedRotation = glm::slerp(
             prevRotation,
@@ -1604,7 +1278,6 @@ OrbitalNavigator::interpolateRetargetAim(double deltaTime, const CameraPose& pos
     }
     return anchorToAim;
 }
-
 
 double OrbitalNavigator::interpolateCameraToSurfaceDistance(double deltaTime,
                                                             double currentDistance,
@@ -1646,13 +1319,16 @@ void OrbitalNavigator::rotateAroundAnchorUp(double deltaTime, double speedScale,
         }
     }(UpDirectionChoice(_upToUseForRotation.value()));
 
-    const double combinedXInput = _mouseStates.globalRotationVelocity().x +
-        _joystickStates.globalRotationVelocity().x +
-        _websocketStates.globalRotationVelocity().x +
-        _scriptStates.globalRotationVelocity().x;
+    const double combinedXInput = _inputHandler.globalRotationVelocity().x;
 
     const double angle = combinedXInput * deltaTime * speedScale;
-    orbitAroundAxis(axis, angle, cameraPosition, globalCameraRotation);
+    IdleMotion::orbitAroundAxis(
+        _anchorNode,
+        axis,
+        angle,
+        cameraPosition,
+        globalCameraRotation
+    );
 }
 
 glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime, double speedScale,
@@ -1668,39 +1344,21 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime, double spee
     const double angleScale = deltaTime * speedScale;
 
     // Get rotation in camera space
-    const glm::dquat mouseRotationDiffCamSpace = glm::dquat(glm::dvec3(
-        -_mouseStates.globalRotationVelocity().y,
-        useX ? -_mouseStates.globalRotationVelocity().x : 0.0,
-        0.0
-    ) * angleScale);
-
-    const glm::dquat joystickRotationDiffCamSpace = glm::dquat(glm::dvec3(
-        -_joystickStates.globalRotationVelocity().y,
-        useX ? -_joystickStates.globalRotationVelocity().x : 0.0,
-        0.0
-    ) * angleScale);
-
-    const glm::dquat scriptRotationDiffCamSpace = glm::dquat(glm::dvec3(
-        -_scriptStates.globalRotationVelocity().y,
-        useX ? -_scriptStates.globalRotationVelocity().x : 0.0,
-        0.0
-    ) * angleScale);
-
-    const glm::dquat websocketRotationDiffCamSpace = glm::dquat(glm::dvec3(
-        -_websocketStates.globalRotationVelocity().y,
-        useX ? -_websocketStates.globalRotationVelocity().x : 0.0,
+    const glm::dquat rotationDiffCameraSpace = glm::dquat(glm::dvec3(
+        -_inputHandler.globalRotationVelocity().y,
+        useX ? -_inputHandler.globalRotationVelocity().x : 0.0,
         0.0
     ) * angleScale);
 
     // Transform to world space
     const glm::dquat rotationDiffWorldSpace = globalCameraRotation *
-        joystickRotationDiffCamSpace * mouseRotationDiffCamSpace *
-        websocketRotationDiffCamSpace * scriptRotationDiffCamSpace *
+        rotationDiffCameraSpace *
         glm::inverse(globalCameraRotation);
 
     const glm::dmat4 modelTransform = _anchorNode->modelTransform();
     const glm::dvec3 outDirection = glm::normalize(
-        glm::dmat3(modelTransform) * positionHandle.referenceSurfaceOutDirection
+        glm::dmat3(modelTransform) *
+        positionHandle.referenceSurfaceOutDirection
     );
 
     // Compute the vector to rotate to find the new position
@@ -1762,9 +1420,7 @@ glm::dvec3 OrbitalNavigator::translateVertically(double deltaTime,
         glm::dmat3(modelTransform) * centerToActualSurfaceModelSpace;
     const glm::dvec3 actualSurfaceToCamera = posDiff - centerToActualSurface;
 
-    const double totalVelocity =
-        _joystickStates.truckMovementVelocity() + _mouseStates.truckMovementVelocity() +
-        _websocketStates.truckMovementVelocity() + _scriptStates.truckMovementVelocity();
+    const double totalVelocity = _inputHandler.truckMovementVelocity();
 
     return cameraPosition - actualSurfaceToCamera * totalVelocity * deltaTime;
 }
@@ -1781,13 +1437,8 @@ glm::dquat OrbitalNavigator::rotateHorizontally(double deltaTime,
         glm::dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace
     );
 
-    const double angle =
-        _mouseStates.globalRollVelocity() * deltaTime +
-        _joystickStates.globalRollVelocity() * deltaTime +
-        _websocketStates.globalRollVelocity() * deltaTime +
-        _scriptStates.globalRollVelocity() * deltaTime;
     const glm::dquat mouseCameraRollRotation = glm::angleAxis(
-        angle,
+        _inputHandler.globalRollVelocity() * deltaTime,
         directionFromSurfaceToCamera
     );
     return mouseCameraRollRotation * globalCameraRotation;
@@ -1839,6 +1490,18 @@ glm::dvec3 OrbitalNavigator::pushToSurface(const glm::dvec3& cameraPosition,
     return cameraPosition + referenceSurfaceOutDirection * adjustment;
 }
 
+void OrbitalNavigator::triggerIdleMotion(std::string_view choice) {
+    const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    if (mode != OpenSpaceEngine::Mode::UserControl) {
+        LERROR(
+            "Could not start idle motion. The camera is being controlled "
+            "by some other part of the system"
+        );
+        return;
+    }
+    _idleMotion.triggerIdleMotion(choice);
+}
+
 glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,
                                                           const glm::dvec3 cameraPosition,
                                                            const glm::dquat& rotationDiff)
@@ -1857,185 +1520,15 @@ glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,
 }
 
 JoystickCameraStates& OrbitalNavigator::joystickStates() {
-    return _joystickStates;
-}
-
-const JoystickCameraStates& OrbitalNavigator::joystickStates() const {
-    return _joystickStates;
+    return _inputHandler.joystickStates();
 }
 
 WebsocketCameraStates& OrbitalNavigator::websocketStates() {
-    return _websocketStates;
-}
-
-const WebsocketCameraStates& OrbitalNavigator::websocketStates() const {
-    return _websocketStates;
+    return _inputHandler.websocketStates();
 }
 
 ScriptCameraStates& OrbitalNavigator::scriptStates() {
-    return _scriptStates;
-}
-
-const ScriptCameraStates& OrbitalNavigator::scriptStates() const {
-    return _scriptStates;
-}
-
-void OrbitalNavigator::triggerIdleBehavior(std::string_view choice) {
-    const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
-    if (mode != OpenSpaceEngine::Mode::UserControl) {
-        LERROR(
-            "Could not start idle behavior. The camera is being controlled by some other "
-            "part of the system"
-        );
-        return;
-    }
-
-    if (choice.empty()) {
-        _idleBehavior.chosenBehavior = std::nullopt;
-    }
-    else {
-        IdleBehavior::Behavior behavior = IdleBehavior::Behavior::Orbit;
-        if (choice == IdleKeyOrbit) {
-            behavior = IdleBehavior::Behavior::Orbit;
-        }
-        else if (choice == IdleKeyOrbitAtConstantLat) {
-            behavior = IdleBehavior::Behavior::OrbitAtConstantLat;
-        }
-        else if (choice == IdleKeyOrbitAroundUp) {
-            behavior = IdleBehavior::Behavior::OrbitAroundUp;
-        }
-        else {
-            throw ghoul::RuntimeError(std::format(
-                "No existing IdleBehavior with identifier '{}'", choice
-            ));
-        }
-        _idleBehavior.chosenBehavior = behavior;
-    }
-
-    _idleBehavior.apply = true;
-}
-
-void OrbitalNavigator::resetIdleBehavior() {
-    _idleBehavior.apply = false;
-    _idleBehavior.chosenBehavior = std::nullopt;
-    // Prevent interpolating stop, to avoid weirdness when changing anchor, etc
-    _idleBehaviorDampenInterpolator.setInterpolationTime(0.f);
-    _idleBehaviorTriggerTimer = _idleBehavior.idleWaitTime;
-}
-
-void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
-                                         glm::dquat&, glm::dquat& globalRotation)
-{
-    _idleBehaviorDampenInterpolator.setDeltaTime(static_cast<float>(deltaTime));
-    _idleBehaviorDampenInterpolator.step();
-
-    if (!(_idleBehavior.apply || _idleBehaviorDampenInterpolator.isInterpolating())) {
-        return;
-    }
-
-    const SurfacePositionHandle posHandle = calculateSurfacePositionHandle(
-        *_anchorNode,
-        position
-    );
-
-    // Same speed scale as horizontal translation
-    double speedScale = rotationSpeedScaleFromCameraHeight(position, posHandle);
-
-    speedScale *= _idleBehavior.speedScaleFactor;
-    // Without this scaling, the motion is way too fast
-    speedScale *= 0.05;
-
-    if (_idleBehavior.invert) {
-        speedScale *= -1.0;
-    }
-
-    // Interpolate so that the start and end are smooth
-    const double s = _idleBehaviorDampenInterpolator.value();
-    speedScale *= _invertIdleBehaviorInterpolation ? (1.0 - s) : s;
-
-    const double angle = deltaTime * speedScale;
-
-    // Apply the chosen behavior
-    const IdleBehavior::Behavior choice = _idleBehavior.chosenBehavior.value_or(
-        static_cast<IdleBehavior::Behavior>(_idleBehavior.defaultBehavior.value())
-    );
-
-    switch (choice) {
-        case IdleBehavior::Behavior::Orbit:
-            orbitAnchor(angle, position, globalRotation);
-            break;
-        case IdleBehavior::Behavior::OrbitAtConstantLat: {
-            // Assume that "north" coincides with the local z-direction
-            // @TODO (2021-07-09, emmbr) Make each scene graph node aware of its own
-            // north/up, so that we can query this information rather than assuming it.
-            // Then we could also combine this idle behavior with the next
-            const glm::dvec3 North = glm::dvec3(0.0, 0.0, 1.0);
-            orbitAroundAxis(North, angle, position, globalRotation);
-            break;
-        }
-        case IdleBehavior::Behavior::OrbitAroundUp: {
-            // Assume that "up" coincides with the local y-direction
-            const glm::dvec3 Up = glm::dvec3(0.0, 1.0, 0.0);
-            orbitAroundAxis(Up, angle, position, globalRotation);
-            break;
-        }
-        default:
-            throw ghoul::MissingCaseException();
-    }
-}
-
-void OrbitalNavigator::orbitAnchor(double angle, glm::dvec3& position,
-                                   glm::dquat& globalRotation)
-{
-    ghoul_assert(_anchorNode != nullptr, "Node to orbit must be set");
-
-    // Apply a rotation to the right, in camera space. (Maybe we should also let the user
-    // decide which direction to rotate? Or provide a few different orbit options)
-    const glm::dvec3 eulerAngles = glm::dvec3(0.0, -1.0, 0.0) * angle;
-    const glm::dquat rotationDiffCameraSpace = glm::dquat(eulerAngles);
-
-    const glm::dquat rotationDiffWorldSpace = globalRotation *
-        rotationDiffCameraSpace *
-        glm::inverse(globalRotation);
-
-    // Rotate to find the difference in position
-    const glm::dvec3 anchorCenterToCamera = position - _anchorNode->worldPosition();
-    const glm::dvec3 rotationDiffVec3 =
-        anchorCenterToCamera * rotationDiffWorldSpace - anchorCenterToCamera;
-
-    position += rotationDiffVec3;
-}
-
-void OrbitalNavigator::orbitAroundAxis(const glm::dvec3& axis, double angle,
-                                       glm::dvec3& position, glm::dquat& globalRotation)
-{
-    ghoul_assert(_anchorNode != nullptr, "Node to orbit must be set");
-
-    if (std::abs(angle) < AngleEpsilon) {
-        return;
-    }
-
-    const glm::dmat4 modelTransform = _anchorNode->modelTransform();
-    const glm::dvec3 axisInWorldSpace =
-        glm::normalize(glm::dmat3(modelTransform) * glm::normalize(axis));
-
-    // Compute rotation to be applied around the axis
-    const glm::dquat spinRotation = glm::angleAxis(angle, axisInWorldSpace);
-
-    // Rotate the position vector from the center to camera and update position
-    const glm::dvec3 anchorCenterToCamera = position - _anchorNode->worldPosition();
-    const glm::dvec3 rotationDiff =
-        spinRotation * anchorCenterToCamera - anchorCenterToCamera;
-
-    if (glm::length(rotationDiff) == 0.0) {
-        return;
-    }
-
-    position += rotationDiff;
-
-    // Also apply the rotation to the global rotation, so the camera up vector is rotated
-    // around the axis as well
-    globalRotation = spinRotation * globalRotation;
+    return _inputHandler.scriptStates();
 }
 
 double OrbitalNavigator::rotationSpeedScaleFromCameraHeight(

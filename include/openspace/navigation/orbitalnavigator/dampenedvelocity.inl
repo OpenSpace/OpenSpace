@@ -22,50 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__
-#define __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__
-
-#include <openspace/properties/propertyowner.h>
-
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec3property.h>
-#include <openspace/util/touch.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
-#include <memory>
-
-namespace ghoul::opengl { class ProgramObject; }
+#include <ghoul/glm.h>
 
 namespace openspace {
 
-class TouchMarker : public PropertyOwner {
-public:
-    TouchMarker();
-    virtual ~TouchMarker();
+template <typename T>
+DampenedVelocity<T>::DampenedVelocity(double scaleFactor, bool useFriction)
+    : _scaleFactor(scaleFactor)
+    , _frictionEnabled(useFriction)
+{}
 
-    void initialize();
-    void deinitialize();
+template <typename T>
+void DampenedVelocity<T>::set(T value, double dt) {
+    _targetValue = value;
+    _currentValue += (_targetValue - _currentValue) * glm::min(_scaleFactor * dt, 1.0);
+    // Less or equal to 1.0 keeps it stable
+}
 
-    void render(const std::vector<TouchInputHolder>& list);
+template <typename T>
+void DampenedVelocity<T>::decelerate(double dt) {
+    if (!_frictionEnabled) {
+        return;
+    }
+    _currentValue *= (1.0 - glm::min(_scaleFactor * dt, 1.0));
+    // Less or equal to 1.0 keeps it stable
+}
 
-private:
-    void createVertexList(const std::vector<TouchInputHolder>& list);
+template <typename T>
+void DampenedVelocity<T>::setImmediate(T value) {
+    _targetValue = value;
+    _currentValue = value;
+}
 
-    BoolProperty _visible;
-    FloatProperty _radiusSize;
-    FloatProperty _opacity;
-    FloatProperty _thickness;
-    Vec3Property _color;
+template <typename T>
+void DampenedVelocity<T>::setFriction(bool enabled) {
+    _frictionEnabled = enabled;
+}
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    UniformCache(radius, opacity, thickness, color) _uniformCache;
+template <typename T>
+void DampenedVelocity<T>::setScaleFactor(double scaleFactor) {
+    _scaleFactor = scaleFactor;
+}
 
-    GLsizei _count = 0;
-    GLuint _vao = 0;
-    GLuint _vbo = 0;
-};
+template <typename T>
+T DampenedVelocity<T>::get() const {
+    return _currentValue;
+}
+
+template <typename T>
+void DampenedVelocity<T>::update(std::optional<T> value, double dt) {
+    if (value.has_value()) {
+        set(*value, dt);
+    }
+    else {
+        decelerate(dt);
+    }
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__

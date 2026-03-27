@@ -22,10 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/joystickcamerastates.h>
+#include <openspace/navigation/orbitalnavigator/joystickcamerastates.h>
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
 #include <algorithm>
@@ -40,13 +41,14 @@ namespace {
 namespace openspace {
 
 JoystickCameraStates::JoystickCameraStates(double sensitivity, double velocityScaleFactor)
-    : CameraInteractionStates(sensitivity, velocityScaleFactor)
+    : OrbitalCameraStates(sensitivity, velocityScaleFactor)
 {}
 
-void JoystickCameraStates::updateStateFromInput(
+void JoystickCameraStates::updateVelocitiesFromInput(
                                            const JoystickInputStates& joystickInputStates,
-                                                double deltaTime)
+                                                                         double deltaTime)
 {
+    // TODO: Move this. The joystick camera state thing should not have to care about this mode
     const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
     if (mode == OpenSpaceEngine::Mode::CameraPath ||
         mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
@@ -54,18 +56,15 @@ void JoystickCameraStates::updateStateFromInput(
         return;
     }
 
-    std::pair<bool, glm::dvec2> globalRotation = std::pair(false, glm::dvec2(0.0));
-    std::pair<bool, double> zoom = std::pair(false, 0.0);
-    std::pair<bool, double> localRoll = std::pair(false, 0.0);
-    std::pair<bool, double> globalRoll = std::pair(false, 0.0);
-    std::pair<bool, glm::dvec2> localRotation = std::pair(false, glm::dvec2(0.0));
+    UpdateStates deltaStates;
 
     for (const JoystickInputState& joystickInputState : joystickInputStates) {
         if (joystickInputState.name.empty()) {
             continue;
         }
 
-        JoystickCameraState* joystick = joystickCameraState(joystickInputState.name);
+        JoystickMapping* joystick = joystickMapping(joystickInputState.name);
+
         if (!joystick) {
             continue;
         }
@@ -75,99 +74,115 @@ void JoystickCameraStates::updateStateFromInput(
              i < std::min(nAxes, static_cast<int>(joystick->axisMapping.size()));
              i++)
         {
-            AxisInformation t = joystick->axisMapping[i];
-            if (t.type == AxisType::None) {
+            AxisInformation axis = joystick->axisMapping[i];
+            if (axis.type == AxisType::None) {
                 continue;
             }
 
             const float rawValue = joystickInputStates.axis(joystickInputState.name, i);
-            float val = rawValue;
+            float value = rawValue;
 
-            if (t.isSticky) {
-                val = rawValue - joystick->prevAxisValues[i];
+            if (axis.isSticky) {
+                value = rawValue - joystick->prevAxisValues[i];
                 joystick->prevAxisValues[i] = rawValue;
             }
 
-            if ((t.joystickType == JoystickType::JoystickLike &&
-                 std::abs(val) <= t.deadzone) ||
-                (t.joystickType == JoystickType::TriggerLike && val <= -1.f + t.deadzone))
+            if ((axis.joystickType == JoystickType::JoystickLike &&
+                 std::abs(value) <= axis.deadzone) ||
+                (
+                    axis.joystickType == JoystickType::TriggerLike &&
+                    value <= -1.f + axis.deadzone
+                ))
             {
                 continue;
             }
 
-            if (t.invert) {
-                val *= -1.f;
+            if (axis.invert) {
+                value *= -1.f;
             }
 
-            if (t.joystickType == JoystickType::TriggerLike ||
-                t.type == AxisType::Property)
+            if (axis.joystickType == JoystickType::TriggerLike ||
+                axis.type == AxisType::Property)
             {
-                val = (val + 1.f) / 2.f;
+                value = (value + 1.f) / 2.f;
             }
 
-            if (t.type == AxisType::Property) {
-                val = val * (t.maxValue - t.minValue)  + t.minValue;
+            if (axis.type == AxisType::Property) {
+                value = value * (axis.maxValue - axis.minValue)  + axis.minValue;
             }
             else {
-                if (std::abs(t.sensitivity) > std::numeric_limits<double>::epsilon()) {
-                    val = static_cast<float>(val * t.sensitivity * _sensitivity);
-                }
-                else {
-                    val = static_cast<float>(val * _sensitivity);
+                value = static_cast<float>(value * _sensitivity);
+                if (std::abs(axis.sensitivity) > std::numeric_limits<double>::epsilon()) {
+                    value *= static_cast<float>(axis.sensitivity);
                 }
             }
 
-            if (t.flip) {
-                val = -val;
+            if (axis.flip) {
+                value = -value;
             }
 
-            switch (t.type) {
+            switch (axis.type) {
                 case AxisType::None:
                     break;
                 case AxisType::OrbitX:
-                    globalRotation.first = true;
-                    globalRotation.second.x += val;
+                    if (!deltaStates.globalRotation.has_value()) {
+                        deltaStates.globalRotation = glm::dvec2(0.0);
+                    }
+                    (*deltaStates.globalRotation).x += value;
                     break;
                 case AxisType::OrbitY:
-                    globalRotation.first = true;
-                    globalRotation.second.y += val;
+                    if (!deltaStates.globalRotation.has_value()) {
+                        deltaStates.globalRotation = glm::dvec2(0.0);
+                    }
+                    (*deltaStates.globalRotation).y += value;
                     break;
                 case AxisType::Zoom:
                 case AxisType::ZoomIn:
-                    zoom.first = true;
-                    zoom.second += val;
+                    if (!deltaStates.zoom.has_value()) {
+                        deltaStates.zoom = 0.0;
+                    }
+                    (*deltaStates.zoom) += value;
                     break;
                 case AxisType::ZoomOut:
-                    zoom.first = true;
-                    zoom.second -= val;
+                    if (!deltaStates.zoom.has_value()) {
+                        deltaStates.zoom = 0.0;
+                    }
+                    (*deltaStates.zoom) -= value;
                     break;
                 case AxisType::LocalRoll:
-                    localRoll.first = true;
-                    localRoll.second+= val;
+                    if (!deltaStates.localRoll.has_value()) {
+                        deltaStates.localRoll = 0.0;
+                    }
+                    (*deltaStates.localRoll) += value;
                     break;
                 case AxisType::GlobalRoll:
-                    globalRoll.first = true;
-                    globalRoll.second += val;
+                    if (!deltaStates.globalRoll.has_value()) {
+                        deltaStates.globalRoll = 0.0;
+                    }
+                    (*deltaStates.globalRoll) += value;
                     break;
                 case AxisType::PanX:
-                    localRotation.first = true;
-                    localRotation.second.x += val;
+                    if (!deltaStates.localRotation.has_value()) {
+                        deltaStates.localRotation = glm::dvec2(0.0);
+                    }
+                    (*deltaStates.localRotation).x += value;
                     break;
                 case AxisType::PanY:
-                    localRotation.first = true;
-                    localRotation.second.y += val;
+                    if (!deltaStates.localRotation.has_value()) {
+                        deltaStates.localRotation = glm::dvec2(0.0);
+                    }
+                    (*deltaStates.localRotation).y += value;
                     break;
                 case AxisType::Property:
                     const std::string script = std::format(
                         "openspace.setPropertyValue('{}', {});",
-                        t.propertyUri, val
+                        axis.propertyUri, value
                     );
 
-                    using Script = ScriptEngine::Script;
                     global::scriptEngine->queueScript({
                         .code = script,
-                        .synchronized = Script::ShouldBeSynchronized(t.isRemote),
-                        .sendToRemote = Script::ShouldSendToRemote(t.isRemote)
+                        .synchronized = ScriptEngine::Script::ShouldBeSynchronized(axis.isRemote),
+                        .sendToRemote = ScriptEngine::Script::ShouldSendToRemote(axis.isRemote)
                     });
                     break;
             }
@@ -177,7 +192,7 @@ void JoystickCameraStates::updateStateFromInput(
         for (int i = 0; i < nButtons; i++) {
             auto itRange = joystick->buttonMapping.equal_range(i);
             for (auto it = itRange.first; it != itRange.second; it++) {
-                const bool active = global::joystickInputStates->button(
+                const bool active = global::interactionHandler->joystickInputStates().button(
                     joystickInputState.name,
                     i,
                     it->second.action
@@ -199,40 +214,7 @@ void JoystickCameraStates::updateStateFromInput(
         }
     }
 
-    if (globalRotation.first) {
-        _globalRotationState.velocity.set(globalRotation.second, deltaTime);
-    }
-    else {
-        _globalRotationState.velocity.decelerate(deltaTime);
-    }
-
-    if (zoom.first) {
-        _truckMovementState.velocity.set(zoom.second, deltaTime);
-    }
-    else {
-        _truckMovementState.velocity.decelerate(deltaTime);
-    }
-
-    if (localRoll.first) {
-        _localRollState.velocity.set(localRoll.second, deltaTime);
-    }
-    else {
-        _localRollState.velocity.decelerate(deltaTime);
-    }
-
-    if (globalRoll.first) {
-        _globalRollState.velocity.set(globalRoll.second, deltaTime);
-    }
-    else {
-        _globalRollState.velocity.decelerate(deltaTime);
-    }
-
-    if (localRotation.first) {
-        _localRotationState.velocity.set(localRotation.second, deltaTime);
-    }
-    else {
-        _localRotationState.velocity.decelerate(deltaTime);
-    }
+    updateVelocities(deltaStates, deltaTime);
 }
 
 void JoystickCameraStates::setAxisMapping(const std::string& joystickName, int axis,
@@ -240,26 +222,26 @@ void JoystickCameraStates::setAxisMapping(const std::string& joystickName, int a
                                           JoystickType joystickType, bool isSticky,
                                           AxisFlip shouldFlip, double sensitivity)
 {
-    JoystickCameraState* joystickCameraState = findOrAddJoystickCameraState(joystickName);
-    if (!joystickCameraState) {
+    JoystickMapping* joystickMapping = findOrAddJoystickMapping(joystickName);
+    if (!joystickMapping) {
         return;
     }
 
     // If the axis index is too big for the vector then resize it to have room
-    if (axis >= static_cast<int>(joystickCameraState->axisMapping.size())) {
-        joystickCameraState->axisMapping.resize(axis + 1);
-        joystickCameraState->prevAxisValues.resize(axis + 1);
+    if (axis >= static_cast<int>(joystickMapping->axisMapping.size())) {
+        joystickMapping->axisMapping.resize(axis + 1);
+        joystickMapping->prevAxisValues.resize(axis + 1);
     }
 
-    joystickCameraState->axisMapping[axis].type = mapping;
-    joystickCameraState->axisMapping[axis].invert = shouldInvert;
-    joystickCameraState->axisMapping[axis].joystickType = joystickType;
-    joystickCameraState->axisMapping[axis].isSticky = isSticky;
-    joystickCameraState->axisMapping[axis].flip = shouldFlip;
-    joystickCameraState->axisMapping[axis].sensitivity = sensitivity;
+    joystickMapping->axisMapping[axis].type = mapping;
+    joystickMapping->axisMapping[axis].invert = shouldInvert;
+    joystickMapping->axisMapping[axis].joystickType = joystickType;
+    joystickMapping->axisMapping[axis].isSticky = isSticky;
+    joystickMapping->axisMapping[axis].flip = shouldFlip;
+    joystickMapping->axisMapping[axis].sensitivity = sensitivity;
 
-    joystickCameraState->prevAxisValues[axis] =
-        global::joystickInputStates->axis(joystickName, axis);
+    joystickMapping->prevAxisValues[axis] =
+        global::interactionHandler->joystickInputStates().axis(joystickName, axis);
 }
 
 void JoystickCameraStates::setAxisMappingProperty(const std::string& joystickName,
@@ -267,39 +249,35 @@ void JoystickCameraStates::setAxisMappingProperty(const std::string& joystickNam
                                                   float min, float max,
                                                   AxisInvert shouldInvert, bool isRemote)
 {
-    JoystickCameraState* joystickCameraState = findOrAddJoystickCameraState(joystickName);
-    if (!joystickCameraState) {
+    JoystickMapping* joystickMapping = findOrAddJoystickMapping(joystickName);
+    if (!joystickMapping) {
         return;
     }
 
     // If the axis index is too big for the vector then resize it to have room
-    if (axis >= static_cast<int>(joystickCameraState->axisMapping.size())) {
-        joystickCameraState->axisMapping.resize(axis + 1);
-        joystickCameraState->prevAxisValues.resize(axis + 1);
+    if (axis >= static_cast<int>(joystickMapping->axisMapping.size())) {
+        joystickMapping->axisMapping.resize(axis + 1);
+        joystickMapping->prevAxisValues.resize(axis + 1);
     }
 
-    joystickCameraState->axisMapping[axis].type = AxisType::Property;
-    joystickCameraState->axisMapping[axis].invert = shouldInvert;
-    joystickCameraState->axisMapping[axis].propertyUri = std::move(propertyUri);
-    joystickCameraState->axisMapping[axis].minValue = min;
-    joystickCameraState->axisMapping[axis].maxValue = max;
-    joystickCameraState->axisMapping[axis].isRemote = isRemote;
+    joystickMapping->axisMapping[axis].type = AxisType::Property;
+    joystickMapping->axisMapping[axis].invert = shouldInvert;
+    joystickMapping->axisMapping[axis].propertyUri = std::move(propertyUri);
+    joystickMapping->axisMapping[axis].minValue = min;
+    joystickMapping->axisMapping[axis].maxValue = max;
+    joystickMapping->axisMapping[axis].isRemote = isRemote;
 
-    joystickCameraState->prevAxisValues[axis] =
-        global::joystickInputStates->axis(joystickName, axis);
+    joystickMapping->prevAxisValues[axis] =
+        global::interactionHandler->joystickInputStates().axis(joystickName, axis);
 }
 
 JoystickCameraStates::AxisInformation JoystickCameraStates::axisMapping(
                                                           const std::string& joystickName,
-                                                                        int axis) const
+                                                                           int axis) const
 {
-    const JoystickCameraState* joystick = joystickCameraState(joystickName);
-    if (!joystick) {
-        JoystickCameraStates::AxisInformation dummy;
-        return dummy;
-    }
+    const JoystickMapping* joystick = joystickMapping(joystickName);
 
-    if (axis >= static_cast<int>(joystick->axisMapping.size())) {
+    if (!joystick || axis >= static_cast<int>(joystick->axisMapping.size())) {
         JoystickCameraStates::AxisInformation dummy;
         return dummy;
     }
@@ -310,23 +288,27 @@ JoystickCameraStates::AxisInformation JoystickCameraStates::axisMapping(
 void JoystickCameraStates::setDeadzone(const std::string& joystickName, int axis,
                                        float deadzone)
 {
-    JoystickCameraState* joystickCameraState = findOrAddJoystickCameraState(joystickName);
-    if (!joystickCameraState) {
+    JoystickMapping* joystick = findOrAddJoystickMapping(joystickName);
+    if (!joystick) {
         return;
     }
 
     // If the axis index is too big for the vector then resize it to have room
-    if (axis >= static_cast<int>(joystickCameraState->axisMapping.size())) {
-        joystickCameraState->axisMapping.resize(axis + 1);
-        joystickCameraState->prevAxisValues.resize(axis + 1);
+    if (axis >= static_cast<int>(joystick->axisMapping.size())) {
+        joystick->axisMapping.resize(axis + 1);
+        joystick->prevAxisValues.resize(axis + 1);
     }
 
-    joystickCameraState->axisMapping[axis].deadzone = deadzone;
+    joystick->axisMapping[axis].deadzone = deadzone;
 }
 
 float JoystickCameraStates::deadzone(const std::string& joystickName, int axis) const {
-    const JoystickCameraState* joystick = joystickCameraState(joystickName);
-    if (!joystick || axis >= static_cast<int>(joystick->axisMapping.size())) {
+    const JoystickMapping* joystick = joystickMapping(joystickName);
+    if (!joystick) {
+        return 0.f;
+    }
+
+    if (axis >= static_cast<int>(joystick->axisMapping.size())) {
         return 0.f;
     }
 
@@ -338,12 +320,12 @@ void JoystickCameraStates::bindButtonCommand(const std::string& joystickName, in
                                              ButtonCommandRemote remote,
                                              std::string documentation)
 {
-    JoystickCameraState* joystickCameraState = findOrAddJoystickCameraState(joystickName);
-    if (!joystickCameraState) {
+    JoystickMapping* joystickMapping = findOrAddJoystickMapping(joystickName);
+    if (!joystickMapping) {
         return;
     }
 
-    joystickCameraState->buttonMapping.insert({
+    joystickMapping->buttonMapping.insert({
         button,
         {
             .command = std::move(command),
@@ -354,14 +336,16 @@ void JoystickCameraStates::bindButtonCommand(const std::string& joystickName, in
     });
 }
 
-void JoystickCameraStates::clearButtonCommand(const std::string& joystickName, int button)
+void JoystickCameraStates::clearButtonCommand(const std::string& joystickName,
+                                              int button)
 {
-    JoystickCameraState* joystick = joystickCameraState(joystickName);
+    JoystickMapping* joystick = joystickMapping(joystickName);
     if (!joystick) {
         return;
     }
 
-    for (auto it = joystick->buttonMapping.begin(); it != joystick->buttonMapping.end();)
+    for (auto it = joystick->buttonMapping.begin();
+         it != joystick->buttonMapping.end();)
     {
         // If the current iterator is the button that we are looking for, delete it
         // (std::multimap::erase will return the iterator to the next element for us)
@@ -379,7 +363,7 @@ std::vector<std::string> JoystickCameraStates::buttonCommand(
                                                                          int button) const
 {
     std::vector<std::string> result;
-    const JoystickCameraState* joystick = joystickCameraState(joystickName);
+    const JoystickMapping* joystick = joystickMapping(joystickName);
     if (!joystick) {
         return result;
     }
@@ -391,42 +375,48 @@ std::vector<std::string> JoystickCameraStates::buttonCommand(
     return result;
 }
 
-JoystickCameraStates::JoystickCameraState* JoystickCameraStates::joystickCameraState(
+JoystickCameraStates::JoystickMapping* JoystickCameraStates::joystickMapping(
                                                           const std::string& joystickName)
 {
-    for (JoystickCameraState& joystickCameraState : _joystickCameraStates) {
-        if (joystickCameraState.joystickName == joystickName) {
-            return &joystickCameraState;
+    for (JoystickMapping& j : _joysticks) {
+        if (j.name == joystickName) {
+            return &j;
         }
     }
-
     return nullptr;
 }
 
-const JoystickCameraStates::JoystickCameraState*
-JoystickCameraStates::joystickCameraState(const std::string& joystickName) const
+const JoystickCameraStates::JoystickMapping*
+JoystickCameraStates::joystickMapping(const std::string& joystickName) const
 {
-    for (const JoystickCameraState& joystickCameraState : _joystickCameraStates) {
-        if (joystickCameraState.joystickName == joystickName) {
-            return &joystickCameraState;
+    for (const JoystickMapping& j : _joysticks) {
+        if (j.name == joystickName) {
+            return &j;
         }
     }
 
-    LWARNING(std::format("Cannot find JoystickCameraState with name '{}'", joystickName));
+    LWARNING(std::format("Cannot find Joystick with name '{}'", joystickName));
     return nullptr;
 }
 
-JoystickCameraStates::JoystickCameraState*
-JoystickCameraStates::findOrAddJoystickCameraState(const std::string& joystickName)
+JoystickCameraStates::JoystickMapping*
+JoystickCameraStates::findOrAddJoystickMapping(const std::string& joystickName)
 {
-    JoystickCameraState* joystick = joystickCameraState(joystickName);
+    JoystickMapping* joystick = joystickMapping(joystickName);
     if (!joystick) {
-        if (_joystickCameraStates.size() < JoystickInputStates::MaxNumJoysticks) {
-            _joystickCameraStates.emplace_back();
-            joystick = &_joystickCameraStates.back();
-            joystick->joystickName = joystickName;
+        if (_joysticks.size() < JoystickInputStates::MaxNumJoysticks) {
+            _joysticks.emplace_back();
+            joystick = &_joysticks.back();
+            joystick->name = joystickName;
         }
         else {
+            // @TODO (emmbr, 2025-12-16): It's a bit weird that we add a joystick mapping
+            // the JoystickCameraStates, but check the maximum number of joysticks in the
+            // JoystickInputStates. This should be refactored to be more intuitive.
+            //
+            // Maybe we should have some type of joystick handler? That handles all added
+            // joysticks, and each joystick can be of a given type (e.g. orbital camera,
+            // as in this case, or maybe something else like "free flight" in the future)
             LWARNING(std::format(
                 "Cannot add more joysticks, only {} joysticks are supported",
                 JoystickInputStates::MaxNumJoysticks

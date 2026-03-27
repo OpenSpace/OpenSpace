@@ -42,12 +42,12 @@ local ToggleRollFriction = {
 }
 
 
--- Idle behavior actions
-local ToggleIdleBehavior = {
-  Identifier = "os.ToggleIdleBehavior",
-  Name = "Toggle idle behavior",
-  Command = [[openspace.invertBooleanProperty("NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior")]],
-  Documentation = [[Toggles the idle behavior of the orbital navigator. If enabled, the camera will automatically rotate around the focus until the next navigation happens]],
+-- Idle motion actions
+local ToggleIdleMotion = {
+  Identifier = "os.ToggleIdleMotion",
+  Name = "Toggle idle motion",
+  Command = [[openspace.invertBooleanProperty("NavigationHandler.OrbitalNavigator.IdleMotion.Apply")]],
+  Documentation = [[Toggles the idle motion of the orbital navigator. If enabled, the camera will automatically rotate around the focus until the next navigation happens]],
   GuiPath = "/Navigation",
   IsLocal = true
 }
@@ -235,8 +235,8 @@ asset.onInitialize(function()
   openspace.action.registerAction(ToggleZoomFriction)
   openspace.action.registerAction(ToggleRollFriction)
 
-  -- Idle behavior
-  openspace.action.registerAction(ToggleIdleBehavior)
+  -- Idle motion
+  openspace.action.registerAction(ToggleIdleMotion)
 
   -- UI
   openspace.action.registerAction(ToggleMainGui)
@@ -282,8 +282,8 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(ToggleNativeUi)
   openspace.action.removeAction(ToggleMainGui)
 
-  -- Idle behavior
-  openspace.action.removeAction(ToggleIdleBehavior)
+  -- Idle motion
+  openspace.action.removeAction(ToggleIdleMotion)
 
   -- Friction
   openspace.action.removeAction(ToggleRollFriction)
@@ -300,7 +300,7 @@ asset.export("ToggleRotationFriction", ToggleRotationFriction.Identifier)
 asset.export("ToggleZoomFriction", ToggleZoomFriction.Identifier)
 asset.export("ToggleRollFriction", ToggleRollFriction.Identifier)
 
-asset.export("ToggleIdleBehavior", ToggleIdleBehavior.Identifier)
+asset.export("ToggleIdleMotion", ToggleIdleMotion.Identifier)
 
 asset.export("ToggleMainGui", ToggleMainGui.Identifier)
 asset.export("ToggleNativeUi", ToggleNativeUi.Identifier)

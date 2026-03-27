@@ -33,12 +33,10 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/actionmanager.h>
-#include <openspace/interaction/interactionmonitor.h>
-#include <openspace/interaction/joystickinputstate.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/keyframerecordinghandler.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
-#include <openspace/interaction/websocketinputstate.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
@@ -93,9 +91,7 @@ namespace {
         sizeof(WindowDelegate) +
         sizeof(Configuration) +
         sizeof(ActionManager) +
-        sizeof(InteractionMonitor) +
-        sizeof(JoystickInputStates) +
-        sizeof(WebsocketInputStates) +
+        sizeof(InteractionHandler) +
         sizeof(KeybindingManager) +
         sizeof(KeyframeRecordingHandler) +
         sizeof(NavigationHandler) +
@@ -265,7 +261,7 @@ void create() {
     versionChecker = new (currentPos) VersionChecker;
     ghoul_assert(versionChecker, "No versionChecker");
     currentPos += sizeof(VersionChecker);
-#else // ^^^^ WIN32 // !WIN32 vvvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     versionChecker = new VersionChecker;
 #endif // WIN32
 
@@ -294,27 +290,11 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    interactionMonitor = new (currentPos) InteractionMonitor;
-    ghoul_assert(interactionMonitor, "No interactionMonitor");
-    currentPos += sizeof(InteractionMonitor);
+    interactionHandler = new (currentPos) InteractionHandler;
+    ghoul_assert(interactionHandler, "No interactionHandler");
+    currentPos += sizeof(InteractionHandler);
 #else // ^^^^ WIN32 / !WIN32 vvvv
-    interactionMonitor = new InteractionMonitor;
-#endif // WIN32
-
-#ifdef WIN32
-    joystickInputStates = new (currentPos) JoystickInputStates;
-    ghoul_assert(joystickInputStates, "No joystickInputStates");
-    currentPos += sizeof(JoystickInputStates);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    joystickInputStates = new JoystickInputStates;
-#endif // WIN32
-
-#ifdef WIN32
-    websocketInputStates = new (currentPos) WebsocketInputStates;
-    ghoul_assert(websocketInputStates, "No websocketInputStates");
-    currentPos += sizeof(WebsocketInputStates);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    websocketInputStates = new WebsocketInputStates;
+    interactionHandler = new InteractionHandler;
 #endif // WIN32
 
 #ifdef WIN32
@@ -407,7 +387,7 @@ void initialize() {
     // New property subowners also have to be added to the ImGuiModule callback
     rootPropertyOwner->addPropertySubOwner(global::navigationHandler);
     rootPropertyOwner->addPropertySubOwner(global::keyframeRecording);
-    rootPropertyOwner->addPropertySubOwner(global::interactionMonitor);
+    rootPropertyOwner->addPropertySubOwner(global::interactionHandler);
     rootPropertyOwner->addPropertySubOwner(global::sessionRecordingHandler);
     rootPropertyOwner->addPropertySubOwner(global::timeManager);
     rootPropertyOwner->addPropertySubOwner(global::scriptScheduler);
@@ -493,25 +473,11 @@ void destroy() {
     delete keybindingManager;
 #endif // WIN32
 
-    LDEBUGC("Globals", "Destroying 'WebsocketInputStates'");
+    LDEBUGC("Globals", "Destroying 'InteractionHandler'");
 #ifdef WIN32
-    websocketInputStates->~WebsocketInputStates();
+    interactionHandler->~InteractionHandler();
 #else // ^^^^ WIN32 / !WIN32 vvvv
-    delete websocketInputStates;
-#endif // WIN32
-
-    LDEBUGC("Globals", "Destroying 'JoystickInputStates'");
-#ifdef WIN32
-    joystickInputStates->~JoystickInputStates();
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    delete joystickInputStates;
-#endif // WIN32
-
-    LDEBUGC("Globals", "Destroying 'InteractionMonitor'");
-#ifdef WIN32
-    interactionMonitor->~InteractionMonitor();
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    delete interactionMonitor;
+    delete interactionHandler;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destorying 'ActionManager'");

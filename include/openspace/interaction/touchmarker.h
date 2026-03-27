@@ -22,30 +22,49 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___MOUSECAMERASTATES___H__
-#define __OPENSPACE_CORE___MOUSECAMERASTATES___H__
+#ifndef __OPENSPACE_MODULE_CORE___TOUCH_MARKER___H__
+#define __OPENSPACE_MODULE_CORE___TOUCH_MARKER___H__
 
-#include <openspace/interaction/camerainteractionstates.h>
+#include <openspace/properties/propertyowner.h>
+
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/touch.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
+#include <memory>
+
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
-class KeyboardInputState;
-class MouseInputState;
-
-class MouseCameraStates : public CameraInteractionStates {
+class TouchMarker : public PropertyOwner {
 public:
-    MouseCameraStates(double sensitivity, double velocityScaleFactor);
+    TouchMarker();
+    virtual ~TouchMarker();
 
-    void updateStateFromInput(const MouseInputState& mouseState,
-        const KeyboardInputState& keyboardState, double deltaTime);
+    void initializeGL();
+    void deinitializeGL();
 
-    void setInvertMouseButton(bool value);
+    void render(const std::vector<TouchInputHolder>& touchPoints);
 
 private:
-    bool _isMouseButtonInverted = false;
-    double _currentSensitivityRamp = 1.0;
+    void createVertexList(const std::vector<TouchInputHolder>& touchPoints);
+
+    BoolProperty _enabled;
+    FloatProperty _radiusSize;
+    FloatProperty _opacity;
+    Vec3Property _color;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    UniformCache(radius, opacity, color) _uniformCache;
+
+    GLsizei _count = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___MOUSECAMERASTATES___H__
+#endif // __OPENSPACE_MODULE_CORE___TOUCH_MARKER___H__

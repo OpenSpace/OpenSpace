@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/websocketcamerastates.h>
+#include <openspace/navigation/orbitalnavigator/websocketcamerastates.h>
 
 #include <ghoul/misc/assert.h>
 #include <cmath>
@@ -32,124 +32,97 @@ namespace openspace {
 
 WebsocketCameraStates::WebsocketCameraStates(double sensitivity,
                                              double velocityScaleFactor)
-    : CameraInteractionStates(sensitivity, velocityScaleFactor)
+    : OrbitalCameraStates(sensitivity, velocityScaleFactor)
 {}
 
-void WebsocketCameraStates::updateStateFromInput(
+void WebsocketCameraStates::updateVelocitiesFromInput(
                                          const WebsocketInputStates& websocketInputStates,
                                                                          double deltaTime)
 {
-    std::pair<bool, glm::dvec2> globalRotation = std::pair(false, glm::dvec2(0.0));
-    std::pair<bool, double> zoom = std::pair(false, 0.0);
-    std::pair<bool, double> localRoll = std::pair(false, 0.0);
-    std::pair<bool, double> globalRoll = std::pair(false, 0.0);
-    std::pair<bool, glm::dvec2> localRotation = std::pair(false, glm::dvec2(0.0));
+    UpdateStates updateStates;
 
     if (!websocketInputStates.empty()) {
         for (int i = 0; i < WebsocketInputState::MaxAxes; i++) {
-            const AxisInformation t = _axisMapping[i];
-            if (t.type == AxisType::None) {
+            const AxisInformation axis = _axisMapping[i];
+            if (axis.type == AxisType::None) {
                 continue;
             }
 
             float value = websocketInputStates.axis(i);
-            const bool hasValue = std::fabs(value) > t.deadzone;
+            const bool hasValue = std::fabs(value) > axis.deadzone;
 
             if (!hasValue) {
-                value = 0.f;
+                continue;
             }
 
-            if (t.normalize) {
+            if (axis.normalize) {
                 value = (value + 1.f) / 2.f;
             }
 
-            if (t.invert) {
+            if (axis.invert) {
                 value *= -1.f;
             }
 
             value = static_cast<float>(value * _sensitivity);
 
-            switch (t.type) {
+            switch (axis.type) {
                 case AxisType::None:
                     break;
                 case AxisType::OrbitX:
-                    globalRotation.first = hasValue || globalRotation.first;
-                    globalRotation.second.x = value;
+                    if (!updateStates.globalRotation.has_value()) {
+                        updateStates.globalRotation = glm::dvec2(0.0);
+                    }
+                    (*updateStates.globalRotation).x = value;
                     break;
                 case AxisType::OrbitY:
-                    globalRotation.first = hasValue || globalRotation.first;
-                    globalRotation.second.y = value;
+                    if (!updateStates.globalRotation.has_value()) {
+                        updateStates.globalRotation = glm::dvec2(0.0);
+                    }
+                    (*updateStates.globalRotation).y = value;
                     break;
                 case AxisType::ZoomIn:
-                    zoom.first = hasValue || zoom.first;
-                    zoom.second += value;
+                    if (!updateStates.zoom.has_value()) {
+                        updateStates.zoom = 0.0;
+                    }
+                    (*updateStates.zoom) += value;
                     break;
                 case AxisType::ZoomOut:
-                    zoom.first = hasValue || zoom.first;
-                    zoom.second -= value;
+                    if (!updateStates.zoom.has_value()) {
+                        updateStates.zoom = 0.0;
+                    }
+                    (*updateStates.zoom) -= value;
                     break;
                 case AxisType::LocalRollX:
-                    localRoll.first = hasValue || localRoll.first;
-                    localRoll.second = value;
-                    break;
                 case AxisType::LocalRollY:
-                    localRoll.first = hasValue || localRoll.first;
-                    localRoll.second = value;
+                    if (!updateStates.localRoll.has_value()) {
+                        updateStates.localRoll = 0.0;
+                    }
+                    (*updateStates.localRoll) = value;
                     break;
                 case AxisType::GlobalRollX:
-                    globalRoll.first = hasValue || globalRoll.first;
-                    globalRoll.second = value;
-                    break;
                 case AxisType::GlobalRollY:
-                    globalRoll.first = hasValue || globalRoll.first;
-                    globalRoll.second = value;
+                    if (!updateStates.globalRoll.has_value()) {
+                        updateStates.globalRoll = 0.0;
+                    }
+                    (*updateStates.globalRoll) = value;
                     break;
                 case AxisType::PanX:
-                    localRotation.first = hasValue || localRotation.first;
-                    localRotation.second.x = value;
+                    if (!updateStates.localRotation.has_value()) {
+                        updateStates.localRotation = glm::dvec2(0.0);
+                    }
+                    (*updateStates.localRotation).x = value;
                     break;
                 case AxisType::PanY:
-                    localRotation.first = hasValue || localRotation.first;
-                    localRotation.second.y = value;
+                    if (!updateStates.localRotation.has_value()) {
+                        updateStates.localRotation = glm::dvec2(0.0);
+                    }
+                    (*updateStates.localRotation).y = value;
                     break;
             }
         }
     }
 
-    if (globalRotation.first) {
-        _globalRotationState.velocity.set(globalRotation.second, deltaTime);
-    }
-    else {
-        _globalRotationState.velocity.decelerate(deltaTime);
-    }
-
-    if (zoom.first) {
-        _truckMovementState.velocity.set(zoom.second, deltaTime);
-    }
-    else {
-        _truckMovementState.velocity.decelerate(deltaTime);
-    }
-
-    if (localRoll.first) {
-        _localRollState.velocity.set(localRoll.second, deltaTime);
-    }
-    else {
-        _localRollState.velocity.decelerate(deltaTime);
-    }
-
-    if (globalRoll.first) {
-        _globalRollState.velocity.set(globalRoll.second, deltaTime);
-    }
-    else {
-        _globalRollState.velocity.decelerate(deltaTime);
-    }
-
-    if (localRotation.first) {
-        _localRotationState.velocity.set(localRotation.second, deltaTime);
-    }
-    else {
-        _localRotationState.velocity.decelerate(deltaTime);
-    }
+    updateVelocities(updateStates, deltaTime);
 }
 
 void WebsocketCameraStates::setAxisMapping(int axis, AxisType mapping,

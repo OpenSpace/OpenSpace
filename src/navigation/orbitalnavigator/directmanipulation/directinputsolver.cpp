@@ -22,10 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/touch/include/touchinteraction.h>
+#include <openspace/navigation/orbitalnavigator/directmanipulation/directinputsolver.h>
 
-#include <modules/touch/include/directinputsolver.h>
 #include <openspace/camera/camera.h>
+#include <openspace/camera/camerapose.h>
+#include <openspace/navigation/orbitalnavigator/directmanipulation/directmanipulation.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
@@ -44,27 +45,29 @@ namespace {
         std::vector<glm::dvec2> screenPoints;
         int nDOF;
         const Camera* camera;
-        SceneGraphNode* node;
-        LMstat stats;
+        const SceneGraphNode* node;
+        ghoul::LMstat stats;
     };
 
     /**
-     * Project back a 3D point in model view to clip space[-1, 1] coordinates on the view
+     * Project back a 3D point in model view to clip space [-1, 1] coordinates on the view
      * plane.
      */
-    glm::dvec2 castToNDC(const glm::dvec3& vec, Camera& camera, SceneGraphNode* node) {
+    glm::dvec2 castToNormalizedDeviceCoordinates(const glm::dvec3& pos, Camera& camera,
+                                                 const SceneGraphNode* node)
+    {
         glm::dvec3 posInCamSpace = glm::inverse(camera.rotationQuaternion()) *
-            (node->worldRotationMatrix() * vec +
+            (node->worldRotationMatrix() * pos +
                 (node->worldPosition() - camera.position()));
 
         glm::dvec4 clipspace = camera.projectionMatrix() * glm::dvec4(posInCamSpace, 1.0);
-        return (glm::dvec2(clipspace) / clipspace.w);
+        return glm::dvec2(clipspace) / clipspace.w;
     }
 
     /**
      * Returns screen point s(xi, par) dependent the transform M(par) and object point xi.
      */
-    double distToMinimize(double* par, int x, void* fdata, LMstat* lmstat) {
+    double distToMinimize(double* par, int x, void* fdata, ghoul::LMstat* lmstat) {
         FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
 
         // Apply transform to camera and find the screen point of the updated camera state
@@ -75,74 +78,30 @@ namespace {
             q[i] = par[i];
         }
 
-        using namespace glm;
-        // Create variables from current state
-        dvec3 camPos = ptr->camera->position();
-        dvec3 centerPos = ptr->node->worldPosition();
+        DirectInputSolver::Result velocities = {
+            .orbit = glm::dvec2(q[0], q[1]),
+            .zoom = q[2],
+            .roll = q[3],
+            .pan = glm::dvec2(q[4], q[5])
+        };
 
-        dvec3 directionToCenter = normalize(centerPos - camPos);
-        dvec3 lookUp = ptr->camera->lookUpVectorWorldSpace();
-        dvec3 camDirection = ptr->camera->viewDirectionWorldSpace();
-
-        // Make a representation of the rotation quaternion with local and global
-        // rotations
-        dmat4 lookAtMat = lookAt(
-            dvec3(0, 0, 0),
-            directionToCenter,
-            // To avoid problem with lookup in up direction
-            normalize(camDirection + lookUp)
+        // @TODO (emmbr, 2026-01-19): Maybe it would be better to put this function
+        // somewhere else, to avoid the circular dependency
+        CameraPose pose = DirectManipulation::cameraPoseFromVelocities(
+            velocities,
+            ptr->camera,
+            ptr->node
         );
-        dquat globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
-        dquat localCamRot = inverse(globalCamRot) * ptr->camera->rotationQuaternion();
 
-        {
-            // Roll
-            dquat rollRot = angleAxis(q[3], dvec3(0.0, 0.0, 1.0));
-            localCamRot = localCamRot * rollRot;
-        }
-        {
-            // Panning (local rotation)
-            dvec3 eulerAngles(q[5], q[4], 0);
-            dquat panRot = dquat(eulerAngles);
-            localCamRot = localCamRot * panRot;
-        }
-        {
-            // Orbit (global rotation)
-            dvec3 eulerAngles(q[1], q[0], 0);
-            dquat rotationDiffCamSpace = dquat(eulerAngles);
+        // Update the camera state (for a local copy of the camera)
+        Camera camera = *ptr->camera;
+        camera.setPose(pose);
 
-            dvec3 centerToCamera = camPos - centerPos;
-
-            dquat rotationDiffWorldSpace =
-                globalCamRot * rotationDiffCamSpace * inverse(globalCamRot);
-            dvec3 rotationDiffVec3 =
-                centerToCamera * rotationDiffWorldSpace - centerToCamera;
-            camPos += rotationDiffVec3;
-
-            centerToCamera = camPos - centerPos;
-            directionToCenter = normalize(-centerToCamera);
-            dvec3 lookUpWhenFacingCenter =
-                globalCamRot * dvec3(ptr->camera->lookUpVectorCameraSpace());
-            lookAtMat = lookAt(
-                dvec3(0, 0, 0),
-                directionToCenter,
-                lookUpWhenFacingCenter
-            );
-            globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
-        }
-        { // Zooming
-            camPos += directionToCenter * q[2];
-        }
-        // Update the camera state
-        Camera cam = *(ptr->camera);
-        cam.setPosition(camPos);
-        cam.setRotation(globalCamRot * localCamRot);
-
-        // we now have a new position and orientation of camera, project surfacePoint to
+        // We now have a new position and orientation of camera, project surfacePoint to
         // the new screen to get distance to minimize
-        glm::dvec2 newScreenPoint = castToNDC(
+        glm::dvec2 newScreenPoint = castToNormalizedDeviceCoordinates(
             ptr->selectedPoints.at(x),
-            cam,
+            camera,
             ptr->node
         );
         lmstat->pos.push_back(newScreenPoint);
@@ -150,9 +109,9 @@ namespace {
     }
 
     /**
-     * Gradient of distToMinimize w.r.t par(using forward difference).
+     * Gradient of distToMinimize w.r.t par (using forward difference).
      */
-    void gradient(double* g, double* par, int x, void* fdata, LMstat* lmstat) {
+    void gradient(double* g, double* par, int x, void* fdata, ghoul::LMstat* lmstat) {
         FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
         double f0 = distToMinimize(par, x, fdata, lmstat);
         // Scale value to find minimum step size h, dependant on planet size
@@ -169,8 +128,7 @@ namespace {
             dPar.at(i) = par[i];
             // Iterative process to find the minimum step h that gives a good gradient
             for (int j = 0; j < 100; j++) {
-                if ((f1 - f0) != 0 && lastG == 0) {
-                    // Found minimum step size h
+                if ((f1 - f0) != 0 && lastG == 0) { // found minimum step size h
                     // Scale up to get a good initial guess value
                     h *= scale * scale * scale;
 
@@ -223,22 +181,23 @@ namespace {
 namespace openspace {
 
 DirectInputSolver::DirectInputSolver() {
-    levmarq_init(&_lmstat);
+    ghoul::initializeLevmarqStats(&_lmstat);
 }
 
-bool DirectInputSolver::solve(const std::vector<TouchInputHolder>& list,
-                              const std::vector<SelectedBody>& selectedBodies,
-                              std::vector<double>* parameters, const Camera& camera)
+std::optional<DirectInputSolver::Result> DirectInputSolver::solve(
+                                               const std::vector<TouchPoint>& touchPoints,
+                                          const std::vector<SelectedBody>& selectedBodies,
+                                                                     const Camera& camera)
 {
     ZoneScopedN("Direct touch input solver");
 
     ghoul_assert(
-        selectedBodies.size() >= list.size(),
+        selectedBodies.size() >= touchPoints.size(),
         "Number of touch inputs must match the number of 'selected bodies'"
     );
 
-    int nFingers = std::min(static_cast<int>(list.size()), 3);
-    _nDof = std::min(nFingers * 2, 6);
+    int nFingers = std::min(static_cast<int>(touchPoints.size()), 3);
+    int nDof = std::min(nFingers * 2, 6);
 
     // Parse input data to be used in the LM algorithm
     std::vector<glm::dvec3> selectedPoints;
@@ -248,45 +207,52 @@ bool DirectInputSolver::solve(const std::vector<TouchInputHolder>& list,
         const SelectedBody& sb = selectedBodies.at(i);
         selectedPoints.push_back(sb.coordinates);
         screenPoints.emplace_back(
-            2.0 * (list[i].latestInput().pos.x - 0.5),
-            -2.0 * (list[i].latestInput().pos.y - 0.5)
+            2.0 * (touchPoints[i].position.x - 0.5),
+            -2.0 * (touchPoints[i].position.y - 0.5)
         );
     }
 
     FunctionData fData = {
         .selectedPoints = selectedPoints,
         .screenPoints = screenPoints,
-        .nDOF = _nDof,
+        .nDOF = nDof,
         .camera = &camera,
         .node = selectedBodies.at(0).node,
         .stats = _lmstat
     };
-    void* dataPtr = reinterpret_cast<void*>(&fData);
 
-    bool result = levmarq(
-        _nDof,
-        parameters->data(),
+    // Find best transform values for the new camera state and store them in parameters
+    std::vector<double> param(6, 0.0);
+
+    bool lmSuccess = ghoul::levmarq(
+        nDof,
+        param.data(),
         static_cast<int>(screenPoints.size()),
         nullptr,
         distToMinimize,
         gradient,
-        dataPtr,
+        reinterpret_cast<void*>(&fData),
         &_lmstat
     );
 
+    if (!lmSuccess) {
+        return std::nullopt;
+    }
+
+    Result result;
+
+    // If good values were found set new camera state
+    result.orbit = glm::dvec2(param[0], param[1]);
+    if (nDof > 2) {
+        result.zoom = param[2];
+        result.roll = param[3];
+        if (nDof > 4) {
+            result.roll = 0.0;
+            result.pan = glm::dvec2(param[4], param[5]);
+        }
+    }
+
     return result;
-}
-
-int DirectInputSolver::nDof() const {
-    return _nDof;
-}
-
-const LMstat& DirectInputSolver::levMarqStat() {
-    return _lmstat;
-}
-
-void DirectInputSolver::setLevMarqVerbosity(bool verbose) {
-    _lmstat.verbose = verbose;
 }
 
 } // namespace openspace

@@ -22,64 +22,67 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
-#define __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
+#ifndef __OPENSPACE_CORE___DIRECTMANIPULATION___H__
+#define __OPENSPACE_CORE___DIRECTMANIPULATION___H__
 
-#include <openspace/interaction/delayedvariable.h>
+#include <openspace/properties/propertyowner.h>
+
+#include <openspace/navigation/orbitalnavigator/directmanipulation/directinputsolver.h>
+#include <openspace/properties/list/stringlistproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/util/touch.h>
 #include <ghoul/glm.h>
+#include <set>
 
 namespace openspace {
 
-class CameraInteractionStates {
+class Camera;
+struct CameraPose;
+class SceneGraphNode;
+
+class DirectManipulation : public PropertyOwner {
 public:
+    using VelocityStates = DirectInputSolver::Result;
+    using TouchPoint = DirectInputSolver::TouchPoint;
+
+    DirectManipulation();
+
+    void updateCameraFromInput();
+
+    static CameraPose cameraPoseFromVelocities(const VelocityStates& velocities,
+        const Camera* camera, const SceneGraphNode* anchor);
+
+private:
     /**
-     * \param sensitivity Interaction sensitivity
-     * \param velocityScale Can be set to 60 to remove the inertia of the interaction.
-     *        Lower value will make it harder to move the camera
+     * Calculates the new camera state such that it minimizes the L2 error in screenspace
+     * between contact points and surface coordinates projected to clip space using LMA.
      */
-    CameraInteractionStates(double sensitivity, double velocityScale);
-    virtual ~CameraInteractionStates() = default;
-
-    void setRotationalFriction(double friction);
-    void setHorizontalFriction(double friction);
-    void setVerticalFriction(double friction);
-    void setSensitivity(double sensitivity);
-    void setVelocityScaleFactor(double scaleFactor);
-
-    glm::dvec2 globalRotationVelocity() const;
-    glm::dvec2 localRotationVelocity() const;
-    double truckMovementVelocity() const;
-    double localRollVelocity() const;
-    double globalRollVelocity() const;
-
-    void resetVelocities();
+    void applyDirectControl(const std::vector<TouchPoint>& touchPoints);
 
     /**
-     * Returns true if any of the velocities are larger than zero, i.e. whether an
-     * interaction happened.
+     * Traces each contact point into the scene as a ray and find the intersection points
+     * on the surface of the current anchor node, if any. Saves the input id the node and
+     * surface coordinates the cursor hit.
      */
-    bool hasNonZeroVelocities(bool checkOnlyMovement = false) const;
+    void updateNodeSurfacePoints(const std::vector<TouchPoint>& touchPoints);
 
-protected:
-    template <typename T>
-    struct InteractionState {
-        explicit InteractionState(double scaleFactor);
-        void setFriction(double friction);
-        void setVelocityScaleFactor(double scaleFactor);
+    bool isValidDirectTouchNode() const;
+    bool isWithinDirectTouchDistance() const;
 
-        T previousValue = T(0.0);
-        DelayedVariable<T, double> velocity;
-    };
+    BoolProperty _enabled;
+    BoolProperty _isActive;
+    BoolProperty _allowMouseInput;
+    FloatProperty _distanceThreshold;
+    StringListProperty _defaultRenderableTypes;
 
-    double _sensitivity = 0.0;
+    // A sorted version of the list in the property
+    std::set<std::string> _sortedDefaultRenderableTypes;
 
-    InteractionState<glm::dvec2> _globalRotationState;
-    InteractionState<glm::dvec2> _localRotationState;
-    InteractionState<double> _truckMovementState;
-    InteractionState<double> _localRollState;
-    InteractionState<double> _globalRollState;
+    std::vector<DirectInputSolver::SelectedBody> _selectedNodeSurfacePoints;
+    DirectInputSolver _directInputSolver;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
+#endif // __OPENSPACE_CORE___DIRECTMANIPULATION___H__

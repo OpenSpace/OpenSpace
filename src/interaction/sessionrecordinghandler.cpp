@@ -432,7 +432,7 @@ void SessionRecordingHandler::startPlayback(SessionRecording timeline, bool loop
         _playback.saveScreenshots.deltaTime = 1.0 / *saveScreenshotFps;
     }
 
-    global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
+    global::navigationHandler->orbitalNavigator().markCameraInteraction();
 
     LINFO("Playback session started");
     global::eventEngine->publishEvent<EventSessionRecordingPlayback>(

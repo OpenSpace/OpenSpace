@@ -63,7 +63,6 @@ private:
     nlohmann::json _allNodes;
     nlohmann::json _interestingTimes;
 
-    WebsocketInputStates _inputStates;
     WebsocketInputState _inputState;
 };
 

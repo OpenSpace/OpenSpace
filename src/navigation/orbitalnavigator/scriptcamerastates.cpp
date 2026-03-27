@@ -22,40 +22,74 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "powerscaling/powerscaling_fs.glsl"
-#include "fragment.glsl"
+#include <openspace/navigation/orbitalnavigator/scriptcamerastates.h>
 
-uniform float opacity;
-uniform float thickness;
-uniform vec3 color;
+namespace openspace {
 
+ScriptCameraStates::ScriptCameraStates()
+    : OrbitalCameraStates(1.0, 1.0)
+{}
 
-Fragment getFragment() {
-  // Calculate normal from texture coordinates
-  vec3 n;
-  n.xy = gl_PointCoord.st * vec2(2.0, -2.0) + vec2(-1.0, 1.0);
-  float mag = dot(n.xy, n.xy);
-
-  float edgeSmoothing = 1.0;
-  float w = 0.1; // wdith for smoothing
-  if (mag > 1.0 - w) {
-    // Kill pixels outside circle. Do a smoothstep for soft border
-    float t = (mag - (1.0 - w)) / w;
-    edgeSmoothing = smoothstep(1.0, 0.0, t);
-    if (edgeSmoothing <= 0.0) {
-        discard;
+void ScriptCameraStates::updateVelocitiesFromInput(double deltaTime) {
+    if (_localRotation != glm::dvec2(0.0)) {
+        _localRotationVelocity.set(_localRotation * _sensitivity, deltaTime);
+        _localRotation = glm::dvec2(0.0);
     }
-  }
-  n.z = sqrt(1.0 - mag);
+    else {
+        _localRotationVelocity.decelerate(deltaTime);
+    }
 
-  // Calculate lighting
-  vec3 light_dir = vec3(0.0, 0.0, 1.0);
-  float diffuse = max(0.0, dot(light_dir, n));
-  float alpha = min(pow(sqrt(mag), thickness), opacity);
-  alpha *= edgeSmoothing;
+    if (_globalRotation != glm::dvec2(0.0)) {
+        _globalRotationVelocity.set(_globalRotation * _sensitivity, deltaTime);
+        _globalRotation = glm::dvec2(0.0);
+    }
+    else {
+        _globalRotationVelocity.decelerate(deltaTime);
+    }
 
-  Fragment frag;
-  frag.color = vec4(color * diffuse, alpha);
-  frag.depth = 1.0;
-  return frag;
+    if (_truckMovement != 0.0) {
+        _truckMovementVelocity.set(_truckMovement * _sensitivity, deltaTime);
+        _truckMovement = 0.0;
+    }
+    else {
+        _truckMovementVelocity.decelerate(deltaTime);
+    }
+
+    if (_localRoll != 0.0) {
+        _localRollVelocity.set(_localRoll * _sensitivity, deltaTime);
+        _localRoll = 0.0;
+    }
+    else {
+        _localRollVelocity.decelerate(deltaTime);
+    }
+
+    if (_globalRoll != 0.0) {
+        _globalRollVelocity.set(_globalRoll * _sensitivity, deltaTime);
+        _globalRoll = 0.0;
+    }
+    else {
+        _globalRollVelocity.decelerate(deltaTime);
+    }
 }
+
+void ScriptCameraStates::addLocalRotation(const glm::dvec2& delta) {
+    _localRotation += delta;
+}
+
+void ScriptCameraStates::addGlobalRotation(const glm::dvec2& delta) {
+    _globalRotation += delta;
+}
+
+void ScriptCameraStates::addTruckMovement(double delta) {
+    _truckMovement += delta;
+}
+
+void ScriptCameraStates::addLocalRoll(double delta) {
+    _localRoll += delta;
+}
+
+void ScriptCameraStates::addGlobalRoll(double delta) {
+    _globalRoll += delta;
+}
+
+} // namespace openspace
