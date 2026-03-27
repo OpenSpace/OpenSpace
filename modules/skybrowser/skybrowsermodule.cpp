@@ -224,8 +224,8 @@ SkyBrowserModule::SkyBrowserModule()
                     pair->startFading(0.f, FadeDuration);
                 }
 
-                // Also hide the hover circle
-                disableHoverCircle();
+                // Also hide the hover indicator
+                disableHoverIndicator();
             }
             else {
                 // Camera moved into the solar system => fade in
@@ -325,26 +325,26 @@ void SkyBrowserModule::lookAtTarget(const std::string& id) {
     }
 }
 
-void SkyBrowserModule::setHoverCircle(SceneGraphNode* circle) {
-    ghoul_assert(circle, "No circle specified");
-    _hoverCircle = circle;
+void SkyBrowserModule::setHoverIndicator(SceneGraphNode* circle) {
+    ghoul_assert(circle, "No indicator specified");
+    _hoverIndicator = circle;
 
     // Always disable it per default. It should only be visible on interaction
-    disableHoverCircle();
+    disableHoverIndicator();
 }
 
-void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScript) {
+void SkyBrowserModule::moveHoverIndicator(const std::string& imageUrl, bool useScript) {
     std::optional<const ImageData> found = _dataHandler.image(imageUrl);
     if (!found.has_value()) {
         return;
     }
     const ImageData image = *found;
     // Only move and show circle if the image has coordinates
-    if (!(_hoverCircle && image.hasCelestialCoords && _isCameraInSolarSystem)) {
+    if (!(_hoverIndicator && image.hasCelestialCoords && _isCameraInSolarSystem)) {
         return;
     }
 
-    const std::string id = _hoverCircle->identifier();
+    const std::string id = _hoverIndicator->identifier();
 
     // Show the circle
     if (useScript) {
@@ -354,7 +354,7 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
         global::scriptEngine->queueScript(script);
     }
     else {
-        Renderable* renderable = _hoverCircle->renderable();
+        Renderable* renderable = _hoverIndicator->renderable();
         if (renderable) {
             renderable->setFade(1.f);
         }
@@ -373,20 +373,20 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
     global::scriptEngine->queueScript(script);
 }
 
-void SkyBrowserModule::disableHoverCircle(bool useScript) {
-    if (!_hoverCircle || !_hoverCircle->renderable()) {
+void SkyBrowserModule::disableHoverIndicator(bool useScript) {
+    if (!_hoverIndicator || !_hoverIndicator->renderable()) {
         return;
     }
 
     if (useScript) {
         const std::string script = std::format(
             "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 0.0);",
-            _hoverCircle->identifier()
+            _hoverIndicator->identifier()
         );
         global::scriptEngine->queueScript(script);
     }
     else {
-        Property* prop = _hoverCircle->renderable()->property("Fade");
+        Property* prop = _hoverIndicator->renderable()->property("Fade");
         FloatProperty* floatProp = dynamic_cast<FloatProperty*>(prop);
         ghoul_assert(floatProp, "Fade property is not a float property");
         *floatProp = 0.f;
@@ -525,9 +525,9 @@ LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::InitializeBrowser,
             codegen::lua::SendOutIdsToBrowsers,
             codegen::lua::ListOfImages,
-            codegen::lua::SetHoverCircle,
-            codegen::lua::MoveCircleToHoverImage,
-            codegen::lua::DisableHoverCircle,
+            codegen::lua::SetHoverIndicator,
+            codegen::lua::MoveIndicatorToHoverImage,
+            codegen::lua::DisableHoverIndicator,
             codegen::lua::LoadImagesToWWT,
             codegen::lua::SelectImage,
             codegen::lua::RemoveSelectedImageInBrowser,

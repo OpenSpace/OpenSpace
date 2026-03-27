@@ -67,10 +67,15 @@ std::string prunedIdentifier(std::string identifier) {
 /**
  * Reloads the sky browser display copy for the node index that is sent in. If no ID is
  * sent in, it will reload all display copies on that node.
+ *
+ * \param nodeIndex The index of the node to reload the display copy on
+ * \param id An optional browser ID to only reload the display copy for a specific browser.
+ *        If "all" or no ID is provided, all display copies will be reloaded
  */
 [[codegen::luawrap]] void reloadDisplayCopyOnNode(int nodeIndex, std::string id = "all") {
-    if (global::windowDelegate->currentNode() != nodeIndex)
+    if (global::windowDelegate->currentNode() != nodeIndex) {
         return;
+    }
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     if (id != "all") {
@@ -94,6 +99,8 @@ std::string prunedIdentifier(std::string identifier) {
 /**
  * Takes an index to an image and selects that image in the currently selected sky
  * browser.
+ *
+ * \param imageUrl The url of the image to select
  */
 [[codegen::luawrap]] void selectImage(std::string imageUrl) {
     // Load image
@@ -144,30 +151,35 @@ std::string prunedIdentifier(std::string identifier) {
 
 /**
  * Takes an identifier to a screen space renderable and adds it to the module.
+ *
+ * \param identifier The identifier of the renderable that should be used as hover
+ *        indicator
  */
-[[codegen::luawrap]] void setHoverCircle(std::string identifier) {
-    SceneGraphNode* circle = global::renderEngine->scene()->sceneGraphNode(identifier);
-    if (!circle) {
+[[codegen::luawrap]] void setHoverIndicator(std::string identifier) {
+    SceneGraphNode* sgn = global::renderEngine->scene()->sceneGraphNode(identifier);
+    if (!sgn) {
         throw ghoul::lua::LuaError(std::format(
-            "Could not find node to set as hover circle: {}", identifier
+            "Could not find node to set as hover indicator: {}", identifier
         ));
     }
 
-    global::moduleEngine->module<SkyBrowserModule>()->setHoverCircle(circle);
+    global::moduleEngine->module<SkyBrowserModule>()->setHoverIndicator(sgn);
 }
 
 /**
- * Moves the hover circle to the coordinate specified by the image index.
+ * Moves the hover indicator to the coordinate specified by the image index.
+ *
+ * \param imageUrl The url of the image to move the hover indicator to
  */
-[[codegen::luawrap]] void moveCircleToHoverImage(std::string imageUrl) {
-    global::moduleEngine->module<SkyBrowserModule>()->moveHoverCircle(imageUrl, false);
+[[codegen::luawrap]] void moveIndicatorToHoverImage(std::string imageUrl) {
+    global::moduleEngine->module<SkyBrowserModule>()->moveHoverIndicator(imageUrl, false);
 }
 
 /**
- * Disables the hover circle, if there is one added to the sky browser module.
+ * Disables the hover indicator, if one is added to the sky browser module.
  */
-[[codegen::luawrap]] void disableHoverCircle() {
-    global::moduleEngine->module<SkyBrowserModule>()->disableHoverCircle(false);
+[[codegen::luawrap]] void disableHoverIndicator() {
+    global::moduleEngine->module<SkyBrowserModule>()->disableHoverIndicator(false);
 }
 
 /**

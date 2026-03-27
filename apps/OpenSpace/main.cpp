@@ -1347,7 +1347,8 @@ int main(int argc, char* argv[]) {
         // initialized again. Therefore we are using the platform specific functions now
 #ifdef WIN32
         glm::ivec2 size = glm::ivec2(1920, 1080);
-        DEVMODEW dm = { 0 };
+        DEVMODEW dm;
+        std::memset(&dm, 0, sizeof(DEVMODEW));
         dm.dmSize = sizeof(DEVMODEW);
         BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
         if (success) {
@@ -1495,7 +1496,8 @@ int main(int argc, char* argv[]) {
         // initialized again. Therefore we are using the platform specific functions now
 #ifdef WIN32
         glm::ivec2 size = glm::ivec2(1920, 1080);
-        DEVMODEW dm = { 0 };
+        DEVMODEW dm;
+        std::memset(&dm, 0, sizeof(DEVMODEW));
         dm.dmSize = sizeof(DEVMODEW);
         BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
         if (success) {

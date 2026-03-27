@@ -1125,7 +1125,7 @@ void TouchInteraction::decelerate(double dt) {
     // Save the new time slack for the next frame
     _timeSlack = fmod((dt + _timeSlack), expectedFrameTime) * expectedFrameTime;
 
-    //Ensure the number of times to apply the decay coefficient is valid
+    // Ensure the number of times to apply the decay coefficient is valid
     times = std::min(times, 1);
 
     _vel.orbit *= computeDecayCoeffFromFrametime(_constTimeDecayCoeff.orbit, times);

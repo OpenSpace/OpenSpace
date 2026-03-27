@@ -72,6 +72,29 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
+    // SizeMappingComponent is a reusable point-cloud helper that controls how per-point
+    // data influences rendered point size. It is intended for datasets where point size
+    // should convey meaning instead of remaining visually uniform.
+    //
+    // When enabled, the component selects one data parameter from the loaded dataset and
+    // uses that value as a multiplicative size input for each point. This makes it
+    // possible to encode attributes such as physical size, intensity, uncertainty, or any
+    // other scalar quantity directly into the visual scale of the point cloud.
+    //
+    // The component is structured as a configurable property owner, so it can be embedded
+    // into larger point-cloud renderables. Rather than defining the available parameters
+    // itself, it works with a provided list of size-capable dataset columns and lets one
+    // of them be chosen as the active mapping source.
+    //
+    // It also handles unit conversion for size values. Dataset values can be interpreted
+    // in a known distance unit or through an explicit numeric conversion factor, allowing
+    // the same logic to work across sources that express size in different scales. This
+    // is important when point sizes represent physical quantities that need to remain
+    // meaningful in the scene.
+    //
+    // In addition, the component supports interpreting incoming values as either radius
+    // or diameter. This allows it to adapt to differing dataset conventions without
+    // requiring the source data to be reformatted.
     struct [[codegen::Dictionary(SizeMappingComponent)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;

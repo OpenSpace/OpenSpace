@@ -60,9 +60,6 @@ class FramebufferRenderer final : public RaycasterListener, public Deferredcaste
 public:
     virtual ~FramebufferRenderer() override = default;
 
-    //============================//
-    //=====  Reuse textures  =====//
-    //============================//
     /**
      * Gives access to the currently NOT used pingPongTexture. This texture is available
      * for all RenderBins. However, it cannot be used at the same time as the Deferred

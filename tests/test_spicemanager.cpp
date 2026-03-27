@@ -294,7 +294,7 @@ TEST_CASE("SpiceManager: Get Field Of View", "[spicemanager]") {
     CHECK_NOTHROW(res = SpiceManager::ref().fieldOfView("CASSINI_ISS_NAC"));
 
     CHECK(found == SPICETRUE);
-    //check vectors have correct values
+    // Check vectors have correct values
     for (size_t i = 0; i < res.bounds.size(); i++) {
         for (size_t j = 0; j < 3; j++) {
             CHECK(

@@ -37,9 +37,11 @@ uniform mat4 modelTransform;
 
 
 void main() {
-  out_data.position = vec4(in_position, 0.0);
   vec4 pos = vec4(in_position, 0.0);
-  gl_Position = z_normalization(
-    viewProjection * pscTransform(pos, modelTransform)
-  );
+  // @TODO (2026-03-19, emmbr) This should be looked over so the pscTransform is not
+  // needed or reimplemented. It currently changes the input pos attribute, which is
+  // confusing
+  vec4 position = pscTransform(pos, modelTransform);
+  out_data.position = pos;
+  gl_Position = z_normalization(viewProjection * position);
 }
