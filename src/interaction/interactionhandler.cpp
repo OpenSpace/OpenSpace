@@ -308,14 +308,14 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
     markInteraction();
 }
 
-bool InteractionHandler::touchDetectedCallback(TouchInput i) {
+void InteractionHandler::touchDetectedCallback(TouchInput i) {
     markInteraction();
-    return _touchInputState.touchDetectedCallback(i);
+    _touchInputState.touchDetectedCallback(i);
 }
 
-bool InteractionHandler::touchUpdatedCallback(TouchInput i) {
+void InteractionHandler::touchUpdatedCallback(TouchInput i) {
     markInteraction();
-    return _touchInputState.touchUpdatedCallback(i);
+    _touchInputState.touchUpdatedCallback(i);
 }
 
 void InteractionHandler::touchExitCallback(TouchInput i) {

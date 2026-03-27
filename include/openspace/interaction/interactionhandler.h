@@ -81,8 +81,8 @@ public:
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
 
-    bool touchDetectedCallback(TouchInput input);
-    bool touchUpdatedCallback(TouchInput input);
+    void touchDetectedCallback(TouchInput input);
+    void touchUpdatedCallback(TouchInput input);
     void touchExitCallback(TouchInput input);
 
     void renderOverlay();
