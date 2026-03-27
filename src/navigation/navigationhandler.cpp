@@ -196,8 +196,14 @@ void NavigationHandler::setCamera(Camera* camera) {
     _orbitalNavigator.setCamera(camera);
 }
 
-void NavigationHandler::setNavigationStateNextFrame(const NavigationState& state) {
+void NavigationHandler::setNavigationStateNextFrame(const NavigationState& state,
+                                                    bool useTimeStamp)
+{
     _pendingState = state;
+
+    if (useTimeStamp && state.timestamp.has_value()) {
+        global::timeManager->setTimeNextFrame(Time(*state.timestamp));
+    }
 }
 
 void NavigationHandler::setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec) {
@@ -708,8 +714,7 @@ void NavigationHandler::saveNavigationState(const std::filesystem::path& filepat
     ofs << state.toJson().dump(2);
 }
 
-void NavigationHandler::loadNavigationState(const std::string& filepath,
-                                            bool useTimeStamp)
+NavigationState NavigationHandler::loadNavigationState(const std::string& filepath)
 {
     std::filesystem::path absolutePath = absPath(filepath);
     LINFO(std::format("Reading camera state from file: {}", absolutePath));
@@ -737,12 +742,7 @@ void NavigationHandler::loadNavigationState(const std::string& filepath,
 
     const nlohmann::json json = nlohmann::json::parse(contents);
 
-    const NavigationState state = NavigationState(json);
-    setNavigationStateNextFrame(state);
-
-    if (useTimeStamp && state.timestamp.has_value()) {
-        global::timeManager->setTimeNextFrame(Time(*state.timestamp));
-    }
+    return NavigationState(json);
 }
 
 std::vector<std::string> NavigationHandler::listAllJoysticks() const {
@@ -867,7 +867,8 @@ LuaLibrary NavigationHandler::luaLibrary() {
     return {
         "navigation",
         {
-            codegen::lua::LoadNavigationState,
+            codegen::lua::LoadNavigationStateFromFile,
+            codegen::lua::LoadNavigationStateDeprecated,
             codegen::lua::GetNavigationState,
             codegen::lua::SetNavigationState,
             codegen::lua::SaveNavigationState,
