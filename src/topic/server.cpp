@@ -310,7 +310,7 @@ void Server::passDataToTopic(const std::string& topicType,
                                    const nlohmann::json& jsonData)
 {
     for (const ConnectionData& connectionData : _connections) {
-        if (auto topic = connectionData.connection->findTopicByType(topicType)) {
+        if (Topic* topic = connectionData.connection->findTopicByType(topicType)) {
             topic->handleJson(jsonData);
         }
     }

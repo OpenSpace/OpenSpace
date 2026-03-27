@@ -61,12 +61,10 @@ void Connection::handleMessage(const std::string& message) {
 
     try {
         const nlohmann::json j = nlohmann::json::parse(message.c_str());
-        try {
-            handleJson(j);
-        }
-        catch (const std::domain_error& e) {
-            LERROR(std::format("JSON handling error from: {}. {}", message, e.what()));
-        }
+        handleJson(j);
+    }
+    catch (const std::domain_error& e) {
+        LERROR(std::format("JSON handling error from: {}. {}", message, e.what()));
     }
     catch (const std::out_of_range& e) {
         LERROR(std::format("JSON handling error from: {}. {}", message, e.what()));
