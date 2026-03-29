@@ -1142,7 +1142,7 @@ void SpiceManager::findSpkCoverage(const std::filesystem::path &path) {
         std::format("File '{}' does not exist", path)
     );
 
-    constexpr unsigned int MaxObj = 1024;
+    constexpr unsigned int MaxObj = 16384;
     constexpr unsigned int WinSiz = 16384;
 
 #if defined __clang__

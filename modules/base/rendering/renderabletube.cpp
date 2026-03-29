@@ -1290,12 +1290,12 @@ void RenderableTube::loadSelectedSample() {
     if (sample >= SpiceIdOffset) {
         // Convert the SPICE id to a filename
         filename = std::format("{:06}.bsp", sample - SpiceIdOffset + 1);
-        identifier = std::to_string(sample);
+        identifier = std::to_string(sample - 1);
         target = identifier;
     }
     else {
         filename = std::format("{:06}.bsp", sample);
-        identifier = std::format("1{:06}", sample);
+        identifier = std::format("1{:06}", sample - 1);
         target = identifier;
     }
 
