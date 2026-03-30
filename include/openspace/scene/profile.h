@@ -182,7 +182,6 @@ public:
     struct Addons {
         std::vector<std::string> recommendedPaths;
         std::vector<Addon> custom;
-        std::vector<std::string> generalPaths;
 
         // The realized recommended Addons are not stored back into the JSON
         std::vector<Addon> recommended;

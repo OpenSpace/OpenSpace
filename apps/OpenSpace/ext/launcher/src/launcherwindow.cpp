@@ -84,9 +84,9 @@ namespace {
             LeftRuler, TopRuler + 180, SmallItemWidth, SmallItemHeight
         );
         constexpr QRect AddonBox(
-            LeftRuler + 10,
-            TopRuler + 215,
-            SmallItemWidth - 10,
+            LeftRuler,
+            TopRuler + 210,
+            SmallItemWidth,
             SmallItemHeight
         );
         constexpr QRect OptionsLabel(LeftRuler + 10, TopRuler + 255, 151, 24);
@@ -301,9 +301,9 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     }
 
     _addonBox.combobox = new QComboBox(centralWidget);
-    _addonBox.combobox->setObjectName("addons");
+    _addonBox.combobox->setObjectName("config");
     _addonBox.combobox->setGeometry(geometry::AddonBox);
-    _addonBox.combobox->setAccessibleName("Select Add-Ons");
+    _addonBox.combobox->setAccessibleName("Select Addons");
     _addonBox.model = new QStandardItemModel;
     _addonBox.combobox->setModel(_addonBox.model);
     updateAddonsBox(globalConfig.profile.profile + ".profile");
@@ -732,10 +732,6 @@ void LauncherWindow::updateStartButton() const {
 
 void LauncherWindow::updateAddonsBox(const std::string& profile) {
     // Get a list of all of the potential variants
-    //const std::filesystem::path& path,
-        //Recursive recursive, Sorted sorted,
-        //std::function<bool(const std::filesystem::path&)> filter
-
     std::vector<std::filesystem::path> addonsCore = ghoul::filesystem::walkDirectory(
         _profilePath,
         ghoul::filesystem::Recursive::Yes,

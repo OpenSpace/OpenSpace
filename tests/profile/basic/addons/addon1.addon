@@ -1,0 +1,11 @@
+
+{
+  "version": { "major": 1, "minor": 0 },
+  "identifier": "addon1",
+  "name": "Addon 1",
+  "description": "Description addon 1.",
+  "assets": [
+    "util/ipac",
+    "util/webgui"
+  ]
+}
