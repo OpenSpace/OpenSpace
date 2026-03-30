@@ -76,10 +76,6 @@ RenderableSphereImageLocal::RenderableSphereImageLocal(
     addProperty(_texturePath);
 }
 
-bool RenderableSphereImageLocal::isReady() const {
-    return RenderableSphere::isReady() && _texture;
-}
-
 void RenderableSphereImageLocal::initialize() {
     _texture = std::make_unique<TextureComponent>(2);
     _texture->setFilterMode(ghoul::opengl::Texture::FilterMode::LinearMipMap);

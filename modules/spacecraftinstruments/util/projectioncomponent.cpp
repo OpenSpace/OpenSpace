@@ -424,10 +424,6 @@ void ProjectionComponent::deinitialize() {
     }
 }
 
-bool ProjectionComponent::isReady() const {
-    return _projectionTexture != nullptr;
-}
-
 void ProjectionComponent::imageProjectBegin() {
     // Keep handle to the current bound FBO
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);

@@ -206,16 +206,6 @@ void RenderableConstellationBounds::deinitializeGL() {
     }
 }
 
-bool RenderableConstellationBounds::isReady() const {
-    bool isReady = _program && _vao != 0 && _vbo != 0;
-
-    // If we have labels, they also need to be loaded
-    if (_hasLabels) {
-        isReady = isReady && RenderableConstellationsBase::isReady();
-    }
-    return isReady;
-}
-
 void RenderableConstellationBounds::render(const RenderData& data, RendererTasks& tasks) {
     _program->activate();
 

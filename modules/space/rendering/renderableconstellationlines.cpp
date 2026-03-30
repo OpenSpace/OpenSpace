@@ -203,16 +203,6 @@ void RenderableConstellationLines::selectionPropertyHasChanged() {
     }
 }
 
-bool RenderableConstellationLines::isReady() const {
-    const bool isReady = _program && !_renderingConstellationsMap.empty();
-
-    // If we have labels, they also need to be loaded
-    if (_hasLabels) {
-        return isReady && RenderableConstellationsBase::isReady();
-    }
-    return isReady;
-}
-
 void RenderableConstellationLines::initialize() {
     RenderableConstellationsBase::initialize();
 

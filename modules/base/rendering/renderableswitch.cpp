@@ -151,12 +151,6 @@ void RenderableSwitch::deinitializeGL() {
     }
 }
 
-bool RenderableSwitch::isReady() const {
-    const bool near = _renderableNear ? _renderableNear->isReady() : true;
-    const bool far = _renderableFar ? _renderableFar->isReady() : true;
-    return near && far;
-}
-
 void RenderableSwitch::update(const UpdateData& data) {
     ghoul_assert(_renderableNear || _renderableFar, "No renderable");
 

@@ -183,11 +183,6 @@ void RenderableToyVolume::deinitializeGL() {
     }
 }
 
-bool RenderableToyVolume::isReady() const {
-    // @TODO isReady function needs to be filled
-    return true;
-}
-
 void RenderableToyVolume::update(const UpdateData& data) {
     if (!_raycaster) {
         return;

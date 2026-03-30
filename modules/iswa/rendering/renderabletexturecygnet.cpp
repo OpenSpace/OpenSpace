@@ -113,7 +113,7 @@ bool RenderableTextureCygnet::updateTextureResource() {
 }
 
 bool RenderableTextureCygnet::readyToRender() const {
-    return isReady() && ((!_textures.empty()) && _textures[0]);
+    return !_textures.empty() && _textures[0];
 }
 
 } // namespace openspace

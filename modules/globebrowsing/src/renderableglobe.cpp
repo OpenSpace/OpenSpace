@@ -881,10 +881,6 @@ void RenderableGlobe::deinitializeGL() {
     }
 }
 
-bool RenderableGlobe::isReady() const {
-    return true;
-}
-
 void RenderableGlobe::render(const RenderData& data, RendererTasks&) {
     const double distanceToCamera = glm::distance(
         data.camera.position(),

@@ -114,12 +114,6 @@ RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictio
     addProperty(_zColor);
 }
 
-bool RenderableCartesianAxes::isReady() const {
-    bool ready = true;
-    ready &= (_program != nullptr);
-    return ready;
-}
-
 void RenderableCartesianAxes::initializeGL() {
     _program = BaseModule::ProgramObjectManager.request(
         "CartesianAxesProgram",

@@ -542,10 +542,6 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     addProperty(_gpuStreamBudgetProperty);
 }
 
-bool RenderableGaiaStars::isReady() const {
-    return _program && _programTM;
-}
-
 void RenderableGaiaStars::initializeGL() {
     _program = ghoul::opengl::ProgramObject::Build(
         "GaiaStar",

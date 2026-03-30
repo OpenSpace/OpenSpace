@@ -77,10 +77,6 @@ void ScreenSpaceSpout::deinitializeGL() {
     ScreenSpaceRenderable::deinitializeGL();
 }
 
-bool ScreenSpaceSpout::isReady() const {
-    return ScreenSpaceRenderable::isReady() && !_spoutReceiver.isReceiving();
-}
-
 void ScreenSpaceSpout::update() {
     ScreenSpaceRenderable::update();
     _spoutReceiver.updateReceiver();

@@ -586,10 +586,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _originalRenderBin = renderBin();
 }
 
-bool RenderableModel::isReady() const {
-    return _program && _quadProgram && (!_castShadow || _depthMapProgram);
-}
-
 void RenderableModel::initialize() {
     ZoneScoped;
 

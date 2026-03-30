@@ -130,10 +130,6 @@ void ShadowComponent::initialize() {
     buildDDepthTexture();
 }
 
-bool ShadowComponent::isReady() const {
-    return true;
-}
-
 void ShadowComponent::initializeGL() {
     ZoneScoped;
 

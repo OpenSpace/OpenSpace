@@ -297,10 +297,6 @@ void RenderableEclipseCone::deinitializeGL() {
     glDeleteBuffers(1, &_vbo);
 }
 
-bool RenderableEclipseCone::isReady() const {
-    return _shader != nullptr;
-}
-
 void RenderableEclipseCone::render(const RenderData& data, RendererTasks&) {
     glDepthMask(false);
     glDisable(GL_CULL_FACE);

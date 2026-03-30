@@ -190,10 +190,6 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     }
 }
 
-bool RenderableGrid::isReady() const {
-    return _gridProgram && (_hasLabels ? _labels->isReady() : true);
-}
-
 void RenderableGrid::initialize() {
     if (_hasLabels) {
         _labels->initialize();

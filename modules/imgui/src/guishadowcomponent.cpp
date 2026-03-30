@@ -71,7 +71,6 @@ void GuiShadowComponent::render() {
             std::string id = node->identifier();
             ImGui::Text("  %s", id.c_str());
             ImGui::Text("    Is Enabled: %d", node->renderable()->isEnabled());
-            ImGui::Text("    Is Ready: %d", node->renderable()->isReady());
             ImGui::Text("    Is Casting Shadow: %d", shadower->isCastingShadow());
 
         }

@@ -156,10 +156,6 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 
 RenderableModelProjection::~RenderableModelProjection() {}
 
-bool RenderableModelProjection::isReady() const {
-    return (_programObject != nullptr) && _projectionComponent.isReady();
-}
-
 void RenderableModelProjection::initializeGL() {
     _programObject = global::renderEngine->buildRenderProgram(
         "ModelShader",

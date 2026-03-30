@@ -332,10 +332,6 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     }
 }
 
-bool RenderableSphere::isReady() const {
-    return _shader != nullptr;
-}
-
 void RenderableSphere::initializeGL() {
     _sphere = std::make_unique<Sphere>(_size, _segments);
     _sphere->initialize();

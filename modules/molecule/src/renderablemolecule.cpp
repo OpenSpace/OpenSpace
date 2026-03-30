@@ -401,10 +401,6 @@ void RenderableMolecule::deinitializeGL() {
     _glMolecule = {};
 }
 
-bool RenderableMolecule::isReady() const {
-    return true;
-}
-
 void RenderableMolecule::update(const UpdateData& data) {
     // Avoid updating if not in view, as it can be quite expensive
     if (!_renderableInView) {

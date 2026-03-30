@@ -140,10 +140,6 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     addProperty(Fadeable::_opacity);
 }
 
-bool RenderableOrbitDisc::isReady() const {
-    return _shader && _texture && _plane;
-}
-
 void RenderableOrbitDisc::initialize() {
     _texture = std::make_unique<TextureComponent>(1);
     _texture->setFilterMode(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);

@@ -391,10 +391,6 @@ void RenderablePlanetProjection::deinitializeGL() {
     _fboProgramObject = nullptr;
 }
 
-bool RenderablePlanetProjection::isReady() const {
-    return _programObject && _projectionComponent.isReady();
-}
-
 void RenderablePlanetProjection::imageProjectGPU(
                                           const ghoul::opengl::Texture& projectionTexture,
                                                          const glm::mat4& projectorMatrix)

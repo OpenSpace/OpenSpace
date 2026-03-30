@@ -490,10 +490,6 @@ void RenderableAtmosphere::initializeGL() {
     global::deferredcasterManager->attachDeferredcaster(*_deferredcaster);
 }
 
-bool RenderableAtmosphere::isReady() const {
-    return true;
-}
-
 glm::dmat4 RenderableAtmosphere::computeModelTransformMatrix(const TransformData& data) {
     // Scale the planet to appropriate size since the planet is a unit sphere
     return glm::translate(glm::dmat4(1.0), data.translation) *

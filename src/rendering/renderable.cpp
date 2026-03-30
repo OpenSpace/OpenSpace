@@ -291,10 +291,6 @@ bool Renderable::isVisible() const {
     return _enabled && Fadeable::isVisible();
 }
 
-bool Renderable::isReady() const {
-    return true;
-}
-
 bool Renderable::isEnabled() const {
     return _enabled;
 }
