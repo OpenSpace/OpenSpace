@@ -85,7 +85,7 @@ namespace {
         constexpr QRect AddonBox(
             LeftRuler + 10,
             TopRuler + 215,
-            SmallItemWidth,
+            SmallItemWidth - 10,
             SmallItemHeight
         );
         constexpr QRect OptionsLabel(LeftRuler + 10, TopRuler + 255, 151, 24);

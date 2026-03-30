@@ -2,6 +2,6 @@ local DataPath = asset.resource({
   Name = "Launcher Images",
   Type = "HttpSynchronization",
   Identifier = "launcher_images",
-  Version = 4
+  Version = 5
 })
 asset.export("DataPath", DataPath)

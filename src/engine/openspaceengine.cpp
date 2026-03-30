@@ -494,6 +494,19 @@ void OpenSpaceEngine::initialize() {
     *global::profile = Profile(profile);
 
     // Enable the add-ons
+    std::vector<std::filesystem::path> coreAddons = ghoul::filesystem::walkDirectory(
+        absPath("${PROFILES}"),
+        ghoul::filesystem::Recursive::Yes,
+        ghoul::filesystem::Sorted::No,
+        [](const std::filesystem::path& p) { return p.extension() == ".addon"; }
+    );
+    std::vector<std::filesystem::path> userAddons = ghoul::filesystem::walkDirectory(
+        absPath("${USER_PROFILES}"),
+        ghoul::filesystem::Recursive::Yes,
+        ghoul::filesystem::Sorted::No,
+        [](const std::filesystem::path& p) { return p.extension() == ".addon"; }
+    );
+
     for (const std::string& addon : global::configuration->profile.addons) {
         auto findIdentifier = [&addon](const Addon& a) {
             return a.identifier == addon;
@@ -506,6 +519,7 @@ void OpenSpaceEngine::initialize() {
         );
         if (iRecommended != global::profile->addons.recommended.end()) {
             iRecommended->isEnabled = true;
+            continue;
         }
 
         auto iCustom = std::find_if(
@@ -517,8 +531,19 @@ void OpenSpaceEngine::initialize() {
             iCustom->isEnabled = true;
         }
 
+        auto iGeneral = std::find_if(
+            global::profile->addons.general.begin(),
+            global::profile->addons.general.end(),
+            findIdentifier
+        );
+        if (iGeneral != global::profile->addons.general.end()) {
+            iGeneral->isEnabled = true;
+        }
+
+
         if (iRecommended == global::profile->addons.recommended.end() &&
-            iCustom == global::profile->addons.custom.end())
+            iCustom == global::profile->addons.custom.end() &&
+            iGeneral == global::profile->addons.general.end())
         {
             LWARNING(std::format("Could find requested variant '{}'", addon));
             continue;
@@ -886,6 +911,7 @@ void OpenSpaceEngine::loadAssets() {
             continue;
         }
 
+        LDEBUG(std::format("Loading addon '{}'", addon.name));
         for (const std::string& a : addon.assets) {
             _assetManager->add(a);
         }
@@ -895,6 +921,17 @@ void OpenSpaceEngine::loadAssets() {
             continue;
         }
 
+        LDEBUG(std::format("Loading addon '{}'", addon.name));
+        for (const std::string& a : addon.assets) {
+            _assetManager->add(a);
+        }
+    }
+    for (const Addon& addon : global::profile->addons.general) {
+        if (!addon.isEnabled) {
+            continue;
+        }
+
+        LDEBUG(std::format("Loading addon '{}'", addon.name));
         for (const std::string& a : addon.assets) {
             _assetManager->add(a);
         }
