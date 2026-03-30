@@ -149,7 +149,7 @@ void ScreenSpaceRenderableFramebuffer::createFramebuffer() {
         ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(resolution.x, resolution.y, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::Red,
+            .format = ghoul::opengl::Texture::Format::RGBA,
             .dataType = GL_UNSIGNED_BYTE
         },
         ghoul::opengl::Texture::SamplerInit {}
