@@ -17,6 +17,14 @@ local S2019S2 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 2",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S2"
@@ -37,6 +45,14 @@ local S2019S2Trail = {
     Period = 795.67,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 2 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S2",
@@ -55,6 +71,13 @@ local S2019S2Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2019 S 2 Label",
@@ -77,6 +100,14 @@ local S2019S3 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 3",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S3"
@@ -97,6 +128,14 @@ local S2019S3Trail = {
     Period = 833.19,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 3 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S3",
@@ -115,6 +154,13 @@ local S2019S3Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2019 S 3 Label",
@@ -137,6 +183,14 @@ local S2020S1 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2020 S 1",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2020S1"
@@ -157,6 +211,14 @@ local S2020S1Trail = {
     Period = 450.77,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2020 S 1 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2020S1",
@@ -175,6 +237,13 @@ local S2020S1Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2020 S 1 Label",
@@ -197,6 +266,14 @@ local S2020S2 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2020 S 2",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S2"
@@ -217,6 +294,14 @@ local S2020S2Trail = {
     Period = 891.86,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2020 S 2 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S2",
@@ -235,6 +320,13 @@ local S2020S2Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2020 S 2 Label",
@@ -257,6 +349,14 @@ local S2004S40 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 40",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S40"
@@ -277,6 +377,14 @@ local S2004S40Trail = {
     Period = 761.0,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 40 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S40",
@@ -295,6 +403,13 @@ local S2004S40Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2004 S 40 Label",
@@ -317,6 +432,14 @@ local S2006S9 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 9",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S9"
@@ -337,6 +460,14 @@ local S2006S9Trail = {
     Period = 645.58,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 9 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S9",
@@ -355,6 +486,13 @@ local S2006S9Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2006 S 9 Label",
@@ -377,6 +515,14 @@ local S2007S5 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2007 S 5",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S5"
@@ -397,6 +543,14 @@ local S2007S5Trail = {
     Period = 744.01,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2007 S 5 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S5",
@@ -415,6 +569,13 @@ local S2007S5Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2007 S 5 Label",
@@ -437,6 +598,14 @@ local S2020S3 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2020 S 3",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2020S3"
@@ -457,6 +626,14 @@ local S2020S3Trail = {
     Period = 905.84,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2020 S 3 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2020S3",
@@ -475,6 +652,13 @@ local S2020S3Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2020 S 3 Label",
@@ -497,6 +681,14 @@ local S2019S4 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 4",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S4"
@@ -517,6 +709,14 @@ local S2019S4Trail = {
     Period = 898.09,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 4 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S4",
@@ -535,6 +735,13 @@ local S2019S4Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2019 S 4 Label",
@@ -557,6 +764,14 @@ local S2004S41 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 41",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S41"
@@ -577,6 +792,14 @@ local S2004S41Trail = {
     Period = 908.89,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 41 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S41",
@@ -595,6 +818,13 @@ local S2004S41Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2004 S 41 Label",
@@ -617,6 +847,14 @@ local S2020S4 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2020 S 4",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2020S4"
@@ -637,6 +875,14 @@ local S2020S4Trail = {
     Period = 919.52,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2020 S 4 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2020S4",
@@ -655,6 +901,13 @@ local S2020S4Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2020 S 4 Label",
@@ -677,6 +930,14 @@ local S2020S5 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2020 S 5",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2020S5"
@@ -697,6 +958,14 @@ local S2020S5Trail = {
     Period = 931.19,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2020 S 5 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2020S5",
@@ -715,6 +984,13 @@ local S2020S5Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2020 S 5 Label",
@@ -737,6 +1013,14 @@ local S2007S6 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2007 S 6",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S6"
@@ -757,6 +1041,14 @@ local S2007S6Trail = {
     Period = 942.98,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2007 S 6 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S6",
@@ -775,6 +1067,13 @@ local S2007S6Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2007 S 6 Label",
@@ -797,6 +1096,14 @@ local S2004S42 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 42",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S42"
@@ -817,6 +1124,14 @@ local S2004S42Trail = {
     Period = 919.88,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 42 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S42",
@@ -835,6 +1150,13 @@ local S2004S42Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2004 S 42 Label",
@@ -857,6 +1179,14 @@ local S2006S10 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 10",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S10"
@@ -877,6 +1207,14 @@ local S2006S10Trail = {
     Period = 976.34,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 10 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S10",
@@ -895,6 +1233,13 @@ local S2006S10Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2006 S 10 Label",
@@ -917,6 +1262,14 @@ local S2019S5 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 5",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S5"
@@ -937,6 +1290,14 @@ local S2019S5Trail = {
     Period = 984.87,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 5 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S5",
@@ -955,6 +1316,13 @@ local S2019S5Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2019 S 5 Label",
@@ -977,6 +1345,14 @@ local S2004S43 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 43",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S43"
@@ -997,6 +1373,14 @@ local S2004S43Trail = {
     Period = 972.85,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 43 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S43",
@@ -1015,6 +1399,13 @@ local S2004S43Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2004 S 43 Label",
@@ -1037,6 +1428,14 @@ local S2004S44 = {
     Type = "RenderableGlobe",
     Radii = { 2.5, 2.5, 2.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 44",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S44"
@@ -1057,6 +1456,14 @@ local S2004S44Trail = {
     Period = 1017.91,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 44 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S44",
@@ -1075,6 +1482,13 @@ local S2004S44Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2004 S 44 Label",
@@ -1097,6 +1511,14 @@ local S2004S45 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 45",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2004S45"
@@ -1117,6 +1539,14 @@ local S2004S45Trail = {
     Period = 1031.86,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 45 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2004S45",
@@ -1135,6 +1565,13 @@ local S2004S45Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2004 S 45 Label",
@@ -1157,6 +1594,14 @@ local S2006S11 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 11",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S11"
@@ -1177,6 +1622,14 @@ local S2006S11Trail = {
     Period = 1033.35,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 11 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S11",
@@ -1195,6 +1648,13 @@ local S2006S11Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2006 S 11 Label",
@@ -1217,6 +1677,14 @@ local S2006S12 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 12",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2006S12"
@@ -1237,6 +1705,14 @@ local S2006S12Trail = {
     Period = 1022.29,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 12 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2006S12",
@@ -1255,6 +1731,13 @@ local S2006S12Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2006 S 12 Label",
@@ -1277,6 +1760,14 @@ local S2019S6 = {
     Type = "RenderableGlobe",
     Radii = { 2.5, 2.5, 2.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 6",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2019S6"
@@ -1297,6 +1788,14 @@ local S2019S6Trail = {
     Period = 917.11,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 6 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2019S6",
@@ -1315,6 +1814,13 @@ local S2019S6Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2019 S 6 Label",
@@ -1337,6 +1843,14 @@ local S2006S13 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 13",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S13"
@@ -1357,6 +1871,14 @@ local S2006S13Trail = {
     Period = 1052.32,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 13 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S13",
@@ -1375,6 +1897,13 @@ local S2006S13Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2006 S 13 Label",
@@ -1397,6 +1926,14 @@ local S2019S7 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 7",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S7"
@@ -1417,6 +1954,14 @@ local S2019S7Trail = {
     Period = 1070.8,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 7 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S7",
@@ -1435,6 +1980,13 @@ local S2019S7Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2019 S 7 Label",
@@ -1457,6 +2009,14 @@ local S2019S8 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 8",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S8"
@@ -1477,6 +2037,14 @@ local S2019S8Trail = {
     Period = 1078.86,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 8 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S8",
@@ -1495,6 +2063,13 @@ local S2019S8Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2019 S 8 Label",
@@ -1517,6 +2092,14 @@ local S2019S9 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 9",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S9"
@@ -1537,6 +2120,14 @@ local S2019S9Trail = {
     Period = 1084.62,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 9 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S9",
@@ -1555,6 +2146,13 @@ local S2019S9Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2019 S 9 Label",
@@ -1577,6 +2175,14 @@ local S2004S46 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 46",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2004S46"
@@ -1597,6 +2203,14 @@ local S2004S46Trail = {
     Period = 1096.99,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 46 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2004S46",
@@ -1615,6 +2229,13 @@ local S2004S46Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2004 S 46 Label",
@@ -1637,6 +2258,14 @@ local S2019S10 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 10",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S10"
@@ -1657,6 +2286,14 @@ local S2019S10Trail = {
     Period = 1111.99,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 10 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S10",
@@ -1675,6 +2312,13 @@ local S2019S10Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2019 S 10 Label",
@@ -1697,6 +2341,14 @@ local S2004S47 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 47",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S47"
@@ -1717,6 +2369,14 @@ local S2004S47Trail = {
     Period = 759.22,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 47 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S47",
@@ -1735,6 +2395,13 @@ local S2004S47Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2004 S 47 Label",
@@ -1757,6 +2424,14 @@ local S2019S11 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 11",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2019S11"
@@ -1777,6 +2452,14 @@ local S2019S11Trail = {
     Period = 1109.11,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 11 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2019S11",
@@ -1795,6 +2478,13 @@ local S2019S11Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2019 S 11 Label",
@@ -1817,6 +2507,14 @@ local S2006S14 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 14",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S14"
@@ -1837,6 +2535,14 @@ local S2006S14Trail = {
     Period = 1141.27,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 14 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S14",
@@ -1855,6 +2561,13 @@ local S2006S14Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2006 S 14 Label",
@@ -1877,6 +2590,14 @@ local S2019S12 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 12",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S12"
@@ -1897,6 +2618,14 @@ local S2019S12Trail = {
     Period = 1127.6,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 12 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S12",
@@ -1915,6 +2644,13 @@ local S2019S12Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2019 S 12 Label",
@@ -1937,6 +2673,14 @@ local S2020S6 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2020 S 6",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S6"
@@ -1957,6 +2701,14 @@ local S2020S6Trail = {
     Period = 1156.81,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2020 S 6 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S6",
@@ -1975,6 +2727,13 @@ local S2020S6Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2020 S 6 Label",
@@ -1997,6 +2756,14 @@ local S2019S13 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 13",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S13"
@@ -2017,6 +2784,14 @@ local S2019S13Trail = {
     Period = 1133.27,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 13 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S13",
@@ -2035,6 +2810,13 @@ local S2019S13Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2019 S 13 Label",
@@ -2057,6 +2839,14 @@ local S2005S4 = {
     Type = "RenderableGlobe",
     Radii = { 2.5, 2.5, 2.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2005 S 4",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2005S4"
@@ -2077,6 +2867,14 @@ local S2005S4Trail = {
     Period = 449.93,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2005 S 4 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2005S4",
@@ -2095,6 +2893,13 @@ local S2005S4Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2005 S 4 Label",
@@ -2117,6 +2922,14 @@ local S2007S7 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2007 S 7",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S7"
@@ -2137,6 +2950,14 @@ local S2007S7Trail = {
     Period = 750.8,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2007 S 7 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S7",
@@ -2155,6 +2976,13 @@ local S2007S7Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2007 S 7 Label",
@@ -2177,6 +3005,14 @@ local S2007S8 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2007 S 8",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2007S8"
@@ -2197,6 +3033,14 @@ local S2007S8Trail = {
     Period = 831.21,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2007 S 8 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2007S8",
@@ -2215,6 +3059,13 @@ local S2007S8Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2007 S 8 Label",
@@ -2237,6 +3088,14 @@ local S2020S7 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2020 S 7",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S7"
@@ -2257,6 +3116,14 @@ local S2020S7Trail = {
     Period = 856.53,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2020 S 7 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S7",
@@ -2275,6 +3142,13 @@ local S2020S7Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2020 S 7 Label",
@@ -2297,6 +3171,14 @@ local S2019S14 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 14",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2019S14"
@@ -2317,6 +3199,14 @@ local S2019S14Trail = {
     Period = 890.59,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 14 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2019S14",
@@ -2335,6 +3225,13 @@ local S2019S14Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2019 S 14 Label",
@@ -2357,6 +3254,14 @@ local S2019S15 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 15",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S15"
@@ -2377,6 +3282,14 @@ local S2019S15Trail = {
     Period = 1151.66,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 15 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S15",
@@ -2395,6 +3308,13 @@ local S2019S15Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2019 S 15 Label",
@@ -2417,6 +3337,14 @@ local S2005S5 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2005 S 5",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2005S5"
@@ -2437,6 +3365,14 @@ local S2005S5Trail = {
     Period = 1165.96,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2005 S 5 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2005S5",
@@ -2455,6 +3391,13 @@ local S2005S5Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2005 S 5 Label",
@@ -2477,6 +3420,14 @@ local S2006S15 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 15",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S15"
@@ -2497,6 +3448,14 @@ local S2006S15Trail = {
     Period = 1201.69,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 15 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S15",
@@ -2515,6 +3474,13 @@ local S2006S15Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2006 S 15 Label",
@@ -2537,6 +3503,14 @@ local S2006S16 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 16",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S16"
@@ -2557,6 +3531,14 @@ local S2006S16Trail = {
     Period = 1195.13,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 16 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S16",
@@ -2575,6 +3557,13 @@ local S2006S16Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2006 S 16 Label",
@@ -2597,6 +3586,14 @@ local S2006S17 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 17",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S17"
@@ -2617,6 +3614,14 @@ local S2006S17Trail = {
     Period = 1250.46,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 17 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S17",
@@ -2635,6 +3640,13 @@ local S2006S17Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2006 S 17 Label",
@@ -2657,6 +3669,14 @@ local S2004S48 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 48",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S48"
@@ -2677,6 +3697,14 @@ local S2004S48Trail = {
     Period = 1229.86,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 48 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S48",
@@ -2695,6 +3723,13 @@ local S2004S48Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2004 S 48 Label",
@@ -2717,6 +3752,14 @@ local S2020S8 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2020 S 8",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S8"
@@ -2737,6 +3780,14 @@ local S2020S8Trail = {
     Period = 1215.61,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2020 S 8 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S8",
@@ -2755,6 +3806,13 @@ local S2020S8Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2020 S 8 Label",
@@ -2777,6 +3835,14 @@ local S2004S49 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 49",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S49"
@@ -2797,6 +3863,14 @@ local S2004S49Trail = {
     Period = 1251.68,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 49 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S49",
@@ -2815,6 +3889,13 @@ local S2004S49Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2004 S 49 Label",
@@ -2837,6 +3918,14 @@ local S2004S50 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 50",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S50"
@@ -2857,6 +3946,14 @@ local S2004S50Trail = {
     Period = 1247.19,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 50 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S50",
@@ -2875,6 +3972,13 @@ local S2004S50Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2004 S 50 Label",
@@ -2897,6 +4001,14 @@ local S2006S18 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 18",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S18"
@@ -2917,6 +4029,14 @@ local S2006S18Trail = {
     Period = 1282.09,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 18 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S18",
@@ -2935,6 +4055,13 @@ local S2006S18Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2006 S 18 Label",
@@ -2957,6 +4084,14 @@ local S2019S16 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 16",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S16"
@@ -2977,6 +4112,14 @@ local S2019S16Trail = {
     Period = 1324.95,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 16 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S16",
@@ -2995,6 +4138,13 @@ local S2019S16Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2019 S 16 Label",
@@ -3017,6 +4167,14 @@ local S2019S17 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 17",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S17"
@@ -3037,6 +4195,14 @@ local S2019S17Trail = {
     Period = 1278.96,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 17 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S17",
@@ -3055,6 +4221,13 @@ local S2019S17Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2019 S 17 Label",
@@ -3077,6 +4250,14 @@ local S2019S18 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 18",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S18"
@@ -3097,6 +4278,14 @@ local S2019S18Trail = {
     Period = 1314.27,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 18 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S18",
@@ -3115,6 +4304,13 @@ local S2019S18Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2019 S 18 Label",
@@ -3137,6 +4333,14 @@ local S2019S19 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 19",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S19"
@@ -3157,6 +4361,14 @@ local S2019S19Trail = {
     Period = 1306.16,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 19 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S19",
@@ -3175,6 +4387,13 @@ local S2019S19Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2019 S 19 Label",
@@ -3197,6 +4416,14 @@ local S2019S20 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 20",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S20"
@@ -3217,6 +4444,14 @@ local S2019S20Trail = {
     Period = 1360.47,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 20 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S20",
@@ -3235,6 +4470,13 @@ local S2019S20Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2019 S 20 Label",
@@ -3257,6 +4499,14 @@ local S2006S19 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 19",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S19"
@@ -3277,6 +4527,14 @@ local S2006S19Trail = {
     Period = 1371.02,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 19 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S19",
@@ -3295,6 +4553,13 @@ local S2006S19Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2006 S 19 Label",
@@ -3317,6 +4582,14 @@ local S2004S51 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 51",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S51"
@@ -3337,6 +4610,14 @@ local S2004S51Trail = {
     Period = 1494.41,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 51 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S51",
@@ -3355,6 +4636,13 @@ local S2004S51Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2004 S 51 Label",
@@ -3377,6 +4665,14 @@ local S2020S9 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2020 S 9",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S9"
@@ -3397,6 +4693,14 @@ local S2020S9Trail = {
     Period = 1512.38,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2020 S 9 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S9",
@@ -3415,6 +4719,13 @@ local S2020S9Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2020 S 9 Label",
@@ -3437,6 +4748,14 @@ local S2004S52 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 52",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S52"
@@ -3457,6 +4776,14 @@ local S2004S52Trail = {
     Period = 1605.89,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 52 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S52",
@@ -3475,6 +4802,13 @@ local S2004S52Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2004 S 52 Label",
@@ -3497,6 +4831,14 @@ local S2007S9 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2007 S 9",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S9"
@@ -3517,6 +4859,14 @@ local S2007S9Trail = {
     Period = 1069.81,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2007 S 9 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S9",
@@ -3535,6 +4885,13 @@ local S2007S9Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2007 S 9 Label",
@@ -3557,6 +4914,14 @@ local S2004S53 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 53",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S53"
@@ -3577,6 +4942,14 @@ local S2004S53Trail = {
     Period = 1326.18,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2004 S 53 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S53",
@@ -3595,6 +4968,13 @@ local S2004S53Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2004 S 53 Label",
@@ -3617,6 +4997,14 @@ local S2020S10 = {
     Type = "RenderableGlobe",
     Radii = { 1.5, 1.5, 1.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2020 S 10",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S10"
@@ -3637,6 +5025,14 @@ local S2020S10Trail = {
     Period = 1503.97,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2020 S 10 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S10",
@@ -3655,6 +5051,13 @@ local S2020S10Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2020 S 10 Label",
@@ -3677,6 +5080,14 @@ local S2019S21 = {
     Type = "RenderableGlobe",
     Radii = { 2.0, 2.0, 2.0 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 21",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S21"
@@ -3697,6 +5108,14 @@ local S2019S21Trail = {
     Period = 1605.28,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2019 S 21 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S21",
@@ -3715,6 +5134,13 @@ local S2019S21Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2019 S 21 Label",
@@ -3737,6 +5163,14 @@ local S2006S20 = {
     Type = "RenderableGlobe",
     Radii = { 2.5, 2.5, 2.5 }
   },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 20",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S20"
@@ -3757,6 +5191,14 @@ local S2006S20Trail = {
     Period = 565.79,
     Resolution = 1000
   },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
   GUI = {
     Name = "S/2006 S 20 Trail",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S20",
@@ -3775,6 +5217,13 @@ local S2006S20Label = {
     Size = 7.0,
     MinMaxSize = { 1, 25 },
     OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
   },
   GUI = {
     Name = "S/2006 S 20 Label",
