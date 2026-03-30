@@ -48,7 +48,7 @@ namespace {
 
 /**
  * Loads [NavigationState](#core_navigationstate) from file and returns the result. The
- * file should be in json format, such as the output files of `saveNavigationState`.
+ * file should be in JSON format, such as the output files of `saveNavigationState`.
  *
  * After loading a navigation state, the camera will not automatically be set to that
  * state. To do that, use the returned table in combination with another function, such as
@@ -63,7 +63,6 @@ namespace {
  *
  * \param filePath The path to the file, including the file name (and extension, if it is
  *        anything other than `.navstate`)
- *
  * \return A Lua table representing the loaded navigation state
  */
 [[codegen::luawrap]] ghoul::Dictionary loadNavigationStateFromFile(std::string filePath) {
