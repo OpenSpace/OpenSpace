@@ -364,8 +364,17 @@ void DirectManipulation::updateCameraFromInput() {
 
     bool isValidNode = isValidDirectTouchNode();
     bool isCloseEnough = isWithinDirectTouchDistance();
+
     bool isValidTouchPoints = !_selectedNodeSurfacePoints.empty() &&
-        touchPoints.size() == _selectedNodeSurfacePoints.size();
+        touchPoints.size() == _selectedNodeSurfacePoints.size() &&
+        std::equal(
+            touchPoints.begin(),
+            touchPoints.end(),
+            _selectedNodeSurfacePoints.begin(),
+            [](TouchPoint& tp, SelectedBody& sb) {
+                return tp.id == sb.id;
+            }
+        );
 
     bool shouldApply =  isCloseEnough && isValidNode && isValidTouchPoints;
 
