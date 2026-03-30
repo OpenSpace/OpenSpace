@@ -117,7 +117,12 @@ namespace {
     }
 
     /**
-     * Returns screen point s(xi, par) dependent the transform M(par) and object point xi.
+     * Computes the residual for the Levenberg-Marquardt optimization. Given camera
+     * parameters `par`, applies the camera transformation and projects the selected 3D
+     * point (at index `x`) to screen space. Returns the distance between the projected
+     * screen point and the target screen point. This distance is minimized during the
+     * optimization to find camera parameters that keep touch points stationary on the
+     * object's surface.
      */
     double distToMinimize(double* par, int x, void* fdata, ghoul::LMstat* lmstat) {
         FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
@@ -155,7 +160,7 @@ namespace {
     }
 
     /**
-     * Gradient of distToMinimize w.r.t par (using forward difference).
+     * Gradient of distToMinimize w.r.t `par` (using forward difference).
      */
     void gradient(double* g, double* par, int x, void* fdata, ghoul::LMstat* lmstat) {
         FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
