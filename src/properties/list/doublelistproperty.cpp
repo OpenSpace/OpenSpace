@@ -27,10 +27,9 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
-DoubleListProperty::DoubleListProperty(Property::PropertyInfo info,
-                                       std::vector<double> values)
+DoubleListProperty::DoubleListProperty(PropertyInfo info, std::vector<double> values)
     : ListProperty(std::move(info), std::move(values))
 {}
 
@@ -55,4 +54,4 @@ std::string DoubleListProperty::stringValue() const {
     return json.dump();
 }
 
-} // namespace openspace::properties
+} // namespace openspace

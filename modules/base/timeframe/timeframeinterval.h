@@ -38,14 +38,14 @@ public:
 
     void update(const Time& time) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::BoolProperty _hasStart;
-    properties::DoubleProperty _start;
+    BoolProperty _hasStart;
+    DoubleProperty _start;
 
-    properties::BoolProperty _hasEnd;
-    properties::DoubleProperty _end;
+    BoolProperty _hasEnd;
+    DoubleProperty _end;
 };
 
 } // namespace openspace

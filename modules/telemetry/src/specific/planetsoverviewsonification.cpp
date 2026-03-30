@@ -31,6 +31,8 @@
 #include <cstdint>
 
 namespace {
+    using namespace openspace;
+
     // Indices for data items
     constexpr int NumDataItems = 1;
     constexpr int GuiSettingsIndex = 0;
@@ -46,9 +48,7 @@ namespace {
     constexpr int UranusIndex = 6;
     constexpr int NeptuneIndex = 7;
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        PlanetsOverviewSonificationInfo =
-    {
+    static const PropertyOwner::PropertyOwnerInfo PlanetsOverviewSonificationInfo = {
         "PlanetsOverviewSonification",
         "Planets Overview Sonification",
         "Sonification that gives an overview of the planets in the Solar System with "
@@ -56,67 +56,67 @@ namespace {
         "sonification."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ToggleAllInfo = {
+    constexpr Property::PropertyInfo ToggleAllInfo = {
         "ToggleAll",
         "Toggle all",
         "Toggle the sonification for all planets.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableMercuryInfo = {
+    constexpr Property::PropertyInfo EnableMercuryInfo = {
         "Mercury",
         "Mercury",
         "Toggle sonification for Mercury.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableVenusInfo = {
+    constexpr Property::PropertyInfo EnableVenusInfo = {
         "Venus",
         "Venus",
         "Toggle sonification for Venus.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableEarthInfo = {
+    constexpr Property::PropertyInfo EnableEarthInfo = {
         "Earth",
         "Earth",
         "Toggle sonification for Earth.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableMarsInfo = {
+    constexpr Property::PropertyInfo EnableMarsInfo = {
         "Mars",
         "Mars",
         "Toggle sonification for Mars.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableJupiterInfo = {
+    constexpr Property::PropertyInfo EnableJupiterInfo = {
         "Jupiter",
         "Jupiter",
         "Toggle sonification for Jupiter.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableSaturnInfo = {
+    constexpr Property::PropertyInfo EnableSaturnInfo = {
         "Saturn",
         "Saturn",
         "Toggle sonification for Saturn.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableUranusInfo = {
+    constexpr Property::PropertyInfo EnableUranusInfo = {
         "Uranus",
         "Uranus",
         "Toggle sonification for Uranus.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableNeptuneInfo = {
+    constexpr Property::PropertyInfo EnableNeptuneInfo = {
         "Neptune",
         "Neptune",
         "Toggle sonification for Neptune.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 } // namespace
 

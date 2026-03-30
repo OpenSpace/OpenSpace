@@ -41,18 +41,16 @@ namespace {
     // Note that, unless playback is mapped to simulation time, the video must be started
     // manually via the user interface.
     struct [[codegen::Dictionary(ScreenSpaceVideo)]] Parameters {};
-#include "screenspacevideo_codegen.cpp"
 } // namespace
+#include "screenspacevideo_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceVideo::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>("video_screenspacevideo");
-
-    documentation::Documentation vp = VideoPlayer::Documentation();
-    doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
-
-    return doc;
+Documentation ScreenSpaceVideo::Documentation() {
+    return codegen::doc<Parameters>(
+        "video_screenspace_video",
+        VideoPlayer::Documentation()
+    );
 }
 
 ScreenSpaceVideo::ScreenSpaceVideo(const ghoul::Dictionary& dictionary)

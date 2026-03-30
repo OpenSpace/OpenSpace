@@ -31,7 +31,7 @@
 #include <utility>
 #include <vector>
 
-namespace openspace::volume {
+namespace openspace {
 
 template <typename VoxelType>
 RawVolumeWriter<VoxelType>::RawVolumeWriter(std::filesystem::path path, size_t bufferSize)
@@ -41,12 +41,12 @@ RawVolumeWriter<VoxelType>::RawVolumeWriter(std::filesystem::path path, size_t b
 
 template <typename VoxelType>
 size_t RawVolumeWriter<VoxelType>::coordsToIndex(const glm::uvec3& cartesian) const {
-    return coordsToIndex(cartesian, dimensions());
+    return openspace::coordsToIndex(cartesian, dimensions());
 }
 
 template <typename VoxelType>
 glm::ivec3 RawVolumeWriter<VoxelType>::indexToCoords(size_t linear) const {
-    return volume::indexToCoords(linear, dimensions());
+    return openspace::indexToCoords(linear, dimensions());
 }
 
 template <typename VoxelType>
@@ -62,7 +62,7 @@ glm::uvec3 RawVolumeWriter<VoxelType>::dimensions() const {
 template <typename VoxelType>
 void RawVolumeWriter<VoxelType>::write(
                                     const std::function<VoxelType(const glm::uvec3&)>& fn,
-                                           const std::function<void(float t)>& onProgress)
+                                             const std::function<void(float)>& onProgress)
 {
     const glm::uvec3 dims = dimensions();
 
@@ -108,4 +108,4 @@ void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
     file.write(buffer, length);
 }
 
-} // namespace openspace::volume
+} // namespace openspace

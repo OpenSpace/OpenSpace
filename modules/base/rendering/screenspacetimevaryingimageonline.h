@@ -44,7 +44,7 @@ public:
     void deinitializeGL() override;
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void bindTexture(ghoul::opengl::TextureUnit& unit) override;
@@ -53,7 +53,7 @@ private:
     void loadImage(const std::string& imageUrl);
     int activeIndex(double currentTime) const;
 
-    properties::StringProperty _jsonFilePath;
+    StringProperty _jsonFilePath;
 
     std::future<DownloadManager::MemoryFile> _imageFuture;
     std::map<double, std::string> _urls;

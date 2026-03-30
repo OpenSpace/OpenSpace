@@ -35,7 +35,7 @@
 
 namespace openspace {
 
-namespace properties { class SelectionProperty; }
+class SelectionProperty;
 
 class DataProcessor {
 public:
@@ -46,10 +46,10 @@ public:
         glm::size3_t& dimensions) = 0;
 
     virtual void addDataValues(const std::string& data,
-        properties::SelectionProperty& dataOptions) = 0;
+        SelectionProperty& dataOptions) = 0;
 
-    virtual std::vector<float*> processData(const std::string& data,
-        properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) = 0;
+    virtual std::vector<std::vector<float>> processData(const std::string& data,
+        SelectionProperty& dataOptions, glm::size3_t& dimensions) = 0;
 
     void useLog(bool useLog);
     void useHistogram(bool useHistogram);
@@ -61,12 +61,6 @@ public:
 
 protected:
     float processDataPoint(float value, int option);
-
-    float normalizeWithStandardScore(float value, float mean, float sd,
-        const glm::vec2& normalizationValues = glm::vec2(1.f, 1.f));
-
-    float unnormalizeWithStandardScore(float value, float mean, float sd,
-        const glm::vec2& normalizationValues = glm::vec2(1.f, 1.f));
 
     void initializeVectors(int numOptions);
     void calculateFilterValues(const std::vector<int>& selectedOptions);

@@ -50,34 +50,34 @@ public:
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    struct Appearance : properties::PropertyOwner {
+    struct Appearance : PropertyOwner {
         Appearance();
 
         /// Specifies the base color of the line/point
-        properties::Vec3Property color;
+        Vec3Property color;
         /// Line width for the line rendering part
-        properties::FloatProperty trailWidth;
+        FloatProperty trailWidth;
         /// Point size exponent for the point rendering part
-        properties::FloatProperty pointSizeExponent;
+        FloatProperty pointSizeExponent;
         /// The option determining which rendering method to use
-        properties::BoolProperty enableMaxSize;
+        BoolProperty enableMaxSize;
         /// The option enables or disables Max Angular Size limit
-        properties::FloatProperty maxSize;
+        FloatProperty maxSize;
         /// Max angular size between vector cameraToPoint and edge of the point
-        properties::OptionProperty renderingModes;
+        OptionProperty renderingModes;
         /// Specifies rendering orientation when rendering points
-        properties::OptionProperty pointRenderOption;
+        OptionProperty pointRenderOption;
         /// Specifies a multiplicative factor that fades out the trail line
-        properties::FloatProperty trailFade;
+        FloatProperty trailFade;
         /// Specifies if the point outline should be enabled
-        properties::BoolProperty enableOutline;
+        BoolProperty enableOutline;
         /// Specifies the color of the point outline
-        properties::Vec3Property outlineColor;
+        Vec3Property outlineColor;
         /// Specifies how much if the point should be covered by the outline
-        properties::FloatProperty outlineWidth;
+        FloatProperty outlineWidth;
 
         bool isRenderTypeDirty = false;
     };
@@ -104,14 +104,18 @@ private:
     std::vector<GLint> _segmentSizeTrails;
     std::vector<kepler::Parameters> _parameters;
 
-    /// Extra data for more efficient updating of vectors
+    /**
+     * Extra data for more efficient updating of vectors.
+     */
     struct UpdateInfo {
         double timestamp = std::numeric_limits<double>::min();
         double timePerStep = 0.0;
     };
     std::vector<UpdateInfo> _updateHelper;
 
-    /// The layout of the VBOs
+    /**
+     * The layout of the VBOs.
+     */
     struct TrailVBOLayout {
         float x = 0.f;
         float y = 0.f;
@@ -125,22 +129,22 @@ private:
 
     ghoul::opengl::ProgramObject* _trailProgram = nullptr;
     ghoul::opengl::ProgramObject* _pointProgram = nullptr;
-    properties::UIntProperty _segmentQuality;
-    properties::UIntProperty _startRenderIdx;
-    properties::UIntProperty _sizeRender;
-    properties::StringProperty _path;
-    properties::BoolProperty _contiguousMode;
+    UIntProperty _segmentQuality;
+    UIntProperty _startRenderIdx;
+    UIntProperty _sizeRender;
+    StringProperty _path;
+    BoolProperty _contiguousMode;
     kepler::Format _format;
     RenderableOrbitalKepler::Appearance _appearance;
 
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;
 
-    // Line cache
+    /// Line cache
     UniformCache(modelViewTransform, projectionTransform, trailFadeExponent,
         colorFadeCutoffValue, inGameTime, color, opacity) _uniformTrailCache;
 
-    // Point cache
+    /// Point cache
     UniformCache(modelTransform, viewTransform, projectionTransform, renderOption,
         cameraViewDirectionUp, cameraViewDirectionRight, cameraPositionWorld,
         cameraUpWorld, inGameTime, color, pointSizeExponent, enableMaxSize, maxSize,

@@ -34,7 +34,7 @@
 
 namespace ghoul { class Dictionary; }
 
-namespace openspace::documentation {
+namespace openspace {
 
 class Verifier;
 
@@ -55,7 +55,9 @@ struct TestResult {
      * offense.
      */
     struct Offense {
-        /// The Reason for the offense
+        /**
+         * The reason for the offense.
+         */
         enum class Reason {
             /// Unknown reason
             Unknown,
@@ -68,10 +70,10 @@ struct TestResult {
             /// The identifier for a ReferencingVerifier did not exist
             UnknownIdentifier
         };
-        /// The offending key that caused the Offense. In the case of a nested table,
-        /// this value will be the fully qualified name of the key
+        /// The offending key that caused the Offense. In the case of a nested table, this
+        /// value will be the fully qualified name of the key
         std::string offender;
-        /// The Reason that caused this offense
+        /// The reason that caused this offense
         Reason reason = Reason::Unknown;
         /// An optional explanation for when a verification fails
         std::string explanation;
@@ -84,23 +86,25 @@ struct TestResult {
      * might be removed in a latter version.
      */
     struct Warning {
-        /// The reason for the warning
+        /**
+         * The reason for the warning.
+         */
         enum class Reason {
             /// The value is marked as deprecated and should not used
             Deprecated
         };
 
-        /// The offending key that caused the Warning. In the case of a nested table,
-        /// this value will be the fully qualified name of the key
+        /// The offending key that caused the Warning. In the case of a nested table, this
+        /// value will be the fully qualified name of the key
         std::string offender;
-        /// The Reason that caused this Warning
+        /// The reason that caused this Warning
         Reason reason;
     };
 
     /// Is `true` if the TestResult is positive, `false` otherwise
     bool success = false;
     /// Contains a list of offenses that were found in the test. Is empty if
-    /// TestResult::Success `true`
+    /// TestResult::Success is `true`
     std::vector<Offense> offenses;
     /// Contains a list of warnings that were found in the test
     std::vector<Warning> warnings;
@@ -152,13 +156,13 @@ struct DocumentationEntry {
      * The constructor for a DocumentationEntry describing a key \p k in a Documentation.
      * The value for the key (or each value in the case of the
      * DocumentationEntry::Wildcard) is tested using the verifier \p v, that specifies the
-     * conditions that the \p k%'s value has to fulfill. The textual documentation
-     * \p doc shall describe the usage of the key-value pair and will be printed for human
+     * conditions that the \p k%'s value has to fulfill. The textual documentation \p doc
+     * shall describe the usage of the key-value pair and will be printed for human
      * consumption for example in the DocumentationEngine. Each DocumentationEntry can
      * further be \p opt.
      *
-     * \param k The key for which this DocumentationEntry is valid. If this valid is
-     *        equal to DocumentationEntry::Wildcard, each entry in the Documentation that
+     * \param k The key for which this DocumentationEntry is valid. If this valid is equal
+     *        to DocumentationEntry::Wildcard, each entry in the Documentation that
      *        contains this DocumentationEntry will be matched
      * \param v The Verifier that is used to test the \p k%'s value to determine if it is
      *        a valid value
@@ -172,7 +176,7 @@ struct DocumentationEntry {
      *        human readable format
      *
      * \pre \p k must not be empty
-     * \pre \p v must not be nullptr
+     * \pre \p v must not be `nullptr`
      */
     DocumentationEntry(std::string k, std::shared_ptr<Verifier> v,
         Optional opt = Optional::No, Private priv = Private::No, std::string doc = "");
@@ -181,8 +185,8 @@ struct DocumentationEntry {
      * The constructor for a DocumentationEntry describing a key \p k in a Documentation.
      * The value for the key (or each value in the case of the
      * DocumentationEntry::Wildcard) is tested using the verifier \p v, that specifies the
-     * conditions that the \p k%'s value has to fulfill. The textual documentation
-     * \p doc shall describe the usage of the key-value pair and will be printed for human
+     * conditions that the \p k%'s value has to fulfill. The textual documentation \p doc
+     * shall describe the usage of the key-value pair and will be printed for human
      * consumption for example in the DocumentationEngine. Each DocumentationEntry can
      * further be \p opt.
      *
@@ -202,7 +206,7 @@ struct DocumentationEntry {
      *        human readable format
      *
      * \pre \p k must not be empty
-     * \pre \p v must not be nullptr
+     * \pre \p v must not be `nullptr`
      */
     DocumentationEntry(std::string k, Verifier* v, Optional opt = Optional::No,
         Private priv = Private::No, std::string doc = "");
@@ -250,7 +254,7 @@ struct Documentation {
     /// A general description for the entire documented entity
     std::string description;
     /// A list of specifications that are describing this Documentation
-    std::vector<documentation::DocumentationEntry> entries;
+    std::vector<DocumentationEntry> entries;
 };
 
 /**
@@ -287,7 +291,7 @@ TestResult testSpecification(const Documentation& documentation,
 void testSpecificationAndThrow(const Documentation& documentation,
     const ghoul::Dictionary& dictionary, std::string component);
 
-} // namespace openspace::documentation
+} // namespace openspace
 
 // Make the overload for std::to_string available for the Offense::Reason for easier
 // error logging
@@ -295,25 +299,25 @@ void testSpecificationAndThrow(const Documentation& documentation,
 namespace ghoul {
 
 template <>
-std::string to_string(const openspace::documentation::TestResult& value);
+std::string to_string(const openspace::TestResult& value);
 
 template <>
-std::string to_string(const openspace::documentation::TestResult::Offense& value);
+std::string to_string(const openspace::TestResult::Offense& value);
 
 template <>
-std::string to_string(const openspace::documentation::TestResult::Offense::Reason& value);
+std::string to_string(const openspace::TestResult::Offense::Reason& value);
 
 template <>
-std::string to_string(const openspace::documentation::TestResult::Warning& value);
+std::string to_string(const openspace::TestResult::Warning& value);
 
 template <>
-std::string to_string(const openspace::documentation::TestResult::Warning::Reason& value);
+std::string to_string(const openspace::TestResult::Warning::Reason& value);
 
 } // namespace ghoul
 
 // The verifier header depends on the classes defined in here, but we want to make it
 // easier for consumers of this header to just have access to all verifiers without
-// needing to include this file separately.  Particularly with the use of the codegen, it
+// needing to include this file separately. Particularly with the use of the codegen, it
 // might lead to some unexcepted error messages about recognized identifiers in the
 // generated code which look scary
 #include <openspace/documentation/verifier.h>

@@ -39,10 +39,11 @@
 #include <vector>
 
 namespace ghoul { class Dictionary; }
-namespace openspace { class SyncBuffer; }
 struct lua_State;
 
-namespace openspace::scripting {
+namespace openspace {
+
+class SyncBuffer;
 
 /**
  * The ScriptEngine is responsible for handling the execution of custom Lua functions and
@@ -115,12 +116,16 @@ public:
     void queueScript(Script script);
     void queueScript(std::string script);
 
-    // This function should only be used by external classes if you are sure that the
-    // passed script should really be executed at this point. Otherwise the #queueScript
-    // should be used
+    /**
+     * This function should only be used by external classes if you are sure that the
+     * passed script should really be executed at this point. Otherwise the #queueScript
+     * should be used.
+     */
     bool runScript(const Script& script);
 
-    // Runs the `script` every `timeout` seconds wallclock time
+    /**
+     * Runs the `script` every `timeout` seconds wallclock time.
+     */
     void registerRepeatedScript(std::string identifier, std::string script,
         double timeout, std::string preScript = "", std::string postScript = "");
     void removeRepeatedScript(std::string_view identifier);
@@ -148,8 +153,8 @@ private:
 
     std::queue<Script> _incomingScripts;
 
-    // Client scripts are mutex protected since decode and rendering may happen
-    // asynchronously
+    /// Client scripts are mutex protected since decode and rendering may happen
+    /// asynchronously
     std::mutex _clientScriptsMutex;
     std::queue<std::string> _clientScriptQueue;
     std::queue<Script> _masterScriptQueue;
@@ -170,10 +175,10 @@ private:
     std::vector<RepeatedScriptInfo> _repeatedScripts;
 
     struct ScheduledScriptInfo {
-        // The script that should be executed
+        /// The script that should be executed
         std::string script;
 
-        // The application timestamp at which time the script should be executed
+        /// The application timestamp at which time the script should be executed
         double timestamp = 0.0;
     };
     std::vector<ScheduledScriptInfo> _scheduledScripts;
@@ -184,6 +189,6 @@ private:
     std::filesystem::path _logFilename;
 };
 
-} // namespace openspace::scripting
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SCRIPTENGINE___H__

@@ -26,7 +26,7 @@
 
 #include <algorithm>
 
-namespace openspace::interaction {
+namespace openspace {
 
 void KeyboardInputState::keyboardCallback(Key key, KeyModifier modifier,
                                           KeyAction action)
@@ -68,4 +68,4 @@ bool KeyboardInputState::isKeyPressed(Key key) const {
     return it != _keysDown.end();
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

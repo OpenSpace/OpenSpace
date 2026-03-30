@@ -31,18 +31,20 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo RotationInfo = {
         "RotationAxis",
         "Rotation axis",
         "This value is the rotation axis around which the object will rotate.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RotationRateInfo = {
+    constexpr Property::PropertyInfo RotationRateInfo = {
         "RotationRate",
         "Rotation rate",
         "This value determines the number of revolutions per in-game second.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This rotation type will cause a scene graph node to rotate about the provided axis
@@ -55,13 +57,13 @@ namespace {
         // [[codegen::verbatim(RotationRateInfo.description)]]
         std::optional<float> rotationRate;
     };
-#include "constantrotation_codegen.cpp"
 } // namespace
+#include "constantrotation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ConstantRotation::Documentation() {
-    return codegen::doc<Parameters>("base_transform_rotation_constant");
+Documentation ConstantRotation::Documentation() {
+    return codegen::doc<Parameters>("base_rotation_constant");
 }
 
 ConstantRotation::ConstantRotation(const ghoul::Dictionary& dictionary)
@@ -89,8 +91,8 @@ glm::dmat3 ConstantRotation::matrix(const UpdateData& data) const {
     }
 
     const double rotPerSec = _rotationRate;
-    const double secPerFrame = data.time.j2000Seconds() -
-                               data.previousFrameTime.j2000Seconds();
+    const double secPerFrame =
+        data.time.j2000Seconds() - data.previousFrameTime.j2000Seconds();
 
     const double rotPerFrame = rotPerSec * secPerFrame;
     const double radPerFrame = rotPerFrame * glm::tau<double>();

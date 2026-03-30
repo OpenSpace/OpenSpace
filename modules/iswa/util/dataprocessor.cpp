@@ -25,10 +25,35 @@
 #include <modules/iswa/util/dataprocessor.h>
 
 #include <algorithm>
-#include <numeric>
 #include <cmath>
 #include <limits>
+#include <numeric>
 #include <utility>
+
+namespace {
+    float normalizeWithStandardScore(float value, float mean, float sd,
+                                     const glm::vec2& normalizationValues)
+    {
+        const float zScoreMin = normalizationValues.x;
+        const float zScoreMax = normalizationValues.y;
+        const float standardScore = (value - mean) / sd;
+        // Clamp intresting values
+        const float clampStandardScore = std::clamp(standardScore, -zScoreMin, zScoreMax);
+        // Return and normalize
+        return (clampStandardScore + zScoreMin) / (zScoreMin + zScoreMax);
+    }
+
+    float unnormalizeWithStandardScore(float standardScore, float mean, float sd,
+                                       const glm::vec2& normalizationValues)
+    {
+        const float zScoreMin = normalizationValues.x;
+        const float zScoreMax = normalizationValues.y;
+
+        const float value = standardScore * (zScoreMax + zScoreMin) - zScoreMin;
+        const float scaledValue = value * sd + mean;
+        return scaledValue;
+    }
+} // namespace
 
 namespace openspace {
 
@@ -41,7 +66,7 @@ void DataProcessor::useHistogram(bool useHistogram) {
 }
 
 void DataProcessor::normValues(glm::vec2 normValues) {
-    _normValues = normValues;
+    _normValues = std::move(normValues);
 }
 
 glm::size3_t DataProcessor::dimensions() const {
@@ -77,30 +102,6 @@ float DataProcessor::processDataPoint(float value, int option) {
     else {
         return normalizeWithStandardScore(value, mean, sd, _normValues);
     }
-}
-
-float DataProcessor::normalizeWithStandardScore(float value, float mean, float sd,
-                                                const glm::vec2& normalizationValues)
-{
-    float zScoreMin = normalizationValues.x;
-    float zScoreMax = normalizationValues.y;
-    float standardScore = (value - mean) / sd;
-    // Clamp intresting values
-    standardScore = glm::clamp(standardScore, -zScoreMin, zScoreMax);
-    //return and normalize
-    return (standardScore + zScoreMin) / (zScoreMin + zScoreMax);
-}
-
-float DataProcessor::unnormalizeWithStandardScore(float standardScore, float mean,
-                                                  float sd,
-                                                  const glm::vec2& normalizationValues)
-{
-    float zScoreMin = normalizationValues.x;
-    float zScoreMax = normalizationValues.y;
-
-    float value = standardScore * (zScoreMax + zScoreMin) - zScoreMin;
-    value = value * sd + mean;
-    return value;
 }
 
 void DataProcessor::initializeVectors(int numOptions) {
@@ -149,7 +150,7 @@ void DataProcessor::calculateFilterValues(const std::vector<int>& selectedOption
                     standardDeviation,
                     _normValues
                 );
-                filterWidth = fabs(0.5f - normalizeWithStandardScore(
+                filterWidth = std::abs(0.5f - normalizeWithStandardScore(
                     filterWidth,
                     mean,
                     standardDeviation,
@@ -232,7 +233,7 @@ void DataProcessor::add(const std::vector<std::vector<float>>& optionValues,
                 oldStandardDeviation,
                 _histNormValues
             );
-            //unnormalize histMin, histMax
+            // Unnormalize histMin, histMax
             auto newHist = std::make_unique<Histogram>(
                 std::min(min, normalizeWithStandardScore(
                     unNormHistMin,

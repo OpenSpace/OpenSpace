@@ -38,37 +38,39 @@
 #include <memory>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo XColorInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo XColorInfo = {
         "XColor",
         "X color",
         "The color of the x-axis.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo YColorInfo = {
+    constexpr Property::PropertyInfo YColorInfo = {
         "YColor",
         "Y color",
         "The color of the y-axis.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ZColorInfo = {
+    constexpr Property::PropertyInfo ZColorInfo = {
         "ZColor",
         "Z color",
         "The color of the z-axis.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
     // The RenderableCartesianAxes can be used to render the local Cartesian coordinate
-    // system, or reference frame, of another scene graph node. The colors of the axes
-    // can be customized but are per default set to Red, Green and Blue, for the X-, Y-
-    // and Z-axis, respectively.
+    // system, or reference frame, of another scene graph node. The colors of the axes can
+    // be customized but are per default set to Red, Green and Blue, for the X-, Y- and
+    // Z-axis, respectively.
     //
     // To add the axes, create a scene graph node with the RenderableCartesianAxes
     // renderable and add it as a child to the other scene graph node, i.e. specify the
     // other node as the `Parent` of the node with this renderable. Also, the axes have to
     // be scaled to match the parent object for the axes to be visible in the scene, for
-    // example using a [StaticScale](#base_transform_scale_static).
+    // example using a [StaticScale](#base_scale_static).
     struct [[codegen::Dictionary(RenderableCartesianAxes)]] Parameters {
         // [[codegen::verbatim(XColorInfo.description)]]
         std::optional<glm::vec3> xColor [[codegen::color()]];
@@ -79,12 +81,12 @@ namespace {
         // [[codegen::verbatim(ZColorInfo.description)]]
         std::optional<glm::vec3> zColor [[codegen::color()]];
     };
-#include "renderablecartesianaxes_codegen.cpp"
 } // namespace
+#include "renderablecartesianaxes_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableCartesianAxes::Documentation() {
+Documentation RenderableCartesianAxes::Documentation() {
     return codegen::doc<Parameters>("base_renderable_cartesianaxes");
 }
 
@@ -100,15 +102,15 @@ RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictio
     addProperty(Fadeable::_opacity);
 
     _xColor = p.xColor.value_or(_xColor);
-    _xColor.setViewOption(properties::Property::ViewOptions::Color);
+    _xColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_xColor);
 
     _yColor = p.yColor.value_or(_yColor);
-    _yColor.setViewOption(properties::Property::ViewOptions::Color);
+    _yColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_yColor);
 
     _zColor = p.zColor.value_or(_zColor);
-    _zColor.setViewOption(properties::Property::ViewOptions::Color);
+    _zColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_zColor);
 }
 
@@ -145,8 +147,8 @@ void RenderableCartesianAxes::initializeGL() {
     );
 
     glCreateBuffers(1, &_ibo);
-    constexpr std::array<int, 6> indices = { 0, 1, 0, 2, 0, 3 };
-    glNamedBufferStorage(_ibo, indices.size() * sizeof(int), indices.data(), GL_NONE_BIT);
+    constexpr std::array<int, 6> Indices = { 0, 1, 0, 2, 0, 3 };
+    glNamedBufferStorage(_ibo, Indices.size() * sizeof(int), Indices.data(), GL_NONE_BIT);
 
     glCreateVertexArrays(1, &_vao);
     glBindVertexArray(_vao);
@@ -185,7 +187,6 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&) {
     _program->setUniform("zColor", _zColor);
     _program->setUniform("opacity", opacity());
 
-    // Changes GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
     glEnable(GL_LINE_SMOOTH);
@@ -197,7 +198,6 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&) {
 
     _program->deactivate();
 
-    // Restores GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
 }

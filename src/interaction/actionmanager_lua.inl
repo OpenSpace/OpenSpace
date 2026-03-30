@@ -27,6 +27,8 @@
 #include <variant>
 #include <utility>
 
+using namespace openspace;
+
 namespace {
 
 /**
@@ -36,7 +38,7 @@ namespace {
     if (identifier.empty()) {
         throw ghoul::lua::LuaError("Identifier must not be empty");
     }
-    const bool res = openspace::global::actionManager->hasAction(identifier);
+    const bool res = global::actionManager->hasAction(identifier);
     return res;
 }
 
@@ -48,8 +50,6 @@ namespace {
 [[codegen::luawrap]] void removeAction(
                                       std::variant<std::string, ghoul::Dictionary> action)
 {
-    using namespace openspace;
-
     std::string identifier;
     if (std::holds_alternative<std::string>(action)) {
         identifier = std::get<std::string>(action);
@@ -77,34 +77,34 @@ namespace {
 }
 
 struct [[codegen::Dictionary(Action)]] Action {
-    /// The identifier under which the action is registered
+    // The identifier under which the action is registered.
     std::string identifier;
 
-    /// The Lua script that is to be executed when the action is triggered
+    // The Lua script that is to be executed when the action is triggered.
     std::string command;
 
-    /// The user-facing name of the action
+    // The user-facing name of the action.
     std::optional<std::string> name;
 
-    /// A documentation that explains what the action does
+    // A documentation that explains what the action does.
     std::optional<std::string> documentation;
 
-    /// The path in the GUI under which the action is shown to the user. If the value is
-    /// not provided, the default value is /
+    // The path in the GUI under which the action is shown to the user. If the value is
+    // not provided, the default value is /.
     std::optional<std::string> guiPath;
 
-    /// This parameter, if specified, will be used as a hint to any potential user
-    /// interface as a desired background color. This can be used, for example, to
-    /// visually group similar Actions together
+    // This parameter, if specified, will be used as a hint to any potential user
+    // interface as a desired background color. This can be used, for example, to visually
+    // group similar Actions together.
     std::optional<glm::vec4> color [[codegen::color()]];
 
-    /// This parameter, if specified, will be used as a hint to any potential user
-    /// interface as a desired text color. This can be used, for example, to visually
-    /// group similar Actions together
+    // This parameter, if specified, will be used as a hint to any potential user
+    // interface as a desired text color. This can be used, for example, to visually group
+    // similar Actions together.
     std::optional<glm::vec4> textColor [[codegen::color()]];
 
-    /// Determines whether the provided command will be executed locally or will be sent
-    /// to connected computers in a cluster or parallel connection environment
+    // Determines whether the provided command will be executed locally or will be sent to
+    // connected computers in a cluster or parallel connection environment.
     std::optional<bool> isLocal;
 };
 
@@ -118,32 +118,30 @@ struct [[codegen::Dictionary(Action)]] Action {
  * default).
  */
 [[codegen::luawrap]] void registerAction(Action action) {
-    using namespace openspace;
-
     if (global::actionManager->hasAction(action.identifier)) {
         throw ghoul::lua::LuaError(std::format(
             "Identifier '{}' for action already registered", action.identifier
         ));
     }
 
-    interaction::Action a;
-    a.identifier = std::move(action.identifier);
-    a.command = std::move(action.command);
-    a.name = action.name.value_or(a.name);
-    a.documentation = action.documentation.value_or(a.documentation);
-    a.color = action.color;
-    a.textColor = action.textColor;
-    a.guiPath = action.guiPath.value_or(a.guiPath);
-    if (!a.guiPath.starts_with('/')) {
+    if (action.guiPath.has_value() && !action.guiPath->starts_with('/')) {
         throw ghoul::RuntimeError(std::format(
-            "Tried to register action: '{}'. The field 'GuiPath' is set to '{}' but "
-            "should be '/{}'",
-            a.name, a.guiPath, a.guiPath
+            "Tried to register action: '{0}'. The field 'GuiPath' is set to '{1}' but "
+            "should be '/{1}'",
+            action.identifier, *action.guiPath
         ));
     }
-    if (action.isLocal.has_value()) {
-        a.isLocal = interaction::Action::IsLocal(*action.isLocal);
-    }
+
+    openspace::Action a = {
+        .identifier = std::move(action.identifier),
+        .command = std::move(action.command),
+        .name = action.name.value_or(a.name),
+        .documentation = action.documentation.value_or(a.documentation),
+        .guiPath = action.guiPath.value_or("/"),
+        .color = action.color,
+        .textColor = action.textColor,
+        .isLocal = openspace::Action::IsLocal(action.isLocal.value_or(false))
+    };
     global::actionManager->registerAction(std::move(a));
 }
 
@@ -152,8 +150,6 @@ struct [[codegen::Dictionary(Action)]] Action {
  * 'Name', 'Documentation', 'GuiPath', and 'Synchronization'.
  */
 [[codegen::luawrap]] ghoul::Dictionary action(std::string identifier) {
-    using namespace openspace;
-
     if (identifier.empty()) {
         throw ghoul::lua::LuaError("Identifier must not be empty");
     }
@@ -163,7 +159,7 @@ struct [[codegen::Dictionary(Action)]] Action {
         );
     }
 
-    const interaction::Action& action = global::actionManager->action(identifier);
+    const openspace::Action& action = global::actionManager->action(identifier);
     ghoul::Dictionary res;
     res.setValue("Identifier", action.identifier);
     res.setValue("Command", action.command);
@@ -176,7 +172,7 @@ struct [[codegen::Dictionary(Action)]] Action {
         res.setValue("TextColor", glm::dvec4(*action.textColor));
     }
     res.setValue("GuiPath", action.guiPath);
-    res.setValue("IsLocal", action.isLocal == interaction::Action::IsLocal::Yes);
+    res.setValue("IsLocal", action.isLocal == openspace::Action::IsLocal::Yes);
     return res;
 }
 
@@ -186,11 +182,9 @@ struct [[codegen::Dictionary(Action)]] Action {
  * 'Synchronization'.
  */
 [[codegen::luawrap]] std::vector<ghoul::Dictionary> actions() {
-    using namespace openspace;
-
     std::vector<ghoul::Dictionary> res;
-    const std::vector<interaction::Action>& actions = global::actionManager->actions();
-    for (const interaction::Action& a : actions) {
+    const std::vector<openspace::Action>& actions = global::actionManager->actions();
+    for (const openspace::Action& a : actions) {
         ghoul::Dictionary d;
         d.setValue("Identifier", a.identifier);
         d.setValue("Command", a.command);
@@ -203,7 +197,7 @@ struct [[codegen::Dictionary(Action)]] Action {
             d.setValue("TextColor", glm::dvec4(*a.textColor));
         }
         d.setValue("GuiPath", a.guiPath);
-        d.setValue("IsLocal", a.isLocal == interaction::Action::IsLocal::Yes);
+        d.setValue("IsLocal", a.isLocal == openspace::Action::IsLocal::Yes);
         res.push_back(d);
     }
     return res;
@@ -215,8 +209,6 @@ struct [[codegen::Dictionary(Action)]] Action {
 [[codegen::luawrap]] void triggerAction(std::string id,
                                         ghoul::Dictionary arg = ghoul::Dictionary())
 {
-    using namespace openspace;
-
     if (id.empty()) {
         throw ghoul::lua::LuaError("Identifier must not be empty");
     }
@@ -224,15 +216,15 @@ struct [[codegen::Dictionary(Action)]] Action {
         throw ghoul::lua::LuaError(std::format("Action '{}' not found", id));
     }
 
-    // No sync because this is already inside a Lua script, therefor it has
-    // already been synced and sent to the connected nodes and peers
+    // No sync because this is already inside a Lua script, therefor it has already been
+    // synced and sent to the connected nodes and peers
     global::actionManager->triggerAction(
         id,
         arg,
-        interaction::ActionManager::ShouldBeSynchronized::No
+        ActionManager::ShouldBeSynchronized::No
     );
 }
 
-#include "actionmanager_lua_codegen.cpp"
-
 } // namespace
+
+#include "actionmanager_lua_codegen.cpp"

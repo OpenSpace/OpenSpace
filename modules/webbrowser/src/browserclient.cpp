@@ -33,7 +33,7 @@
 
 namespace openspace {
 
-bool BrowserClient::_hasFocus = false; // Define the static member variable
+bool BrowserClient::_hasFocus = false;
 
 BrowserClient::BrowserClient(WebRenderHandler* handler,
                              WebKeyboardHandler* keyboardHandler)
@@ -90,7 +90,7 @@ bool BrowserClient::NoContextMenuHandler::RunContextMenu(CefRefPtr<CefBrowser>,
                                                          CefRefPtr<CefMenuModel>,
                                                      CefRefPtr<CefRunContextMenuCallback>)
 {
-    // Disable the context menu.
+    // Disable the context menu
     return true;
 }
 
@@ -161,7 +161,7 @@ bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser>, CefCur
         case cef_cursor_type_t::CT_GRAB:
         case cef_cursor_type_t::CT_GRABBING:
             // There is no "grabbing" cursors in GLFW, so for now the pointing hand to
-            // make web objects that use drag-n-drop look more interactive.
+            // make web objects that use drag-n-drop look more interactive
             // @TODO (emmbr, 2024-12-09) Add custom cursors for these cases
             newCursor = WindowDelegate::Cursor::PointingHand;
             break;

@@ -34,7 +34,7 @@
 #include <set>
 #include <string>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 struct RawTile;
 
@@ -45,8 +45,8 @@ struct RawTile;
 class AsyncTileDataProvider {
 public:
     /**
-     * \param name is the name for this provider
-     * \param rawTileDataReader is the reader that will be used for the asynchronous tile
+     * \param name The name for this provider
+     * \param rawTileDataReader The reader that will be used for the asynchronous tile
      *        loading
      */
     AsyncTileDataProvider(std::string name,
@@ -113,6 +113,6 @@ private:
     bool _shouldBeDeleted = false;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATAPROVIDER___H__

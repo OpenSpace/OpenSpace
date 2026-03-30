@@ -37,8 +37,8 @@ public:
     virtual ~Syncable() = default;
 
 protected:
-    // Allowing SyncEngine synchronization methods and at the same time hiding them
-    // from the used of implementations of the interface
+    // Allowing SyncEngine synchronization methods and at the same time hiding them from
+    // the used of implementations of the interface
     friend class SyncEngine;
 
     virtual void preSync(bool isMaster);

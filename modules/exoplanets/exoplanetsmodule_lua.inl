@@ -37,18 +37,17 @@
 #include <string>
 #include <string_view>
 
+using namespace openspace;
+
 namespace {
 
 constexpr std::string_view _loggerCat = "ExoplanetsModule";
 
-openspace::exoplanets::ExoplanetSystem findSystemInData(std::string_view starName) {
-    using namespace openspace;
-    using namespace exoplanets;
-
+ExoplanetSystem findSystemInData(std::string_view starName) {
     const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
 
     const std::filesystem::path binPath = module->exoplanetsDataPath();
-    std::ifstream data(absPath(binPath), std::ios::in | std::ios::binary);
+    std::ifstream data = std::ifstream(absPath(binPath), std::ios::in | std::ios::binary);
     if (!data.good()) {
         throw ghoul::lua::LuaError(std::format(
             "Failed to open exoplanets data file '{}'", binPath
@@ -56,7 +55,7 @@ openspace::exoplanets::ExoplanetSystem findSystemInData(std::string_view starNam
     }
 
     const std::filesystem::path lutPath = module->lookUpTablePath();
-    std::ifstream lut(absPath(lutPath));
+    std::ifstream lut = std::ifstream(absPath(lutPath));
     if (!lut.good()) {
         throw ghoul::lua::LuaError(std::format(
             "Failed to open exoplanets look-up table '{}'", lutPath
@@ -65,13 +64,13 @@ openspace::exoplanets::ExoplanetSystem findSystemInData(std::string_view starNam
 
     ExoplanetSystem system;
 
-    // 1. search lut for the starname and return the corresponding location
-    // 2. go to that location in the data file
-    // 3. read sizeof(exoplanet) bytes into an exoplanet object.
+    // 1. Search lut for the starname and return the corresponding location
+    // 2. Go to that location in the data file
+    // 3. Read sizeof(exoplanet) bytes into an exoplanet object
     ExoplanetDataEntry p;
     std::string line;
     while (ghoul::getline(lut, line)) {
-        std::istringstream ss(line);
+        std::istringstream ss = std::istringstream(line);
         std::string name;
         ghoul::getline(ss, name, ',');
 
@@ -104,8 +103,6 @@ openspace::exoplanets::ExoplanetSystem findSystemInData(std::string_view starNam
 }
 
 std::vector<std::string> hostStarsWithSufficientData() {
-    using namespace openspace;
-    using namespace exoplanets;
     const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
 
     if (!module->hasDataFiles()) {
@@ -122,7 +119,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
     }
 
     const std::filesystem::path binPath = module->exoplanetsDataPath();
-    std::ifstream data(absPath(binPath), std::ios::in | std::ios::binary);
+    std::ifstream data = std::ifstream(absPath(binPath), std::ios::in | std::ios::binary);
     if (!data.good()) {
         throw ghoul::lua::LuaError(std::format("Failed to open data file '{}'", binPath));
     }
@@ -147,8 +144,8 @@ std::vector<std::string> hostStarsWithSufficientData() {
         // Remove the last two characters, that specify the planet
         name = name.substr(0, name.size() - 2);
 
-        // Don't want to list systems where there is not enough data to visualize.
-        // So, test if there is before adding the name to the list.
+        // Don't want to list systems where there is not enough data to visualize. So,
+        // test if there is before adding the name to the list
         std::string location_s;
         ghoul::getline(ss, location_s);
         long location = std::stol(location_s.c_str());
@@ -174,13 +171,11 @@ std::vector<std::string> hostStarsWithSufficientData() {
  *
  * \param starName The name of the star to get the information for
  *
- * \return An object of the type [ExoplanetSystemData](#exoplanets_exoplanet_system_data)
+ * \return An object of the type [ExoplanetSystemData](#exoplanets_data_exoplanetsystem)
  *         that can be used to create the scene graph nodes for the exoplanet system
  */
 [[codegen::luawrap]] ghoul::Dictionary systemData(std::string starName){
-    using namespace openspace;
-
-    exoplanets::ExoplanetSystem systemData = findSystemInData(starName);
+    ExoplanetSystem systemData = findSystemInData(starName);
 
     if (systemData.planetsData.empty()) {
         throw ghoul::lua::LuaError(std::format(
@@ -197,25 +192,22 @@ std::vector<std::string> hostStarsWithSufficientData() {
  * \param starName The name of the host star for the system to remove
  */
 [[codegen::luawrap]] void removeExoplanetSystem(std::string starName) {
-    using namespace openspace;
-    using namespace exoplanets;
     const std::string starIdentifier = makeIdentifier(std::move(starName));
 
     // No sync or send because this is already inside a Lua script, therefor it has
     // already been synced and sent to the connected nodes and peers
     global::scriptEngine->queueScript({
         .code = "openspace.removeSceneGraphNode('" + starIdentifier + "');",
-        .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
-        .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+        .synchronized = ScriptEngine::Script::ShouldBeSynchronized::No,
+        .sendToRemote = ScriptEngine::Script::ShouldSendToRemote::No
     });
 }
 
 /**
- * Returns a list with names of the host star of all the exoplanet systems
- * that have sufficient data for generating a visualization, based on the
- * module's loaded data file.
+ * Returns a list with names of the host star of all the exoplanet systems that have
+ * sufficient data for generating a visualization, based on the module's loaded data file.
  *
- * \return A list of exoplanet host star names.
+ * \return A list of exoplanet host star names
  */
 [[codegen::luawrap]] std::vector<std::string> listOfExoplanets() {
     std::vector<std::string> names = hostStarsWithSufficientData();
@@ -223,8 +215,8 @@ std::vector<std::string> hostStarsWithSufficientData() {
 }
 
 /**
- * Lists the names of the host stars of all exoplanet systems that have sufficient
- * data for generating a visualization, and prints the list to the console.
+ * Lists the names of the host stars of all exoplanet systems that have sufficient data
+ * for generating a visualization, and prints the list to the console.
  */
 [[codegen::luawrap]] void listAvailableExoplanetSystems() {
     std::vector<std::string> names = hostStarsWithSufficientData();
@@ -254,18 +246,15 @@ std::vector<std::string> hostStarsWithSufficientData() {
   * \param csvFile A path to the CSV file to load the data from
   *
   * \return A list of objects of the type
-  *         [ExoplanetSystemData](#exoplanets_exoplanet_system_data), that can be used to
+  *         [ExoplanetSystemData](#exoplanets_data_exoplanetsystem), that can be used to
   *         create the scene graph nodes for the exoplanet systems
   */
 [[codegen::luawrap]] std::vector<ghoul::Dictionary> loadSystemDataFromCsv(
                                                                       std::string csvFile)
 {
-    using namespace openspace;
-    using namespace exoplanets;
-
     using PlanetData = ExoplanetsDataPreparationTask::PlanetData;
 
-    std::ifstream inputDataFile(csvFile);
+    std::ifstream inputDataFile = std::ifstream(csvFile);
     if (!inputDataFile.good()) {
         throw ghoul::lua::LuaError(std::format(
             "Failed to open input file '{}'", csvFile
@@ -333,6 +322,6 @@ std::vector<std::string> hostStarsWithSufficientData() {
     return result;
 }
 
-#include "exoplanetsmodule_lua_codegen.cpp"
-
 } // namespace
+
+#include "exoplanetsmodule_lua_codegen.cpp"

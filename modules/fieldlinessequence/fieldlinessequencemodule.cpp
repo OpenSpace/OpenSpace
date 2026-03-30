@@ -55,7 +55,9 @@ namespace openspace {
 
 std::filesystem::path FieldlinesSequenceModule::DefaultTransferFunctionFile = "";
 
-FieldlinesSequenceModule::FieldlinesSequenceModule() : OpenSpaceModule(Name) {
+FieldlinesSequenceModule::FieldlinesSequenceModule()
+    : OpenSpaceModule(Name)
+{
     DefaultTransferFunctionFile = absPath("${TEMPORARY}/default_transfer_function.txt");
 
     std::ofstream file = std::ofstream(DefaultTransferFunctionFile);
@@ -78,7 +80,7 @@ void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
     fTask->registerClass<FindLastClosedFieldlinesTask>("FindLastClosedFieldlinesTask");
 }
 
-std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const
+std::vector<Documentation> FieldlinesSequenceModule::documentations() const
 {
     return {
         FindLastClosedFieldlinesTask::Documentation(),

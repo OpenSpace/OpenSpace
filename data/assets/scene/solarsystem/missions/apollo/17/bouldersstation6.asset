@@ -11,8 +11,8 @@ local models = asset.resource({
 })
 
 
-local Station6Frag1Model = {
-  Identifier = "Station6Frag1Model",
+local Station6Frag1 = {
+  Identifier = "Apollo17Station6Frag1",
   Parent = moon.Moon.Identifier,
   Transform = {
     Translation = {
@@ -52,13 +52,13 @@ local Station6Frag1Model = {
     ModelScale = 0.1
   },
   GUI = {
-    Name = "Station 6 Fragment 1 Model",
+    Name = "Station 6 Fragment 1",
     Path = "/Solar System/Missions/Apollo/17/Station 6"
   }
 }
 
-local Station6Frag2Model = {
-  Identifier = "A17S6F5",
+local Station6Frag2 = {
+  Identifier = "Apollo17Station6Fragment2",
   Parent = moon.Moon.Identifier,
   Transform = {
     Translation = {
@@ -98,13 +98,13 @@ local Station6Frag2Model = {
     ModelScale = 0.15
   },
   GUI = {
-    Name = "Station 6 Fragment 2 Model",
+    Name = "Station 6 Fragment 2",
     Path = "/Solar System/Missions/Apollo/17/Station 6"
   }
 }
 
-local Station6Frag3Model = {
-  Identifier = "A17S6F3",
+local Station6Frag3 = {
+  Identifier = "Apollo17Station6Fragment3",
   Parent = moon.Moon.Identifier,
   Transform = {
     Translation = {
@@ -144,27 +144,27 @@ local Station6Frag3Model = {
     ModelScale = 0.14
   },
   GUI = {
-    Name = "Station 6 Fragment 3 Model",
+    Name = "Station 6 Fragment 3",
     Path = "/Solar System/Missions/Apollo/17/Station 6"
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Station6Frag1Model)
-  openspace.addSceneGraphNode(Station6Frag2Model)
-  openspace.addSceneGraphNode(Station6Frag3Model)
+  openspace.addSceneGraphNode(Station6Frag1)
+  openspace.addSceneGraphNode(Station6Frag2)
+  openspace.addSceneGraphNode(Station6Frag3)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Station6Frag3Model)
-  openspace.removeSceneGraphNode(Station6Frag2Model)
-  openspace.removeSceneGraphNode(Station6Frag1Model)
+  openspace.removeSceneGraphNode(Station6Frag3)
+  openspace.removeSceneGraphNode(Station6Frag2)
+  openspace.removeSceneGraphNode(Station6Frag1)
 end)
 
-asset.export(Station6Frag1Model)
-asset.export(Station6Frag2Model)
-asset.export(Station6Frag3Model)
+asset.export(Station6Frag1)
+asset.export(Station6Frag2)
+asset.export(Station6Frag3)
 
 
 

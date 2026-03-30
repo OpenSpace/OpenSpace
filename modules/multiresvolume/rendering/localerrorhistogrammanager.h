@@ -65,8 +65,8 @@ private:
 
     float interpolate(glm::vec3 samplePoint, const std::vector<float>& voxels) const;
 
-    TSP* _tsp = nullptr;
-    std::ifstream* _file;
+    TSP* _tsp;
+    std::ifstream* _file = nullptr;
 
     std::vector<Histogram> _spatialHistograms;
     std::vector<Histogram> _temporalHistograms;

@@ -62,8 +62,8 @@ struct TextureFormatHash {
 
 /**
  * This class describes a point cloud renderable that can be used to draw billboraded
- * points based on a data file with 3D positions.  Alternatively the points can also
- * be colored and sized based on a separate column in the data file.
+ * points based on a data file with 3D positions. Alternatively the points can also be
+ * colored and sized based on a separate column in the data file.
  */
 class RenderablePointCloud : public Renderable {
 public:
@@ -79,7 +79,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     enum class TextureInputMode {
@@ -99,10 +99,10 @@ protected:
     virtual int nAttributesPerPoint() const;
 
     /**
-     * Helper function to buffer the vertex attribute with the given name and number
-     * of values. Assumes that the value is a float value.
+     * Helper function to buffer the vertex attribute with the given name and number of
+     * values. Assumes that the value is a float value.
      *
-     * Returns the updated offset after this attribute is added
+     * \return The updated offset after this attribute is added
      */
     int bufferVertexAttribute(const std::string& name, GLint nValues,
         int nAttributesPerPoint, int offset) const;
@@ -110,9 +110,14 @@ protected:
     virtual void updateBufferData();
     void updateSpriteTexture();
 
-    /// Find the index of the currently chosen color parameter in the dataset
+    /**
+     * Find the index of the currently chosen color parameter in the dataset.
+     */
     int currentColorParameterIndex() const;
-    /// Find the index of the currently chosen size parameter in the dataset
+
+    /**
+     * Find the index of the currently chosen size parameter in the dataset.
+     */
     int currentSizeParameterIndex() const;
 
     bool hasColorData() const;
@@ -131,7 +136,7 @@ protected:
 
     /**
      * A function that subclasses could override to initialize their own textures to
-     * use for rendering, when the `_textureMode` is set to Other
+     * use for rendering, when the `_textureMode` is set to Other.
      */
     virtual void initializeCustomTexture();
     void initializeSingleTexture();
@@ -144,7 +149,8 @@ protected:
         glm::uvec2 resolution, size_t nLayers, bool useAlpha);
 
     void fillAndUploadTextureLayer(unsigned int arrayindex, unsigned int layer,
-        size_t textureIndex, glm::uvec2 resolution, bool useAlpha, const void* pixelData);
+        size_t textureIndex, glm::uvec2 resolution, bool useAlpha,
+        const std::vector<std::byte>& pixelData);
 
     void generateArrayTextures();
 
@@ -166,56 +172,56 @@ protected:
     bool _hasDatavarSize = false;
     bool _hasLabels = false;
 
-    struct SizeSettings : properties::PropertyOwner {
+    struct SizeSettings : PropertyOwner {
         explicit SizeSettings(const ghoul::Dictionary& dictionary);
 
         std::unique_ptr<SizeMappingComponent> sizeMapping;
 
-        properties::FloatProperty scaleExponent;
-        properties::FloatProperty scaleFactor;
+        FloatProperty scaleExponent;
+        FloatProperty scaleFactor;
 
-        properties::BoolProperty useMaxSizeControl;
-        properties::FloatProperty maxAngularSize;
+        BoolProperty useMaxSizeControl;
+        FloatProperty maxAngularSize;
     };
     SizeSettings _sizeSettings;
 
-    struct ColorSettings : properties::PropertyOwner {
+    struct ColorSettings : PropertyOwner {
         explicit ColorSettings(const ghoul::Dictionary& dictionary);
-        properties::Vec3Property pointColor;
+        Vec3Property pointColor;
         std::unique_ptr<ColorMappingComponent> colorMapping;
-        properties::BoolProperty enableOutline;
-        properties::Vec3Property outlineColor;
-        properties::FloatProperty outlineWidth;
-        properties::OptionProperty outlineStyle;
-        properties::BoolProperty applyCmapToOutline;
+        BoolProperty enableOutline;
+        Vec3Property outlineColor;
+        FloatProperty outlineWidth;
+        OptionProperty outlineStyle;
+        BoolProperty applyCmapToOutline;
     };
     ColorSettings _colorSettings;
 
-    struct Fading : properties::PropertyOwner {
+    struct Fading : PropertyOwner {
         explicit Fading(const ghoul::Dictionary& dictionary);
-        properties::Vec2Property fadeInDistances;
-        properties::BoolProperty enabled;
-        properties::BoolProperty invert;
+        Vec2Property fadeInDistances;
+        BoolProperty enabled;
+        BoolProperty invert;
     };
     Fading _fading;
 
-    properties::BoolProperty _useAdditiveBlending;
-    properties::BoolProperty _useRotation;
+    BoolProperty _useAdditiveBlending;
+    BoolProperty _useRotation;
 
-    properties::BoolProperty _drawElements;
-    properties::OptionProperty _renderOption;
+    BoolProperty _drawElements;
+    OptionProperty _renderOption;
 
-    properties::UIntProperty _nDataPoints;
-    properties::BoolProperty _hasOrientationData;
+    UIntProperty _nDataPoints;
+    BoolProperty _hasOrientationData;
 
-    struct Texture : properties::PropertyOwner {
+    struct Texture : PropertyOwner {
         Texture();
 
-        properties::BoolProperty enabled;
-        properties::BoolProperty allowCompression;
-        properties::BoolProperty useAlphaChannel;
-        properties::StringProperty spriteTexturePath;
-        properties::StringProperty inputMode;
+        BoolProperty enabled;
+        BoolProperty allowCompression;
+        BoolProperty useAlphaChannel;
+        StringProperty spriteTexturePath;
+        StringProperty inputMode;
     };
     Texture _texture;
     TextureInputMode _textureMode = TextureInputMode::Single;
@@ -252,15 +258,15 @@ protected:
     GLuint _vao = 0;
     GLuint _vbo = 0;
 
-    // List of (unique) loaded textures. The other maps refer to the index in this vector
+    /// List of (unique) loaded textures. The other maps refer to the index in this vector
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
     std::unordered_map<std::string, size_t> _textureNameToIndex;
 
-    // Texture index in dataset to index in vector of textures
+    /// Texture index in dataset to index in vector of textures
     std::unordered_map<int, size_t> _indexInDataToTextureIndex;
 
-    // Resolution/format to index in textures vector (used to generate one texture
-    // array per unique format)
+    /// Resolution/format to index in textures vector (used to generate one texture array
+    /// per unique format)
     std::unordered_map<TextureFormat, std::vector<size_t>, TextureFormatHash>
         _textureMapByFormat;
 

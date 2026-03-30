@@ -26,20 +26,13 @@
 
 namespace openspace {
 
-BrickSelection::BrickSelection() {}
-
 BrickSelection::BrickSelection(int numBricks, int numTimeSteps, SplitType splitType_,
                                float splitPoints_)
-{
-    cover = BrickCover(numBricks);
-    lowT = 0;
-    highT = numTimeSteps;
-    brickIndex = 0;
-    splitType = splitType_;
-    splitPoints = splitPoints_;
-    nSpatialSplits = 0;
-    nTemporalSplits = 0;
-}
+    : splitPoints(splitPoints_)
+    , splitType(splitType_)
+    , cover(BrickCover(numBricks))
+    , highT(numTimeSteps)
+{}
 
 BrickSelection BrickSelection::splitSpatially(bool x, bool y, bool z,
                                               unsigned int childBrickIndex,

@@ -43,22 +43,19 @@
 #include <utility>
 
 namespace openspace {
-    namespace scripting { struct LuaLibrary; }
-    class Camera;
-    struct CameraPose;
-    class SceneGraphNode;
-    struct SurfacePositionHandle;
-    class Syncable;
-} // namespace
 
-namespace openspace::interaction {
-
-class MouseInputState;
+class Camera;
+struct CameraPose;
 class KeyboardInputState;
+struct LuaLibrary;
+class MouseInputState;
+class SceneGraphNode;
+struct SurfacePositionHandle;
+class Syncable;
 
-class OrbitalNavigator : public properties::PropertyOwner {
+class OrbitalNavigator : public PropertyOwner {
 public:
-    struct IdleBehavior : public properties::PropertyOwner {
+    struct IdleBehavior : public PropertyOwner {
         enum class Behavior {
             Orbit = 0,
             OrbitAtConstantLat,
@@ -67,15 +64,15 @@ public:
 
         IdleBehavior();
 
-        properties::BoolProperty apply;
-        properties::BoolProperty shouldTriggerWhenIdle;
-        properties::FloatProperty idleWaitTime;
-        properties::BoolProperty abortOnCameraInteraction;
-        properties::BoolProperty invert;
-        properties::FloatProperty speedScaleFactor;
-        properties::FloatProperty dampenInterpolationTime;
+        BoolProperty apply;
+        BoolProperty shouldTriggerWhenIdle;
+        FloatProperty idleWaitTime;
+        BoolProperty abortOnCameraInteraction;
+        BoolProperty invert;
+        FloatProperty speedScaleFactor;
+        FloatProperty dampenInterpolationTime;
 
-        properties::OptionProperty defaultBehavior;
+        OptionProperty defaultBehavior;
         std::optional<Behavior> chosenBehavior;
     };
 
@@ -90,7 +87,7 @@ public:
     /**
      * This function should be called on every camera interaction: for example when
      * navigating using an input device, changing the focus node or starting a path or a
-     * session recording playback
+     * session recording playback.
      */
     void updateOnCameraInteraction();
 
@@ -143,7 +140,7 @@ public:
 
     /**
      * Compute a camera position that pushed the camera position to a valid position over
-     * the anchor node, accounting for the minimal allowed distance
+     * the anchor node, accounting for the minimal allowed distance.
      */
     glm::dvec3 pushToSurfaceOfAnchor(const glm::dvec3& cameraPosition) const;
 
@@ -154,7 +151,7 @@ public:
      * \return The Lua library that contains all Lua functions available to affect the
      *         OrbitalNavigator
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     struct CameraRotationDecomposition {
@@ -164,14 +161,14 @@ private:
 
     using Displacement = std::pair<glm::dvec3, glm::dvec3>;
 
-    struct Friction : public properties::PropertyOwner {
+    struct Friction : public PropertyOwner {
         Friction();
 
-        properties::BoolProperty roll;
-        properties::BoolProperty rotational;
-        properties::BoolProperty zoom;
+        BoolProperty roll;
+        BoolProperty rotational;
+        BoolProperty zoom;
 
-        properties::FloatProperty friction;
+        FloatProperty friction;
     };
 
     void updateAnchorNode(const SceneGraphNode* anchorNode);
@@ -185,60 +182,60 @@ private:
     Friction _friction;
 
     /// Anchor: Node to follow and orbit
-    properties::StringProperty _anchor;
+    StringProperty _anchor;
 
     /// Aim: Node to look at (when camera direction is reset), empty string means same as
     /// anchor. If these are the same node we call it the `focus` node
-    properties::StringProperty _aim;
+    StringProperty _aim;
 
-    // Reset camera direction to the anchor node.
-    properties::TriggerProperty _retargetAnchor;
-    // Reset camera direction to the aim node.
-    properties::TriggerProperty _retargetAim;
+    /// Reset camera direction to the anchor node
+    TriggerProperty _retargetAnchor;
+    /// Reset camera direction to the aim node
+    TriggerProperty _retargetAim;
 
-    properties::BoolProperty _followAnchorNodeRotation;
-    properties::FloatProperty _followAnchorNodeRotationDistance;
+    BoolProperty _followAnchorNodeRotation;
+    FloatProperty _followAnchorNodeRotationDistance;
 
 
-    struct LimitZoom : public properties::PropertyOwner {
+    struct LimitZoom : public PropertyOwner {
         LimitZoom();
 
-        properties::BoolProperty enableZoomInLimit;
-        properties::FloatProperty minimumAllowedDistance;
+        BoolProperty enableZoomInLimit;
+        FloatProperty minimumAllowedDistance;
 
-        properties::BoolProperty enableZoomOutLimit;
-        properties::FloatProperty maximumAllowedDistance;
+        BoolProperty enableZoomOutLimit;
+        FloatProperty maximumAllowedDistance;
     };
 
     LimitZoom _limitZoom;
 
-    properties::BoolProperty _disableZoom;
-    properties::BoolProperty _disableRoll;
+    BoolProperty _disableZoom;
+    BoolProperty _disableRoll;
 
-    properties::FloatProperty _mouseSensitivity;
-    properties::FloatProperty _joystickSensitivity;
-    properties::FloatProperty _websocketSensitivity;
+    FloatProperty _mouseSensitivity;
+    FloatProperty _joystickSensitivity;
+    FloatProperty _websocketSensitivity;
 
-    properties::BoolProperty _useAdaptiveStereoscopicDepth;
-    properties::FloatProperty _stereoscopicDepthOfFocusSurface;
-    properties::FloatProperty _staticViewScaleExponent;
+    BoolProperty _useAdaptiveStereoscopicDepth;
+    FloatProperty _stereoscopicDepthOfFocusSurface;
+    FloatProperty _staticViewScaleExponent;
 
-    properties::BoolProperty _constantVelocityFlight;
+    BoolProperty _constantVelocityFlight;
 
-    properties::FloatProperty _retargetInterpolationTime;
-    properties::FloatProperty _stereoInterpolationTime;
-    properties::FloatProperty _followRotationInterpolationTime;
+    FloatProperty _retargetInterpolationTime;
+    FloatProperty _stereoInterpolationTime;
+    FloatProperty _followRotationInterpolationTime;
 
-    properties::BoolProperty _invertMouseButtons;
+    BoolProperty _invertMouseButtons;
 
-    properties::BoolProperty _shouldRotateAroundUp;
+    BoolProperty _shouldRotateAroundUp;
 
     enum class UpDirectionChoice {
         XAxis = 0,
         YAxis,
         ZAxis
     };
-    properties::OptionProperty _upToUseForRotation;
+    OptionProperty _upToUseForRotation;
 
     MouseCameraStates _mouseStates;
     JoystickCameraStates _joystickStates;
@@ -336,8 +333,8 @@ private:
         double targetDistance);
 
     /**
-     * Modify the camera position and global rotation to rotate around the up vector
-     * of the current anchor based on x-wise input.
+     * Modify the camera position and global rotation to rotate around the up vector of
+     * the current anchor based on x-wise input.
      *
      * The up-vector to rotate around is determined by the "_upToUseForRotation" property
      */
@@ -349,7 +346,7 @@ private:
      * result in an orbital rotation around the object. This function does not affect the
      * rotation but only the position.
      *
-     * \return A position vector adjusted in the horizontal direction.
+     * \return A position vector adjusted in the horizontal direction
      */
     glm::dvec3 translateHorizontally(double deltaTime, double speedScale,
         const glm::dvec3& cameraPosition, const glm::dvec3& objectPosition,
@@ -377,7 +374,7 @@ private:
     /**
      * Translates the camera position towards or away from the anchor node.
      *
-     * \return A position vector adjusted in the vertical direction.
+     * \return A position vector adjusted in the vertical direction
      */
     glm::dvec3 translateVertically(double deltaTime, const glm::dvec3& cameraPosition,
         const glm::dvec3& objectPosition,
@@ -426,7 +423,7 @@ private:
      * Orbit the current anchor node, in a right-bound orbit, by updating the position
      * and global rotation of the camera.
      *
-     * Used for IdleBehavior::Behavior::Orbit
+     * Used for IdleBehavior::Behavior::Orbit.
      *
      * \param angle The rotation angle to use for the motion
      * \param position The position of the camera. Will be changed by the function
@@ -456,6 +453,6 @@ private:
         const SurfacePositionHandle& positionHandle) const;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___ORBITALNAVIGATOR___H__

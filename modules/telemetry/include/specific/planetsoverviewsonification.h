@@ -69,15 +69,15 @@ private:
 
     void onToggleAllChanged();
 
-    properties::BoolProperty _toggleAll;
-    properties::BoolProperty _mercuryEnabled;
-    properties::BoolProperty _venusEnabled;
-    properties::BoolProperty _earthEnabled;
-    properties::BoolProperty _marsEnabled;
-    properties::BoolProperty _jupiterEnabled;
-    properties::BoolProperty _saturnEnabled;
-    properties::BoolProperty _uranusEnabled;
-    properties::BoolProperty _neptuneEnabled;
+    BoolProperty _toggleAll;
+    BoolProperty _mercuryEnabled;
+    BoolProperty _venusEnabled;
+    BoolProperty _earthEnabled;
+    BoolProperty _marsEnabled;
+    BoolProperty _jupiterEnabled;
+    BoolProperty _saturnEnabled;
+    BoolProperty _uranusEnabled;
+    BoolProperty _neptuneEnabled;
 };
 
 } // namespace openspace

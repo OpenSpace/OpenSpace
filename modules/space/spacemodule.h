@@ -38,18 +38,18 @@ public:
 
     SpaceModule();
     ~SpaceModule() override = default;
-    std::vector<documentation::Documentation> documentations() const override;
+    std::vector<openspace::Documentation> documentations() const override;
 
     static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
 
-    scripting::LuaLibrary luaLibrary() const override;
-    static documentation::Documentation Documentation();
+    LuaLibrary luaLibrary() const override;
+    static openspace::Documentation Documentation();
 
 private:
     void internalInitialize(const ghoul::Dictionary&) override;
     void internalDeinitializeGL() override;
 
-    properties::BoolProperty _showSpiceExceptions;
+    BoolProperty _showSpiceExceptions;
 };
 
 } // namespace openspace

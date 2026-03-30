@@ -26,11 +26,10 @@
 
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
-DMat4Property::DMat4Property(Property::PropertyInfo info, glm::dmat4x4 value,
-                             glm::dmat4x4 minValue, glm::dmat4x4 maxValue,
-                             glm::dmat4x4 stepValue)
+DMat4Property::DMat4Property(PropertyInfo info, glm::dmat4x4 value, glm::dmat4x4 minValue,
+                             glm::dmat4x4 maxValue, glm::dmat4x4 stepValue)
     : NumericalProperty<glm::dmat4x4>(
         std::move(info),
         std::move(value),
@@ -60,4 +59,4 @@ std::string DMat4Property::stringValue() const {
     return formatJson(_value);
 }
 
-}  // namespace openspace::properties
+} // namespace openspace

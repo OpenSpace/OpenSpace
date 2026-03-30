@@ -33,23 +33,26 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/texture.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <cctype>
 #include <iterator>
-#include <sstream>
 #include <optional>
+#include <sstream>
 #include <vector>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableTimeVaryingFitsSphere";
 
-    // Extract J2000 time from file names
-    // Requires file to be named as example : 'wsa_202209291400R011_agong.fits'
-    // Looks for timestamp after first '_'
+    /**
+     * Extract J2000 time from file names.Requires file to be named as example:
+     * 'wsa_202209291400R011_agong.fits'. Looks for timestamp after first '_'.
+     */
     double extractTriggerTimeFromFitsFileName(const std::filesystem::path& filePath) {
         // Extract the filename from the path (without extension)
         std::string fileName = filePath.stem().string();
@@ -81,77 +84,73 @@ namespace {
         }
 
         // Extract digits from the substring and construct ISO 8601 formatted string
-        std::ostringstream oss;
-        oss << digits.substr(0, 4) << "-" // Year
-            << digits.substr(4, 2) << "-" // Month
-            << digits.substr(6, 2) << "T" // Day
-            << digits.substr(8, 2) << ":" // Hour
-            << digits.substr(10, 2) << ":" // Minute
-            << "00"
-            << digits.substr(12, 2) << "." // Second
-            << "000";
-
-        return openspace::Time::convertTime(oss.str());
+        std::string res = std::format(
+            "{}-{}-{}T{}:{}:00{}.000",
+            digits.substr(0, 4), digits.substr(4, 2), digits.substr(6, 2),
+            digits.substr(8, 2), digits.substr(10, 2), digits.substr(12, 2)
+        );
+        return Time::convertTime(res);
     }
 
-    constexpr openspace::properties::Property::PropertyInfo TextureSourceInfo = {
+    constexpr Property::PropertyInfo TextureSourceInfo = {
         "TextureSource",
         "Texture source",
         "A directory on disk from which to load the texture files for the sphere.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FitsLayerInfo = {
+    constexpr Property::PropertyInfo FitsLayerInfo = {
         "FitsLayer",
         "Texture layer",
         "The index, a whole positive number, of the layer in the FITS file to use as "
         "texture. If not specified, the first layer in the data will be used regardless. "
         "When specified, that data layer will be the option used.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FitsLayerNameInfo = {
+    constexpr Property::PropertyInfo FitsLayerNameInfo = {
         "LayerNames",
         "Texture layer options",
         "This value specifies which name of the fits layer to use as texture.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextureFilterInfo = {
+    constexpr Property::PropertyInfo TextureFilterInfo = {
         "TextureFilter",
         "Texture filter",
         "Option to choose nearest neighbor or linear filtering for the texture.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SaveDownloadsOnShutdown = {
+    constexpr Property::PropertyInfo SaveDownloadsOnShutdown = {
         "SaveDownloadsOnShutdown",
         "Save downloads on shutdown",
-        "This is an option for if dynamically downloaded files should be saved for the"
+        "This is an option for if dynamically downloaded files should be saved for the "
         "next run or not.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `Renderable` reads a data sequence from specifically FITS files and makes
     // textures from them and wraps them onto a sphere. A sequence is a data source
-    // consisting of multiple data files that each correspond to a specific
-    // time and is therefore time varying like the name of the renderable suggests.
+    // consisting of multiple data files that each correspond to a specific time and is
+    // therefore time varying like the name of the renderable suggests.
     //
     // `LoadingType` can be specified in two ways;
     //
     // 1. `StaticLoading`: In this case, all data will be loaded on startup, from the
-    // location specified in the `TextureSource` parameter. Other required parameters are
-    // `LayerNames` and `LayerMinMaxCapValues` that require at least one entry each.
-    // `LayerNames` assigns a name to an index that corresponds to a layer in the FITS
-    // data to use. For each entry in `LayerNames`, there should also be a matching entry
-    // in the `LayerMinMaxCapValues` that specifies the min and max range for the data.
+    //    location specified in the `TextureSource` parameter. Other required parameters
+    //    are `LayerNames` and `LayerMinMaxCapValues` that require at least one entry
+    //    each. `LayerNames` assigns a name to an index that corresponds to a layer in the
+    //    FITS data to use. For each entry in `LayerNames`, there should also be a
+    //    matching entry in the `LayerMinMaxCapValues` that specifies the min and max
+    //    range for the data.
     //
     // 2. `DynamicDownloading`: This case downloads the data during runtime. In addition
-    // to `LayerNames` and `LayerMinMaxCapValues`, a few more parameters are required in
-    // this case: `InfoURL` together with `DataID` will construct a URL that is used for a
-    // HTTP request that returns meta data. `DataURL` and `DataID`, together with this
-    // meta data, will be used in constructing another HTTP request that returns the list
-    // with data files. The `DataID` specify which data source to use.
+    //    to `LayerNames` and `LayerMinMaxCapValues`, a few more parameters are required
+    //    in this case: `InfoURL` together with `DataID` will construct a URL that is used
+    //    for a HTTP request that returns meta data. `DataURL` and `DataID`, together with
+    //    this meta data, will be used in constructing another HTTP request that returns
+    //    the list with data files. The `DataID` specify which data source to use.
     //
     // In addition, but not required, the `FitsLayer` parameter can be specified to use a
     // specific data layer for the sphere texture. The index should match one of the
@@ -164,17 +163,17 @@ namespace {
         enum class [[codegen::map(
             openspace::RenderableTimeVaryingFitsSphere::LoadingType)]] LoadingType
         {
+            // Download and load files on startup.
             StaticLoading,
+            // Download and load files during run time.
             DynamicDownloading
         };
 
-        // Choose type of loading:
-        // StaticLoading: Download and load files on startup.
-        // DynamicDownloading: Download and load files during run time.
+        // Choose type of loading.
         std::optional<LoadingType> loadingType;
 
-        // This is a max value of the amount of files to queue up
-        // so that not to big of a data set is downloaded.
+        // This is a max value of the amount of files to queue up so that not to big of a
+        // data set is downloaded.
         std::optional<int> numberOfFilesToQueue;
 
         // A data ID that corresponds to what dataset to use if using dynamic downloading.
@@ -192,9 +191,9 @@ namespace {
         // [[codegen::verbatim(FitsLayerNameInfo.description)]]
         std::optional<ghoul::Dictionary> layerNames;
 
-        // A range per layer to be used to cap where the color range will lie.
-        // Values outside of range will be overexposed, i.e. data values below the min
-        // or above the max, will all be set to the min and max color value in range.
+        // A range per layer to be used to cap where the color range will lie. Values
+        // outside of range will be overexposed, i.e. data values below the min or above
+        // the max, will all be set to the min and max color value in range.
         std::optional<ghoul::Dictionary> layerMinMaxCapValues;
 
         // This is set to false by default and will delete all the downloaded content when
@@ -207,14 +206,14 @@ namespace {
         // specified, the field lines are shown at all times.
         std::optional<bool> showAtAllTimes;
     };
-#include "renderabletimevaryingfitssphere_codegen.cpp"
 } // namespace
+#include "renderabletimevaryingfitssphere_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableTimeVaryingFitsSphere::Documentation() {
+Documentation RenderableTimeVaryingFitsSphere::Documentation() {
     return codegen::doc<Parameters>(
-        "fitsfilereader_renderable_time_varying_fits_sphere",
+        "fitsfilereader_renderable_timevaryingfitssphere",
         RenderableSphere::Documentation()
     );
 }
@@ -234,14 +233,11 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
     }
 
     _textureSource.setReadOnly(true);
-    addProperty(_textureSource); // Added only to show in GUI which file is active
+    addProperty(_textureSource);
 
-    if (p.loadingType.has_value()) {
-        _loadingType = codegen::map<LoadingType>(*p.loadingType);
-    }
-    else {
-        _loadingType = LoadingType::StaticLoading;
-    }
+    _loadingType = codegen::map<LoadingType>(
+        p.loadingType.value_or(Parameters::LoadingType::StaticLoading)
+    );
 
     if (p.fitsLayer.has_value()) {
         _fitsLayerTemp = *p.fitsLayer;
@@ -265,18 +261,22 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
             case static_cast<int>(ghoul::opengl::Texture::FilterMode::Nearest):
                 for (File& file : _files) {
                     if (file.texture) {
-                        file.texture->setFilter(
-                            ghoul::opengl::Texture::FilterMode::Nearest
-                        );
+                        // @TODO (2026-02-19, abock) This should be replaced with a
+                        // sampler at some point
+                        GLuint id = *file.texture;
+                        glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                        glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
                     }
                 }
                 break;
             case static_cast<int>(ghoul::opengl::Texture::FilterMode::Linear):
                 for (File& file : _files) {
                     if (file.texture) {
-                        file.texture->setFilter(
-                            ghoul::opengl::Texture::FilterMode::Linear
-                        );
+                        // @TODO (2026-02-19, abock) This should be replaced with a
+                        // sampler at some point
+                        GLuint id = *file.texture;
+                        glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                        glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                     }
                 }
                 break;
@@ -295,13 +295,20 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
                 if (file.status == File::FileStatus::Loaded) {
                     std::pair<float, float> minMax = _layerMinMaxCaps.at(_fitsLayerName);
                     file.texture = loadTextureFromFits(file.path, _fitsLayerName, minMax);
-                    file.texture->uploadTexture();
-                    using FM = ghoul::opengl::Texture::FilterMode;
-                    if (_textureFilterProperty == static_cast<int>(FM::Nearest)) {
-                        file.texture->setFilter(FM::Nearest);
+                    using enum ghoul::opengl::Texture::FilterMode;
+                    if (_textureFilterProperty == static_cast<int>(Nearest)) {
+                        // @TODO (2026-02-19, abock) This should be replaced with a
+                        // sampler at some point
+                        GLuint id = *file.texture;
+                        glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                        glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
                     }
-                    else if (_textureFilterProperty == static_cast<int>(FM::Linear)) {
-                        file.texture->setFilter(FM::Linear);
+                    else if (_textureFilterProperty == static_cast<int>(Linear)) {
+                        // @TODO (2026-02-19, abock) This should be replaced with a
+                        // sampler at some point
+                        GLuint id = *file.texture;
+                        glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                        glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                     }
                 }
             }
@@ -375,9 +382,8 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
         }
         if (!p.fitsLayer.has_value()) {
             LWARNING(std::format(
-                "Specify 'FitsLayer' for scene graph node with DataID: {}. ",
-                "Assuming first layer",
-                _dataID
+                "Specify 'FitsLayer' for scene graph node with DataID: {}. Assuming "
+                "first layer", _dataID
             ));
             _fitsLayerTemp = 0;
         }
@@ -414,10 +420,14 @@ void RenderableTimeVaryingFitsSphere::readFileFromFits(std::filesystem::path pat
 
     using FilterMode = ghoul::opengl::Texture::FilterMode;
     if (_textureFilterProperty == static_cast<int>(FilterMode::Nearest)) {
-        t->setFilter(FilterMode::Nearest);
+        // @TODO (2026-02-19, abock) This should be replaced with a sampler at some point
+        glTextureParameteri(*t, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTextureParameteri(*t, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     }
     else if (_textureFilterProperty == static_cast<int>(FilterMode::Linear)) {
-        t->setFilter(FilterMode::Linear);
+        // @TODO (2026-02-19, abock) This should be replaced with a sampler at some point
+        glTextureParameteri(*t, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(*t, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
 
     glm::vec2 minMaxDataValues = minMaxTextureDataValues(t);
@@ -434,9 +444,7 @@ void RenderableTimeVaryingFitsSphere::readFileFromFits(std::filesystem::path pat
         _files.begin(),
         _files.end(),
         newFile.time,
-        [](double timeRef, const File& fileRef) {
-            return timeRef < fileRef.time;
-        }
+        [](double timeRef, const File& fileRef) { return timeRef < fileRef.time; }
     );
     std::deque<File>::iterator it = _files.insert(iter, std::move(newFile));
     trackOldest(*it);
@@ -452,15 +460,17 @@ glm::vec2 RenderableTimeVaryingFitsSphere::minMaxTextureDataValues(
     std::vector<float> pixelValues;
     pixelValues.reserve(width * height * 4);
 
+    t->downloadTexture();
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            glm::vec4 texel = t->texelAsFloat(x, y);
+            glm::vec4 texel = t->texelAsFloat(glm::uvec3(x, y, 0));
             pixelValues.push_back(texel.r);
             pixelValues.push_back(texel.g);
             pixelValues.push_back(texel.b);
             pixelValues.push_back(texel.a);
         }
     }
+    t->clearDownloadedTexture();
     if (!pixelValues.empty()) {
         float min = *std::min_element(pixelValues.begin(), pixelValues.end());
         float max = *std::max_element(pixelValues.begin(), pixelValues.end());
@@ -472,8 +482,8 @@ glm::vec2 RenderableTimeVaryingFitsSphere::minMaxTextureDataValues(
 }
 
 void RenderableTimeVaryingFitsSphere::extractMandatoryInfoFromSourceFolder() {
-    // Ensure that the source folder exists and then extract
-    // the files with the same extension as <inputFileTypeString>
+    // Ensure that the source folder exists and then extract the files with the same
+    // extension as <inputFileTypeString>
     namespace fs = std::filesystem;
     const fs::path sourceFolder = _textureSource.stringValue();
     if (!std::filesystem::is_directory(sourceFolder)) {
@@ -548,10 +558,10 @@ void RenderableTimeVaryingFitsSphere::update(const UpdateData& data) {
                     loadTextureFromFits(file.path, _fitsLayerName, minMax);
                 using FilterMode = ghoul::opengl::Texture::FilterMode;
                 if (_textureFilterProperty == static_cast<int>(FilterMode::Nearest)) {
-                    file.texture->setFilter(FilterMode::Nearest);
+                    //file.texture->setFilter(FilterMode::Nearest);
                 }
                 else if (_textureFilterProperty == static_cast<int>(FilterMode::Linear)) {
-                    file.texture->setFilter(FilterMode::Linear);
+                    //file.texture->setFilter(FilterMode::Linear);
                 }
                 file.status = File::FileStatus::Loaded;
                 trackOldest(file);
@@ -583,7 +593,7 @@ void RenderableTimeVaryingFitsSphere::render(const RenderData& data, RendererTas
 }
 
 void RenderableTimeVaryingFitsSphere::bindTexture(ghoul::opengl::TextureUnit& unit) {
-    if (_texture) {
+    if (_texture) [[likely]] {
         unit.bind(*_texture);
     }
 }
@@ -625,8 +635,7 @@ void RenderableTimeVaryingFitsSphere::updateDynamicDownloading(double currentTim
         updateActiveTriggerTimeIndex(currentTime);
     }
     if (_firstUpdate) {
-        const bool isInInterval = !_files.empty() &&
-            currentTime >= _files[0].time &&
+        const bool isInInterval = !_files.empty() && currentTime >= _files[0].time &&
             currentTime < _sequenceEndTime;
 
         if (isInInterval &&
@@ -637,8 +646,8 @@ void RenderableTimeVaryingFitsSphere::updateDynamicDownloading(double currentTim
             loadTexture();
         }
     }
-    // If all files are moved into _sourceFiles then we can
-    // empty the DynamicFileSequenceDownloader's downloaded files list
+    // If all files are moved into _sourceFiles then we can empty the
+    // DynamicFileSequenceDownloader's downloaded files list
     _dynamicFileDownloader->clearDownloaded();
 }
 
@@ -650,7 +659,7 @@ void RenderableTimeVaryingFitsSphere::computeSequenceEndTime() {
         _sequenceEndTime = _files[0].time + 7200.f;
         if (_loadingType == LoadingType::StaticLoading && !_renderForever) {
             // TODO (2025-06-10, Elon) Alternativly check at construction and throw
-            // exeption.
+            // exeption
             LWARNING(
                 "Only one file in data set, but ShowAtAllTimes set to false. "
                 "Using arbitrary 2 hours to visualize data file instead"

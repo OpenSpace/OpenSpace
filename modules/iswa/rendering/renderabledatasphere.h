@@ -44,14 +44,14 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    bool createGeometry() override;
-    bool destroyGeometry() override;
+    void createGeometry() override;
+    void destroyGeometry() override;
     void renderGeometry() const override;
     void setUniforms() override;
-    std::vector<float*> textureData() override;
+    std::vector<std::vector<float>> textureData() override;
 
     std::unique_ptr<Sphere> _sphere;
     float _radius;

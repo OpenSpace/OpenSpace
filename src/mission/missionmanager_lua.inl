@@ -27,18 +27,24 @@
 #include <variant>
 #include <utility>
 
-// Load mission phases from file.
+using namespace openspace;
+
+namespace {
+
+/**
+ * Load mission phases from file.
+ */
 [[codegen::luawrap]] void loadMission(ghoul::Dictionary mission) {
     // TODO: Check if mission table is valid
-    openspace::global::missionManager->loadMission(openspace::Mission(mission));
+    global::missionManager->loadMission(Mission(mission));
 }
 
-// Unloads a previously loaded mission.
+/**
+ * Unloads a previously loaded mission
+ */
 [[codegen::luawrap]] void unloadMission(
                          std::variant<std::string, ghoul::Dictionary> identifierOrMission)
 {
-    using namespace openspace;
-
     std::string identifier;
     if (std::holds_alternative<std::string>(identifierOrMission)) {
         identifier = std::move(std::get<std::string>(identifierOrMission));
@@ -64,22 +70,28 @@
     global::missionManager->unloadMission(identifier);
 }
 
-// Returns whether a mission with the provided name has been loaded.
+/**
+ * Returns whether a mission with the provided name has been loaded.
+ */
 [[codegen::luawrap]] bool hasMission(std::string identifier) {
     if (identifier.empty()) {
         throw ghoul::lua::LuaError("Mission identifier is empty");
     }
 
-    bool hasMission = openspace::global::missionManager->hasMission(identifier);
+    bool hasMission = global::missionManager->hasMission(identifier);
     return hasMission;
 }
 
-// Set the currnet mission.
+/**
+ * Set the current mission.
+ */
 [[codegen::luawrap]] void setCurrentMission(std::string identifier) {
     if (identifier.empty()) {
         throw ghoul::lua::LuaError("Mission identifier is empty");
     }
-    openspace::global::missionManager->setCurrentMission(identifier);
+    global::missionManager->setCurrentMission(identifier);
 }
-#include "missionmanager_lua_codegen.cpp"
 
+} // namespace
+
+#include "missionmanager_lua_codegen.cpp"

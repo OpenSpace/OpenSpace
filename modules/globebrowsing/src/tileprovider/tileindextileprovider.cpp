@@ -33,24 +33,26 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo UniqueBackgroundColors = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo UniqueBackgroundColors = {
         "UniqueBackgroundColor",
         "Unique background color",
         "If 'true' each index tile will have a unique background color assigned to it.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(TileIndexTileProvider)]] Parameters {
         // [[codegen::verbatim(UniqueBackgroundColors.description)]]
         std::optional<bool> uniqueBackgroundColors;
     };
-#include "tileindextileprovider_codegen.cpp"
 } // namespace
+#include "tileindextileprovider_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation TileIndexTileProvider::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_tileindextileprovider");
+Documentation TileIndexTileProvider::Documentation() {
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_tileindex");
 }
 
 TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary& dictionary)
@@ -113,7 +115,7 @@ Tile::Status TileIndexTileProvider::tileStatus(const TileIndex&) {
 }
 
 TileDepthTransform TileIndexTileProvider::depthTransform() {
-    return { 0.f, 1.f };
+    return { .scale = 0.f, .offset = 1.f };
 }
 
 void TileIndexTileProvider::update() {}
@@ -130,4 +132,4 @@ float TileIndexTileProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

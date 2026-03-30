@@ -42,13 +42,13 @@ namespace {
         // The folder to the cdf files to extract data from.
         std::filesystem::path input [[codegen::directory()]];
 
-        // A text file with seedpoints with the format x1 y1 z1 x2 y2 z2 ...
-        // Seedpoints are expressed in the native coordinate system of the model.
+        // A text file with seedpoints with the format x1 y1 z1 x2 y2 z2 ... Seedpoints
+        // are expressed in the native coordinate system of the model.
         std::filesystem::path seedpoints [[codegen::directory()]];
 
         // If data sets parameter start_time differ from start of run,
-        // elapsed_time_in_seconds might be in relation to start of run.
-        // ManuelTimeOffset will be added to trigger time.
+        // elapsed_time_in_seconds might be in relation to start of run. ManualTimeOffset
+        // will be added to trigger time.
         std::optional<double> manualTimeOffset;
 
         // The name of the kameleon variable to use for tracing, like b, or u.
@@ -57,26 +57,25 @@ namespace {
         // The folder to write the files to.
         std::filesystem::path outputFolder [[codegen::directory()]];
 
-        enum class
-        [[codegen::map(openspace::KameleonVolumeToFieldlinesTask::OutputType)]]
+        enum class [[codegen::map(openspace::KameleonVolumeToFieldlinesTask::OutputType)]]
         OutputType
         {
             Json,
             Osfls
         };
 
-        // Output type. Either osfls (OpenSpace FieldLineSequence) or json
+        // Output type. Either osfls (OpenSpace FieldLineSequence) or JSON.
         OutputType outputType;
 
-        // A list of vector variables to extract along the fieldlines
+        // A list of vector variables to extract along the fieldlines.
         std::optional<std::vector<std::string>> extraVars;
     };
-#include "kameleonvolumetofieldlinestask_codegen.cpp"
 } // namespace
+#include "kameleonvolumetofieldlinestask_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation KameleonVolumeToFieldlinesTask::Documentation() {
+Documentation KameleonVolumeToFieldlinesTask::Documentation() {
     return codegen::doc<Parameters>("fieldlinessequence_task_kameleonvolumetofieldlines");
 }
 
@@ -118,8 +117,8 @@ KameleonVolumeToFieldlinesTask::KameleonVolumeToFieldlinesTask(
 
 std::string KameleonVolumeToFieldlinesTask::description() {
     return std::format(
-        "Extract fieldline data from cdf file {} and seedpoint file {}. "
-        "Write either osfls files or json files into the folder {}.",
+        "Extract fieldline data from cdf file {} and seedpoint file {}. Write either "
+        "osfls files or json files into the folder {}.",
         _inputPath, _seedpointsPath, _outputFolder
     );
 }
@@ -127,11 +126,10 @@ std::string KameleonVolumeToFieldlinesTask::description() {
 void KameleonVolumeToFieldlinesTask::perform(
                                            const Task::ProgressCallback& progressCallback)
 {
-    std::vector<std::string> extraMagVars =
-        fls::extractMagnitudeVarsFromStrings(_extraVars);
+    std::vector<std::string> extraMagVars = extractMagnitudeVarsFromStrings(_extraVars);
 
     std::unordered_map<std::string, std::vector<glm::vec3>> seedPoints =
-        fls::extractSeedPointsFromFiles(_seedpointsPath);
+        extractSeedPointsFromFiles(_seedpointsPath);
 
     if (seedPoints.empty()) {
         LERROR("Falied to read seedpoints");
@@ -140,7 +138,7 @@ void KameleonVolumeToFieldlinesTask::perform(
 
     for (const std::string& cdfPath : _sourceFiles) {
         FieldlinesState newState;
-        bool isSuccessful = fls::convertCdfToFieldlinesState(
+        bool isSuccessful = convertCdfToFieldlinesState(
             newState,
             cdfPath,
             seedPoints,

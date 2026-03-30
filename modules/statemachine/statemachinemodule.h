@@ -47,7 +47,9 @@ public:
 
     bool hasStateMachine() const;
 
-    // initializeStateMachine must have been called before
+    /**
+     * #initializeStateMachine must have been called before.
+     */
     void setInitialState(const std::string& initialState);
     std::string currentState() const;
     std::vector<std::string> possibleTransitions() const;
@@ -61,9 +63,9 @@ public:
     void saveToFile(const std::string& filename,
         std::string directory = "${TEMPORARY}/") const;
 
-    scripting::LuaLibrary luaLibrary() const override;
+    LuaLibrary luaLibrary() const override;
 
-    std::vector<documentation::Documentation> documentations() const override;
+    std::vector<openspace::Documentation> documentations() const override;
 
 private:
     std::unique_ptr<StateMachine> _machine = nullptr;

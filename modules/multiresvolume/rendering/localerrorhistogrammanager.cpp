@@ -70,7 +70,7 @@ bool LocalErrorHistogramManager::buildHistograms(int numBins) {
 
     // All TSP Leaves
     const int numOtNodes = _tsp->numOTNodes();
-    const int otOffset = static_cast<int>((pow(8, numOtLevels - 1) - 1) / 7);
+    const int otOffset = static_cast<int>((std::pow(8, numOtLevels - 1) - 1) / 7);
 
     const int numBstNodes = _tsp->numBSTNodes();
     const int bstOffset = numBstNodes / 2;
@@ -78,7 +78,7 @@ bool LocalErrorHistogramManager::buildHistograms(int numBins) {
     const int numberOfLeaves = numOtLeaves * numBstLeaves;
 
     LINFO("Building spatial histograms");
-    ProgressBar pb1(numberOfLeaves);
+    ProgressBar pb1 = ProgressBar(numberOfLeaves);
     int processedLeaves = 0;
     pb1.print(processedLeaves);
     bool success = true;
@@ -94,7 +94,7 @@ bool LocalErrorHistogramManager::buildHistograms(int numBins) {
     }
 
     LINFO("Building temporal histograms");
-    ProgressBar pb2(numberOfLeaves);
+    ProgressBar pb2 = ProgressBar(numberOfLeaves);
     processedLeaves = 0;
     pb2.print(processedLeaves);
     for (int ot = otOffset; ot < numOtNodes; ot++) {
@@ -176,10 +176,10 @@ bool LocalErrorHistogramManager::buildFromOctreeChild(unsigned int bstOffset,
         for (int z = 0; z < brickDim; z++) {
             for (int y = 0; y < brickDim; y++) {
                 for (int x = 0; x < brickDim; x++) {
-                    glm::ivec3 childSamplePoint = glm::ivec3(x, y, z) +
-                                                  glm::ivec3(padding);
-                    glm::vec3 parentSamplePoint = parentOffset +
-                                           glm::vec3(x + 0.5f, y + 0.5f, z + 0.5f) * 0.5f;
+                    glm::ivec3 childSamplePoint =
+                        glm::ivec3(x, y, z) + glm::ivec3(padding);
+                    glm::vec3 parentSamplePoint =
+                        parentOffset + glm::vec3(x + 0.5f, y + 0.5f, z + 0.5f) * 0.5f;
                     float childValue = childValues[linearCoords(childSamplePoint)];
                     float parentValue = interpolate(parentSamplePoint, parentValues);
 
@@ -309,7 +309,7 @@ bool LocalErrorHistogramManager::buildFromBstChild(unsigned int bstOffset,
 }
 
 bool LocalErrorHistogramManager::loadFromFile(const std::filesystem::path& filename) {
-    std::ifstream file(filename, std::ios::in | std::ios::binary);
+    std::ifstream file = std::ifstream(filename, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
         return false;
     }
@@ -320,13 +320,13 @@ bool LocalErrorHistogramManager::loadFromFile(const std::filesystem::path& filen
     file.read(reinterpret_cast<char*>(&_maxBin), sizeof(float));
 
     const int nFloats = _numInnerNodes * _numBins;
-    std::vector<float> histogramData(nFloats);
+    std::vector<float> histogramData = std::vector<float>(nFloats);
 
     file.read(reinterpret_cast<char*>(histogramData.data()), sizeof(float) * nFloats);
     _spatialHistograms = std::vector<Histogram>(_numInnerNodes);
     for (unsigned int i = 0; i < _numInnerNodes; i++) {
         const int offset = i * _numBins;
-        // No need to deallocate histogram data, since histograms take ownership.
+        // No need to deallocate histogram data, since histograms take ownership
         float* data = new float[_numBins];
         memcpy(data, &histogramData[offset], sizeof(float) * _numBins);
         _spatialHistograms[i] = Histogram(_minBin, _maxBin, _numBins, data);
@@ -336,7 +336,7 @@ bool LocalErrorHistogramManager::loadFromFile(const std::filesystem::path& filen
     _temporalHistograms = std::vector<Histogram>(_numInnerNodes);
     for (unsigned int i = 0; i < _numInnerNodes; i++) {
         const int offset = i * _numBins;
-        // No need to deallocate histogram data, since histograms take ownership.
+        // No need to deallocate histogram data, since histograms take ownership
         float* data = new float[_numBins];
         memcpy(data, &histogramData[offset], sizeof(float) * _numBins);
         _temporalHistograms[i] = Histogram(_minBin, _maxBin, _numBins, data);
@@ -348,7 +348,7 @@ bool LocalErrorHistogramManager::loadFromFile(const std::filesystem::path& filen
 
 
 bool LocalErrorHistogramManager::saveToFile(const std::filesystem::path& filename) {
-    std::ofstream file(filename, std::ios::out | std::ios::binary);
+    std::ofstream file = std::ofstream(filename, std::ios::out | std::ios::binary);
     if (!file.is_open()) {
         return false;
     }
@@ -363,25 +363,23 @@ bool LocalErrorHistogramManager::saveToFile(const std::filesystem::path& filenam
 
     for (unsigned int i = 0; i < _numInnerNodes; i++) {
         int offset = i * _numBins;
-        memcpy(
+        std::memcpy(
             &histogramData[offset],
             _spatialHistograms[i].data(),
             sizeof(float) * _numBins
         );
     }
-    file.write(reinterpret_cast<char*>(histogramData.data()), sizeof(float) * nFloats);
+    file.write(reinterpret_cast<char*>(histogramData.data()), nFloats * sizeof(float));
 
     for (unsigned int i = 0; i < _numInnerNodes; i++) {
         int offset = i * _numBins;
-        memcpy(
+        std::memcpy(
             &histogramData[offset],
             _temporalHistograms[i].data(),
             sizeof(float) * _numBins
         );
     }
-    file.write(reinterpret_cast<char*>(histogramData.data()), sizeof(float) * nFloats);
-
-    file.close();
+    file.write(reinterpret_cast<char*>(histogramData.data()), nFloats * sizeof(float));
     return true;
 }
 
@@ -463,14 +461,14 @@ int LocalErrorHistogramManager::parentOffset(int offset, int base) const {
         return -1;
     }
     const int depth = static_cast<int>(
-        floor(log1p(((base - 1) * offset)) / log(base))
+        std::floor(std::log1p(((base - 1) * offset)) / std::log(base))
     );
-    const int firstInLevel = static_cast<int>((pow(base, depth) - 1) / (base - 1));
+    const int firstInLevel = static_cast<int>((std::pow(base, depth) - 1) / (base - 1));
     const int inLevelOffset = offset - firstInLevel;
 
     const int parentDepth = depth - 1;
     const int firstInParentLevel = static_cast<int>(
-        (pow(base, parentDepth) - 1) / (base - 1)
+        (std::pow(base, parentDepth) - 1.0) / (base - 1)
     );
     const int parentInLevelOffset = inLevelOffset / base;
 
@@ -483,8 +481,9 @@ std::vector<float> LocalErrorHistogramManager::readValues(unsigned int brickInde
     const unsigned int numBrickVals = paddedBrickDim * paddedBrickDim * paddedBrickDim;
     std::vector<float> voxelValues(numBrickVals);
 
-    std::streampos offset = _tsp->dataPosition() +
-                            static_cast<long long>(brickIndex*numBrickVals*sizeof(float));
+    std::streampos offset =
+        _tsp->dataPosition() +
+        static_cast<long long>(brickIndex * numBrickVals * sizeof(float));
     _file->seekg(offset);
 
     _file->read(
@@ -501,14 +500,14 @@ unsigned int LocalErrorHistogramManager::brickToInnerNodeIndex(
     const unsigned int numOtNodes = _tsp->numOTNodes();
     const unsigned int numBstLevels = _tsp->numBSTLevels();
     const unsigned int numInnerBstNodes = static_cast<unsigned int>(
-        (pow(2, numBstLevels - 1) - 1) * numOtNodes
+        (std::pow(2, numBstLevels - 1) - 1) * numOtNodes
     );
     if (brickIndex < numInnerBstNodes) {
         return brickIndex;
     }
 
     const unsigned int numOtLeaves = static_cast<unsigned int>(
-        pow(8, _tsp->numOTLevels() - 1)
+        std::pow(8, _tsp->numOTLevels() - 1)
     );
     const unsigned int numOtInnerNodes = (numOtNodes - numOtLeaves);
 
@@ -532,14 +531,14 @@ unsigned int LocalErrorHistogramManager::innerNodeToBrickIndex(
     const unsigned int numOtNodes = _tsp->numOTNodes();
     const unsigned int numBstLevels = _tsp->numBSTLevels();
     const unsigned int numInnerBstNodes = static_cast<unsigned int>(
-        (pow(2, numBstLevels - 1) - 1) * numOtNodes
+        (std::pow(2, numBstLevels - 1) - 1) * numOtNodes
     );
     if (innerNodeIndex < numInnerBstNodes) {
         return innerNodeIndex;
     }
 
     const unsigned int numOtLeaves = static_cast<unsigned int>(
-        pow(8, _tsp->numOTLevels() - 1)
+        std::pow(8, _tsp->numOTLevels() - 1)
     );
     const unsigned int numOtInnerNodes = (numOtNodes - numOtLeaves);
 

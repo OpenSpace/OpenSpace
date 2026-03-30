@@ -24,26 +24,26 @@
 
 #include <modules/space/rendering/renderableorbitalkepler.h>
 
+#include <modules/space/kepler.h>
 #include <modules/space/translation/keplertranslation.h>
 #include <modules/space/spacemodule.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/properties/property.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/programobject.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <openspace/properties/property.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/rendering/fadeable.h>
-#include <openspace/rendering/renderable.h>
-#include <modules/space/kepler.h>
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -56,6 +56,8 @@
 #include <thread>
 
 namespace {
+    using namespace openspace;
+
     // The possible values for the _renderingModes property
     enum class RenderMode {
         RenderingModeTrail = 0,
@@ -68,14 +70,14 @@ namespace {
         PositionNormal
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PathInfo = {
+    constexpr Property::PropertyInfo PathInfo = {
         "Path",
         "Path",
         "The file path to the data file to read.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointRenderingModeInfo = {
+    constexpr Property::PropertyInfo PointRenderingModeInfo = {
         "PointRenderingMode",
         "Point Rendering Mode",
         "Controls how the points will be oriented. \"Camera View Direction\" rotates the "
@@ -83,44 +85,44 @@ namespace {
         "(useful for planar displays), and \"Camera Position Normal\" rotates the points "
         "towards the position of the camera (useful for spherical displays, like dome "
         "theaters).",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SegmentQualityInfo = {
+    constexpr Property::PropertyInfo SegmentQualityInfo = {
         "SegmentQuality",
         "Segment quality",
-        "A segment quality value for the orbital trail. A value from 1 (lowest) to "
-        "10 (highest) that controls the number of line segments in the rendering of the "
+        "A segment quality value for the orbital trail. A value from 1 (lowest) to 10 "
+        "(highest) that controls the number of line segments in the rendering of the "
         "orbital trail. This does not control the direct number of segments because "
         "these automatically increase according to the eccentricity of the orbit.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TrailWidthInfo = {
+    constexpr Property::PropertyInfo TrailWidthInfo = {
         "TrailWidth",
         "Trail width",
         "The line width used for the trail, if the selected rendering method includes "
         "lines. If the rendering mode is set to Points, this value is ignored.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointSizeExponentInfo = {
+    constexpr Property::PropertyInfo PointSizeExponentInfo = {
         "PointSizeExponent",
         "Point size exponent",
         "An exponential scale value to set the absolute size of the point.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableMaxSizeInfo = {
+    constexpr Property::PropertyInfo EnableMaxSizeInfo = {
         "EnableMaxSize",
         "Enable max size",
         "If true, the Max Size property will be used as an upper limit for the size of "
         "the point. This reduces the size of the points when approaching them, so that "
         "they stick to a maximum visual size depending on the Max Size value.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MaxSizeInfo = {
+    constexpr Property::PropertyInfo MaxSizeInfo = {
         "MaxSize",
         "Max size",
         "Controls the maximum allowed size for the points, when the max size control "
@@ -128,79 +130,79 @@ namespace {
         "distance to the camera. The larger the value, the larger the points are allowed "
         "to be. In the background, the computations are made to limit the size of the "
         "angle between the CameraToPointMid and CameraToPointEdge vectors.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
+    constexpr Property::PropertyInfo RenderingModeInfo = {
         "Rendering",
         "Rendering mode",
-        "Determines how the trail should be rendered. If 'Trail' is selected, "
-        "only the line part is visible, if 'Point' is selected, only the "
-        "current satellite/debris point is visible.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "Determines how the trail should be rendered. If 'Trail' is selected, only the "
+        "line part is visible, if 'Point' is selected, only the current satellite/debris "
+        "point is visible.",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The RGB main color for the trails and points.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
+    constexpr Property::PropertyInfo TrailFadeInfo = {
         "TrailFade",
         "Trail fade",
         "Determines how fast the trail fades out. A smaller number shows less of the "
         "trail and a larger number shows more.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableOutlineInfo = {
+    constexpr Property::PropertyInfo EnableOutlineInfo = {
         "EnableOutline",
         "Enable point outline",
         "Determines if the points should be rendered with an outline or not.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OutlineColorInfo = {
+    constexpr Property::PropertyInfo OutlineColorInfo = {
         "OutlineColor",
         "Outline color",
         "The color of the outline.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OutlineWidthInfo = {
+    constexpr Property::PropertyInfo OutlineWidthInfo = {
         "OutlineWidth",
         "Outline width",
         "Determines the thickness of the outline. A value of 0 will not show any "
         "outline, while a value of 1 will cover the whole point.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {
+    constexpr Property::PropertyInfo StartRenderIdxInfo = {
         "StartRenderIdx",
         "Contiguous starting index of render",
         "Index of the first object in the block to render (all prior objects will be "
         "ignored). The block of objects to render will be determined by StartRenderIdx "
         "and RenderSize.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderSizeInfo = {
+    constexpr Property::PropertyInfo RenderSizeInfo = {
         "RenderSize",
         "Contiguous size of render block",
         "Number of objects to render sequentially from StartRenderIdx.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ContiguousModeInfo = {
+    constexpr Property::PropertyInfo ContiguousModeInfo = {
         "ContiguousMode",
         "Contiguous mode",
-        "If enabled, the contiguous set of objects starting from StartRenderIdx "
-        "of size RenderSize will be rendered. If disabled, the number of objects "
-        "defined by UpperLimit will rendered from an evenly dispersed sample of the "
-        "full length of the data file.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "If enabled, the contiguous set of objects starting from StartRenderIdx of size "
+        "RenderSize will be rendered. If disabled, the number of objects defined by "
+        "UpperLimit will rendered from an evenly dispersed sample of the full length of "
+        "the data file.",
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableOrbitalKepler)]] Parameters {
@@ -274,17 +276,17 @@ namespace {
         // [[codegen::verbatim(OutlineWidthInfo.description)]]
         std::optional<float> outlineWidth;
     };
-#include "renderableorbitalkepler_codegen.cpp"
 } // namespace
+#include "renderableorbitalkepler_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableOrbitalKepler::Documentation() {
-    return codegen::doc<Parameters>("space_renderableorbitalkepler");
+Documentation RenderableOrbitalKepler::Documentation() {
+    return codegen::doc<Parameters>("space_renderable_orbitalkepler");
 }
 
 RenderableOrbitalKepler::Appearance::Appearance()
-    : properties::PropertyOwner({
+    : PropertyOwner({
         "Appearance",
         "Appearance",
         "Appearance of RenderableOrbitalKepler"
@@ -304,11 +306,11 @@ RenderableOrbitalKepler::Appearance::Appearance()
     renderingModes.addOptions({
         { static_cast<int>(RenderMode::RenderingModeTrail), "Trails" },
         { static_cast<int>(RenderMode::RenderingModePoint), "Points"},
-        { static_cast<int>(RenderMode::RenderingModePointTrail) , "Points and Trails" }
+        { static_cast<int>(RenderMode::RenderingModePointTrail), "Points and Trails" }
     });
     renderingModes.onChange([this]() { isRenderTypeDirty = true; });
     addProperty(renderingModes);
-    color.setViewOption(properties::Property::ViewOptions::Color);
+    color.setViewOption(Property::ViewOptions::Color);
     addProperty(color);
     addProperty(trailWidth);
     addProperty(trailFade);
@@ -317,7 +319,7 @@ RenderableOrbitalKepler::Appearance::Appearance()
     addProperty(enableMaxSize);
     addProperty(maxSize);
     addProperty(enableOutline);
-    outlineColor.setViewOption(properties::Property::ViewOptions::Color);
+    outlineColor.setViewOption(Property::ViewOptions::Color);
     addProperty(outlineColor);
     addProperty(outlineWidth);
 }
@@ -412,10 +414,8 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
 
     _sizeRender = p.renderSize.value_or(0u);
     _sizeRender.onChange([this]() {
-        if (_contiguousMode) {
-            if (_sizeRender > (_nOrbits - _startRenderIdx)) {
-                _startRenderIdx = static_cast<unsigned int>(_nOrbits - _sizeRender);
-            }
+        if (_contiguousMode && _sizeRender > (_nOrbits - _startRenderIdx)) {
+            _startRenderIdx = static_cast<unsigned int>(_nOrbits - _sizeRender);
         }
         _updateDataBuffersAtNextRender = true;
     });
@@ -452,13 +452,13 @@ void RenderableOrbitalKepler::initializeGL() {
     // Program for line rendering
     _trailProgram = SpaceModule::ProgramObjectManager.request(
         "OrbitalKeplerTrails",
-       []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
            return global::renderEngine->buildRenderProgram(
                "OrbitalKeplerTrails",
                absPath("${MODULE_SPACE}/shaders/keplertrails_vs.glsl"),
                absPath("${MODULE_SPACE}/shaders/keplertrails_fs.glsl")
            );
-       }
+        }
    );
 
     // Program for point rendering
@@ -576,17 +576,14 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
             _uniformPointCache.renderOption,
             _appearance.pointRenderOption
         );
-        _pointProgram->setUniform(
-            _uniformPointCache.cameraViewDirectionUp,
-            orthoUp
-        );
+        _pointProgram->setUniform(_uniformPointCache.cameraViewDirectionUp, orthoUp);
         _pointProgram->setUniform(
             _uniformPointCache.cameraViewDirectionRight,
             orthoRight
         );
         _pointProgram->setUniform(
             _uniformPointCache.cameraPositionWorld,
-            data.camera.positionVec3()
+            data.camera.position()
         );
         _pointProgram->setUniform(
             _uniformPointCache.cameraUpWorld,
@@ -655,11 +652,10 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
         );
         _trailProgram->setUniform(_uniformTrailCache.trailFadeExponent, fade);
 
-        // 0.05 is the "alpha value" for which the trail should no longer be rendered.
-        // The value that's compared to 0.05 is calculated in the shader and depends
-        // on the distance from the head of the trail to the part that's being rendered.
-        // Value is passed as uniform due to it being used in both geometry and fragment
-        // shader.
+        // 0.05 is the "alpha value" for which the trail should no longer be rendered. The
+        // value that's compared to 0.05 is calculated in the shader and depends on the
+        // distance from the head of the trail to the part that's being rendered. Value is
+        // passed as uniform due to it being used in both geometry and fragment shader
         _trailProgram->setUniform(_uniformTrailCache.colorFadeCutoffValue, 0.05f);
 
         glLineWidth(_appearance.trailWidth);
@@ -711,7 +707,7 @@ void RenderableOrbitalKepler::updateBuffers() {
             ));
         }
 
-        // Extract subset that starts at _startRenderIdx and contains _sizeRender obejcts
+        // Extract subset that starts at _startRenderIdx and contains _sizeRender objects
         _parameters = std::vector<kepler::Parameters>(
             _parameters.begin() + _startRenderIdx,
             _parameters.begin() + _startRenderIdx + _sizeRender
@@ -816,7 +812,7 @@ void RenderableOrbitalKepler::updateBuffers() {
         }
     );
 
-    // Calculate how many orbits we calculate per thread
+    // Calculate how many orbits we calculate per thread.
     // 1000 per thread (arbitrary) to not create threads that do little to no work
     unsigned int orbitsPerThread = std::max(
         1000,
@@ -851,14 +847,12 @@ void RenderableOrbitalKepler::threadedSegmentCalculations(int threadId,
     ZoneScoped;
 
     const int selection = _appearance.renderingModes;
-    _renderPoints = (
+    _renderPoints =
         selection == static_cast<int>(RenderMode::RenderingModePoint) ||
-        selection == static_cast<int>(RenderMode::RenderingModePointTrail)
-    );
-    _renderTrails = (
+        selection == static_cast<int>(RenderMode::RenderingModePointTrail);
+    _renderTrails =
         selection == static_cast<int>(RenderMode::RenderingModeTrail) ||
-        selection == static_cast<int>(RenderMode::RenderingModePointTrail)
-    );
+        selection == static_cast<int>(RenderMode::RenderingModePointTrail);
 
     const float fade = std::pow(
         _appearance.trailFade.maxValue() - _appearance.trailFade,
@@ -895,15 +889,15 @@ void RenderableOrbitalKepler::threadedSegmentCalculations(int threadId,
             // We can always do this since it has no cost
             _startIndexPoints[i] = startVertexIndex + pointHead;
 
-            // There is a lot of what seems to be "magic numbers" in this section.
-            // They will most likely disappear when we change our method of determining
-            // the trail fade amount is changed.
+            // There is a lot of what seems to be "magic numbers" in this section. They
+            // will most likely disappear when we change our method of determining the
+            // trail fade amount is changed
             if (_renderTrails) {
-                // When rendering a trail we don't know if the trail will pass over
-                // the starting point of the orbit or not. If the trail passes over the
+                // When rendering a trail we don't know if the trail will pass over the
+                // starting point of the orbit or not. If the trail passes over the
                 // starting point of the orbit, then we can't draw the entire trail as
                 // line strip. Instead we need to divide the line strip into two parts,
-                // where p0 and p1 denotes the respctive line strips (parts).
+                // where p0 and p1 denotes the respctive line strips (parts)
                 int p0Start = -1;
                 int p0Length = -1;
                 int p1Start = -1;
@@ -939,7 +933,7 @@ void RenderableOrbitalKepler::threadedSegmentCalculations(int threadId,
 
                         // Special check to make sure we don't end up with segment
                         // sections 1 vertex length. A segment must contain at least 2
-                        // vertices or more.
+                        // vertices or more
                         if (lastVertexIndex - correctVertexIndex == 1) {
                             p1Length = 0;
                             p0Length = correctTrailLength - 1;

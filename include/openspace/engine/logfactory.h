@@ -34,7 +34,7 @@ namespace ghoul {
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 
 /**
  * This function provides the capabilities to create a new ghoul::logging::Log from the
@@ -48,8 +48,8 @@ namespace documentation { struct Documentation; }
  * \param dictionary The dictionary from which the ghoul::logging::Log should be created
  * \return The created ghoul::logging::Log
  *
- * \post The return value will not be `nullptr`
  * \throw ghoul::RuntimeError If there was an error creating the ghoul::logging::Log
+ * \post The return value will not be `nullptr`
  *
  * \see ghoul::logging::TextLog
  * \see ghoul::logging::HTMLLog
@@ -63,7 +63,7 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
  * \return The Documentation that describes an acceptable Dictionary for the method
  *         createLog
  */
-documentation::Documentation LogFactoryDocumentation();
+Documentation LogFactoryDocumentation();
 
 } // namespace openspace
 

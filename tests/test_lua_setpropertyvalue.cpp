@@ -37,7 +37,6 @@
 #include <chrono>
 
 using namespace openspace;
-using namespace properties;
 
 namespace {
     // Offloading this into a separate function as it would otherwise be a lot of
@@ -858,9 +857,7 @@ TEST_CASE("SetPropertyValue: Wildcard Interpolation Multiple", "[setpropertyvalu
         LogMgr.resetMessageCounters();
         defer { LogMgr.resetMessageCounters(); };
 
-        global::scriptEngine->queueScript(
-            "openspace.setPropertyValue('*.p1', 2.0, 1.0)"
-        );
+        global::scriptEngine->queueScript("openspace.setPropertyValue('*.p1', 2.0, 1.0)");
         defer {
             scene->removePropertyInterpolation(&p1);
             scene->removePropertyInterpolation(&p2);
@@ -1011,9 +1008,7 @@ TEST_CASE(
         LogMgr.resetMessageCounters();
         defer { LogMgr.resetMessageCounters(); };
 
-        global::scriptEngine->queueScript(
-            "openspace.setPropertyValue('*.p1', 2.0, 0.0)"
-        );
+        global::scriptEngine->queueScript("openspace.setPropertyValue('*.p1', 2.0, 0.0)");
         defer {
             scene->removePropertyInterpolation(&p1);
             scene->removePropertyInterpolation(&p2);

@@ -26,11 +26,10 @@
 
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
-Mat2Property::Mat2Property(Property::PropertyInfo info, glm::mat2x2 value,
-                           glm::mat2x2 minValue, glm::mat2x2 maxValue,
-                           glm::mat2x2 stepValue)
+Mat2Property::Mat2Property(PropertyInfo info, glm::mat2x2 value, glm::mat2x2 minValue,
+                           glm::mat2x2 maxValue, glm::mat2x2 stepValue)
     : NumericalProperty<glm::mat2x2>(
         std::move(info),
         std::move(value),
@@ -60,4 +59,4 @@ std::string Mat2Property::stringValue() const {
     return formatJson(_value);
 }
 
-}  // namespace openspace::properties
+} // namespace openspace

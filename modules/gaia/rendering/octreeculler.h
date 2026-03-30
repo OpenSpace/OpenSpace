@@ -44,7 +44,7 @@ public:
      * \param viewFrustum This is the view space in normalized device coordinates space.
      *        Hence it is an axis aligned bounding box and not a real frustum
      */
-    explicit OctreeCuller(globebrowsing::AABB3 viewFrustum);
+    explicit OctreeCuller(AABB3 viewFrustum);
 
     ~OctreeCuller() = default;
 
@@ -65,8 +65,8 @@ private:
      */
     void createNodeBounds(const std::vector<glm::dvec4>& corners, const glm::dmat4& mvp);
 
-    const globebrowsing::AABB3 _viewFrustum;
-    globebrowsing::AABB3 _nodeBounds;
+    const AABB3 _viewFrustum;
+    AABB3 _nodeBounds;
 };
 
 } // namespace openspace

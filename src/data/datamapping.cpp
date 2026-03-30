@@ -35,6 +35,8 @@
 #include <algorithm>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderablePolygonCloud";
 
     constexpr std::string_view DefaultX = "x";
@@ -44,8 +46,8 @@ namespace {
     enum class PositionColumn { X, Y, Z };
 
     bool checkPosColumnInternal(PositionColumn columnCase, const std::string& c,
-                         const std::optional<openspace::dataloader::DataMapping>& mapping,
-                             const std::string_view defaultValue)
+                                const std::optional<dataloader::DataMapping>& mapping,
+                                const std::string_view defaultValue)
     {
         std::string testColumn = c;
         std::string column = std::string(defaultValue);
@@ -104,52 +106,52 @@ namespace {
     // SPECK files, as for those we always expect the first three values per row to
     // specify the XYZ position
     struct [[codegen::Dictionary(DataMapping)]] Parameters {
-        // Specifies the column name for the x coordinate
+        // Specifies the column name for the x coordinate.
         std::optional<std::string> x;
 
-        // Specifies the column name for the y coordinate
+        // Specifies the column name for the y coordinate.
         std::optional<std::string> y;
 
-        // Specifies the column name for the z coordinate
+        // Specifies the column name for the z coordinate.
         std::optional<std::string> z;
 
         // Specifies the column name for the optional name column. Not valid for SPECK
-        // files, where the name is given by the comment at the end of each line
+        // files, where the name is given by the comment at the end of each line.
         std::optional<std::string> name;
 
-        // Specifies a column name for a column that has the data for which texture to
-        // use for each point (given as an integer index). If included, a texture map
-        // file need to be included as well
+        // Specifies a column name for a column that has the data for which texture to use
+        // for each point (given as an integer index). If included, a texture map file
+        // need to be included as well.
         std::optional<std::string> textureColumn;
 
-        // A file where each line contains an integer index and an image file name.
-        // Not valid for SPECK files, which includes this information as part of its
-        // data format. This map will be used to map the data in the TextureColumn to
-        // an image file to use for rendering the points. Note that only the files with
-        // indices that are used in the dataset will actually be loaded
+        // A file where each line contains an integer index and an image file name. Not
+        // valid for SPECK files, which includes this information as part of its data
+        // format. This map will be used to map the data in the TextureColumn to an image
+        // file to use for rendering the points. Note that only the files with indices
+        // that are used in the dataset will actually be loaded.
         std::optional<std::filesystem::path> textureMapFile;
 
         // Specifies whether to do case sensitive checks when reading column names.
-        // Default is not to, so that 'X' and 'x' are both valid column names for the
-        // x position column, for example
+        // Default is not to, so that 'X' and 'x' are both valid column names for the x
+        // position column, for example.
         std::optional<bool> caseSensitive;
 
         // Specifies a value that, when read from the file, should be interpreted as 'no
         // value', i.e. a missing data value. Note that the same value is used across all
-        // data columns
+        // data columns.
         std::optional<float> missingDataValue;
 
         // A list of column names, of columns that will not be loaded into the dataset.
-        // Note that not all data formats support this. E.g. SPECK files do not
+        // Note that not all data formats support this. E.g. SPECK files do not.
         std::optional<std::vector<std::string>> excludeColumns;
     };
-#include "datamapping_codegen.cpp"
 } // namespace
+#include "datamapping_codegen.cpp"
 
 namespace openspace::dataloader {
 
-documentation::Documentation DataMapping::Documentation() {
-    return codegen::doc<Parameters>("dataloader_datamapping");
+Documentation DataMapping::Documentation() {
+    return codegen::doc<Parameters>("core_dataloader_datamapping");
 }
 
 DataMapping DataMapping::createFromDictionary(const ghoul::Dictionary& dictionary) {
@@ -157,20 +159,17 @@ DataMapping DataMapping::createFromDictionary(const ghoul::Dictionary& dictionar
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    DataMapping result;
-
-    result.xColumnName = p.x;
-    result.yColumnName = p.y;
-    result.zColumnName = p.z;
-    result.nameColumn = p.name;
-    result.textureColumn = p.textureColumn;
-    result.textureMap = p.textureMapFile;
-
-    result.missingDataValue = p.missingDataValue;
-
+    DataMapping result = {
+        .xColumnName = p.x,
+        .yColumnName = p.y,
+        .zColumnName = p.z,
+        .nameColumn = p.name,
+        .textureColumn = p.textureColumn,
+        .textureMap = p.textureMapFile,
+        .missingDataValue = p.missingDataValue,
+    };
     result.isCaseSensitive = p.caseSensitive.value_or(result.isCaseSensitive);
     result.excludeColumns = p.excludeColumns.value_or(result.excludeColumns);
-
     return result;
 }
 

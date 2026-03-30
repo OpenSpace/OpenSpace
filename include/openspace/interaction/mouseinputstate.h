@@ -29,17 +29,17 @@
 #include <ghoul/glm.h>
 #include <vector>
 
-namespace openspace::interaction {
+namespace openspace {
 
-// This class represents the global input state of interaction devices
+/**
+ * This class represents the global input state of interaction devices.
+ */
 class MouseInputState {
 public:
-    // Callback functions
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double mouseX, double mouseY);
     void mouseScrollWheelCallback(double mouseScrollDelta);
 
-    // Accessors
     const std::vector<MouseButton>& pressedMouseButtons() const;
     glm::dvec2 mousePosition() const;
     double mouseScrollDelta() const;
@@ -52,6 +52,6 @@ private:
     double _mouseScrollDelta = 0.0;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___MOUSEINPUTSTATE___H__

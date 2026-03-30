@@ -26,7 +26,7 @@
 
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 ULongProperty::ULongProperty(Property::PropertyInfo info, unsigned long value,
                              unsigned long minValue, unsigned long maxValue,
@@ -60,4 +60,4 @@ std::string ULongProperty::stringValue() const {
     return formatJson(_value);
 }
 
-} // namespace openspace::properties
+} // namespace openspace

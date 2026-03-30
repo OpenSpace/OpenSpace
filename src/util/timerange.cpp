@@ -31,19 +31,19 @@
 
 namespace {
     struct [[codegen::Dictionary(TimeRange)]] Parameters {
-        // The start date of the time range
+        // The start date of the time range.
         std::string start [[codegen::annotation("A string representing a valid date")]];
 
-        // The end date of the time range
+        // The end date of the time range.
         std::string end [[codegen::annotation("A string representing a valid date")]];
     };
-#include "timerange_codegen.cpp"
 } // namespace
+#include "timerange_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation TimeRange::Documentation() {
-    return codegen::doc<Parameters>("core_util_timerange");
+Documentation TimeRange::Documentation() {
+    return codegen::doc<Parameters>("core_timerange");
 }
 
 TimeRange::TimeRange(double startTime, double endTime)

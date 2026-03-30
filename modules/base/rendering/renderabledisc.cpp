@@ -38,36 +38,38 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "The path to a file with a one-dimensional texture to be used for the disc "
-        "color. The leftmost color will be innermost color when rendering the disc, "
-        "and the rightmost color will be the outermost color.",
-        openspace::properties::Property::Visibility::User
+        "color. The leftmost color will be innermost color when rendering the disc, and "
+        "the rightmost color will be the outermost color.",
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "The outer radius of the disc, in meters.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo WidthInfo = {
+    constexpr Property::PropertyInfo WidthInfo = {
         "Width",
         "Width",
         "The disc width, given as a ratio of the full disc radius. For example, a value "
         "of 1 results in a full circle, while 0.5 results in a disc where the inner "
         "radius is half of the full radius.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This renderable can be used to create a circular disc that is colored based on a
     // one-dimensional texture.
     //
-    // The disc will be filled i.e. a full circle, per default, but may also be made
-    // with a hole in the center using the `Width` parameter.
+    // The disc will be filled i.e. a full circle, per default, but may also be made with
+    // a hole in the center using the `Width` parameter.
     struct [[codegen::Dictionary(RenderableDisc)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::filesystem::path texture;
@@ -78,12 +80,12 @@ namespace {
         // [[codegen::verbatim(WidthInfo.description)]]
         std::optional<float> width [[codegen::inrange(0.0, 1.0)]];
     };
-#include "renderabledisc_codegen.cpp"
 } // namespace
+#include "renderabledisc_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableDisc::Documentation() {
+Documentation RenderableDisc::Documentation() {
     return codegen::doc<Parameters>("base_renderable_disc");
 }
 
@@ -92,7 +94,7 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
     , _texturePath(TextureInfo)
     , _size(SizeInfo, 1.f, 0.001f, 1e13f)
     , _width(WidthInfo, 1.f, 0.001f, 1.f)
-    , _plane(_size)
+    , _plane(glm::vec2(_size))
     , _planeIsDirty(true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -130,8 +132,6 @@ void RenderableDisc::initializeGL() {
     initializeShader();
 
     _texture->loadFromFile(_texturePath.value());
-    _texture->uploadToGpu();
-
     _plane.initialize();
 }
 
@@ -169,7 +169,6 @@ void RenderableDisc::render(const RenderData& data, RendererTasks&) {
 
     _shader->deactivate();
 
-    // Restores GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();
@@ -182,7 +181,7 @@ void RenderableDisc::update(const UpdateData&) {
     }
 
     if (_planeIsDirty) [[unlikely]] {
-        _plane.updateSize(planeSize());
+        _plane.updateSize(glm::vec2(planeSize()));
         _planeIsDirty = false;
     }
 

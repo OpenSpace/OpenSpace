@@ -50,7 +50,6 @@ void main() {
   out_data.starBrightness = clamp(float(8000.0 * Parsec / distanceToStar), 0.0, 1.0);
 
   dvec4 dpos = dvec4(out_data.position) * dvec4(8.0, 8.0, 8.0, 1.0);
-  dpos.xyz *= 8.0;
   dpos = modelMatrix * dpos;
   dpos /= Parsec;
 

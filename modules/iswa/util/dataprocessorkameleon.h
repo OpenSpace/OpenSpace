@@ -29,22 +29,20 @@
 
 namespace openspace {
 
-namespace properties { class SelectionProperty; }
 class KameleonWrapper;
+class SelectionProperty;
 
 class DataProcessorKameleon : public DataProcessor {
 public:
-    DataProcessorKameleon();
-    virtual ~DataProcessorKameleon();
+    virtual ~DataProcessorKameleon() = default;
 
     std::vector<std::string> readMetadata(const std::string& path,
         glm::size3_t& dimensions) override;
 
-    void addDataValues(const std::string& data,
-        properties::SelectionProperty& dataOptions) override;
+    void addDataValues(const std::string& data, SelectionProperty& dataOptions) override;
 
-    std::vector<float*> processData(const std::string& path,
-        properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) override;
+    std::vector<std::vector<float>> processData(const std::string& path,
+        SelectionProperty& dataOptions, glm::size3_t& dimensions) override;
 
     void setSlice(float slice);
 

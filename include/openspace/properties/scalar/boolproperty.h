@@ -27,15 +27,14 @@
 
 #include <openspace/properties/templateproperty.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 /**
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type `bool`.
+ * This class is a concrete implementation of TemplateProperty with the type `bool`.
  */
 class BoolProperty : public TemplateProperty<bool> {
 public:
-    explicit BoolProperty(Property::PropertyInfo info, bool value = false);
+    explicit BoolProperty(PropertyInfo info, bool value = false);
 
     std::string_view className() const override final;
     ghoul::lua::LuaTypes typeLua() const override final;
@@ -49,6 +48,6 @@ private:
     bool toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___BOOLPROPERTY___H__

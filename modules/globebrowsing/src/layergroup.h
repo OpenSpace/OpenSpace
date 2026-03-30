@@ -33,14 +33,14 @@
 
 namespace ghoul { class Dictionary; }
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 class Layer;
 
 /**
  * Convenience class for dealing with multiple `Layer`s.
  */
-struct LayerGroup : public properties::PropertyOwner {
+struct LayerGroup : public PropertyOwner {
     explicit LayerGroup(layers::Group group);
 
     void initialize();
@@ -54,22 +54,24 @@ struct LayerGroup : public properties::PropertyOwner {
     Layer* addLayer(const ghoul::Dictionary& layerDict);
     void deleteLayer(const std::string& layerName);
 
-    // The same as `deleteLayer` but executed later before the next frame
+    /**
+     * The same as `deleteLayer` but executed later before the next frame.
+     */
     void scheduleDeleteLayer(const std::string& layerName);
     void moveLayer(int oldPosition, int newPosition);
 
     /**
-     * \return const vector of all layers
+     * \return Vector of all layers
      */
     std::vector<Layer*> layers() const;
 
     /**
-     * \return const vector of all active layers
+     * \return Const vector of all active layers
      */
     const std::vector<Layer*>& activeLayers() const;
 
     /**
-     * \return the size of the pile to be used in rendering of this layer
+     * \return The size of the pile to be used in rendering of this layer
      */
     int pileSize() const;
 
@@ -86,10 +88,10 @@ private:
 
     std::vector<std::string> _layersToDelete;
 
-    properties::BoolProperty _levelBlendingEnabled;
+    BoolProperty _levelBlendingEnabled;
     std::function<void(Layer*)> _onChangeCallback;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__

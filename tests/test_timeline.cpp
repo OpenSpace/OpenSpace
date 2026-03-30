@@ -28,16 +28,18 @@
 #include <openspace/util/timeline.h>
 #include <openspace/util/time.h>
 
+using namespace openspace;
+
 TEST_CASE("TimeLine: Add and Count Keyframes", "[timeline]") {
-    openspace::Timeline<openspace::Time> timeline;
-    timeline.addKeyframe(0.0, openspace::Time::now());
-    timeline.addKeyframe(1.0, openspace::Time::now());
+    Timeline<Time> timeline;
+    timeline.addKeyframe(0.0, Time::now());
+    timeline.addKeyframe(1.0, Time::now());
 
     CHECK(timeline.nKeyframes() == 2);
 }
 
 TEST_CASE("TimeLine: Query Keyframes", "[timeline]") {
-    openspace::Timeline<float> timeline;
+    Timeline<float> timeline;
     timeline.addKeyframe(0.0, 0.f);
     timeline.addKeyframe(1.0, 1.f);
 
@@ -53,7 +55,7 @@ TEST_CASE("TimeLine: Query Keyframes", "[timeline]") {
 }
 
 TEST_CASE("TimeLine: Remove Keyframes", "[timeline]") {
-    openspace::Timeline<float> timeline;
+    Timeline<float> timeline;
     timeline.addKeyframe(0.0, 0.f);
     timeline.addKeyframe(1.0, 1.f);
 
@@ -77,7 +79,7 @@ TEST_CASE("TimeLine: Remove Keyframes", "[timeline]") {
 }
 
 TEST_CASE("TimeLine: Remove Keyframes In Range", "[timeline]") {
-    openspace::Timeline<float> timeline;
+    Timeline<float> timeline;
     timeline.addKeyframe(0.0, 0.f);
     timeline.addKeyframe(1.0, 1.f);
     timeline.addKeyframe(2.0, 2.f);

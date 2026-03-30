@@ -34,28 +34,29 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo IntensityInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo IntensityInfo = {
         "Intensity",
         "Intensity",
         "The intensity of this light source.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NodeInfo = {
+    constexpr Property::PropertyInfo NodeInfo = {
         "Node",
         "Node",
         "The identifier of the scene graph node to follow.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    // This `LightSource` type represents a light source placed at the position of a
-    // scene graph node. That is, the direction of the light will follow the position
-    // of an existing object in the scene. It will also update dynamically as the
-    // object moves.
+    // This `LightSource` type represents a light source placed at the position of a scene
+    // graph node. That is, the direction of the light will follow the position of an
+    // existing object in the scene. It will also update dynamically as the object moves.
     //
-    // Note that the brightness of the light from the light source does not depend on
-    // the distance between the two scene graph nodes. Only the `Intensity` value has
-    // an impact on the brightness.
+    // Note that the brightness of the light from the light source does not depend on the
+    // distance between the two scene graph nodes. Only the `Intensity` value has an
+    // impact on the brightness.
     struct [[codegen::Dictionary(SceneGraphLightSource)]] Parameters {
         // [[codegen::verbatim(IntensityInfo.description)]]
         std::optional<float> intensity;
@@ -63,13 +64,13 @@ namespace {
         // [[codegen::verbatim(NodeInfo.description)]]
         std::string node [[codegen::identifier()]];
     };
-#include "scenegraphlightsource_codegen.cpp"
 } // namespace
+#include "scenegraphlightsource_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation SceneGraphLightSource::Documentation() {
-    return codegen::doc<Parameters>("base_scene_graph_light_source");
+Documentation SceneGraphLightSource::Documentation() {
+    return codegen::doc<Parameters>("base_lightsource_scenegraph");
 }
 
 SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary)

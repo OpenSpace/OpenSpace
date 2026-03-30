@@ -31,12 +31,11 @@
 #include <string>
 
 namespace ghoul { class Dictionary; }
-namespace openspace {
-    namespace documentation { struct Documentation; }
-    struct CameraPose;
-} // namespace openspace
 
-namespace openspace::interaction {
+namespace openspace {
+
+struct CameraPose;
+struct Documentation;
 
 struct NavigationState {
     NavigationState() = default;
@@ -50,7 +49,7 @@ struct NavigationState {
     CameraPose cameraPose() const;
     ghoul::Dictionary dictionary() const;
     nlohmann::json toJson() const;
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     std::string anchor;
     std::string aim;
@@ -63,6 +62,6 @@ struct NavigationState {
     std::optional<double> timestamp;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___NAVIGATIONSTATE___H__

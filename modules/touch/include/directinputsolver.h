@@ -43,7 +43,7 @@ class DirectInputSolver {
 public:
     /**
      * Stores the selected node, the cursor ID as well as the surface coordinates the
-     * cursor touched
+     * cursor touched.
      */
     struct SelectedBody {
         size_t id = 0;
@@ -73,7 +73,7 @@ private:
     LMstat _lmstat;
 };
 
-} // openspace namespace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_TOUCH___DIRECTINPUT_SOLVER___H__
 

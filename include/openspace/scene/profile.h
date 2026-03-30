@@ -38,9 +38,9 @@
 
 namespace openspace {
 
-namespace interaction { struct NavigationState; }
-namespace properties { class PropertyOwner; }
-namespace scripting { struct LuaLibrary; }
+struct LuaLibrary;
+struct NavigationState;
+class PropertyOwner;
 
 class Profile {
 public:
@@ -52,7 +52,6 @@ public:
         Severity severity;
     };
 
-    // Version
     struct Version {
         int major = 0;
         int minor = 0;
@@ -167,8 +166,8 @@ public:
      * Saves all current settings, starting from the profile that was loaded at startup,
      * and all of the property & asset changes that were made since startup.
      */
-    void saveCurrentSettingsToProfile(const properties::PropertyOwner& rootOwner,
-        std::string currentTime, interaction::NavigationState navState);
+    void saveCurrentSettingsToProfile(const PropertyOwner& rootOwner,
+        std::string currentTime, NavigationState navState);
 
     /**
      * Adds a new asset and checks for duplicates unless the `ignoreUpdates` member is
@@ -176,7 +175,9 @@ public:
      */
     void addAsset(const std::string& path);
 
-    /// Removes an asset unless the `ignoreUpdates` member is set to `true`
+    /**
+     * Removes an asset unless the `ignoreUpdates` member is set to `true`.
+     */
     void removeAsset(const std::string& path);
 
     static constexpr Version CurrentVersion = Version{ 1, 4 };
@@ -203,7 +204,7 @@ public:
      *
      * \return The Lua library that contains all Lua functions available for profiles
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 };
 
 } // namespace openspace

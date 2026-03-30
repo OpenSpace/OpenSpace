@@ -29,15 +29,15 @@
 
 #include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 /**
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type `unsigned short`.
+ * This class is a concrete implementation of TemplateProperty with the type
+ * `unsigned short`.
  */
 class UShortProperty : public NumericalProperty<unsigned short> {
 public:
-    explicit UShortProperty(Property::PropertyInfo info, unsigned short value = 0,
+    explicit UShortProperty(PropertyInfo info, unsigned short value = 0,
         unsigned short minValue = std::numeric_limits<unsigned short>::lowest(),
         unsigned short maxValue = std::numeric_limits<unsigned short>::max(),
         unsigned short stepValue = 1);
@@ -54,6 +54,6 @@ private:
     unsigned short toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___USHORTPROPERTY___H__

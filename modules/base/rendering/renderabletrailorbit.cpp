@@ -37,6 +37,41 @@
 #include <limits>
 #include <numeric>
 
+namespace {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo PeriodInfo = {
+        "Period",
+        "Period (in days)",
+        "The objects period, i.e. the length of its orbit around the parent object given "
+        "in (Earth) days. In the case of Earth, this would be a sidereal year "
+        "(=365.242 days). If this values is specified as multiples of the period, it is "
+        "possible to show the effects of precession.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo ResolutionInfo = {
+        "Resolution",
+        "Number of samples along the orbit",
+        "The number of samples along the orbit. This determines the resolution of the "
+        "trail; the tradeoff being that a higher resolution is able to resolve more "
+        "detail, but will take more resources while rendering, too. The higher, the "
+        "smoother the trail, but also more memory will be used.",
+        Property::Visibility::AdvancedUser
+    };
+
+    struct [[codegen::Dictionary(RenderableTrailOrbit)]] Parameters {
+        // [[codegen::verbatim(PeriodInfo.description)]]
+        double period;
+
+        // [[codegen::verbatim(ResolutionInfo.description)]]
+        int resolution;
+    };
+} // namespace
+#include "renderabletrailorbit_codegen.cpp"
+
+namespace openspace {
+
 // This class is using a VBO ring buffer + a constantly updated point as follows:
 // Structure of the array with a _resolution of 16. FF denotes the floating position that
 // is updated every frame:
@@ -80,46 +115,12 @@
 // Rendering 16 elements will 'generate' the index buffer:
 // 10 11 12 13 14 15 00 01 02 03 04 05 06 07 08 09
 //
-//
 // NB: This method was implemented without a ring buffer before by manually shifting the
-// items in memory as was shown to be much slower than the current system.   ---abock
+// items in memory as was shown to be much slower than the current system         ---abock
 
-namespace {
-    constexpr openspace::properties::Property::PropertyInfo PeriodInfo = {
-        "Period",
-        "Period (in days)",
-        "The objects period, i.e. the length of its orbit around the parent object given "
-        "in (Earth) days. In the case of Earth, this would be a sidereal year "
-        "(=365.242 days). If this values is specified as multiples of the period, it is "
-        "possible to show the effects of precession.",
-        openspace::properties::Property::Visibility::User
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
-        "Resolution",
-        "Number of samples along the orbit",
-        "The number of samples along the orbit. This determines the resolution of the "
-        "trail; the tradeoff being that a higher resolution is able to resolve more "
-        "detail, but will take more resources while rendering, too. The higher, the "
-        "smoother the trail, but also more memory will be used.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    struct [[codegen::Dictionary(RenderableTrailOrbit)]] Parameters {
-        // [[codegen::verbatim(PeriodInfo.description)]]
-        double period;
-
-        // [[codegen::verbatim(ResolutionInfo.description)]]
-        int resolution;
-    };
-#include "renderabletrailorbit_codegen.cpp"
-} // namespace
-
-namespace openspace {
-
-documentation::Documentation RenderableTrailOrbit::Documentation() {
+Documentation RenderableTrailOrbit::Documentation() {
     return codegen::doc<Parameters>(
-        "base_renderable_renderabletrailorbit",
+        "base_renderable_trailorbit",
         RenderableTrail::Documentation()
     );
 }
@@ -188,9 +189,9 @@ void RenderableTrailOrbit::deinitializeGL() {
 
 void RenderableTrailOrbit::update(const UpdateData& data) {
     // Overview:
-    // 1. Update trails
-    // 2. Update floating position
-    // 3. Determine which parts of the array to upload and upload the data
+    //   1. Update trails
+    //   2. Update floating position
+    //   3. Determine which parts of the array to upload and upload the data
 
     // 1
     // Update the trails; the report contains whether any of the other values has been
@@ -211,8 +212,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     // 3
     if (!report.permanentPointsNeedUpdate) {
         if (report.floatingPointNeedsUpdate) {
-            // If no other values have been touched, we only need to upload the
-            // floating value
+            // If no other values have been touched, we only need to upload the floating
+            // value
             glNamedBufferSubData(
                 _primaryRenderInformation._vbo,
                 _primaryRenderInformation.first * sizeof(TrailVBOLayout<float>),
@@ -234,8 +235,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             );
 
             if (_indexBufferDirty) {
-                // We only need to upload the index buffer if it has been invalidated
-                // by changing the number of values we want to represent
+                // We only need to upload the index buffer if it has been invalidated by
+                // changing the number of values we want to represent
                 glNamedBufferData(
                     _primaryRenderInformation._ibo,
                     _indexArray.size() * sizeof(unsigned int),
@@ -246,8 +247,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             }
         }
         else {
-            // The lambda expression that will upload parts of the array starting at
-            // begin and containing length number of elements
+            // The lambda expression that will upload parts of the array starting at begin
+            // and containing length number of elements
             auto upload = [this](int begin, int length) {
                 glNamedBufferSubData(
                     _primaryRenderInformation._vbo,
@@ -260,7 +261,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             // Only update the changed ones
             // Since we are using a ring buffer, the number of updated needed might be
             // bigger than our current points, which means we have to split the upload
-            // into two calls.
+            // into two calls
             if (report.nUpdated > 0) {
                 // deltaT is positive, so the pointer is moving backwards and update has
                 // to happen towards the front
@@ -288,7 +289,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
                 }
             }
             else {
-                // deltaT is negative, so the pointer is moving forwards
+                // `deltaT` is negative, so the pointer is moving forwards
 
                 // The current index
                 const int i = _primaryRenderInformation.first;
@@ -304,8 +305,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
                 else {
                     // The current index is too close to the beginning of the array, so we
                     // need to split the upload into two parts:
-                    // 1. from the beginning of the array to the current index
-                    // 2. filling the back of the array with the rest
+                    //   1. From the beginning of the array to the current index
+                    //   2. Filling the back of the array with the rest
                     const int b = n - (i + 1);
                     upload(0, i + 1); // 1
                     upload(s-b, b);   // 2
@@ -327,7 +328,11 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     constexpr double Epsilon = 1e-7;
     // When time stands still (at the iron hill), we don't need to perform any work
     if (std::abs(data.time.j2000Seconds() - _previousTime) < Epsilon) {
-        return { false, false, 0 };
+        return {
+            .floatingPointNeedsUpdate = false,
+            .permanentPointsNeedUpdate = false,
+            .nUpdated = 0
+        };
     }
 
     using namespace std::chrono;
@@ -344,14 +349,22 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     // intervals
 
     if (std::abs(delta) < Epsilon) {
-        return { false, false, 0 };
+        return {
+            .floatingPointNeedsUpdate = false,
+            .permanentPointsNeedUpdate = false,
+            .nUpdated = 0
+        };
     }
 
     if (delta > 0.0) {
         // Check whether we need to drop a new permanent point. This is only the case if
         // enough (> secondsPerPoint) time has passed since the last permanent point
         if (std::abs(delta) < secondsPerPoint) {
-            return { true, false, 0 };
+            return {
+                .floatingPointNeedsUpdate = true,
+                .permanentPointsNeedUpdate = false,
+                .nUpdated = 0
+            };
         }
 
         // See how many points we need to drop
@@ -385,7 +398,11 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         // future
         _firstPointTime += nNewPoints * secondsPerPoint;
 
-        return { false, true, static_cast<int>(nNewPoints) };
+        return {
+            .floatingPointNeedsUpdate = false,
+            .permanentPointsNeedUpdate = true,
+            .nUpdated = static_cast<int>(nNewPoints)
+        };
     }
     else {
         // See how many new points needs to be generated. Delta is negative, so we need
@@ -397,7 +414,11 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         // array, it is faster to regenerate the entire array
         if (nNewPoints >= _resolution) {
             fullSweep(data.time.j2000Seconds());
-            return { false, true, UpdateReport::All };
+            return {
+                .floatingPointNeedsUpdate = false,
+                .permanentPointsNeedUpdate = true,
+                .nUpdated = UpdateReport::All
+            };
         }
 
         for (int i = 0; i < nNewPoints; i++) {
@@ -423,7 +444,11 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         // The previously youngest point has become nNewPoints steps older
         _lastPointTime -= nNewPoints * secondsPerPoint;
 
-        return { false, true, static_cast<int>(-nNewPoints) };
+        return {
+            .floatingPointNeedsUpdate = false,
+            .permanentPointsNeedUpdate = true,
+            .nUpdated = static_cast<int>(-nNewPoints)
+        };
     }
 }
 
@@ -446,7 +471,7 @@ void RenderableTrailOrbit::fullSweep(double time) {
     using namespace std::chrono;
     const double periodSeconds = _period * duration_cast<seconds>(hours(24)).count();
     const double secondsPerPoint = periodSeconds / (_resolution - 1);
-    // starting at 1 because the first position is a floating current one
+    // Starting at 1 because the first position is a floating current one
     for (int i = 1; i < _resolution; i++) {
         const glm::vec3 p = translationPosition(Time(time));
         _vertexArray[i] = { p.x, p.y, p.z };

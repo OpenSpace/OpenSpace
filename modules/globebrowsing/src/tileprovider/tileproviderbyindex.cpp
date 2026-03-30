@@ -83,13 +83,13 @@ namespace {
         // not the user.
         int layerGroupID [[codegen::private()]];
     };
-#include "tileproviderbyindex_codegen.cpp"
 } // namespace
+#include "tileproviderbyindex_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation TileProviderByIndex::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_tileproviderbyindex");
+Documentation TileProviderByIndex::Documentation() {
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_byindex");
 }
 
 TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
@@ -175,4 +175,4 @@ float TileProviderByIndex::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

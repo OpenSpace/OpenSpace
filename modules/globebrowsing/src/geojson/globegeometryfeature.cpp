@@ -30,6 +30,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
@@ -39,16 +40,15 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-#include <geos/util/GEOSException.h>
-#include <geos/triangulate/polygon/ConstrainedDelaunayTriangulator.h>
-#include <geos/util/IllegalStateException.h>
-#include <openspace/util/geodetic.h>
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/LinearRing.h>
 #include <geos/geom/Polygon.h>
+#include <geos/triangulate/polygon/ConstrainedDelaunayTriangulator.h>
 #include <geos/triangulate/tri/Tri.h>
 #include <geos/triangulate/tri/TriList.h>
+#include <geos/util/GEOSException.h>
+#include <geos/util/IllegalStateException.h>
 #include <algorithm>
 #include <array>
 #include <cstdlib>
@@ -64,13 +64,16 @@ namespace {
     constexpr std::chrono::milliseconds HeightUpdateInterval(10000);
 } // namespace
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 GlobeGeometryFeature::GlobeGeometryFeature(const RenderableGlobe& globe,
                                            GeoJsonProperties& defaultProperties,
                                            GeoJsonOverrideProperties& overrideProperties)
     : _globe(globe)
-    , _properties({ defaultProperties, overrideProperties })
+    , _properties({
+        .defaultValues = defaultProperties,
+        .overrideValues = overrideProperties
+    })
     , _lastHeightUpdateTime(std::chrono::system_clock::now())
 {}
 
@@ -83,7 +86,7 @@ void GlobeGeometryFeature::setOffsets(glm::vec3 offsets) {
 }
 
 void GlobeGeometryFeature::initializeGL(ghoul::opengl::ProgramObject* pointsProgram,
-                                   ghoul::opengl::ProgramObject* linesAndPolygonsProgram)
+                                    ghoul::opengl::ProgramObject* linesAndPolygonsProgram)
 {
     _pointsProgram = pointsProgram;
     _linesAndPolygonsProgram = linesAndPolygonsProgram;
@@ -105,7 +108,7 @@ void GlobeGeometryFeature::deinitializeGL() {
 
 bool GlobeGeometryFeature::isReady() const {
     const bool shadersAreReady = _linesAndPolygonsProgram && _pointsProgram;
-    const bool textureIsReady = (!_hasTexture) || _pointTexture;
+    const bool textureIsReady = !_hasTexture || _pointTexture;
     return shadersAreReady && textureIsReady;
 }
 
@@ -123,8 +126,8 @@ void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
     GlobeBrowsingModule* m = global::moduleEngine->module<GlobeBrowsingModule>();
 
     if (!isInitializeStep && _properties.hasOverrideTexture()) {
-        // Here we don't necessarily have to update, since it should have been
-        // created at initialization. Do nothing
+        // Here we don't necessarily have to update, since it should have been created at
+        // initialization. Do nothing
         return;
     }
     else if (!_properties.pointTexture().empty()) {
@@ -151,7 +154,6 @@ void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
     if (std::filesystem::is_regular_file(texture)) {
         _hasTexture = true;
         _pointTexture->loadFromFile(texture);
-        _pointTexture->uploadToGpu();
     }
     else {
         LERROR(std::format(
@@ -174,37 +176,38 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
     switch (geo->getGeometryTypeId()) {
         case geos::geom::GEOS_POINT:
         case geos::geom::GEOS_MULTIPOINT: {
-            _geoCoordinates.push_back(geometryhelper::geometryCoordsAsGeoVector(geo));
+            _geoCoordinates.push_back(geometryCoordsAsGeoVector(geo));
             _type = GeometryType::Point;
             break;
         }
         case geos::geom::GEOS_LINESTRING: {
-            _geoCoordinates.push_back(geometryhelper::geometryCoordsAsGeoVector(geo));
+            _geoCoordinates.push_back(geometryCoordsAsGeoVector(geo));
             _type = GeometryType::LineString;
             break;
         }
         case geos::geom::GEOS_POLYGON: {
             try {
+                using geos::triangulate::polygon::ConstrainedDelaunayTriangulator;
+
                 const auto p = dynamic_cast<const geos::geom::Polygon*>(geo);
 
                 // Triangles
                 // Note that Constrained Delaunay triangulation supports polygons with
                 // holes :)
-                std::vector<geos::geom::Coordinate> triCoords;
                 geos::triangulate::tri::TriList<geos::triangulate::tri::Tri> triangles;
-                using geos::triangulate::polygon::ConstrainedDelaunayTriangulator;
                 ConstrainedDelaunayTriangulator::triangulatePolygon(p, triangles);
 
+                std::vector<geos::geom::Coordinate> triCoords;
                 triCoords.reserve(3 * triangles.size());
 
-                // Add three coordinates per triangle. Note flipped winding order
-                // (want counter clockwise, but GEOS provides clockwise)
+                // Add three coordinates per triangle. Note flipped winding order (want
+                // counter clockwise, but GEOS provides clockwise)
                 for (const geos::triangulate::tri::Tri* t : triangles) {
                     triCoords.push_back(t->getCoordinate(0));
                     triCoords.push_back(t->getCoordinate(2));
                     triCoords.push_back(t->getCoordinate(1));
                 }
-                _triangleCoordinates = geometryhelper::coordsToGeodetic(triCoords);
+                _triangleCoordinates = coordsToGeodetic(triCoords);
 
                 // Boundaries / Lines
 
@@ -214,7 +217,7 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
 
                 const geos::geom::LinearRing* outerRing = pNormalized->getExteriorRing();
                 const std::vector<Geodetic3> outerBoundsGeoCoords =
-                    geometryhelper::geometryCoordsAsGeoVector(outerRing);
+                    geometryCoordsAsGeoVector(outerRing);
 
                 if (!outerBoundsGeoCoords.empty()) {
                     const int nHoles = static_cast<int>(
@@ -230,7 +233,7 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
                         const geos::geom::LinearRing* hole =
                             pNormalized->getInteriorRingN(i);
                         std::vector<Geodetic3> ringGeoCoords =
-                            geometryhelper::geometryCoordsAsGeoVector(hole);
+                            geometryCoordsAsGeoVector(hole);
                         _geoCoordinates.push_back(std::move(ringGeoCoords));
                     }
                 }
@@ -265,11 +268,11 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
     // Compute reference positions to use for checking if height map changes
     geos::geom::Coordinate centroid;
     geo->getCentroid(centroid);
-    Geodetic3 geoCentroid = geometryhelper::coordsToGeodetic({ centroid }).front();
+    Geodetic3 geoCentroid = coordsToGeodetic({ centroid }).front();
     _heightUpdateReferencePoints.push_back(std::move(geoCentroid));
 
     std::vector<Geodetic3> envelopeGeoCoords =
-        geometryhelper::geometryCoordsAsGeoVector(geo->getEnvelope().get());
+        geometryCoordsAsGeoVector(geo->getEnvelope().get());
 
     _heightUpdateReferencePoints.insert(
         _heightUpdateReferencePoints.end(),
@@ -311,7 +314,7 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
             continue;
         }
 
-        const bool shouldRenderTwice = r.type == RenderType::Polygon &&
+        const bool shouldRenderTwice = (r.type == RenderType::Polygon) &&
             fillOpacity < 1.f && _properties.extrude();
 
         if (pass > 0 && !shouldRenderTwice) {
@@ -330,8 +333,7 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
         shader->setUniform("useHeightMapData", useHeightMap());
 
         if (shader == _linesAndPolygonsProgram) {
-            const rendering::helper::LightSourceRenderData& ls =
-                extraRenderData.lightSourceData;
+            const rendering::LightSourceRenderData& ls = extraRenderData.lightSourceData;
             shader->setUniform("normalTransform", normalTransform);
             shader->setUniform("nLightSources", ls.nLightSources);
             shader->setUniform("lightIntensities", ls.intensitiesBuffer);
@@ -348,17 +350,19 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
                 );
                 renderLines(r);
                 break;
-            case RenderType::Points: {
+            case RenderType::Points:
                 shader->setUniform("opacity", opacity);
-                const float scale = extraRenderData.pointSizeScale;
-                renderPoints(r, renderData, extraRenderData.pointRenderMode, scale);
+                renderPoints(
+                    r,
+                    renderData,
+                    extraRenderData.pointRenderMode,
+                    extraRenderData.pointSizeScale
+                );
                 break;
-            }
-            case RenderType::Polygon: {
+            case RenderType::Polygon:
                 shader->setUniform("opacity", fillOpacity);
                 renderPolygons(r, shouldRenderTwice, pass);
                 break;
-            }
             default:
                 throw ghoul::MissingCaseException();
         }
@@ -413,7 +417,7 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
     _pointsProgram->setUniform("cameraUp", glm::vec3(orthoUp));
     _pointsProgram->setUniform("cameraRight", glm::vec3(orthoRight));
 
-    const glm::dvec3 cameraPositionWorld = renderData.camera.positionVec3();
+    const glm::dvec3 cameraPositionWorld = renderData.camera.position();
     _pointsProgram->setUniform("cameraPosition", cameraPositionWorld);
     _pointsProgram->setUniform("cameraLookUp", glm::vec3(cameraUpDirWorld));
 
@@ -422,8 +426,8 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
     _pointsProgram->setUniform("pointTexture", unit);
 
     const float widthHeightRatio =
-        static_cast<float>(_pointTexture->texture()->width()) /
-        static_cast<float>(_pointTexture->texture()->height());
+        static_cast<float>(_pointTexture->texture()->dimensions().x) /
+        static_cast<float>(_pointTexture->texture()->dimensions().y);
     _pointsProgram->setUniform("textureWidthFactor", widthHeightRatio);
 
     glEnable(GL_PROGRAM_POINT_SIZE);
@@ -530,7 +534,7 @@ void GlobeGeometryFeature::updateGeometry() {
 void GlobeGeometryFeature::updateHeightsFromHeightMap() {
     // @TODO: do the updating piece by piece, not all in one frame
     for (RenderFeature& f : _renderFeatures) {
-        f.heights = geometryhelper::heightMapHeightsFromGeodetic2List(_globe, f.vertices);
+        f.heights = heightMapHeightsFromGeodetic2List(_globe, f.vertices);
         bufferDynamicHeightData(f);
     }
 
@@ -543,9 +547,9 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
     for (const std::vector<Geodetic3>& coordinates : _geoCoordinates) {
         std::vector<Vertex> vertices;
         std::vector<glm::vec3> positions;
-        // TODO: this is not correct anymore
+        // @TODO: this is not correct anymore
         vertices.reserve(coordinates.size() * 3);
-        // TODO: this is not correct anymore
+        // @TODO: this is not correct anymore
         positions.reserve(coordinates.size() * 3);
 
         glm::dvec3 lastPos = glm::dvec3(0.0);
@@ -553,7 +557,7 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
 
         bool isFirst = true;
         for (const Geodetic3& geodetic : coordinates) {
-            const glm::dvec3 v = geometryhelper::computeOffsetedModelCoordinate(
+            const glm::dvec3 v = computeOffsetedModelCoordinate(
                 geodetic,
                 _globe,
                 _offsets.x,
@@ -561,7 +565,7 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
             );
 
             const auto addLinePos = [&vertices, &positions](const glm::vec3& pos) {
-                vertices.push_back({ { pos.x, pos.y, pos.z }, { 0.f, 0.f, 0.f } });
+                vertices.push_back({ .position = pos, .normal = glm::vec3(0.f) });
                 positions.push_back(pos);
             };
 
@@ -576,21 +580,15 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
             if (_properties.tessellationEnabled()) {
                 // Tessellate.
                 // But first, determine the step size for the tessellation (larger
-                // features will not be tesselated)
+                // features will not be tessellated)
                 const float stepSize = tessellationStepSize();
 
-                std::vector<geometryhelper::PosHeightPair> subdividedPositions =
-                    geometryhelper::subdivideLine(
-                        lastPos,
-                        v,
-                        lastHeightValue,
-                        geodetic.height,
-                        stepSize
-                    );
+                std::vector<PosHeightPair> subdividedPositions =
+                    subdivideLine(lastPos, v, lastHeightValue, geodetic.height, stepSize);
 
                 // Don't add the first position. Has been added as last in previous step
                 for (size_t si = 1; si < subdividedPositions.size(); si++) {
-                    const geometryhelper::PosHeightPair& pair = subdividedPositions[si];
+                    const PosHeightPair& pair = subdividedPositions[si];
                     addLinePos(glm::vec3(pair.position));
                 }
             }
@@ -605,9 +603,10 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
 
         vertices.shrink_to_fit();
 
-        RenderFeature feature;
-        feature.nVertices = vertices.size();
-        feature.type = RenderType::Lines;
+        RenderFeature feature = {
+            .type = RenderType::Lines,
+            .nVertices = vertices.size()
+        };
         initializeRenderFeature(feature, vertices);
         _renderFeatures.push_back(std::move(feature));
 
@@ -632,7 +631,7 @@ void GlobeGeometryFeature::createPointGeometry() {
         extrudedLineVertices.reserve(2 * coordinates.size());
 
         for (const Geodetic3& geodetic : coordinates) {
-            const glm::dvec3 v = geometryhelper::computeOffsetedModelCoordinate(
+            const glm::dvec3 v = computeOffsetedModelCoordinate(
                 geodetic,
                 _globe,
                 _offsets.x,
@@ -643,49 +642,51 @@ void GlobeGeometryFeature::createPointGeometry() {
             // Normal is the out direction
             const glm::vec3 normal = glm::normalize(vf);
 
-            vertices.push_back({
-                { vf.x, vf.y, vf.z }, { normal.x, normal.y, normal.z }
-            });
+            vertices.push_back({ .position = vf, .normal = normal });
 
             // Lines from center of the globe out to the point
-            extrudedLineVertices.push_back({ { 0.f, 0.f, 0.f }, { 0.f, 0.f, 0.f } });
-            extrudedLineVertices.push_back({ { vf.x, vf.y, vf.z }, { 0.f, 0.f, 0.f } });
+            extrudedLineVertices.push_back({
+                .position = glm::vec3(0.f),
+                .normal = glm::vec3(0.f)
+            });
+            extrudedLineVertices.push_back({ .position = vf, .normal = glm::vec3(0.f) });
         }
 
         vertices.shrink_to_fit();
         extrudedLineVertices.shrink_to_fit();
 
-        RenderFeature feature;
-        feature.nVertices = vertices.size();
-        feature.type = RenderType::Points;
+        RenderFeature feature = {
+            .type = RenderType::Points,
+            .nVertices = vertices.size()
+        };
         initializeRenderFeature(feature, vertices);
         _renderFeatures.push_back(std::move(feature));
 
         // Create extrusion feature
-        RenderFeature extrudeFeature;
-        extrudeFeature.nVertices = extrudedLineVertices.size();
-        extrudeFeature.type = RenderType::Lines;
-        extrudeFeature.isExtrusionFeature = true;
+        RenderFeature extrudeFeature = {
+            .type = RenderType::Lines,
+            .nVertices = extrudedLineVertices.size(),
+            .isExtrusionFeature = true
+        };
         initializeRenderFeature(extrudeFeature, extrudedLineVertices);
         _renderFeatures.push_back(std::move(extrudeFeature));
     }
 }
 
 void GlobeGeometryFeature::createExtrudedGeometry(
-                                 const std::vector<std::vector<glm::vec3>>& edgeVertices)
+                                  const std::vector<std::vector<glm::vec3>>& edgeVertices)
 {
     if (edgeVertices.empty()) {
         return;
     }
 
-    const std::vector<Vertex> vertices = geometryhelper::createExtrudedGeometryVertices(
-        edgeVertices
-    );
+    const std::vector<Vertex> vertices = createExtrudedGeometryVertices(edgeVertices);
 
-    RenderFeature feature;
-    feature.type = RenderType::Polygon;
-    feature.nVertices = vertices.size();
-    feature.isExtrusionFeature = true;
+    RenderFeature feature = {
+        .type = RenderType::Polygon,
+        .nVertices = vertices.size(),
+        .isExtrusionFeature = true
+    };
     initializeRenderFeature(feature, vertices);
     _renderFeatures.push_back(std::move(feature));
 }
@@ -702,7 +703,7 @@ void GlobeGeometryFeature::createPolygonGeometry() {
     std::array<glm::vec3, 3> triPositions;
     std::array<double, 3> triHeights;
     for (const Geodetic3& geodetic : _triangleCoordinates) {
-        const glm::vec3 vert = geometryhelper::computeOffsetedModelCoordinate(
+        const glm::vec3 vert = computeOffsetedModelCoordinate(
             geodetic,
             _globe,
             _offsets.x,
@@ -729,7 +730,7 @@ void GlobeGeometryFeature::createPolygonGeometry() {
                 // will not be tesselated)
                 const float stepSize = tessellationStepSize();
 
-                std::vector<Vertex> verts = geometryhelper::subdivideTriangle(
+                std::vector<Vertex> verts = subdivideTriangle(
                     v0, v1, v2,
                     h0, h1, h2,
                     stepSize,
@@ -740,16 +741,17 @@ void GlobeGeometryFeature::createPolygonGeometry() {
             else {
                 // Just add a triangle consisting of the three vertices
                 const glm::vec3 n = -glm::normalize(glm::cross(v1 - v0, v2 - v0));
-                polyVertices.push_back({ { v0.x, v0.y, v0.z }, { n.x, n.y, n.z } });
-                polyVertices.push_back({ { v1.x, v1.y, v1.z }, { n.x, n.y, n.z } });
-                polyVertices.push_back({ { v2.x, v2.y, v2.z }, { n.x, n.y, n.z } });
+                polyVertices.push_back({ .position = v0, .normal = n });
+                polyVertices.push_back({ .position = v1, .normal = n });
+                polyVertices.push_back({ .position = v2, .normal = n });
             }
         }
     }
 
-    RenderFeature triFeature;
-    triFeature.type = RenderType::Polygon;
-    triFeature.nVertices = polyVertices.size();
+    RenderFeature triFeature = {
+        .type = RenderType::Polygon,
+        .nVertices = polyVertices.size()
+    };
     initializeRenderFeature(triFeature, polyVertices);
     _renderFeatures.push_back(std::move(triFeature));
 }
@@ -758,11 +760,8 @@ void GlobeGeometryFeature::initializeRenderFeature(RenderFeature& feature,
                                                    const std::vector<Vertex>& vertices)
 {
     // Get height map heights
-    feature.vertices = geometryhelper::geodetic2FromVertexList(_globe, vertices);
-    feature.heights = geometryhelper::heightMapHeightsFromGeodetic2List(
-        _globe,
-        feature.vertices
-    );
+    feature.vertices = geodetic2FromVertexList(_globe, vertices);
+    feature.heights = heightMapHeightsFromGeodetic2List(_globe, feature.vertices);
 
     ghoul_assert(_pointsProgram, "Shader program must be initialized");
     ghoul_assert(_linesAndPolygonsProgram, "Shader program must be initialized");
@@ -832,7 +831,7 @@ std::vector<double> GlobeGeometryFeature::getCurrentReferencePointsHeights() con
     std::vector<double> newHeights;
     newHeights.reserve(_heightUpdateReferencePoints.size());
     for (const Geodetic3& geo : _heightUpdateReferencePoints) {
-        const glm::dvec3 p = geometryhelper::computeOffsetedModelCoordinate(
+        const glm::dvec3 p = computeOffsetedModelCoordinate(
             geo,
             _globe,
             _offsets.x,
@@ -856,4 +855,4 @@ void GlobeGeometryFeature::bufferDynamicHeightData(const RenderFeature& feature)
     );
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

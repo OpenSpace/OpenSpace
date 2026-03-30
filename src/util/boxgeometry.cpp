@@ -36,7 +36,7 @@ BoxGeometry::~BoxGeometry() {
     glDeleteBuffers(1, &_vbo);
 }
 
-bool BoxGeometry::initialize() {
+void BoxGeometry::initialize() {
     // Initialize and upload to GPU
     const float x = _size.x * 0.5f;
     const float y = _size.y * 0.5f;
@@ -48,47 +48,47 @@ bool BoxGeometry::initialize() {
         float b;
     };
     const std::array<Vertex, 36> Vertices = {
-        Vertex { -x, -y,  z}, // blue corner
-        Vertex {  x,  y,  z}, // white corner
-        Vertex { -x,  y,  z}, // cyan corner
-        Vertex { -x, -y,  z}, // blue corner
-        Vertex {  x, -y,  z}, // magenta corner
-        Vertex {  x,  y,  z}, // white corner
+        Vertex { -x, -y,  z }, // blue corner
+        Vertex {  x,  y,  z }, // white corner
+        Vertex { -x,  y,  z }, // cyan corner
+        Vertex { -x, -y,  z }, // blue corner
+        Vertex {  x, -y,  z }, // magenta corner
+        Vertex {  x,  y,  z }, // white corner
 
-        Vertex { -x, -y, -z}, // black corner
-        Vertex { -x,  y, -z}, // green
-        Vertex {  x,  y, -z}, // yellow corner
-        Vertex { -x, -y, -z}, // black
-        Vertex {  x,  y, -z}, // yellow
-        Vertex {  x, -y, -z}, // red
+        Vertex { -x, -y, -z }, // black corner
+        Vertex { -x,  y, -z }, // green
+        Vertex {  x,  y, -z }, // yellow corner
+        Vertex { -x, -y, -z }, // black
+        Vertex {  x,  y, -z }, // yellow
+        Vertex {  x, -y, -z }, // red
 
-        Vertex {  x, -y, -z}, // red
-        Vertex {  x,  y,  z}, // yellow
-        Vertex {  x, -y,  z}, // magenta
-        Vertex {  x, -y, -z}, // red
-        Vertex {  x,  y, -z}, // yellow
-        Vertex {  x,  y,  z}, // white
+        Vertex {  x, -y, -z }, // red
+        Vertex {  x,  y,  z }, // yellow
+        Vertex {  x, -y,  z }, // magenta
+        Vertex {  x, -y, -z }, // red
+        Vertex {  x,  y, -z }, // yellow
+        Vertex {  x,  y,  z }, // white
 
-        Vertex { -x, -y, -z}, // black
-        Vertex { -x, -y,  z}, // blue
-        Vertex { -x,  y,  z}, // cyan
-        Vertex { -x, -y, -z}, // black
-        Vertex { -x,  y,  z}, // cyan
-        Vertex { -x,  y, -z}, // green
+        Vertex { -x, -y, -z }, // black
+        Vertex { -x, -y,  z }, // blue
+        Vertex { -x,  y,  z }, // cyan
+        Vertex { -x, -y, -z }, // black
+        Vertex { -x,  y,  z }, // cyan
+        Vertex { -x,  y, -z }, // green
 
-        Vertex {  x,  y,  z}, // white
-        Vertex { -x,  y, -z}, // green
-        Vertex { -x,  y,  z}, // cyan
-        Vertex { -x,  y, -z}, // green
-        Vertex {  x,  y,  z}, // white
-        Vertex {  x,  y, -z}, // yellow
+        Vertex {  x,  y,  z }, // white
+        Vertex { -x,  y, -z }, // green
+        Vertex { -x,  y,  z }, // cyan
+        Vertex { -x,  y, -z }, // green
+        Vertex {  x,  y,  z }, // white
+        Vertex {  x,  y, -z }, // yellow
 
-        Vertex { -x, -y, -z}, // black
-        Vertex {  x, -y,  z}, // magenta
-        Vertex { -x, -y,  z}, // blue
-        Vertex { -x, -y, -z}, // black
-        Vertex {  x, -y, -z}, // red
-        Vertex {  x, -y,  z}  // magenta
+        Vertex { -x, -y, -z }, // black
+        Vertex {  x, -y,  z }, // magenta
+        Vertex { -x, -y,  z }, // blue
+        Vertex { -x, -y, -z }, // black
+        Vertex {  x, -y, -z }, // red
+        Vertex {  x, -y,  z }  // magenta
     };
 
     glCreateBuffers(1, &_vbo);
@@ -100,8 +100,6 @@ bool BoxGeometry::initialize() {
     glEnableVertexArrayAttrib(_vao, 0);
     glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayAttribBinding(_vao, 0, 0);
-
-    return true;
 }
 
 void BoxGeometry::render() const {

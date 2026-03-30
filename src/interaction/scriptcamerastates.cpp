@@ -24,16 +24,15 @@
 
 #include <openspace/interaction/scriptcamerastates.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
-ScriptCameraStates::ScriptCameraStates() : CameraInteractionStates(1.0, 1.0) {}
+ScriptCameraStates::ScriptCameraStates()
+    : CameraInteractionStates(1.0, 1.0)
+{}
 
 void ScriptCameraStates::updateStateFromInput(double deltaTime) {
     if (_localRotation != glm::dvec2(0.0)) {
-        _localRotationState.velocity.set(
-            _localRotation * _sensitivity,
-            deltaTime
-        );
+        _localRotationState.velocity.set(_localRotation * _sensitivity, deltaTime);
         _localRotation = glm::dvec2(0.0);
     }
     else {
@@ -41,10 +40,7 @@ void ScriptCameraStates::updateStateFromInput(double deltaTime) {
     }
 
     if (_globalRotation != glm::dvec2(0.0)) {
-        _globalRotationState.velocity.set(
-            _globalRotation * _sensitivity,
-            deltaTime
-        );
+        _globalRotationState.velocity.set(_globalRotation * _sensitivity, deltaTime);
         _globalRotation = glm::dvec2(0.0);
     }
     else {
@@ -52,10 +48,7 @@ void ScriptCameraStates::updateStateFromInput(double deltaTime) {
     }
 
     if (_truckMovement != 0.0) {
-        _truckMovementState.velocity.set(
-            _truckMovement * _sensitivity,
-            deltaTime
-        );
+        _truckMovementState.velocity.set(_truckMovement * _sensitivity, deltaTime);
         _truckMovement = 0.0;
     }
     else {
@@ -63,10 +56,7 @@ void ScriptCameraStates::updateStateFromInput(double deltaTime) {
     }
 
     if (_localRoll != 0.0) {
-        _localRollState.velocity.set(
-            _localRoll * _sensitivity,
-            deltaTime
-        );
+        _localRollState.velocity.set(_localRoll * _sensitivity, deltaTime);
         _localRoll = 0.0;
     }
     else {
@@ -74,10 +64,7 @@ void ScriptCameraStates::updateStateFromInput(double deltaTime) {
     }
 
     if (_globalRoll != 0.0) {
-        _globalRollState.velocity.set(
-            _globalRoll * _sensitivity,
-            deltaTime
-        );
+        _globalRollState.velocity.set(_globalRoll * _sensitivity, deltaTime);
         _globalRoll = 0.0;
     }
     else {
@@ -105,4 +92,4 @@ void ScriptCameraStates::addGlobalRoll(double delta) {
     _globalRoll += delta;
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

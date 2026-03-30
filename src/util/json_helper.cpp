@@ -83,8 +83,8 @@ std::string escapedJson(const std::vector<std::string>& list) {
 }
 
 std::string formatJsonNumber(double d) {
-    // to_string will represent infinite values with 'inf' and NaNs with 'nan'.
-    // These are not valid in JSON, so use 'null' instead
+    // `to_string` will represent infinite values with 'inf' and NaNs with 'nan'. These
+    // are not valid in JSON, so use 'null' instead
     if (!std::isfinite(d)) {
         return "null";
     }
@@ -98,7 +98,6 @@ void sortJson(nlohmann::json& json, std::string_view key) {
         [&key](const nlohmann::json& lhs, const nlohmann::json& rhs) {
             const std::string lhsString = ghoul::toLowerCase(lhs[key].get<std::string>());
             const std::string rhsString = ghoul::toLowerCase(rhs[key].get<std::string>());
-
             return rhsString > lhsString;
         }
     );
@@ -163,4 +162,4 @@ ghoul::Dictionary jsonToDictionary(const nlohmann::json& json) {
     return result;
 }
 
-}  // namespace openspace
+} // namespace openspace

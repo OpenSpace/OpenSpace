@@ -35,7 +35,7 @@ public:
 
     void update(const Time&) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     std::vector<ghoul::mm_unique_ptr<TimeFrame>> _timeFrames;

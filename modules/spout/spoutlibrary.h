@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_SPOUT___SPOUTLIBRARY___H__
 
 // We need to have this extra file as the Spout people have not put an include guard into
-// their file which leads to a violation of the ODR in our usage.
+// their file which leads to a violation of the ODR in our usage
 
 #define __gl_h_
 #include <modules/spout/ext/spout/SpoutLibrary.h>

@@ -37,14 +37,16 @@
 #include <array>
 #include <iterator>
 
+using namespace openspace;
+
 namespace {
 
 /**
- * Toggles the shutdown mode that will close the application after the countdown timer
- * is reached.
+ * Toggles the shutdown mode that will close the application after the countdown timer is
+ * reached.
  */
 [[codegen::luawrap]] void toggleShutdown() {
-    openspace::global::openSpaceEngine->toggleShutdownMode();
+    global::openSpaceEngine->toggleShutdownMode();
 }
 
 /**
@@ -58,8 +60,6 @@ namespace {
  * Sets the folder used for storing screenshots or session recording frames.
  */
 [[codegen::luawrap]] void setScreenshotFolder(std::string newFolder) {
-    using namespace openspace;
-
     std::filesystem::path folder = absPath(newFolder);
     if (!std::filesystem::exists(folder)) {
         std::filesystem::create_directory(folder);
@@ -75,11 +75,9 @@ namespace {
 }
 
 /**
- * Adds a Tag to a SceneGraphNode identified by the provided uri.
+ * Adds a Tag to a SceneGraphNode identified by the provided URI.
  */
 [[codegen::luawrap]] void addTag(std::string uri, std::string tag) {
-    using namespace openspace;
-
     SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(uri);
     if (!node) {
         throw ghoul::lua::LuaError(std::format("Unknown scene graph node '{}'", uri));
@@ -92,8 +90,6 @@ namespace {
  * Removes a tag(second argument) from a scene graph node (first argument).
  */
 [[codegen::luawrap]] void removeTag(std::string uri, std::string tag) {
-    using namespace openspace;
-
     SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(uri);
     if (!node) {
         throw ghoul::lua::LuaError(std::format("Unknown scene graph node '{}'", uri));
@@ -109,8 +105,6 @@ namespace {
                                        bool waitForCompletion = false,
                                        bool overrideExistingFile = true)
 {
-    using namespace openspace;
-
     LINFOC("OpenSpaceEngine", std::format("Downloading file from '{}'", url));
     std::shared_ptr<DownloadManager::FileFuture> future =
         global::downloadManager->downloadFile(
@@ -129,10 +123,6 @@ namespace {
     }
 }
 
-} // namespace
-
-// Closing the anoynmous namespace here to allow a unit test to access this function
-
 /**
  * Creates a 1 pixel image with a certain color in the cache folder and returns the path
  * to the file. If a cached file with the given name already exists, the path to that file
@@ -142,14 +132,12 @@ namespace {
 [[codegen::luawrap]] std::filesystem::path createSingleColorImage(std::string name,
                                                                   glm::dvec3 color)
 {
-    using namespace openspace;
-
     // @TODO (emmbr 2020-12-18) Verify that the input dictionary is a vec3
     // Would like to clean this up with a more direct use of the Verifier in the future
     const std::string& key = "color";
     ghoul::Dictionary colorDict;
     colorDict.setValue(key, color);
-    documentation::TestResult res = documentation::Color3Verifier()(colorDict, key);
+    TestResult res = Color3Verifier()(colorDict, key);
 
     if (!res.success) {
         throw ghoul::lua::LuaError(
@@ -170,30 +158,27 @@ namespace {
         constexpr unsigned int Width = 1;
         constexpr unsigned int Height = 1;
         constexpr unsigned int Size = Width * Height;
-        std::array<GLubyte, Size * 3> img = {
-            static_cast<GLubyte>(255 * color.r),
-            static_cast<GLubyte>(255 * color.g),
-            static_cast<GLubyte>(255 * color.b)
+        std::array<std::byte, Size * 3> img = {
+            static_cast<std::byte>(255 * color.r),
+            static_cast<std::byte>(255 * color.g),
+            static_cast<std::byte>(255 * color.b)
         };
 
         using Texture = ghoul::opengl::Texture;
-        Texture textureFromData = Texture(
-            reinterpret_cast<void*>(img.data()),
-            glm::uvec3(Width, Height, 1),
-            GL_TEXTURE_2D,
-            Texture::Format::RGB
+
+        Texture texture = Texture(
+            ghoul::opengl::Texture::FormatInit{
+                .dimensions = glm::uvec3(Width, Height, 1),
+                .type = GL_TEXTURE_2D,
+                .format = ghoul::opengl::Texture::Format::RGB,
+                .dataType = GL_UNSIGNED_BYTE
+            },
+            {},
+            img.data()
         );
-        textureFromData.setDataOwnership(Texture::TakeOwnership::No);
 
         try {
-            ghoul::io::TextureWriter::ref().saveTexture(
-                textureFromData,
-                fileName.string()
-            );
-        }
-        catch (const ghoul::io::TextureWriter::MissingWriterException& e) {
-            // This should not happen, as we know .png is a supported format
-            throw ghoul::lua::LuaError(e.message);
+            ghoul::io::TextureWriter::ref().saveTexture(texture, fileName.string());
         }
         catch (const std::filesystem::filesystem_error& e) {
             LERRORC("Exception: {}", e.what());
@@ -236,7 +221,7 @@ namespace {
  * 'true'.
  */
 [[codegen::luawrap]] bool isMaster() {
-    return openspace::global::windowDelegate->isMaster();
+    return global::windowDelegate->isMaster();
 }
 
 /**
@@ -256,13 +241,13 @@ namespace {
     ghoul::Dictionary res;
 
     ghoul::Dictionary version;
-    version.setValue("Major", static_cast<int>(openspace::OPENSPACE_VERSION_MAJOR));
-    version.setValue("Minor", static_cast<int>(openspace::OPENSPACE_VERSION_MINOR));
-    version.setValue("Patch", static_cast<int>(openspace::OPENSPACE_VERSION_PATCH));
+    version.setValue("Major", static_cast<int>(OPENSPACE_VERSION_MAJOR));
+    version.setValue("Minor", static_cast<int>(OPENSPACE_VERSION_MINOR));
+    version.setValue("Patch", static_cast<int>(OPENSPACE_VERSION_PATCH));
     res.setValue("Version", std::move(version));
 
-    res.setValue("Commit", std::string(openspace::OPENSPACE_GIT_COMMIT));
-    res.setValue("Branch", std::string(openspace::OPENSPACE_GIT_BRANCH));
+    res.setValue("Commit", std::string(OPENSPACE_GIT_COMMIT));
+    res.setValue("Branch", std::string(OPENSPACE_GIT_BRANCH));
 
     return res;
 }
@@ -271,7 +256,7 @@ namespace {
  * Loads the CSV file provided as a parameter and returns it as a vector containing the
  * values of the each row. The inner vector has the same number of values as the CSV has
  * columns. The second parameter controls whether the first entry in the returned outer
- * vector is containing the names of the columns
+ * vector is containing the names of the columns.
  */
 [[codegen::luawrap]] std::vector<std::vector<std::string>> readCSVFile(
                                                                std::filesystem::path file,
@@ -286,26 +271,24 @@ namespace {
 }
 
 /**
- * Resets the camera position to the same position where the profile originally started
+ * Resets the camera position to the same position where the profile originally started.
  */
 [[codegen::luawrap]] void resetCamera() {
-    openspace::setCameraFromProfile(*openspace::global::profile);
+    setCameraFromProfile(*global::profile);
 }
 
 /**
- * Returns the whole configuration object as a Dictionary
+ * Returns the whole configuration object as a Dictionary.
  */
 [[codegen::luawrap]] ghoul::Dictionary configuration() {
-    openspace::Configuration& config = *openspace::global::configuration;
-    return config.createDictionary();
+    return global::configuration->createDictionary();
 }
 
 /**
- * Returns the current layer server from the configuration
+ * Returns the current layer server from the configuration.
  */
 [[codegen::luawrap]] std::string layerServer() {
-    openspace::Configuration& config = *openspace::global::configuration;
-    return layerServerToString(config.layerServer);
+    return layerServerToString(global::configuration->layerServer);
 }
 
 /**
@@ -347,7 +330,7 @@ namespace {
  * only works on Windows.
  */
 [[codegen::luawrap]] double vramInUse() {
-    return static_cast<double>(openspace::global::openSpaceEngine->vramInUse());
+    return static_cast<double>(global::openSpaceEngine->vramInUse());
 }
 
 /**
@@ -355,7 +338,9 @@ namespace {
  * function only works on Windows.
  */
 [[codegen::luawrap]] double ramInUse() {
-    return static_cast<double>(openspace::global::openSpaceEngine->ramInUse());
+    return static_cast<double>(global::openSpaceEngine->ramInUse());
 }
+
+} // namespace
 
 #include "openspaceengine_lua_codegen.cpp"

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// The following code was taken from VIAMD (https://github.com/scanberg/viamd), MIT.
+// The following code was taken from VIAMD (https://github.com/scanberg/viamd), MIT
 
 #include <modules/molecule/src/coloring.h>
 
@@ -173,7 +173,7 @@ namespace {
     }
 } // namespace
 
-namespace molecule::color::atoms {
+namespace molecule {
 
 void uniform(uint32_t* colors, int64_t count, uint32_t rgba, const md_bitfield_t* mask) {
     if (mask) {
@@ -190,13 +190,14 @@ void uniform(uint32_t* colors, int64_t count, uint32_t rgba, const md_bitfield_t
 }
 
 void cpk(uint32_t* colors, int64_t count, const md_molecule_t& mol) {
-    // In the case of coarsegrained molecules, CPK is a bit illdefined as it operates on elements.
-    // What we do instead is to try and ad-hoc guess elements from the atom names.
+    // In the case of coarsegrained molecules, CPK is a bit illdefined as it operates on
+    // elements. What we do instead is to try and ad-hoc guess elements from the atom
+    // names
     if (count == 0) {
         return;
     }
 
-    md_element_t* elements = 0;
+    md_element_t* elements = nullptr;
     const md_element_t* elem = mol.atom.element;
 
     if (!elem) {
@@ -314,4 +315,4 @@ void secondaryStructure(uint32_t* colors, int64_t count, const md_molecule_t& mo
     }
 }
 
-} // namespace molecule::color::atoms
+} // namespace molecule

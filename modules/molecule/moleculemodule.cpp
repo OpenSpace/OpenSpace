@@ -29,8 +29,8 @@
 #include <modules/molecule/src/postprocessing.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
@@ -40,6 +40,8 @@
 #include <md_gl.h>
 
 namespace {
+    using namespace openspace;
+
     // Defining the shaders here since we don't want to need to include MOLD header files
     // in the module header, which would mean that the core would need to know about them
     std::unique_ptr<md_gl_shaders_t> _shaders = nullptr;
@@ -53,45 +55,47 @@ vec2 encode_normal(vec3 n) {
   return n.xy / p + 0.5;
 }
 
-void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color, uint atom_index) {
+void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color,
+                    uint atom_index)
+{
   out_normal = vec4(encode_normal(view_normal), 0, 0);
   out_color = color;
 }
 )";
 
-    constexpr openspace::properties::Property::PropertyInfo SSAOEnabledInfo = {
+    constexpr Property::PropertyInfo SSAOEnabledInfo = {
         "Enabled",
         "Enabled",
         "Determines whether this SSAO pass should be enabled or not."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SSAOIntensityInfo = {
+    constexpr Property::PropertyInfo SSAOIntensityInfo = {
         "Intensity",
         "Intensity",
         "Controls the strength of the ambient occlusion effect. Higher values darken "
         "occluded areas more strongly."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SSAORadiusInfo = {
+    constexpr Property::PropertyInfo SSAORadiusInfo = {
         "Radius",
         "Radius",
         "Sets the sampling radius for occlusion. Larger values produce broader, smoother "
         "shading, while smaller values create tighter shadows."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SSAOBiasInfo = {
+    constexpr Property::PropertyInfo SSAOBiasInfo = {
         "HorizonBias",
         "Horizon Bias",
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SSAONormalBiasInfo = {
+    constexpr Property::PropertyInfo SSAONormalBiasInfo = {
         "NormalBias",
         "Normal Bias",
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ExposureInfo = {
+    constexpr Property::PropertyInfo ExposureInfo = {
         "Exposure",
         "Exposure",
         "Controls the Exposure setting for the tonemap."
@@ -100,8 +104,8 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
 
 namespace openspace {
 
-MoleculeModule::SSAO::SSAO(properties::PropertyOwner::PropertyOwnerInfo info)
-    : properties::PropertyOwner(info)
+MoleculeModule::SSAO::SSAO(PropertyOwner::PropertyOwnerInfo info)
+    : PropertyOwner(info)
     , enabled(SSAOEnabledInfo, true)
     , intensity(SSAOIntensityInfo, 7.5f, 0.f, 100.f)
     , radius(SSAORadiusInfo, 1.f, 0.1f, 1000.f)
@@ -176,15 +180,16 @@ void MoleculeModule::initializeShaders() {
     const glm::ivec2 size = global::windowDelegate->currentWindowSize();
 
     _colorTex = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(size.x, size.y, 1),
-        GL_TEXTURE_2D,
-        ghoul::opengl::Texture::Format::RGBA,
-        GL_RGBA8,
-        GL_UNSIGNED_BYTE,
-        ghoul::opengl::Texture::FilterMode::Linear,
-        ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        ghoul::opengl::Texture::FormatInit {
+            .dimensions = glm::uvec3(size.x, size.y, 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::RGBA,
+            .dataType = GL_UNSIGNED_BYTE
+        },
+        ghoul::opengl::Texture::SamplerInit {
+            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        }
     );
-    _colorTex->uploadTexture();
     glFramebufferTexture2D(
         GL_DRAW_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
@@ -194,15 +199,17 @@ void MoleculeModule::initializeShaders() {
     );
 
     _normalTex = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(size.x, size.y, 1),
-        GL_TEXTURE_2D,
-        ghoul::opengl::Texture::Format::RG,
-        GL_RG16,
-        GL_UNSIGNED_SHORT,
-        ghoul::opengl::Texture::FilterMode::Nearest,
-        ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        ghoul::opengl::Texture::FormatInit {
+            .dimensions = glm::uvec3(size.x, size.y, 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::RG,
+            .dataType = GL_UNSIGNED_SHORT
+        },
+        ghoul::opengl::Texture::SamplerInit {
+            .filter = ghoul::opengl::Texture::FilterMode::Nearest,
+            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        }
     );
-    _normalTex->uploadTexture();
     glFramebufferTexture2D(
         GL_DRAW_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT1,
@@ -212,15 +219,16 @@ void MoleculeModule::initializeShaders() {
     );
 
     _depthTex = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(size.x, size.y, 1),
-        GL_TEXTURE_2D,
-        ghoul::opengl::Texture::Format::DepthComponent,
-        GL_DEPTH_COMPONENT32F,
-        GL_FLOAT,
-        ghoul::opengl::Texture::FilterMode::Linear,
-        ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        ghoul::opengl::Texture::FormatInit {
+            .dimensions = glm::uvec3(size.x, size.y, 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::DepthComponent,
+            .dataType = GL_FLOAT
+        },
+        ghoul::opengl::Texture::SamplerInit {
+            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        }
     );
-    _depthTex->uploadTexture();
     glFramebufferTexture2D(
         GL_DRAW_FRAMEBUFFER,
         GL_DEPTH_ATTACHMENT,
@@ -267,15 +275,40 @@ void MoleculeModule::preDraw() {
 
     _width = size.x;
     _height = size.y;
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
+
     _colorTex->resize(glm::uvec3(size.x, size.y, 1));
+    glFramebufferTexture2D(
+        GL_DRAW_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D,
+        *_colorTex,
+        0
+    );
+
     _normalTex->resize(glm::uvec3(size.x, size.y, 1));
+    glFramebufferTexture2D(
+        GL_DRAW_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT1,
+        GL_TEXTURE_2D,
+        *_normalTex,
+        0
+    );
+
     _depthTex->resize(glm::uvec3(size.x, size.y, 1));
+    glFramebufferTexture2D(
+        GL_DRAW_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        GL_TEXTURE_2D,
+        *_depthTex,
+        0
+    );
 
     postprocessing::resize(size.x, size.y);
 }
 
 void MoleculeModule::render(const glm::mat4&, const glm::mat4& viewMatrix,
-                            const glm::mat4& projectionMatrix)
+                            const glm::mat4& projectionMatrix) const
 {
     if (_initializeCounter == 0) {
         return;
@@ -294,28 +327,39 @@ void MoleculeModule::render(const glm::mat4&, const glm::mat4& viewMatrix,
         lastDrawBuffers[lastDrawBufferCount++] = static_cast<GLenum>(drawBuf);
     }
 
-    postprocessing::Settings settings;
-    settings.background.enabled = false;
-    settings.ambientOcclusion[0].enabled = _ssao.enabled;
-    settings.ambientOcclusion[0].intensity = _ssao.intensity;
-    settings.ambientOcclusion[0].radius = _ssao.radius;
-    settings.ambientOcclusion[0].horizonBias = _ssao.horizonBias;
-    settings.ambientOcclusion[0].normalBias = _ssao.normalBias;
-    settings.ambientOcclusion[1].enabled = _ssao2.enabled;
-    settings.ambientOcclusion[1].intensity = _ssao2.intensity;
-    settings.ambientOcclusion[1].radius = _ssao2.radius;
-    settings.ambientOcclusion[1].horizonBias = _ssao2.horizonBias;
-    settings.ambientOcclusion[1].normalBias = _ssao2.normalBias;
-    settings.bloom.enabled = false;
-    settings.depthOfField.enabled = false;
-    settings.temporalReprojection.enabled = false;
-    settings.tonemapping.enabled = true;
-    settings.tonemapping.mode = postprocessing::Tonemapping::ACES;
-    settings.tonemapping.exposure = _exposure;
-    settings.fxaa.enabled = true;
-    settings.inputTextures.depth = _depthTex.get();
-    settings.inputTextures.color = _colorTex.get();
-    settings.inputTextures.normal = _normalTex.get();
+    const postprocessing::Settings settings = {
+        .background = {.enabled = false },
+        .bloom = { .enabled = false },
+        .tonemapping = {
+            .enabled = true,
+            .mode = postprocessing::Tonemapping::ACES,
+            .exposure = _exposure
+        },
+        .ambientOcclusion = {
+            {
+                .enabled = _ssao.enabled,
+                .radius = _ssao.radius,
+                .intensity = _ssao.intensity,
+                .horizonBias = _ssao.horizonBias,
+                .normalBias = _ssao.normalBias
+            },
+            {
+                .enabled = _ssao2.enabled,
+                .radius = _ssao2.radius,
+                .intensity = _ssao2.intensity,
+                .horizonBias = _ssao2.horizonBias,
+                .normalBias = _ssao2.normalBias
+            }
+        },
+        .depthOfField = { .enabled = false },
+        .temporalReprojection = { .enabled = false },
+        .fxaa = { .enabled = true },
+        .inputTextures = {
+            .color = _colorTex.get(),
+            .depth = _depthTex.get(),
+            .normal = _normalTex.get()
+        }
+    };
 
     postprocessing::postprocess(settings, viewMatrix, projectionMatrix);
 
@@ -331,7 +375,7 @@ void MoleculeModule::render(const glm::mat4&, const glm::mat4& viewMatrix,
     glDrawBuffers(lastDrawBufferCount, lastDrawBuffers.data());
 }
 
-std::vector<documentation::Documentation> MoleculeModule::documentations() const {
+std::vector<Documentation> MoleculeModule::documentations() const {
     return {
         RenderableMolecule::Documentation(),
         RenderableSimulationBox::Documentation()

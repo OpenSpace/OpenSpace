@@ -41,7 +41,7 @@ namespace openspace {
     struct RenderData;
 } // namespace openspace
 
-namespace openspace::rendering::helper {
+namespace openspace::rendering {
 
 enum class Anchor { Center, NW, NE, SW, SE };
 
@@ -117,10 +117,8 @@ struct VertexObjects {
 };
 
 namespace detail {
-
-Shaders& gShadersConstructor();
-VertexObjects& gVertexObjectsConstructor();
-
+    Shaders& gShadersConstructor();
+    VertexObjects& gVertexObjectsConstructor();
 } // namespace detail
 
 static Shaders& shaders = detail::gShadersConstructor();
@@ -179,6 +177,6 @@ struct LightSourceRenderData {
         const std::vector<std::unique_ptr<LightSource>>& sources);
 };
 
-} // namespace openspace::rendering::helper
+} // namespace openspace::rendering
 
 #endif // __OPENSPACE_CORE___HELPER___H__

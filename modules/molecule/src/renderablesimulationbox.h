@@ -50,7 +50,7 @@ public:
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& tasks) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     struct Molecules {
@@ -95,20 +95,20 @@ private:
 
     std::vector<Molecules> _molecules;
 
-    properties::OptionProperty _representation;
-    properties::OptionProperty _coloring;
-    properties::FloatProperty _repScale;
-    properties::FloatProperty _animationSpeed;
-    properties::FloatProperty _simulationSpeed;
-    properties::FloatProperty _linearVelocity;
-    properties::FloatProperty _angularVelocity;
-    properties::DVec3Property _simulationBox;
-    properties::FloatProperty _collisionRadius;
-    properties::StringProperty _filter;
+    OptionProperty _representation;
+    OptionProperty _coloring;
+    FloatProperty _repScale;
+    FloatProperty _animationSpeed;
+    FloatProperty _simulationSpeed;
+    FloatProperty _linearVelocity;
+    FloatProperty _angularVelocity;
+    DVec3Property _simulationBox;
+    FloatProperty _collisionRadius;
+    StringProperty _filter;
 
-    properties::Vec4Property  _circleColor;
-    properties::FloatProperty _circleWidth;
-    properties::FloatProperty _circleFalloff;
+    Vec4Property  _circleColor;
+    FloatProperty _circleWidth;
+    FloatProperty _circleFalloff;
 };
 
 } // namespace openspace

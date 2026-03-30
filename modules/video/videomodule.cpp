@@ -44,10 +44,10 @@ VideoModule::VideoModule()
 {}
 
 void VideoModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<globebrowsing::TileProvider>* fTileProvider =
-        FactoryManager::ref().factory<globebrowsing::TileProvider>();
+    ghoul::TemplateFactory<TileProvider>* fTileProvider =
+        FactoryManager::ref().factory<TileProvider>();
     ghoul_assert(fTileProvider, "TileProvider factory was not created");
-    fTileProvider->registerClass<globebrowsing::VideoTileProvider>("VideoTileProvider");
+    fTileProvider->registerClass<VideoTileProvider>("VideoTileProvider");
 
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
@@ -62,12 +62,12 @@ void VideoModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableVideoPlane>("RenderableVideoPlane");
 }
 
-std::vector<documentation::Documentation> VideoModule::documentations() const {
+std::vector<Documentation> VideoModule::documentations() const {
     return {
         RenderableVideoPlane::Documentation(),
         RenderableVideoSphere::Documentation(),
         ScreenSpaceVideo::Documentation(),
-        globebrowsing::VideoTileProvider::Documentation()
+        VideoTileProvider::Documentation()
     };
 }
 

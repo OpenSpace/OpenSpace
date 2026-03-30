@@ -116,7 +116,7 @@ glm::ivec2 currentDrawResolution;
 
 #ifdef OPENVR_SUPPORT
 Window* FirstOpenVRWindow = nullptr;
-#endif
+#endif // OPENVR_SUPPORT
 
 // This value is specified from the commandline options and kept around to be run after
 // everything has been initialized. It's going to be std::nullopt unless a user wants to
@@ -128,17 +128,18 @@ std::optional<std::string> taskToRun;
 //
 
 #ifdef OPENSPACE_HAS_SPOUT
+
 /**
- * This struct stores all information about a single render window. Depending on the
- * frame setup, each window can be mono or stereo, the information of which is stored in
- * the `leftOrMain` and `right` members respectively.
+ * This struct stores all information about a single render window. Depending on the frame
+ * setup, each window can be mono or stereo, the information of which is stored in the
+ * `leftOrMain` and `right` members respectively.
  */
 struct SpoutWindow {
     /// The left framebuffer (or main, if there is no stereo rendering)
-    openspace::spout::SpoutSender leftOrMain;
+    SpoutSender leftOrMain;
 
     /// The right framebuffer
-    openspace::spout::SpoutSender right;
+    SpoutSender right;
 
     /// The window ID of this windows
     size_t windowId = size_t(-1);
@@ -207,10 +208,11 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
         nullptr
     );
 
-    MINIDUMP_EXCEPTION_INFORMATION exceptionParameter;
-    exceptionParameter.ThreadId = GetCurrentThreadId();
-    exceptionParameter.ExceptionPointers = exceptionPointers;
-    exceptionParameter.ClientPointers = TRUE;
+    MINIDUMP_EXCEPTION_INFORMATION exceptionParameter = {
+        .ThreadId = GetCurrentThreadId(),
+        .ExceptionPointers = exceptionPointers,
+        .ClientPointers = TRUE
+    };
 
     BOOL success = MiniDumpWriteDump(
         GetCurrentProcess(),
@@ -236,8 +238,6 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
 #endif // WIN32
 
 void checkJoystickStatus() {
-    using namespace interaction;
-
     for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; i++) {
         ZoneScopedN("Joystick state");
 
@@ -319,8 +319,8 @@ void mainInitFunc(GLFWwindow*) {
     //
     //  Screenshots
     //
-    // We save the startup value of the screenshots just in case we want to add a date
-    // to them later in the RenderEngine
+    // We save the startup value of the screenshots just in case we want to add a date to
+    // them later in the RenderEngine
     std::filesystem::path screenshotPath = absPath("${SCREENSHOTS}");
     sgct::Engine::instance().setCapturePath(screenshotPath);
     FileSys.registerPathToken("${STARTUP_SCREENSHOT}", std::move(screenshotPath));
@@ -337,10 +337,11 @@ void mainInitFunc(GLFWwindow*) {
         const std::string p = path.string();
         unsigned char* data = stbi_load(p.c_str(), &x, &y, &n, 0);
 
-        GLFWimage icon;
-        icon.pixels = data;
-        icon.width = x;
-        icon.height = y;
+        GLFWimage icon = {
+            .width = x,
+            .height = y,
+            .pixels = data
+        };
 
         for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
             glfwSetWindowIcon(window->windowHandle(), 1, &icon);
@@ -359,20 +360,20 @@ void mainInitFunc(GLFWwindow*) {
 
 
     // Find if we have at least one OpenVR window
-    // Save reference to first OpenVR window, which is the one we will copy to the HMD.
+    // Save reference to first OpenVR window, which is the one we will copy to the HMD
     for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
         if (window->hasTag(OpenVRTag)) {
 #ifdef OPENVR_SUPPORT
             FirstOpenVRWindow = window.get();
 
-            // If we have an OpenVRWindow, initialize OpenVR.
+            // If we have an OpenVRWindow, initialize OpenVR
             sgct::OpenVR::initialize(
                 Engine::instance().nearClippingPlane(),
                 Engine::instance().farClippingPlane()
             );
-#else
+#else // ^^^^ OPENVR_SUPPORT // !OPENVR_SUPPORT vvvv
             LWARNING("OpenVR was requested, but program was compiled without VR support");
-#endif
+#endif // OPENVR_SUPPORT
 
             break;
         }
@@ -413,7 +414,7 @@ void mainInitFunc(GLFWwindow*) {
         if (retValue) {
             SpoutWindows.push_back(std::move(w));
         }
-#else
+#else // ^^^^ OPENSPACE_HAS_SPOUT // !OPENSPACE_HAS_SPOUT vvvv
         LWARNING("Spout was requested, but program was compiled without Spout support");
 #endif // OPENSPACE_HAS_SPOUT
     }
@@ -533,7 +534,7 @@ void mainRenderFunc(const sgct::RenderData& data) {
             SgctEngine->getCurrentFrustumMode()
         );
     }
-#endif
+#endif // OPENVR_SUPPORT
 
     try {
         glm::mat4 modelMatrix;
@@ -1179,16 +1180,16 @@ int main(int argc, char* argv[]) {
 #endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
 
 #ifdef WIN32
-    // In order to be able to use PDB files to resolve stack traces on _user_ machines,
-    // we need to explicitly tell the operating system where to find the PDB files. We
-    // place them right next to the .exe file and this seems to be the only reliable way
-    // to do it.
+    // In order to be able to use PDB files to resolve stack traces on _user_ machines, we
+    // need to explicitly tell the operating system where to find the PDB files. We place
+    // them right next to the .exe file and this seems to be the only reliable way to do
+    // it.
     // Using SymInitialize and SymSetSearchPath from dbghelp.h didn't work
     // https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/symbol-path
 
     std::string exeFolder = std::filesystem::path(argv[0]).parent_path().string();
     _putenv_s("_NT_SYMBOL_PATH", exeFolder.c_str());
-#endif //WIN32
+#endif // WIN32
 
     std::setlocale(LC_ALL, "C");
 
@@ -1214,8 +1215,8 @@ int main(int argc, char* argv[]) {
     ghoul::initialize();
     global::create();
 
-    // Register the path of the executable,
-    // to make it possible to find other files in the same directory.
+    // Register the path of the executable, to make it possible to find other files in the
+    // same directory
     FileSys.registerPathToken(
         "${BIN}",
         std::filesystem::current_path() / std::filesystem::path(argv[0]).parent_path(),
@@ -1239,7 +1240,7 @@ int main(int argc, char* argv[]) {
         "-f",
         "Provides the path to the OpenSpace configuration file. Only the '${TEMPORARY}' "
         "path token is available and any other path has to be specified relative to the "
-        "current working directory"
+        "current working directory."
     ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
         commandlineArguments.windowConfig,
@@ -1346,7 +1347,8 @@ int main(int argc, char* argv[]) {
         // initialized again. Therefore we are using the platform specific functions now
 #ifdef WIN32
         glm::ivec2 size = glm::ivec2(1920, 1080);
-        DEVMODEW dm = { 0 };
+        DEVMODEW dm;
+        std::memset(&dm, 0, sizeof(DEVMODEW));
         dm.dmSize = sizeof(DEVMODEW);
         BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
         if (success) {
@@ -1376,19 +1378,19 @@ int main(int argc, char* argv[]) {
         if (commandlineArguments.propertyVisibility.has_value()) {
             if (commandlineArguments.propertyVisibility == "NoviceUser") {
                 global::configuration->propertyVisibility =
-                    properties::Property::Visibility::NoviceUser;
+                    Property::Visibility::NoviceUser;
             }
             else if (commandlineArguments.propertyVisibility == "User") {
                 global::configuration->propertyVisibility =
-                    properties::Property::Visibility::User;
+                    Property::Visibility::User;
             }
             else if (commandlineArguments.propertyVisibility == "AdvancedUser") {
                 global::configuration->propertyVisibility =
-                    properties::Property::Visibility::AdvancedUser;
+                    Property::Visibility::AdvancedUser;
             }
             else if (commandlineArguments.propertyVisibility == "Developer") {
                 global::configuration->propertyVisibility =
-                    properties::Property::Visibility::Developer;
+                    Property::Visibility::Developer;
             }
             else {
                 throw ghoul::RuntimeError(std::format(
@@ -1403,7 +1405,7 @@ int main(int argc, char* argv[]) {
 
         windowConfiguration = global::configuration->windowConfiguration;
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const SpecificationError& e) {
         LFATALC("main", "Loading of configuration file failed");
         logError(e);
         ghoul::deinitialize();
@@ -1494,7 +1496,8 @@ int main(int argc, char* argv[]) {
         // initialized again. Therefore we are using the platform specific functions now
 #ifdef WIN32
         glm::ivec2 size = glm::ivec2(1920, 1080);
-        DEVMODEW dm = { 0 };
+        DEVMODEW dm;
+        std::memset(&dm, 0, sizeof(DEVMODEW));
         dm.dmSize = sizeof(DEVMODEW);
         BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
         if (success) {
@@ -1517,8 +1520,8 @@ int main(int argc, char* argv[]) {
         isGeneratedWindowConfig = false;
         if (!commandlineArguments.windowConfig.has_value()) {
             config = launcher.selectedWindowConfig();
-            if (config.find(labelFromCfgFile) != std::string::npos) {
-                if (config.find("sgct.config") == std::string::npos) {
+            if (config.contains(labelFromCfgFile)) {
+                if (!config.contains("sgct.config")) {
                     config = config.substr(
                         0,
                         config.length() - labelFromCfgFile.length()
@@ -1545,7 +1548,7 @@ int main(int argc, char* argv[]) {
 
 
     {
-        openspace::Settings settings = loadSettings();
+        Settings settings = loadSettings();
 
         const std::filesystem::path profile = global::configuration->profile;
 
@@ -1676,7 +1679,7 @@ int main(int argc, char* argv[]) {
 #ifdef OPENVR_SUPPORT
     // Clean up OpenVR
     sgct::SGCTOpenVR::shutdown();
-#endif
+#endif // OPENVR_SUPPORT
 
 #ifdef OPENSPACE_HAS_SPOUT
     for (SpoutWindow& w : SpoutWindows) {

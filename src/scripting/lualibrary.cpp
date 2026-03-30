@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <utility>
 
-namespace openspace::scripting {
+namespace openspace {
 
 bool LuaLibrary::operator<(const LuaLibrary& rhs) const {
     return name < rhs.name;
@@ -45,8 +45,8 @@ void LuaLibrary::merge(LuaLibrary rhs) {
             }
         );
         if (itf != functions.end()) {
-            // the function with the desired name is already present, but we don't
-            // want to overwrite it
+            // The function with the desired name is already present, but we don't want to
+            // overwrite it
             LERRORC(
                 "LuaLibrary",
                 std::format(
@@ -83,4 +83,4 @@ void LuaLibrary::merge(LuaLibrary rhs) {
     }
 }
 
-} // namespace openspace::scripting
+} // namespace openspace

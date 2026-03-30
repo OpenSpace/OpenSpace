@@ -27,7 +27,7 @@
 
 #include <string>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 struct TileCacheProperties {
     bool enabled = false;
@@ -37,6 +37,6 @@ struct TileCacheProperties {
     int blockSize;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_CACHE_PROPERTIES___H__

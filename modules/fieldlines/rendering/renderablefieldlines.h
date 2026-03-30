@@ -55,25 +55,21 @@ public:
 private:
     using Line = std::vector<LinePoint>;
 
-    void initializeDefaultPropertyValues();
-    void loadSeedPoints();
     void loadSeedPointsFromFile();
-    void loadSeedPointsFromTable();
 
-    std::vector<Line> generateFieldlines();
     std::vector<Line> generateFieldlinesVolumeKameleon();
 
-    properties::FloatProperty _stepSize;
-    properties::BoolProperty _classification;
-    properties::Vec4Property _fieldlineColor;
-    properties::OptionProperty _seedPointSource;
-    properties::StringProperty _seedPointSourceFile;
+    FloatProperty _stepSize;
+    BoolProperty _classification;
+    Vec4Property _fieldlineColor;
+    OptionProperty _seedPointSource;
+    StringProperty _seedPointSourceFile;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
-    ghoul::Dictionary _vectorFieldInfo;
-    ghoul::Dictionary _fieldlineInfo;
-    ghoul::Dictionary _seedPointsInfo;
+    std::filesystem::path _file;
+    std::vector<std::string> _variables;
+    std::optional<std::vector<glm::vec3>> _seedPointsTable;
 
     bool _seedPointsAreDirty = true;
     bool _fieldLinesAreDirty = true;

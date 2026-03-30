@@ -28,13 +28,13 @@
 #include <openspace/properties/numericalproperty.h>
 
 #include <ghoul/glm.h>
+#include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 class Mat2Property : public NumericalProperty<glm::mat2x2> {
 public:
-    explicit Mat2Property(Property::PropertyInfo info,
-        glm::mat2x2 value = glm::mat2x2(0.f),
+    explicit Mat2Property(PropertyInfo info, glm::mat2x2 value = glm::mat2x2(0.f),
         glm::mat2x2 minValue =
             ghoul::createFillMat2x2<float>(std::numeric_limits<float>::lowest()),
         glm::mat2x2 maxValue =
@@ -53,6 +53,6 @@ private:
     glm::mat2x2 toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___MAT2PROPERTY___H__

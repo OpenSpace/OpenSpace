@@ -29,23 +29,25 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TextInfo = {
         "Text",
         "Text",
         "The text to be displayed.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(DashboardItemText)]] Parameters {
         // [[codegen::verbatim(TextInfo.description)]]
         std::optional<std::string> text;
     };
-#include "dashboarditemtext_codegen.cpp"
 } // namespace
+#include "dashboarditemtext_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemText::Documentation() {
+Documentation DashboardItemText::Documentation() {
     return codegen::doc<Parameters>(
         "base_dashboarditem_text",
         DashboardTextItem::Documentation()

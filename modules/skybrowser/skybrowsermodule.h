@@ -55,7 +55,7 @@ public:
     int uniqueIdentifierCounter() const;
 
     void setSelectedBrowser(std::string_view id);
-    void setHoverCircle(SceneGraphNode* circle);
+    void setHoverIndicator(SceneGraphNode* circle);
 
     // Rotation, animation, placement
     void lookAtTarget(const std::string& id);
@@ -76,17 +76,19 @@ public:
     void removeTargetBrowserPair(const std::string& id);
     void addTargetBrowserPair(const std::string& targetId, const std::string& browserId);
 
-    // Hover circle
-    void moveHoverCircle(const std::string& imageUrl, bool useScript = true);
-    void disableHoverCircle(bool useScript = true);
+    // Hover indicator
+    void moveHoverIndicator(const std::string& imageUrl, bool useScript = true);
+    void disableHoverIndicator(bool useScript = true);
 
     // Image collection handling
     void loadImages(const std::string& root, const std::filesystem::path& directory);
     int nLoadedImages() const;
 
-    scripting::LuaLibrary luaLibrary() const override;
-    std::vector<documentation::Documentation> documentations() const override;
-    static documentation::Documentation Documentation();
+    int topicUpdateInterval() const;
+
+    LuaLibrary luaLibrary() const override;
+    std::vector<openspace::Documentation> documentations() const override;
+    static openspace::Documentation Documentation();
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;
@@ -95,28 +97,30 @@ private:
     void incrementallyRotateCamera();
     void incrementallyAnimateTargets();
 
-    properties::BoolProperty _allowCameraRotation;
-    properties::DoubleProperty _cameraRotationSpeed;
-    properties::DoubleProperty _targetAnimationSpeed;
-    properties::DoubleProperty _browserAnimationSpeed;
-    properties::BoolProperty _hideTargetsBrowsersWithGui;
-    properties::BoolProperty _inverseZoomDirection;
-    properties::BoolProperty _synchronizeAim;
-    properties::DoubleProperty _spaceCraftAnimationTime;
-    properties::StringProperty _wwtImageCollectionUrl;
+    BoolProperty _allowCameraRotation;
+    DoubleProperty _cameraRotationSpeed;
+    DoubleProperty _targetAnimationSpeed;
+    DoubleProperty _browserAnimationSpeed;
+    BoolProperty _hideTargetsBrowsersWithGui;
+    BoolProperty _inverseZoomDirection;
+    BoolProperty _synchronizeAim;
+    DoubleProperty _spaceCraftAnimationTime;
+    StringProperty _wwtImageCollectionUrl;
 
     // The browsers and targets
     std::vector<std::unique_ptr<TargetBrowserPair>> _targetsBrowsers;
-    SceneGraphNode* _hoverCircle = nullptr;
-    std::string _selectedBrowser; // Currently selected browser
+    SceneGraphNode* _hoverIndicator = nullptr;
+    /// Currently selected browser
+    std::string _selectedBrowser;
     int _uniqueIdentifierCounter = 0;
+    int _topicUpdateInterval = 100;
 
     // Flags
-    bool _isCameraInSolarSystem = true; // Visualization modes
+    bool _isCameraInSolarSystem = true;
 
     // Animation of rotation of camera to look at coordinate galactic coordinates
-    skybrowser::Animation<glm::dvec3> _cameraRotation =
-        skybrowser::Animation(glm::dvec3(0.0), glm::dvec3(0.0), 0.0);
+    Animation<glm::dvec3> _cameraRotation =
+        Animation(glm::dvec3(0.0), glm::dvec3(0.0), 0.0);
 
     // Data handler for the image collections
     WwtDataHandler _dataHandler;

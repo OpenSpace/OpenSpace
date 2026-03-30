@@ -119,7 +119,7 @@ public:
 
     /**
      * \param data Defines position and camera that we will see the other cameras view
-     *             frustum from
+     *        frustum from
      * \param otherCamera The camera who's view frustum is to be rendered
      * \param rgba Color to draw the view frustum with
      */

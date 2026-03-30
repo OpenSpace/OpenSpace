@@ -24,7 +24,7 @@
 
 #include <openspace/properties/misc/triggerproperty.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 TriggerProperty::TriggerProperty(PropertyInfo info)
     : Property(std::move(info))
@@ -52,4 +52,4 @@ std::string TriggerProperty::jsonValue() const {
     return "true";
 }
 
-} // namespace openspace::properties
+} // namespace openspace

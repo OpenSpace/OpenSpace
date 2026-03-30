@@ -39,14 +39,14 @@ public:
 
     glm::dvec3 position(const UpdateData& data) const override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::StringProperty _target;
-    properties::StringProperty _observer;
-    properties::StringProperty _frame;
-    properties::StringProperty _fixedDate;
-    properties::FloatProperty _timeOffset;
+    StringProperty _target;
+    StringProperty _observer;
+    StringProperty _frame;
+    StringProperty _fixedDate;
+    FloatProperty _timeOffset;
 
     // We are accessing these values every frame and when retrieving a string from the
     // StringProperty, it allocates some new memory, which we want to prevent. Until the

@@ -52,6 +52,8 @@ public:
      * Function that uses the QtFileSystemModel class to search the given directory.
      *
      * \param dir The directory from which to start the search from
+     * \param userAssets If `true` the provided directory points to user assets. If
+     *        `false` the directory is referring to core assets instead
      */
     std::string useQtFileSystemModelToTraverseDir(const std::string& dir,
         bool userAssets = false);

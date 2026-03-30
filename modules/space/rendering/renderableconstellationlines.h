@@ -50,17 +50,17 @@ public:
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     struct ConstellationLine {
         bool isEnabled = true;
         std::string name;
-        int lineIndex;
-        int colorIndex;
-        int numV;
-        GLuint vaoArray;
-        GLuint vboArray;
+        int lineIndex = 0;
+        int colorIndex = 0;
+        int numV = 0;
+        GLuint vao = 0;
+        GLuint vbo = 0;
         std::vector<GLfloat> vertices;
     };
 
@@ -75,8 +75,8 @@ private:
      */
     void selectionPropertyHasChanged() override;
 
-    properties::StringProperty _speckFile;
-    properties::BoolProperty _drawElements;
+    StringProperty _speckFile;
+    BoolProperty _drawElements;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, opacity,

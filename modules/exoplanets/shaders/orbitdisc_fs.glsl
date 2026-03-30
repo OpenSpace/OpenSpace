@@ -75,10 +75,10 @@ Fragment getFragment() {
   // Normalize based on outer apoapsis distance (size of plane)
   float normAU = aUpper / outerApoapsisDistance;
   float normBU = bUpper / outerApoapsisDistance;
-  float normCU = eccentricity <= Epsilon ? cUpper / outerApoapsisDistance : 0.0;
+  float normCU = eccentricity > Epsilon ? cUpper / outerApoapsisDistance : 0.0;
   float normAL = aLower / outerApoapsisDistance;
   float normBL = bLower / outerApoapsisDistance;
-  float normCL = eccentricity <= Epsilon ? cLower / outerApoapsisDistance : 0.0;
+  float normCL = eccentricity > Epsilon ? cLower / outerApoapsisDistance : 0.0;
 
   float outer = ellipseTest(st, normAU, normBU, -normCU);
   float inner = ellipseTest(st, normAL, normBL, -normCL);

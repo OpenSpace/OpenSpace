@@ -34,15 +34,15 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "TextureCygnet";
+
+    struct [[codegen::Dictionary(RenderableTextureCygnet)]] Parameters {};
 } // namespace
+#include "renderabletexturecygnet_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableTextureCygnet::Documentation() {
-    documentation::Documentation doc = RenderableIswaCygnet::Documentation();
-    doc.name = "RenderableTextureCygnet";
-    doc.id = "iswa_renderable_texturecygnet";
-    return doc;
+Documentation RenderableTextureCygnet::Documentation() {
+    return codegen::doc<Parameters>("iswa_renderable_texturecygnet");
 }
 
 RenderableTextureCygnet::RenderableTextureCygnet(const ghoul::Dictionary& dictionary)
@@ -54,22 +54,17 @@ RenderableTextureCygnet::RenderableTextureCygnet(const ghoul::Dictionary& dictio
 bool RenderableTextureCygnet::updateTexture() {
     using namespace ghoul;
 
-    std::unique_ptr<opengl::Texture> texture = io::TextureReader::ref().loadTexture(
+    _textures[0] = io::TextureReader::ref().loadTexture(
         reinterpret_cast<void*>(_imageFile.buffer),
         _imageFile.size,
         2,
+        { .filter = opengl::Texture::FilterMode::LinearMipMap },
         _imageFile.format
     );
 
-    if (texture) {
-        LDEBUG(std::format(
-            "Loaded texture from image iswa cygnet with id '{}'", _data.id
-        ));
-        texture->uploadTexture();
-        // Textures of planets looks much smoother with AnisotropicMipMap
-        texture->setFilter(opengl::Texture::FilterMode::LinearMipMap);
-        _textures[0] = std::move(texture);
-    }
+    LDEBUG(std::format(
+        "Loaded texture from image iswa cygnet with id '{}'", _data.id
+    ));
 
     return false;
 }
@@ -97,7 +92,7 @@ bool RenderableTextureCygnet::downloadTextureResource(double timestamp) {
 }
 
 bool RenderableTextureCygnet::updateTextureResource() {
-    // if The future is done then get the new imageFile
+    // If the future is done then get the new imageFile
     DownloadManager::MemoryFile imageFile;
     if (_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
         imageFile = _futureObject.get();
@@ -121,4 +116,4 @@ bool RenderableTextureCygnet::readyToRender() const {
     return isReady() && ((!_textures.empty()) && _textures[0]);
 }
 
-} //namespace openspace
+} // namespace openspace

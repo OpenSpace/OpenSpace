@@ -45,39 +45,41 @@
 #include "debuggingmodule_lua.inl"
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view KeyFontMono = "Mono";
 
-    constexpr openspace::properties::Property::PropertyInfo ShowStatisticsInfo = {
+    constexpr Property::PropertyInfo ShowStatisticsInfo = {
         "ShowStatistics",
         "Show statistics",
         "Show updating, rendering, and network statistics on all rendering nodes.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StatisticsScaleInfo = {
+    constexpr Property::PropertyInfo StatisticsScaleInfo = {
         "StatisticsScale",
         "Statistics scale",
         "This value is scaling the statistics window by the provided amount. For flat "
         "projections this is rarely necessary, but it is important when using a setup "
         "where the corners of the image are masked out.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StatisticsOffsetInfo = {
+    constexpr Property::PropertyInfo StatisticsOffsetInfo = {
         "StatisticsOffset",
         "Statistics offset",
         "This value is offsetting the center of the statistics window by the provided "
         "amount. For flat projections this is rarely necessary, but it is important when "
         "using a setup the center of the image is distorted in some form.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowFrameNumberInfo = {
+    constexpr Property::PropertyInfo ShowFrameNumberInfo = {
         "ShowFrameInformation",
         "Show frame information",
         "If this value is enabled, the current frame number and frame times are rendered "
         "into the window.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 } // namespace
 
@@ -118,38 +120,40 @@ DebuggingModule::DebuggingModule()
     global::callback::render->push_back(
         [this](const glm::mat4&, const glm::mat4&, const glm::mat4&)
         {
-            if (_showFrameInformation) {
-                ZoneScopedN("Show Frame Information");
-                WindowDelegate* del = global::windowDelegate;
-
-                glm::vec2 penPosition = glm::vec2(
-                    global::renderEngine->fontResolution().x / 2 - 70,
-                    global::renderEngine->fontResolution().y / 3
-                );
-
-                std::string fn = std::to_string(global::renderEngine->frameNumber());
-                const WindowDelegate::Frustum frustum = del->frustumMode();
-                std::string fr = [](WindowDelegate::Frustum f) -> std::string {
-                    switch (f) {
-                        case WindowDelegate::Frustum::Mono:     return "";
-                        case WindowDelegate::Frustum::LeftEye:  return "(left)";
-                        case WindowDelegate::Frustum::RightEye: return "(right)";
-                        default:                      throw ghoul::MissingCaseException();
-
-                    }
-                }(frustum);
-
-                std::string node = std::to_string(del->currentNode());
-                std::string sgFn = std::to_string(del->swapGroupFrameNumber());
-                std::string dt = std::to_string(del->deltaTime());
-                std::string avgDt = std::to_string(del->averageDeltaTime());
-
-                const std::string res = std::format(
-                    "Node: {}\n\nFrame: {} {}\nSwap group frame: {}\nDt: {}\nAvg Dt: {}",
-                    node, fn, fr, sgFn, dt, avgDt
-                );
-                RenderFont(*_fontFrameInfo, penPosition, res);
+            if (!_showFrameInformation) {
+                return;
             }
+
+            ZoneScopedN("Show Frame Information");
+            WindowDelegate* del = global::windowDelegate;
+
+            glm::vec2 penPosition = glm::vec2(
+                global::renderEngine->fontResolution().x / 2 - 70,
+                global::renderEngine->fontResolution().y / 3
+            );
+
+            std::string fn = std::to_string(global::renderEngine->frameNumber());
+            const WindowDelegate::Frustum frustum = del->frustumMode();
+            std::string fr = [](WindowDelegate::Frustum f) -> std::string {
+                switch (f) {
+                    case WindowDelegate::Frustum::Mono:     return "";
+                    case WindowDelegate::Frustum::LeftEye:  return "(left)";
+                    case WindowDelegate::Frustum::RightEye: return "(right)";
+                    default:                          throw ghoul::MissingCaseException();
+
+                }
+            }(frustum);
+
+            std::string node = std::to_string(del->currentNode());
+            std::string sgFn = std::to_string(del->swapGroupFrameNumber());
+            std::string dt = std::to_string(del->deltaTime());
+            std::string avgDt = std::to_string(del->averageDeltaTime());
+
+            const std::string res = std::format(
+                "Node: {}\n\nFrame: {} {}\nSwap group frame: {}\nDt: {}\nAvg Dt: {}",
+                node, fn, fr, sgFn, dt, avgDt
+            );
+            RenderFont(*_fontFrameInfo, penPosition, res);
         }
     );
 }
@@ -167,13 +171,13 @@ void DebuggingModule::internalInitializeGL() {
     _fontFrameInfo = global::fontManager->font(KeyFontMono, fontSize.frameInfo);
 }
 
-std::vector<documentation::Documentation> DebuggingModule::documentations() const {
+std::vector<Documentation> DebuggingModule::documentations() const {
     return {
         ScreenSpaceDebugPlane::Documentation()
     };
 }
 
-scripting::LuaLibrary DebuggingModule::luaLibrary() const {
+LuaLibrary DebuggingModule::luaLibrary() const {
     return {
         .name = "debugging",
         .functions = {

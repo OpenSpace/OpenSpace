@@ -37,7 +37,7 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 
 struct Configuration {
     Configuration() = default;
@@ -52,8 +52,7 @@ struct Configuration {
     std::string asset;
     std::string profile;
 
-    properties::Property::Visibility propertyVisibility =
-        properties::Property::Visibility::User;
+    Property::Visibility propertyVisibility = Property::Visibility::User;
 
     bool showPropertyConfirmation = true;
 
@@ -132,6 +131,8 @@ struct Configuration {
 
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
 
+    ghoul::Dictionary server;
+
     struct OpenGLDebugContext {
         bool isActive = false;
         bool printStacktrace = false;
@@ -159,7 +160,7 @@ struct Configuration {
     // Values not read from the openspace.cfg file
     std::string sgctConfigNameInitialized;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
     ghoul::lua::LuaState state;
 };
 

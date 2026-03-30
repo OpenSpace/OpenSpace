@@ -30,46 +30,48 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo VisibilityInfo = {
         "Visibility",
         "Toggle visibility of markers",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
+    constexpr Property::PropertyInfo RadiusInfo = {
         "Size",
         "Marker radius",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
+    constexpr Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Marker opacity",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ThicknessInfo = {
+    constexpr Property::PropertyInfo ThicknessInfo = {
         "Thickness",
         "Marker thickness",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr Property::PropertyInfo ColorInfo = {
         "MarkerColor",
         "Marker color",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 } // namespace
 
 namespace openspace {
 
 TouchMarker::TouchMarker()
-    : properties::PropertyOwner({ "TouchMarker", "Touch Marker" })
+    : PropertyOwner({ "TouchMarker", "Touch Marker" })
     , _visible(VisibilityInfo, true)
     , _radiusSize(RadiusInfo, 30.f, 0.f, 100.f)
     , _opacity(OpacityInfo, 0.8f, 0.f, 1.f)
@@ -80,7 +82,7 @@ TouchMarker::TouchMarker()
     addProperty(_radiusSize);
     addProperty(_opacity);
     addProperty(_thickness);
-    _color.setViewOption(properties::Property::ViewOptions::Color);
+    _color.setViewOption(Property::ViewOptions::Color);
     addProperty(_color);
 }
 
@@ -114,35 +116,37 @@ void TouchMarker::deinitialize() {
     }
 }
 
-void TouchMarker::render(const std::vector<openspace::TouchInputHolder>& list) {
-    if (_visible && !list.empty()) {
-        createVertexList(list);
-        _shader->activate();
-
-        _shader->setUniform(_uniformCache.radius, _radiusSize);
-        _shader->setUniform(_uniformCache.opacity, _opacity);
-        _shader->setUniform(_uniformCache.thickness, _thickness);
-        _shader->setUniform(_uniformCache.color, _color.value());
-
-        glEnable(GL_BLEND);
-        glBlendEquation(GL_FUNC_ADD);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex shader
-        glBindVertexArray(_vao);
-        glDrawArrays(GL_POINTS, 0, _count);
-
-        _shader->deactivate();
+void TouchMarker::render(const std::vector<TouchInputHolder>& list) {
+    if (!_visible || list.empty()) {
+        return;
     }
+
+    createVertexList(list);
+    _shader->activate();
+
+    _shader->setUniform(_uniformCache.radius, _radiusSize);
+    _shader->setUniform(_uniformCache.opacity, _opacity);
+    _shader->setUniform(_uniformCache.thickness, _thickness);
+    _shader->setUniform(_uniformCache.color, _color.value());
+
+    glEnable(GL_BLEND);
+    glBlendEquation(GL_FUNC_ADD);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    glBindVertexArray(_vao);
+    glDrawArrays(GL_POINTS, 0, _count);
+
+    _shader->deactivate();
 }
 
-void TouchMarker::createVertexList(const std::vector<openspace::TouchInputHolder>& list) {
+void TouchMarker::createVertexList(const std::vector<TouchInputHolder>& list) {
     std::vector<GLfloat> vertexData;
     vertexData.resize(list.size() * 2);
 
     int i = 0;
-    for (const openspace::TouchInputHolder& inputHolder : list) {
-        vertexData[i] = 2.f * (inputHolder.latestInput().x - 0.5f);
-        vertexData[i + 1] = -2.f * (inputHolder.latestInput().y - 0.5f);
+    for (const TouchInputHolder& inputHolder : list) {
+        vertexData[i] = 2.f * (inputHolder.latestInput().pos.x - 0.5f);
+        vertexData[i + 1] = -2.f * (inputHolder.latestInput().pos.y - 0.5f);
         i += 2;
     }
 
@@ -156,4 +160,4 @@ void TouchMarker::createVertexList(const std::vector<openspace::TouchInputHolder
     _count = static_cast<GLsizei>(list.size());
 }
 
-} // openspace namespace
+} // namespace openspace

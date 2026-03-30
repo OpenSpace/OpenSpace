@@ -33,7 +33,7 @@
 
 namespace ghoul::opengl { class Texture; }
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 struct AABB3 {
     glm::vec3 min = glm::vec3(std::numeric_limits<float>::max());
@@ -51,15 +51,15 @@ struct PixelRegion {
 
 struct IODescription {
     struct ReadData {
-        int overview;
+        int overview = 0;
         PixelRegion region;
         PixelRegion fullRegion;
     } read;
 
     struct WriteData {
         PixelRegion region;
-        size_t bytesPerLine;
-        size_t totalNumBytes;
+        size_t bytesPerLine = 0;
+        size_t totalNumBytes = 0;
     } write;
 };
 
@@ -104,7 +104,7 @@ public:
      * Describe if this Tile is good for usage (OK) or otherwise the reason why it is not.
      */
     enum class Status {
-        /// E.g when texture data is not currently in memory.
+        /// For example when texture data is not currently in memory.
         /// `texture` and `tileMetaData` are both `nullptr`
         Unavailable,
 
@@ -113,7 +113,7 @@ public:
         /// `texture` and `metaData` are both `nullptr`
         OutOfRange,
 
-        /// An IO Error happend
+        /// An IO Error happened.
         /// `texture` and `metaData` are both `nullptr`
         IOError,
 
@@ -149,6 +149,6 @@ struct ChunkTile {
 // the current layer is needed
 using ChunkTilePile = std::array<std::optional<ChunkTile>, 3>;
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING__BASICTYPES___H__

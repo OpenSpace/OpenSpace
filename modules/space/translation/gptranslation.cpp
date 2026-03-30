@@ -33,30 +33,41 @@
 #include <optional>
 
 namespace {
+    // GPTranslation is a [Translation](#core_translation) component that defines an
+    // object's orbit from a general perturbation ("GP") element source rather than from
+    // explicitly authored Keplerian parameters. It is intended for orbit descriptions
+    // stored in common external formats such as satellite element sets and similar
+    // catalog-style orbital data products.
+    //
+    // The implementation also supports files that contain multiple element entries. In
+    // that case, a specific entry can be selected, allowing a single file to serve as a
+    // source for multiple orbiting objects or multiple records of the same kind.
     struct [[codegen::Dictionary(GPTranslation)]] Parameters {
-        // Specifies the filename of the general pertubation file
+        // Specifies the filename of the general pertubation file.
         std::filesystem::path file;
 
         enum class [[codegen::map(openspace::kepler::Format)]] Format {
-            // A NORAD-style Two-Line element
+            // A NORAD-style Two-Line element.
             TLE,
-            // Orbit Mean-Elements Message in the KVN notation
+            // Orbit Mean-Elements Message in the KVN notation.
             OMM,
-            // JPL's Small Bodies Database
+            // JPL's Small Bodies Database.
             SBDB
         };
-        // The file format that is contained in the file
+        // The file format that is contained in the file.
         Format format;
 
         // Specifies the element within the file that should be used in case the file
         // provides multiple general pertubation elements. Defaults to 1.
         std::optional<int> element [[codegen::greater(0)]];
     };
+} // namespace
 #include "gptranslation_codegen.cpp"
 
-    ghoul::Dictionary gpDictionaryToKepler(const ghoul::Dictionary& dictionary) {
-        using namespace openspace;
+namespace {
+    using namespace openspace;
 
+    ghoul::Dictionary gpDictionaryToKepler(const ghoul::Dictionary& dictionary) {
         const Parameters p = codegen::bake<Parameters>(dictionary);
         if (!std::filesystem::is_regular_file(p.file)) {
             throw ghoul::RuntimeError("The provided TLE file must exist");
@@ -95,7 +106,7 @@ namespace {
 
 namespace openspace {
 
-documentation::Documentation GPTranslation::Documentation() {
+Documentation GPTranslation::Documentation() {
     return codegen::doc<Parameters>("space_translation_gp");
 }
 

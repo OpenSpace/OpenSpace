@@ -25,6 +25,8 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 
+using namespace openspace;
+
 namespace {
 
 /**
@@ -33,8 +35,6 @@ namespace {
  * is being downloaded.
  */
 [[codegen::luawrap]] bool syncResource(std::string identifier, int version) {
-    using namespace openspace;
-
     ghoul::Dictionary dict;
     dict.setValue("Type", std::string("HttpSynchronization"));
     dict.setValue("Identifier", identifier);
@@ -63,8 +63,6 @@ namespace {
 [[codegen::luawrap]] void unsyncResource(std::string identifier,
                                          std::optional<int> version)
 {
-    using namespace openspace;
-
     const SyncModule* module = global::moduleEngine->module<SyncModule>();
     std::filesystem::path sync = absPath(module->synchronizationRoot());
     std::filesystem::path base = sync / "http" / identifier;
@@ -84,6 +82,6 @@ namespace {
     }
 }
 
-#include "syncmodule_lua_codegen.cpp"
-
 } // namespace
+
+#include "syncmodule_lua_codegen.cpp"

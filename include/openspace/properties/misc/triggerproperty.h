@@ -27,7 +27,7 @@
 
 #include <openspace/properties/property.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 /**
  * TriggerProperty that can be used to fire events into your code using the callback
@@ -73,6 +73,6 @@ public:
     std::string jsonValue() const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___TRIGGERPROPERTY___H__

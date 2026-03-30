@@ -52,7 +52,7 @@ public:
      * \return The openspace::Documentation that describes the ghoul::Dicitonary that can
      *         be passed to the constructor
      */
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 };
 
 } // namespace openspace

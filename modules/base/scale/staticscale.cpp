@@ -28,12 +28,14 @@
 #include <openspace/util/updatestructures.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ScaleInfo = {
         "Scale",
         "Scale",
         "This value is used as a scaling factor for the scene graph node that this "
         "transformation is attached to relative to its parent.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
     // This Scale type scales the scene graph node that it is attached to by a fixed
@@ -45,13 +47,13 @@ namespace {
         // [[codegen::verbatim(ScaleInfo.description)]]
         double scale;
     };
-#include "staticscale_codegen.cpp"
 } // namespace
+#include "staticscale_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation StaticScale::Documentation() {
-    return codegen::doc<Parameters>("base_transform_scale_static");
+Documentation StaticScale::Documentation() {
+    return codegen::doc<Parameters>("base_scale_static");
 }
 
 StaticScale::StaticScale(const ghoul::Dictionary& dictionary)

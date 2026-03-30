@@ -33,43 +33,68 @@
 #include <variant>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "SizeMapping";
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Size mapping enabled",
         "If this value is set to 'true' and at least one column was loaded as an option "
         "for size mapping, the chosen data column will be used to scale the size of the "
         "points. The first option in the list is selected per default.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OptionInfo = {
+    constexpr Property::PropertyInfo OptionInfo = {
         "Parameter",
         "Parameter option",
         "This value determines which parameter is used for scaling of the point. The "
         "parameter value will be used as a multiplicative factor to scale the size of "
         "the points. Note that they may however still be scaled by max size adjustment "
         "effects.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
+    constexpr Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale factor",
         "This value is a multiplicative factor that is applied to the data values that "
         "are used to scale the points, when size mapping is applied.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IsRadiusInfo = {
+    constexpr Property::PropertyInfo IsRadiusInfo = {
         "IsRadius",
         "Size is radius",
         "If true, the size value in the data is interpreted as the radius of the points. "
         "Otherwise, it is interpreted as the diameter.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
+    // SizeMappingComponent is a reusable point-cloud helper that controls how per-point
+    // data influences rendered point size. It is intended for datasets where point size
+    // should convey meaning instead of remaining visually uniform.
+    //
+    // When enabled, the component selects one data parameter from the loaded dataset and
+    // uses that value as a multiplicative size input for each point. This makes it
+    // possible to encode attributes such as physical size, intensity, uncertainty, or any
+    // other scalar quantity directly into the visual scale of the point cloud.
+    //
+    // The component is structured as a configurable property owner, so it can be embedded
+    // into larger point-cloud renderables. Rather than defining the available parameters
+    // itself, it works with a provided list of size-capable dataset columns and lets one
+    // of them be chosen as the active mapping source.
+    //
+    // It also handles unit conversion for size values. Dataset values can be interpreted
+    // in a known distance unit or through an explicit numeric conversion factor, allowing
+    // the same logic to work across sources that express size in different scales. This
+    // is important when point sizes represent physical quantities that need to remain
+    // meaningful in the scene.
+    //
+    // In addition, the component supports interpreting incoming values as either radius
+    // or diameter. This allows it to adapt to differing dataset conventions without
+    // requiring the source data to be reformatted.
     struct [[codegen::Dictionary(SizeMappingComponent)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -113,17 +138,17 @@ namespace {
         // [[codegen::verbatim(IsRadiusInfo.description)]]
         std::optional<bool> isRadius;
     };
+} // namespace
 #include "sizemappingcomponent_codegen.cpp"
-}  // namespace
 
 namespace openspace {
 
-documentation::Documentation SizeMappingComponent::Documentation() {
+Documentation SizeMappingComponent::Documentation() {
     return codegen::doc<Parameters>("base_sizemappingcomponent");
 }
 
 SizeMappingComponent::SizeMappingComponent()
-    : properties::PropertyOwner({ "SizeMapping", "Size Mapping", "" })
+    : PropertyOwner({ "SizeMapping", "Size Mapping", "" })
     , enabled(EnabledInfo, true)
     , parameterOption(OptionInfo)
     , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 1000.f)

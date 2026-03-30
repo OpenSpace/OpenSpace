@@ -29,7 +29,7 @@
 
 #include <openspace/util/ellipsoid.h>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 class SizeReferenceTileProvider : public TextTileProvider {
 public:
@@ -43,12 +43,12 @@ public:
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     Ellipsoid _ellipsoid;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__SIZEREFERENCETILEPROVIDER___H__

@@ -27,7 +27,7 @@
 
 #include <openspace/properties/numericalproperty.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 /**
  * The OptionProperty is a property that provides a number of predefined (using the
@@ -55,7 +55,7 @@ public:
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
      */
-    explicit OptionProperty(Property::PropertyInfo info);
+    explicit OptionProperty(PropertyInfo info);
 
     /**
      * Returns the name of the class for reflection purposes.
@@ -146,6 +146,6 @@ private:
     std::vector<Option> _options;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___OPTIONPROPERTY___H__

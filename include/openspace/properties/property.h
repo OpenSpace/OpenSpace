@@ -42,7 +42,7 @@
 
 struct lua_State;
 
-namespace openspace::properties {
+namespace openspace {
 
 class PropertyOwner;
 
@@ -164,7 +164,7 @@ public:
      * read-only state is `false`.
      *
      * \param info The PropertyInfo structure that contains all the required static
-     *        information for initializing this Property.
+     *        information for initializing this Property
      *
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
@@ -225,7 +225,7 @@ public:
      * can be a combination of any value contained in the `LuaTypes`.
      *
      * \return The Lua type that will be consumed or produced by the Property::getLuaValue
-     *         and Property::setLuaValue methods.
+     *         and Property::setLuaValue methods
      */
     virtual ghoul::lua::LuaTypes typeLua() const = 0;
 
@@ -246,7 +246,7 @@ public:
      *
      * \param callback The callback function that is called when the encapsulated type has
      *        been successfully changed by either the Property::set or
-     *        Property::setLuaValue methods.
+     *        Property::setLuaValue methods
      * \return An OnChangeHandle that can be used in subsequent calls to remove a callback
      *
      * \pre The \p callback must not be empty
@@ -270,7 +270,7 @@ public:
      * returned here.
      *
      * \param callback The callback function that is called when the meta data of the
-     *        property has been changed.
+     *        property has been changed
      * \return An OnMetaDataChangeHandle that can be used in subsequent calls to remove a
      *         callback
      *
@@ -284,9 +284,9 @@ public:
      * are removed.
      *
      * \param handle An OnChangeHandle that was returned from a previous call to onChange
-     *        by this property or OnChangeHandleAll if all callbacks should be removed.
+     *        by this property or OnChangeHandleAll if all callbacks should be removed
      *
-     * \pre \p handle must refer to a callback that has been previously registred
+     * \pre \p handle must refer to a callback that has been previously registered
      * \pre \p handle must refer to a callback that has not been removed previously
      */
     void removeOnChange(OnChangeHandle handle);
@@ -296,9 +296,9 @@ public:
      * method.
      *
      * \param handle An OnDeleteHandle that was returned from a previous call to onDelete
-     *        by this property.
+     *        by this property
      *
-     * \pre \p handle must refer to a callback that has been previously registred
+     * \pre \p handle must refer to a callback that has been previously registered
      * \pre \p handle must refer to a callback that has not been removed previously
      */
     void removeOnDelete(OnDeleteHandle handle);
@@ -309,10 +309,10 @@ public:
      * all registered callbacks are removed.
      *
      * \param handle An OnMetaDataChangeHandle that was returned from a previous call to
-     * onMetaDataChange by this property or OnMetaDataChangeHandleAll if all callbacks
-     * should be removed.
+     *        onMetaDataChange by this property or OnMetaDataChangeHandleAll if all
+     *        callbacks should be removed
      *
-     * \pre \p handle must refer to a callback that has been previously registred
+     * \pre \p handle must refer to a callback that has been previously registered
      * \pre \p handle must refer to a callback that has not been removed previously
      */
     void removeOnMetaDataChange(OnMetaDataChangeHandle handle);
@@ -426,7 +426,7 @@ public:
      * Property::setLuaValue methods.
      *
      * \param needsConfirmation `true` if confirmation dialogs should be shown, `false`
-     *        otherwise.
+     *        otherwise
      */
     void setNeedsConfirmation(bool needsConfirmation);
 
@@ -437,8 +437,8 @@ public:
      *   - Property::ViewOptions::MinMaxRange = `MinMaxRange` (Intended for Vec2)
      */
     struct ViewOptions {
-        static const char* Color;
-        static const char* MinMaxRange;
+        static std::string Color;
+        static std::string MinMaxRange;
     };
 
     /**
@@ -473,7 +473,9 @@ public:
      */
     virtual std::string jsonValue() const;
 
-    /// Interpolation methods
+    /**
+     * Interpolation methods.
+     */
     virtual void setLuaInterpolationTarget(lua_State* state);
 
     virtual void interpolateValue(float t,
@@ -501,7 +503,7 @@ public:
     /**
      * Returns whether or not the property value has changed.
      *
-     * \return true if the property has changed
+     * \return `true` if the property has changed
      */
     bool hasChanged() const;
 
@@ -525,12 +527,12 @@ protected:
     void notifyChangeListeners();
 
     /**
-     * This method must be called by all subclasses whenever the meta data has
-     * changed and potential listeners need to be informed.
+     * This method must be called by all subclasses whenever the meta data has changed and
+     * potential listeners need to be informed.
      */
     void notifyMetaDataChangeListeners();
 
-    /// The PropetyOwner this Property belongs to, or `nullptr`
+    /// The PropertyOwner this Property belongs to, or `nullptr`
     PropertyOwner* _owner = nullptr;
 
     /// The identifier for this Property
@@ -542,12 +544,14 @@ protected:
     /// The user-facing description of this Property
     std::string _description;
 
-    /// The meta data necessary for external applications
+    /**
+     * The meta data necessary for external applications.
+     */
     struct {
         std::optional<std::string> group;
         Visibility visibility = Visibility::Default;
         std::optional<bool> readOnly;
-        bool needsConfirmation;
+        bool needsConfirmation = false;
         std::unordered_map<std::string, bool> viewOptions;
     } _metaData;
 
@@ -574,12 +578,12 @@ private:
 
 #ifdef _DEBUG
     // These identifiers can be used for debugging. Each Property is assigned one unique
-    // identifier.
+    // identifier
     static uint64_t Identifier;
     uint64_t _id;
 #endif
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___PROPERTY___H__

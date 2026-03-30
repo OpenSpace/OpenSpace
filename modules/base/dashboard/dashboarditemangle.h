@@ -42,13 +42,13 @@ public:
 
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     struct Component {
-        properties::OptionProperty type;
-        properties::StringProperty nodeIdentifier;
-        SceneGraphNode* node;
+        OptionProperty type;
+        StringProperty nodeIdentifier;
+        SceneGraphNode* node = nullptr;
     };
 
     static std::pair<glm::dvec3, std::string> positionAndLabel(Component& comp);

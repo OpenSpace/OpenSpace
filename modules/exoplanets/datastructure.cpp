@@ -42,9 +42,9 @@ namespace {
     // This is the documentation for the data object that is returned from the
     // `openspace.exoplanets.systemData` function in the Scripting API.
     //
-    // The data object provides the information needed to create the scene graph nodes
-    // for an exoplanet system. However, depending on what data is available for the
-    // specific planets and star, some values may be undefined.
+    // The data object provides the information needed to create the scene graph nodes for
+    // an exoplanet system. However, depending on what data is available for the specific
+    // planets and star, some values may be undefined.
     struct [[codegen::Dictionary(ExoplanetSystemData)]] Parameters {
         // The identifier of the system, which equals the identifier of the host star
         // created based on the star name.
@@ -108,14 +108,14 @@ namespace {
             double inclination;
 
             // The longitude of ascending node, that is, the angle for the direction of
-            // the point where the orbit passes through a reference plane. Also
-            // known as the right ascension of the ascending node. The angle is given as
-            // degrees in the range 0-360. If it does not exist in the data, it is given
-            // a default value of 180 degrees.
+            // the point where the orbit passes through a reference plane. Also known as
+            // the right ascension of the ascending node. The angle is given as degrees in
+            // the range 0-360. If it does not exist in the data, it is given a default
+            // value of 180 degrees.
             double ascendingNode;
 
-            // The argument of periapsis of the orbit, given as an angle in degrees in
-            // the range 0-360. It is the angle between the planet's periapsis (the point
+            // The argument of periapsis of the orbit, given as an angle in degrees in the
+            // range 0-360. It is the angle between the planet's periapsis (the point
             // where it is closest to its star) and its ascending node, that is, where it
             // passes through its reference plane. If it does not exist in the data, it
             // is given a default value of 90 degrees.
@@ -148,8 +148,8 @@ namespace {
 
         // A rotation matrix to use for the entire system's rotation. Broadly speaking, it
         // rotates the system so that the reference plane is perpendicular to the
-        // line-of-sight from Earth (and so that a 90 degree orbit inclination leads to
-        // an orbit that passes in front of its star, relative to the line-of-sight).
+        // line-of-sight from Earth (and so that a 90 degree orbit inclination leads to an
+        // orbit that passes in front of its star, relative to the line-of-sight).
         glm::dmat3 systemRotation;
 
         // A rotation matrix that represents the average of all the orbit planes in the
@@ -160,10 +160,10 @@ namespace {
         // The distance from this system to our solar system, in light years.
         double distance;
     };
-#include "datastructure_codegen.cpp"
 } // namespace
+#include "datastructure_codegen.cpp"
 
-namespace openspace::exoplanets {
+namespace openspace {
 
 ghoul::Dictionary ExoplanetSystem::toDataDictionary() const {
     ghoul_assert(
@@ -334,8 +334,8 @@ ghoul::Dictionary ExoplanetSystem::toDataDictionary() const {
     return res;
 }
 
-documentation::Documentation ExoplanetSystem::Documentation() {
-    return codegen::doc<Parameters>("exoplanets_exoplanet_system_data");
+Documentation ExoplanetSystem::Documentation() {
+    return codegen::doc<Parameters>("exoplanets_data_exoplanetsystem");
 }
 
-} // namespace openspace::exoplanets
+} // namespace openspace

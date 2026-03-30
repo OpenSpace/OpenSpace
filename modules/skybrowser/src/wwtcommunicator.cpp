@@ -26,8 +26,8 @@
 
 #include <modules/webbrowser/include/browserinstance.h>
 #include <ghoul/format.h>
-#include <ghoul/misc/dictionaryjsonformatter.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/dictionaryjsonformatter.h>
 #include <algorithm>
 #include <iterator>
 
@@ -93,8 +93,8 @@ namespace {
     ghoul::Dictionary setLayerOrderMessage(const std::string& imageUrl, int order) {
         static int MessageCounter = 0;
 
-        // The lower the layer order, the more towards the back the image is placed
-        // 0 is the background
+        // The lower the layer order, the more towards the back the image is placed 0 is
+        // the background
         using namespace std::string_literals;
 
         ghoul::Dictionary msg;
@@ -122,7 +122,7 @@ void WwtCommunicator::selectImage(const std::string& url) {
         // Push newly selected image to front
         _selectedImages.emplace_front(url, 1.0);
 
-        // If wwt has not loaded the collection yet, wait with passing the message
+        // If WWT has not loaded the collection yet, wait with passing the message
         if (_isImageCollectionLoaded) {
             addImageLayerToWwt(url);
         }
@@ -283,6 +283,5 @@ void WwtCommunicator::executeJavascript(const std::string& script) const {
         frame->ExecuteJavaScript(script, frame->GetURL(), 0);
     }
 }
-
 
 } // namespace openspace

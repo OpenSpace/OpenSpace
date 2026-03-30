@@ -39,12 +39,14 @@ namespace openspace {
 class AtmosphereDeferredcaster;
 struct TransformData;
 
-// Shadow structure
+/**
+ * Shadow structure.
+ */
 struct ShadowConfiguration {
     std::pair<std::string, double> source;
     std::pair<std::string, double> caster;
-    // Set to 'true' if we printed an error because we couldn't find the source or caster.
-    // We only want to print a message once
+    /// Set to 'true' if we printed an error because we couldn't find the source or
+    /// caster. We only want to print a message once
     bool printedSourceError = false;
     bool printedCasterError = false;
 };
@@ -60,38 +62,38 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     glm::dmat4 computeModelTransformMatrix(const TransformData& data);
     void updateAtmosphereParameters();
     void setDimmingCoefficient(const glm::dmat4& modelTransform);
 
-    properties::FloatProperty _atmosphereHeight;
-    properties::FloatProperty _groundAverageReflectance;
-    properties::FloatProperty _groundRadianceEmission;
-    properties::FloatProperty _rayleighHeightScale;
-    properties::Vec3Property _rayleighScatteringCoeff;
-    properties::BoolProperty _ozoneEnabled;
-    properties::FloatProperty _ozoneHeightScale;
-    properties::Vec3Property _ozoneCoeff;
-    properties::FloatProperty _mieHeightScale;
-    properties::Vec3Property _mieScatteringCoeff;
-    properties::FloatProperty _mieScatteringExtinctionPropCoeff;
-    properties::FloatProperty _miePhaseConstant;
-    properties::FloatProperty _sunIntensity;
-    properties::BoolProperty _sunFollowingCameraEnabled;
-    properties::BoolProperty _hardShadowsEnabled;
-    properties::FloatProperty _sunAngularSize;
+    FloatProperty _atmosphereHeight;
+    FloatProperty _groundAverageReflectance;
+    FloatProperty _groundRadianceEmission;
+    FloatProperty _rayleighHeightScale;
+    Vec3Property _rayleighScatteringCoeff;
+    BoolProperty _ozoneEnabled;
+    FloatProperty _ozoneHeightScale;
+    Vec3Property _ozoneCoeff;
+    FloatProperty _mieHeightScale;
+    Vec3Property _mieScatteringCoeff;
+    FloatProperty _mieScatteringExtinctionCoeff;
+    FloatProperty _miePhaseConstant;
+    FloatProperty _sunIntensity;
+    BoolProperty _sunFollowingCameraEnabled;
+    BoolProperty _hardShadowsEnabled;
+    FloatProperty _sunAngularSize;
     SceneGraphNode* _lightSourceNode = nullptr;
-    properties::StringProperty _lightSourceNodeName;
+    StringProperty _lightSourceNodeName;
 
     // Atmosphere dimming
-    properties::FloatProperty _atmosphereDimmingHeight;
-    properties::Vec2Property _atmosphereDimmingSunsetAngle;
+    FloatProperty _atmosphereDimmingHeight;
+    Vec2Property _atmosphereDimmingSunsetAngle;
 
     float _planetRadius = 0.f;
-    float _mieScattExtPropCoefProp = 1.f;
+    float _mieScattExtCoef = 1.f;
 
     glm::vec3 _mieExtinctionCoeff = glm::vec3(0.f);
 

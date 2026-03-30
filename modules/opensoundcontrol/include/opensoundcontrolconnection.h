@@ -39,14 +39,13 @@ using OpenSoundControlDataType = std::variant<osc::Blob, double, int, std::strin
 class OpenSoundControlConnection {
 public:
     OpenSoundControlConnection(const std::string& ip, int port);
-    ~OpenSoundControlConnection();
 
     void send(const std::string& label,
         const std::vector<OpenSoundControlDataType>& data);
 
 private:
     UdpTransmitSocket _socket;
-    char* _buffer = nullptr;
+    std::vector<char> _buffer;
     osc::OutboundPacketStream _stream;
 };
 

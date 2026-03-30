@@ -26,10 +26,10 @@
 
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
-FloatProperty::FloatProperty(Property::PropertyInfo info, float value,
-                             float minValue, float maxValue, float stepValue)
+FloatProperty::FloatProperty(PropertyInfo info, float value, float minValue,
+                             float maxValue, float stepValue)
     : NumericalProperty<float>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
@@ -53,4 +53,4 @@ std::string FloatProperty::stringValue() const {
     return formatJson(_value);
 }
 
-} // namespace openspace::properties
+} // namespace openspace

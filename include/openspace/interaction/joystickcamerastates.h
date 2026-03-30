@@ -36,7 +36,7 @@
 #include <string_view>
 #include <vector>
 
-namespace openspace::interaction {
+namespace openspace {
 
 class JoystickCameraStates : public CameraInteractionStates {
 public:
@@ -70,8 +70,8 @@ public:
         AxisFlip flip = AxisFlip::No;
 
         // The axis values can either go back to 0 when the joystick is released or it can
-        // stay at the value it was before the joystick was released.
-        // The latter is called a sticky axis, when the values don't go back to 0.
+        // stay at the value it was before the joystick was released. The latter is called
+        // a sticky axis, when the values don't go back to 0
         bool isSticky = false;
 
         float deadzone = 0.f;
@@ -156,76 +156,72 @@ private:
     JoystickCameraState* findOrAddJoystickCameraState(const std::string& joystickName);
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 namespace ghoul {
-
-template <>
-inline std::string to_string(
-                      const openspace::interaction::JoystickCameraStates::AxisType& value)
-{
-    using T = openspace::interaction::JoystickCameraStates::AxisType;
-    switch (value) {
-        case T::None:       return "None";
-        case T::OrbitX:     return "Orbit X";
-        case T::OrbitY:     return "Orbit Y";
-        case T::ZoomIn:     return "Zoom In";
-        case T::ZoomOut:    return "Zoom Out";
-        case T::Zoom:       return "Zoom In and Out";
-        case T::LocalRoll:  return "LocalRoll";
-        case T::GlobalRoll: return "GlobalRoll";
-        case T::PanX:       return "Pan X";
-        case T::PanY:       return "Pan Y";
-        case T::Property:   return "Property";
-        default:            return "";
+    template <>
+    inline std::string to_string(const openspace::JoystickCameraStates::AxisType& value) {
+        using T = openspace::JoystickCameraStates::AxisType;
+        switch (value) {
+            case T::None:       return "None";
+            case T::OrbitX:     return "Orbit X";
+            case T::OrbitY:     return "Orbit Y";
+            case T::ZoomIn:     return "Zoom In";
+            case T::ZoomOut:    return "Zoom Out";
+            case T::Zoom:       return "Zoom In and Out";
+            case T::LocalRoll:  return "LocalRoll";
+            case T::GlobalRoll: return "GlobalRoll";
+            case T::PanX:       return "Pan X";
+            case T::PanY:       return "Pan Y";
+            case T::Property:   return "Property";
+            default:            return "";
+        }
     }
-}
 
-template <>
-constexpr openspace::interaction::JoystickCameraStates::AxisType
-from_string(std::string_view string)
-{
-    using T = openspace::interaction::JoystickCameraStates::AxisType;
+    template <>
+    constexpr openspace::JoystickCameraStates::AxisType from_string(
+                                                                  std::string_view string)
+    {
+        using T = openspace::JoystickCameraStates::AxisType;
 
-    if (string == "None") { return T::None; }
-    if (string == "Orbit X") { return T::OrbitX; }
-    if (string == "Orbit Y") { return T::OrbitY; }
-    if (string == "Zoom In") { return T::ZoomIn; }
-    if (string == "Zoom Out") { return T::ZoomOut; }
-    if (string == "Zoom") { return T::Zoom; }
-    if (string == "LocalRoll") { return T::LocalRoll; }
-    if (string == "GlobalRoll") { return T::GlobalRoll; }
-    if (string == "Pan X") { return T::PanX; }
-    if (string == "Pan Y") { return T::PanY; }
-    if (string == "Property") { return T::Property; }
+        if (string == "None") { return T::None; }
+        if (string == "Orbit X") { return T::OrbitX; }
+        if (string == "Orbit Y") { return T::OrbitY; }
+        if (string == "Zoom In") { return T::ZoomIn; }
+        if (string == "Zoom Out") { return T::ZoomOut; }
+        if (string == "Zoom") { return T::Zoom; }
+        if (string == "LocalRoll") { return T::LocalRoll; }
+        if (string == "GlobalRoll") { return T::GlobalRoll; }
+        if (string == "Pan X") { return T::PanX; }
+        if (string == "Pan Y") { return T::PanY; }
+        if (string == "Property") { return T::Property; }
 
-    throw RuntimeError(std::format("Unknown axis type '{}'", string), "Joystick");
-}
-
-template <>
-inline std::string to_string(
-    const openspace::interaction::JoystickCameraStates::JoystickType& value)
-{
-    using T = openspace::interaction::JoystickCameraStates::JoystickType;
-    switch (value) {
-        case T::JoystickLike: return "JoystickLike";
-        case T::TriggerLike:  return "TriggerLike";
-        default:              return "";
+        throw RuntimeError(std::format("Unknown axis type '{}'", string), "Joystick");
     }
-}
 
-template <>
-constexpr openspace::interaction::JoystickCameraStates::JoystickType
-from_string(std::string_view string)
-{
-    using T = openspace::interaction::JoystickCameraStates::JoystickType;
+    template <>
+    inline std::string to_string(
+                               const openspace::JoystickCameraStates::JoystickType& value)
+    {
+        using JoystickType = openspace::JoystickCameraStates::JoystickType;
 
-    if (string == "JoystickLike") { return T::JoystickLike; }
-    if (string == "TriggerLike") { return T::TriggerLike; }
+        switch (value) {
+            case JoystickType::JoystickLike: return "JoystickLike";
+            case JoystickType::TriggerLike:  return "TriggerLike";
+            default:                         throw MissingCaseException();
+        }
+    }
 
-    throw RuntimeError(std::format("Unknown joystick type '{}'", string), "Joystick");
-}
+    template <>
+    constexpr openspace::JoystickCameraStates::JoystickType from_string(
+                                                                  std::string_view string)
+    {
+        using JoystickType = openspace::JoystickCameraStates::JoystickType;
 
+        if (string == "JoystickLike") { return JoystickType::JoystickLike; }
+        else if (string == "TriggerLike") { return JoystickType::TriggerLike; }
+        throw RuntimeError(std::format("Unknown joystick type '{}'", string), "Joystick");
+    }
 } // namespace ghoul
 
 #endif // __OPENSPACE_CORE___JOYSTICKCAMERASTATES___H__

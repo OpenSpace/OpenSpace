@@ -32,120 +32,42 @@
 #include <compare>
 #include <set>
 #include <sstream>
+#include <string_view>
 #include <type_traits>
 #include <utility>
-#include <string_view>
 
 namespace {
+    using namespace openspace;
 
-// Structure used to make offenses unique
-struct OffenseCompare {
-    using Offense = openspace::documentation::TestResult::Offense;
-    bool operator()(const Offense& lhs, const Offense& rhs) const {
-        if (lhs.offender != rhs.offender) {
-            return lhs.offender < rhs.offender;
+    // Structure used to make offenses unique
+    struct OffenseCompare {
+        using Offense = TestResult::Offense;
+        bool operator()(const Offense& lhs, const Offense& rhs) const {
+            if (lhs.offender != rhs.offender) {
+                return lhs.offender < rhs.offender;
+            }
+            else {
+                return std::underlying_type_t<Offense::Reason>(lhs.reason) <
+                    std::underlying_type_t<Offense::Reason>(rhs.reason);
+            }
         }
-        else {
-            return std::underlying_type_t<Offense::Reason>(lhs.reason) <
-                std::underlying_type_t<Offense::Reason>(rhs.reason);
-        }
-    }
-};
+    };
 
-struct WarningCompare {
-    using Warning = openspace::documentation::TestResult::Warning;
-    bool operator()(const Warning& lhs, const Warning& rhs) const {
-        if (lhs.offender != rhs.offender) {
-            return lhs.offender < rhs.offender;
+    struct WarningCompare {
+        using Warning = TestResult::Warning;
+        bool operator()(const Warning& lhs, const Warning& rhs) const {
+            if (lhs.offender != rhs.offender) {
+                return lhs.offender < rhs.offender;
+            }
+            else {
+                return std::underlying_type_t<Warning::Reason>(lhs.reason) <
+                    std::underlying_type_t<Warning::Reason>(rhs.reason);
+            }
         }
-        else {
-            return std::underlying_type_t<Warning::Reason>(lhs.reason) <
-                std::underlying_type_t<Warning::Reason>(rhs.reason);
-        }
-    }
-};
-
+    };
 } // namespace
 
-namespace ghoul {
-
-template <>
-std::string to_string(const openspace::documentation::TestResult& value) {
-    using namespace openspace::documentation;
-
-    if (value.success) {
-        return "Success";
-    }
-    else {
-        std::stringstream stream;
-        stream << "Specification Failure. ";
-
-        for (const TestResult::Offense& offense : value.offenses) {
-            stream << std::format(" {}", ghoul::to_string(offense));
-            if (!offense.explanation.empty()) {
-                stream << std::format(" ({})", offense.explanation);
-            }
-            stream << '\n';
-        }
-
-        for (const TestResult::Warning& warning : value.warnings) {
-            stream << std::format(" {}\n", ghoul::to_string(warning));
-        }
-
-        return stream.str();
-    }
-}
-
-template <>
-std::string to_string(const openspace::documentation::TestResult::Offense& value) {
-    std::stringstream stream;
-    stream << value.offender + ": " + ghoul::to_string(value.reason);
-
-    if (!value.explanation.empty()) {
-        stream << std::format(" ({})", value.explanation);
-    }
-
-    return stream.str();
-}
-
-template <>
-std::string to_string(const openspace::documentation::TestResult::Offense::Reason& value)
-{
-    switch (value) {
-        case openspace::documentation::TestResult::Offense::Reason::Unknown:
-            return "Unknown";
-        case openspace::documentation::TestResult::Offense::Reason::MissingKey:
-            return "Missing key";
-        case openspace::documentation::TestResult::Offense::Reason::UnknownIdentifier:
-            return "Unknown documentation identifier";
-        case openspace::documentation::TestResult::Offense::Reason::Verification:
-            return "Verification failed";
-        case openspace::documentation::TestResult::Offense::Reason::WrongType:
-            return "Wrong type";
-        default:
-            throw ghoul::MissingCaseException();
-    }
-}
-
-template <>
-std::string to_string(const openspace::documentation::TestResult::Warning& value) {
-    return value.offender + ": " + ghoul::to_string(value.reason);
-}
-
-template <>
-std::string to_string(const openspace::documentation::TestResult::Warning::Reason& value)
-{
-    switch (value) {
-        case openspace::documentation::TestResult::Warning::Reason::Deprecated:
-            return "Deprecated";
-        default:
-            throw ghoul::MissingCaseException();
-    }
-}
-
-} // namespace ghoul
-
-namespace openspace::documentation {
+namespace openspace {
 
 const std::string DocumentationEntry::Wildcard = "*";
 
@@ -168,7 +90,7 @@ void logError(const SpecificationError& error, std::string component) {
     else {
         LERRORC(std::format("{}: {}", component, error.component), error.message);
     }
-    for (const documentation::TestResult::Offense& o : error.result.offenses) {
+    for (const TestResult::Offense& o : error.result.offenses) {
         if (o.explanation.empty()) {
             LERRORC(ghoul::to_string(o.reason), o.offender);
         }
@@ -179,7 +101,7 @@ void logError(const SpecificationError& error, std::string component) {
             );
         }
     }
-    for (const documentation::TestResult::Warning& w : error.result.warnings) {
+    for (const TestResult::Warning& w : error.result.warnings) {
         LWARNINGC(ghoul::to_string(w.reason), w.offender);
     }
 }
@@ -198,8 +120,13 @@ DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> 
 
 DocumentationEntry::DocumentationEntry(std::string k, Verifier* v, Optional opt,
                                        Private priv, std::string doc)
-    : DocumentationEntry(std::move(k), std::shared_ptr<Verifier>(v), opt, priv,
-                         std::move(doc))
+    : DocumentationEntry(
+        std::move(k),
+        std::shared_ptr<Verifier>(v),
+        opt,
+        priv,
+        std::move(doc)
+    )
 {}
 
 TestResult testSpecification(const Documentation& documentation,
@@ -251,20 +178,24 @@ TestResult testSpecification(const Documentation& documentation,
         }
     }
 
-    // Remove duplicate offenders that might occur if multiple rules apply to a single
-    // key and more than one of these rules are broken
+    // Remove duplicate offenders that might occur if multiple rules apply to a single key
+    // and more than one of these rules are broken
     const std::set<TestResult::Offense, OffenseCompare> uniqueOffenders(
-        result.offenses.begin(), result.offenses.end()
+        result.offenses.begin(),
+        result.offenses.end()
     );
     result.offenses = std::vector<TestResult::Offense>(
-        uniqueOffenders.begin(), uniqueOffenders.end()
+        uniqueOffenders.begin(),
+        uniqueOffenders.end()
     );
     // Remove duplicate warnings. This should normally not happen, but we want to be sure
     const std::set<TestResult::Warning, WarningCompare> uniqueWarnings(
-        result.warnings.begin(), result.warnings.end()
+        result.warnings.begin(),
+        result.warnings.end()
     );
     result.warnings = std::vector<TestResult::Warning>(
-        uniqueWarnings.begin(), uniqueWarnings.end()
+        uniqueWarnings.begin(),
+        uniqueWarnings.end()
     );
 
     return result;
@@ -280,4 +211,70 @@ void testSpecificationAndThrow(const Documentation& documentation,
     }
 }
 
-} // namespace openspace::documentation
+} // namespace openspace
+
+namespace ghoul {
+    template <>
+    std::string to_string(const openspace::TestResult& value) {
+        if (value.success) {
+            return "Success";
+        }
+
+        std::stringstream stream;
+        stream << "Specification Failure. ";
+
+        for (const openspace::TestResult::Offense& offense : value.offenses) {
+            stream << std::format(" {}", ghoul::to_string(offense));
+            if (!offense.explanation.empty()) {
+                stream << std::format(" ({})", offense.explanation);
+            }
+            stream << '\n';
+        }
+
+        for (const openspace::TestResult::Warning& warning : value.warnings) {
+            stream << std::format(" {}\n", ghoul::to_string(warning));
+        }
+
+        return stream.str();
+    }
+
+    template <>
+    std::string to_string(const openspace::TestResult::Offense& value) {
+        std::stringstream stream;
+        stream << value.offender + ": " + ghoul::to_string(value.reason);
+
+        if (!value.explanation.empty()) {
+            stream << std::format(" ({})", value.explanation);
+        }
+
+        return stream.str();
+    }
+
+    template <>
+    std::string to_string(const openspace::TestResult::Offense::Reason& value) {
+        using Reason = openspace::TestResult::Offense::Reason;
+        switch (value) {
+            case Reason::Unknown: return "Unknown";
+            case Reason::MissingKey: return "Missing key";
+            case Reason::UnknownIdentifier: return "Unknown documentation identifier";
+            case Reason::Verification: return "Verification failed";
+            case Reason::WrongType: return "Wrong type";
+            default: throw ghoul::MissingCaseException();
+        }
+    }
+
+    template <>
+    std::string to_string(const openspace::TestResult::Warning& value) {
+        return value.offender + ": " + ghoul::to_string(value.reason);
+    }
+
+    template <>
+    std::string to_string(const openspace::TestResult::Warning::Reason& value) {
+        switch (value) {
+            case openspace::TestResult::Warning::Reason::Deprecated:
+                return "Deprecated";
+            default:
+                throw ghoul::MissingCaseException();
+        }
+    }
+} // namespace ghoul
