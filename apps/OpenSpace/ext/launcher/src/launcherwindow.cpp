@@ -730,6 +730,25 @@ void LauncherWindow::updateStartButton() const {
 }
 
 void LauncherWindow::updateAddonsBox(const std::string& profile) {
+    // Get a list of all of the potential variants
+    //const std::filesystem::path& path,
+        //Recursive recursive, Sorted sorted,
+        //std::function<bool(const std::filesystem::path&)> filter
+
+    std::vector<std::filesystem::path> addonsCore = ghoul::filesystem::walkDirectory(
+        _profilePath,
+        ghoul::filesystem::Recursive::Yes,
+        ghoul::filesystem::Sorted::Yes,
+        [](const std::filesystem::path& path) { return path.extension() == ".addon"; }
+    );
+    std::vector<std::filesystem::path> addonsUser = ghoul::filesystem::walkDirectory(
+        _userProfilePath,
+        ghoul::filesystem::Recursive::Yes,
+        ghoul::filesystem::Sorted::Yes,
+        [](const std::filesystem::path& path) { return path.extension() == ".addon"; }
+    );
+
+    // First clear the model of the previous results
     _addonBox.model->clear();
     _addonBox.combobox->setPlaceholderText("Addons");
 
@@ -755,24 +774,66 @@ void LauncherWindow::updateAddonsBox(const std::string& profile) {
         return item;
     };
 
-    const bool hasAddons = !p.addons.custom.empty() || !p.addons.recommended.empty();
+    const bool hasProfileAddons =
+        !p.addons.custom.empty() || !p.addons.recommended.empty();
+    const bool hasGlobalAddons = !addonsCore.empty() || !addonsUser.empty();
 
-    if (hasAddons) {
+    // Stores the list of the adds explicitly mentioned by the profile so that we can
+    // filter them out from the automatically populated list
+    std::set<std::string> profileAddons;
+
+
+    if (hasProfileAddons) {
         QStandardItem* header = new QStandardItem("Recommended");
         header->setEnabled(false);
         _addonBox.model->appendRow(header);
-    }
-    // First the custom
-    for (const Addon& addon : p.addons.custom) {
-        QStandardItem* i = toItem(addon);
-        _addonBox.model->appendRow(i);
-    }
-    // Then the recommended
-    for (const Addon& addon : p.addons.recommended) {
-        QStandardItem* i = toItem(addon);
-        _addonBox.model->appendRow(i);
+
+        // First the custom
+        for (const Addon& addon : p.addons.custom) {
+            profileAddons.insert(addon.identifier);
+
+            QStandardItem* i = toItem(addon);
+            _addonBox.model->appendRow(i);
+        }
+        // Then the recommended
+        for (const Addon& addon : p.addons.recommended) {
+            profileAddons.insert(addon.identifier);
+
+            QStandardItem* i = toItem(addon);
+            _addonBox.model->appendRow(i);
+        }
     }
 
+    if (hasGlobalAddons) {
+        QStandardItem* header = new QStandardItem("Other");
+        header->setEnabled(false);
+        _addonBox.model->appendRow(header);
+
+        // First the addons found in the user folder
+        for (const std::filesystem::path& path : addonsUser) {
+            Addon addon = loadAddonFromFile(path);
+
+            if (profileAddons.contains(addon.identifier)) {
+                continue;
+            }
+
+            QStandardItem* i = toItem(addon);
+            _addonBox.model->appendRow(i);
+        }
+        // Then add all of the addons found in the core
+        for (const std::filesystem::path& path : addonsCore) {
+            Addon addon = loadAddonFromFile(path);
+
+            if (profileAddons.contains(addon.identifier)) {
+                continue;
+            }
+
+            QStandardItem* i = toItem(addon);
+            _addonBox.model->appendRow(i);
+        }
+    }
+
+    const bool hasAddons = hasProfileAddons || hasGlobalAddons;
     _addonBox.combobox->setEnabled(hasAddons);
 }
 

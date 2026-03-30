@@ -159,7 +159,7 @@ static void to_json(nlohmann::json& j, const Addon& v) {
     j["assets"] = v.assets;
 }
 
-static Addon loadAddon(const std::filesystem::path& path) {
+Addon loadAddonFromFile(const std::filesystem::path& path) {
     ghoul_assert(std::filesystem::is_regular_file(path), "Path must exist");
 
     std::ifstream inFile = std::ifstream(path, std::ifstream::in);
@@ -489,12 +489,34 @@ static void from_json(const nlohmann::json& j, Profile::Addons& v) {
                 );
                 continue;
             }
-            Addon addon = loadAddon(p);
+            Addon addon = loadAddonFromFile(p);
             v.recommended.push_back(std::move(addon));
         }
     }
     if (j.find("custom") != j.end()) {
         j["custom"].get_to(v.custom);
+    }
+
+    std::vector<std::filesystem::path> coreAddons = ghoul::filesystem::walkDirectory(
+        absPath("${PROFILES}"),
+        ghoul::filesystem::Recursive::Yes,
+        ghoul::filesystem::Sorted::No,
+        [](const std::filesystem::path& p) { return p.extension() == ".addon"; }
+    );
+    for (const std::filesystem::path& p : coreAddons) {
+        Addon addon = loadAddonFromFile(p);
+        v.general.push_back(std::move(addon));
+    }
+
+    std::vector<std::filesystem::path> userAddons = ghoul::filesystem::walkDirectory(
+        absPath("${USER_PROFILES}"),
+        ghoul::filesystem::Recursive::Yes,
+        ghoul::filesystem::Sorted::No,
+        [](const std::filesystem::path& p) { return p.extension() == ".addon"; }
+    );
+    for (const std::filesystem::path& p : userAddons) {
+        Addon addon = loadAddonFromFile(p);
+        v.general.push_back(std::move(addon));
     }
 }
 

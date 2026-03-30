@@ -63,6 +63,8 @@ struct Addon {
     bool operator==(const Addon&) const noexcept = default;
 };
 
+Addon loadAddonFromFile(const std::filesystem::path& path);
+
 class Profile {
 public:
     struct ParsingError final : public ghoul::RuntimeError {
@@ -180,9 +182,11 @@ public:
     struct Addons {
         std::vector<std::string> recommendedPaths;
         std::vector<Addon> custom;
+        std::vector<std::string> generalPaths;
 
         // The realized recommended Addons are not stored back into the JSON
         std::vector<Addon> recommended;
+        std::vector<Addon> general;
 
         bool operator==(const Addons&) const noexcept = default;
     };
