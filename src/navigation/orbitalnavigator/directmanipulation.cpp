@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/navigation/orbitalnavigator/directmanipulation/directmanipulation.h>
+#include <openspace/navigation/orbitalnavigator/directmanipulation.h>
 
 #include <openspace/camera/camera.h>
 #include <openspace/camera/camerapose.h>
@@ -36,6 +36,7 @@
 #include <openspace/util/factorymanager.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/levmarqsolver.h>
 #include <glm/gtx/intersect.hpp>
 #include <algorithm>
 #include <format>
@@ -54,6 +55,173 @@ namespace {
     using namespace openspace;
 
     constexpr std::string_view _loggerCat = "DirectManipulation";
+
+    /// Used in the LM algorithm
+    struct FunctionData {
+        std::vector<glm::dvec3> selectedPoints;
+        std::vector<glm::dvec2> screenPoints;
+        int nDOF;
+        const Camera* camera;
+        const SceneGraphNode* node;
+        ghoul::LMstat stats;
+    };
+
+    /**
+     * Extract the camera parameters from the lsit of parameters, `par`.
+     *
+     * \param par The list of parameters, in the order of orbit.x, orbit.y, zoom, roll,
+     *        pan.x, pan.y. The number of parameters should match the number of degrees
+     *        of freedom (`nDof`).
+     * \param nDof The number of degrees of freedom, which determines how many parameters
+     *        to read from `par` and how to interpret them. For example, if `nDof` is 2,
+     *        only the first two parameters (orbit.x and orbit.y) will be read, and the
+     *        rest will be ignored.
+     * \return The VelocityStates struct containing the parsed camera parameters, with
+     *         default values for the non-parsed parameters.
+     */
+    DirectManipulation::VelocityStates parseCameraParameterList(std::vector<double>& par,
+                                                                int nDof)
+    {
+        ghoul_assert(par.size() >= 2, "There should be at least 2 camera parameters");
+
+        DirectManipulation::VelocityStates result;
+        result.orbit = glm::dvec2(par[0], par[1]);
+
+        if (nDof > 2) {
+            ghoul_assert(par.size() >= 4, "There should be at least 4 camera parameters");
+            result.zoom = par[2];
+            result.roll = par[3];
+
+            if (nDof > 4) {
+                ghoul_assert(par.size() == 6, "There should be 6 camera parameters");
+                result.roll = 0.0;
+                result.pan = glm::dvec2(par[4], par[5]);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Project back a 3D point in model view to clip space [-1, 1] coordinates on the view
+     * plane.
+     */
+    glm::dvec2 castToNormalizedDeviceCoordinates(const glm::dvec3& pos, Camera& camera,
+                                                 const SceneGraphNode* node)
+    {
+        glm::dvec3 posInCamSpace = glm::inverse(camera.rotationQuaternion()) *
+            (node->worldRotationMatrix() * pos +
+                (node->worldPosition() - camera.position()));
+
+        glm::dvec4 clipspace = camera.projectionMatrix() * glm::dvec4(posInCamSpace, 1.0);
+        return glm::dvec2(clipspace) / clipspace.w;
+    }
+
+    /**
+     * Returns screen point s(xi, par) dependent the transform M(par) and object point xi.
+     */
+    double distToMinimize(double* par, int x, void* fdata, ghoul::LMstat* lmstat) {
+        FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
+
+        // Apply transform to camera and find the screen point of the updated camera state
+
+        // { vec2 globalRot, zoom, roll, vec2 localRot }
+        std::vector<double> q(6, 0.0);
+        for (int i = 0; i < ptr->nDOF; i++) {
+            q[i] = par[i];
+        }
+
+        DirectManipulation::VelocityStates velocities =
+            parseCameraParameterList(q, ptr->nDOF);
+
+        CameraPose pose = DirectManipulation::cameraPoseFromVelocities(
+            velocities,
+            ptr->camera,
+            ptr->node
+        );
+
+        // Update the camera state (for a local copy of the camera)
+        Camera camera = *ptr->camera;
+        camera.setPose(pose);
+
+        // We now have a new position and orientation of camera, project surfacePoint to
+        // the new screen to get distance to minimize
+        glm::dvec2 newScreenPoint = castToNormalizedDeviceCoordinates(
+            ptr->selectedPoints.at(x),
+            camera,
+            ptr->node
+        );
+        lmstat->pos.push_back(newScreenPoint);
+        return glm::length(ptr->screenPoints.at(x) - newScreenPoint);
+    }
+
+    /**
+     * Gradient of distToMinimize w.r.t par (using forward difference).
+     */
+    void gradient(double* g, double* par, int x, void* fdata, ghoul::LMstat* lmstat) {
+        FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
+        double f0 = distToMinimize(par, x, fdata, lmstat);
+        // Scale value to find minimum step size h, dependant on planet size
+        double scale = log10(ptr->node->interactionSphere());
+        std::vector<double> dPar(ptr->nDOF, 0.0);
+        dPar.assign(par, par + ptr->nDOF);
+
+        for (int i = 0; i < ptr->nDOF; i++) {
+            // Initial values
+            double h = 1e-8;
+            double lastG = 1;
+            dPar.at(i) += h;
+            double f1 = distToMinimize(dPar.data(), x, fdata, lmstat);
+            dPar.at(i) = par[i];
+            // Iterative process to find the minimum step h that gives a good gradient
+            for (int j = 0; j < 100; j++) {
+                if ((f1 - f0) != 0 && lastG == 0) { // found minimum step size h
+                    // Scale up to get a good initial guess value
+                    h *= scale * scale * scale;
+
+                    // Clamp min step size to a fraction of the incoming parameter
+                    if (i == 2) {
+                        double epsilon = 1e-3;
+                        // Make sure incoming parameter is larger than 0
+                        h = std::max(std::max(std::abs(dPar.at(i)), epsilon) * 0.001, h);
+                    }
+                    else if (ptr->nDOF == 2) {
+                        h = std::max(std::abs(dPar.at(i)) * 0.001, h);
+                    }
+
+                    // Calculate f1 with good h for finite difference
+                    dPar[i] += h;
+                    f1 = distToMinimize(dPar.data(), x, fdata, lmstat);
+                    dPar[i] = par[i];
+                    break;
+                }
+                else if ((f1 - f0) != 0 && lastG != 0) {
+                    // `h` too big
+                    h /= scale;
+                }
+                else if ((f1 - f0) == 0) {
+                    // `h` too small
+                    h *= scale;
+                }
+                lastG = f1 - f0;
+                dPar.at(i) += h;
+                f1 = distToMinimize(dPar.data(), x, fdata, lmstat);
+                dPar.at(i) = par[i];
+            }
+            g[i] = (f1 - f0) / h;
+        }
+        if (ptr->nDOF == 2) {
+            // Normalize on 1 finger case to allow for horizontal/vertical movement
+            for (int i = 0; i < 2; i++) {
+                g[i] = g[i] / std::abs(g[i]);
+            }
+        }
+        else if (ptr->nDOF == 6) {
+            for (int i = 0; i < ptr->nDOF; i++) {
+                // Lock to only pan and zoom on 3 finger case, no roll/orbit
+                g[i] = (i == 2) ? g[i] : g[i] / std::abs(g[i]);
+            }
+        }
+    }
 
     constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
@@ -211,9 +379,8 @@ void DirectManipulation::applyDirectControl(const std::vector<TouchPoint>& touch
     }
 
     // Find best transform values for the new camera state
-    std::optional<DirectInputSolver::Result> result = _directInputSolver.solve(
+    std::optional<VelocityStates> result = solveVelocitiesFromTouchPoints(
         touchPoints,
-        _selectedNodeSurfacePoints,
         *camera
     );
 
@@ -244,7 +411,7 @@ void DirectManipulation::updateNodeSurfacePoints(
     const glm::dquat camRotation = camera->rotationQuaternion();
     const glm::dvec3 camPos = camera->position();
 
-    std::vector<DirectInputSolver::SelectedBody> surfacePoints;
+    std::vector<SelectedBody> surfacePoints;
 
     for (const TouchPoint& touchPoint : touchPoints) {
         const size_t id = touchPoint.id;
@@ -288,9 +455,9 @@ void DirectManipulation::updateNodeSurfacePoints(
     _selectedNodeSurfacePoints = std::move(surfacePoints);
 }
 
-CameraPose DirectManipulation::cameraPoseFromVelocities(const VelocityStates& velocities,
-                                                        const Camera* camera,
-                                                        const SceneGraphNode* anchor)
+CameraPose DirectManipulation::cameraPoseFromVelocities(
+    const DirectManipulation::VelocityStates& velocities,
+    const Camera* camera, const SceneGraphNode* anchor)
 {
     ghoul_assert(camera != nullptr, "Camera must not be null");
     ghoul_assert(anchor != nullptr, "Anchor node must not be null");
@@ -393,6 +560,68 @@ bool DirectManipulation::isWithinDirectTouchDistance() const {
     }
 
     return false;
+}
+
+std::optional<DirectManipulation::VelocityStates>
+DirectManipulation::solveVelocitiesFromTouchPoints(
+                           const std::vector<DirectManipulation::TouchPoint>& touchPoints,
+                                                                     const Camera& camera)
+{
+    ZoneScopedN("Direct touch input solver");
+
+    ghoul_assert(
+        _selectedNodeSurfacePoints.size() >= touchPoints.size(),
+        "Number of touch inputs must match the number of 'selected bodies'"
+    );
+
+    // Initialize LM solver
+    ghoul::LMstat lmStat;
+    initializeLevmarqStats(&lmStat);
+
+    int nFingers = std::min(static_cast<int>(touchPoints.size()), 3);
+    int nDof = std::min(nFingers * 2, 6);
+
+    // Parse input data to be used in the LM algorithm
+    std::vector<glm::dvec3> selectedPoints;
+    std::vector<glm::dvec2> screenPoints;
+
+    for (int i = 0; i < nFingers; i++) {
+        const SelectedBody& sb = _selectedNodeSurfacePoints.at(i);
+        selectedPoints.push_back(sb.coordinates);
+        screenPoints.emplace_back(
+            2.0 * (touchPoints[i].position.x - 0.5),
+            -2.0 * (touchPoints[i].position.y - 0.5)
+        );
+    }
+
+    FunctionData fData = {
+        .selectedPoints = selectedPoints,
+        .screenPoints = screenPoints,
+        .nDOF = nDof,
+        .camera = &camera,
+        .node = _selectedNodeSurfacePoints.at(0).node,
+        .stats = lmStat
+    };
+
+    // Find best transform values for the new camera state and store them in parameters
+    std::vector<double> param(6, 0.0);
+
+    bool lmSuccess = ghoul::levmarq(
+        nDof,
+        param.data(),
+        static_cast<int>(screenPoints.size()),
+        nullptr,
+        distToMinimize,
+        gradient,
+        reinterpret_cast<void*>(&fData),
+        &lmStat
+    );
+
+    if (!lmSuccess) {
+        return std::nullopt;
+    }
+
+    return parseCameraParameterList(param, nDof);
 }
 
 } // namespace openspace

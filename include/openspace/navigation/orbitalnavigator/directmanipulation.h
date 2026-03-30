@@ -22,31 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___DIRECTINPUT_SOLVER___H__
-#define __OPENSPACE_CORE___DIRECTINPUT_SOLVER___H__
+#ifndef __OPENSPACE_CORE___DIRECTMANIPULATION___H__
+#define __OPENSPACE_CORE___DIRECTMANIPULATION___H__
 
+#include <openspace/properties/propertyowner.h>
+
+#include <openspace/properties/list/stringlistproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <ghoul/glm.h>
-#include <ghoul/misc/levmarqsolver.h>
-#include <optional>
-#include <vector>
+#include <set>
 
 namespace openspace {
 
 class Camera;
+struct CameraPose;
 class SceneGraphNode;
 
-/**
- * The DirectInputSolver is used to minimize the L2 error of touch input to 3D camera
- * position. It uses the levmarq (Levenberg–Marquardt) algorithm in order to do this.
- */
-class DirectInputSolver {
+class DirectManipulation : public PropertyOwner {
 public:
-    /**
-     * Result of the optimization process, containing the computed camera manipulation
-     * parameters. These values represent the transformations needed to align the camera
-     * with the touch input.
-     */
-    struct Result {
+    struct VelocityStates {
         glm::dvec2 orbit = glm::dvec2(0.0);
         double zoom = 0.0;
         double roll = 0.0;
@@ -71,21 +66,62 @@ public:
         glm::dvec2 position = glm::dvec2(0.0);
     };
 
-    DirectInputSolver();
+    DirectManipulation();
+
+    void updateCameraFromInput();
 
     /**
-     * Returns a result if the error could be minimized within certain bounds. If the
-     * error is found to be outside the bounds after a certain amount of iterations,
-     * this function fails and returns `std::nullopt`.
+     * Compute a camera pose from the velocity states resulting from a direct
+     * manipulation interaction.
+     *
+     * \param velocities The velocity states to process, which contains the parameters
+     *        for orbiting, zooming, rolling, and panning
+     * \param camera The camera for which to compute the new pose. The current pose of
+     *        the camera is used as the starting point for the computation
+     * \param anchor The anchor node for the direct manipulation interaction, which is
+     *        used as the reference point for the camera transformations. For example,
+     *        the camera will orbit around this node
+     * \return The resulting camera pose
      */
-    std::optional<Result> solve(const std::vector<TouchPoint>& touchPoints,
-        const std::vector<SelectedBody>& selectedBodies, const Camera& camera);
+    static CameraPose cameraPoseFromVelocities(const VelocityStates& velocities,
+        const Camera* camera, const SceneGraphNode* anchor);
 
 private:
-    ghoul::LMstat _lmstat;
+    /**
+     * Calculates the new camera state such that it minimizes the L2 error in screenspace
+     * between contact points and surface coordinates projected to clip space using LMA.
+     */
+    void applyDirectControl(const std::vector<TouchPoint>& touchPoints);
+
+    /**
+     * Traces each contact point into the scene as a ray and find the intersection points
+     * on the surface of the current anchor node, if any. Saves the input id the node and
+     * surface coordinates the cursor hit.
+     */
+    void updateNodeSurfacePoints(const std::vector<TouchPoint>& touchPoints);
+
+    bool isValidDirectTouchNode() const;
+    bool isWithinDirectTouchDistance() const;
+
+    /**
+     * Minimize the L2 error of touch input to 3D camera position, using the levmarq
+     * (Levenberg–Marquardt) algorithm.
+     */
+    std::optional<VelocityStates> solveVelocitiesFromTouchPoints(
+        const std::vector<TouchPoint>& touchPoints, const Camera& camera);
+
+    BoolProperty _enabled;
+    BoolProperty _isActive;
+    BoolProperty _allowMouseInput;
+    FloatProperty _distanceThreshold;
+    StringListProperty _defaultRenderableTypes;
+
+    // A sorted version of the list in the property
+    std::set<std::string> _sortedDefaultRenderableTypes;
+
+    std::vector<SelectedBody> _selectedNodeSurfacePoints;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___DIRECTINPUT_SOLVER___H__
-
+#endif // __OPENSPACE_CORE___DIRECTMANIPULATION___H__

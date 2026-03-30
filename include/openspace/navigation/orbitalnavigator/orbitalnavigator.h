@@ -27,7 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/navigation/orbitalnavigator/directmanipulation/directmanipulation.h>
+#include <openspace/navigation/orbitalnavigator/directmanipulation.h>
 #include <openspace/navigation/orbitalnavigator/idlemotion.h>
 #include <openspace/navigation/orbitalnavigator/orbitalinputhandler.h>
 #include <openspace/properties/misc/optionproperty.h>
