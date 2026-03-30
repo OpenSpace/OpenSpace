@@ -160,64 +160,71 @@ namespace {
     void gradient(double* g, double* par, int x, void* fdata, ghoul::LMstat* lmstat) {
         FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
         double f0 = distToMinimize(par, x, fdata, lmstat);
-        // Scale value to find minimum step size h, dependant on planet size
-        double scale = log10(ptr->node->interactionSphere());
-        std::vector<double> dPar(ptr->nDOF, 0.0);
-        dPar.assign(par, par + ptr->nDOF);
+        // Scale value to find minimum step size h, dependent on planet size
+        double scale = std::log10(ptr->node->interactionSphere());
+        int nDof = ptr->nDOF;
 
-        for (int i = 0; i < ptr->nDOF; i++) {
+        std::vector<double> dPar(nDof, 0.0);
+        dPar.assign(par, par + nDof);
+
+        for (int i = 0; i < nDof; i++) {
             // Initial values
             double h = 1e-8;
-            double lastG = 1;
-            dPar.at(i) += h;
-            double f1 = distToMinimize(dPar.data(), x, fdata, lmstat);
-            dPar.at(i) = par[i];
-            // Iterative process to find the minimum step h that gives a good gradient
-            for (int j = 0; j < 100; j++) {
-                if ((f1 - f0) != 0 && lastG == 0) { // found minimum step size h
+            double prevDiff = 1;
+
+            // Iterative process to find the minimum step `h` that gives a good gradient
+            constexpr int MaxIterations = 100;
+            for (int step = 0; step < MaxIterations; step++) {
+                dPar[i] += h;
+                double f1 = distToMinimize(dPar.data(), x, fdata, lmstat);
+                dPar[i] = par[i];
+
+                double diff = f1 - f0;
+
+                // Found good minimum step size
+                if (diff != 0 && prevDiff == 0) {
                     // Scale up to get a good initial guess value
                     h *= scale * scale * scale;
 
                     // Clamp min step size to a fraction of the incoming parameter
-                    if (i == 2) {
-                        double epsilon = 1e-3;
+                    if (i == 2) { // Zoom
                         // Make sure incoming parameter is larger than 0
-                        h = std::max(std::max(std::abs(dPar.at(i)), epsilon) * 0.001, h);
+                        constexpr double Epsilon = 1e-3;
+                        h = std::max(std::max(std::abs(dPar.at(i)), Epsilon) * 0.001, h);
                     }
-                    else if (ptr->nDOF == 2) {
+                    else if (nDof == 2) {
                         h = std::max(std::abs(dPar.at(i)) * 0.001, h);
                     }
-
-                    // Calculate f1 with good h for finite difference
-                    dPar[i] += h;
-                    f1 = distToMinimize(dPar.data(), x, fdata, lmstat);
-                    dPar[i] = par[i];
                     break;
                 }
-                else if ((f1 - f0) != 0 && lastG != 0) {
-                    // `h` too big
+                // Adapt step size (keep testing)
+                if (diff != 0 && prevDiff != 0) {
+                    // Step too big
                     h /= scale;
                 }
-                else if ((f1 - f0) == 0) {
-                    // `h` too small
+                else if (diff == 0) {
+                    // Step too small
                     h *= scale;
                 }
-                lastG = f1 - f0;
-                dPar.at(i) += h;
-                f1 = distToMinimize(dPar.data(), x, fdata, lmstat);
-                dPar.at(i) = par[i];
+                prevDiff = diff;
             }
+
+            // Compute finite difference using the adapted step size `h`
+            dPar[i] += h;
+            double f1 = distToMinimize(dPar.data(), x, fdata, lmstat);
+            dPar[i] = par[i];
             g[i] = (f1 - f0) / h;
         }
-        if (ptr->nDOF == 2) {
-            // Normalize on 1 finger case to allow for horizontal/vertical movement
-            for (int i = 0; i < 2; i++) {
+
+        if (nDof == 2) {
+            // 1-finger: Normalize to allow for horizontal/vertical movement
+            for (int i = 0; i < nDof; i++) {
                 g[i] = g[i] / std::abs(g[i]);
             }
         }
-        else if (ptr->nDOF == 6) {
-            for (int i = 0; i < ptr->nDOF; i++) {
-                // Lock to only pan and zoom on 3 finger case, no roll/orbit
+        else if (nDof == 6) {
+            // 3-fingers: Lock to only pan and zoom (no roll/orbit)
+            for (int i = 0; i < nDof; i++) {
                 g[i] = (i == 2) ? g[i] : g[i] / std::abs(g[i]);
             }
         }
@@ -455,9 +462,9 @@ void DirectManipulation::updateNodeSurfacePoints(
     _selectedNodeSurfacePoints = std::move(surfacePoints);
 }
 
-CameraPose DirectManipulation::cameraPoseFromVelocities(
-    const DirectManipulation::VelocityStates& velocities,
-    const Camera* camera, const SceneGraphNode* anchor)
+CameraPose DirectManipulation::cameraPoseFromVelocities(const VelocityStates& velocities,
+                                                        const Camera* camera,
+                                                        const SceneGraphNode* anchor)
 {
     ghoul_assert(camera != nullptr, "Camera must not be null");
     ghoul_assert(anchor != nullptr, "Anchor node must not be null");
