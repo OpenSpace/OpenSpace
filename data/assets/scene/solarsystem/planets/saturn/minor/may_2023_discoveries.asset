@@ -19,7 +19,7 @@ local S2019S2 = {
   },
   GUI = {
     Name = "S/2019 S 2",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2019S2"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S2"
   }
 }
 
@@ -39,7 +39,7 @@ local S2019S2Trail = {
   },
   GUI = {
     Name = "S/2019 S 2 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2019S2",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S2",
     Focusable = false
   }
 }
@@ -58,7 +58,7 @@ local S2019S2Label = {
   },
   GUI = {
     Name = "S/2019 S 2 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2019S2",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S2",
     Focusable = false
   }
 }
@@ -79,7 +79,7 @@ local S2019S3 = {
   },
   GUI = {
     Name = "S/2019 S 3",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S3"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S3"
   }
 }
 
@@ -99,7 +99,7 @@ local S2019S3Trail = {
   },
   GUI = {
     Name = "S/2019 S 3 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S3",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S3",
     Focusable = false
   }
 }
@@ -118,7 +118,7 @@ local S2019S3Label = {
   },
   GUI = {
     Name = "S/2019 S 3 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S3",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S3",
     Focusable = false
   }
 }
@@ -139,7 +139,7 @@ local S2020S1 = {
   },
   GUI = {
     Name = "S/2020 S 1",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit (Kiviuq) Group/S2020S1"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2020S1"
   }
 }
 
@@ -159,7 +159,7 @@ local S2020S1Trail = {
   },
   GUI = {
     Name = "S/2020 S 1 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit (Kiviuq) Group/S2020S1",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2020S1",
     Focusable = false
   }
 }
@@ -178,7 +178,7 @@ local S2020S1Label = {
   },
   GUI = {
     Name = "S/2020 S 1 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit (Kiviuq) Group/S2020S1",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2020S1",
     Focusable = false
   }
 }
@@ -199,7 +199,7 @@ local S2020S2 = {
   },
   GUI = {
     Name = "S/2020 S 2",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2020S2"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S2"
   }
 }
 
@@ -219,7 +219,7 @@ local S2020S2Trail = {
   },
   GUI = {
     Name = "S/2020 S 2 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2020S2",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S2",
     Focusable = false
   }
 }
@@ -238,7 +238,7 @@ local S2020S2Label = {
   },
   GUI = {
     Name = "S/2020 S 2 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2020S2",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S2",
     Focusable = false
   }
 }
@@ -259,7 +259,7 @@ local S2004S40 = {
   },
   GUI = {
     Name = "S/2004 S 40",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S40"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S40"
   }
 }
 
@@ -279,7 +279,7 @@ local S2004S40Trail = {
   },
   GUI = {
     Name = "S/2004 S 40 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S40",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S40",
     Focusable = false
   }
 }
@@ -298,7 +298,7 @@ local S2004S40Label = {
   },
   GUI = {
     Name = "S/2004 S 40 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S40",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S40",
     Focusable = false
   }
 }
@@ -319,7 +319,7 @@ local S2006S9 = {
   },
   GUI = {
     Name = "S/2006 S 9",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2006S9"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S9"
   }
 }
 
@@ -339,7 +339,7 @@ local S2006S9Trail = {
   },
   GUI = {
     Name = "S/2006 S 9 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2006S9",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S9",
     Focusable = false
   }
 }
@@ -358,7 +358,7 @@ local S2006S9Label = {
   },
   GUI = {
     Name = "S/2006 S 9 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2006S9",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S9",
     Focusable = false
   }
 }
@@ -379,7 +379,7 @@ local S2007S5 = {
   },
   GUI = {
     Name = "S/2007 S 5",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2007S5"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S5"
   }
 }
 
@@ -399,7 +399,7 @@ local S2007S5Trail = {
   },
   GUI = {
     Name = "S/2007 S 5 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2007S5",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S5",
     Focusable = false
   }
 }
@@ -418,7 +418,7 @@ local S2007S5Label = {
   },
   GUI = {
     Name = "S/2007 S 5 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2007S5",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S5",
     Focusable = false
   }
 }
@@ -439,7 +439,7 @@ local S2020S3 = {
   },
   GUI = {
     Name = "S/2020 S 3",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit (Siarnaq) Group/S2020S3"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2020S3"
   }
 }
 
@@ -459,7 +459,7 @@ local S2020S3Trail = {
   },
   GUI = {
     Name = "S/2020 S 3 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit (Siarnaq) Group/S2020S3",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2020S3",
     Focusable = false
   }
 }
@@ -478,7 +478,7 @@ local S2020S3Label = {
   },
   GUI = {
     Name = "S/2020 S 3 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit (Siarnaq) Group/S2020S3",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2020S3",
     Focusable = false
   }
 }
@@ -499,7 +499,7 @@ local S2019S4 = {
   },
   GUI = {
     Name = "S/2019 S 4",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S4"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S4"
   }
 }
 
@@ -519,7 +519,7 @@ local S2019S4Trail = {
   },
   GUI = {
     Name = "S/2019 S 4 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S4",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S4",
     Focusable = false
   }
 }
@@ -538,7 +538,7 @@ local S2019S4Label = {
   },
   GUI = {
     Name = "S/2019 S 4 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S4",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S4",
     Focusable = false
   }
 }
@@ -559,7 +559,7 @@ local S2004S41 = {
   },
   GUI = {
     Name = "S/2004 S 41",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S41"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S41"
   }
 }
 
@@ -579,7 +579,7 @@ local S2004S41Trail = {
   },
   GUI = {
     Name = "S/2004 S 41 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S41",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S41",
     Focusable = false
   }
 }
@@ -598,7 +598,7 @@ local S2004S41Label = {
   },
   GUI = {
     Name = "S/2004 S 41 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S41",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S41",
     Focusable = false
   }
 }
@@ -679,7 +679,7 @@ local S2020S5 = {
   },
   GUI = {
     Name = "S/2020 S 5",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit (Siarnaq) Group/S2020S5"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2020S5"
   }
 }
 
@@ -699,7 +699,7 @@ local S2020S5Trail = {
   },
   GUI = {
     Name = "S/2020 S 5 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit (Siarnaq) Group/S2020S5",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2020S5",
     Focusable = false
   }
 }
@@ -718,7 +718,7 @@ local S2020S5Label = {
   },
   GUI = {
     Name = "S/2020 S 5 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit (Siarnaq) Group/S2020S5",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2020S5",
     Focusable = false
   }
 }
@@ -739,7 +739,7 @@ local S2007S6 = {
   },
   GUI = {
     Name = "S/2007 S 6",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2007S6"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S6"
   }
 }
 
@@ -759,7 +759,7 @@ local S2007S6Trail = {
   },
   GUI = {
     Name = "S/2007 S 6 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2007S6",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S6",
     Focusable = false
   }
 }
@@ -778,7 +778,7 @@ local S2007S6Label = {
   },
   GUI = {
     Name = "S/2007 S 6 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2007S6",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S6",
     Focusable = false
   }
 }
@@ -799,7 +799,7 @@ local S2004S42 = {
   },
   GUI = {
     Name = "S/2004 S 42",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S42"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S42"
   }
 }
 
@@ -819,7 +819,7 @@ local S2004S42Trail = {
   },
   GUI = {
     Name = "S/2004 S 42 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S42",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S42",
     Focusable = false
   }
 }
@@ -838,7 +838,7 @@ local S2004S42Label = {
   },
   GUI = {
     Name = "S/2004 S 42 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S42",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S42",
     Focusable = false
   }
 }
@@ -859,7 +859,7 @@ local S2006S10 = {
   },
   GUI = {
     Name = "S/2006 S 10",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S10"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S10"
   }
 }
 
@@ -879,7 +879,7 @@ local S2006S10Trail = {
   },
   GUI = {
     Name = "S/2006 S 10 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S10",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S10",
     Focusable = false
   }
 }
@@ -898,7 +898,7 @@ local S2006S10Label = {
   },
   GUI = {
     Name = "S/2006 S 10 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S10",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S10",
     Focusable = false
   }
 }
@@ -919,7 +919,7 @@ local S2019S5 = {
   },
   GUI = {
     Name = "S/2019 S 5",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S5"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S5"
   }
 }
 
@@ -939,7 +939,7 @@ local S2019S5Trail = {
   },
   GUI = {
     Name = "S/2019 S 5 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S5",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S5",
     Focusable = false
   }
 }
@@ -958,7 +958,7 @@ local S2019S5Label = {
   },
   GUI = {
     Name = "S/2019 S 5 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S5",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S5",
     Focusable = false
   }
 }
@@ -979,7 +979,7 @@ local S2004S43 = {
   },
   GUI = {
     Name = "S/2004 S 43",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S43"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S43"
   }
 }
 
@@ -999,7 +999,7 @@ local S2004S43Trail = {
   },
   GUI = {
     Name = "S/2004 S 43 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S43",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S43",
     Focusable = false
   }
 }
@@ -1018,7 +1018,7 @@ local S2004S43Label = {
   },
   GUI = {
     Name = "S/2004 S 43 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S43",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S43",
     Focusable = false
   }
 }
@@ -1039,7 +1039,7 @@ local S2004S44 = {
   },
   GUI = {
     Name = "S/2004 S 44",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S44"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S44"
   }
 }
 
@@ -1059,7 +1059,7 @@ local S2004S44Trail = {
   },
   GUI = {
     Name = "S/2004 S 44 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S44",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S44",
     Focusable = false
   }
 }
@@ -1078,7 +1078,7 @@ local S2004S44Label = {
   },
   GUI = {
     Name = "S/2004 S 44 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S44",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S44",
     Focusable = false
   }
 }
@@ -1099,7 +1099,7 @@ local S2004S45 = {
   },
   GUI = {
     Name = "S/2004 S 45",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Kari) Group/S2004S45"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2004S45"
   }
 }
 
@@ -1119,7 +1119,7 @@ local S2004S45Trail = {
   },
   GUI = {
     Name = "S/2004 S 45 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Kari) Group/S2004S45",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2004S45",
     Focusable = false
   }
 }
@@ -1138,7 +1138,7 @@ local S2004S45Label = {
   },
   GUI = {
     Name = "S/2004 S 45 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Kari) Group/S2004S45",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2004S45",
     Focusable = false
   }
 }
@@ -1159,7 +1159,7 @@ local S2006S11 = {
   },
   GUI = {
     Name = "S/2006 S 11",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2006S11"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S11"
   }
 }
 
@@ -1179,7 +1179,7 @@ local S2006S11Trail = {
   },
   GUI = {
     Name = "S/2006 S 11 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2006S11",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S11",
     Focusable = false
   }
 }
@@ -1198,7 +1198,7 @@ local S2006S11Label = {
   },
   GUI = {
     Name = "S/2006 S 11 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2006S11",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S11",
     Focusable = false
   }
 }
@@ -1279,7 +1279,7 @@ local S2019S6 = {
   },
   GUI = {
     Name = "S/2019 S 6",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit (Siarnaq) Group/S2019S6"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2019S6"
   }
 }
 
@@ -1299,7 +1299,7 @@ local S2019S6Trail = {
   },
   GUI = {
     Name = "S/2019 S 6 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit (Siarnaq) Group/S2019S6",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2019S6",
     Focusable = false
   }
 }
@@ -1318,7 +1318,7 @@ local S2019S6Label = {
   },
   GUI = {
     Name = "S/2019 S 6 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit (Siarnaq) Group/S2019S6",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2019S6",
     Focusable = false
   }
 }
@@ -1339,7 +1339,7 @@ local S2006S13 = {
   },
   GUI = {
     Name = "S/2006 S 13",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S13"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S13"
   }
 }
 
@@ -1359,7 +1359,7 @@ local S2006S13Trail = {
   },
   GUI = {
     Name = "S/2006 S 13 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S13",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S13",
     Focusable = false
   }
 }
@@ -1378,7 +1378,7 @@ local S2006S13Label = {
   },
   GUI = {
     Name = "S/2006 S 13 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S13",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S13",
     Focusable = false
   }
 }
@@ -1399,7 +1399,7 @@ local S2019S7 = {
   },
   GUI = {
     Name = "S/2019 S 7",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2019S7"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S7"
   }
 }
 
@@ -1419,7 +1419,7 @@ local S2019S7Trail = {
   },
   GUI = {
     Name = "S/2019 S 7 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2019S7",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S7",
     Focusable = false
   }
 }
@@ -1438,7 +1438,7 @@ local S2019S7Label = {
   },
   GUI = {
     Name = "S/2019 S 7 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2019S7",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S7",
     Focusable = false
   }
 }
@@ -1459,7 +1459,7 @@ local S2019S8 = {
   },
   GUI = {
     Name = "S/2019 S 8",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2019S8"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S8"
   }
 }
 
@@ -1479,7 +1479,7 @@ local S2019S8Trail = {
   },
   GUI = {
     Name = "S/2019 S 8 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2019S8",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S8",
     Focusable = false
   }
 }
@@ -1498,7 +1498,7 @@ local S2019S8Label = {
   },
   GUI = {
     Name = "S/2019 S 8 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2019S8",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S8",
     Focusable = false
   }
 }
@@ -1519,7 +1519,7 @@ local S2019S9 = {
   },
   GUI = {
     Name = "S/2019 S 9",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S9"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S9"
   }
 }
 
@@ -1539,7 +1539,7 @@ local S2019S9Trail = {
   },
   GUI = {
     Name = "S/2019 S 9 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S9",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S9",
     Focusable = false
   }
 }
@@ -1558,7 +1558,7 @@ local S2019S9Label = {
   },
   GUI = {
     Name = "S/2019 S 9 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S9",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S9",
     Focusable = false
   }
 }
@@ -1579,7 +1579,7 @@ local S2004S46 = {
   },
   GUI = {
     Name = "S/2004 S 46",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2004S46"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2004S46"
   }
 }
 
@@ -1599,7 +1599,7 @@ local S2004S46Trail = {
   },
   GUI = {
     Name = "S/2004 S 46 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2004S46",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2004S46",
     Focusable = false
   }
 }
@@ -1618,7 +1618,7 @@ local S2004S46Label = {
   },
   GUI = {
     Name = "S/2004 S 46 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2004S46",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2004S46",
     Focusable = false
   }
 }
@@ -1639,7 +1639,7 @@ local S2019S10 = {
   },
   GUI = {
     Name = "S/2019 S 10",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S10"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S10"
   }
 }
 
@@ -1659,7 +1659,7 @@ local S2019S10Trail = {
   },
   GUI = {
     Name = "S/2019 S 10 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S10",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S10",
     Focusable = false
   }
 }
@@ -1678,7 +1678,7 @@ local S2019S10Label = {
   },
   GUI = {
     Name = "S/2019 S 10 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S10",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S10",
     Focusable = false
   }
 }
@@ -1699,7 +1699,7 @@ local S2004S47 = {
   },
   GUI = {
     Name = "S/2004 S 47",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S47"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S47"
   }
 }
 
@@ -1719,7 +1719,7 @@ local S2004S47Trail = {
   },
   GUI = {
     Name = "S/2004 S 47 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S47",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S47",
     Focusable = false
   }
 }
@@ -1738,7 +1738,7 @@ local S2004S47Label = {
   },
   GUI = {
     Name = "S/2004 S 47 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S47",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S47",
     Focusable = false
   }
 }
@@ -1759,7 +1759,7 @@ local S2019S11 = {
   },
   GUI = {
     Name = "S/2019 S 11",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (low-inclination) Group/S2019S11"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2019S11"
   }
 }
 
@@ -1779,7 +1779,7 @@ local S2019S11Trail = {
   },
   GUI = {
     Name = "S/2019 S 11 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (low-inclination) Group/S2019S11",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2019S11",
     Focusable = false
   }
 }
@@ -1798,7 +1798,7 @@ local S2019S11Label = {
   },
   GUI = {
     Name = "S/2019 S 11 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (low-inclination) Group/S2019S11",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2019S11",
     Focusable = false
   }
 }
@@ -1819,7 +1819,7 @@ local S2006S14 = {
   },
   GUI = {
     Name = "S/2006 S 14",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S14"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S14"
   }
 }
 
@@ -1839,7 +1839,7 @@ local S2006S14Trail = {
   },
   GUI = {
     Name = "S/2006 S 14 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S14",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S14",
     Focusable = false
   }
 }
@@ -1858,7 +1858,7 @@ local S2006S14Label = {
   },
   GUI = {
     Name = "S/2006 S 14 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S14",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S14",
     Focusable = false
   }
 }
@@ -1879,7 +1879,7 @@ local S2019S12 = {
   },
   GUI = {
     Name = "S/2019 S 12",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S12"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S12"
   }
 }
 
@@ -1899,7 +1899,7 @@ local S2019S12Trail = {
   },
   GUI = {
     Name = "S/2019 S 12 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S12",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S12",
     Focusable = false
   }
 }
@@ -1918,7 +1918,7 @@ local S2019S12Label = {
   },
   GUI = {
     Name = "S/2019 S 12 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S12",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S12",
     Focusable = false
   }
 }
@@ -1939,7 +1939,7 @@ local S2020S6 = {
   },
   GUI = {
     Name = "S/2020 S 6",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2020S6"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S6"
   }
 }
 
@@ -1959,7 +1959,7 @@ local S2020S6Trail = {
   },
   GUI = {
     Name = "S/2020 S 6 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2020S6",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S6",
     Focusable = false
   }
 }
@@ -1978,7 +1978,7 @@ local S2020S6Label = {
   },
   GUI = {
     Name = "S/2020 S 6 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2020S6",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S6",
     Focusable = false
   }
 }
@@ -1999,7 +1999,7 @@ local S2019S13 = {
   },
   GUI = {
     Name = "S/2019 S 13",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2019S13"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S13"
   }
 }
 
@@ -2019,7 +2019,7 @@ local S2019S13Trail = {
   },
   GUI = {
     Name = "S/2019 S 13 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2019S13",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S13",
     Focusable = false
   }
 }
@@ -2038,7 +2038,7 @@ local S2019S13Label = {
   },
   GUI = {
     Name = "S/2019 S 13 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2019S13",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S13",
     Focusable = false
   }
 }
@@ -2059,7 +2059,7 @@ local S2005S4 = {
   },
   GUI = {
     Name = "S/2005 S 4",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit (Kiviuq) Group/S2005S4"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2005S4"
   }
 }
 
@@ -2079,7 +2079,7 @@ local S2005S4Trail = {
   },
   GUI = {
     Name = "S/2005 S 4 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit (Kiviuq) Group/S2005S4",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2005S4",
     Focusable = false
   }
 }
@@ -2098,7 +2098,7 @@ local S2005S4Label = {
   },
   GUI = {
     Name = "S/2005 S 4 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit (Kiviuq) Group/S2005S4",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2005S4",
     Focusable = false
   }
 }
@@ -2119,7 +2119,7 @@ local S2007S7 = {
   },
   GUI = {
     Name = "S/2007 S 7",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2007S7"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S7"
   }
 }
 
@@ -2139,7 +2139,7 @@ local S2007S7Trail = {
   },
   GUI = {
     Name = "S/2007 S 7 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2007S7",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S7",
     Focusable = false
   }
 }
@@ -2158,7 +2158,7 @@ local S2007S7Label = {
   },
   GUI = {
     Name = "S/2007 S 7 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2007S7",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S7",
     Focusable = false
   }
 }
@@ -2239,7 +2239,7 @@ local S2020S7 = {
   },
   GUI = {
     Name = "S/2020 S 7",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2020S7"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S7"
   }
 }
 
@@ -2259,7 +2259,7 @@ local S2020S7Trail = {
   },
   GUI = {
     Name = "S/2020 S 7 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2020S7",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S7",
     Focusable = false
   }
 }
@@ -2278,7 +2278,7 @@ local S2020S7Label = {
   },
   GUI = {
     Name = "S/2020 S 7 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2020S7",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S7",
     Focusable = false
   }
 }
@@ -2299,7 +2299,7 @@ local S2019S14 = {
   },
   GUI = {
     Name = "S/2019 S 14",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit (Siarnaq) Group/S2019S14"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2019S14"
   }
 }
 
@@ -2319,7 +2319,7 @@ local S2019S14Trail = {
   },
   GUI = {
     Name = "S/2019 S 14 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit (Siarnaq) Group/S2019S14",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2019S14",
     Focusable = false
   }
 }
@@ -2338,7 +2338,7 @@ local S2019S14Label = {
   },
   GUI = {
     Name = "S/2019 S 14 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit (Siarnaq) Group/S2019S14",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2019S14",
     Focusable = false
   }
 }
@@ -2359,7 +2359,7 @@ local S2019S15 = {
   },
   GUI = {
     Name = "S/2019 S 15",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S15"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S15"
   }
 }
 
@@ -2379,7 +2379,7 @@ local S2019S15Trail = {
   },
   GUI = {
     Name = "S/2019 S 15 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S15",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S15",
     Focusable = false
   }
 }
@@ -2398,7 +2398,7 @@ local S2019S15Label = {
   },
   GUI = {
     Name = "S/2019 S 15 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S15",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S15",
     Focusable = false
   }
 }
@@ -2419,7 +2419,7 @@ local S2005S5 = {
   },
   GUI = {
     Name = "S/2005 S 5",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2005S5"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2005S5"
   }
 }
 
@@ -2439,7 +2439,7 @@ local S2005S5Trail = {
   },
   GUI = {
     Name = "S/2005 S 5 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2005S5",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2005S5",
     Focusable = false
   }
 }
@@ -2458,7 +2458,7 @@ local S2005S5Label = {
   },
   GUI = {
     Name = "S/2005 S 5 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2005S5",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2005S5",
     Focusable = false
   }
 }
@@ -2479,7 +2479,7 @@ local S2006S15 = {
   },
   GUI = {
     Name = "S/2006 S 15",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S15"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S15"
   }
 }
 
@@ -2499,7 +2499,7 @@ local S2006S15Trail = {
   },
   GUI = {
     Name = "S/2006 S 15 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S15",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S15",
     Focusable = false
   }
 }
@@ -2518,7 +2518,7 @@ local S2006S15Label = {
   },
   GUI = {
     Name = "S/2006 S 15 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S15",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S15",
     Focusable = false
   }
 }
@@ -2539,7 +2539,7 @@ local S2006S16 = {
   },
   GUI = {
     Name = "S/2006 S 16",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S16"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S16"
   }
 }
 
@@ -2559,7 +2559,7 @@ local S2006S16Trail = {
   },
   GUI = {
     Name = "S/2006 S 16 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S16",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S16",
     Focusable = false
   }
 }
@@ -2578,7 +2578,7 @@ local S2006S16Label = {
   },
   GUI = {
     Name = "S/2006 S 16 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S16",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S16",
     Focusable = false
   }
 }
@@ -2599,7 +2599,7 @@ local S2006S17 = {
   },
   GUI = {
     Name = "S/2006 S 17",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S17"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S17"
   }
 }
 
@@ -2619,7 +2619,7 @@ local S2006S17Trail = {
   },
   GUI = {
     Name = "S/2006 S 17 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S17",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S17",
     Focusable = false
   }
 }
@@ -2638,7 +2638,7 @@ local S2006S17Label = {
   },
   GUI = {
     Name = "S/2006 S 17 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S17",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S17",
     Focusable = false
   }
 }
@@ -2659,7 +2659,7 @@ local S2004S48 = {
   },
   GUI = {
     Name = "S/2004 S 48",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S48"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S48"
   }
 }
 
@@ -2679,7 +2679,7 @@ local S2004S48Trail = {
   },
   GUI = {
     Name = "S/2004 S 48 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S48",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S48",
     Focusable = false
   }
 }
@@ -2698,7 +2698,7 @@ local S2004S48Label = {
   },
   GUI = {
     Name = "S/2004 S 48 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S48",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S48",
     Focusable = false
   }
 }
@@ -2719,7 +2719,7 @@ local S2020S8 = {
   },
   GUI = {
     Name = "S/2020 S 8",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2020S8"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S8"
   }
 }
 
@@ -2739,7 +2739,7 @@ local S2020S8Trail = {
   },
   GUI = {
     Name = "S/2020 S 8 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2020S8",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S8",
     Focusable = false
   }
 }
@@ -2758,7 +2758,7 @@ local S2020S8Label = {
   },
   GUI = {
     Name = "S/2020 S 8 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2020S8",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S8",
     Focusable = false
   }
 }
@@ -2779,7 +2779,7 @@ local S2004S49 = {
   },
   GUI = {
     Name = "S/2004 S 49",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S49"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S49"
   }
 }
 
@@ -2799,7 +2799,7 @@ local S2004S49Trail = {
   },
   GUI = {
     Name = "S/2004 S 49 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S49",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S49",
     Focusable = false
   }
 }
@@ -2818,7 +2818,7 @@ local S2004S49Label = {
   },
   GUI = {
     Name = "S/2004 S 49 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S49",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S49",
     Focusable = false
   }
 }
@@ -2839,7 +2839,7 @@ local S2004S50 = {
   },
   GUI = {
     Name = "S/2004 S 50",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S50"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S50"
   }
 }
 
@@ -2859,7 +2859,7 @@ local S2004S50Trail = {
   },
   GUI = {
     Name = "S/2004 S 50 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S50",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S50",
     Focusable = false
   }
 }
@@ -2878,7 +2878,7 @@ local S2004S50Label = {
   },
   GUI = {
     Name = "S/2004 S 50 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S50",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S50",
     Focusable = false
   }
 }
@@ -2899,7 +2899,7 @@ local S2006S18 = {
   },
   GUI = {
     Name = "S/2006 S 18",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S18"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S18"
   }
 }
 
@@ -2919,7 +2919,7 @@ local S2006S18Trail = {
   },
   GUI = {
     Name = "S/2006 S 18 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S18",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S18",
     Focusable = false
   }
 }
@@ -2938,7 +2938,7 @@ local S2006S18Label = {
   },
   GUI = {
     Name = "S/2006 S 18 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2006S18",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S18",
     Focusable = false
   }
 }
@@ -2959,7 +2959,7 @@ local S2019S16 = {
   },
   GUI = {
     Name = "S/2019 S 16",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S16"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S16"
   }
 }
 
@@ -2979,7 +2979,7 @@ local S2019S16Trail = {
   },
   GUI = {
     Name = "S/2019 S 16 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S16",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S16",
     Focusable = false
   }
 }
@@ -2998,7 +2998,7 @@ local S2019S16Label = {
   },
   GUI = {
     Name = "S/2019 S 16 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S16",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S16",
     Focusable = false
   }
 }
@@ -3019,7 +3019,7 @@ local S2019S17 = {
   },
   GUI = {
     Name = "S/2019 S 17",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Kari) Group/S2019S17"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S17"
   }
 }
 
@@ -3039,7 +3039,7 @@ local S2019S17Trail = {
   },
   GUI = {
     Name = "S/2019 S 17 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Kari) Group/S2019S17",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S17",
     Focusable = false
   }
 }
@@ -3058,7 +3058,7 @@ local S2019S17Label = {
   },
   GUI = {
     Name = "S/2019 S 17 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Kari) Group/S2019S17",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S17",
     Focusable = false
   }
 }
@@ -3079,7 +3079,7 @@ local S2019S18 = {
   },
   GUI = {
     Name = "S/2019 S 18",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Kari) Group/S2019S18"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S18"
   }
 }
 
@@ -3099,7 +3099,7 @@ local S2019S18Trail = {
   },
   GUI = {
     Name = "S/2019 S 18 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Kari) Group/S2019S18",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S18",
     Focusable = false
   }
 }
@@ -3118,7 +3118,7 @@ local S2019S18Label = {
   },
   GUI = {
     Name = "S/2019 S 18 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Kari) Group/S2019S18",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S18",
     Focusable = false
   }
 }
@@ -3139,7 +3139,7 @@ local S2019S19 = {
   },
   GUI = {
     Name = "S/2019 S 19",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Kari) Group/S2019S19"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S19"
   }
 }
 
@@ -3159,7 +3159,7 @@ local S2019S19Trail = {
   },
   GUI = {
     Name = "S/2019 S 19 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Kari) Group/S2019S19",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S19",
     Focusable = false
   }
 }
@@ -3178,7 +3178,7 @@ local S2019S19Label = {
   },
   GUI = {
     Name = "S/2019 S 19 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Kari) Group/S2019S19",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S19",
     Focusable = false
   }
 }
@@ -3199,7 +3199,7 @@ local S2019S20 = {
   },
   GUI = {
     Name = "S/2019 S 20",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Kari) Group/S2019S20"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S20"
   }
 }
 
@@ -3219,7 +3219,7 @@ local S2019S20Trail = {
   },
   GUI = {
     Name = "S/2019 S 20 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Kari) Group/S2019S20",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S20",
     Focusable = false
   }
 }
@@ -3238,7 +3238,7 @@ local S2019S20Label = {
   },
   GUI = {
     Name = "S/2019 S 20 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Kari) Group/S2019S20",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S20",
     Focusable = false
   }
 }
@@ -3259,7 +3259,7 @@ local S2006S19 = {
   },
   GUI = {
     Name = "S/2006 S 19",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2006S19"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S19"
   }
 }
 
@@ -3279,7 +3279,7 @@ local S2006S19Trail = {
   },
   GUI = {
     Name = "S/2006 S 19 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2006S19",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S19",
     Focusable = false
   }
 }
@@ -3298,7 +3298,7 @@ local S2006S19Label = {
   },
   GUI = {
     Name = "S/2006 S 19 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2006S19",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S19",
     Focusable = false
   }
 }
@@ -3319,7 +3319,7 @@ local S2004S51 = {
   },
   GUI = {
     Name = "S/2004 S 51",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S51"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S51"
   }
 }
 
@@ -3339,7 +3339,7 @@ local S2004S51Trail = {
   },
   GUI = {
     Name = "S/2004 S 51 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S51",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S51",
     Focusable = false
   }
 }
@@ -3358,7 +3358,7 @@ local S2004S51Label = {
   },
   GUI = {
     Name = "S/2004 S 51 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S51",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S51",
     Focusable = false
   }
 }
@@ -3379,7 +3379,7 @@ local S2020S9 = {
   },
   GUI = {
     Name = "S/2020 S 9",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2020S9"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S9"
   }
 }
 
@@ -3399,7 +3399,7 @@ local S2020S9Trail = {
   },
   GUI = {
     Name = "S/2020 S 9 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2020S9",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S9",
     Focusable = false
   }
 }
@@ -3418,7 +3418,7 @@ local S2020S9Label = {
   },
   GUI = {
     Name = "S/2020 S 9 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2020S9",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S9",
     Focusable = false
   }
 }
@@ -3439,7 +3439,7 @@ local S2004S52 = {
   },
   GUI = {
     Name = "S/2004 S 52",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S52"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S52"
   }
 }
 
@@ -3459,7 +3459,7 @@ local S2004S52Trail = {
   },
   GUI = {
     Name = "S/2004 S 52 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S52",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S52",
     Focusable = false
   }
 }
@@ -3478,7 +3478,7 @@ local S2004S52Label = {
   },
   GUI = {
     Name = "S/2004 S 52 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S52",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S52",
     Focusable = false
   }
 }
@@ -3499,7 +3499,7 @@ local S2007S9 = {
   },
   GUI = {
     Name = "S/2007 S 9",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2007S9"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S9"
   }
 }
 
@@ -3519,7 +3519,7 @@ local S2007S9Trail = {
   },
   GUI = {
     Name = "S/2007 S 9 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2007S9",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S9",
     Focusable = false
   }
 }
@@ -3538,7 +3538,7 @@ local S2007S9Label = {
   },
   GUI = {
     Name = "S/2007 S 9 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2007S9",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S9",
     Focusable = false
   }
 }
@@ -3559,7 +3559,7 @@ local S2004S53 = {
   },
   GUI = {
     Name = "S/2004 S 53",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S53"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S53"
   }
 }
 
@@ -3579,7 +3579,7 @@ local S2004S53Trail = {
   },
   GUI = {
     Name = "S/2004 S 53 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S53",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S53",
     Focusable = false
   }
 }
@@ -3598,7 +3598,7 @@ local S2004S53Label = {
   },
   GUI = {
     Name = "S/2004 S 53 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2004S53",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S53",
     Focusable = false
   }
 }
@@ -3619,7 +3619,7 @@ local S2020S10 = {
   },
   GUI = {
     Name = "S/2020 S 10",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2020S10"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S10"
   }
 }
 
@@ -3639,7 +3639,7 @@ local S2020S10Trail = {
   },
   GUI = {
     Name = "S/2020 S 10 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2020S10",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S10",
     Focusable = false
   }
 }
@@ -3658,7 +3658,7 @@ local S2020S10Label = {
   },
   GUI = {
     Name = "S/2020 S 10 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2020S10",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S10",
     Focusable = false
   }
 }
@@ -3679,7 +3679,7 @@ local S2019S21 = {
   },
   GUI = {
     Name = "S/2019 S 21",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S21"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S21"
   }
 }
 
@@ -3699,7 +3699,7 @@ local S2019S21Trail = {
   },
   GUI = {
     Name = "S/2019 S 21 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S21",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S21",
     Focusable = false
   }
 }
@@ -3718,7 +3718,7 @@ local S2019S21Label = {
   },
   GUI = {
     Name = "S/2019 S 21 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Mundilfari) Group/S2019S21",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S21",
     Focusable = false
   }
 }
@@ -3739,7 +3739,7 @@ local S2006S20 = {
   },
   GUI = {
     Name = "S/2006 S 20",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2006S20"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S20"
   }
 }
 
@@ -3759,7 +3759,7 @@ local S2006S20Trail = {
   },
   GUI = {
     Name = "S/2006 S 20 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2006S20",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S20",
     Focusable = false
   }
 }
@@ -3778,7 +3778,7 @@ local S2006S20Label = {
   },
   GUI = {
     Name = "S/2006 S 20 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse (Phoebe) Group/S2006S20",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S20",
     Focusable = false
   }
 }
