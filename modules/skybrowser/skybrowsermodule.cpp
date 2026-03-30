@@ -27,9 +27,12 @@
 #include <modules/skybrowser/include/renderableskytarget.h>
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/targetbrowserpair.h>
+#include <modules/skybrowser/include/skybrowsertopic.h>
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/topic/server.h>
+#include <openspace/topic/connection.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/properties/property.h>
@@ -150,6 +153,11 @@ namespace {
 
         // [[codegen::verbatim(SpaceCraftTimeInfo.description)]]
         std::optional<std::string> wwtImageCollectionUrl;
+
+        // How often the SkyBrowser module should send updates to the UI.
+        // Set in milliseconds, so for example a value of 100 will result in
+        //  an update sent every 0.1 second (10 updates per second).
+        std::optional<int> updateInterval;
     };
 } // namespace
 #include "skybrowsermodule_codegen.cpp"
@@ -257,6 +265,7 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     _spaceCraftAnimationTime = p.spaceCraftAnimationTime.value_or(
         _spaceCraftAnimationTime
     );
+    _topicUpdateInterval = p.updateInterval.value_or(_topicUpdateInterval);
 
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
@@ -267,6 +276,10 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<RenderableSkyTarget>("RenderableSkyTarget");
+
+    ghoul::TemplateFactory<Topic>* fTopic = FactoryManager::ref().factory<Topic>();
+    ghoul_assert(fTopic, "Topic factory was not created");
+    fTopic->registerClass<SkyBrowserTopic>("skybrowser");
 }
 
 void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId,
@@ -388,6 +401,10 @@ void SkyBrowserModule::loadImages(const std::string& root,
 
 int SkyBrowserModule::nLoadedImages() const {
     return _dataHandler.nLoadedImages();
+}
+
+int SkyBrowserModule::topicUpdateInterval() const {
+    return _topicUpdateInterval;
 }
 
 const WwtDataHandler& SkyBrowserModule::wwtDataHandler() const {

@@ -24,11 +24,10 @@
 
 #include <modules/webgui/webguimodule.h>
 
-#include <modules/server/include/serverinterface.h>
-#include <modules/server/servermodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/topic/server.h>
 #include <openspace/util/json_helper.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
@@ -243,10 +242,8 @@ void WebGuiModule::startProcess() {
 
     _endpoints.clear();
 
-    ServerModule* serverModule = global::moduleEngine->module<ServerModule>();
-    const ServerInterface* serverInterface = serverModule->serverInterfaceByIdentifier(
-        _webSocketInterface
-    );
+    const ServerInterface* serverInterface =
+        global::server->serverInterfaceByIdentifier(_webSocketInterface);
     if (!serverInterface) {
         LERROR("Missing server interface. Server process could not start");
         return;
