@@ -119,6 +119,75 @@ namespace openspace {
 // Current version:
 //
 
+static void to_json(nlohmann::json& j, const Addon::Version& v) {
+    j["major"] = v.major;
+    j["minor"] = v.minor;
+}
+
+static void from_json(const nlohmann::json& j, Addon::Version& v) {
+    checkValue(j, "major", &nlohmann::json::is_number, "version", false);
+    checkValue(j, "minor", &nlohmann::json::is_number, "version", false);
+    checkExtraKeys(j, "version", { "major", "minor" });
+
+    j["major"].get_to(v.major);
+    j["minor"].get_to(v.minor);
+}
+
+static void from_json(const nlohmann::json& j, Addon& v) {
+    checkValue(j, "version", &nlohmann::json::is_object, "version", false);
+    checkValue(j, "identifier", &nlohmann::json::is_string, "identifier", false);
+    checkValue(j, "name", &nlohmann::json::is_string, "name", false);
+    checkValue(j, "assets", &nlohmann::json::is_array, "assets", false);
+    checkValue(j, "description", &nlohmann::json::is_string, "description", true);
+
+    j["version"].get_to(v.version);
+    j["identifier"].get_to(v.identifier);
+    j["name"].get_to(v.name);
+    if (j.find("description") != j.end()) {
+        j["description"].get_to(v.description);
+    }
+    j["assets"].get_to(v.assets);
+}
+
+static void to_json(nlohmann::json& j, const Addon& v) {
+    j["version"] = Addon::CurrentVersion;
+    j["identifier"] = v.identifier;
+    j["name"] = v.name;
+    if (!v.description.empty()) {
+        j["description"] = v.description;
+    }
+    j["assets"] = v.assets;
+}
+
+Addon loadAddonFromFile(const std::filesystem::path& path) {
+    ghoul_assert(std::filesystem::is_regular_file(path), "Path must exist");
+
+    std::ifstream inFile = std::ifstream(path, std::ifstream::in);
+    if (!inFile.is_open()) {
+        throw ghoul::RuntimeError(std::format(
+            "Exception opening addon file for read '{}'", path
+        ));
+    }
+
+    const std::string content = std::string(
+        std::istreambuf_iterator<char>(inFile),
+        std::istreambuf_iterator<char>()
+    );
+
+    try {
+        nlohmann::json addon = nlohmann::json::parse(content);
+        Addon res = addon.get<Addon>();
+        return res;
+    }
+    catch (const nlohmann::json::exception& e) {
+        std::string err = e.what();
+        throw Profile::ParsingError(
+            Profile::ParsingError::Severity::Error,
+            std::move(err)
+        );
+    }
+}
+
 static void to_json(nlohmann::json& j, const Profile::Version& v) {
     j["major"] = v.major;
     j["minor"] = v.minor;
@@ -402,6 +471,45 @@ static void to_json(nlohmann::json& j, const Profile::CameraNavState& v) {
     }
 }
 
+static void from_json(const nlohmann::json& j, Profile::Addons& v) {
+    checkValue(j, "recommended", &nlohmann::json::is_array, "recommended", true);
+    checkValue(j, "custom", &nlohmann::json::is_array, "custom", true);
+
+    if (j.find("recommended") != j.end()) {
+        j["recommended"].get_to(v.recommendedPaths);
+        // The recommended list in the profile is just a list of paths but we want to have
+        // the addons as a fully loaded entity
+        for (const std::string& r : v.recommendedPaths) {
+            const std::filesystem::path p =
+                absPath(std::format("${{PROFILES}}/{}.addon", r));
+            if (!std::filesystem::exists(p)) {
+                LERRORC(
+                    "Profile",
+                    std::format("Unable to find recommended addon '{}'", p)
+                );
+                continue;
+            }
+            Addon addon = loadAddonFromFile(p);
+            v.recommended.push_back(std::move(addon));
+        }
+    }
+    if (j.find("custom") != j.end()) {
+        j["custom"].get_to(v.custom);
+    }
+}
+
+static void to_json(nlohmann::json& j, const Profile::Addons& v) {
+    if (!v.custom.empty()) {
+        j["custom"] = v.custom;
+    }
+    if (!v.recommendedPaths.empty()) {
+        j["recommended"] = v.recommendedPaths;
+    }
+
+    // We don't serialize the realized Addon struct that come from the recommended paths
+    // on purpose
+}
+
 static void from_json(const nlohmann::json& j, Profile::CameraNavState& v) {
     ghoul_assert(
         j.at("type").get<std::string>() == Profile::CameraNavState::Type,
@@ -633,6 +741,15 @@ static void convertVersion13to14(nlohmann::json& profile) {
 
 } // namespace version13
 
+namespace version14 {
+
+static void convertVersion14to15(nlohmann::json& profile) {
+    // Version 1.5 introduced profile add-ons
+    profile["version"] = Profile::Version{ 1, 5 };
+}
+
+} // namespace version14
+
 Profile::ParsingError::ParsingError(Severity severity_, std::string msg)
     : ghoul::RuntimeError(std::move(msg), "profile")
     , severity(severity_)
@@ -753,6 +870,10 @@ std::string Profile::serialize() const {
         r["panel_visibility"] = uiPanelVisibility;
     }
 
+    if (!addons.recommendedPaths.empty() || !addons.custom.empty()) {
+        r["addons"] = addons;
+    }
+
     return r.dump(2);
 }
 
@@ -793,6 +914,11 @@ Profile::Profile(const std::filesystem::path& path) {
 
         if (version.major == 1 && version.minor == 3) {
             version13::convertVersion13to14(profile);
+            profile["version"].get_to(version);
+        }
+
+        if (version.major == 1 && version.minor == 4) {
+            version14::convertVersion14to15(profile);
             profile["version"].get_to(version);
         }
 
@@ -847,6 +973,33 @@ Profile::Profile(const std::filesystem::path& path) {
         if (profile.find("panel_visibility") != profile.end()) {
             profile["panel_visibility"].get_to(uiPanelVisibility);
         }
+        if (profile.find("addons") != profile.end()) {
+            profile["addons"].get_to(addons);
+        }
+
+        // Load the general addon files
+        std::vector<std::filesystem::path> coreAddons = ghoul::filesystem::walkDirectory(
+            absPath("${PROFILES}"),
+            ghoul::filesystem::Recursive::Yes,
+            ghoul::filesystem::Sorted::No,
+            [](const std::filesystem::path& p) { return p.extension() == ".addon"; }
+        );
+        for (const std::filesystem::path& p : coreAddons) {
+            Addon addon = loadAddonFromFile(p);
+            addons.general.push_back(std::move(addon));
+        }
+
+        std::vector<std::filesystem::path> userAddons = ghoul::filesystem::walkDirectory(
+            absPath("${USER_PROFILES}"),
+            ghoul::filesystem::Recursive::Yes,
+            ghoul::filesystem::Sorted::No,
+            [](const std::filesystem::path& p) { return p.extension() == ".addon"; }
+        );
+        for (const std::filesystem::path& p : userAddons) {
+            Addon addon = loadAddonFromFile(p);
+            addons.general.push_back(std::move(addon));
+        }
+
     }
     catch (const nlohmann::json::exception& e) {
         std::string err = e.what();
@@ -860,6 +1013,7 @@ LuaLibrary Profile::luaLibrary() {
         {
             codegen::lua::ProfileName,
             codegen::lua::ProfilePath,
+            codegen::lua::ProfileAddons,
             codegen::lua::SaveSettingsToProfile
         }
     };
