@@ -927,7 +927,10 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         data.camera.projectionMatrix()
     );
 
-    if (!_enableFaceCulling) {
+    if (_enableFaceCulling) {
+        glEnable(GL_CULL_FACE);
+    }
+    else {
         glDisable(GL_CULL_FACE);
     }
 
@@ -948,7 +951,10 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             break;
     }
 
-    if (!_enableDepthTest) {
+    if (_enableDepthTest) {
+        glEnable(GL_DEPTH_TEST);
+    }
+    else {
         glDisable(GL_DEPTH_TEST);
     }
 
@@ -1029,7 +1035,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             glm::value_ptr(PosBufferClearVal)
         );
 
-        // Use a manuel depth test to make the models aware of the rest of the scene
+        // Use a manual depth test to make the models aware of the rest of the scene
         _program->setUniform(_uniformCache.performManualDepthTest, _enableDepthTest);
 
         // Bind the G-buffer depth texture for a manual depth test towards the rest of the
@@ -1105,14 +1111,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glBindVertexArray(_vao);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         _quadProgram->deactivate();
-    }
-
-    if (!_enableFaceCulling) {
-        glEnable(GL_CULL_FACE);
-    }
-
-    if (!_enableDepthTest) {
-        glEnable(GL_DEPTH_TEST);
     }
 
     global::renderEngine->openglStateCache().resetBlendState();

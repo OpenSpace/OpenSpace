@@ -88,6 +88,9 @@ void ScreenSpaceRenderableFramebuffer::deinitializeGL() {
     ghoul::opengl::FramebufferObject::deactivate();
     removeAllRenderFunctions();
 
+    _texture = nullptr;
+    _depthTexture = nullptr;
+
     ScreenSpaceRenderable::deinitializeGL();
 }
 
@@ -154,8 +157,20 @@ void ScreenSpaceRenderableFramebuffer::createFramebuffer() {
         },
         ghoul::opengl::Texture::SamplerInit {}
     );
-    _objectSize = glm::ivec2(resolution);
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
+
+    _depthTexture = std::make_unique<ghoul::opengl::Texture>(
+        ghoul::opengl::Texture::FormatInit {
+            .dimensions = glm::uvec3(resolution.x, resolution.y, 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::DepthComponent,
+            .dataType = GL_FLOAT
+        },
+        ghoul::opengl::Texture::SamplerInit {}
+    );
+    _framebuffer->attachTexture(_depthTexture.get(), GL_DEPTH_ATTACHMENT);
+
+    _objectSize = glm::ivec2(resolution);
     ghoul::opengl::FramebufferObject::deactivate();
 }
 
