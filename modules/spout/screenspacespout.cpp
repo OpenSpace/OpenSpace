@@ -83,7 +83,9 @@ void ScreenSpaceSpout::update() {
 }
 
 void ScreenSpaceSpout::bindTexture(ghoul::opengl::TextureUnit& unit) {
-    unit.bind(_spoutReceiver.spoutTexture());
+    if (_spoutReceiver.isReceiving()) {
+        unit.bind(_spoutReceiver.spoutTexture());
+    }
 }
 
 } // namespace openspace
