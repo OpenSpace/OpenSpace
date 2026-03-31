@@ -272,7 +272,7 @@ namespace {
         "A list of renderable types that will automatically use the direct manipulation "
         "scheme when interacted with, keeping the finger on a static position on the "
         "interaction sphere of the object when touching. Good for relatively spherical "
-        "objects.",
+        "objects. Per default, it's set to RenderableGlobes.",
         Property::Visibility::AdvancedUser
     };
 
@@ -307,6 +307,15 @@ DirectManipulation::DirectManipulation()
     addProperty(_allowMouseInput);
 
     addProperty(_distanceThreshold);
+
+    // @TODO (2026-03-31, emmbr) This is a bit of a hack, to apply this setting to
+    // RenderableGlobes per default. It's done manually before the onchange, as the
+    // RenderableGlobe type has not yet been registered when this constructor is run, so
+    // the existance check fails... In the future we want to remove this and ideally,
+    // this property should not be needed at all. Direct manipulation should be made to
+    // work fine for all renderable types
+    _defaultRenderableTypes = std::vector<std::string>({ "RenderableGlobe" });
+    _sortedDefaultRenderableTypes.insert("RenderableGlobe");
 
     _defaultRenderableTypes.onChange([this]() {
         _sortedDefaultRenderableTypes.clear();
