@@ -48,6 +48,21 @@ namespace {
         Property::Visibility::Developer
     };
 
+    // ScreenSpaceDashboard is a screen-space renderable for displaying dashboard content
+    // as a 2D overlay on top of the scene. Unlike world-space objects, it is anchored to
+    // the screen rather than to any location in the 3D environment, which makes it
+    // suitable for HUD-style information displays.
+    //
+    // The class acts as a container and renderer for [DashboardItem](#core_dashboarditem)
+    // instances. These items can present textual or status-oriented information such as
+    // time, camera state, mission data, frame rate, or other runtime values. The
+    // dashboard is rendered into a framebuffer-backed screen-space surface and then
+    // composited into the final view.
+    //
+    // ScreenSpaceDashboard supports two usage patterns. It can either render the
+    // application’s shared main dashboard, or it can host its own independent dashboard
+    // instance. This makes it useful both for reusing a global information overlay and
+    // for creating dedicated screen-space panels with their own item composition.
     struct [[codegen::Dictionary(ScreenSpaceDashboard)]] Parameters {
         std::optional<std::string> identifier [[codegen::private()]];
 

@@ -1323,7 +1323,7 @@ int main(int argc, char* argv[]) {
 #ifdef WIN32
         glm::ivec2 size = glm::ivec2(1920, 1080);
         DEVMODEW dm;
-        std:memset(&dm, 0, sizeof(DEVMODEW));
+        std::memset(&dm, 0, sizeof(DEVMODEW));
         dm.dmSize = sizeof(DEVMODEW);
         BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
         if (success) {

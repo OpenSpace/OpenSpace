@@ -61,6 +61,7 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/topic/server.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/openspacemodule.h>
@@ -426,6 +427,8 @@ void OpenSpaceEngine::initialize() {
 
     LINFOC("OpenSpace Version", std::string(OPENSPACE_VERSION));
     LINFOC("Commit", std::string(OPENSPACE_GIT_FULL));
+
+    global::server->initialize(global::configuration->server);
 
     // Register modules
     global::moduleEngine->initialize(global::configuration->moduleConfigurations);
@@ -1145,6 +1148,8 @@ void OpenSpaceEngine::preSynchronization() {
         global::parallelPeer->preSynchronization();
         global::interactionHandler->preSynchronization();
     }
+
+    global::server->preSync();
 
     for (const std::function<void()>& func : *global::callback::preSync) {
         ZoneScopedN("[Module] preSync");

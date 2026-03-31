@@ -50,6 +50,7 @@
 #include <openspace/scene/profile.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
+#include <openspace/topic/server.h>
 #include <openspace/util/downloadeventengine.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/timemanager.h>
@@ -71,6 +72,8 @@ namespace {
 #ifdef WIN32
     constexpr int TotalSize =
         sizeof(MemoryManager) +
+        sizeof(Server) +
+        sizeof(OpenSpaceEngine) +
         sizeof(DownloadEventEngine) +
         sizeof(EventEngine) +
         sizeof(ghoul::fontrendering::FontManager) +
@@ -80,7 +83,6 @@ namespace {
         sizeof(LuaConsole) +
         sizeof(MissionManager) +
         sizeof(ModuleEngine) +
-        sizeof(OpenSpaceEngine) +
         sizeof(ParallelPeer) +
         sizeof(RaycasterManager) +
         sizeof(RenderEngine) +
@@ -126,6 +128,14 @@ void create() {
     currentPos += sizeof(MemoryManager);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     memoryManager = new MemoryManager;
+#endif // WIN32
+
+#ifdef WIN32
+    server = new (currentPos) Server;
+    ghoul_assert(server, "No server");
+    currentPos += sizeof(Server);
+#else // ^^^^ WIN32 / !WIN32 vvvv
+    server = new Server;
 #endif // WIN32
 
 #ifdef WIN32
@@ -395,6 +405,8 @@ void initialize() {
     rootPropertyOwner->addPropertySubOwner(global::renderEngine);
     rootPropertyOwner->addPropertySubOwner(global::screenSpaceRootPropertyOwner);
 
+    rootPropertyOwner->addPropertySubOwner(global::server);
+
     rootPropertyOwner->addPropertySubOwner(global::parallelPeer);
     rootPropertyOwner->addPropertySubOwner(global::luaConsole);
     rootPropertyOwner->addPropertySubOwner(global::dashboard);
@@ -618,6 +630,13 @@ void destroy() {
     openSpaceEngine->~OpenSpaceEngine();
 #else // ^^^^ WIN32 / !WIN32 vvvv
     delete openSpaceEngine;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'Server'");
+#ifdef WIN32
+    server->~Server();
+#else // ^^^^ WIN32 / !WIN32 vvvv
+    delete server;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'MemoryManager'");

@@ -59,6 +59,28 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
+    // HorizonsTranslation is a file-driven translation component that computes an
+    // object's position from ephemeris data exported from JPL Horizons. It is intended
+    // for bodies whose motion is best represented by sampled positional data over time
+    // rather than by an analytic orbit model.
+    //
+    // The class reads one or more Horizons text files and converts their contents into a
+    // time-ordered position timeline. At runtime, it evaluates the object's position by
+    // interpolating between the surrounding keyframes, which produces smooth motion
+    // across the sampled interval. If the requested time falls outside the covered
+    // range, it returns the nearest available position at the start or end of the
+    // dataset.
+    //
+    // This makes HorizonsTranslation well suited for objects whose trajectories come
+    // directly from external ephemeris products, such as spacecraft, planets, moons,
+    // asteroids, or observational targets generated through Horizons. It is particularly
+    // useful when authoritative trajectory samples are preferred over simplified orbital
+    // parameterization.
+    //
+    // The implementation also supports combining multiple Horizons files into a single
+    // translation timeline. New samples are merged while avoiding duplicate timestamps,
+    // which allows a trajectory to be assembled from multiple exports or extended over
+    // longer time spans.
     struct [[codegen::Dictionary(HorizonsTranslation)]] Parameters {
         // [[codegen::verbatim(HorizonsTextFileInfo.description)]]
         std::variant<

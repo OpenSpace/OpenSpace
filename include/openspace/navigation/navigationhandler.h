@@ -88,15 +88,18 @@ public:
     void saveNavigationState(const std::filesystem::path& filepath,
         const std::string& referenceFrameIdentifier) const;
 
-    void loadNavigationState(const std::string& filepath, bool useTimeStamp);
+    NavigationState loadNavigationState(const std::string& filepath);
 
     /**
      * Set camera state from a provided navigation state next frame. The actual position
      * will computed from the scene in the same frame as it is set.
      *
      * \param state The navigation state to compute a camera positon from
+     * \param useTimeStamp If `true`, also set the time based on the time stamp in the
+     *        navigation state, if it is provided. If `false`, do not change time
      */
-    void setNavigationStateNextFrame(const NavigationState& state);
+    void setNavigationStateNextFrame(const NavigationState& state,
+        bool useTimeStamp = false);
 
     /**
      * Set camera state from a provided node based camera specification structure, next

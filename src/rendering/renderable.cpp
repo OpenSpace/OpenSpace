@@ -192,6 +192,10 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings s
     _enabled = p.enabled.value_or(_enabled);
     addProperty(_enabled);
     _enabled.onChange([this]() {
+        if (!_parent) {
+            return;
+        }
+
         if (isEnabled()) {
             global::eventEngine->publishEvent<EventRenderableEnabled>(_parent);
         }
