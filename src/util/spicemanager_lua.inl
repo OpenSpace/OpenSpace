@@ -189,6 +189,9 @@ namespace {
     //
     // Load the TLE file
     //
+    if (!std::filesystem::exists(tle)) {
+        throw ghoul::RuntimeError(std::format("Could not find TLE file '{}'", tle));
+    }
     std::ifstream f = std::ifstream(tle, std::ios::binary);
     std::string contents = std::string(
         std::istreambuf_iterator<char>(f),
