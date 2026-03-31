@@ -48,6 +48,18 @@ struct CameraRotationDecomposition {
  *
  * The local rotation defines the differential from the global to the current total
  * rotation so that `cameraRotation = globalRotation * localRotation`.
+ *
+ * Global Rotation (base orientation toward object):
+ *
+ *        Camera
+ *           *
+ *           | view direction (pointing to object center)
+ *           v
+ *         .---.
+ *        /     \
+ *       |   *   |  Reference Node
+ *        \     /
+ *         '---'
  */
 CameraRotationDecomposition decomposeCameraRotation(const CameraPose& cameraPose,
     const glm::dvec3& reference);
@@ -59,6 +71,20 @@ CameraRotationDecomposition decomposeCameraRotation(const CameraPose& cameraPose
  * out from the surface of the object. The local rotation defines the differential from
  * the global to the current total rotation so that
  * `cameraRotation = globalRotation * localRotation`.
+ *
+ * Global Rotation (base orientation toward object):
+ *
+ *       Camera
+ *          *
+ *          | view direction (opposite to surface normal)
+ *          |
+ *          | ^
+ *          v | surface normal
+ *         .---.
+ *        /     \
+ *       |   *   |  Reference Node
+ *        \     /
+ *         '---'
  */
 CameraRotationDecomposition decomposeCameraRotationSurface(
     const CameraPose& cameraPose, const SceneGraphNode& reference);
