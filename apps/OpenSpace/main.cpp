@@ -1262,10 +1262,10 @@ int main(int argc, char* argv[]) {
         commandlineArguments.profileAddons,
         "--addons",
         "-a",
-        "Specifies the add-ons of the profile that should be loaded. The provided "
-        "add-ons must exist on the profile. Multiple add-ons can be specified by "
-        "separating them with a \";\", for example \"--variants abc;def\" specifies the "
-        "add-ons \"abc\" and \"def\"."
+        "Specifies the add-ons of the profile that should be loaded. The provided addons "
+        "must exist on the profile. Multiple addons can be specified by separating them "
+        "with a \";\", for example \"--addons abc;def\" specifies the addons \"abc\" and "
+        "\"def\"."
     ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
         commandlineArguments.propertyVisibility,

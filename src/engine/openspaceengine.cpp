@@ -497,19 +497,6 @@ void OpenSpaceEngine::initialize() {
     *global::profile = Profile(profile);
 
     // Enable the add-ons
-    std::vector<std::filesystem::path> coreAddons = ghoul::filesystem::walkDirectory(
-        absPath("${PROFILES}"),
-        ghoul::filesystem::Recursive::Yes,
-        ghoul::filesystem::Sorted::No,
-        [](const std::filesystem::path& p) { return p.extension() == ".addon"; }
-    );
-    std::vector<std::filesystem::path> userAddons = ghoul::filesystem::walkDirectory(
-        absPath("${USER_PROFILES}"),
-        ghoul::filesystem::Recursive::Yes,
-        ghoul::filesystem::Sorted::No,
-        [](const std::filesystem::path& p) { return p.extension() == ".addon"; }
-    );
-
     for (const std::string& addon : global::configuration->profile.addons) {
         auto findIdentifier = [&addon](const Addon& a) {
             return a.identifier == addon;
@@ -548,7 +535,7 @@ void OpenSpaceEngine::initialize() {
             iCustom == global::profile->addons.custom.end() &&
             iGeneral == global::profile->addons.general.end())
         {
-            LWARNING(std::format("Could find requested variant '{}'", addon));
+            LWARNING(std::format("Could not find requested addon '{}'", addon));
             continue;
         }
     }

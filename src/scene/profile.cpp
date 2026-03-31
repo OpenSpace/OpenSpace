@@ -165,7 +165,7 @@ Addon loadAddonFromFile(const std::filesystem::path& path) {
     std::ifstream inFile = std::ifstream(path, std::ifstream::in);
     if (!inFile.is_open()) {
         throw ghoul::RuntimeError(std::format(
-            "Exception opening profile file for read '{}'", path
+            "Exception opening addon file for read '{}'", path
         ));
     }
 
@@ -495,28 +495,6 @@ static void from_json(const nlohmann::json& j, Profile::Addons& v) {
     }
     if (j.find("custom") != j.end()) {
         j["custom"].get_to(v.custom);
-    }
-
-    std::vector<std::filesystem::path> coreAddons = ghoul::filesystem::walkDirectory(
-        absPath("${PROFILES}"),
-        ghoul::filesystem::Recursive::Yes,
-        ghoul::filesystem::Sorted::No,
-        [](const std::filesystem::path& p) { return p.extension() == ".addon"; }
-    );
-    for (const std::filesystem::path& p : coreAddons) {
-        Addon addon = loadAddonFromFile(p);
-        v.general.push_back(std::move(addon));
-    }
-
-    std::vector<std::filesystem::path> userAddons = ghoul::filesystem::walkDirectory(
-        absPath("${USER_PROFILES}"),
-        ghoul::filesystem::Recursive::Yes,
-        ghoul::filesystem::Sorted::No,
-        [](const std::filesystem::path& p) { return p.extension() == ".addon"; }
-    );
-    for (const std::filesystem::path& p : userAddons) {
-        Addon addon = loadAddonFromFile(p);
-        v.general.push_back(std::move(addon));
     }
 }
 
@@ -892,7 +870,7 @@ std::string Profile::serialize() const {
         r["panel_visibility"] = uiPanelVisibility;
     }
 
-    if (!addons.recommended.empty() || !addons.custom.empty()) {
+    if (!addons.recommendedPaths.empty() || !addons.custom.empty()) {
         r["addons"] = addons;
     }
 
@@ -998,6 +976,30 @@ Profile::Profile(const std::filesystem::path& path) {
         if (profile.find("addons") != profile.end()) {
             profile["addons"].get_to(addons);
         }
+
+        // Load the general addon files
+        std::vector<std::filesystem::path> coreAddons = ghoul::filesystem::walkDirectory(
+            absPath("${PROFILES}"),
+            ghoul::filesystem::Recursive::Yes,
+            ghoul::filesystem::Sorted::No,
+            [](const std::filesystem::path& p) { return p.extension() == ".addon"; }
+        );
+        for (const std::filesystem::path& p : coreAddons) {
+            Addon addon = loadAddonFromFile(p);
+            addons.general.push_back(std::move(addon));
+        }
+
+        std::vector<std::filesystem::path> userAddons = ghoul::filesystem::walkDirectory(
+            absPath("${USER_PROFILES}"),
+            ghoul::filesystem::Recursive::Yes,
+            ghoul::filesystem::Sorted::No,
+            [](const std::filesystem::path& p) { return p.extension() == ".addon"; }
+        );
+        for (const std::filesystem::path& p : userAddons) {
+            Addon addon = loadAddonFromFile(p);
+            addons.general.push_back(std::move(addon));
+        }
+
     }
     catch (const nlohmann::json::exception& e) {
         std::string err = e.what();

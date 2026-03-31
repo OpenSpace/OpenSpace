@@ -17,9 +17,9 @@
         "name": "Apollo 17 Boulders",
         "description": "Adds 3D reconstructed boulders for Stations 2, 6, and 7 of the Apollo 17 EVAs.",
         "assets": [
-          "scene/solarsystem/mssions/apollo/17/bouldersstation2",
-          "scene/solarsystem/mssions/apollo/17/bouldersstation6",
-          "scene/solarsystem/mssions/apollo/17/bouldersstation7"
+          "scene/solarsystem/missions/apollo/17/bouldersstation2",
+          "scene/solarsystem/missions/apollo/17/bouldersstation6",
+          "scene/solarsystem/missions/apollo/17/bouldersstation7"
         ]
       }
     ]
