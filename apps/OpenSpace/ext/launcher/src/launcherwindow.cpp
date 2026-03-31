@@ -30,6 +30,7 @@
 #include "notificationwindow.h"
 #include "settingsdialog.h"
 #include "splitcombobox.h"
+#include "usericon.h"
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/settings.h>
 #include <openspace/openspace.h>
@@ -83,12 +84,7 @@ namespace {
         constexpr QRect EditProfileButton(
             LeftRuler, TopRuler + 180, SmallItemWidth, SmallItemHeight
         );
-        constexpr QRect AddonBox(
-            LeftRuler,
-            TopRuler + 210,
-            SmallItemWidth,
-            SmallItemHeight
-        );
+        constexpr QRect AddonBox(LeftRuler, TopRuler + 210, ItemWidth, SmallItemHeight);
         constexpr QRect OptionsLabel(LeftRuler + 10, TopRuler + 255, 151, 24);
         constexpr QRect WindowConfigBox(LeftRuler, TopRuler + 285, ItemWidth, ItemHeight);
         constexpr QRect NewWindowButton(
@@ -303,8 +299,17 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     _addonBox.combobox = new QComboBox(centralWidget);
     _addonBox.combobox->setObjectName("config");
     _addonBox.combobox->setGeometry(geometry::AddonBox);
+    _addonBox.combobox->setPlaceholderText("Addons");
     _addonBox.combobox->setAccessibleName("Select Addons");
     _addonBox.model = new QStandardItemModel;
+    connect(
+        _addonBox.model,
+        &QStandardItemModel::itemChanged,
+        this,
+        &LauncherWindow::updatePlaceholderText
+    );
+
+
     _addonBox.combobox->setModel(_addonBox.model);
     updateAddonsBox(globalConfig.profile.profile + ".profile");
     for (const std::string& addon : globalConfig.profile.addons) {
@@ -730,6 +735,26 @@ void LauncherWindow::updateStartButton() const {
     _startButton->setEnabled(!profilePath.empty() && !configPath.empty());
 }
 
+void LauncherWindow::updatePlaceholderText() {
+    int count = 0;
+    for (int i = 0; i < _addonBox.model->rowCount(); i++) {
+        QStandardItem* item = _addonBox.model->item(i);
+        const int state = item->data(Qt::CheckStateRole).toInt();
+        const bool checked = state == Qt::Checked;
+        if (checked) {
+            count++;
+        }
+    }
+
+    if (count > 0) {
+        std::string text = std::format("Addons ({} selected)", count);
+        _addonBox.combobox->setPlaceholderText(QString::fromStdString(text));
+    }
+    else {
+        _addonBox.combobox->setPlaceholderText("Addons");
+    }
+}
+
 void LauncherWindow::updateAddonsBox(const std::string& profile) {
     // Get a list of all of the potential variants
     std::vector<std::filesystem::path> addonsCore = ghoul::filesystem::walkDirectory(
@@ -747,7 +772,6 @@ void LauncherWindow::updateAddonsBox(const std::string& profile) {
 
     // First clear the model of the previous results
     _addonBox.model->clear();
-    _addonBox.combobox->setPlaceholderText("Addons");
 
     // Then recreate the new ones
     const std::filesystem::path coreCandidate = _profilePath / profile;
@@ -763,8 +787,17 @@ void LauncherWindow::updateAddonsBox(const std::string& profile) {
         std::filesystem::exists(userCandidate) ? userCandidate : coreCandidate
     );
 
-    auto toItem = [](const Addon& addon) {
-        QStandardItem* item = new QStandardItem(QString::fromStdString(addon.name));
+    QIcon icon = userIcon();
+
+    auto toItem = [&icon](const Addon& addon, bool isUser) {
+        std::string name = isUser ? std::format(" {}", addon.name) : addon.name;
+        QStandardItem* item = new QStandardItem(QString::fromStdString(name));
+        if (isUser) {
+            item->setIcon(icon);
+        }
+
+        item->setToolTip(QString::fromStdString(addon.description));
+
         item->setData(QString::fromStdString(addon.identifier));
         item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
         item->setData(Qt::Unchecked, Qt::CheckStateRole);
@@ -789,14 +822,16 @@ void LauncherWindow::updateAddonsBox(const std::string& profile) {
         for (const Addon& addon : p.addons.custom) {
             profileAddons.insert(addon.identifier);
 
-            QStandardItem* i = toItem(addon);
+            constexpr bool IsUserFolder = false;
+            QStandardItem* i = toItem(addon, IsUserFolder);
             _addonBox.model->appendRow(i);
         }
         // Then the recommended
         for (const Addon& addon : p.addons.recommended) {
             profileAddons.insert(addon.identifier);
 
-            QStandardItem* i = toItem(addon);
+            constexpr bool IsUserFolder = false;
+            QStandardItem* i = toItem(addon, IsUserFolder);
             _addonBox.model->appendRow(i);
         }
     }
@@ -814,7 +849,8 @@ void LauncherWindow::updateAddonsBox(const std::string& profile) {
                 continue;
             }
 
-            QStandardItem* i = toItem(addon);
+            constexpr bool IsUserFolder = true;
+            QStandardItem* i = toItem(addon, IsUserFolder);
             _addonBox.model->appendRow(i);
         }
         // Then add all of the addons found in the core
@@ -825,13 +861,16 @@ void LauncherWindow::updateAddonsBox(const std::string& profile) {
                 continue;
             }
 
-            QStandardItem* i = toItem(addon);
+            constexpr bool IsUserFolder = false;
+            QStandardItem* i = toItem(addon, IsUserFolder);
             _addonBox.model->appendRow(i);
         }
     }
 
     const bool hasAddons = hasProfileAddons || hasGlobalAddons;
     _addonBox.combobox->setEnabled(hasAddons);
+
+    updatePlaceholderText();
 }
 
 bool LauncherWindow::wasLaunchSelected() const {

@@ -1262,7 +1262,7 @@ int main(int argc, char* argv[]) {
         commandlineArguments.profileAddons,
         "--addons",
         "-a",
-        "Specifies the add-ons of the profile that should be loaded. The provided addons "
+        "Specifies the addons of the profile that should be loaded. The provided addons "
         "must exist on the profile. Multiple addons can be specified by separating them "
         "with a \";\", for example \"--addons abc;def\" specifies the addons \"abc\" and "
         "\"def\"."

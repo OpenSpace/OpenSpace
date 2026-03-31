@@ -122,6 +122,8 @@ private:
     // profile and configurations
     void updateStartButton() const;
 
+    void updatePlaceholderText();
+
     void updateAddonsBox(const std::string& profile);
 
     const std::filesystem::path _assetPath;
