@@ -57,7 +57,7 @@ Requirements for compiling are:
 
   - CMake version 4.0 or above
   - C++ compiler supporting C++23 (Visual Studio 2026 18, GCC13, Clang18)
-  - <a href="https://www.qt.io/download">Qt</a>
+  - <a href="https://www.qt.io/download">Qt</a>. Version 6.9 is recommended
 
 
 <h2 align="center">:bulb: Asking Questions :bulb:</h2>
