@@ -142,7 +142,7 @@ private:
     UniformCache(model, view, viewScaling, projection, renderOption, luminosityMultiplier,
         cutOffThreshold, time, colorTexture, nChunksToRender, valuesPerStar,
         maxStarsPerNode, posXThreshold, posYThreshold, posZThreshold, gMagThreshold,
-        bpRpThreshold, distThreshold)
+        bpRpThreshold, distThreshold, opacity)
         _uniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programTM;

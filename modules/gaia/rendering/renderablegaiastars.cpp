@@ -394,6 +394,8 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    addProperty(Fadeable::_opacity);
+
     _dataFile = std::make_unique<ghoul::filesystem::File>(p.file);
     _dataFile->setCallback([this]() { _dataIsDirty = true; });
 
@@ -765,6 +767,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     glDepthMask(false);
     _program->activate();
 
+    _program->setUniform(_uniformCache.opacity, opacity());
     _program->setUniform(_uniformCache.model, model);
     _program->setUniform(_uniformCache.view, data.camera.combinedViewMatrix());
     _program->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
