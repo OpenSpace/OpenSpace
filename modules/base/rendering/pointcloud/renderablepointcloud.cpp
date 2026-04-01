@@ -996,7 +996,9 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
     std::unique_ptr<ghoul::opengl::Texture> t =
         ghoul::io::texture::loadTexture(path, 2);
 
-    bool useAlpha = (t->numberOfChannels() > 3) && _texture.useAlphaChannel;
+    // @TODO: Add support for compression to STB texture reader
+    // @TODO: Bring back "useAlhpa" support (only in shader or in the texture reader)
+    // @TODO: How deal with textures with lower than 3 channels? How do we set the swizzle?
 
     // For debugging purposes, we keep the name of the file in the texture
     t->setName(filename);
@@ -1005,7 +1007,8 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
 
     TextureFormat format = {
         .resolution = glm::uvec2(t->dimensions().x, t->dimensions().y),
-        .useAlpha = useAlpha
+        .format = t->format(),
+        .internalFormat = t->internalFormat(),
     };
 
     size_t indexInTextureArray = _textures.size();
@@ -1016,11 +1019,11 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
 }
 
 void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
-                                                       glm::uvec2 resolution,
-                                                       size_t nLayers, bool useAlpha)
+                                                       const TextureFormat& format,
+                                                       size_t nLayers)
 {
-    float w = static_cast<float>(resolution.x);
-    float h = static_cast<float>(resolution.y);
+    float w = static_cast<float>(format.resolution.x);
+    float h = static_cast<float>(format.resolution.y);
     glm::vec2 aspectScale = w > h ? glm::vec2(1.f, h / w) : glm::vec2(w / h, 1.f);
 
     _textureArrays.push_back({
@@ -1028,16 +1031,13 @@ void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
         .aspectRatioScale = aspectScale
     });
 
-    gl::GLenum internalFormat = internalGlFormat(useAlpha);
-    //gl::GLenum format = gl::GLenum(glFormat(useAlpha));
-
     // Create storage for the texture
     glTextureStorage3D(
         textureId,
         1, // levels of mipmaps, we don't use mipmaps for the textures so just 1
-        internalFormat,
-        resolution.x,
-        resolution.y,
+        format.internalFormat,
+        format.resolution.x,
+        format.resolution.y,
         static_cast<gl::GLsizei>(nLayers)
     );
 
@@ -1051,21 +1051,19 @@ void RenderablePointCloud::fillAndUploadTextureLayer(unsigned int textureId,
                                                      unsigned int arrayIndex,
                                                      unsigned int layer,
                                                      size_t textureIndex,
-                                                     glm::uvec2 resolution, bool useAlpha,
+                                                     const TextureFormat& format,
                                                   const std::vector<std::byte>& pixelData)
 {
-    gl::GLenum format = gl::GLenum(glFormat(useAlpha));
-
     glTextureSubImage3D(
         textureId,
         0, // Mipmap number
         0, // xoffset
         0, // yoffset
         gl::GLint(layer), // zoffset
-        gl::GLsizei(resolution.x), // width
-        gl::GLsizei(resolution.y), // height
+        gl::GLsizei(format.resolution.x), // width
+        gl::GLsizei(format.resolution.y), // height
         1, // depth
-        format,
+        gl::GLenum(format.format),
         GL_UNSIGNED_BYTE, // type
         pixelData.data()
     );
@@ -1082,8 +1080,7 @@ void RenderablePointCloud::generateArrayTextures() {
     using Entry = std::pair<const TextureFormat, std::vector<size_t>>;
     unsigned int arrayIndex = 0;
     for (const Entry& e : _textureMapByFormat) {
-        glm::uvec2 res = e.first.resolution;
-        bool useAlpha = e.first.useAlpha;
+        const TextureFormat format = e.first;
         std::vector<size_t> textureListIndices = e.second;
         size_t nLayers = textureListIndices.size();
 
@@ -1091,7 +1088,7 @@ void RenderablePointCloud::generateArrayTextures() {
         unsigned int id = 0;
         glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &id);
 
-        initAndAllocateTextureArray(id, res, nLayers, useAlpha);
+        initAndAllocateTextureArray(id, format, nLayers);
 
         // Fill that storage with the data from the individual textures
         unsigned int layer = 0;
@@ -1100,33 +1097,12 @@ void RenderablePointCloud::generateArrayTextures() {
 
             ghoul_assert(texture != nullptr, "Texture pointer was null");
 
-            //// Add validation before upload
-            glm::uvec3 actualDims = texture->dimensions();
-            size_t actualChannels = texture->numberOfChannels();
-
-            // Calculate expected vs actual buffer sizes
-            size_t expectedChannels = useAlpha ? 4 : 3;
-            size_t expectedSize = res.x * res.y * expectedChannels;
-            size_t actualSize = texture->pixelData().size();
-
-            if ((expectedSize != actualSize) || (actualChannels != expectedChannels)) {
-                LERROR(std::format("Buffer size mismatch for texture {}: {}", i, texture->name()));
-                LERROR(std::format(
-                    "Texture {}: Expected {}x{}x{} channels ({}bytes), "
-                    "Actual {}x{}x{} channels ({}bytes)",
-                    i, res.x, res.y, expectedChannels, expectedSize,
-                    actualDims.x, actualDims.y, actualChannels, actualSize
-                ));
-                continue;
-            }
-
             fillAndUploadTextureLayer(
                 id,
                 arrayIndex,
                 layer,
                 i,
-                res,
-                useAlpha,
+                format,
                 texture->pixelData()
             );
             layer++;
@@ -1137,8 +1113,8 @@ void RenderablePointCloud::generateArrayTextures() {
         if (static_cast<int>(layer) > nMaxTextureLayers) {
             LERROR(std::format(
                 "Too many layers bound in the same texture array. Found {} textures with "
-                "resolution {}x{} pixels. Max supported is {}.",
-                layer, res.x, res.y, nMaxTextureLayers
+                "resolution {}x{} pixels and the same color format. Max supported is {}.",
+                layer, format.resolution.x, format.resolution.y, nMaxTextureLayers
             ));
             // @TODO: Should we split the array up? Do we think this will ever become
             // a problem?
@@ -1722,30 +1698,17 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
     return result;
 }
 
-
-gl::GLenum RenderablePointCloud::internalGlFormat(bool useAlpha) const {
-    if (useAlpha) {
-        return _texture.allowCompression ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : GL_RGBA8;
-    }
-    else {
-        return _texture.allowCompression ? GL_COMPRESSED_RGB_S3TC_DXT1_EXT : GL_RGB8;
-    }
-}
-
-ghoul::opengl::Texture::Format RenderablePointCloud::glFormat(bool useAlpha) const {
-    using Tex = ghoul::opengl::Texture;
-    return useAlpha ? Tex::Format::RGBA : Tex::Format::RGB;
-}
-
 bool operator==(const TextureFormat& l, const TextureFormat& r) {
-    return (l.resolution == r.resolution) && (l.useAlpha == r.useAlpha);
+    return (l.resolution == r.resolution) && (l.format == r.format)
+        && (l.internalFormat == r.internalFormat);
 }
 
 size_t TextureFormatHash::operator()(const TextureFormat& k) const {
     size_t res = 0;
     res += static_cast<uint64_t>(k.resolution.x) << 32;
     res += static_cast<uint64_t>(k.resolution.y) << 16;
-    res += k.useAlpha ? 0 : 1;
+    res += int(k.format);
+    res += int(k.internalFormat);
     return res;
 }
 

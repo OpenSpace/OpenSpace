@@ -52,7 +52,8 @@ namespace openspace {
 
 struct TextureFormat {
     glm::uvec2 resolution;
-    bool useAlpha = false;
+    ghoul::opengl::Texture::Format format;
+    GLenum internalFormat;
 
     friend bool operator==(const TextureFormat& l, const TextureFormat& r);
 };
@@ -146,10 +147,10 @@ protected:
     void loadTexture(const std::filesystem::path& path, int index);
 
     void initAndAllocateTextureArray(unsigned int textureId,
-        glm::uvec2 resolution, size_t nLayers, bool useAlpha);
+        const TextureFormat& format, size_t nLayers);
 
     void fillAndUploadTextureLayer(unsigned int textureId, unsigned int arrayindex,
-        unsigned int layer, size_t textureIndex, glm::uvec2 resolution, bool useAlpha,
+        unsigned int layer, size_t textureIndex, const TextureFormat& format,
         const std::vector<std::byte>& pixelData);
 
     void generateArrayTextures();
@@ -158,9 +159,6 @@ protected:
 
     void renderPoints(const RenderData& data, const glm::dmat4& modelMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
-
-    GLenum internalGlFormat(bool useAlpha) const;
-    ghoul::opengl::Texture::Format glFormat(bool useAlpha) const;
 
     bool _dataIsDirty = true;
     bool _spriteTextureIsDirty = false;
