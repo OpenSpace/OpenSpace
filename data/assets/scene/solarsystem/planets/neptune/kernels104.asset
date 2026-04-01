@@ -2,7 +2,7 @@ local kernels = asset.resource({
   Name = "Neptune Spice Kernels",
   Type = "HttpSynchronization",
   Identifier = "neptune_kernels",
-  Version = 2
+  Version = 3
 })
 
 
@@ -11,16 +11,18 @@ local ID = {
   Laomedeia = "LAOMEDEIA",
   Psamathe = "PSAMATHE",
   Sao = "SAO",
-  Neso = "NESO"
+  Neso = "NESO",
+  S2021N1 = 85051,
+  S2002N5 = 85052
 }
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels .. "nep102.bsp")
+  openspace.spice.loadKernel(kernels .. "nep104.bsp")
 end)
 
 asset.onDeinitialize(function()
-  openspace.spice.unloadKernel(kernels .. "nep102.bsp")
+  openspace.spice.unloadKernel(kernels .. "nep104.bsp")
 end)
 
 asset.export("ID", ID)

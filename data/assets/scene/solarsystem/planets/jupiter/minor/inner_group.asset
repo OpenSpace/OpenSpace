@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local kernels344 = asset.require("../kernels344")
+local kernels347 = asset.require("../kernels347")
 local coreKernels = asset.require("spice/core")
 
 
@@ -10,7 +10,7 @@ local Metis = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels344.ID.Metis,
+      Target = kernels347.ID.Metis,
       Observer = coreKernels.ID.JupiterBarycenter
     }
   },
@@ -39,7 +39,7 @@ local MetisTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels344.ID.Metis,
+      Target = kernels347.ID.Metis,
       Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
@@ -99,7 +99,7 @@ local Adrastea = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels344.ID.Adrastea,
+      Target = kernels347.ID.Adrastea,
       Observer = coreKernels.ID.JupiterBarycenter
     }
   },
@@ -128,7 +128,7 @@ local AdrasteaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels344.ID.Adrastea,
+      Target = kernels347.ID.Adrastea,
       Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
@@ -188,7 +188,7 @@ local Amalthea = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels344.ID.Amalthea,
+      Target = kernels347.ID.Amalthea,
       Observer = coreKernels.ID.JupiterBarycenter
     }
   },
@@ -217,7 +217,7 @@ local AmaltheaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels344.ID.Amalthea,
+      Target = kernels347.ID.Amalthea,
       Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
@@ -277,7 +277,7 @@ local Thebe = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels344.ID.Thebe,
+      Target = kernels347.ID.Thebe,
       Observer = coreKernels.ID.JupiterBarycenter
     }
   },
@@ -306,7 +306,7 @@ local ThebeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels344.ID.Thebe,
+      Target = kernels347.ID.Thebe,
       Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
