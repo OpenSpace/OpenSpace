@@ -56,13 +56,15 @@ namespace {
 
     constexpr std::string_view _loggerCat = "DirectManipulation";
 
-    /// Used in the LM algorithm
+    /**
+     * Used in the LM algorithm/
+     */
     struct FunctionData {
         std::vector<glm::dvec3> selectedPoints;
         std::vector<glm::dvec2> screenPoints;
-        int nDOF;
-        const Camera* camera;
-        const SceneGraphNode* node;
+        int nDOF = 0;
+        const Camera* camera = nullptr;
+        const SceneGraphNode* node = nullptr;
         ghoul::LMstat stats;
     };
 
@@ -105,7 +107,8 @@ namespace {
      * Project back a 3D point in model view to clip space [-1, 1] coordinates on the view
      * plane.
      */
-    glm::dvec2 castToNormalizedDeviceCoordinates(const glm::dvec3& pos, Camera& camera,
+    glm::dvec2 castToNormalizedDeviceCoordinates(const glm::dvec3& pos,
+                                                 const Camera& camera,
                                                  const SceneGraphNode* node)
     {
         glm::dvec3 posInCamSpace = glm::inverse(camera.rotationQuaternion()) *
@@ -192,7 +195,8 @@ namespace {
                     h *= scale * scale * scale;
 
                     // Clamp min step size to a fraction of the incoming parameter
-                    if (i == 2) { // Zoom
+                    if (i == 2) {
+                        // Zoom
                         // Make sure incoming parameter is larger than 0
                         constexpr double Epsilon = 1e-3;
                         h = std::max(std::max(std::abs(dPar.at(i)), Epsilon) * 0.001, h);
@@ -385,7 +389,7 @@ void DirectManipulation::updateCameraFromInput() {
             }
         );
 
-    bool shouldApply =  isCloseEnough && isValidNode && isValidTouchPoints;
+    bool shouldApply = isCloseEnough && isValidNode && isValidTouchPoints;
 
     if (shouldApply) {
         applyDirectControl(touchPoints);
