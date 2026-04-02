@@ -24,6 +24,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/util/geodetic.h>
 #include <openspace/util/time.h>
@@ -306,7 +307,7 @@ namespace {
                                            bool isSticky = false, bool shouldFlip = false,
                                            double sensitivity = 0.0)
 {
-    global::navigationHandler->setJoystickAxisMapping(
+    global::navigationHandler->orbitalNavigator().joystickStates().setAxisMapping(
         std::move(joystickName),
         axis,
         ghoul::from_string<JoystickCameraStates::AxisType>(axisType),
@@ -342,7 +343,7 @@ namespace {
                                                    bool shouldInvert = false,
                                                    bool isRemote = true)
 {
-    global::navigationHandler->setJoystickAxisMappingProperty(
+    global::navigationHandler->orbitalNavigator().joystickStates().setAxisMappingProperty(
         std::move(joystickName),
         axis,
         std::move(propertyUri),
@@ -406,7 +407,10 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  */
 [[codegen::luawrap]] ghoul::Dictionary joystickAxis(std::string joystickName, int axis) {
     JoystickCameraStates::AxisInformation info =
-        global::navigationHandler->joystickAxisMapping(joystickName, axis);
+        global::navigationHandler->orbitalNavigator().joystickStates().axisMapping(
+            joystickName,
+            axis
+        );
 
     ghoul::Dictionary dict;
     dict.setValue("Type", ghoul::to_string(info.type));
@@ -440,7 +444,11 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
                                                                                  int axis,
                                                                            float deadzone)
 {
-    global::navigationHandler->setJoystickAxisDeadzone(joystickName, axis, deadzone);
+    global::navigationHandler->orbitalNavigator().joystickStates().setDeadzone(
+        joystickName,
+        axis,
+        deadzone
+    );
 }
 
 /**
@@ -454,8 +462,10 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 [[codegen::luawrap("axisDeadzone")]] float joystickAxisDeadzone(std::string joystickName,
                                                                 int axis)
 {
-    float deadzone = global::navigationHandler->joystickAxisDeadzone(joystickName, axis);
-    return deadzone;
+    return global::navigationHandler->orbitalNavigator().joystickStates().deadzone(
+        joystickName,
+        axis
+    );
 }
 
 /**
@@ -482,7 +492,7 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 {
     JoystickAction act = ghoul::from_string<JoystickAction>(action);
 
-    global::navigationHandler->bindJoystickButtonCommand(
+    global::navigationHandler->orbitalNavigator().joystickStates().bindButtonCommand(
         joystickName,
         button,
         command,
@@ -500,7 +510,10 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * \param button The button for which to clear the commands
  */
 [[codegen::luawrap]] void clearJoystickButton(std::string joystickName, int button) {
-    global::navigationHandler->clearJoystickButtonCommand(joystickName, button);
+    global::navigationHandler->orbitalNavigator().joystickStates().clearButtonCommand(
+        joystickName,
+        button
+    );
 }
 
 /**
@@ -513,7 +526,10 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  */
 [[codegen::luawrap]] std::string joystickButton(std::string joystickName, int button) {
     const std::vector<std::string>& cmds =
-        global::navigationHandler->joystickButtonCommand(joystickName, button);
+        global::navigationHandler->orbitalNavigator().joystickStates().buttonCommand(
+            joystickName,
+            button
+        );
 
     std::string cmd = std::accumulate(
         cmds.cbegin(),
@@ -612,12 +628,12 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 }
 
 /**
- * Immediately start applying the chosen IdleBehavior. If none is specified, use the one
+ * Immediately start applying the chosen IdleMotion. If none is specified, use the one
  * set to default in the OrbitalNavigator.
  */
-[[codegen::luawrap]] void triggerIdleBehavior(std::string choice = "") {
+[[codegen::luawrap]] void triggerIdleMotion(std::string choice = "") {
     try {
-        global::navigationHandler->orbitalNavigator().triggerIdleBehavior(choice);
+        global::navigationHandler->orbitalNavigator().triggerIdleMotion(choice);
     }
     catch (const ghoul::RuntimeError& e) {
         throw ghoul::lua::LuaError(e.message);
@@ -630,7 +646,16 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * \return A list of joystick names
  */
 [[codegen::luawrap]] std::vector<std::string> listAllJoysticks() {
-    return global::navigationHandler->listAllJoysticks();
+    JoystickInputStates joysticks = global::interactionHandler->joystickInputStates();
+
+    std::vector<std::string> result;
+    result.reserve(joysticks.size());
+    for (const JoystickInputState& state : joysticks) {
+        if (!state.name.empty()) {
+            result.push_back(state.name);
+        }
+    }
+    return result;
 }
 
 /**

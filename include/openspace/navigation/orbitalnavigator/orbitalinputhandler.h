@@ -22,33 +22,66 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SCRIPTCAMERASTATES___H__
-#define __OPENSPACE_CORE___SCRIPTCAMERASTATES___H__
+#ifndef __OPENSPACE_CORE___ORBITALINPUTHANDLER___H__
+#define __OPENSPACE_CORE___ORBITALINPUTHANDLER___H__
 
-#include <openspace/interaction/camerainteractionstates.h>
+#include <openspace/properties/propertyowner.h>
+
+#include <openspace/navigation/orbitalnavigator/joystickcamerastates.h>
+#include <openspace/navigation/orbitalnavigator/mousecamerastates.h>
+#include <openspace/navigation/orbitalnavigator/scriptcamerastates.h>
+#include <openspace/navigation/orbitalnavigator/touchcamerastates.h>
+#include <openspace/navigation/orbitalnavigator/websocketcamerastates.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace {
 
-class ScriptCameraStates : public CameraInteractionStates {
+class OrbitalInputHandler : public PropertyOwner {
 public:
-    ScriptCameraStates();
+    OrbitalInputHandler(double friction);
 
-    void updateStateFromInput(double deltaTime);
+    JoystickCameraStates& joystickStates();
+    const JoystickCameraStates& joystickStates() const;
 
-    void addLocalRotation(const glm::dvec2& delta);
-    void addGlobalRotation(const glm::dvec2& delta);
-    void addTruckMovement(double delta);
-    void addLocalRoll(double delta);
-    void addGlobalRoll(double delta);
+    WebsocketCameraStates& websocketStates();
+    const WebsocketCameraStates& websocketStates() const;
+
+    ScriptCameraStates& scriptStates();
+    const ScriptCameraStates& scriptStates() const;
+
+    TouchCameraStates& touchStates();
+    const TouchCameraStates& touchStates() const;
+
+    bool hasNonZeroVelocity() const;
+    bool hasTranslationalVelocity() const;
+    void resetVelocities();
+
+    double localRollVelocity() const;
+    double globalRollVelocity() const;
+    glm::dvec2 localRotationVelocity() const;
+    glm::dvec2 globalRotationVelocity() const;
+    double truckMovementVelocity() const;
+
+    void updateStatesFromInput(double deltaTime);
+
+    void updateFrictionFactor(double friction);
+    void setRollFrictionEnabled(bool enabled);
+    void setRotationalFrictionEnabled(bool enabled);
+    void setZoomFrictionEnabled(bool enabled);
 
 private:
-    glm::dvec2 _localRotation = glm::dvec2(0.0);
-    glm::dvec2 _globalRotation = glm::dvec2(0.0);
-    double _truckMovement = 0.0;
-    double _localRoll = 0.0;
-    double _globalRoll = 0.0;
+    FloatProperty _mouseSensitivity;
+    FloatProperty _joystickSensitivity;
+    FloatProperty _websocketSensitivity;
+    FloatProperty _touchSensitivity;
+
+    MouseCameraStates _mouseStates;
+    JoystickCameraStates _joystickStates;
+    WebsocketCameraStates _websocketStates;
+    ScriptCameraStates _scriptStates;
+    TouchCameraStates _touchStates;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___SCRIPTCAMERASTATES___H__
+#endif // __OPENSPACE_CORE___ORBITALINPUTHANDLER___H__

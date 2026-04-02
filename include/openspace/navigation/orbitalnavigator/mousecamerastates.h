@@ -22,54 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/misc/assert.h>
-#include <ghoul/glm.h>
+#ifndef __OPENSPACE_CORE___MOUSECAMERASTATES___H__
+#define __OPENSPACE_CORE___MOUSECAMERASTATES___H__
+
+#include <openspace/navigation/orbitalnavigator/orbitalcamerastates.h>
 
 namespace openspace {
 
-template <typename T, typename ScaleType>
-DelayedVariable<T, ScaleType>::DelayedVariable(ScaleType scaleFactor, ScaleType friction)
-    : _scaleFactor(std::move(scaleFactor))
-    , _friction(friction)
-{
-    ghoul_assert(_friction >= ScaleType(0.0), "Friction must be positive");
-}
+class KeyboardInputState;
+class MouseInputState;
 
-template <typename T, typename ScaleType>
-void DelayedVariable<T, ScaleType>::set(T value, double dt) {
-    _targetValue = value;
-    _currentValue = _currentValue + (_targetValue - _currentValue) *
-        // Less or equal to 1.0 keeps it stable
-        glm::min(_scaleFactor * dt, 1.0);
-}
+class MouseCameraStates : public OrbitalCameraStates {
+public:
+    MouseCameraStates(double sensitivity, double velocityScaleFactor);
 
-template <typename T, typename ScaleType>
-void DelayedVariable<T, ScaleType>::decelerate(double dt) {
-    _currentValue = _currentValue + (- _currentValue) *
-        // Less or equal to 1.0 keeps it stable
-        glm::min(_scaleFactor * _friction * dt, 1.0);
-}
+    void updateVelocitiesFromInput(const MouseInputState& mouseState,
+        const KeyboardInputState& keyboardState, double deltaTime);
 
-template <typename T, typename ScaleType>
-void DelayedVariable<T, ScaleType>::setHard(T value) {
-    _targetValue = value;
-    _currentValue = value;
-}
+private:
+    double _currentSensitivityRamp = 1.0;
 
-template <typename T, typename ScaleType>
-void DelayedVariable<T, ScaleType>::setFriction(ScaleType friction) {
-    _friction = friction;
-    ghoul_assert(_friction >= ScaleType(0.0), "Friction must be positive");
-}
-
-template <typename T, typename ScaleType>
-void DelayedVariable<T, ScaleType>::setScaleFactor(ScaleType scaleFactor) {
-    _scaleFactor = scaleFactor;
-}
-
-template <typename T, typename ScaleType>
-T DelayedVariable<T, ScaleType>::get() const {
-    return _currentValue;
-}
+    // Mouse positions before a certain type of interaction is started
+    struct {
+        glm::dvec2 primary = glm::dvec2(0.0);
+        glm::dvec2 secondary = glm::dvec2(0.0);
+        glm::dvec2 button3 = glm::dvec2(0.0);
+    } _prevMousePos;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_CORE___MOUSECAMERASTATES___H__

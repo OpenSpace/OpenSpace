@@ -22,64 +22,57 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
-#define __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
+#ifndef __OPENSPACE_CORE___TOUCHCAMERASTATES___H__
+#define __OPENSPACE_CORE___TOUCHCAMERASTATES___H__
 
-#include <openspace/interaction/delayedvariable.h>
+#include <openspace/navigation/orbitalnavigator/orbitalcamerastates.h>
+
+#include <openspace/util/touch.h>
 #include <ghoul/glm.h>
+#include <array>
+
+//#define TOUCH_DEBUG_MODE
 
 namespace openspace {
 
-class CameraInteractionStates {
+class TouchInputState;
+
+class TouchCameraStates : public OrbitalCameraStates {
 public:
-    /**
-     * \param sensitivity Interaction sensitivity
-     * \param velocityScale Can be set to 60 to remove the inertia of the interaction.
-     *        Lower value will make it harder to move the camera
-     */
-    CameraInteractionStates(double sensitivity, double velocityScale);
-    virtual ~CameraInteractionStates() = default;
-
-    void setRotationalFriction(double friction);
-    void setHorizontalFriction(double friction);
-    void setVerticalFriction(double friction);
-    void setSensitivity(double sensitivity);
-    void setVelocityScaleFactor(double scaleFactor);
-
-    glm::dvec2 globalRotationVelocity() const;
-    glm::dvec2 localRotationVelocity() const;
-    double truckMovementVelocity() const;
-    double localRollVelocity() const;
-    double globalRollVelocity() const;
-
-    void resetVelocities();
-
-    /**
-     * Returns true if any of the velocities are larger than zero, i.e. whether an
-     * interaction happened.
-     */
-    bool hasNonZeroVelocities(bool checkOnlyMovement = false) const;
-
-protected:
-    template <typename T>
-    struct InteractionState {
-        explicit InteractionState(double scaleFactor);
-        void setFriction(double friction);
-        void setVelocityScaleFactor(double scaleFactor);
-
-        T previousValue = T(0.0);
-        DelayedVariable<T, double> velocity;
+    enum class InteractionType {
+        Rotation = 0,
+        Pinch,
+        Pan,
+        Roll,
+        None
     };
 
-    double _sensitivity = 0.0;
+    TouchCameraStates(double sensitivity, double velocityScaleFactor);
+    virtual ~TouchCameraStates() override;
 
-    InteractionState<glm::dvec2> _globalRotationState;
-    InteractionState<glm::dvec2> _localRotationState;
-    InteractionState<double> _truckMovementState;
-    InteractionState<double> _localRollState;
-    InteractionState<double> _globalRollState;
+    void updateVelocitiesFromInput(const TouchInputState& mouseState,
+        double deltaTime);
+
+private:
+    /**
+     * Compute new velocity according to the interpreted action.
+     */
+    UpdateStates computeVelocities(const std::vector<TouchInputHolder>& touchPoints,
+        const std::vector<TouchInput>& lastProcessed);
+
+    /**
+     * Returns an enum for what interaction to be used, depending on what input was
+     * received.
+     */
+    InteractionType interpretInteraction(const std::vector<TouchInputHolder>& list,
+        const std::vector<TouchInput>& lastProcessed);
+
+    void resetAfterInput();
+
+    std::array<TouchInputHolder, 2> _pinchInputs;
+    glm::vec2 _centroid = glm::vec2(0.f);
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
+#endif // __OPENSPACE_CORE___TOUCHCAMERASTATES___H__

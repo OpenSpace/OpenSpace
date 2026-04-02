@@ -25,9 +25,11 @@
 #include <openspace/topic/topics/flightcontrollertopic.h>
 
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/websocketcamerastates.h>
+#include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/websocketinputstate.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
+#include <openspace/navigation/orbitalnavigator/websocketcamerastates.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -150,20 +152,19 @@ namespace openspace {
 
 FlightControllerTopic::FlightControllerTopic() {
     for (auto it = AxisIndexMap.begin(); it != AxisIndexMap.end(); it++) {
-        global::navigationHandler->setWebsocketAxisMapping(
-            int(std::distance(AxisIndexMap.begin(), it)),
+        global::navigationHandler->orbitalNavigator().websocketStates().setAxisMapping(
+            static_cast<int>(std::distance(AxisIndexMap.begin(), it)),
             it->second
         );
     }
 
     // Add WebsocketInputState to global states
-    (*global::websocketInputStates)[_topicId] = &_inputState;
+    global::interactionHandler->websocketInputStates()[_topicId] = &_inputState;
 }
 
 FlightControllerTopic::~FlightControllerTopic() {
     // Reset global websocketInputStates
-    global::websocketInputStates->erase(_topicId);
-    *global::websocketInputStates = WebsocketInputStates();
+    global::interactionHandler->websocketInputStates().erase(_topicId);
 }
 
 bool FlightControllerTopic::isDone() const {
@@ -348,8 +349,9 @@ void FlightControllerTopic::setRenderableEnabled(const nlohmann::json& json) con
 
 void FlightControllerTopic::disconnect() {
     // Reset global websocketInputStates
-    global::websocketInputStates->erase(_topicId);
-    *global::websocketInputStates = WebsocketInputStates();
+    global::interactionHandler->websocketInputStates().erase(_topicId);
+    // @TODO (emmbr, 2026-04-02): This assumes only one state. Remove?
+    //global::interactionHandler->websocketInputStates() = interaction::WebsocketInputStates();
 
     // Update FlightController
     nlohmann::json j;
@@ -364,6 +366,8 @@ void FlightControllerTopic::setFriction(bool all) const {
     setFriction(all, all, all);
 }
 
+// @TODO (emmbr, 2025-12-17) Consider removing this function from the topic. It is just
+// setting the properties in orbitalnavigator
 void FlightControllerTopic::setFriction(bool roll, bool rotation, bool zoom) const {
     const OrbitalNavigator& navigator = global::navigationHandler->orbitalNavigator();
 

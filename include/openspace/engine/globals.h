@@ -39,8 +39,8 @@ class DeferredcasterManager;
 class DownloadEventEngine;
 class DownloadManager;
 class EventEngine;
+class InteractionHandler;
 class InteractionMonitor;
-struct JoystickInputStates;
 class KeybindingManager;
 class KeyframeRecordingHandler;
 class LuaConsole;
@@ -62,7 +62,6 @@ class SyncEngine;
 class TimeManager;
 class Server;
 class VersionChecker;
-struct WebsocketInputStates;
 struct WindowDelegate;
 
 namespace global {
@@ -89,9 +88,8 @@ inline VersionChecker* versionChecker;
 inline WindowDelegate* windowDelegate;
 inline Configuration* configuration;
 inline ActionManager* actionManager;
+inline InteractionHandler* interactionHandler;
 inline InteractionMonitor* interactionMonitor;
-inline JoystickInputStates* joystickInputStates;
-inline WebsocketInputStates* websocketInputStates;
 inline KeybindingManager* keybindingManager;
 inline KeyframeRecordingHandler* keyframeRecording;
 inline NavigationHandler* navigationHandler;

@@ -27,18 +27,12 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/interaction/joystickcamerastates.h>
-#include <openspace/interaction/joystickinputstate.h>
-#include <openspace/interaction/keyboardinputstate.h>
-#include <openspace/interaction/mouseinputstate.h>
-#include <openspace/interaction/websocketcamerastates.h>
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/navigation/navigationstate.h>
-#include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/navigation/pathnavigator.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec4property.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 #include <ghoul/glm.h>
@@ -50,12 +44,15 @@
 namespace openspace {
 
 class Camera;
-struct JoystickInputStates;
 struct LuaLibrary;
+struct NavigationState;
 struct NodeCameraStateSpec;
 class SceneGraphNode;
-struct WebsocketInputStates;
 
+/**
+ * The NavigationHandler is responsible for updating the camera, and switching between
+ * different navigation modes (navigators).
+ */
 class NavigationHandler : public PropertyOwner {
 public:
     NavigationHandler();
@@ -75,8 +72,7 @@ public:
 
     Camera* camera() const;
     const SceneGraphNode* anchorNode() const;
-    const MouseInputState& mouseInputState() const;
-    const KeyboardInputState& keyboardInputState() const;
+
     const OrbitalNavigator& orbitalNavigator() const;
     OrbitalNavigator& orbitalNavigator();
     KeyframeNavigator& keyframeNavigator();
@@ -85,57 +81,6 @@ public:
     bool isKeyFrameInteractionEnabled() const;
     float jumpToFadeDuration() const;
     float interpolationTime() const;
-
-    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-
-    bool disabledKeybindings() const;
-    bool disabledMouse() const;
-    bool disabledJoystick() const;
-
-    void mouseButtonCallback(MouseButton button, MouseAction action);
-    void mousePositionCallback(double x, double y);
-    void mouseScrollWheelCallback(double pos);
-
-    void renderOverlay() const;
-
-    std::vector<std::string> listAllJoysticks() const;
-    void setJoystickAxisMapping(std::string joystickName,
-        int axis, JoystickCameraStates::AxisType mapping,
-        JoystickCameraStates::AxisInvert shouldInvert =
-            JoystickCameraStates::AxisInvert::No,
-        JoystickCameraStates::JoystickType joystickType =
-            JoystickCameraStates::JoystickType::JoystickLike,
-        bool isSticky = false,
-        JoystickCameraStates::AxisFlip shouldFlip = JoystickCameraStates::AxisFlip::No,
-        double sensitivity = 0.0);
-
-    void setJoystickAxisMappingProperty(std::string joystickName,
-        int axis, std::string propertyUri,
-        float min = 0.f, float max = 1.f,
-        JoystickCameraStates::AxisInvert shouldInvert =
-            JoystickCameraStates::AxisInvert::No,
-        bool isRemote = true);
-
-    JoystickCameraStates::AxisInformation joystickAxisMapping(
-        const std::string& joystickName, int axis) const;
-
-    void setJoystickAxisDeadzone(const std::string& joystickName, int axis,
-        float deadzone);
-    float joystickAxisDeadzone(const std::string& joystickName, int axis) const;
-
-    void bindJoystickButtonCommand(const std::string& joystickName, int button,
-        std::string command, JoystickAction action,
-        JoystickCameraStates::ButtonCommandRemote remote, std::string documentation);
-
-    void clearJoystickButtonCommand(const std::string& joystickName, int button);
-    std::vector<std::string> joystickButtonCommand(const std::string& joystickName,
-        int button) const;
-
-    void setWebsocketAxisMapping(int axis, WebsocketCameraStates::AxisType mapping,
-        WebsocketCameraStates::AxisInvert shouldInvert =
-        WebsocketCameraStates::AxisInvert::No,
-        WebsocketCameraStates::AxisNormalize shouldNormalize =
-        WebsocketCameraStates::AxisNormalize::No);
 
     NavigationState navigationState() const;
     NavigationState navigationState(const SceneGraphNode& referenceFrame) const;
@@ -187,10 +132,7 @@ public:
 private:
     void applyPendingState();
     void updateCameraTransitions();
-    void clearGlobalJoystickStates();
 
-    MouseInputState _mouseInputState;
-    KeyboardInputState _keyboardInputState;
     Camera* _camera = nullptr;
     std::function<void()> _playbackEndCallback;
 
@@ -204,22 +146,8 @@ private:
 
     std::optional<std::variant<NodeCameraStateSpec, NavigationState>> _pendingState;
 
-    BoolProperty _disableKeybindings;
-    BoolProperty _disableMouseInputs;
-    BoolProperty _disableJoystickInputs;
     BoolProperty _useKeyFrameInteraction;
     FloatProperty _jumpToFadeDuration;
-
-    struct {
-        PropertyOwner owner;
-        BoolProperty enable;
-        Vec4Property color;
-
-        bool isMouseFirstPress = false;
-        bool isMousePressed = false;
-        glm::vec2 clickPosition = glm::vec2(0.f);
-        glm::vec2 currentPosition = glm::vec2(0.f);
-    } _mouseVisualizer;
 };
 
 } // namespace openspace

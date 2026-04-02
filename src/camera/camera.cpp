@@ -186,6 +186,13 @@ const glm::dquat& Camera::rotationQuaternion() const {
     return _rotation;
 }
 
+CameraPose Camera::pose() const {
+    return {
+        .position = _position,
+        .rotation = _rotation
+    };
+}
+
 const glm::dmat4& Camera::combinedViewMatrix() const {
     //if (_cachedCombinedViewMatrix.isDirty) {
         const glm::dmat4 cameraTranslation = glm::inverse(

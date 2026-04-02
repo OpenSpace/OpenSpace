@@ -22,53 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
-#define __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+#ifndef __OPENSPACE_CORE___SCRIPTCAMERASTATES___H__
+#define __OPENSPACE_CORE___SCRIPTCAMERASTATES___H__
 
-#include <openspace/util/openspacemodule.h>
-
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/util/touch.h>
-#include <memory>
-#include <set>
+#include <openspace/navigation/orbitalnavigator/orbitalcamerastates.h>
 
 namespace openspace {
 
-class TuioEar;
-
-#ifdef WIN32
-class Win32TouchHook;
-#endif // WIN32
-
-class TouchModule : public OpenSpaceModule {
+class ScriptCameraStates : public OrbitalCameraStates {
 public:
-    constexpr static const char* Name = "Touch";
+    ScriptCameraStates();
 
-    TouchModule();
-    ~TouchModule();
+    void updateVelocitiesFromInput(double deltaTime);
 
-protected:
-    void internalInitialize(const ghoul::Dictionary& dictionary) override;
+    void addLocalRotation(const glm::dvec2& delta);
+    void addGlobalRotation(const glm::dvec2& delta);
+    void addTruckMovement(double delta);
+    void addLocalRoll(double delta);
+    void addGlobalRoll(double delta);
 
 private:
-    /**
-     * Process TUIO touch input that occured since the last frame.
-     */
-    void processNewInput();
-
-    std::unique_ptr<TuioEar> _ear;
-
-    IntProperty _tuioPort;
-    BoolProperty _hasActiveTouchEvent;
-
-    /// Contains an id and the Point that was processed last frame
-    glm::ivec2 _webPositionCallback = glm::ivec2(0);
-#ifdef WIN32
-    std::unique_ptr<Win32TouchHook> _win32TouchHook;
-#endif // WIN32
+    glm::dvec2 _localRotation = glm::dvec2(0.0);
+    glm::dvec2 _globalRotation = glm::dvec2(0.0);
+    double _truckMovement = 0.0;
+    double _localRoll = 0.0;
+    double _globalRoll = 0.0;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+#endif // __OPENSPACE_CORE___SCRIPTCAMERASTATES___H__

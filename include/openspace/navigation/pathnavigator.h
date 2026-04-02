@@ -112,7 +112,7 @@ private:
     OptionProperty _defaultPathType;
     BoolProperty _includeRoll;
     FloatProperty _speedScale;
-    BoolProperty _applyIdleBehaviorOnFinish;
+    BoolProperty _applyIdleMotionOnFinish;
     DoubleProperty _arrivalDistanceFactor;
     FloatProperty _linearRotationSpeedFactor;
     DoubleProperty _minValidBoundingSphere;

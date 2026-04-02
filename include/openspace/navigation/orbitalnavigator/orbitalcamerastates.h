@@ -22,58 +22,67 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_TOUCH___DIRECTINPUT_SOLVER___H__
-#define __OPENSPACE_MODULE_TOUCH___DIRECTINPUT_SOLVER___H__
+#ifndef __OPENSPACE_CORE___ORBITALCAMERASTATES___H__
+#define __OPENSPACE_CORE___ORBITALCAMERASTATES___H__
 
-#include <modules/touch/ext/levmarq.h>
-#include <openspace/util/touch.h>
+#include <openspace/navigation/orbitalnavigator/dampenedvelocity.h>
 #include <ghoul/glm.h>
-#include <vector>
 
 namespace openspace {
 
-class Camera;
-class SceneGraphNode;
-
 /**
- * The DirectInputSolver is used to minimize the L2 error of touch input to 3D camera
- * position. It uses the levmarq algorithm in order to do this.
+ * Velocity input states for the OrbitalNavigator's camera interaction.
  */
-class DirectInputSolver {
+class OrbitalCameraStates {
 public:
     /**
-     * Stores the selected node, the cursor ID as well as the surface coordinates the
-     * cursor touched.
+     * \param sensitivity Interaction sensitivity
+     * \param velocityScale Can be set to 60 to remove the inertia of the interaction.
+     *        Lower value will make it harder to move the camera
      */
-    struct SelectedBody {
-        size_t id = 0;
-        SceneGraphNode* node = nullptr;
-        glm::dvec3 coordinates = glm::dvec3(0.0);
-    };
+    OrbitalCameraStates(double sensitivity, double velocityScaleFactor);
+    virtual ~OrbitalCameraStates() = default;
 
-    DirectInputSolver();
+    void setRotationalFriction(bool friction);
+    void setHorizontalFriction(bool friction);
+    void setVerticalFriction(bool friction);
+    void setSensitivity(double sensitivity);
+    void setVelocityScaleFactor(double scaleFactor);
+
+    glm::dvec2 globalRotationVelocity() const;
+    glm::dvec2 localRotationVelocity() const;
+    double truckMovementVelocity() const;
+    double localRollVelocity() const;
+    double globalRollVelocity() const;
+
+    void resetVelocities();
 
     /**
-     * Returns true if the error could be minimized within certain bounds. If the error is
-     * found to be outside the bounds after a certain amount of iterations, this function
-     * fails.
+     * Returns true if any of the velocities are larger than zero, i.e. whether an
+     * interaction happened.
      */
-    bool solve(const std::vector<TouchInputHolder>& list,
-        const std::vector<SelectedBody>& selectedBodies,
-        std::vector<double>* calculatedValues, const Camera& camera);
+    bool hasNonZeroVelocities(bool checkOnlyMovement = false) const;
 
-    int nDof() const;
+protected:
+    struct UpdateStates {
+        std::optional<glm::dvec2> globalRotation; // Orbit
+        std::optional<double> zoom;
+        std::optional<double> localRoll;
+        std::optional<double> globalRoll;
+        std::optional<glm::dvec2> localRotation; // Pan
+    };
 
-    const LMstat& levMarqStat();
+    void updateVelocities(const UpdateStates& updateState, double deltaTime);
 
-    void setLevMarqVerbosity(bool verbose);
+    double _sensitivity = 0.0;
 
-private:
-    int _nDof = 0;
-    LMstat _lmstat;
+    DampenedVelocity<glm::dvec2> _globalRotationVelocity;
+    DampenedVelocity<glm::dvec2> _localRotationVelocity;
+    DampenedVelocity<double> _truckMovementVelocity;
+    DampenedVelocity<double> _localRollVelocity;
+    DampenedVelocity<double> _globalRollVelocity;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_TOUCH___DIRECTINPUT_SOLVER___H__
-
+#endif // __OPENSPACE_CORE___ORBITALCAMERASTATES___H__
