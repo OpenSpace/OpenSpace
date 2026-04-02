@@ -154,7 +154,7 @@ void TouchInputState::removeTouchInput(TouchInput input) {
             {
                 // Check for double tap
                 std::chrono::milliseconds timestamp =
-                    duration_cast<std::chrono::milliseconds>(
+                    std::chrono::duration_cast<std::chrono::milliseconds>(
                         std::chrono::high_resolution_clock::now().time_since_epoch()
                     );
 

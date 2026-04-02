@@ -350,7 +350,7 @@ void FlightControllerTopic::setRenderableEnabled(const nlohmann::json& json) con
 void FlightControllerTopic::disconnect() {
     // Reset global websocketInputStates
     global::interactionHandler->websocketInputStates().erase(_topicId);
-    // TODO: This assumes only one state. Remove?
+    // @TODO (emmbr, 2026-04-02): This assumes only one state. Remove?
     //global::interactionHandler->websocketInputStates() = interaction::WebsocketInputStates();
 
     // Update FlightController

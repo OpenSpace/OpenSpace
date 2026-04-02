@@ -146,13 +146,19 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
             // Add global roll rotation velocity
             double rollFactor = 0.0;
             for (const TouchInputHolder& touchPoint : touchPoints) {
-                TouchInput point = *std::find_if(
+                const auto it = std::find_if(
                     lastProcessed.begin(),
                     lastProcessed.end(),
                     [&touchPoint](const TouchInput& input) {
                         return touchPoint.holdsInput(input);
                     }
                 );
+
+                if (it == lastProcessed.end()) {
+                    continue;
+                }
+
+                const TouchInput& point = *it;
                 float lastAngle = point.angleToPos(_centroid);
                 float currentAngle = touchPoint.latestInput().angleToPos(_centroid);
                 rollFactor += validAngleDiff(lastAngle, currentAngle);
@@ -194,7 +200,7 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
     if (inputs.size() != lastProcessed.size() || inputs.empty() || lastProcessed.empty()) {
         // Not a valid gesture. Probably just a tap.
         // @TODO (2026-03-11, emmbr) This code prevents a crash from happening, but
-        // ideally we should instea dchange the code below so this check is not needed
+        // ideally we should instead change the code below so this check is not needed
         return InteractionType::None;
     }
 
