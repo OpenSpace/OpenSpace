@@ -570,4 +570,15 @@ void EventHandler::resetBrowserInstance() {
     _browserInstance = nullptr;
 }
 
+CefKeyEvent EventHandler::toCefKeyEvent(KeyWithModifier key) {
+    CefKeyEvent keyEvent;
+    keyEvent.windows_key_code = mapFromGlfwToWindows(key.key);
+    keyEvent.character = mapFromGlfwToCharacter(key.key);
+    keyEvent.native_key_code = mapFromGlfwToNative(key.key);
+    keyEvent.unmodified_character = mapFromGlfwToUnmodifiedCharacter(key.key);
+    keyEvent.modifiers = mapToCefModifiers(key.modifier);
+    keyEvent.type = KEYEVENT_KEYDOWN;
+    return keyEvent;
+}
+
 } // namespace openspace

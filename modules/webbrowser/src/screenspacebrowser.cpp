@@ -26,9 +26,11 @@
 
 #include <modules/webbrowser/webbrowsermodule.h>
 #include <modules/webbrowser/include/browserinstance.h>
+#include <modules/webbrowser/include/eventhandler.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/util/keys.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
@@ -45,6 +47,22 @@ namespace {
         "Browser dimensions",
         "The dimensions of the web browser window in pixels.",
         Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo KeyInfo = {
+        "Key",
+        "Key",
+        "The string representation of a key. If the key is entered and the `KeyTrigger` "
+        "property is triggered, the entered key will be send to the browser and this "
+        "property will be cleared."
+    };
+
+    constexpr Property::PropertyInfo KeyTriggerInfo = {
+        "KeyTrigger",
+        "Key trigger",
+        "When this property is triggered, the text in the `Key` property will be used to "
+        "create a keyboard input that is then sent to the browser. This will also clear "
+        "the value in the `Key` property."
     };
 
     constexpr Property::PropertyInfo UrlInfo = {
@@ -98,8 +116,10 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _dimensions(DimensionsInfo, glm::uvec2(0), glm::uvec2(0), glm::uvec2(3000))
     , _reload(ReloadInfo)
-    , _renderHandler(new ScreenSpaceRenderHandler)
+    , _key(::KeyInfo)
+    , _keyTrigger(KeyTriggerInfo)
     , _url(UrlInfo)
+    , _renderHandler(new ScreenSpaceRenderHandler)
     , _keyboardHandler(new WebKeyboardHandler)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -108,22 +128,32 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     identifier = makeUniqueIdentifier(identifier);
     setIdentifier(identifier);
 
+    addProperty(_key);
+    _keyTrigger.onChange([this]() {
+        const KeyWithModifier key = stringToKey(_key);
+        const CefKeyEvent k = EventHandler::toCefKeyEvent(key);
+        _browserInstance->sendKeyEvent(k);
+
+        _key = std::string();
+    });
+    addProperty(_keyTrigger);
+
     _url = p.url.value_or(_url);
+    _url.onChange([this]() { _isUrlDirty = true; });
+    addProperty(_url);
 
     _dimensions = p.dimensions.value_or(glm::vec2(1920, 1080));
+    _dimensions.onChange([this]() { _isDimensionsDirty = true; });
+    addProperty(_dimensions);
 
     _browserInstance = std::make_unique<BrowserInstance>(
         _renderHandler.get(),
         _keyboardHandler.get()
     );
 
-    _url.onChange([this]() { _isUrlDirty = true; });
-    _dimensions.onChange([this]() { _isDimensionsDirty = true; });
     _reload.onChange([this]() { _browserInstance->reloadBrowser(); });
-
-    addProperty(_url);
-    addProperty(_dimensions);
     addProperty(_reload);
+
     _useAcceleratedRendering = WebBrowserModule::canUseAcceleratedRendering();
 
     WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();
