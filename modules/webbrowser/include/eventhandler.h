@@ -61,6 +61,8 @@ public:
     void setBrowserInstance(BrowserInstance* browserInstance);
     void resetBrowserInstance();
 
+    static CefKeyEvent toCefKeyEvent(KeyWithModifier key);
+
 private:
     bool mouseButtonCallback(MouseButton button, MouseAction action, KeyModifier mods);
     bool mousePositionCallback(double x, double y);
@@ -96,7 +98,7 @@ private:
         const cef_touch_event_type_t eventType) const;
 #endif // WIN32
 
-    cef_key_event_type_t keyEventType(KeyAction action);
+    static cef_key_event_type_t keyEventType(KeyAction action);
 
     BrowserInstance* _browserInstance = nullptr;
     glm::vec2 _mousePosition = glm::vec2(0.f);
