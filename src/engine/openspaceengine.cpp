@@ -1189,6 +1189,8 @@ void OpenSpaceEngine::preSynchronization() {
         global::profile->ignoreUpdates = false;
         resetPropertyChangeFlagsOfSubowners(global::rootPropertyOwner);
         global::windowDelegate->setSynchronization(false);
+
+        global::eventEngine->publishEvent<EventProfileLoadingFinished>();
     }
 
     const bool master = global::windowDelegate->isMaster();
