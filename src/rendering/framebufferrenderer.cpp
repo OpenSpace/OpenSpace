@@ -491,7 +491,10 @@ std::vector<std::string> FramebufferRenderer::shadowGroups() const {
     return res;
 }
 
-void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::ivec4& viewport) {
+void FramebufferRenderer::applyTMO(const glm::vec4& blackoutColor,
+                                   ghoul::opengl::Texture* blackoutTexture,
+                                   const glm::ivec4& viewport)
+{
     ZoneScoped;
     TracyGpuZone("applyTMO");
 
@@ -501,7 +504,19 @@ void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::ivec4& viewp
     hdrFeedingUnit.bind(_pingPongBuffers.colorTexture[_pingPongIndex]);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrFeedingTexture, hdrFeedingUnit);
 
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutFactor, blackoutFactor);
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutFactor, blackoutColor);
+    ghoul::opengl::TextureUnit blackoutTextureUnit;
+    if (blackoutTexture) {
+        blackoutTextureUnit.bind(*blackoutTexture);
+    }
+    _hdrFilteringProgram->setUniform(
+        _hdrUniformCache.hasBlackoutTexture,
+        blackoutTexture != nullptr
+    );
+    _hdrFilteringProgram->setUniform(
+        _hdrUniformCache.blackoutTexture,
+        blackoutTextureUnit
+    );
     _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrExposure, _hdrExposure);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.gamma, _gamma);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.hue, _hue);
@@ -1156,7 +1171,10 @@ void FramebufferRenderer::updateDownscaledVolume() {
     );
 }
 
-void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
+void FramebufferRenderer::render(Scene* scene, Camera* camera,
+                                 const glm::vec4& blackoutColor,
+                                 ghoul::opengl::Texture* blackoutTexture)
+{
     ZoneScoped;
     TracyGpuZone("FramebufferRenderer");
 
@@ -1294,7 +1312,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         TracyGpuZone("Apply TMO");
         const ghoul::GLDebugGroup group("Apply TMO");
 
-        applyTMO(blackoutFactor, viewport);
+        applyTMO(blackoutColor, blackoutTexture, viewport);
     }
 
     if (_enableFXAA) {
