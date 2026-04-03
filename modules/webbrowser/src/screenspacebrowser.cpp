@@ -53,8 +53,9 @@ namespace {
         "Key",
         "Key",
         "The string representation of a key. If the key is entered and the `KeyTrigger` "
-        "property is triggered, the entered key will be send to the browser and this "
-        "property will be cleared."
+        "property is triggered, the entered key will be sent to the browser and this "
+        "property will be cleared.",
+        Property::Visibility::User
     };
 
     constexpr Property::PropertyInfo KeyTriggerInfo = {
@@ -62,7 +63,8 @@ namespace {
         "Key trigger",
         "When this property is triggered, the text in the `Key` property will be used to "
         "create a keyboard input that is then sent to the browser. This will also clear "
-        "the value in the `Key` property."
+        "the value in the `Key` property.",
+        Property::Visibility::User
     };
 
     constexpr Property::PropertyInfo UrlInfo = {
@@ -131,7 +133,12 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     addProperty(_key);
     _keyTrigger.onChange([this]() {
         const KeyWithModifier key = stringToKey(_key);
-        const CefKeyEvent k = EventHandler::toCefKeyEvent(key);
+        CefKeyEvent k = EventHandler::toCefKeyEvent(key);
+
+        k.type = KEYEVENT_KEYDOWN;
+        _browserInstance->sendKeyEvent(k);
+
+        k.type = KEYEVENT_KEYUP;
         _browserInstance->sendKeyEvent(k);
 
         _key = std::string();
