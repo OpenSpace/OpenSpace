@@ -47,8 +47,6 @@ public:
     void initialize() override;
     void initializeGL() override;
 
-    bool isReady() const override;
-
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
     static openspace::Documentation Documentation();

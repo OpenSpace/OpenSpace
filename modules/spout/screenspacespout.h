@@ -39,8 +39,6 @@ public:
 
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     void update() override;
 
     static openspace::Documentation Documentation();

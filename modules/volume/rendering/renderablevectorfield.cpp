@@ -493,10 +493,6 @@ void RenderableVectorField::deinitializeGL() {
     }
 }
 
-bool RenderableVectorField::isReady() const {
-    return _program != nullptr;
-}
-
 void RenderableVectorField::render(const RenderData& data, RendererTasks&) {
     if (_instances.empty()) {
         return;

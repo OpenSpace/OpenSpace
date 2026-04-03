@@ -1327,7 +1327,7 @@ void FramebufferRenderer::renderDepthMaps() {
 
             const Shadower* shadower = dynamic_cast<const Shadower*>(node->renderable());
             if (shadower && node->renderable()->isEnabled() &&
-                shadower->isCastingShadow() && node->renderable()->isReady())
+                shadower->isCastingShadow())
             {
                 const double fsz = shadower->shadowFrustumSize();
                 const glm::dvec3 center = shadower->center();

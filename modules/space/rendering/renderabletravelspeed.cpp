@@ -273,10 +273,6 @@ void RenderableTravelSpeed::reinitiateTravel() {
     _arrivalTime = _initiationTime + _travelTime;
 }
 
-bool RenderableTravelSpeed::isReady() const{
-    return _shaderProgram != nullptr;
-}
-
 void RenderableTravelSpeed::update(const UpdateData& data) {
     if (_initiationTime == -1.0) {
         _initiationTime = data.time.j2000Seconds();

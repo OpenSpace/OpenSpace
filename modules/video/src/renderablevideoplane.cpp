@@ -76,10 +76,6 @@ void RenderableVideoPlane::deinitializeGL() {
     RenderablePlane::deinitializeGL();
 }
 
-bool RenderableVideoPlane::isReady() const {
-    return RenderablePlane::isReady() && _videoPlayer.isInitialized();
-}
-
 void RenderableVideoPlane::render(const RenderData& data, RendererTasks& rendererTask) {
     if (_videoPlayer.isInitialized()) {
         RenderablePlane::render(data, rendererTask);

@@ -262,10 +262,6 @@ void RenderableShadowCylinder::deinitializeGL() {
     glDeleteBuffers(1, &_vbo);
 }
 
-bool RenderableShadowCylinder::isReady() const {
-    return _shader != nullptr;
-}
-
 void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     glDepthMask(false);
     glDisable(GL_CULL_FACE);

@@ -181,10 +181,6 @@ void ScreenSpaceBrowser::update() {
     }
 }
 
-bool ScreenSpaceBrowser::isReady() const {
-    return _shader != nullptr;
-}
-
 void ScreenSpaceBrowser::bindTexture(ghoul::opengl::TextureUnit& unit) {
     _renderHandler->bindTexture(unit);
 }

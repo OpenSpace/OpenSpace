@@ -348,10 +348,6 @@ RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
     addProperty(_fadeWidths);
 }
 
-bool RenderableLabel::isReady() const {
-    return true;
-}
-
 void RenderableLabel::initialize() {
     ZoneScoped;
 

@@ -483,10 +483,6 @@ void ScreenSpaceRenderable::render(const RenderData& renderData) {
     draw(mat, renderData);
 }
 
-bool ScreenSpaceRenderable::isReady() const {
-    return _shader != nullptr;
-}
-
 void ScreenSpaceRenderable::update() {}
 
 bool ScreenSpaceRenderable::isEnabled() const {

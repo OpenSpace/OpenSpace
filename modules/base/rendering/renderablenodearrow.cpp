@@ -383,10 +383,6 @@ void RenderableNodeArrow::deinitializeGL() {
     _shaderProgram = nullptr;
 }
 
-bool RenderableNodeArrow::isReady() const {
-    return _shaderProgram != nullptr;
-}
-
 void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
     SceneGraphNode* startNode = sceneGraphNode(_start);
     SceneGraphNode* endNode = sceneGraphNode(_end);

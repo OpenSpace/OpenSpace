@@ -339,10 +339,6 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     setBoundingSphere(glm::compMax(_size.value()));
 }
 
-bool RenderablePlane::isReady() const {
-    return _shader != nullptr;
-}
-
 void RenderablePlane::initializeGL() {
     ZoneScoped;
 

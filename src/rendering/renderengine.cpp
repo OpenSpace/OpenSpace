@@ -778,7 +778,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         for (const std::unique_ptr<ScreenSpaceRenderable>& ssr :
             *global::screenSpaceRenderables)
         {
-            if (ssr->isEnabled() && ssr->isReady()) {
+            if (ssr->isEnabled()) {
                 ssrs.push_back(ssr.get());
             }
         }

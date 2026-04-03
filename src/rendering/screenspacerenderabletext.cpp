@@ -105,10 +105,6 @@ void ScreenSpaceRenderableText::deinitializeGL() {
     ScreenSpaceRenderable::deinitializeGL();
 }
 
-bool ScreenSpaceRenderableText::isReady() const {
-    return _shader && _font && _texture;
-}
-
 void ScreenSpaceRenderableText::update() {
     updateFramebuffer();
 }

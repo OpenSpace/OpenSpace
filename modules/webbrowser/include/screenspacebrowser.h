@@ -71,7 +71,6 @@ public:
 
     void render(const RenderData& renderData) override;
     void update() override;
-    bool isReady() const override;
 
     static openspace::Documentation Documentation();
 

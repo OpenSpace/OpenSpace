@@ -775,10 +775,6 @@ void RenderableStars::deinitializeGL() {
     }
 }
 
-bool RenderableStars::isReady() const {
-    return _program && _glare.texture;
-}
-
 void RenderableStars::loadPSFTexture() {
     auto markPsfTextureAsDirty = [this]() { _pointSpreadFunctionTextureIsDirty = true; };
     auto loadTexture = [markPsfTextureAsDirty](TextureComponent& component) {
