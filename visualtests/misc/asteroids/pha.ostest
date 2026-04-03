@@ -1,6 +1,10 @@
 {
-  "profile": "asteroids",
+  "profile": "default",
   "commands": [
+    {
+      "type": "asset",
+      "value": "scene/solarsystem/interstellar/pha.asset"
+    },
     {
       "type": "navigationstate",
       "value": {

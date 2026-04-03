@@ -1,6 +1,10 @@
 {
-  "profile": "asteroids",
+  "profile": "default",
   "commands": [
+    {
+      "type": "asset",
+      "value": "scene/solarsystem/sssb/amor_asteroid.asset"
+    },
     {
       "type": "navigationstate",
       "value": {
