@@ -657,6 +657,9 @@ void saveSessionRecording(const std::filesystem::path& filename,
                           const SessionRecording& sessionRecording, DataMode dataMode)
 {
     std::ofstream file = std::ofstream(filename, std::ios::binary);
+    if (!file.good()) {
+        throw ghoul::RuntimeError(std::format("Could not save recording '{}'", filename));
+    }
 
     constexpr int CurrentVersion = Versions.back().second;
     const Header header = {
