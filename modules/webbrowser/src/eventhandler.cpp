@@ -577,7 +577,6 @@ CefKeyEvent EventHandler::toCefKeyEvent(KeyWithModifier key) {
     keyEvent.native_key_code = mapFromGlfwToNative(key.key);
     keyEvent.unmodified_character = mapFromGlfwToUnmodifiedCharacter(key.key);
     keyEvent.modifiers = mapToCefModifiers(key.modifier);
-    keyEvent.type = KEYEVENT_KEYDOWN;
     return keyEvent;
 }
 
