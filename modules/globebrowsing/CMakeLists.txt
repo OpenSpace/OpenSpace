@@ -178,7 +178,7 @@ else (WIN32)
 endif () # WIN32
 
 begin_dependency("GEOS")
-add_subdirectory(ext/geos SYSTEM)
+add_subdirectory(ext/geos SYSTEM EXCLUDE_FROM_ALL)
 target_link_libraries(openspace-module-globebrowsing PRIVATE geos)
 
 if (MSVC)
