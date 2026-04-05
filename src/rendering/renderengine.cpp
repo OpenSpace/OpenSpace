@@ -363,7 +363,7 @@ RenderEngine::RenderEngine()
         .owner = PropertyOwner(
             { "GlobalBlackout", "Global Blackout", "Blackout settings" }
         ),
-        .factor = FloatProperty(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f),
+        .factor = FloatProperty(GlobalBlackoutFactorInfo, 0.f, 0.f, 1.f),
         .color = Vec4Property(
             GlobalBlackoutColorInfo,
             glm::vec4(0.f, 0.f, 0.f, 1.f),
@@ -694,15 +694,20 @@ void RenderEngine::updateScreenSpaceRenderables() {
 
     // Not really part of the screenspace renderables but its pretty close
     if (_globalBlackout.imageIsDirty) [[unlikely]] {
-        try {
-            _globalBlackout.imageTexture = ghoul::io::TextureReader::ref().loadTexture(
-                _globalBlackout.imagePath.value(),
-                2
-            );
+        std::string path = _globalBlackout.imagePath;
+        if (path.empty()) {
+            _globalBlackout.imageTexture = nullptr;
         }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.message);
+        else {
+            try {
+                _globalBlackout.imageTexture =
+                    ghoul::io::TextureReader::ref().loadTexture(path, 2);
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERRORC(e.component, e.message);
+            }
         }
+
         _globalBlackout.imageIsDirty = false;
     }
 
@@ -853,7 +858,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         _renderer.render(
             _scene,
             _camera,
-            trueBlackoutFactor,
+            1.f - trueBlackoutFactor,
             _globalBlackout.color.value(),
             _globalBlackout.imageFactor,
             _globalBlackout.imageTexture.get()
@@ -898,7 +903,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         ScreenSpaceRenderable::RenderData data = {
-            .blackoutFactor = trueBlackoutFactor,
+            .blackoutFactor = 1.f - trueBlackoutFactor,
             .hue = _hue / 360.f,
             .value = _value,
             .saturation = _saturation,
