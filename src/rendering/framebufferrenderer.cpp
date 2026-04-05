@@ -492,7 +492,8 @@ std::vector<std::string> FramebufferRenderer::shadowGroups() const {
     return res;
 }
 
-void FramebufferRenderer::applyTMO(const glm::vec4& blackoutColor,
+void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::vec4& blackoutColor,
+                                   float blackoutTextureFactor,
                                    ghoul::opengl::Texture* blackoutTexture,
                                    const glm::ivec4& viewport)
 {
@@ -505,6 +506,7 @@ void FramebufferRenderer::applyTMO(const glm::vec4& blackoutColor,
     hdrFeedingUnit.bind(_pingPongBuffers.colorTexture[_pingPongIndex]);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrFeedingTexture, hdrFeedingUnit);
 
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutFactor, blackoutFactor);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutColor, blackoutColor);
     ghoul::opengl::TextureUnit blackoutTextureUnit;
     if (blackoutTexture) {
@@ -513,6 +515,10 @@ void FramebufferRenderer::applyTMO(const glm::vec4& blackoutColor,
     _hdrFilteringProgram->setUniform(
         _hdrUniformCache.hasBlackoutTexture,
         blackoutTexture != nullptr
+    );
+    _hdrFilteringProgram->setUniform(
+        _hdrUniformCache.blackoutTextureFactor,
+        blackoutTextureFactor
     );
     _hdrFilteringProgram->setUniform(
         _hdrUniformCache.blackoutTexture,
@@ -1172,8 +1178,9 @@ void FramebufferRenderer::updateDownscaledVolume() {
     );
 }
 
-void FramebufferRenderer::render(Scene* scene, Camera* camera,
+void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor,
                                  const glm::vec4& blackoutColor,
+                                 float blackoutTextureFactor,
                                  ghoul::opengl::Texture* blackoutTexture)
 {
     ZoneScoped;
@@ -1313,7 +1320,13 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera,
         TracyGpuZone("Apply TMO");
         const ghoul::GLDebugGroup group("Apply TMO");
 
-        applyTMO(blackoutColor, blackoutTexture, viewport);
+        applyTMO(
+            blackoutFactor,
+            blackoutColor,
+            blackoutTextureFactor,
+            blackoutTexture,
+            viewport
+        );
     }
 
     if (_enableFXAA) {

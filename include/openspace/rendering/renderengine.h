@@ -197,11 +197,18 @@ private:
     BoolProperty _screenshotUseDateTime;
     BoolProperty _disableMasterRendering;
 
-    Vec4Property _globalBlackoutColor;
-    StringProperty _globalBlackoutImage;
-    bool _globalBlackoutImageIsDirty = false;
-    std::unique_ptr<ghoul::opengl::Texture> _globalBlackoutImageTexture;
-    BoolProperty _applyBlackoutToMaster;
+    struct Blackout {
+        PropertyOwner owner;
+        FloatProperty factor;
+        Vec4Property color;
+        FloatProperty imageFactor;
+        StringProperty imagePath;
+        BoolProperty applyToMaster;
+        bool imageIsDirty = false;
+        std::unique_ptr<ghoul::opengl::Texture> imageTexture;
+    };
+    Blackout _globalBlackout;
+
 
     BoolProperty _enableFXAA;
 
