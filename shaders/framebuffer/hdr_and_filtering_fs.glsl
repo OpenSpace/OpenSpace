@@ -33,9 +33,11 @@ in Data {
 layout (location = 0) out vec4 out_color;
 
 uniform float hdrExposure;
+uniform float blackoutFactor;
 uniform vec4 blackoutColor;
 uniform bool hasBlackoutTexture;
 uniform sampler2D blackoutTexture;
+uniform float blackoutTextureFactor;
 uniform float gamma;
 uniform float hue;
 uniform float saturation;
@@ -64,7 +66,7 @@ void main() {
   vec3 tColor = toneMappingOperator(color.rgb, hdrExposure);
 
   vec4 blkoutColor = blackoutColor;
-  if (blkoutColor.a > 0.0 && hasBlackoutTexture) {
+  if (blackoutFactor < 1.0 && hasBlackoutTexture) {
     vec2 texSize = vec2(textureSize(blackoutTexture, 0));
 
     float texAspect = texSize.x / texSize.y;
@@ -87,11 +89,11 @@ void main() {
     bool inRange = imageTexCoords.s >= 0.0 && imageTexCoords.s <= 1.0 &&
         imageTexCoords.t >= 0.0 && imageTexCoords.t <= 1.0;
 
-    vec4 texColor = inRange ? texture(blackoutTexture, imageTexCoords) : vec4(0.0);
-    blkoutColor.rgb = mix(blkoutColor.rgb, texColor.rgb, texColor.a);
+    vec4 t = texture(blackoutTexture, imageTexCoords);
+    blkoutColor = inRange ? mix(blkoutColor, t, blackoutTextureFactor) : blkoutColor;
   }
 
-  tColor.rgb = mix(tColor.rgb, blkoutColor.rgb, blkoutColor.a);
+  tColor.rgb = mix(tColor.rgb, blkoutColor.rgb, blkoutColor.a * (1.0 - blackoutFactor));
 
   // Color control
   vec3 hsvColor = rgb2hsv(tColor);
