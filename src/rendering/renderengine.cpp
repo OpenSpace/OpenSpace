@@ -258,16 +258,42 @@ namespace {
     };
 
     constexpr Property::PropertyInfo GlobalBlackoutFactorInfo = {
-        "BlackoutFactor",
-        "Blackout factor",
+        "Factor",
+        "Factor",
         "The blackout factor of the rendering. This can be used for fading in or out the "
         "rendering window.",
         Property::Visibility::User
     };
 
+    constexpr Property::PropertyInfo GlobalBlackoutColorInfo = {
+        "Color",
+        "Color",
+        "The color used for the blackout of the rendering. This can be used for fading "
+        "in or out the rendering window.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo GlobalBlackoutImageFactorInfo = {
+        "ImageFactor",
+        "Image factor",
+        "Determines the visibility of the image provided by `BlackoutImage`, if no such "
+        "image has been loaded, this value does nothing."
+    };
+
+    constexpr Property::PropertyInfo GlobalBlackoutImageInfo = {
+        "ImagePath",
+        "Image Path",
+        "The path to an image that is used when the blackout rendering is enabled. "
+        "Whether the image is shown or not is controlled by the alpha component of the "
+        "`BlackoutColor` property. It also determines the color shown if the selected "
+        "image has transparency or does not have the same aspect ratio as the render "
+        "window.",
+        Property::Visibility::User
+    };
+
     constexpr Property::PropertyInfo ApplyBlackoutToMasterInfo = {
-        "ApplyBlackoutToMaster",
-        "Apply blackout to master",
+        "ApplyMaster",
+        "Apply to master",
         "If this value is 'true', the blackout factor is applied to the master node. "
         "Regardless of this value, the clients will always adhere to the factor.",
         Property::Visibility::AdvancedUser
@@ -328,8 +354,21 @@ RenderEngine::RenderEngine()
     , _applyWarping(ApplyWarpingInfo, false)
     , _screenshotUseDate(ScreenshotUseDateInfo, false)
     , _disableMasterRendering(DisableMasterInfo, false)
-    , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
-    , _applyBlackoutToMaster(ApplyBlackoutToMasterInfo, true)
+    , _globalBlackout {
+        .owner = PropertyOwner(
+            { "GlobalBlackout", "Global Blackout", "Blackout settings" }
+        ),
+        .factor = FloatProperty(GlobalBlackoutFactorInfo, 0.f, 0.f, 1.f),
+        .color = Vec4Property(
+            GlobalBlackoutColorInfo,
+            glm::vec4(0.f, 0.f, 0.f, 1.f),
+            glm::vec4(0.f),
+            glm::vec4(1.f)
+        ),
+        .imageFactor = FloatProperty(GlobalBlackoutImageFactorInfo, 1.f, 0.f, 1.f),
+        .imagePath = StringProperty(GlobalBlackoutImageInfo),
+        .applyToMaster = BoolProperty(ApplyBlackoutToMasterInfo, true)
+    }
     , _enableFXAA(FXAAInfo, true)
     , _disableHDRPipeline(DisableHDRPipelineInfo, false)
     , _hdrExposure(HDRExposureInfo, 3.7f, 0.01f, 10.f)
@@ -402,8 +441,15 @@ RenderEngine::RenderEngine()
     _value.onChange(setHueValueSaturation);
     addProperty(_value);
 
-    addProperty(_globalBlackOutFactor);
-    addProperty(_applyBlackoutToMaster);
+    _globalBlackout.owner.addProperty(_globalBlackout.factor);
+    _globalBlackout.color.setViewOption(Property::ViewOptions::Color);
+    _globalBlackout.owner.addProperty(_globalBlackout.color);
+    _globalBlackout.owner.addProperty(_globalBlackout.imageFactor);
+    _globalBlackout.imagePath.onChange([this]() { _globalBlackout.imageIsDirty = true; });
+    _globalBlackout.owner.addProperty(_globalBlackout.imagePath);
+    _globalBlackout.owner.addProperty(_globalBlackout.applyToMaster);
+    addPropertySubOwner(_globalBlackout.owner);
+
     addProperty(_screenshotWindowIds);
     addProperty(_applyWarping);
 
@@ -617,6 +663,25 @@ void RenderEngine::updateRenderer() {
 void RenderEngine::updateScreenSpaceRenderables() {
     ZoneScoped;
 
+    // Not really part of the screenspace renderables but its pretty close
+    if (_globalBlackout.imageIsDirty) [[unlikely]] {
+        std::string path = _globalBlackout.imagePath;
+        if (path.empty()) {
+            _globalBlackout.imageTexture = nullptr;
+        }
+        else {
+            try {
+                _globalBlackout.imageTexture =
+                    ghoul::io::TextureReader::ref().loadTexture(path, 2);
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERRORC(e.component, e.message);
+            }
+        }
+
+        _globalBlackout.imageIsDirty = false;
+    }
+
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : *global::screenSpaceRenderables) {
 #ifdef TRACY_ENABLE
         TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
@@ -755,8 +820,20 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     }
 
     const bool renderingEnabled = delegate.isMaster() ? !_disableMasterRendering : true;
-    if (renderingEnabled && combinedBlackoutFactor() > 0.f) {
-        _renderer.render(_scene, _camera, combinedBlackoutFactor());
+    const float trueBlackoutFactor =
+        global::windowDelegate->isMaster() ?
+        _globalBlackout.applyToMaster ? _globalBlackout.factor : 1.f :
+        _globalBlackout.factor;
+
+    if (renderingEnabled) {
+        _renderer.render(
+            _scene,
+            _camera,
+            1.f - trueBlackoutFactor,
+            _globalBlackout.color.value(),
+            _globalBlackout.imageFactor,
+            _globalBlackout.imageTexture.get()
+        );
     }
 
     // The CEF webbrowser fix has to be called at least once per frame and we are doing
@@ -797,7 +874,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         ScreenSpaceRenderable::RenderData data = {
-            .blackoutFactor = combinedBlackoutFactor(),
+            .blackoutFactor = 1.f - trueBlackoutFactor,
             .hue = _hue / 360.f,
             .value = _value,
             .saturation = _saturation,
@@ -938,15 +1015,6 @@ void RenderEngine::renderDashboard() const {
     );
 
     global::dashboard->render(penPosition);
-}
-
-float RenderEngine::combinedBlackoutFactor() const {
-    if (global::windowDelegate->isMaster()) {
-        return _applyBlackoutToMaster ? _globalBlackOutFactor : 1.f;
-    }
-    else {
-        return _globalBlackOutFactor;
-    }
 }
 
 void RenderEngine::postDraw() {
