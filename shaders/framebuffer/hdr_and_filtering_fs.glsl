@@ -65,7 +65,29 @@ void main() {
 
   vec4 blkoutColor = blackoutColor;
   if (blkoutColor.a > 0.0 && hasBlackoutTexture) {
-    vec4 texColor = texture(blackoutTexture, st);
+    vec2 texSize = vec2(textureSize(blackoutTexture, 0));
+
+    float texAspect = texSize.x / texSize.y;
+    float windowAspect = resolution.x / resolution.y;
+
+    vec2 imageTexCoords;
+    if (texAspect > windowAspect) {
+      float fittedHeight = windowAspect / texAspect;
+
+      imageTexCoords.s = st.s;
+      imageTexCoords.t = (st.t - 0.5) / fittedHeight + 0.5;
+    }
+    else {
+      float fittedWidth = texAspect / windowAspect;
+
+      imageTexCoords.s = (st.s - 0.5) / fittedWidth + 0.5;
+      imageTexCoords.t = st.y;
+    }
+
+    bool inRange = imageTexCoords.s >= 0.0 && imageTexCoords.s <= 1.0 &&
+        imageTexCoords.t >= 0.0 && imageTexCoords.t <= 1.0;
+
+    vec4 texColor = inRange ? texture(blackoutTexture, imageTexCoords) : vec4(0.0);
     blkoutColor.rgb = mix(blkoutColor.rgb, texColor.rgb, texColor.a);
   }
 
