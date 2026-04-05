@@ -33,7 +33,9 @@ in Data {
 layout (location = 0) out vec4 out_color;
 
 uniform float hdrExposure;
-uniform float blackoutFactor;
+uniform vec4 blackoutColor;
+uniform bool hasBlackoutTexture;
+uniform sampler2D blackoutTexture;
 uniform float gamma;
 uniform float hue;
 uniform float saturation;
@@ -57,10 +59,17 @@ void main() {
   st.y = st.y / (resolution.y / viewport[3]) + (viewport[1] / resolution.y);
 
   vec4 color = texture(hdrFeedingTexture, st);
-  color.rgb *= blackoutFactor;
 
   // Applies TMO
   vec3 tColor = toneMappingOperator(color.rgb, hdrExposure);
+
+  vec4 blkoutColor = blackoutColor;
+  if (blkoutColor.a > 0.0 && hasBlackoutTexture) {
+    vec4 texColor = texture(blackoutTexture, st);
+    blkoutColor.rgb = mix(blkoutColor.rgb, texColor.rgb, texColor.a);
+  }
+
+  tColor.rgb = mix(tColor.rgb, blkoutColor.rgb, blkoutColor.a);
 
   // Color control
   vec3 hsvColor = rgb2hsv(tColor);

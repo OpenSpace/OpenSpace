@@ -424,8 +424,9 @@ RenderEngine::RenderEngine()
     _value.onChange(setHueValueSaturation);
     addProperty(_value);
 
+    _globalBlackoutColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_globalBlackoutColor);
-    _globalBlackoutImage.onChange([this]() { _blackoutImageIsDirty = true; });
+    _globalBlackoutImage.onChange([this]() { _globalBlackoutImageIsDirty = true; });
     addProperty(_globalBlackoutImage);
     addProperty(_applyBlackoutToMaster);
     addProperty(_screenshotWindowIds);
@@ -671,6 +672,7 @@ void RenderEngine::updateScreenSpaceRenderables() {
             _globalBlackoutImage.value(),
             2
         );
+        _globalBlackoutImageIsDirty = false;
     }
 
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : *global::screenSpaceRenderables) {
@@ -818,7 +820,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         _applyBlackoutToMaster ? _globalBlackoutColor.value() : glm::vec4(0.f) :
         _globalBlackoutColor.value();
 
-    if (renderingEnabled && trueBlackoutColor.a != 0.f) {
+    if (renderingEnabled) {
         _renderer.render(
             _scene,
             _camera,

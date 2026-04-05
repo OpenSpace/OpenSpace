@@ -42,6 +42,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -504,7 +505,7 @@ void FramebufferRenderer::applyTMO(const glm::vec4& blackoutColor,
     hdrFeedingUnit.bind(_pingPongBuffers.colorTexture[_pingPongIndex]);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrFeedingTexture, hdrFeedingUnit);
 
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutFactor, blackoutColor);
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutColor, blackoutColor);
     ghoul::opengl::TextureUnit blackoutTextureUnit;
     if (blackoutTexture) {
         blackoutTextureUnit.bind(*blackoutTexture);
