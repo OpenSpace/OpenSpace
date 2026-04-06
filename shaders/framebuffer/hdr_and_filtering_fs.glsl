@@ -68,10 +68,11 @@ void main() {
   vec4 blkoutColor = blackoutColor;
   if (blackoutFactor < 1.0 && hasBlackoutTexture) {
     vec2 texSize = vec2(textureSize(blackoutTexture, 0));
-
     float texAspect = texSize.x / texSize.y;
     float windowAspect = resolution.x / resolution.y;
 
+    // Calculate the converted texture coordinates based on the aspect ratios of the
+    // rendering window and the image
     vec2 imageTexCoords;
     if (texAspect > windowAspect) {
       float fittedHeight = windowAspect / texAspect;

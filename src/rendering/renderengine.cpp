@@ -280,8 +280,9 @@ namespace {
     constexpr Property::PropertyInfo GlobalBlackoutImageFactorInfo = {
         "ImageFactor",
         "Image factor",
-        "Determines the visibility of the image provided by `BlackoutImage`, if no such "
-        "image has been loaded, this value does nothing."
+        "Determines the visibility of the image provided by the `Blackout.Image`, if no "
+        "such image has been loaded, this value does nothing.",
+        Property::Visibility::User
     };
 
     constexpr Property::PropertyInfo GlobalBlackoutImageInfo = {
@@ -289,7 +290,7 @@ namespace {
         "Image Path",
         "The path to an image that is used when the blackout rendering is enabled. "
         "Whether the image is shown or not is controlled by the alpha component of the "
-        "`BlackoutColor` property. It also determines the color shown if the selected "
+        "`Blackout.Color` property. It also determines the color shown if the selected "
         "image has transparency or does not have the same aspect ratio as the render "
         "window.",
         Property::Visibility::User
@@ -692,7 +693,7 @@ void RenderEngine::updateRenderer() {
 void RenderEngine::updateScreenSpaceRenderables() {
     ZoneScoped;
 
-    // Not really part of the screenspace renderables but its pretty close
+    // Not really part of the screenspace renderables but it's pretty close
     if (_globalBlackout.imageIsDirty) [[unlikely]] {
         std::string path = _globalBlackout.imagePath;
         if (path.empty()) {
