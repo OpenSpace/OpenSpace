@@ -3,7 +3,7 @@
   "commands": [
     {
       "type": "asset",
-      "value": "scene/solarsystem/interstellar/pha.asset"
+      "value": "scene/solarsystem/sssb/pha.asset"
     },
     {
       "type": "navigationstate",
