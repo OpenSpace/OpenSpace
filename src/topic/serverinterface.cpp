@@ -236,6 +236,7 @@ void ServerInterface::initialize() {
     if (!_enabled) {
         return;
     }
+
     switch (static_cast<InterfaceType>(_socketType.value())) {
         case InterfaceType::TcpSocket:
             _socketServer = std::make_unique<ghoul::io::TcpSocketServer>();
@@ -248,6 +249,10 @@ void ServerInterface::initialize() {
 }
 
 void ServerInterface::deinitialize() {
+    if (!_enabled) {
+        return;
+    }
+
     _socketServer->close();
 }
 
