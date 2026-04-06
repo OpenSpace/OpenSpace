@@ -101,6 +101,11 @@ namespace {
         // [[codegen::verbatim(BrowserUpdateIntervalInfo.description)]]
         std::optional<float> browserUpdateInterval;
 
+        // If this value is set to `true`, it is possible to remote debug the CEF browser
+        // through port 8088. If it is set to `false` (the default), the remote debugging
+        // is not available.
+        std::optional<bool> enableRemoteDebugging;
+
         // Forcably disables accelerated rendering, even if other preconditions would
         // otherwise allow the use of it to speed up the rendering of the user interface.
         // This setting can be used to circumvent an otherwise fatal crash that is caused
@@ -161,7 +166,10 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     std::filesystem::path webHelperLocation =
         p.webHelperLocation.value_or(findHelperExecutable());
     LDEBUG(std::format("CEF using web helper executable: {}", webHelperLocation));
-    _cefHost = std::make_unique<CefHost>(webHelperLocation.string());
+    _cefHost = std::make_unique<CefHost>(
+        webHelperLocation.string(),
+        p.enableRemoteDebugging.value_or(false)
+    );
     LDEBUG("Starting CEF... done");
 
     _updateBrowserBetweenRenderables =

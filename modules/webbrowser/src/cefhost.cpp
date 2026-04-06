@@ -54,7 +54,7 @@ namespace {
 
 namespace openspace {
 
-CefHost::CefHost([[maybe_unused]] const std::string& helperLocation) {
+CefHost::CefHost(const std::string& helperLocation, bool enableRemoteDebugging) {
     LDEBUG("Initializing CEF...");
 
     CefSettings settings;
@@ -72,11 +72,18 @@ CefHost::CefHost([[maybe_unused]] const std::string& helperLocation) {
 
     settings.windowless_rendering_enabled = 1;
 
-    settings.remote_debugging_port = 8088;
-    LDEBUG(std::format(
-        "Remote WebBrowser debugging available on http://localhost:{}",
-        settings.remote_debugging_port
-    ));
+    if (enableRemoteDebugging) {
+        settings.remote_debugging_port = 8088;
+        LDEBUG(std::format(
+            "Remote WebBrowser debugging available on http://localhost:{}",
+            settings.remote_debugging_port
+        ));
+    }
+
+    // Suppress Chromium ERROR/WARNING/INFO messages from stderr. These include spurious
+    // messages like "Network service crashed, restarting service" that appear during
+    // normal shutdown
+    settings.log_severity = LOGSEVERITY_FATAL;
 
     // cf. https://github.com/chromiumembedded/cef/issues/3685
     settings.chrome_runtime = 1;
