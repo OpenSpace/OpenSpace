@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___DOCUMENTATIONENGINE___H__
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/documentation/schema.h>
 #include <openspace/json.h>
 #include <openspace/properties/propertyowner.h>
 #include <vector>
@@ -53,6 +54,17 @@ public:
     void addDocumentation(Documentation documentation);
 
     /**
+     * Adds the \p schema to the list of Schema%s that are written to a schema json file
+     * with the writeJsonschema method.
+     *
+     * \param schema The Schema object that is to be stored for later use
+     *
+     * \throw DuplicateDocumentationException If the \p schema has a non-empty identifier
+     *        and it was not unique
+     */
+    void addSchema(Schema schema);
+
+    /**
      * Returns a list of all registered Documentation%s.
      *
      * \return A list of all registered Documentation%s
@@ -72,6 +84,7 @@ public:
 
     void writeJavascriptDocumentation() const;
     void writeJsonDocumentation() const;
+    void writeJsonSchema();
 
     nlohmann::json generateScriptEngineJson() const;
     nlohmann::json generateFactoryManagerJson() const;
@@ -85,6 +98,8 @@ public:
 private:
     /// The list of all Documentation%s that are stored by the DocumentationEngine
     std::vector<Documentation> _documentations;
+    /// The list of all Schema%s that are stored by the DocumentationEngine
+    std::vector<Schema> _schemas;
 
     static DocumentationEngine* _instance;
 };

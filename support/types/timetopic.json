@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "data": {
+      "additionalProperties": false,
+      "properties": {
+        "deltaTime": {
+          "type": "number"
+        },
+        "deltaTimeSteps": {
+          "items": {
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "hasNextStep": {
+          "type": "boolean"
+        },
+        "hasPrevStep": {
+          "type": "boolean"
+        },
+        "isPaused": {
+          "type": "boolean"
+        },
+        "nextStep": {
+          "type": "number"
+        },
+        "prevStep": {
+          "type": "number"
+        },
+        "targetDeltaTime": {
+          "type": "number"
+        },
+        "time": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "topicId": {
+      "const": "time"
+    },
+    "topicPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "event": {
+          "enum": [
+            "start_subscription",
+            "stop_subscription"
+          ]
+        }
+      },
+      "required": [
+        "event"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "topicId",
+    "topicPayload",
+    "data"
+  ],
+  "title": "TimeTopic",
+  "type": "object"
+}

@@ -66,6 +66,8 @@
 #include <openspace/util/timerange.h>
 #include <openspace/topic/server.h>
 #include <openspace/topic/serverinterface.h>
+#include <openspace/topic/topics/cameratopic.h>
+#include <openspace/topic/topics/timetopic.h>
 
 namespace openspace {
 
@@ -94,6 +96,11 @@ void registerCoreClasses(DocumentationEngine& engine) {
     engine.addDocumentation(Path::Documentation());
     engine.addDocumentation(ServerInterface::Documentation());
     engine.addDocumentation(Server::Documentation());
+}
+
+void registerCoreSchemas(DocumentationEngine& engine) {
+    engine.addSchema(CameraTopic::Schema());
+    engine.addSchema(TimeTopic::Schema());
 }
 
 // NOTE: should this be in the documentation/core_reg.cpp file? Seems to be here just
