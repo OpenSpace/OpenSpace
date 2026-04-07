@@ -58,8 +58,6 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/io/texture/texturereadercmap.h>
 #include <ghoul/io/texture/texturereaderstb.h>
-#include <ghoul/io/texture/texturewriter.h>
-#include <ghoul/io/texture/texturewriterstb.h>
 #include <ghoul/logging/loglevel.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
@@ -482,7 +480,6 @@ void RenderEngine::initialize() {
     using namespace ghoul::io;
     TextureReader::ref().addReader(std::make_unique<TextureReaderSTB>());
     TextureReader::ref().addReader(std::make_unique<TextureReaderCMAP>());
-    TextureWriter::ref().addWriter(std::make_unique<TextureWriterSTB>());
     ModelReader::ref().addReader(std::make_unique<ModelReaderAssimp>());
     ModelReader::ref().addReader(std::make_unique<ModelReaderBinary>());
 }
