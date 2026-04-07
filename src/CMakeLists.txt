@@ -260,6 +260,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/documentation/core_registration.h
   ${PROJECT_SOURCE_DIR}/include/openspace/documentation/documentation.h
   ${PROJECT_SOURCE_DIR}/include/openspace/documentation/documentationengine.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/documentation/schema.h
   ${PROJECT_SOURCE_DIR}/include/openspace/documentation/verifier.h
   ${PROJECT_SOURCE_DIR}/include/openspace/documentation/verifier.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/engine/configuration.h

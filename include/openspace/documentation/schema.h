@@ -22,57 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/documentation/documentationengine.h>
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/settings.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/logging/logmanager.h>
+#ifndef __OPENSPACE_CORE___SCHEMA___H__
+#define __OPENSPACE_CORE___SCHEMA___H__
 
-int main(int, char** argv) {
-    using namespace openspace;
+#include <nlohmann/json.hpp>
+#include <string>
 
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Debug,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
-    );
+namespace openspace {
 
-    ghoul::initialize();
-    global::create();
-
-    // In order to initialize the engine, we need to specify the tokens
-    // We start by registering the path of the executable,
-    // to make it possible to find other files in the same directory
-    FileSys.registerPathToken(
-        "${BIN}",
-        std::filesystem::path(argv[0]).parent_path(),
-        ghoul::filesystem::FileSystem::Override::Yes
-    );
-
-    std::filesystem::path configFile = findConfiguration();
-
-    // Register the base path as the directory where the configuration file lives
-    std::filesystem::path base = configFile.parent_path();
-    FileSys.registerPathToken("${BASE}", base);
-
-    *global::configuration = loadConfigurationFromFile(
-        configFile.string(),
-        "",
-        glm::ivec2(0)
-    );
-    openspace::global::openSpaceEngine->registerPathTokens();
-
-    // Now that we have the tokens we can initialize the engine
-    global::openSpaceEngine->initialize();
-
-    // Print out the documentation to the documentation folder
-    // @TODO (ylvse, 2024-05-02) change this directory when integrating with jenkins?
-    DocEng.writeJsonDocumentation();
-    DocEng.writeJsonSchema();
-
-    global::openSpaceEngine->deinitialize();
-
-    return 0;
+struct Schema {
+    /// A unique identifier which can be used to reference this Documentation
+    std::string id;
+    /// The JSON schema describing the types
+    nlohmann::json schema;
 };
+
+} // namespace openspace
+
+#endif // !__OPENSPACE_CORE___SCHEMA___H__

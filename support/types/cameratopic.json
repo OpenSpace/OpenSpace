@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "data": {
+      "additionalProperties": false,
+      "properties": {
+        "altitude": {
+          "type": "number"
+        },
+        "altitudeMeters": {
+          "type": "number"
+        },
+        "altitudeUnit": {
+          "enum": [
+            "nanometer",
+            "nanometers",
+            "micrometer",
+            "micrometers",
+            "millimeter",
+            "millimeters",
+            "meter",
+            "meters",
+            "Gigaparsec",
+            "Gigaparsecs",
+            "Megaparsec",
+            "Megaparsecs",
+            "Kiloparsec",
+            "Kiloparsecs",
+            "Parsec",
+            "Parsecs",
+            "Lightyear",
+            "Lightyears",
+            "Lightmonth",
+            "Lightmonths",
+            "Lightday",
+            "Lightdays",
+            "Lighthour",
+            "Lighthours",
+            "AU",
+            "km"
+          ]
+        },
+        "latitude": {
+          "type": "number"
+        },
+        "longitude": {
+          "type": "number"
+        },
+        "subSolarLatitude": {
+          "type": "number"
+        },
+        "subSolarLongitude": {
+          "type": "number"
+        },
+        "viewLatitude": {
+          "type": "number"
+        },
+        "viewLength": {
+          "type": "number"
+        },
+        "viewLongitude": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "latitude",
+        "longitude",
+        "altitude",
+        "altitudeUnit",
+        "altitudeMeters",
+        "viewLatitude",
+        "viewLongitude",
+        "viewLength",
+        "subSolarLatitude",
+        "subSolarLongitude"
+      ],
+      "type": "object"
+    },
+    "topicId": {
+      "const": "camera"
+    },
+    "topicPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "event": {
+          "const": "start_subscription"
+        }
+      },
+      "required": [
+        "event"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "topicId",
+    "topicPayload",
+    "data"
+  ],
+  "title": "CameraTopic",
+  "type": "object"
+}

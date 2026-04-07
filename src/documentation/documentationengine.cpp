@@ -304,6 +304,7 @@ DocumentationEngine& DocumentationEngine::ref() {
     if (_instance == nullptr) {
         _instance = new DocumentationEngine;
         registerCoreClasses(*_instance);
+        registerCoreSchemas(*_instance);
     }
     return *_instance;
 }
@@ -496,6 +497,21 @@ nlohmann::json DocumentationEngine::generateEventJson() const {
     result[NameKey] = EventsTitle;
     result[DataKey] = data;
     return result;
+}
+
+void DocumentationEngine::writeJsonSchema() {
+    for (Schema& schema : _schemas) {
+        // Write two json files for the static docs page - asset components and scripting API
+        std::ofstream out = std::ofstream(absPath(std::format(
+            "{}/support/types/{}.json", "${BASE}", schema.id
+        )));
+        if (out) {
+            schema.schema["$schema"] = "https://json-schema.org/draft/2020-12/schema";
+            out << schema.schema.dump(2);
+            out << '\n';
+        }
+        out.close();
+    }
 }
 
 nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
@@ -731,6 +747,28 @@ void DocumentationEngine::addDocumentation(Documentation documentation) {
         }
         else {
             _documentations.push_back(std::move(documentation));
+        }
+    }
+}
+
+void DocumentationEngine::addSchema(Schema schema) {
+    if (schema.id.empty()) {
+        _schemas.push_back(std::move(schema));
+    }
+    else {
+        auto it = std::find_if(
+            _schemas.begin(),
+            _schemas.end(),
+            [schema](const Schema& s) { return schema.id == s.id; }
+        );
+
+        if (it != _schemas.end()) {
+            throw ghoul::RuntimeError(std::format(
+                "Duplicate Schema with id '{}'", schema.id
+            ));
+        }
+        else {
+            _schemas.push_back(std::move(schema));
         }
     }
 }
