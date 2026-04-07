@@ -847,23 +847,21 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
 }
 
 Configuration::LayerServer stringToLayerServer(std::string_view server) {
-    using Server = Configuration::LayerServer;
-    if (server == "All") { return Server::All; }
-    else if (server == "NewYork") { return Server::NewYork; }
-    else if (server == "Sweden") { return Server::Sweden; }
-    else if (server == "Utah") { return Server::Utah; }
-    else if (server == "None") { return Server::None; }
+    if (server == "All") { return Configuration::LayerServer::All; }
+    else if (server == "NewYork") { return Configuration::LayerServer::NewYork; }
+    else if (server == "Sweden") { return Configuration::LayerServer::Sweden; }
+    else if (server == "Utah") { return Configuration::LayerServer::Utah; }
+    else if (server == "None") { return Configuration::LayerServer::None; }
     else { throw ghoul::MissingCaseException(); }
 }
 
 std::string layerServerToString(Configuration::LayerServer server) {
-    using Server = Configuration::LayerServer;
     switch (server) {
-        case Server::All: return "All";
-        case Server::NewYork: return "NewYork";
-        case Server::Sweden: return "Sweden";
-        case Server::Utah: return "Utah";
-        case Server::None: return "None";
+        case Configuration::LayerServer::All: return "All";
+        case Configuration::LayerServer::NewYork: return "NewYork";
+        case Configuration::LayerServer::Sweden: return "Sweden";
+        case Configuration::LayerServer::Utah: return "Utah";
+        case Configuration::LayerServer::None: return "None";
         default: throw ghoul::MissingCaseException();
     }
 }
