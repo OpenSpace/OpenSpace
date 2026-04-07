@@ -26,6 +26,7 @@
 
 #include <openspace/util/httprequest.h>
 
+#include <chrono>
 #include <cstdint>
 #include <deque>
 #include <filesystem>
@@ -40,6 +41,7 @@ namespace openspace {
 class DynamicHelioviewerImageDownloader {
 public:
     using RequestKey = int64_t;
+    using SteadyTimePoint = std::chrono::time_point<std::chrono::steady_clock>;
 
     DynamicHelioviewerImageDownloader(
         std::filesystem::path outputFolder,
@@ -88,7 +90,7 @@ private:
     void enqueueKey(RequestKey key);
     std::vector<RequestKey> desiredKeys(double currentTimeJ2000, double deltaTime) const;
     bool shouldRequestNewWindow(double currentTimeJ2000) const;
-    bool shouldRetry(RequestKey key, double currentTimeJ2000) const;
+    bool shouldRetry(RequestKey key) const;
 
     RequestKey requestKeyForTime(double j2000) const;
     double startTimeForKey(RequestKey key) const;
@@ -113,13 +115,13 @@ private:
     double _requestWindowAfter = 12.0 * 3600.0;
     double _minRequestShift = 1.0 * 3600.0;
     double _lastRequestedCenterTime = -1.0;
-    double _nextListingAllowedTime = -1.0;
+    SteadyTimePoint _nextListingAllowedTime = SteadyTimePoint::min();
 
     std::unique_ptr<ListingRequest> _activeListingRequest;
     std::deque<RequestKey> _queuedDownloadKeys;
     std::unordered_map<RequestKey, RemoteFrame> _availableFrames;
     std::unordered_map<RequestKey, ActiveDownload> _activeDownloads;
-    std::unordered_map<RequestKey, double> _failedUntil;
+    std::unordered_map<RequestKey, SteadyTimePoint> _failedUntil;
     std::unordered_map<RequestKey, int> _retryCounts;
     std::unordered_set<RequestKey> _knownLocalKeys;
     std::unordered_set<RequestKey> _queuedKeys;

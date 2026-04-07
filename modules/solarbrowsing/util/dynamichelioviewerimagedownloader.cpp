@@ -16,6 +16,10 @@
 namespace {
     constexpr std::string_view _loggerCat = "DynamicHelioviewerImageDownloader";
     constexpr double J2000UnixOffset = 946684800.0;
+
+    std::chrono::steady_clock::time_point wallClockNow() {
+        return std::chrono::steady_clock::now();
+    }
 } // namespace
 
 namespace openspace {
@@ -68,15 +72,15 @@ void DynamicHelioviewerImageDownloader::update(double currentTimeJ2000, double d
     const bool needListing = std::any_of(
         requestedKeys.begin(),
         requestedKeys.end(),
-        [this, currentTimeJ2000](RequestKey key) {
+        [this](RequestKey key) {
             return !_knownLocalKeys.contains(key) &&
                 !_availableFrames.contains(key) &&
-                shouldRetry(key, currentTimeJ2000);
+                shouldRetry(key);
         }
     );
 
     if (needListing && !_activeListingRequest && shouldRequestNewWindow(currentTimeJ2000) &&
-        currentTimeJ2000 >= _nextListingAllowedTime)
+        wallClockNow() >= _nextListingAllowedTime)
     {
         startListingRequest(currentTimeJ2000);
     }
@@ -216,14 +220,16 @@ void DynamicHelioviewerImageDownloader::pollListingRequest(double currentTimeJ20
             }
 
             _lastRequestedCenterTime = _activeListingRequest->centerTimeJ2000;
-            _nextListingAllowedTime = currentTimeJ2000;
+            _nextListingAllowedTime = SteadyTimePoint::min();
         }
         catch (const std::exception& e) {
             LERROR(std::format(
                 "Failed to parse Helioviewer frame response [{}]",
                 e.what()
             ));
-            _nextListingAllowedTime = currentTimeJ2000 + _retryBackoffSeconds;
+            _nextListingAllowedTime = wallClockNow() + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+                std::chrono::duration<double>(_retryBackoffSeconds)
+            );
         }
 
         _activeListingRequest = nullptr;
@@ -234,7 +240,9 @@ void DynamicHelioviewerImageDownloader::pollListingRequest(double currentTimeJ20
             "Failed to fetch Helioviewer frame list from '{}'",
             request.url()
         ));
-        _nextListingAllowedTime = currentTimeJ2000 + _retryBackoffSeconds;
+        _nextListingAllowedTime = wallClockNow() + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+            std::chrono::duration<double>(_retryBackoffSeconds)
+        );
         _activeListingRequest = nullptr;
     }
 }
@@ -263,7 +271,7 @@ void DynamicHelioviewerImageDownloader::reprioritizeQueue(double currentTimeJ200
 
     for (RequestKey key : desired) {
         if (_knownLocalKeys.contains(key) || !_availableFrames.contains(key) ||
-            _activeDownloads.contains(key) || !shouldRetry(key, currentTimeJ2000))
+            _activeDownloads.contains(key) || !shouldRetry(key))
         {
             continue;
         }
@@ -329,7 +337,9 @@ void DynamicHelioviewerImageDownloader::pollDownloads(double currentTimeJ2000) {
                     download.temporaryPath
                 ));
                 std::filesystem::remove(download.temporaryPath, ec);
-                _failedUntil[download.key] = currentTimeJ2000 + _retryBackoffSeconds;
+                _failedUntil[download.key] = wallClockNow() + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+                    std::chrono::duration<double>(_retryBackoffSeconds)
+                );
                 ++_retryCounts[download.key];
                 it = _activeDownloads.erase(it);
                 continue;
@@ -344,7 +354,9 @@ void DynamicHelioviewerImageDownloader::pollDownloads(double currentTimeJ2000) {
                     download.finalPath,
                     ec.message()
                 ));
-                _failedUntil[download.key] = currentTimeJ2000 + _retryBackoffSeconds;
+                _failedUntil[download.key] = wallClockNow() + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+                    std::chrono::duration<double>(_retryBackoffSeconds)
+                );
                 ++_retryCounts[download.key];
                 it = _activeDownloads.erase(it);
                 continue;
@@ -373,7 +385,9 @@ void DynamicHelioviewerImageDownloader::pollDownloads(double currentTimeJ2000) {
 
             const int retries = ++_retryCounts[download.key];
             const double multiplier = std::pow(2.0, static_cast<double>(std::max(0, retries - 1)));
-            _failedUntil[download.key] = currentTimeJ2000 + (_retryBackoffSeconds * multiplier);
+            _failedUntil[download.key] = wallClockNow() + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+                std::chrono::duration<double>(_retryBackoffSeconds * multiplier)
+            );
             it = _activeDownloads.erase(it);
             continue;
         }
@@ -427,11 +441,10 @@ bool DynamicHelioviewerImageDownloader::shouldRequestNewWindow(double currentTim
     return std::abs(currentTimeJ2000 - _lastRequestedCenterTime) >= _minRequestShift;
 }
 
-bool DynamicHelioviewerImageDownloader::shouldRetry(RequestKey key,
-                                                    double currentTimeJ2000) const
+bool DynamicHelioviewerImageDownloader::shouldRetry(RequestKey key) const
 {
     auto failedIt = _failedUntil.find(key);
-    if (failedIt != _failedUntil.end() && failedIt->second > currentTimeJ2000) {
+    if (failedIt != _failedUntil.end() && failedIt->second > wallClockNow()) {
         return false;
     }
 
@@ -486,7 +499,7 @@ std::string DynamicHelioviewerImageDownloader::frameListingUrl(double beginJ2000
                                                                double endJ2000) const
 {
     return std::format(
-        "https://api.helioviewer.org/v2/getJPX/?startTime={}&endTime={}"
+        "https://api.helioviewer.org/v2/getJPX/?startTime={}Z&endTime={}Z"
         "&sourceId={}&verbose=true&cadence=true&cadence={}",
         j2000ToIso(beginJ2000),
         j2000ToIso(endJ2000),
