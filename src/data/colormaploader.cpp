@@ -26,8 +26,12 @@
 
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
 #include <format>
+#include <fstream>
+#include <sstream>
 
 namespace {
     constexpr std::string_view _loggerCat = "ColorMapLoader";
