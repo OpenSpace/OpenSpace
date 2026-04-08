@@ -426,7 +426,7 @@ void RenderableGalaxy::initializeGL() {
     );
 
     if (!_pointSpreadFunctionTexturePath.empty()) {
-        _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
+        _pointSpreadFunctionTexture = ghoul::io::TextureReader::loadTexture(
             absPath(_pointSpreadFunctionTexturePath),
             2,
             { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }

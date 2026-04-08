@@ -953,7 +953,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         LDEBUG("Reloading Color Texture");
         _colorTexture = nullptr;
         if (!_colorTexturePath.value().empty()) {
-            _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
+            _colorTexture = ghoul::io::TextureReader::loadTexture(
                 absPath(_colorTexturePath),
                 1
             );

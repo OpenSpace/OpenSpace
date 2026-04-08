@@ -256,7 +256,7 @@ bool LabelParser::create() {
             }
             if (count == static_cast<int>(_specsOfInterest.size())) {
                 const std::vector<std::string> extensions =
-                    ghoul::io::TextureReader::ref().supportedExtensions();
+                    ghoul::io::TextureReader::supportedExtensions();
 
                 count = 0;
 

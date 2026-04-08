@@ -116,7 +116,7 @@ void ScreenSpaceImageLocal::update() {
             //.swizzleMask = std::array<GLenum, 4>{ GL_RED, GL_RED, GL_RED, GL_ONE }
         };
 
-        _texture = ghoul::io::TextureReader::ref().loadTexture(
+        _texture = ghoul::io::TextureReader::loadTexture(
             absPath(_texturePath),
             2,
             samplerInit

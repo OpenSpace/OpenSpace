@@ -362,7 +362,7 @@ bool ProjectionComponent::initializeGL() {
 
     using ghoul::opengl::Texture;
 
-    _placeholderTexture = ghoul::io::TextureReader::ref().loadTexture(
+    _placeholderTexture = ghoul::io::TextureReader::loadTexture(
         absPath(PlaceholderFile),
         2,
         {
@@ -859,7 +859,7 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
         Texture::WrappingMode::Repeat,
         Texture::WrappingMode::MirroredRepeat
     };
-    std::unique_ptr<Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
+    std::unique_ptr<Texture> texture = ghoul::io::TextureReader::loadTexture(
         absPath(texturePath),
         2,
         {

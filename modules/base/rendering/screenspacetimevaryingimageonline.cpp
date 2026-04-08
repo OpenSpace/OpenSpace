@@ -191,7 +191,7 @@ void ScreenSpaceTimeVaryingImageOnline::update() {
                 //.swizzleMask = std::array<GLenum, 4>{ GL_RED, GL_RED, GL_RED, GL_ONE }
             };
 
-            _texture = ghoul::io::TextureReader::ref().loadTexture(
+            _texture = ghoul::io::TextureReader::loadTexture(
                 reinterpret_cast<void*>(imageFile.buffer),
                 imageFile.size,
                 2,

@@ -790,7 +790,7 @@ void RenderableStars::loadPSFTexture() {
             return;
         }
 
-        component.texture = ghoul::io::TextureReader::ref().loadTexture(
+        component.texture = ghoul::io::TextureReader::loadTexture(
             absPath(path),
             2,
             {
@@ -947,7 +947,7 @@ void RenderableStars::update(const UpdateData&) {
         LDEBUG("Reloading Color Texture");
         _colorTexture = nullptr;
         if (!_colorTexturePath.value().empty()) {
-            _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
+            _colorTexture = ghoul::io::TextureReader::loadTexture(
                 absPath(_colorTexturePath),
                 1
             );
@@ -965,7 +965,7 @@ void RenderableStars::update(const UpdateData&) {
         LDEBUG("Reloading Color Texture");
         _otherDataColorMapTexture = nullptr;
         if (!_otherDataColorMapPath.value().empty()) {
-            _otherDataColorMapTexture = ghoul::io::TextureReader::ref().loadTexture(
+            _otherDataColorMapTexture = ghoul::io::TextureReader::loadTexture(
                 absPath(_otherDataColorMapPath),
                 1
             );

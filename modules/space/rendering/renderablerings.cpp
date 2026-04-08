@@ -250,7 +250,7 @@ void RenderableRings::update(const UpdateData& data) {
 void RenderableRings::loadTexture() {
     using namespace ghoul::io;
     using namespace ghoul::opengl;
-    _texture = TextureReader::ref().loadTexture(
+    _texture = TextureReader::loadTexture(
         _texturePath.value(),
         1,
         { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }

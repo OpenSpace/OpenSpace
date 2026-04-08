@@ -134,7 +134,7 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
         }
 
         try {
-            _texture = ghoul::io::TextureReader::ref().loadTexture(
+            _texture = ghoul::io::TextureReader::loadTexture(
                 reinterpret_cast<void*>(imageFile.buffer),
                 imageFile.size,
                 2,

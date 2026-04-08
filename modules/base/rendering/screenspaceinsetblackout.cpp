@@ -513,7 +513,7 @@ ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dict
                 //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
                 .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
             };
-            _calibrationTexture = ghoul::io::TextureReader::ref().loadTexture(
+            _calibrationTexture = ghoul::io::TextureReader::loadTexture(
                 *optTexturePath,
                 2,
                 samplerInit

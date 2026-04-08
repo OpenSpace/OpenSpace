@@ -178,7 +178,7 @@ namespace {
         );
 
         try {
-            ghoul::io::TextureWriter::ref().saveTexture(texture, fileName.string());
+            ghoul::io::TextureWriter::saveTexture(texture, fileName.string());
         }
         catch (const std::filesystem::filesystem_error& e) {
             LERRORC("Exception: {}", e.what());
@@ -195,7 +195,7 @@ namespace {
  * \return The size of the image in pixels
  */
 [[codegen::luawrap]] glm::ivec2 imageSize(std::filesystem::path path) {
-    return ghoul::io::TextureReader::ref().imageSize(path);
+    return ghoul::io::TextureReader::imageSize(path);
 }
 
 /**

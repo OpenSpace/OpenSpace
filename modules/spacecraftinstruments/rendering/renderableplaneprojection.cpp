@@ -225,7 +225,7 @@ void RenderablePlaneProjection::loadTexture() {
         .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
         //.swizzleMask = std::array<GLenum, 4>{ GL_RED, GL_RED, GL_RED, GL_ONE }
     };
-    _texture = ghoul::io::TextureReader::ref().loadTexture(_texturePath, 2, samplerInit);
+    _texture = ghoul::io::TextureReader::loadTexture(_texturePath, 2, samplerInit);
 
     _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
     _textureFile->setCallback([this]() { _textureIsDirty = true; });
