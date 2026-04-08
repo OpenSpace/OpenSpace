@@ -150,9 +150,18 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ScreenshotUseDateInfo = {
-        "ScreenshotUseDate",
-        "Screenshot folder uses date",
+    constexpr Property::PropertyInfo UseNewScreenshotFolderInfo = {
+        "UseNewScreenshotFolder",
+        "Use New Screenshot Folder",
+        "If this property is triggered, a new screenshot folder is created and the "
+        "numbering for screenshots is reset to start at 0. Note, this property only does "
+        "something if `ScreenshotUseDateTime` is set to `true`.",
+        Property::Visibility::AdvancedUser
+    };
+
+    constexpr Property::PropertyInfo ScreenshotUseDateTimeInfo = {
+        "ScreenshotUseDateTime",
+        "Screenshot folder uses datetime",
         "If this value is set to 'true', screenshots will be saved to a folder that "
         "contains the time at which this value was enabled.",
         Property::Visibility::AdvancedUser
@@ -326,7 +335,8 @@ RenderEngine::RenderEngine()
     , _showCameraInfo(ShowCameraInfo, true)
     , _screenshotWindowIds(ScreenshotWindowIdsInfo)
     , _applyWarping(ApplyWarpingInfo, false)
-    , _screenshotUseDate(ScreenshotUseDateInfo, false)
+    , _useNewScreenfolder(UseNewScreenshotFolderInfo)
+    , _screenshotUseDateTime(ScreenshotUseDateTimeInfo, false)
     , _disableMasterRendering(DisableMasterInfo, false)
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
     , _applyBlackoutToMaster(ApplyBlackoutToMasterInfo, true)
@@ -407,20 +417,47 @@ RenderEngine::RenderEngine()
     addProperty(_screenshotWindowIds);
     addProperty(_applyWarping);
 
-    _screenshotUseDate.onChange([this]() {
+    _useNewScreenfolder.onChange([this]() {
+        // If there is no screenshot folder or if we are not using the date, we don't need
+        // to do anything
+        if (!FileSys.hasRegisteredToken("${STARTUP_SCREENSHOT}") ||
+            !_screenshotUseDateTime)
+        {
+            return;
+        }
+
+        const std::time_t now = std::time(nullptr);
+        std::tm* nowTime = std::localtime(&now);
+        std::array<char, 128> date;
+        strftime(date.data(), sizeof(date), "%Y-%m-%d-%H-%M-%S", nowTime);
+
+        const std::filesystem::path newFolder = absPath(
+            "${STARTUP_SCREENSHOT}/" + std::string(date.data())
+        );
+
+        FileSys.registerPathToken(
+            "${SCREENSHOTS}",
+            newFolder,
+            ghoul::filesystem::FileSystem::Override::Yes
+        );
+        global::windowDelegate->setScreenshotFolder(absPath("${SCREENSHOTS}"));
+    });
+    addProperty(_useNewScreenfolder);
+
+    _screenshotUseDateTime.onChange([this]() {
         // If there is no screenshot folder, don't bother with handling the change
         if (!FileSys.hasRegisteredToken("${STARTUP_SCREENSHOT}")) {
             return;
         }
 
-        if (_screenshotUseDate) {
+        if (_screenshotUseDateTime) {
             // Going from 'false' -> 'true'
             // We might need to create the folder first
 
             const std::time_t now = std::time(nullptr);
             std::tm* nowTime = std::localtime(&now);
             std::array<char, 128> date;
-            strftime(date.data(), sizeof(date), "%Y-%m-%d-%H-%M", nowTime);
+            strftime(date.data(), sizeof(date), "%Y-%m-%d-%H-%M-%S", nowTime);
 
             const std::filesystem::path newFolder = absPath(
                 "${STARTUP_SCREENSHOT}/" + std::string(date.data())
@@ -443,7 +480,7 @@ RenderEngine::RenderEngine()
         }
         global::windowDelegate->setScreenshotFolder(absPath("${SCREENSHOTS}"));
     });
-    addProperty(_screenshotUseDate);
+    addProperty(_screenshotUseDateTime);
 
     addPropertySubOwner(_windowing);
     // Adding the actual window owners later in the initialize, as we don't know yet how
@@ -477,7 +514,7 @@ void RenderEngine::initialize() {
     _screenSpaceRotation = global::configuration->screenSpaceRotation;
     _masterRotation = global::configuration->masterRotation;
     _disableMasterRendering = global::configuration->isRenderingOnMasterDisabled;
-    _screenshotUseDate = global::configuration->shouldUseScreenshotDate;
+    _screenshotUseDateTime = global::configuration->shouldUseScreenshotDateTime;
 
     using namespace ghoul::io;
     TextureReader::ref().addReader(std::make_unique<TextureReaderSTB>());

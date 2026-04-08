@@ -111,7 +111,7 @@ struct Configuration {
 
     float shutdownCountdown = 0.f;
 
-    bool shouldUseScreenshotDate = false;
+    bool shouldUseScreenshotDateTime = false;
 
     bool sandboxedLua = true;
 
