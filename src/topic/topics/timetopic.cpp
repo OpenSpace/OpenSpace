@@ -24,6 +24,7 @@
 
 #include "openspace/topic/topics/timetopic.h"
 
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/topic/connection.h>
 #include <openspace/util/timemanager.h>
@@ -34,8 +35,6 @@
 using nlohmann::json;
 
 namespace {
-    constexpr std::string_view SubscribeEvent = "start_subscription";
-    constexpr std::string_view UnsubscribeEvent = "stop_subscription";
     constexpr std::chrono::milliseconds TimeUpdateInterval(50);
 } // namespace
 
@@ -61,7 +60,7 @@ TimeTopic::~TimeTopic() {
 
 void TimeTopic::handleJson(const nlohmann::json& json) {
     const std::string event = json.at("event").get<std::string>();
-    if (event == UnsubscribeEvent) {
+    if (event == "stop_subscription") {
         _isDone = true;
         return;
     }
@@ -69,7 +68,7 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
     sendFullTimeData();
     sendDeltaTimeSteps();
 
-    if (event != SubscribeEvent) {
+    if (event != "start_subscription") {
         _isDone = true;
         return;
     }
@@ -108,6 +107,51 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
 
 bool TimeTopic::isDone() const {
     return _isDone;
+}
+
+Schema TimeTopic::Schema() {
+    nlohmann::json schema = {
+        { "title", "TimeTopic" },
+        { "type", "object" },
+        { "properties", {
+            { "topicId", {{ "const", "time" }} },
+            { "topicPayload", {
+                { "type", "object" },
+                { "properties", {
+                    { "event", {
+                        { "enum", { "start_subscription", "stop_subscription" }}
+                    }}
+                }},
+                { "required", { "event" }},
+                { "additionalProperties", false }
+            }},
+            { "data", {
+                { "type", "object" },
+                { "properties", {
+                    { "time", {{ "type", "string" }} },
+                    { "deltaTime", {{ "type", "number" }} },
+                    { "targetDeltaTime", {{ "type", "number" }} },
+                    { "isPaused", {{ "type", "boolean" }} },
+                    { "deltaTimeSteps", {
+                        { "type", "array" },
+                        { "items", {{ "type", "number" }} }
+                    }},
+                    { "hasNextStep", {{ "type", "boolean" }} },
+                    { "hasPrevStep", {{ "type", "boolean" }} },
+                    { "nextStep", {{ "type", "number" }} },
+                    { "prevStep", {{ "type", "number" }} }
+                }},
+                { "additionalProperties", false },
+            }}
+        }},
+        { "required", { "topicId", "topicPayload", "data" }},
+        { "additionalProperties", false }
+    };
+
+    return {
+        "timetopic",
+        schema
+    };
 }
 
 json TimeTopic::getNextPrevDeltaTimeStepJson() {

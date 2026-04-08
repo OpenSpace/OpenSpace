@@ -1,0 +1,147 @@
+{
+  "$defs": {
+    "Action": {
+      "additionalProperties": false,
+      "properties": {
+        "color": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 4,
+          "minItems": 4,
+          "type": "array"
+        },
+        "documentation": {
+          "type": "string"
+        },
+        "guiPath": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isLocal": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "identifier",
+        "name",
+        "isLocal",
+        "documentation",
+        "guiPath"
+      ],
+      "type": "object"
+    },
+    "Keybind": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "modifiers": {
+          "items": {
+            "enum": [
+              "shift",
+              "control",
+              "alt",
+              "super"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "key",
+        "modifiers",
+        "action"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "data": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Action"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Response to get_all",
+          "properties": {
+            "actions": {
+              "items": {
+                "$ref": "#/$defs/Action"
+              },
+              "type": "array"
+            },
+            "keybinds": {
+              "items": {
+                "$ref": "#/$defs/Keybind"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "actions",
+            "keybinds"
+          ],
+          "type": "object"
+        }
+      ],
+      "type": "object"
+    },
+    "topicId": {
+      "const": "actionsKeybinds"
+    },
+    "topicPayload": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "event": {
+              "const": "get_all"
+            }
+          },
+          "required": [
+            "event"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "event": {
+              "const": "get_action"
+            },
+            "identifier": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "event",
+            "identifier"
+          ],
+          "type": "object"
+        }
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "topicId",
+    "topicPayload",
+    "data"
+  ],
+  "title": "ActionKeybindTopic",
+  "type": "object"
+}

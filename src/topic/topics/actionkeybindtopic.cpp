@@ -24,6 +24,7 @@
 
 #include <openspace/topic/topics/actionkeybindtopic.h>
 
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
@@ -54,6 +55,109 @@ void ActionKeybindTopic::handleJson(const nlohmann::json& input) {
 
 bool ActionKeybindTopic::isDone() const {
     return true;
+}
+
+Schema ActionKeybindTopic::Schema() {
+    nlohmann::json schema = {
+        { "title", "ActionKeybindTopic" },
+        { "$defs", {
+            { "Action", {
+                { "type", "object" },
+                { "properties", {
+                    { "identifier" , {{ "type", "string" }} },
+                    { "name", {{ "type", "string" }} },
+                    { "isLocal", {{ "type", "boolean" }} },
+                    { "documentation", {{ "type", "string" }} },
+                    { "guiPath", {{ "type", "string" }} },
+                    { "color", {
+                        { "type", "array" },
+                        { "minItems", 4 },
+                        { "maxItems", 4 },
+                        { "items", {{ "type", "number" }} }
+                    }}
+                }},
+                { "required", {
+                    "identifier", "name", "isLocal", "documentation", "guiPath"
+                }},
+                { "additionalProperties", false }
+            }},
+            { "Keybind", {
+                { "type", "object"},
+                { "properties", {
+                    { "key", {{ "type", "string" }} },
+                    { "modifiers", {
+                        { "type", "array" },
+                        { "items", {
+                            { "type", "string" },
+                            { "enum", { "shift", "control", "alt", "super" }}
+                        }}
+                    }},
+                    { "action", {{ "type", "string" }} }
+                }},
+                { "required", { "key", "modifiers", "action" }},
+                { "additionalProperties", false }
+            }}
+        }},
+        { "type", "object" },
+        { "properties", {
+            { "topicId", {
+                { "const", "actionsKeybinds" }
+            }},
+            { "topicPayload", {
+                { "type", "object" },
+                { "anyOf", {
+                    {
+                        { "type", "object" },
+                        { "properties", {
+                            { "event", {{ "const", "get_all"}} }
+                        }},
+                        { "required", { "event" }},
+                        { "additionalProperties", false }
+                    },
+                    {
+                        { "type", "object" },
+                        { "properties", {
+                            { "event", {{ "const", "get_action"}} },
+                            { "identifier", {{ "type", "string" }} }
+                        }},
+                        { "required", { "event", "identifier" }},
+                        { "additionalProperties", false }
+                    }
+                }}
+            }},
+            { "data", {
+                { "type", "object" },
+                { "anyOf", {
+                    {
+                        { "$ref", "#/$defs/Action" }
+                    },
+                    {
+                        { "type", "object" },
+                        { "description", std::format("Response to {}", "get_all")},
+                        { "properties", {
+                            { "actions", {
+                                { "type", "array" },
+                                { "items", {{ "$ref", "#/$defs/Action" }} }
+                            }},
+                            { "keybinds", {
+                                { "type", "array" },
+                                { "items", {{"$ref", "#/$defs/Keybind" }} }
+                            }}
+                        }},
+                        { "required", { "actions", "keybinds" }},
+                        { "additionalProperties", false },
+                    }
+                }}
+            }}
+        }},
+        { "required", { "topicId", "topicPayload", "data" } },
+        { "additionalProperties", false }
+    };
+
+    return {
+        "actionkeybindtopic",
+        schema
+    };
 }
 
 nlohmann::json jsonKeybind(const KeyWithModifier& k, std::string identifier) {
