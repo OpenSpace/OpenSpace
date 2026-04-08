@@ -28,6 +28,7 @@ set(OPENSPACE_SOURCE
   openspace.cpp
   camera/camera.cpp
   camera/camerapose.cpp
+  data/colormaploader.cpp
   data/csvloader.cpp
   data/dataloader.cpp
   data/datamapping.cpp
@@ -253,6 +254,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/json.h
   ${PROJECT_SOURCE_DIR}/include/openspace/camera/camera.h
   ${PROJECT_SOURCE_DIR}/include/openspace/camera/camerapose.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/data/colormaploader.h
   ${PROJECT_SOURCE_DIR}/include/openspace/data/csvloader.h
   ${PROJECT_SOURCE_DIR}/include/openspace/data/dataloader.h
   ${PROJECT_SOURCE_DIR}/include/openspace/data/datamapping.h

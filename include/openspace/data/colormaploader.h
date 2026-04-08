@@ -22,25 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SPECKLOADER___H__
-#define __OPENSPACE_CORE___SPECKLOADER___H__
+#ifndef __OPENSPACE_CORE___COLORMAPLOADER___H__
+#define __OPENSPACE_CORE___COLORMAPLOADER___H__
 
-#include <openspace/data/datamapping.h>
+#include <openspace/data/dataloader.h>
+#include <ghoul/opengl/texture.h>
 #include <filesystem>
-#include <optional>
+#include <memory>
 
-namespace openspace::dataloader {
-    struct Dataset;
-    struct Labelset;
-} // namespace openspace::dataloader
+namespace openspace::dataloader::colormap {
 
-namespace openspace::dataloader::speck {
+ColorMap loadCmapFile(std::filesystem::path path);
 
-Dataset loadSpeckFile(std::filesystem::path path,
-    std::optional<DataMapping> specs = std::nullopt);
+/**
+ * Loads a 1-dimensional color map texture from a file and returns it as a texture object.
+ *
+ * This function supports two types of colormap formats:
+ * - `.cmap` files: Custom color map format parsed by `loadCmapFile`
+ * - Standard image formats: Any 1D texture format supported by `ghoul::io::TextureReader`
+ *
+ * \param filename The path to the color map file to load. Must have a valid file
+ *                 extension
+ * \param samplerSettings Optional sampler settings to apply to the texture
+ *
+ * \return A unique pointer to the loaded OpenGL texture
+ *
+ * \throw ghoul::io::TextureReader::MissingReaderException if the file extension is not
+ *        supported
+ * \pre The filename must have a file extension
+ */
+std::unique_ptr<ghoul::opengl::Texture> loadColorMapTexture(
+    const std::filesystem::path& filename,
+    ghoul::opengl::Texture::SamplerInit samplerSettings = {});
 
-Labelset loadLabelFile(std::filesystem::path path);
+} // namespace openspace::dataloader::colormap
 
-} // namespace openspace::dataloader::speck
-
-#endif // __OPENSPACE_CORE___SPECKLOADER___H__
+#endif // __OPENSPACE_CORE___COLORMAPLOADER___H__
