@@ -501,11 +501,12 @@ nlohmann::json DocumentationEngine::generateEventJson() const {
 
 void DocumentationEngine::writeJsonSchema() {
     for (Schema& schema : _schemas) {
-        // Write two json files for the static docs page - asset components and scripting API
         std::ofstream out = std::ofstream(absPath(std::format(
             "{}/support/types/{}.json", "${BASE}", schema.id
         )));
         if (out) {
+            // Add which schema version we're targeting see
+            // https://json-schema.org/understanding-json-schema/reference/schema#schema
             schema.schema["$schema"] = "https://json-schema.org/draft/2020-12/schema";
             out << schema.schema.dump(2);
             out << '\n';
