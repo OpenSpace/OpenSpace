@@ -55,9 +55,6 @@
 #include <ghoul/io/model/modelreader.h>
 #include <ghoul/io/model/modelreaderassimp.h>
 #include <ghoul/io/model/modelreaderbinary.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/io/texture/texturereadercmap.h>
-#include <ghoul/io/texture/texturereaderstb.h>
 #include <ghoul/logging/loglevel.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
@@ -478,8 +475,6 @@ void RenderEngine::initialize() {
     _screenshotUseDate = global::configuration->shouldUseScreenshotDate;
 
     using namespace ghoul::io;
-    TextureReader::ref().addReader(std::make_unique<TextureReaderSTB>());
-    TextureReader::ref().addReader(std::make_unique<TextureReaderCMAP>());
     ModelReader::ref().addReader(std::make_unique<ModelReaderAssimp>());
     ModelReader::ref().addReader(std::make_unique<ModelReaderBinary>());
 }
