@@ -52,13 +52,11 @@ RenderableTextureCygnet::RenderableTextureCygnet(const ghoul::Dictionary& dictio
 }
 
 bool RenderableTextureCygnet::updateTexture() {
-    using namespace ghoul;
-
-    _textures[0] = io::TextureReader::ref().loadTexture(
+    _textures[0] = ghoul::io::texture::loadTexture(
         reinterpret_cast<void*>(_imageFile.buffer),
         _imageFile.size,
         2,
-        { .filter = opengl::Texture::FilterMode::LinearMipMap },
+        { .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap },
         _imageFile.format
     );
 

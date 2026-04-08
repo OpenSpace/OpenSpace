@@ -160,6 +160,14 @@ loadColorMapTexture(const std::filesystem::path& filename,
 
     if (extension == "cmap") {
         const ColorMap colorMap = loadCmapFile(filename);
+
+        if (colorMap.entries.empty()) {
+            LERROR(std::format(
+                "Could not read any color data from color map file '{}'", filename
+            ));
+            return nullptr;
+        }
+
         return std::make_unique<ghoul::opengl::Texture>(
             ghoul::opengl::Texture::FormatInit{
                 .dimensions = glm::uvec3(static_cast<unsigned int>(colorMap.entries.size()), 1, 1),
