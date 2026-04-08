@@ -319,7 +319,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     if (_isInterpolating) {
         _interpolateTileProvider = std::make_unique<InterpolateTileProvider>(dictionary);
         _interpolateTileProvider->initialize();
-        _interpolateTileProvider->colormap = ghoul::io::TextureReader::loadTexture(
+        _interpolateTileProvider->colormap = ghoul::io::texture::loadTexture(
             _colormap,
             1,
             { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }

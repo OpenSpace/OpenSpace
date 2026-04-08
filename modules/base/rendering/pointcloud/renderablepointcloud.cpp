@@ -994,7 +994,7 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
     }
 
     std::unique_ptr<ghoul::opengl::Texture> t =
-        ghoul::io::TextureReader::loadTexture(path, 2);
+        ghoul::io::texture::loadTexture(path, 2);
 
     bool useAlpha = (t->numberOfChannels() > 3) && _texture.useAlphaChannel;
 

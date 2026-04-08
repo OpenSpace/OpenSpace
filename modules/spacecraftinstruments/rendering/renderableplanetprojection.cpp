@@ -640,7 +640,7 @@ void RenderablePlanetProjection::loadColorTexture() {
             Texture::WrappingMode::MirroredRepeat
         };
 
-        _baseTexture = ghoul::io::TextureReader::loadTexture(
+        _baseTexture = ghoul::io::texture::loadTexture(
             absPath(selectedPath),
             2,
             ghoul::opengl::Texture::SamplerInit {
@@ -660,7 +660,7 @@ void RenderablePlanetProjection::loadHeightTexture() {
     // run out in the case of two large textures
     _heightMapTexture = nullptr;
     if (selectedPath != NoImageText) {
-        _heightMapTexture = ghoul::io::TextureReader::loadTexture(
+        _heightMapTexture = ghoul::io::texture::loadTexture(
             absPath(selectedPath),
             2,
             {

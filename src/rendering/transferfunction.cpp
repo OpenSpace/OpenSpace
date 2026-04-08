@@ -212,7 +212,7 @@ void TransferFunction::setTextureFromTxt() {
 }
 
 void TransferFunction::setTextureFromImage() {
-    _texture = ghoul::io::TextureReader::loadTexture(
+    _texture = ghoul::io::texture::loadTexture(
         _filepath,
         1,
         { .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge }

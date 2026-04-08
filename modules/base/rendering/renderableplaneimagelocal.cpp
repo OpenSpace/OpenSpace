@@ -171,7 +171,7 @@ void RenderablePlaneImageLocal::loadTexture() {
         std::to_string(hash),
         [path = _texturePath.value()]() -> std::unique_ptr<ghoul::opengl::Texture> {
             std::unique_ptr<ghoul::opengl::Texture> texture =
-                ghoul::io::TextureReader::loadTexture(
+                ghoul::io::texture::loadTexture(
                     absPath(path),
                     2,
                     ghoul::opengl::Texture::SamplerInit {

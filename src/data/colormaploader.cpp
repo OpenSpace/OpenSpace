@@ -169,11 +169,11 @@ loadColorMapTexture(const std::filesystem::path& filename,
         // @TODO (emmbr, 2026-04-08) Consider including nanColor, below and above range.
         // These are now ignored in the texture
     }
-    else if (ghoul::io::TextureReader::isSupportedExtension(extension)) {
-        return ghoul::io::TextureReader::loadTexture(filename, 1, samplerSettings);
+    else if (ghoul::io::texture::isSupportedReadExtension(extension)) {
+        return ghoul::io::texture::loadTexture(filename, 1, samplerSettings);
     }
     else {
-        throw ghoul::io::TextureReader::MissingReaderException(extension, filename);
+        throw ghoul::io::texture::MissingReaderException(extension, filename);
     }
 }
 

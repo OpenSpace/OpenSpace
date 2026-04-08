@@ -142,7 +142,7 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
         }
 
         try {
-            _texture = ghoul::io::TextureReader::loadTexture(
+            _texture = ghoul::io::texture::loadTexture(
                 reinterpret_cast<void*>(imageFile.buffer),
                 imageFile.size,
                 2,
@@ -176,7 +176,7 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
                 _textureDimensions = textureDim;
             }
         }
-        catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
+        catch (const ghoul::io::texture::InvalidLoadException& e) {
             _textureIsDirty = false;
             LERRORC(e.component, e.message);
         }

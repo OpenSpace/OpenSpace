@@ -561,7 +561,7 @@ void RenderableVectorField::update(const UpdateData&) {
         _colorTexture = nullptr;
 
         if (!_colorSettings.colorMap.value().empty()) {
-            _colorTexture = ghoul::io::TextureReader::loadTexture(
+            _colorTexture = ghoul::io::texture::loadTexture(
                 absPath(_colorSettings.colorMap),
                 1,
                 ghoul::opengl::Texture::SamplerInit {

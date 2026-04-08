@@ -791,7 +791,7 @@ void RenderableStars::loadPSFTexture() {
             return;
         }
 
-        component.texture = ghoul::io::TextureReader::loadTexture(
+        component.texture = ghoul::io::texture::loadTexture(
             absPath(path),
             2,
             {
