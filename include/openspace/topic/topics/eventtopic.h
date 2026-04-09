@@ -32,6 +32,8 @@
 
 namespace openspace {
 
+struct Schema;
+
 class Property;
 
 class EventTopic : public Topic {
@@ -42,6 +44,7 @@ public:
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
 
+    static openspace::Schema Schema();
 private:
     /**
      * Returns `true` if there is at least one subscription active, `false` otherwise.

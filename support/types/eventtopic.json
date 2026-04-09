@@ -1,0 +1,671 @@
+{
+  "$defs": {
+    "ActionAddedData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "ActionAdded"
+        },
+        "Uri": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Event",
+        "Uri"
+      ],
+      "type": "object"
+    },
+    "ActionRemovedData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "ActionRemoved"
+        },
+        "Uri": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Event",
+        "Uri"
+      ],
+      "type": "object"
+    },
+    "ApplicationShutdownData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "ApplicationShutdown"
+        },
+        "State": {
+          "enum": [
+            "Started",
+            "Aborted",
+            "Finished"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Event",
+        "State"
+      ],
+      "type": "object"
+    },
+    "AssetLoadingData": {
+      "additionalProperties": false,
+      "properties": {
+        "AssetPath": {
+          "type": "string"
+        },
+        "Event": {
+          "const": "AssetLoading"
+        },
+        "State": {
+          "enum": [
+            "Loaded",
+            "Loading",
+            "Unloaded",
+            "Error"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Event",
+        "AssetPath",
+        "State"
+      ],
+      "type": "object"
+    },
+    "CameraFocusTransitionData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "CameraFocusTransition"
+        },
+        "Node": {
+          "type": "string"
+        },
+        "Transition": {
+          "enum": [
+            "Approaching",
+            "Reaching",
+            "Receding",
+            "Exiting"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Event",
+        "Node",
+        "Transition"
+      ],
+      "type": "object"
+    },
+    "CameraMovedPositionData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "CameraMovedPosition"
+        }
+      },
+      "required": [
+        "Event"
+      ],
+      "type": "object"
+    },
+    "CameraPathFinishedData": {
+      "additionalProperties": false,
+      "properties": {
+        "Destination": {
+          "type": "string"
+        },
+        "Event": {
+          "const": "CameraPathFinished"
+        },
+        "Origin": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Event",
+        "Origin",
+        "Destination"
+      ],
+      "type": "object"
+    },
+    "CameraPathStartedData": {
+      "additionalProperties": false,
+      "properties": {
+        "Destination": {
+          "type": "string"
+        },
+        "Event": {
+          "const": "CameraPathStarted"
+        },
+        "Origin": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Event",
+        "Origin",
+        "Destination"
+      ],
+      "type": "object"
+    },
+    "CustomData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "Custom"
+        },
+        "Payload": {
+          "type": "string"
+        },
+        "Subtype": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Event",
+        "Subtype",
+        "Payload"
+      ],
+      "type": "object"
+    },
+    "EventData": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ActionAddedData"
+        },
+        {
+          "$ref": "#/$defs/ActionRemovedData"
+        },
+        {
+          "$ref": "#/$defs/ApplicationShutdownData"
+        },
+        {
+          "$ref": "#/$defs/AssetLoadingData"
+        },
+        {
+          "$ref": "#/$defs/CameraFocusTransitionData"
+        },
+        {
+          "$ref": "#/$defs/CameraMovedPositionData"
+        },
+        {
+          "$ref": "#/$defs/CameraPathFinishedData"
+        },
+        {
+          "$ref": "#/$defs/CameraPathStartedData"
+        },
+        {
+          "$ref": "#/$defs/CustomData"
+        },
+        {
+          "$ref": "#/$defs/FocusNodeChangedData"
+        },
+        {
+          "$ref": "#/$defs/GuiTreeUpdatedData"
+        },
+        {
+          "$ref": "#/$defs/InterpolationFinishedData"
+        },
+        {
+          "$ref": "#/$defs/MissionAddedData"
+        },
+        {
+          "$ref": "#/$defs/MissionEventReachedData"
+        },
+        {
+          "$ref": "#/$defs/MissionRemovedData"
+        },
+        {
+          "$ref": "#/$defs/ParallelConnectionData"
+        },
+        {
+          "$ref": "#/$defs/PlanetEclipsedData"
+        },
+        {
+          "$ref": "#/$defs/PointSpacecraftData"
+        },
+        {
+          "$ref": "#/$defs/ProfileLoadingFinishedData"
+        },
+        {
+          "$ref": "#/$defs/PropertyTreePrunedData"
+        },
+        {
+          "$ref": "#/$defs/PropertyTreeUpdatedData"
+        },
+        {
+          "$ref": "#/$defs/RenderableDisabledData"
+        },
+        {
+          "$ref": "#/$defs/RenderableEnabledData"
+        },
+        {
+          "$ref": "#/$defs/ScheduledScriptExecutedData"
+        },
+        {
+          "$ref": "#/$defs/SessionRecordingPlaybackData"
+        },
+        {
+          "$ref": "#/$defs/TimeOfInterestReachedData"
+        }
+      ]
+    },
+    "EventType": {
+      "enum": [
+        "ActionAdded",
+        "ActionRemoved",
+        "ApplicationShutdown",
+        "AssetLoading",
+        "CameraFocusTransition",
+        "CameraMovedPosition",
+        "CameraPathFinished",
+        "CameraPathStarted",
+        "Custom",
+        "FocusNodeChanged",
+        "GuiTreeUpdated",
+        "InterpolationFinished",
+        "MissionAdded",
+        "MissionEventReached",
+        "MissionRemoved",
+        "ParallelConnection",
+        "PlanetEclipsed",
+        "PointSpacecraft",
+        "ProfileLoadingFinished",
+        "PropertyTreePruned",
+        "PropertyTreeUpdated",
+        "RenderableDisabled",
+        "RenderableEnabled",
+        "ScheduledScriptExecuted",
+        "SessionRecordingPlayback",
+        "TimeOfInterestReached"
+      ],
+      "type": "string"
+    },
+    "EventTypeOrWildcard": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/EventType"
+        },
+        {
+          "enum": [
+            "*",
+            "all"
+          ],
+          "type": "string"
+        }
+      ]
+    },
+    "FocusNodeChangedData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "FocusNodeChanged"
+        },
+        "NewNode": {
+          "type": "string"
+        },
+        "OldNode": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Event",
+        "OldNode",
+        "NewNode"
+      ],
+      "type": "object"
+    },
+    "GuiTreeUpdatedData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "GuiTreeUpdated"
+        }
+      },
+      "required": [
+        "Event"
+      ],
+      "type": "object"
+    },
+    "InterpolationFinishedData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "InterpolationFinished"
+        },
+        "Property": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Event",
+        "Property"
+      ],
+      "type": "object"
+    },
+    "MissionAddedData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "MissionAdded"
+        },
+        "Identifier": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Event",
+        "Identifier"
+      ],
+      "type": "object"
+    },
+    "MissionEventReachedData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "MissionEventReached"
+        }
+      },
+      "required": [
+        "Event"
+      ],
+      "type": "object"
+    },
+    "MissionRemovedData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "MissionRemoved"
+        },
+        "Identifier": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Event",
+        "Identifier"
+      ],
+      "type": "object"
+    },
+    "ParallelConnectionData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "ParallelConnection"
+        },
+        "State": {
+          "enum": [
+            "Established",
+            "Lost",
+            "HostshipGained",
+            "HostshipLost"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Event",
+        "State"
+      ],
+      "type": "object"
+    },
+    "PlanetEclipsedData": {
+      "additionalProperties": false,
+      "properties": {
+        "Eclipsee": {
+          "type": "string"
+        },
+        "Eclipser": {
+          "type": "string"
+        },
+        "Event": {
+          "const": "PlanetEclipsed"
+        }
+      },
+      "required": [
+        "Event",
+        "Eclipsee",
+        "Eclipser"
+      ],
+      "type": "object"
+    },
+    "PointSpacecraftData": {
+      "additionalProperties": false,
+      "properties": {
+        "Dec": {
+          "type": "number"
+        },
+        "Duration": {
+          "type": "number"
+        },
+        "Event": {
+          "const": "PointSpacecraft"
+        },
+        "Ra": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "Event",
+        "Ra",
+        "Dec",
+        "Duration"
+      ],
+      "type": "object"
+    },
+    "ProfileLoadingFinishedData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "ProfileLoadingFinished"
+        }
+      },
+      "required": [
+        "Event"
+      ],
+      "type": "object"
+    },
+    "PropertyTreePrunedData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "PropertyTreePruned"
+        },
+        "Uri": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Event",
+        "Uri"
+      ],
+      "type": "object"
+    },
+    "PropertyTreeUpdatedData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "PropertyTreeUpdated"
+        },
+        "Uri": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Event",
+        "Uri"
+      ],
+      "type": "object"
+    },
+    "RenderableDisabledData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "RenderableDisabled"
+        },
+        "Node": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Event",
+        "Node"
+      ],
+      "type": "object"
+    },
+    "RenderableEnabledData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "RenderableEnabled"
+        },
+        "Node": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Event",
+        "Node"
+      ],
+      "type": "object"
+    },
+    "ScheduledScriptExecutedData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "ScheduledScriptExecuted"
+        },
+        "Script": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Event",
+        "Script"
+      ],
+      "type": "object"
+    },
+    "SessionRecordingPlaybackData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "SessionRecordingPlayback"
+        },
+        "State": {
+          "enum": [
+            "Started",
+            "Paused",
+            "Resumed",
+            "Finished"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Event",
+        "State"
+      ],
+      "type": "object"
+    },
+    "TimeOfInterestReachedData": {
+      "additionalProperties": false,
+      "properties": {
+        "Event": {
+          "const": "TimeOfInterestReached"
+        }
+      },
+      "required": [
+        "Event"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "data": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/EventData"
+        }
+      ],
+      "type": "object"
+    },
+    "topicId": {
+      "const": "event"
+    },
+    "topicPayload": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "event": {
+              "const": "start_subscription"
+            },
+            "eventType": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/EventTypeOrWildcard"
+                },
+                {
+                  "items": {
+                    "$ref": "#/$defs/EventType"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          "required": [
+            "event",
+            "eventType"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "event": {
+              "const": "stop_subscription"
+            },
+            "eventType": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/EventTypeOrWildcard"
+                },
+                {
+                  "items": {
+                    "$ref": "#/$defs/EventType"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          "required": [
+            "event",
+            "eventType"
+          ],
+          "type": "object"
+        }
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "topicId",
+    "topicPayload",
+    "data"
+  ],
+  "title": "EventTopic",
+  "type": "object"
+}

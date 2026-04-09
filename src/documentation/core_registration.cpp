@@ -73,6 +73,7 @@
 #include <openspace/topic/topics/downloadeventtopic.h>
 #include <openspace/topic/topics/enginemodetopic.h>
 #include <openspace/topic/topics/errorlogtopic.h>
+#include <openspace/topic/topics/eventtopic.h>
 #include <openspace/topic/topics/timetopic.h>
 
 namespace openspace {
@@ -112,6 +113,7 @@ void registerCoreSchemas(DocumentationEngine& engine) {
     engine.addSchema(DownloadEventTopic::Schema());
     engine.addSchema(EngineModeTopic::Schema());
     engine.addSchema(ErrorLogTopic::Schema());
+    engine.addSchema(EventTopic::Schema());
     engine.addSchema(TimeTopic::Schema());
 }
 
