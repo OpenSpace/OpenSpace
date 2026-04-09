@@ -32,6 +32,8 @@
 namespace openspace {
 
 class EngineModeTopic : public Topic {
+struct Schema;
+
 public:
     EngineModeTopic();
     ~EngineModeTopic() override;
@@ -39,6 +41,7 @@ public:
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
 
+    static openspace::Schema Schema();
 private:
     static constexpr int UnsetOnChangeHandle = -1;
 

@@ -120,6 +120,7 @@ Schema TimeTopic::Schema() {
               "type": "object",
               "properties": {
                 "event": {
+                  "type": "string",
                   "enum": ["start_subscription", "stop_subscription"]
                 }
               },

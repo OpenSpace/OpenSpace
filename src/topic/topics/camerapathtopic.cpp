@@ -24,6 +24,7 @@
 
 #include <openspace/topic/topics/camerapathtopic.h>
 
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
@@ -36,12 +37,6 @@
 #include <algorithm>
 #include <cmath>
 #include <string_view>
-
-using nlohmann::json;
-
-namespace {
-    constexpr std::string_view SubscribeEvent = "start_subscription";
-} // namespace
 
 namespace openspace {
 
@@ -58,27 +53,69 @@ CameraPathTopic::~CameraPathTopic() {
 void CameraPathTopic::handleJson(const nlohmann::json& json) {
     const std::string event = json.at("event").get<std::string>();
 
-    if (event != SubscribeEvent) {
+    if (event == "stop_subscription") {
         _isDone = true;
         return;
     }
 
-    _dataCallbackHandle = global::server->addPreSyncCallback(
-        [this]() {
-            const bool isInPath =(global::openSpaceEngine->currentMode()
-                == OpenSpaceEngine::Mode::CameraPath);
+    if (event == "start_subscription") {
+        _dataCallbackHandle = global::server->addPreSyncCallback(
+            [this]() {
+                const bool isInPath = (global::openSpaceEngine->currentMode()
+                    == OpenSpaceEngine::Mode::CameraPath);
 
-            const auto now = std::chrono::system_clock::now();
-            if (isInPath && (now - _lastUpdateTime) > _cameraPathUpdateTime) {
-                sendCameraPathData();
-                _lastUpdateTime = std::chrono::system_clock::now();
+                const auto now = std::chrono::system_clock::now();
+                if (isInPath && (now - _lastUpdateTime) > _cameraPathUpdateTime) {
+                    sendCameraPathData();
+                    _lastUpdateTime = std::chrono::system_clock::now();
+                }
             }
-        }
-    );
+        );
+    }
 }
 
 bool CameraPathTopic::isDone() const {
     return _isDone;
+}
+
+Schema CameraPathTopic::Schema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "title": "CameraPathTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "cameraPath" },
+            "topicPayload": {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "type": "string",
+                  "enum": ["start_subscription", "stop_subscription"]
+                }
+              },
+              "additionalProperties": false,
+              "required": ["event"]
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "target": { "type": "string" },
+                "remainingTime": { "type": "number" },
+                "isPaused": { "type": "boolean" }
+              },
+              "additionalProperties": false,
+              "required": ["target", "remainingTime", "isPaused"]
+            }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+    )");
+
+    return {
+        "camerapathtopic",
+        schema
+    };
 }
 
 void CameraPathTopic::sendCameraPathData() {

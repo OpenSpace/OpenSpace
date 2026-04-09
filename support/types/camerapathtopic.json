@@ -5,41 +5,25 @@
     "data": {
       "additionalProperties": false,
       "properties": {
-        "deltaTime": {
-          "type": "number"
-        },
-        "deltaTimeSteps": {
-          "items": {
-            "type": "number"
-          },
-          "type": "array"
-        },
-        "hasNextStep": {
-          "type": "boolean"
-        },
-        "hasPrevStep": {
-          "type": "boolean"
-        },
         "isPaused": {
           "type": "boolean"
         },
-        "nextStep": {
+        "remainingTime": {
           "type": "number"
         },
-        "prevStep": {
-          "type": "number"
-        },
-        "targetDeltaTime": {
-          "type": "number"
-        },
-        "time": {
+        "target": {
           "type": "string"
         }
       },
+      "required": [
+        "target",
+        "remainingTime",
+        "isPaused"
+      ],
       "type": "object"
     },
     "topicId": {
-      "const": "time"
+      "const": "cameraPath"
     },
     "topicPayload": {
       "additionalProperties": false,
@@ -63,6 +47,6 @@
     "topicPayload",
     "data"
   ],
-  "title": "TimeTopic",
+  "title": "CameraPathTopic",
   "type": "object"
 }

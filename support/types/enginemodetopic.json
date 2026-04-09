@@ -5,41 +5,22 @@
     "data": {
       "additionalProperties": false,
       "properties": {
-        "deltaTime": {
-          "type": "number"
-        },
-        "deltaTimeSteps": {
-          "items": {
-            "type": "number"
-          },
-          "type": "array"
-        },
-        "hasNextStep": {
-          "type": "boolean"
-        },
-        "hasPrevStep": {
-          "type": "boolean"
-        },
-        "isPaused": {
-          "type": "boolean"
-        },
-        "nextStep": {
-          "type": "number"
-        },
-        "prevStep": {
-          "type": "number"
-        },
-        "targetDeltaTime": {
-          "type": "number"
-        },
-        "time": {
+        "mode": {
+          "enum": [
+            "user_control",
+            "session_recording_playback",
+            "camera_path"
+          ],
           "type": "string"
         }
       },
+      "required": [
+        "mode"
+      ],
       "type": "object"
     },
     "topicId": {
-      "const": "time"
+      "const": "engineMode"
     },
     "topicPayload": {
       "additionalProperties": false,
@@ -47,7 +28,8 @@
         "event": {
           "enum": [
             "start_subscription",
-            "stop_subscription"
+            "stop_subscription",
+            "refresh"
           ],
           "type": "string"
         }
@@ -63,6 +45,6 @@
     "topicPayload",
     "data"
   ],
-  "title": "TimeTopic",
+  "title": "EngineModeTopic",
   "type": "object"
 }

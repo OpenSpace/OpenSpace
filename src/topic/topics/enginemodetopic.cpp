@@ -24,6 +24,7 @@
 
 #include "openspace/topic/topics/enginemodetopic.h"
 
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/query/query.h>
 #include <openspace/topic/connection.h>
@@ -34,10 +35,6 @@ using nlohmann::json;
 
 namespace {
     constexpr std::string_view _loggerCat = "EngineModeTopic";
-
-    constexpr std::string_view SubscribeEvent = "start_subscription";
-    constexpr std::string_view UnsubscribeEvent = "stop_subscription";
-    constexpr std::string_view RefreshEvent = "refresh";
 } // namespace
 
 namespace openspace {
@@ -54,22 +51,22 @@ EngineModeTopic::~EngineModeTopic() {
 
 void EngineModeTopic::handleJson(const nlohmann::json& json) {
     const std::string event = json.at("event").get<std::string>();
-    if (event != SubscribeEvent && event != UnsubscribeEvent &&
-        event != RefreshEvent)
+    if (event != "start_subscription" && event != "stop_subscription" &&
+        event != "refresh")
     {
         LERROR("Unsupported event");
         _isDone = true;
         return;
     }
 
-    if (event == UnsubscribeEvent) {
+    if (event == "stop_subscription") {
         _isDone = true;
         return;
     }
 
     sendJsonData();
 
-    if (event == SubscribeEvent) {
+    if (event == "start_subscription") {
         _modeCallbackHandle = global::openSpaceEngine->addModeChangeCallback(
             [this]() {
                 const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
@@ -86,6 +83,47 @@ bool EngineModeTopic::isDone() const {
     return _isDone;
 }
 
+Schema EngineModeTopic::Schema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "title": "EngineModeTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "engineMode" },
+            "topicPayload": {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "type": "string",
+                  "enum": ["start_subscription", "stop_subscription", "refresh"]
+                }
+              },
+              "additionalProperties": false,
+              "required": ["event"]
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": ["user_control", "session_recording_playback", "camera_path"]
+                }
+              },
+              "additionalProperties": false,
+              "required": ["mode"]
+            }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+
+    )");
+
+    return {
+        "enginemodetopic",
+        schema
+    };
+}
 void EngineModeTopic::sendJsonData() {
     const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
     std::string modeString;

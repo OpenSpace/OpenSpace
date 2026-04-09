@@ -24,6 +24,7 @@
 
 #include <openspace/topic/topics/authorizationtopic.h>
 
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/topic/connection.h>
@@ -35,10 +36,26 @@
 namespace {
     constexpr std::string_view _loggerCat = "AuthorizationTopic";
 
-    constexpr std::string_view KeyStatus = "status";
-    constexpr std::string_view Authorized = "authorized";
-    constexpr std::string_view IncorrectKey = "incorrectKey";
-    constexpr std::string_view BadRequest = "badRequest";
+    enum class Status {
+        Authorized,
+        IncorrecctKey,
+        BadRequest
+    };
+
+    std::string_view toString(Status response) {
+        switch (response) {
+            case Status::Authorized: return "authorized";
+            case Status::IncorrecctKey: return "incorrectKey";
+            case Status::BadRequest: return "badRequest";
+            default: throw ghoul::MissingCaseException();
+        }
+    }
+
+    nlohmann::json response(Status status) {
+        nlohmann::json response;
+        response["status"] = toString(status);
+        return response;
+    }
 } // namespace
 
 namespace openspace {
@@ -49,27 +66,66 @@ bool AuthorizationTopic::isDone() const {
     return _isAuthenticated;
 }
 
+Schema AuthorizationTopic::Schema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "title": "AuthorizationTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "authorize" },
+            "topicPayload": {
+              "type": "object",
+              "properties": {
+                "password": { "type": "string" }
+              },
+              "additionalProperties": false,
+              "required": ["password"]
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "enum": ["authorized", "incorrectKey", "badRequest"]
+                }
+              },
+              "additionalProperties": false,
+              "required": ["status"]
+            }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+
+    )");
+
+    return {
+        "authorizationtopic",
+        schema
+    };
+}
+
 void AuthorizationTopic::handleJson(const nlohmann::json& json) {
     if (isDone()) {
-        _connection->sendJson(wrappedPayload({ KeyStatus, Authorized }));
+        _connection->sendJson(wrappedPayload(response(Status::Authorized)));
     }
     else {
         try {
-            const std::string providedKey = json.at("key").get<std::string>();
-            if (authorize(providedKey)) {
+            const std::string providedPassword = json.at("password").get<std::string>();
+            if (authorize(providedPassword)) {
                 _connection->setAuthorized(true);
-                _connection->sendJson(wrappedPayload({ KeyStatus, Authorized }));
+                _connection->sendJson(wrappedPayload(response(Status::Authorized)));
                 LINFO("Client successfully authorized");
             }
             else {
-                _connection->sendJson(wrappedPayload({ KeyStatus, IncorrectKey }));
+                _connection->sendJson(wrappedPayload(response(Status::IncorrecctKey)));
             }
         }
         catch (const std::out_of_range&) {
-            _connection->sendJson(wrappedPayload({ KeyStatus, BadRequest }));
+            _connection->sendJson(wrappedPayload(response(Status::BadRequest)));
         }
         catch (const std::domain_error&) {
-            _connection->sendJson(wrappedPayload({ KeyStatus, BadRequest }));
+            _connection->sendJson(wrappedPayload(response(Status::BadRequest)));
         }
     }
 }
