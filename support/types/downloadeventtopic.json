@@ -1,38 +1,72 @@
 {
   "$defs": {
     "DownloadType": {
-      "type": "integer",
-      "enum": [0, 1, 2, 3],
-      "tsEnumNames": ["Started", "Progress", "Finished", "Failed"]
+      "enum": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "tsEnumNames": [
+        "Started",
+        "Progress",
+        "Finished",
+        "Failed"
+      ],
+      "type": "integer"
     }
   },
-  "title": "DownloadEventTopic",
-  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
   "properties": {
-    "topicId": { "const": "downloadEvent" },
-    "topicPayload": {
-      "type": "object",
+    "data": {
+      "additionalProperties": false,
       "properties": {
-        "event": {
-          "type": "string",
-          "enum": ["start_subscription", "stop_subscription"]
+        "downloadedBytes": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "string"
+        },
+        "totalBytes": {
+          "type": "integer"
+        },
+        "type": {
+          "$ref": "#/$defs/DownloadType"
         }
       },
-      "additionalProperties": false,
-      "required": ["event"]
+      "required": [
+        "type",
+        "id",
+        "downloadedBytes"
+      ],
+      "type": "object"
     },
-    "data": {
-      "type": "object",
-      "properties": {
-        "type": { "$ref": "#/$defs/DownloadType" },
-        "id": { "type": "string" },
-        "downloadedBytes": { "type": "integer" },
-        "totalBytes": { "type": "integer" }
-      },
+    "topicId": {
+      "const": "downloadEvent"
+    },
+    "topicPayload": {
       "additionalProperties": false,
-      "required": ["type", "id", "downloadedBytes"]
+      "properties": {
+        "event": {
+          "enum": [
+            "start_subscription",
+            "stop_subscription"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "event"
+      ],
+      "type": "object"
     }
   },
-  "additionalProperties": false,
-  "required": ["topicId", "topicPayload", "data"]
+  "required": [
+    "topicId",
+    "topicPayload",
+    "data"
+  ],
+  "title": "DownloadEventTopic",
+  "type": "object"
 }
