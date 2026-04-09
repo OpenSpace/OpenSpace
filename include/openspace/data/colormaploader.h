@@ -44,7 +44,6 @@ ColorMap loadCmapFile(std::filesystem::path path);
  * \param filename The path to the color map file to load. Must have a valid file
  *                 extension
  * \param samplerSettings Optional sampler settings to apply to the texture
- *
  * \return A unique pointer to the loaded OpenGL texture
  *
  * \throw ghoul::io::texture::MissingReaderException if the file extension is not

@@ -169,7 +169,7 @@ loadColorMapTexture(const std::filesystem::path& filename,
         }
 
         return std::make_unique<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit{
+            ghoul::opengl::Texture::FormatInit {
                 .dimensions = glm::uvec3(static_cast<unsigned int>(colorMap.entries.size()), 1, 1),
                 .type = GL_TEXTURE_1D,
                 .format = ghoul::opengl::Texture::Format::RGBA,
