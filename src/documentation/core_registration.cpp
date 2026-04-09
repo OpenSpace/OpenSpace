@@ -70,6 +70,7 @@
 #include <openspace/topic/topics/authorizationtopic.h>
 #include <openspace/topic/topics/camerapathtopic.h>
 #include <openspace/topic/topics/cameratopic.h>
+#include <openspace/topic/topics/downloadeventtopic.h>
 #include <openspace/topic/topics/enginemodetopic.h>
 #include <openspace/topic/topics/timetopic.h>
 
@@ -107,6 +108,7 @@ void registerCoreSchemas(DocumentationEngine& engine) {
     engine.addSchema(AuthorizationTopic::Schema());
     engine.addSchema(CameraPathTopic::Schema());
     engine.addSchema(CameraTopic::Schema());
+    engine.addSchema(DownloadEventTopic::Schema());
     engine.addSchema(EngineModeTopic::Schema());
     engine.addSchema(TimeTopic::Schema());
 }

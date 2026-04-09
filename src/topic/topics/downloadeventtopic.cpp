@@ -24,6 +24,7 @@
 
 #include <openspace/topic/topics/downloadeventtopic.h>
 
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/topic/connection.h>
 #include <openspace/util/downloadeventengine.h>
@@ -31,8 +32,6 @@
 #include <string_view>
 
 namespace {
-    constexpr std::string_view StartSubscription = "start_subscription";
-    constexpr std::string_view StopSubscription = "stop_subscription";
     constexpr std::chrono::milliseconds CallbackUpdateInterval(250);
 } // namespace
 
@@ -48,7 +47,7 @@ DownloadEventTopic::~DownloadEventTopic() {
 void DownloadEventTopic::handleJson(const nlohmann::json& json) {
     const std::string& event = json.at("event").get<std::string>();
 
-    if (event == StartSubscription) {
+    if (event == "start_subscription") {
         _isSubscribedTo = true;
 
         auto callback = [this](const DownloadEventEngine::DownloadEvent& e) {
@@ -78,7 +77,7 @@ void DownloadEventTopic::handleJson(const nlohmann::json& json) {
         _subscriptionID = global::downloadEventEngine->subscribe(callback);
     }
 
-    else if (event == StopSubscription) {
+    else if (event == "stop_subscription") {
         global::downloadEventEngine->unsubscribe(_subscriptionID);
         _isSubscribedTo = false;
     }
@@ -86,6 +85,54 @@ void DownloadEventTopic::handleJson(const nlohmann::json& json) {
 
 bool DownloadEventTopic::isDone() const {
     return !_isSubscribedTo;
+}
+
+Schema DownloadEventTopic::Schema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "$defs": {
+            "DownloadType": {
+              "type": "integer",
+              "enum": [0, 1, 2, 3],
+              "tsEnumNames": ["Started", "Progress", "Finished", "Failed"]
+            }
+          },
+          "title": "DownloadEventTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "downloadEvent" },
+            "topicPayload": {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "type": "string",
+                  "enum": ["start_subscription", "stop_subscription"]
+                }
+              },
+              "additionalProperties": false,
+              "required": ["event"]
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "type": { "$ref": "#/$defs/DownloadType" },
+                "id": { "type": "string" },
+                "downloadedBytes": { "type": "integer" },
+                "totalBytes": { "type": "integer" }
+              },
+              "additionalProperties": false,
+              "required": ["type", "id", "downloadedBytes"]
+            }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+    )");
+
+    return {
+        "downloadeventtopic",
+        schema
+    };
 }
 
 } // namespace openspace

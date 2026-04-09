@@ -29,6 +29,7 @@
 #include <chrono>
 
 namespace openspace {
+
 struct Schema;
 
 class CameraPathTopic : public Topic {
