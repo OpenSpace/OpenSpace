@@ -458,6 +458,7 @@ void SessionRecordingHandler::setupPlayback(double startTime) {
         std::get<SessionRecording::Entry::Camera>(firstCamera->value).focusNode;
     auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), startFocusNode);
     if (it == _loadedNodes.end()) {
+        global::openSpaceEngine->setMode(OpenSpaceEngine::Mode::UserControl);
         throw SessionRecordingError(std::format(
             "Playback file requires scenegraph node '{}', which is not currently loaded",
             startFocusNode
