@@ -1,0 +1,134 @@
+{
+  "$defs": {
+    "LogLevel": {
+      "enum": [
+        "All",
+        "Trace",
+        "Debug",
+        "Info",
+        "Warning",
+        "Error",
+        "Fatal",
+        "None"
+      ],
+      "tsEnumNames": [
+        "All",
+        "Trace",
+        "Debug",
+        "Info",
+        "Warning",
+        "Error",
+        "Fatal",
+        "NoLogging"
+      ],
+      "type": "string"
+    },
+    "Settings": {
+      "additionalProperties": false,
+      "properties": {
+        "categoryStamping": {
+          "type": "boolean"
+        },
+        "dateStamping": {
+          "type": "boolean"
+        },
+        "logLevel": {
+          "$ref": "#/$defs/LogLevel"
+        },
+        "logLevelStamping": {
+          "type": "boolean"
+        },
+        "timeStamping": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "data": {
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "type": "string"
+        },
+        "dateStamp": {
+          "type": "string"
+        },
+        "level": {
+          "$ref": "#/$defs/LogLevel"
+        },
+        "message": {
+          "type": "string"
+        },
+        "timeStamp": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "message"
+      ],
+      "type": "object"
+    },
+    "topicId": {
+      "const": "errorLog"
+    },
+    "topicPayload": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "event": {
+              "const": "start_subscription"
+            },
+            "settings": {
+              "$ref": "#/$defs/Settings"
+            }
+          },
+          "required": [
+            "event"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "event": {
+              "const": "stop_subscription"
+            }
+          },
+          "required": [
+            "event"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "event": {
+              "const": "update_log_level"
+            },
+            "logLevel": {
+              "$ref": "#/$defs/LogLevel"
+            }
+          },
+          "required": [
+            "event",
+            "logLevel"
+          ],
+          "type": "object"
+        }
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "topicId",
+    "topicPayload",
+    "data"
+  ],
+  "title": "ErrorLogTopic",
+  "type": "object"
+}
