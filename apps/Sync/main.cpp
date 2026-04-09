@@ -47,11 +47,7 @@ int main(int, char**) {
 
     std::filesystem::path configFile = findConfiguration();
     std::filesystem::path settings = findSettings();
-    *global::configuration = loadConfigurationFromFile(
-        configFile,
-        settings,
-        glm::ivec2(0, 0)
-    );
+    *global::configuration = loadConfigurationFromFile(configFile, settings);
     global::openSpaceEngine->initialize();
 
 

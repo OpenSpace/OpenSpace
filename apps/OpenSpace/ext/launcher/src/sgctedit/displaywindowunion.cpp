@@ -153,7 +153,8 @@ void DisplayWindowUnion::initialize(const std::vector<QRect>& monitorSizeList,
                 posY -= monitorSizeList[monitorNum].y();
             }
         }
-        wCtrl->setDimensions(posX, posY, w.size->x, w.size->y);
+        sgct::ivec2 sz = w.size.value_or(sgct::ivec2{ 1920, 1080 });
+        wCtrl->setDimensions(posX, posY, sz.x, sz.y);
 
         //
         // Get Window name
