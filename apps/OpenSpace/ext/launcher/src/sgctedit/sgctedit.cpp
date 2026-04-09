@@ -60,8 +60,8 @@ namespace {
             std::numeric_limits<int>::max()
         );
         for (const sgct::config::Window& window : cluster.nodes.front().windows) {
-            if (window.size.x <= size.x && window.size.y <= size.y) {
-                size = window.size;
+            if (window.size->x <= size.x && window.size->y <= size.y) {
+                size = *window.size;
             }
             else {
                 // The window size is bigger than a previous one, so we gotta bail

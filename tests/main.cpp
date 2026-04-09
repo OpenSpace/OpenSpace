@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
     const std::filesystem::path base = configFile.parent_path();
     FileSys.registerPathToken("${BASE}", base);
 
-    *global::configuration = loadConfigurationFromFile(configFile, "", glm::ivec2(0));
+    *global::configuration = loadConfigurationFromFile(configFile, "");
     global::openSpaceEngine->registerPathTokens();
     global::openSpaceEngine->initialize();
 
