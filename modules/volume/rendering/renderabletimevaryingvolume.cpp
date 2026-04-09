@@ -51,6 +51,24 @@
 namespace {
     using namespace openspace;
 
+    ghoul::opengl::Texture::SamplerInit volumeTextureSamplerInit(VolumeGridType gridType)
+    {
+        using Texture = ghoul::opengl::Texture;
+
+        constexpr Texture::WrappingMode Clamp = Texture::WrappingMode::ClampToEdge;
+        Texture::WrappingModes wrapping = {
+            .s = Clamp,
+            .t = Clamp,
+            .r = Clamp
+        };
+
+        if (gridType == VolumeGridType::Spherical) {
+            wrapping.r = Texture::WrappingMode::Repeat;
+        }
+
+        return Texture::SamplerInit { .wrapping = wrapping };
+    }
+
     constexpr std::string_view _loggerCat = "RenderableTimeVaryingVolume";
 
     constexpr float SecondsInOneDay = 60 * 60 * 24;
@@ -241,6 +259,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
     }
 
     // TODO: defer loading of data to later (separate thread or at least not when loading)
+    const VolumeGridType gridType = static_cast<VolumeGridType>(_gridType.value());
     for (std::pair<const double, Timestep>& p : _volumeTimesteps) {
         Timestep& t = p.second;
         const std::string path = std::format(
@@ -269,9 +288,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
                 .format = ghoul::opengl::Texture::Format::Red,
                 .dataType = GL_FLOAT
             },
-            ghoul::opengl::Texture::SamplerInit {
-                .wrapping = ghoul::opengl::Texture::WrappingMode::Clamp
-            },
+            volumeTextureSamplerInit(gridType),
             reinterpret_cast<std::byte*>(data)
         );
     }
