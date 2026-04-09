@@ -505,7 +505,7 @@ void DocumentationEngine::writeJsonSchema() {
             "{}/support/types/{}.json", "${BASE}", schema.id
         )));
         if (out) {
-            // Add which schema version we're targeting see
+            // Add which schema version we're targeting, see
             // https://json-schema.org/understanding-json-schema/reference/schema#schema
             schema.schema["$schema"] = "https://json-schema.org/draft/2020-12/schema";
             out << schema.schema.dump(2);

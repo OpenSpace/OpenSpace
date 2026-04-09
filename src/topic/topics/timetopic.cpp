@@ -110,43 +110,45 @@ bool TimeTopic::isDone() const {
 }
 
 Schema TimeTopic::Schema() {
-    nlohmann::json schema = {
-        { "title", "TimeTopic" },
-        { "type", "object" },
-        { "properties", {
-            { "topicId", {{ "const", "time" }} },
-            { "topicPayload", {
-                { "type", "object" },
-                { "properties", {
-                    { "event", {
-                        { "enum", { "start_subscription", "stop_subscription" }}
-                    }}
-                }},
-                { "required", { "event" }},
-                { "additionalProperties", false }
-            }},
-            { "data", {
-                { "type", "object" },
-                { "properties", {
-                    { "time", {{ "type", "string" }} },
-                    { "deltaTime", {{ "type", "number" }} },
-                    { "targetDeltaTime", {{ "type", "number" }} },
-                    { "isPaused", {{ "type", "boolean" }} },
-                    { "deltaTimeSteps", {
-                        { "type", "array" },
-                        { "items", {{ "type", "number" }} }
-                    }},
-                    { "hasNextStep", {{ "type", "boolean" }} },
-                    { "hasPrevStep", {{ "type", "boolean" }} },
-                    { "nextStep", {{ "type", "number" }} },
-                    { "prevStep", {{ "type", "number" }} }
-                }},
-                { "additionalProperties", false },
-            }}
-        }},
-        { "required", { "topicId", "topicPayload", "data" }},
-        { "additionalProperties", false }
-    };
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "title": "TimeTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "time" },
+            "topicPayload": {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "enum": ["start_subscription", "stop_subscription"]
+                }
+              },
+              "additionalProperties": false,
+              "required": ["event"]
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "time": { "type": "string" },
+                "deltaTime": { "type": "number" },
+                "targetDeltaTime": { "type": "number" },
+                "isPaused": { "type": "boolean" },
+                "deltaTimeSteps": {
+                  "items": { "type": "number" },
+                  "type": "array"
+                },
+                "hasNextStep": { "type": "boolean" },
+                "hasPrevStep": { "type": "boolean" },
+                "nextStep": { "type": "number" },
+                "prevStep": { "type": "number" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+    )");
 
     return {
         "timetopic",
