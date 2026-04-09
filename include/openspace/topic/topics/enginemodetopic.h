@@ -31,8 +31,9 @@
 
 namespace openspace {
 
-class EngineModeTopic : public Topic {
 struct Schema;
+
+class EngineModeTopic : public Topic {
 
 public:
     EngineModeTopic();

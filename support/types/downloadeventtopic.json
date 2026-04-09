@@ -1,0 +1,38 @@
+{
+  "$defs": {
+    "DownloadType": {
+      "type": "integer",
+      "enum": [0, 1, 2, 3],
+      "tsEnumNames": ["Started", "Progress", "Finished", "Failed"]
+    }
+  },
+  "title": "DownloadEventTopic",
+  "type": "object",
+  "properties": {
+    "topicId": { "const": "downloadEvent" },
+    "topicPayload": {
+      "type": "object",
+      "properties": {
+        "event": {
+          "type": "string",
+          "enum": ["start_subscription", "stop_subscription"]
+        }
+      },
+      "additionalProperties": false,
+      "required": ["event"]
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "type": { "$ref": "#/$defs/DownloadType" },
+        "id": { "type": "string" },
+        "downloadedBytes": { "type": "integer" },
+        "totalBytes": { "type": "integer" }
+      },
+      "additionalProperties": false,
+      "required": ["type", "id", "downloadedBytes"]
+    }
+  },
+  "additionalProperties": false,
+  "required": ["topicId", "topicPayload", "data"]
+}

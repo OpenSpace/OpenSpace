@@ -28,6 +28,7 @@
 #include <openspace/topic/topics/topic.h>
 
 namespace openspace {
+
 struct Schema;
 
 class ActionKeybindTopic : public Topic {
