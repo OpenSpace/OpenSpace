@@ -25,18 +25,17 @@
 #include <modules/volume/rendering/renderablevectorfield.h>
 
 #include <modules/volume/rawvolumereader.h>
+#include <openspace/data/colormaploader.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <algorithm>
-#include <array>
 #include <execution>
 #include <numeric>
 
@@ -561,9 +560,8 @@ void RenderableVectorField::update(const UpdateData&) {
         _colorTexture = nullptr;
 
         if (!_colorSettings.colorMap.value().empty()) {
-            _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
+            _colorTexture = dataloader::colormap::loadColorMapTexture(
                 absPath(_colorSettings.colorMap),
-                1,
                 ghoul::opengl::Texture::SamplerInit {
                     .filter = ghoul::opengl::Texture::FilterMode::Nearest,
                     .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge

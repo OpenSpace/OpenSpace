@@ -89,7 +89,7 @@ void SingleImageProvider::reset() {
         return;
     }
 
-    _tileTexture = ghoul::io::TextureReader::ref().loadTexture(
+    _tileTexture = ghoul::io::texture::loadTexture(
         _filePath.value(),
         2,
         { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }

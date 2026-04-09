@@ -24,6 +24,7 @@
 
 #include <modules/space/rendering/renderablestars.h>
 
+#include <openspace/data/colormaploader.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
@@ -790,7 +791,7 @@ void RenderableStars::loadPSFTexture() {
             return;
         }
 
-        component.texture = ghoul::io::TextureReader::ref().loadTexture(
+        component.texture = ghoul::io::texture::loadTexture(
             absPath(path),
             2,
             {
@@ -947,9 +948,8 @@ void RenderableStars::update(const UpdateData&) {
         LDEBUG("Reloading Color Texture");
         _colorTexture = nullptr;
         if (!_colorTexturePath.value().empty()) {
-            _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_colorTexturePath),
-                1
+            _colorTexture = dataloader::colormap::loadColorMapTexture(
+                absPath(_colorTexturePath)
             );
 
             LDEBUG(std::format("Loaded texture '{}'", _colorTexturePath.value()));
@@ -962,12 +962,11 @@ void RenderableStars::update(const UpdateData&) {
     }
 
     if (_otherDataColorMapIsDirty) [[unlikely]] {
-        LDEBUG("Reloading Color Texture");
+        LDEBUG("Reloading Other Data Color Texture");
         _otherDataColorMapTexture = nullptr;
         if (!_otherDataColorMapPath.value().empty()) {
-            _otherDataColorMapTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_otherDataColorMapPath),
-                1
+            _otherDataColorMapTexture = dataloader::colormap::loadColorMapTexture(
+                absPath(_otherDataColorMapPath)
             );
             LDEBUG(std::format(
                 "Loaded texture '{}'", _otherDataColorMapPath.value()

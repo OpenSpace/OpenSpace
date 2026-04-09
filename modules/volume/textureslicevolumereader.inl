@@ -46,7 +46,7 @@ void TextureSliceVolumeReader<VoxelType>::initialize() {
     ghoul_assert(_paths.size() > 0, "No paths to read slices from");
 
     std::shared_ptr<ghoul::opengl::Texture> firstSlice =
-        ghoul::io::TextureReader::ref().loadTexture(_paths[0], 2);
+        ghoul::io::texture::loadTexture(_paths[0], 2);
 
     glm::uvec3 dimensions = firstSlice->dimensions();
     _sliceDimensions = glm::uvec2(dimensions.x, dimensions.y);
@@ -83,7 +83,7 @@ TextureSliceVolumeReader<VoxelType>::getSlice(int sliceIndex) const
 
     if (!_cache.has(sliceIndex)) {
         std::shared_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::TextureReader::ref().loadTexture(_paths[sliceIndex], 2);
+            ghoul::io::texture::loadTexture(_paths[sliceIndex], 2);
 
         ghoul_assert(
             glm::ivec2(texture->dimensions()) == _sliceDimensions,

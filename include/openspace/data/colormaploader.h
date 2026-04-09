@@ -22,75 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/rendering/texturecomponent.h>
+#ifndef __OPENSPACE_CORE___COLORMAPLOADER___H__
+#define __OPENSPACE_CORE___COLORMAPLOADER___H__
 
-#include <ghoul/filesystem/file.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <string_view>
-#include <utility>
+#include <openspace/data/dataloader.h>
+#include <ghoul/opengl/texture.h>
+#include <filesystem>
+#include <memory>
 
-namespace {
-    constexpr std::string_view _loggerCat = "TextureComponent";
-} // namespace
+namespace openspace::dataloader::colormap {
 
-namespace openspace {
+ColorMap loadCmapFile(std::filesystem::path path);
 
-TextureComponent::TextureComponent(int nDimensions)
-    : _nDimensions(nDimensions)
-{
-    ghoul_assert(
-        _nDimensions >= 1 && _nDimensions <= 4,
-        "nDimensions must be 1, 2, or 3"
-    );
-}
+/**
+ * Loads a 1-dimensional color map texture from a file and returns it as a texture object.
+ *
+ * This function supports two types of colormap formats:
+ * - `.cmap` files: Custom color map format parsed by `loadCmapFile`
+ * - Standard image formats: Any 1D texture format supported by `ghoul::io::texture::loadTexture`
+ *
+ * \param filename The path to the color map file to load. Must have a valid file
+ *                 extension
+ * \param samplerSettings Optional sampler settings to apply to the texture
+ * \return A unique pointer to the loaded OpenGL texture
+ *
+ * \throw ghoul::io::texture::MissingReaderException if the file extension is not
+ *        supported
+ * \pre The filename must have a file extension
+ */
+std::unique_ptr<ghoul::opengl::Texture> loadColorMapTexture(
+    const std::filesystem::path& filename,
+    ghoul::opengl::Texture::SamplerInit samplerSettings = {});
 
-const ghoul::opengl::Texture* TextureComponent::texture() const {
-    return _texture.get();
-}
+} // namespace openspace::dataloader::colormap
 
-ghoul::opengl::Texture* TextureComponent::texture() {
-    return _texture.get();
-}
-
-void TextureComponent::setFilterMode(ghoul::opengl::Texture::FilterMode filterMode) {
-    _filterMode = filterMode;
-}
-
-void TextureComponent::setWrapping(ghoul::opengl::Texture::WrappingMode wrapping) {
-    _wrappingMode = wrapping;
-}
-
-void TextureComponent::setShouldWatchFileForChanges(bool value) {
-    _shouldWatchFile = value;
-}
-
-void TextureComponent::loadFromFile(const std::filesystem::path& path) {
-    if (path.empty()) {
-        return;
-    }
-
-    _texture = ghoul::io::texture::loadTexture(
-        path,
-        _nDimensions,
-        ghoul::opengl::Texture::SamplerInit {
-            .filter = _filterMode,
-            .wrapping = _wrappingMode
-        }
-    );
-    LDEBUG(std::format("Loaded texture from '{}'", path));
-
-    _textureFile = std::make_unique<ghoul::filesystem::File>(path);
-    if (_shouldWatchFile) {
-        _textureFile->setCallback([this]() { _fileIsDirty = true; });
-    }
-
-    _fileIsDirty = false;
-}
-
-void TextureComponent::update() {
-    if (_fileIsDirty) {
-        loadFromFile(_textureFile->path());
-    }
-}
-} // namespace openspace
+#endif // __OPENSPACE_CORE___COLORMAPLOADER___H__
