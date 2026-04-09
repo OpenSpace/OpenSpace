@@ -157,7 +157,7 @@ void Server::initialize(const ghoul::Dictionary& configuration) {
         return;
     }
 
-    for (const ghoul::Dictionary interface : p.interfaces.value()) {
+    for (const ghoul::Dictionary& interface : p.interfaces.value()) {
         std::unique_ptr<ServerInterface> serverInterface =
             ServerInterface::createFromDictionary(interface);
 

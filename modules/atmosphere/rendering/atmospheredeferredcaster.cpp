@@ -401,7 +401,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
     const glm::dvec3 sunPosObj =
         _sunFollowingCameraEnabled ?
         camPosObjCoords :
-        invModelMatrix * glm::dvec4(sunPosWorld, 1.0);;
+        invModelMatrix * glm::dvec4(sunPosWorld, 1.0);
 
     // Sun Position in Object Space
     program.setUniform(_uniformCache.sunDirectionObj, glm::normalize(sunPosObj));

@@ -174,6 +174,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     }
 
     QWidget* centralWidget = new QWidget;
+    setCentralWidget(centralWidget);
 
     {
         // Yes, this looks weird to create an object but not keeping the pointer around,
@@ -447,8 +448,6 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
             this, &LauncherWindow::openSettings
         );
     }
-
-    setCentralWidget(centralWidget);
 }
 
 void LauncherWindow::editProfile() {

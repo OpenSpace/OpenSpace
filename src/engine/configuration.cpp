@@ -217,7 +217,7 @@ namespace {
         // concrete OpenSpace instance was started. This value is enabled by default, but
         // it is advised to disable this value if rendering sessions of individual frames
         // pass beyond local midnight.
-        std::optional<bool> screenshotUseDate;
+        std::optional<bool> screenshotUseDateTime;
 
         // Toggles whether the Lua states used inside OpenSpace are sandboxed which
         // prevents potentially unsafe malicious code to run on the system. Only turn this
@@ -441,7 +441,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("IsPrintingEvents", isPrintingEvents);
     res.setValue("ConsoleKey", ghoul::to_string(consoleKey));
     res.setValue("ShutdownCountdown", static_cast<double>(shutdownCountdown));
-    res.setValue("shouldUseScreenshotDate", shouldUseScreenshotDate);
+    res.setValue("shouldUseScreenshotDateTime", shouldUseScreenshotDateTime);
     res.setValue("sandboxedLua", sandboxedLua);
     res.setValue("OnScreenTextScaling", onScreenTextScaling);
     res.setValue("UsePerProfileCache", usePerProfileCache);
@@ -606,7 +606,8 @@ void parseLuaState(Configuration& configuration) {
     }
 
     c.shutdownCountdown = p.shutdownCountdown.value_or(c.shutdownCountdown);
-    c.shouldUseScreenshotDate = p.screenshotUseDate.value_or(c.shouldUseScreenshotDate);
+    c.shouldUseScreenshotDateTime =
+        p.screenshotUseDateTime.value_or(c.shouldUseScreenshotDateTime);
     c.sandboxedLua = p.sandboxedLua.value_or(c.sandboxedLua);
     c.onScreenTextScaling = p.onScreenTextScaling.value_or(c.onScreenTextScaling);
     c.usePerProfileCache = p.perProfileCache.value_or(c.usePerProfileCache);
@@ -847,23 +848,21 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
 }
 
 Configuration::LayerServer stringToLayerServer(std::string_view server) {
-    using Server = Configuration::LayerServer;
-    if (server == "All") { return Server::All; }
-    else if (server == "NewYork") { return Server::NewYork; }
-    else if (server == "Sweden") { return Server::Sweden; }
-    else if (server == "Utah") { return Server::Utah; }
-    else if (server == "None") { return Server::None; }
+    if (server == "All") { return Configuration::LayerServer::All; }
+    else if (server == "NewYork") { return Configuration::LayerServer::NewYork; }
+    else if (server == "Sweden") { return Configuration::LayerServer::Sweden; }
+    else if (server == "Utah") { return Configuration::LayerServer::Utah; }
+    else if (server == "None") { return Configuration::LayerServer::None; }
     else { throw ghoul::MissingCaseException(); }
 }
 
 std::string layerServerToString(Configuration::LayerServer server) {
-    using Server = Configuration::LayerServer;
     switch (server) {
-        case Server::All: return "All";
-        case Server::NewYork: return "NewYork";
-        case Server::Sweden: return "Sweden";
-        case Server::Utah: return "Utah";
-        case Server::None: return "None";
+        case Configuration::LayerServer::All: return "All";
+        case Configuration::LayerServer::NewYork: return "NewYork";
+        case Configuration::LayerServer::Sweden: return "Sweden";
+        case Configuration::LayerServer::Utah: return "Utah";
+        case Configuration::LayerServer::None: return "None";
         default: throw ghoul::MissingCaseException();
     }
 }
