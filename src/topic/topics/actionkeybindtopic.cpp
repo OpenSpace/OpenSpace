@@ -58,101 +58,103 @@ bool ActionKeybindTopic::isDone() const {
 }
 
 Schema ActionKeybindTopic::Schema() {
-    nlohmann::json schema = {
-        { "title", "ActionKeybindTopic" },
-        { "$defs", {
-            { "Action", {
-                { "type", "object" },
-                { "properties", {
-                    { "identifier" , {{ "type", "string" }} },
-                    { "name", {{ "type", "string" }} },
-                    { "isLocal", {{ "type", "boolean" }} },
-                    { "documentation", {{ "type", "string" }} },
-                    { "guiPath", {{ "type", "string" }} },
-                    { "color", {
-                        { "type", "array" },
-                        { "minItems", 4 },
-                        { "maxItems", 4 },
-                        { "items", {{ "type", "number" }} }
-                    }}
-                }},
-                { "required", {
-                    "identifier", "name", "isLocal", "documentation", "guiPath"
-                }},
-                { "additionalProperties", false }
-            }},
-            { "Keybind", {
-                { "type", "object"},
-                { "properties", {
-                    { "key", {{ "type", "string" }} },
-                    { "modifiers", {
-                        { "type", "array" },
-                        { "items", {
-                            { "type", "string" },
-                            { "enum", { "shift", "control", "alt", "super" }}
-                        }}
-                    }},
-                    { "action", {{ "type", "string" }} }
-                }},
-                { "required", { "key", "modifiers", "action" }},
-                { "additionalProperties", false }
-            }}
-        }},
-        { "type", "object" },
-        { "properties", {
-            { "topicId", {
-                { "const", "actionsKeybinds" }
-            }},
-            { "topicPayload", {
-                { "type", "object" },
-                { "anyOf", {
-                    {
-                        { "type", "object" },
-                        { "properties", {
-                            { "event", {{ "const", "get_all"}} }
-                        }},
-                        { "required", { "event" }},
-                        { "additionalProperties", false }
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "$defs": {
+            "Action": {
+              "type": "object",
+              "properties": {
+                "color": {
+                  "type": "array",
+                  "items": { "type": "number" },
+                  "maxItems": 4,
+                  "minItems": 4
+                },
+                "documentation": { "type": "string" },
+                "guiPath": { "type": "string" },
+                "identifier": { "type": "string" },
+                "isLocal": { "type": "boolean" },
+                "name": { "type": "string" }
+              },
+              "additionalProperties": false,
+              "required": ["identifier", "name", "isLocal", "documentation", "guiPath"]
+            },
+            "Keybind": {
+              "type": "object",
+              "properties": {
+                "action": { "type": "string" },
+                "key": { "type": "string" },
+                "modifiers": {
+                  "type": "array",
+                  "items": {
+                    "enum": ["shift", "control", "alt", "super"],
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": false,
+              "required": ["key", "modifiers", "action"]
+            }
+          },
+          "title": "ActionKeybindTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "actionsKeybinds" },
+            "topicPayload": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "event": { "const": "get_all" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["event"]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "event": { "const": "get_action" },
+                    "identifier": { "type": "string" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["event", "identifier"]
+                }
+              ]
+            },
+            "data": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Action"
+                },
+                {
+                  "type": "object",
+                  "description": "Response to get_all",
+                  "properties": {
+                    "actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/$defs/Action"
+                      }
                     },
-                    {
-                        { "type", "object" },
-                        { "properties", {
-                            { "event", {{ "const", "get_action"}} },
-                            { "identifier", {{ "type", "string" }} }
-                        }},
-                        { "required", { "event", "identifier" }},
-                        { "additionalProperties", false }
+                    "keybinds": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/$defs/Keybind"
+                      }
                     }
-                }}
-            }},
-            { "data", {
-                { "type", "object" },
-                { "anyOf", {
-                    {
-                        { "$ref", "#/$defs/Action" }
-                    },
-                    {
-                        { "type", "object" },
-                        { "description", std::format("Response to {}", "get_all")},
-                        { "properties", {
-                            { "actions", {
-                                { "type", "array" },
-                                { "items", {{ "$ref", "#/$defs/Action" }} }
-                            }},
-                            { "keybinds", {
-                                { "type", "array" },
-                                { "items", {{"$ref", "#/$defs/Keybind" }} }
-                            }}
-                        }},
-                        { "required", { "actions", "keybinds" }},
-                        { "additionalProperties", false },
-                    }
-                }}
-            }}
-        }},
-        { "required", { "topicId", "topicPayload", "data" } },
-        { "additionalProperties", false }
-    };
+                  },
+                  "additionalProperties": false,
+                  "required": ["actions", "keybinds"]
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+    )");
 
     return {
         "actionkeybindtopic",

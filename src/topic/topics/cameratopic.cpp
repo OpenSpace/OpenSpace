@@ -101,60 +101,82 @@ void CameraTopic::sendCameraData() {
 }
 
 Schema CameraTopic::Schema() {
-    nlohmann::json schema = {
-        { "title", "CameraTopic" },
-        { "type", "object" },
-        { "properties", {
-            { "topicId", {{ "const", "camera" }} },
-            { "topicPayload", {
-                { "type", "object" },
-                { "properties", {
-                    { "event", {{ "const", "start_subscription" }} }
-                }},
-                { "additionalProperties", false },
-                { "required", { "event" }}
-            }},
-            { "data", {
-                { "type", "object" },
-                { "properties", {
-                    { "latitude", {{ "type", "number" }} },
-                    { "longitude", {{ "type", "number" }} },
-                    { "altitude", {{ "type", "number" }} },
-                    { "altitudeUnit", {
-                        { "enum", {
-                            "nanometer", "nanometers",
-                            "micrometer", "micrometers",
-                            "millimeter", "millimeters",
-                            "meter", "meters",
-                            "Gigaparsec", "Gigaparsecs",
-                            "Megaparsec", "Megaparsecs",
-                            "Kiloparsec", "Kiloparsecs",
-                            "Parsec", "Parsecs",
-                            "Lightyear", "Lightyears",
-                            "Lightmonth", "Lightmonths",
-                            "Lightday", "Lightdays",
-                            "Lighthour", "Lighthours",
-                            "AU", "km"
-                        }}
-                    }},
-                    { "altitudeMeters", {{ "type", "number" }} },
-                    { "viewLatitude", {{ "type", "number" }} },
-                    { "viewLongitude", {{ "type", "number" }} },
-                    { "viewLength", {{ "type", "number" }} },
-                    { "subSolarLatitude", {{ "type", "number" }} },
-                    { "subSolarLongitude", {{ "type", "number" }} }
-                }},
-                { "required", {
-                    "latitude", "longitude", "altitude", "altitudeUnit", "altitudeMeters",
-                    "viewLatitude", "viewLongitude", "viewLength", "subSolarLatitude",
-                    "subSolarLongitude"
-                }},
-                { "additionalProperties", false }
-            }}
-        }},
-        { "required", { "topicId", "topicPayload", "data" }},
-        { "additionalProperties", false }
-    };
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "title": "CameraTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "camera" },
+            "topicPayload": {
+              "type": "object",
+              "properties": {
+                "event": { "const": "start_subscription" }
+              },
+              "additionalProperties": false,
+              "required": ["event"]
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "altitude": { "type": "number" },
+                "altitudeMeters": { "type": "number" },
+                "altitudeUnit": {
+                  "enum": [
+                    "nanometer",
+                    "nanometers",
+                    "micrometer",
+                    "micrometers",
+                    "millimeter",
+                    "millimeters",
+                    "meter",
+                    "meters",
+                    "Gigaparsec",
+                    "Gigaparsecs",
+                    "Megaparsec",
+                    "Megaparsecs",
+                    "Kiloparsec",
+                    "Kiloparsecs",
+                    "Parsec",
+                    "Parsecs",
+                    "Lightyear",
+                    "Lightyears",
+                    "Lightmonth",
+                    "Lightmonths",
+                    "Lightday",
+                    "Lightdays",
+                    "Lighthour",
+                    "Lighthours",
+                    "AU",
+                    "km"
+                  ]
+                },
+                "latitude": { "type": "number" },
+                "longitude": { "type": "number" },
+                "subSolarLatitude": { "type": "number" },
+                "subSolarLongitude": { "type": "number" },
+                "viewLatitude": { "type": "number" },
+                "viewLength": { "type": "number" },
+                "viewLongitude": { "type": "number" }
+              },
+              "additionalProperties": false,
+              "required": [
+                "latitude",
+                "longitude",
+                "altitude",
+                "altitudeUnit",
+                "altitudeMeters",
+                "viewLatitude",
+                "viewLongitude",
+                "viewLength",
+                "subSolarLatitude",
+                "subSolarLongitude"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+    )");
 
     return {
         "cameratopic",
