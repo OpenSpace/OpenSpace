@@ -121,6 +121,7 @@ Schema CameraTopic::Schema() {
                 "altitude": { "type": "number" },
                 "altitudeMeters": { "type": "number" },
                 "altitudeUnit": {
+                  "type": "string",
                   "enum": [
                     "nanometer",
                     "nanometers",

@@ -35,6 +35,7 @@ set(OPENSPACE_SOURCE
   documentation/core_registration.cpp
   documentation/documentation.cpp
   documentation/documentationengine.cpp
+  documentation/schema.cpp
   documentation/verifier.cpp
   engine/configuration.cpp
   engine/downloadmanager.cpp
@@ -188,7 +189,6 @@ set(OPENSPACE_SOURCE
   topic/server.cpp
   topic/topics/actionkeybindtopic.cpp
   topic/topics/authorizationtopic.cpp
-  topic/topics/bouncetopic.cpp
   topic/topics/camerapathtopic.cpp
   topic/topics/cameratopic.cpp
   topic/topics/documentationtopic.cpp
@@ -409,7 +409,6 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/server.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/actionkeybindtopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/authorizationtopic.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/bouncetopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/camerapathtopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/cameratopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/documentationtopic.h

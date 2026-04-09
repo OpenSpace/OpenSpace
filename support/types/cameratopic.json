@@ -39,7 +39,8 @@
             "Lighthours",
             "AU",
             "km"
-          ]
+          ],
+          "type": "string"
         },
         "latitude": {
           "type": "number"

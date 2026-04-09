@@ -87,8 +87,8 @@ Schema ActionKeybindTopic::Schema() {
                 "modifiers": {
                   "type": "array",
                   "items": {
-                    "enum": ["shift", "control", "alt", "super"],
-                    "type": "string"
+                    "type": "string",
+                    "enum": ["shift", "control", "alt", "super"]
                   }
                 }
               },
