@@ -115,7 +115,7 @@ Schema EventTopic::Schema() {
         {
           "$defs": {
             "EventTypeOrWildcard": {
-              "oneOf": [
+              "anyOf": [
                 { "$ref": "#/$defs/EventType" },
                 {
                   "type": "string",
@@ -155,7 +155,7 @@ Schema EventTopic::Schema() {
               ]
             },
             "EventData": {
-              "oneOf": [
+              "anyOf": [
                 { "$ref": "#/$defs/ActionAddedData" },
                 { "$ref": "#/$defs/ActionRemovedData" },
                 { "$ref": "#/$defs/ApplicationShutdownData" },
@@ -450,7 +450,7 @@ Schema EventTopic::Schema() {
                   "properties": {
                     "event": { "const": "start_subscription" },
                     "eventType": {
-                      "oneOf": [
+                      "anyOf": [
                         { "$ref": "#/$defs/EventTypeOrWildcard" },
                         {
                           "type": "array",
@@ -467,7 +467,7 @@ Schema EventTopic::Schema() {
                   "properties": {
                     "event": { "const": "stop_subscription" },
                     "eventType": {
-                      "oneOf": [
+                      "anyOf": [
                         { "$ref": "#/$defs/EventTypeOrWildcard" },
                         {
                           "type": "array",
@@ -483,7 +483,7 @@ Schema EventTopic::Schema() {
             },
             "data": {
               "type": "object",
-              "oneOf": [{ "$ref": "#/$defs/EventData" }]
+              "anyOf": [{ "$ref": "#/$defs/EventData" }]
             }
           },
           "additionalProperties": false,
