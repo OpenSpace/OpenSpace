@@ -31,7 +31,7 @@ local SdoPosition = {
 }
 
 local SolarImagery = {
-  Identifier = "SolarImagery_SDO_AIA193",
+  Identifier = "SolarImagery_SDO_Dynamic",
   Parent = SdoPosition.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
@@ -44,19 +44,26 @@ local SolarImagery = {
     StartInstrument = "AIA-193",
 
     -- DynamicDownload streams one instrument at a time for this renderable.
-    -- If `Instrument` is omitted, the downloader follows the currently selected
-    -- `StartInstrument` / active instrument and rebuilds itself when the user switches.
-    -- Downloaded JP2 files are written into the same folder layout that the normal
-    -- SolarBrowsing metadata/texture pipeline expects.
+    -- `InstrumentNames` and `InstrumentSourceIds` predeclare the available SDO
+    -- channels and their Helioviewer source ids so the ActiveInstrument property
+    -- can switch between them even before any files exist on disk.
     DynamicDownload = {
       Enable = true,
-      SourceId = 11,
       SpacecraftName = "SDO",
-      Instrument = "AIA-193",
+      InstrumentNames = {
+        "AIA-171",
+        "AIA-193",
+        "AIA-211",
+        "AIA-304",
+        "AIA-335",
+        "AIA-1600",
+        "AIA-1700",
+        "AIA-4500",
+        "HMI-continuum",
+        "HMI-magnetogram"
+      },
+      InstrumentSourceIds = { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 },
       CadenceSeconds = 3600.0,
-      DownloadDirectory = openspace.absPath(
-        "${SYNC_DYNAMIC}/solarbrowsing_runtime/sdo/AIA-193"
-      ),
       PrefetchFramesBefore = 1,
       PrefetchFramesAfter = 3,
       MaxConcurrentDownloads = 2,
@@ -71,7 +78,7 @@ local SolarImagery = {
     Gamma = 0.9
   },
   GUI = {
-    Name = "SDO AIA 193 Imagery",
+    Name = "SDO Dynamic Imagery",
     Path = "/Solar System/Solar Imagery"
   }
 }
@@ -89,9 +96,10 @@ end)
 asset.export("Imagery", SolarImagery)
 
 asset.meta = {
-  Name = "SDO AIA 193 Solar Imagery",
-  Description = [[Runtime-streamed SDO AIA 193 imagery from Helioviewer using the
-    RenderableSolarImagery DynamicDownload pipeline.]],
+  Name = "SDO Dynamic Solar Imagery",
+  Description = [[Runtime-streamed SDO solar imagery from Helioviewer using the
+    RenderableSolarImagery DynamicDownload pipeline. The downloader follows the
+    currently selected SDO instrument.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

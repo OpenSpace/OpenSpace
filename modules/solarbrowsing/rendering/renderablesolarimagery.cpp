@@ -226,7 +226,8 @@ namespace {
 
         // Optional runtime streaming settings for HelioViewer-backed imagery downloads.
         // Supported keys are:
-        // `Enable`, `SourceId`, `SpacecraftName`, `Instrument`, `CadenceSeconds`,
+        // `Enable`, `SourceId`, `Instrument`, `InstrumentNames`, `InstrumentSourceIds`,
+        // `SpacecraftName`, `CadenceSeconds`,
         // `DownloadDirectory`, `PrefetchFramesBefore`, `PrefetchFramesAfter`,
         // `MaxConcurrentDownloads`, `SaveDownloadsOnShutdown`,
         // `RetryBackoffSeconds`, and `MaxRetries`.
@@ -234,9 +235,79 @@ namespace {
         // The downloader currently manages one active instrument stream per
         // RenderableSolarImagery instance. If `Instrument` is omitted, the downloader
         // follows the currently selected instrument and rebuilds itself when the active
-        // instrument changes.
+        // instrument changes. `InstrumentNames` and `InstrumentSourceIds` can be used to
+        // predeclare switchable instrument/source pairs before any files exist on disk.
         std::optional<ghoul::Dictionary> dynamicDownload;
     };
+
+    int intValueFromDictionary(const ghoul::Dictionary& dictionary, std::string_view key,
+                               int fallback)
+    {
+        if (dictionary.hasValue<int>(key)) {
+            return dictionary.value<int>(key);
+        }
+        if (dictionary.hasValue<double>(key)) {
+            return static_cast<int>(dictionary.value<double>(key));
+        }
+        return fallback;
+    }
+
+    std::optional<std::vector<int>> intVectorFromDictionary(
+        const ghoul::Dictionary& dictionary,
+        std::string_view key)
+    {
+        if (dictionary.hasValue<std::vector<int>>(key)) {
+            return dictionary.value<std::vector<int>>(key);
+        }
+        if (dictionary.hasValue<std::vector<double>>(key)) {
+            const std::vector<double> values = dictionary.value<std::vector<double>>(key);
+            std::vector<int> result;
+            result.reserve(values.size());
+            for (double value : values) {
+                result.push_back(static_cast<int>(value));
+            }
+            return result;
+        }
+        if (dictionary.hasValue<ghoul::Dictionary>(key)) {
+            const ghoul::Dictionary values = dictionary.value<ghoul::Dictionary>(key);
+            std::vector<int> result;
+            result.reserve(values.size());
+            for (size_t i = 1; i <= values.size(); ++i) {
+                const std::string entryKey = std::to_string(i);
+                if (!values.hasKey(entryKey)) {
+                    return std::nullopt;
+                }
+                result.push_back(intValueFromDictionary(values, entryKey, 0));
+            }
+            return result;
+        }
+
+        return std::nullopt;
+    }
+
+    std::optional<std::vector<std::string>> stringVectorFromDictionary(
+        const ghoul::Dictionary& dictionary,
+        std::string_view key)
+    {
+        if (dictionary.hasValue<std::vector<std::string>>(key)) {
+            return dictionary.value<std::vector<std::string>>(key);
+        }
+        if (dictionary.hasValue<ghoul::Dictionary>(key)) {
+            const ghoul::Dictionary values = dictionary.value<ghoul::Dictionary>(key);
+            std::vector<std::string> result;
+            result.reserve(values.size());
+            for (size_t i = 1; i <= values.size(); ++i) {
+                const std::string entryKey = std::to_string(i);
+                if (!values.hasKey(entryKey) || !values.hasValue<std::string>(entryKey)) {
+                    return std::nullopt;
+                }
+                result.push_back(values.value<std::string>(entryKey));
+            }
+            return result;
+        }
+
+        return std::nullopt;
+    }
 
 } // namespace
 #include "renderablesolarimagery_codegen.cpp"
@@ -272,12 +343,11 @@ namespace openspace {
             if (dynamicDownload.hasValue<bool>("Enable")) {
                 _enableDynamicDownload = dynamicDownload.value<bool>("Enable");
             }
-            if (dynamicDownload.hasValue<double>("SourceId")) {
-                _dynamicSourceId = static_cast<int>(dynamicDownload.value<double>("SourceId"));
-            }
-            else if (dynamicDownload.hasValue<int>("SourceId")) {
-                _dynamicSourceId = dynamicDownload.value<int>("SourceId");
-            }
+            _dynamicSourceId = intValueFromDictionary(
+                dynamicDownload,
+                "SourceId",
+                _dynamicSourceId
+            );
             if (dynamicDownload.hasValue<std::string>("SpacecraftName")) {
                 _dynamicSpacecraftName = dynamicDownload.value<std::string>(
                     "SpacecraftName"
@@ -294,32 +364,21 @@ namespace openspace {
                     dynamicDownload.value<std::string>("DownloadDirectory")
                 );
             }
-            if (dynamicDownload.hasValue<double>("PrefetchFramesBefore")) {
-                _dynamicPrefetchBefore = static_cast<int>(
-                    dynamicDownload.value<double>("PrefetchFramesBefore")
-                );
-            }
-            else if (dynamicDownload.hasValue<int>("PrefetchFramesBefore")) {
-                _dynamicPrefetchBefore = dynamicDownload.value<int>("PrefetchFramesBefore");
-            }
-            if (dynamicDownload.hasValue<double>("PrefetchFramesAfter")) {
-                _dynamicPrefetchAfter = static_cast<int>(
-                    dynamicDownload.value<double>("PrefetchFramesAfter")
-                );
-            }
-            else if (dynamicDownload.hasValue<int>("PrefetchFramesAfter")) {
-                _dynamicPrefetchAfter = dynamicDownload.value<int>("PrefetchFramesAfter");
-            }
-            if (dynamicDownload.hasValue<double>("MaxConcurrentDownloads")) {
-                _dynamicMaxConcurrentDownloads = static_cast<int>(
-                    dynamicDownload.value<double>("MaxConcurrentDownloads")
-                );
-            }
-            else if (dynamicDownload.hasValue<int>("MaxConcurrentDownloads")) {
-                _dynamicMaxConcurrentDownloads = dynamicDownload.value<int>(
-                    "MaxConcurrentDownloads"
-                );
-            }
+            _dynamicPrefetchBefore = intValueFromDictionary(
+                dynamicDownload,
+                "PrefetchFramesBefore",
+                _dynamicPrefetchBefore
+            );
+            _dynamicPrefetchAfter = intValueFromDictionary(
+                dynamicDownload,
+                "PrefetchFramesAfter",
+                _dynamicPrefetchAfter
+            );
+            _dynamicMaxConcurrentDownloads = intValueFromDictionary(
+                dynamicDownload,
+                "MaxConcurrentDownloads",
+                _dynamicMaxConcurrentDownloads
+            );
             if (dynamicDownload.hasValue<bool>("SaveDownloadsOnShutdown")) {
                 _saveDownloadsOnShutdown = dynamicDownload.value<bool>(
                     "SaveDownloadsOnShutdown"
@@ -330,13 +389,48 @@ namespace openspace {
                     "RetryBackoffSeconds"
                 );
             }
-            if (dynamicDownload.hasValue<double>("MaxRetries")) {
-                _dynamicMaxRetries = static_cast<int>(
-                    dynamicDownload.value<double>("MaxRetries")
-                );
+            _dynamicMaxRetries = intValueFromDictionary(
+                dynamicDownload,
+                "MaxRetries",
+                _dynamicMaxRetries
+            );
+
+            const std::optional<std::vector<std::string>> instrumentNames =
+                stringVectorFromDictionary(dynamicDownload, "InstrumentNames");
+            const std::optional<std::vector<int>> instrumentSourceIds =
+                intVectorFromDictionary(dynamicDownload, "InstrumentSourceIds");
+
+            if (instrumentNames.has_value() && instrumentSourceIds.has_value())
+            {
+                const std::vector<std::string>& names = *instrumentNames;
+                const std::vector<int>& sourceIds = *instrumentSourceIds;
+
+                if (names.size() != sourceIds.size()) {
+                    LWARNING(std::format(
+                        "Ignoring dynamic instrument list: {} names but {} source ids",
+                        names.size(),
+                        sourceIds.size()
+                    ));
+                }
+                else {
+                    for (size_t i = 0; i < names.size(); ++i) {
+                        if (sourceIds[i] < 0) {
+                            LWARNING(std::format(
+                                "Ignoring dynamic instrument '{}' without a valid SourceId",
+                                names[i]
+                            ));
+                            continue;
+                        }
+
+                        _dynamicSourceIds[names[i]] = sourceIds[i];
+                    }
+                }
             }
-            else if (dynamicDownload.hasValue<int>("MaxRetries")) {
-                _dynamicMaxRetries = dynamicDownload.value<int>("MaxRetries");
+            else if (instrumentNames.has_value() || instrumentSourceIds.has_value()) {
+                LWARNING(
+                    "DynamicDownload instrument predeclaration requires both "
+                    "InstrumentNames and InstrumentSourceIds"
+                );
             }
         }
 
@@ -377,29 +471,18 @@ namespace openspace {
         }
         addProperty(_faceMode);
 
-        // Add Instrument GUI names
-        unsigned int guiNameCount = 0;
-        using T = Timeline<ImageMetadata>;
-        for (const std::pair<const InstrumentName, T>& instrument : _imageMetadataMap) {
-            _activeInstruments.addOption(guiNameCount++, instrument.first);
+        for (const auto& [instrument, _] : _imageMetadataMap) {
+            addInstrumentOption(instrument);
+        }
+        for (const auto& [instrument, _] : _dynamicSourceIds) {
+            addInstrumentOption(instrument);
         }
 
         if (p.startInstrument.has_value()) {
             _currentActiveInstrument = p.startInstrument.value();
-            // Update the option property to show the correct label
-            const std::vector<OptionProperty::Option>& options =
-                _activeInstruments.options();
-
-            auto it = std::find_if(
-                options.begin(),
-                options.end(),
-                [this](const OptionProperty::Option& option) {
-                    return option.description == _currentActiveInstrument;
-                }
-            );
-
-            if (it != options.end()) {
-                _activeInstruments = it->value;
+            const std::optional<int> option = instrumentOptionValue(_currentActiveInstrument);
+            if (option.has_value()) {
+                _activeInstruments = *option;
             }
         }
         else {
@@ -418,6 +501,9 @@ namespace openspace {
             _predictionIsDirty = true;
             if (_enableDynamicDownload && !_dynamicInstrument.has_value()) {
                 _dynamicDownloaderInstrument.clear();
+                if (_dynamicDownloader) {
+                    _dynamicDownloader->deinitialize(_saveDownloadsOnShutdown);
+                }
                 _dynamicDownloader = nullptr;
             }
             });
@@ -756,13 +842,51 @@ namespace openspace {
         }
     }
 
+    int RenderableSolarImagery::addInstrumentOption(std::string instrument) {
+        const std::optional<int> existing = instrumentOptionValue(instrument);
+        if (existing.has_value()) {
+            return *existing;
+        }
+
+        const int optionValue = static_cast<int>(_activeInstruments.options().size());
+        _activeInstruments.addOption(optionValue, std::move(instrument));
+        return optionValue;
+    }
+
+    std::optional<int> RenderableSolarImagery::instrumentOptionValue(
+        std::string_view instrument) const
+    {
+        const std::vector<OptionProperty::Option>& options = _activeInstruments.options();
+        auto it = std::find_if(
+            options.begin(),
+            options.end(),
+            [instrument](const OptionProperty::Option& option) {
+                return option.description == instrument;
+            }
+        );
+
+        if (it == options.end()) {
+            return std::nullopt;
+        }
+
+        return it->value;
+    }
+
     void RenderableSolarImagery::ensureDynamicDownloader() {
-        if (!_enableDynamicDownload || _dynamicSourceId < 0 || _dynamicSpacecraftName.empty()) {
+        if (!_enableDynamicDownload || _dynamicSpacecraftName.empty()) {
             return;
         }
 
         const std::string instrument = _dynamicInstrument.value_or(_currentActiveInstrument);
         if (instrument.empty()) {
+            return;
+        }
+
+        const int sourceId = [&]() {
+            auto it = _dynamicSourceIds.find(instrument);
+            return (it != _dynamicSourceIds.end()) ? it->second : _dynamicSourceId;
+        }();
+        if (sourceId < 0) {
             return;
         }
 
@@ -781,7 +905,7 @@ namespace openspace {
         _dynamicDownloader = std::make_unique<DynamicHelioviewerImageDownloader>(
             outputDirectory,
             _dynamicSpacecraftName,
-            _dynamicSourceId,
+            sourceId,
             instrument,
             _dynamicCadenceSeconds,
             _dynamicPrefetchBefore,
@@ -847,8 +971,7 @@ namespace openspace {
         _imageMetadataMap[instrument].addKeyframe(*timestamp, *metadata);
 
         if (!hadInstrument) {
-            const int optionValue = static_cast<int>(_activeInstruments.options().size());
-            _activeInstruments.addOption(optionValue, instrument);
+            const int optionValue = addInstrumentOption(instrument);
             transferFunctionsMayNeedRefresh = true;
 
             if (_activeInstruments.options().size() == 1) {

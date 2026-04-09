@@ -37,6 +37,8 @@
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
 #include <optional>
+#include <string_view>
+#include <unordered_map>
 
 namespace ghoul::opengl { class Texture; }
 
@@ -95,6 +97,8 @@ namespace openspace {
         };
 
         void updateImageryTexture();
+        int addInstrumentOption(std::string instrument);
+        std::optional<int> instrumentOptionValue(std::string_view instrument) const;
         void ensureDynamicDownloader();
         void ingestDownloadedFiles();
         void ingestFile(const std::filesystem::path& filePath,
@@ -165,6 +169,7 @@ namespace openspace {
         std::string _dynamicDownloaderInstrument;
         std::string _dynamicSpacecraftName;
         int _dynamicSourceId = -1;
+        std::unordered_map<std::string, int> _dynamicSourceIds;
         double _dynamicCadenceSeconds = 3600.0;
         int _dynamicPrefetchBefore = 1;
         int _dynamicPrefetchAfter = 3;
