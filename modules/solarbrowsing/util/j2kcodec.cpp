@@ -32,14 +32,17 @@
 #include <optional>
 #include <vector>
 
-#define JP2_RFC3745_MAGIC "\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a"
-#define JP2_MAGIC "\x0d\x0a\x87\x0a"
-#define J2K_CODESTREAM_MAGIC "\xff\x4f\xff\x51"
-
 namespace {
     constexpr std::string_view _loggerCat = "J2kCodec";
 
-    enum class FileFormat : int {
+    using namespace std::string_view_literals;
+    // Since the JP2_RFC3745_MAGIC contains the null terminator we need to use the sv
+    // suffix here to get the correct size.
+    constexpr std::string_view JP2_RFC3745_MAGIC = "\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a"sv;
+    constexpr std::string_view JP2_MAGIC = "\x0d\x0a\x87\x0a"sv;
+    constexpr std::string_view J2K_CODESTREAM_MAGIC = "\xff\x4f\xff\x51"sv;
+
+    enum class FileFormat {
         J2K = J2K_CFMT,
         JP2 = JP2_CFMT,
         JPT = JPT_CFMT,
@@ -96,8 +99,8 @@ namespace {
             return std::nullopt;
         }
 
-        std::array<unsigned char, 12> buf{};
-        file.read(reinterpret_cast<char*>(buf.data()), buf.size());
+        std::array<std::byte, 12> buffer{};
+        file.read(reinterpret_cast<char*>(buffer.data()), buffer.size());
         if (!file) {
             return std::nullopt;
         }
@@ -109,14 +112,17 @@ namespace {
             return FileFormat::JPT;
         }
 
+        const std::string_view bufView = std::string_view(
+            reinterpret_cast<const char*>(buffer.data()), buffer.size()
+        );
+
         // Try to read the magic bytes of the file
         std::optional<FileFormat> magicFormat;
-        if (std::memcmp(buf.data(), JP2_RFC3745_MAGIC, buf.size()) == 0 ||
-            std::memcmp(buf.data(), JP2_MAGIC, 4) == 0)
-        {
+        if (bufView.starts_with(JP2_RFC3745_MAGIC) || bufView.starts_with(JP2_MAGIC)) {
             magicFormat = FileFormat::JP2;
+
         }
-        else if (std::memcmp(buf.data(), J2K_CODESTREAM_MAGIC, 4) == 0) {
+        else if (bufView.starts_with(J2K_CODESTREAM_MAGIC)) {
             magicFormat = FileFormat::J2K;
         }
         else {
