@@ -1,9 +1,18 @@
--- Example task for downloading data from Helioviewer API
+-- This task downloads solar imagery data from the Helioviewer API for the SDO and
+-- STEREO-A spacecraft and stores the resulting JP2 files on disk for use in OpenSpace.
+
+-- To get started, edit the StartTime, EndTime, and TimeStep for each entry below.
+-- Each entry downloads data for one spacecraft and instrument combination.
+-- The time range and cadence do not need to be the same for both entries.
+
+-- For more information, including how to add data for other instruments or spacecraft,
+-- see the solar browsing documentation at:
+-- https://docs.openspaceproject.com/en/latest/content/solarsystem/solarbrowsing/solarbrowsing-data.html
 -- Valid sourceIds can be found at:
 -- https://api.helioviewer.org/docs/v2/appendix/data_sources.html
 
 -- Manually download the color maps from the OpenSpace data servers since we cannot use
--- asset.resource or similar functions to fetch data
+-- asset.resource or similar functions to fetch data in a task file
 local savePathBase = openspace.absPath("${SYNC}/http/solarbrowsing/")
 openspace.createDirectory(savePathBase, true);
 
@@ -40,6 +49,10 @@ for _, spacecraft in pairs(Downloads) do
   end
 end
 
+-- Each entry below downloads images for one instrument. Images are only available for the
+-- duration of each mission. If no images are found for a given time range, the 
+-- Helioviewer API will return a message indicating this. It is safe to run this task 
+-- multiple times or with different time ranges for the same instrument.
 return {
   {
     Type = "HelioviewerDownloadTask",
