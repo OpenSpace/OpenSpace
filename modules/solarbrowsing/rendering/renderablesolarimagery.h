@@ -98,7 +98,7 @@ private:
     void createPlaneAndFrustum(double moveDistance);
     void createPlane() const;
     void createFrustum() const;
-    void updateTimelineRangeInfo();
+    void updateTimelineDataRangeInfo();
 
     TriggerProperty _jumpToStart;
     OptionProperty _activeInstruments;

@@ -333,12 +333,12 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         );
         _currentKeyframe = NoActiveKeyframe;
         _predictionIsDirty = true;
-        updateTimelineRangeInfo();
+        updateTimelineDataRangeInfo();
     });
     addProperty(_activeInstruments);
 
     // Data automatically updates when changing the active instrument
-    updateTimelineRangeInfo();
+    updateTimelineDataRangeInfo();
     _timelineDataRangeInfo.setReadOnly(true);
     addProperty(_timelineDataRangeInfo);
 
@@ -911,7 +911,7 @@ void RenderableSolarImagery::createFrustum() const {
     );
 }
 
-void RenderableSolarImagery::updateTimelineRangeInfo() {
+void RenderableSolarImagery::updateTimelineDataRangeInfo() {
     const Timeline<ImageMetadata>& timeline = _imageMetadataMap[_currentActiveInstrument];
     const std::deque<Keyframe<ImageMetadata>>& keyframes = timeline.keyframes();
 
