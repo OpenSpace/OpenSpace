@@ -999,9 +999,12 @@ void RenderableStars::loadData() {
     }
     _otherDataOption.addOptions(variableNames);
 
-    const bool success = _dataset.normalizeVariable("lum");
+    const bool success = _dataset.normalizeVariable(_dataMapping.luminance);
     if (!success) {
-        throw ghoul::RuntimeError("Could not find required variable 'luminosity'");
+        throw ghoul::RuntimeError(std::format(
+            "Could not find required variable '{}'",
+            _dataMapping.luminance.value()
+        ));
     }
 }
 
