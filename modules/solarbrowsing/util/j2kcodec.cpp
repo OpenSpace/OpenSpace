@@ -27,10 +27,9 @@
 #include <ghoul/logging/logmanager.h>
 #include <format_defs.h>
 #include <chrono>
-#include <cstring>
 #include <format>
 #include <fstream>
-#include <memory>
+#include <optional>
 #include <vector>
 
 #define JP2_RFC3745_MAGIC "\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a"
@@ -40,82 +39,97 @@
 namespace {
     constexpr std::string_view _loggerCat = "J2kCodec";
 
+    enum class FileFormat : int {
+        J2K = J2K_CFMT,
+        JP2 = JP2_CFMT,
+        JPT = JPT_CFMT,
+        PXM = PXM_DFMT,
+        PGX = PGX_DFMT,
+        BMP = BMP_DFMT,
+        TIF = TIF_DFMT,
+        RAW = RAW_DFMT,
+        TGA = TGA_DFMT,
+        PNG = PNG_DFMT,
+    };
+
+    std::string_view toString(FileFormat f) {
+        switch (f) {
+            case FileFormat::J2K: return ".j2k/.j2c/.jpc";
+            case FileFormat::JP2: return ".jp2";
+            case FileFormat::JPT: return ".jpt";
+            case FileFormat::PXM:  return ".pnm/.pgm/.ppm";
+            case FileFormat::PGX:  return ".pgx";
+            case FileFormat::BMP:  return ".bmp";
+            case FileFormat::TIF:  return ".tif";
+            case FileFormat::RAW:  return ".raw";
+            case FileFormat::TGA:  return ".tga";
+            case FileFormat::PNG:  return ".png";
+            default:
+                throw ghoul::MissingCaseException();
+        }
+    }
+
+    std::optional<FileFormat> fromExtension(const std::filesystem::path& ext) {
+        if (ext == ".j2k" || ext == ".j2c" || ext == ".jpc") return FileFormat::J2K;
+        else if (ext == ".jp2") return FileFormat::JP2;
+        else if (ext == ".jpt") return FileFormat::JPT;
+        else if (ext == ".pnm" || ext == ".pgm" || ext == ".ppm") return FileFormat::PXM;
+        else if (ext == ".pgx") return FileFormat::PGX;
+        else if (ext == ".bmp") return FileFormat::BMP;
+        else if (ext == ".tif") return FileFormat::TIF;
+        else if (ext == ".raw") return FileFormat::RAW;
+        else if (ext == ".tga") return FileFormat::TGA;
+        else if (ext == ".png") return FileFormat::PNG;
+
+        return std::nullopt;
+    }
+
     // (anden88 2026-02-03): This function opens the file, reads some number of bytes from
     // the metadata header and compares to some specific byte string. Further it compares
     // that the read bytestring matches the extension. Imo, this is quite verbose, I think
     // we could get away with only looking at the file extension. Did some measurements
     // and it is in the ballpark of ~200-300 microseconds of work. Compared to setting up
     // the `inFileStream` which is ~100ms
-    int infileFormat(const std::string& fileName) {
-        const auto fileFormat = [](const char* filename) {
-            static const char* extension[] = {
-                "pgx", "pnm", "pgm", "ppm", "bmp", "tif", "raw",
-                "tga", "png", "j2k", "jp2", "jpt", "j2c", "jpc"
-            };
-            static const int format[] = {
-                PGX_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, BMP_DFMT, TIF_DFMT, RAW_DFMT,
-                TGA_DFMT, PNG_DFMT, J2K_CFMT, JP2_CFMT, JPT_CFMT, J2K_CFMT, J2K_CFMT
-            };
-
-            const char* ext = strrchr(filename, '.');
-            if (!ext) {
-                return -1;
-            }
-
-            ++ext;
-            if (ext) {
-                for (unsigned int i = 0; i < sizeof(format) / sizeof(*format); i++) {
-                    if (strncmp(ext, extension[i], 3) == 0) {
-                        return format[i];
-                    }
-                }
-            }
-
-            return -1;
-        };
-
-        FILE* reader = fopen(fileName.c_str(), "rb");
-        if (!reader) {
-            return -1;
+    std::optional<FileFormat> infileFormat(const std::filesystem::path& filePath) {
+        std::ifstream file(filePath, std::ios::binary);
+        if (!file) {
+            return std::nullopt;
         }
 
-        std::array<unsigned char, 12> buf;
-        std::memset(buf.data(), 0, buf.size());
-        OPJ_SIZE_T l_nb_read = std::fread(buf.data(), 1, buf.size(), reader);
-        fclose(reader);
-
-        if (l_nb_read != 12) {
-            return -1;
+        std::array<unsigned char, 12> buf{};
+        file.read(reinterpret_cast<char*>(buf.data()), buf.size());
+        if (!file) {
+            return std::nullopt;
         }
 
-        int extFormat = fileFormat(fileName.c_str());
+        const std::optional<FileFormat> extFormat = fromExtension(filePath.extension());
 
-        if (extFormat == JPT_CFMT) {
-            return JPT_CFMT;
+        // JPT is only detectable via extension, no magic bytes to check
+        if (extFormat && *extFormat == FileFormat::JPT) {
+            return FileFormat::JPT;
         }
 
-        int magicFormat;
-        const char* magicS;
-        if (std::memcmp(buf.data(), JP2_RFC3745_MAGIC, buf.size()) == 0 || std::memcmp(buf.data(), JP2_MAGIC, 4) == 0) {
-            magicFormat = JP2_CFMT;
-            magicS = ".jp2";
+        // Try to read the magic bytes of the file
+        std::optional<FileFormat> magicFormat;
+        if (std::memcmp(buf.data(), JP2_RFC3745_MAGIC, buf.size()) == 0 ||
+            std::memcmp(buf.data(), JP2_MAGIC, 4) == 0)
+        {
+            magicFormat = FileFormat::JP2;
         }
         else if (std::memcmp(buf.data(), J2K_CODESTREAM_MAGIC, 4) == 0) {
-            magicFormat = J2K_CFMT;
-            magicS = ".j2k or .jpc or .j2c";
+            magicFormat = FileFormat::J2K;
         }
         else {
-            return -1;
+            return std::nullopt;
         }
 
-        if (magicFormat == extFormat) {
-            return extFormat;
+        if (extFormat && magicFormat != extFormat) {
+            LERROR(std::format(
+                "Extension of file is incorrect. Found {} should be {}",
+                filePath.extension(), toString(*magicFormat)
+            ));
         }
 
-        const char* s = fileName.c_str() + strlen(fileName.c_str()) - 4;
-        LERROR(std::format(
-            "Extension of file is incorrect. Found {} should be {}", s, magicS
-        ));
         return magicFormat;
     }
 } // namespace
@@ -186,32 +200,37 @@ void J2kCodec::createInfileStream(const std::filesystem::path& path) {
 
 void J2kCodec::setupDecoder(int downsamplingLevel) {
     opj_set_default_decoder_parameters(&_decoderParams);
-    _decoderParams.decod_format = infileFormat(_filePath.string());
     _decoderParams.cp_reduce = downsamplingLevel;
 
-    switch (_decoderParams.decod_format) {
-        case J2K_CFMT: {
+    const std::optional<FileFormat> format = infileFormat(_filePath);
+    if (!format) {
+        LERROR(std::format("Unrecognized format for input {}", _filePath));
+        return;
+    }
+    _decoderParams.decod_format = static_cast<int>(*format);
+
+    OPJ_CODEC_FORMAT codec;
+    switch (*format) {
+        case FileFormat::J2K:
             // JPEG-2000 codestream
-            _decoder = opj_create_decompress(OPJ_CODEC_J2K);
+            codec = OPJ_CODEC_J2K;
             break;
-        }
-        case JP2_CFMT: {
+        case FileFormat::JP2:
             // JPEG 2000 compressed image data
-            _decoder = opj_create_decompress(OPJ_CODEC_JP2);
+            codec = OPJ_CODEC_JP2;
             break;
-        }
-        case JPT_CFMT: {
+        case FileFormat::JPT:
             // JPEG 2000, JPIP
-            _decoder = opj_create_decompress(OPJ_CODEC_JPT);
+            codec = OPJ_CODEC_JPT;
             break;
-        }
         default:
             LERROR(std::format(
-                "Unrecognized format for input {}. Expected .j2k (0), .jp2 (1) or .jpc "
-                "(2), got {}", _decoderParams.infile, _decoderParams.decod_format
-            ));
+                "Unsupported format {} for input {}",
+                toString(*format), _filePath));
             return;
     }
+
+    _decoder = opj_create_decompress(codec);
 
     if (!opj_setup_decoder(_decoder, &_decoderParams)) {
         LERROR("Failed to set up the decoder");
