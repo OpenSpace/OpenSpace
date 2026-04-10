@@ -232,7 +232,10 @@ void SessionRecordingHandler::tickPlayback(double dt) {
     );
 
     if (isSavingFramesDuringPlayback()) {
-        ghoul_assert(dt == _playback.saveScreenshots.deltaTime, "Misaligned delta times");
+        ghoul_assert(
+            dt == _playback.saveScreenshots.deltaTime || dt == 0.0,
+            "Misaligned delta times"
+        );
 
         // Check if renderable in focus is still resolving tile loading do not adjust time
         // while we are doing this, or take screenshot
