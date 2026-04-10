@@ -73,9 +73,7 @@ Fragment getFragment() {
     // Doublesided, do nothing as we want the same image on the back side
   }
 
-  outColor.r = pow(outColor.r, gammaValue);
-  outColor.g = pow(outColor.g, gammaValue);
-  outColor.b = pow(outColor.b, gammaValue);
+  outColor = pow(outColor, vec4(vec3(gammaValue), 1.0));
 
   if (planeOpacity == 0.0) {
     discard;

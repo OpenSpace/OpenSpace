@@ -85,9 +85,7 @@ Fragment getFragment() {
         res = vec4(intensityOrg, intensityOrg, intensityOrg, 1.0);
       }
 
-      res.r = pow(res.r, gammaValue[i]);
-      res.g = pow(res.g, gammaValue[i]);
-      res.b = pow(res.b, gammaValue[i]);
+      res = pow(res, vec4(vec3(gammaValue[i]), 1.0));
 
       // @TODO (anden 2026-03-05): After discussion with Abock we've decided to remove
       // the blending since two spacecrafts will probably not display images at with
