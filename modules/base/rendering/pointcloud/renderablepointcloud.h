@@ -230,11 +230,12 @@ protected:
     UniformCache(
         cameraViewMatrix, projectionMatrix, modelMatrix, cameraPosition, cameraLookUp,
         renderOption, maxAngularSize, color, opacity, scaleExponent, scaleFactor, up,
-        right, fadeInValue, hasSpriteTexture, spriteTexture, useColorMap, colorMapTexture,
-        cmapRangeMin, cmapRangeMax, nanColor, useNanColor, hideOutsideRange,
-        enableMaxSizeControl, aboveRangeColor, useAboveRangeColor, belowRangeColor,
-        useBelowRangeColor, hasDvarScaling, dvarScaleFactor, enableOutline, outlineColor,
-        outlineWeight, outlineStyle, useCmapOutline, aspectRatioScale, useOrientationData
+        right, fadeInValue, hasSpriteTexture, spriteTexture, useTextureAlpha, useColorMap,
+        colorMapTexture, cmapRangeMin, cmapRangeMax, nanColor, useNanColor,
+        hideOutsideRange, enableMaxSizeControl, aboveRangeColor, useAboveRangeColor,
+        belowRangeColor, useBelowRangeColor, hasDvarScaling, dvarScaleFactor, enableOutline,
+        outlineColor, outlineWeight, outlineStyle, useCmapOutline, aspectRatioScale,
+        useOrientationData
     ) _uniformCache;
 
     std::filesystem::path _dataFile;

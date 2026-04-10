@@ -741,7 +741,6 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         _hasSpriteTexture = !_texture.spriteTexturePath.value().empty();
     });
     _texture.allowCompression.onChange([this]() { _spriteTextureIsDirty = true; });
-    _texture.useAlphaChannel.onChange([this]() { _spriteTextureIsDirty = true; });
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 
@@ -993,19 +992,62 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
         return;
     }
 
-    std::unique_ptr<ghoul::opengl::Texture> t =
-        ghoul::io::texture::loadTexture(path, 2);
+    // Just load the image data so we have full control of the texture formatting
+    ghoul::io::texture::ImageInfo imageInfo = ghoul::io::texture::loadImage(path);
 
-    // @TODO: Add support for compression to STB texture reader
-    // @TODO: Bring back "useAlhpa" support (only in shader or in the texture reader)
-    // @TODO: How deal with textures with lower than 3 channels? How do we set the swizzle?
+    if (imageInfo.data.empty()) {
+        throw ghoul::RuntimeError(std::format("Failed to load image data from '{}'", path));
+    }
+
+    if (imageInfo.dimensions.x == 0 || imageInfo.dimensions.y == 0) {
+        throw ghoul::RuntimeError(std::format("Invalid image dimensions from '{}'", path));
+    }
+
+    using Texture = ghoul::opengl::Texture;
+
+    const Texture::Format format = [&](int nDim) {
+        switch (nDim) {
+        case 1: return Texture::Format::Red;
+        case 2: return Texture::Format::RG;
+        case 3: return Texture::Format::RGB;
+        case 4: return Texture::Format::RGBA;
+        default:
+            throw ghoul::RuntimeError(std::format("Unsupported channel count: {}", nDim));
+        }
+    }(imageInfo.nChannels);
+
+    Texture::FormatInit formatInit = Texture::FormatInit{
+        .dimensions = glm::uvec3(imageInfo.dimensions, 1),
+        .type = GL_TEXTURE_2D,
+        .format = format,
+        .dataType = GL_UNSIGNED_BYTE,
+    };
+
+    if (_texture.allowCompression) {
+        formatInit.internalFormat = [](int nDim) {
+            switch (nDim) {
+            case 1: return GL_COMPRESSED_RED_RGTC1;
+            case 2: return GL_COMPRESSED_RG_RGTC2;
+            case 3: return GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+            case 4: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+            default:
+                throw ghoul::RuntimeError(std::format("Unsupported channel count: {}", nDim));
+            }
+        }(imageInfo.nChannels);
+    }
+
+    std::unique_ptr<Texture> t = std::make_unique<Texture>(
+        formatInit,
+        Texture::SamplerInit {},
+        reinterpret_cast<const std::byte*>(imageInfo.data.data())
+    );
 
     // For debugging purposes, we keep the name of the file in the texture
     t->setName(filename);
 
     LINFO(std::format("Loaded texture {}", path));
 
-    TextureFormat format = {
+    TextureFormat formatInfo = {
         .resolution = glm::uvec2(t->dimensions().x, t->dimensions().y),
         .format = t->format(),
         .internalFormat = t->internalFormat(),
@@ -1014,7 +1056,7 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
     size_t indexInTextureArray = _textures.size();
     _textures.push_back(std::move(t));
     _textureNameToIndex[filename] = indexInTextureArray;
-    _textureMapByFormat[format].push_back(indexInTextureArray);
+    _textureMapByFormat[formatInfo].push_back(indexInTextureArray);
     _indexInDataToTextureIndex[index] = indexInTextureArray;
 }
 
@@ -1040,6 +1082,12 @@ void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
         format.resolution.y,
         static_cast<gl::GLsizei>(nLayers)
     );
+
+    if (format.format == ghoul::opengl::Texture::Format::Red) {
+        // Swizzle for grayscale images so that the red channel is used for all RGB
+        std::array<GLenum, 4> swizzleMask = { GL_RED, GL_RED, GL_RED, GL_ONE};
+        glTextureParameteriv(textureId, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask.data());
+    }
 
     glTextureParameteri(textureId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTextureParameteri(textureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -1285,6 +1333,8 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
 
     ghoul::opengl::TextureUnit spriteTextureUnit;
     _program->setUniform(_uniformCache.spriteTexture, spriteTextureUnit);
+
+    _program->setUniform(_uniformCache.useTextureAlpha, _texture.useAlphaChannel);
 
     setExtraUniforms();
 
