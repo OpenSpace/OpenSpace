@@ -40,25 +40,27 @@ for _, spacecraft in pairs(Downloads) do
   end
 end
 
-return {{
-	Type = "HelioviewerDownloadTask",
-	Name = "SDO",
-	SourceId = 10,
-	Instrument = "AIA-171",
-	ColorMap = savePathBase.. "AIA-171.txt",
-	StartTime = "2024-05-06T00:00:00.000Z",
-	EndTime = "2024-05-14T00:00:00.000Z",
-	TimeStep = 60 * 60, -- Download an image every hour
-	OutputFolder = "${SYNC_DYNAMIC}/solarbrowsing/sdo/aia-171"
-},
-{
-	Type = "HelioviewerDownloadTask",
-	Name = "STEREO",
-	SourceId = 20,
-	Instrument = "EUVI-A 171",
-	ColorMap = savePathBase .. "EUVI-A-171.txt",
-	StartTime = "2024-05-06T00:00:00.000Z",
-	EndTime = "2024-05-14T00:00:00.000Z",
-	TimeStep = 60 * 60, -- Download an image every hour
-	OutputFolder = "${SYNC_DYNAMIC}/solarbrowsing/stereo/euvi-a-171"
-}}
+return {
+  {
+    Type = "HelioviewerDownloadTask",
+    Name = "SDO",
+    SourceId = 10,
+    Instrument = "AIA-171",
+    ColorMap = savePathBase .. "AIA-171.txt",
+    StartTime = "2024-05-06T00:00:00.000Z",
+    EndTime = "2024-05-14T00:00:00.000Z",
+    TimeStep = 60 * 60, -- Download an image every hour
+    OutputFolder = "${SYNC_DYNAMIC}/solarbrowsing/sdo/aia-171"
+  },
+  {
+    Type = "HelioviewerDownloadTask",
+    Name = "STEREO",
+    SourceId = 20,
+    Instrument = "EUVI-A 171",
+    ColorMap = savePathBase .. "EUVI-A-171.txt",
+    StartTime = "2024-05-06T00:00:00.000Z",
+    EndTime = "2024-05-14T00:00:00.000Z",
+    TimeStep = 60 * 60, -- Download an image every hour
+    OutputFolder = "${SYNC_DYNAMIC}/solarbrowsing/stereo/euvi-a-171"
+  }
+}

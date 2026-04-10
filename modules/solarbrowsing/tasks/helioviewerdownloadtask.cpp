@@ -68,7 +68,7 @@ namespace {
         std::string instrument;
 
         // The path to the colormap that will be used for this spacecraft and instrument.
-        // Note, the colormap is copied into the output folder.
+        // Note that the colormap is copied into the output folder.
         std::filesystem::path colorMap;
 
         // The beginning of the time interval to extract data from. Format:
@@ -118,10 +118,7 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
     const std::string jpxRequest = std::format(
         "http://api.helioviewer.org/v2/getJPX/?startTime={}&endTime={}"
         "&sourceId={}&verbose=true&cadence=true&cadence={}",
-        _startTime,
-        _endTime,
-        _sourceId,
-        _timeStep
+        _startTime, _endTime, _sourceId, _timeStep
     );
 
     // @TODO (anden88 2026-03-05): Due to how the progress bar uses the '\r' carriage
@@ -148,7 +145,7 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
         frames = json["frames"].get<std::vector<double>>();
 
         if (frames.empty()) {
-            LERROR(std::format("Failed to acquire frames"));
+            LERROR("Failed to acquire frames");
         }
 
         // Display the optional message from HelioViewer which contains important
@@ -179,12 +176,8 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
         std::tm* utcTime = std::gmtime(&timestamp);
         std::string utcTimeString = std::format(
             "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}",
-            utcTime->tm_year + 1900,
-            utcTime->tm_mon + 1,
-            utcTime->tm_mday,
-            utcTime->tm_hour,
-            utcTime->tm_min,
-            utcTime->tm_sec
+            utcTime->tm_year + 1900, utcTime->tm_mon + 1, utcTime->tm_mday,
+            utcTime->tm_hour, utcTime->tm_min, utcTime->tm_sec
         );
         const Time time = Time(utcTimeString);
 
@@ -231,16 +224,8 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
 
             const std::string outFilename = std::format(
                 "{}/{:04}_{:02}_{:02}__{:02}_{:02}_{:02}_{:03}__{}_{}.jp2",
-                _outputFolder,
-                year,
-                month,
-                day,
-                hour,
-                minute,
-                second,
-                millisecond,
-                _name,
-                _instrument
+                _outputFolder, year, month, day, hour, minute,
+                second, millisecond, _name, _instrument
             );
 
             // Skip existing files

@@ -59,8 +59,7 @@ namespace {
 
     // @TODO emiax: If openjpeg ever starts supporting reading XML metadata,
     // this implementation should be improved in order not to search the entire buffer for
-    // XML data. There is an issue here:
-    // (https://github.com/uclouvain/openjpeg/issues/929)
+    // XML data. There is an issue here: https://github.com/uclouvain/openjpeg/issues/929
     std::optional<ImageMetadata> parseJ2kMetadata(const std::filesystem::path& filePath) {
         ImageMetadata im;
         im.filePath = filePath;
@@ -82,31 +81,19 @@ namespace {
             const std::string startTag = std::format("<{}>", elementName);
             const std::string endTag = std::format("</{}>", elementName);
 
-            const auto begin = std::search(
-                view.begin(),
-                view.end(),
-                startTag.begin(),
-                startTag.end()
-            );
-
-            if (begin == view.end()) {
+            const size_t beginPos = view.find(startTag);
+            if (beginPos == std::string_view::npos) {
                 return std::nullopt;
             }
 
-            const auto afterBeginTag = begin + startTag.size();
+            const size_t contentStart = beginPos + startTag.size();
 
-            const auto end = std::search(
-                afterBeginTag,
-                view.end(),
-                endTag.begin(),
-                endTag.end()
-            );
-
-            if (end == view.end()) {
+            const size_t endPos = view.find(endTag, contentStart);
+            if (endPos == std::string_view::npos) {
                 return std::nullopt;
             }
 
-            return std::string_view(&*afterBeginTag, end - afterBeginTag);
+            return view.substr(contentStart, endPos - contentStart);
         };
 
         std::optional<std::string_view> metaData = extractInnerXml(bufferView, "meta");
@@ -475,13 +462,10 @@ namespace {
                     isFirstWrite = false;
                 }
 
-                ofs << std::format("{}\n{}\n{}\n{}\n{}\n{}\n{}\n",
-                    date,
-                    relativePath.generic_string(),
-                    im.fullResolution,
-                    im.scale,
-                    im.centerPixel.x,
-                    im.centerPixel.y,
+                ofs << std::format(
+                    "{}\n{}\n{}\n{}\n{}\n{}\n{}\n",
+                    date, relativePath.generic_string(), im.fullResolution, im.scale,
+                    im.centerPixel.x, im.centerPixel.y,
                     static_cast<int>(im.isCoronaGraph) // Output bool as 0/1
                 );
             }
@@ -687,11 +671,9 @@ DecodedImageData loadDecodedDataFromCache(const std::filesystem::path& path,
         SolarBrowsingModule* module = global::moduleEngine->module<SolarBrowsingModule>();
         module->cacheManager()->removeCacheFile(
             path,
-            std::format("{}x{}", imageSize, imageSize)
+            std::format("{0}x{0}", imageSize)
         );
-        throw ghoul::RuntimeError(std::format(
-            "Error, could not open cache file '{}'", path
-        ));
+        throw ghoul::RuntimeError(std::format("Could not open cache file '{}'", path));
     }
 
     size_t nEntries = 0;
@@ -709,7 +691,7 @@ DecodedImageData loadDecodedDataFromCache(const std::filesystem::path& path,
         file.close();
         module->cacheManager()->removeCacheFile(
             path,
-            std::format("{}x{}", imageSize, imageSize)
+            std::format("{0}x{0}", imageSize)
         );
         throw ghoul::RuntimeError(std::format(
             "Failed to read image data from cache '{}'", path

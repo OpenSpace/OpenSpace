@@ -1,4 +1,4 @@
-local stereo_a = asset.require('scene/solarsystem/missions/stereo/stereo_a')
+local stereo_a = asset.require("scene/solarsystem/missions/stereo/stereo_a")
 local coreKernels = asset.require("spice/core")
 local kernels = asset.require("scene/solarsystem/missions/stereo/kernels")
 

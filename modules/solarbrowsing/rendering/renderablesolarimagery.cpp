@@ -410,14 +410,14 @@ void RenderableSolarImagery::initializeGL() {
     createPlaneAndFrustum(_moveFactor);
 
     _imageryTexture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(DefaultTextureSize, DefaultTextureSize, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::Red,
-            .dataType = GL_UNSIGNED_BYTE,
+            .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit{
-            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge,
+        ghoul::opengl::Texture::SamplerInit {
+            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
 
@@ -543,14 +543,11 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
 
     ghoul::opengl::TextureUnit tfUnit;
     TransferFunction* lut = transferFunction();
+    _planeShader->setUniform(_uniformCachePlane.hasLut, lut != nullptr);
     if (lut) {
         tfUnit.bind(lut->texture());
-        _planeShader->setUniform(_uniformCachePlane.hasLut, true);
     }
-    else {
-        _planeShader->setUniform(_uniformCachePlane.hasLut, false);
-    }
-    // Must bind all sampler2D, otherwise undefined behaviour
+    // Must bind all sampler2D, otherwise undefined behavior
     _planeShader->setUniform(_uniformCachePlane.lut, tfUnit);
     _planeShader->setUniform(_uniformCachePlane.faceMode, _faceMode);
 
@@ -777,7 +774,7 @@ void RenderableSolarImagery::requestPredictiveFrames(
         std::filesystem::path path = kf.data.filePath;
         std::filesystem::path cacheFile = module->cacheManager()->cachedFilename(
             path.replace_extension(".bin"),
-            std::format("{}x{}", imageSize, imageSize)
+            std::format("{0}x{0}", imageSize)
         );
 
         // Skip if file is already cached

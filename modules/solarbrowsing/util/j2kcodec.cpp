@@ -207,9 +207,8 @@ void J2kCodec::setupDecoder(int downsamplingLevel) {
         }
         default:
             LERROR(std::format(
-                "Unrecognized format for input {}"
-                "[Accept only .j2k (0), .jp2 (1), or .jpc (2), got {}]",
-                _decoderParams.infile, _decoderParams.decod_format
+                "Unrecognized format for input {}. Expected .j2k (0), .jp2 (1) or .jpc "
+                "(2), got {}", _decoderParams.infile, _decoderParams.decod_format
             ));
             return;
     }

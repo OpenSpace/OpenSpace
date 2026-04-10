@@ -85,7 +85,7 @@ local SdoTrail = {
       Type = "SpiceTranslation",
       Target = kernels.ID.SDO,
       Observer = coreKernels.ID.Earth,
-      Frame = coreKernels.Frame.J2000,
+      Frame = coreKernels.Frame.J2000
     },
     Color = { 0.51, 0.78, 0.12 },
     Period = 0.997319,
@@ -93,9 +93,9 @@ local SdoTrail = {
     EnableFade = true
   },
   GUI = {
-      Name = "SDO Trail",
-      Path = "/Solar System/Missions/SDO",
-      Description = "The trajectory of the SDO spacecraft."
+    Name = "SDO Trail",
+    Path = "/Solar System/Missions/SDO",
+    Description = "The trajectory of the SDO spacecraft."
   }
 }
 
@@ -122,7 +122,7 @@ asset.export("MissionEnd", MissionEnd)
 
 asset.meta = {
   Name = "SDO",
-  Description = [[This asset adds the SDO (Solar Dynamics Observatory) Model,
+  Description = [[This asset adds the SDO (Solar Dynamics Observatory) model,
     including the trajectory for the entire duration of the SDO mission.
     Model credits: https://sketchfab.com/3d-models/solar-dynamics-observatory-8a40c426c12f48ff9fef4897283ef1d2
   ]],

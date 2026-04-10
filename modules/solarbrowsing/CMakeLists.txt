@@ -57,9 +57,9 @@ set(SHADER_FILES
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-    "SolarBrowsing"
-    solarbrowsing_module
-    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+  "SolarBrowsing"
+  solarbrowsing_module
+  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
 set(OPENJPEG_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/openjpeg/")
@@ -70,12 +70,12 @@ target_link_libraries(openspace-module-solarbrowsing PRIVATE openjp2)
 target_include_directories(openspace-module-solarbrowsing SYSTEM PUBLIC ${HEADER_FILES})
 
 target_include_directories(
-    openspace-module-solarbrowsing PUBLIC
-    ${OPENJPEG_BINARY_DIR}/src/lib/openjp2
-    ${OPENJPEG_BINARY_DIR}/src/bin/common
-    ${OPENJPEG_ROOT_DIR}/src/lib/openjp2
-    ${OPENJPEG_ROOT_DIR}/src/bin/jp2
-    ${OPENJPEG_ROOT_DIR}/src/bin/common
+  openspace-module-solarbrowsing PUBLIC
+  ${OPENJPEG_BINARY_DIR}/src/lib/openjp2
+  ${OPENJPEG_BINARY_DIR}/src/bin/common
+  ${OPENJPEG_ROOT_DIR}/src/lib/openjp2
+  ${OPENJPEG_ROOT_DIR}/src/bin/jp2
+  ${OPENJPEG_ROOT_DIR}/src/bin/common
 )
 
 # Force static linking to prevent __imp* linker errors

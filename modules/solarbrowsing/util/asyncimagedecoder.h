@@ -68,8 +68,7 @@ public:
     /**
      * Stops all worker threads and waits for them to finish.
      *
-     * Pending requests in the queue may not be processed after destruction
-     * begins.
+     * Pending requests in the queue may not be processed after destruction begins.
      */
     ~AsyncImageDecoder();
 
@@ -117,6 +116,6 @@ private:
     std::unordered_map<std::filesystem::path, bool> _activeRequests;
 };
 
-} //namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SOLARBROWSING___ASYNCIMAGEDECODER___H__

@@ -90,7 +90,7 @@ Fragment getFragment() {
   }
 
   Fragment frag;
-  frag.color = vec4(outColor.xyz, planeOpacity);
+  frag.color = vec4(outColor.rgb, planeOpacity);
   frag.depth = in_data.depth;
   frag.blend = BlendModeAdditive;
   return frag;

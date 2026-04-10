@@ -68,4 +68,4 @@ void saveDecodedDataToCache(const std::filesystem::path& path,
 
 } // namespace openspace
 
-#endif // !__OPENSPACE_MODULE_SOLARBROWSING___SOLARBROWSINGHELPER___H__
+#endif // __OPENSPACE_MODULE_SOLARBROWSING___SOLARBROWSINGHELPER___H__

@@ -26,9 +26,9 @@
 #define __OPENSPACE_MODULE_SOLARBROWSING___J2KCODEC___H__
 
 #include <openjpeg.h>
+#include <filesystem>
 #include <memory>
 #include <string>
-#include <filesystem>
 
 namespace openspace {
 
