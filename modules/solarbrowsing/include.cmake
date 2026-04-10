@@ -1,1 +1,1 @@
-set (OPENSPACE_DEPENDENCIES space base)
+set(OPENSPACE_DEPENDENCIES base space)

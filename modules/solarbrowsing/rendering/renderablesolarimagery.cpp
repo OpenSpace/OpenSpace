@@ -208,7 +208,7 @@ namespace {
 namespace openspace {
 
 openspace::Documentation RenderableSolarImagery::Documentation() {
-    return codegen::doc<Parameters>("solarbrowsing_renderable_solarimegary");
+    return codegen::doc<Parameters>("solarbrowsing_renderable_solarimagery");
 }
 
 RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictionary)
@@ -243,7 +243,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     if (!hasData) {
         LWARNING(std::format(
             "Could not find any image data in '{}'. Image data can be downloaded using "
-            "the HelioviewerDownloadTask. See the solar browsing documentation for more "
+            "the HelioviewerDownloadTask. See the SolarBrowsing documentation for more "
             "information", p.imageDirectory
         ));
     }
@@ -615,10 +615,8 @@ TransferFunction* RenderableSolarImagery::transferFunction() {
     return _tfMap[_currentActiveInstrument].get();
 }
 
-const std::unique_ptr<ghoul::opengl::Texture>&
-RenderableSolarImagery::imageryTexture() const
-{
-    return _imageryTexture;
+const ghoul::opengl::Texture& RenderableSolarImagery::imageryTexture() const {
+    return *_imageryTexture;
 }
 
 float RenderableSolarImagery::contrastValue() const {
@@ -819,9 +817,9 @@ void RenderableSolarImagery::requestPredictiveFrames(
 
 void RenderableSolarImagery::createPlaneAndFrustum(double moveDistance) {
     // Computing the image plane position using linear scale is not sufficient for fine
-    // tuning movement near the Sun. A Gaussian function* (3.1) is used to address this
-    // issue: *https://www.diva-portal.org/smash/get/diva2:1147161/FULLTEXT01.pdf
-    _gaussianMoveFactor = exp(-(pow((moveDistance - 1), 2.0)) / (2.0));
+    // tuning movement near the Sun. A Gaussian function (3.1) is used to address this
+    // issue: https://www.diva-portal.org/smash/get/diva2:1147161/FULLTEXT01.pdf
+    _gaussianMoveFactor = std::exp(-(std::pow((moveDistance - 1), 2.0)) / (2.0));
     _size = static_cast<float>(_gaussianMoveFactor * distanceconstants::SolarRadius);
     createPlane();
     createFrustum();

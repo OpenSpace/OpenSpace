@@ -4,6 +4,7 @@ local kernels = asset.require("scene/solarsystem/missions/sdo/kernels")
 local earthTransform = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
+
 -- We use the SDO position relative to the inertial to get less wobbly image. Adding
 -- the rotation further removes any small variations visible when increasing the
 -- simulation time

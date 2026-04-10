@@ -46,7 +46,7 @@ namespace {
     //
     // All available images within the given interval are retrieved at the requested
     // temporal cadence and stored locally as JP2 files. The filenames are formatted
-    // according to the OpenSpace solar browsing convention,encoding timestamp, spacecraft
+    // according to the OpenSpace SolarBrowsing convention, encoding timestamp, spacecraft
     // name, and instrument identifier. The instrument string must match the local
     // colormap naming convention (hyphen-separated, e.g., "AIA-193") so that the correct
     // colormap can be resolved at runtime. Existing files are not re-downloaded.
@@ -75,7 +75,7 @@ namespace {
         // YYYY-MM-DDTHH:MM:SS
         std::string startTime [[codegen::datetime()]];
 
-        // The end of the time interval to extract data from. Format YYYY-MM-DDTHH:MM:SS
+        // The end of the time interval to extract data from. Format: YYYY-MM-DDTHH:MM:SS
         std::string endTime [[codegen::datetime()]];
 
         // Desired temporal sampling interval in seconds.

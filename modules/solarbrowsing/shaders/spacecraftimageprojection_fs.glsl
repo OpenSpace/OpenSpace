@@ -24,11 +24,12 @@
 
 #include "fragment.glsl"
 
+// This value should be kept in sync with the constant in the .cpp file
 const int MaxSpacecraftObservatories = 7;
 
 in Data {
   vec4 positionScreenSpace;
-  vec3 vUv[MaxSpacecraftObservatories];
+  vec3 texCoords[MaxSpacecraftObservatories];
 } in_data;
 
 uniform int numSpacecraftCameraPlanes;
@@ -47,6 +48,7 @@ uniform float opacity;
 
 const float SunRadius = 6.95700E8;
 
+
 float contrast(float intensity, int i) {
   return min(
     clamp(0.5 + (intensity - 0.5) * (1.0 + contrastValue[i] / 10.0), 0.0, 1.0),
@@ -64,23 +66,23 @@ Fragment getFragment() {
       continue;
     }
 
-    if (planePositionSpacecraft[i].z < in_data.vUv[i].z) {
-      vec3 uv = in_data.vUv[i].xyz;
+    if (planePositionSpacecraft[i].z < in_data.texCoords[i].z) {
+      vec3 uv = in_data.texCoords[i].xyz;
       uv /= (SunRadius / scale[i]) * 2.0;
       uv += 0.5;
 
       uv.x += (centerPixel[i].x / SunRadius) / 2.0;
-      uv.y -= (centerPixel[i].y /  SunRadius) / 2.0;
+      uv.y -= (centerPixel[i].y / SunRadius) / 2.0;
 
       float intensityOrg = texture(imageryTexture[i], vec2(uv.x, 1.0 - uv.y)).r;
       intensityOrg = contrast(intensityOrg, i);
 
       vec4 res;
       if (hasLut[i]) {
-          res = texture(lut[i], intensityOrg);
+        res = texture(lut[i], intensityOrg);
       }
       else {
-          res = vec4(intensityOrg, intensityOrg, intensityOrg, 1.0);
+        res = vec4(intensityOrg, intensityOrg, intensityOrg, 1.0);
       }
 
       res.r = pow(res.r, gammaValue[i]);

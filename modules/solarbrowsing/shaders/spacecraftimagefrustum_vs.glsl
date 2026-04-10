@@ -38,6 +38,7 @@ uniform mat4 modelViewProjectionTransformPlane;
 uniform float scale;
 uniform vec2 centerPixel;
 
+
 void main() {
   // Transform in either planes or spacecraft coordinate system
   vec4 positionScreenSpace = vec4(0.0);

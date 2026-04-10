@@ -24,8 +24,6 @@
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
-set(OPENJPEG_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/openjpeg/")
-
 set(HEADER_FILES
   rendering/renderablesolarimagery.h
   rendering/renderablesolarimageryprojection.h
@@ -64,6 +62,7 @@ create_new_module(
     ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
+set(OPENJPEG_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/openjpeg/")
 add_subdirectory(${OPENJPEG_ROOT_DIR} SYSTEM)
 set_target_properties(openjp2 PROPERTIES FOLDER "External")
 target_link_libraries(openspace-module-solarbrowsing PRIVATE openjp2)
@@ -72,7 +71,6 @@ target_include_directories(openspace-module-solarbrowsing SYSTEM PUBLIC ${HEADER
 
 target_include_directories(
     openspace-module-solarbrowsing PUBLIC
-    # Openjpeg stuff
     ${OPENJPEG_BINARY_DIR}/src/lib/openjp2
     ${OPENJPEG_BINARY_DIR}/src/bin/common
     ${OPENJPEG_ROOT_DIR}/src/lib/openjp2

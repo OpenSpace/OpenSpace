@@ -57,10 +57,10 @@ void ProgressBar::print(int current) {
 }
 
 void ProgressBar::finish() {
-    if (!isFinished) {
+    if (!_isFinished) {
         print(_end);
         _stream << '\n';
-        isFinished = true;
+        _isFinished = true;
     }
 }
 

@@ -12,6 +12,7 @@ local models = asset.resource({
   Version = 1
 })
 
+
 local MissionBegin = "2010 FEB 11 05:02:58"
 local MissionEnd = "2026 JUN 12 07:11:59"
 

@@ -47,7 +47,7 @@ namespace {
     // and it is in the ballpark of ~200-300 microseconds of work. Compared to setting up
     // the `inFileStream` which is ~100ms
     int infileFormat(const std::string& fileName) {
-        const auto get_file_format = [](const char* filename) {
+        const auto fileFormat = [](const char* filename) {
             static const char* extension[] = {
                 "pgx", "pnm", "pgm", "ppm", "bmp", "tif", "raw",
                 "tga", "png", "j2k", "jp2", "jpt", "j2c", "jpc"
@@ -79,51 +79,51 @@ namespace {
             return -1;
         }
 
-        unsigned char buf[12];
-        memset(buf, 0, 12);
-        OPJ_SIZE_T l_nb_read = fread(buf, 1, 12, reader);
+        std::array<unsigned char, 12> buf;
+        std::memset(buf.data(), 0, buf.size());
+        OPJ_SIZE_T l_nb_read = std::fread(buf.data(), 1, buf.size(), reader);
         fclose(reader);
 
         if (l_nb_read != 12) {
             return -1;
         }
 
-        int ext_format = get_file_format(fileName.c_str());
+        int extFormat = fileFormat(fileName.c_str());
 
-        if (ext_format == JPT_CFMT) {
+        if (extFormat == JPT_CFMT) {
             return JPT_CFMT;
         }
 
-        int magic_format;
-        const char* magic_s;
-        if (memcmp(buf, JP2_RFC3745_MAGIC, 12) == 0 || memcmp(buf, JP2_MAGIC, 4) == 0) {
-            magic_format = JP2_CFMT;
-            magic_s = ".jp2";
+        int magicFormat;
+        const char* magicS;
+        if (std::memcmp(buf.data(), JP2_RFC3745_MAGIC, buf.size()) == 0 || std::memcmp(buf.data(), JP2_MAGIC, 4) == 0) {
+            magicFormat = JP2_CFMT;
+            magicS = ".jp2";
         }
-        else if (memcmp(buf, J2K_CODESTREAM_MAGIC, 4) == 0) {
-            magic_format = J2K_CFMT;
-            magic_s = ".j2k or .jpc or .j2c";
+        else if (std::memcmp(buf.data(), J2K_CODESTREAM_MAGIC, 4) == 0) {
+            magicFormat = J2K_CFMT;
+            magicS = ".j2k or .jpc or .j2c";
         }
         else {
             return -1;
         }
 
-        if (magic_format == ext_format) {
-            return ext_format;
+        if (magicFormat == extFormat) {
+            return extFormat;
         }
 
         const char* s = fileName.c_str() + strlen(fileName.c_str()) - 4;
         LERROR(std::format(
-            "Extension of file is incorrect. Found {} should be {}", s, magic_s
+            "Extension of file is incorrect. Found {} should be {}", s, magicS
         ));
-        return magic_format;
+        return magicFormat;
     }
 } // namespace
 
 namespace openspace {
 
-J2kCodec::J2kCodec(bool verboseMode)
-    : _verboseMode(verboseMode)
+J2kCodec::J2kCodec(bool shouldPrintTiming)
+    : _sholdPrintTiming(shouldPrintTiming)
 {}
 
 J2kCodec::~J2kCodec() {
@@ -162,7 +162,7 @@ void J2kCodec::decodeIntoBuffer(const std::filesystem::path& path, unsigned char
     );
 
     auto t2 = std::chrono::high_resolution_clock::now();
-    if (_verboseMode) {
+    if (_sholdPrintTiming) {
         LINFO(std::format(
             "Decode time of {}: {} ms",
             path, std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()

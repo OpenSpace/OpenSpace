@@ -38,11 +38,12 @@ public:
 
     void print(int current);
     void finish();
+
 private:
     int _width;
     int _previous = -1;
     int _end;
-    bool isFinished = false;
+    bool _isFinished = false;
 
     std::ostream& _stream;
 };

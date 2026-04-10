@@ -40,7 +40,7 @@ class SceneGraphNode;
 
 class RenderableSolarImageryProjection : public Renderable {
 public:
-    RenderableSolarImageryProjection(const ghoul::Dictionary& dictionary);
+    explicit RenderableSolarImageryProjection(const ghoul::Dictionary& dictionary);
     ~RenderableSolarImageryProjection() override = default;
 
     void initializeGL() override;

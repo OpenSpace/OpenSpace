@@ -29,7 +29,7 @@
 namespace openspace {
 
 AsyncImageDecoder::AsyncImageDecoder(size_t numThreads, bool verbose)
-    : _verbose(verbose)
+    : _isVerbose(verbose)
 {
     _workers.reserve(numThreads);
     for (size_t i = 0; i < numThreads; i++) {
@@ -50,7 +50,7 @@ AsyncImageDecoder::~AsyncImageDecoder() {
 
 void AsyncImageDecoder::requestDecode(DecodeRequest request) {
     {
-        std::lock_guard<std::mutex> lock(_queueMutex);
+        std::lock_guard lock(_queueMutex);
         const std::string key = std::format(
             "{}_ds_{}", request.metadata.filePath, request.downsamplingLevel
         );
@@ -70,13 +70,16 @@ void AsyncImageDecoder::workerThread() {
     while (!_stopRequest) {
         DecodeRequest request;
         {
-            // Aquire lock
-            std::unique_lock<std::mutex> lock(_queueMutex);
+            // Acquire lock
+            std::unique_lock lock(_queueMutex);
 
             // Wait for work or stop signal
-            _queueCV.wait(lock, [this]() {
-                return _stopRequest || !_requestQueue.empty();
-            });
+            _queueCV.wait(
+                lock,
+                [this]() {
+                    return _stopRequest || !_requestQueue.empty();
+                }
+            );
 
             // Exit working if the async decoder is stopped
             if (_stopRequest) {
@@ -97,18 +100,17 @@ void AsyncImageDecoder::workerThread() {
 }
 
 void AsyncImageDecoder::decodeRequest(const DecodeRequest& request) {
-    DecodedImageData decodedData;
-
     const unsigned int imageSize = static_cast<unsigned int>(
         request.metadata.fullResolution /
         std::pow(2, request.downsamplingLevel)
     );
-    decodedData.imageSize = imageSize;
+    DecodedImageData decodedData = {
+        .buffer = std::vector<uint8_t>(imageSize * imageSize * sizeof(ImagePrecision)),
+        .metadata = request.metadata,
+        .imageSize = imageSize
+    };
 
-    decodedData.buffer.resize(imageSize * imageSize * sizeof(ImagePrecision));
-    decodedData.metadata = request.metadata;
-
-    J2kCodec j2c(_verbose);
+    J2kCodec j2c(_isVerbose);
     j2c.decodeIntoBuffer(
         request.metadata.filePath,
         decodedData.buffer.data(),
@@ -129,7 +131,7 @@ void AsyncImageDecoder::decodeRequest(const DecodeRequest& request) {
 }
 
 void AsyncImageDecoder::setVerboseFlag(bool verbose) {
-    _verbose = verbose;
+    _isVerbose = verbose;
 }
 
 } // namespace openspace

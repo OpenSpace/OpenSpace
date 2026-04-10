@@ -39,9 +39,9 @@
 #include <execution>
 #include <format>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <string_view>
-#include <iostream>
 
 namespace {
     using namespace openspace;
@@ -53,7 +53,7 @@ namespace {
         if (!std::filesystem::is_regular_file(path)) {
             return false;
         }
-        const std::string& ext = path.extension().string();
+        std::filesystem::path ext = path.extension();
         return (ext == ".jp2") || (ext == ".j2k");
     }
 
@@ -110,21 +110,18 @@ namespace {
         };
 
         std::optional<std::string_view> metaData = extractInnerXml(bufferView, "meta");
-
         if (!metaData.has_value()) {
             LERROR(std::format("Could not find metadata in {}", filePath));
             return std::nullopt;
         }
 
         std::optional<std::string_view> telescop = extractInnerXml(*metaData, "TELESCOP");
-
         if (!telescop.has_value()) {
             LERROR(std::format("Could not find TELESCOP tag {}", filePath));
             return std::nullopt;
         }
 
         std::optional<std::string_view> naxis = extractInnerXml(*metaData, "NAXIS1");
-
         if (!naxis.has_value()) {
             LERROR(std::format("Could not find NAXIS1 tag {}", filePath));
             return std::nullopt;
@@ -134,7 +131,6 @@ namespace {
             bufferView,
             "CRPIX1"
         );
-
         if (!centerPixelX.has_value()) {
             LERROR(std::format("Could not find CRPIX1 tag {}", filePath));
             return std::nullopt;
@@ -144,7 +140,6 @@ namespace {
             bufferView,
             "CRPIX2"
         );
-
         if (!centerPixelY.has_value()) {
             LERROR(std::format("Could not find CRPIX2 tag {}", filePath));
             return std::nullopt;
@@ -243,11 +238,11 @@ namespace {
         return im;
     }
 
-    // Conversion needed before passing dates into the spice manager
+    // Conversion needed before passing dates into the SpiceManager
     std::string ISO8601(std::string& datetime) {
         std::string month = datetime.substr(5, 3);
 
-        std::string MM = "";
+        std::string MM;
         if (month == "JAN") { MM = "01"; }
         else if (month == "FEB") { MM = "02"; }
         else if (month == "MAR") { MM = "03"; }
@@ -282,7 +277,6 @@ namespace {
      *        optional cache files
      * \param imageMetadataMap The metadata map that will be populated with metadata from
      *        valid cache files
-     *
      * \return A map from subdirectory path to a boolean indicating whether the cache for
      *         that directory was valid
      */
@@ -317,7 +311,7 @@ namespace {
             ghoul::filesystem::Recursive::No,
             ghoul::filesystem::Sorted::No,
             [](const std::filesystem::path& path) {
-                const std::string extension = path.extension().string();
+                const std::filesystem::path extension = path.extension();
                 const std::string base = path.filename().string();
                 const size_t pos = base.find("_cached");
                 const bool isCacheFile = extension == ".txt" && pos != std::string::npos;
@@ -440,7 +434,6 @@ namespace {
 
                 imageMetadataMap[instrument].addKeyframe(timeObserved, std::move(im));
             }
-            myfile.close();
             // All files in cache exists and there were no additional files in the
             // subdirectory, cache is assumed to be up-to-date
             subDirectoriesMap[subDirectory] = true;
@@ -468,7 +461,7 @@ namespace {
 
             for (const Keyframe<ImageMetadata>& metadata : sequence.keyframes()) {
                 const std::string date = SpiceManager::ref().dateFromEphemerisTime(
-                        metadata.timestamp
+                    metadata.timestamp
                 );
                 const ImageMetadata& im = metadata.data;
                 const std::filesystem::path relativePath = std::filesystem::relative(
@@ -566,7 +559,7 @@ ImageMetadataMap loadImageMetadata(const std::filesystem::path& rootDir) {
     );
 
     if (cacheFilesValidityMap.empty()) {
-        // All cache files are ok, no more files to load.
+        // All cache files are ok, no more files to load
         return result;
     }
 
@@ -592,7 +585,7 @@ ImageMetadataMap loadImageMetadata(const std::filesystem::path& rootDir) {
             sequencePaths.begin(),
             sequencePaths.end(),
             [](const std::filesystem::path& path) {
-                const std::string& ext = path.extension().string();
+                std::filesystem::path ext = path.extension();
                 return (ext != ".jp2") && (ext != ".j2k");
             }
         ),
@@ -703,10 +696,12 @@ DecodedImageData loadDecodedDataFromCache(const std::filesystem::path& path,
 
     size_t nEntries = 0;
     file.read(reinterpret_cast<char*>(&nEntries), sizeof(nEntries));
-    DecodedImageData data;
-    data.imageSize = imageSize;
-    data.metadata = metadata;
-    data.buffer.resize(nEntries);
+    DecodedImageData data = {
+        .buffer = std::vector<uint8_t>(nEntries),
+        .metadata = metadata,
+        .imageSize = imageSize
+    };
+
     file.read(reinterpret_cast<char*>(data.buffer.data()), nEntries * sizeof(uint8_t));
 
     if (!file) {
@@ -725,9 +720,9 @@ DecodedImageData loadDecodedDataFromCache(const std::filesystem::path& path,
 }
 
 void saveDecodedDataToCache(const std::filesystem::path& path,
-                            const DecodedImageData& data, bool verboseMode)
+                            const DecodedImageData& data, bool shouldPrintTiming)
 {
-    if (verboseMode) {
+    if (shouldPrintTiming) {
         LINFO(std::format("Saving cache '{}'", path));
     }
     std::ofstream file = std::ofstream(path, std::ofstream::binary);
@@ -737,7 +732,6 @@ void saveDecodedDataToCache(const std::filesystem::path& path,
         reinterpret_cast<const char*>(data.buffer.data()),
         nEntries * sizeof(uint8_t)
     );
-    file.close();
 }
 
 } // namespace openspace

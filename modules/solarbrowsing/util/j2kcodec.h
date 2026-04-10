@@ -55,9 +55,7 @@ struct ImageData {
 
 class J2kCodec {
 public:
-    static constexpr const int ALL_THREADS = 0;
-
-    explicit J2kCodec(bool verboseMode = false);
+    explicit J2kCodec(bool shouldPrintTiming = false);
     ~J2kCodec();
 
     // Decode into a client allocated buffer
@@ -75,7 +73,7 @@ private:
 
     std::filesystem::path _filePath;
     opj_stream_t* _infileStream = nullptr;
-    bool _verboseMode = false;
+    bool _sholdPrintTiming = false;
 };
 
 } // namespace openspace

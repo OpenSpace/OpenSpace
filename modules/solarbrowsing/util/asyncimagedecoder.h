@@ -75,8 +75,8 @@ public:
 
     /**
      * Submits a decode request to be processed asynchronously. If an equivalent request
-     * (same image file and downsampling level) is already being processed, the request
-     * is ignored.
+     * (same image file and downsampling level) is already being processed, the request is
+     * ignored.
      *
      * The provided callback will be invoked once decoding has completed.
      *
@@ -89,8 +89,8 @@ private:
     /**
      * Entry point for each worker thread.
      *
-     * Continuously waits for queued decode requests and processes them until
-     * the decoder is stopped.
+     * Continuously waits for queued decode requests and processes them until the decoder
+     * is stopped.
      */
     void workerThread();
 
@@ -104,7 +104,7 @@ private:
      */
     void decodeRequest(const DecodeRequest& request);
 
-    bool _verbose = false;
+    bool _isVerbose = false;
 
     // Thread management
     std::vector<std::thread> _workers;
@@ -119,4 +119,4 @@ private:
 
 } //namespace openspace
 
-#endif // !__OPENSPACE_MODULE_SOLARBROWSING___ASYNCIMAGEDECODER___H__
+#endif // __OPENSPACE_MODULE_SOLARBROWSING___ASYNCIMAGEDECODER___H__

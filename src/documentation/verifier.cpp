@@ -385,7 +385,6 @@ TestResult DateTimeVerifier::operator()(const ghoul::Dictionary& dict,
         res.offenses.push_back(std::move(o));
     }
 
-    // first check format (automatically checks if valid time)
     return res;
 }
 

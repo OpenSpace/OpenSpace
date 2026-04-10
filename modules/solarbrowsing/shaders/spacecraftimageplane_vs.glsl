@@ -30,7 +30,7 @@ layout(location = 0) in vec2 in_position;
 layout(location = 1) in vec2 in_texCoords;
 
 out Data {
-  vec2 textCoords;
+  vec2 texCoords;
   float depth;
 } out_data;
 
@@ -38,13 +38,11 @@ uniform mat4 modelViewProjectionTransform;
 uniform float scale;
 uniform vec2 centerPixel;
 
-void main() {
-  out_data.textCoords = in_texCoords;
 
-  vec2 position = in_position;
-  position.x += centerPixel.x;
-  position.y += centerPixel.y;
-  position.xy *= 1.0 / scale;
+void main() {
+  out_data.texCoords = in_texCoords;
+
+  vec2 position = (in_position ++ centerPixel) / scale;
 
   vec4 positionClipSpace = modelViewProjectionTransform * vec4(position, 0.0, 1.0);
   vec4 positionScreenSpace = z_normalization(positionClipSpace);

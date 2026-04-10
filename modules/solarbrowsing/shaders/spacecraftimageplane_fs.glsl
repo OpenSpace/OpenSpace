@@ -25,7 +25,7 @@
 #include "fragment.glsl"
 
 in Data {
-  vec2 textCoords;
+  vec2 texCoords;
   float depth;
 } in_data;
 
@@ -43,6 +43,7 @@ const int FrontOnly = 0;
 const int SolidBack = 1;
 const int DoubleSided = 2;
 
+
 float contrast(float intensity) {
   return min(
     clamp(0.5 + (intensity - 0.5) * (1.0 + contrastValue / 10.0), 0.0, 1.0),
@@ -53,7 +54,7 @@ float contrast(float intensity) {
 Fragment getFragment() {
   float intensityOrg = texture(
     imageryTexture,
-    vec2(in_data.textCoords.s, 1.0 - in_data.textCoords.t)
+    vec2(in_data.texCoords.s, 1.0 - in_data.texCoords.t)
   ).r;
   intensityOrg = contrast(intensityOrg);
 
@@ -80,11 +81,10 @@ Fragment getFragment() {
     discard;
   }
 
-  float absx = abs(0.5 - in_data.textCoords.s);
-  float absy = abs(0.5 - in_data.textCoords.t);
+  vec2 center = abs(vec2(0.5 - in_data.texCoords);
 
   if (isCoronaGraph && length(outColor.xyz) < 0.10 &&
-     ((absy * absy + absx * absx) > 0.25))
+     ((center.y * center.y + center.x * center.x) > 0.25))
   {
     discard;
   }

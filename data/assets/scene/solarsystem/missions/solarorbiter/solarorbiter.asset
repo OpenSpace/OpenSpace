@@ -4,13 +4,14 @@ local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
 
 
---model from https://scifleet.esa.int/model/solar_orbiter/
+-- Model from https://scifleet.esa.int/model/solar_orbiter/
 local models = asset.resource({
   Name = "Solar Orbiter Models",
   Type = "HttpSynchronization",
   Identifier = "solarorbiter_models",
   Version = 1
 })
+
 
 local MissionBegin = "2020 FEB 10 04:56:58"
 local MissionEnd = "2030 NOV 20 04:05:16"
@@ -22,7 +23,7 @@ local SolarOrbiterPosition = {
     Translation = {
       Type = "SpiceTranslation",
       Target = kernels.ID.SolarOrbiter,
-      Observer = coreKernels.ID.SolarSystemBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   GUI = {

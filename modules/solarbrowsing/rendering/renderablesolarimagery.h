@@ -68,7 +68,7 @@ public:
     static openspace::Documentation Documentation();
 
     TransferFunction* transferFunction();
-    const std::unique_ptr<ghoul::opengl::Texture>& imageryTexture() const;
+    const ghoul::opengl::Texture& imageryTexture() const;
     float contrastValue() const;
     float gammaValue() const;
     float scale() const;
@@ -146,9 +146,9 @@ private:
     double _gaussianMoveFactor = 0.0;
     float _size = 0.f;
 
-    glm::dvec3 _position;
-    glm::dmat4 _rotation;
-    glm::vec3 _normal;
+    glm::dvec3 _position = glm::dvec3(0.0);
+    glm::dmat4 _rotation = glm::dmat4(1.0);
+    glm::vec3 _normal = glm::vec3(0.0);
 };
 
 } // namespace openspace

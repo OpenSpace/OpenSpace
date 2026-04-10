@@ -51,7 +51,7 @@ namespace {
 
     // A RenderableSolarImageryProjection projects solar observations from spacecraft
     // instruments onto the surface of the Sun. The renderable uses one or more
-    // [RenderableSolarImagery](#solarbrowsing_renderable_solarimegary) nodes as input and
+    // [RenderableSolarImagery](#solarbrowsing_renderable_solarimagery) nodes as input and
     // maps their imagery onto a solar sphere from the observing spacecraft's perspective.
     //
     // Each dependent RenderableSolarImagery provides the image texture, spacecraft
@@ -63,7 +63,7 @@ namespace {
     // observed from different viewpoints to be compared on the solar surface.
     struct [[codegen::Dictionary(RenderableSolarImageryProjection)]] Parameters {
         // List of scene graph node identifiers that reference
-        // [RenderableSolarImagery](#solarbrowsing_renderable_solarimegary) nodes. The
+        // [RenderableSolarImagery](#solarbrowsing_renderable_solarimagery) nodes. The
         // imagery from these nodes is projected onto the solar surface from the
         // perspective of the observing spacecraft.
         std::vector<std::string> dependentNodes;
@@ -218,7 +218,7 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
         );
 
         // Imagery texture
-        textureImageryUnits[i].bind(*solarImagery->imageryTexture());
+        textureImageryUnits[i].bind(solarImagery->imageryTexture());
         _shader->setUniform(
             std::format("imageryTexture[{}]", i),
             textureImageryUnits[i]
@@ -228,16 +228,17 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
         if (transferFunction && solarImageryEnabled) {
             transferFunctionUnits[i].bind(transferFunction->texture());
             _shader->setUniform(std::format("hasLut[{}]", i), true);
-        } else {
+        }
+        else {
             _shader->setUniform(std::format("hasLut[{}]", i), false);
         }
-        // Must bind all sampler2D, otherwise undefined behaviour
+        // Must bind all sampler2D, otherwise undefined behavior
         _shader->setUniform(std::format("lut[{}]", i), transferFunctionUnits[i]);
 
         solarImageryCount++;
     }
 
-    // Set the rest of the texture units for well defined behaviour
+    // Set the rest of the texture units for well defined behavior
     for (int i = solarImageryCount; i < MaxSpacecraftObservatories; i++) {
         _shader->setUniform(std::format("imageryTexture[{}]", i),textureImageryUnits[i]);
         _shader->setUniform(std::format("lut[{}]", i), transferFunctionUnits[i]);
