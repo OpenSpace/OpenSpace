@@ -81,7 +81,7 @@ Fragment getFragment() {
     discard;
   }
 
-  vec2 center = abs(vec2(0.5 - in_data.texCoords);
+  vec2 center = abs(vec2(0.5 - in_data.texCoords));
 
   if (isCoronaGraph && length(outColor.xyz) < 0.10 &&
      ((center.y * center.y + center.x * center.x) > 0.25))

@@ -42,7 +42,7 @@ uniform vec2 centerPixel;
 void main() {
   out_data.texCoords = in_texCoords;
 
-  vec2 position = (in_position ++ centerPixel) / scale;
+  vec2 position = (in_position + centerPixel) / scale;
 
   vec4 positionClipSpace = modelViewProjectionTransform * vec4(position, 0.0, 1.0);
   vec4 positionScreenSpace = z_normalization(positionClipSpace);

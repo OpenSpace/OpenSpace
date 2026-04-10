@@ -142,10 +142,16 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
     std::vector<double> frames;
     try {
         nlohmann::json json = nlohmann::json::parse(listingString.c_str());
-        frames = json["frames"].get<std::vector<double>>();
+		std::string* error = json["error"].get_ptr<std::string*>();
+		if (error && !error->empty()) {
+			LERROR(*error);
+			return;
+		}
 
+        frames = json["frames"].get<std::vector<double>>();
         if (frames.empty()) {
             LERROR("Failed to acquire frames");
+			return;
         }
 
         // Display the optional message from HelioViewer which contains important

@@ -29,6 +29,7 @@
 
 #include <modules/solarbrowsing/util/structs.h>
 #include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -97,7 +98,9 @@ private:
     void createPlaneAndFrustum(double moveDistance);
     void createPlane() const;
     void createFrustum() const;
+    void updateTimelineRangeInfo();
 
+    TriggerProperty _jumpToStart;
     OptionProperty _activeInstruments;
     FloatProperty _contrastValue;
     BoolProperty _enableBorder;
@@ -107,6 +110,7 @@ private:
     DoubleProperty _moveFactor;
     IntProperty _downsamplingLevel;
 
+    StringProperty _timelineDataRangeInfo;
     BoolProperty _verboseMode;
     IntProperty _predictFramesAfter;
     IntProperty _predictFramesBefore;

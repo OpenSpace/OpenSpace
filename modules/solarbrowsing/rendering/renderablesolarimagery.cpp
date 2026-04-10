@@ -60,6 +60,13 @@ namespace {
         DoubleSided
     };
 
+    constexpr Property::PropertyInfo JumpToStartInfo = {
+        "JumpToStart",
+        "Jump to start of sequence",
+        "Performs a time jump to the start of the sequence.",
+        Property::Visibility::NoviceUser
+    };
+
     constexpr Property::PropertyInfo ActiveInstrumentInfo = {
         "ActiveInstrument",
         "Active instrument",
@@ -103,6 +110,15 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
+    constexpr Property::PropertyInfo TimelineDataRangeInfo = {
+        "TimelineDataRange",
+        "Timeline data range",
+        "Displays the earliest and latest available image data for the currently active "
+        "instrument. Note that data may not be continuously available across the entire "
+        "displayed time span.",
+        Property::Visibility::User
+    };
+
     constexpr Property::PropertyInfo ContrastValueInfo = {
         "ContrastValue",
         "Contrast",
@@ -121,7 +137,7 @@ namespace {
         "VerboseMode",
         "Verbose mode",
         "Output information about image decoding.",
-        Property::Visibility::AdvancedUser
+        Property::Visibility::Developer
     };
 
     constexpr Property::PropertyInfo PredictFramesAfterInfo = {
@@ -213,6 +229,7 @@ openspace::Documentation RenderableSolarImagery::Documentation() {
 
 RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
+    , _jumpToStart(JumpToStartInfo)
     , _activeInstruments(ActiveInstrumentInfo)
     , _contrastValue(ContrastValueInfo, 0.f, -15.f, 15.f)
     , _enableBorder(EnableBorderInfo, false)
@@ -221,6 +238,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     , _gammaValue(GammaValueInfo, 0.9f, 0.1f, 10.f)
     , _moveFactor(MoveFactorInfo, 1.0, 0.0, 1.0)
     , _downsamplingLevel(DownsamplingLevelInfo, 2, 0, 5)
+    , _timelineDataRangeInfo(TimelineDataRangeInfo)
     , _verboseMode(VerboseModeInfo, false)
     , _predictFramesAfter(PredictFramesAfterInfo, 10, 0, 20)
     , _predictFramesBefore(PredictFramesBeforeInfo, 2, 0, 20)
@@ -247,6 +265,17 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
             "information", p.imageDirectory
         ));
     }
+
+    _jumpToStart.onChange([this]() {
+        if (_imageMetadataMap[_currentActiveInstrument].nKeyframes() > 0) {
+            const std::deque<Keyframe<ImageMetadata>>& keyframes =
+                _imageMetadataMap[_currentActiveInstrument].keyframes();
+
+            Keyframe<ImageMetadata> firstFrame = keyframes.front();
+            global::timeManager->setTimeNextFrame(Time(firstFrame.timestamp));
+        }
+    });
+    addProperty(_jumpToStart);
 
     _enableBorder = p.enableBorder.value_or(_enableBorder);
     addProperty(_enableBorder);
@@ -304,8 +333,14 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         );
         _currentKeyframe = NoActiveKeyframe;
         _predictionIsDirty = true;
+        updateTimelineRangeInfo();
     });
     addProperty(_activeInstruments);
+
+    // Data automatically updates when changing the active instrument
+    updateTimelineRangeInfo();
+    _timelineDataRangeInfo.setReadOnly(true);
+    addProperty(_timelineDataRangeInfo);
 
     _downsamplingLevel = p.downsamplingLevel.value_or(_downsamplingLevel);
     _downsamplingLevel.onChange([this]() {
@@ -873,6 +908,27 @@ void RenderableSolarImagery::createFrustum() const {
         sizeof(vertexData),
         vertexData.data(),
         GL_STATIC_DRAW
+    );
+}
+
+void RenderableSolarImagery::updateTimelineRangeInfo() {
+    const Timeline<ImageMetadata>& timeline = _imageMetadataMap[_currentActiveInstrument];
+    const std::deque<Keyframe<ImageMetadata>>& keyframes = timeline.keyframes();
+
+    if (keyframes.empty()) {
+        _timelineDataRangeInfo = std::format(
+            "No image data available",
+            _currentActiveInstrument
+        );
+        return;
+    }
+
+    Keyframe<ImageMetadata> start = keyframes.front();
+    Keyframe<ImageMetadata> end = keyframes.back();
+
+    _timelineDataRangeInfo = std::format(
+        "Data from {} to {}",
+        Time(start.timestamp).ISO8601(), Time(end.timestamp).ISO8601()
     );
 }
 
