@@ -73,9 +73,20 @@ private:
     Timestep* timestepFromIndex(int target);
     void jumpToTimestep(int target);
 
+    std::filesystem::path timestepPath(const Timestep& timestep) const;
+    std::pair<float, float> normalizationRange(const Timestep& timestep) const;
+    bool loadTimestepData(Timestep& timestep);
+    void uploadTimestepTexture(Timestep& timestep);
+    bool ensureTimestepResident(Timestep& timestep);
+    void updateTimestepResidency(const Timestep* currentTimestep);
+    void releaseCpuData(Timestep& timestep);
+    void releaseGpuData(Timestep& timestep);
+    void releaseAllTimesteps();
+
     void loadTimestepMetadata(const std::filesystem::path& path);
 
     OptionProperty _gridType;
+    OptionProperty _normalizationMode;
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
 
     FloatProperty _stepSize;
@@ -93,6 +104,9 @@ private:
     std::map<double, Timestep> _volumeTimesteps;
     std::unique_ptr<BasicVolumeRaycaster> _raycaster;
     bool _invertDataAtZ;
+    float _globalMinValue = 0.f;
+    float _globalMaxValue = 1.f;
+    bool _hasGlobalValueRange = false;
 
     std::shared_ptr<TransferFunction> _transferFunction;
 };

@@ -33,7 +33,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/transferfunction.h>
-#include <openspace/util/histogram.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
@@ -44,12 +43,18 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/opengl/texture.h>
+#include <limits>
 #include <optional>
 #include <type_traits>
 #include <utility>
 
 namespace {
     using namespace openspace;
+
+    enum class NormalizationMode {
+        PerTimestep = 0,
+        Global = 1
+    };
 
     ghoul::opengl::Texture::SamplerInit volumeTextureSamplerInit(VolumeGridType gridType)
     {
@@ -85,6 +90,14 @@ namespace {
         "GridType",
         "Grid type",
         "The grid type to use for the volume.",
+        Property::Visibility::AdvancedUser
+    };
+
+    constexpr Property::PropertyInfo NormalizationModeInfo = {
+        "NormalizationMode",
+        "Normalization mode",
+        "Choose whether each timestep uses its own value range or the whole sequence "
+        "shares a single global value range.",
         Property::Visibility::AdvancedUser
     };
 
@@ -176,6 +189,9 @@ namespace {
         // [[codegen::verbatim(GridTypeInfo.description)]]
         std::optional<std::string> gridType [[codegen::inlist("Spherical", "Cartesian")]];
 
+        // [[codegen::verbatim(NormalizationModeInfo.description)]]
+        std::optional<std::string> normalizationMode [[codegen::inlist("PerTimestep", "Global")]];
+
         // @TODO Missing documentation
         std::optional<ghoul::Dictionary> clipPlanes;
     };
@@ -192,6 +208,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridType(GridTypeInfo)
+    , _normalizationMode(NormalizationModeInfo)
     , _stepSize(StepSizeInfo, 0.02f, 0.001f, 0.1f)
     , _brightness(BrightnessInfo, 0.33f, 0.f, 1.f)
     , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
@@ -221,6 +238,12 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     });
     _gridType = static_cast<int>(VolumeGridType::Cartesian);
 
+    _normalizationMode.addOptions({
+        { static_cast<int>(NormalizationMode::PerTimestep), "Per timestep" },
+        { static_cast<int>(NormalizationMode::Global), "Global" }
+    });
+    _normalizationMode = static_cast<int>(NormalizationMode::PerTimestep);
+
     _stepSize = p.stepSize.value_or(_stepSize);
 
     _brightness = p.brightness.value_or(_brightness);
@@ -235,6 +258,15 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     if (p.gridType.has_value()) {
         const VolumeGridType gridType = parseGridType(*p.gridType);
         _gridType = static_cast<std::underlying_type_t<VolumeGridType>>(gridType);
+    }
+
+    if (p.normalizationMode.has_value()) {
+        const NormalizationMode normalizationMode =
+            *p.normalizationMode == "Global" ?
+                NormalizationMode::Global :
+                NormalizationMode::PerTimestep;
+        _normalizationMode =
+            static_cast<std::underlying_type_t<NormalizationMode>>(normalizationMode);
     }
 
     addProperty(_brightness);
@@ -258,39 +290,18 @@ void RenderableTimeVaryingVolume::initializeGL() {
         }
     }
 
-    // TODO: defer loading of data to later (separate thread or at least not when loading)
-    const VolumeGridType gridType = static_cast<VolumeGridType>(_gridType.value());
-    for (std::pair<const double, Timestep>& p : _volumeTimesteps) {
-        Timestep& t = p.second;
-        const std::string path = std::format(
-            "{}/{}.rawvolume", _sourceDirectory.value(), t.baseName
-        );
-        RawVolumeReader<float> reader(path, t.metadata.dimensions);
-        t.rawVolume = reader.read(_invertDataAtZ);
-
-        const float min = t.metadata.minValue;
-        const float diff = t.metadata.maxValue - t.metadata.minValue;
-        float* data = t.rawVolume->data();
-        for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
-            data[i] = std::clamp((data[i] - min) / diff, 0.f, 1.f);
+    _globalMinValue = std::numeric_limits<float>::max();
+    _globalMaxValue = std::numeric_limits<float>::lowest();
+    _hasGlobalValueRange = !_volumeTimesteps.empty();
+    for (const std::pair<const double, Timestep>& p : _volumeTimesteps) {
+        const Timestep& timestep = p.second;
+        _hasGlobalValueRange = _hasGlobalValueRange && timestep.metadata.hasValueRange;
+        if (!_hasGlobalValueRange) {
+            break;
         }
 
-        t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
-        for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
-            t.histogram->add(data[i]);
-        }
-        // TODO: handle normalization properly for different timesteps + transfer function
-
-        t.texture = std::make_shared<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit {
-                .dimensions = t.metadata.dimensions,
-                .type = GL_TEXTURE_3D,
-                .format = ghoul::opengl::Texture::Format::Red,
-                .dataType = GL_FLOAT
-            },
-            volumeTextureSamplerInit(gridType),
-            reinterpret_cast<std::byte*>(data)
-        );
+        _globalMinValue = std::min(_globalMinValue, timestep.metadata.minValue);
+        _globalMaxValue = std::max(_globalMaxValue, timestep.metadata.maxValue);
     }
 
     _clipPlanes->initialize();
@@ -331,10 +342,18 @@ void RenderableTimeVaryingVolume::initializeGL() {
     addProperty(_rNormalization);
     addProperty(_rUpperBound);
     addProperty(_gridType);
+    addProperty(_normalizationMode);
 
     _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
     _gridType.onChange([this] {
         _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
+        for (std::pair<const double, Timestep>& p : _volumeTimesteps) {
+            releaseGpuData(p.second);
+        }
+    });
+
+    _normalizationMode.onChange([this] {
+        releaseAllTimesteps();
     });
 
     _transferFunctionPath.onChange([this] {
@@ -368,6 +387,146 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::filesystem::pa
         .metadata = metadata
     };
     _volumeTimesteps[t.metadata.time] = std::move(t);
+}
+
+std::filesystem::path RenderableTimeVaryingVolume::timestepPath(
+                                                   const Timestep& timestep) const
+{
+    return std::filesystem::path(_sourceDirectory.value()) /
+        std::format("{}.rawvolume", timestep.baseName.string());
+}
+
+std::pair<float, float> RenderableTimeVaryingVolume::normalizationRange(
+                                                   const Timestep& timestep) const
+{
+    const NormalizationMode normalizationMode =
+        static_cast<NormalizationMode>(_normalizationMode.value());
+
+    if (normalizationMode == NormalizationMode::Global && _hasGlobalValueRange) {
+        return { _globalMinValue, _globalMaxValue };
+    }
+
+    return { timestep.metadata.minValue, timestep.metadata.maxValue };
+}
+
+bool RenderableTimeVaryingVolume::loadTimestepData(Timestep& timestep) {
+    if (timestep.rawVolume) {
+        timestep.inRam = true;
+        return true;
+    }
+
+    try {
+        RawVolumeReader<float> reader(timestepPath(timestep), timestep.metadata.dimensions);
+        timestep.rawVolume = reader.read(_invertDataAtZ);
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
+        return false;
+    }
+    catch (const std::exception& e) {
+        LERROR(std::format(
+            "Failed to load timestep '{}' from '{}': {}",
+            timestep.baseName.string(),
+            timestepPath(timestep),
+            e.what()
+        ));
+        return false;
+    }
+
+    const auto [min, max] = normalizationRange(timestep);
+    const float diff = max - min;
+    float* data = timestep.rawVolume->data();
+    if (diff > 0.f) {
+        for (size_t i = 0; i < timestep.rawVolume->nCells(); i++) {
+            data[i] = std::clamp((data[i] - min) / diff, 0.f, 1.f);
+        }
+    }
+    else {
+        for (size_t i = 0; i < timestep.rawVolume->nCells(); i++) {
+            data[i] = 0.f;
+        }
+    }
+
+    timestep.inRam = true;
+    return true;
+}
+
+void RenderableTimeVaryingVolume::uploadTimestepTexture(Timestep& timestep) {
+    if (!timestep.rawVolume) {
+        return;
+    }
+
+    const VolumeGridType gridType = static_cast<VolumeGridType>(_gridType.value());
+    timestep.texture = std::make_shared<ghoul::opengl::Texture>(
+        ghoul::opengl::Texture::FormatInit {
+            .dimensions = timestep.metadata.dimensions,
+            .type = GL_TEXTURE_3D,
+            .format = ghoul::opengl::Texture::Format::Red,
+            .dataType = GL_FLOAT
+        },
+        volumeTextureSamplerInit(gridType),
+        reinterpret_cast<std::byte*>(timestep.rawVolume->data())
+    );
+    timestep.onGpu = true;
+}
+
+bool RenderableTimeVaryingVolume::ensureTimestepResident(Timestep& timestep) {
+    if (timestep.texture) {
+        timestep.onGpu = true;
+        return true;
+    }
+
+    if (!loadTimestepData(timestep)) {
+        return false;
+    }
+
+    uploadTimestepTexture(timestep);
+    releaseCpuData(timestep);
+    return timestep.texture != nullptr;
+}
+
+void RenderableTimeVaryingVolume::updateTimestepResidency(const Timestep* currentTimestep) {
+    const int currentIndex = timestepIndex(currentTimestep);
+
+    int index = 0;
+    for (std::pair<const double, Timestep>& p : _volumeTimesteps) {
+        Timestep& timestep = p.second;
+        const bool keepResident = currentIndex >= 0 && std::abs(index - currentIndex) <= 1;
+
+        if (keepResident) {
+            if (!ensureTimestepResident(timestep)) {
+                releaseCpuData(timestep);
+                releaseGpuData(timestep);
+            }
+        }
+        else {
+            if (timestep.texture) {
+                releaseGpuData(timestep);
+            }
+            if (timestep.rawVolume) {
+                releaseCpuData(timestep);
+            }
+        }
+
+        index++;
+    }
+}
+
+void RenderableTimeVaryingVolume::releaseCpuData(Timestep& timestep) {
+    timestep.rawVolume = nullptr;
+    timestep.inRam = false;
+}
+
+void RenderableTimeVaryingVolume::releaseGpuData(Timestep& timestep) {
+    timestep.texture = nullptr;
+    timestep.onGpu = false;
+}
+
+void RenderableTimeVaryingVolume::releaseAllTimesteps() {
+    for (std::pair<const double, Timestep>& p : _volumeTimesteps) {
+        releaseCpuData(p.second);
+        releaseGpuData(p.second);
+    }
 }
 
 RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimestep() {
@@ -444,11 +603,12 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
 
     if (_raycaster) {
         Timestep* t = currentTimestep();
+        updateTimestepResidency(t);
 
         // Set scale and translation matrices:
         // The original data cube is a unit cube centered in 0, that is with lower bound
         // from (-0.5, -0.5, -0.5) and upper bound (0.5, 0.5, 0.5)
-        if (t && t->texture) {
+        if (t && ensureTimestepResident(*t)) {
             if (_raycaster->gridType() == VolumeGridType::Cartesian) {
                 const glm::dvec3 scale =
                     t->metadata.upperDomainBound - t->metadata.lowerDomainBound;
@@ -493,6 +653,8 @@ bool RenderableTimeVaryingVolume::isReady() const {
 }
 
 void RenderableTimeVaryingVolume::deinitializeGL() {
+    releaseAllTimesteps();
+
     if (_raycaster) {
         global::raycasterManager->detachRaycaster(*_raycaster);
         _raycaster = nullptr;
