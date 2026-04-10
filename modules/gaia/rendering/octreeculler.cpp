@@ -62,7 +62,7 @@ glm::vec2 OctreeCuller::getNodeSizeInPixels(const std::vector<glm::dvec4>& corne
 
     createNodeBounds(corners, mvp);
 
-    // Screen space is mapped to [-1, 1] so divide by 2 and multiply with screen size.
+    // Screen space is mapped to [-1, 1] so divide by 2 and multiply with screen size
     glm::vec3 size = (_nodeBounds.max - _nodeBounds.min) / 2.f;
     size = glm::abs(size);
     return glm::vec2(size.x * screenSize.x, size.y * screenSize.y);
@@ -71,7 +71,7 @@ glm::vec2 OctreeCuller::getNodeSizeInPixels(const std::vector<glm::dvec4>& corne
 void OctreeCuller::createNodeBounds(const std::vector<glm::dvec4>& corners,
                                     const glm::dmat4& mvp)
 {
-    // Create a bounding box in clipping space from node boundaries.
+    // Create a bounding box in clipping space from node boundaries
     _nodeBounds = AABB3();
 
     for (size_t i = 0; i < 8; i++) {

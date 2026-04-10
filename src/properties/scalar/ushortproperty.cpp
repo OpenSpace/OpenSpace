@@ -28,7 +28,7 @@
 
 namespace openspace {
 
-UShortProperty::UShortProperty(Property::PropertyInfo info, unsigned short value,
+UShortProperty::UShortProperty(PropertyInfo info, unsigned short value,
                                unsigned short minValue, unsigned short maxValue,
                                unsigned short stepValue)
     : NumericalProperty<unsigned short>(

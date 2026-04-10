@@ -33,7 +33,9 @@
 
 namespace openspace {
 
-FieldlinesModule::FieldlinesModule() : OpenSpaceModule(Name) {}
+FieldlinesModule::FieldlinesModule()
+    : OpenSpaceModule(Name)
+{}
 
 void FieldlinesModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul::TemplateFactory<Renderable>* fRenderable =

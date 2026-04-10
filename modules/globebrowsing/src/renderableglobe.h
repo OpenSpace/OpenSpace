@@ -58,7 +58,7 @@ class Layer;
 struct BoundingHeights {
     float min;
     float max;
-    bool available;
+    bool isAvailable;
     bool tileOK;
 };
 
@@ -276,7 +276,7 @@ private:
     Chunk _leftRoot;  // Covers all negative longitudes
     Chunk _rightRoot; // Covers all positive longitudes
 
-    // Two different shader programs. One for global and one for local rendering.
+    // Two different shader programs. One for global and one for local rendering
     struct {
         std::unique_ptr<ghoul::opengl::ProgramObject> program;
         bool updatedSinceLastCall = false;

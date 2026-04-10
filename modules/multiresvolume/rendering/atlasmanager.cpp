@@ -39,12 +39,12 @@ AtlasManager::AtlasManager(TSP* tsp)
     , _nBricksPerDim(_tsp->header().xNumBricks)
     , _nOtLeaves(_nBricksPerDim * _nBricksPerDim * _nBricksPerDim)
     , _nOtNodes(_tsp->numOTNodes())
-    , _nOtLevels(static_cast<unsigned int>(log(_nOtLeaves) / log(8) + 1))
+    , _nOtLevels(static_cast<unsigned int>(std::log(_nOtLeaves) / std::log(8) + 1))
     , _brickSize(_nBrickVals * sizeof(float))
     , _nBrickVals(_paddedBrickDim * _paddedBrickDim * _paddedBrickDim)
     , _volumeSize(_brickSize * _nOtLeaves)
-    , _nBricksInAtlas(_nBricksInMap)
     , _paddedBrickDim(_tsp->paddedBrickDim())
+    , _nBricksInAtlas(_nBricksInMap)
     , _nBricksInMap(_nBricksPerDim * _nBricksPerDim * _nBricksPerDim)
     , _atlasDim(_nBricksPerDim * _paddedBrickDim)
     , _atlasMap(std::vector<unsigned int>(_nOtLeaves, NotUsedIndex))
@@ -55,13 +55,13 @@ AtlasManager::AtlasManager(TSP* tsp)
     }
 
     _textureAtlas = new ghoul::opengl::Texture(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(_atlasDim, _atlasDim, _atlasDim),
             .type = GL_TEXTURE_3D,
             .format = ghoul::opengl::Texture::Format::RGBA,
             .dataType = GL_FLOAT
         },
-        ghoul::opengl::Texture::SamplerInit{}
+        ghoul::opengl::Texture::SamplerInit {}
     );
 
     glCreateBuffers(2, _pboHandle);
@@ -69,7 +69,7 @@ AtlasManager::AtlasManager(TSP* tsp)
     glCreateBuffers(1, &_atlasMapBuffer);
     glNamedBufferData(
         _atlasMapBuffer,
-        sizeof(GLint) * _nBricksInMap,
+        _nBricksInMap * sizeof(GLint),
         nullptr,
         GL_DYNAMIC_READ
     );
@@ -141,7 +141,7 @@ void AtlasManager::updateAtlas(BufferIndex bufferIndex, std::vector<int>& brickI
     pboToAtlas(bufferIndex);
 
     void* to = glMapNamedBuffer(_atlasMapBuffer, GL_WRITE_ONLY);
-    std::memcpy(to, _atlasMap.data(), sizeof(GLint)*_atlasMap.size());
+    std::memcpy(to, _atlasMap.data(), _atlasMap.size() * sizeof(GLint));
     glUnmapNamedBuffer(_atlasMapBuffer);
 }
 
@@ -202,9 +202,9 @@ void AtlasManager::fillVolume(float* in, float* out, unsigned int linearAtlasCoo
     int y = (linearAtlasCoords / _nBricksPerDim) % _nBricksPerDim;
     int z = linearAtlasCoords / _nBricksPerDim / _nBricksPerDim;
 
-    unsigned int xMin = x*_paddedBrickDim;
-    unsigned int yMin = y*_paddedBrickDim;
-    unsigned int zMin = z*_paddedBrickDim;
+    unsigned int xMin = x * _paddedBrickDim;
+    unsigned int yMin = y * _paddedBrickDim;
+    unsigned int zMin = z * _paddedBrickDim;
     unsigned int xMax = xMin + _paddedBrickDim;
     unsigned int yMax = yMin + _paddedBrickDim;
     unsigned int zMax = zMin + _paddedBrickDim;
@@ -215,7 +215,6 @@ void AtlasManager::fillVolume(float* in, float* out, unsigned int linearAtlasCoo
             for (unsigned int xValCoord = xMin; xValCoord<xMax; xValCoord++) {
                 unsigned int idx = xValCoord + yValCoord * _atlasDim +
                                    zValCoord * _atlasDim * _atlasDim;
-
                 out[idx] = in[from];
                 from++;
             }

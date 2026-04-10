@@ -53,7 +53,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -68,6 +68,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
+#include <gdal.h>
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -75,8 +76,6 @@
 #include <limits>
 #include <optional>
 #include <utility>
-
-#include <gdal.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -129,8 +128,7 @@ namespace {
                                                        int nSubdatasets)
     {
         // Idea: Iterate over the list of sublayers keeping a current layer and identify
-        //       it by its number.  If this number changes, we know that we have a new
-        //       layer
+        // it by its number.  If this number changes, we know that we have a new layer
 
         using Layer = GlobeBrowsingModule::Layer;
         std::vector<Layer> result;
@@ -365,7 +363,7 @@ void GlobeBrowsingModule::goToChunk(const SceneGraphNode& node,
 
     const double altitude = altitudeFromCamera(node);
 
-    goToGeodetic3(node, { pointPosition, altitude });
+    goToGeodetic3(node, { .geodetic2 = pointPosition, .height = altitude });
 }
 
 const RenderableGlobe* GlobeBrowsingModule::castFocusNodeRenderableToGlobe() {
@@ -412,8 +410,6 @@ void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string glob
         downloadFunction,
         url
     );
-
-    //_capabilitiesMap[name] = downloadFunction(url);
 
     _urlList.emplace(std::move(globe), UrlInfo{ std::move(name), std::move(url) });
 }

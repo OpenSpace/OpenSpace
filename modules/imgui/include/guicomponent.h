@@ -91,7 +91,7 @@ protected:
     /// `true` if this component is enabled and visible on the screen
     BoolProperty _isEnabled;
 
-    /// if `true` this window is currently collapsed. This setting mirrors the ImGui
+    /// If `true` this window is currently collapsed. This setting mirrors the ImGui
     /// internal state of the window
     BoolProperty _isCollapsed;
 

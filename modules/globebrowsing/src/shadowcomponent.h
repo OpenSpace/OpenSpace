@@ -85,7 +85,7 @@ private:
 
     ShadowMapData _shadowData;
 
-    // DEBUG
+    // Debug
     TriggerProperty _saveDepthTexture;
     IntProperty _distanceFraction;
     BoolProperty _enabled;
@@ -118,7 +118,7 @@ private:
 
     std::unique_ptr<Camera> _lightCamera;
 
-    // DEBUG
+    // Debug
     bool _executeDepthTextureSave = false;
 };
 

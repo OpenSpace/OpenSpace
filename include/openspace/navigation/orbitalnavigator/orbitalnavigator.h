@@ -1,0 +1,348 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2026                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#ifndef __OPENSPACE_CORE___ORBITALNAVIGATOR___H__
+#define __OPENSPACE_CORE___ORBITALNAVIGATOR___H__
+
+#include <openspace/properties/propertyowner.h>
+
+#include <openspace/navigation/orbitalnavigator/directmanipulation.h>
+#include <openspace/navigation/orbitalnavigator/idlemotion.h>
+#include <openspace/navigation/orbitalnavigator/orbitalinputhandler.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/util/interpolator.h>
+#include <openspace/util/syncdata.h>
+#include <ghoul/glm.h>
+#include <optional>
+#include <string_view>
+#include <utility>
+
+namespace openspace {
+
+class Camera;
+struct CameraPose;
+struct CameraRotationDecomposition;
+struct LuaLibrary;
+class SceneGraphNode;
+struct SurfacePositionHandle;
+class Syncable;
+
+class OrbitalNavigator : public PropertyOwner {
+public:
+    OrbitalNavigator();
+
+    void updateCamera(double deltaTime);
+
+    void updateCameraStateFromStates(double deltaTime);
+    void updateCameraScalingFromAnchor(double deltaTime);
+    void resetVelocities();
+
+    /**
+     * This function should be called on every camera interaction: for example when
+     * navigating using an input device, changing the focus node or starting a path or a
+     * session recording playback.
+     */
+    void markCameraInteraction();
+    void tickMovementTimer(float deltaTime);
+
+    Camera* camera() const;
+    void setCamera(Camera* camera);
+    void clearPreviousState();
+
+    void setFocusNode(const SceneGraphNode* node, bool resetVelocities = true);
+    void setFocusNode(const std::string& identifier, bool resetVelocities = true);
+    void setAnchorNode(const std::string& identifier);
+    void setAimNode(const std::string& identifier);
+
+    void startRetargetAnchor();
+    void startRetargetAim();
+    float retargetInterpolationTime() const;
+    void setRetargetInterpolationTime(float durationInSeconds);
+    void updatePreviousStateVariables();
+
+    void setMinimumAllowedDistance(float distance);
+    void setMaximumAllowedDistance(float distance);
+
+    JoystickCameraStates& joystickStates();
+    WebsocketCameraStates& websocketStates();
+    ScriptCameraStates& scriptStates();
+
+    bool shouldFollowAnchorRotation(const glm::dvec3& cameraPosition) const;
+    bool followingAnchorRotation() const;
+    const SceneGraphNode* anchorNode() const;
+    const SceneGraphNode* aimNode() const;
+
+    bool hasRotationalFriction() const;
+    bool hasZoomFriction() const;
+    bool hasRollFriction() const;
+
+    double minAllowedDistance() const;
+    double maxAllowedDistance() const;
+
+    glm::dvec3 anchorNodeToCameraVector() const;
+    glm::quat anchorNodeToCameraRotation() const;
+
+    /**
+     * Compute a camera position that pushed the camera position to a valid position over
+     * the anchor node, accounting for the minimal allowed distance.
+     */
+    glm::dvec3 pushToSurfaceOfAnchor(const glm::dvec3& cameraPosition) const;
+
+    void triggerIdleMotion(std::string_view choice);
+
+    void updateAnchorOnSync();
+    std::vector<Syncable*> syncables();
+
+    /**
+     * \return The Lua library that contains all Lua functions available to affect the
+     *         OrbitalNavigator
+     */
+    static LuaLibrary luaLibrary();
+
+private:
+    using Displacement = std::pair<glm::dvec3, glm::dvec3>;
+
+    struct Friction : public PropertyOwner {
+        Friction();
+
+        BoolProperty roll;
+        BoolProperty rotational;
+        BoolProperty zoom;
+
+        FloatProperty friction;
+    };
+
+    void updateAnchorNode(const SceneGraphNode* anchorNode);
+    void updateAimNode(const SceneGraphNode* aimNode);
+
+    void updatePreviousAnchorState();
+    void updatePreviousAimState();
+
+    Camera* _camera = nullptr;
+
+    Friction _friction;
+
+    /// Anchor: Node to follow and orbit
+    StringProperty _anchor;
+
+    /// Aim: Node to look at (when camera direction is reset), empty string means same as
+    /// anchor. If these are the same node we call it the `focus` node
+    StringProperty _aim;
+
+    /// Reset camera direction to the anchor node
+    TriggerProperty _retargetAnchor;
+    /// Reset camera direction to the aim node
+    TriggerProperty _retargetAim;
+
+    BoolProperty _followAnchorNodeRotation;
+    FloatProperty _followAnchorNodeRotationDistance;
+
+
+    struct LimitZoom : public PropertyOwner {
+        LimitZoom();
+
+        BoolProperty enableZoomInLimit;
+        FloatProperty minimumAllowedDistance;
+
+        BoolProperty enableZoomOutLimit;
+        FloatProperty maximumAllowedDistance;
+    };
+
+    LimitZoom _limitZoom;
+
+    BoolProperty _disableZoom;
+    BoolProperty _disableRoll;
+
+    BoolProperty _useAdaptiveStereoscopicDepth;
+    FloatProperty _stereoscopicDepthOfFocusSurface;
+    FloatProperty _staticViewScaleExponent;
+
+    BoolProperty _constantVelocityFlight;
+
+    FloatProperty _retargetInterpolationTime;
+    FloatProperty _stereoInterpolationTime;
+    FloatProperty _followRotationInterpolationTime;
+
+    BoolProperty _shouldRotateAroundUp;
+
+    enum class UpDirectionChoice {
+        XAxis = 0,
+        YAxis,
+        ZAxis
+    };
+    OptionProperty _upToUseForRotation;
+
+    OrbitalInputHandler _inputHandler;
+
+    SyncData<std::string> _syncedAnchorNode;
+    const SceneGraphNode* _anchorNode = nullptr;
+    const SceneGraphNode* _aimNode = nullptr;
+
+    std::optional<glm::dvec3>_previousAnchorNodePosition;
+    std::optional<glm::dquat> _previousAnchorNodeRotation;
+    std::optional<glm::dvec3> _previousAimNodePosition;
+    bool _resetVelocitiesOnAnchorChange = true;
+
+    double _currentCameraToSurfaceDistance = 0.0;
+    bool _directlySetStereoDistance = false;
+
+    Interpolator<double> _retargetAimInterpolator;
+    Interpolator<double> _retargetAnchorInterpolator;
+    Interpolator<double> _cameraToSurfaceDistanceInterpolator;
+    Interpolator<double> _followRotationInterpolator;
+
+    IdleMotion _idleMotion;
+
+    DirectManipulation _directManipulation;
+
+    // Timer that prevents the camera position event to trigger too often
+    float _movementTimer = 0.f;
+
+    /**
+     * Moves and rotates the camera around the anchor node in order to maintain the screen
+     * space position of the aim node. Also interpolates to the aim node, when retargeting
+     * the aim.
+     */
+    CameraPose followAim(CameraPose pose, const glm::dvec3& cameraToAnchor,
+        const Displacement& anchorToAim);
+
+    /**
+     * Perform a camera roll on the local camera rotation.
+     *
+     * \return A local camera rotation modified with a roll
+     */
+    glm::dquat roll(double deltaTime, const glm::dquat& localCameraRotation) const;
+
+    /**
+     * Performs rotation around the cameras x and y axes.
+     *
+     * \return A local camera rotation modified with two degrees of freedom
+     */
+    glm::dquat rotateLocally(double deltaTime,
+        const glm::dquat& localCameraRotation) const;
+
+    /**
+     * Interpolates the camera rotation based on active interpolators.
+     *
+     * \return A new rotation quaternion
+     */
+    glm::dquat interpolateLocalRotation(double deltaTime,
+        const glm::dquat& localCameraRotation);
+
+    Displacement interpolateRetargetAim(double deltaTime, const CameraPose& pose,
+        const glm::dvec3& prevCameraToAnchor, Displacement anchorToAim);
+
+    double interpolateCameraToSurfaceDistance(double deltaTime, double currentDistance,
+        double targetDistance);
+
+    /**
+     * Modify the camera position and global rotation to rotate around the up vector of
+     * the current anchor based on x-wise input.
+     *
+     * The up-vector to rotate around is determined by the "_upToUseForRotation" property
+     */
+    void rotateAroundAnchorUp(double deltaTime, double speedScale,
+        glm::dvec3& cameraPosition, glm::dquat& globalCameraRotation);
+
+    /**
+     * Translates the horizontal direction. If far from the anchor object, this will
+     * result in an orbital rotation around the object. This function does not affect the
+     * rotation but only the position.
+     *
+     * \return A position vector adjusted in the horizontal direction
+     */
+    glm::dvec3 translateHorizontally(double deltaTime, double speedScale,
+        const glm::dvec3& cameraPosition, const glm::dvec3& objectPosition,
+        const glm::dquat& globalCameraRotation,
+        const SurfacePositionHandle& positionHandle) const;
+
+    /**
+     * Adds rotation to the camera position so that it follows the rotation of the anchor
+     * node defined by the differential \p focusNodeRotationDiff.
+     *
+     * \return A position updated with the rotation defined by \p anchorNodeRotationDiff
+     */
+    glm::dvec3 followAnchorNodeRotation(const glm::dvec3& cameraPosition,
+        const glm::dvec3& objectPosition, const glm::dquat& focusNodeRotationDiff) const;
+
+    /**
+     * Updates the global rotation so that it points towards the anchor node.
+     *
+     * \return A global rotation quaternion defining a rotation towards the anchor node
+     */
+    glm::dquat rotateGlobally(const glm::dquat& globalCameraRotation,
+        const glm::dquat& focusNodeRotationDiff,
+        const SurfacePositionHandle& positionHandle) const;
+
+    /**
+     * Translates the camera position towards or away from the anchor node.
+     *
+     * \return A position vector adjusted in the vertical direction
+     */
+    glm::dvec3 translateVertically(double deltaTime, const glm::dvec3& cameraPosition,
+        const glm::dvec3& objectPosition,
+        const SurfacePositionHandle& positionHandle) const;
+
+    /**
+     * Rotates the camera around the out vector of the surface.
+     *
+     * \return A quaternion adjusted to rotate around the out vector of the surface
+     */
+    glm::dquat rotateHorizontally(double deltaTime,
+        const glm::dquat& globalCameraRotation,
+        const SurfacePositionHandle& positionHandle) const;
+
+    /**
+     * Push the camera out to the surface of the object.
+     *
+     * \return A position vector adjusted to be at least _minimumAllowedDistance meters
+     *         above the actual surface of the object
+     */
+    glm::dvec3 pushToSurface(const glm::dvec3& cameraPosition,
+        const glm::dvec3& objectPosition,
+        const SurfacePositionHandle& positionHandle) const;
+
+    /**
+     * Interpolates between rotationDiff and a 0 rotation.
+     */
+    glm::dquat interpolateRotationDifferential(double deltaTime,
+        const glm::dvec3 cameraPosition, const glm::dquat& rotationDiff);
+
+    /**
+     * Get the vector from the camera to the surface of the anchor object in world space.
+     */
+    glm::dvec3 cameraToSurfaceVector(const glm::dvec3& cameraPos,
+        const glm::dvec3& centerPos, const SurfacePositionHandle& posHandle);
+
+    double rotationSpeedScaleFromCameraHeight(const glm::dvec3& cameraPosition,
+        const SurfacePositionHandle& positionHandle) const;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_CORE___ORBITALNAVIGATOR___H__

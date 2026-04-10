@@ -70,6 +70,7 @@ private:
     std::vector<std::function<void()>> _renderFunctions;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<ghoul::opengl::Texture> _depthTexture;
 };
 
 } // namespace openspace

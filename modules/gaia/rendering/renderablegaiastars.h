@@ -132,7 +132,7 @@ private:
     OptionProperty _fileReaderOption;
     OptionProperty _renderMode;
     IntProperty _nRenderedStars;
-    // LongLongProperty doesn't show up in menu, use FloatProperty instead.
+    // LongLongProperty doesn't show up in menu, use FloatProperty instead
     FloatProperty _cpuRamBudgetProperty;
     FloatProperty _gpuStreamBudgetProperty;
     FloatProperty _maxGpuMemoryPercent;
@@ -142,7 +142,7 @@ private:
     UniformCache(model, view, viewScaling, projection, renderOption, luminosityMultiplier,
         cutOffThreshold, time, colorTexture, nChunksToRender, valuesPerStar,
         maxStarsPerNode, posXThreshold, posYThreshold, posZThreshold, gMagThreshold,
-        bpRpThreshold, distThreshold)
+        bpRpThreshold, distThreshold, opacity)
         _uniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programTM;

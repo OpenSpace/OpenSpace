@@ -31,7 +31,7 @@ namespace openspace {
 
 class DoubleListProperty : public ListProperty<double> {
 public:
-    explicit DoubleListProperty(Property::PropertyInfo info,
+    explicit DoubleListProperty(PropertyInfo info,
         std::vector<double> values = std::vector<double>());
 
     std::string_view className() const override final;

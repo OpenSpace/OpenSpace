@@ -28,9 +28,9 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keyboardinputstate.h>
-#include <openspace/navigation/navigationhandler.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <algorithm>
@@ -129,7 +129,9 @@ namespace {
         return static_cast<int16_t>(key);
     }
 
-    // This is needed to avoid the backspace up event to trigger backspace.
+    /**
+     * This is needed to avoid the backspace up event to trigger backspace.
+     */
     int16_t mapFromGlfwToUnmodifiedCharacter(Key key) {
         switch (key) {
             case Key::BackSpace:   return 127;
@@ -269,7 +271,7 @@ void EventHandler::initialize() {
 
             _validTouchStates.emplace_back(input);
 
-            global::interactionMonitor->markInteraction();
+            global::interactionHandler->markInteraction();
             return true;
         }
     );
@@ -304,7 +306,7 @@ void EventHandler::initialize() {
                 _leftButton.down = true;
                 _browserInstance->sendMouseMoveEvent(mouseEvent());
 #endif // WIN32
-                global::interactionMonitor->markInteraction();
+                global::interactionHandler->markInteraction();
                 return true;
             }
             else if (it != _validTouchStates.cend()) {
@@ -366,12 +368,12 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action,
         return false;
     }
 
-    global::interactionMonitor->markInteraction();
+    global::interactionHandler->markInteraction();
     MouseButtonState& state = (button == MouseButton::Left) ? _leftButton : _rightButton;
 
     int clickCount = BrowserInstance::SingleClick;
 
-    // click or release?
+    // Click or release?
     if (action == MouseAction::Release) {
         state.down = false;
     }
@@ -403,7 +405,7 @@ bool EventHandler::isDoubleClick(const MouseButtonState& button) const {
         return false;
     }
 
-    // check position
+    // Check position
     const float maxDist = maxDoubleClickDistance() / 2.f;
     const bool x = std::abs(_mousePosition.x - button.lastClickPosition.x) < maxDist;
     const bool y = std::abs(_mousePosition.y - button.lastClickPosition.y) < maxDist;
@@ -418,7 +420,7 @@ bool EventHandler::mousePositionCallback(double x, double y) {
     _mousePosition =
         global::windowDelegate->mousePositionViewportRelative(_mousePosition);
     _browserInstance->sendMouseMoveEvent(mouseEvent());
-    global::interactionMonitor->markInteraction();
+    global::interactionHandler->markInteraction();
 
     // Let the mouse event trickle on
     return false;
@@ -426,7 +428,7 @@ bool EventHandler::mousePositionCallback(double x, double y) {
 
 bool EventHandler::mouseWheelCallback(glm::ivec2 delta) {
 #ifdef WIN32
-    // scroll wheel returns very low numbers on Windows machines
+    // Scroll wheel returns very low numbers on Windows machines
     delta.x *= 50;
     delta.y *= 50;
 #endif // WIN32
@@ -463,7 +465,7 @@ bool EventHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction act
     // The `Enter` key does not produce a `charCallback` event like other character keys.
     // Some web elements (e.g., buttons) rely on receiving a char event in addition to
     // `keydown` to properly register an `onClick`. Since GLFW does not generate this
-    // event for Enter, we manually invoke it to ensure expected behavior.
+    // event for Enter, we manually invoke it to ensure expected behavior
     constexpr int EnterKeyCode = 13;
     if (keyEvent.windows_key_code == EnterKeyCode && keyEvent.type == KEYEVENT_KEYDOWN) {
         return charCallback(static_cast<unsigned int>(Key::Enter), modifier);
@@ -549,7 +551,7 @@ CefTouchEvent EventHandler::touchEvent(const TouchInput& input,
     event.y = windowPos.y;
     event.type = eventType;
     const std::vector<std::pair<Key, KeyModifier>>& keyMods =
-        global::navigationHandler->keyboardInputState().pressedKeys();
+        global::interactionHandler->keyboardInputState().pressedKeys();
     for (const std::pair<Key, KeyModifier>& p : keyMods) {
         const KeyModifier mods = p.second;
         event.modifiers |= static_cast<uint32_t>(mapToCefModifiers(mods));

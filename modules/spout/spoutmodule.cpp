@@ -38,7 +38,9 @@
 
 namespace openspace {
 
-SpoutModule::SpoutModule() : OpenSpaceModule(Name) {}
+SpoutModule::SpoutModule()
+    : OpenSpaceModule(Name)
+{}
 
 void SpoutModule::internalInitialize(const ghoul::Dictionary&) {
 #ifdef WIN32

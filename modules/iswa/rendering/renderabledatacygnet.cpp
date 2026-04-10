@@ -99,15 +99,18 @@ namespace {
         "", // @TODO Missing documentation
         Property::Visibility::Developer
     };
+
+    struct [[codegen::Dictionary(RenderableDataCygnet)]] Parameters {};
 } // namespace
+#include "renderabledatacygnet_codegen.cpp"
 
 namespace openspace {
 
 Documentation RenderableDataCygnet::Documentation() {
-    openspace::Documentation doc = RenderableIswaCygnet::Documentation();
-    doc.name = "RenderableDataCygnet";
-    doc.id = "iswa_renderable_datacygnet";
-    return doc;
+    return codegen::doc<Parameters>(
+        "iswa_renderable_datacygnet",
+        RenderableIswaCygnet::Documentation()
+    );
 }
 
 RenderableDataCygnet::RenderableDataCygnet(const ghoul::Dictionary& dictionary)
@@ -133,7 +136,7 @@ RenderableDataCygnet::RenderableDataCygnet(const ghoul::Dictionary& dictionary)
 RenderableDataCygnet::~RenderableDataCygnet() {}
 
 bool RenderableDataCygnet::updateTexture() {
-    const std::vector<float*>& data = textureData();
+    std::vector<std::vector<float>> data = textureData();
 
     if (data.empty()) {
         return false;
@@ -151,30 +154,32 @@ bool RenderableDataCygnet::updateTexture() {
     }
 
     for (int option : selectedOptionsIndices) {
-        float* values = data[option];
-        if (!values) {
+        const std::vector<float>& values = data[option];
+        if (values.empty()) {
             continue;
         }
 
         if (!_textures[option]) {
             auto texture = std::make_unique<ghoul::opengl::Texture>(
-                ghoul::opengl::Texture::FormatInit{
+                ghoul::opengl::Texture::FormatInit {
                     .dimensions = _textureDimensions,
                     .type = GL_TEXTURE_2D,
                     .format = ghoul::opengl::Texture::Format::Red,
                     .dataType = GL_FLOAT
                 },
-                ghoul::opengl::Texture::SamplerInit{
+                ghoul::opengl::Texture::SamplerInit {
                     .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
                     .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
                 },
-                reinterpret_cast<std::byte*>(values)
+                reinterpret_cast<const std::byte*>(values.data())
             );
 
             _textures[option] = std::move(texture);
         }
         else {
-            _textures[option]->setPixelData(reinterpret_cast<std::byte*>(values));
+            _textures[option]->setPixelData(
+                reinterpret_cast<const std::byte*>(values.data())
+            );
         }
         texturesReady = true;
     }
@@ -228,7 +233,7 @@ void RenderableDataCygnet::setTextureUniforms() {
     for (const std::string& option : selectedOptions) {
         auto it = std::find(options.begin(), options.end(), option);
         ghoul_assert(it != options.end(), "Selected option must be in all options");
-        int idx = static_cast<int>(std::distance(options.begin(), it));
+        const int idx = static_cast<int>(std::distance(options.begin(), it));
         selectedOptionsIndices.push_back(idx);
     }
 
@@ -255,11 +260,11 @@ void RenderableDataCygnet::setTextureUniforms() {
 
     if (activeTextures > 0 &&
         selectedOptionsIndices.back() >= static_cast<int>(_transferFunctions.size()))
-        {
+    {
             activeTransferfunctions = 1;
-        }
+    }
 
-    // This array + txUnits will use up 12 Texture Units, which is alot
+    // This array + txUnits will use up 12 Texture Units, which is a lot
     ghoul::opengl::TextureUnit tfUnits[MaxTextures];
     j = 0;
 
@@ -289,17 +294,14 @@ void RenderableDataCygnet::setTextureUniforms() {
 }
 
 void RenderableDataCygnet::readTransferFunctions(std::string tfPath) {
-    std::ifstream tfFile(absPath(std::move(tfPath)));
+    std::ifstream tfFile = std::ifstream(absPath(std::move(tfPath)));
 
     std::vector<TransferFunction> tfs;
-
     if (tfFile.is_open()) {
         std::string line;
         while (ghoul::getline(tfFile, line)) {
             tfs.emplace_back(absPath(line).string());
         }
-
-        tfFile.close();
     }
 
     if (!tfs.empty()) {
@@ -313,7 +315,7 @@ void RenderableDataCygnet::fillOptions(const std::string& source) {
         _textureDimensions
     );
 
-    for (int i = 0; i < static_cast<int>(options.size()); i++) {
+    for (size_t i = 0; i < options.size(); i++) {
         _dataOptions.addOption(options[i]);
         _textures.push_back(nullptr);
     }
@@ -350,7 +352,7 @@ void RenderableDataCygnet::setPropertyCallbacks() {
 
     _dataOptions.onChange([this]() {
         if (_dataOptions.value().size() > MaxTextures) {
-            LWARNING("Too many options chosen, max is " + std::to_string(MaxTextures));
+            LWARNING(std::format("Too many options chosen, max is {}", MaxTextures));
         }
         updateTexture();
     });

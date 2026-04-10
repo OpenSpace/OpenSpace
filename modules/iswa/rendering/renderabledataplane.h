@@ -52,7 +52,7 @@ private:
     void destroyGeometry() override;
     void renderGeometry() const override;
     void setUniforms() override;
-    std::vector<float*> textureData() override;
+    std::vector<std::vector<float>> textureData() override;
 
     GLuint _vao = 0;
     GLuint _vbo = 0;

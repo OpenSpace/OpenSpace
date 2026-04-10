@@ -27,8 +27,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/settings.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/settings.h>
 #include <openspace/util/openspacemodule.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
@@ -38,8 +38,10 @@
 #include <ghoul/misc/dictionaryjsonformatter.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringconversion.h>
+#include <ghoul/misc/stringhelper.h>
 #include <memory>
 #include <new>
+#include <numeric>
 #include <optional>
 #include <string_view>
 #include <utility>
@@ -53,23 +55,27 @@ namespace {
 
     struct [[codegen::Dictionary(Configuration)]] Parameters {
         // The SGCT configuration file that determines the window and view frustum
-        // settings that are being used when OpenSpace is started
+        // settings that are being used when OpenSpace is started.
         std::optional<std::string> windowConfiguration [[codegen::key("SGCTConfig")]];
 
         // The scene description that is used to populate the application after startup.
         // The scene determines which objects are loaded, the startup time and other
         // scene-specific settings. More information is provided in the Scene
         // documentation. If the 'Asset' and the 'Profile' values are specified, the asset
-        // is silently ignored
+        // is silently ignored.
         std::optional<std::string> asset;
 
         // The profile that should be loaded at the startup. The profile determines which
         // assets are loaded, the startup time, keyboard shortcuts, and other settings.
         std::optional<std::string> profile;
 
+        // The list of add-ons that should be loaded for the provided `Profile`. The
+        // listed add-ons must exist for the selected profile.
+        std::optional<std::vector<std::string>> profileAddons;
+
         // This value names a list of scripts that get executed after initialization of
         // any scene. These scripts can be used for user-specific customization, such as a
-        // global rebinding of keys from the default
+        // global rebinding of keys from the default.
         std::optional<std::vector<std::string>> globalCustomizationScripts;
 
         enum class [[codegen::map(Property::Visibility)]] Visibility {
@@ -79,7 +85,7 @@ namespace {
             Developer
         };
         // Determines the property visibility level that is selected when starting up
-        // OpenSpace. If it is not provided, it defaults to 'User'
+        // OpenSpace. If it is not provided, it defaults to 'User'.
         std::optional<Visibility> propertyVisibility;
 
         // Determines when the property confirmation modal should be shown when starting
@@ -89,28 +95,28 @@ namespace {
 
         // A list of paths that are automatically registered with the file system. If a
         // key X is used in the table, it is then useable by referencing ${X} in all other
-        // configuration files or scripts
+        // configuration files or scripts.
         std::map<std::string, std::string> paths;
 
         // A list of all fonts that will automatically be loaded on startup. Each
         // key-value pair contained in the table will become the name and the file for a
-        // font
+        // font.
         std::optional<std::map<std::string, std::string>> fonts;
 
         struct FontSizes {
             // The font size (in pt) used for printing optional information about the
-            // currently rendered frame
+            // currently rendered frame.
             float frameInfo;
-            // The font size (in pt) used for rendering the shutdown text
+            // The font size (in pt) used for rendering the shutdown text.
             float shutdown;
-            // The font size (in pt) used for rendering the screen log
+            // The font size (in pt) used for rendering the screen log.
             float log;
-            // The font size (in pt) used for printing the camera friction state
+            // The font size (in pt) used for printing the camera friction state.
             float cameraInfo;
-            // The font size (in pt) used for printing the version information
+            // The font size (in pt) used for printing the version information.
             float versionInfo;
         };
-        // Information about the hardcoded fontsizes used by the rendering engine itself
+        // Information about the hardcoded fontsizes used by the rendering engine itself.
         FontSizes fontSize;
 
         struct Logging {
@@ -124,28 +130,28 @@ namespace {
             // Determines whether error messages will be displayed immediately or if it is
             // acceptable to have a short delay, but being more performant. If the delay
             // is allowed ('true'), messages might get lost if the application crashes
-            // shortly after a message was logged
+            // shortly after a message was logged.
             std::optional<bool> immediateFlush;
 
             // Per default, log messages are written to the console, the onscreen text,
             // and (if available) the Visual Studio output window. This table can define
-            // other logging methods that will be used additionally
+            // other logging methods that will be used additionally.
             std::optional<std::vector<ghoul::Dictionary>> logs
                 [[codegen::reference("core_logfactory")]];
 
             // At startup, a list of system capabilities is created and logged. This value
-            // determines how verbose this listing should be
+            // determines how verbose this listing should be.
             std::optional<std::string> capabilitiesVerbosity [[codegen::inlist("None",
                 "Minimal", "Default", "Full"
             )]];
         };
         // Configurations for the logging of messages that are generated throughout the
-        // code and are useful for debugging potential errors or other information
+        // code and are useful for debugging potential errors or other information.
         std::optional<Logging> logging;
 
         // The file that will be created on startup containing the log of all Lua scripts
         // that are executed in the last session. Any existing file (including the results
-        // from previous runs) will be silently overwritten
+        // from previous runs) will be silently overwritten.
         std::optional<std::string> scriptLog;
 
         // If this value is set to `true`, the script log will contain scripts that have
@@ -157,61 +163,61 @@ namespace {
         std::optional<bool> verboseScriptLog;
 
         // If this value is specified, this many number of script log files are being
-        // retained before overwriting any
+        // retained before overwriting any.
         std::optional<int> scriptLogRotation;
 
         struct Documentation {
-            // The path where the documentation files will be stored
+            // The path where the documentation files will be stored.
             std::optional<std::string> path;
         };
-        // Right now only contains the path where the documentation is written to
+        // Right now only contains the path where the documentation is written to.
         std::optional<Documentation> documentation;
 
         // The countdown that the application will wait between pressing ESC and actually
-        // shutting down. If ESC is pressed again in this time, the shutdown is aborted
+        // shutting down. If ESC is pressed again in this time, the shutdown is aborted.
         std::optional<float> shutdownCountdown [[codegen::greater(0.0)]];
 
         // If this is set to 'true', the name of the profile will be appended to the cache
         // directory, thus not reusing the same directory. This is useful in cases where
         // the same instance of OpenSpace is run with multiple profiles, but the caches
-        // should be retained. This value defaults to 'false'
+        // should be retained. This value defaults to 'false'.
         std::optional<bool> perProfileCache;
 
         // The method for scaling the onscreen text in the window. As the resolution of
         // the rendering can be different from the size of the window, the onscreen text
         // can either be scaled according to the window size ('window'), or the rendering
-        // resolution ('framebuffer'). This value defaults to 'window'
+        // resolution ('framebuffer'). This value defaults to 'window'.
         std::optional<std::string> onScreenTextScaling [[codegen::inlist("window",
             "framebuffer")]];
 
         // Toggles whether the master in a multi-application setup should be rendering or
         // just managing the state of the network. This is desired in cases where the
-        // master computer does not have the resources to render a scene
+        // master computer does not have the resources to render a scene.
         std::optional<bool> disableRenderingOnMaster;
 
         // Applies a global view rotation. Use this to rotate the position of the focus
         // node away from the default location on the screen. This setting persists even
-        // when a new focus node is selected. Defined using roll, pitch, yaw in radians
+        // when a new focus node is selected. Defined using roll, pitch, yaw in radians.
         std::optional<glm::vec3> globalRotation;
 
         // Applies a view rotation for only the master node, defined using roll, pitch yaw
         // in radians. This can be used to compensate the master view direction for tilted
-        // display systems in clustered immersive environments
+        // display systems in clustered immersive environments.
         std::optional<glm::vec3> masterRotation;
 
         // Applies a global rotation for all screenspace renderables. Defined using roll,
-        // pitch, yaw in radians
+        // pitch, yaw in radians.
         std::optional<glm::vec3> screenSpaceRotation;
 
         // If this value is set to 'true' the ingame console is disabled, locking the
-        // system down against random access
+        // system down against random access.
         std::optional<bool> disableInGameConsole;
 
         // Toggles whether screenshots generated by OpenSpace contain the date when the
         // concrete OpenSpace instance was started. This value is enabled by default, but
         // it is advised to disable this value if rendering sessions of individual frames
-        // pass beyond local midnight
-        std::optional<bool> screenshotUseDate;
+        // pass beyond local midnight.
+        std::optional<bool> screenshotUseDateTime;
 
         // Toggles whether the Lua states used inside OpenSpace are sandboxed which
         // prevents potentially unsafe malicious code to run on the system. Only turn this
@@ -220,99 +226,102 @@ namespace {
         std::optional<bool> sandboxedLua;
 
         struct HttpProxy {
-            // Determines whether the proxy is being used
+            // Determines whether the proxy is being used.
             std::optional<bool> activate;
 
-            // The address of the http proxy
+            // The address of the HTTP proxy.
             std::string address;
 
-            // The port of the http proxy
+            // The port of the HTTP proxy.
             int port [[codegen::inrange(0, 65536)]];
 
-            // The authentication method of the http proxy
+            // The authentication method of the HTTP proxy.
             std::optional<std::string> authentication [[codegen::inlist("basic", "ntlm",
                 "digest", "any")]];
 
-            // The user of the http proxy
+            // The user of the HTTP proxy.
             std::optional<std::string> user;
 
-            // The password of the http proxy
+            // The password of the HTTP proxy.
             std::optional<std::string> password;
         };
-        // This defines the use for a proxy when fetching data over http. No proxy will be
-        // used if this is left out
+        // This defines the use for a proxy when fetching data over HTTP. No proxy will be
+        // used if this is left out.
         std::optional<HttpProxy> httpProxy;
 
+        // Defines the connections (WebSocket or TcpSocket) that are allowed
+        std::optional<ghoul::Dictionary> server [[codegen::reference("core_server")]];
+
         struct OpenGLDebugContext {
-            // Determines whether the OpenGL context should be a debug context
+            // Determines whether the OpenGL context should be a debug context.
             bool activate;
 
             // If this is set to 'true', everytime an OpenGL error is logged, the full
             // stacktrace leading to the error is printed as well, making debugging under
-            // production situations much easier
+            // production situations much easier.
             std::optional<bool> printStacktrace;
 
             // Determines whether the OpenGL debug callbacks are performed synchronously.
             // If set to 'true' the callbacks are in the same thread as the context and in
             // the scope of the OpenGL function that triggered the message. The default
-            // value is 'true'
+            // value is 'true'.
             std::optional<bool> synchronous;
 
-            // Individual OpenGL debug message identifiers
+            // Individual OpenGL debug message identifiers.
             struct Filter {
-                // The identifier that is to be filtered
+                // The identifier that is to be filtered.
                 int identifier;
 
-                // The source of the identifier to be filtered
+                // The source of the identifier to be filtered.
                 std::string source [[codegen::inlist("API", "Window System",
                     "Shader Compiler", "Third Party", "Application", "Other",
                     "Don't care")]];
 
-                // The type of the identifier to be filtered
+                // The type of the identifier to be filtered.
                 std::string type [[codegen::inlist("Error", "Deprecated", "Undefined",
                     "Portability", "Performance", "Marker", "Push group", "Pop group",
                     "Other", "Don't care")]];
             };
-            // A list of OpenGL debug messages identifiers that are filtered
+            // A list of OpenGL debug messages identifiers that are filtered.
             std::optional<std::vector<Filter>> filterIdentifier;
 
-            // Determines the settings for the creation of an OpenGL debug context
+            // Determines the settings for the creation of an OpenGL debug context.
             std::optional<std::vector<std::string>> filterSeverity [[codegen::inlist(
                 "High", "Medium", "Low", "Notification"
             )]];
         };
-        // Determines the settings for the creation of an OpenGL debug context
+        // Determines the settings for the creation of an OpenGL debug context.
         std::optional<OpenGLDebugContext> openGLDebugContext;
 
         // Determines whether the OpenGL state is checked after each OpenGL function call.
         // This will dramatically slow down the rendering, but will make finding OpenGL
-        // errors easier. This defaults to 'false'
+        // errors easier. This defaults to 'false'.
         std::optional<bool> checkOpenGLState;
 
         // Determines whether each OpenGL call that happens should be logged using the
         // 'TRACE' loglevel. This will bring the rendering to a crawl but provides useful
         // debugging features for the order in which OpenGL calls occur. This defaults to
-        // 'false'
+        // 'false'.
         std::optional<bool> logEachOpenGLCall;
 
         // Determines whether events are printed as debug messages to the console each
         // frame. If this value is set it determines the default value of the property of
-        // the OpenSpaceEngine with the same name
+        // the OpenSpaceEngine with the same name.
         std::optional<bool> printEvents;
 
-        /// Determines which key opens the in-game console. The value passed in must be a
-        /// valid key (see keys.h for a list)
+        // Determines which key opens the in-game console. The value passed in must be a
+        // valid key (see keys.h for a list).
         std::optional<std::string> consoleKey;
 
         // This value determines whether the initialization of the scene graph should
         // occur multithreaded, that is, whether multiple scene graph nodes should
         // initialize in parallel. The only use for this value is to disable it for
-        // debugging support
+        // debugging support.
         std::optional<bool> useMultithreadedInitialization;
 
         // If this value is set to 'true', the launcher will not be shown and OpenSpace
         // will start with the provided configuration options directly. Useful in
-        // multiprojector setups where a launcher window would be undesired
+        // multiprojector setups where a launcher window would be undesired.
         std::optional<bool> bypassLauncher;
 
         // Set which layer server should be preferd to be used, the options are
@@ -321,12 +330,12 @@ namespace {
             "Sweden", "Utah", "None")]];
 
         // The URL that is pinged to check which version of OpenSpace is the most current
-        // if you don't want this request to happen, this value should not be set at all
+        // if you don't want this request to happen, this value should not be set at all.
         std::optional<std::string> versionCheckUrl;
 
         struct LoadingScreen {
             // If this value is set to 'true', the loading screen will display a message
-            // information about the current phase the loading is in
+            // information about the current phase the loading is in.
             std::optional<bool> showMessage;
 
             // If this value is set to 'true', the loading screen will display a list of
@@ -335,11 +344,11 @@ namespace {
             std::optional<bool> showNodeNames;
 
             // If this value is set to 'true', the loading screen will display a list of
-            // warning and error messages
+            // warning and error messages.
             std::optional<bool> showLogMessages;
         };
         // Values in this table describe the behavior of the loading screen that is
-        // displayed while the scene graph is created and initialized
+        // displayed while the scene graph is created and initialized.
         std::optional<LoadingScreen> loadingScreen;
     };
 } // namespace
@@ -352,7 +361,8 @@ ghoul::Dictionary Configuration::createDictionary() {
 
     res.setValue("WindowConfiguration", windowConfiguration);
     res.setValue("Asset", asset);
-    res.setValue("Profile", profile);
+    res.setValue("Profile", profile.profile);
+    res.setValue("ProfileAddons", profile.addons);
     res.setValue("PropertyVisibility", static_cast<int>(propertyVisibility));
     res.setValue("ShowPropertyConfirmation", static_cast<int>(showPropertyConfirmation));
 
@@ -431,7 +441,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("IsPrintingEvents", isPrintingEvents);
     res.setValue("ConsoleKey", ghoul::to_string(consoleKey));
     res.setValue("ShutdownCountdown", static_cast<double>(shutdownCountdown));
-    res.setValue("shouldUseScreenshotDate", shouldUseScreenshotDate);
+    res.setValue("shouldUseScreenshotDateTime", shouldUseScreenshotDateTime);
     res.setValue("sandboxedLua", sandboxedLua);
     res.setValue("OnScreenTextScaling", onScreenTextScaling);
     res.setValue("UsePerProfileCache", usePerProfileCache);
@@ -448,6 +458,8 @@ ghoul::Dictionary Configuration::createDictionary() {
         moduleConfigurationsDict.setValue(key, value);
     }
     res.setValue("ModuleConfigurations", moduleConfigurationsDict);
+
+    res.setValue("Server", server);
 
     {
         ghoul::Dictionary openGLDebugContextDict;
@@ -549,7 +561,13 @@ void parseLuaState(Configuration& configuration) {
 
     c.windowConfiguration = p.windowConfiguration.value_or(c.windowConfiguration);
     c.asset = p.asset.value_or(c.asset);
-    c.profile = p.profile.value_or(c.profile);
+    if (p.profile.has_value()) {
+        c.profile.profile = *p.profile;
+    }
+    if (p.profileAddons.has_value()) {
+        c.profile.addons = *p.profileAddons;
+    }
+
     c.globalCustomizationScripts =
         p.globalCustomizationScripts.value_or(c.globalCustomizationScripts);
 
@@ -588,7 +606,8 @@ void parseLuaState(Configuration& configuration) {
     }
 
     c.shutdownCountdown = p.shutdownCountdown.value_or(c.shutdownCountdown);
-    c.shouldUseScreenshotDate = p.screenshotUseDate.value_or(c.shouldUseScreenshotDate);
+    c.shouldUseScreenshotDateTime =
+        p.screenshotUseDateTime.value_or(c.shouldUseScreenshotDateTime);
     c.sandboxedLua = p.sandboxedLua.value_or(c.sandboxedLua);
     c.onScreenTextScaling = p.onScreenTextScaling.value_or(c.onScreenTextScaling);
     c.usePerProfileCache = p.perProfileCache.value_or(c.usePerProfileCache);
@@ -628,6 +647,10 @@ void parseLuaState(Configuration& configuration) {
         for (std::string_view key : dict.keys()) {
             c.moduleConfigurations[std::string(key)] = dict.value<ghoul::Dictionary>(key);
         }
+    }
+
+    if (p.server.has_value()) {
+        c.server = *p.server;
     }
 
     if (p.openGLDebugContext.has_value()) {
@@ -678,8 +701,13 @@ void patchConfiguration(Configuration& configuration, const Settings& settings) 
         configuration.windowConfiguration = *settings.configuration;
         configuration.sgctConfigNameInitialized.clear();
     }
-    if (settings.rememberLastProfile.value_or(false) && settings.profile.has_value()) {
-        configuration.profile = *settings.profile;
+    if (settings.rememberLastProfile.value_or(false)) {
+        if (settings.profile.has_value()) {
+            configuration.profile.profile = *settings.profile;
+        }
+        if (settings.profileAddons.has_value()) {
+            configuration.profile.addons = *settings.profileAddons;
+        }
     }
     if (settings.visibility.has_value()) {
         configuration.propertyVisibility = *settings.visibility;
@@ -820,23 +848,21 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
 }
 
 Configuration::LayerServer stringToLayerServer(std::string_view server) {
-    using Server = Configuration::LayerServer;
-    if (server == "All") { return Server::All; }
-    else if (server == "NewYork") { return Server::NewYork; }
-    else if (server == "Sweden") { return Server::Sweden; }
-    else if (server == "Utah") { return Server::Utah; }
-    else if (server == "None") { return Server::None; }
+    if (server == "All") { return Configuration::LayerServer::All; }
+    else if (server == "NewYork") { return Configuration::LayerServer::NewYork; }
+    else if (server == "Sweden") { return Configuration::LayerServer::Sweden; }
+    else if (server == "Utah") { return Configuration::LayerServer::Utah; }
+    else if (server == "None") { return Configuration::LayerServer::None; }
     else { throw ghoul::MissingCaseException(); }
 }
 
 std::string layerServerToString(Configuration::LayerServer server) {
-    using Server = Configuration::LayerServer;
     switch (server) {
-        case Server::All: return "All";
-        case Server::NewYork: return "NewYork";
-        case Server::Sweden: return "Sweden";
-        case Server::Utah: return "Utah";
-        case Server::None: return "None";
+        case Configuration::LayerServer::All: return "All";
+        case Configuration::LayerServer::NewYork: return "NewYork";
+        case Configuration::LayerServer::Sweden: return "Sweden";
+        case Configuration::LayerServer::Utah: return "Utah";
+        case Configuration::LayerServer::None: return "None";
         default: throw ghoul::MissingCaseException();
     }
 }

@@ -67,7 +67,7 @@ private:
         Vec3Property vector;
         BoolProperty isOrthogonal;
 
-        SceneGraphNode* node;
+        SceneGraphNode* node = nullptr;
     };
 
     BoolProperty _enabled;

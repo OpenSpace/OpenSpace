@@ -59,8 +59,8 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
 
     std::string profile;
     // Remove the .profile extension
-    if (global::configuration->profile.starts_with(builtInProfiles)) {
-        std::filesystem::path path = global::configuration->profile;
+    if (global::configuration->profile.profile.starts_with(builtInProfiles)) {
+        std::filesystem::path path = global::configuration->profile.profile;
         path.replace_extension("");
         profile = path.string().substr(builtInProfiles.size() + 1);
     }
@@ -117,10 +117,10 @@ void VersionChecker::cancel() {
         _latestVersion = { major, minor, patch };
         _request = nullptr;
 
-        SemanticVersion currentVersion{
-            OPENSPACE_VERSION_MAJOR,
-            OPENSPACE_VERSION_MINOR,
-            OPENSPACE_VERSION_PATCH
+        SemanticVersion currentVersion = {
+            .major = OPENSPACE_VERSION_MAJOR,
+            .minor = OPENSPACE_VERSION_MINOR,
+            .patch = OPENSPACE_VERSION_PATCH
         };
 
         if (currentVersion < _latestVersion) {

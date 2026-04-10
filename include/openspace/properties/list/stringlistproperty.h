@@ -31,7 +31,7 @@ namespace openspace {
 
 class StringListProperty : public ListProperty<std::string> {
 public:
-    explicit StringListProperty(Property::PropertyInfo info,
+    explicit StringListProperty(PropertyInfo info,
         std::vector<std::string> values = std::vector<std::string>());
 
     std::string_view className() const override final;

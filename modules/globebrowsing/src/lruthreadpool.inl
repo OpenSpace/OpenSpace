@@ -36,26 +36,25 @@ template <typename KeyType>
 void LRUThreadPoolWorker<KeyType>::operator()() {
     std::function<void()> task;
     while (true) {
-        // acquire lock
+        // Acquire lock
         {
             std::unique_lock lock(_pool._queueMutex);
 
-            // look for a work item
+            // Look for a work item
             while (!_pool._stop && _pool._queuedTasks.isEmpty()) {
-                // if there are none wait for notification
+                // If there are none wait for notification
                 _pool._condition.wait(lock);
             }
 
-            if (_pool._stop) { // exit if the pool is stopped
+            if (_pool._stop) {
+                // Exit if the pool is stopped
                 return;
             }
 
-            // get the task from the queue
+            // Get the task from the queue
             task = _pool._queuedTasks.popMRU().second;
+        }
 
-        }// release lock
-
-        // execute the task
         task();
     }
 }
@@ -74,28 +73,28 @@ LRUThreadPool<KeyType>::LRUThreadPool(const LRUThreadPool& toCopy)
     : LRUThreadPool(toCopy._workers.size(), toCopy._queuedTasks.maximumCacheSize())
 {}
 
-// the destructor joins all threads
+// The destructor joins all threads
 template <typename KeyType>
 LRUThreadPool<KeyType>::~LRUThreadPool() {
     {
-        std::unique_lock lock(_queueMutex);
+        const std::unique_lock lock(_queueMutex);
         _stop = true;
     }
     _condition.notify_all();
 
-    // join them
+    // Join them
     for (size_t i = 0; i < _workers.size(); i++) {
         _workers[i].join();
     }
 }
 
-// add new work item to the pool
+// Add new work item to the pool
 template <typename KeyType>
 void LRUThreadPool<KeyType>::enqueue(std::function<void()> f, KeyType key) {
     {
-        std::unique_lock<std::mutex> lock(_queueMutex);
+        const std::unique_lock lock(_queueMutex);
 
-        // add the task
+        // Add the task
         //_queuedTasks.put(key, f);
         const std::vector<std::pair<KeyType, std::function<void()>>>& unfinishedTasks =
             _queuedTasks.putAndFetchPopped(key, f);
@@ -106,13 +105,13 @@ void LRUThreadPool<KeyType>::enqueue(std::function<void()> f, KeyType key) {
         }
     }
 
-    // wake up one thread
+    // Wake up one thread
     _condition.notify_one();
 }
 
 template <typename KeyType>
 bool LRUThreadPool<KeyType>::touch(KeyType key) {
-    std::unique_lock<std::mutex> lock(_queueMutex);
+    const std::unique_lock lock(_queueMutex);
     return _queuedTasks.touch(key);
 }
 
@@ -120,7 +119,7 @@ template <typename KeyType>
 std::vector<KeyType> LRUThreadPool<KeyType>::getUnqueuedTasksKeys() {
     std::vector<KeyType> toReturn = _unqueuedTasks;
     {
-        std::unique_lock<std::mutex> lock(_queueMutex);
+        const std::unique_lock lock(_queueMutex);
         _unqueuedTasks.clear();
     }
     return toReturn;
@@ -130,7 +129,7 @@ template <typename KeyType>
 std::vector<KeyType> LRUThreadPool<KeyType>::getQueuedTasksKeys() {
     std::vector<KeyType> queuedTasks;
     {
-        std::unique_lock<std::mutex> lock(_queueMutex);
+        const std::unique_lock lock(_queueMutex);
         while (!_queuedTasks.isEmpty()) {
             queuedTasks.push_back(_queuedTasks.popMRU().first);
         }
@@ -140,7 +139,7 @@ std::vector<KeyType> LRUThreadPool<KeyType>::getQueuedTasksKeys() {
 
 template <typename KeyType>
 void LRUThreadPool<KeyType>::clearEnqueuedTasks() {
-    std::unique_lock<std::mutex> lock(_queueMutex);
+    const std::unique_lock lock(_queueMutex);
     _queuedTasks.clear();
 }
 

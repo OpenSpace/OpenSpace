@@ -49,8 +49,8 @@ class Time;
  * Provide `Tile`s from web map services that have temporal resolution.
  *
  * TemporalTileProviders are instantiated using a ghoul::Dictionary, and must define a
- * filepath to a Openspace Temporal dataset description file. This is an xml-file that
- * defines the same meta data as the GDAL wms description
+ * filepath to a Openspace Temporal dataset description file. This is an XML-file that
+ * defines the same meta data as the GDAL WMS description
  * (http://www.gdal.org/frmt_wms.html), but augmented with some extra tags describing the
  * temporal properties of the dataset.
  *
@@ -110,7 +110,7 @@ private:
 
     TileProvider* tileProvider(const Time& time);
 
-    Mode _mode;
+    Mode _mode = Mode::Prototype;
 
     struct {
         double startTimeJ2000 = 0.0;

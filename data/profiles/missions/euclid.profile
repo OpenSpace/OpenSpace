@@ -6,6 +6,19 @@
     "scene/solarsystem/telescopes/euclid/euclid",
     "scene/solarsystem/planets/earth/earth"
   ],
+  "addons": {
+    "custom": [
+      {
+        "version": { "major": 1, "minor": 0 },
+        "identifier": "l2_spacecraft",
+        "name": "Spacecraft in L2",
+        "description": "Includes other spacecraft that are in the Earth's L2 orbit.",
+        "assets": [
+          "scene/solarsystem/telescopes/jwst/jwst"
+        ]
+      }
+    ]
+  },
   "camera": {
     "anchor": "Euclid",
     "type": "goToNode"
@@ -72,6 +85,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 4
+    "minor": 5
   }
 }

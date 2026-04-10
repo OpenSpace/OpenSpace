@@ -52,7 +52,7 @@ void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
 
     const std::string upperIdentifier = ghoul::toUpperCase(identifier());
 
-    std::string moduleToken = "${" + std::string(ModuleBaseToken) + upperIdentifier + "}";
+    std::string moduleToken = std::format("${{{}{}}}", ModuleBaseToken, upperIdentifier);
 
     std::filesystem::path path = modulePath();
     if (!path.empty()) {
@@ -99,10 +99,6 @@ LuaLibrary OpenSpaceModule::luaLibrary() const {
 
 std::vector<LuaLibrary> OpenSpaceModule::luaLibraries() const {
     return {};
-}
-
-ghoul::systemcapabilities::Version OpenSpaceModule::requiredOpenGLVersion() const {
-    return { 3, 3, 0 };
 }
 
 std::vector<std::string> OpenSpaceModule::requiredOpenGLExtensions() const {

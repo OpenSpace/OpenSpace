@@ -11,8 +11,8 @@ local models = asset.resource({
 })
 
 
-local Station2Boulder1Holder = {
-  Identifier = "Station_2_Boulder1",
+local Station2Boulder1 = {
+  Identifier = "Apollo17Station2Boulder1",
   Parent = moon.Moon.Identifier,
   Transform = {
     Translation = {
@@ -22,19 +22,7 @@ local Station2Boulder1Holder = {
       Latitude = 20.098824,
       Altitude = -2442.8,
       UseHeightMap = false
-    }
-  },
-  GUI = {
-    Name = "Station 2 Boulder 1",
-    Path = "/Solar System/Missions/Apollo/17/Station 2",
-    Focusable = false
-  }
-}
-
-local Station2Boulder1Model = {
-  Identifier = "Station2Boulder1Model",
-  Parent = Station2Boulder1Holder.Identifier,
-  Transform = {
+    },
     Scale = {
       Type = "StaticScale",
       Scale = 0.06
@@ -56,13 +44,13 @@ local Station2Boulder1Model = {
     EnableFaceCulling = false
   },
   GUI = {
-    Name = "Station 2 Boulder 1 Model",
+    Name = "Station 2 Boulder 1",
     Path = "/Solar System/Missions/Apollo/17/Station 2"
   }
 }
 
-local Station2Boulder2Holder = {
-  Identifier = "Station_2_Boulder2",
+local Station2Boulder2 = {
+  Identifier = "Apollo17Station2Boulder2",
   Parent = moon.Moon.Identifier,
   Transform = {
     Translation = {
@@ -72,19 +60,7 @@ local Station2Boulder2Holder = {
       Latitude = 20.098240,
       Altitude = -2434.6,
       UseHeightMap = false
-    }
-  },
-  GUI = {
-    Name = "Station 2 Boulder 2",
-    Path = "/Solar System/Missions/Apollo/17/Station 2",
-    Focusable = false
-  }
-}
-
-local Station2Boulder2Model = {
-  Identifier = "Station2Boulder2Model",
-  Parent = Station2Boulder2Holder.Identifier,
-  Transform = {
+    },
     Scale = {
       Type = "StaticScale",
       Scale = 0.06
@@ -106,13 +82,13 @@ local Station2Boulder2Model = {
     EnableFaceCulling = false
   },
   GUI = {
-    Name = "Station 2 Boulder 2 Model",
+    Name = "Station 2 Boulder 2",
     Path = "/Solar System/Missions/Apollo/17/Station 2"
   }
 }
 
-local Station2Boulder3Holder = {
-  Identifier = "Station_2_Boulder3",
+local Station2Boulder3 = {
+  Identifier = "Apollo17Station2Boulder3",
   Parent = moon.Moon.Identifier,
   Transform = {
     Translation = {
@@ -122,19 +98,7 @@ local Station2Boulder3Holder = {
       Latitude = 20.098610,
       Altitude = -2441.55,
       UseHeightMap = false
-    }
-  },
-  GUI = {
-    Name = "Station 2 Boulder 3",
-    Path = "/Solar System/Missions/Apollo/17/Station 2",
-    Focusable = false
-  }
-}
-
-local Station2Boulder3Model = {
-  Identifier = "Station2Boulder3Model",
-  Parent = Station2Boulder3Holder.Identifier,
-  Transform = {
+    },
     Scale = {
       Type = "StaticScale",
       Scale = 0.06
@@ -156,36 +120,27 @@ local Station2Boulder3Model = {
     EnableFaceCulling = false
   },
   GUI = {
-    Name = "Station 2 Boulder 3 Model",
+    Name = "Station 2 Boulder 3",
     Path = "/Solar System/Missions/Apollo/17/Station 2"
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Station2Boulder1Holder)
-  openspace.addSceneGraphNode(Station2Boulder1Model)
-  openspace.addSceneGraphNode(Station2Boulder2Holder)
-  openspace.addSceneGraphNode(Station2Boulder2Model)
-  openspace.addSceneGraphNode(Station2Boulder3Holder)
-  openspace.addSceneGraphNode(Station2Boulder3Model)
+  openspace.addSceneGraphNode(Station2Boulder1)
+  openspace.addSceneGraphNode(Station2Boulder2)
+  openspace.addSceneGraphNode(Station2Boulder3)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Station2Boulder3Model)
-  openspace.removeSceneGraphNode(Station2Boulder3Holder)
-  openspace.removeSceneGraphNode(Station2Boulder2Model)
-  openspace.removeSceneGraphNode(Station2Boulder2Holder)
-  openspace.removeSceneGraphNode(Station2Boulder1Model)
-  openspace.removeSceneGraphNode(Station2Boulder1Holder)
+  openspace.removeSceneGraphNode(Station2Boulder3)
+  openspace.removeSceneGraphNode(Station2Boulder2)
+  openspace.removeSceneGraphNode(Station2Boulder1)
 end)
 
-asset.export(Station2Boulder1Holder)
-asset.export(Station2Boulder1Model)
-asset.export(Station2Boulder2Holder)
-asset.export(Station2Boulder2Model)
-asset.export(Station2Boulder3Holder)
-asset.export(Station2Boulder3Model)
+asset.export(Station2Boulder1)
+asset.export(Station2Boulder2)
+asset.export(Station2Boulder3)
 
 
 

@@ -71,6 +71,21 @@ struct JoystickInputState {
     int nButtons = 0;
     /// The status of each button
     std::vector<JoystickAction> buttons;
+
+    /**
+     * Initialize the aces and buttons vectors based on the currently set number of axes
+     * and buttons.
+     */
+    void initializeAxesAndButtons();
+
+    /**
+     * Update the button state for the button with the given index, based on the provided
+     * isPressed value and the previous value.
+     *
+     * \param isPressed Whether the button is currently pressed
+     * \param buttonIndex The index of the button to update the state for
+     */
+    void updateButtonState(bool isPressed, int buttonIndex);
 };
 
 /// The maximum number of joysticks that are supported by this system. This number is
@@ -84,8 +99,8 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
     /**
      * This function return the number of axes the joystick with the given name has.
      *
-     * \param joystickName The name of the joystick to check how many axes it has,
-     *        if empty the max number of axes for all joysticks are returned
+     * \param joystickName The name of the joystick to check how many axes it has, if
+     *        empty the max number of axes for all joysticks are returned
      * \return The number of axes for the joystick with the given name
      */
     int numAxes(const std::string& joystickName = "") const;
@@ -93,8 +108,8 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
     /**
      * This function return the number of buttons the joystick with the given name has.
      *
-     * \param joystickName The name of the joystick to check how many buttons it has,
-     *        if empty the max number of buttons for all joysticks are returned
+     * \param joystickName The name of the joystick to check how many buttons it has, if
+     *        empty the max number of buttons for all joysticks are returned
      * \return The number of buttons for the joystick with the given name
      */
     int numButtons(const std::string& joystickName = "") const;
@@ -132,27 +147,25 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
 } // namespace openspace
 
 namespace ghoul {
-
-template <>
-inline std::string to_string(const openspace::JoystickAction& value) {
-    switch (value) {
-        case openspace::JoystickAction::Idle:    return "Idle";
-        case openspace::JoystickAction::Press:   return "Press";
-        case openspace::JoystickAction::Repeat:  return "Repeat";
-        case openspace::JoystickAction::Release: return "Release";
-        default:                                 throw MissingCaseException();
+    template <>
+    inline std::string to_string(const openspace::JoystickAction& value) {
+        switch (value) {
+            case openspace::JoystickAction::Idle:    return "Idle";
+            case openspace::JoystickAction::Press:   return "Press";
+            case openspace::JoystickAction::Repeat:  return "Repeat";
+            case openspace::JoystickAction::Release: return "Release";
+            default:                                 throw MissingCaseException();
+        }
     }
-}
 
-template <>
-constexpr openspace::JoystickAction from_string(std::string_view string) {
-    if (string == "Idle")         { return openspace::JoystickAction::Idle; }
-    else if (string == "Press")   { return openspace::JoystickAction::Press; }
-    else if (string == "Repeat")  { return openspace::JoystickAction::Repeat; }
-    else if (string == "Release") { return openspace::JoystickAction::Release; }
-    throw RuntimeError(std::format("Unknown action '{}'", string));
-}
-
+    template <>
+    constexpr openspace::JoystickAction from_string(std::string_view string) {
+        if (string == "Idle")         { return openspace::JoystickAction::Idle; }
+        else if (string == "Press")   { return openspace::JoystickAction::Press; }
+        else if (string == "Repeat")  { return openspace::JoystickAction::Repeat; }
+        else if (string == "Release") { return openspace::JoystickAction::Release; }
+        throw RuntimeError(std::format("Unknown action '{}'", string));
+    }
 } // namespace ghoul
 
 #endif // __OPENSPACE_CORE___JOYSTICKINPUTSTATE___H__

@@ -60,6 +60,17 @@ namespace {
         { "Color Adding", ColorAddingBlending }
     };
 
+    enum class Orientation {
+        Outside,
+        Inside,
+        Both
+    };
+
+    enum class TextureProjection {
+        Equirectangular,
+        AngularFisheye
+    };
+
     constexpr Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
@@ -72,12 +83,6 @@ namespace {
         "Number of segments",
         "The number of segments that the sphere is split into.",
         Property::Visibility::AdvancedUser
-    };
-
-    enum class Orientation {
-        Outside,
-        Inside,
-        Both
     };
 
     constexpr Property::PropertyInfo OrientationInfo = {
@@ -93,11 +98,6 @@ namespace {
         "Mirror texture",
         "If true, mirror the texture along the x-axis.",
         Property::Visibility::AdvancedUser
-    };
-
-    enum class TextureProjection {
-        Equirectangular,
-        AngularFisheye
     };
 
     constexpr Property::PropertyInfo TextureProjectionInfo = {
@@ -256,9 +256,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     addProperty(_size);
 
     _segments = p.segments.value_or(_segments);
-    _segments.onChange([this]() {
-        _sphereIsDirty = true;
-    });
+    _segments.onChange([this]() { _sphereIsDirty = true; });
     addProperty(_segments);
 
     _orientation.addOptions({
@@ -317,18 +315,15 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
 
     _colorMap.onChange([this]() {
         if (!std::filesystem::exists(_colorMap.value())) {
-            LERROR(std::format(
-                "Path {} to color map is invalid.",
-                _colorMap.value()
-            ));
+            LERROR(std::format("Path {} to color map is invalid.", _colorMap.value()));
             return;
         }
         _transferFunction = std::make_unique<TransferFunction>(_colorMap.value());
     });
     addProperty(_colorMap);
 
-    // This check is after color map in case a color map is given
-    // but using it on start-up is set to false.
+    // This check is after color map in case a color map is given but using it on start-up
+    // is set to false
     if (p.useColorMap.has_value()) {
         if (!p.colorMap.has_value()) {
             throw ghoul::RuntimeError("No color map path was provided");
@@ -379,7 +374,6 @@ void RenderableSphere::deinitializeGL() {
 void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     const Orientation orientation = static_cast<Orientation>(_orientation.value());
 
-    // Activate shader
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     _shader->activate();
     _shader->setIgnoreUniformLocationError(IgnoreError::Yes);
@@ -404,7 +398,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     if (!_disableFadeInDistance) {
         if (_fadeInThreshold > 0.f) {
             const double d = glm::distance(
-                data.camera.positionVec3(),
+                data.camera.position(),
                 data.modelTransform.translation
             );
             const float logDist =
@@ -412,11 +406,11 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
                 std::log(static_cast<float>(d)) :
                 -std::numeric_limits<float>::max();
 
-            const float startLogFadeDistance = glm::log(_size * _fadeInThreshold);
+            const float startLogFadeDistance = std::log(_size * _fadeInThreshold);
             const float stopLogFadeDistance = startLogFadeDistance + 1.f;
 
             if (logDist > startLogFadeDistance && logDist < stopLogFadeDistance) {
-                const float fadeFactor = glm::clamp(
+                const float fadeFactor = std::clamp(
                     (logDist - startLogFadeDistance) /
                     (stopLogFadeDistance - startLogFadeDistance),
                     0.f,
@@ -431,18 +425,18 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 
         if (_fadeOutThreshold > 0.f) {
             const double d = glm::distance(
-                data.camera.positionVec3(),
+                data.camera.position(),
                 data.modelTransform.translation
             );
             const float logDist =
                 d > 0.0 ?
                 std::log(static_cast<float>(d)) :
                 -std::numeric_limits<float>::max();
-            const float startLogFadeDistance = glm::log(_size * _fadeOutThreshold);
+            const float startLogFadeDistance = std::log(_size * _fadeOutThreshold);
             const float stopLogFadeDistance = startLogFadeDistance + 1.f;
 
             if (logDist > startLogFadeDistance && logDist < stopLogFadeDistance) {
-                const float fadeFactor = glm::clamp(
+                const float fadeFactor = std::clamp(
                     (logDist - startLogFadeDistance) /
                         (stopLogFadeDistance - startLogFadeDistance),
                     0.f,
@@ -460,7 +454,6 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
         return;
     }
 
-    // TextureUnit cannot be declared in if statement below
     ghoul::opengl::TextureUnit transferFunctionUnit;
     _shader->setUniform("usingTransferFunction", _useColorMap);
     _shader->setUniform("transferFunction", transferFunctionUnit);
@@ -479,8 +472,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform(_uniformCache.textureProjection, _textureProjection.value());
 
-    // Setting these states should not be necessary,
-    // since they are the default state in OpenSpace.
+    // Setting these states should not be necessary, since they are the default state
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
@@ -517,7 +509,6 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     _shader->setIgnoreUniformLocationError(IgnoreError::No);
     _shader->deactivate();
 
-    // Reset
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();
@@ -536,7 +527,7 @@ void RenderableSphere::update(const UpdateData&) {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
-    if (!_transferFunction && std::filesystem::exists(_colorMap.value())) {
+    if (!_transferFunction && std::filesystem::exists(_colorMap.value())) [[unlikely]] {
         _transferFunction = std::make_unique<TransferFunction>(_colorMap.value());
     }
     if (_sphereIsDirty) [[unlikely]] {

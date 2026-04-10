@@ -43,7 +43,7 @@ public:
 
 private:
     const size_t MAX_SIZE_BEFORE_WRITE = 48000000; // ~183MB -> 2M stars with 24 values
-    //const size_t MAX_SIZE_BEFORE_WRITE = 9000000; // ~34MB -> 0,5 stars with 18 values
+    // const size_t MAX_SIZE_BEFORE_WRITE = 9000000; // ~34MB -> 0,5 stars with 18 values
 
     /**
      * Reads a single FITS file and stores ordered star data in one binary file.
@@ -51,8 +51,8 @@ private:
     void readSingleFitsFile(const Task::ProgressCallback& progressCallback);
 
     /**
-     * Reads all FITS files in a folder with multiple threads and stores ordered star
-     * data into 8 binary files.
+     * Reads all FITS files in a folder with multiple threads and stores ordered star data
+     * into 8 binary files.
      */
     void readAllFitsFilesFromFolder(const Task::ProgressCallback& progressCallback);
 

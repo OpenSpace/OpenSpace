@@ -23,8 +23,8 @@
  ****************************************************************************************/
 
 #include <ghoul/misc/dictionary.h>
-#include <string>
 #include <optional>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -38,7 +38,7 @@ namespace {
  * against and only if it passes the filter, the action is triggered.
  */
 [[codegen::luawrap]] void registerEventAction(std::string event, std::string action,
-                                    std::optional<ghoul::Dictionary> filter)
+                                              std::optional<ghoul::Dictionary> filter)
 {
     Event::Type type = fromString(event);
     global::eventEngine->registerEventAction(type, std::move(action), std::move(filter));

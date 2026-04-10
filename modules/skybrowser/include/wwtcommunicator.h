@@ -42,7 +42,6 @@ public:
     explicit WwtCommunicator(BrowserInstance* browserInstance);
     ~WwtCommunicator() = default;
 
-    // WorldWide Telescope communication
     void selectImage(const std::string& imageUrl);
     void addImageLayerToWwt(const std::string& imageUrl);
     void removeSelectedImage(const std::string& imageUrl);

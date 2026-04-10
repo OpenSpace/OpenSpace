@@ -100,9 +100,9 @@ public:
     /**
      * Stops all currently playing tracks. After this function, none of the identifiers
      * used to previously play a sound a valid any longer, but can still be used by the
-     * #playAudio or #playAudio3d functions to start a new sound.
-     * This function behaves the same way as if manually calling #stopAudio on all of the
-     * sounds that have been started.
+     * #playAudio or #playAudio3d functions to start a new sound. This function behaves
+     * the same way as if manually calling #stopAudio on all of the sounds that have been
+     * started.
      */
     void stopAll();
 
@@ -233,7 +233,7 @@ public:
      *
      * \return The list of all tracks that are currently playing
      */
-    std::vector<std::string> currentlyPlaying() const;
+    std::vector<std::string> currentlyPlaying();
 
     /**
      * Sets the global volume for all track referred to the new \p volume. The total
@@ -265,7 +265,7 @@ public:
      * value continues to be used instead. The coordinate system for the tracks and the
      * listener is a meter-based coordinate system.
      *
-     * \param position The position of the listener.
+     * \param position The position of the listener
      * \param lookAt The direction vector of the forward direction
      * \param up The up-vector of the coordinate system
      */
@@ -285,6 +285,7 @@ public:
 
     /**
      * Returns the position for the speaker of the provided \p channel.
+     *
      * \return The position for the speaker of the provided \p channel
      */
     glm::vec3 speakerPosition(int channel) const;
@@ -301,11 +302,20 @@ private:
     void internalDeinitializeGL() override;
 
     /**
+     * We want to do a little garbage collection on our internal data structure to remove
+     * the songs that someone has loaded at some point and that have since organically
+     * stopped. In general, this should only happen if the song was started without
+     * looping and has ended.
+     */
+    void garbageCollection();
+
+    /**
      * Loads the sound at the provided \p path as an audio source and returns the pointer
      * to it. The sound has only been loaded and no other attributes have changed.
      *
      * \param path The path to the audio file on disk that should be loaded
      * \return The SoLoud::Wav object of the loaded file
+     *
      * \throw ghoul::RuntimeError If the \p path is not a loadable audio file
      */
     std::unique_ptr<SoLoud::Wav> loadSound(const std::filesystem::path& path);

@@ -94,7 +94,7 @@ namespace openspace {
 
 Documentation RenderableHabitableZone::Documentation() {
     return codegen::doc<Parameters>(
-        "space_renderablehabitablezone",
+        "space_renderable_habitablezone",
         RenderableDisc::Documentation()
     );
 }
@@ -159,7 +159,6 @@ void RenderableHabitableZone::render(const RenderData& data, RendererTasks&) {
 
     _shader->deactivate();
 
-    // Restores GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();
@@ -204,8 +203,8 @@ glm::dvec4 RenderableHabitableZone::computeKopparapuZoneBoundaries(float teff,
 {
     // Kopparapu's formula only considers stars with teff in range [2600, 7200] K.
     // However, we want to use the formula for more stars, so add some flexibility to
-    // the teff boundaries (see constructor).
-    // OBS! This also prevents problems with too large teff values in the computation
+    // the teff boundaries (see constructor). OBS! This also prevents problems with too
+    // large teff values in the computation
     const glm::vec2 teffBounds = _kopparapuTeffInterval;
     if (teff > teffBounds.y || teff < teffBounds.x) {
         // For the other stars, use a method by Tom E. Morris:

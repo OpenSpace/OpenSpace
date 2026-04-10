@@ -115,16 +115,12 @@ private:
         std::vector<glm::vec2> bottomSplineData;
         std::vector<glm::vec2> leftSplineData;
 
-        /**
-         * Enables a brighted color for the shape which makes it easier to see the
-         * boundaries of the shape during setup
-         **/
+        /// Enables a brighted color for the shape which makes it easier to see the
+        /// boundaries of the shape during setup
         BoolProperty enableCalibrationColor;
 
-        /**
-         * Enables a calibration texture instead of the shape which can be used to check
-         * which position values to use during shape setup
-         **/
+        /// Enables a calibration texture instead of the shape which can be used to check
+        /// which position values to use during shape setup
         BoolProperty enableCalibrationPattern;
 
     private:

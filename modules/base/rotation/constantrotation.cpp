@@ -63,7 +63,7 @@ namespace {
 namespace openspace {
 
 Documentation ConstantRotation::Documentation() {
-    return codegen::doc<Parameters>("base_transform_rotation_constant");
+    return codegen::doc<Parameters>("base_rotation_constant");
 }
 
 ConstantRotation::ConstantRotation(const ghoul::Dictionary& dictionary)
@@ -91,8 +91,8 @@ glm::dmat3 ConstantRotation::matrix(const UpdateData& data) const {
     }
 
     const double rotPerSec = _rotationRate;
-    const double secPerFrame = data.time.j2000Seconds() -
-                               data.previousFrameTime.j2000Seconds();
+    const double secPerFrame =
+        data.time.j2000Seconds() - data.previousFrameTime.j2000Seconds();
 
     const double rotPerFrame = rotPerSec * secPerFrame;
     const double radPerFrame = rotPerFrame * glm::tau<double>();

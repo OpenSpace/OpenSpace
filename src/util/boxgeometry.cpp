@@ -48,47 +48,47 @@ void BoxGeometry::initialize() {
         float b;
     };
     const std::array<Vertex, 36> Vertices = {
-        Vertex { -x, -y,  z}, // blue corner
-        Vertex {  x,  y,  z}, // white corner
-        Vertex { -x,  y,  z}, // cyan corner
-        Vertex { -x, -y,  z}, // blue corner
-        Vertex {  x, -y,  z}, // magenta corner
-        Vertex {  x,  y,  z}, // white corner
+        Vertex { -x, -y,  z }, // blue corner
+        Vertex {  x,  y,  z }, // white corner
+        Vertex { -x,  y,  z }, // cyan corner
+        Vertex { -x, -y,  z }, // blue corner
+        Vertex {  x, -y,  z }, // magenta corner
+        Vertex {  x,  y,  z }, // white corner
 
-        Vertex { -x, -y, -z}, // black corner
-        Vertex { -x,  y, -z}, // green
-        Vertex {  x,  y, -z}, // yellow corner
-        Vertex { -x, -y, -z}, // black
-        Vertex {  x,  y, -z}, // yellow
-        Vertex {  x, -y, -z}, // red
+        Vertex { -x, -y, -z }, // black corner
+        Vertex { -x,  y, -z }, // green
+        Vertex {  x,  y, -z }, // yellow corner
+        Vertex { -x, -y, -z }, // black
+        Vertex {  x,  y, -z }, // yellow
+        Vertex {  x, -y, -z }, // red
 
-        Vertex {  x, -y, -z}, // red
-        Vertex {  x,  y,  z}, // yellow
-        Vertex {  x, -y,  z}, // magenta
-        Vertex {  x, -y, -z}, // red
-        Vertex {  x,  y, -z}, // yellow
-        Vertex {  x,  y,  z}, // white
+        Vertex {  x, -y, -z }, // red
+        Vertex {  x,  y,  z }, // yellow
+        Vertex {  x, -y,  z }, // magenta
+        Vertex {  x, -y, -z }, // red
+        Vertex {  x,  y, -z }, // yellow
+        Vertex {  x,  y,  z }, // white
 
-        Vertex { -x, -y, -z}, // black
-        Vertex { -x, -y,  z}, // blue
-        Vertex { -x,  y,  z}, // cyan
-        Vertex { -x, -y, -z}, // black
-        Vertex { -x,  y,  z}, // cyan
-        Vertex { -x,  y, -z}, // green
+        Vertex { -x, -y, -z }, // black
+        Vertex { -x, -y,  z }, // blue
+        Vertex { -x,  y,  z }, // cyan
+        Vertex { -x, -y, -z }, // black
+        Vertex { -x,  y,  z }, // cyan
+        Vertex { -x,  y, -z }, // green
 
-        Vertex {  x,  y,  z}, // white
-        Vertex { -x,  y, -z}, // green
-        Vertex { -x,  y,  z}, // cyan
-        Vertex { -x,  y, -z}, // green
-        Vertex {  x,  y,  z}, // white
-        Vertex {  x,  y, -z}, // yellow
+        Vertex {  x,  y,  z }, // white
+        Vertex { -x,  y, -z }, // green
+        Vertex { -x,  y,  z }, // cyan
+        Vertex { -x,  y, -z }, // green
+        Vertex {  x,  y,  z }, // white
+        Vertex {  x,  y, -z }, // yellow
 
-        Vertex { -x, -y, -z}, // black
-        Vertex {  x, -y,  z}, // magenta
-        Vertex { -x, -y,  z}, // blue
-        Vertex { -x, -y, -z}, // black
-        Vertex {  x, -y, -z}, // red
-        Vertex {  x, -y,  z}  // magenta
+        Vertex { -x, -y, -z }, // black
+        Vertex {  x, -y,  z }, // magenta
+        Vertex { -x, -y,  z }, // blue
+        Vertex { -x, -y, -z }, // black
+        Vertex {  x, -y, -z }, // red
+        Vertex {  x, -y,  z }  // magenta
     };
 
     glCreateBuffers(1, &_vbo);

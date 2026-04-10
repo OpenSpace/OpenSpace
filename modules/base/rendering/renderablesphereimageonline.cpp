@@ -40,8 +40,8 @@ namespace {
     constexpr Property::PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
-        "A URL to an image to use as a texture for this sphere. The image is expected "
-        "to be an equirectangular projection.",
+        "A URL to an image to use as a texture for this sphere. The image is expected to "
+        "be an equirectangular projection.",
         Property::Visibility::User
     };
 
@@ -67,7 +67,7 @@ namespace {
     // This `Renderable` shows a sphere with an image provided by an online URL. The image
     // will be downloaded when the `Renderable` is added to a scene graph node. To show a
     // sphere with an image from a local file, see
-    // [RenderableSphereImageLocal](#base_screenspace_image_local).
+    // [RenderableSphereImageLocal](#base_screenspace_imagelocal).
     //
     // Per default, the sphere uses an equirectangular projection for the image mapping
     // and hence expects an equirectangular image. However, it can also be used to show
@@ -83,7 +83,7 @@ namespace openspace {
 
 Documentation RenderableSphereImageOnline::Documentation() {
     return codegen::doc<Parameters>(
-        "base_renderable_sphere_image_online",
+        "base_renderable_sphereimageonline",
         RenderableSphere::Documentation()
     );
 }
@@ -96,9 +96,7 @@ RenderableSphereImageOnline::RenderableSphereImageOnline(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _textureUrl = p.url;
-    _textureUrl.onChange([this]() {
-        _textureIsDirty = true;
-    });
+    _textureUrl.onChange([this]() { _textureIsDirty = true; });
     addProperty(_textureUrl);
 }
 
@@ -136,7 +134,7 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
         }
 
         try {
-            _texture = ghoul::io::TextureReader::ref().loadTexture(
+            _texture = ghoul::io::texture::loadTexture(
                 reinterpret_cast<void*>(imageFile.buffer),
                 imageFile.size,
                 2,
@@ -146,7 +144,7 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
 
             _textureIsDirty = false;
         }
-        catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
+        catch (const ghoul::io::texture::InvalidLoadException& e) {
             _textureIsDirty = false;
             LERRORC(e.component, e.message);
         }

@@ -25,8 +25,6 @@
 #include <openspace/data/speckloader.h>
 
 #include <openspace/data/dataloader.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
@@ -76,7 +74,7 @@ namespace openspace::dataloader::speck {
 Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> specs) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
-    std::ifstream file(path);
+    std::ifstream file = std::ifstream(path);
     if (!file.good()) {
         throw ghoul::RuntimeError(std::format("Failed to open speck file '{}'", path));
     }
@@ -91,8 +89,8 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
     while (ghoul::getline(file, line)) {
         currentLineNumber++;
 
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
+        // Guard against wrong line endings (copying files between operating systems)
+        // causes lines to have a final \r
         if (!line.empty() && line.back() == '\r') {
             line = line.substr(0, line.length() - 1);
         }
@@ -112,7 +110,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
 
 
         if (startsWith(line, "datavar")) {
-            // each datavar line is following the form:
+            // Each datavar line is following the form:
             // datavar <idx> <description>
             // with <idx> being the index of the data variable
 
@@ -127,7 +125,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
         }
 
         if (startsWith(line, "texturevar")) {
-            // each texturevar line is following the form:
+            // Each texturevar line is following the form:
             // texturevar <idx>
             // where <idx> is the data value index where the texture index is stored
             if (res.textureDataIndex != -1) {
@@ -144,7 +142,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
         }
 
         if (startsWith(line, "polyorivar")) {
-            // each polyorivar line is following the form:
+            // Each polyorivar line is following the form:
             // texturevar <idx>
             // where <idx> is the data value index where the orientation index storage
             // starts. There are 6 values stored in total, xyz + uvw
@@ -159,7 +157,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
             std::string dummy;
             str >> dummy >> res.orientationDataIndex;
 
-            // Ok.. this is kind of weird.  Speck unfortunately doesn't tell us in the
+            // Ok.. this is kind of weird. Speck unfortunately doesn't tell us in the
             // specification how many values a datavar has. Usually this is 1 value per
             // datavar, unless it is a polygon orientation thing. Now, the datavar name
             // for these can be anything (have seen 'orientation' and 'ori' before, so we
@@ -173,7 +171,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
         }
 
         if (startsWith(line, "texture")) {
-            // each texture line is following one of two forms:
+            // Each texture line is following one of two forms:
             // 1:   texture -M 1 halo.sgi
             // 2:   texture 1 M1.sgi
             // The parameter in #1 is currently being ignored
@@ -219,7 +217,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
         }
 
         if (startsWith(line, "maxcomment")) {
-            // ignoring this comment as we don't need it
+            // Ignoring this comment as we don't need it
             continue;
         }
 
@@ -259,8 +257,8 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
             continue;
         }
 
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
+        // Guard against wrong line endings (copying files between operating systems)
+        // causes lines to have a final \r
         if (line.back() == '\r') {
             line = line.substr(0, line.length() - 1);
         }
@@ -365,7 +363,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
             );
         }
     }
-#endif
+#endif // _DEBUG
 
     return res;
 }
@@ -373,7 +371,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
 Labelset loadLabelFile(std::filesystem::path path) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
-    std::ifstream file(path);
+    std::ifstream file = std::ifstream(path);
     if (!file.good()) {
         throw ghoul::RuntimeError(std::format("Failed to open dataset file '{}'", path));
     }
@@ -388,8 +386,8 @@ Labelset loadLabelFile(std::filesystem::path path) {
             continue;
         }
 
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
+        // Guard against wrong line endings (copying files between operating systems)
+        // causes lines to have a final \r
         if (line.back() == '\r') {
             line = line.substr(0, line.length() - 1);
         }
@@ -403,7 +401,7 @@ Labelset loadLabelFile(std::filesystem::path path) {
         }
 
         if (startsWith(line, "textcolor")) {
-            // each textcolor line is following the form:
+            // Each textcolor line is following the form:
             // textcolor <idx>
             // with <idx> being the index of the color into some configuration file (not
             // really sure how these configuration files work, but they don't seem to be
@@ -432,8 +430,8 @@ Labelset loadLabelFile(std::filesystem::path path) {
             continue;
         }
 
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
+        // Guard against wrong line endings (copying files between operating systems)
+        // causes lines to have a final \r
         if (line.back() == '\r') {
             line = line.substr(0, line.length() - 1);
         }
@@ -466,13 +464,13 @@ Labelset loadLabelFile(std::filesystem::path path) {
         strip(rest);
 
         if (startsWith(rest, "id")) {
-            // optional arument with identifier
+            // Optional arument with identifier
             // Remove the 'id' text
             rest = rest.substr(std::string_view("id ").size());
             const size_t index = rest.find("text");
             entry.identifier = rest.substr(0, index - 1);
 
-            // update the rest, remove the identifier
+            // Update the rest, remove the identifier
             rest = rest.substr(index);
         }
         if (!startsWith(rest, "text")) {
@@ -499,86 +497,6 @@ Labelset loadLabelFile(std::filesystem::path path) {
         if (!rest.empty()) {
             res.entries.push_back(std::move(entry));
         }
-    }
-
-    return res;
-}
-
-ColorMap loadCmapFile(std::filesystem::path path) {
-    ghoul_assert(std::filesystem::exists(path), "File must exist");
-
-    std::ifstream file = std::ifstream(path);
-    if (!file.good()) {
-        throw ghoul::RuntimeError(std::format(
-            "Failed to open color map file '{}'", path
-        ));
-    }
-
-    ColorMap res;
-    int nColorLines = -1;
-
-    std::string line;
-    while (ghoul::getline(file, line)) {
-        // Ignore empty line or commented-out lines
-        if (line.empty() || line[0] == '#') {
-            continue;
-        }
-
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
-        if (line.back() == '\r') {
-            line = line.substr(0, line.length() - 1);
-        }
-
-        strip(line);
-
-        if (nColorLines == -1) {
-            // This is the first time we get this far, it will have to be the first number
-            // meaning that it is the number of color values
-
-            std::stringstream str(line);
-            str >> nColorLines;
-            res.entries.reserve(nColorLines);
-        }
-        else {
-            // We have already read the number of color lines, so we are in the process of
-            // reading the individual value lines
-
-            glm::vec4 color;
-            std::string dummy;
-            // Note that startwith converts the input string to all lowercase
-            if (startsWith(line, "belowrange")) {
-                std::stringstream str(line);
-                str >> dummy >> color.x >> color.y >> color.z >> color.w;
-                res.belowRangeColor = color;
-            }
-            else if (startsWith(line, "aboverange")) {
-                std::stringstream str(line);
-                str >> dummy >> color.x >> color.y >> color.z >> color.w;
-                res.aboveRangeColor = color;
-            }
-            else if (startsWith(line, "nan")) {
-                std::stringstream str(line);
-                str >> dummy >> color.x >> color.y >> color.z >> color.w;
-                res.nanColor = color;
-            }
-            else {
-                // TODO: Catch when this is not a color!
-                std::stringstream str(line);
-                str >> color.x >> color.y >> color.z >> color.w;
-                res.entries.push_back(std::move(color));
-            }
-        }
-    }
-
-    res.entries.shrink_to_fit();
-
-    if (nColorLines != static_cast<int>(res.entries.size())) {
-        LWARNINGC("SpeckLoader", std::format(
-            "While loading color map '{}', the expected number of color values '{}' was "
-            "different from the actual number of color values '{}'",
-            path, nColorLines, res.entries.size()
-        ));
     }
 
     return res;

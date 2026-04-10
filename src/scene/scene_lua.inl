@@ -72,7 +72,6 @@
 using namespace openspace;
 
 namespace {
-
     /**
      * Returns the Property that matches the provided tag. First the provided owner is
      * checked and if that does not contain the requested tag, its own owners are checked
@@ -93,14 +92,14 @@ namespace {
 
         if (size_t i = tagToMatch.find(Intersection);  i != std::string_view::npos) {
             // We have an intersection instruction
-            if (tagToMatch.find(Negation) != std::string_view::npos) {
+            if (tagToMatch.contains(Negation)) {
                 throw ghoul::RuntimeError(std::format(
                     "Only a single instruction to combine tags is supported. Found an "
                     "intersection ('{}') and a negation instruction ('{}') in the query: "
                     "'{}'", Intersection, Negation, tagToMatch
                 ));
             }
-            if (tagToMatch.find(Union) != std::string_view::npos) {
+            if (tagToMatch.contains(Union)) {
                 throw ghoul::RuntimeError(std::format(
                     "Only a single instruction to combine tags is supported. Found an "
                     "intersection ('{}') and a union instruction ('{}') in the query: "
@@ -118,18 +117,18 @@ namespace {
         }
         if (size_t i = tagToMatch.find(Negation);  i != std::string_view::npos) {
             // We have an negation instruction
-            if (tagToMatch.find(Intersection) != std::string_view::npos) {
+            if (tagToMatch.contains(Intersection)) {
                 throw ghoul::RuntimeError(std::format(
                     "Only a single instruction to combine tags is supported. Found a "
                     "negation ('{}') and an intersection instruction ('{}') in the "
                     "query: '{}'", Negation, Intersection, tagToMatch
                 ));
             }
-            if (tagToMatch.find(Union) != std::string_view::npos) {
+            if (tagToMatch.contains(Union)) {
                 throw ghoul::RuntimeError(std::format(
                     "Only a single instruction to combine tags is supported. Found a "
-                    "negation ('{}') and a union instruction ('{}') in the query: "
-                    "'{}'", Negation, Union, tagToMatch
+                    "negation ('{}') and a union instruction ('{}') in the query: '{}'",
+                    Negation, Union, tagToMatch
                 ));
             }
 
@@ -143,14 +142,14 @@ namespace {
         }
         if (size_t i = tagToMatch.find(Union);  i != std::string_view::npos) {
             // We have an union instruction
-            if (tagToMatch.find(Negation) != std::string_view::npos) {
+            if (tagToMatch.contains(Negation)) {
                 throw ghoul::RuntimeError(std::format(
                     "Only a single instruction to combine tags is supported. Found a "
-                    "union ('{}') and a negation instruction ('{}') in the query: "
-                    "'{}'", Union, Negation, tagToMatch
+                    "union ('{}') and a negation instruction ('{}') in the query: '{}'",
+                    Union, Negation, tagToMatch
                 ));
             }
-            if (tagToMatch.find(Intersection) != std::string_view::npos) {
+            if (tagToMatch.contains(Intersection)) {
                 throw ghoul::RuntimeError(std::format(
                     "Only a single instruction to combine tags is supported. Found a "
                     "union ('{}') and an intersection instruction ('{}') in the query: "
@@ -208,31 +207,31 @@ namespace {
     std::tuple<std::string_view, std::string_view, bool> parseRegex(
                                                                    std::string_view regex)
     {
-        if (size_t wildPos = regex.find_first_of("*");  wildPos != std::string::npos) {
-            std::string_view preName = regex.substr(0, wildPos);
-            std::string_view postName = regex.substr(wildPos + 1);
-
-            // If none then malformed regular expression
-            if (preName.empty() && postName.empty()) [[unlikely]] {
-                throw ghoul::lua::LuaError(std::format(
-                    "Malformed regular expression: '{}': Empty both before and after '*'",
-                    regex
-                ));
-            }
-
-            // Currently do not support several wildcards
-            if (regex.find_first_of("*", wildPos + 1) != std::string::npos) [[unlikely]] {
-                throw ghoul::lua::LuaError(std::format(
-                    "Malformed regular expression: '{}': Only one '*' is supported", regex
-                ));
-            }
-
-            return { preName, postName, false };
-        }
-        else {
+        size_t wildPos = regex.find_first_of("*");
+        if (wildPos == std::string::npos) {
             // Literal or tag
             return { "", regex, true };
         }
+
+        std::string_view preName = regex.substr(0, wildPos);
+        std::string_view postName = regex.substr(wildPos + 1);
+
+        // If none then malformed regular expression
+        if (preName.empty() && postName.empty()) [[unlikely]] {
+            throw ghoul::lua::LuaError(std::format(
+                "Malformed regular expression: '{}': Empty both before and after '*'",
+                regex
+            ));
+        }
+
+        // Currently do not support several wildcards
+        if (regex.find_first_of("*", wildPos + 1) != std::string::npos) [[unlikely]] {
+            throw ghoul::lua::LuaError(std::format(
+                "Malformed regular expression: '{}': Only one '*' is supported", regex
+            ));
+        }
+
+        return { preName, postName, false };
     }
 
     bool checkUriMatchFromRegexResults(std::string_view uri,
@@ -256,7 +255,7 @@ namespace {
                 // Check that the identifier fully matches the identifier in URI
                 ((propertyPos + identifier.length() + 1) < uri.length()) ||
                 // Match parent URI
-                (!parentUri.empty() && uri.find(parentUri) == std::string::npos))
+                (!parentUri.empty() && !uri.contains(parentUri)))
             {
                 return false;
             }
@@ -319,7 +318,7 @@ namespace {
                 );
 
                 if (isMatch) {
-                    std::lock_guard g(mutex);
+                    std::unique_lock lock(mutex);
                     matches.push_back(prop);
                 }
             }
@@ -338,10 +337,10 @@ namespace {
             isLiteral = false;
         }
 
-        // If we are in group mode, no parent URI is found, and there is no punctuation
-        // in the returned owner identifier, we only got the group - no identifier
+        // If we are in group mode, no parent URI is found, and there is no punctuation in
+        // the returned owner identifier, we only got the group - no identifier
         const bool inputIsOnlyTag = isGroupMode && parentUri.empty() &&
-            ownerIdentifier.find(".") == std::string::npos;
+            !ownerIdentifier.contains(".");
 
         const std::vector<PropertyOwner*>& propertyOwners = allPropertyOwners();
 
@@ -376,7 +375,7 @@ namespace {
                     }
                 }
 
-                std::lock_guard g(mutex);
+                std::unique_lock lock(mutex);
                 matches.push_back(propOwner);
             }
         );
@@ -690,7 +689,6 @@ int propertyGetValue(lua_State* L) {
     prop->getLuaValue(L);
     return 1;
 }
-
 } // namespace openspace::luascriptfunctions
 
 namespace {
@@ -707,8 +705,8 @@ namespace {
  * match the URI are changed instead.
  *
  * \param uri The URI that identifies the property or properties whose values should be
- *            changed. The URI can contain 0 or 1 wildcard `*` characters or a tag
- *            expression (`{tag}`) that identifies a property owner.
+ *        changed. The URI can contain 0 or 1 wildcard `*` characters or a tag expression
+ *        (`{tag}`) that identifies a property owner
  */
 [[codegen::luawrap]] bool hasProperty(std::string uri) {
     Property* prop = property(uri);
@@ -728,9 +726,9 @@ namespace {
  * instead.
  *
  * \param uri The URI that identifies the property or properties to get. The URI can
- *            contain 0 or 1 wildcard `*` characters or a tag expression (`{tag}`) that
- *            identifies a property owner.
- * \ return A list of property URIs
+ *        contain 0 or 1 wildcard `*` characters or a tag expression (`{tag}`) that
+ *        identifies a property owner
+ * \return A list of property URIs
  */
 [[codegen::luawrap]] std::vector<std::string> property(std::string uri) {
     std::string tag = groupTag(uri);
@@ -762,9 +760,9 @@ namespace {
  * match the URI are returned instead.
  *
  * \param uri The URI that identifies the property owner or owners to get. The URI can
- *            contain 0 or 1 wildcard `*` characters or a tag expression (`{tag}`) that
- *            identifies a property owner.
- * \ return A list of property owner URIs
+ *        contain 0 or 1 wildcard `*` characters or a tag expression (`{tag}`) that
+ *        identifies a property owner
+ * \return A list of property owner URIs
  */
 [[codegen::luawrap]] std::vector<std::string> propertyOwner(std::string uri) {
     std::string tag = groupTag(uri);
@@ -908,11 +906,10 @@ namespace {
             if (
                 // Check if the propertyIdentifier appears in the URI at all
                 (propertyPos == std::string::npos) ||
-                // Check that the propertyIdentifier fully matches the property in uri
+                // Check that the propertyIdentifier fully matches the property in URI
                 ((propertyPos + propertyIdentifier.length() + 1) < identifier.length()) ||
                 // Match node name
-                (!nodeIdentifier.empty() &&
-                    identifier.find(nodeIdentifier) == std::string::npos))
+                (!nodeIdentifier.empty() && !identifier.contains(nodeIdentifier)))
             {
                 continue;
             }
@@ -929,8 +926,7 @@ namespace {
             }
         }
 
-        SceneGraphNode* parent = node->parent();
-        if (!parent) {
+        if (SceneGraphNode* parent = node->parent();  !parent) {
             throw ghoul::lua::LuaError("Cannot remove root node");
         }
 
@@ -998,13 +994,17 @@ namespace {
     }
 }
 
-// Checks whether the specifies SceneGraphNode is present in the current scene.
+/**
+ * Checks whether the specifies SceneGraphNode is present in the current scene.
+ */
 [[codegen::luawrap]] bool hasSceneGraphNode(std::string nodeName) {
     SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(nodeName);
     return node != nullptr;
 }
 
-// Returns a list of all scene graph nodes in the scene
+/**
+ * Returns a list of all scene graph nodes in the scene.
+ */
 [[codegen::luawrap]] std::vector<std::string> sceneGraphNodes() {
     const std::vector<SceneGraphNode*>& nodes =
         global::renderEngine->scene()->allSceneGraphNodes();
@@ -1027,15 +1027,15 @@ namespace {
  * objects other than the shadowee.
  *
  * \param lightSource The identifier of the scene graph node that should act as the source
- *                    of the light for shadowing purposes
+ *        of the light for shadowing purposes
  * \param shadower The identifier of the scene graph node that is the object that casts a
- *                 shadow on the shadowee and other shadowers in the tsame shadow group
+ *        shadow on the shadowee and other shadowers in the tsame shadow group
  * \param shadowee The identifier of the scene graph node that is the object that receives
- *                 the shadow of the shadower
+ *        the shadow of the shadower
  * \param shadowGroup An arbitrary name that identifies a shadow group, meaning multiple
- *                    shadowcaster registrations that should act in unison. The name must
- *                    not start with a `_` character. If this parameter is omitted, a
- *                    suitable unique name will be automatically generated
+ *        shadowcaster registrations that should act in unison. The name must not start
+ *        with a `_` character. If this parameter is omitted, a suitable unique name will
+ *        be automatically generated
  */
 [[codegen::luawrap]] void registerShadowcaster(std::string lightSource,
                                                std::string shadower, std::string shadowee,
@@ -1083,19 +1083,17 @@ namespace {
  * causing the shadow calculations to cease. If the pairing does not exist, an error
  * message will be raised.
  *
- *
  * \param lightSource The identifier of the scene graph node that should act as the source
- *                    of the light for shadowing purposes
+ *        of the light for shadowing purposes
  * \param shadower The identifier of the scene graph node that is the object that casts a
- *                 shadow on the shadowee and other shadowers in the tsame shadow group
+ *        shadow on the shadowee and other shadowers in the same shadow group
  * \param shadowee The identifier of the scene graph node that is the object that receives
- *                 the shadow of the shadower
+ *        the shadow of the shadower
  * \param shadowGroup An arbitrary name that identifies a shadow group, meaning multiple
- *                    shadowcaster registrations that should act in unison. The name must
- *                    not start with a `_` character. If this parameter is omitted, a
- *                    suitable unique name will be automatically generated. If the same
- *                    light source, shadower, and shadowee are provided as for a previous
- *                    register call, the generated name will be identical
+ *        shadowcaster registrations that should act in unison. The name must not start
+ *        with a `_` character. If this parameter is omitted, a suitable unique name will
+ *        be automatically generated. If the same light source, shadower, and shadowee are
+ *        provided as for a previous register call, the generated name will be identical
  */
 [[codegen::luawrap]] void removeShadowcaster(std::string lightSource,
                                              std::string shadower, std::string shadowee,
@@ -1137,8 +1135,10 @@ namespace {
     global::renderEngine->removeShadowCaster(*shadowGroup, shdr, shdee);
 }
 
-// Returns a list of all scene graph nodes in the scene that have a renderable of the
-// specific type
+/**
+ * Returns a list of all scene graph nodes in the scene that have a renderable of the
+ * specific type.
+ */
 [[codegen::luawrap]] std::vector<std::string> nodeByRenderableType(std::string type) {
     const std::vector<SceneGraphNode*>& nodes =
         global::renderEngine->scene()->allSceneGraphNodes();
@@ -1152,7 +1152,9 @@ namespace {
     return res;
 }
 
-// Returns a list of all screen-space renderables
+/**
+ * Returns a list of all screen - space renderables.
+ */
 [[codegen::luawrap]] std::vector<std::string> screenSpaceRenderables() {
     const std::vector<ScreenSpaceRenderable*>& ssrs =
         global::renderEngine->screenSpaceRenderables();
@@ -1320,7 +1322,7 @@ enum class [[codegen::enum]] CustomPropertyType {
     // @TODO (abock, 2022-05-01)  These if statements here are a bit gnarly since it
     // requires us to update them as soon as we add a new property type. It would be nicer
     // to have a factory function for this but right now this is the only place where that
-    // factory would be used.
+    // factory would be used
 
     const char* gui =
         guiName.has_value() && !guiName->empty() ?
@@ -1441,7 +1443,7 @@ enum class [[codegen::enum]] CustomPropertyType {
 
 /**
  * Create a valid identifier from the provided input string. Will replace invalid
- * characters like whitespaces and some punctuation marks with valid alternatives
+ * characters like whitespaces and some punctuation marks with valid alternatives.
  */
 [[codegen::luawrap]] std::string makeIdentifier(std::string input) {
     return openspace::makeIdentifier(input);
@@ -1451,11 +1453,11 @@ enum class [[codegen::enum]] CustomPropertyType {
  * Set a custom ordering of the items in a specific branch in the Scene GUI tree, i.e.
  * for a specific GUI path.
  *
- * \param guiPath The GUI path for which the order should be set.
+ * \param guiPath The GUI path for which the order should be set
  * \param list A list of names of scene graph nodes or subgroups in the GUI, in the order
- *             of which they should appear in the tree. The list does not have to include
- *             all items in the given GUI path. Any excluded items will be placed after
- *             the ones in the list.
+ *        of which they should appear in the tree. The list does not have to include all
+ *        items in the given GUI path. Any excluded items will be placed after the ones in
+ *        the list
  */
 [[codegen::luawrap]] void setGuiOrder(std::string guiPath, std::vector<std::string> list)
 {

@@ -45,8 +45,8 @@ struct RawTile;
 class AsyncTileDataProvider {
 public:
     /**
-     * \param name is the name for this provider
-     * \param rawTileDataReader is the reader that will be used for the asynchronous tile
+     * \param name The name for this provider
+     * \param rawTileDataReader The reader that will be used for the asynchronous tile
      *        loading
      */
     AsyncTileDataProvider(std::string name,

@@ -44,10 +44,10 @@
 namespace {
     struct [[codegen::Dictionary(SyncModule)]] Parameters {
         // The list of all repository URLs that are used to fetch data from for
-        // HTTPSynchronizations
+        // HTTPSynchronizations.
         std::optional<std::vector<std::string>> httpSynchronizationRepositories;
 
-        // The folder where all of the synchronizations are stored
+        // The folder where all of the synchronizations are stored.
         std::string synchronizationRoot;
     };
 } // namespace

@@ -43,8 +43,8 @@ namespace {
         "Texture",
         "Texture",
         "The path to a file with a one-dimensional texture to be used for the disc "
-        "color. The leftmost color will be innermost color when rendering the disc, "
-        "and the rightmost color will be the outermost color.",
+        "color. The leftmost color will be innermost color when rendering the disc, and "
+        "the rightmost color will be the outermost color.",
         Property::Visibility::AdvancedUser
     };
 
@@ -66,8 +66,8 @@ namespace {
         "Offset",
         "Offset",
         "The width of the disc, given as two values that specify the lower and upper "
-        "deviation from the semi major axis, respectively. The values are relative "
-        "to the size of the semi-major axis. That is, 0 means no deviation from the "
+        "deviation from the semi major axis, respectively. The values are relative to "
+        "the size of the semi-major axis. That is, 0 means no deviation from the "
         "semi-major axis and 1 is a whole semi-major axis's worth of deviation.",
         Property::Visibility::AdvancedUser
     };
@@ -102,7 +102,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableOrbitDisc::Documentation() {
-    return codegen::doc<Parameters>("exoplanets_renderableorbitdisc");
+    return codegen::doc<Parameters>("exoplanets_renderable_orbitdisc");
 }
 
 RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
@@ -148,7 +148,7 @@ void RenderableOrbitDisc::initialize() {
     _texture = std::make_unique<TextureComponent>(1);
     _texture->setFilterMode(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
     _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
-    _plane = std::make_unique<PlaneGeometry>(planeSize());
+    _plane = std::make_unique<PlaneGeometry>(glm::vec2(planeSize()));
 }
 
 void RenderableOrbitDisc::initializeGL() {
@@ -200,7 +200,6 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
 
     _shader->deactivate();
 
-    // Restores GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();
@@ -213,7 +212,7 @@ void RenderableOrbitDisc::update(const UpdateData&) {
     }
 
     if (_planeIsDirty) [[unlikely]] {
-        _plane->updateSize(planeSize());
+        _plane->updateSize(glm::vec2(planeSize()));
         _planeIsDirty = false;
     }
 

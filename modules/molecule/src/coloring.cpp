@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// The following code was taken from VIAMD (https://github.com/scanberg/viamd), MIT.
+// The following code was taken from VIAMD (https://github.com/scanberg/viamd), MIT
 
 #include <modules/molecule/src/coloring.h>
 

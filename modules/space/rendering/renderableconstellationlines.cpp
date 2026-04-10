@@ -312,7 +312,6 @@ void RenderableConstellationLines::renderConstellations(const RenderData&,
     glBindVertexArray(0);
     _program->deactivate();
 
-    // Restores GL State
     global::renderEngine->openglStateCache().resetDepthState();
     global::renderEngine->openglStateCache().resetBlendState();
 }
@@ -365,8 +364,8 @@ void RenderableConstellationLines::loadData() {
             break;
         }
 
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
+        // Guard against wrong line endings (copying files between operating systems)
+        // causes lines to have a final \r
         if (!line.empty() && line.back() == '\r') {
             line = line.substr(0, line.length() - 1);
         }
@@ -375,7 +374,7 @@ void RenderableConstellationLines::loadData() {
             continue;
         }
 
-        if (const size_t found = line.find("mesh");  found == std::string::npos) {
+        if (!line.contains("mesh")) {
             continue;
         }
 
@@ -393,7 +392,7 @@ void RenderableConstellationLines::loadData() {
         str >> dummy; // color index command
         do {
             if (dummy == "-c") {
-                str >> constellationLine.colorIndex; // color index
+                str >> constellationLine.colorIndex;
             }
             else {
                 LWARNING(std::format(
@@ -414,7 +413,7 @@ void RenderableConstellationLines::loadData() {
 
         id >> dummy; // id command
         dummy.clear();
-        ghoul::getline(id, identifier); // identifier
+        ghoul::getline(id, identifier);
         ghoul::trimWhitespace(identifier);
         constellationLine.name = constellationFullName(identifier);
 

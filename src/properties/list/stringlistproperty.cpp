@@ -29,8 +29,7 @@
 
 namespace openspace {
 
-StringListProperty::StringListProperty(Property::PropertyInfo info,
-                                       std::vector<std::string> values)
+StringListProperty::StringListProperty(PropertyInfo info, std::vector<std::string> values)
     : ListProperty(std::move(info), std::move(values))
 {}
 

@@ -50,8 +50,7 @@ namespace openspace {
 MultiresVolumeRaycaster::MultiresVolumeRaycaster(std::shared_ptr<TSP> tsp,
                                                std::shared_ptr<AtlasManager> atlasManager,
                                        std::shared_ptr<TransferFunction> transferFunction)
-    : _boundingBox(glm::vec3(1.f))
-    , _tsp(tsp)
+    : _tsp(tsp)
     , _atlasManager(atlasManager)
     , _transferFunction(transferFunction)
 {}
@@ -69,7 +68,7 @@ void MultiresVolumeRaycaster::renderEntryPoints(const RenderData& data,
 {
     program.setUniform("modelTransform", _modelTransform);
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
-    program.setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
+    program.setUniform("campos", glm::vec4(data.camera.position(), 1.f));
     program.setUniform("objpos", glm::vec4(data.modelTransform.translation, 0.f));
     program.setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
     program.setUniform("scaling", glm::vec2(1.f, 0.f));
@@ -85,7 +84,7 @@ void MultiresVolumeRaycaster::renderExitPoints(const RenderData& data,
 {
     program.setUniform("modelTransform", _modelTransform);
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
-    program.setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
+    program.setUniform("campos", glm::vec4(data.camera.position(), 1.f));
     program.setUniform("objpos", glm::vec4(data.modelTransform.translation, 0.f));
     program.setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
     program.setUniform("scaling", glm::vec2(1.f, 0.f));
@@ -102,7 +101,6 @@ void MultiresVolumeRaycaster::preRaycast(const RaycastData& data,
                                          ghoul::opengl::ProgramObject& program)
 {
     std::string id = std::to_string(data.id);
-    //program.setUniform("opacity_" + std::to_string(id), visible ? 1.f : 0.f);
     program.setUniform("stepSizeCoefficient_" + id, _stepSizeCoefficient);
 
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
@@ -138,12 +136,10 @@ void MultiresVolumeRaycaster::preRaycast(const RaycastData& data,
 bool MultiresVolumeRaycaster::isCameraInside(const RenderData& data,
                                              glm::vec3& localPosition)
 {
-    // Camera rig position in world coordinates.
-    glm::vec4 rigWorldPos = glm::vec4(data.camera.positionVec3(), 1.0);
-    //rigWorldPos /= data.camera.scaling().x * pow(10.0, data.camera.scaling().y);
-    //glm::mat4 invSgctMatrix = glm::inverse(data.camera.viewMatrix());
+    // Camera rig position in world coordinates
+    glm::vec4 rigWorldPos = glm::vec4(data.camera.position(), 1.0);
 
-    // Camera position in world coordinates.
+    // Camera position in world coordinates
     glm::vec4 camWorldPos = rigWorldPos;
     glm::vec3 objPos = static_cast<glm::vec3>(data.modelTransform.translation);
 
@@ -157,13 +153,10 @@ bool MultiresVolumeRaycaster::isCameraInside(const RenderData& data,
     }
 
     glm::mat4 scaledModelTransform = modelTransform / divisor;
-
     glm::vec4 modelPos = (glm::inverse(scaledModelTransform) / divisor) * camWorldPos;
-
-
     localPosition = (glm::vec3(modelPos) + glm::vec3(0.5f));
-    return (localPosition.x > 0 && localPosition.y > 0 && localPosition.z > 0 &&
-            localPosition.x < 1 && localPosition.y < 1 && localPosition.z < 1);
+    return (localPosition.x > 0.f && localPosition.y > 0.f && localPosition.z > 0.f &&
+            localPosition.x < 1.f && localPosition.y < 1.f && localPosition.z < 1.f);
 }
 
 void MultiresVolumeRaycaster::postRaycast(const RaycastData&,
@@ -186,7 +179,7 @@ std::filesystem::path MultiresVolumeRaycaster::raycasterPath() const {
 }
 
 std::filesystem::path MultiresVolumeRaycaster::helperPath() const {
-    return absPath(GlslHelperPath); // no helper file
+    return absPath(GlslHelperPath);
 }
 
 void MultiresVolumeRaycaster::setModelTransform(glm::mat4 transform) {

@@ -25,12 +25,12 @@
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 
 #include <modules/skybrowser/skybrowsermodule.h>
-#include <modules/skybrowser/include/utility.h>
 #include <modules/webbrowser/include/browserinstance.h>
+#include <modules/skybrowser/include/utility.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/windowdelegate.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/dictionary.h>
 #include <glm/gtx/color_space.hpp>
@@ -88,8 +88,8 @@ namespace {
     constexpr Property::PropertyInfo UpdateDuringAnimationInfo = {
         "UpdateDuringTargetAnimation",
         "Update during target animation",
-        "If checked, the sky browser display copy will update its coordinates while "
-        "the target is animating.",
+        "If checked, the sky browser display copy will update its coordinates while the "
+        "target is animating.",
         Property::Visibility::User
     };
 
@@ -100,8 +100,10 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
+    /**
+     * Generate a random border color with sufficient lightness.
+     */
     glm::ivec3 randomBorderColor() {
-        // Generate a random border color with sufficient lightness and a n
         std::random_device rd;
         // Hue is in the unit degrees [0, 360]
         std::uniform_real_distribution<float> hue(0.f, 360.f);
@@ -143,7 +145,7 @@ namespace {
 namespace openspace {
 
 Documentation ScreenSpaceSkyBrowser::Documentation() {
-    return codegen::doc<Parameters>("skybrowser_screenspaceskybrowser");
+    return codegen::doc<Parameters>("skybrowser_screenspace_skybrowser");
 }
 
 ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary)
@@ -477,7 +479,7 @@ double ScreenSpaceSkyBrowser::setVerticalFovWithScroll(float scroll) {
     // Make scroll more sensitive the smaller the FOV
     const double x = _verticalFov;
     const double zoomFactor =
-        atan(x / 50.0) + exp(x / 40.0) - 0.99999999999999999999999999999;
+        std::atan(x / 50.0) + std::exp(x / 40.0) - 0.99999999999999999999999999999;
     const double zoom = scroll > 0.0 ? zoomFactor : -zoomFactor;
     _verticalFov = std::clamp(_verticalFov + zoom, 0.0, 70.0);
 

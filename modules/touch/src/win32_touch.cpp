@@ -75,7 +75,7 @@ namespace openspace {
 LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam);
 
 // This hook will only work for Win8+ Digitizers.
-// - Once GLFW has native touch support, we can remove this windows-specific code
+//   - Once GLFW has native touch support, we can remove this windows-specific code
 LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
     if (nCode != HC_ACTION) {
         return CallNextHookEx(0, nCode, wParam, lParam);
@@ -94,11 +94,11 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                 break;
             }
 
-            //Implementation from microsoft STL of high_resolution_clock(steady_clock):
+            // Implementation from microsoft STL of high_resolution_clock(steady_clock):
             const long long freq = gFrequency;
             const long long whole = (info.PerformanceCount / freq) * std::micro::den;
-            const long long part  = (info.PerformanceCount % freq) *
-                                    std::micro::den / freq;
+            const long long part = (info.PerformanceCount % freq) *
+                                   std::micro::den / freq;
             const std::chrono::microseconds timestamp =
                 std::chrono::duration<UINT64, std::micro>(whole + part) - gStartTime;
 
@@ -106,19 +106,18 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
             GetClientRect(pStruct->hwnd, reinterpret_cast<LPRECT>(&rect));
 
             POINT p = info.ptPixelLocation;
-            // native touch to screen conversion
+            // Native touch to screen conversion
             ScreenToClient(pStruct->hwnd, reinterpret_cast<LPPOINT>(&p));
 
-            const float xPos = static_cast<float>(p.x) /
-                               static_cast<float>(rect.right - rect.left);
-            const float yPos = static_cast<float>(p.y) /
-                               static_cast<float>(rect.bottom - rect.top);
+            const float xPos =
+                static_cast<float>(p.x) / static_cast<float>(rect.right - rect.left);
+            const float yPos =
+                static_cast<float>(p.y) / static_cast<float>(rect.bottom - rect.top);
 
-            TouchInput touchInput(
+            TouchInput touchInput = TouchInput(
                 reinterpret_cast<size_t>(info.sourceDevice),
                 static_cast<size_t>(info.pointerId),
-                xPos,
-                yPos,
+                glm::vec2(xPos, yPos),
                 static_cast<double>(timestamp.count()) / 1000000.0
             );
 
@@ -171,24 +170,24 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
         }
     }
 
-    // Pass the hook along!
+    // Pass the hook along
     return CallNextHookEx(0, nCode, wParam, lParam);
 }
 
 Win32TouchHook::Win32TouchHook(void* nativeWindow) {
     HWND hWnd = reinterpret_cast<HWND>(nativeWindow);
-    if (hWnd == nullptr) {
+    if (!hWnd) {
         LINFO("No windowhandle available for touch input");
         return;
     }
 
-    // Test for touch:
+    // Test for touch
     int value = GetSystemMetrics(SM_DIGITIZER);
     if ((value & NID_READY) == 0) {
-        // Don't bother setting up touch hooks?
+        // Don't bother setting up touch hooks
         return;
     }
-    // stack ready, drivers installed and digitizer is ready for input
+    // Stack ready, drivers installed and digitizer is ready for input
     if (value & NID_MULTI_INPUT) {
         // Digitizer is multitouch
         LINFO("Found Multitouch input digitizer");
@@ -197,15 +196,15 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow) {
         // Integrated touch
     }
 
-    // This should be needed, but we seem to receive messages even without it,
-    // this ought to be part to the older (< win8) windows touch-api.
-    // Also - RegisterTouchWindow enables Windows gestures, which we don't want
-    // since they produce visual feedback for "press-and-tap" etc.
+    // This should be needed, but we seem to receive messages even without it, this ought
+    // to be part to the older (< win8) windows touch-api. Also - RegisterTouchWindow
+    // enables Windows gestures, which we don't want since they produce visual feedback
+    // for "press-and-tap" etc.
     // RegisterTouchWindow(hWnd, TWF_FINETOUCH | TWF_WANTPALM);
 
     // TODO: Would be nice to find out if the gesture "press-and-tap" can be disabled
-    // basically we don't really care for windows gestures for now...
-    // this disables press and hold (right-click) gesture
+    // basically we don't really care for windows gestures for now... this disables press
+    // and hold (right-click) gesture
     const UINT_PTR dwHwndTabletProperty = TABLET_DISABLE_PRESSANDHOLD;
 
     ATOM atom = ::GlobalAddAtom(MICROSOFT_TABLETPENSERVICE_PROPERTY);
@@ -233,12 +232,11 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow) {
         );
 
         // Attach a lowlevel mouse hook.
-        // This mouse hook prevents injected mouse events (touch-to-mouse),
-        // since we cannot catch it in our messageloop.
-        // Since this is attached to windows global thread, this will block lowlevel mouse
-        // access to all running applications if we stall in this thread.
-        // Debug breakpoints typically freeze our application, in which case we simply
-        // don't create this if a debugger is attached.
+        // This mouse hook prevents injected mouse events (touch-to-mouse), since we
+        // cannot catch it in our messageloop. Since this is attached to windows global
+        // thread, this will block lowlevel mouse access to all running applications if we
+        // stall in this thread. Debug breakpoints typically freeze our application, in
+        // which case we simply don't create this if a debugger is attached
         if (!IsDebuggerPresent()) {
             gMouseHookThread = new std::thread([](){
                 gMouseHook = SetWindowsHookExW(
@@ -280,28 +278,27 @@ Win32TouchHook::~Win32TouchHook() {
 }
 
 // Low-level mouse hook is "needed" if we want to stop mousecursor from moving when we get
-// a touch-input on our window.
-// A negative effect is that this function is for global threads, meaning our application
-// will cause Windows to stall the mouse cursor when this  function can't be scheduled
-// (i.e. when debugger hits a breakpoint). This is not yet fail-proof...might be a
-// race-condition on message pumping?
-// - Seems to move the cursor when we get two fingers as input..
-// - If we ourselves would pump windows for events, we can handle this.
+// a touch-input on our window. A negative effect is that this function is for global
+// threads, meaning our application will cause Windows to stall the mouse cursor when this
+// function can't be scheduled (i.e. when debugger hits a breakpoint). This is not yet
+// fail-proof...might be a race-condition on message pumping?
+//   - Seems to move the cursor when we get two fingers as input..
+//   - If we ourselves would pump windows for events, we can handle this
 LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
     constexpr LONG_PTR SIGNATURE_MASK = 0xFFFFFF00;
     constexpr LONG_PTR MOUSEEVENTF_FROMTOUCH = 0xFF515700;
     if (nCode < 0) {
-        // do not process message
+        // Do not process message
         return CallNextHookEx(0, nCode, wParam, lParam);
     }
     LPMSLLHOOKSTRUCT msg = reinterpret_cast<LPMSLLHOOKSTRUCT>(lParam);
-    // block injected events (in most cases generated by touches)
+    // Block injected events (in most cases generated by touches)
     bool isFromTouch = (msg->dwExtraInfo | SIGNATURE_MASK) == MOUSEEVENTF_FROMTOUCH;
     if (msg->flags & LLMHF_INJECTED || isFromTouch) {
         return 1;
     }
 
-    // forward event
+    // Forward event
     return CallNextHookEx(0, nCode, wParam, lParam);
 }
 

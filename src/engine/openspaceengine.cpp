@@ -40,12 +40,13 @@
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/interaction/tasks/convertrecformattask.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/network/parallelpeer.h>
@@ -60,6 +61,7 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/topic/server.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/openspacemodule.h>
@@ -85,8 +87,8 @@
 #include <ghoul/misc/stringconversion.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/misc/templatefactory.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/debugcontext.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/shaderpreprocessor.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
@@ -157,9 +159,9 @@ namespace {
         "FadeDuration",
         "Fade duration (seconds)",
         "Controls how long time the fading in/out takes when enabling/disabling an "
-        "object through a checkbox in the UI. Holding SHIFT while clicking the "
-        "checkbox will enable/disable the renderable without fading, as will setting "
-        "this value to zero.",
+        "object through a checkbox in the UI. Holding SHIFT while clicking the checkbox "
+        "will enable/disable the renderable without fading, as will setting this value "
+        "to zero.",
         Property::Visibility::AdvancedUser
     };
 
@@ -239,7 +241,7 @@ OpenSpaceEngine::OpenSpaceEngine()
         { static_cast<int>(Property::Visibility::User), "User" },
         { static_cast<int>(Property::Visibility::AdvancedUser), "Advanced User" },
         { static_cast<int>(Property::Visibility::Developer), "Developer" },
-        { static_cast<int>(Property::Visibility::Hidden), "Everything" },
+        { static_cast<int>(Property::Visibility::Hidden), "Everything" }
     });
     addProperty(_visibility);
 
@@ -279,7 +281,7 @@ void OpenSpaceEngine::registerPathTokens() {
     // overwrite the default path of the cfg directory
     using T = std::string;
     for (const std::pair<const T, T>& path : global::configuration->pathTokens) {
-        std::string fullKey = "${" + path.first + "}";
+        std::string fullKey = std::format("${{{}}}", path.first);
         LDEBUG(std::format("Registering path '{}': {}", fullKey, path.second));
 
         const bool overrideBase = (fullKey == "${BASE}");
@@ -304,6 +306,11 @@ void OpenSpaceEngine::initialize() {
 
     LTRACE("OpenSpaceEngine::initialize(begin)");
 
+    // Remove any previously existing temporary folder
+    if (std::filesystem::exists(absPath("${TEMPORARY}"))) {
+        std::filesystem::remove_all(absPath("${TEMPORARY}"));
+    }
+
     global::initialize();
     // Initialize the general capabilities component
     SysCap.addComponent(
@@ -316,7 +323,9 @@ void OpenSpaceEngine::initialize() {
 
     std::filesystem::path cacheFolder = absPath("${CACHE}");
     if (global::configuration->usePerProfileCache) {
-        cacheFolder = std::format("{}-{}", cacheFolder, global::configuration->profile);
+        cacheFolder = std::format(
+            "{}-{}", cacheFolder, global::configuration->profile.profile
+        );
 
         LINFO(std::format("Old cache: {}", absPath("${CACHE}")));
         LINFO(std::format("New cache: {}", cacheFolder));
@@ -327,7 +336,7 @@ void OpenSpaceEngine::initialize() {
         );
     }
 
-    // Create directories that doesn't exist
+    // Create directories that don't exist
     for (const std::string& token : FileSys.tokens()) {
         if (!std::filesystem::is_directory(absPath(token))) {
             std::filesystem::create_directories(absPath(token));
@@ -343,10 +352,9 @@ void OpenSpaceEngine::initialize() {
     }
 
 
-
-    // Initialize the requested logs from the configuration file
-    // We previously initialized the LogManager with a console log to provide some logging
-    // until we know which logs should be added
+    // Initialize the requested logs from the configuration file. We previously
+    // initialized the LogManager with a console log to provide some logging until we know
+    // which logs should be added
     if (ghoul::logging::LogManager::isInitialized()) {
         ghoul::logging::LogManager::deinitialize();
     }
@@ -422,11 +430,13 @@ void OpenSpaceEngine::initialize() {
     LINFOC("OpenSpace Version", std::string(OPENSPACE_VERSION));
     LINFOC("Commit", std::string(OPENSPACE_GIT_FULL));
 
+    global::server->initialize(global::configuration->server);
+
     // Register modules
     global::moduleEngine->initialize(global::configuration->moduleConfigurations);
 
-    // After registering the modules, the documentations for the available classes
-    // can be added as well
+    // After registering the modules, the documentations for the available classes can be
+    // added as well
     for (Documentation d : global::moduleEngine->moduleDocumentations()) {
         DocEng.addDocumentation(std::move(d));
     }
@@ -442,7 +452,7 @@ void OpenSpaceEngine::initialize() {
 
     if (!global::configuration->sandboxedLua) {
         // The Lua state is sandboxed by default, so if the user wants an unsandboxed one,
-        // we have to recreate it here.
+        // we have to recreate it here
         // @TODO (2024-08-07, abock) It's not pretty, but doing it differently would
         // require a bigger rewrite of how we handle the ScriptEngine
         global::scriptEngine->~ScriptEngine();
@@ -457,12 +467,12 @@ void OpenSpaceEngine::initialize() {
 
     // Process profile file
     std::filesystem::path profile;
-    if (!std::filesystem::is_regular_file(global::configuration->profile)) {
+    if (!std::filesystem::is_regular_file(global::configuration->profile.profile)) {
         const std::filesystem::path userCandidate = absPath(std::format(
-            "${{USER_PROFILES}}/{}.profile", global::configuration->profile
+            "${{USER_PROFILES}}/{}.profile", global::configuration->profile.profile
         ));
         const std::filesystem::path profileCandidate = absPath(std::format(
-            "${{PROFILES}}/{}.profile", global::configuration->profile
+            "${{PROFILES}}/{}.profile", global::configuration->profile.profile
         ));
 
         // Give the user profile priority if there are both
@@ -475,17 +485,62 @@ void OpenSpaceEngine::initialize() {
         else {
             throw ghoul::RuntimeError(std::format(
                 "Could not load profile '{}': File does not exist",
-                global::configuration->profile
+                global::configuration->profile.profile
             ));
         }
     }
     else {
-        profile = global::configuration->profile;
+        profile = global::configuration->profile.profile;
     }
 
     // Load the profile
     LINFO(std::format("Loading profile '{}'", profile));
     *global::profile = Profile(profile);
+
+    // Enable the add-ons
+    for (const std::string& addon : global::configuration->profile.addons) {
+        auto findIdentifier = [&addon](const Addon& a) {
+            return a.identifier == addon;
+        };
+
+        auto iRecommended = std::find_if(
+            global::profile->addons.recommended.begin(),
+            global::profile->addons.recommended.end(),
+            findIdentifier
+        );
+        if (iRecommended != global::profile->addons.recommended.end()) {
+            iRecommended->isEnabled = true;
+            continue;
+        }
+
+        auto iCustom = std::find_if(
+            global::profile->addons.custom.begin(),
+            global::profile->addons.custom.end(),
+            findIdentifier
+        );
+        if (iCustom != global::profile->addons.custom.end()) {
+            iCustom->isEnabled = true;
+        }
+
+        auto iGeneral = std::find_if(
+            global::profile->addons.general.begin(),
+            global::profile->addons.general.end(),
+            findIdentifier
+        );
+        if (iGeneral != global::profile->addons.general.end()) {
+            iGeneral->isEnabled = true;
+        }
+
+
+        if (iRecommended == global::profile->addons.recommended.end() &&
+            iCustom == global::profile->addons.custom.end() &&
+            iGeneral == global::profile->addons.general.end())
+        {
+            LWARNING(std::format("Could not find requested addon '{}'", addon));
+            continue;
+        }
+    }
+
 
     // Set up asset loader
     _assetManager = std::make_unique<AssetManager>(
@@ -511,6 +566,8 @@ void OpenSpaceEngine::initialize() {
 
     global::renderEngine->initialize();
 
+    global::interactionHandler->initialize();
+
     for (const std::function<void()>& func : *global::callback::initialize) {
         ZoneScopedN("[Module] initialize");
 
@@ -526,7 +583,6 @@ void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL(begin)");
 
     glbinding::Binding::initialize(global::windowDelegate->openGLProcedureAddress);
-    //glbinding::Binding::useCurrentContext();
 
     LDEBUG("Adding OpenGL capabilities components");
     // Detect and log OpenCL and OpenGL versions and available devices
@@ -548,32 +604,16 @@ void OpenSpaceEngine::initializeGL() {
         global::versionChecker->requestLatestVersion(versionCheckUrl);
     }
 
-    // Check the required OpenGL versions of the registered modules
-    const ghoul::systemcapabilities::Version version =
-        global::moduleEngine->requiredOpenGLVersion();
-    LINFO(std::format("Required OpenGL version: {}", ghoul::to_string(version)));
-
-    if (OpenGLCap.openGLVersion() < version) {
-        throw ghoul::RuntimeError(
-            "An included module required a higher OpenGL version than is supported on "
-            "this system",
-            "OpenSpaceEngine"
-        );
-    }
-
-    {
-        // Check the available OpenGL extensions against the required extensions
-        using OCC = ghoul::systemcapabilities::OpenGLCapabilitiesComponent;
-        for (OpenSpaceModule* m : global::moduleEngine->modules()) {
-            for (const std::string& ext : m->requiredOpenGLExtensions()) {
-                if (!SysCap.component<OCC>().isExtensionSupported(ext)) {
-                    LFATAL(std::format(
-                        "Module '{}' required OpenGL extension '{}' which is not "
-                        "available on this system. Some functionality related to this "
-                        "module will probably not work",
-                        m->guiName(), ext
-                    ));
-                }
+    // Check the available OpenGL extensions against the required extensions
+    for (OpenSpaceModule* m : global::moduleEngine->modules()) {
+        for (const std::string& ext : m->requiredOpenGLExtensions()) {
+            using OCC = ghoul::systemcapabilities::OpenGLCapabilitiesComponent;
+            if (!SysCap.component<OCC>().isExtensionSupported(ext)) {
+                LFATAL(std::format(
+                    "Module '{}' required OpenGL extension '{}' which is not available "
+                    "on this system. Some functionality related to this module will "
+                    "probably not work", m->guiName(), ext
+                ));
             }
         }
     }
@@ -699,8 +739,8 @@ void OpenSpaceEngine::initializeGL() {
 
     // The ordering of the KeyCheckOpenGLState and KeyLogEachOpenGLCall are important as
     // the callback mask in glbinding is stateful for each context, and since
-    // KeyLogEachOpenGLCall is more specific, we want it to be able to overwrite the
-    // state from KeyCheckOpenGLState
+    // KeyLogEachOpenGLCall is more specific, we want it to be able to overwrite the state
+    // from KeyCheckOpenGLState
     if (global::configuration->isCheckingOpenGLState) {
         using namespace glbinding;
 
@@ -761,8 +801,8 @@ void OpenSpaceEngine::initializeGL() {
         );
         if (lvl > LogLevel::Trace) {
             LWARNING(
-                "Logging OpenGL calls is enabled, but the selected log level does "
-                "not include TRACE, so no OpenGL logs will be printed"
+                "Logging OpenGL calls is enabled, but the selected log level does not "
+                "include TRACE, so no OpenGL logs will be printed"
             );
         }
         else {
@@ -802,7 +842,6 @@ void OpenSpaceEngine::initializeGL() {
     global::renderEngine->initializeGL();
 
     global::moduleEngine->initializeGL();
-
 
     for (const std::function<void()>& func : *global::callback::initializeGL) {
         ZoneScopedN("[Module] initializeGL");
@@ -854,8 +893,41 @@ void OpenSpaceEngine::loadAssets() {
         );
     }
 
+    // Load all of the assets specified in the profile
     for (const std::string& a : global::profile->assets) {
         _assetManager->add(a);
+    }
+
+    // Load all assets in enabled add-ons
+    for (const Addon& addon : global::profile->addons.custom) {
+        if (!addon.isEnabled) {
+            continue;
+        }
+
+        LDEBUG(std::format("Loading addon '{}'", addon.name));
+        for (const std::string& a : addon.assets) {
+            _assetManager->add(a);
+        }
+    }
+    for (const Addon& addon : global::profile->addons.recommended) {
+        if (!addon.isEnabled) {
+            continue;
+        }
+
+        LDEBUG(std::format("Loading addon '{}'", addon.name));
+        for (const std::string& a : addon.assets) {
+            _assetManager->add(a);
+        }
+    }
+    for (const Addon& addon : global::profile->addons.general) {
+        if (!addon.isEnabled) {
+            continue;
+        }
+
+        LDEBUG(std::format("Loading addon '{}'", addon.name));
+        for (const std::string& a : addon.assets) {
+            _assetManager->add(a);
+        }
     }
 
     _loadingScreen->exec(*_assetManager, *_scene);
@@ -1008,7 +1080,7 @@ uint64_t OpenSpaceEngine::ramInUse() const {
 #else // ^^^^ WIN32 // !WIN32 vvvv
     LWARNING("Unsupported operating");
     return 0;
-#endif
+#endif // WIN32
 }
 
 uint64_t OpenSpaceEngine::vramInUse() const {
@@ -1035,7 +1107,7 @@ uint64_t OpenSpaceEngine::vramInUse() const {
 #else // ^^^^ WIN32 // !WIN32 vvvv
     LWARNING("Unsupported operating");
     return 0;
-#endif
+#endif // WIN32
 }
 
 void OpenSpaceEngine::runGlobalCustomizationScripts() {
@@ -1117,6 +1189,8 @@ void OpenSpaceEngine::preSynchronization() {
         global::profile->ignoreUpdates = false;
         resetPropertyChangeFlagsOfSubowners(global::rootPropertyOwner);
         global::windowDelegate->setSynchronization(false);
+
+        global::eventEngine->publishEvent<EventProfileLoadingFinished>();
     }
 
     const bool master = global::windowDelegate->isMaster();
@@ -1154,8 +1228,10 @@ void OpenSpaceEngine::preSynchronization() {
         }
         global::sessionRecordingHandler->preSynchronization(dt);
         global::parallelPeer->preSynchronization();
-        global::interactionMonitor->updateActivityState();
+        global::interactionHandler->preSynchronization();
     }
+
+    global::server->preSync();
 
     for (const std::function<void()>& func : *global::callback::preSync) {
         ZoneScopedN("[Module] preSync");
@@ -1302,7 +1378,7 @@ void OpenSpaceEngine::drawOverlays() {
     if (isGuiWindow) {
         global::renderEngine->renderOverlays(_shutdown);
         global::sessionRecordingHandler->render();
-        global::navigationHandler->renderOverlay();
+        global::interactionHandler->renderOverlay();
     }
 
     for (const std::function<void()>& func : *global::callback::draw2D) {
@@ -1333,6 +1409,7 @@ void OpenSpaceEngine::postDraw() {
     LTRACE("OpenSpaceEngine::postDraw(begin)");
 
     global::renderEngine->postDraw();
+    global::interactionHandler->postDraw();
 
     for (const std::function<void()>& func : *global::callback::postDraw) {
         ZoneScopedN("[Module] postDraw");
@@ -1407,13 +1484,11 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         }
     }
 
-    global::navigationHandler->keyboardCallback(key, mod, action);
+    global::interactionHandler->keyboardCallback(key, mod, action);
 
-    if (!global::navigationHandler->disabledKeybindings()) {
+    if (!global::interactionHandler->disabledKeybindings()) {
         global::keybindingManager->keyboardCallback(key, mod, action);
     }
-
-    global::interactionMonitor->markInteraction();
 }
 
 void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier,
@@ -1429,7 +1504,7 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier,
     }
 
     global::luaConsole->charCallback(codepoint, modifier);
-    global::interactionMonitor->markInteraction();
+    global::interactionHandler->markInteraction();
 
     if (_shutdown.inShutdown) {
         _shutdown.inShutdown = false;
@@ -1466,8 +1541,8 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
         }
     }
 
-    // Check if the user clicked on one of the 'buttons' the RenderEngine is drawing.
-    // Only handle the clicks if we are in a GUI window
+    // Check if the user clicked on one of the 'buttons' the RenderEngine is drawing. Only
+    // handle the clicks if we are in a GUI window
     if (action == MouseAction::Press && isGuiWindow) {
         const bool isConsumed =
             global::renderEngine->mouseActivationCallback(_mousePosition);
@@ -1488,8 +1563,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
         }
     }
 
-    global::navigationHandler->mouseButtonCallback(button, action);
-    global::interactionMonitor->markInteraction();
+    global::interactionHandler->mouseButtonCallback(button, action);
 
     if (_shutdown.inShutdown) {
         _shutdown.inShutdown = false;
@@ -1511,8 +1585,7 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y, IsGuiWindow isGu
         func(x, y, isGuiWindow);
     }
 
-    global::navigationHandler->mousePositionCallback(x, y);
-    global::interactionMonitor->markInteraction();
+    global::interactionHandler->mousePositionCallback(x, y);
 
     _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
 }
@@ -1534,8 +1607,7 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY,
         }
     }
 
-    global::navigationHandler->mouseScrollWheelCallback(posY);
-    global::interactionMonitor->markInteraction();
+    global::interactionHandler->mouseScrollWheelCallback(posY);
 }
 
 void OpenSpaceEngine::touchDetectionCallback(TouchInput input) {
@@ -1547,6 +1619,8 @@ void OpenSpaceEngine::touchDetectionCallback(TouchInput input) {
             return;
         }
     }
+
+    global::interactionHandler->touchDetectedCallback(input);
 }
 
 void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
@@ -1558,6 +1632,8 @@ void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
             return;
         }
     }
+
+    global::interactionHandler->touchUpdatedCallback(input);
 }
 
 void OpenSpaceEngine::touchExitCallback(TouchInput input) {
@@ -1566,6 +1642,8 @@ void OpenSpaceEngine::touchExitCallback(TouchInput input) {
     for (const std::function<void(TouchInput)>& func : *global::callback::touchExit) {
         func(input);
     }
+
+    global::interactionHandler->touchExitCallback(input);
 }
 
 void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
@@ -1696,8 +1774,8 @@ OpenSpaceEngine::Mode OpenSpaceEngine::currentMode() const {
 
 bool OpenSpaceEngine::setMode(Mode newMode) {
     if (_currentMode == Mode::CameraPath && newMode == Mode::CameraPath) {
-        // Special case: It is okay to trigger another camera path while one is
-        // already playing. So just return that we were successful
+        // Special case: It is okay to trigger another camera path while one is already
+        // playing. So just return that we were successful
         return true;
     }
     else if (newMode == _currentMode) {
@@ -1864,7 +1942,7 @@ void setCameraFromProfile(const Profile& p) {
                 // Instead of direct calls to navigation state code, Lua commands with
                 // globebrowsing goToGeo are used because this prevents a module
                 // dependency in this core code. Eventually, goToGeo will be incorporated
-                // in the OpenSpace core and this code will change.
+                // in the OpenSpace core and this code will change
                 checkNodeExists(geo.anchor);
                 std::string geoScript;
                 if (geo.altitude.has_value()) {
@@ -1899,10 +1977,13 @@ void setCameraFromProfile(const Profile& p) {
 void setModulesFromProfile(const Profile& p) {
     for (Profile::Module mod : p.modules) {
         const std::vector<OpenSpaceModule*>& m = global::moduleEngine->modules();
-        const auto it = std::find_if(m.begin(), m.end(),
+        const auto it = std::find_if(
+            m.begin(),
+            m.end(),
             [&mod](const OpenSpaceModule* moduleSearch) {
                 return (moduleSearch->identifier() == mod.name);
-            });
+            }
+        );
         if (it != m.end()) {
             if (mod.loadedInstruction.has_value()) {
                 global::scriptEngine->queueScript(mod.loadedInstruction.value());
@@ -1931,13 +2012,14 @@ void setActionsFromProfile(const Profile& p) {
                 "Identifier '{}' does not provide a Lua command to execute", a.identifier
             ));
         }
-        Action action;
-        action.identifier = a.identifier;
-        action.command = a.script;
-        action.name = a.name;
-        action.documentation = a.documentation;
-        action.guiPath = a.guiPath;
-        action.isLocal = Action::IsLocal(a.isLocal);
+        Action action = {
+            .identifier = a.identifier,
+            .command = a.script,
+            .name = a.name,
+            .documentation = a.documentation,
+            .guiPath = a.guiPath,
+            .isLocal = Action::IsLocal(a.isLocal)
+        };
         global::actionManager->registerAction(std::move(action));
     }
 }

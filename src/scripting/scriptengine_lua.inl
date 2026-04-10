@@ -85,13 +85,17 @@ int printFatal(lua_State* L) {
     );
 }
 
-// Checks whether the provided file exists.
+/**
+ * Checks whether the provided file exists.
+ */
 [[codegen::luawrap]] bool fileExists(std::string file) {
     const bool e = std::filesystem::is_regular_file(absPath(std::move(file)));
     return e;
 }
 
-// Reads a file from disk and return its contents.
+/**
+ * Reads a file from disk and return its contents.
+ */
 [[codegen::luawrap]] std::string readFile(std::filesystem::path file) {
     std::filesystem::path p = absPath(file);
     if (!std::filesystem::is_regular_file(p)) {
@@ -105,7 +109,9 @@ int printFatal(lua_State* L) {
     return contents;
 }
 
-// Reads a file from disk and return its as a list of lines.
+/**
+ * Reads a file from disk and return its as a list of lines.
+ */
 [[codegen::luawrap]] std::vector<std::string> readFileLines(std::filesystem::path file) {
     std::filesystem::path p = absPath(file);
     if (!std::filesystem::is_regular_file(p)) {
@@ -123,7 +129,9 @@ int printFatal(lua_State* L) {
     return contents;
 }
 
-// Checks whether the provided directory exists.
+/**
+ * Checks whether the provided directory exists.
+ */
 [[codegen::luawrap]] bool directoryExists(std::filesystem::path file) {
     const bool e = std::filesystem::is_directory(absPath(std::move(file)));
     return e;
@@ -132,7 +140,7 @@ int printFatal(lua_State* L) {
 /**
  * Creates a directory at the provided path, returns true if directory was newly created
  * and false otherwise. If `recursive` flag is set to true, it will automatically create
- * any missing parent folder as well
+ * any missing parent folder as well.
  */
 [[codegen::luawrap]] bool createDirectory(std::filesystem::path path,
                                           bool recursive = false)
@@ -211,12 +219,11 @@ int printFatal(lua_State* L) {
         return std::vector<std::filesystem::path>();
     }
 
-    namespace fs = std::filesystem;
     return ghoul::filesystem::walkDirectory(
         path,
         ghoul::filesystem::Recursive(recursive),
         ghoul::filesystem::Sorted(sorted),
-        [](const fs::path& p) { return fs::is_directory(p); }
+        [](const std::filesystem::path& p) { return std::filesystem::is_directory(p); }
     );
 }
 
@@ -292,7 +299,7 @@ int printFatal(lua_State* L) {
 }
 
 /**
- * Removes a previously registered repeated script (see #registerRepeatedScript)
+ * Removes a previously registered repeated script (see #registerRepeatedScript).
  */
 [[codegen::luawrap]] void removeRepeatedScript(std::string identifier) {
     global::scriptEngine->removeRepeatedScript(identifier);

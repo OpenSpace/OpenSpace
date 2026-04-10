@@ -60,14 +60,14 @@ namespace {
             ChromaKey,
             TransferFunction
         };
-        // Specifies the type of the adjustment that is applied
+        // Specifies the type of the adjustment that is applied.
         std::optional<Type> type;
 
-        // Specifies the chroma key used when selecting 'ChromaKey' for the 'Type'
+        // Specifies the chroma key used when selecting 'ChromaKey' for the 'Type'.
         std::optional<glm::vec3> chromaKeyColor [[codegen::color()]];
 
         // Specifies the tolerance to match the color to the chroma key when the
-        // 'ChromaKey' type is selected for the 'Type'
+        // 'ChromaKey' type is selected for the 'Type'.
         std::optional<float> chromaKeyTolerance;
     };
 } // namespace
@@ -86,7 +86,6 @@ LayerAdjustment::LayerAdjustment()
     , _typeOption(TypeInfo)
     , _typeId(static_cast<layers::Adjustment::ID>(_typeOption.value()))
 {
-    // Add options to option properties
     for (const layers::Adjustment& ai : layers::Adjustments) {
         _typeOption.addOption(static_cast<int>(ai.id), std::string(ai.identifier));
     }

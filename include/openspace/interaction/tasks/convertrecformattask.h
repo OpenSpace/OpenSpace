@@ -50,7 +50,7 @@ public:
 private:
     std::filesystem::path _inFilePath;
     std::filesystem::path _outFilePath;
-    DataMode _dataMode;
+    DataMode _dataMode = DataMode::Binary;
 };
 
 } // namespace openspace

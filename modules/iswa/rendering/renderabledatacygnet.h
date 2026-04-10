@@ -82,7 +82,7 @@ protected:
      */
     bool updateTextureResource() override;
 
-    virtual std::vector<float*> textureData() = 0;
+    virtual std::vector<std::vector<float>> textureData() = 0;
 
     SelectionProperty _dataOptions;
     StringProperty _transferFunctionsFile;

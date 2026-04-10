@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/list/intlistproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -119,14 +120,14 @@ public:
     void setCamera(Camera* camera);
 
     /**
-     * Lets the renderer update the data to be brought into the rendererer programs
-     * as a 'rendererData' variable in the dictionary.
+     * Lets the renderer update the data to be brought into the rendererer programs as a
+     * 'rendererData' variable in the dictionary.
      */
     void setRendererData(ghoul::Dictionary rendererData);
 
     /**
-    * Lets the renderer update the data to be brought into the post rendererer programs
-    * as a 'resolveData' variable in the dictionary.
+    * Lets the renderer update the data to be brought into the post rendererer programs as
+    * a 'resolveData' variable in the dictionary.
     */
     void setResolveData(ghoul::Dictionary resolveData);
 
@@ -192,7 +193,8 @@ private:
 
     IntListProperty _screenshotWindowIds;
     BoolProperty _applyWarping;
-    BoolProperty _screenshotUseDate;
+    TriggerProperty _useNewScreenfolder;
+    BoolProperty _screenshotUseDateTime;
     BoolProperty _disableMasterRendering;
 
     FloatProperty _globalBlackOutFactor;

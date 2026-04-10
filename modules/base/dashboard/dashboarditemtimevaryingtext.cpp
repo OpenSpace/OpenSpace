@@ -46,7 +46,7 @@ namespace {
         "Format string",
         "The format text describing how this dashboard item renders its text. This text "
         "must contain exactly one {} which is a placeholder that will be replaced "
-        "with the values read from the file provided in `DataFile`",
+        "with the values read from the file provided in `DataFile`.",
         Property::Visibility::AdvancedUser
     };
 
@@ -61,7 +61,7 @@ namespace {
     // The value that is displayed depends on the current in-game simulation time.
     //
     // The JSON must contain a 'data' array with timestamp-value pairs. Example format:
-    // {\"data\": [[\"2024-05-10T00:00:00Z\", 2.33], [\"2024-05-10T03:00:00Z\", 3.0]]}
+    // { \"data\": [[\"2024-05-10T00:00:00Z\", 2.33], [\"2024-05-10T03:00:00Z\", 3.0]] }.
     struct [[codegen::Dictionary(DashboardItemTimeVaryingText)]] Parameters {
         // [[codegen::verbatim(FormatStringInfo.description)]]
         std::optional<std::string> formatString;
@@ -107,84 +107,64 @@ void DashboardItemTimeVaryingText::update() {
     double first = _startTimes.front();
     double last = _sequenceEndTime;
 
-    if (current >= first && current < last) {
-        int newIdx = updateActiveTriggerTimeIndex(current);
-        if (newIdx != _activeTriggerTimeIndex) {
-            _activeTriggerTimeIndex = newIdx;
-            double timeKey = _startTimes[_activeTriggerTimeIndex];
-            const nlohmann::json value = _data[timeKey];
-            try {
-                switch (value.type()) {
-                    case nlohmann::json::value_t::null:
-                    case nlohmann::json::value_t::discarded:
-                        break;
-                    case nlohmann::json::value_t::boolean: {
-                        const bool v = value.get<bool>();
-                        _buffer = std::vformat(
-                            _formatString.value(),
-                            std::make_format_args(v)
-                        );
-                        break;
-                    }
-                    case nlohmann::json::value_t::string: {
-                        const std::string v = value.get<std::string>();
-                        _buffer = std::vformat(
-                            _formatString.value(),
-                            std::make_format_args(v)
-                        );
-                        break;
-                    }
-                    case nlohmann::json::value_t::number_integer: {
-                        const int v = value.get<int>();
-                        _buffer = std::vformat(
-                            _formatString.value(),
-                            std::make_format_args(v)
-                        );
-                        break;
-                    }
-                    case nlohmann::json::value_t::number_unsigned: {
-                        const unsigned v = value.get<unsigned>();
-                        _buffer = std::vformat(
-                            _formatString.value(),
-                            std::make_format_args(v)
-                        );
-                        break;
-                    }
-                    case nlohmann::json::value_t::number_float: {
-                        const double v = value.get<double>();
-                        _buffer = std::vformat(
-                            _formatString.value(),
-                            std::make_format_args(v)
-                        );
-                        break;
-                    }
-                    case nlohmann::json::value_t::object:
-                    case nlohmann::json::value_t::array: {
-                        const std::string v = nlohmann::to_string(value);
-                        _buffer = std::vformat(
-                            _formatString.value(),
-                            std::make_format_args(v)
-                        );
-                        break;
-                    }
-                    case nlohmann::json::value_t::binary: {
-                        LWARNINGC(
-                            "DashboardItemTimeVaryingText",
-                            "Binary data is not supported"
-                        );
-                        break;
-                    }
-                }
+    if (current < first || current >= last) {
+        _activeTriggerTimeIndex = -1;
+        _buffer.clear();
+        return;
+    }
 
+    int newIdx = updateActiveTriggerTimeIndex(current);
+    if (newIdx == _activeTriggerTimeIndex) {
+        return;
+    }
+
+    _activeTriggerTimeIndex = newIdx;
+    double timeKey = _startTimes[_activeTriggerTimeIndex];
+    const nlohmann::json value = _data[timeKey];
+    try {
+        switch (value.type()) {
+            case nlohmann::json::value_t::null:
+            case nlohmann::json::value_t::discarded:
+                break;
+            case nlohmann::json::value_t::boolean: {
+                const bool v = value.get<bool>();
+                _buffer = std::vformat(_formatString.value(), std::make_format_args(v));
+                break;
             }
-            catch (const std::format_error&) {
-                LERRORC("DashboardItemTimeVaryingText", "Illegal format string");
+            case nlohmann::json::value_t::string: {
+                const std::string v = value.get<std::string>();
+                _buffer = std::vformat(_formatString.value(), std::make_format_args(v));
+                break;
+            }
+            case nlohmann::json::value_t::number_integer: {
+                const int v = value.get<int>();
+                _buffer = std::vformat(_formatString.value(), std::make_format_args(v));
+                break;
+            }
+            case nlohmann::json::value_t::number_unsigned: {
+                const unsigned v = value.get<unsigned>();
+                _buffer = std::vformat(_formatString.value(), std::make_format_args(v));
+                break;
+            }
+            case nlohmann::json::value_t::number_float: {
+                const double v = value.get<double>();
+                _buffer = std::vformat(_formatString.value(), std::make_format_args(v));
+                break;
+            }
+            case nlohmann::json::value_t::object:
+            case nlohmann::json::value_t::array: {
+                const std::string v = nlohmann::to_string(value);
+                _buffer = std::vformat(_formatString.value(), std::make_format_args(v));
+                break;
+            }
+            case nlohmann::json::value_t::binary: {
+                LWARNINGC("DashboardItemTimeVaryingText", "Binary data is not supported");
+                break;
             }
         }
     }
-    else {
-        _activeTriggerTimeIndex = -1;
-        _buffer.clear();
+    catch (const std::format_error&) {
+        LERRORC("DashboardItemTimeVaryingText", "Illegal format string");
     }
 }
 

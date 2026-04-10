@@ -55,7 +55,6 @@ private:
     void updateVertexData();
     void updateBufferData();
 
-    // Properties
     IntProperty _nShapeSegments;
     IntProperty _nLines;
     FloatProperty _radius;

@@ -69,9 +69,8 @@ namespace {
  * Starts a playback session with keyframe times that are relative to the time since the
  * recording was started (the same relative time applies to the playback). When playback
  * starts, the simulation time is automatically set to what it was at recording time. The
- * file argument is the filename to the session recording file. If a second input
- * value of true is given, then playback will continually loop until it is manually
- * stopped.
+ * file argument is the filename to the session recording file. If a second input value of
+ * true is given, then playback will continually loop until it is manually stopped.
  */
 [[codegen::luawrap]] void startPlayback(std::filesystem::path file, bool loop = false,
                                         bool shouldWaitForTiles = true,
@@ -96,12 +95,16 @@ namespace {
     );
 }
 
-// Stops a playback session before playback of all keyframes is complete.
+/**
+ * Stops a playback session before playback of all keyframes is complete.
+ */
 [[codegen::luawrap]] void stopPlayback() {
     global::sessionRecordingHandler->stopPlayback();
 }
 
-// Pauses or resumes the playback progression through keyframes.
+/**
+ * Pauses or resumes the playback progression through keyframes.
+ */
 [[codegen::luawrap]] void setPlaybackPause(bool pause) {
     global::sessionRecordingHandler->setPlaybackPause(pause);
 }
@@ -115,12 +118,16 @@ namespace {
     global::sessionRecordingHandler->setPlaybackPause(!isPlaybackPaused);
 }
 
-// Returns true if session recording is currently playing back a recording.
+/**
+ * Returns true if session recording is currently playing back a recording.
+ */
 [[codegen::luawrap]] bool isPlayingBack() {
     return global::sessionRecordingHandler->isPlayingBack();
 }
 
-// Returns true if session recording is currently recording a recording.
+/**
+ * Returns true if session recording is currently recording a recording.
+ */
 [[codegen::luawrap]] bool isRecording() {
     return global::sessionRecordingHandler->isRecording();
 }

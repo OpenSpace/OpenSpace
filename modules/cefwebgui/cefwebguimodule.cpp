@@ -24,10 +24,10 @@
 
 #include <modules/cefwebgui/cefwebguimodule.h>
 
-#include <modules/webbrowser/webbrowsermodule.h>
 #include <modules/cefwebgui/include/guirenderhandler.h>
 #include <modules/cefwebgui/include/guikeyboardhandler.h>
 #include <modules/webbrowser/include/browserinstance.h>
+#include <modules/webbrowser/webbrowsermodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
@@ -86,7 +86,6 @@ namespace {
 
         // [[codegen::verbatim(VisibleInfo.description)]]
         std::optional<bool> visible;
-
     };
 } // namespace
 #include "cefwebguimodule_codegen.cpp"
@@ -204,12 +203,12 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         }
     });
 
-    // We need this to make sure that the browser is reloaded
-    // once the endpoint comes online, on OpenSpace startup.
+    // We need this to make sure that the browser is reloaded once the endpoint comes
+    // online, on OpenSpace startup
 
     // TODO: See if the hardcoded endpoint `gui` below can be removed.
-    // Possible fix: Reload browser if cefwebgui is routed to localhost
-    // and the same endpoint that just came online.
+    // Possible fix: Reload browser if cefwebgui is routed to localhost and the same
+    // endpoint that just came online.
     WebGuiModule* webGuiModule = global::moduleEngine->module<WebGuiModule>();
 
     _endpointCallback = webGuiModule->addEndpointChangeCallback(

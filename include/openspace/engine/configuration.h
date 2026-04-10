@@ -50,7 +50,12 @@ struct Configuration {
 
     std::string windowConfiguration = "${CONFIG}/single.json";
     std::string asset;
-    std::string profile;
+
+    struct Profile {
+        std::string profile;
+        std::vector<std::string> addons;
+    };
+    Profile profile;
 
     Property::Visibility propertyVisibility = Property::Visibility::User;
 
@@ -106,7 +111,7 @@ struct Configuration {
 
     float shutdownCountdown = 0.f;
 
-    bool shouldUseScreenshotDate = false;
+    bool shouldUseScreenshotDateTime = false;
 
     bool sandboxedLua = true;
 
@@ -130,6 +135,8 @@ struct Configuration {
     LayerServer layerServer = LayerServer::All;
 
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
+
+    ghoul::Dictionary server;
 
     struct OpenGLDebugContext {
         bool isActive = false;

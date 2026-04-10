@@ -29,7 +29,7 @@
 
 namespace openspace {
 
-IntListProperty::IntListProperty(Property::PropertyInfo info, std::vector<int> values)
+IntListProperty::IntListProperty(PropertyInfo info, std::vector<int> values)
     : ListProperty(std::move(info), std::move(values))
 {}
 

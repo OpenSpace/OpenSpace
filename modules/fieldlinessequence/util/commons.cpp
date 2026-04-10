@@ -27,19 +27,11 @@
 namespace openspace {
 
 Model stringToModel(const std::string& s) {
-    if (s == "batsrus") {
-        return Model::Batsrus;
-    }
-    else if (s == "enlil") {
-        return Model::Enlil;
-    }
-    else if (s == "pfss") {
-        return Model::Pfss;
-    }
-    else if (s == "mas") {
-        return Model::Mas;
-    }
-    return Model::Invalid;
+    if (s == "batsrus") { return Model::Batsrus; }
+    else if (s == "enlil") { return Model::Enlil; }
+    else if (s == "pfss") { return Model::Pfss; }
+    else if (s == "mas") { return Model::Mas; }
+    else { return Model::Invalid; }
 }
 
 } // namespace openspace

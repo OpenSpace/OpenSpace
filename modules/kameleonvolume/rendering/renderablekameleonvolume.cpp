@@ -24,11 +24,11 @@
 
 #include <modules/kameleonvolume/rendering/renderablekameleonvolume.h>
 
-#include <modules/volume/rendering/basicvolumeraycaster.h>
-#include <modules/volume/rawvolume.h>
 #include <modules/kameleonvolume/kameleonvolumereader.h>
+#include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
+#include <modules/volume/rendering/basicvolumeraycaster.h>
 #include <modules/volume/rendering/volumeclipplanes.h>
 #include <modules/volume/volumegridtype.h>
 #include <openspace/documentation/documentation.h>
@@ -358,13 +358,13 @@ void RenderableKameleonVolume::loadFromPath(const std::string& path) {
 }
 
 void RenderableKameleonVolume::loadRaw(const std::filesystem::path& path) {
-    RawVolumeReader<float> reader(path, _dimensions);
+    RawVolumeReader<float> reader = RawVolumeReader<float>(path, _dimensions);
     _rawVolume = reader.read();
     updateTextureFromVolume();
 }
 
 void RenderableKameleonVolume::loadCdf(const std::string& path) {
-    KameleonVolumeReader reader(path);
+    KameleonVolumeReader reader = KameleonVolumeReader(path);
 
     if (_autoValueBounds) {
         _lowerValueBound = static_cast<float>(reader.minValue(_variable));
@@ -414,23 +414,23 @@ void RenderableKameleonVolume::updateTextureFromVolume() {
     float diff = _upperValueBound - _lowerValueBound;
 
     for (size_t i = 0; i < _normalizedVolume->nCells(); i++) {
-        out[i] = glm::clamp((in[i] - min) / diff, 0.f, 1.f);
+        out[i] = std::clamp((in[i] - min) / diff, 0.f, 1.f);
     }
 
     _volumeTexture = std::make_shared<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = _dimensions,
             .type = GL_TEXTURE_3D,
             .format = ghoul::opengl::Texture::Format::Red,
             .dataType = GL_FLOAT
         },
-        ghoul::opengl::Texture::SamplerInit{},
+        ghoul::opengl::Texture::SamplerInit {},
         reinterpret_cast<std::byte*>(_normalizedVolume->data())
     );
 }
 
 void RenderableKameleonVolume::storeRaw(const std::filesystem::path& path) {
-    RawVolumeWriter<float> writer(path);
+    RawVolumeWriter<float> writer = RawVolumeWriter<float>(path);
     writer.write(*_rawVolume);
 }
 
@@ -452,7 +452,7 @@ void RenderableKameleonVolume::update(const UpdateData&) {
 }
 
 void RenderableKameleonVolume::render(const RenderData& data, RendererTasks& tasks) {
-    tasks.raycasterTasks.push_back({ _raycaster.get(), data });
+    tasks.raycasterTasks.push_back({ .raycaster = _raycaster.get(), .renderData = data });
 }
 
 } // namespace openspace

@@ -210,9 +210,9 @@ void ModulesDialog::listItemAdded() {
     const int currentListSize = _list->count();
 
     if ((currentListSize == 1) && (isLineEmpty(0))) {
-        // Special case where list is "empty" but really has one line that is blank.
-        // This is done because QListWidget does not seem to like having its sole
-        // remaining item being removed.
+        // Special case where list is "empty" but really has one line that is blank. This
+        // is done because QListWidget does not seem to like having its sole remaining
+        // item being removed
         _moduleData.at(0) = Blank;
         _list->item(0)->setText("  (Enter details below & click 'Save')");
         _list->setCurrentRow(0);
@@ -221,7 +221,7 @@ void ModulesDialog::listItemAdded() {
     else {
         _moduleData.push_back(Blank);
         _list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
-        //Scroll down to that blank line highlighted
+        // Scroll down to that blank line highlighted
         _list->setCurrentRow(_list->count() - 1);
     }
 
@@ -319,7 +319,9 @@ void ModulesDialog::transitionFromEditMode() {
     editBoxDisabled(true);
     _moduleLabel->setText("<font color='light gray'>Module</font>");
     _loadedLabel->setText("<font color='light gray'>Command if Module is Loaded</font>");
-    _notLoadedLabel->setText("<font color='light gray'>Command if Module is NOT Loaded</font>");
+    _notLoadedLabel->setText(
+        "<font color='light gray'>Command if Module is NOT Loaded</font>"
+    );
 }
 
 void ModulesDialog::editBoxDisabled(bool disabled) {

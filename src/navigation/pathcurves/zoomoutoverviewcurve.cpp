@@ -36,12 +36,14 @@ namespace {
 
 namespace openspace {
 
-// Go far out to get a view of both tagets, aimed to match lookAt orientation
+/**
+ * Go far out to get a view of both tagets, aimed to match lookAt orientation.
+ */
 ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint& end) {
     const double startNodeRadius = start.validBoundingSphere();
     const double endNodeRadius = end.validBoundingSphere();
 
-    if (!start.node() || !end.node()) { // guard, but should never happen
+    if (!start.node() || !end.node()) {
         LERROR("Something went wrong. The start or end node does not exist");
         return;
     }
@@ -71,8 +73,8 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
         const glm::dvec3& n2 = endTangentDir;
         const glm::dvec3 halfWayPos = start.position() + 0.5 * startPosToEndPos;
 
-        // Decide the step direction for the "overview point" based on the directions
-        // at the start and end of the path, to try to get a nice curve shape
+        // Decide the step direction for the "overview point" based on the directions at
+        // the start and end of the path, to try to get a nice curve shape
         glm::dvec3 goodStepDirection;
         if (glm::dot(n1, n2) < 0.0) {
             // Facing in different directions => step in direction of the cross product

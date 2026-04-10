@@ -124,7 +124,7 @@ namespace {
 namespace openspace {
 
 Documentation Renderable::Documentation() {
-    return codegen::doc<Parameters>("renderable");
+    return codegen::doc<Parameters>("core_renderable");
 }
 
 ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
@@ -192,6 +192,10 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings s
     _enabled = p.enabled.value_or(_enabled);
     addProperty(_enabled);
     _enabled.onChange([this]() {
+        if (!_parent) {
+            return;
+        }
+
         if (isEnabled()) {
             global::eventEngine->publishEvent<EventRenderableEnabled>(_parent);
         }
@@ -201,12 +205,12 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings s
     });
 
     _opacity = p.opacity.value_or(_opacity);
-    // We don't add the property here as subclasses should decide on their own whether
-    // they to expose the opacity or not
+    // We don't add the opacity property here as subclasses should decide on their own
+    // whether they to expose the opacity or not
 
     addProperty(Fadeable::_fade);
 
-    // set type for UI
+    // Set type for UI
     _renderableType = p.type.value_or(_renderableType);
     _renderableType.setReadOnly(true);
     addProperty(_renderableType);
@@ -252,11 +256,11 @@ std::string_view Renderable::typeAsString() const noexcept {
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
                                                  const glm::dvec3& targetModelSpace) const
 {
-    const glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
+    const glm::dvec3 dirFromCenterToTarget = glm::normalize(targetModelSpace);
     return {
-        directionFromCenterToTarget * _parent->interactionSphere(),
-        directionFromCenterToTarget,
-        0.0
+        .centerToReferenceSurface = dirFromCenterToTarget * _parent->interactionSphere(),
+        .referenceSurfaceOutDirection = dirFromCenterToTarget,
+        .heightToSurface = 0.0
     };
 }
 
@@ -304,8 +308,8 @@ bool Renderable::shouldUpdateIfDisabled() const noexcept {
 }
 
 void Renderable::onEnabledChange(std::function<void(bool)> callback) {
-    _enabled.onChange([this, c = std::move(callback)]() {
-        c(isEnabled());
+    _enabled.onChange([this, cb = std::move(callback)]() {
+        cb(isEnabled());
     });
 }
 

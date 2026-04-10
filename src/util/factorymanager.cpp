@@ -32,6 +32,7 @@
 #include <openspace/scene/scale.h>
 #include <openspace/scene/timeframe.h>
 #include <openspace/scene/translation.h>
+#include <openspace/topic/topics/topic.h>
 #include <openspace/util/resourcesynchronization.h>
 #include <openspace/util/task.h>
 #include <ghoul/misc/assert.h>
@@ -64,6 +65,7 @@ void FactoryManager::initialize() {
     _manager->addFactory<Task>("Task");
     _manager->addFactory<TimeFrame>("TimeFrame");
     _manager->addFactory<Translation>("Translation");
+    _manager->addFactory<Topic>("Topic");
 }
 
 void FactoryManager::deinitialize() {
@@ -79,7 +81,6 @@ bool FactoryManager::isInitialized() {
 
 FactoryManager& FactoryManager::ref() {
     ghoul_assert(_manager, "Factory Manager must have been initialized");
-
     return *_manager;
 }
 

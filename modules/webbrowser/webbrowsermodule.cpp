@@ -68,7 +68,7 @@ namespace {
      * Try to find the CEF Helper executable. It looks in the bin/openspace folder.
      * Therefore, if you change that this might cause a crash here.
      *
-     * \return the absolute path to the file
+     * \return The absolute path to the file
      */
     std::filesystem::path findHelperExecutable() {
 #ifdef WIN32
@@ -89,10 +89,10 @@ namespace {
     }
 
     struct [[codegen::Dictionary(WebBrowserModule)]] Parameters {
-        // The location of the web helper application
+        // The location of the web helper application.
         std::optional<std::filesystem::path> webHelperLocation;
 
-        // Determines whether the WebBrowser module is enabled
+        // Determines whether the WebBrowser module is enabled.
         std::optional<bool> enabled;
 
         // [[codegen::verbatim(UpdateBrowserBetweenRenderablesInfo.description)]]
@@ -101,10 +101,15 @@ namespace {
         // [[codegen::verbatim(BrowserUpdateIntervalInfo.description)]]
         std::optional<float> browserUpdateInterval;
 
-        // Forcably disables accelerated rendering, even if other preconditions
-        // would otherwise allow the use of it to speed up the rendering of the
-        // user interface. This setting can be used to circumvent an otherwise
-        // fatal crash that is caused by the accelerated rendering.
+        // If this value is set to `true`, it is possible to remote debug the CEF browser
+        // through port 8088. If it is set to `false` (the default), the remote debugging
+        // is not available.
+        std::optional<bool> enableRemoteDebugging;
+
+        // Forcably disables accelerated rendering, even if other preconditions would
+        // otherwise allow the use of it to speed up the rendering of the user interface.
+        // This setting can be used to circumvent an otherwise fatal crash that is caused
+        // by the accelerated rendering.
         std::optional<bool> disableAcceleratedRendering;
     };
 } // namespace
@@ -161,7 +166,10 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     std::filesystem::path webHelperLocation =
         p.webHelperLocation.value_or(findHelperExecutable());
     LDEBUG(std::format("CEF using web helper executable: {}", webHelperLocation));
-    _cefHost = std::make_unique<CefHost>(webHelperLocation.string());
+    _cefHost = std::make_unique<CefHost>(
+        webHelperLocation.string(),
+        p.enableRemoteDebugging.value_or(false)
+    );
     LDEBUG("Starting CEF... done");
 
     _updateBrowserBetweenRenderables =
@@ -170,7 +178,7 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 
     _eventHandler->initialize();
 
-    // register ScreenSpaceBrowser
+    // Register ScreenSpaceBrowser
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
@@ -270,7 +278,9 @@ std::vector<Documentation> WebBrowserModule::documentations() const {
     };
 }
 
-/// Logic for the webbrowser performance hotfix, described in globalscallbacks.h
+/**
+ * Logic for the webbrowser performance hotfix, described in globalscallbacks.h.
+ */
 namespace webbrowser {
 
 /**

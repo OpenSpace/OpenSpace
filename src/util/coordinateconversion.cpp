@@ -41,12 +41,9 @@ namespace {
     // Galactic longitude of the equatorial north pole
     constexpr double L0 = glm::radians(122.9320);
 
-    void parseString(const std::string& str, int& hoursOrDegrees, int& minutes,
-                     double& seconds)
-    {
+    std::tuple<int, int, double> parseString(const std::string& str) {
         // Find hms or dms indicies
-        const size_t hOrDIndex =
-            (str.find('h') != std::string::npos) ? str.find('h') : str.find('d');
+        const size_t hOrDIndex = str.contains('h') ? str.find('h') : str.find('d');
         const size_t mIndex = str.find('m');
         const size_t sIndex = str.find('s');
         if (hOrDIndex == std::string::npos || mIndex == std::string::npos ||
@@ -73,7 +70,7 @@ namespace {
                     "and Dec 'XdYmZs', where X must be an integer", str
                 ));
             }
-            hoursOrDegrees = std::stoi(sHoursOrDegrees);
+            int hoursOrDegrees = std::stoi(sHoursOrDegrees);
 
             // Minutes must be an integer
             temp = std::stod(sMinutes);
@@ -83,10 +80,12 @@ namespace {
                     "and Dec 'XdYmZs', where Y must be an integer", str
                 ));
             }
-            minutes = std::stoi(sMinutes);
+            int minutes = std::stoi(sMinutes);
 
             // Seconds is a double
-            seconds = std::stod(sSeconds);
+            double seconds = std::stod(sSeconds);
+
+            return { hoursOrDegrees, minutes, seconds };
         }
         catch (const std::invalid_argument&) {
             throw ghoul::lua::LuaRuntimeException(std::format(
@@ -96,22 +95,22 @@ namespace {
         }
     }
 
-    void parseRa(const std::string& ra, int& hours, int& minutes, double& seconds) {
-        if (ra.find('d') != std::string::npos) {
+    std::tuple<int, int, double> parseRa(const std::string& ra) {
+        if (ra.contains('d')) {
             throw ghoul::lua::LuaRuntimeException(std::format(
                 "Ra '{}' format is incorrect. Correct format is: 'XhYmZs'", ra
             ));
         }
-        parseString(ra, hours, minutes, seconds);
+        return parseString(ra);
     }
 
-    void parseDec(const std::string& dec, int& degrees, int& minutes, double& seconds) {
-        if (dec.find('h') != std::string::npos) {
+    std::tuple<int, int, double> parseDec(const std::string& dec) {
+        if (dec.contains('h')) {
             throw ghoul::lua::LuaRuntimeException(std::format(
                 "Dec '{}' format is incorrect. Correct format is: 'XdYmZs'", dec
             ));
         }
-        parseString(dec, degrees, minutes, seconds);
+        return parseString(dec);
     }
 
     bool isRaDecValid(int raH, int raM, double raS, int decD, int decM, double decS) {
@@ -173,10 +172,12 @@ namespace {
 
 namespace openspace {
 
-// Convert Equatorial coordinates ICRS right ascension and declination (a, d)
-// into Galactic coordinates (l, b)
-// Reference:
-// https://www.atnf.csiro.au/people/Tobias.Westmeier/tools_coords.php
+/**
+ * Convert Equatorial coordinates ICRS right ascension and declination (a, d) into
+ * Galactic coordinates (l, b).
+ *
+ * Reference: https://www.atnf.csiro.au/people/Tobias.Westmeier/tools_coords.php
+ */
 glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance) {
     // (Ra, Dec) -> (a, d)
     const double a = glm::radians(ra);
@@ -201,12 +202,15 @@ glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance) {
     return distance * rGalactic;
 }
 
-// Ra format 'XhYmZs', where X and Y are positive integers and Z is a positive double
-// Dec format 'XdYmZs', where X is a signed integer, Y is a positive integer and Z is a
-// positive double
-// Reference:
-// https://math.stackexchange.com/questions/15323/how-do-i-calculate-the-cartesian-
-// coordinates-of-stars
+/**
+ * Ra format 'XhYmZs', where X and Y are positive integers and Z is a positive double
+ * Dec format 'XdYmZs', where X is a signed integer, Y is a positive integer and Z is a
+ * positive double.
+ *
+ * Reference:
+ * https://math.stackexchange.com/questions/15323/how-do-i-calculate-the-cartesian-
+ * coordinates-of-stars
+ */
 glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
     if (ra.size() < 6 || dec.size() < 6) {
         throw ghoul::lua::LuaRuntimeException(std::format(
@@ -215,24 +219,15 @@ glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
         ));
     }
 
-    // Parse right ascension
-    int raHours = 0;
-    int raMinutes = 0;
-    double raSeconds = 0.0;
-    parseRa(ra, raHours, raMinutes, raSeconds);
-
-    // Parse declination
-    int decDegrees = 0;
-    int decMinutes = 0;
-    double decSeconds = 0.0;
-    parseDec(dec, decDegrees, decMinutes, decSeconds);
+    auto [raHours, raMinutes, raSeconds] = parseRa(ra);
+    auto [decDegrees, decMinutes, decSeconds] = parseDec(dec);
 
     const bool isValid = isRaDecValid(raHours,
         raMinutes,
         raSeconds,
         decDegrees,
         decMinutes,
-        decSeconds
+       decSeconds
     );
 
     if (!isValid) {
@@ -255,11 +250,14 @@ glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
     return glm::dvec2(raDeg, decDeg);
 }
 
-// Convert Galactic coordinates (x, y, z) or (l, b) into Equatorial coordinates ICRS
-// right ascension and declination in decimal degrees (a, d) plus distance
-// References:
-// https://www.atnf.csiro.au/people/Tobias.Westmeier/tools_coords.php,
-// https://en.wikipedia.org/wiki/Celestial_coordinate_system
+/**
+ * Convert Galactic coordinates (x, y, z) or (l, b) into Equatorial coordinates ICRS right
+ * ascension and declination in decimal degrees (a, d) plus distance.
+ *
+ * References:
+ * https://www.atnf.csiro.au/people/Tobias.Westmeier/tools_coords.php,
+ * https://en.wikipedia.org/wiki/Celestial_coordinate_system
+ */
 glm::dvec3 galacticCartesianToIcrs(double x, double y, double z) {
     // Normalize
     const double distance = std::sqrt(x*x + y*y + z*z);
@@ -284,11 +282,14 @@ glm::dvec3 galacticCartesianToIcrs(double x, double y, double z) {
     return glm::dvec3(glm::degrees(a), glm::degrees(d), distance);
 }
 
-// Return a pair with two formatted strings from the decimal degrees ra and dec
-// References:
-// https://www.rapidtables.com/convert/number/degrees-to-degrees-minutes-seconds.html,
-// https://math.stackexchange.com/questions/15323/how-do-i-calculate-the-cartesian-
-// coordinates-of-stars
+/**
+ * Return a pair with two formatted strings from the decimal degrees ra and dec.
+ *
+ * References:
+ * https://www.rapidtables.com/convert/number/degrees-to-degrees-minutes-seconds.html,
+ * https://math.stackexchange.com/questions/15323/how-do-i-calculate-the-cartesian-
+ * coordinates-of-stars
+ */
 std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec) {
     // Check input
     if (ra < 0.0 || ra > 360.0 || dec < -90.0 || dec > 90.0) {
@@ -311,14 +312,10 @@ std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec) 
     const double decSeconds = (decMinutesFull - decMinutes) * 60.0;
 
     // Construct strings
-    std::pair<std::string, std::string> result;
-    result.first = std::to_string(raHours) + 'h' +
-        std::to_string(raMinutes) + 'm' +
-        std::to_string(raSeconds) + 's';
-
-    result.second = std::to_string(decDegrees) + 'd' +
-        std::to_string(decMinutes) + 'm' +
-        std::to_string(decSeconds) + 's';
+    const std::pair<std::string, std::string> result = {
+        std::format("{}h{}m{}s", raHours, raMinutes, raSeconds),
+        std::format("{}d{}m{}s", decDegrees, decMinutes, decSeconds)
+    };
 
     // Check results
     const bool isValid = isRaDecValid(raHours,

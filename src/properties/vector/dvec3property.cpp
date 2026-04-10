@@ -28,9 +28,8 @@
 
 namespace openspace {
 
-DVec3Property::DVec3Property(Property::PropertyInfo info, glm::dvec3 value,
-                             glm::dvec3 minValue, glm::dvec3 maxValue,
-                             glm::dvec3 stepValue)
+DVec3Property::DVec3Property(PropertyInfo info, glm::dvec3 value, glm::dvec3 minValue,
+                             glm::dvec3 maxValue, glm::dvec3 stepValue)
     : NumericalProperty<glm::dvec3>(
         std::move(info),
         std::move(value),

@@ -66,8 +66,6 @@
 
 namespace openspace {
 
-//////////////////////////////////////////////////////////////////////////////////////////
-
 enum class KeyAction : uint8_t {
     Release = 0,
     Press = 1,
@@ -89,8 +87,6 @@ constexpr KeyAction operator|(KeyAction lhs, KeyAction rhs) {
 constexpr KeyAction operator|=(KeyAction& lhs, KeyAction rhs) {
     return (lhs | rhs);
 }
-
-//////////////////////////////////////////////////////////////////////////////////////////
 
 enum class KeyModifier : uint8_t {
     None       = 0x00,
@@ -129,8 +125,6 @@ constexpr bool hasKeyModifier(KeyModifier lhs, KeyModifier rhs) {
     return static_cast<std::underlying_type_t<KeyModifier>>(lhs) &
         static_cast<std::underlying_type_t<KeyModifier>>(rhs);
 }
-
-//////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Key : uint16_t {
     Unknown        =  uint16_t(-1),
@@ -385,8 +379,6 @@ constexpr std::array<KeyInfo, 120> KeyInfos = {
     KeyInfo { Key::Menu,           "Menu",          "MENU"          }
 };
 
-//////////////////////////////////////////////////////////////////////////////////////////
-
 struct KeyWithModifier {
     Key key = Key::Unknown;
     KeyModifier modifier = KeyModifier::None;
@@ -409,16 +401,14 @@ std::string keyToString(KeyWithModifier keyWithModifier);
 } // namespace openspace
 
 namespace ghoul {
+    template <>
+    std::string to_string(const openspace::Key& key);
 
-template <>
-std::string to_string(const openspace::Key& key);
+    template <>
+    std::string to_string(const openspace::KeyModifier& mod);
 
-template <>
-std::string to_string(const openspace::KeyModifier& mod);
-
-template <>
-std::string to_string(const openspace::KeyWithModifier& keyMod);
-
+    template <>
+    std::string to_string(const openspace::KeyWithModifier& keyMod);
 } // namespace ghoul
 
 #endif // __OPENSPACE_CORE___KEYS___H__

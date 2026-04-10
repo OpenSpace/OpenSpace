@@ -104,14 +104,18 @@ private:
     std::vector<GLint> _segmentSizeTrails;
     std::vector<kepler::Parameters> _parameters;
 
-    /// Extra data for more efficient updating of vectors
+    /**
+     * Extra data for more efficient updating of vectors.
+     */
     struct UpdateInfo {
         double timestamp = std::numeric_limits<double>::min();
         double timePerStep = 0.0;
     };
     std::vector<UpdateInfo> _updateHelper;
 
-    /// The layout of the VBOs
+    /**
+     * The layout of the VBOs.
+     */
     struct TrailVBOLayout {
         float x = 0.f;
         float y = 0.f;
@@ -136,11 +140,11 @@ private:
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;
 
-    // Line cache
+    /// Line cache
     UniformCache(modelViewTransform, projectionTransform, trailFadeExponent,
         colorFadeCutoffValue, inGameTime, color, opacity) _uniformTrailCache;
 
-    // Point cache
+    /// Point cache
     UniformCache(modelTransform, viewTransform, projectionTransform, renderOption,
         cameraViewDirectionUp, cameraViewDirectionRight, cameraPositionWorld,
         cameraUpWorld, inGameTime, color, pointSizeExponent, enableMaxSize, maxSize,

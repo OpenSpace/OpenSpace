@@ -137,36 +137,34 @@ void RenderableConstellationBounds::initialize() {
 
     loadData();
 
-    if (!_assetSelection.empty()) {
-        const std::vector<std::string> options = _selection.options();
-        std::set<std::string> selectedConstellations;
+    if (_assetSelection.empty()) {
+        return;
+    }
 
-        for (const std::string& s : _assetSelection) {
-            auto it = std::find(options.cbegin(), options.cend(), s);
+    const std::vector<std::string> options = _selection.options();
+    std::set<std::string> selectedConstellations;
+
+    for (const std::string& s : _assetSelection) {
+        auto it = std::find(options.cbegin(), options.cend(), s);
+        if (it == options.cend()) {
+            // Test if the provided name was an identifier instead of the full name
+            it = std::find(options.cbegin(), options.cend(), constellationFullName(s));
+
             if (it == options.cend()) {
-                // Test if the provided name was an identifier instead of the full name
-                it = std::find(
-                    options.cbegin(),
-                    options.cend(),
-                    constellationFullName(s)
-                );
-
-                if (it == options.cend()) {
-                    // The user has specified a constellation name that doesn't exist
-                    LWARNING(std::format(
-                        "Option '{}' not found in list of constellations", s
-                    ));
-                }
-                else {
-                    selectedConstellations.insert(constellationFullName(s));
-                }
+                // The user has specified a constellation name that doesn't exist
+                LWARNING(std::format(
+                    "Option '{}' not found in list of constellations", s
+                ));
             }
             else {
-                selectedConstellations.insert(s);
+                selectedConstellations.insert(constellationFullName(s));
             }
         }
-        _selection = selectedConstellations;
+        else {
+            selectedConstellations.insert(s);
+        }
     }
+    _selection = selectedConstellations;
 }
 
 void RenderableConstellationBounds::initializeGL() {
@@ -195,7 +193,7 @@ void RenderableConstellationBounds::initializeGL() {
     const GLint positionAttrib = _program->attributeLocation("in_position");
     glEnableVertexArrayAttrib(_vao, positionAttrib);
     glVertexArrayAttribFormat(_vao, positionAttrib, 3, GL_FLOAT, GL_FALSE, 0);
-    glVertexArrayAttribBinding(_vao, 0, 0);
+    glVertexArrayAttribBinding(_vao, positionAttrib, 0);
 }
 
 void RenderableConstellationBounds::deinitializeGL() {
@@ -221,10 +219,7 @@ bool RenderableConstellationBounds::isReady() const {
 void RenderableConstellationBounds::render(const RenderData& data, RendererTasks& tasks) {
     _program->activate();
 
-    _program->setUniform(
-        _uniformCache.campos,
-        glm::vec4(data.camera.positionVec3(), 1.f)
-    );
+    _program->setUniform(_uniformCache.campos, glm::vec4(data.camera.position(), 1.f));
     _program->setUniform(
         _uniformCache.objpos,
         glm::vec4(data.modelTransform.translation, 0.f)
@@ -284,8 +279,8 @@ bool RenderableConstellationBounds::loadVertexFile() {
     int currentLineNumber = 1;
 
     // Overview of the reading algorithm:
-    // We keep an active ConstellationBound (currentBound) and update it until we read
-    // a new constellation name, at which point the currentBound is stored away, a new,
+    // We keep an active ConstellationBound (currentBound) and update it until we read a
+    // new constellation name, at which point the currentBound is stored away, a new,
     // empty ConstellationBound is created and set at the currentBound
     while (file.good()) {
         ghoul::getline(file, currentLine);
@@ -321,13 +316,13 @@ bool RenderableConstellationBounds::loadVertexFile() {
             );
             // Store the constellation and start a new one
             _constellationBounds.push_back(currentBound);
-            currentBound = ConstellationBound();
-            currentBound.isEnabled = true;
-            currentBound.constellationAbbreviation = abbreviation;
             std::string name = constellationFullName(abbreviation);
-            currentBound.constellationFullName =
-                name.empty() ? abbreviation : std::move(name);
-            currentBound.startIndex = static_cast<GLsizei>(_vertexValues.size());
+            currentBound = ConstellationBound {
+                .constellationAbbreviation = abbreviation,
+                .constellationFullName = name.empty() ? abbreviation : std::move(name),
+                .isEnabled = true,
+                .startIndex = static_cast<GLsizei>(_vertexValues.size())
+            };
         }
 
         // The file format stores the right ascension in hours, while SPICE expects them
@@ -337,9 +332,9 @@ bool RenderableConstellationBounds::loadVertexFile() {
         // Likewise, the declination is stored in degrees and needs to be converted
         dec = glm::radians(dec);
 
-        // Convert the (right ascension, declination) to rectangular coordinates.
-        // The 1.0 is the distance of the celestial sphere, we will scale that in the
-        // render function
+        // Convert the (right ascension, declination) to rectangular coordinates. The 1.0
+        // is the distance of the celestial sphere, we will scale that in the render
+        // function
         std::array<double, 3> rectangularValues;
         radrec_c(1.0, ra, dec, rectangularValues.data());
 

@@ -22,20 +22,6 @@
       }
     },
     {
-      "type": "property",
-      "value": {
-        "property": "Scene.PlutoKeplerianTrail.Renderable.Enabled",
-        "value": true
-      }
-    },
-    {
-      "type": "property",
-      "value": {
-        "property": "Scene.PlutoKeplerianTrail.Renderable.Appearance.EnableFade",
-        "value": false
-      }
-    },
-    {
       "type": "screenshot"
     }
   ]

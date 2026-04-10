@@ -62,7 +62,7 @@ glm::uvec3 RawVolumeWriter<VoxelType>::dimensions() const {
 template <typename VoxelType>
 void RawVolumeWriter<VoxelType>::write(
                                     const std::function<VoxelType(const glm::uvec3&)>& fn,
-                                           const std::function<void(float t)>& onProgress)
+                                             const std::function<void(float)>& onProgress)
 {
     const glm::uvec3 dims = dimensions();
 

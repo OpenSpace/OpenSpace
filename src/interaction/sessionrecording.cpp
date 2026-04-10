@@ -87,10 +87,11 @@ namespace {
     constexpr char FrameTypeScriptBinary = 's';
 
     // Mapping for version numbers in session recording files
-    constexpr std::array<std::pair<std::string_view, int>, 3> Versions = {
+    constexpr std::array<std::pair<std::string_view, int>, 4> Versions = {
         std::pair("00.85", 0),
         std::pair("01.00", 1),
-        std::pair("02.00", 2)
+        std::pair("02.00", 2),
+        std::pair("03.00", 3)
     };
 
 
@@ -340,16 +341,23 @@ namespace {
     SessionRecording::Entry::Camera readCamera(std::istream&, int);
 
     template <>
-    SessionRecording::Entry::Camera readCamera<DataMode::Ascii>(std::istream& stream, int)
+    SessionRecording::Entry::Camera readCamera<DataMode::Ascii>(std::istream& stream,
+                                                                int version)
     {
         SessionRecording::Entry::Camera camera;
         std::string rotationFollowing;
-        stream >> camera.position.x >> camera.position.y >> camera.position.z
-               >> camera.rotation.x >> camera.rotation.y
-               >> camera.rotation.z >> camera.rotation.w
-               >> camera.scale
-               >> rotationFollowing
-               >> camera.focusNode;
+        stream >> camera.position.x >> camera.position.y >> camera.position.z;
+
+        if (version < 3) {
+            // The order of quaternions was changed from (x,y,z,w) -> (w,x,y,z)
+            stream >> camera.rotation.x >> camera.rotation.y
+                   >> camera.rotation.z >> camera.rotation.w;
+        }
+        else {
+            stream >> camera.rotation.w >> camera.rotation.x
+                   >> camera.rotation.y >> camera.rotation.z;
+        }
+        stream >> camera.scale >> rotationFollowing >> camera.focusNode;
         camera.followFocusNodeRotation = (rotationFollowing == "F");
         return camera;
     }
@@ -359,19 +367,26 @@ namespace {
                                                                  int version)
     {
         SessionRecording::Entry::Camera camera;
-        std::array<double, 4> buffer = {};
+        std::array<double, 3> buffer = {};
         stream.read(reinterpret_cast<char*>(buffer.data()), 3 * sizeof(double));
         camera.position = glm::dvec3(buffer[0], buffer[1], buffer[2]);
 
         if (version < 2) {
             // Rotations are stored as four doubles immediately get downcasted to floats
-            stream.read(reinterpret_cast<char*>(buffer.data()), 4 * sizeof(double));
-            camera.rotation = glm::dquat(buffer[3], buffer[0], buffer[1], buffer[2]);
+            std::array<double, 4> b = {};
+            stream.read(reinterpret_cast<char*>(b.data()), 4 * sizeof(double));
+            camera.rotation = glm::dquat(b[3], b[0], b[1], b[2]);
+        }
+        else if (version < 3) {
+            // The order of quaternions was changed from (x,y,z,w) -> (w,x,y,z)
+            std::array<float, 4> b = {};
+            stream.read(reinterpret_cast<char*>(b.data()), 4 * sizeof(float));
+            camera.rotation = glm::quat(b[3], b[0], b[1], b[2]);
         }
         else {
             std::array<float, 4> b = {};
             stream.read(reinterpret_cast<char*>(b.data()), 4 * sizeof(float));
-            camera.rotation = glm::quat(b[3], b[0], b[1], b[2]);
+            camera.rotation = glm::quat(b[0], b[1], b[2], b[3]);
         }
         char follow = 0;
         stream.read(&follow, sizeof(char));
@@ -401,7 +416,7 @@ namespace {
         std::string buffer = std::format(
             "{} {} {} {} {} {} {} {} {} {}",
             camera.position.x, camera.position.y, camera.position.z,
-            camera.rotation.x, camera.rotation.y, camera.rotation.z, camera.rotation.w,
+            camera.rotation.w, camera.rotation.x, camera.rotation.y, camera.rotation.z,
             camera.scale,
             camera.followFocusNodeRotation ? "F" : "-",
             camera.focusNode
@@ -417,10 +432,13 @@ namespace {
             reinterpret_cast<const char*>(glm::value_ptr(camera.position)),
             3 * sizeof(double)
         );
-        stream.write(
-            reinterpret_cast<const char*>(glm::value_ptr(camera.rotation)),
-            4 * sizeof(float)
-        );
+        std::array<float, 4> rot = {
+            camera.rotation.w,
+            camera.rotation.x,
+            camera.rotation.y,
+            camera.rotation.z
+        };
+        stream.write(reinterpret_cast<const char*>(rot.data()), 4 * sizeof(float));
 
         const char follow = camera.followFocusNodeRotation ? 1 : 0;
         stream.write(&follow, sizeof(char));
@@ -496,7 +514,7 @@ namespace {
 
         // Erase all \r (from windows newline), and all \n from line endings and replace
         // with ';' so that lua will treat them as separate lines. This is done in order
-        // to treat a multi-line script as a single line in the file.
+        // to treat a multi-line script as a single line in the file
         size_t startPos = s.find('\r', 0);
         while (startPos != std::string::npos) {
             s.erase(startPos, 1);
@@ -657,6 +675,9 @@ void saveSessionRecording(const std::filesystem::path& filename,
                           const SessionRecording& sessionRecording, DataMode dataMode)
 {
     std::ofstream file = std::ofstream(filename, std::ios::binary);
+    if (!file.good()) {
+        throw ghoul::RuntimeError(std::format("Could not save recording '{}'", filename));
+    }
 
     constexpr int CurrentVersion = Versions.back().second;
     const Header header = {

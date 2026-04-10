@@ -27,7 +27,7 @@
 
 #include <string>
 
-namespace openspace { // (F)ield(L)ines(S)equence
+namespace openspace {
 
 enum class Model : int {
     Batsrus = 0,

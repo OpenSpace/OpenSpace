@@ -98,23 +98,7 @@ void AudioModule::internalDeinitializeGL() {
     _engine = nullptr;
 }
 
-std::unique_ptr<SoLoud::Wav> AudioModule::loadSound(const std::filesystem::path& path) {
-    ghoul_assert(_engine, "No audio engine loaded");
-
-    std::unique_ptr<SoLoud::Wav> sound = std::make_unique<SoLoud::Wav>();
-    const std::string p = path.string();
-    SoLoud::result res = sound->load(p.c_str());
-    if (res != 0) {
-        throw ghoul::RuntimeError(std::format(
-            "Error loading sound from {}. {}: {}",
-            path, static_cast<int>(res), _engine->getErrorString(res)
-        ));
-    }
-
-    // While we are loading a sound, we also want to do a little garbage collection on our
-    // internal data structure to remove the songs that someone has loaded at some point
-    // and that have since organically stopped. In general, this should only happen if the
-    // song was started without looping and has ended
+void AudioModule::garbageCollection() {
     for (auto it = _sounds.begin(); it != _sounds.end();) {
         if (!isPlaying(it->first)) {
             // We have found one of the candidates
@@ -129,6 +113,20 @@ std::unique_ptr<SoLoud::Wav> AudioModule::loadSound(const std::filesystem::path&
             it++;
         }
     }
+}
+
+std::unique_ptr<SoLoud::Wav> AudioModule::loadSound(const std::filesystem::path& path) {
+    ghoul_assert(_engine, "No audio engine loaded");
+
+    std::unique_ptr<SoLoud::Wav> sound = std::make_unique<SoLoud::Wav>();
+    const std::string p = path.string();
+    SoLoud::result res = sound->load(p.c_str());
+    if (res != 0) {
+        throw ghoul::RuntimeError(std::format(
+            "Error loading sound from {}. {}: {}",
+            path, static_cast<int>(res), _engine->getErrorString(res)
+        ));
+    }
 
     return sound;
 }
@@ -137,16 +135,16 @@ void AudioModule::playAudio(const std::filesystem::path& path, std::string ident
                             ShouldLoop loop)
 {
     ghoul_assert(_engine, "No audio engine loaded");
-    if (_sounds.find(identifier) != _sounds.end()) {
-        LERROR(std::format("Sound with name '{}' already played", identifier));
-        return;
-    }
+    garbageCollection();
 
     std::unique_ptr<SoLoud::Wav> sound = loadSound(path);
     sound->setLooping(loop);
     SoLoud::handle handle = _engine->playBackground(*sound);
 
-    ghoul_assert(_sounds.find(identifier) == _sounds.end(), "Handle already used");
+    if (_sounds.find(identifier) != _sounds.end()) {
+        LERROR(std::format("Sound with name '{}' already played", identifier));
+        return;
+    }
     _sounds[identifier] = {
         .sound = std::move(sound),
         .handle = handle
@@ -157,6 +155,8 @@ void AudioModule::playAudio3d(const std::filesystem::path& path, std::string ide
                               const glm::vec3& position, ShouldLoop loop)
 {
     ghoul_assert(_engine, "No audio engine loaded");
+    garbageCollection();
+
     if (_sounds.find(identifier) != _sounds.end()) {
         LERROR(std::format("Sound with name '{}' already played", identifier));
         return;
@@ -282,7 +282,7 @@ void AudioModule::setVolume(const std::string& identifier, float volume, float f
     }
 
     // We clamp the volume level between [0, 1] to not accidentally blow any speakers
-    volume = glm::clamp(volume, 0.f, 1.f);
+    volume = std::clamp(volume, 0.f, 1.f);
     if (fade == 0.f) {
         _engine->setVolume(it->second.handle, volume);
     }
@@ -318,14 +318,12 @@ void AudioModule::set3dSourcePosition(const std::string& identifier,
     }
 }
 
-std::vector<std::string> AudioModule::currentlyPlaying() const {
+std::vector<std::string> AudioModule::currentlyPlaying() {
     // This function is *technically* not the ones that are playing, but that ones that we
     // are keeping track of. So we still have songs in our internal data structure that
     // were started as not-looping and that have ended playing. We need to filter them out
     // here.
-    // The alternative would be to have a periodic garbage collection running, but that
-    // feels worse. We are doing the garbage collection in the two playAudio functions
-    // instead, since we have to do some work their either way
+    garbageCollection();
 
     std::vector<std::string> res;
     res.reserve(_sounds.size());
@@ -341,7 +339,7 @@ void AudioModule::setGlobalVolume(float volume, float fade) const {
     ghoul_assert(_engine, "No audio engine loaded");
 
     // We clamp the volume level between [0, 1] to not accidentally blow any speakers
-    volume = glm::clamp(volume, 0.f, 1.f);
+    volume = std::clamp(volume, 0.f, 1.f);
     if (fade == 0.f) {
         _engine->setGlobalVolume(volume);
     }

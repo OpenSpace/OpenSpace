@@ -62,15 +62,15 @@ namespace {
     };
 
     // The RenderableCartesianAxes can be used to render the local Cartesian coordinate
-    // system, or reference frame, of another scene graph node. The colors of the axes
-    // can be customized but are per default set to Red, Green and Blue, for the X-, Y-
-    // and Z-axis, respectively.
+    // system, or reference frame, of another scene graph node. The colors of the axes can
+    // be customized but are per default set to Red, Green and Blue, for the X-, Y- and
+    // Z-axis, respectively.
     //
     // To add the axes, create a scene graph node with the RenderableCartesianAxes
     // renderable and add it as a child to the other scene graph node, i.e. specify the
     // other node as the `Parent` of the node with this renderable. Also, the axes have to
     // be scaled to match the parent object for the axes to be visible in the scene, for
-    // example using a [StaticScale](#base_transform_scale_static).
+    // example using a [StaticScale](#base_scale_static).
     struct [[codegen::Dictionary(RenderableCartesianAxes)]] Parameters {
         // [[codegen::verbatim(XColorInfo.description)]]
         std::optional<glm::vec3> xColor [[codegen::color()]];
@@ -147,8 +147,8 @@ void RenderableCartesianAxes::initializeGL() {
     );
 
     glCreateBuffers(1, &_ibo);
-    constexpr std::array<int, 6> indices = { 0, 1, 0, 2, 0, 3 };
-    glNamedBufferStorage(_ibo, indices.size() * sizeof(int), indices.data(), GL_NONE_BIT);
+    constexpr std::array<int, 6> Indices = { 0, 1, 0, 2, 0, 3 };
+    glNamedBufferStorage(_ibo, Indices.size() * sizeof(int), Indices.data(), GL_NONE_BIT);
 
     glCreateVertexArrays(1, &_vao);
     glBindVertexArray(_vao);
@@ -187,7 +187,6 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&) {
     _program->setUniform("zColor", _zColor);
     _program->setUniform("opacity", opacity());
 
-    // Changes GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
     glEnable(GL_LINE_SMOOTH);
@@ -199,7 +198,6 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&) {
 
     _program->deactivate();
 
-    // Restores GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
 }

@@ -40,7 +40,7 @@ namespace {
 
     constexpr std::string_view _loggerCat = "SimpleTfBrickSelector";
 
-    bool compareSplitPoints(const BrickSelection& a, const BrickSelection& b) {
+    constexpr bool compareSplitPoints(const BrickSelection& a, const BrickSelection& b) {
         return a.splitPoints < b.splitPoints;
     }
 } // namespace
@@ -111,7 +111,7 @@ void SimpleTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks)
             // On average on the whole time period, splitting this spatial brick in two
             // time steps would generate twice as much streaming. Current number of
             // streams of this spatial brick is 2^nTemporalSplits over the whole time
-            // period.
+            // period
             int newStreams = static_cast<int>(std::pow(2, bs.nTemporalSplits));
 
             // Refining this one more step would require the double amount of streams
@@ -148,22 +148,22 @@ void SimpleTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks)
             }
         }
         else if (bs.splitType == BrickSelection::SplitType::Spatial) {
-            nBricksInMemory += 7; // Remove one and add eight.
+            nBricksInMemory += 7; // Remove one and add eight
             unsigned int firstChild = _tsp->firstOctreeChild(brickIndex);
 
             // On average on the whole time period, splitting this spatial brick into
             // eight spatial bricks would generate eight times as much streaming. Current
             // number of streams of this spatial brick is 2^nTemporalStreams over the
-            // whole time period.
+            // whole time period
             int newStreams = 7 * static_cast<int>(std::pow(2, bs.nTemporalSplits));
             if (nStreamedBricks + newStreams > totalStreamingBudget) {
-                // Reached dead end (streaming budget would be exceeded)
-                // However, temporal split might be possible
+                // Reached dead end (streaming budget would be exceeded). However,
+                // temporal split might be possible
                 if (bs.splitType != BrickSelection::SplitType::Temporal) {
                     bs.splitType = BrickSelection::SplitType::Temporal;
                     bs.splitPoints = temporalSplitPoints(bs.brickIndex);
                 }
-                if (bs.splitPoints > -1) {
+                if (bs.splitPoints > -1.f) {
                     temporalSplitQueue.push_back(bs);
                 }
                 else {
@@ -239,7 +239,7 @@ void SimpleTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks)
             int newStreams = static_cast<int>(std::pow(2, bs.nTemporalSplits));
             if (nStreamedBricks + newStreams > totalStreamingBudget) {
                 // The current best choice would make us exceed the streaming budget, try
-                // next instead.
+                // next instead
                 deadEnds.push_back(bs);
                 continue;
             }
@@ -318,16 +318,16 @@ float SimpleTfBrickSelector::splitPoints(unsigned int brickIndex,
     float spatialPoints = spatialSplitPoints(brickIndex);
     float splitPoints;
 
-    if (spatialPoints > 0 && spatialPoints > temporalPoints) {
+    if (spatialPoints > 0.f && spatialPoints > temporalPoints) {
         splitPoints = spatialPoints;
         splitType = BrickSelection::SplitType::Spatial;
     }
-    else if (temporalPoints > 0) {
+    else if (temporalPoints > 0.f) {
         splitPoints = temporalPoints;
         splitType = BrickSelection::SplitType::Temporal;
     }
     else {
-        splitPoints = -1;
+        splitPoints = -1.f;
         splitType = BrickSelection::SplitType::None;
     }
 

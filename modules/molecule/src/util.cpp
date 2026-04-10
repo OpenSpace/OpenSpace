@@ -176,7 +176,7 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
         std::min<int64_t>(f + 2, lastFrame)
     };
 
-    md_vec3_soa_t dst = { mol.atom.x, mol.atom.y, mol.atom.z };
+    md_vec3_soa_t dst = { .x = mol.atom.x, .y = mol.atom.y, .z = mol.atom.z };
 
     const InterpolationType mode =
         (fIdx[1] != fIdx[2]) ? interp : InterpolationType::Nearest;

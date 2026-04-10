@@ -72,7 +72,7 @@ protected:
         GLenum mode = GL_LINE_STRIP;
     };
 
-    ghoul::opengl::ProgramObject* _gridProgram;
+    ghoul::opengl::ProgramObject* _gridProgram = nullptr;
 
     Vec3Property _color;
     IVec2Property _gridSegments;

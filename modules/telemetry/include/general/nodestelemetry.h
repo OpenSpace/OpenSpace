@@ -61,22 +61,24 @@ public:
      * Returns the Lua library that contains all Lua functions available for the
      * nodes telemetry.
      *
-     * \return The Lua library that contains all Lua functions available for the
-     *         nodes telemetry
+     * \return The Lua library that contains all Lua functions available for the nodes
+     *         telemetry
      */
     static LuaLibrary luaLibrary();
 
 private:
     static constexpr int NumDataItems = 4;
 
-    // Struct to hold data for all the nodes
+    /**
+     * Struct to hold data for all the nodes.
+     */
     struct TelemetryNode {
         TelemetryNode(std::string id);
 
         std::string identifier;
 
-        // Distance, horizontal angle, vertical angle (do not store the distance unit
-        // here, the option property stores it instead)
+        /// Distance, horizontal angle, vertical angle (do not store the distance unit
+        /// here, the option property stores it instead)
         std::vector<double> data = std::vector<double>(NumDataItems - 1, 0.0);
     };
 
@@ -105,9 +107,8 @@ private:
      * \param nodeIndex The index to the internally stored node data that should be
      *        updated
      * \param angleCalculationMode The angle calculation mode to use. This determines
-     *        which method to use when calculating the angle.
+     *        which method to use when calculating the angle
      * \param includeElevation Whether the additional elevation angle should be calculated
-     *
      * \return `true` if the data is new compared to before, otherwise `false`
      */
     bool updateData(const Camera* camera, int nodeIndex,
@@ -117,7 +118,7 @@ private:
     /**
      * Send current telemetry data for the indicated node to the Open Sound Control
      * receiver. The order of sent data is as follows: distance, horizontal angle,
-     * vertical angle, and the unit used for the distance value
+     * vertical angle, and the unit used for the distance value.
      */
     void sendData(int nodeIndex);
 
@@ -128,7 +129,7 @@ private:
         // node is the current focus node, then the high precision value is used. This
         // is due to the node being in the current focus and therfore needs better
         // precision. If the node is not the current focus node, then the low precision
-        // value is used to save performance.
+        // value is used to save performance
         DoubleProperty lowDistancePrecision;
         DoubleProperty highDistancePrecision;
         DoubleProperty lowAnglePrecision;

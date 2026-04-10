@@ -104,7 +104,7 @@ namespace {
         // [[codegen::verbatim(StepSizeInfo.description)]]
         std::optional<float> stepSize;
 
-        // Raycast steps
+        // Raycast steps.
         std::optional<int> steps;
 
         // [[codegen::verbatim(DownscaleVolumeRenderingInfo.description)]]
@@ -116,7 +116,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableToyVolume::Documentation() {
-    return codegen::doc<Parameters>("toyvolume_renderabletoyvolume");
+    return codegen::doc<Parameters>("toyvolume_renderable_toyvolume");
 }
 
 RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)

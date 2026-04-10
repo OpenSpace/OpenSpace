@@ -15,9 +15,6 @@ asset.require("util/dpiscaling")
 -- Load the images required for the launcher to show up
 asset.require("util/launcher_images")
 
--- Modules and component settings
-asset.require("modules/touch/default_settings")
-
 -- Load web gui
 local webGui = asset.require("util/webgui")
 

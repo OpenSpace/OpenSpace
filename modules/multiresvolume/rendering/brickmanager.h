@@ -81,7 +81,7 @@ private:
     int _yCoord = 0;
     int _zCoord = 0;
 
-    // Texture where the actual atlas is kept
+    /// Texture where the actual atlas is kept
     ghoul::opengl::Texture* _textureAtlas = nullptr;
 
     std::vector<std::vector<int>> _brickLists;
@@ -89,7 +89,7 @@ private:
     bool _hasReadHeader = false;
     bool _atlasInitialized = false;
 
-    // PBOs
+    /// PBOs
     unsigned int _pboHandle[2];
 
     // Caching, one for each PBO

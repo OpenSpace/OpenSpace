@@ -60,7 +60,9 @@ public:
      */
     static double convertTime(const std::string& time);
 
-    /// \overload static double convertTime(const std::string& time)
+    /**
+     * \overload static double convertTime(const std::string& time).
+     */
     static double convertTime(const char* time);
 
     /**

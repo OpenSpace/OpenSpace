@@ -159,7 +159,7 @@ private:
     glm::dvec3 calculateWorldPosition() const;
     glm::dmat3 calculateWorldRotation() const;
     glm::dvec3 calculateWorldScale() const;
-    void computeScreenSpaceData(RenderData& newData);
+    void computeScreenSpaceData(const RenderData& newData);
     void renderDebugSphere(const Camera& camera, double size,
         const glm::vec4& color) const;
 
@@ -177,8 +177,8 @@ private:
 
     ghoul::mm_unique_ptr<Renderable> _renderable;
 
-    // If this value is 'true' GUIs are asked to hide this node from collections, as it
-    // might be a node that is not very interesting (for example barycenters)
+    /// If this value is `true` GUIs are asked to hide this node from collections, as it
+    /// might be a node that is not very interesting (for example barycenters)
     BoolProperty _guiHidden;
 
     StringProperty _guiPath;
@@ -188,7 +188,9 @@ private:
     BoolProperty _guiFocusable;
     FloatProperty _guiOrderingNumber;
 
-    // Transformation defined by translation, rotation and scale
+    /**
+     * Transformation defined by translation, rotation and scale.
+     */
     struct {
         ghoul::mm_unique_ptr<Translation> translation;
         ghoul::mm_unique_ptr<Rotation> rotation;
@@ -218,8 +220,8 @@ private:
     FloatProperty _visibilityDistance;
     BoolProperty _supportsDirectInteraction;
 
-    // This variable is used for the rate-limiting of the screenspace positions (if they
-    // are calculated when _computeScreenSpaceValues is true)
+    /// This variable is used for the rate-limiting of the screenspace positions (if they
+    /// are calculated when _computeScreenSpaceValues is true)
     std::chrono::high_resolution_clock::time_point _lastScreenSpaceUpdateTime;
 
     BoolProperty _showDebugSphere;
