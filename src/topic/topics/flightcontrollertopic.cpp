@@ -24,6 +24,7 @@
 
 #include <openspace/topic/topics/flightcontrollertopic.h>
 
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/websocketinputstate.h>
@@ -175,7 +176,7 @@ bool FlightControllerTopic::isDone() const {
 }
 
 void FlightControllerTopic::handleJson(const nlohmann::json& json) {
-    auto it = CommandMap.find(json[TypeKey].get<std::string>());
+    auto it = CommandMap.find(json["type"].get<std::string>());
     if (it == CommandMap.end()) {
         LWARNING(
             std::format("Malformed JSON command: no '{}' in payload", TypeKey)
@@ -329,9 +330,10 @@ void FlightControllerTopic::changeFocus(const nlohmann::json& json) const {
 void FlightControllerTopic::setRenderableEnabled(const nlohmann::json& json) const {
     if (json[RenderableKey].find(SceneNodeName) == json[RenderableKey].end()) {
         const std::string j = json.get<std::string>();
-        LWARNING(
-            std::format("Could not find '{}' key in JSON. JSON was:\n{}", FocusKey, j)
-        );
+        LWARNING(std::format(
+            "Could not find '{}' key in JSON. JSON was:\n{}",
+            SceneNodeName, j
+        ));
         return;
     }
 
@@ -448,6 +450,264 @@ void FlightControllerTopic::handleAutopilot(const nlohmann::json &json) {
     j[Autopilot][AutopilotEngagedKey] = _autopilotEngaged;
 
     _connection->sendJson(wrappedPayload(j));
+}
+
+Schema FlightControllerTopic::Schema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "$defs": {
+            "SceneNodeMap": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "identifier": { "type": "string" },
+                  "enabled": { "type": "boolean" }
+                },
+                "additionalProperties": false,
+                "required": ["identifier", "enabled"]
+              }
+            },
+            "AxisValues": {
+              "type": "object",
+              "properties": {
+                "orbitX": { "type": "number" },
+                "orbitY": { "type": "number" },
+                "zoomIn": { "type": "number" },
+                "zoomOut": { "type": "number" },
+                "localRollX": { "type": "number" },
+                "localRollY": { "type": "number" },
+                "globalRollX": { "type": "number" },
+                "globalRollY": { "type": "number" },
+                "panX": { "type": "number" },
+                "panY": { "type": "number" }
+              },
+              "additionalProperties": false
+            },
+            "FrictionPayload": {
+              "type": "object",
+              "properties": {
+                "rotation": { "type": "boolean" },
+                "zoom": { "type": "boolean" },
+                "roll": { "type": "boolean" }
+              },
+              "additionalProperties": false,
+              "required": ["rotation", "zoom", "roll"]
+            },
+            "FlightControllerConnectCommand": {
+              "type": "object",
+              "properties": {
+                "type": { "const": "connect" }
+              },
+              "additionalProperties": false,
+              "required": ["type"]
+            },
+            "FlightControllerDisconnectCommand": {
+              "type": "object",
+              "properties": {
+                "type": { "const": "disconnect" }
+              },
+              "additionalProperties": false,
+              "required": ["type"]
+            },
+            "FlightControllerInputStateCommand": {
+              "type": "object",
+              "properties": {
+                "type": { "const": "inputState" },
+                "inputState": {
+                  "type": "object",
+                  "properties": {
+                    "values": { "$ref": "#/$defs/AxisValues" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["values"]
+                }
+              },
+              "additionalProperties": false,
+              "required": ["type", "inputState"]
+            },
+            "FlightControllerUpdateViewCommand": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": { "const": "updateView" },
+                    "renderable": {
+                      "type": "object",
+                      "properties": {
+                        "identifier": { "type": "string" },
+                        "enabled": { "type": "boolean" }
+                      },
+                      "additionalProperties": false,
+                      "required": ["identifier", "enabled"]
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": ["type", "renderable"]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": { "const": "updateView" },
+                    "focus": { "type": "string" },
+                    "anchor": { "type": "string" },
+                    "aim": { "type": "string" },
+                    "resetVelocities": { "type": "boolean" },
+                    "retargetAnchor": { "type": "boolean" },
+                    "retargetAim": { "type": "boolean" }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "type",
+                    "resetVelocities",
+                    "retargetAnchor",
+                    "retargetAim"
+                  ]
+                }
+              ]
+            },
+            "FlightControllerAutopilotCommand": {
+              "type": "object",
+              "properties": {
+                "type": { "const": "autopilot" },
+                "autopilot": {
+                  "type": "object",
+                  "properties": {
+                    "engaged": { "type": "boolean" },
+                    "autopilotInput": {
+                      "type": "object",
+                      "properties": {
+                        "values": { "$ref": "#/$defs/AxisValues" }
+                      },
+                      "additionalProperties": false,
+                      "required": ["values"]
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": ["engaged"]
+                }
+              },
+              "additionalProperties": false,
+              "required": ["type", "autopilot"]
+            },
+            "FlightControllerFrictionCommand": {
+              "type": "object",
+              "properties": {
+                "type": { "const": "friction" },
+                "friction": { "$ref": "#/$defs/FrictionPayload" }
+              },
+              "additionalProperties": false,
+              "required": ["type", "friction"]
+            },
+            "FlightControllerLuaCommand": {
+              "type": "object",
+              "properties": {
+                "type": { "const": "lua" },
+                "lua": {
+                  "type": "object",
+                  "properties": {
+                    "script": { "type": "string" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["script"]
+                }
+              },
+              "additionalProperties": false,
+              "required": ["type", "lua"]
+            },
+            "FlightControllerCommand": {
+              "oneOf": [
+                { "$ref": "#/$defs/FlightControllerConnectCommand" },
+                { "$ref": "#/$defs/FlightControllerDisconnectCommand" },
+                { "$ref": "#/$defs/FlightControllerInputStateCommand" },
+                { "$ref": "#/$defs/FlightControllerUpdateViewCommand" },
+                { "$ref": "#/$defs/FlightControllerAutopilotCommand" },
+                { "$ref": "#/$defs/FlightControllerFrictionCommand" },
+                { "$ref": "#/$defs/FlightControllerLuaCommand" }
+              ]
+            },
+            "FlightControllerConnectData": {
+              "type": "object",
+              "properties": {
+                "type": { "const": "connect" },
+                "connect": {
+                  "type": "object",
+                  "properties": {
+                    "focusNodes": { "$ref": "#/$defs/SceneNodeMap" },
+                    "allNodes": { "$ref": "#/$defs/SceneNodeMap" },
+                    "interestingTimes": {}
+                  },
+                  "additionalProperties": false,
+                  "required": ["focusNodes", "allNodes", "interestingTimes"]
+                }
+              },
+              "additionalProperties": false,
+              "required": ["type", "connect"]
+            },
+            "FlightControllerDisconnectData": {
+              "type": "object",
+              "properties": {
+                "type": { "const": "disconnect" },
+                "disconnect": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["success"]
+                }
+              },
+              "additionalProperties": false,
+              "required": ["type", "disconnect"]
+            },
+            "FlightControllerAutopilotData": {
+              "type": "object",
+              "properties": {
+                "type": { "const": "autopilot" },
+                "autopilot": {
+                  "type": "object",
+                  "properties": {
+                    "engaged": { "type": "boolean" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["engaged"]
+                }
+              },
+              "additionalProperties": false,
+              "required": ["type", "autopilot"]
+            },
+            "FlightControllerFrictionData": {
+              "type": "object",
+              "properties": {
+                "type": { "const": "friction" },
+                "friction": { "$ref": "#/$defs/FrictionPayload" }
+              },
+              "additionalProperties": false,
+              "required": ["type", "friction"]
+            },
+            "FlightControllerData": {
+              "oneOf": [
+                { "$ref": "#/$defs/FlightControllerConnectData" },
+                { "$ref": "#/$defs/FlightControllerDisconnectData" },
+                { "$ref": "#/$defs/FlightControllerAutopilotData" },
+                { "$ref": "#/$defs/FlightControllerFrictionData" }
+              ]
+            }
+          },
+          "title": "FlightControllerTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "flightcontroller" },
+            "topicPayload": { "$ref": "#/$defs/FlightControllerCommand" },
+            "data": { "$ref": "#/$defs/FlightControllerData" }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+    )");
+
+    return { "flightcontrollertopic", schema };
 }
 
 void FlightControllerTopic::processInputState(const nlohmann::json& json) {

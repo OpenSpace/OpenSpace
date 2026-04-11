@@ -31,6 +31,8 @@
 
 namespace openspace {
 
+struct Schema;
+
 class FlightControllerTopic : public Topic {
 public:
     FlightControllerTopic();
@@ -43,6 +45,7 @@ public:
     void disengageAutopilot() const;
     void handleAutopilot(const nlohmann::json &json);
 
+    static openspace::Schema Schema();
 private:
     void connect();
     void disconnect();
