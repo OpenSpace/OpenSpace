@@ -178,7 +178,7 @@
       "type": "object"
     },
     "EventData": {
-      "oneOf": [
+      "anyOf": [
         {
           "$ref": "#/$defs/ActionAddedData"
         },
@@ -291,7 +291,7 @@
       "type": "string"
     },
     "EventTypeOrWildcard": {
-      "oneOf": [
+      "anyOf": [
         {
           "$ref": "#/$defs/EventType"
         },
@@ -593,7 +593,7 @@
   "additionalProperties": false,
   "properties": {
     "data": {
-      "oneOf": [
+      "anyOf": [
         {
           "$ref": "#/$defs/EventData"
         }
@@ -612,7 +612,7 @@
               "const": "start_subscription"
             },
             "eventType": {
-              "oneOf": [
+              "anyOf": [
                 {
                   "$ref": "#/$defs/EventTypeOrWildcard"
                 },
@@ -638,7 +638,7 @@
               "const": "stop_subscription"
             },
             "eventType": {
-              "oneOf": [
+              "anyOf": [
                 {
                   "$ref": "#/$defs/EventTypeOrWildcard"
                 },
