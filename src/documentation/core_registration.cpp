@@ -74,6 +74,7 @@
 #include <openspace/topic/topics/enginemodetopic.h>
 #include <openspace/topic/topics/errorlogtopic.h>
 #include <openspace/topic/topics/eventtopic.h>
+#include <openspace/topic/topics/flightcontrollertopic.h>
 #include <openspace/topic/topics/timetopic.h>
 
 namespace openspace {
@@ -114,6 +115,7 @@ void registerCoreSchemas(DocumentationEngine& engine) {
     engine.addSchema(EngineModeTopic::Schema());
     engine.addSchema(ErrorLogTopic::Schema());
     engine.addSchema(EventTopic::Schema());
+    engine.addSchema(FlightControllerTopic::Schema());
     engine.addSchema(TimeTopic::Schema());
 }
 
