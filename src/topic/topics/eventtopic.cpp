@@ -491,10 +491,7 @@ Schema EventTopic::Schema() {
         }
     )");
 
-    return {
-        "eventtopic",
-        schema
-    };
+    return { "eventtopic", schema };
 }
 
 bool EventTopic::isSubscribed() const {

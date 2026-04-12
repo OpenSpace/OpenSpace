@@ -119,10 +119,7 @@ Schema EngineModeTopic::Schema() {
 
     )");
 
-    return {
-        "enginemodetopic",
-        schema
-    };
+    return { "enginemodetopic", schema };
 }
 void EngineModeTopic::sendJsonData() {
     const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();

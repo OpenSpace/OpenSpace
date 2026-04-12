@@ -112,10 +112,7 @@ Schema CameraPathTopic::Schema() {
         }
     )");
 
-    return {
-        "camerapathtopic",
-        schema
-    };
+    return { "camerapathtopic", schema };
 }
 
 void CameraPathTopic::sendCameraPathData() {

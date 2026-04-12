@@ -236,10 +236,7 @@ Schema ErrorLogTopic::Schema() {
         }
     )");
 
-    return {
-        "errorlogtopic",
-        schema
-    };
+    return { "errorlogtopic", schema };
 }
 
 
