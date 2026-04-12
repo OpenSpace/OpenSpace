@@ -151,10 +151,7 @@ Schema TimeTopic::Schema() {
         }
     )");
 
-    return {
-        "timetopic",
-        schema
-    };
+    return { "timetopic", schema };
 }
 
 json TimeTopic::getNextPrevDeltaTimeStepJson() {

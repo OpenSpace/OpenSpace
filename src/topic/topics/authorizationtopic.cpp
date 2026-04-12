@@ -99,10 +99,7 @@ Schema AuthorizationTopic::Schema() {
 
     )");
 
-    return {
-        "authorizationtopic",
-        schema
-    };
+    return { "authorizationtopic", schema };
 }
 
 void AuthorizationTopic::handleJson(const nlohmann::json& json) {

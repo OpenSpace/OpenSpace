@@ -129,10 +129,7 @@ Schema DownloadEventTopic::Schema() {
         }
     )");
 
-    return {
-        "downloadeventtopic",
-        schema
-    };
+    return { "downloadeventtopic", schema };
 }
 
 } // namespace openspace

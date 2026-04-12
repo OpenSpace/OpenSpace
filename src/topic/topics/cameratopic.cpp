@@ -179,10 +179,7 @@ Schema CameraTopic::Schema() {
         }
     )");
 
-    return {
-        "cameratopic",
-        schema
-    };
+    return { "cameratopic", schema };
 }
 
 } // namespace openspace

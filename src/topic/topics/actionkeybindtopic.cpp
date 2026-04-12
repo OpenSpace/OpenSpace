@@ -156,10 +156,7 @@ Schema ActionKeybindTopic::Schema() {
         }
     )");
 
-    return {
-        "actionkeybindtopic",
-        schema
-    };
+    return { "actionkeybindtopic", schema };
 }
 
 nlohmann::json jsonKeybind(const KeyWithModifier& k, std::string identifier) {
