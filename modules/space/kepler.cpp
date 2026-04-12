@@ -198,7 +198,7 @@ namespace {
         // 5. Adjust for the fact the epoch starts on 1st Januaray at 12:00:00, not
         // midnight
 
-        // According to https://celestrak.com/columns/v04n03/
+        // According to https://celestrak.org/columns/v04n03/
         // Apparently, US Space Command sees no need to change the two-line element set
         // format yet since no artificial earth satellites existed prior to 1957. By their
         // reasoning, two-digit years from 57-99 correspond to 1957-1999 and those from

@@ -50,6 +50,6 @@ asset.meta = {
   Name = "Satellites Science Engineering",
   Description = "Satellites asset for Science Engineering. Data from Celestrak",
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/NORAD/elements/",
+  URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
 }

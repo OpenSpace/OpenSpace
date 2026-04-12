@@ -50,6 +50,6 @@ asset.meta = {
   Name = "Satellites Radar Calibration",
   Description = "Satellites asset for Radar Calibration. Data from Celestrak",
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/NORAD/elements/",
+  URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
 }

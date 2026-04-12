@@ -192,6 +192,6 @@ asset.meta = {
   Description = [[Model and Trail for ISS. Model from NASA 3D models, trail from
     Celestrak.]],
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/",
+  URL = "https://celestrak.org/",
   License = "NASA"
 }

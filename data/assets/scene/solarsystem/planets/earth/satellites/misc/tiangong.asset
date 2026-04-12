@@ -157,5 +157,5 @@ asset.meta = {
   Description = [[Model and Trail for Tiangong. Model from Turbosquid, trail from
     Celestrak.]],
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/"
+  URL = "https://celestrak.org/"
 }

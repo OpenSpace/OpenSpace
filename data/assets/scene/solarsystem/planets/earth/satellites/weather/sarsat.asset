@@ -51,6 +51,6 @@ asset.meta = {
   Description = [[Satellites asset for Weather - Search & Rescue (SARSAT). Data from
     Celestrak]],
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/NORAD/elements/",
+  URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
 }
