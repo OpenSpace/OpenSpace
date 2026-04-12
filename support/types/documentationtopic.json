@@ -1,0 +1,430 @@
+{
+  "$defs": {
+    "AssetData": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/$defs/DocPropertyOwner"
+          },
+          "type": "array"
+        },
+        "name": {
+          "const": "propertyOwner"
+        }
+      },
+      "required": [
+        "name",
+        "data"
+      ],
+      "type": "object"
+    },
+    "DocPropertyEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "type",
+        "uri",
+        "identifier",
+        "description"
+      ],
+      "type": "object"
+    },
+    "DocPropertyOwner": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "properties": {
+          "items": {
+            "$ref": "#/$defs/DocPropertyEntry"
+          },
+          "type": "array"
+        },
+        "propertyOwners": {
+          "items": {
+            "$ref": "#/$defs/DocPropertyOwner"
+          },
+          "type": "array"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "type",
+        "tags",
+        "properties",
+        "propertyOwners"
+      ],
+      "type": "object"
+    },
+    "DocumentationMember": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "documentation": {
+          "type": "string"
+        },
+        "members": {
+          "items": {
+            "$ref": "#/$defs/DocumentationMember"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "optional": {
+          "type": "boolean"
+        },
+        "reference": {
+          "additionalProperties": false,
+          "properties": {
+            "found": {
+              "type": "boolean"
+            },
+            "identifier": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "found"
+          ],
+          "type": "object"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "optional",
+        "type",
+        "documentation",
+        "members"
+      ],
+      "type": "object"
+    },
+    "Factory": {
+      "additionalProperties": false,
+      "properties": {
+        "classes": {
+          "items": {
+            "$ref": "#/$defs/FactoryClass"
+          },
+          "type": "array"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "identifier",
+        "classes"
+      ],
+      "type": "object"
+    },
+    "FactoryClass": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "members": {
+          "items": {
+            "$ref": "#/$defs/DocumentationMember"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "identifier",
+        "members"
+      ],
+      "type": "object"
+    },
+    "Keybind": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "action"
+      ],
+      "type": "object"
+    },
+    "KeyboardData": {
+      "additionalProperties": false,
+      "properties": {
+        "keybindings": {
+          "items": {
+            "$ref": "#/$defs/Keybind"
+          },
+          "type": "array"
+        },
+        "name": {
+          "const": "Keybindings"
+        }
+      },
+      "required": [
+        "name",
+        "keybindings"
+      ],
+      "type": "object"
+    },
+    "LicenseEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "author": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "identifiers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "license": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "description",
+        "author",
+        "url",
+        "license",
+        "identifiers",
+        "path"
+      ],
+      "type": "object"
+    },
+    "LuaArgument": {
+      "additionalProperties": false,
+      "properties": {
+        "defaultValue": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "type",
+        "defaultValue"
+      ],
+      "type": "object"
+    },
+    "LuaFunction": {
+      "additionalProperties": false,
+      "properties": {
+        "arguments": {
+          "items": {
+            "$ref": "#/$defs/LuaArgument"
+          },
+          "type": "array"
+        },
+        "help": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "returnType": {
+          "type": "string"
+        },
+        "sourceLocation": {
+          "$ref": "#/$defs/SourceLocation"
+        }
+      },
+      "required": [
+        "name",
+        "arguments",
+        "returnType",
+        "help"
+      ],
+      "type": "object"
+    },
+    "LuaLibrary": {
+      "additionalProperties": false,
+      "properties": {
+        "fullName": {
+          "type": "string"
+        },
+        "functions": {
+          "items": {
+            "$ref": "#/$defs/LuaFunction"
+          },
+          "type": "array"
+        },
+        "library": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "library",
+        "name",
+        "fullName",
+        "functions"
+      ],
+      "type": "object"
+    },
+    "SourceLocation": {
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "file",
+        "line"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "data": {
+      "oneOf": [
+        {
+          "description": "Response to lua",
+          "items": {
+            "$ref": "#/$defs/LuaLibrary"
+          },
+          "type": "array"
+        },
+        {
+          "description": "Response to factories",
+          "items": {
+            "$ref": "#/$defs/Factory"
+          },
+          "type": "array"
+        },
+        {
+          "$ref": "#/$defs/KeyboardData",
+          "description": "Response to keyboard"
+        },
+        {
+          "$ref": "#/$defs/AssetData",
+          "description": "Response to asset"
+        },
+        {
+          "description": "Response to meta",
+          "items": {
+            "$ref": "#/$defs/LicenseEntry"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    "topicId": {
+      "const": "documentation"
+    },
+    "topicPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "lua",
+            "factories",
+            "keyboard",
+            "asset",
+            "meta"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "topicId",
+    "topicPayload",
+    "data"
+  ],
+  "title": "DocumentationTopic",
+  "type": "object"
+}
