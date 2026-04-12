@@ -7,6 +7,16 @@ LLMs can be useful for generating an initial draft, but the result must always b
   - One or two examples of existing schemas
   - Relevant engine source code for the topic
 
+## Validating Your Schema
+
+You can validate your schema and inspect the generated TypeScript types using the [JSON Schema to TypeScript Browser](https://borischerny.com/json-schema-to-typescript-browser/) Browser
+
+Paste your schema into the tool to:
+
+  - Verify that it produces the expected TypeScript types
+  - Catch structrural issues early
+  - Ensure `topicPayload` and `data` map correctly to the API
+
 ## General Conventions
 
   - Use 2-space indentation for all JSON files
@@ -24,7 +34,7 @@ LLMs can be useful for generating an initial draft, but the result must always b
 
 ## Top-Level Contract (Strict)
 
-All schemas **must** define exactly the following top-level properties:
+All schemas **must** define exactly the following top-level properties. This structure defines the contract between the API and the client: `topicPayload` is the input, and `data` is the streamed output.
 
   - `topicId`
   - `topicPayload`
@@ -40,7 +50,7 @@ at the root level.
 
 ### topicId
 
-`topicId` is the unique identifier of the topic, this must match the identifier defined in `server.cpp`. This identifier is used by the API to select which topic to start.
+`topicId` is the unique identifier of the topic. It must match the identifier defined in `server.cpp`. This identifier is used by the API to select which topic to start.
 
 ### topicPayload
 
@@ -88,7 +98,6 @@ for await (const _data_ of authorizeTopic.iterator()) {
     - Set `additionalProperties: false`
     - Explicitly declare `required` fields
 
-  - Prefer compact syntax for properties and their types if they are simple i.e., `string`, `number`, `boolean` etc. If a property has multiple fields that defines it, each key gets its own line.
 
   - Prefer **compact syntax** for simple property definitions (e.g., only `type`)
 
@@ -171,7 +180,7 @@ Below is a minimal base schema that all topic schemas must adhere to:
 
 ## Review Checklist
 
-Before submitting a schema, verify:
+Before submitting a schema, ensure the following:
 
   - Top-level contains only: `topicId`, `topicPayload`, `data`
   - `additionalProperties: false` is set on all objects
