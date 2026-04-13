@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "data": {},
+    "topicId": {
+      "const": "luascript"
+    },
+    "topicPayload": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "return": {
+              "type": "boolean"
+            },
+            "script": {
+              "type": "string"
+            },
+            "shouldBeSynchronized": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "script"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "arguments": {
+              "items": {},
+              "type": "array"
+            },
+            "function": {
+              "type": "string"
+            },
+            "return": {
+              "type": "boolean"
+            },
+            "shouldBeSynchronized": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "function",
+            "arguments"
+          ],
+          "type": "object"
+        }
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "topicId",
+    "topicPayload",
+    "data"
+  ],
+  "title": "LuaScriptTopic",
+  "type": "object"
+}

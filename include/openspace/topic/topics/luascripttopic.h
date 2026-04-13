@@ -29,11 +29,14 @@
 
 namespace openspace {
 
+struct Schema;
+
 class LuaScriptTopic : public Topic {
 public:
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
 
+    static openspace::Schema Schema();
 private:
     void runScript(std::string script, bool shouldReturn, bool shouldBeSynchronized);
 
