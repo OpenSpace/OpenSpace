@@ -1004,41 +1004,29 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
     }
 
     using Texture = ghoul::opengl::Texture;
-
-    const Texture::Format format = [&](int nDim) {
-        switch (nDim) {
-        case 1: return Texture::Format::Red;
-        case 2: return Texture::Format::RG;
-        case 3: return Texture::Format::RGB;
-        case 4: return Texture::Format::RGBA;
-        default:
-            throw ghoul::RuntimeError(std::format("Unsupported channel count: {}", nDim));
-        }
-    }(imageInfo.nChannels);
-
     Texture::FormatInit formatInit = Texture::FormatInit{
         .dimensions = glm::uvec3(imageInfo.dimensions, 1),
         .type = GL_TEXTURE_2D,
-        .format = format,
+        .format = Texture::formatFromNumChannels(imageInfo.nChannels),
         .dataType = GL_UNSIGNED_BYTE,
     };
 
     if (_texture.allowCompression) {
         formatInit.internalFormat = [](int nDim) {
             switch (nDim) {
-            case 1: return GL_COMPRESSED_RED_RGTC1;
-            case 2: return GL_COMPRESSED_RG_RGTC2;
-            case 3: return GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
-            case 4: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-            default:
-                throw ghoul::RuntimeError(std::format("Unsupported channel count: {}", nDim));
+                case 1: return GL_COMPRESSED_RED_RGTC1;
+                case 2: return GL_COMPRESSED_RG_RGTC2;
+                case 3: return GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+                case 4: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+                default:
+                    throw ghoul::RuntimeError(std::format("Unsupported channel count: {}", nDim));
             }
         }(imageInfo.nChannels);
     }
 
     std::unique_ptr<Texture> t = std::make_unique<Texture>(
         formatInit,
-        Texture::SamplerInit {},
+        Texture::SamplerInit{},
         reinterpret_cast<const std::byte*>(imageInfo.data.data())
     );
 
