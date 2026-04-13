@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Space & Earth Science)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_science",
-  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=science&FORMAT=kvn",
+  Url = "https://relay.openspaceproject.com/celestrak?GROUP=science&FORMAT=kvn",
   Filename = "science.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
