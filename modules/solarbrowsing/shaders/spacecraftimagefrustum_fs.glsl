@@ -22,32 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PROGRESSBAR___H__
-#define __OPENSPACE_CORE___PROGRESSBAR___H__
+#include "fragment.glsl"
 
-#include <iostream>
+in Data {
+  float depth;
+} in_data;
 
-namespace openspace {
+uniform float planeOpacity;
 
-class ProgressBar {
-public:
-    explicit ProgressBar(int end, int width = 70, std::ostream& stream = std::cout);
-    ~ProgressBar();
 
-    ProgressBar& operator=(const ProgressBar& rhs) = delete;
+Fragment getFragment() {
+  vec4 diffuse = vec4(1.0, 1.0, 1.0, max(0.25, planeOpacity));
 
-    void print(int current);
-    void finish();
-
-private:
-    int _width;
-    int _previous = -1;
-    int _end;
-    bool _isFinished = false;
-
-    std::ostream& _stream;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_CORE___PROGRESSBAR___H__
+  Fragment frag;
+  frag.color = diffuse;
+  frag.depth = in_data.depth;
+  return frag;
+}
