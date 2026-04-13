@@ -77,17 +77,15 @@ void ScreenSpaceSpout::deinitializeGL() {
     ScreenSpaceRenderable::deinitializeGL();
 }
 
-bool ScreenSpaceSpout::isReady() const {
-    return ScreenSpaceRenderable::isReady() && !_spoutReceiver.isReceiving();
-}
-
 void ScreenSpaceSpout::update() {
     ScreenSpaceRenderable::update();
     _spoutReceiver.updateReceiver();
 }
 
 void ScreenSpaceSpout::bindTexture(ghoul::opengl::TextureUnit& unit) {
-    unit.bind(_spoutReceiver.spoutTexture());
+    if (_spoutReceiver.isReceiving()) {
+        unit.bind(_spoutReceiver.spoutTexture());
+    }
 }
 
 } // namespace openspace

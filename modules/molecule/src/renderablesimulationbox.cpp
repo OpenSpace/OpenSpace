@@ -449,10 +449,6 @@ void RenderableSimulationBox::deinitializeGL() {
     _billboard.program = nullptr;
 }
 
-bool RenderableSimulationBox::isReady() const {
-    return true;
-}
-
 void RenderableSimulationBox::update(const UpdateData& data) {
     // Avoid updating if not in view, as it can be quite expensive
     if (!_renderableInView) {

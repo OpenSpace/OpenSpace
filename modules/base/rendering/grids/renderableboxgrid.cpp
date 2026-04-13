@@ -105,10 +105,6 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     addProperty(_size);
 }
 
-bool RenderableBoxGrid::isReady() const {
-    return _gridProgram != nullptr;
-}
-
 void RenderableBoxGrid::initializeGL() {
     _gridProgram = BaseModule::ProgramObjectManager.request(
         "GridProgram",

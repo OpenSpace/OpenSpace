@@ -67,10 +67,6 @@ RenderableVideoSphere::RenderableVideoSphere(const ghoul::Dictionary& dictionary
     addPropertySubOwner(_videoPlayer);
 }
 
-bool RenderableVideoSphere::isReady() const {
-    return RenderableSphere::isReady() && _videoPlayer.isInitialized();
-}
-
 void RenderableVideoSphere::initializeGL() {
     RenderableSphere::initializeGL();
     _videoPlayer.initialize();

@@ -91,8 +91,6 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     /**
      * The render method will set up the shader information and then render first the
      * information contained in the the `_primaryRenderInformation`, then the optional

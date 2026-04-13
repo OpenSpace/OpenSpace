@@ -478,10 +478,6 @@ void RenderableFov::deinitializeGL() {
     glDeleteVertexArrays(1, &_fieldOfViewBounds.vao);
 }
 
-bool RenderableFov::isReady() const {
-    return _program && !_instrument.bounds.empty();
-}
-
 /**
  * Orthogonal projection next to planets surface.
  */

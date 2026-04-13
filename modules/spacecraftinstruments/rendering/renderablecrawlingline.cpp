@@ -89,10 +89,6 @@ RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictiona
     _lineColorEnd = p.color.end;
 }
 
-bool RenderableCrawlingLine::isReady() const {
-    return _program != nullptr;
-}
-
 void RenderableCrawlingLine::initializeGL() {
     _program = global::renderEngine->buildRenderProgram(
         "RenderableCrawlingLine",

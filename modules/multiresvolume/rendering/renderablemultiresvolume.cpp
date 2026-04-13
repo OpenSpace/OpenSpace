@@ -360,8 +360,6 @@ void RenderableMultiresVolume::initializeGL() {
 
     _transferFunction->update();
 
-    success &= isReady();
-
     _raycaster = std::make_unique<MultiresVolumeRaycaster>(
         _tsp,
         _atlasManager,
@@ -390,10 +388,6 @@ void RenderableMultiresVolume::initializeGL() {
 void RenderableMultiresVolume::deinitializeGL() {
     _tsp = nullptr;
     _transferFunction = nullptr;
-}
-
-bool RenderableMultiresVolume::isReady() const {
-    return true;
 }
 
 bool RenderableMultiresVolume::initializeSelector() {

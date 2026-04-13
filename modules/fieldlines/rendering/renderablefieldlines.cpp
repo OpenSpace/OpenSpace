@@ -199,10 +199,6 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
     addProperty(_seedPointSourceFile);
 }
 
-bool RenderableFieldlines::isReady() const {
-    return _program != nullptr;
-}
-
 void RenderableFieldlines::initializeGL() {
     _program = global::renderEngine->buildRenderProgram(
         "Fieldline",

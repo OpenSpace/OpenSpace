@@ -91,10 +91,6 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     loadTexture();
 }
 
-bool RenderableTimeVaryingSphere::isReady() const {
-    return RenderableSphere::isReady() && _texture;
-}
-
 void RenderableTimeVaryingSphere::deinitializeGL() {
     _texture = nullptr;
     _files.clear();

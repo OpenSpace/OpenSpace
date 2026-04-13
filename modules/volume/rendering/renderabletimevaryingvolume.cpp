@@ -471,10 +471,6 @@ void RenderableTimeVaryingVolume::render(const RenderData& data, RendererTasks& 
     }
 }
 
-bool RenderableTimeVaryingVolume::isReady() const {
-    return true;
-}
-
 void RenderableTimeVaryingVolume::deinitializeGL() {
     if (_raycaster) {
         global::raycasterManager->detachRaycaster(*_raycaster);

@@ -307,12 +307,6 @@ void RenderableNodeLine::deinitializeGL() {
     _program = nullptr;
 }
 
-bool RenderableNodeLine::isReady() const {
-    bool ready = true;
-    ready &= (_program != nullptr);
-    return ready;
-}
-
 void RenderableNodeLine::update(const UpdateData&) {
     SceneGraphNode* startNode = global::renderEngine->scene()->sceneGraphNode(_start);
     SceneGraphNode* endNode = global::renderEngine->scene()->sceneGraphNode(_end);

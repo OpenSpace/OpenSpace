@@ -105,10 +105,6 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
     }
 }
 
-bool RenderablePlaneProjection::isReady() const {
-    return _shader && _texture;
-}
-
 void RenderablePlaneProjection::initializeGL() {
     glCreateBuffers(1, &_vbo);
     glNamedBufferStorage(_vbo, 6 * sizeof(Vertex), nullptr, GL_DYNAMIC_STORAGE_BIT);

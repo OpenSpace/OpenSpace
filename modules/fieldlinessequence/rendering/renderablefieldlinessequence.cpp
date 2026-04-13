@@ -1002,10 +1002,6 @@ int RenderableFieldlinesSequence::updateActiveIndex(double currentTime) {
     }
 }
 
-bool RenderableFieldlinesSequence::isReady() const {
-    return _shaderProgram != nullptr;
-}
-
 void RenderableFieldlinesSequence::updateDynamicDownloading(double currentTime,
                                                             double deltaTime)
 {

@@ -810,14 +810,6 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     addProperty(_hasOrientationData);
 }
 
-bool RenderablePointCloud::isReady() const {
-    bool isReady = _program != nullptr;
-    if (_hasLabels) {
-        isReady = isReady && _labels->isReady();
-    }
-    return isReady;
-}
-
 void RenderablePointCloud::initialize() {
     ZoneScoped;
 

@@ -117,10 +117,6 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
     setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
 }
 
-bool RenderableDisc::isReady() const {
-    return _shader && _texture;
-}
-
 void RenderableDisc::initialize() {
     _texture = std::make_unique<TextureComponent>(1);
     _texture->setFilterMode(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);

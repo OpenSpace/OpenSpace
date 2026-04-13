@@ -84,7 +84,6 @@ public:
     virtual void deinitialize();
     virtual void deinitializeGL();
 
-    virtual bool isReady() const = 0;
     bool isEnabled() const;
     bool shouldUpdateIfDisabled() const noexcept;
 
