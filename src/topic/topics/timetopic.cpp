@@ -135,8 +135,8 @@ Schema TimeTopic::Schema() {
                 "targetDeltaTime": { "type": "number" },
                 "isPaused": { "type": "boolean" },
                 "deltaTimeSteps": {
-                  "items": { "type": "number" },
-                  "type": "array"
+                  "type": "array",
+                  "items": { "type": "number" }
                 },
                 "hasNextStep": { "type": "boolean" },
                 "hasPrevStep": { "type": "boolean" },
