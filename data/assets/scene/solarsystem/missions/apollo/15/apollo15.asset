@@ -39,6 +39,8 @@ local Apollo15 = {
     Type = "RenderableModel",
     GeometryFile = models .. "ApolloCSM.osmodel",
     ModelScale = 0.0001,
+    -- Empirically determined to make the direction of the Metric cam during flight point
+    -- at the Moon
     RotationVector = { 0.0, 325.45, 0.0 },
     LightSources = {
       sun.LightSource
