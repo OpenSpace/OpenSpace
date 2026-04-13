@@ -14,7 +14,7 @@ You can validate your schema and inspect the generated TypeScript types using th
 Paste your schema into the tool to:
 
   - Verify that it produces the expected TypeScript types
-  - Catch structrural issues early
+  - Catch structural issues early
   - Ensure `topicPayload` and `data` map correctly to the API
 
 ## General Conventions
@@ -79,13 +79,41 @@ for await (const _data_ of authorizeTopic.iterator()) {
   - `additionalProperties`
     - Must be set to `false` unless there is a strong, well-justified reason not to
     - Applies to all objects unless explicitly required otherwise
-  - Enums vs unions
+  - Enums vs Union (`anyOf`)
     - Use `enum` for simple sets of constant values (e.g., strings or numbers)
     - Avoid `anyOf` when `enum` is sufficient
   - `anyOf` vs `oneOf`
     - Prefer `anyOf` over `oneOf` for performance and predictability
     - Only use `oneOf` when strict mutual exclusivity is required
     - See [documentation](https://json-schema.org/blog/posts/applicability-json-schema-fundamentals-part-1#putting-everything-together-avoiding-oneof-pitfalls)
+  - Use `anyOf` with discriminated variants when a `type` or `event` const field distinguishes the payload shapes, for example:
+
+```json
+{
+  "topicPayload": {
+    "type": "object",
+    "anyOf": [
+      {
+        "type": "object",
+        "properties": {
+          "event": { "const": "start_subscription" },
+          "settings": { "$ref": "#/$defs/Settings" }
+        },
+        "additionalProperties": false,
+        "required": ["event"]
+      },
+      {
+        "type": "object",
+        "properties": {
+          "event": { "const": "stop_subscription" }
+        },
+        "additionalProperties": false,
+        "required": ["event"]
+      }
+    ]
+  }
+}
+```
 
 ## Property Design
 
@@ -97,7 +125,6 @@ for await (const _data_ of authorizeTopic.iterator()) {
     - Define `properties`
     - Set `additionalProperties: false`
     - Explicitly declare `required` fields
-
 
   - Prefer **compact syntax** for simple property definitions (e.g., only `type`)
 
@@ -140,6 +167,184 @@ for await (const _data_ of authorizeTopic.iterator()) {
   "deltaTimeSteps": { "type": "array", "items": { "type": "number" } }
 }
 ```
+
+  - Use `{ "const": "value" }` for fields that always have a single known value. When reviewing C++ source, look for `constexpr std::string_view` literals that flow directly into JSON output - these should always be typed as `const` rather than `string`:
+
+```json
+{
+  // Do - when the C++ always sets this to "Keybindings":
+  "name": { "const": "Keybindings" },
+  // Don't do:
+  "name": { "type": "string" }
+}
+```
+
+  - `$ref` should always be written compactly on a single line unless it has sibling keywords:
+
+```json
+{
+  // Do:
+  "level": { "$ref": "#/$defs/LogLevel" },
+  // Do (with sibling):
+  "type": {
+    "$ref": "#/$defs/SomeType",
+    "description": "The type of event"
+  }
+}
+```
+
+## Named Union Types in $defs
+
+When a `topicPayload` or `data` has multiple distinct shapes (e.g. different commands or response types), define each shape as a named `$defs` entry and collect them into a union type. This produces clean, navigable TypeScript output:
+
+```json
+{
+  "$defs": {
+    "ConnectCommand": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "connect" }
+      },
+      "additionalProperties": false,
+      "required": ["type"]
+    },
+    "DisconnectCommand": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "disconnect" }
+      },
+      "additionalProperties": false,
+      "required": ["type"]
+    },
+    "TopicCommand": {
+      "anyOf": [
+        { "$ref": "#/$defs/ConnectCommand" },
+        { "$ref": "#/$defs/DisconnectCommand" }
+      ]
+    }
+  }
+}
+```
+
+This generates the TypeScript equivalent of:
+```ts
+export type TopicCommand = ConnectCommand | DisconnectCommand;
+```
+
+## Integer Enums and tsEnumNames
+
+When a field is serialized as an integer from a C++ enum, use `tsEnumNames` to produce a named TypeScript enum rather than a bare numeric union. This is a `json-schema-to-typescript` specific extension:
+
+```json
+{
+  "$defs": {
+    "LogLevel": {
+      "type": "integer",
+      "enum": [0, 1, 2, 3, 4, 5, 6, 7],
+      "tsEnumNames": ["AllLogging", "Trace", "Debug", "Info", "Warning"]
+    }
+  }
+}
+```
+
+This generates:
+```ts
+export enum LogLevel {
+  AllLogging = 0,
+  Trace = 1,
+  Debug = 2,
+  ...
+}
+```
+
+Note that if the same enum is used across multiple topics it is a strong candidate for a shared global schema file.
+
+## Shared / Global Definitions
+
+Some types are used across multiple topics and should be extracted into shared helper schema files rather than redefined per topic. Rather than a single monolithic file, types are organized into focused helper files by domain. `json-schema-to-typescript` resolves cross-file `$ref` pointers via its built-in `$RefParser`, so shared types are fully supported.
+
+### Helper Schema Files
+
+Each helper file lives alongside the topic schemas in `OpenSpace/support/types/` and contains only `$defs` - no top-level `title` or topic contract is needed.
+
+Current helper files and their intended contents:
+
+@TODO (anden88: 2026-04-14): Create helper schema files.
+
+| File | Contents |
+| --- | --- |
+| `properties.json` | `AnyProperty`, `PropertyOwner`, `BaseMetaData`, all property type defs, `AdditionalData*`, `ViewOptions` |
+| `scenegraph.json` | `SceneGraphNode`, `Vec3` |
+| `logging.json` | `LogLevel`, `LogLevelString` |
+| `actions.json` | `Action`, `Keybind` |
+| `events.json` | `EventType`, `EventData` and all per-event data defs |
+
+A helper file looks like this:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "LogLevel": {
+      "type": "integer",
+      "enum": [0, 1, 2, 3, 4, 5, 6, 7],
+      "tsEnumNames": [
+        "AllLogging", "Trace", "Debug", "Info",
+        "Warning", "Error", "Fatal", "NoLogging"
+      ]
+    },
+    "LogLevelString": {
+      "type": "string",
+      "enum": ["All", "Trace", "Debug", "Info", "Warning", "Error", "Fatal", "None"]
+    }
+  }
+}
+```
+
+Reference a shared type from any topic schema using a relative file path:
+
+```json
+{
+  "properties": {
+    "level": { "$ref": "logging.json#/$defs/LogLevel" },
+    "node": { "$ref": "scenegraph.json#/$defs/SceneGraphNode" }
+  }
+}
+```
+
+TypeScript type generation is handled by `generatetopictypes.mjs` in the [JavaScript repository](https://github.com/OpenSpace/openspace-api-js). The script uses `compileFromFile` which automatically resolves relative `$ref` paths using the schema file's directory as the base, so cross-file refs work without any script changes. Helper files are excluded from individual topic compilation since the script filters for files ending in `topic.json`.
+
+To generate standalone `.d.ts` files for the helper schemas, add a separate npm script per file using `--unreachableDefinitions` so all `$defs` are emitted even if not referenced at the top level:
+
+```sh
+json2ts -i support/types/logging.json -o src/types/generated/logging.d.ts \ --unreachableDefinitions
+```
+
+### Flagging Candidates for Extraction
+
+When a type in a topic schema is identified as a candidate for extraction, add a
+`description` note so it can be tracked:
+
+```json
+{
+  "$defs": {
+    "LogLevel": {
+      "description": "TODO: extract to logging.json - also used in errorlogtopic",
+      "type": "integer"
+    }
+  }
+}
+```
+
+## C++ Source as Source of Truth
+
+The C++ source is always the source of truth for the schema. When reviewing or writing a schema:
+
+  - Verify field names match exactly - including casing (e.g. `camelCase` vs `snake_case`)
+  - Check for `constexpr` string literals that flow into JSON keys or values and use `const` accordingly
+  - Flag any inconsistencies between the schema and the source as bugs to be fixed in the C++, not worked around in the schema
+  - Check optional fields - only fields guarded by `has_value()`, `find()`, or `value_or` with a meaningful fallback should be omitted from `required`
+  - Watch for misspellings in identifiers, string literals, and comments in the C++ source and report them
 
 ## Example Base JSON Schema
 
@@ -188,3 +393,8 @@ Before submitting a schema, ensure the following:
   - All required fields are explicitly listed
   - No unused `$defs`
   - `enum` is used instead of `anyOf` where possible
+  - `const` used for all fields with a single known fixed value from C++ source
+  - Integer enums use `tsEnumNames` to produce named TypeScript enums
+  - Named union types defined in `$defs` for multi-shape `topicPayload` and `data`
+  - Shared types flagged for extraction into a global schema file
+  - C++ source reviewed for misspellings and inconsistencies
