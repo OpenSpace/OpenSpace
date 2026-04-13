@@ -122,13 +122,6 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MieScatteringExtinctionCoeffInfo = {
-        "MieScatteringExtinctionCoefficient",
-        "Mie scattering/extinction proportion coefficient (%)",
-        "Mie Scattering/Extinction Proportion Coefficient.",
-        Property::Visibility::AdvancedUser
-    };
-
     constexpr Property::PropertyInfo MieAsymmetricFactorGInfo = {
         "MieAsymmetricFactorG",
         "Mie asymmetric factor G",
@@ -225,9 +218,6 @@ namespace {
         // [[codegen::verbatim(SunIntensityInfo.description)]]
         std::optional<float> sunIntensity;
 
-        // [[codegen::verbatim(MieScatteringExtinctionCoeffInfo.description)]]
-        std::optional<float> mieScatteringExtinctionCoefficient;
-
         // [[codegen::verbatim(GroundRadianceEmissionInfo.description)]]
         float groundRadianceEmission;
 
@@ -315,7 +305,6 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         glm::vec3(0.00001f),
         glm::vec3(1.f)
     )
-    , _mieScatteringExtinctionCoeff(MieScatteringExtinctionCoeffInfo, 0.9f, 0.01f, 1.f)
     , _miePhaseConstant(MieAsymmetricFactorGInfo, 0.f, -1.f, 1.f)
     , _sunIntensity(SunIntensityInfo, 5.f, 0.1f, 1000.f)
     , _sunFollowingCameraEnabled(EnableSunOnCameraPositionInfo, false)
@@ -367,8 +356,6 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     _sunIntensity.onChange(updateWithoutCalculation);
     addProperty(_sunIntensity);
 
-    _mieScattExtCoef = p.mieScatteringExtinctionCoefficient.value_or(_mieScattExtCoef);
-
     _rayleighScatteringCoeff = p.rayleigh.coefficients.scattering;
     _rayleighScatteringCoeff.onChange(updateWithCalculation);
     addProperty(_rayleighScatteringCoeff);
@@ -404,13 +391,6 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     _miePhaseConstant = p.mie.phaseConstant;
     _miePhaseConstant.onChange(updateWithCalculation);
     addProperty(_miePhaseConstant);
-
-    _mieScatteringExtinctionCoeff =
-        _mieScattExtCoef != 1.f ? _mieScattExtCoef :
-        _mieScatteringCoeff.value().x / _mieExtinctionCoeff.x;
-
-    _mieScatteringExtinctionCoeff.onChange(updateWithCalculation);
-    addProperty(_mieScatteringExtinctionCoeff);
 
     if (p.debug.has_value()) {
         _textureScale = p.debug->preCalculatedTextureScale.value_or(_textureScale);
@@ -525,9 +505,6 @@ void RenderableAtmosphere::update(const UpdateData& data) {
 }
 
 void RenderableAtmosphere::updateAtmosphereParameters() {
-    _mieExtinctionCoeff =
-        _mieScatteringCoeff.value() / _mieScatteringExtinctionCoeff.value();
-
     _deferredcaster->setParameters(
         _planetRadius + _atmosphereHeight,
         _planetRadius,

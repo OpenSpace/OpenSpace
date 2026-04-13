@@ -20,7 +20,7 @@ local Atmosphere = {
         -- Reflection coefficients are given in km^-1
         Scattering = { 0.005349578367831898, 0.01265595939366191, 0.03133178295339324 }
       },
-      -- Thickness of atmosphere if its density were uniform, in Km
+      -- Thickness of atmosphere if its density were uniform, in km
       H_R = 20.0
     },
     Mie = {

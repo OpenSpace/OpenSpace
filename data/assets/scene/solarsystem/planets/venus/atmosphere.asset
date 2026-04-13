@@ -22,7 +22,7 @@ local Atmosphere = {
           -- In Rayleigh scattering, the coefficients of
           -- absorption and scattering are the same.
       },
-      -- Thickness of atmosphere if its density were uniform, in Km
+      -- Thickness of atmosphere if its density were uniform, in km
       H_R = 15.9 -- from https://nssdc.gsfc.nasa.gov/planetary/factsheet/venusfact.html
       -- H_R = 3.53
     },
@@ -34,7 +34,7 @@ local Atmosphere = {
         -- Extinction coefficients are a fraction of the Scattering coefficients
         Extinction = { 0.05361771 / 0.98979, 0.05361771 / 0.98979, 0.05361771 / 0.98979 }
       },
-      -- Mie Height scale (atmosphere thickness for constant density) in Km
+      -- Mie Height scale (atmosphere thickness for constant density) in km
       H_M = 5.42,
       -- Mie Phase Function Value (G e [-1.0, 1.0].
       -- If G = 1.0, Mie phase function = Rayleigh Phase Function)
