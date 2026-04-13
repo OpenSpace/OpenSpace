@@ -1,7 +1,7 @@
 {
   "version": { "major": 1, "minor": 0 },
-  "identifier": "interstellar",
-  "name": "Interstellar",
+  "identifier": "interstellar_objects",
+  "name": "Interstellar Objects",
   "description": "Includes the interstellar objects that passed through the solar system.",
   "assets": [
     "scene/solarsystem/interstellar/c-2019_q4_borisov",
