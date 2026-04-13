@@ -73,7 +73,7 @@ private:
 
     std::filesystem::path _filePath;
     opj_stream_t* _infileStream = nullptr;
-    bool _sholdPrintTiming = false;
+    bool _shouldPrintTiming = false;
 };
 
 } // namespace openspace
