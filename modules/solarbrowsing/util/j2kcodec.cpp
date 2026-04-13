@@ -38,7 +38,8 @@ namespace {
     using namespace std::string_view_literals;
     // Since the JP2_RFC3745_MAGIC contains the null terminator we need to use the sv
     // suffix here to get the correct size.
-    constexpr std::string_view JP2_RFC3745_MAGIC = "\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a"sv;
+    constexpr std::string_view JP2_RFC3745_MAGIC =
+        "\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a"sv;
     constexpr std::string_view JP2_MAGIC = "\x0d\x0a\x87\x0a"sv;
     constexpr std::string_view J2K_CODESTREAM_MAGIC = "\xff\x4f\xff\x51"sv;
 
@@ -60,15 +61,14 @@ namespace {
             case FileFormat::J2K: return ".j2k/.j2c/.jpc";
             case FileFormat::JP2: return ".jp2";
             case FileFormat::JPT: return ".jpt";
-            case FileFormat::PXM:  return ".pnm/.pgm/.ppm";
-            case FileFormat::PGX:  return ".pgx";
-            case FileFormat::BMP:  return ".bmp";
-            case FileFormat::TIF:  return ".tif";
-            case FileFormat::RAW:  return ".raw";
-            case FileFormat::TGA:  return ".tga";
-            case FileFormat::PNG:  return ".png";
-            default:
-                throw ghoul::MissingCaseException();
+            case FileFormat::PXM: return ".pnm/.pgm/.ppm";
+            case FileFormat::PGX: return ".pgx";
+            case FileFormat::BMP: return ".bmp";
+            case FileFormat::TIF: return ".tif";
+            case FileFormat::RAW: return ".raw";
+            case FileFormat::TGA: return ".tga";
+            case FileFormat::PNG: return ".png";
+            default: throw ghoul::MissingCaseException();
         }
     }
 
@@ -99,7 +99,7 @@ namespace {
             return std::nullopt;
         }
 
-        std::array<std::byte, 12> buffer{};
+        std::array<std::byte, 12> buffer;
         file.read(reinterpret_cast<char*>(buffer.data()), buffer.size());
         if (!file) {
             return std::nullopt;
@@ -108,19 +108,19 @@ namespace {
         const std::optional<FileFormat> extFormat = fromExtension(filePath.extension());
 
         // JPT is only detectable via extension, no magic bytes to check
-        if (extFormat && *extFormat == FileFormat::JPT) {
+        if (extFormat.has_value() && *extFormat == FileFormat::JPT) {
             return FileFormat::JPT;
         }
 
         const std::string_view bufView = std::string_view(
-            reinterpret_cast<const char*>(buffer.data()), buffer.size()
+            reinterpret_cast<const char*>(buffer.data()),
+            buffer.size()
         );
 
         // Try to read the magic bytes of the file
         std::optional<FileFormat> magicFormat;
         if (bufView.starts_with(JP2_RFC3745_MAGIC) || bufView.starts_with(JP2_MAGIC)) {
             magicFormat = FileFormat::JP2;
-
         }
         else if (bufView.starts_with(J2K_CODESTREAM_MAGIC)) {
             magicFormat = FileFormat::J2K;
@@ -129,7 +129,7 @@ namespace {
             return std::nullopt;
         }
 
-        if (extFormat && magicFormat != extFormat) {
+        if (extFormat.has_value() && magicFormat != extFormat) {
             LERROR(std::format(
                 "Extension of file is incorrect. Found {} should be {}",
                 filePath.extension(), toString(*magicFormat)
@@ -143,7 +143,7 @@ namespace {
 namespace openspace {
 
 J2kCodec::J2kCodec(bool shouldPrintTiming)
-    : _sholdPrintTiming(shouldPrintTiming)
+    : _shouldPrintTiming(shouldPrintTiming)
 {}
 
 J2kCodec::~J2kCodec() {
@@ -182,7 +182,7 @@ void J2kCodec::decodeIntoBuffer(const std::filesystem::path& path, unsigned char
     );
 
     auto t2 = std::chrono::high_resolution_clock::now();
-    if (_sholdPrintTiming) {
+    if (_shouldPrintTiming) {
         LINFO(std::format(
             "Decode time of {}: {} ms",
             path, std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
@@ -209,7 +209,7 @@ void J2kCodec::setupDecoder(int downsamplingLevel) {
     _decoderParams.cp_reduce = downsamplingLevel;
 
     const std::optional<FileFormat> format = infileFormat(_filePath);
-    if (!format) {
+    if (!format.has_value()) {
         LERROR(std::format("Unrecognized format for input {}", _filePath));
         return;
     }
