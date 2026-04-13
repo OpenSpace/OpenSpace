@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Galileo)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_galileo",
-  Url = "https://relay.openspaceproject.com/celestrak?GROUP=galileo&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=galileo&FORMAT=kvn",
   Filename = "galileo.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })

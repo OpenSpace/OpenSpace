@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Fengyun Debris)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_1999-025",
-  Url = "https://relay.openspaceproject.com/celestrak?INTDES=1999-025&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?INTDES=1999-025&FORMAT=kvn",
   Filename = "1999-025.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
