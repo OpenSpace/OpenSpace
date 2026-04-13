@@ -47,7 +47,7 @@ void DocumentationTopic::handleJson(const nlohmann::json& json) {
         response = DocEng.generateKeybindingsJson();
     }
     else if (requestedType == "asset") {
-        DocEng.generatePropertyOwnerJson(global::rootPropertyOwner);
+        response = DocEng.generatePropertyOwnerJson(global::rootPropertyOwner);
     }
     else if (requestedType == "meta") {
         response = DocEng.generateLicenseListJson();
