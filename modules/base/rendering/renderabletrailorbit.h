@@ -56,7 +56,9 @@ public:
 private:
 	enum PhaseType {
 		Pre = 0,
+        Beginning,
 	    Normal,
+        Ending,
 	    Post
 	};
 
@@ -107,11 +109,13 @@ private:
     PhaseType trailPhase(double time);
 
     /// Determines if trail length should be forced to be one orbital period in length
-    properties::BoolProperty _forceFullOrbitTrail;
+    BoolProperty _forceFullOrbitTrail;
+    /// Only shows full trail orbit trail between StartTime and EndTime
+    BoolProperty _limitToTimeFrame;
     /// The start time of the trail
-    properties::StringProperty _startTime;
+    StringProperty _startTime;
     /// The end time of the trail
-    properties::StringProperty _endTime;
+    StringProperty _endTime;
     /// The orbital period of the RenderableTrail in days
     DoubleProperty _period;
     /// The number of points that should be sampled between _period and now
