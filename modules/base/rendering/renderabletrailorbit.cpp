@@ -454,7 +454,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
 
     constexpr double Epsilon = 1e-7;
     // When time stands still (at the iron hill), we don't need to perform any work
-    if (std::abs(data.time.j2000Seconds() - _previousTime) < Epsilon) {
+    if (std::abs(time - _previousTime) < Epsilon) {
         return {
             .floatingPointNeedsUpdate = false,
             .permanentPointsNeedUpdate = false,
@@ -506,7 +506,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
             // If we would need to generate more new points than there are total points in
             // the array, it is faster to regenerate the entire array
             if (nNewPoints >= static_cast<uint64_t>(_resolution)) {
-                fullSweep(data.time.j2000Seconds());
+                fullSweep(time);
                 return {
                     .floatingPointNeedsUpdate = false,
                     .permanentPointsNeedUpdate = true,
@@ -550,7 +550,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
             // If we would need to generate more new points than there are total points in
             // the array, it is faster to regenerate the entire array
             if (nNewPoints >= _resolution) {
-                fullSweep(data.time.j2000Seconds());
+                fullSweep(time);
                 return {
                     .floatingPointNeedsUpdate = false,
                     .permanentPointsNeedUpdate = true,

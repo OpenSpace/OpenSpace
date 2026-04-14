@@ -104,7 +104,7 @@ private:
     * calculated based on ingame time, start time and end time.
     *
     * \param time The current ingame time in j2000 epoch
-    * \return Beginning, Normal, or End
+    * \return Pre, Beginning, Normal, End or Post
     */
     PhaseType trailPhase(double time);
 
