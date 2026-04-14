@@ -35,7 +35,7 @@ namespace {
     // Provides the ability to override the contents for tiles at specific indices. A
     // default tile provider has to be specified that is used by default for the entire
     // globe. If a tile provider is specified for a specific tile, then the default tile
-    // provider is used for all other indices and the specialized  tile provider `P` is
+    // provider is used for all other indices and the specialized tile provider `P` is
     // used for the specified index. Any number of specialized tile providers can be
     // provided to overwrite specific locations on the globe.
     //

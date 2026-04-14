@@ -47,7 +47,7 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // Will make a scene graph node rotate about the provided axis at a fixed and constant
+    // Makes a scene graph node rotate about the provided axis at a fixed and constant
     // rotation speed.
     struct [[codegen::Dictionary(ConstantRotation)]] Parameters {
         // [[codegen::verbatim(RotationInfo.description)]]

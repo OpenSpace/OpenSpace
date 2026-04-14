@@ -88,7 +88,7 @@ namespace {
     //
     // If you are unfamiliar with SPICE, their webpage has both extensive
     // [Tutorials](https://naif.jpl.nasa.gov/naif/tutorials.html) as well as
-    // [Lessions](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/Lessons/) that explain
+    // [Lessons](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/Lessons/) that explain
     // the system deeper. This class provides access to the
     // [spkpos_c](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html)
     // function of the SPICE library.

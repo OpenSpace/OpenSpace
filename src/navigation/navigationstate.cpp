@@ -55,8 +55,8 @@ namespace {
     //
     // Note that when loading a `NavigationState`, the visuals may be different depending
     // on what the simulation timestamp is, as the relative positions of objects in the
-    // scene may have changed. The get the exact same visuals as when the`NavigationState`
-    // was saved you need to also set the simulation time to correpsond to the timestamp.
+    // scene may have changed. To get the exact same visuals as when the `NavigationState`
+    // was saved you need to also set the simulation time to correspond to the timestamp.
     struct [[codegen::Dictionary(NavigationState)]] Parameters {
         // The identifier of the anchor node.
         std::string anchor;

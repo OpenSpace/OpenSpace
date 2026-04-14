@@ -38,7 +38,6 @@ namespace {
         Property::Visibility::User
     };
 
-    //
     struct [[codegen::Dictionary(DashboardItemText)]] Parameters {
         // [[codegen::verbatim(TextInfo.description)]]
         std::optional<std::string> text;

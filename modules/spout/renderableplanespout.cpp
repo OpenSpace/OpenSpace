@@ -33,7 +33,7 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    // Render a plane with a texture that is provided by another application on the same
+    // Renders a plane with a texture that is provided by another application on the same
     // computer using the SPOUT library.
     //
     // Note: The SPOUT library is only available on Windows.

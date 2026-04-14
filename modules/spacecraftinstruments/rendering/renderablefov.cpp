@@ -153,7 +153,7 @@ namespace {
         }
     }
 
-    // Shows a visual representation of a spacecraft instrument's  field-of-view.
+    // Shows a visual representation of a spacecraft instrument's field-of-view.
     // Information about the field-of-view are extracted from SPICE kernels that must be
     // loaded with the correct information. By default a field-of-view is only visible
     // while an instrument is active, but the field-of-view can be made visible at all

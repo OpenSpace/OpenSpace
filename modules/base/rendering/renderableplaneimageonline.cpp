@@ -49,7 +49,7 @@ namespace {
     };
 
     // Creates a textured 3D plane, where the texture image is loaded from the internet
-    // though a web URL.
+    // through a web URL.
     struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];
