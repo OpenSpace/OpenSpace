@@ -626,15 +626,10 @@ void RenderableTrailOrbit::fullSweep(double time) {
 
     const PhaseType phase = trailPhase(time);
 
-    const bool useStart = (phase == PhaseType::Beginning) ||
-        (phase == PhaseType::Pre && !_limitToTimeFrame);
-    const bool useEnd = (phase == PhaseType::Ending) ||
-        (phase == PhaseType::Post && !_limitToTimeFrame);
-
-    if (useStart) {
+    if ((phase == PhaseType::Beginning) || (phase == PhaseType::Pre)) {
         time = Time::convertTime(_startTime) + periodSeconds;
     }
-    else if (useEnd) {
+    else if ((phase == PhaseType::Ending) || (phase == PhaseType::Post)) {
         time = Time::convertTime(_endTime);
     }
     _lastPointTime = time;
