@@ -105,6 +105,7 @@ private:
     void decodeRequest(const DecodeRequest& request);
 
     bool _verbose = false;
+    std::atomic<size_t> _queuedRequestCount = 0;
 
     // Thread management
     std::vector<std::thread> _workers;

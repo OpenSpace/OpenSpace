@@ -26,6 +26,14 @@
 
 #include <modules/solarbrowsing/util/j2kcodec.h>
 
+#include <ghoul/logging/logmanager.h>
+
+#include <format>
+
+namespace {
+    constexpr std::string_view _loggerCat = "AsyncImageDecoder";
+} // namespace
+
 namespace openspace {
 
 AsyncImageDecoder::AsyncImageDecoder(size_t numThreads, bool verbose)
@@ -61,6 +69,8 @@ void AsyncImageDecoder::requestDecode(DecodeRequest request) {
 
         _activeRequests[key] = true;
         _requestQueue.push(std::move(request));
+        const size_t count = ++_queuedRequestCount;
+        LDEBUG(std::format("Queued solar image decode request #{}", count));
     }
 
     _queueCV.notify_one();

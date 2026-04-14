@@ -81,10 +81,17 @@ private:
         std::filesystem::path finalPath;
     };
 
+    struct InstrumentationCounters {
+        size_t localScans = 0;
+        size_t listingsStarted = 0;
+        size_t downloadsStarted = 0;
+        size_t downloadsCompleted = 0;
+    };
+
     void scanForNewLocalFiles();
     void pollListingRequest(double currentTimeJ2000);
     void startListingRequest(double currentTimeJ2000);
-    void reprioritizeQueue(double currentTimeJ2000, double deltaTime);
+    void reprioritizeQueue(const std::vector<RequestKey>& desiredKeys, double currentTimeJ2000);
     void startQueuedDownloads();
     void pollDownloads(double currentTimeJ2000);
     void enqueueKey(RequestKey key);
@@ -128,6 +135,7 @@ private:
     std::unordered_set<std::string> _knownFiles;
     std::vector<std::filesystem::path> _downloadedFiles;
     std::vector<std::filesystem::path> _runtimeDownloadedFiles;
+    InstrumentationCounters _instrumentation;
 };
 
 } // namespace openspace

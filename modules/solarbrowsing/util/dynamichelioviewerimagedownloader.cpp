@@ -61,13 +61,13 @@ DynamicHelioviewerImageDownloader::DynamicHelioviewerImageDownloader(
 }
 
 void DynamicHelioviewerImageDownloader::update(double currentTimeJ2000, double deltaTime) {
-    scanForNewLocalFiles();
+    const std::vector<RequestKey> requestedKeys = desiredKeys(currentTimeJ2000, deltaTime);
+
     pollListingRequest(currentTimeJ2000);
-    reprioritizeQueue(currentTimeJ2000, deltaTime);
+    reprioritizeQueue(requestedKeys, currentTimeJ2000);
     startQueuedDownloads();
     pollDownloads(currentTimeJ2000);
 
-    const std::vector<RequestKey> requestedKeys = desiredKeys(currentTimeJ2000, deltaTime);
     const bool needListing = std::any_of(
         requestedKeys.begin(),
         requestedKeys.end(),
@@ -138,6 +138,7 @@ void DynamicHelioviewerImageDownloader::deinitialize(bool saveDownloadsOnShutdow
 }
 
 void DynamicHelioviewerImageDownloader::scanForNewLocalFiles() {
+    ++_instrumentation.localScans;
     std::vector<std::filesystem::path> files = ghoul::filesystem::walkDirectory(
         _outputFolder,
         ghoul::filesystem::Recursive::No,
@@ -169,6 +170,13 @@ void DynamicHelioviewerImageDownloader::scanForNewLocalFiles() {
         };
         _downloadedFiles.push_back(file);
     }
+
+    LDEBUG(std::format(
+        "Helioviewer local scan #{} in '{}' found {} known files",
+        _instrumentation.localScans,
+        _outputFolder,
+        _knownFiles.size()
+    ));
 }
 
 void DynamicHelioviewerImageDownloader::pollListingRequest(double currentTimeJ2000) {
@@ -253,18 +261,23 @@ void DynamicHelioviewerImageDownloader::startListingRequest(double currentTimeJ2
     auto request = std::make_unique<HttpMemoryDownload>(frameListingUrl(begin, end));
     request->start();
 
+    ++_instrumentation.listingsStarted;
     LINFO(std::format("Requesting Helioviewer frames: {}", request->url()));
+    LDEBUG(std::format(
+        "Helioviewer listing count for '{}' is now {}",
+        _instrument,
+        _instrumentation.listingsStarted
+    ));
     _activeListingRequest = std::make_unique<ListingRequest>(ListingRequest{
         .request = std::move(request),
         .centerTimeJ2000 = currentTimeJ2000
     });
 }
 
-void DynamicHelioviewerImageDownloader::reprioritizeQueue(double currentTimeJ2000,
-                                                          double deltaTime)
+void DynamicHelioviewerImageDownloader::reprioritizeQueue(
+    const std::vector<RequestKey>& desired,
+    double currentTimeJ2000)
 {
-    const std::vector<RequestKey> desired = desiredKeys(currentTimeJ2000, deltaTime);
-
     std::deque<RequestKey> nextQueue;
     std::unordered_set<RequestKey> nextQueuedKeys;
 
@@ -308,7 +321,13 @@ void DynamicHelioviewerImageDownloader::startQueuedDownloads() {
         auto request = std::make_unique<HttpFileDownload>(imageUrl(frame.unixTimestamp), tempPath);
         request->start();
 
+        ++_instrumentation.downloadsStarted;
         LINFO(std::format("Downloading Helioviewer image: {}", request->url()));
+        LDEBUG(std::format(
+            "Helioviewer download count for '{}' is now {}",
+            _instrument,
+            _instrumentation.downloadsStarted
+        ));
         _activeDownloads.emplace(key, ActiveDownload{
             .request = std::move(request),
             .key = key,
@@ -368,6 +387,13 @@ void DynamicHelioviewerImageDownloader::pollDownloads(double currentTimeJ2000) {
             _runtimeDownloadedFiles.push_back(download.finalPath);
             _retryCounts.erase(download.key);
             _failedUntil.erase(download.key);
+            ++_instrumentation.downloadsCompleted;
+            LDEBUG(std::format(
+                "Helioviewer completed download count for '{}' is now {}",
+                _instrument,
+                _instrumentation.downloadsCompleted
+            ));
+            scanForNewLocalFiles();
             it = _activeDownloads.erase(it);
             continue;
         }
