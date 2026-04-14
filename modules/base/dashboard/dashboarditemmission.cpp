@@ -54,9 +54,9 @@ namespace {
         return progress;
     }
 
-    // This `DashboardItem` shows information about the currently active mission. This
-    // includes information about the currently active mission phase, the next phase, and
-    // all subphases of the currently active phase.
+    // Shows information about the currently active mission. This includes information
+    // about the currently active mission phase, the next phase, and all subphases of the
+    // currently active phase.
     struct [[codegen::Dictionary(DashboardItemMission)]] Parameters {};
 } // namespace
 #include "dashboarditemmission_codegen.cpp"

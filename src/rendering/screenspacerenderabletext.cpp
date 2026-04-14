@@ -50,7 +50,7 @@ namespace {
         Property::Visibility::User
     };
 
-    struct [[codegen::Dictionary(DashboardTextItem)]] Parameters {
+    struct [[codegen::Dictionary(ScreenSpaceRenderableText)]] Parameters {
         // [[codegen::verbatim(FontNameInfo.description)]]
         std::optional<std::string> fontName;
 

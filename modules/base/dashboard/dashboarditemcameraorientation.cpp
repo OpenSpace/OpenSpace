@@ -34,9 +34,9 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    // This `DashboardItem` shows the current camera orientation in the yaw, pitch, and
-    // roll directions in degrees. Note that the camera's orientation is relative to the
-    // global coordinate system used in the system.
+    // Shows the current camera orientation in the yaw, pitch, and roll directions in
+    // degrees. Note that the camera's orientation is relative to the global coordinate
+    // system used in the system.
     struct [[codegen::Dictionary(DashboardItemCameraOrientation)]] Parameters {};
 } // namespace
 #include "dashboarditemcameraorientation_codegen.cpp"
