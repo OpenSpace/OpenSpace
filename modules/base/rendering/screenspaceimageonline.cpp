@@ -48,7 +48,7 @@ namespace {
         Property::Visibility::User
     };
 
-    // This `ScreenSpaceRenderable` can be used to display an image from a web URL.
+    // Displays an image from a web URL on a plane in screen space.
     //
     // To load an image from a local file on disk, see
     // [`ScreenSpaceImageLocal`](#base_screenspace_imagelocal).
