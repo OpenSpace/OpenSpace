@@ -996,11 +996,15 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
     ghoul::io::texture::ImageInfo imageInfo = ghoul::io::texture::loadImage(path);
 
     if (imageInfo.data.empty()) {
-        throw ghoul::RuntimeError(std::format("Failed to load image data from '{}'", path));
+        throw ghoul::RuntimeError(std::format(
+            "Failed to load image data from '{}'", path
+        ));
     }
 
     if (imageInfo.dimensions.x == 0 || imageInfo.dimensions.y == 0) {
-        throw ghoul::RuntimeError(std::format("Invalid image dimensions from '{}'", path));
+        throw ghoul::RuntimeError(std::format(
+            "Invalid image dimensions from '{}'", path
+        ));
     }
 
     using Texture = ghoul::opengl::Texture;
@@ -1019,7 +1023,9 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
                 case 3: return GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
                 case 4: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
                 default:
-                    throw ghoul::RuntimeError(std::format("Unsupported channel count: {}", nDim));
+                    throw ghoul::RuntimeError(std::format(
+                        "Unsupported channel count: {}", nDim
+                    ));
             }
         }(imageInfo.nChannels);
     }
@@ -1064,7 +1070,7 @@ void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
     // Create storage for the texture
     glTextureStorage3D(
         textureId,
-        1, // levels of mipmaps, we don't use mipmaps for the textures so just 1
+        1, // number of layers; we don't use mipmaps for the textures so just 1
         format.internalFormat,
         format.resolution.x,
         format.resolution.y,
@@ -1130,7 +1136,6 @@ void RenderablePointCloud::generateArrayTextures() {
         unsigned int layer = 0;
         for (const size_t& i : textureListIndices) {
             ghoul::opengl::Texture* texture = _textures[i].get();
-
             ghoul_assert(texture != nullptr, "Texture pointer was null");
 
             fillAndUploadTextureLayer(
@@ -1737,8 +1742,8 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
 }
 
 bool operator==(const TextureFormat& l, const TextureFormat& r) {
-    return (l.resolution == r.resolution) && (l.format == r.format)
-        && (l.internalFormat == r.internalFormat);
+    return (l.resolution == r.resolution) && (l.format == r.format) &&
+        (l.internalFormat == r.internalFormat);
 }
 
 size_t TextureFormatHash::operator()(const TextureFormat& k) const {
