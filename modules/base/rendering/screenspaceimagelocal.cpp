@@ -112,8 +112,7 @@ void ScreenSpaceImageLocal::update() {
             ghoul::opengl::Texture::SamplerInit{
                 // TODO: AnisotropicMipMap crashes on ATI cards ---abock
                 //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
-                .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
-                .autoSwizzleGrayscale = true
+                .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
             }
         );
         _objectSize = _texture->dimensions();

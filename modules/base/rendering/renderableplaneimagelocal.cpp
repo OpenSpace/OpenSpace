@@ -175,8 +175,7 @@ void RenderablePlaneImageLocal::loadTexture() {
                     absPath(path),
                     2,
                     ghoul::opengl::Texture::SamplerInit{
-                        .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
-                        .autoSwizzleGrayscale = true
+                        .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
                     }
                 );
 

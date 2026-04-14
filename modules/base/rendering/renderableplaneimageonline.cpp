@@ -147,8 +147,7 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
                 imageFile.size,
                 2,
                 ghoul::opengl::Texture::SamplerInit{
-                    .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
-                    .autoSwizzleGrayscale = true
+                    .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
                 },
                 imageFile.format
             );
