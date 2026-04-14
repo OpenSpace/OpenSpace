@@ -85,10 +85,8 @@ namespace {
        Property::Visibility::User
     };
 
-    /**
-     * This is a utility renderable used by the SkyBrowser module to visualize a
-     * crosshair-like target in the sky.
-     */
+    // This is a utility renderable used by the SkyBrowser module to visualize a
+    // crosshair-like target in the sky.
     struct [[codegen::Dictionary(RenderableSkyTarget)]] Parameters {
         // [[codegen::verbatim(crossHairSizeInfo.description)]]
         std::optional<float> crossHairSize;

@@ -74,26 +74,24 @@ namespace {
         Property::Visibility::User
     };
 
-    /**
-     * Represents a star's habitable zone, with boundaries computed from its effective
-     * temperature and luminosity.
-     *
-     * The inner and outer boundaries of the habitable zone are computed using formulas
-     * from Kopparapu et al. (2013) for an Earth-like rocky planet. The model defines both
-     * optimistic and conservative boundaries: the optimistic range includes regions where
-     * liquid water could exist (assuming Venus and Mars once had it), while the
-     * conservative range is more restrictive, indicating where stable surface liquid
-     * water is most likely under Earth-like conditions.
-     *
-     * These formulas are valid for stars with effective temperatures between 2600–7200 K.
-     * Outside this range, a simpler method by Tom E. Harris is used, based only on
-     * stellar luminosity and without optimistic boundaries.
-     *
-     * The habitable zone regions are visualized using the provided 1D `Texture`, divided
-     * into three equal parts: the center represents the conservative zone, the first part
-     * the optimistic inner zone, and the last part the optimistic outer zone (furthest
-     * from the star).
-     */
+    // Represents a star's habitable zone, with boundaries computed from its effective
+    // temperature and luminosity.
+    //
+    // The inner and outer boundaries of the habitable zone are computed using formulas
+    // from Kopparapu et al. (2013) for an Earth-like rocky planet. The model defines both
+    // optimistic and conservative boundaries: the optimistic range includes regions where
+    // liquid water could exist (assuming Venus and Mars once had it), while the
+    // conservative range is more restrictive, indicating where stable surface liquid
+    // water is most likely under Earth-like conditions.
+    //
+    // These formulas are valid for stars with effective temperatures between 2600–7200 K.
+    // Outside this range, a simpler method by Tom E. Harris is used, based only on
+    // stellar luminosity and without optimistic boundaries.
+    //
+    // The habitable zone regions are visualized using the provided 1D `Texture`, divided
+    // into three equal parts: the center represents the conservative zone, the first part
+    // the optimistic inner zone, and the last part the optimistic outer zone (furthest
+    // from the star).
     struct [[codegen::Dictionary(RenderableHabitableZone)]] Parameters {
         // [[codegen::verbatim(EffectiveTemperatureInfo.description)]]
         float effectiveTemperature;
