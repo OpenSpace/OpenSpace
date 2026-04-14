@@ -24,9 +24,10 @@ local MoonInertial = {
     }
   },
   GUI = {
+    Name = "Moon Inertial",
     Path = "/Solar System/Planets/Earth/Moon",
     Focusable = false,
-    Hidden = false
+    Hidden = true
   }
 }
 
