@@ -43,7 +43,7 @@ namespace {
 
     constexpr Property::PropertyInfo ForceFullOrbitTrailInfo = {
         "ForceFullOrbitTrail",
-        "Force Full Orbit Trail",
+        "Force full orbit trail",
         "Forces the trail to always have a visible length of one orbit. If the time "
         "from the start date of the trail and the current time in OpenSpace is less "
         "than one period (full rotation), then the trail will extends into the future "
@@ -53,11 +53,11 @@ namespace {
         Property::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LimitToTimeFrameInfo = {
-        "LimitToTimeFrame",
-        "Use Time Frame",
-        "Only forces full trail orbit trail between Start Time and End Time + one "
-        "orbital period.",
+    constexpr Property::PropertyInfo LimitToTimeRangeInfo = {
+        "LimitToTimeRange",
+        "Limit to time range",
+        "Only forces full trail orbit trail between start time and one orbital period "
+        "after the end time.",
         Property::Visibility::AdvancedUser
     };
 
@@ -99,8 +99,8 @@ namespace {
         // [[codegen::verbatim(ForceFullOrbitTrailInfo.description)]]
         std::optional<bool> forceFullOrbitTrail;
 
-        // [[codegen::verbatim(LimitToTimeFrameInfo.description)]]
-        std::optional<bool> limitToTimeFrame;
+        // [[codegen::verbatim(LimitToTimeRangeInfo.description)]]
+        std::optional<bool> limitToTimeRange;
 
         // [[codegen::verbatim(StartTimeInfo.description)]]
         std::optional<std::string> startTime
@@ -176,7 +176,7 @@ Documentation RenderableTrailOrbit::Documentation() {
 RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     : RenderableTrail(dictionary)
     , _forceFullOrbitTrail(ForceFullOrbitTrailInfo, false)
-    , _limitToTimeFrame(LimitToTimeFrameInfo, true)
+    , _limitToTimeRange(LimitToTimeRangeInfo, true)
     , _startTime(StartTimeInfo)
     , _endTime(EndTimeInfo)
     , _period(PeriodInfo, 0.0, 0.0, 250.0 * 365.25) // 250 years should be enough I guess
@@ -193,12 +193,12 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     });
     addProperty(_forceFullOrbitTrail);
 
-    _limitToTimeFrame = p.limitToTimeFrame.value_or(_limitToTimeFrame);
-    _limitToTimeFrame.onChange([&]() {
+    _limitToTimeRange = p.limitToTimeRange.value_or(_limitToTimeRange);
+    _limitToTimeRange.onChange([&]() {
         _needsFullSweep = true;
         _indexBufferDirty = true;
         });
-    addProperty(_limitToTimeFrame);
+    addProperty(_limitToTimeRange);
 
     // Start time in ISO 8601 format
     _startTime = p.startTime.value_or(_startTime);
@@ -431,7 +431,7 @@ RenderableTrailOrbit::PhaseType RenderableTrailOrbit::trailPhase(double time) {
         phase = PhaseType::Ending;
     }
 
-    if (_limitToTimeFrame && (phase == PhaseType::Pre || phase == PhaseType::Post)) {
+    if (_limitToTimeRange && (phase == PhaseType::Pre || phase == PhaseType::Post)) {
         phase = PhaseType::Normal;
     }
 

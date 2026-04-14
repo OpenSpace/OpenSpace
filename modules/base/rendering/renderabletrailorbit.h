@@ -111,7 +111,7 @@ private:
     /// Determines if trail length should be forced to be one orbital period in length
     BoolProperty _forceFullOrbitTrail;
     /// Only shows full trail orbit trail between StartTime and EndTime
-    BoolProperty _limitToTimeFrame;
+    BoolProperty _limitToTimeRange;
     /// The start time of the trail
     StringProperty _startTime;
     /// The end time of the trail
