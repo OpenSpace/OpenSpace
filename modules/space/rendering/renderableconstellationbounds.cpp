@@ -69,9 +69,8 @@ namespace {
         Property::Visibility::NoviceUser
     };
 
-    // This `Renderable` type can be used to draw bounding shapes on the night sky, where
-    // each shape encapsulates a group of night sky objects, such as the stars of a
-    // constellation.
+    // Can be used to draw bounding shapes on the night sky, where each shape encapsulates
+    // a group of night sky objects, such as the stars of a constellation.
     //
     // The shapes are defined in a file where each line specifies a vertex location in RA
     // Dec coordinates on the celestial sphere. Each coordinate must also be marked with

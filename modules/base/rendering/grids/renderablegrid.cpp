@@ -97,8 +97,8 @@ namespace {
         "The labels for the grid."
     };
 
-    // This `Renderable` can be used to create a planar grid, to for example illustrate
-    // distances in 3D space.
+    // Creates a planar grid, that can be useful to for example illustrate distances in 3D
+    // space.
     //
     // The grid is created by specifying a size and how many segments to split each
     // dimension into. A secondary color can be used to highlight grid lines with a given

@@ -130,10 +130,9 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // This `Renderable` reads a data sequence from specifically FITS files and makes
-    // textures from them and wraps them onto a sphere. A sequence is a data source
-    // consisting of multiple data files that each correspond to a specific time and is
-    // therefore time varying like the name of the renderable suggests.
+    // Reads a data sequence from specifically FITS files, makes textures from them, and
+    // wraps them onto a sphere. A sequence is a data source consisting of multiple data
+    // files that each correspond to a specific time.
     //
     // `LoadingType` can be specified in two ways;
     //

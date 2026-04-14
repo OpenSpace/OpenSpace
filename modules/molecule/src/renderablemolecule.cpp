@@ -183,8 +183,8 @@ namespace {
         "reached."
     };
 
-    // This `Renderable` class is used to render a single molecular system, which can be
-    // either static or dynamic. The rendering is done using the rendering engine of the
+    // Used to render a single molecular system, which can be either static or dynamic.
+    // The rendering is done using the rendering engine of the
     // [ViaMD](https://github.com/scanberg/viamd) framework. Many of the parameters are
     // described in greater detail on their [Wiki](https://github.com/scanberg/viamd/wiki)
     // page. It is possible to assign multiple representations to a molecular structure

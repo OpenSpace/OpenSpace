@@ -299,11 +299,11 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // A RenderablePointCloud can be used to render point-based datasets in 3D space,
-    // optionally including color mapping, a sprite texture and labels. There are several
-    // properties that affect the visuals of the points, such as settings for scaling,
-    // fading, sprite texture, color mapping and whether the colors of overlapping points
-    // should be blended additively or not.
+    // Can be used to render point-based datasets in 3D space, optionally including color
+    // mapping, a sprite texture and labels. There are several properties that affect the
+    // visuals of the points, such as settings for scaling, fading, sprite texture, color
+    // mapping and whether the colors of overlapping points should be blended additively
+    // or not.
     //
     // The points are rendered as planes whose size depends on a few different things:
     //

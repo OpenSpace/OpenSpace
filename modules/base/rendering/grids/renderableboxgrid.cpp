@@ -60,7 +60,7 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // A RenderableBoxGrid creates a 3D box that is rendered using grid lines.
+    // Creates a 3D box that is rendered using grid lines.
     //
     // Per default the box is given a uniform size of 1x1x1 meters. It can then be scaled
     // to the desired size. Alternatively, the size in each dimension can be specified.

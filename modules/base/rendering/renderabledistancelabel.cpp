@@ -72,9 +72,9 @@ namespace {
         Property::Visibility::User
     };
 
-    // This `Renderable` creates a label that shows the distance between two nodes, based
-    // on an existing [RenderableNodeLine](#base_renderable_nodeline). The label will be
-    // placed halfway between the two scene graph nodes that the line connects.
+    // Creates a label that shows the distance between two nodes, based on an existing
+    // [RenderableNodeLine](#base_renderable_nodeline). The label will be placed halfway
+    // between the two scene graph nodes that the line connects.
     //
     // The unit in which the distance is displayed can be customized, as well as the
     // precision of the number.

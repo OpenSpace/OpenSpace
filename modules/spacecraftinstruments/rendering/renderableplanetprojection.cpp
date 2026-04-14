@@ -144,12 +144,12 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // This Renderable serves as a potential target for images projected from a
-    // spacecraft's instrument. Images have to be loaded into an image sequence first and
-    // when it is then time to project an image into the world from the point of view of
-    // the instrument, the field-of-view will be checked against the extent of this
-    // planetary body. If the field-of-view intersects, the image gets correctly projected
-    // onto the surface.
+    // Serves as a potential target for images projected from a spacecraft's instrument,
+    // when the observed object is a planetary body. The images first have to be loaded
+    // into an image sequence and when it is then time to project an image onto the world
+    // from the point of view of the instrument, the field-of-view will be checked against
+    // the extent of this planetary body. If the field-of-view intersects, the image gets
+    // correctly projected onto the surface.
     struct [[codegen::Dictionary(RenderablePlanetProjection)]] Parameters {
         // Contains information about projecting onto this planet.
         ghoul::Dictionary projection
