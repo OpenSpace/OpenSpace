@@ -164,6 +164,7 @@ namespace openspace {
         glm::vec3 _normal;
 
         std::filesystem::path _imageDirectory;
+        std::unordered_map<std::string, std::filesystem::path> _configuredTransferFunctions;
         std::optional<std::filesystem::path> _downloadDirectory;
         std::optional<std::string> _dynamicInstrument;
         std::string _dynamicDownloaderInstrument;

@@ -43,7 +43,10 @@ class TransferFunction;
  * \return A map from instrument name to loaded TransferFunction instances
  */
 std::unordered_map<std::string, std::shared_ptr<TransferFunction>> loadTransferFunctions(
-    const std::filesystem::path& rootDir, const ImageMetadataMap& imageMetadataMap);
+    const std::filesystem::path& rootDir,
+    const ImageMetadataMap& imageMetadataMap,
+    const std::unordered_map<std::string, std::filesystem::path>& configuredTransferFunctions = {}
+);
 
 bool isJp2ImageFile(const std::filesystem::path& path);
 

@@ -225,6 +225,12 @@ namespace {
         // [[codegen::verbatim(PredictFramesBeforeInfo.description)]]
         std::optional<int> predictFramesBefore;
 
+        // Optional explicit instrument-to-transfer-function mapping. Keys are instrument
+        // names (for example `AIA-193`) and values are absolute or asset-expanded paths to
+        // `.txt` color tables. Asset-configured mappings take precedence over the legacy
+        // auto-discovery of `<Instrument>.txt` files under `ImageDirectory`.
+        std::optional<ghoul::Dictionary> transferFunctions;
+
         // Optional runtime streaming settings for HelioViewer-backed imagery downloads.
         // Supported keys are:
         // `Enable`, `SourceId`, `Instrument`, `InstrumentNames`, `InstrumentSourceIds`,
@@ -339,6 +345,22 @@ namespace openspace {
         addProperty(Fadeable::_opacity);
 
         _imageDirectory = p.imageDirectory;
+        if (p.transferFunctions.has_value()) {
+            for (std::string_view key : p.transferFunctions->keys()) {
+                if (!p.transferFunctions->hasValue<std::string>(key)) {
+                    LWARNING(std::format(
+                        "Ignoring transfer function entry '{}' with non-string value",
+                        key
+                    ));
+                    continue;
+                }
+
+                _configuredTransferFunctions[std::string(key)] = std::filesystem::path(
+                    p.transferFunctions->value<std::string>(key)
+                );
+            }
+        }
+
         if (p.dynamicDownload.has_value()) {
             const ghoul::Dictionary& dynamicDownload = *p.dynamicDownload;
             if (dynamicDownload.hasValue<bool>("Enable")) {
@@ -436,7 +458,11 @@ namespace openspace {
         }
 
         _imageMetadataMap = loadImageMetadata(p.imageDirectory);
-        _tfMap = loadTransferFunctions(p.imageDirectory, _imageMetadataMap);
+        _tfMap = loadTransferFunctions(
+            p.imageDirectory,
+            _imageMetadataMap,
+            _configuredTransferFunctions
+        );
         const bool hasData = std::any_of(
             _imageMetadataMap.begin(),
             _imageMetadataMap.end(),
@@ -935,7 +961,11 @@ namespace openspace {
         }
 
         if (transferFunctionsMayNeedRefresh) {
-            _tfMap = loadTransferFunctions(_imageDirectory, _imageMetadataMap);
+            _tfMap = loadTransferFunctions(
+                _imageDirectory,
+                _imageMetadataMap,
+                _configuredTransferFunctions
+            );
         }
 
         const Keyframe<ImageMetadata>* newCurrentKeyframe =

@@ -43,6 +43,22 @@ local SolarImagery = {
     ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing_runtime/sdo"),
     StartInstrument = "AIA-193",
 
+    -- Asset-configured transfer functions override the legacy auto-discovery of
+    -- <Instrument>.txt under ImageDirectory. Paths can point anywhere, but here we
+    -- point them to user-provided colortables.
+    TransferFunctions = {
+      ["AIA-171"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/AIA-171.txt"),
+      ["AIA-193"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/AIA-193.txt"),
+      ["AIA-211"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/AIA-211.txt"),
+      ["AIA-304"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/AIA-304.txt"),
+      ["AIA-335"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/AIA-335.txt"),
+      ["AIA-1600"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/AIA-1600.txt"),
+      ["AIA-1700"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/AIA-1700.txt"),
+      ["AIA-4500"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/AIA-4500.txt"),
+      ["HMI-continuum"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/HMI-continuum.txt"),
+      ["HMI-magnetogram"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/HMI-magnetogram.txt")
+    },
+
     -- DynamicDownload streams one instrument at a time for this renderable.
     -- `InstrumentNames` and `InstrumentSourceIds` predeclare the available SDO
     -- channels and their Helioviewer source ids so the ActiveInstrument property

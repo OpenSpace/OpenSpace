@@ -387,7 +387,8 @@ std::string isoStringFromUnixTimestamp(double unixTimestamp, bool includeMillise
 
 std::unordered_map<std::string, std::shared_ptr<TransferFunction>> loadTransferFunctions(
     const std::filesystem::path& rootDir,
-                                                 const ImageMetadataMap& imageMetadataMap)
+    const ImageMetadataMap& imageMetadataMap,
+    const std::unordered_map<std::string, std::filesystem::path>& configuredTransferFunctions)
 {
     std::unordered_map<std::string, std::shared_ptr<TransferFunction>> tfMap;
 
@@ -404,26 +405,82 @@ std::unordered_map<std::string, std::shared_ptr<TransferFunction>> loadTransferF
         }
     );
 
-    using T = Timeline<ImageMetadata>;
-    for (const std::pair<const InstrumentName, T>& instrument : imageMetadataMap) {
+    std::vector<std::string> instruments;
+    instruments.reserve(imageMetadataMap.size() + configuredTransferFunctions.size());
+    for (const auto& [instrument, _] : imageMetadataMap) {
+        instruments.push_back(instrument);
+    }
+    for (const auto& [instrument, _] : configuredTransferFunctions) {
+        if (std::find(instruments.begin(), instruments.end(), instrument) == instruments.end()) {
+            instruments.push_back(instrument);
+        }
+    }
+
+    for (const std::string& instrument : instruments) {
+        auto loadTransferFunction = [&tfMap](const std::string& instrumentName,
+                                             const std::filesystem::path& texturePath)
+        {
+            try {
+                tfMap[instrumentName] = std::make_shared<TransferFunction>(texturePath);
+                return true;
+            }
+            catch (const std::exception& e) {
+                LWARNING(std::format(
+                    "Failed to load color map '{}' for instrument '{}' [{}]",
+                    texturePath,
+                    instrumentName,
+                    e.what()
+                ));
+                return false;
+            }
+        };
+
+        auto configuredIt = configuredTransferFunctions.find(instrument);
+        if (configuredIt != configuredTransferFunctions.end()) {
+            if (std::filesystem::is_regular_file(configuredIt->second)) {
+                if (loadTransferFunction(instrument, configuredIt->second)) {
+                    LINFO(std::format(
+                        "Using asset-configured color map '{}' for instrument '{}'",
+                        configuredIt->second,
+                        instrument
+                    ));
+                    continue;
+                }
+            }
+            else {
+                LWARNING(std::format(
+                    "Configured color map '{}' for instrument '{}' does not exist; "
+                    "falling back to auto-discovery",
+                    configuredIt->second,
+                    instrument
+                ));
+            }
+        }
+
         // The subdirectories might have a different name than the instrument name so we
         // have to search the directories for the correct texture map
         bool found = false;
         for (const std::filesystem::path& subdirectory : subdirectories) {
             const std::filesystem::path texturePath =
-                subdirectory / std::format("{}.txt", instrument.first);
+                subdirectory / std::format("{}.txt", instrument);
 
             if (std::filesystem::is_regular_file(texturePath)) {
-                tfMap[instrument.first] = std::make_shared<TransferFunction>(texturePath);
-                found = true;
-                break;
+                if (loadTransferFunction(instrument, texturePath)) {
+                    LDEBUG(std::format(
+                        "Using auto-discovered color map '{}' for instrument '{}'",
+                        texturePath,
+                        instrument
+                    ));
+                    found = true;
+                    break;
+                }
             }
         }
 
         if (!found) {
-            LERROR(std::format(
-                "Unable to find and load a color map for instrument '{}'",
-                instrument.first
+            LWARNING(std::format(
+                "No color map found for instrument '{}'; rendering grayscale",
+                instrument
             ));
         }
     }
