@@ -15,7 +15,6 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "DynamicHelioviewerImageDownloader";
-    constexpr double J2000UnixOffset = 946684800.0;
 
     std::chrono::steady_clock::time_point wallClockNow() {
         return std::chrono::steady_clock::now();
@@ -164,7 +163,7 @@ void DynamicHelioviewerImageDownloader::scanForNewLocalFiles() {
         _knownFiles.insert(filename);
         _knownLocalKeys.insert(key);
         _availableFrames[key] = {
-            .unixTimestamp = *j2000 + J2000UnixOffset,
+            .unixTimestamp = 0.0,
             .j2000Timestamp = *j2000,
             .destinationPath = file
         };
@@ -463,7 +462,7 @@ double DynamicHelioviewerImageDownloader::startTimeForKey(RequestKey key) const 
 }
 
 double DynamicHelioviewerImageDownloader::j2000FromUnix(double unixTimestamp) const {
-    return unixTimestamp - J2000UnixOffset;
+    return Time::convertTime(isoStringFromUnixTimestamp(unixTimestamp, true));
 }
 
 std::filesystem::path DynamicHelioviewerImageDownloader::expectedFilename(

@@ -38,6 +38,7 @@
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconstants.h>
+#include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/cachemanager.h>
@@ -922,6 +923,10 @@ namespace openspace {
             return;
         }
 
+        const double now = global::timeManager->time().j2000Seconds();
+        const Keyframe<ImageMetadata>* previousCurrentKeyframe =
+            _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(now, true);
+
         bool activeInstrumentChanged = false;
         bool transferFunctionsMayNeedRefresh = false;
 
@@ -933,9 +938,18 @@ namespace openspace {
             _tfMap = loadTransferFunctions(_imageDirectory, _imageMetadataMap);
         }
 
+        const Keyframe<ImageMetadata>* newCurrentKeyframe =
+            _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(now, true);
+        const bool visibleKeyframeChanged =
+            (previousCurrentKeyframe == nullptr) != (newCurrentKeyframe == nullptr) ||
+            (previousCurrentKeyframe != nullptr && newCurrentKeyframe != nullptr &&
+             previousCurrentKeyframe->id != newCurrentKeyframe->id);
+
         if (activeInstrumentChanged) {
             _predictionIsDirty = true;
-            _currentKeyframe = NoActiveKeyframe;
+            if (visibleKeyframeChanged) {
+                _currentKeyframe = NoActiveKeyframe;
+            }
         }
 
         _dynamicDownloader->clearDownloaded();
@@ -1048,6 +1062,12 @@ namespace openspace {
                 _imageryTexture->setPixelData(
                     reinterpret_cast<std::byte*>(buffer.data())
                 );
+
+                LINFO(std::format(
+                    "Cleared solar image for instrument '{}' at simulation time {}",
+                    _currentActiveInstrument,
+                    global::timeManager->time().ISO8601()
+                ));
             }
             return;
         }
@@ -1089,6 +1109,15 @@ namespace openspace {
             _imageryTexture->setPixelData(
                 reinterpret_cast<std::byte*>(data.buffer.data())
             );
+
+            LINFO(std::format(
+                "Showing solar image '{}' for instrument '{}' at image time {} "
+                "(simulation time {})",
+                keyframe->data.filePath.filename(),
+                _currentActiveInstrument,
+                Time(keyframe->timestamp).ISO8601(),
+                global::timeManager->time().ISO8601()
+            ));
         }
     }
 
