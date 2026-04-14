@@ -81,7 +81,7 @@ protected:
     TriggerProperty _reload;
 
     StringProperty _key;
-    TriggerProperty _keyTrigger;
+    TriggerProperty _triggerKey;
 
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {

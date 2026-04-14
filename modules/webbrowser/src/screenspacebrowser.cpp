@@ -52,18 +52,16 @@ namespace {
     constexpr Property::PropertyInfo KeyInfo = {
         "Key",
         "Key",
-        "The string representation of a key. If the key is entered and the `KeyTrigger` "
-        "property is triggered, the entered key will be sent to the browser and this "
-        "property will be cleared.",
+        "The string representation of a keyboard key. If a key is entered and the "
+        "`KeyTrigger` property is triggered, the entered key will be sent to the browser.",
         Property::Visibility::User
     };
 
-    constexpr Property::PropertyInfo KeyTriggerInfo = {
-        "KeyTrigger",
-        "Key trigger",
+    constexpr Property::PropertyInfo TriggerKeyInfo = {
+        "TriggerKey",
+        "Trigger key",
         "When this property is triggered, the text in the `Key` property will be used to "
-        "create a keyboard input that is then sent to the browser. This will also clear "
-        "the value in the `Key` property.",
+        "create a keyboard input that is then sent to the browser.",
         Property::Visibility::User
     };
 
@@ -119,7 +117,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     , _dimensions(DimensionsInfo, glm::uvec2(0), glm::uvec2(0), glm::uvec2(3000))
     , _reload(ReloadInfo)
     , _key(::KeyInfo)
-    , _keyTrigger(KeyTriggerInfo)
+    , _triggerKey(TriggerKeyInfo)
     , _url(UrlInfo)
     , _renderHandler(new ScreenSpaceRenderHandler)
     , _keyboardHandler(new WebKeyboardHandler)
@@ -131,7 +129,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     setIdentifier(identifier);
 
     addProperty(_key);
-    _keyTrigger.onChange([this]() {
+    _triggerKey.onChange([this]() {
         const KeyWithModifier key = stringToKey(_key);
         CefKeyEvent k = EventHandler::toCefKeyEvent(key);
 
@@ -140,10 +138,8 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
 
         k.type = KEYEVENT_KEYUP;
         _browserInstance->sendKeyEvent(k);
-
-        _key = std::string();
     });
-    addProperty(_keyTrigger);
+    addProperty(_triggerKey);
 
     _url = p.url.value_or(_url);
     _url.onChange([this]() { _isUrlDirty = true; });
