@@ -86,7 +86,8 @@ namespace {
     //
     // These formulas are valid for stars with effective temperatures between 2600–7200 K.
     // Outside this range, a simpler method by Tom E. Harris is used, based only on
-    // stellar luminosity and without optimistic boundaries.
+    // stellar luminosity and without optimistic boundaries. For flexibility, the
+    // temperature interval for using Kopparapu's formulas can be configured.
     //
     // The habitable zone regions are visualized using the provided 1D `Texture`, divided
     // into three equal parts: the center represents the conservative zone, the first part
