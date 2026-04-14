@@ -53,7 +53,7 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // Generates the translation values used to offset the  attached scene graph node's
+    // Generates the translation values used to offset the attached scene graph node's
     // position by calling the provided Lua script. The script must return three
     // translation factors, one for each principal axis, each providing in meters. The
     // script parameter describes in greater detail how the Lua script file should be
