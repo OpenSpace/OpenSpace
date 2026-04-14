@@ -92,8 +92,8 @@ namespace {
     }
 
 
-    // A PathInstruction is a table describing the specification for a camera path. It is
-    // used as an input to the `openspace.pathnavigation.createPath` function.
+    // This is a table describing the specification for a camera path. It is used as an
+    // input to the `openspace.pathnavigation.createPath` function.
     //
     // There are two types of paths that can be created, as specified by the required
     // TargetType parameter: 'Node' or 'NavigationState'. The difference is what kind of

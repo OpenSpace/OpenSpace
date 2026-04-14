@@ -131,15 +131,14 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // KeplerTranslation is a translation component that computes an object's position
-    // from classical Keplerian orbital elements. It is intended for bodies whose motion
-    // can be described analytically as an ellipse around a central body, using a compact
-    // orbital parameter set rather than sampled trajectory data.
-    // The class evaluates orbital motion from the standard elements that define orbit
-    // shape, orientation, and phase. From these values, it reconstructs the orbital
-    // plane, advances the object along the orbit as time progresses, and returns the
-    // corresponding 3D position in space. This makes it a foundational translation type
-    // for planets, moons, spacecraft, and other orbiting objects when an idealized
+    // Computes an object's position from classical Keplerian orbital elements. It is
+    // intended for bodies whose motion can be described analytically as an ellipse around
+    // a central body, using a compact orbital parameter set rather than sampled
+    // trajectory data. The class evaluates orbital motion from the standard elements that
+    // define orbit shape, orientation, and phase. From these values, it reconstructs the
+    // orbital plane, advances the object along the orbit as time progresses, and returns
+    // the corresponding 3D position in space. This makes it a foundational translation
+    // type for planets, moons, spacecraft, and other orbiting objects when an idealized
     // two-body style orbit is sufficient.
     //
     // A key responsibility of KeplerTranslation is converting time into orbital phase. It
