@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,7 @@
 
 #include <modules/volume/volumeutils.h>
 
-namespace openspace::volume {
+namespace openspace {
 
 size_t coordsToIndex(const glm::uvec3& coords, const glm::uvec3& dimensions) {
     const size_t w = dimensions.x;
@@ -43,4 +43,4 @@ glm::uvec3 indexToCoords(size_t index, const glm::uvec3& dimensions) {
     return glm::uvec3(x, y, z);
 }
 
-} // namespace openspace::volume
+} // namespace openspace

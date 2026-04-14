@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,8 +25,9 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
 #define __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
 
-#include <vector>
 #include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <vector>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -37,7 +38,6 @@
 #endif // _MSC_VER
 
 #include <include/cef_render_handler.h>
-#include <include/cef_display_handler.h>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -45,7 +45,7 @@
 //#pragma clang diagnostic pop
 #endif // _MSC_VER
 
-#include <ghoul/opengl/ghoul_gl.h>
+namespace ghoul::opengl { class TextureUnit; }
 
 namespace openspace {
 
@@ -55,32 +55,38 @@ public:
 
     WebRenderHandler();
 
-    virtual void draw(void) = 0;
+    virtual void draw() = 0;
     virtual void render() = 0;
 
     void reshape(int, int);
 
-    void GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) override;
+    void GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect) override;
 
-    // Regular OnPaint method. Uses CPU allocation
+    /**
+     * Regular OnPaint method.Uses CPU allocation.
+     */
     void OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type,
         const RectList &dirtyRects, const void* buffer, int width, int height) override;
 
 #ifdef WIN32
-    // Used when the "shared_texture" flag is set to true for CEF. Uses a shared texture
-    // from CEF that is allocated on another part of the GPU. Skip CPU allocationn for
-    // better performance. Needs OpenGl 4.5 or higher.
+    /**
+     * Used when the "shared_texture" flag is set to true for CEF.Uses a shared texture
+     * from CEF that is allocated on another part of the GPU. Skip CPU allocation for
+     * better performance.
+     */
     void OnAcceleratedPaint(CefRefPtr<CefBrowser> browser, PaintElementType type,
         const RectList& dirtyRects, const CefAcceleratedPaintInfo& info) override;
 #endif // WIN32
 
-    // Determines if the alpha value is > 0 at the specified pixel coordinates. Used in
-    // the GUI to determine if the click is consumed
+    /**
+     * Determines if the alpha value is > 0 at the specified pixel coordinates. Used in
+     * the GUI to determine if the click is consumed.
+     */
     bool hasContent(int x, int y);
 
     bool isTextureReady() const;
     void updateTexture();
-    void bindTexture();
+    void bindTexture(ghoul::opengl::TextureUnit& unit);
 
 protected:
     GLuint _texture = 0;
@@ -90,9 +96,7 @@ private:
     glm::ivec2 _windowSize = glm::ivec2(0);
     glm::ivec2 _browserBufferSize = glm::ivec2(0);
 
-    /**
-     * RGBA buffer from browser
-     */
+    /// RGBA buffer from browser
     std::vector<Pixel> _browserBuffer;
     bool _needsRepaint = true;
     bool _textureSizeIsDirty = true;

@@ -10,8 +10,8 @@ openspace.globebrowsing.documentation = {
     },
     Documentation = [[
       Sets the position of a scene graph node that has a
-      [GlobeTranslation](#base_translation_globetranslation) and/or
-      [GlobeRotation](#base_rotation_globerotation).
+      [GlobeTranslation](#base_translation_globe) and/or
+      [GlobeRotation](#base_rotation_globe).
 
       Usage:
       ```lua
@@ -21,12 +21,13 @@ openspace.globebrowsing.documentation = {
       ```
 
       \\param nodeIdentifier The identifier of the scene graph node to move
-      \\param globeIdentifier The identifier of the [RenderableGlobe](#globebrowsing_renderableglobe)
-                              that the object should be put on
+      \\param globeIdentifier The identifier of the
+              [RenderableGlobe](#globebrowsing_renderable_globe) that the object should be
+              put on
       \\param latitude The latitude value for the new position, in degrees
       \\param longitude The longitude value for the new position, in degrees
       \\param altitude An optional altitude value for the new position, in meters. If
-                       excluded, an altitude of 0 will be used
+              excluded, an altitude of 0 will be used
     ]]
   },
   {
@@ -37,10 +38,10 @@ openspace.globebrowsing.documentation = {
     },
     Documentation = [[
       Sets the position of a scene graph node that has a
-      [GlobeTranslation](#base_translation_globetranslation) and/or
-      [GlobeRotation](#base_rotation_globerotation) to match the camera. Only
-      uses camera position not rotation. If useAltitude is true, then the position
-      will also be updated to the camera's altitude.
+      [GlobeTranslation](#base_translation_globe) and/or
+      [GlobeRotation](#base_rotation_globe) to match the camera. Only uses camera position
+      not rotation. If useAltitude is true, then the position will also be updated to the
+      camera's altitude.
 
       Usage:
       ```lua
@@ -51,7 +52,7 @@ openspace.globebrowsing.documentation = {
 
       \\param nodeIdentifier The identifier of the scene graph node to move
       \\param useAltitude If true, the camera's altitude will also be used for the new
-                          positions. Otherwise, it will not.
+              positions. Otherwise, it will not
     ]]
   }
 }

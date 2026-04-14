@@ -7,7 +7,7 @@ local models = asset.resource({
   Name = "JWST Model",
   Type = "HttpSynchronization",
   Identifier = "jwst_model",
-  Version = 3
+  Version = 4
 })
 
 

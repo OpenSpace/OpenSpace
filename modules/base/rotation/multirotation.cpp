@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,27 +25,26 @@
 #include <modules/base/rotation/multirotation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/util/time.h>
-#include <optional>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
+#include <utility>
 
 namespace {
     // This Rotation type combines multiple individual rotations that are applied one
     // after the other. The rotations are applied in the order in which they are specified
     // in the `Rotations` key.
     struct [[codegen::Dictionary(MultiRotation)]] Parameters {
-        // The list of rotations that are applied one after the other
-        std::vector<ghoul::Dictionary> rotations
-            [[codegen::reference("core_transform_rotation")]];
+        // The list of rotations that are applied one after the other.
+        std::vector<ghoul::Dictionary> rotations [[codegen::reference("core_rotation")]];
     };
-#include "multirotation_codegen.cpp"
 } // namespace
+#include "multirotation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation MultiRotation::Documentation() {
-    return codegen::doc<Parameters>("base_transform_rotation_multi");
+Documentation MultiRotation::Documentation() {
+    return codegen::doc<Parameters>("base_rotation_multi");
 }
 
 MultiRotation::MultiRotation(const ghoul::Dictionary& dictionary)

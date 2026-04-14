@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,17 +24,20 @@
 
 #include <openspace/rendering/transferfunction.h>
 
+#include <openspace/data/colormaploader.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/texture.h>
-#include <iterator>
-#include <filesystem>
+#include <cmath>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 namespace {
     constexpr std::string_view _loggerCat = "TransferFunction";
@@ -69,24 +72,25 @@ void TransferFunction::setPath(const std::filesystem::path& filepath) {
 }
 
 ghoul::opengl::Texture& TransferFunction::texture() {
-    ghoul_assert(_texture != nullptr, "Transfer function is null");
+    ghoul_assert(_texture, "Transfer function is null");
     update();
     return *_texture;
 }
 
 void TransferFunction::update() {
-    if (_needsUpdate) {
-        if (_filepath.extension() == ".txt") {
-            setTextureFromTxt();
-        }
-        else {
-            setTextureFromImage();
-        }
-        _texture->uploadTexture();
-        _needsUpdate = false;
-        if (_tfChangedCallback) {
-            _tfChangedCallback(*this);
-        }
+    if (!_needsUpdate) {
+        return;
+    }
+
+    if (_filepath.extension() == ".txt") {
+        setTextureFromTxt();
+    }
+    else {
+        setTextureFromImage();
+    }
+    _needsUpdate = false;
+    if (_tfChangedCallback) {
+        _tfChangedCallback(*this);
     }
 }
 
@@ -119,11 +123,11 @@ void TransferFunction::setTextureFromTxt() {
         }
         else if (key == "lower") {
             iss >> lower;
-            lower = glm::clamp(lower, 0.f, 1.f);
+            lower = std::clamp(lower, 0.f, 1.f);
         }
         else if (key == "upper") {
             iss >> upper;
-            upper = glm::clamp(upper, lower, 1.f);
+            upper = std::clamp(upper, lower, 1.f);
         }
         else if (key == "mappingkey") {
             float intensity = 0.f;
@@ -149,7 +153,7 @@ void TransferFunction::setTextureFromTxt() {
         mappingKeys.emplace_back(upper, mappingKeys.back().color);
     }
 
-    // allocate new float array with zeros
+    // Allocate new float array with zeros
     float* transferFunction = new float[width * 4];
     for (int i = 0; i < 4 * width; i++) {
         transferFunction[i] = 0.f;
@@ -179,7 +183,7 @@ void TransferFunction::setTextureFromTxt() {
         const float dist = fpos - prevKey->position;
         const float weight = dist / (currentKey->position - prevKey->position);
 
-        for (int channel = 0; channel < 4; ++channel) {
+        for (int channel = 0; channel < 4; channel++) {
             const size_t position = 4 * i + channel;
             // Interpolate linearly between prev and next mapping key
             float value = (prevKey->color[channel] * (1.f - weight) +
@@ -193,23 +197,25 @@ void TransferFunction::setTextureFromTxt() {
         }
     }
 
-    // no need to deallocate transferFunction. Ownership is transferred to the Texture.
-
     _texture = std::make_unique<ghoul::opengl::Texture>(
-        transferFunction,
-        glm::size3_t(width, 1, 1),
-        GL_TEXTURE_1D,
-        ghoul::opengl::Texture::Format::RGBA,
-        GL_RGBA,
-        GL_FLOAT,
-        ghoul::opengl::Texture::FilterMode::Linear,
-        ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(width, 1, 1),
+            .type = GL_TEXTURE_1D,
+            .format = ghoul::opengl::Texture::Format::RGBA,
+            .dataType = GL_FLOAT
+        },
+        ghoul::opengl::Texture::SamplerInit {
+            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        },
+        reinterpret_cast<std::byte*>(transferFunction)
     );
 }
 
 void TransferFunction::setTextureFromImage() {
-    _texture = ghoul::io::TextureReader::ref().loadTexture(_filepath, 1);
-    _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+    _texture = dataloader::colormap::loadColorMapTexture(
+        _filepath,
+        { .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge }
+    );
 }
 
 glm::vec4 TransferFunction::sample(size_t offset) {
@@ -217,24 +223,19 @@ glm::vec4 TransferFunction::sample(size_t offset) {
         return glm::vec4(0.f);
     }
 
-    const int nPixels = _texture->width();
+    const int nPixels = _texture->dimensions().x;
 
-    // Clamp to range.
+    // Clamp to range
     if (offset >= static_cast<size_t>(nPixels)) {
         offset = nPixels - 1;
     }
 
-    return _texture->texelAsFloat(static_cast<unsigned int>(offset));
+    return _texture->texelAsFloat(glm::uvec3(static_cast<unsigned int>(offset), 0, 0));
 }
 
 size_t TransferFunction::width() {
     update();
-    return _texture->width();
-}
-
-void TransferFunction::bind() {
-    update();
-    _texture->bind();
+    return _texture->dimensions().y;
 }
 
 } // namespace openspace

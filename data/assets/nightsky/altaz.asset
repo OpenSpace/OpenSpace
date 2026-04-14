@@ -59,6 +59,7 @@ local AltAzGrid = {
     Color = { 0.2, 0.4, 0.2 },
     LineWidth = 2.0,
     RenderBinMode = "PostDeferredTransparent"
+
   },
   Tag = { "nightsky_marking" },
   GUI = {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,155 +25,155 @@
 #include <modules/base/rendering/renderablenodearrow.h>
 
 #include <modules/base/basemodule.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
-#include <openspace/scene/translation.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <glm/gtx/projection.hpp>
-#include <glm/gtx/transform.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <limits>
+#include <memory>
+#include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableNodeArrow";
 
-    constexpr openspace::properties::Property::PropertyInfo StartNodeInfo = {
+    constexpr Property::PropertyInfo StartNodeInfo = {
         "StartNode",
-        "Start Node",
+        "Start node",
         "The identifier of the node the arrow starts from.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EndNodeInfo = {
+    constexpr Property::PropertyInfo EndNodeInfo = {
         "EndNode",
-        "End Node",
+        "End node",
         "The identifier of the node the arrow should point towards.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The RGB color for the arrow.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
+    constexpr Property::PropertyInfo SegmentsInfo = {
         "Segments",
-        "Number of Segments",
+        "Number of segments",
         "The number of segments that the shapes of the arrow are divided into. A higher "
         "number leads to a higher resolution and smoother shape.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InvertInfo = {
+    constexpr Property::PropertyInfo InvertInfo = {
         "Invert",
-        "Invert Direction",
+        "Invert direction",
         "If true, the arrow direction is inverted so that it points to the start node "
         "instead of the end node.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ArrowHeadSizeInfo = {
+    constexpr Property::PropertyInfo ArrowHeadSizeInfo = {
         "ArrowHeadSize",
-        "Arrow Head Size",
+        "Arrow head size",
         "The length of the arrow head, given in relative value of the entire length of "
         "the arrow. For example, 0.1 makes the arrow head length be 10% of the full "
         "arrow length.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ArrowHeadWidthInfo = {
+    constexpr Property::PropertyInfo ArrowHeadWidthInfo = {
         "ArrowHeadWidthFactor",
-        "Arrow Head Width Factor",
+        "Arrow head width factor",
         "A factor that is multiplied with the width, or the arrow itself, to determine "
         "the width of the base of the arrow head.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OffsetDistanceInfo = {
+    constexpr Property::PropertyInfo OffsetDistanceInfo = {
         "Offset",
-        "Offset Distance",
-        "The distance from the center of the start node where the arrow starts. "
-        "If 'UseRelativeOffset' is true, the value should be given as a factor to "
-        "multiply with the bounding sphere of the node. Otherwise, the value is "
-        "specified in meters.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "Offset distance",
+        "The distance from the center of the start node where the arrow starts. If "
+        "'UseRelativeOffset' is true, the value should be given as a factor to multiply "
+        "with the bounding sphere of the node. Otherwise, the value is specified in "
+        "meters.",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RelativeOffsetInfo = {
+    constexpr Property::PropertyInfo RelativeOffsetInfo = {
         "UseRelativeOffset",
-        "Use Relative Offset Distance",
+        "Use relative offset distance",
         "Decides whether to use relative distances for the offset distance. This means "
         "that the offset distance will be computed as the provided 'Offset' value times "
         "the bounding sphere of the start node. If false, meters is used.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LengthInfo = {
+    constexpr Property::PropertyInfo LengthInfo = {
         "Length",
         "Length",
-        "The length of the arrow, given either in meters or as a factor to be "
-        "multiplied with the bounding sphere of the start node (if "
-        "'UseRelativeLength' is true).",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "The length of the arrow, given either in meters or as a factor to be multiplied "
+        "with the bounding sphere of the start node (if 'UseRelativeLength' is true).",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RelativeLengthInfo = {
+    constexpr Property::PropertyInfo RelativeLengthInfo = {
         "UseRelativeLength",
-        "Use Relative Length",
+        "Use relative length",
         "Decides whether to use relative size for the length of the arrow. This means "
-        "that the arrow length will be computed as the provided 'Length' value times "
-        "the bounding sphere of the start node. If false, meters is used.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "that the arrow length will be computed as the provided 'Length' value times the "
+        "bounding sphere of the start node. If false, meters is used.",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo WidthInfo = {
+    constexpr Property::PropertyInfo WidthInfo = {
         "Width",
         "Width",
         "The width of the arrow, in meters.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
+    constexpr Property::PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
-        "Ambient Intensity",
+        "Ambient intensity",
         "A multiplier for ambient lighting for the shading of the arrow.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DiffuseIntensityInfo = {
+    constexpr Property::PropertyInfo DiffuseIntensityInfo = {
         "DiffuseIntensity",
-        "Diffuse Intensity",
+        "Diffuse intensity",
         "A multiplier for diffuse lighting for the shading of the arrow.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SpecularIntensityInfo = {
+    constexpr Property::PropertyInfo SpecularIntensityInfo = {
         "SpecularIntensity",
-        "Specular Intensity",
+        "Specular intensity",
         "A multiplier for specular lighting for the shading of the arrow.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShadingEnabledInfo = {
+    constexpr Property::PropertyInfo ShadingEnabledInfo = {
         "PerformShading",
-        "Perform Shading",
+        "Perform shading",
         "Determines whether shading should be applied to the arrow model.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     void updateDistanceBasedOnRelativeValues(const std::string& nodeName,
-                                             bool useRelative,
-                                             openspace::properties::FloatProperty& prop)
+                                             bool useRelative, FloatProperty& prop)
     {
         using namespace::openspace;
 
@@ -207,11 +207,11 @@ namespace {
     // A RenderableNodeArrow can be used to create a 3D arrow pointing in the direction
     // of one scene graph node to another.
     //
-    // The arrow will be placed at the `StartNode` at a distance of the provided
-    // `Offset` value. Per default, the `Length` and `Offset` of the arrow is specified
-    // in meters, but they may also be specified as a multiplier of the bounding sphere
-    // of the `StartNode`. The look of the arrow can be customized to change the width
-    // and length of both the arrow body and head.
+    // The arrow will be placed at the `StartNode` at a distance of the provided `Offset`
+    // value. Per default, the `Length` and `Offset` of the arrow is specified in meters,
+    // but they may also be specified as a multiplier of the bounding sphere of the
+    // `StartNode`. The look of the arrow can be customized to change the width and length
+    // of both the arrow body and head.
     struct [[codegen::Dictionary(RenderableNodeArrow)]] Parameters {
         // [[codegen::verbatim(StartNodeInfo.description)]]
         std::string startNode [[codegen::identifier()]];
@@ -261,17 +261,17 @@ namespace {
         // [[codegen::verbatim(SpecularIntensityInfo.description)]]
         std::optional<float> specularIntensity [[codegen::greaterequal(0.f)]];
     };
-#include "renderablenodearrow_codegen.cpp"
 } // namespace
+#include "renderablenodearrow_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableNodeArrow::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_renderablenodearrow");
+Documentation RenderableNodeArrow::Documentation() {
+    return codegen::doc<Parameters>("base_renderable_nodearrow");
 }
 
 RenderableNodeArrow::Shading::Shading()
-    : properties::PropertyOwner({ "Shading" })
+    : PropertyOwner({ "Shading" })
     , enabled(ShadingEnabledInfo, true)
     , ambientIntensity(AmbientIntensityInfo, 0.2f, 0.f, 1.f)
     , diffuseIntensity(DiffuseIntensityInfo, 0.7f, 0.f, 1.f)
@@ -309,7 +309,7 @@ RenderableNodeArrow::RenderableNodeArrow(const ghoul::Dictionary& dictionary)
     addProperty(Fadeable::_opacity);
 
     _color = p.color.value_or(_color);
-    _color.setViewOption(properties::Property::ViewOptions::Color);
+    _color.setViewOption(Property::ViewOptions::Color);
     addProperty(_color);
 
     _start = p.startNode;
@@ -383,10 +383,6 @@ void RenderableNodeArrow::deinitializeGL() {
     _shaderProgram = nullptr;
 }
 
-bool RenderableNodeArrow::isReady() const {
-    return _shaderProgram != nullptr;
-}
-
 void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
     SceneGraphNode* startNode = sceneGraphNode(_start);
     SceneGraphNode* endNode = sceneGraphNode(_end);
@@ -449,7 +445,7 @@ void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
     // Create transformation matrices to reshape to size and position
     _cylinderTranslation = glm::translate(glm::dmat4(1.0), startPos);
     const glm::dvec3 cylinderScale = glm::dvec3(
-        s * glm::dvec4(_width, _width, cylinderLength, 0.0)
+        s * glm::dvec4(_width.value(), _width.value(), cylinderLength, 0.0)
     );
     _cylinderScale = glm::scale(glm::dmat4(1.0), cylinderScale);
 
@@ -490,15 +486,13 @@ void RenderableNodeArrow::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform("specularIntensity", _shading.specularIntensity);
     _shaderProgram->setUniform("performShading", _shading.enabled);
 
-    // Change GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
 
-    // Draw cylinder
-    glBindVertexArray(rendering::helper::vertexObjects.cylinder.vao);
+    glBindVertexArray(rendering::vertexObjects.cylinder.vao);
     glDrawElements(
         GL_TRIANGLES,
-        rendering::helper::vertexObjects.cylinder.nElements,
+        rendering::vertexObjects.cylinder.nElements,
         GL_UNSIGNED_SHORT,
         nullptr
     );
@@ -511,15 +505,14 @@ void RenderableNodeArrow::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _shaderProgram->setUniform("normalTransform", glm::mat3(normalTransform));
 
-    glBindVertexArray(rendering::helper::vertexObjects.cone.vao);
+    glBindVertexArray(rendering::vertexObjects.cone.vao);
     glDrawElements(
         GL_TRIANGLES,
-        rendering::helper::vertexObjects.cone.nElements,
+        rendering::vertexObjects.cone.nElements,
         GL_UNSIGNED_SHORT,
         nullptr
     );
 
-    // Restore GL State
     glBindVertexArray(0);
     global::renderEngine->openglStateCache().resetBlendState();
 

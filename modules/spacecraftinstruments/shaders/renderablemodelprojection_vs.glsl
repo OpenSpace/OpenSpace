@@ -1,0 +1,53 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2026                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#version __CONTEXT__
+
+#include "powerscaling/powerscaling_vs.glsl"
+
+layout(location = 0) in vec4 in_position;
+layout(location = 1) in vec2 in_texCoords;
+layout(location = 2) in vec3 in_normal;
+
+out Data {
+  vec4 ndc;
+  vec4 normal;
+} out_data;
+
+uniform mat4 projectorMatrix;
+uniform mat4 modelTransform;
+uniform mat4 meshTransform;
+uniform mat4 meshNormalTransform;
+
+
+void main() {
+  vec4 raw_pos = psc_to_meter(meshTransform * in_position, vec2(1.0, 0.0));
+  vec4 position = projectorMatrix * modelTransform * raw_pos;
+  out_data.normal = normalize(
+    modelTransform * meshNormalTransform * vec4(in_normal, 0.0)
+  );
+  out_data.ndc = position / position.w;
+
+  gl_Position = vec4(in_texCoords * 2.0 - 1.0, 0.0, 1.0);
+}

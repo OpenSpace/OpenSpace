@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,12 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "profile/assettreeitem.h"
 #include "profile/assettreemodel.h"
+
+#include "profile/assettreeitem.h"
 #include "filesystemaccess.h"
 #include <ghoul/misc/stringhelper.h>
 #include <sstream>
-#include <QColor>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view Header1 = "Asset";
@@ -85,7 +87,8 @@ namespace {
             const int levelChange = elem.level - level;
 
             if (levelChange == 0) {
-                parent->insertChildren(++nChildInsert, 1, 3);
+                nChildInsert++;
+                parent->insertChildren(nChildInsert, 1, 3);
                 parent->child(nChildInsert)->setData(
                     0,
                     QString::fromStdString(elem.line)

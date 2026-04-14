@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,23 +25,32 @@
 #include <modules/video/include/screenspacevideo.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/programobject.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureconversion.h>
+#include <ghoul/opengl/textureunit.h>
 #include <filesystem>
-#include <optional>
+
+namespace {
+    // This `ScreenSpaceRenderable` can be used to render a video in front of the camera.
+    //
+    // The video can either be played back based on a given simulation time
+    // (`PlaybackMode` MapToSimulationTime) or through the user interface (for
+    // `PlaybackMode` RealTimeLoop). It is also possible to control whether the video
+    // should loop or just be played once.
+    //
+    // Note that, unless playback is mapped to simulation time, the video must be started
+    // manually via the user interface.
+    struct [[codegen::Dictionary(ScreenSpaceVideo)]] Parameters {};
+} // namespace
+#include "screenspacevideo_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceVideo::Documentation() {
-    documentation::Documentation doc = VideoPlayer::Documentation();
-    doc.name = "ScreenSpaceVideo";
-    doc.id = "video_screenspacevideo";
-    return doc;
+Documentation ScreenSpaceVideo::Documentation() {
+    return codegen::doc<Parameters>(
+        "video_screenspace_video",
+        VideoPlayer::Documentation()
+    );
 }
 
 ScreenSpaceVideo::ScreenSpaceVideo(const ghoul::Dictionary& dictionary)
@@ -93,8 +102,8 @@ void ScreenSpaceVideo::deinitializeGL() {
     ScreenSpaceRenderable::deinitializeGL();
 }
 
-void ScreenSpaceVideo::bindTexture() {
-    _videoPlayer.frameTexture()->bind();
+void ScreenSpaceVideo::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(*_videoPlayer.frameTexture());
 }
 
 } // namespace openspace

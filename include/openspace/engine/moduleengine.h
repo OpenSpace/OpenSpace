@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,19 +28,18 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/list/stringlistproperty.h>
-#include <map>
 #include <memory>
-#include <vector>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::systemcapabilities { struct Version; }
+namespace ghoul {
+    namespace systemcapabilities { struct Version; }
+    class Dictionary;
+} // namespace ghoul
 
 namespace openspace {
 
+struct Documentation;
+struct LuaLibrary;
 class OpenSpaceModule;
-
-namespace documentation { struct Documentation; }
-namespace scripting { struct LuaLibrary; }
 
 /**
  * The ModuleEngine is the central repository for registering and accessing
@@ -50,7 +49,7 @@ namespace scripting { struct LuaLibrary; }
  * OpenSpaceModule%s can be registered with the #registerModule function, which will
  * internally call the OpenSpaceModule::initialize method.
  */
-class ModuleEngine : public properties::PropertyOwner {
+class ModuleEngine : public PropertyOwner {
 public:
     ModuleEngine();
 
@@ -87,7 +86,7 @@ public:
      *
      * \throw ghoul::RuntimeError If the name of the \p module was already registered
      *        previously
-     * \pre \p module must not be nullptr
+     * \pre \p module must not be `nullptr`
      */
     void registerModule(std::unique_ptr<OpenSpaceModule> module);
 
@@ -101,8 +100,8 @@ public:
 
     /**
      * Get the module subclass with given template argument. Requires the module subclass
-     * to have the public static member variable `name` which must be equal to
-     * the name of the module used in its constructor.
+     * to have the public static member variable `name` which must be equal to the name of
+     * the module used in its constructor.
      *
      * \return A pointer to the module of the given subclass
      */
@@ -110,27 +109,19 @@ public:
     ModuleSubClass* module() const;
 
     /**
-     * Returns the combined minimum OpenGL version. The return value is the maximum
-     * version of all registered modules' OpenGL versions.
-     *
-     * \return The combined minimum OpenGL version
-     */
-    ghoul::systemcapabilities::Version requiredOpenGLVersion() const;
-
-    /**
      * Returns the Lua library that contains all Lua functions available to affect the
      * modules.
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
     /**
      * Returns the list of all documentations for all modules.
      */
-    std::vector<documentation::Documentation> moduleDocumentations() const;
+    std::vector<Documentation> moduleDocumentations() const;
 
 private:
     /// The list of all names of all registered OpenSpaceModules
-    properties::StringListProperty _allModules;
+    StringListProperty _allModules;
 
     /// The list of all registered OpenSpaceModules
     std::vector<std::unique_ptr<OpenSpaceModule>> _modules;

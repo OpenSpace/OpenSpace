@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,9 +25,7 @@
 #ifndef __OPENSPACE_CORE___TOUCH___H__
 #define __OPENSPACE_CORE___TOUCH___H__
 
-#include <glm/vec2.hpp>
-
-#include <cstdint>
+#include <ghoul/glm.h>
 #include <deque>
 
 namespace openspace {
@@ -38,20 +36,21 @@ namespace openspace {
  * other TouchInputs in order to calculate gesture-like behavior.
  */
 struct TouchInput {
-    TouchInput(size_t touchDeviceId, size_t fingerId, float x, float y, double timestamp);
+    TouchInput(size_t touchDeviceId, size_t fingerId, glm::vec2 pos, double timestamp);
+
     glm::vec2 screenCoordinates(const glm::vec2& resolution) const;
     glm::vec2 currentWindowCoordinates() const;
     bool isMoving() const;
-    float distanceToPos(float otherX, float otherY) const;
-    float angleToPos(float otherX, float otherY) const;
+    float distanceToPos(const glm::vec2& other) const;
+    float angleToPos(const glm::vec2& other) const;
 
-    size_t touchDeviceId;
-    size_t fingerId;
-    float x;
-    float y;
-    float dx = 0.f; // movement in x direction since last touch input
-    float dy = 0.f; // movement in y direction since last touch input
-    double timestamp; // timestamp in seconds from global touch initialization
+    size_t touchDeviceId = size_t(-1);
+    size_t fingerId = size_t(-1);
+    glm::vec2 pos = glm::vec2(0.f);
+    // Movement since last touch input
+    glm::vec2 dPos = glm::vec2(0.f);
+    // Timestamp in seconds from global touch initialization
+    double timestamp = 0.0;
 };
 
 /**
@@ -60,7 +59,7 @@ struct TouchInput {
  */
 class TouchInputHolder {
 public:
-    TouchInputHolder(TouchInput input);
+    explicit TouchInputHolder(TouchInput input);
 
     /**
      * Succeeds upon a different input than last. Fails upon a too similar input as last.

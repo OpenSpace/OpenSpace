@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,16 +25,16 @@
 #ifndef __OPENSPACE_MODULE_TELEMETRY___TELEMETRYMODULE___H__
 #define __OPENSPACE_MODULE_TELEMETRY___TELEMETRYMODULE___H__
 
-#include "openspace/util/openspacemodule.h"
+#include <openspace/util/openspacemodule.h>
 
-#include <modules/telemetry/include/telemetrybase.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
-#include <ghoul/misc/boolean.h>
 #include <atomic>
 #include <condition_variable>
+#include <mutex>
+#include <thread>
 
 namespace openspace {
 
@@ -50,20 +50,18 @@ public:
      * part of the angles is located further below.
      *
      * Horizontal: This angle calculation mode is suitable for flat displays or
-     *             forward-facing immersive environments. For more information about
-     *             surround sound configurations, see "Surround Sound Configurations" on
-     *             the OpenSpace documentation page. This angle determines where the
-     *             object is placed within a horizontal plane of reference in relation to
-     *             the camera.
+     * forward-facing immersive environments. For more information about surround sound
+     * configurations, see "Surround Sound Configurations" on the OpenSpace documentation
+     * page. This angle determines where the object is placed within a horizontal plane of
+     * reference in relation to the camera.
      *
      * Circular: This angle calculation mode is suitable for centered fisheye displays or
-     *           omnidirectional immersive environments. For more information about
-     *           surround sound configurations, see "Surround Sound Configurations" on
-     *           the OpenSpace documentation page. The computed angle determines the
-     *           object's position in a circular space around the center of the screen.
-     *           Compared to the horizontal mode, this mode calculates the angles in a
-     *           circular (or radial) manner around the center point instead of the
-     *           deviation from the camera view direction.
+     * omnidirectional immersive environments. For more information about surround sound
+     * configurations, see "Surround Sound Configurations" on the OpenSpace documentation
+     * page. The computed angle determines the object's position in a circular space
+     * around the center of the screen. Compared to the horizontal mode, this mode
+     * calculates the angles in a circular (or radial) manner around the center point
+     * instead of the deviation from the camera view direction.
      */
     enum class AngleCalculationMode {
         Horizontal = 0,
@@ -78,23 +76,22 @@ public:
      *
      * \return The Lua libraries for all telemetries available in the telemetry module
      */
-    std::vector<scripting::LuaLibrary> luaLibraries() const override;
+    std::vector<LuaLibrary> luaLibraries() const override;
 
-    virtual void internalInitialize(const ghoul::Dictionary& dictionary) override;
-    virtual void internalDeinitialize() override;
+    void internalInitialize(const ghoul::Dictionary& dictionary) override;
+    void internalDeinitialize() override;
 
     /**
      * Get the list of telemetries that are currently registered in the module.
      *
      * \return A list of all registered telemetries
      */
-    const std::vector<TelemetryBase*>& telemetries() const;
+    std::vector<TelemetryBase*> telemetries() const;
 
     /**
      * Get a specified telemetry from the list of registered telemetries in the module.
      *
      * \param id The identifier of the telemetry to fetch
-     *
      * \return The requested telemetry
      */
     const TelemetryBase* telemetry(const std::string_view& id) const;
@@ -112,7 +109,7 @@ public:
      * Control receiver or not.
      *
      * \return `true` if elevation angles are being calculated and sent to the Open Sound
-     * Control receiver, `false` otherwise
+     *         Control receiver, `false` otherwise
      */
     bool includeElevationAngle() const;
 
@@ -126,42 +123,33 @@ private:
     void update(std::atomic<bool>& isRunning);
 
     /**
-     * Add a given telemetry to the list of registered telemetries in the module.
-     *
-     * \param telemetry The telemetry to register in the module
-     */
-    void addTelemetry(TelemetryBase* telemetry);
-
-    /**
      * Function that gets called when the angle calculation mode is changed in the GUI.
      */
     void guiOnChangeAngleCalculationMode();
 
-    // To sync the sonification thread with the main thread
+    /// To sync the sonification thread with the main thread
     std::mutex mutexLock;
     std::condition_variable syncToMain;
 
-    properties::BoolProperty _enabled;
-    properties::StringProperty _ipAddress;
-    properties::IntProperty _port;
-    properties::OptionProperty _modeOptions;
+    BoolProperty _enabled;
+    StringProperty _ipAddress;
+    IntProperty _port;
+    OptionProperty _modeOptions;
 
-    /**
-     * This setting only affects telemetries that send angle information. For example, the
-     * NodesTelemetry and the PlanetsSonification.
-     *
-     * `true`: This angle determines where the object is placed within a vertical plane of
-     *         reference in relation to the camera, i.e the height in relation to the
-     *         horizontal plane of reference.
-     *
-     * `false`: The elevation angle sent to the Open Sound Control receiver is always set
-     *          to 0.0
-    */
-    properties::BoolProperty _includeElevationAngle;
+    /// This setting only affects telemetries that send angle information. For example,
+    /// the NodesTelemetry and the PlanetsSonification.
+    ///
+    /// `true`: This angle determines where the object is placed within a vertical plane
+    /// of reference in relation to the camera, i.e the height in relation to the
+    /// horizontal plane of reference.
+    ///
+    /// `false`: The elevation angle sent to the Open Sound Control receiver is always set
+    /// to 0.0
+    BoolProperty _includeElevationAngle;
 
     std::thread _updateThread;
     std::atomic<bool> _isRunning = false;
-    std::vector<TelemetryBase*> _telemetries;
+    std::vector<std::unique_ptr<TelemetryBase>> _telemetries;
     AngleCalculationMode _angleCalculationMode = AngleCalculationMode::Horizontal;
 };
 

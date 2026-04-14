@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,106 +26,106 @@
 
 #include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/format.h>
+#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <array>
-#include <cstdint>
-#include <filesystem>
+#include <algorithm>
+#include <cmath>
 #include <fstream>
-#include <optional>
+#include <sstream>
+#include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableDUMeshes";
 
     constexpr int RenderOptionViewDirection = 0;
     constexpr int RenderOptionPositionNormal = 1;
 
-    constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
+    constexpr Property::PropertyInfo TextColorInfo = {
         "TextColor",
-        "Text Color",
+        "Text color",
         "The text color for the astronomical object.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
+    constexpr Property::PropertyInfo TextOpacityInfo = {
         "TextOpacity",
-        "Text Opacity",
-        "Determines the transparency of the text label, where 1 is completely opaque "
-        "and 0 fully transparent.",
-        openspace::properties::Property::Visibility::NoviceUser
+        "Text opacity",
+        "Determines the transparency of the text label, where 1 is completely opaque and "
+        "0 fully transparent.",
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
+    constexpr Property::PropertyInfo TextSizeInfo = {
         "TextSize",
-        "Text Size",
+        "Text size",
         "The text size for the astronomical object labels.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelFileInfo = {
+    constexpr Property::PropertyInfo LabelFileInfo = {
         "LabelFile",
-        "Label File",
+        "Label file",
         "The path to the label file that contains information about the astronomical "
         "objects being rendered.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
+    constexpr Property::PropertyInfo LabelMinMaxSizeInfo = {
         "TextMinMaxSize",
-        "Text Min/Max Size",
+        "Text min/max size",
         "The minimum and maximum size (in pixels) of the text for the labels for the "
         "astronomical objects being rendered.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "If the DU mesh is of wire type, this value determines the width of the lines.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
+    constexpr Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
-        "Draw Elements",
+        "Draw elements",
         "Enables/Disables the drawing of the astronomical objects.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
+    constexpr Property::PropertyInfo DrawLabelInfo = {
         "DrawLabels",
-        "Draw Labels",
+        "Draw labels",
         "Determines whether labels should be drawn or hidden.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MeshColorInfo = {
+    constexpr Property::PropertyInfo MeshColorInfo = {
         "MeshColor",
         "Meshes colors",
         "The defined colors for the meshes to be rendered.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
+    constexpr Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
-        "Render Option",
+        "Render option",
         "Debug option for rendering of billboards and texts.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableDUMeshes)]] Parameters {
@@ -169,13 +169,13 @@ namespace {
         // [[codegen::verbatim(MeshColorInfo.description)]]
         std::optional<std::vector<glm::vec3>> meshColor;
     };
+} // namespace
 #include "renderabledumeshes_codegen.cpp"
-}  // namespace
 
 namespace openspace {
 
-documentation::Documentation RenderableDUMeshes::Documentation() {
-    return codegen::doc<Parameters>("digitaluniverse_renderabledumeshes");
+Documentation RenderableDUMeshes::Documentation() {
+    return codegen::doc<Parameters>("digitaluniverse_renderable_dumeshes");
 }
 
 RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
@@ -233,7 +233,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
 
         _textColor = p.textColor.value_or(_textColor);
         _hasLabel = p.textColor.has_value();
-        _textColor.setViewOption(properties::Property::ViewOptions::Color);
+        _textColor.setViewOption(Property::ViewOptions::Color);
         addProperty(_textColor);
         _textColor.onChange([this]() { _textColorIsDirty = true; });
 
@@ -244,7 +244,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         addProperty(_textSize);
 
         _textMinMaxSize = p.textMinMaxSize.value_or(_textMinMaxSize);
-        _textMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+        _textMinMaxSize.setViewOption(Property::ViewOptions::MinMaxRange);
         addProperty(_textMinMaxSize);
     }
 
@@ -254,11 +254,6 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
             _meshColorMap.insert({ static_cast<int>(i) + 1, ops[i] });
         }
     }
-}
-
-bool RenderableDUMeshes::isReady() const {
-    return (_program != nullptr) &&
-        (!_renderingMeshesMap.empty() || (!_labelset.entries.empty()));
 }
 
 void RenderableDUMeshes::initialize() {
@@ -317,7 +312,6 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
 {
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(false);
     glEnable(GL_DEPTH_TEST);
 
@@ -351,7 +345,6 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     glBindVertexArray(0);
     _program->deactivate();
 
-    // Restores GL State
     global::renderEngine->openglStateCache().resetDepthState();
     global::renderEngine->openglStateCache().resetBlendState();
 }
@@ -373,11 +366,11 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
         .mvpMatrix = modelViewProjectionMatrix,
         .orthoRight = orthoRight,
         .orthoUp = orthoUp,
-        .cameraPos = data.camera.positionVec3(),
+        .cameraPos = data.camera.position(),
         .cameraLookUp = data.camera.lookUpVectorWorldSpace()
     };
 
-    const glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
+    const glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity.value());
 
     for (const dataloader::Labelset::Entry& e : _labelset.entries) {
         glm::vec3 scaledPos(e.position);
@@ -394,8 +387,8 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
 
 void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4 modelMatrix =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     const glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
@@ -479,8 +472,8 @@ bool RenderableDUMeshes::readSpeckFile() {
             break;
         }
 
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
+        // Guard against wrong line endings (copying files between operating systems)
+        // causes lines to have a final \r
         if (!line.empty() && line.back() == '\r') {
             line = line.substr(0, line.length() - 1);
         }
@@ -499,7 +492,7 @@ bool RenderableDUMeshes::readSpeckFile() {
             // where textnum is the index of the texture;
             // colorindex is the index of the color for the mesh
             // and style is solid, wire or point (for now we support only wire)
-            std::stringstream str(line);
+            std::stringstream str = std::stringstream(line);
 
             RenderingMesh mesh;
             mesh.meshIndex = meshIndex;
@@ -539,17 +532,17 @@ bool RenderableDUMeshes::readSpeckFile() {
             } while (dummy != "{");
 
             ghoul::getline(file, line);
-            std::stringstream dim(line);
+            std::stringstream dim = std::stringstream(line);
             dim >> mesh.numU >> mesh.numV;
 
-            // We can now read the vertices data:
-            for (int l = 0; l < mesh.numU * mesh.numV; ++l) {
+            // We can now read the vertices data
+            for (int l = 0; l < mesh.numU * mesh.numV; l++) {
                 ghoul::getline(file, line);
                 if (line.substr(0, 1) == "}") {
                     break;
                 }
 
-                std::stringstream lineData(line);
+                std::stringstream lineData = std::stringstream(line);
 
                 // Try to read three values for the position
                 glm::vec3 pos;
@@ -579,21 +572,6 @@ bool RenderableDUMeshes::readSpeckFile() {
                 // Check if new max radius
                 const double r = glm::length(glm::dvec3(pos));
                 maxRadius = std::max(maxRadius, r);
-
-                // OLD CODE:
-                // (2022-03-23, emmbr)  None of our files included texture coordinates,
-                // and if they would they would still not be used by the shader
-                //for (int i = 0; i < 7; i++) {
-                //    GLfloat value;
-                //    lineData >> value;
-                //    bool errorReading = lineData.rdstate() & std::ifstream::failbit;
-                //    if (!errorReading) {
-                //        mesh.vertices.push_back(value);
-                //    }
-                //    else {
-                //        break;
-                //    }
-                //}
             }
 
             ghoul::getline(file, line);
@@ -618,120 +596,73 @@ void RenderableDUMeshes::createMeshes() {
 
     for (std::pair<const int, RenderingMesh>& p : _renderingMeshesMap) {
         for (int i = 0; i < p.second.numU; i++) {
-            GLuint vao = 0;
-            glGenVertexArrays(1, &vao);
-            p.second.vaoArray.push_back(vao);
-
             GLuint vbo = 0;
-            glGenBuffers(1, &vbo);
-            p.second.vboArray.push_back(vbo);
-
-            glBindVertexArray(vao);
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            //glBufferData(GL_ARRAY_BUFFER, it->second.numV * sizeof(GLfloat),
-            glBufferData(
-                GL_ARRAY_BUFFER,
+            glCreateBuffers(1, &vbo);
+            glNamedBufferStorage(
+                vbo,
                 p.second.vertices.size() * sizeof(GLfloat),
                 p.second.vertices.data(),
-                GL_STATIC_DRAW
+                GL_NONE_BIT
             );
-            // in_position
-            glEnableVertexAttribArray(0);
-            // (2022-03-23, emmbr) This code was actually never used. We only read three
-            // values per line and did not handle any texture cooridnates, even if there
-            // would have been some in the file
-            //// U and V may not be given by the user
-            //if (p.second.vertices.size() / (p.second.numU * p.second.numV) > 3) {
-            //    glVertexAttribPointer(
-            //        0,
-            //        3,
-            //        GL_FLOAT,
-            //        GL_FALSE,
-            //        sizeof(GLfloat) * 5,
-            //        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * i * p.second.numV)
-            //    );
+            p.second.vertices.clear();
+            p.second.vboArray.push_back(vbo);
 
-            //    // texture coords
-            //    glEnableVertexAttribArray(1);
-            //    glVertexAttribPointer(
-            //        1,
-            //        2,
-            //        GL_FLOAT,
-            //        GL_FALSE,
-            //        sizeof(GLfloat) * 7,
-            //        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * p.second.numV)
-            //    );
-            //}
-            //else { // no U and V:
-                glVertexAttribPointer(
-                    0,
-                    3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    0,
-                    reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * p.second.numV)
-                );
-            //}
+            GLuint vao = 0;
+            glCreateVertexArrays(1, &vao);
+            glVertexArrayVertexBuffer(vao, 0, vbo, 0, 3 * sizeof(float));
+            p.second.vaoArray.push_back(vao);
+
+            glEnableVertexArrayAttrib(vao, 0);
+            glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+            glVertexArrayAttribBinding(vao, 0, 0);
         }
 
         // Grid: we need columns
         if (p.second.numU > 1) {
             for (int i = 0; i < p.second.numV; i++) {
-                GLuint cvao = 0;
-                glGenVertexArrays(1, &cvao);
-                p.second.vaoArray.push_back(cvao);
-
                 GLuint cvbo = 0;
-                glGenBuffers(1, &cvbo);
-                p.second.vboArray.push_back(cvbo);
-
-                glBindVertexArray(cvao);
-                glBindBuffer(GL_ARRAY_BUFFER, cvbo);
-                glBufferData(
-                    GL_ARRAY_BUFFER,
+                glCreateBuffers(1, &cvbo);
+                glNamedBufferStorage(
+                    cvbo,
                     p.second.vertices.size() * sizeof(GLfloat),
                     p.second.vertices.data(),
-                    GL_STATIC_DRAW
+                    GL_NONE_BIT
                 );
-                // in_position
-                glEnableVertexAttribArray(0);
-                // U and V may not be given by the user
-                if (p.second.vertices.size() / (p.second.numU * p.second.numV) > 3) {
-                    glVertexAttribPointer(
-                        0,
-                        3,
-                        GL_FLOAT,
-                        GL_FALSE,
-                        p.second.numV * sizeof(GLfloat) * 5,
-                        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * i)
-                    );
+                p.second.vertices.clear();
+                p.second.vboArray.push_back(cvbo);
 
-                    // texture coords
-                    glEnableVertexAttribArray(1);
-                    glVertexAttribPointer(
+                GLuint cvao = 0;
+                glCreateVertexArrays(1, &cvao);
+                const bool hasUV =
+                    p.second.vertices.size() / (p.second.numU * p.second.numV) > 3;
+                glVertexArrayVertexBuffer(
+                    cvao,
+                    0,
+                    cvbo,
+                    0,
+                    hasUV ? 5 * sizeof(GLfloat) : 3 * sizeof(GLfloat)
+                );
+                p.second.vaoArray.push_back(cvao);
+
+                glEnableVertexArrayAttrib(cvao, 0);
+                glVertexArrayAttribFormat(cvao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+                glVertexArrayAttribBinding(cvao, 0, 0);
+
+                if (hasUV) {
+                    glEnableVertexArrayAttrib(cvao, 1);
+                    glVertexArrayAttribFormat(
+                        cvao,
                         1,
                         2,
                         GL_FLOAT,
                         GL_FALSE,
-                        p.second.numV * sizeof(GLfloat) * 7,
-                        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i)
+                        3 * sizeof(GLfloat)
                     );
-                }
-                else { // no U and V:
-                    glVertexAttribPointer(
-                        0,
-                        3,
-                        GL_FLOAT,
-                        GL_FALSE,
-                        p.second.numV * sizeof(GLfloat) * 3,
-                        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i)
-                    );
+                    glVertexArrayAttribBinding(cvao, 0, 0);
                 }
             }
         }
     }
-
-    glBindVertexArray(0);
 
     _dataIsDirty = false;
 }

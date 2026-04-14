@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -67,11 +67,12 @@
 #include <modules/base/rendering/renderableprism.h>
 #include <modules/base/rendering/renderabletimevaryingsphere.h>
 #include <modules/base/rendering/screenspacedashboard.h>
-#include <modules/base/rendering/screenspaceframebuffer.h>
+#include <modules/base/rendering/screenspacedate.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
 #include <modules/base/rendering/screenspaceimageonline.h>
 #include <modules/base/rendering/screenspaceinsetblackout.h>
 #include <modules/base/rendering/screenspacerenderablerenderable.h>
+#include <modules/base/rendering/screenspacetext.h>
 #include <modules/base/rendering/screenspacetimevaryingimageonline.h>
 #include <modules/base/rotation/constantrotation.h>
 #include <modules/base/rotation/fixedrotation.h>
@@ -87,27 +88,29 @@
 #include <modules/base/scale/timedependentscale.h>
 #include <modules/base/scale/timelinescale.h>
 #include <modules/base/task/convertmodeltask.h>
-#include <modules/base/translation/timelinetranslation.h>
 #include <modules/base/translation/globetranslation.h>
 #include <modules/base/translation/luatranslation.h>
 #include <modules/base/translation/multitranslation.h>
 #include <modules/base/translation/statictranslation.h>
+#include <modules/base/translation/timelinetranslation.h>
 #include <modules/base/timeframe/timeframeinterval.h>
 #include <modules/base/timeframe/timeframeunion.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/texturemanager.h>
 
 namespace openspace {
 
 ghoul::opengl::ProgramObjectManager BaseModule::ProgramObjectManager;
 ghoul::opengl::TextureManager BaseModule::TextureManager;
 
-BaseModule::BaseModule() : OpenSpaceModule(BaseModule::Name) {}
+BaseModule::BaseModule()
+    : OpenSpaceModule(BaseModule::Name)
+{}
 
 void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
@@ -115,7 +118,6 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
 
     fSsRenderable->registerClass<ScreenSpaceDashboard>("ScreenSpaceDashboard");
-    fSsRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
     fSsRenderable->registerClass<ScreenSpaceImageLocal>("ScreenSpaceImageLocal");
     fSsRenderable->registerClass<ScreenSpaceImageOnline>("ScreenSpaceImageOnline");
     fSsRenderable->registerClass<ScreenSpaceInsetBlackout>("ScreenSpaceInsetBlackout");
@@ -125,6 +127,8 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fSsRenderable->registerClass<ScreenSpaceTimeVaryingImageOnline>(
         "ScreenSpaceTimeVaryingImageOnline"
     );
+    fSsRenderable->registerClass<ScreenSpaceDate>("ScreenSpaceDate");
+    fSsRenderable->registerClass<ScreenSpaceText>("ScreenSpaceText");
 
 
     ghoul::TemplateFactory<DashboardItem>* fDashboard =
@@ -259,7 +263,7 @@ void BaseModule::internalDeinitializeGL() {
     TextureManager.releaseAll(ghoul::opengl::TextureManager::Warnings::Yes);
 }
 
-std::vector<documentation::Documentation> BaseModule::documentations() const {
+std::vector<Documentation> BaseModule::documentations() const {
     return {
         DashboardItemAngle::Documentation(),
         DashboardItemCameraOrientation::Documentation(),
@@ -308,11 +312,12 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         SizeMappingComponent::Documentation(),
 
         ScreenSpaceDashboard::Documentation(),
-        ScreenSpaceFramebuffer::Documentation(),
+        ScreenSpaceDate::Documentation(),
         ScreenSpaceImageLocal::Documentation(),
         ScreenSpaceImageOnline::Documentation(),
         ScreenSpaceInsetBlackout::Documentation(),
         ScreenSpaceRenderableRenderable::Documentation(),
+        ScreenSpaceText::Documentation(),
         ScreenSpaceTimeVaryingImageOnline::Documentation(),
 
         ConstantRotation::Documentation(),
@@ -343,7 +348,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
     };
 }
 
-std::vector<scripting::LuaLibrary> BaseModule::luaLibraries() const {
+std::vector<LuaLibrary> BaseModule::luaLibraries() const {
     return {
         ScreenSpaceDashboard::luaLibrary()
     };

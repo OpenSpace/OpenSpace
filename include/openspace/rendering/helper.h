@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,11 @@
 #ifndef __OPENSPACE_CORE___HELPER___H__
 #define __OPENSPACE_CORE___HELPER___H__
 
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <memory>
+#include <vector>
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -37,15 +41,9 @@ namespace openspace {
     struct RenderData;
 } // namespace openspace
 
-namespace openspace::rendering::helper {
+namespace openspace::rendering {
 
-enum class Anchor {
-    Center,
-    NW,
-    NE,
-    SW,
-    SE
-};
+enum class Anchor { Center, NW, NE, SW, SE };
 
 void initialize();
 void deinitialize();
@@ -62,6 +60,9 @@ void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4
 
 void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color,
     const ghoul::opengl::Texture& texture, Anchor anchor = Anchor::NW);
+
+void renderLine(const glm::vec2& startPosition, const glm::vec2& endPosition,
+    const glm::vec2& size, const glm::vec4& startColor, const glm::vec4& endColor);
 
 struct Shaders {
     struct {
@@ -107,32 +108,35 @@ struct VertexObjects {
 
     struct {
         GLuint vao = 0;
+        GLuint vbo = 0;
+    } line;
+
+    struct {
+        GLuint vao = 0;
     } empty;
 };
 
 namespace detail {
-
-Shaders& gShadersConstructor();
-VertexObjects& gVertexObjectsConstructor();
-
+    Shaders& gShadersConstructor();
+    VertexObjects& gVertexObjectsConstructor();
 } // namespace detail
 
 static Shaders& shaders = detail::gShadersConstructor();
 static VertexObjects& vertexObjects = detail::gVertexObjectsConstructor();
 
 struct Vertex {
-    GLfloat xyz[3];
-    GLfloat uv[2];
-    GLfloat rgba[4];
+    glm::vec3 position;
+    glm::vec2 texCoords;
+    glm::vec4 color;
 };
 
 struct VertexXYZ {
-    GLfloat xyz[3];
+    glm::vec3 position;
 };
 
 struct VertexXYZNormal {
-    GLfloat xyz[3];
-    GLfloat normal[3];
+    glm::vec3 position;
+    glm::vec3 normal;
 };
 
 template <typename V>
@@ -173,6 +177,6 @@ struct LightSourceRenderData {
         const std::vector<std::unique_ptr<LightSource>>& sources);
 };
 
-} // namespace openspace::rendering::helper
+} // namespace openspace::rendering
 
 #endif // __OPENSPACE_CORE___HELPER___H__

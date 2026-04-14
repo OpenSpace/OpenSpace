@@ -1,5 +1,5 @@
 local transforms = asset.require("./transforms")
-local kernel = asset.require("./kernels116")
+local kernel = asset.require("./kernels184")
 local coreKernels = asset.require("spice/core")
 
 
@@ -652,6 +652,86 @@ local FerdinandLabel = {
   }
 }
 
+local S2023U1 = {
+  Identifier = "S2023U1",
+  Parent = transforms.UranusBarycenter.S2023U1,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.S2023U1,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 5000, 5000, 5000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_irregular_retrograde",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "S/2023 U 1",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/S2023U1"
+  }
+}
+
+local S2023U1Trail = {
+  Identifier = "S2023U1Trail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.S2023U1,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 681,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "S/2023 U 1 Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/S2023U1",
+    Focusable = false
+  }
+}
+
+local S2023U1Label = {
+  Identifier = "S2023U1Label",
+  Parent = S2023U1.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2023 U 1",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 80.0 },
+    FadeWidths = { 1.0, 40.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2023 U 1 Label",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/S2023U1",
+    Focusable = false
+  }
+}
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Francisco)
@@ -685,9 +765,17 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Ferdinand)
   openspace.addSceneGraphNode(FerdinandTrail)
   openspace.addSceneGraphNode(FerdinandLabel)
+
+  openspace.addSceneGraphNode(S2023U1)
+  openspace.addSceneGraphNode(S2023U1Trail)
+  openspace.addSceneGraphNode(S2023U1Label)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2023U1Label)
+  openspace.removeSceneGraphNode(S2023U1Trail)
+  openspace.removeSceneGraphNode(S2023U1)
+
   openspace.removeSceneGraphNode(FerdinandLabel)
   openspace.removeSceneGraphNode(FerdinandTrail)
   openspace.removeSceneGraphNode(Ferdinand)
@@ -753,12 +841,14 @@ asset.export(Ferdinand)
 asset.export(FerdinandTrail)
 asset.export(FerdinandLabel)
 
-
+asset.export(S2023U1)
+asset.export(S2023U1Trail)
+asset.export(S2023U1Label)
 
 asset.meta = {
   Name = "Uranus Irregular Retrograde Moons",
   Description = [[Procedural Globe asset containing Uranus' irregular retrograde moons:
-    Francisco, Caliban, Stephano, Trinculo, Sycorax, Prospero, Setebos and Ferdinand.
+    Francisco, Caliban, Stephano, Trinculo, Sycorax, Prospero, Setebos, Ferdinand and S2023U1.
     Blank globes and SPICE trails are generated for each moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

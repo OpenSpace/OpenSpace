@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,63 +24,65 @@
 
 #include <modules/toyvolume/rendering/renderabletoyvolume.h>
 
-#include <modules/toyvolume/rendering/toyvolumeraycaster.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <cmath>
+#include <optional>
+#include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
+    constexpr Property::PropertyInfo ScalingExponentInfo = {
         "ScalingExponent",
-        "Scaling Exponent",
+        "Scaling exponent",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    constexpr Property::PropertyInfo StepSizeInfo = {
         "StepSize",
-        "Step Size",
+        "Step size",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TranslationInfo = {
+    constexpr Property::PropertyInfo TranslationInfo = {
         "Translation",
         "Translation",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
+    constexpr Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DownscaleVolumeRenderingInfo =
-    {
+    constexpr Property::PropertyInfo DownscaleVolumeRenderingInfo = {
         "Downscale",
-        "Downscale Factor Volume Rendering",
+        "Downscale factor volume rendering",
         "The downscaling factor used when rendering the current volume.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableToyVolume)]] Parameters {
@@ -102,16 +104,20 @@ namespace {
         // [[codegen::verbatim(StepSizeInfo.description)]]
         std::optional<float> stepSize;
 
-        // Raycast steps
+        // Raycast steps.
         std::optional<int> steps;
 
         // [[codegen::verbatim(DownscaleVolumeRenderingInfo.description)]]
         std::optional<float> downscale;
     };
-#include "renderabletoyvolume_codegen.cpp"
 } // namespace
+#include "renderabletoyvolume_codegen.cpp"
 
 namespace openspace {
+
+Documentation RenderableToyVolume::Documentation() {
+    return codegen::doc<Parameters>("toyvolume_renderable_toyvolume");
+}
 
 RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -138,11 +144,9 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     _stepSize = p.stepSize.value_or(_stepSize);
     _rayCastSteps = p.steps.value_or(_rayCastSteps);
 
-    _downScaleVolumeRendering.setVisibility(properties::Property::Visibility::Developer);
+    _downScaleVolumeRendering.setVisibility(Property::Visibility::Developer);
     _downScaleVolumeRendering = p.downscale.value_or(_downScaleVolumeRendering);
 }
-
-RenderableToyVolume::~RenderableToyVolume() {}
 
 void RenderableToyVolume::initializeGL() {
     glm::vec4 color = glm::vec4(glm::vec3(_color), opacity());
@@ -177,11 +181,6 @@ void RenderableToyVolume::deinitializeGL() {
         global::raycasterManager->detachRaycaster(*_raycaster);
         _raycaster = nullptr;
     }
-}
-
-bool RenderableToyVolume::isReady() const {
-    // @TODO isReady function needs to be filled
-    return true;
 }
 
 void RenderableToyVolume::update(const UpdateData& data) {

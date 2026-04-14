@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,10 +29,45 @@
 
 namespace openspace {
 
+class SceneGraphNode;
+
 struct CameraPose {
     glm::dvec3 position = glm::dvec3(0.0);
     glm::dquat rotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
 };
+
+struct CameraRotationDecomposition {
+    glm::dquat localRotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
+    glm::dquat globalRotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
+};
+
+/**
+ * Decomposes the camera's rotation in to a global and a local rotation defined by
+ * CameraRotationDecomposition. The global rotation defines the rotation so that the
+ * camera points towards the reference position.
+ *
+ * The local rotation defines the differential from the global to the current total
+ * rotation so that `cameraRotation = globalRotation * localRotation`.
+ */
+CameraRotationDecomposition decomposeCameraRotation(const CameraPose& cameraPose,
+    const glm::dvec3& reference);
+
+/**
+ * Decomposes the camera's rotation in to a global and a local rotation defined by
+ * CameraRotationDecomposition. The global rotation defines the rotation so that the
+ * camera points towards the reference node in the direction opposite to the direction
+ * out from the surface of the object. The local rotation defines the differential from
+ * the global to the current total rotation so that
+ * `cameraRotation = globalRotation * localRotation`.
+ */
+CameraRotationDecomposition decomposeCameraRotationSurface(
+    const CameraPose& cameraPose, const SceneGraphNode& reference);
+
+/**
+ * Composes a pair of global and local rotations into a quaternion that can be used as the
+ * world rotation for a camera.
+ */
+glm::dquat composeCameraRotation(const CameraRotationDecomposition& decomposition);
 
 } // namespace openspace
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,10 @@
 #include <modules/iswa/rendering/renderabledatacygnet.h>
 
 #include <openspace/properties/misc/selectionproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <filesystem>
+#include <tuple>
 
 namespace openspace {
 
@@ -47,18 +50,15 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    /**
-     * Creates a plane geometry.
-     */
-    bool createGeometry() override;
-    bool destroyGeometry() override;
+    void createGeometry() override;
+    void destroyGeometry() override;
     bool updateTextureResource() override;
     void renderGeometry() const override;
     void setUniforms() override;
-    std::vector<float*> textureData() override;
+    std::vector<std::vector<float>> textureData() override;
 
     void setDimensions();
 
@@ -78,11 +78,10 @@ private:
     void subscribeToGroup();
 
     void changeKwPath(std::string path);
-    static int id();
 
-    properties::SelectionProperty _fieldlines;
-    properties::FloatProperty _resolution;
-    properties::FloatProperty _slice;
+    SelectionProperty _fieldlines;
+    FloatProperty _resolution;
+    FloatProperty _slice;
 
     std::string _kwPath;
 
@@ -109,8 +108,8 @@ private:
     };
     Cut _cut;
 
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 };
 
 } // namespace openspace

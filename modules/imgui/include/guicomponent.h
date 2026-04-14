@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,16 +26,17 @@
 #define __OPENSPACE_MODULE_IMGUI___GUICOMPONENT___H__
 
 #include <openspace/properties/propertyowner.h>
+
 #include <openspace/properties/scalar/boolproperty.h>
 
-namespace openspace::gui {
+namespace openspace {
 
 class GUI;
 
 /**
  * The base class for a GUI component that can be rendered to the screen.
  */
-class GuiComponent : public properties::PropertyOwner {
+class GuiComponent : public PropertyOwner {
 public:
     /**
      * Constructor that initializes this components member variables.
@@ -84,20 +85,20 @@ public:
     virtual void render() = 0;
 
     void setShowHelpTooltip(bool showHelpTooltip);
-    void setShowHelpTooltipDelay(double delay);
+    void setShowHelpTooltipDelay(float delay);
 
 protected:
     /// `true` if this component is enabled and visible on the screen
-    properties::BoolProperty _isEnabled;
+    BoolProperty _isEnabled;
 
-    /// if `true` this window is currently collapsed. This setting mirrors the ImGui
+    /// If `true` this window is currently collapsed. This setting mirrors the ImGui
     /// internal state of the window
-    properties::BoolProperty _isCollapsed;
+    BoolProperty _isCollapsed;
 
     bool _showHelpTooltip = true;
-    double _tooltipDelay = true;
+    float _tooltipDelay = 1.f;
 };
 
-} // namespace openspace::gui
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_IMGUI___GUICOMPONENT___H__

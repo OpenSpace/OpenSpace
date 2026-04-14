@@ -1,0 +1,79 @@
+local stereo_a = asset.require("scene/solarsystem/missions/stereo/stereo_a")
+local coreKernels = asset.require("spice/core")
+local kernels = asset.require("scene/solarsystem/missions/stereo/kernels")
+
+
+
+-- We use the Stereo position with an added rotation to stabilize the image and remove
+-- any wobble effect since we don't have the CK kernels
+local StereoPosition = {
+  Identifier = "STEREO_A_Position_Ecliptic",
+  Parent = stereo_a.Position.Identifier,
+  Transform = {
+    -- This rotation removes tiny wobbles and fixes the frame in place
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.EclipJ2000,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "STEREO A Position",
+    Path = "/Solar System/Missions/STEREO A",
+    Description = [[The position of the STEREO-A spacecraft with an added rotation to
+      reduce wobble effects.]],
+    Hidden = true,
+    Focusable = false
+  }
+}
+
+local SolarImagery = {
+  Identifier = "SolarImagery_STEREO_A",
+  Parent = StereoPosition.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = stereo_a.MissionBegin,
+    End = stereo_a.MissionEnd
+  },
+  Renderable = {
+    Type = "RenderableSolarImagery",
+    ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing/stereo"),
+    TransferfunctionDir = asset.resource("colortables")
+  },
+  GUI = {
+    Name = "STEREO A Imagery",
+    Path = "/Solar System/Sun/Solar Imagery",
+    Description = [[Time-resolved solar imagery from NASA's Solar TErrestrial RElations
+      Observatory (STEREO-A). Images from multiple instruments can be browsed over time and
+      are projected onto a plane positioned relative to the Sun. Instrument-specific color
+      mappings help highlight different solar phenomena such as active regions, flares,
+      and coronal structures.]],
+      Focusable = false
+  }
+}
+
+
+asset.onInitialize(function ()
+  openspace.addSceneGraphNode(StereoPosition)
+  openspace.addSceneGraphNode(SolarImagery)
+end
+)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(SolarImagery)
+  openspace.removeSceneGraphNode(StereoPosition)
+end
+)
+
+asset.export("Imagery", SolarImagery)
+
+
+
+asset.meta = {
+  Name = "STEREO Solar Imagery",
+  Description = [[Time-resolved solar imagery from NASA's STEREO-A spacecraft,
+    showing the Sun in multiple wavelengths captured by its onboard instruments.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

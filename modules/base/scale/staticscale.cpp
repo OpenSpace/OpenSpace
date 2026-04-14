@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,15 +25,17 @@
 #include <modules/base/scale/staticscale.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/util/updatestructures.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ScaleInfo = {
         "Scale",
         "Scale",
         "This value is used as a scaling factor for the scene graph node that this "
         "transformation is attached to relative to its parent.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
     // This Scale type scales the scene graph node that it is attached to by a fixed
@@ -45,13 +47,13 @@ namespace {
         // [[codegen::verbatim(ScaleInfo.description)]]
         double scale;
     };
-#include "staticscale_codegen.cpp"
 } // namespace
+#include "staticscale_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation StaticScale::Documentation() {
-    return codegen::doc<Parameters>("base_transform_scale_static");
+Documentation StaticScale::Documentation() {
+    return codegen::doc<Parameters>("base_scale_static");
 }
 
 StaticScale::StaticScale(const ghoul::Dictionary& dictionary)
@@ -63,6 +65,10 @@ StaticScale::StaticScale(const ghoul::Dictionary& dictionary)
     _scaleValue = p.scale;
     _scaleValue.onChange([this]() { requireUpdate(); });
     addProperty(_scaleValue);
+
+    // We need to trigger an update or else the `_cacheScale` value will not be the same
+    // as `_scaleValue` until the first "real" update call
+    update(UpdateData());
 }
 
 glm::dvec3 StaticScale::scaleValue(const UpdateData&) const {

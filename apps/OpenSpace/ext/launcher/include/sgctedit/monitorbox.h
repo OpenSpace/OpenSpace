@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,9 +27,11 @@
 
 #include <QWidget>
 
-#include <QColor>
-#include <array>
 #include <vector>
+
+class QPaintEvent;
+class QRect;
+class QRectF;
 
 class MonitorBox final : public QWidget {
 Q_OBJECT
@@ -39,8 +41,8 @@ public:
      * relative position and size, and window(s) that they contain.
      *
      * \param widgetSize The size of the display widget in pixels
-     * \param monitorResolution A vector containing each monitor's maximum display size in
-     *        pixels
+     * \param monitorResolutions A vector containing each monitor's maximum display size
+     *        in pixels
      * \param parent The parent which to which this MonitorBox belongs
      */
     MonitorBox(QRect widgetSize, const std::vector<QRect>& monitorResolutions,

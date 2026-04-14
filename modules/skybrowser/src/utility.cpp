@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,9 +28,10 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <ghoul/misc/easing.h>
 #include <glm/gtx/vector_angle.hpp>
+#include <algorithm>
 #include <cmath>
+#include <cstdlib>
 
 namespace {
     // Galactic coordinates are projected onto the celestial sphere
@@ -46,25 +47,28 @@ namespace {
     );
 } // namespace
 
-namespace openspace::skybrowser {
+namespace openspace {
 
-// Converts from spherical coordinates in the unit of degrees to cartesian coordianates
+/**
+ * Converts from spherical coordinates in the unit of degrees to cartesian coordinates.
+ */
 glm::dvec3 sphericalToCartesian(const glm::dvec2& coords) {
     const glm::dvec2 coordsRadians = glm::radians(coords);
     const glm::dvec3 cartesian = glm::dvec3(
-        cos(coordsRadians.x) * cos(coordsRadians.y),
-        sin(coordsRadians.x) * cos(coordsRadians.y),
-        sin(coordsRadians.y)
+        std::cos(coordsRadians.x) * std::cos(coordsRadians.y),
+        std::sin(coordsRadians.x) * std::cos(coordsRadians.y),
+        std::sin(coordsRadians.y)
     );
-
     return cartesian;
 }
 
-// Converts from cartesian coordianates to spherical in the unit of degrees
+/**
+ * Converts from cartesian coordianates to spherical in the unit of degrees.
+ */
 glm::dvec2 cartesianToSpherical(const glm::dvec3& coords) {
     // Equatorial coordinates RA = right ascension, Dec = declination
-    double ra = atan2(coords.y, coords.x);
-    const double dec = atan2(
+    double ra = std::atan2(coords.y, coords.x);
+    const double dec = std::atan2(
         coords.z,
         glm::sqrt((coords.x * coords.x) + (coords.y * coords.y))
     );
@@ -86,8 +90,8 @@ glm::dvec3 equatorialToGalactic(const glm::dvec3& coords) {
 }
 
 glm::dvec3 localCameraToScreenSpace3d(const glm::dvec3& coords) {
-    // Ensure that if the coord is behind the camera,
-    // the converted coordinate will be there too
+    // Ensure that if the coord is behind the camera, the converted coordinate will be
+    // there too
     const double zCoord = coords.z > 0.0 ? -ScreenSpaceZ : ScreenSpaceZ;
 
     // Calculate screen space coords x and y
@@ -99,7 +103,7 @@ glm::dvec3 localCameraToScreenSpace3d(const glm::dvec3& coords) {
 }
 
 glm::dvec3 localCameraToGalactic(const glm::dvec3& coords) {
-    const glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
+    const glm::dvec3 camPos = global::navigationHandler->camera()->position();
     const glm::dvec4 coordsVec4 = glm::dvec4(coords, 1.0) ;
     const glm::dmat4 camMat = glm::inverse(
         global::navigationHandler->camera()->combinedViewMatrix()
@@ -111,9 +115,9 @@ glm::dvec3 localCameraToGalactic(const glm::dvec3& coords) {
 }
 
 glm::dvec3 localCameraToEquatorial(const glm::dvec3& coords) {
-    // Calculate the galactic coordinate of the target direction
-    // projected onto the celestial sphere
-    const glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
+    // Calculate the galactic coordinate of the target direction projected onto the
+    // celestial sphere
+    const glm::dvec3 camPos = global::navigationHandler->camera()->position();
     const glm::dvec3 galactic = camPos + localCameraToGalactic(coords);
     return galacticToEquatorial(galactic);
 }
@@ -154,10 +158,9 @@ glm::dvec3 cameraDirectionEquatorial() {
 glm::dvec3 cameraDirectionGalactic() {
     // Get the view direction of the screen in galactic coordinates
     Camera* camera = global::navigationHandler->camera();
-    const glm::dvec3 camPos = camera->positionVec3();
+    const glm::dvec3 camPos = camera->position();
     const glm::dvec3 view = camera->viewDirectionWorldSpace();
     const glm::dvec3 galCoord = camPos + CelestialSphereRadius * view;
-
     return galCoord;
 }
 
@@ -179,7 +182,9 @@ bool isCoordinateInView(const glm::dvec3& equatorial) {
     return isCoordInView;
 }
 
-// Transforms a pixel coordinate to a screen space coordinate
+/**
+ * Transforms a pixel coordinate to a screen space coordinate.
+ */
 glm::vec2 pixelToScreenSpace2d(const glm::vec2& mouseCoordinate) {
     const glm::vec2 size = glm::vec2(global::windowDelegate->currentWindowSize());
     // Change origin to middle of the window
@@ -191,7 +196,9 @@ glm::vec2 pixelToScreenSpace2d(const glm::vec2& mouseCoordinate) {
     return screenSpacePos;
 }
 
-// The horizontal and vertical fov of the OpenSpace window
+/**
+ * The horizontal and vertical fov of the OpenSpace window.
+ */
 glm::dvec2 fovWindow() {
     // OpenSpace FOV
     const glm::dvec2 windowDim = glm::dvec2(global::windowDelegate->currentWindowSize());
@@ -199,14 +206,14 @@ glm::dvec2 fovWindow() {
     const double hFov = global::windowDelegate->horizFieldOfView(
         global::windowDelegate->currentWindowId()
     );
-    const glm::dvec2 OpenSpaceFOV = glm::dvec2(hFov, hFov * ratio);
-    return OpenSpaceFOV;
+    const glm::dvec2 fov = glm::dvec2(hFov, hFov * ratio);
+    return fov;
 }
 
 double angleBetweenVectors(const glm::dvec3& start, const glm::dvec3& end) {
     // Find smallest angle between the two vectors
     const double cos = glm::dot(glm::normalize(start), glm::normalize(end));
-    // Ensure cos is within defined interval [-1,1]
+    // Ensure acos is within defined interval [-1,1]
     return std::acos(std::clamp(cos, -1.0, 1.0));
 }
 
@@ -233,48 +240,4 @@ double sizeFromFov(double fov, const glm::dvec3& worldPosition) {
     return opposite;
 }
 
-template <>
-double Animation<double>::newValue() const {
-    if (!isAnimating()) {
-        return _goal;
-    }
-    else {
-        const double percentage = percentageSpent();
-        const double diff = (_goal - _start) * ghoul::exponentialEaseOut(percentage);
-        return _start + diff;
-    }
-}
-
-template <>
-glm::dmat4 Animation<glm::dvec3>::rotationMatrix() {
-    if (!isAnimating()) {
-        return glm::dmat4(1.0);
-    }
-
-    const double percentage = ghoul::sineEaseInOut(percentageSpent());
-    const double increment = percentage - _lastPercentage;
-    _lastPercentage = percentage;
-
-    glm::dmat4 rotMat = skybrowser::incrementalAnimationMatrix(
-        glm::normalize(_start),
-        glm::normalize(_goal),
-        increment
-    );
-    return rotMat;
-}
-
-template <>
-glm::dvec3 Animation<glm::dvec3>::newValue() const {
-    if (!isAnimating()) {
-        return _goal;
-    }
-    const glm::dmat4 rotMat = skybrowser::incrementalAnimationMatrix(
-        glm::normalize(_start),
-        glm::normalize(_goal),
-        ghoul::exponentialEaseOut(percentageSpent())
-    );
-    // Rotate direction
-    return glm::dvec3(rotMat * glm::dvec4(_start, 1.0));;
-}
-
-} // namespace openspace::skybrowser
+} // namespace openspace

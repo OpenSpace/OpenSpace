@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,7 +31,7 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 
 struct TimeRange {
     /**
@@ -46,7 +46,7 @@ struct TimeRange {
     TimeRange(double startTime, double endTime);
 
     /**
-     * Throws exception if unable to parse the provided \class ghoul::Dictionary.
+     * Throws exception if unable to parse the provided ghoul::Dictionary.
      */
     explicit TimeRange(const ghoul::Dictionary& dict);
 
@@ -73,7 +73,7 @@ struct TimeRange {
 
     bool includes(const TimeRange& o) const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     double start = std::numeric_limits<double>::max();
     double end = -std::numeric_limits<double>::max();

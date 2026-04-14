@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,11 @@
 #include <openspace/engine/globals.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timemanager.h>
-#include <functional>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <utility>
 
 namespace {
     struct [[codegen::Dictionary(TileProviderByDate)]] Parameters {
@@ -42,16 +46,16 @@ namespace {
         // tile provider with the earliest time will be used for all dates prior to that
         // date and the provider with the latest time will be used for all dates
         // afterwards. In between, a provider is used from the specified time until the
-        // time of the next provider
+        // time of the next provider.
         std::map<std::string, ghoul::Dictionary> providers;
     };
-#include "tileproviderbydate_codegen.cpp"
 } // namespace
+#include "tileproviderbydate_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation TileProviderByDate::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_tileproviderbydate");
+Documentation TileProviderByDate::Documentation() {
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_bydate");
 }
 
 TileProviderByDate::TileProviderByDate(const ghoul::Dictionary& dictionary) {
@@ -178,4 +182,4 @@ float TileProviderByDate::noDataValueAsFloat() {
     return _currentTileProvider ? _currentTileProvider->noDataValueAsFloat() : 1;
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

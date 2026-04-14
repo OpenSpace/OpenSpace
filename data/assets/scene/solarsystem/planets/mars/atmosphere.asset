@@ -13,7 +13,6 @@ local Atmosphere = {
     PlanetAverageGroundReflectance = 0.1,
     GroundRadianceEmission = 0.37,
     SunIntensity = 13.1,
-    MieScatteringExtinctionPropCoefficient = 0.23862,
     Rayleigh = {
       Coefficients = {
         -- Wavelengths are given in 10^-9m
@@ -23,7 +22,7 @@ local Atmosphere = {
         -- In Rayleigh scattering, the coefficients of
         -- absorption and scattering are the same.
       },
-    -- Thickness of atmosphere if its density were uniform, in Km
+      -- Thickness of atmosphere if its density were uniform, in km
       H_R = 10.43979
     },
     -- Default
@@ -32,9 +31,9 @@ local Atmosphere = {
         -- Reflection coefficients are given in km^-1
         Scattering = { 0.05361771, 0.05361771, 0.05361771 },
         -- Extinction coefficients are a fraction of the Scattering coefficients
-        Extinction = { 0.05361771 / 0.98979, 0.05361771 / 0.98979, 0.05361771 / 0.98979 }
+        Extinction = { 0.05361771 / 0.23862, 0.05361771 / 0.23862, 0.05361771 / 0.23862 }
       },
-      -- Mie Height scale (atmosphere thickness for constant density) in Km
+      -- Mie Height scale (atmosphere thickness for constant density) in km
       H_M = 3.09526,
       -- Mie Phase Function Value (G e [-1.0, 1.0].
       -- If G = 1.0, Mie phase function = Rayleigh Phase Function)

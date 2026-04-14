@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,8 +32,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 /**
  * This concrete implementation of a RenderableTrail renders an updated trail behind an
  * object that is likely to have an orbit-like path. However, this is not required and
@@ -53,7 +51,7 @@ public:
 
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
 	enum PhaseType {
@@ -88,6 +86,7 @@ private:
         /// oldest
         int nUpdated;
     };
+
     /**
      * Updates the trail based on the new incoming UpdateData information. This function
      * might update an arbitrary number of values in the vertex buffer and returns an
@@ -114,12 +113,12 @@ private:
     /// The end time of the trail
     properties::StringProperty _endTime;
     /// The orbital period of the RenderableTrail in days
-    properties::DoubleProperty _period;
+    DoubleProperty _period;
     /// The number of points that should be sampled between _period and now
-    properties::IntProperty _resolution;
+    IntProperty _resolution;
 
-    /// A dirty flag that determines whether a full sweep (recomputing of all values)
-    /// is necessary
+    /// A dirty flag that determines whether a full sweep (recomputing of all values) is
+    /// necessary
     bool _needsFullSweep = true;
     /// A dirty flag to determine whether the index buffer needs to be regenerated and
     /// then reuploaded
@@ -131,7 +130,7 @@ private:
     double _firstPointTime = 0.0;
     /// The time stamp of the newest fixed point in the array
     double _lastPointTime = 0.0;
-    /// The time stamp of when the last valid trail was generated.
+    /// The time stamp of when the last valid trail was generated
     double _previousTime = 0.0;
 };
 

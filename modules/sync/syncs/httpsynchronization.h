@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -95,10 +95,11 @@ public:
 
     std::string generateUid() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    /** Creates a file next to the directory that indicates that this
+    /**
+     * Creates a file next to the directory that indicates that this
      * ResourceSynchronization has successfully synchronized its contents.
      */
     void createSyncFile(bool isFullySynchronized = true) const override;
@@ -133,16 +134,16 @@ private:
     bool _unzipFiles = false;
     std::optional<std::string> _unzipFilesDestination = std::nullopt;
 
-    // The list of all repositories that we'll try to sync from
+    /// The list of all repositories that we'll try to sync from
     const std::vector<std::string> _syncRepositories;
 
-    // The thread that will be doing the synchronization
+    /// The thread that will be doing the synchronization
     std::thread _syncThread;
 
-    // The files that have already been synchronized
+    /// The files that have already been synchronized
     std::vector<std::string> _existingSyncedFiles;
 
-    // The files that have been synchronized this time
+    /// The files that have been synchronized this time
     std::vector<std::string> _newSyncedFiles;
 };
 

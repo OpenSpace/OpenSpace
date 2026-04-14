@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace::properties {
+namespace openspace {
 
 template <typename T>
 TemplateProperty<T>::TemplateProperty(Property::PropertyInfo info, T value)
@@ -71,4 +71,4 @@ const std::type_info& TemplateProperty<T>::type() const {
     return typeid(T);
 }
 
-}  // namespace openspace::properties
+} // namespace openspace

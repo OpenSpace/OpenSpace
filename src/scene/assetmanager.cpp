@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,19 +25,29 @@
 #include <openspace/scene/assetmanager.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/scene/asset.h>
+#include <openspace/scene/profile.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/util/resourcesynchronization.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/defer.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/lua/luastate.h>
+#include <algorithm>
+#include <string_view>
+#include <utility>
 
 #include "assetmanager_lua.inl"
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "AssetManager";
 
     constexpr const char* AssetGlobalVariableName = "asset";
@@ -46,10 +56,14 @@ namespace {
     constexpr const char* AssetTableName = "_asset";
 
     enum class PathType {
-        RelativeToAsset, ///< Specified as a path relative to the requiring asset
-        RelativeToAssetRoot, ///< Specified as a path relative to the root folder
-        Absolute,  ///< Specified as an absolute path
-        Tokenized ///< Specified as a path that starts with a token
+        /// Specified as a path relative to the requiring asset
+        RelativeToAsset,
+        /// Specified as a path relative to the root folder
+        RelativeToAssetRoot,
+        /// Specified as an absolute path
+        Absolute,
+        /// Specified as a path that starts with a token
+        Tokenized
     };
 
     PathType classifyPath(const std::string& path) {
@@ -73,26 +87,26 @@ namespace {
 
     struct [[codegen::Dictionary(AssetMeta)]] Parameters {
         // The user-facing name of the asset. It should describe to the user what they can
-        // expect when loading the asset into a profile
+        // expect when loading the asset into a profile.
         std::optional<std::string> name;
 
         // A version number for this specific asset. It is recommended to use SemVer for
         // the versioning. The versioning used here does not have to correspond to any
-        // versioning information provided by OpenSpace
+        // versioning information provided by OpenSpace.
         std::optional<std::string> version;
 
         // A user-facing description of the asset explaining what the contents are, where
         // the data has been acquired from and what a user can do or see with this asset.
         // This might also provide additional URLs for a user to read more details about
-        // the content of this asset
+        // the content of this asset.
         std::optional<std::string> description;
 
-        // The name of the author for this asset file
+        // The name of the author for this asset file.
         std::optional<std::string> author;
 
         // A reprentative URL for this asset as chosen by the asset author. This might be
         // a URL to the research group that provided the data, the personal URL of the
-        // author, or a webpage for the group that is responsible for this asset
+        // author, or a webpage for the group that is responsible for this asset.
         std::optional<std::string> url [[codegen::key("URL")]];
 
         // The license information under which this asset is released. For suggestions on
@@ -101,12 +115,11 @@ namespace {
         std::optional<std::string> license;
 
         // A list of all identifiers that are exposed by this asset. This list is needed
-        // to populate the descriptions in the main user interface
+        // to populate the descriptions in the main user interface.
         std::optional<std::vector<std::string>> identifiers [[codegen::identifier()]];
     };
-
-#include "assetmanager_codegen.cpp"
 } // namespace
+#include "assetmanager_codegen.cpp"
 
 namespace openspace {
 
@@ -193,7 +206,6 @@ void AssetManager::runRemoveQueue() {
 void AssetManager::runAddQueue() {
     ZoneScoped;
     for (const std::string& asset : _assetAddQueue) {
-
         const std::filesystem::path path = generateAssetPath(_assetRootDirectory, asset);
         Asset* a = nullptr;
         try {
@@ -230,10 +242,6 @@ void AssetManager::runAddQueue() {
 
 void AssetManager::update() {
     ZoneScoped;
-
-    // Flag to keep track of when to emit synchronization event
-    const bool isLoadingAssets = !_toBeInitialized.empty();
-
     // Delete all the assets that have been marked for deletion in the previous frame
     {
         ZoneScopedN("Deleting assets");
@@ -302,11 +310,6 @@ void AssetManager::update() {
         else {
             it++;
         }
-    }
-
-    // If the _toBeInitialized state has changed in this update call we emit the event
-    if (isLoadingAssets && _toBeInitialized.empty()) {
-        global::eventEngine->publishEvent<events::EventAssetLoadingFinished>();
     }
 }
 
@@ -387,6 +390,10 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(std::format("Could not load asset '{}': {}", asset->path(), e.message));
+        global::eventEngine->publishEvent<EventAssetLoading>(
+            asset->path().string(),
+            EventAssetLoading::State::Error
+        );
         return false;
     }
     catch (const ghoul::RuntimeError& e) {
@@ -402,14 +409,15 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
     if (!metaDict.isEmpty()) {
         const Parameters p = codegen::bake<Parameters>(metaDict);
 
-        Asset::MetaInformation meta;
-        meta.name = p.name.value_or(meta.name);
-        meta.version = p.version.value_or(meta.version);
-        meta.description = p.description.value_or(meta.description);
-        meta.author = p.author.value_or(meta.author);
-        meta.url = p.url.value_or(meta.url);
-        meta.license = p.license.value_or(meta.license);
-        meta.identifiers = p.identifiers.value_or(meta.identifiers);
+        Asset::MetaInformation meta = {
+            .name = p.name.value_or(""),
+            .version = p.version.value_or(""),
+            .description = p.description.value_or(""),
+            .author = p.author.value_or(""),
+            .url = p.url.value_or(""),
+            .license = p.license.value_or(""),
+            .identifiers = p.identifiers.value_or(std::vector<std::string>())
+        };
 
         // We need to do this as the asset might have 'export'ed identifiers before
         // defining the meta table.  Therefore the meta information already contains some
@@ -439,10 +447,9 @@ void AssetManager::unloadAsset(Asset* asset) {
     }
     _onDeinitializeFunctionRefs[asset].clear();
 
-    //
     // Tear down asset lua table
     const int top = lua_gettop(*_luaState);
-    // Push the global table of AssetInfos to the lua stack.
+    // Push the global table of AssetInfos to the lua stack
     lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
     const int globalTableIndex = lua_gettop(*_luaState);
 
@@ -466,6 +473,10 @@ void AssetManager::unloadAsset(Asset* asset) {
         // might be painful
         _toBeDeleted.push_back(std::move(*it));
         _assets.erase(it);
+        global::eventEngine->publishEvent<EventAssetLoading>(
+            asset->path().string(),
+            EventAssetLoading::State::Unloaded
+        );
     }
 }
 
@@ -527,8 +538,9 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                 std::unique_ptr<ResourceSynchronization> s =
                     ResourceSynchronization::createFromDictionary(d);
 
-                const std::string uid =
-                    d.value<std::string>("Type") + "/" + s->generateUid();
+                const std::string uid = std::format(
+                    "{}/{}", d.value<std::string>("Type"), s->generateUid()
+                );
                 SyncItem* syncItem = nullptr;
                 auto it = manager->_synchronizations.find(uid);
                 if (it == manager->_synchronizations.end()) {
@@ -644,7 +656,6 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     );
     lua_setfield(*_luaState, assetTableIndex, "syncedResource");
 
-
     // Register require function
     // Asset require(string path, bool? explicitEnable = true)
     ghoul::lua::push(*_luaState, this, asset);
@@ -682,6 +693,10 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                     "Cannot require child asset when already loaded"
                 );
 
+            }
+
+            if (parent == dependency) {
+                return ghoul::lua::luaError(L, "Asset required itself");
             }
 
             if (dependency->isFailed()) {
@@ -803,7 +818,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             lua_getfield(L, -1, ExportsTableName);
             const int exportsTableIndex = lua_gettop(L);
 
-            // push the second argument
+            // Push the second argument
             lua_pushvalue(L, targetLocation);
             lua_setfield(L, exportsTableIndex, exportName.c_str());
 
@@ -896,12 +911,35 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
     const auto it = std::find_if(
         _assets.cbegin(),
         _assets.cend(),
-        [&path](const std::unique_ptr<Asset>& asset) { return asset->path() == path; }
+        [&path](const std::unique_ptr<Asset>& asset) {
+#ifdef WIN32
+            // `std::filesystem::path` is case-sensitive, but paths on Windows are not, so
+            // we have to compare them in lower-case instead
+            std::string p1 = asset->path().string();
+            std::transform(
+                p1.begin(),
+                p1.end(),
+                p1.begin(),
+                [](unsigned char c) { return std::tolower(c); }
+            );
+            std::string p2 = path.string();
+            std::transform(
+                p2.begin(),
+                p2.end(),
+                p2.begin(),
+                [](unsigned char c) { return std::tolower(c); }
+            );
+
+            return p1 == p2;
+#else // ^^^^ WIN32 // !WIN32
+            return asset->path() == path;
+#endif // WIN32
+        }
     );
     if (it != _assets.end()) {
         Asset* a = it->get();
         // We should warn if an asset is requested twice with different enable settings or
-        // else the resulting status will depend on the order of asset loading.
+        // else the resulting status will depend on the order of asset loading
         if (a->explicitEnabled() != explicitEnable) {
             if (a->firstParent()) {
                 // The first request came from another asset, so we can mention it in the
@@ -940,8 +978,7 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
         }
         else {
             throw ghoul::RuntimeError(std::format(
-                "Could not find asset file '{}' requested by '{}'",
-                path, retriever
+                "Could not find asset file '{}' requested by '{}'", path, retriever
             ));
         }
     }
@@ -965,6 +1002,10 @@ void AssetManager::callOnInitialize(Asset* asset) const {
     for (const int init : it->second) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
+            global::eventEngine->publishEvent<EventAssetLoading>(
+                asset->path().string(),
+                EventAssetLoading::State::Error
+            );
             throw ghoul::lua::LuaRuntimeException(std::format(
                 "When initializing '{}': {}",
                 asset->path(),
@@ -1049,7 +1090,7 @@ std::filesystem::path AssetManager::generateAssetPath(
     return absPath(fullAssetPath);
 }
 
-scripting::LuaLibrary AssetManager::luaLibrary() {
+LuaLibrary AssetManager::luaLibrary() {
     return {
         "asset",
         {
@@ -1059,7 +1100,8 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
             codegen::lua::RemoveAll,
             codegen::lua::IsLoaded,
             codegen::lua::AllAssets,
-            codegen::lua::RootAssets
+            codegen::lua::RootAssets,
+            codegen::lua::Parents
         }
     };
 }

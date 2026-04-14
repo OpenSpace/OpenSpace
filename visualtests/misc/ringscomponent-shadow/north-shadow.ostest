@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "scene/solarsystem/planets/saturn/saturn.asset"
+    },
+    {
+      "type": "asset",
+      "value": "scene/solarsystem/planets/saturn/default_layers.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Saturn",
+        "position": [
+          208667642.45118257,
+          54126259.93271133,
+          57439831.8162123
+        ],
+        "pitch": -0.017233193591973957,
+        "up": [
+          -0.26992564738826463,
+          0.018988409251575723,
+          0.9626939208264074
+        ],
+        "yaw": -0.003697934996467431,
+        "timestamp": "2028 MAY 14 12:13:12"
+      }
+    },
+    {
+      "type": "wait",
+      "value": 10.0
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

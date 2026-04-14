@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_CORE___CONFIGURATION___H__
 #define __OPENSPACE_CORE___CONFIGURATION___H__
 
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/properties/property.h>
 #include <openspace/util/keys.h>
+#include <ghoul/glm.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/dictionary.h>
 #include <filesystem>
@@ -37,7 +37,7 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 
 struct Configuration {
     Configuration() = default;
@@ -50,10 +50,14 @@ struct Configuration {
 
     std::string windowConfiguration = "${CONFIG}/single.json";
     std::string asset;
-    std::string profile;
 
-    properties::Property::Visibility propertyVisibility =
-        properties::Property::Visibility::User;
+    struct Profile {
+        std::string profile;
+        std::vector<std::string> addons;
+    };
+    Profile profile;
+
+    Property::Visibility propertyVisibility = Property::Visibility::User;
 
     bool showPropertyConfirmation = true;
 
@@ -107,7 +111,7 @@ struct Configuration {
 
     float shutdownCountdown = 0.f;
 
-    bool shouldUseScreenshotDate = false;
+    bool shouldUseScreenshotDateTime = false;
 
     bool sandboxedLua = true;
 
@@ -131,6 +135,8 @@ struct Configuration {
     LayerServer layerServer = LayerServer::All;
 
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
+
+    ghoul::Dictionary server;
 
     struct OpenGLDebugContext {
         bool isActive = false;
@@ -159,7 +165,7 @@ struct Configuration {
     // Values not read from the openspace.cfg file
     std::string sgctConfigNameInitialized;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
     ghoul::lua::LuaState state;
 };
 

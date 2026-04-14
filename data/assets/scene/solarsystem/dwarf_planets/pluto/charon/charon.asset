@@ -51,8 +51,7 @@ local Charon = {
     "moon_major_pluto"
   },
   GUI = {
-    Path = "/Solar System/Dwarf Planets/Pluto/Charon",
-    Focusable = false
+    Path = "/Solar System/Dwarf Planets/Pluto/Charon"
   }
 }
 

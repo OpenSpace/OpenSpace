@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,55 +26,23 @@
 
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <geos/io/GeoJSON.h>
 #include <scn/scan.h>
 #include <algorithm>
-#include <cstdio>
-
-// Keys used to read properties from GeoJson files
-namespace geojson::propertykeys {
-    constexpr std::string_view Name = "name";
-
-    constexpr std::string_view Opacity = "opacity";
-
-    constexpr std::array<std::string_view, 2> Color = { "color", "stroke" };
-    constexpr std::array<std::string_view, 2> FillColor = { "fill", "fill-color" };
-    constexpr std::string_view FillOpacity = "fill-opacity";
-    constexpr std::string_view LineWidth = "stroke-width";
-
-    constexpr std::string_view PointSize = "point-size";
-    constexpr std::array<std::string_view, 3> Texture = {
-        "texture", "sprite", "point-texture"
-    };
-
-    constexpr std::array<std::string_view, 2> PointTextureAnchor = {
-        "point-anchor", "anchor"
-    };
-    constexpr std::string_view PointTextureAnchorBottom = "bottom";
-    constexpr std::string_view PointTextureAnchorCenter = "center";
-
-    constexpr std::string_view Extrude = "extrude";
-
-    constexpr std::string_view Tessellate = "tessellate";
-    constexpr std::string_view TessellationLevel = "tessellationLevel";
-    constexpr std::string_view TessellationMaxDistance = "tessellationDistance";
-
-    constexpr std::string_view AltitudeMode = "altitudeMode";
-    //constexpr std::string_view AltitudeModeClamp = "clampToGround";
-    constexpr std::string_view AltitudeModeAbsolute = "absolute";
-    constexpr std::string_view AltitudeModeRelative = "relativeToGround";
-
-    constexpr std::string_view PerformShading = "performShading";
-} // namespace geojson::propertykeys
+#include <array>
+#include <filesystem>
 
 namespace {
-    using PropertyInfo = openspace::properties::Property::PropertyInfo;
+    using namespace openspace;
 
     template <size_t SIZE>
     bool keyMatches(const std::string_view key,
                     const std::array<std::string_view, SIZE>& keyAlternativesArray,
-                    std::optional<const PropertyInfo> propInfo = std::nullopt)
+                    std::optional<const Property::PropertyInfo> propInfo = std::nullopt)
     {
         auto it = std::find(
             keyAlternativesArray.begin(),
@@ -85,7 +53,7 @@ namespace {
             return true;
         }
 
-        if (propInfo.has_value() && key == (*propInfo).identifier) {
+        if (propInfo.has_value() && key == propInfo->identifier) {
             return true;
         }
 
@@ -93,7 +61,7 @@ namespace {
     }
 
     bool keyMatches(const std::string_view key, const std::string_view keyAlternative,
-                    std::optional<const PropertyInfo> propInfo = std::nullopt)
+                    std::optional<const Property::PropertyInfo> propInfo = std::nullopt)
     {
         const std::array<std::string_view, 1> array = { keyAlternative };
         return keyMatches(key, array, propInfo);
@@ -167,137 +135,137 @@ namespace {
         return color;
     }
 
-    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
+    constexpr Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Opacity",
-        "This value determines the opacity of this object. A value of 0 means "
-        "completely transparent.",
-        openspace::properties::Property::Visibility::NoviceUser
+        "This value determines the opacity of this object. A value of 0 means completely "
+        "transparent.",
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "The color of the rendered geometry. For points it will be used as a multiply"
+        "The color of the rendered geometry. For points it will be used as a multiply "
         "color for any provided texture.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FillOpacityInfo = {
+    constexpr Property::PropertyInfo FillOpacityInfo = {
         "FillOpacity",
-        "Fill Opacity",
-        "This value determines the opacity of the filled portion of a polygon. Will "
-        "also be used for extruded features.",
-        openspace::properties::Property::Visibility::NoviceUser
+        "Fill opacity",
+        "This value determines the opacity of the filled portion of a polygon. Will also "
+        "be used for extruded features.",
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FillColorInfo = {
+    constexpr Property::PropertyInfo FillColorInfo = {
         "FillColor",
-        "Fill Color",
+        "Fill color",
         "The color of the filled portion of a rendered polygon. Will also be used for "
         "extruded features.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "The width of any rendered lines.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
+    constexpr Property::PropertyInfo PointSizeInfo = {
         "PointSize",
-        "Point Size",
-        "The size of any rendered points. The size will be scaled based on the "
-        "bounding sphere of the globe.",
-        openspace::properties::Property::Visibility::NoviceUser
+        "Point size",
+        "The size of any rendered points. The size will be scaled based on the bounding "
+        "sphere of the globe.",
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointTextureInfo = {
+    constexpr Property::PropertyInfo PointTextureInfo = {
         "PointTexture",
-        "Point Texture",
+        "Point texture",
         "A texture to be used for rendering points. No value means to use the default "
         "texture provided by the GlobeBrowsing module. If no texture is provided there "
         "either, the point will be rendered as a plane and colored by the color value.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ExtrudeInfo = {
+    constexpr Property::PropertyInfo ExtrudeInfo = {
         "Extrude",
         "Extrude",
-        "If true, extrude the geometry to intersect the globe.Lines/polygons will be"
+        "If true, extrude the geometry to intersect the globe.Lines/polygons will be "
         "extruded with polygons,and points with lines.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
+    constexpr Property::PropertyInfo PerformShadingInfo = {
         "PerformShading",
-        "Perform Shading",
+        "Perform shading",
         "If true, perform shading on any create meshes, either from polygons or "
         "extruded lines. The shading will be computed based on any light sources of the "
         "GeoJson component.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AltitudeModeInfo = {
+    constexpr Property::PropertyInfo AltitudeModeInfo = {
         "AltitudeMode",
-        "Altitude Mode",
+        "Altitude mode",
         "The altitude mode decides how any height values of the geo coordinates should "
         "be interpreted. Absolute means that the height is interpreted as the height "
         "above the reference ellipsoid, while RelativeToGround takes the height map "
         "into account. For coordinates with only two values (latitude and longitude), "
         "the height is considered to be equal to zero.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointAnchorOptionInfo = {
+    constexpr Property::PropertyInfo PointAnchorOptionInfo = {
         "PointTextureAnchor",
-        "Point Texture Anchor",
-        "Decides the placement of the point texture in relation to the position. "
-        "Default is a the bottom of the texture, but it can also be put at the center.",
-        openspace::properties::Property::Visibility::User
+        "Point texture anchor",
+        "Decides the placement of the point texture in relation to the position. Default "
+        "is a the bottom of the texture, but it can also be put at the center.",
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TessellationEnabledInfo = {
+    constexpr Property::PropertyInfo TessellationEnabledInfo = {
         "Enabled",
         "Enabled",
         "If false, no tessellation to bend the geometry based on the curvature of the "
         "planet is performed. This leads to increased performance, but tessellation is "
         "neccessary for large geometry that spans a big portion of the globe. Otherwise "
         "it may intersect the surface.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseTessellationLevelInfo = {
+    constexpr Property::PropertyInfo UseTessellationLevelInfo = {
         "UseTessellationLevel",
-        "Use Tessellation Level",
+        "Use tessellation level",
         "If true, use the 'Tessellation Level' to control the level of detail for the "
         "tessellation. The distance used will be the 'Tessellation Distance' divided by "
         "the 'Tessellation Level', so the higher the level value, the smaller each "
         "segment in the geomoetry will be.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TessellationLevelInfo = {
+    constexpr Property::PropertyInfo TessellationLevelInfo = {
         "TessellationLevel",
-        "Tessellation Level",
+        "Tessellation level",
         "When manual tessellation is enabled, this value will be used to determine how "
         "much tessellation to apply. The resulting distance used for subdividing the "
         "geometry will be the 'Tessellation Distance' divided by this value. Zero means "
         "to use the 'Tessellation Distance' as is.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TessellationDistanceInfo = {
+    constexpr Property::PropertyInfo TessellationDistanceInfo = {
         "TessellationDistance",
-        "Tessellation Distance",
+        "Tessellation distance",
         "Defult distance to use for tessellation of line and polygon geometry. Anything "
         "larger than this distance will be automatically subdivided into smaller pieces "
         "matching this distance, while anything smaller will not be subdivided. Per "
         "default this will be set to a distance corresponding to about 1 degree "
         "longitude on the globe.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(GeoJsonProperties)]] Parameters {
@@ -329,7 +297,7 @@ namespace {
         std::optional<bool> performShading;
 
         enum class
-        [[codegen::map(openspace::globebrowsing::GeoJsonProperties::AltitudeMode)]]
+        [[codegen::map(openspace::GeoJsonProperties::AltitudeMode)]]
         AltitudeMode
         {
             Absolute,
@@ -339,7 +307,7 @@ namespace {
         std::optional<AltitudeMode> altitudeMode;
 
         enum class
-        [[codegen::map(openspace::globebrowsing::GeoJsonProperties::PointTextureAnchor)]]
+        [[codegen::map(openspace::GeoJsonProperties::PointTextureAnchor)]]
         PointTextureAnchor
         {
             Bottom,
@@ -363,17 +331,53 @@ namespace {
         };
         std::optional<Tessellation> tessellation;
     };
-#include "geojsonproperties_codegen.cpp"
 } // namespace
+#include "geojsonproperties_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation GeoJsonProperties::Documentation() {
+// Keys used to read properties from GeoJson files
+namespace geojson::propertykeys {
+    constexpr std::string_view Name = "name";
+
+    constexpr std::string_view Opacity = "opacity";
+
+    constexpr std::array<std::string_view, 2> Color = { "color", "stroke" };
+    constexpr std::array<std::string_view, 2> FillColor = { "fill", "fill-color" };
+    constexpr std::string_view FillOpacity = "fill-opacity";
+    constexpr std::string_view LineWidth = "stroke-width";
+
+    constexpr std::string_view PointSize = "point-size";
+    constexpr std::array<std::string_view, 3> Texture = {
+        "texture", "sprite", "point-texture"
+    };
+
+    constexpr std::array<std::string_view, 2> PointTextureAnchor = {
+        "point-anchor", "anchor"
+    };
+    constexpr std::string_view PointTextureAnchorBottom = "bottom";
+    constexpr std::string_view PointTextureAnchorCenter = "center";
+
+    constexpr std::string_view Extrude = "extrude";
+
+    constexpr std::string_view Tessellate = "tessellate";
+    constexpr std::string_view TessellationLevel = "tessellationLevel";
+    constexpr std::string_view TessellationMaxDistance = "tessellationDistance";
+
+    constexpr std::string_view AltitudeMode = "altitudeMode";
+    //constexpr std::string_view AltitudeModeClamp = "clampToGround";
+    constexpr std::string_view AltitudeModeAbsolute = "absolute";
+    constexpr std::string_view AltitudeModeRelative = "relativeToGround";
+
+    constexpr std::string_view PerformShading = "performShading";
+} // namespace geojson::propertykeys
+
+Documentation GeoJsonProperties::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_geojsonproperties");
 }
 
 GeoJsonProperties::Tessellation::Tessellation()
-    : properties::PropertyOwner({ "Tessellation" })
+    : PropertyOwner({ "Tessellation" })
     , enabled(TessellationEnabledInfo, true)
     , useLevel(UseTessellationLevelInfo, false)
     , level(TessellationLevelInfo, 10, 0, 100)
@@ -386,7 +390,7 @@ GeoJsonProperties::Tessellation::Tessellation()
 }
 
 GeoJsonProperties::GeoJsonProperties()
-    : properties::PropertyOwner({ "DefaultProperties" })
+    : PropertyOwner({ "DefaultProperties", "Default Properties" })
     , opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , fillOpacity(FillOpacityInfo, 0.7f, 0.f, 1.f)
@@ -400,10 +404,10 @@ GeoJsonProperties::GeoJsonProperties()
     , altitudeModeOption(AltitudeModeInfo)
 {
     addProperty(opacity);
-    color.setViewOption(properties::Property::ViewOptions::Color);
+    color.setViewOption(Property::ViewOptions::Color);
     addProperty(color);
     addProperty(fillOpacity);
-    fillColor.setViewOption(properties::Property::ViewOptions::Color);
+    fillColor.setViewOption(Property::ViewOptions::Color);
     addProperty(fillColor);
 
     addProperty(lineWidth);
@@ -478,13 +482,11 @@ void GeoJsonProperties::createFromDictionary(const ghoul::Dictionary& dictionary
     tessellation.distance.setMaxValue(maxDistance);
 
     if (p.tessellation.has_value()) {
-        const Parameters::Tessellation pTess = (*p.tessellation);
-        tessellation.enabled = pTess.useTessellationLevel.value_or(tessellation.enabled);
-        tessellation.useLevel =
-            pTess.useTessellationLevel.value_or(tessellation.useLevel);
-        tessellation.level = pTess.tessellationLevel.value_or(tessellation.level);
-        tessellation.distance =
-            pTess.tessellationDistance.value_or(tessellation.distance);
+        const Parameters::Tessellation t = *p.tessellation;
+        tessellation.enabled = t.useTessellationLevel.value_or(tessellation.enabled);
+        tessellation.useLevel = t.useTessellationLevel.value_or(tessellation.useLevel);
+        tessellation.level = t.tessellationLevel.value_or(tessellation.level);
+        tessellation.distance = t.tessellationDistance.value_or(tessellation.distance);
     }
 }
 
@@ -527,7 +529,8 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
             result.pointSize = static_cast<float>(value.getNumber());
         }
         else if (keyMatches(key, propertykeys::Texture, PointTextureInfo)) {
-            result.pointTexture = value.getString();
+            std::string texture = value.getString();
+            result.pointTexture = absPath(texture);
         }
         else if (keyMatches(key, propertykeys::PointTextureAnchor, PointAnchorOptionInfo))
         {
@@ -628,8 +631,8 @@ float PropertySet::pointSize() const {
     return overrideValues.pointSize.value_or(defaultValues.pointSize);
 }
 
-std::string PropertySet::pointTexture() const {
-    return overrideValues.pointTexture.value_or(defaultValues.pointTexture);
+std::filesystem::path PropertySet::pointTexture() const {
+    return overrideValues.pointTexture.value_or(defaultValues.pointTexture.value());
 }
 
 GeoJsonProperties::PointTextureAnchor PropertySet::pointTextureAnchor() const {
@@ -676,4 +679,4 @@ bool PropertySet::hasOverrideTexture() const {
     return overrideValues.pointTexture.has_value();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

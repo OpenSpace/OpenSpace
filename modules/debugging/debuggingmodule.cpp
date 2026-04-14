@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,59 +30,56 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/path.h>
-#include <openspace/navigation/pathnavigator.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/templatefactory.h>
 
 #include "debuggingmodule_lua.inl"
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view KeyFontMono = "Mono";
 
-    constexpr openspace::properties::Property::PropertyInfo ShowStatisticsInfo = {
+    constexpr Property::PropertyInfo ShowStatisticsInfo = {
         "ShowStatistics",
-        "Show Statistics",
+        "Show statistics",
         "Show updating, rendering, and network statistics on all rendering nodes.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StatisticsScaleInfo = {
+    constexpr Property::PropertyInfo StatisticsScaleInfo = {
         "StatisticsScale",
-        "Statistics Scale",
+        "Statistics scale",
         "This value is scaling the statistics window by the provided amount. For flat "
         "projections this is rarely necessary, but it is important when using a setup "
         "where the corners of the image are masked out.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StatisticsOffsetInfo = {
+    constexpr Property::PropertyInfo StatisticsOffsetInfo = {
         "StatisticsOffset",
-        "Statistics Offset",
+        "Statistics offset",
         "This value is offsetting the center of the statistics window by the provided "
         "amount. For flat projections this is rarely necessary, but it is important when "
         "using a setup the center of the image is distorted in some form.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowFrameNumberInfo = {
+    constexpr Property::PropertyInfo ShowFrameNumberInfo = {
         "ShowFrameInformation",
-        "Show Frame Information",
+        "Show frame information",
         "If this value is enabled, the current frame number and frame times are rendered "
         "into the window.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 } // namespace
 
@@ -120,8 +117,13 @@ DebuggingModule::DebuggingModule()
 
     addProperty(_showFrameInformation);
 
-    global::callback::render->push_back([this]() {
-        if (_showFrameInformation) {
+    global::callback::render->push_back(
+        [this](const glm::mat4&, const glm::mat4&, const glm::mat4&)
+        {
+            if (!_showFrameInformation) {
+                return;
+            }
+
             ZoneScopedN("Show Frame Information");
             WindowDelegate* del = global::windowDelegate;
 
@@ -153,7 +155,7 @@ DebuggingModule::DebuggingModule()
             );
             RenderFont(*_fontFrameInfo, penPosition, res);
         }
-    });
+    );
 }
 
 void DebuggingModule::internalInitialize(const ghoul::Dictionary&) {
@@ -169,13 +171,13 @@ void DebuggingModule::internalInitializeGL() {
     _fontFrameInfo = global::fontManager->font(KeyFontMono, fontSize.frameInfo);
 }
 
-std::vector<documentation::Documentation> DebuggingModule::documentations() const {
+std::vector<Documentation> DebuggingModule::documentations() const {
     return {
         ScreenSpaceDebugPlane::Documentation()
     };
 }
 
-scripting::LuaLibrary DebuggingModule::luaLibrary() const {
+LuaLibrary DebuggingModule::luaLibrary() const {
     return {
         .name = "debugging",
         .functions = {

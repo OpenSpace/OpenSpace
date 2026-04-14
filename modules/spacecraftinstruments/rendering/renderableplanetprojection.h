@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,35 +28,32 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
+#include <modules/spacecraftinstruments/util/image.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/sphere.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <memory>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
-
-struct Image;
-class Sphere;
-
-namespace planetgeometry { class PlanetGeometry; }
 
 class RenderablePlanetProjection : public Renderable {
 public:
     explicit RenderablePlanetProjection(const ghoul::Dictionary& dict);
-    ~RenderablePlanetProjection() override;
 
     void initializeGL() override;
     void deinitializeGL() override;
-    bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
     ghoul::opengl::Texture& baseTexture() const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void loadColorTexture();
@@ -69,36 +66,36 @@ private:
 
     ProjectionComponent _projectionComponent;
 
-    properties::OptionProperty _colorTexturePaths;
-    properties::StringProperty _addColorTexturePath;
+    OptionProperty _colorTexturePaths;
+    StringProperty _addColorTexturePath;
     bool _colorTextureDirty = false;
 
-    properties::OptionProperty _heightMapTexturePaths;
-    properties::StringProperty _addHeightMapTexturePath;
+    OptionProperty _heightMapTexturePaths;
+    StringProperty _addHeightMapTexturePath;
     bool _heightMapTextureDirty = false;
 
     ghoul::opengl::ProgramObject* _programObject = nullptr;
     ghoul::opengl::ProgramObject* _fboProgramObject = nullptr;
-    UniformCache(sun_pos, modelTransform, modelViewProjectionTransform, hasBaseMap,
+    UniformCache(sunPos, modelTransform, modelViewProjectionTransform, hasBaseMap,
         hasHeightMap, heightExaggeration, meridianShift, ambientBrightness,
         projectionFading, baseTexture, projectionTexture,
         heightTexture) _mainUniformCache;
 
-    UniformCache(projectionTexture, ProjectorMatrix, ModelTransform, boresight,
+    UniformCache(projectionTexture, projectorMatrix, modelTransform, boresight,
         radius, segments) _fboUniformCache;
 
     std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
 
-    properties::FloatProperty _heightExaggeration;
-    properties::BoolProperty _meridianShift;
-    properties::FloatProperty _ambientBrightness;
-    properties::IntProperty _maxProjectionsPerFrame;
-    properties::IntProperty _projectionsInBuffer;
-    properties::TriggerProperty _clearProjectionBuffer;
+    FloatProperty _heightExaggeration;
+    BoolProperty _meridianShift;
+    FloatProperty _ambientBrightness;
+    IntProperty _maxProjectionsPerFrame;
+    IntProperty _projectionsInBuffer;
+    TriggerProperty _clearProjectionBuffer;
 
-    properties::Vec3Property _radius;
-    properties::IntProperty _segments;
+    Vec3Property _radius;
+    IntProperty _segments;
     std::unique_ptr<Sphere> _sphere;
 
     glm::mat4 _transform = glm::mat4(1.f);
@@ -107,10 +104,10 @@ private:
 
     std::vector<Image> _imageTimes;
 
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___RENDERABLEPLANETPROJECTION___H__

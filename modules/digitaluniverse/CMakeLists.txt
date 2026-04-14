@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2025                                                                #
+# Copyright (c) 2014-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -37,8 +37,6 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 set(SHADER_FILES
   shaders/dumesh_vs.glsl
   shaders/dumesh_fs.glsl
-  shaders/plane_vs.glsl
-  shaders/plane_fs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

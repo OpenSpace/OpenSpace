@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,9 +24,12 @@
 
 #include <openspace/scripting/lualibrary.h>
 
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <algorithm>
+#include <utility>
 
-namespace openspace::scripting {
+namespace openspace {
 
 bool LuaLibrary::operator<(const LuaLibrary& rhs) const {
     return name < rhs.name;
@@ -42,8 +45,8 @@ void LuaLibrary::merge(LuaLibrary rhs) {
             }
         );
         if (itf != functions.end()) {
-            // the function with the desired name is already present, but we don't
-            // want to overwrite it
+            // The function with the desired name is already present, but we don't want to
+            // overwrite it
             LERRORC(
                 "LuaLibrary",
                 std::format(
@@ -80,4 +83,4 @@ void LuaLibrary::merge(LuaLibrary rhs) {
     }
 }
 
-} // namespace openspace::scripting
+} // namespace openspace

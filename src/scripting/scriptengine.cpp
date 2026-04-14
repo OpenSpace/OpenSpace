@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,26 +28,30 @@
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
-#include <openspace/documentation/documentation.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/ext/assimp/contrib/zip/src/zip.h>
-#include <filesystem>
+#include <algorithm>
 #include <fstream>
+#include <optional>
+#include <utility>
 
 #include "scriptengine_lua.inl"
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "ScriptEngine";
 
-    constexpr int TableOffset = -3; // top-first argument-second argument
+    constexpr int TableOffset = -3; // Top-first argument-second argument
 
     struct [[codegen::Dictionary(Documentation)]] Parameters {
         std::string name;
@@ -56,11 +60,7 @@ namespace {
         std::optional<std::string> documentation;
     };
 
-    std::vector<std::string> luaFunctions(const openspace::scripting::LuaLibrary& library,
-                                          std::string prefix)
-    {
-        using namespace openspace::scripting;
-
+    std::vector<std::string> luaFunctions(const LuaLibrary& library, std::string prefix) {
         std::vector<std::string> result;
 
         std::string total = prefix;
@@ -83,10 +83,10 @@ namespace {
 
         return result;
     }
-#include "scriptengine_codegen.cpp"
 } // namespace
+#include "scriptengine_codegen.cpp"
 
-namespace openspace::scripting {
+namespace openspace {
 
 ScriptEngine::ScriptEngine(bool sandboxedLua)
     : _state(ghoul::lua::LuaState::Sandboxed(sandboxedLua))
@@ -142,7 +142,7 @@ void ScriptEngine::addLibrary(LuaLibrary library) {
         return lhs.name < rhs.name;
     };
 
-    // do we have a library with the same name as the incoming one
+    // Do we have a library with the same name as the incoming one
     const auto it = std::find_if(
         _registeredLibraries.begin(),
         _registeredLibraries.end(),
@@ -150,7 +150,7 @@ void ScriptEngine::addLibrary(LuaLibrary library) {
     );
 
     if (it != _registeredLibraries.end()) {
-        // if we found the library, we want to merge them
+        // If we found the library, we want to merge them
         LuaLibrary cpy = *it;
         cpy.merge(std::move(library));
         _registeredLibraries.erase(it);
@@ -224,9 +224,9 @@ bool ScriptEngine::runScript(const Script& script) {
         }
         return false;
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const SpecificationError& e) {
         LERRORC(e.component, e.message);
-        documentation::logError(e, e.component);
+        logError(e, e.component);
         if (script.callback) {
             script.callback(ghoul::Dictionary());
         }
@@ -337,7 +337,6 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
         // First we run the script to set its values in the current state
         ghoul::lua::runScriptFile(state, script);
 
-
         // Then, we extract the documentation information from the file
         ghoul::lua::push(state, "documentation");
         lua_gettable(state, -2);
@@ -358,18 +357,18 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
 
                 LuaLibrary::Function func;
                 func.name = p.name;
-                for (const std::vector<std::string>& pair : p.arguments)
-                {
-                    LuaLibrary::Function::Argument arg;
-                    arg.name = pair[0];
-                    arg.type = pair[1];
+                for (const std::vector<std::string>& pair : p.arguments) {
+                    LuaLibrary::Function::Argument arg = {
+                        .name = pair[0],
+                        .type = pair[1]
+                    };
                     func.arguments.push_back(arg);
                 }
                 func.returnType = p.returnValue.value_or(func.returnType);
                 func.helpText = p.documentation.value_or(func.helpText);
                 library.documentations.push_back(std::move(func));
             }
-            catch (const documentation::SpecificationError& e) {
+            catch (const SpecificationError& e) {
                 logError(e);
             }
             lua_pop(state, 1);
@@ -475,7 +474,7 @@ void ScriptEngine::writeLog(const std::string& script) {
 void ScriptEngine::preSync(bool isMaster) {
     ZoneScoped;
 
-    std::lock_guard guard(_clientScriptsMutex);
+    const std::unique_lock lock(_clientScriptsMutex);
     if (isMaster) {
         while (!_incomingScripts.empty()) {
             Script item = std::move(_incomingScripts.front());
@@ -523,11 +522,11 @@ void ScriptEngine::encode(SyncBuffer* syncBuffer) {
 void ScriptEngine::decode(SyncBuffer* syncBuffer) {
     ZoneScoped;
 
-    std::lock_guard guard(_clientScriptsMutex);
+    const std::unique_lock lock(_clientScriptsMutex);
     size_t nScripts;
     syncBuffer->decode(nScripts);
 
-    for (size_t i = 0; i < nScripts; ++i) {
+    for (size_t i = 0; i < nScripts; i++) {
         std::string script;
         syncBuffer->decode(script);
         _clientScriptQueue.push(std::move(script));
@@ -551,7 +550,7 @@ void ScriptEngine::postSync(bool isMaster) {
         }
     }
     else {
-        std::lock_guard guard(_clientScriptsMutex);
+        const std::unique_lock lock(_clientScriptsMutex);
         while (!_clientScriptQueue.empty()) {
             try {
                 runScript({ _clientScriptQueue.front() });
@@ -662,7 +661,7 @@ void ScriptEngine::addBaseLibrary() {
         .functions = {
             {
                 "printTrace",
-                &luascriptfunctions::printTrace,
+                &printTrace,
                 { { "", "*" } },
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
@@ -672,7 +671,7 @@ void ScriptEngine::addBaseLibrary() {
             },
             {
                 "printDebug",
-                &luascriptfunctions::printDebug,
+                &printDebug,
                 { { "", "*" } },
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
@@ -682,7 +681,7 @@ void ScriptEngine::addBaseLibrary() {
             },
             {
                 "printInfo",
-                &luascriptfunctions::printInfo,
+                &printInfo,
                 { { "", "*" } },
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
@@ -692,7 +691,7 @@ void ScriptEngine::addBaseLibrary() {
             },
             {
                 "printWarning",
-                &luascriptfunctions::printWarning,
+                &printWarning,
                 { { "", "*" } },
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
@@ -702,7 +701,7 @@ void ScriptEngine::addBaseLibrary() {
             },
             {
                 "printError",
-                &luascriptfunctions::printError,
+                &printError,
                 { { "", "*" } },
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
@@ -712,7 +711,7 @@ void ScriptEngine::addBaseLibrary() {
             },
             {
                 "printFatal",
-                &luascriptfunctions::printFatal,
+                &printFatal,
                 { { "", "*" } },
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
@@ -740,4 +739,4 @@ void ScriptEngine::addBaseLibrary() {
     addLibrary(lib);
 }
 
-} // namespace openspace::scripting
+} // namespace openspace

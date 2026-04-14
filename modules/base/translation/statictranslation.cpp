@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,15 +25,17 @@
 #include <modules/base/translation/statictranslation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/util/updatestructures.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo PositionInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo PositionInfo = {
         "Position",
         "Position",
         "This value is used as a static offset (in meters) that is applied to the scene "
         "graph node that this transformation is attached to relative to its parent.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `Translation` provides a fixed translation to the attached scene graph node
@@ -42,13 +44,13 @@ namespace {
         // [[codegen::verbatim(PositionInfo.description)]]
         glm::dvec3 position;
     };
-#include "statictranslation_codegen.cpp"
 } // namespace
+#include "statictranslation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation StaticTranslation::Documentation() {
-    return codegen::doc<Parameters>("base_transform_translation_static");
+Documentation StaticTranslation::Documentation() {
+    return codegen::doc<Parameters>("base_translation_static");
 }
 
 StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
@@ -66,6 +68,10 @@ StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
     // negative values very well. When they do, this line can be uncommented
     //_position.setExponent(20.f);
     addProperty(_position);
+
+    // We need to trigger an update or else the `_cacheScale` value will not be the same
+    // as `_scaleValue` until the first "real" update call
+    update(UpdateData());
 }
 
 glm::dvec3 StaticTranslation::position(const UpdateData&) const {

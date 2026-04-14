@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,30 +27,32 @@
 #include <openspace/documentation/documentation.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <fstream>
 #include <optional>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "StateMachine";
 
     struct [[codegen::Dictionary(StateMachine)]] Parameters {
-        // A list of states
+        // A list of states.
         std::vector<ghoul::Dictionary> states
             [[codegen::reference("statemachine_state")]];
 
-        // A list of transitions between the different states
+        // A list of transitions between the different states.
         std::vector<ghoul::Dictionary> transitions
             [[codegen::reference("statemachine_transition")]];
 
-        // The initial state of the state machine. Defaults to the first in the list
+        // The initial state of the state machine. Defaults to the first in the list.
         std::optional<std::string> startState;
     };
-#include "statemachine_codegen.cpp"
 } // namespace
+#include "statemachine_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation StateMachine::Documentation() {
+Documentation StateMachine::Documentation() {
     return codegen::doc<Parameters>("statemachine_statemachine");
 }
 
@@ -153,8 +155,10 @@ bool StateMachine::canTransitionTo(const std::string& state) const {
     return transitionIndex != -1;
 }
 
-// Search if the transition from _currentState to newState exists.
-// If yes then return the index to the transition, otherwise return -1
+/**
+ * Search if the transition from _currentState to newState exists. If yes then return the
+ * index to the transition, otherwise return -1.
+ */
 int StateMachine::findTransitionTo(const std::string& state) const {
     if (!currentState()) {
         return -1;
@@ -170,8 +174,10 @@ int StateMachine::findTransitionTo(const std::string& state) const {
     return -1;
 }
 
-// Search if the state exist.
-// If yes then return the index to the state, otherwise return -1
+/**
+ * Search if the state exist. If yes then return the index to the state, otherwise return
+ * -1.
+ */
 int StateMachine::findState(const std::string& state) const {
     for (size_t i = 0; i < _states.size(); i++) {
         if (_states[i].name() == state) {

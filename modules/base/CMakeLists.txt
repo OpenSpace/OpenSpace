@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2025                                                                #
+# Copyright (c) 2014-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -71,11 +71,12 @@ set(HEADER_FILES
   rendering/renderabletrailorbit.h
   rendering/renderabletrailtrajectory.h
   rendering/screenspacedashboard.h
-  rendering/screenspaceframebuffer.h
+  rendering/screenspacedate.h
   rendering/screenspaceimagelocal.h
   rendering/screenspaceimageonline.h
   rendering/screenspaceinsetblackout.h
   rendering/screenspacerenderablerenderable.h
+  rendering/screenspacetext.h
   rendering/screenspacetimevaryingimageonline.h
   rotation/timelinerotation.h
   rotation/constantrotation.h
@@ -149,11 +150,12 @@ set(SOURCE_FILES
   rendering/renderabletrailtrajectory.cpp
   rendering/screenspacedashboard.cpp
   rendering/screenspacedashboard_lua.inl
-  rendering/screenspaceframebuffer.cpp
+  rendering/screenspacedate.cpp
   rendering/screenspaceimagelocal.cpp
   rendering/screenspaceimageonline.cpp
   rendering/screenspaceinsetblackout.cpp
   rendering/screenspacerenderablerenderable.cpp
+  rendering/screenspacetext.cpp
   rendering/screenspacetimevaryingimageonline.cpp
   rotation/timelinerotation.cpp
   rotation/constantrotation.cpp
@@ -188,18 +190,20 @@ set(SHADER_FILES
   shaders/disc_vs.glsl
   shaders/grid_vs.glsl
   shaders/grid_fs.glsl
-  shaders/imageplane_fs.glsl
-  shaders/imageplane_vs.glsl
   shaders/line_fs.glsl
   shaders/line_vs.glsl
+  shaders/model_depth_fs.glsl
+  shaders/model_depth_vs.glsl
   shaders/model_fs.glsl
   shaders/model_vs.glsl
+  shaders/modelopacity_fs.glsl
+  shaders/modelopacity_vs.glsl
   shaders/plane_fs.glsl
   shaders/plane_vs.glsl
   shaders/pointcloud/pointcloud_fs.glsl
   shaders/pointcloud/pointcloud_gs.glsl
-  shaders/pointcloud/pointcloud_vs.glsl
   shaders/pointcloud/pointcloud_interpolated_vs.glsl
+  shaders/pointcloud/pointcloud_vs.glsl
   shaders/polygon_fs.glsl
   shaders/polygon_gs.glsl
   shaders/polygon_vs.glsl
@@ -207,8 +211,6 @@ set(SHADER_FILES
   shaders/prism_vs.glsl
   shaders/renderabletrail_fs.glsl
   shaders/renderabletrail_vs.glsl
-  shaders/screenspace_fs.glsl
-  shaders/screenspace_vs.glsl
   shaders/screenspaceinsetblackout_vs.glsl
   shaders/screenspaceinsetblackout_fs.glsl
   shaders/sphere_fs.glsl

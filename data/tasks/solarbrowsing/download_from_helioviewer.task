@@ -1,0 +1,79 @@
+-- This task downloads solar imagery data from the Helioviewer API for the SDO and
+-- STEREO-A spacecraft and stores the resulting JP2 files on disk for use in OpenSpace.
+
+-- To get started, edit the StartTime, EndTime, and TimeStep for each entry below.
+-- Each entry downloads data for one spacecraft and instrument combination.
+-- The time range and cadence do not need to be the same for both entries.
+
+-- For more information, including how to add data for other instruments or spacecraft,
+-- see the solar browsing documentation at:
+-- https://docs.openspaceproject.com/en/latest/content/solarsystem/solarbrowsing/solarbrowsing-data.html
+-- Valid sourceIds can be found at:
+-- https://api.helioviewer.org/docs/v2/appendix/data_sources.html
+
+-- Manually download the color maps from the OpenSpace data servers since we cannot use
+-- asset.resource or similar functions to fetch data in a task file
+local savePathBase = openspace.absPath("${SYNC}/http/solarbrowsing/")
+openspace.createDirectory(savePathBase, true);
+
+local Downloads = {
+  SDO = {
+    BaseUrl = "http://liu-se.cdn.openspaceproject.com/files/solarsystem/missions/sdo/colortables/v1_v1/",
+    Files = {
+      "AIA-94.txt",
+      "AIA-131.txt",
+      "AIA-171.txt",
+      "AIA-193.txt",
+      "AIA-211.txt",
+      "AIA-304.txt",
+      "AIA-335.txt",
+      "AIA-1311.txt",
+      "AIA-1600.txt",
+      "AIA-1700.txt",
+      "AIA-4500.txt"
+    }
+  },
+  STEREO_A = {
+    BaseUrl = "http://liu-se.cdn.openspaceproject.com/files/solarsystem/missions/stereo_a/colortables/v1_v1/",
+    Files = {
+      "EUVI-A-171.txt"
+    }
+  }
+}
+
+for _, spacecraft in pairs(Downloads) do
+  for _, file in ipairs(spacecraft.Files) do
+    local url = spacecraft.BaseUrl .. file
+    local savePath = savePathBase .. file
+    openspace.downloadFile(url, savePath, true, false)
+  end
+end
+
+-- Each entry below downloads images for one instrument. Images are only available for the
+-- duration of each mission. If no images are found for a given time range, the 
+-- Helioviewer API will return a message indicating this. It is safe to run this task 
+-- multiple times or with different time ranges for the same instrument.
+return {
+  {
+    Type = "HelioviewerDownloadTask",
+    Name = "SDO",
+    SourceId = 10,
+    Instrument = "AIA-171",
+    ColorMap = savePathBase .. "AIA-171.txt",
+    StartTime = "2024-05-06T00:00:00.000Z",
+    EndTime = "2024-05-14T00:00:00.000Z",
+    TimeStep = 60 * 60, -- Download an image every hour
+    OutputFolder = "${SYNC_DYNAMIC}/solarbrowsing/sdo/aia-171"
+  },
+  {
+    Type = "HelioviewerDownloadTask",
+    Name = "STEREO",
+    SourceId = 20,
+    Instrument = "EUVI-A 171",
+    ColorMap = savePathBase .. "EUVI-A-171.txt",
+    StartTime = "2024-05-06T00:00:00.000Z",
+    EndTime = "2024-05-14T00:00:00.000Z",
+    TimeStep = 60 * 60, -- Download an image every hour
+    OutputFolder = "${SYNC_DYNAMIC}/solarbrowsing/stereo/euvi-a-171"
+  }
+}

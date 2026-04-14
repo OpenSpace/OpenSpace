@@ -4,8 +4,17 @@
     "base_keybindings",
     "events/toggle_sun",
     "scene/solarsystem/planets/earth/earth",
-    "scene/solarsystem/planets/earth/satellites/satellites"
+    "scene/solarsystem/planets/earth/satellites/satellites",
+    "scene/solarsystem/planets/earth/noaa-sos/overlays/latlon_grid-white"
   ],
+  "addons": {
+    "recommended": [
+      "addons/asteroids",
+      "addons/dwarf_planets",
+      "addons/interstellar_objects",
+      "addons/minor_moons"
+    ]
+  },
   "camera": {
     "altitude": 17000000.0,
     "anchor": "Earth",
@@ -35,20 +44,6 @@
     315360000.0,
     630720000.0
   ],
-  "keybindings": [
-    {
-      "action": "os.solarsystem.ToggleSatelliteTrails",
-      "key": "S"
-    },
-    {
-      "action": "os.solarsystem.FocusIss",
-      "key": "I"
-    },
-    {
-      "action": "os.solarsystem.FocusEarth",
-      "key": "HOME"
-    }
-  ],
   "mark_nodes": [
     "Earth",
     "Mars",
@@ -70,6 +65,11 @@
       "name": "{earth_satellites~space_stations}.Renderable.Enabled",
       "type": "setPropertyValue",
       "value": "false"
+    },
+    {
+      "name": "Scene.Earth.Renderable.Layers.Overlays.noaa-sos-overlays-latlon_grid-white.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
     }
   ],
   "time": {
@@ -79,6 +79,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 4
+    "minor": 5
   }
 }

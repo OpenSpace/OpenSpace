@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,17 +24,25 @@
 
 #include <modules/telemetry/include/general/nodestelemetry.h>
 
+#include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 #include <modules/telemetry/include/util.h>
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/distanceconversion.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
+#include <cstdlib>
+#include <limits>
+#include <utility>
 
 #include "nodestelemetry_lua.inl"
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "NodesTelemetry";
 
     // Indices for data items
@@ -43,67 +51,64 @@ namespace {
     constexpr int VerticalAngleIndex = 2;
     constexpr int DistanceUnitIndex = 3;
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        NodesTelemetryInfo =
-    {
+    static const PropertyOwner::PropertyOwnerInfo NodesTelemetryInfo = {
         "NodesTelemetry",
         "Nodes Telemetry",
         "Telemetry of a list of nodes that has been added by the user."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DistanceUnitInfo = {
+    constexpr Property::PropertyInfo DistanceUnitInfo = {
         "DistanceUnit",
-        "Distance Unit",
+        "Distance unit",
         "The unit used for the distance part of the telemetry information.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
+    static const PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
         "Precision",
         "Precision",
         "Settings for the precision of the nodes telemetry information."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LowDistancePrecisionInfo = {
+    constexpr Property::PropertyInfo LowDistancePrecisionInfo = {
         "LowDistancePrecision",
-        "Distance Precision (Low)",
-        "The precision in meters used to determine when to send updated distance data "
-        "to the Open Sound Control receiver. This is the low precision value (low level "
-        "of detail) that is used for objects that are not the current focus, saving "
+        "Distance precision (low)",
+        "The precision in meters used to determine when to send updated distance data to "
+        "the Open Sound Control receiver. This is the low precision value (low level of "
+        "detail) that is used for objects that are not the current focus, saving "
         "performance.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HighDistancePrecisionInfo = {
+    constexpr Property::PropertyInfo HighDistancePrecisionInfo = {
         "HighDistancePrecision",
-        "Distance Precision (High)",
-        "The precision in meters used to determine when to send updated distance data "
-        "to the Open Sound Control receiver. This is the high precision value (high "
-        "level of detail) that is used when the monitored object is the current focus, "
+        "Distance precision (high)",
+        "The precision in meters used to determine when to send updated distance data to "
+        "the Open Sound Control receiver. This is the high precision value (high level "
+        "of detail) that is used when the monitored object is the current focus, "
         "providing more accurate data.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LowAnglePrecisionInfo = {
+    constexpr Property::PropertyInfo LowAnglePrecisionInfo = {
         "LowAnglePrecision",
-        "Angle Precision (Low)",
-        "The precision in radians used to determine when to send updated angle data "
-        "to the Open Sound Control receiver. This is the low precision value (low level "
-        "of detail) that is used for objects that are not the current focus, saving "
+        "Angle precision (low)",
+        "The precision in radians used to determine when to send updated angle data to "
+        "the Open Sound Control receiver. This is the low precision value (low level of "
+        "detail) that is used for objects that are not the current focus, saving "
         "performance.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HighAnglePrecisionInfo = {
+    constexpr Property::PropertyInfo HighAnglePrecisionInfo = {
         "HighAnglePrecision",
-        "Angle Precision (High)",
-        "The precision in radians used to determine when to send updated angle data "
-        "to the Open Sound Control receiver. This is the high precision value (high "
-        "level of detail) that is used when the monitored object is the current focus, "
+        "Angle precision (high)",
+        "The precision in radians used to determine when to send updated angle data to "
+        "the Open Sound Control receiver. This is the high precision value (high level "
+        "of detail) that is used when the monitored object is the current focus, "
         "providing more accurate data.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
-
 } // namespace
 
 namespace openspace {
@@ -113,7 +118,7 @@ NodesTelemetry::NodesTelemetry(const std::string& ip, int port)
     , _distanceUnitOption(DistanceUnitInfo)
     , _precisionProperties(NodesTelemetry::PrecisionProperties(PrecisionInfo))
 {
-    for (int i = 0; i < DistanceUnitNames.size(); ++i) {
+    for (int i = 0; i < DistanceUnitNames.size(); i++) {
         _distanceUnitOption.addOption(i, DistanceUnitNames[i].singular.data());
     }
 
@@ -130,8 +135,8 @@ NodesTelemetry::TelemetryNode::TelemetryNode(std::string id)
 {}
 
 NodesTelemetry::PrecisionProperties::PrecisionProperties(
-                               properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
-    : properties::PropertyOwner(precisionInfo)
+                                           PropertyOwner::PropertyOwnerInfo precisionInfo)
+    : PropertyOwner(precisionInfo)
     , lowDistancePrecision(LowDistancePrecisionInfo, 10000.0, 0.0, 1.0e+25)
     , highDistancePrecision(HighDistancePrecisionInfo, 1000.0, 0.0, 1.0e+25)
     , lowAnglePrecision(LowAnglePrecisionInfo, 0.1, 0.0, 10.0)
@@ -168,7 +173,7 @@ void NodesTelemetry::update(const Camera* camera) {
     bool includeElevation = module->includeElevationAngle();
 
     // Update data for all nodes
-    for (int i = 0; i < _nodes.size(); ++i) {
+    for (int i = 0; i < _nodes.size(); i++) {
         // Increase precision if the node is in focus
         if (focusNode->identifier() == _nodes[i].identifier) {
             _anglePrecision = _precisionProperties.highAnglePrecision;
@@ -268,7 +273,7 @@ void NodesTelemetry::sendData(int nodeIndex) {
     _connection->send(label, data);
 }
 
-scripting::LuaLibrary NodesTelemetry::luaLibrary() {
+LuaLibrary NodesTelemetry::luaLibrary() {
     return {
         "telemetry",
         {

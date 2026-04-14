@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,18 +26,24 @@
 #define __OPENSPACE_CORE___SCRIPTENGINE___H__
 
 #include <openspace/util/syncable.h>
+
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/boolean.h>
 #include <filesystem>
-#include <mutex>
-#include <optional>
-#include <queue>
 #include <functional>
+#include <mutex>
+#include <queue>
+#include <string>
+#include <string_view>
+#include <vector>
 
-namespace openspace { class SyncBuffer; }
+namespace ghoul { class Dictionary; }
+struct lua_State;
 
-namespace openspace::scripting {
+namespace openspace {
+
+class SyncBuffer;
 
 /**
  * The ScriptEngine is responsible for handling the execution of custom Lua functions and
@@ -102,20 +108,24 @@ public:
     void addLibrary(LuaLibrary library);
     bool hasLibrary(const std::string& name);
 
-    virtual void preSync(bool isMaster) override;
-    virtual void encode(SyncBuffer* syncBuffer) override;
-    virtual void decode(SyncBuffer* syncBuffer) override;
-    virtual void postSync(bool isMaster) override;
+    void preSync(bool isMaster) override;
+    void encode(SyncBuffer* syncBuffer) override;
+    void decode(SyncBuffer* syncBuffer) override;
+    void postSync(bool isMaster) override;
 
     void queueScript(Script script);
     void queueScript(std::string script);
 
-    // This function should only be used by external classes if you are sure that the
-    // passed script should really be executed at this point. Otherwise the #queueScript
-    // should be used
+    /**
+     * This function should only be used by external classes if you are sure that the
+     * passed script should really be executed at this point. Otherwise the #queueScript
+     * should be used.
+     */
     bool runScript(const Script& script);
 
-    // Runs the `script` every `timeout` seconds wallclock time
+    /**
+     * Runs the `script` every `timeout` seconds wallclock time.
+     */
     void registerRepeatedScript(std::string identifier, std::string script,
         double timeout, std::string preScript = "", std::string postScript = "");
     void removeRepeatedScript(std::string_view identifier);
@@ -143,8 +153,8 @@ private:
 
     std::queue<Script> _incomingScripts;
 
-    // Client scripts are mutex protected since decode and rendering may happen
-    // asynchronously
+    /// Client scripts are mutex protected since decode and rendering may happen
+    /// asynchronously
     std::mutex _clientScriptsMutex;
     std::queue<std::string> _clientScriptQueue;
     std::queue<Script> _masterScriptQueue;
@@ -165,10 +175,10 @@ private:
     std::vector<RepeatedScriptInfo> _repeatedScripts;
 
     struct ScheduledScriptInfo {
-        // The script that should be executed
+        /// The script that should be executed
         std::string script;
 
-        // The application timestamp at which time the script should be executed
+        /// The application timestamp at which time the script should be executed
         double timestamp = 0.0;
     };
     std::vector<ScheduledScriptInfo> _scheduledScripts;
@@ -179,6 +189,6 @@ private:
     std::filesystem::path _logFilename;
 };
 
-} // namespace openspace::scripting
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SCRIPTENGINE___H__

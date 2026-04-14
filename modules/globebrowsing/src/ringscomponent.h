@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,27 +34,26 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/vector/vec4property.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/glm.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <functional>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
-    struct RenderData;
-    struct UpdateData;
 
-namespace documentation { struct Documentation; }
+struct Documentation;
+struct RenderData;
+struct UpdateData;
 
-class RingsComponent : public properties::PropertyOwner, public Fadeable {
+class RingsComponent : public PropertyOwner, public Fadeable {
 public:
-    enum class RenderPass {
-        GeometryOnly,
-        GeometryAndShading
-    };
+    // Callback for when readiness state changes
+    using ReadinessChangeCallback = std::function<void()>;
 
     explicit RingsComponent(const ghoul::Dictionary& dictionary);
 
@@ -64,45 +63,59 @@ public:
 
     bool isReady() const;
 
-    void draw(const RenderData& data, RenderPass renderPass,
+    void draw(const RenderData& data,
         const ShadowComponent::ShadowMapData& shadowData = {}
     );
     void update(const UpdateData& data);
-
-    static documentation::Documentation Documentation();
-
     bool isEnabled() const;
+
+    static openspace::Documentation Documentation();
     double size() const;
+
+    // Readiness change callback
+    void onReadinessChange(ReadinessChangeCallback callback);
+
+    // Texture access methods for globe rendering
+    ghoul::opengl::Texture* textureForwards() const;
+    ghoul::opengl::Texture* textureBackwards() const;
+    ghoul::opengl::Texture* textureUnlit() const;
+    ghoul::opengl::Texture* textureColor() const;
+    ghoul::opengl::Texture* textureTransparency() const;
+    glm::vec2 textureOffset() const;
+    glm::vec3 sunPositionObj() const;
+    glm::vec3 camPositionObj() const;
+
+    void setEllipsoidRadii(glm::vec3 radii);
 
 private:
     void loadTexture();
-    void createPlane();
     void compileShadowShader();
+    void checkAndNotifyReadinessChange();
 
-    properties::StringProperty _texturePath;
-    properties::StringProperty _textureFwrdPath;
-    properties::StringProperty _textureBckwrdPath;
-    properties::StringProperty _textureUnlitPath;
-    properties::StringProperty _textureColorPath;
-    properties::StringProperty _textureTransparencyPath;
-    properties::FloatProperty _size;
-    properties::Vec2Property _offset;
-    properties::FloatProperty _nightFactor;
-    properties::FloatProperty _colorFilter;
-    properties::BoolProperty _enabled;
-    properties::FloatProperty _zFightingPercentage;
-    properties::IntProperty _nShadowSamples;
+    StringProperty _texturePath;
+    StringProperty _textureFwrdPath;
+    StringProperty _textureBckwrdPath;
+    StringProperty _textureUnlitPath;
+    StringProperty _textureColorPath;
+    StringProperty _textureTransparencyPath;
+    FloatProperty _size;
+    Vec2Property _offset;
+    FloatProperty _nightFactor;
+    FloatProperty _colorFilter;
+    BoolProperty _enabled;
+    FloatProperty _zFightingPercentage;
+    IntProperty _nShadowSamples;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::unique_ptr<ghoul::opengl::ProgramObject> _geometryOnlyShader;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
-        sunPosition, ringTexture, shadowMatrix, shadowMapTexture, zFightingPercentage,
-        opacity
+        sunPosition, sunPositionObj, ringTexture,
+        opacity, ellipsoidRadii
     ) _uniformCache;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
-        sunPosition, sunPositionObj, camPositionObj, ringTextureFwrd, ringTextureBckwrd,
-        ringTextureUnlit, ringTextureColor, ringTextureTransparency, shadowMatrix,
-        shadowMapTexture, zFightingPercentage, opacity
+        sunPosition, sunPositionObj, camPositionObj, textureForwards, textureBackwards,
+        textureUnlit, textureColor, textureTransparency,
+        opacity, ellipsoidRadii
     ) _uniformCacheAdvancedRings;
     UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture) _geomUniformCache;
 
@@ -122,12 +135,17 @@ private:
     ghoul::Dictionary _ringsDictionary;
     bool _textureIsDirty = false;
     bool _isAdvancedTextureEnabled = false;
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
-    bool _planeIsDirty = false;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
+    bool _planeIsDirty = true;
 
     glm::vec3 _sunPosition = glm::vec3(0.f);
     glm::vec3 _camPositionObjectSpace = glm::vec3(0.f);
+    glm::vec3 _ellipsoidRadii = glm::vec3(1.f);
+
+    // Callback for readiness state changes
+    ReadinessChangeCallback _readinessChangeCallback;
+    bool _wasReady = false;
 };
 
 } // namespace openspace

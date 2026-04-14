@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,10 +25,10 @@
 #include "profile/horizonsdialog.h"
 
 #include "profile/line.h"
+#include <modules/space/horizonsfile.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/boolean.h>
 #include <QComboBox>
 #include <QDateTimeEdit>
 #include <QDialogButtonBox>
@@ -36,7 +36,6 @@
 #include <QFileDialog>
 #include <QGridLayout>
 #include <QLabel>
-#include <QLineEdit>
 #include <QMessageBox>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -44,11 +43,14 @@
 #include <QProgressBar>
 #include <QPushButton>
 #include <QScrollBar>
-#include <QStyle>
+#include <cstdint>
+#include <istream>
+#include <limits>
 #include <sstream>
+#include <string_view>
+#include <vector>
 
-//using json = nlohmann::json;
-//using namespace openspace;
+using namespace openspace;
 
 namespace {
     constexpr std::string_view _loggerCat = "HorizonsDialog";
@@ -62,8 +64,7 @@ namespace {
     constexpr std::string_view Years = "calendar years";
     constexpr std::string_view Unitless = "equal intervals (unitless)";
 
-    BooleanType(IsDirty);
-    void styleLabel(QLabel* label, IsDirty isDirty) {
+    void styleLabel(QLabel* label, bool isDirty) {
         const std::string newStyle = isDirty ? "error" : "normal";
         label->setObjectName(QString::fromStdString(newStyle));
         label->style()->unpolish(label);
@@ -95,7 +96,7 @@ HorizonsDialog::HorizonsDialog(QWidget* parent)
 std::filesystem::path HorizonsDialog::file() const {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
     return _horizonsFile.file();
-#else // OPENSPACE_MODULE_SPACE_ENABLED
+#else // ^^^^ OPENSPACE_MODULE_SPACE_ENABLED // !OPENSPACE_MODULE_SPACE_ENABLED vvvv
     return std::filesystem::path();
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
 }
@@ -110,7 +111,7 @@ void HorizonsDialog::openSaveAs() {
 #ifdef __linux__
         // Linux in Qt5 and Qt6 crashes when trying to access the native dialog here
         , QFileDialog::DontUseNativeDialog
-#endif
+#endif // __linux__
     );
     _fileEdit->setText(filename);
 }
@@ -126,7 +127,7 @@ void HorizonsDialog::typeOnChange(int index) {
     }
     else {
         QMessageBox::critical(this, "Error", "Invalid Horizons type");
-        styleLabel(_typeLabel, IsDirty::Yes);
+        styleLabel(_typeLabel, true);
     }
 }
 
@@ -390,7 +391,7 @@ bool HorizonsDialog::isValidInput() {
     if (_fileEdit->text().isEmpty()) {
         QMessageBox::critical(this, "Error", "File path not selected");
         _fileEdit->setFocus();
-        styleLabel(_fileLabel, IsDirty::Yes);
+        styleLabel(_fileLabel, true);
         return false;
     }
 
@@ -400,14 +401,14 @@ bool HorizonsDialog::isValidInput() {
     {
         QMessageBox::critical(this, "Error", "Target not selected");
         _targetEdit->setFocus();
-        styleLabel(_targetLabel, IsDirty::Yes);
+        styleLabel(_targetLabel, true);
         return false;
     }
     if (_targetEdit->text().toStdString().find_first_of("¤<>§£´¨€") != std::string::npos)
     {
         QMessageBox::critical(this, "Error", "Target includes illegal characters");
         _targetEdit->setFocus();
-        styleLabel(_targetLabel, IsDirty::Yes);
+        styleLabel(_targetLabel, true);
         return false;
     }
 
@@ -417,14 +418,14 @@ bool HorizonsDialog::isValidInput() {
     {
         QMessageBox::critical(this, "Error", "Observer not selected");
         _centerEdit->setFocus();
-        styleLabel(_centerLabel, IsDirty::Yes);
+        styleLabel(_centerLabel, true);
         return false;
     }
     if (_centerEdit->text().toStdString().find_first_of("¤<>§£´¨€") != std::string::npos)
     {
         QMessageBox::critical(this, "Error", "Observer includes illegal characters");
         _centerEdit->setFocus();
-        styleLabel(_centerLabel, IsDirty::Yes);
+        styleLabel(_centerLabel, true);
         return false;
     }
 
@@ -433,7 +434,7 @@ bool HorizonsDialog::isValidInput() {
     if (_stepEdit->text().isEmpty()) {
         QMessageBox::critical(this, "Error", "Step size is not selected");
         _stepEdit->setFocus();
-        styleLabel(_stepLabel, IsDirty::Yes);
+        styleLabel(_stepLabel, true);
         return false;
     }
     // Numerical
@@ -448,7 +449,7 @@ bool HorizonsDialog::isValidInput() {
             ))
         );
         _stepEdit->setFocus();
-        styleLabel(_stepLabel, IsDirty::Yes);
+        styleLabel(_stepLabel, true);
         return false;
     }
     // In the case of arcseconds range is different
@@ -460,7 +461,7 @@ bool HorizonsDialog::isValidInput() {
                 "Angular step size needs to be in range 60 to 3600"
             );
             _stepEdit->setFocus();
-            styleLabel(_stepLabel, IsDirty::Yes);
+            styleLabel(_stepLabel, true);
             return false;
         }
     }
@@ -474,7 +475,7 @@ bool HorizonsDialog::isValidInput() {
             std::numeric_limits<int32_t>::max()
         )));
         _stepEdit->setFocus();
-        styleLabel(_stepLabel, IsDirty::Yes);
+        styleLabel(_stepLabel, true);
         return false;
     }
     return true;
@@ -706,13 +707,13 @@ bool HorizonsDialog::handleRequest() {
     }
 
     // Clean all widgets
-    styleLabel(_typeLabel, IsDirty::No);
-    styleLabel(_fileLabel, IsDirty::No);
-    styleLabel(_targetLabel, IsDirty::No);
-    styleLabel(_centerLabel, IsDirty::No);
-    styleLabel(_startLabel, IsDirty::No);
-    styleLabel(_endLabel, IsDirty::No);
-    styleLabel(_stepLabel, IsDirty::No);
+    styleLabel(_typeLabel, false);
+    styleLabel(_fileLabel, false);
+    styleLabel(_targetLabel, false);
+    styleLabel(_centerLabel, false);
+    styleLabel(_startLabel, false);
+    styleLabel(_endLabel, false);
+    styleLabel(_stepLabel, false);
 
     _importTimeButton->hide();
     _validTimeRange = std::pair<std::string, std::string>();
@@ -771,7 +772,7 @@ std::string HorizonsDialog::constructUrl() {
     }
     else {
         QMessageBox::critical(this, "Error", "Invalid Horizons type");
-        styleLabel(_typeLabel, IsDirty::Yes);
+        styleLabel(_typeLabel, true);
         return "";
     }
 
@@ -838,7 +839,7 @@ std::string HorizonsDialog::constructUrl() {
     }
     else {
         QMessageBox::critical(this, "Error", "Invalid time unit type");
-        styleLabel(_stepLabel, IsDirty::Yes);
+        styleLabel(_stepLabel, true);
         return "";
     }
 
@@ -853,9 +854,7 @@ std::string HorizonsDialog::constructUrl() {
     );
 }
 
-openspace::HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
-    using namespace openspace;
-
+HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
     auto it = answer.find("error");
     if (it != answer.end()) {
         _latestHorizonsError = it->get<std::string>();
@@ -871,7 +870,7 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
         // Special case with ErrorTimeRange since it is detected as an error
         // but could be nice to display the available time range of target to the user
         handleResult(isValid);
-        return openspace::HorizonsFile();
+        return HorizonsFile();
     }
 
     // Create a text file and write reply to it
@@ -884,7 +883,7 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
             "Malformed answer received '{}'", answer.dump()
         );
         appendLog(msg, HorizonsDialog::LogLevel::Error);
-        return openspace::HorizonsFile();
+        return HorizonsFile();
     }
 
     // Check if the file already exists
@@ -907,22 +906,20 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
                     "Error",
                     "File already exist, try another file path"
                 );
-                styleLabel(_fileLabel, IsDirty::Yes);
-                return openspace::HorizonsFile();
+                styleLabel(_fileLabel, true);
+                return HorizonsFile();
             default:
                 QMessageBox::critical(this, "Error", "Invalid answer");
-                styleLabel(_fileLabel, IsDirty::Yes);
-                return openspace::HorizonsFile();
+                styleLabel(_fileLabel, true);
+                return HorizonsFile();
         }
     }
 
     // Return a new file with the result
-    return openspace::HorizonsFile(filePath, result->get<std::string>());
+    return HorizonsFile(filePath, result->get<std::string>());
 }
 
-bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
-    using namespace openspace;
-
+bool HorizonsDialog::handleResult(HorizonsResultCode& result) {
     switch (result) {
         case HorizonsResultCode::Valid: {
             // If the request worked then delete the corresponding error file if it exist
@@ -958,9 +955,9 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 _timeTypeCombo->currentText().toStdString()
             );
             appendLog(msg, HorizonsDialog::LogLevel::Error);
-            styleLabel(_startLabel, IsDirty::Yes);
-            styleLabel(_endLabel, IsDirty::Yes);
-            styleLabel(_stepLabel, IsDirty::Yes);
+            styleLabel(_startLabel, true);
+            styleLabel(_endLabel, true);
+            styleLabel(_stepLabel, true);
 
             std::filesystem::remove(_horizonsFile.file());
             break;
@@ -970,7 +967,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 "Step size is too big, exceeds available time span for target",
                 HorizonsDialog::LogLevel::Error
             );
-            styleLabel(_stepLabel, IsDirty::Yes);
+            styleLabel(_stepLabel, true);
 
             std::filesystem::remove(_horizonsFile.file());
             break;
@@ -979,8 +976,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 "Time range is outside the valid range for target '{}'", _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Error);
-            styleLabel(_startLabel, IsDirty::Yes);
-            styleLabel(_endLabel, IsDirty::Yes);
+            styleLabel(_startLabel, true);
+            styleLabel(_endLabel, true);
 
             _validTimeRange = readTimeRange();
             if (_validTimeRange.first.empty() || _validTimeRange.second.empty()) {
@@ -1012,7 +1009,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 _observerName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Info);
-            styleLabel(_centerLabel, IsDirty::Yes);
+            styleLabel(_centerLabel, true);
 
             std::filesystem::remove(_horizonsFile.file());
             break;
@@ -1023,8 +1020,8 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 "observer for the current target", _observerName, _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Error);
-            styleLabel(_targetLabel, IsDirty::Yes);
-            styleLabel(_centerLabel, IsDirty::Yes);
+            styleLabel(_targetLabel, true);
+            styleLabel(_centerLabel, true);
 
             std::filesystem::remove(_horizonsFile.file());
             break;
@@ -1053,7 +1050,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 "for alternatives", _observerName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Info);
-            styleLabel(_centerLabel, IsDirty::Yes);
+            styleLabel(_centerLabel, true);
 
             const std::vector<std::string> matchingstations =
                 _horizonsFile.parseMatches(
@@ -1096,7 +1093,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 "Horizons command 'NEWS'", _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Info);
-            styleLabel(_targetLabel, IsDirty::Yes);
+            styleLabel(_targetLabel, true);
 
             std::filesystem::remove(_horizonsFile.file());
             break;
@@ -1106,7 +1103,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 "Multiple matches were found for observer '{}'", _observerName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Warning);
-            styleLabel(_centerLabel, IsDirty::Yes);
+            styleLabel(_centerLabel, true);
 
             const std::vector<std::string> matchingObservers =
                 _horizonsFile.parseMatches("Name", "matches", ">MATCH NAME<");
@@ -1144,7 +1141,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 "Try to use '{}*' as target to search for possible matches", _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Info);
-            styleLabel(_targetLabel, IsDirty::Yes);
+            styleLabel(_targetLabel, true);
 
             std::filesystem::remove(_horizonsFile.file());
             break;
@@ -1165,7 +1162,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 "Multiple matches were found for target '{}'", _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Warning);
-            styleLabel(_targetLabel, IsDirty::Yes);
+            styleLabel(_targetLabel, true);
 
             const std::vector<std::string> matchingTargets =
                 _horizonsFile.parseMatches("Name", "matches", ">MATCH NAME<");

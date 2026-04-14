@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,118 +24,128 @@
 
 #include <openspace/documentation/documentationengine.h>
 
-#include <openspace/openspace.h>
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/globals.h>
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
-#include <openspace/json.h>
+#include <openspace/properties/property.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
+#include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
-#include <openspace/scripting/scriptscheduler.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/json_helper.h>
+#include <openspace/util/keys.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>
+#include <ghoul/misc/templatefactory.h>
+#include <algorithm>
 #include <fstream>
 #include <future>
+#include <map>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <unordered_map>
+#include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "DocumentationEngine";
 
     // General keys
-    constexpr const char* NameKey = "name";
-    constexpr const char* IdentifierKey = "identifier";
-    constexpr const char* DescriptionKey = "description";
-    constexpr const char* DataKey = "data";
-    constexpr const char* TypeKey = "type";
-    constexpr const char* DocumentationKey = "documentation";
-    constexpr const char* ActionKey = "action";
-    constexpr const char* IdKey = "id";
+    constexpr std::string_view NameKey = "name";
+    constexpr std::string_view IdentifierKey = "identifier";
+    constexpr std::string_view DescriptionKey = "description";
+    constexpr std::string_view DataKey = "data";
+    constexpr std::string_view TypeKey = "type";
+    constexpr std::string_view DocumentationKey = "documentation";
+    constexpr std::string_view ActionKey = "action";
+    constexpr std::string_view IdKey = "id";
 
     // Actions
-    constexpr const char* ActionTitle = "Actions";
-    constexpr const char* GuiNameKey = "guiName";
-    constexpr const char* CommandKey = "command";
-    constexpr const char* ColorKey = "color";
-    constexpr const char* TextColorKey = "textColor";
+    constexpr std::string_view ActionTitle = "Actions";
+    constexpr std::string_view GuiNameKey = "guiName";
+    constexpr std::string_view CommandKey = "command";
+    constexpr std::string_view ColorKey = "color";
+    constexpr std::string_view TextColorKey = "textColor";
 
     // Factory
-    constexpr const char* MembersKey = "members";
-    constexpr const char* OptionalKey = "optional";
-    constexpr const char* ReferenceKey = "reference";
-    constexpr const char* FoundKey = "found";
-    constexpr const char* ClassesKey = "classes";
+    constexpr std::string_view MembersKey = "members";
+    constexpr std::string_view OptionalKey = "optional";
+    constexpr std::string_view ReferenceKey = "reference";
+    constexpr std::string_view FoundKey = "found";
+    constexpr std::string_view ClassesKey = "classes";
 
-    constexpr const char* OtherName = "Other";
-    constexpr const char* OtherIdentifierName = "other";
-    constexpr const char* propertyOwnerName = "propertyOwner";
-    constexpr const char* categoryName = "category";
+    constexpr std::string_view OtherName = "Other";
+    constexpr std::string_view OtherIdentifierName = "other";
+    constexpr std::string_view PropertyOwnerName = "propertyOwner";
+    constexpr std::string_view CategoryName = "category";
 
     // Properties
-    constexpr const char* SettingsTitle = "Settings";
-    constexpr const char* SceneTitle = "Scene";
-    constexpr const char* PropertiesKeys = "properties";
-    constexpr const char* PropertyOwnersKey = "propertyOwners";
-    constexpr const char* TagsKey = "tags";
-    constexpr const char* UriKey = "uri";
+    constexpr std::string_view SettingsTitle = "Settings";
+    constexpr std::string_view SceneTitle = "Scene";
+    constexpr std::string_view PropertiesKeys = "properties";
+    constexpr std::string_view PropertyOwnersKey = "propertyOwners";
+    constexpr std::string_view TagsKey = "tags";
+    constexpr std::string_view UriKey = "uri";
 
     // Scripting
-    constexpr const char* DefaultValueKey = "defaultValue";
-    constexpr const char* ArgumentsKey = "arguments";
-    constexpr const char* ReturnTypeKey = "returnType";
-    constexpr const char* HelpKey = "help";
-    constexpr const char* FileKey = "file";
-    constexpr const char* LineKey = "line";
-    constexpr const char* LibraryKey = "library";
-    constexpr const char* FullNameKey = "fullName";
-    constexpr const char* FunctionsKey = "functions";
-    constexpr const char* SourceLocationKey = "sourceLocation";
-    constexpr const char* OpenSpaceScriptingKey = "openspace";
+    constexpr std::string_view DefaultValueKey = "defaultValue";
+    constexpr std::string_view ArgumentsKey = "arguments";
+    constexpr std::string_view ReturnTypeKey = "returnType";
+    constexpr std::string_view HelpKey = "help";
+    constexpr std::string_view FileKey = "file";
+    constexpr std::string_view LineKey = "line";
+    constexpr std::string_view LibraryKey = "library";
+    constexpr std::string_view FullNameKey = "fullName";
+    constexpr std::string_view FunctionsKey = "functions";
+    constexpr std::string_view SourceLocationKey = "sourceLocation";
+    constexpr std::string_view OpenSpaceScriptingKey = "openspace";
 
     // Licenses
-    constexpr const char* LicensesTitle = "Licenses";
-    constexpr const char* ProfileName = "Profile";
-    constexpr const char* AssetsName = "Assets";
-    constexpr const char* LicensesName = "Licenses";
-    constexpr const char* NoLicenseName = "No License";
-    constexpr const char* NoDataName = "";
+    constexpr std::string_view LicensesTitle = "Licenses";
+    constexpr std::string_view ProfileName = "Profile";
+    constexpr std::string_view AssetsName = "Assets";
+    constexpr std::string_view LicensesName = "Licenses";
+    constexpr std::string_view NoLicenseName = "No License";
 
-    constexpr const char* ProfileNameKey = "profileName";
-    constexpr const char* VersionKey = "version";
-    constexpr const char* AuthorKey = "author";
-    constexpr const char* UrlKey = "url";
-    constexpr const char* LicenseKey = "license";
-    constexpr const char* IdentifiersKey = "identifiers";
-    constexpr const char* PathKey = "path";
-    constexpr const char* AssetKey = "assets";
-    constexpr const char* LicensesKey = "licenses";
+    constexpr std::string_view ProfileNameKey = "profileName";
+    constexpr std::string_view VersionKey = "version";
+    constexpr std::string_view AuthorKey = "author";
+    constexpr std::string_view UrlKey = "url";
+    constexpr std::string_view LicenseKey = "license";
+    constexpr std::string_view IdentifiersKey = "identifiers";
+    constexpr std::string_view PathKey = "path";
+    constexpr std::string_view AssetKey = "assets";
+    constexpr std::string_view LicensesKey = "licenses";
 
     // Keybindings
-    constexpr const char* KeybindingsTitle = "Keybindings";
-    constexpr const char* KeybindingsKey = "keybindings";
+    constexpr std::string_view KeybindingsTitle = "Keybindings";
+    constexpr std::string_view KeybindingsKey = "keybindings";
 
     // Events
-    constexpr const char* EventsTitle = "Events";
-    constexpr const char* FiltersKey = "filters";
-    constexpr const char* ActionsKey = "actions";
+    constexpr std::string_view EventsTitle = "Events";
+    constexpr std::string_view FiltersKey = "filters";
+    constexpr std::string_view ActionsKey = "actions";
 
-    nlohmann::json documentationToJson(
-                             const openspace::documentation::Documentation& documentation)
-    {
-        using namespace openspace::documentation;
-
+    nlohmann::json documentationToJson(const Documentation& documentation) {
         nlohmann::json json;
 
         json[NameKey] = documentation.name;
@@ -179,8 +189,8 @@ namespace {
                 // Since this is a table we need to recurse this function to extract data
                 nlohmann::json tableDocs = documentationToJson(doc);
 
-                // Set the members entry to the members of the table
-                // to remove unnecessary nestling
+                // Set the members entry to the members of the table to remove unnecessary
+                // nestling
                 entry[MembersKey] = tableDocs[MembersKey];
             }
             else {
@@ -188,15 +198,14 @@ namespace {
             }
             json[MembersKey].push_back(entry);
         }
-        openspace::sortJson(json[MembersKey], NameKey);
+        sortJson(json[MembersKey], NameKey);
 
         return json;
     }
 
-    nlohmann::json propertyOwnerToJson(openspace::properties::PropertyOwner* owner) {
+    nlohmann::json propertyOwnerToJson(PropertyOwner* owner) {
         ZoneScoped;
 
-        using namespace openspace;
         nlohmann::json json;
         json[NameKey] =
             !owner->guiName().empty() ? owner->guiName() : owner->identifier();
@@ -207,7 +216,7 @@ namespace {
         json[TypeKey] = owner->type();
         json[TagsKey] = owner->tags();
 
-        for (properties::Property* p : owner->properties()) {
+        for (Property* p : owner->properties()) {
             nlohmann::json propertyJson;
             std::string name = !p->guiName().empty() ? p->guiName() : p->identifier();
             propertyJson[NameKey] = name;
@@ -220,7 +229,7 @@ namespace {
         }
         sortJson(json[PropertiesKeys], NameKey);
 
-        for (properties::PropertyOwner* o : owner->propertySubOwners()) {
+        for (PropertyOwner* o : owner->propertySubOwners()) {
             nlohmann::json propertyOwner;
             json[PropertyOwnersKey].push_back(propertyOwnerToJson(o));
         }
@@ -229,11 +238,9 @@ namespace {
         return json;
     }
 
-    nlohmann::json luaFunctionToJson(const openspace::scripting::LuaLibrary::Function& f,
+    nlohmann::json luaFunctionToJson(const LuaLibrary::Function& f,
                                      bool includeSourceLocation)
     {
-        using namespace openspace::scripting;
-
         nlohmann::json function;
         function[NameKey] = f.name;
         nlohmann::json arguments = nlohmann::json::array();
@@ -242,7 +249,7 @@ namespace {
             nlohmann::json argument;
             argument[NameKey] = arg.name;
             argument[TypeKey] = arg.type;
-            argument[DefaultValueKey] = arg.defaultValue.value_or(NoDataName);
+            argument[DefaultValueKey] = arg.defaultValue.value_or("");
             arguments.push_back(argument);
         }
 
@@ -272,17 +279,9 @@ namespace {
     }
 } // namespace
 
-namespace openspace::documentation {
+namespace openspace {
 
 DocumentationEngine* DocumentationEngine::_instance = nullptr;
-
-DocumentationEngine::DuplicateDocumentationException::DuplicateDocumentationException(
-                                                                        Documentation doc)
-    : ghoul::RuntimeError(std::format(
-        "Duplicate Documentation with name '{}' and id '{}'", doc.name, doc.id
-    ))
-    , documentation(std::move(doc))
-{}
 
 DocumentationEngine::DocumentationEngine() {}
 
@@ -312,7 +311,6 @@ DocumentationEngine& DocumentationEngine::ref() {
 nlohmann::json DocumentationEngine::generateScriptEngineJson() const {
     ZoneScoped;
 
-    using namespace openspace::scripting;
     const std::vector<LuaLibrary> libraries = global::scriptEngine->allLuaLibraries();
     nlohmann::json json;
 
@@ -322,8 +320,9 @@ nlohmann::json DocumentationEngine::generateScriptEngineJson() const {
         // Keep the library key for backwards compatability
         library[LibraryKey] = libraryName;
         library[NameKey] = libraryName;
-        std::string os = OpenSpaceScriptingKey;
-        library[FullNameKey] = libraryName.empty() ? os : os + "." + libraryName;
+        std::string os = std::string(OpenSpaceScriptingKey);
+        library[FullNameKey] =
+            libraryName.empty() ? os : std::format("{}.{}", os, libraryName);
 
         for (const LuaLibrary::Function& f : l.functions) {
             constexpr bool HasSourceLocation = true;
@@ -350,12 +349,12 @@ nlohmann::json DocumentationEngine::generateLicenseGroupsJson() const {
 
         nlohmann::json metaJson;
         metaJson[NameKey] = ProfileName;
-        metaJson[ProfileNameKey] = meta.name.value_or(NoDataName);
-        metaJson[VersionKey] = meta.version.value_or(NoDataName);
-        metaJson[DescriptionKey] = meta.description.value_or(NoDataName);
-        metaJson[AuthorKey] = meta.author.value_or(NoDataName);
-        metaJson[UrlKey] = meta.url.value_or(NoDataName);
-        metaJson[LicenseKey] = meta.license.value_or(NoDataName);
+        metaJson[ProfileNameKey] = meta.name.value_or("");
+        metaJson[VersionKey] = meta.version.value_or("");
+        metaJson[DescriptionKey] = meta.description.value_or("");
+        metaJson[AuthorKey] = meta.author.value_or("");
+        metaJson[UrlKey] = meta.url.value_or("");
+        metaJson[LicenseKey] = meta.license.value_or("");
         json.push_back(std::move(metaJson));
     }
 
@@ -368,17 +367,17 @@ nlohmann::json DocumentationEngine::generateLicenseGroupsJson() const {
         std::optional<Asset::MetaInformation> meta = asset->metaInformation();
 
         // Ensure the license is not going to be an empty string
-        std::string licenseName = NoLicenseName;
-        if (meta.has_value() && meta->license != NoDataName) {
+        std::string licenseName = std::string(NoLicenseName);
+        if (meta.has_value() && !meta->license.empty()) {
             licenseName = meta->license;
         }
 
         nlohmann::json assetJson;
-        assetJson[NameKey] = meta.has_value() ? meta->name : NoDataName;
-        assetJson[VersionKey] = meta.has_value() ? meta->version : NoDataName;
-        assetJson[DescriptionKey] = meta.has_value() ? meta->description : NoDataName;
-        assetJson[AuthorKey] = meta.has_value() ? meta->author : NoDataName;
-        assetJson[UrlKey] = meta.has_value() ? meta->url : NoDataName;
+        assetJson[NameKey] = meta.has_value() ? meta->name : "";
+        assetJson[VersionKey] = meta.has_value() ? meta->version : "";
+        assetJson[DescriptionKey] = meta.has_value() ? meta->description : "";
+        assetJson[AuthorKey] = meta.has_value() ? meta->author : "";
+        assetJson[UrlKey] = meta.has_value() ? meta->url : "";
         assetJson[LicenseKey] = licenseName;
         assetJson[PathKey] = asset->path().string();
         assetJson[IdKey] = asset->path().string();
@@ -414,12 +413,12 @@ nlohmann::json DocumentationEngine::generateLicenseListJson() const {
 
     if (global::profile->meta.has_value()) {
         nlohmann::json profile;
-        profile[NameKey] = global::profile->meta->name.value_or(NoDataName);
-        profile[VersionKey] = global::profile->meta->version.value_or(NoDataName);
-        profile[DescriptionKey] = global::profile->meta->description.value_or(NoDataName);
-        profile[AuthorKey] = global::profile->meta->author.value_or(NoDataName);
-        profile[UrlKey] = global::profile->meta->url.value_or(NoDataName);
-        profile[LicenseKey] = global::profile->meta->license.value_or(NoDataName);
+        profile[NameKey] = global::profile->meta->name.value_or("");
+        profile[VersionKey] = global::profile->meta->version.value_or("");
+        profile[DescriptionKey] = global::profile->meta->description.value_or("");
+        profile[AuthorKey] = global::profile->meta->author.value_or("");
+        profile[UrlKey] = global::profile->meta->url.value_or("");
+        profile[LicenseKey] = global::profile->meta->license.value_or("");
         json.push_back(profile);
     }
 
@@ -448,7 +447,7 @@ nlohmann::json DocumentationEngine::generateLicenseListJson() const {
 }
 
 nlohmann::json DocumentationEngine::generateEventJson() const {
-    using Type = events::Event::Type;
+    using Type = Event::Type;
     const std::unordered_map<Type, std::vector<EventEngine::ActionInfo>>& eventActions =
         global::eventEngine->eventActions();
     nlohmann::json events;
@@ -459,7 +458,7 @@ nlohmann::json DocumentationEngine::generateEventJson() const {
     for (const auto& [eventType, actions] : eventActions) {
         nlohmann::json eventJson;
 
-        eventJson[NameKey] = std::string(events::toString(eventType));
+        eventJson[NameKey] = std::string(toString(eventType));
         nlohmann::json actionsJson = nlohmann::json::array();
 
         for (const EventEngine::ActionInfo& action : actions) {
@@ -513,7 +512,7 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
         }
         nlohmann::json factory;
         factory[NameKey] = factoryInfo.name;
-        factory[IdentifierKey] = categoryName + factoryInfo.name;
+        factory[IdentifierKey] = std::format("{}{}", CategoryName, factoryInfo.name);
 
         ghoul::TemplateFactoryBase* f = factoryInfo.factory.get();
         // Add documentation about base class
@@ -539,7 +538,7 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
         // Add documentation about derived classes
         const std::vector<std::string>& registeredClasses = f->registeredClasses();
         for (const std::string& c : registeredClasses) {
-            if (c == "") {
+            if (c.empty()) {
                 LERROR("Factory documentation, derived class, without identifier");
                 continue;
             }
@@ -564,14 +563,14 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
         sortJson(factory[ClassesKey], NameKey);
         json.push_back(factory);
     }
+
     // Add all leftover docs
     nlohmann::json leftovers;
     leftovers[NameKey] = OtherName;
     leftovers[IdentifierKey] = OtherIdentifierName;
 
     for (const Documentation& doc : docs) {
-        if (doc.id == "") {
-            LERROR("Documentation without identifier");
+        if (doc.id.empty()) {
             continue;
         }
         leftovers[ClassesKey].push_back(documentationToJson(doc));
@@ -604,16 +603,15 @@ nlohmann::json DocumentationEngine::generateKeybindingsJson() const {
     return result;
 }
 
-nlohmann::json DocumentationEngine::generatePropertyOwnerJson(
-                                                   properties::PropertyOwner* owner) const
+nlohmann::json DocumentationEngine::generatePropertyOwnerJson(PropertyOwner* owner) const
 {
     ZoneScoped;
 
     ghoul_assert(owner, "Owner must not be nullptr");
 
     nlohmann::json json;
-    std::vector<properties::PropertyOwner*> subOwners = owner->propertySubOwners();
-    for (properties::PropertyOwner* o : subOwners) {
+    std::vector<PropertyOwner*> subOwners = owner->propertySubOwners();
+    for (PropertyOwner* o : subOwners) {
         if (o->identifier() != SceneTitle) {
             nlohmann::json jsonOwner = propertyOwnerToJson(o);
 
@@ -623,7 +621,7 @@ nlohmann::json DocumentationEngine::generatePropertyOwnerJson(
     sortJson(json, NameKey);
 
     nlohmann::json result;
-    result[NameKey] = propertyOwnerName;
+    result[NameKey] = PropertyOwnerName;
     result[DataKey] = json;
 
     return result;
@@ -634,7 +632,7 @@ void DocumentationEngine::writeJavascriptDocumentation() const {
 
     // Write documentation to json files if config file supplies path for doc files
     if (global::configuration->documentation.path.empty()) {
-        // if path was empty, that means that no documentation is requested
+        // If path was empty, that means that no documentation is requested
         return;
     }
 
@@ -668,32 +666,28 @@ void DocumentationEngine::writeJavascriptDocumentation() const {
     nlohmann::json result;
     result[DocumentationKey] = documentation;
 
-    // Make into a javascript variable so that it is possible to open with static html
+    // Make into a JavaScript variable so that it is possible to open with static HTML
     std::ofstream out = std::ofstream(absPath("${DOCUMENTATION}/documentationData.js"));
     out << "var data = " << result.dump();
 }
 
 void DocumentationEngine::writeJsonDocumentation() const {
-    nlohmann::json factory = generateFactoryManagerJson();
-    nlohmann::json scripting = generateScriptEngineJson();
+    // Write two json files for the static docs page - asset components and scripting API
 
-    // Write two json files for the static docs page - asset components and scripting api
-    std::ofstream out = std::ofstream(absPath("${DOCUMENTATION}/assetComponents.json"));
-    if (out) {
-        out << factory.dump();
+    std::ofstream outFactory(absPath("${DOCUMENTATION}/assetComponents.json"));
+    if (outFactory.good()) {
+        nlohmann::json factory = generateFactoryManagerJson();
+        outFactory << factory.dump();
     }
-    out.close();
 
-    out.open(absPath("${DOCUMENTATION}/scriptingApi.json"));
-    if (out) {
-        out << scripting.dump();
+    std::ofstream outScription(absPath("${DOCUMENTATION}/scriptingApi.json"));
+    if (outScription.good()) {
+        nlohmann::json scripting = generateScriptEngineJson();
+        outScription << scripting.dump();
     }
-    out.close();
 }
 
 nlohmann::json DocumentationEngine::generateActionJson() const {
-    using namespace interaction;
-
     nlohmann::json res;
     res[NameKey] = ActionTitle;
     res[DataKey] = nlohmann::json::array();
@@ -701,7 +695,7 @@ nlohmann::json DocumentationEngine::generateActionJson() const {
 
     for (const Action& action : actions) {
         nlohmann::json d;
-        // Use identifier as name to make it more similar to scripting api
+        // Use identifier as name to make it more similar to the scripting API
         d[NameKey] = action.identifier;
         d[GuiNameKey] = action.name;
         d[DocumentationKey] = action.documentation;
@@ -718,7 +712,6 @@ nlohmann::json DocumentationEngine::generateActionJson() const {
     return res;
 }
 
-
 void DocumentationEngine::addDocumentation(Documentation documentation) {
     if (documentation.id.empty()) {
         _documentations.push_back(std::move(documentation));
@@ -731,7 +724,10 @@ void DocumentationEngine::addDocumentation(Documentation documentation) {
         );
 
         if (it != _documentations.end()) {
-            throw DuplicateDocumentationException(std::move(documentation));
+            throw ghoul::RuntimeError(std::format(
+                "Duplicate Documentation with name '{}' and id '{}'",
+                documentation.name, documentation.id
+            ));
         }
         else {
             _documentations.push_back(std::move(documentation));
@@ -742,4 +738,5 @@ void DocumentationEngine::addDocumentation(Documentation documentation) {
 std::vector<Documentation> DocumentationEngine::documentations() const {
     return _documentations;
 }
-} // namespace openspace::documentation
+
+} // namespace openspace

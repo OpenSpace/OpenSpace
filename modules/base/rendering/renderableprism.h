@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,49 +32,41 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <ghoul/glm.h>
-
-namespace ghoul::opengl { class ProgramObject; }
+#include <cstdint>
+#include <memory>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class RenderablePrism : public Renderable {
 public:
     explicit RenderablePrism(const ghoul::Dictionary& dictionary);
 
-    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
-
-    bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void updateVertexData();
     void updateBufferData();
 
-    // Properties
-    properties::IntProperty _nShapeSegments;
-    properties::IntProperty _nLines;
-    properties::FloatProperty _radius;
-    properties::FloatProperty _baseRadius;
-    properties::FloatProperty _lineWidth;
-    properties::Vec3Property _lineColor;
-    properties::FloatProperty _length;
+    IntProperty _nShapeSegments;
+    IntProperty _nLines;
+    FloatProperty _radius;
+    FloatProperty _baseRadius;
+    FloatProperty _lineWidth;
+    Vec3Property _lineColor;
+    FloatProperty _length;
     UniformCache(modelViewProjectionTransform, color) _uniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    GLuint _vaoId = 0;
-    GLuint _vboId = 0;
-    GLuint _iboId = 0;
-    std::vector<float> _vertexArray;
-    std::vector<uint8_t> _indexArray;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
+    GLuint _ibo = 0;
+    GLsizei _count = 0;
 
     bool _prismIsDirty = false;
 };

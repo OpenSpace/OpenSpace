@@ -2,11 +2,13 @@
   "assets": [
     "base",
     "base_keybindings",
-    "scene/solarsystem/heliosphere/todayssun/fieldlines",
+    "scene/solarsystem/heliosphere/todayssun/V54_fieldlines",
+    "scene/solarsystem/heliosphere/todayssun/V62_fieldlines",
     "scene/solarsystem/heliosphere/todayssun/grid",
     "scene/solarsystem/heliosphere/todayssun/mission",
     "scene/solarsystem/heliosphere/todayssun/sun_earth_line",
-    "scene/solarsystem/heliosphere/todayssun/surfaces",
+    "scene/solarsystem/heliosphere/todayssun/V54_surfaces",
+    "scene/solarsystem/heliosphere/todayssun/V62_surfaces",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites"
   ],
@@ -38,12 +40,6 @@
     157680000.0,
     315360000.0,
     630720000.0
-  ],
-  "keybindings": [
-    {
-      "action": "os.solarsystem.ToggleSatelliteTrails",
-      "key": "S"
-    }
   ],
   "mark_nodes": [
     "Sun",
@@ -109,7 +105,7 @@
     {
       "name": "Scene.WSA_54_Magnetograms_GONGZ.Renderable.Enabled",
       "type": "setPropertyValueSingle",
-      "value": "true"
+      "value": "false"
     },
     {
       "name": "Scene.WSA_54_Magnetic_Field_ADAPT_5_Rs.Renderable.Enabled",
@@ -124,12 +120,12 @@
     {
       "name": "Scene.WSA_54_Fieldlines_PFSS_IO.Renderable.Enabled",
       "type": "setPropertyValueSingle",
-      "value": "true"
+      "value": "false"
     },
     {
       "name": "Scene.WSA_54_Fieldlines_PFSS_OI.Renderable.Enabled",
       "type": "setPropertyValueSingle",
-      "value": "true"
+      "value": "false"
     },
     {
       "name": "Scene.WSA_54_Fieldlines_SCS_OI.Renderable.Enabled",
@@ -150,6 +146,66 @@
       "name": "Scene.WSA_54_Fieldlines_PFSS_IO.Renderable.LineWidth",
       "type": "setPropertyValueSingle",
       "value": "2.0"
+    },
+    {
+      "name": "Scene.WSA_62_velocity_GONGZ_Outer_Boundary.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.WSA_62_velocity_ADAPT_Outer_Boundary.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.WSA_62_Magnetograms_ADAPT.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.WSA_62_Magnetograms_GONGZ.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "true"
+    },
+    {
+      "name": "Scene.WSA_62_Magnetic_Field_ADAPT_5_Rs.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.WSA_62_Magnetic_Field_GONGZ_5_Rs.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.WSA_62_Fieldlines_PFSS_IO.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "true"
+    },
+    {
+      "name": "Scene.WSA_62_Fieldlines_PFSS_OI.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "true"
+    },
+    {
+      "name": "Scene.WSA_62_Fieldlines_SCS_OI.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.WSA_62_Fieldlines_Earth.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.WSA_62_Fieldlines_PFSS_IO.Renderable.ABlendingEnabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.WSA_62_Fieldlines_PFSS_IO.Renderable.LineWidth",
+      "type": "setPropertyValueSingle",
+      "value": "2.0"
     }
   ],
   "time": {
@@ -159,6 +215,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 4
+    "minor": 5
   }
 }

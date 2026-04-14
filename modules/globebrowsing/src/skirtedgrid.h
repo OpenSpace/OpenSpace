@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,11 +25,9 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___SKIRTEDGRID___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___SKIRTEDGRID___H__
 
-#include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <vector>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 /**
  * This grid is a regular grid with skirts around its edges. The areas covered by the
@@ -39,8 +37,8 @@ namespace openspace::globebrowsing {
 class SkirtedGrid {
 public:
     /**
-     * \param xSeg is the number of grid cells in the x direction
-     * \param ySeg is the number of grid cells in the y direction
+     * \param xSeg The number of grid cells in the x direction
+     * \param ySeg The number of grid cells in the y direction
      */
     SkirtedGrid(unsigned int xSeg, unsigned int ySeg);
     ~SkirtedGrid() = default;
@@ -61,12 +59,12 @@ public:
     const int ySegments;
 
 private:
-    GLuint _vaoID = 0;
-    GLuint _vertexBufferID = 0;
-    GLuint _elementBufferID = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
+    GLuint _ibo = 0;
     const GLsizei _elementSize;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___SKIRTEDGRID___H__

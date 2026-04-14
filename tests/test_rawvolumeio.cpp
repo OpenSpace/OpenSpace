@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,8 +32,9 @@
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 
+using namespace openspace;
+
 TEST_CASE("RawVolumeIO: TinyInputOutput", "[rawvolumeio]") {
-    using namespace openspace::volume;
 
     const glm::uvec3 dims = glm::uvec3(1, 1, 1);
     const float value = 0.5f;
@@ -56,8 +57,6 @@ TEST_CASE("RawVolumeIO: TinyInputOutput", "[rawvolumeio]") {
 }
 
 TEST_CASE("RawVolumeIO: BasicInputOutput", "[rawvolumeio]") {
-    using namespace openspace::volume;
-
     const glm::uvec3 dims = glm::uvec3(2, 4, 8);
     auto value = [dims](const glm::uvec3& v) {
         return static_cast<float>(v.z * dims.z * dims.y + v.y * dims.y + v.x);

@@ -14,8 +14,7 @@ local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "rhea.jpg",
   Enabled = asset.enabled,
-  ZIndex = 5,
-  CacheSettings = { Enabled = false }
+  ZIndex = 5
 }
 
 

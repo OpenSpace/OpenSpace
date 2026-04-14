@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,11 +26,11 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILELOADJOB___H__
 
 #include <openspace/util/job.h>
-
 #include <modules/globebrowsing/src/rawtile.h>
+
 #include <modules/globebrowsing/src/tileindex.h>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 class RawTileDataReader;
 
@@ -51,8 +51,8 @@ struct TileLoadJob : public Job<RawTile> {
 
     /**
      * If the TileLoadJob has been created using PBO, this is the address that the
-     * RawTileDataReader will read to. In case specified so in the TileTextureInitData
-     * of RawTileDataReader, the data will also be written to CPU memory.
+     * RawTileDataReader will read to. In case specified so in the TileTextureInitData of
+     * RawTileDataReader, the data will also be written to CPU memory.
      */
     void execute() override;
 
@@ -69,6 +69,6 @@ protected:
     bool _hasTile = false;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILELOADJOB___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,11 +24,12 @@
 
 #include <modules/galaxy/tasks/milkywayconversiontask.h>
 
-#include <modules/volume/textureslicevolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
+#include <modules/volume/textureslicevolumereader.h>
 #include <modules/volume/volumesampler.h>
 #include <openspace/documentation/documentation.h>
 #include <ghoul/misc/dictionary.h>
+#include <vector>
 
 namespace {
     struct [[codegen::Dictionary(MilkywayConversionTask)]] Parameters {
@@ -39,13 +40,13 @@ namespace {
         std::string outFilename;
         glm::ivec3 outDimensions;
     };
-#include "milkywayconversiontask_codegen.cpp"
 } // namespace
+#include "milkywayconversiontask_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation MilkywayConversionTask::Documentation() {
-    return codegen::doc<Parameters>("galaxy_milkywayconversiontask");
+Documentation MilkywayConversionTask::Documentation() {
+    return codegen::doc<Parameters>("galaxy_task_milkywayconversion");
 }
 
 MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictionary) {
@@ -63,8 +64,6 @@ std::string MilkywayConversionTask::description() {
 }
 
 void MilkywayConversionTask::perform(const Task::ProgressCallback& onProgress) {
-    using namespace openspace::volume;
-
     std::vector<std::string> filenames;
     for (size_t i = 0; i < _inNSlices; i++) {
         filenames.push_back(
@@ -72,19 +71,22 @@ void MilkywayConversionTask::perform(const Task::ProgressCallback& onProgress) {
         );
     }
 
-    TextureSliceVolumeReader<glm::tvec4<GLfloat>> sliceReader(filenames, _inNSlices, 10);
+    TextureSliceVolumeReader<glm::tvec4<GLfloat>> sliceReader =
+        TextureSliceVolumeReader<glm::tvec4<GLfloat>>(filenames, _inNSlices, 10);
     sliceReader.initialize();
 
-    RawVolumeWriter<glm::tvec4<GLfloat>> rawWriter(_outFilename);
+    RawVolumeWriter<glm::tvec4<GLfloat>> rawWriter =
+        RawVolumeWriter<glm::tvec4<GLfloat>>(_outFilename);
     rawWriter.setDimensions(_outDimensions);
 
     const glm::vec3 resolutionRatio = static_cast<glm::vec3>(sliceReader.dimensions()) /
                                       static_cast<glm::vec3>(rawWriter.dimensions());
 
-    const VolumeSampler<TextureSliceVolumeReader<glm::tvec4<GLfloat>>> sampler(
-        &sliceReader,
-        resolutionRatio
-    );
+    const VolumeSampler<TextureSliceVolumeReader<glm::tvec4<GLfloat>>> sampler =
+        VolumeSampler<TextureSliceVolumeReader<glm::tvec4<GLfloat>>>(
+            &sliceReader,
+            resolutionRatio
+        );
     auto sampleFunction = [resolutionRatio, sampler](const glm::ivec3& outCoord) {
         const glm::vec3 inCoord =
             ((glm::vec3(outCoord) + glm::vec3(0.5f)) * resolutionRatio) - glm::vec3(0.5f);

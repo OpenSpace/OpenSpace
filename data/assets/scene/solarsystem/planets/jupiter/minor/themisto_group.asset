@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local kernels344 = asset.require("../kernels344")
+local kernels347 = asset.require("../kernels347")
 local coreKernels = asset.require("spice/core")
 
 
@@ -10,7 +10,7 @@ local Themisto = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels344.ID.Themisto,
+      Target = kernels347.ID.Themisto,
       Observer = coreKernels.ID.JupiterBarycenter
     }
   },
@@ -39,7 +39,7 @@ local ThemistoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels344.ID.Themisto,
+      Target = kernels347.ID.Themisto,
       Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },

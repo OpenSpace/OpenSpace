@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,11 +27,15 @@
 #include <modules/fitsfilereader/include/renderabletimevaryingfitssphere.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 
-FitsFileReaderModule::FitsFileReaderModule() : OpenSpaceModule(Name) {}
+FitsFileReaderModule::FitsFileReaderModule()
+    : OpenSpaceModule(Name)
+{}
 
 void FitsFileReaderModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul::TemplateFactory<Renderable>* fRenderable =
@@ -42,7 +46,7 @@ void FitsFileReaderModule::internalInitialize(const ghoul::Dictionary&) {
     );
 }
 
-std::vector<documentation::Documentation> FitsFileReaderModule::documentations() const {
+std::vector<Documentation> FitsFileReaderModule::documentations() const {
     return {
         FitsFileReaderModule::Documentation(),
         RenderableTimeVaryingFitsSphere::Documentation()

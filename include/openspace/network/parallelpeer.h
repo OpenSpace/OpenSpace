@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,6 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/network/messagestructures.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -35,16 +34,15 @@
 #include <ghoul/designpattern/event.h>
 #include <atomic>
 #include <deque>
+#include <memory>
 #include <mutex>
-#include <string>
 #include <thread>
-#include <vector>
 
 namespace openspace {
 
-namespace scripting { struct LuaLibrary; }
+struct LuaLibrary;
 
-class ParallelPeer : public properties::PropertyOwner {
+class ParallelPeer : public PropertyOwner {
 public:
     ParallelPeer();
     ~ParallelPeer() override;
@@ -70,7 +68,7 @@ public:
      * Returns the Lua library that contains all Lua functions available to affect the
      * remote OS parallel connection.
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
     ParallelConnection::Status status();
     int nConnections();
     ghoul::Event<>& connectionEvent();
@@ -96,18 +94,18 @@ private:
     double convertTimestamp(double messageTimestamp);
     void analyzeTimeDifference(double messageTimestamp);
 
-    properties::StringProperty _password;
-    properties::StringProperty _hostPassword;
-    properties::StringProperty _serverName;
+    StringProperty _password;
+    StringProperty _hostPassword;
+    StringProperty _serverName;
 
-    // While the port should in theory be an int,
-    // we use a StringProperty to avoid a slider in the GUI.
-    properties::StringProperty _port;
-    properties::StringProperty _address;
-    properties::StringProperty _name;
-    properties::FloatProperty _bufferTime;
-    properties::FloatProperty _timeKeyframeInterval;
-    properties::FloatProperty _cameraKeyframeInterval;
+    // While the port should in theory be an int, we use a StringProperty to avoid a
+    // slider in the GUI
+    StringProperty _port;
+    StringProperty _address;
+    StringProperty _name;
+    FloatProperty _bufferTime;
+    FloatProperty _timeKeyframeInterval;
+    FloatProperty _cameraKeyframeInterval;
 
     double _lastTimeKeyframeTimestamp = 0.0;
     double _lastCameraKeyframeTimestamp = 0.0;

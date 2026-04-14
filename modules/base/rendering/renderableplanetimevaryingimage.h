@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,17 +27,12 @@
 
 #include <modules/base/rendering/renderableplane.h>
 
+#include <openspace/properties/misc/stringproperty.h>
 #include <filesystem>
-
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class Texture; }
+#include <limits>
+#include <memory>
 
 namespace openspace {
-
-struct RenderData;
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
 
 class RenderablePlaneTimeVaryingImage : public RenderablePlane {
 public:
@@ -50,10 +45,10 @@ public:
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks&) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    virtual void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
 private:
     ghoul::opengl::Texture* loadTexture() const;
@@ -67,7 +62,7 @@ private:
     std::vector<std::filesystem::path> _sourceFiles;
     std::vector<double> _startTimes;
     int _activeTriggerTimeIndex = 0;
-    properties::StringProperty _sourceFolder;
+    StringProperty _sourceFolder;
     ghoul::opengl::Texture* _texture = nullptr;
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textureFiles;
     bool _isLoadingLazily = false;

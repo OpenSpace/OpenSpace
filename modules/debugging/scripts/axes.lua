@@ -21,14 +21,14 @@ openspace.debugging.documentation = {
                              current focus node is used instead.
       \\param scale An optional parameter that specifies the size of the coordinate axes,
                     in meters. If not specified, the size is set to 2.5 times the
-                    interaction sphere of the selected node.
+                    bounding sphere of the selected node.
     ]]
   }
 }
 
 openspace.debugging.createCoordinateAxes = function (nodeIdentifier, scale)
   local node = nodeIdentifier or openspace.navigation.getNavigationState().Anchor
-  local sphere = openspace.propertyValue("Scene." .. node .. ".EvaluatedInteractionSphere")
+  local sphere = openspace.propertyValue("Scene." .. node .. ".EvaluatedBoundingSphere")
   if sphere == -1 then
     sphere = 1
   end

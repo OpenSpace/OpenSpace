@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,14 +32,9 @@
 #include <openspace/rendering/texturecomponent.h>
 #include <openspace/util/planegeometry.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <ghoul/opengl/ghoul_gl.h>
-
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; }
+#include <memory>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class RenderableDisc : public Renderable {
 public:
@@ -49,12 +44,10 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     virtual void initializeShader();
@@ -62,9 +55,9 @@ protected:
 
     virtual float planeSize() const;
 
-    properties::StringProperty _texturePath;
-    properties::FloatProperty _size;
-    properties::FloatProperty _width;
+    StringProperty _texturePath;
+    FloatProperty _size;
+    FloatProperty _width;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 

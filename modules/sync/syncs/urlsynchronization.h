@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,9 +27,7 @@
 
 #include <openspace/util/resourcesynchronization.h>
 
-#include <atomic>
-#include <filesystem>
-#include <string>
+#include <mutex>
 #include <thread>
 #include <vector>
 
@@ -50,8 +48,8 @@ public:
      *
      * \param dictionary The parameter dictionary that contains all information that this
      *        UrlSynchronization needs to download the provided files
-     * \param synchronizationRoot The base location based off which the final placement
-     *        is calculated
+     * \param synchronizationRoot The base location based off which the final placement is
+     *        calculated
      */
     UrlSynchronization(const ghoul::Dictionary& dictionary,
         std::filesystem::path synchronizationRoot);
@@ -81,7 +79,7 @@ public:
 
     std::string generateUid() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     /**
@@ -117,7 +115,7 @@ private:
     /// Contains a flag whether the current transfer should be cancelled
     std::atomic_bool _shouldCancel = false;
 
-    // The thread that will be doing the synchronization
+    /// The thread that will be doing the synchronization
     std::thread _syncThread;
 
     /// Determines how long the file is valid before it should be downloaded again

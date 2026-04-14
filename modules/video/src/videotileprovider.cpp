@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,29 +24,38 @@
 
 #include <modules/video/include/videotileprovider.h>
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
-#include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/engine/windowdelegate.h>
-#include <openspace/util/time.h>
-#include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
+#include <cmath>
+#include <cstdint>
+#include <limits>
+#include <optional>
 
 namespace {
     constexpr std::string_view _loggerCat = "VideoTileProvider";
+
+    // This `TileProvider` can be used to render a video on the globe.
+    //
+    // The video can either be played back based on a given simulation time
+    // (`PlaybackMode` MapToSimulationTime) or through the user interface (for
+    // `PlaybackMode` RealTimeLoop). It is also possible to control whether the video
+    // should loop or just be played once.
+    //
+    // Note that, unless playback is mapped to simulation time, the video must be started
+    // manually via the user interface.
+    struct [[codegen::Dictionary(VideoTileProvider)]] Parameters {};
 } // namespace
+#include "videotileprovider_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation VideoTileProvider::Documentation() {
-    documentation::Documentation doc = VideoPlayer::Documentation();
-    doc.name = "VideoTileProvider";
-    doc.id = "video_videotileprovider";
-    return doc;
+Documentation VideoTileProvider::Documentation() {
+    return codegen::doc<Parameters>(
+        "video_tileprovider_video",
+        VideoPlayer::Documentation()
+    );
 }
 
 VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
@@ -56,9 +65,7 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_videoPlayer);
 }
 
-VideoTileProvider::~VideoTileProvider() {}
-
-globebrowsing::Tile VideoTileProvider::tile(const globebrowsing::TileIndex& tileIndex) {
+Tile VideoTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped;
 
     if (!_videoPlayer.isInitialized()) {
@@ -70,7 +77,7 @@ globebrowsing::Tile VideoTileProvider::tile(const globebrowsing::TileIndex& tile
         LINFO("Framebuffer is not complete");
     }
 
-    // For now, don't use the cache as we're trying to debug the problem w playback
+    // For now, don't use the cache as we're trying to debug the problem with playback
     const uint64_t hash = tileIndex.hashKey();
     auto foundTile = _tileCache.find(hash);
     const bool textureChanged = foundTile != _tileCache.end() &&
@@ -151,4 +158,4 @@ void VideoTileProvider::internalDeinitialize() {
     _videoPlayer.destroy();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,21 +33,19 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class SpiceRotation : public Rotation {
 public:
     explicit SpiceRotation(const ghoul::Dictionary& dictionary);
 
     glm::dmat3 matrix(const UpdateData& data) const override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::StringProperty _sourceFrame;
-    properties::StringProperty _destinationFrame;
-    properties::StringProperty _fixedDate;
-    properties::FloatProperty _timeOffset;
+    StringProperty _sourceFrame;
+    StringProperty _destinationFrame;
+    StringProperty _fixedDate;
+    FloatProperty _timeOffset;
 
     std::optional<double> _fixedEphemerisTime;
 };

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,7 +43,7 @@ void AtmosphereModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableAtmosphere>("RenderableAtmosphere");
 }
 
-std::vector<documentation::Documentation> AtmosphereModule::documentations() const {
+std::vector<Documentation> AtmosphereModule::documentations() const {
     return {
         RenderableAtmosphere::Documentation()
     };

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,13 +32,18 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
+namespace {
+    struct [[codegen::Dictionary(RenderableDataPlane)]] Parameters {};
+} // namespace
+#include "renderabledataplane_codegen.cpp"
+
 namespace openspace {
 
-documentation::Documentation RenderableDataPlane::Documentation() {
-    documentation::Documentation doc = RenderableDataCygnet::Documentation();
-    doc.name = "RenderableDataPlane";
-    doc.id = "iswa_renderable_dataplane";
-    return doc;
+Documentation RenderableDataPlane::Documentation() {
+    return codegen::doc<Parameters>(
+        "iswa_renderable_dataplane",
+        RenderableDataCygnet::Documentation()
+    );
 }
 
 RenderableDataPlane::RenderableDataPlane(const ghoul::Dictionary& dictionary)
@@ -63,17 +68,17 @@ void RenderableDataPlane::initializeGL() {
     else {
         _dataProcessor = std::make_shared<DataProcessorText>();
 
-        //If autofiler is on, background values property should be hidden
+        // If autofiler is on, background values property should be hidden
         _autoFilter.onChange([this]() {
-            // If autofiler is selected, use _dataProcessor to set backgroundValues
-            // and unregister backgroundvalues property.
+            // If autofiler is selected, use _dataProcessor to set backgroundValues and
+            // unregister backgroundvalues property
             if (_autoFilter) {
                 _backgroundValues = _dataProcessor->filterValues();
-                _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
-            // else if autofilter is turned off, register backgroundValues
+                _backgroundValues.setVisibility(Property::Visibility::Hidden);
             }
             else {
-                _backgroundValues.setVisibility(properties::Property::Visibility::Always);
+                // If autofilter is turned off, register backgroundValues
+                _backgroundValues.setVisibility(Property::Visibility::Always);
             }
         });
     }
@@ -88,103 +93,84 @@ void RenderableDataPlane::deinitializeGL() {
     RenderableDataCygnet::deinitializeGL();
 }
 
-bool RenderableDataPlane::createGeometry() {
-    glGenVertexArrays(1, &_quad); // generate array
-    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+void RenderableDataPlane::createGeometry() {
+    struct Vertex {
+        glm::vec4 position;
+        glm::vec2 texCoords;
+    };
 
-    // ============================
-    //         GEOMETRY (quad)
-    // ============================
-    // GLfloat x,y, z;
+    glCreateBuffers(1, &_vbo);
     float s = _data.spatialScale.x;
-    const GLfloat x =  s *_data.scale.x / 2.f;
+    const GLfloat x = s * _data.scale.x / 2.f;
     const GLfloat y = s * _data.scale.y / 2.f;
     const GLfloat z = s * _data.scale.z / 2.f;
     const GLfloat w = _data.spatialScale.w;
-
-    const GLfloat vertex_data[] = { // square of two triangles (sigh)
-    //   x   y               z   w  s  t
-        -x, -y,             -z,  w, 0, 1,
-         x,  y,              z,  w, 1, 0,
-        -x,  ((x>0)?y:-y),   z,  w, 0, 0,
-        -x, -y,             -z,  w, 0, 1,
-         x,  ((x>0)?-y:y),  -z,  w, 1, 1,
-         x,  y,              z,  w, 1, 0,
+    const Vertex VertexData[] = {
+        { glm::vec4(-x,                 -y, -z,  w), glm::vec2(0.f, 1.f) },
+        { glm::vec4( x,                  y,  z,  w), glm::vec2(1.f, 0.f) },
+        { glm::vec4(-x, ((x > 0) ? y : -y),  z,  w), glm::vec2(0.f, 0.f) },
+        { glm::vec4(-x,                 -y, -z,  w), glm::vec2(0.f, 1.f) },
+        { glm::vec4( x, ((x > 0) ? -y : y), -z,  w), glm::vec2(1.f, 1.f) },
+        { glm::vec4( x,                  y,  z,  w), glm::vec2(1.f, 0.f) }
     };
+    glNamedBufferStorage(_vbo, sizeof(VertexData), VertexData, GL_NONE_BIT);
 
-    glBindVertexArray(_quad); // bind array
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-        0,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 6,
-        nullptr
-    );
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
+
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(
+        _vao,
         1,
         2,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
+        offsetof(Vertex, texCoords)
     );
-
-    return true;
+    glVertexArrayAttribBinding(_vao, 1, 0);
 }
 
-bool RenderableDataPlane::destroyGeometry() {
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
-
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
-
-    return true;
+void RenderableDataPlane::destroyGeometry() {
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 }
 
 void RenderableDataPlane::renderGeometry() const {
-    glBindVertexArray(_quad);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 void RenderableDataPlane::setUniforms() {
-    // set both data texture and transfer function texture
+    // Set both data texture and transfer function texture
     setTextureUniforms();
     _shader->setUniform("backgroundValues", _backgroundValues);
     _shader->setUniform("transparency", _alpha);
 }
 
-std::vector<float*> RenderableDataPlane::textureData() {
-    // if the buffer in the datafile is empty, do not proceed
+std::vector<std::vector<float>> RenderableDataPlane::textureData() {
+    // If the buffer in the datafile is empty, do not proceed
     if (_dataBuffer.empty()) {
-        return std::vector<float*>();
+        return std::vector<std::vector<float>>();
     }
 
-    if (!_dataOptions.options().size()) { // load options for value selection
+    if (!_dataOptions.options().size()) {
+        // Load options for value selection
         fillOptions(_dataBuffer);
         _dataProcessor->addDataValues(_dataBuffer, _dataOptions);
 
-        // if this datacygnet has added new values then reload texture
-        // for the whole group, including this datacygnet, and return after.
+        // If this datacygnet has added new values then reload texture for the whole
+        // group, including this datacygnet, and return after.
         if (_group) {
             _group->updateGroup();
-            return std::vector<float*>();
+            return std::vector<std::vector<float>>();
         }
     }
-    // _textureDimensions = _dataProcessor->setDimensions();
 
-    std::vector<float*> d = _dataProcessor->processData(
-        _dataBuffer,
-        _dataOptions,
-        _textureDimensions
-    );
-
-    return d;
+    return _dataProcessor->processData(_dataBuffer, _dataOptions, _textureDimensions);
 }
 
 } // namespace openspace

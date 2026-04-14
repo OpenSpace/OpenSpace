@@ -1,6 +1,6 @@
 <GDAL_WMS>
   <Service name="TMS">
-    <ServerUrl>http://wms.itn.liu.se/Europa/Voyager_GalileoSSI_global_mosaic_500m/tile/${z}/${y}/${x}</ServerUrl>
+    <ServerUrl>http://liu-se.wms.openspaceproject.com/Europa/Voyager_GalileoSSI_global_mosaic_500m/tile/${z}/${y}/${x}</ServerUrl>
   </Service>
   <DataWindow>
     <UpperLeftX>-180.0</UpperLeftX>

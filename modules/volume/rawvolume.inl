@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,8 +23,9 @@
  ****************************************************************************************/
 
 #include <modules/volume/volumeutils.h>
+#include <functional>
 
-namespace openspace::volume {
+namespace openspace {
 
 template <typename VoxelType>
 RawVolume<VoxelType>::RawVolume(const glm::uvec3& dimensions)
@@ -45,7 +46,7 @@ void RawVolume<VoxelType>::setDimensions(const glm::uvec3& dimensions) {
     _data.resize(nCells());
 }
 
-template<typename VoxelType>
+template <typename VoxelType>
 size_t RawVolume<VoxelType>::nCells() const
 {
     return static_cast<size_t>(_dimensions.x) * static_cast<size_t>(_dimensions.y) *
@@ -84,12 +85,12 @@ void RawVolume<VoxelType>::forEachVoxel(
 
 template <typename VoxelType>
 size_t RawVolume<VoxelType>::coordsToIndex(const glm::uvec3& cartesian) const {
-    return volume::coordsToIndex(cartesian, dimensions());
+    return openspace::coordsToIndex(cartesian, dimensions());
 }
 
 template <typename VoxelType>
 glm::uvec3 RawVolume<VoxelType>::indexToCoords(size_t linear) const {
-    return volume::indexToCoords(linear, dimensions());
+    return openspace::indexToCoords(linear, dimensions());
 }
 
 template <typename VoxelType>
@@ -102,4 +103,4 @@ const VoxelType* RawVolume<VoxelType>::data() const {
     return _data.data();
 }
 
-} // namespace openspace::volume
+} // namespace openspace

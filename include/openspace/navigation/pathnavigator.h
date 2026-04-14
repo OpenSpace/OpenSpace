@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,27 +33,21 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <ghoul/glm.h>
 #include <memory>
 
 namespace openspace {
-    class Camera;
-    struct CameraPose;
-    class SceneGraphNode;
-} // namespace openspace
 
-namespace openspace::scripting { struct LuaLibrary; }
-
-namespace openspace::interaction {
-
+class Camera;
+struct CameraPose;
+struct LuaLibrary;
 class Path;
+class SceneGraphNode;
 
-class PathNavigator : public properties::PropertyOwner {
+class PathNavigator : public PropertyOwner {
 public:
     PathNavigator();
-    virtual ~PathNavigator() override;
+    ~PathNavigator() override;
 
-    // Accessors
     Camera* camera() const;
     const SceneGraphNode* anchor() const;
     const Path* currentPath() const;
@@ -89,7 +83,7 @@ public:
      * Find a node close to the given node. Closeness is determined by a factor times
      * the bounding sphere of the object.
      *
-     * \return Pointer to the SGN if one was found, nullptr otherwise
+     * \return Pointer to the SGN if one was found, `nullptr` otherwise
      */
     static SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node);
 
@@ -97,7 +91,7 @@ public:
      * \return The Lua library that contains all Lua functions available to affect the
      *         path navigation
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     void handlePathEnd();
@@ -115,19 +109,19 @@ private:
 
     bool _setCameraToEndNextFrame = false;
 
-    properties::OptionProperty _defaultPathType;
-    properties::BoolProperty _includeRoll;
-    properties::FloatProperty _speedScale;
-    properties::BoolProperty _applyIdleBehaviorOnFinish;
-    properties::DoubleProperty _arrivalDistanceFactor;
-    properties::FloatProperty _linearRotationSpeedFactor;
-    properties::DoubleProperty _minValidBoundingSphere;
-    properties::StringListProperty _relevantNodeTags;
+    OptionProperty _defaultPathType;
+    BoolProperty _includeRoll;
+    FloatProperty _speedScale;
+    BoolProperty _applyIdleMotionOnFinish;
+    DoubleProperty _arrivalDistanceFactor;
+    FloatProperty _linearRotationSpeedFactor;
+    DoubleProperty _minValidBoundingSphere;
+    StringListProperty _relevantNodeTags;
 
     std::vector<SceneGraphNode*> _relevantNodes;
     bool _hasInitializedRelevantNodes = false;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___PATHNAVIGATOR___H__

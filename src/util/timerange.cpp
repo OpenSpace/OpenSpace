@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,26 +25,25 @@
 #include <openspace/util/timerange.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
-
 #include <ghoul/misc/dictionary.h>
+#include <stdexcept>
 
 namespace {
     struct [[codegen::Dictionary(TimeRange)]] Parameters {
-        // The start date of the time range
+        // The start date of the time range.
         std::string start [[codegen::annotation("A string representing a valid date")]];
 
-        // The end date of the time range
+        // The end date of the time range.
         std::string end [[codegen::annotation("A string representing a valid date")]];
     };
-#include "timerange_codegen.cpp"
 } // namespace
+#include "timerange_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation TimeRange::Documentation() {
-    return codegen::doc<Parameters>("core_util_timerange");
+Documentation TimeRange::Documentation() {
+    return codegen::doc<Parameters>("core_timerange");
 }
 
 TimeRange::TimeRange(double startTime, double endTime)

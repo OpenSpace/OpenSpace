@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,9 +26,10 @@
 #define __OPENSPACE_CORE___NUMERICALPROPERTY___H__
 
 #include <openspace/properties/templateproperty.h>
-#include <openspace/util/json_helper.h>
 
-namespace openspace::properties {
+#include <ghoul/misc/easing.h>
+
+namespace openspace {
 
 template <typename T>
 class NumericalProperty : public TemplateProperty<T> {
@@ -68,7 +69,7 @@ protected:
     T _interpolationEnd = T(0);
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #include "openspace/properties/numericalproperty.inl"
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,9 +24,10 @@
 
 #include <openspace/util/collisionhelper.h>
 
-#include <ghoul/misc/exception.h>
+#include <cmath>
+#include <cstdlib>
 
-namespace openspace::collision {
+namespace openspace {
 
 // Source: http://paulbourke.net/geometry/circlesphere/raysphere.c
 bool lineSphereIntersection(const glm::dvec3& p1, const glm::dvec3& p2,
@@ -38,10 +39,9 @@ bool lineSphereIntersection(const glm::dvec3& p1, const glm::dvec3& p2,
     const double a = diffp.x * diffp.x + diffp.y * diffp.y + diffp.z * diffp.z;
     const double b = 2.0 * (diffp.x * (p1.x - center.x) + diffp.y * (p1.y - center.y) +
         diffp.z * (p1.z - center.z));
-    double c = center.x * center.x + center.y * center.y + center.z * center.z;
-    c += p1.x * p1.x + p1.y * p1.y + p1.z * p1.z;
-    c -= 2.0 * (center.x * p1.x + center.y * p1.y + center.z * p1.z);
-    c -= r * r;
+    const double c = center.x * center.x + center.y * center.y + center.z * center.z +
+        p1.x * p1.x + p1.y * p1.y + p1.z * p1.z -
+        2.0 * (center.x * p1.x + center.y * p1.y + center.z * p1.z) - r * r;
 
     const double intersectionTest = b * b - 4.0 * a * c;
 
@@ -68,8 +68,7 @@ bool isPointInsideSphere(const glm::dvec3& p, const glm::dvec3& c, double r) {
     const glm::dvec3 v = c - p;
     const double squaredDistance = v.x * v.x + v.y * v.y + v.z * v.z;
     const double squaredRadius = r * r;
-
     return (squaredDistance <= squaredRadius);
 }
 
-}  // namespace openspace::collision
+} // namespace openspace

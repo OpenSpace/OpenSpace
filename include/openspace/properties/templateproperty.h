@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 #include <openspace/properties/property.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 /**
  * This subclass of Property handles a single parameter value that is of type `T`. It
@@ -58,7 +58,7 @@ public:
      * \p info and and the default value \p value.
      *
      * \param info The PropertyInfo structure that contains all the required static
-     *        information for initializing this Property.
+     *        information for initializing this Property
      * \param value The default value of the Property
      *
      * \pre \p info.identifier must not be empty
@@ -72,7 +72,7 @@ public:
      *
      * \return The type info object describing the template parameter `T`
      */
-    virtual const std::type_info& type() const override;
+    const std::type_info& type() const override;
 
     /**
      * This operator allows the TemplateProperty to be used almost transparently as if it
@@ -129,7 +129,7 @@ protected:
     T _value;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #include "openspace/properties/templateproperty.inl"
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,10 +24,12 @@
 
 #include "fragment.glsl"
 
-in vec4 vs_position;
-in vec2 vs_textureCoords;
-in vec3 vs_normal;
-in float vs_screenSpaceDepth;
+in Data {
+  vec4 position;
+  vec2 textureCoords;
+  vec3 normal;
+  float screenSpaceDepth;
+} in_data;
 
 uniform sampler2D colorTexture;
 
@@ -38,9 +40,45 @@ uniform vec2 dataMinMaxValues;
 uniform float opacity;
 uniform bool mirrorTexture;
 
+const int Equirectangular = 0;
+const int AngularFisheye = 1;
+uniform int textureProjection;
+
+const float M_PI = 3.14159265358979323846;
+
+
+// Remap equirectangular texture coordinates into angular fisheye
+vec2 equiToAngularFisheye(vec2 textureCoords) {
+  vec2 pos2 = textureCoords * 2.0 - 1.0; // Map [0,1] tex coords to [-1,1]
+
+  // 2D equi to 3D vector
+  float lat = pos2.y * 0.5 * M_PI;
+  float lon = pos2.x * M_PI;
+
+  // Map to 3D position, with Z being the north pole
+  vec3 pos3 = vec3(cos(lat) * cos(lon), sin(lat), cos(lat) * sin(lon));
+
+  // 3D vector to normalized 2D fisheye [-1,1]
+  float r = 2.0 / M_PI * atan(sqrt(dot(pos3.xz, pos3.xz)), pos3.y);
+  if (r > 1.0) {
+    // Invalid coordinates (outside fisheye frame)
+     discard;
+  }
+
+  float theta = atan(pos3.z, pos3.x);
+  vec2 fisheye2D = vec2(r * cos(theta), r * sin(theta));
+
+  // Remap to [0,1]
+  return 0.5 * fisheye2D + 0.5;
+}
 
 Fragment getFragment() {
-  vec2 texCoord = vs_textureCoords;
+  // Equirectangular
+  vec2 texCoord = in_data.textureCoords;
+
+  if (textureProjection == AngularFisheye) {
+    texCoord = equiToAngularFisheye(in_data.textureCoords);
+  }
 
   Fragment frag;
   if (mirrorTexture) {
@@ -52,20 +90,14 @@ Fragment getFragment() {
     float maxVal = dataMinMaxValues.y;
     // dataValue and minVal comes from the same texture so dataValue cannot be < minVal
     float lookUpVal = (dataValue.x - minVal) / (maxVal - minVal);
-    frag.color = vec4(
-        texture(transferFunction, lookUpVal).rgb,
-        1.0
-    );
+    frag.color = vec4(texture(transferFunction, lookUpVal).rgb, 1.0);
   }
   else {
     frag.color = texture(colorTexture, texCoord);
   }
   frag.color.a *= opacity;
-  frag.depth = vs_screenSpaceDepth;
-
-  // G-Buffer
-  frag.gPosition = vs_position;
-  frag.gNormal = vec4(vs_normal, 1.0);
-
+  frag.depth = in_data.screenSpaceDepth;
+  frag.gPosition = in_data.position;
+  frag.gNormal = vec4(in_data.normal, 1.0);
   return frag;
 }

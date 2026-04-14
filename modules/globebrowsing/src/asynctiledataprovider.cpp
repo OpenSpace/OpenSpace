@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,23 +24,25 @@
 
 #include <modules/globebrowsing/src/asynctiledataprovider.h>
 
-#include <modules/globebrowsing/src/memoryawaretilecache.h>
-#include <modules/globebrowsing/src/rawtiledatareader.h>
+#include <modules/globebrowsing/src/lruthreadpool.h>
+#include <modules/globebrowsing/src/rawtile.h>
 #include <modules/globebrowsing/src/tileloadjob.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/engine/globals.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/ghoul_gl.h>
-
-namespace openspace::globebrowsing {
+#include <ghoul/misc/assert.h>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 namespace {
     constexpr std::string_view _loggerCat = "AsyncTileDataProvider";
 } // namespace
 
+namespace openspace {
+
 AsyncTileDataProvider::AsyncTileDataProvider(std::string name,
-                                    std::unique_ptr<RawTileDataReader> rawTileDataReader)
+                                     std::unique_ptr<RawTileDataReader> rawTileDataReader)
     : _name(std::move(name))
     , _rawTileDataReader(std::move(rawTileDataReader))
     , _concurrentJobManager(LRUThreadPool<TileIndex::TileHashKey>(1, 10))
@@ -81,7 +83,6 @@ std::optional<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
         const TileIndex::TileHashKey key = product.tileIndex.hashKey();
         // No longer enqueued. Remove from set of enqueued tiles
         _enqueuedTileRequests.erase(key);
-        // Pbo is still mapped. Set the id for the raw tile
         if (product.error != RawTile::ReadError::None) {
             product.imageData = nullptr;
             return std::nullopt;
@@ -97,14 +98,14 @@ std::optional<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
 bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const TileIndex& tileIndex) {
     ZoneScoped;
 
-    // Only satisfies if it is not already enqueued. Also bumps the request to the top.
+    // Only satisfies if it is not already enqueued. Also bumps the request to the top
     const bool alreadyEnqueued = _concurrentJobManager.touch(tileIndex.hashKey());
     // Early out so we don't need to check the already enqueued requests
     if (alreadyEnqueued) {
         return false;
     }
 
-    // Concurrent job manager can start jobs which will pop them from enqueued, however
+    // Concurrent job manager can start jobs which will pop them from enqueued; however
     // they are still in _enqueuedTileRequests until finished
     const auto it = _enqueuedTileRequests.find(tileIndex.hashKey());
     const bool notFoundAmongEnqueued = it == _enqueuedTileRequests.end();
@@ -169,7 +170,7 @@ void AsyncTileDataProvider::update() {
 
 void AsyncTileDataProvider::reset() {
     // Can not clear concurrent job manager in case there are threads running. therefore
-    // we need to wait until _enqueuedTileRequests is empty before finishing up.
+    // we need to wait until _enqueuedTileRequests is empty before finishing up
     _resetMode = ResetMode::ShouldResetAll;
     endEnqueuedJobs();
     LINFO(std::format("Prepairing for resetting of tile reader '{}'", _name));
@@ -202,4 +203,4 @@ float AsyncTileDataProvider::noDataValueAsFloat() const {
     return _rawTileDataReader->noDataValueAsFloat();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

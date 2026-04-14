@@ -1,49 +1,49 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2025                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2026                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 Platform.userExtensionDir
 NetAddr.langPort;
 NetAddr.localAddr;
 
 /*****************************************************************************************
-* This is a SuperCollider file that needs to be run in the SuperCollider application    *
-* that can be downloaded here: https://supercollider.github.io/                         *
-*                                                                                       *
-* This is a sonification of the planets in the solar system, for more details, see the  *
-* http://dx.doi.org/10.21785/icad2021.018. This sonification was made by Elias          *
-* Elmquist.
-*                                                                                       *
-* To run a SuperCollider file, click any line within the parentheses below, such as the *
-* marked line. When you have selected a line, press the CTRL and ENTER keys on your     *
-* keyboard at the same time, and SuperCollider will run the code. You will see a        *
-* message appear in the log to the right, the message should be:                        *
-* "-> OSCdef(Neptune, /Neptune, nil, nil, nil)". At this point, SuperCollider is ready  *
-* to receive messages from OpenSpace. For a guide on how to enable and use the          *
-* Telemetry module inside OpenSpace, see this documentation page:                       *
-* https://docs.openspaceproject.com/latest/creating-data-assets/modules/telemetry/      *
-* index.html                                                                            *
-****************************************************************************************/
+ * This is a SuperCollider file that needs to be run in the SuperCollider application    *
+ * that can be downloaded here: https://supercollider.github.io/                         *
+ *                                                                                       *
+ * This is a sonification of the planets in the solar system, for more details, see the  *
+ * http://dx.doi.org/10.21785/icad2021.018. This sonification was made by Elias          *
+ * Elmquist.
+ *                                                                                       *
+ * To run a SuperCollider file, click any line within the parentheses below, such as the *
+ * marked line. When you have selected a line, press the CTRL and ENTER keys on your     *
+ * keyboard at the same time, and SuperCollider will run the code. You will see a        *
+ * message appear in the log to the right, the message should be:                        *
+ * "-> OSCdef(Neptune, /Neptune, nil, nil, nil)". At this point, SuperCollider is ready  *
+ * to receive messages from OpenSpace. For a guide on how to enable and use the          *
+ * Telemetry module inside OpenSpace, see this documentation page:                       *
+ * https://docs.openspaceproject.com/latest/creating-data-assets/modules/telemetry/      *
+ * index.html                                                                            *
+ ****************************************************************************************/
 
 (
 

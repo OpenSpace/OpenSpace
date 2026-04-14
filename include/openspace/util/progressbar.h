@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,11 +37,13 @@ public:
     ProgressBar& operator=(const ProgressBar& rhs) = delete;
 
     void print(int current);
+    void finish();
 
 private:
     int _width;
     int _previous = -1;
     int _end;
+    bool _isFinished = false;
 
     std::ostream& _stream;
 };

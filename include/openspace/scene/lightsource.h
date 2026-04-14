@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,12 +35,11 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
+struct Documentation;
 class SceneGraphNode;
 struct RenderData;
 
-class LightSource : public properties::PropertyOwner {
+class LightSource : public PropertyOwner {
 public:
     static std::unique_ptr<LightSource> createFromDictionary(
         const ghoul::Dictionary& dictionary);
@@ -56,12 +55,12 @@ public:
 
     virtual bool initialize();
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::BoolProperty _enabled;
+    BoolProperty _enabled;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___LIGHTSOURCE___H__

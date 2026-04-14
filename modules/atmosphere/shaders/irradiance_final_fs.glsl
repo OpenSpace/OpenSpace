@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,15 +24,15 @@
 
 #version __CONTEXT__
 
-out vec4 renderTableColor;
+out vec4 out_color;
 
-uniform ivec2 OTHER_TEXTURES;
+uniform ivec2 deltaESize;
 uniform sampler2D deltaETexture;
 
 
 void main() {
-  vec2 uv = gl_FragCoord.xy / vec2(OTHER_TEXTURES);
+  vec2 uv = gl_FragCoord.xy / vec2(deltaESize);
 
   // Update texture E with E plus deltaE textures.
-  renderTableColor = texture(deltaETexture, uv);
+  out_color = texture(deltaETexture, uv);
 }

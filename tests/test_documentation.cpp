@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,9 +31,9 @@
 #include <ghoul/misc/dictionary.h>
 #include <string>
 
-TEST_CASE("Documentation: Constructor", "[documentation]") {
-    using namespace openspace::documentation;
+using namespace openspace;
 
+TEST_CASE("Documentation: Constructor", "[documentation]") {
     Documentation doc;
 
     // Basic Verifiers
@@ -87,14 +87,11 @@ TEST_CASE("Documentation: Constructor", "[documentation]") {
     doc.entries.emplace_back("IntListVerifier", new IntListVerifier);
 
     // Range Verifiers
-    doc.entries.emplace_back("InListDouble", new DoubleInRangeVerifier({ 0.0, 1.0 }));
-    doc.entries.emplace_back("InListInt", new IntInRangeVerifier({ 0, 1 }));
+    doc.entries.emplace_back("InListDouble", new DoubleInRangeVerifier(0.0, 1.0));
+    doc.entries.emplace_back("InListInt", new IntInRangeVerifier(0, 1));
 
-    doc.entries.emplace_back(
-        "NotInListDouble",
-        new DoubleNotInRangeVerifier({ 0.0, 1.0 })
-    );
-    doc.entries.emplace_back("NotInListInt", new IntNotInRangeVerifier({ 0, 1 }));
+    doc.entries.emplace_back("NotInListDouble", new DoubleNotInRangeVerifier(0.0, 1.0));
+    doc.entries.emplace_back("NotInListInt", new IntNotInRangeVerifier(0, 1));
 
     // Misc Verifiers
     doc.entries.emplace_back("AnnotationBool", new BoolAnnotationVerifier("Bool"));
@@ -105,8 +102,6 @@ TEST_CASE("Documentation: Constructor", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Initializer Constructor", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {
             // Basic Verifiers
@@ -172,8 +167,6 @@ TEST_CASE("Documentation: Initializer Constructor", "[documentation]") {
 }
 
 TEST_CASE("Documentation: BoolVerifier", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Bool", new BoolVerifier }}
     };
@@ -203,8 +196,6 @@ TEST_CASE("Documentation: BoolVerifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: DoubleVerifier", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Double", new DoubleVerifier }}
     };
@@ -233,8 +224,6 @@ TEST_CASE("Documentation: DoubleVerifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: IntVerifier", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Int", new IntVerifier }}
     };
@@ -269,7 +258,6 @@ TEST_CASE("Documentation: IntVerifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: StringVerifier", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -300,7 +288,6 @@ TEST_CASE("Documentation: StringVerifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: IdentifierVerifier", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -363,7 +350,6 @@ TEST_CASE("Documentation: IdentifierVerifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: FileVerifier", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -402,7 +388,6 @@ TEST_CASE("Documentation: FileVerifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: DirectoryVerifier", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -441,7 +426,6 @@ TEST_CASE("Documentation: DirectoryVerifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: DateTimeVerifier", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -480,8 +464,6 @@ TEST_CASE("Documentation: DateTimeVerifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: TableVerifierType", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Table", new TableVerifier }}
     };
@@ -510,7 +492,6 @@ TEST_CASE("Documentation: TableVerifierType", "[documentation]") {
 }
 
 TEST_CASE("Documentation: StringListVerifierType", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -562,7 +543,6 @@ TEST_CASE("Documentation: StringListVerifierType", "[documentation]") {
 }
 
 TEST_CASE("Documentation: IntListVerifierType", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -613,7 +593,6 @@ TEST_CASE("Documentation: IntListVerifierType", "[documentation]") {
 }
 
 TEST_CASE("Documentation: MixedVerifiers", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -664,7 +643,6 @@ TEST_CASE("Documentation: MixedVerifiers", "[documentation]") {
 }
 
 TEST_CASE("Documentation: NestedTables", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -853,8 +831,6 @@ TEST_CASE("Documentation: NestedTables", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Optional", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {
             { "Bool_Force", new BoolVerifier },
@@ -901,8 +877,6 @@ TEST_CASE("Documentation: Optional", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Required In Optional", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {
             {
@@ -956,8 +930,6 @@ TEST_CASE("Documentation: Required In Optional", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Exhaustive", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Int", new IntVerifier }}
     };
@@ -986,8 +958,6 @@ TEST_CASE("Documentation: Exhaustive", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Nested Exhaustive", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Table", new TableVerifier({{ "a", new IntVerifier }}) }}
     };
@@ -1016,8 +986,6 @@ TEST_CASE("Documentation: Nested Exhaustive", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Empty Entries Non Exhaustive", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc;
 
     const ghoul::Dictionary positive {};
@@ -1033,8 +1001,6 @@ TEST_CASE("Documentation: Empty Entries Non Exhaustive", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Empty Nested Exhaustive", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Table", new TableVerifier() }}
     };
@@ -1057,8 +1023,6 @@ TEST_CASE("Documentation: Empty Nested Exhaustive", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Less Int", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Int", new IntLessVerifier(5) }}
     };
@@ -1079,8 +1043,6 @@ TEST_CASE("Documentation: Less Int", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Less Double", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Double", new DoubleLessVerifier(5.0) }}
     };
@@ -1101,8 +1063,6 @@ TEST_CASE("Documentation: Less Double", "[documentation]") {
 }
 
 TEST_CASE("Documentation: LessEqual Int", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Int", new IntLessEqualVerifier(5) }}
     };
@@ -1129,8 +1089,6 @@ TEST_CASE("Documentation: LessEqual Int", "[documentation]") {
 }
 
 TEST_CASE("Documentation: LessEqual Double", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Double", new DoubleLessEqualVerifier(5.0) }}
     };
@@ -1157,8 +1115,6 @@ TEST_CASE("Documentation: LessEqual Double", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Greater Int", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Int", new IntGreaterVerifier(5) }}
     };
@@ -1179,8 +1135,6 @@ TEST_CASE("Documentation: Greater Int", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Greater Double", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Double", new DoubleGreaterVerifier(5.0) }}
     };
@@ -1201,8 +1155,6 @@ TEST_CASE("Documentation: Greater Double", "[documentation]") {
 }
 
 TEST_CASE("Documentation: GreaterEqual Int", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Int", new IntGreaterEqualVerifier(5) }}
     };
@@ -1229,8 +1181,6 @@ TEST_CASE("Documentation: GreaterEqual Int", "[documentation]") {
 }
 
 TEST_CASE("Documentation: GreaterEqual Double", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Double", new DoubleGreaterEqualVerifier(5.0) }}
     };
@@ -1257,8 +1207,6 @@ TEST_CASE("Documentation: GreaterEqual Double", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Equal Bool", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Bool", new BoolEqualVerifier(true) }}
     };
@@ -1279,8 +1227,6 @@ TEST_CASE("Documentation: Equal Bool", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Equal Int", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Int", new IntEqualVerifier(1) }}
     };
@@ -1301,8 +1247,6 @@ TEST_CASE("Documentation: Equal Int", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Equal Double", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Double", new DoubleEqualVerifier(1.0) }}
     };
@@ -1323,7 +1267,6 @@ TEST_CASE("Documentation: Equal Double", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Equal String", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -1346,8 +1289,6 @@ TEST_CASE("Documentation: Equal String", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Unequal Bool", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Bool", new BoolUnequalVerifier(true) }}
     };
@@ -1368,8 +1309,6 @@ TEST_CASE("Documentation: Unequal Bool", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Unequal Int", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Int", new IntUnequalVerifier(1) }}
     };
@@ -1390,8 +1329,6 @@ TEST_CASE("Documentation: Unequal Int", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Unequal Double", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Double", new DoubleUnequalVerifier(1.0) }}
     };
@@ -1412,7 +1349,6 @@ TEST_CASE("Documentation: Unequal Double", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Unequal String", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -1435,8 +1371,6 @@ TEST_CASE("Documentation: Unequal String", "[documentation]") {
 }
 
 TEST_CASE("Documentation: List Bool", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Bool", new BoolInListVerifier({ true }) }}
     };
@@ -1457,8 +1391,6 @@ TEST_CASE("Documentation: List Bool", "[documentation]") {
 }
 
 TEST_CASE("Documentation: List Int", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Int", new IntInListVerifier({ 0, 1, 2 }) }}
     };
@@ -1485,8 +1417,6 @@ TEST_CASE("Documentation: List Int", "[documentation]") {
 }
 
 TEST_CASE("Documentation: List Double", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Double", new DoubleInListVerifier({ 0.0, 1.0, 2.0 }) }}
     };
@@ -1513,7 +1443,6 @@ TEST_CASE("Documentation: List Double", "[documentation]") {
 }
 
 TEST_CASE("Documentation: List String", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -1542,8 +1471,6 @@ TEST_CASE("Documentation: List String", "[documentation]") {
 }
 
 TEST_CASE("Documentation: NotList Bool", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Bool", new BoolNotInListVerifier({ true }) }}
     };
@@ -1564,8 +1491,6 @@ TEST_CASE("Documentation: NotList Bool", "[documentation]") {
 }
 
 TEST_CASE("Documentation: NotList Int", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Int", new IntNotInListVerifier({ 0, 1, 2 }) }}
     };
@@ -1592,8 +1517,6 @@ TEST_CASE("Documentation: NotList Int", "[documentation]") {
 }
 
 TEST_CASE("Documentation: NotList Double", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Double", new DoubleNotInListVerifier({ 0.0, 1.0, 2.0 }) }}
     };
@@ -1620,7 +1543,6 @@ TEST_CASE("Documentation: NotList Double", "[documentation]") {
 }
 
 TEST_CASE("Documentation: NotList String", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -1649,8 +1571,6 @@ TEST_CASE("Documentation: NotList String", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Annotation Bool", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Bool", new BoolAnnotationVerifier("Bool") }}
     };
@@ -1671,8 +1591,6 @@ TEST_CASE("Documentation: Annotation Bool", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Annotation Int", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Int", new IntAnnotationVerifier("Int") }}
     };
@@ -1693,8 +1611,6 @@ TEST_CASE("Documentation: Annotation Int", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Annotation Double", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Double", new DoubleAnnotationVerifier("Double") }}
     };
@@ -1715,7 +1631,6 @@ TEST_CASE("Documentation: Annotation Double", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Annotation String", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -1738,8 +1653,6 @@ TEST_CASE("Documentation: Annotation String", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Annotation Table", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Table", new TableAnnotationVerifier("Table") }}
     };
@@ -1760,8 +1673,6 @@ TEST_CASE("Documentation: Annotation Table", "[documentation]") {
 }
 
 TEST_CASE("Documentation: InRange Int", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Int", new InRangeVerifier<IntVerifier>(0, 5) }}
     };
@@ -1794,8 +1705,6 @@ TEST_CASE("Documentation: InRange Int", "[documentation]") {
 }
 
 TEST_CASE("Documentation: InRange Double", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Double", new InRangeVerifier<DoubleVerifier>(0.0, 5.0) }}
     };
@@ -1834,8 +1743,6 @@ TEST_CASE("Documentation: InRange Double", "[documentation]") {
 }
 
 TEST_CASE("Documentation: NotInRange Int", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Int", new NotInRangeVerifier<IntVerifier>(0, 5) }}
     };
@@ -1878,8 +1785,6 @@ TEST_CASE("Documentation: NotInRange Int", "[documentation]") {
 }
 
 TEST_CASE("Documentation: NotInRange Double", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "Double", new NotInRangeVerifier<DoubleVerifier>(0.0, 5.0) }}
     };
@@ -1922,8 +1827,6 @@ TEST_CASE("Documentation: NotInRange Double", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Wildcard", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ DocumentationEntry::Wildcard, new IntVerifier }}
     };
@@ -1974,8 +1877,6 @@ TEST_CASE("Documentation: Wildcard", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Wildcard Mixed", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {
             { DocumentationEntry::Wildcard, new IntVerifier },
@@ -2043,8 +1944,6 @@ TEST_CASE("Documentation: Wildcard Mixed", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Referencing", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation referenced = {
         "Referenced Name",
         "referenced_id",
@@ -2063,7 +1962,7 @@ TEST_CASE("Documentation: Referencing", "[documentation]") {
         inner.setValue("a", 1);
         inner.setValue("b", 2.0);
         positive.setValue("Table", inner);
-    };
+    }
     const TestResult positiveRes = testSpecification(doc, positive);
     CHECK(positiveRes.success);
     CHECK(positiveRes.offenses.empty());
@@ -2082,7 +1981,7 @@ TEST_CASE("Documentation: Referencing", "[documentation]") {
         inner.setValue("a", 1);
         inner.setValue("b", true);
         negative2.setValue("Table", inner);
-    };
+    }
     negativeRes = testSpecification(doc, negative2);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2110,7 +2009,6 @@ TEST_CASE("Documentation: Referencing", "[documentation]") {
 }
 
 TEST_CASE("Documentation: OrOperator", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -2139,8 +2037,6 @@ TEST_CASE("Documentation: OrOperator", "[documentation]") {
 }
 
 TEST_CASE("Documentation: IntVector2Verifier", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "a", new IntVector2Verifier }}
     };
@@ -2157,7 +2053,7 @@ TEST_CASE("Documentation: IntVector2Verifier", "[documentation]") {
         inner.setValue("1", true);
         inner.setValue("2", 1);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2174,8 +2070,6 @@ TEST_CASE("Documentation: IntVector2Verifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: DoubleVector2Verifier", "[documentation]") {
-    using namespace openspace::documentation;
-
     const Documentation doc = {
         .entries = {{ "a", new DoubleVector2Verifier }}
     };
@@ -2192,7 +2086,7 @@ TEST_CASE("Documentation: DoubleVector2Verifier", "[documentation]") {
         inner.setValue("1", true);
         inner.setValue("2", 1.0);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2209,7 +2103,6 @@ TEST_CASE("Documentation: DoubleVector2Verifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: IntVector3Verifier", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -2229,7 +2122,7 @@ TEST_CASE("Documentation: IntVector3Verifier", "[documentation]") {
         inner.setValue("2", 1);
         inner.setValue("3", "s"s);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2246,7 +2139,6 @@ TEST_CASE("Documentation: IntVector3Verifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: DoubleVector3Verifier", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -2266,7 +2158,7 @@ TEST_CASE("Documentation: DoubleVector3Verifier", "[documentation]") {
         inner.setValue("2", 1.0);
         inner.setValue("3", "s"s);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2283,7 +2175,6 @@ TEST_CASE("Documentation: DoubleVector3Verifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: IntVector4Verifier", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -2304,7 +2195,7 @@ TEST_CASE("Documentation: IntVector4Verifier", "[documentation]") {
         inner.setValue("3", "s"s);
         inner.setValue("4", 1);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2321,7 +2212,6 @@ TEST_CASE("Documentation: IntVector4Verifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: DoubleVector4Verifier", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -2342,7 +2232,7 @@ TEST_CASE("Documentation: DoubleVector4Verifier", "[documentation]") {
         inner.setValue("3", "s"s);
         inner.setValue("4", 1);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2359,7 +2249,6 @@ TEST_CASE("Documentation: DoubleVector4Verifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: DoubleMatrix2x2Verifier", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -2379,7 +2268,7 @@ TEST_CASE("Documentation: DoubleMatrix2x2Verifier", "[documentation]") {
         inner.setValue("2", 1.0);
         inner.setValue("3", "s"s);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2396,7 +2285,6 @@ TEST_CASE("Documentation: DoubleMatrix2x2Verifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: DoubleMatrix2x3Verifier", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -2433,7 +2321,6 @@ TEST_CASE("Documentation: DoubleMatrix2x3Verifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: DoubleMatrix2x4Verifier", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -2453,7 +2340,7 @@ TEST_CASE("Documentation: DoubleMatrix2x4Verifier", "[documentation]") {
         inner.setValue("2", 1.0);
         inner.setValue("3", "s"s);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2470,7 +2357,6 @@ TEST_CASE("Documentation: DoubleMatrix2x4Verifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: DoubleMatrix3x2Verifier", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -2490,7 +2376,7 @@ TEST_CASE("Documentation: DoubleMatrix3x2Verifier", "[documentation]") {
         inner.setValue("2", 1.0);
         inner.setValue("3", "s"s);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2507,7 +2393,6 @@ TEST_CASE("Documentation: DoubleMatrix3x2Verifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: DoubleMatrix3x3Verifier", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -2527,7 +2412,7 @@ TEST_CASE("Documentation: DoubleMatrix3x3Verifier", "[documentation]") {
         inner.setValue("2", 1.0);
         inner.setValue("3", "s"s);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2544,7 +2429,6 @@ TEST_CASE("Documentation: DoubleMatrix3x3Verifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: DoubleMatrix3x4Verifier", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -2564,7 +2448,7 @@ TEST_CASE("Documentation: DoubleMatrix3x4Verifier", "[documentation]") {
         inner.setValue("2", 1.0);
         inner.setValue("3", "s"s);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2581,7 +2465,6 @@ TEST_CASE("Documentation: DoubleMatrix3x4Verifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: DoubleMatrix4x2Verifier", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -2601,7 +2484,7 @@ TEST_CASE("Documentation: DoubleMatrix4x2Verifier", "[documentation]") {
         inner.setValue("2", 1.0);
         inner.setValue("3", "s"s);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2618,7 +2501,6 @@ TEST_CASE("Documentation: DoubleMatrix4x2Verifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: DoubleMatrix4x3Verifier", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -2638,7 +2520,7 @@ TEST_CASE("Documentation: DoubleMatrix4x3Verifier", "[documentation]") {
         inner.setValue("2", 1.0);
         inner.setValue("3", "s"s);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2655,7 +2537,6 @@ TEST_CASE("Documentation: DoubleMatrix4x3Verifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: DoubleMatrix4x4Verifier", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     const Documentation doc = {
@@ -2675,7 +2556,7 @@ TEST_CASE("Documentation: DoubleMatrix4x4Verifier", "[documentation]") {
         inner.setValue("2", 1.0);
         inner.setValue("3", "s"s);
         negative.setValue("a", inner);
-    };
+    }
     TestResult negativeRes = testSpecification(doc, negative);
     CHECK_FALSE(negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -2692,7 +2573,6 @@ TEST_CASE("Documentation: DoubleMatrix4x4Verifier", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Verifier Type Post Conditions", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     CHECK(!BoolVerifier().type().empty());
@@ -2735,10 +2615,10 @@ TEST_CASE("Documentation: Verifier Type Post Conditions", "[documentation]") {
     CHECK(!DoubleNotInListVerifier({ 0.0 }).type().empty());
     CHECK(!StringNotInListVerifier({ ""s }).type().empty());
 
-    CHECK(!IntInRangeVerifier({ 0, 1 }).type().empty());
-    CHECK(!DoubleInRangeVerifier({ 0.0, 1.0 }).type().empty());
-    CHECK(!IntNotInRangeVerifier({ 0, 1 }).type().empty());
-    CHECK(!DoubleNotInRangeVerifier({ 0.0, 1.0 }).type().empty());
+    CHECK(!IntInRangeVerifier(0, 1).type().empty());
+    CHECK(!DoubleInRangeVerifier(0.0, 1.0).type().empty());
+    CHECK(!IntNotInRangeVerifier(0, 1).type().empty());
+    CHECK(!DoubleNotInRangeVerifier(0.0, 1.0).type().empty());
 
     CHECK(!BoolAnnotationVerifier("A"s).type().empty());
     CHECK(!IntAnnotationVerifier("A"s).type().empty());
@@ -2756,7 +2636,6 @@ TEST_CASE("Documentation: Verifier Type Post Conditions", "[documentation]") {
 }
 
 TEST_CASE("Documentation: Verifier Documentation Post Conditions", "[documentation]") {
-    using namespace openspace::documentation;
     using namespace std::string_literals;
 
     CHECK(!BoolVerifier().documentation().empty());

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,9 +27,10 @@
 
 #include <list>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
-namespace openspace::globebrowsing::cache {
+namespace openspace {
 
 /**
  * Templated class implementing a Least-Recently-Used Cache. `KeyType` needs to be an
@@ -84,7 +85,7 @@ private:
     size_t _maximumCacheSize;
 };
 
-} // namespace openspace::globebrowsing::cache
+} // namespace openspace
 
 #include <modules/globebrowsing/src/lrucache.inl>
 

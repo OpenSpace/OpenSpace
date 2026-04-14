@@ -1,5 +1,6 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local coreKernels = asset.require("spice/core")
+local jupiterKernels = asset.require("./kernels")
 
 
 
@@ -10,7 +11,7 @@ local JupiterTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = coreKernels.ID.Jupiter,
+      Target = jupiterKernels.ID.Jupiter,
       Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.8, 0.7, 0.7 },

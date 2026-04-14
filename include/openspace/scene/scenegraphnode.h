@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,11 +39,12 @@
 #include <atomic>
 #include <chrono>
 #include <functional>
-#include <memory>
 #include <optional>
+#include <string>
+#include <string_view>
 #include <vector>
 
- //#define Debugging_Core_SceneGraphNode_Indices
+// #define Debugging_Core_SceneGraphNode_Indices
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::opengl { class ProgramObject; }
@@ -51,21 +52,20 @@ namespace ghoul::opengl { class ProgramObject; }
 namespace openspace {
 
 class Camera;
-struct RenderData;
+struct Documentation;
 class Renderable;
+struct RenderData;
 struct RendererTasks;
 class Rotation;
-class Translation;
 class Scale;
 class Scene;
-struct UpdateData;
 struct SurfacePositionHandle;
-class TimeFrame;
 class Time;
+class TimeFrame;
+class Translation;
+struct UpdateData;
 
-namespace documentation { struct Documentation; }
-
-class SceneGraphNode : public properties::PropertyOwner {
+class SceneGraphNode : public PropertyOwner {
 public:
     enum class State : int {
         Loaded,
@@ -81,7 +81,7 @@ public:
     static constexpr std::string_view KeyTag = "Tag";
 
     SceneGraphNode();
-    virtual ~SceneGraphNode() override;
+    ~SceneGraphNode() override;
 
     static ghoul::mm_unique_ptr<SceneGraphNode> createFromDictionary(
         const ghoul::Dictionary& dictionary);
@@ -150,7 +150,7 @@ public:
     bool hasGuiHintHidden() const;
     void setGuiHintHidden(bool value);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void traversePreOrder(const std::function<void(SceneGraphNode*)>& fn);
@@ -159,7 +159,7 @@ private:
     glm::dvec3 calculateWorldPosition() const;
     glm::dmat3 calculateWorldRotation() const;
     glm::dvec3 calculateWorldScale() const;
-    void computeScreenSpaceData(RenderData& newData);
+    void computeScreenSpaceData(const RenderData& newData);
     void renderDebugSphere(const Camera& camera, double size,
         const glm::vec4& color) const;
 
@@ -177,18 +177,20 @@ private:
 
     ghoul::mm_unique_ptr<Renderable> _renderable;
 
-    // If this value is 'true' GUIs are asked to hide this node from collections, as it
-    // might be a node that is not very interesting (for example barycenters)
-    properties::BoolProperty _guiHidden;
+    /// If this value is `true` GUIs are asked to hide this node from collections, as it
+    /// might be a node that is not very interesting (for example barycenters)
+    BoolProperty _guiHidden;
 
-    properties::StringProperty _guiPath;
-    properties::StringProperty _guiDisplayName;
-    properties::StringProperty _guiDescription;
-    properties::BoolProperty _useGuiOrdering;
-    properties::BoolProperty _guiFocusable;
-    properties::FloatProperty _guiOrderingNumber;
+    StringProperty _guiPath;
+    StringProperty _guiDisplayName;
+    StringProperty _guiDescription;
+    BoolProperty _useGuiOrdering;
+    BoolProperty _guiFocusable;
+    FloatProperty _guiOrderingNumber;
 
-    // Transformation defined by translation, rotation and scale
+    /**
+     * Transformation defined by translation, rotation and scale.
+     */
     struct {
         ghoul::mm_unique_ptr<Translation> translation;
         ghoul::mm_unique_ptr<Rotation> rotation;
@@ -204,25 +206,25 @@ private:
 
     glm::dmat4 _modelTransformCached = glm::dmat4(1.0);
 
-    properties::DoubleProperty _boundingSphere;
-    properties::DoubleProperty _evaluatedBoundingSphere;
-    properties::DoubleProperty _interactionSphere;
-    properties::DoubleProperty _evaluatedInteractionSphere;
-    properties::DoubleProperty _approachFactor;
-    properties::DoubleProperty _reachFactor;
-    properties::BoolProperty _computeScreenSpaceValues;
-    properties::IVec2Property _screenSpacePosition;
-    properties::BoolProperty _screenVisibility;
-    properties::DoubleProperty _distFromCamToNode;
-    properties::DoubleProperty _screenSizeRadius;
-    properties::FloatProperty _visibilityDistance;
-    properties::BoolProperty _supportsDirectInteraction;
+    DoubleProperty _boundingSphere;
+    DoubleProperty _evaluatedBoundingSphere;
+    DoubleProperty _interactionSphere;
+    DoubleProperty _evaluatedInteractionSphere;
+    DoubleProperty _approachFactor;
+    DoubleProperty _reachFactor;
+    BoolProperty _computeScreenSpaceValues;
+    IVec2Property _screenSpacePosition;
+    BoolProperty _screenVisibility;
+    DoubleProperty _distFromCamToNode;
+    DoubleProperty _screenSizeRadius;
+    FloatProperty _visibilityDistance;
+    BoolProperty _supportsDirectInteraction;
 
-    // This variable is used for the rate-limiting of the screenspace positions (if they
-    // are calculated when _computeScreenSpaceValues is true)
+    /// This variable is used for the rate-limiting of the screenspace positions (if they
+    /// are calculated when _computeScreenSpaceValues is true)
     std::chrono::high_resolution_clock::time_point _lastScreenSpaceUpdateTime;
 
-    properties::BoolProperty _showDebugSphere;
+    BoolProperty _showDebugSphere;
     static ghoul::opengl::ProgramObject* _debugSphereProgram;
 
     std::optional<double> _overrideBoundingSphere;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,11 @@
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
+#include <chrono>
+#include <thread>
+#include <utility>
 
 namespace openspace {
 
@@ -72,7 +77,7 @@ void SceneInitializer::initializeNode(SceneGraphNode* node) {
             catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
-            const std::lock_guard g(_mutex);
+            const std::unique_lock lock(_mutex);
             _initializedNodes.push_back(node);
             _initializingNodes.erase(node);
 
@@ -84,7 +89,7 @@ void SceneInitializer::initializeNode(SceneGraphNode* node) {
                     progressInfo
                 );
             }
-            };
+        };
 
         LoadingScreen::ProgressInfo progressInfo;
         progressInfo.progress = 0.f;
@@ -99,7 +104,7 @@ void SceneInitializer::initializeNode(SceneGraphNode* node) {
             );
         }
 
-        const std::lock_guard g(_mutex);
+        const std::unique_lock lock(_mutex);
         _initializingNodes.insert(node);
         _threadPool.enqueue(initFunction);
     }
@@ -113,13 +118,13 @@ std::vector<SceneGraphNode*> SceneInitializer::takeInitializedNodes() {
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
-    const std::lock_guard g(_mutex);
+    const std::unique_lock lock(_mutex);
     std::vector<SceneGraphNode*> nodes = std::move(_initializedNodes);
     return nodes;
 }
 
 bool SceneInitializer::isInitializing() const {
-    const std::lock_guard g(_mutex);
+    const std::unique_lock lock(_mutex);
     return !_initializingNodes.empty();
 }
 

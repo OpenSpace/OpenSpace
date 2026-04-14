@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,9 @@
 #include <openspace/camera/camera.h>
 
 #include <openspace/camera/camerapose.h>
-#include <sstream>
+#include <openspace/util/syncable.h>
+#include <cmath>
+#include <utility>
 
 namespace openspace {
 
@@ -40,20 +42,20 @@ Camera::Camera(const Camera& o)
 {}
 
 void Camera::setPose(CameraPose pose) {
-    setPositionVec3(std::move(pose.position));
+    setPosition(std::move(pose.position));
     setRotation(std::move(pose.rotation));
 }
 
-void Camera::setPositionVec3(glm::dvec3 pos) {
+void Camera::setPosition(glm::dvec3 pos) {
     if (!glm::any(glm::isnan(pos))) {
-        const std::lock_guard lock(_mutex);
+        const std::unique_lock lock(_mutex);
         _position = std::move(pos);
         _cachedCombinedViewMatrix.isDirty = true;
     }
 }
 
 void Camera::setRotation(glm::dquat rotation) {
-    const std::lock_guard lock(_mutex);
+    const std::unique_lock lock(_mutex);
     _rotation = std::move(rotation);
     _cachedViewDirection.isDirty = true;
     _cachedLookupVector.isDirty = true;
@@ -62,14 +64,14 @@ void Camera::setRotation(glm::dquat rotation) {
 }
 
 void Camera::setScaling(float scaling) {
-    const std::lock_guard lock(_mutex);
+    const std::unique_lock lock(_mutex);
     _scaling = scaling;
     _cachedViewScaleMatrix.isDirty = true;
     _cachedCombinedViewMatrix.isDirty = true;
 }
 
 void Camera::setMaxFov(float fov) {
-    const std::lock_guard lock(_mutex);
+    const std::unique_lock lock(_mutex);
     _maxFov = fov;
     _cachedSinMaxFov.isDirty = true;
 }
@@ -79,34 +81,29 @@ void Camera::setParent(SceneGraphNode* parent) {
 }
 
 void Camera::rotate(const glm::dquat& rotation) {
-    const std::lock_guard lock(_mutex);
-    _rotation = rotation * static_cast<glm::dquat>(_rotation);
+    const std::unique_lock lock(_mutex);
 
+    _rotation = rotation * static_cast<glm::dquat>(_rotation);
     _cachedViewDirection.isDirty = true;
     _cachedLookupVector.isDirty = true;
     _cachedViewRotationMatrix.isDirty = true;
     _cachedCombinedViewMatrix.isDirty = true;
 }
 
-const glm::dvec3& Camera::positionVec3() const {
+const glm::dvec3& Camera::position() const {
     return _position;
 }
 
-glm::dvec3 Camera::eyePositionVec3() const {
+glm::dvec3 Camera::eyePosition() const {
     constexpr glm::dvec4 EyeInEyeSpace = glm::dvec4(0.0, 0.0, 0.0, 1.0);
 
-    const glm::dmat4 invViewMat = glm::inverse(sgctInternal.viewMatrix());
-    const glm::dmat4 invRotationMat = glm::mat4_cast(static_cast<glm::dquat>(_rotation));
-    const glm::dmat4 invTranslationMat = glm::translate(
-        glm::dmat4(1.0),
-        static_cast<glm::dvec3>(_position)
-    );
-
+    const glm::dmat4 invView = glm::inverse(sgctInternal.viewMatrix());
+    const glm::dmat4 invRotation = glm::mat4_cast(static_cast<glm::dquat>(_rotation));
+    const glm::dmat4 invTranslation = glm::translate(glm::dmat4(1.0), _position.data());
     const glm::dmat4 invViewScale = glm::inverse(viewScaleMatrix());
 
-    const glm::dvec4 eyeInWorldSpace = invTranslationMat * invRotationMat *
-        invViewScale * invViewMat * EyeInEyeSpace;
-
+    const glm::dvec4 eyeInWorldSpace =
+        invTranslation * invRotation * invViewScale * invView * EyeInEyeSpace;
     return glm::dvec3(eyeInWorldSpace.x, eyeInWorldSpace.y, eyeInWorldSpace.z);
 }
 
@@ -117,7 +114,7 @@ const glm::dvec3& Camera::unsynchedPositionVec3() const {
 const glm::dvec3& Camera::viewDirectionWorldSpace() const {
     if (_cachedViewDirection.isDirty) {
         _cachedViewDirection.datum = glm::normalize(
-            static_cast<glm::dquat>(_rotation) * ViewDirectionCameraSpace
+            _rotation.data() * ViewDirectionCameraSpace
         );
         _cachedViewDirection.isDirty = false;
     }
@@ -131,7 +128,7 @@ const glm::dvec3& Camera::lookUpVectorCameraSpace() const {
 const glm::dvec3& Camera::lookUpVectorWorldSpace() const {
     if (_cachedLookupVector.isDirty) {
         _cachedLookupVector.datum = glm::normalize(
-            static_cast<glm::dquat>(_rotation) * UpDirectionCameraSpace
+            _rotation.data() * UpDirectionCameraSpace
         );
         _cachedLookupVector.isDirty = false;
     }
@@ -170,7 +167,7 @@ float Camera::scaling() const {
 const glm::dmat4& Camera::viewRotationMatrix() const {
     //if (_cachedViewRotationMatrix.isDirty) {
         _cachedViewRotationMatrix.datum = glm::mat4_cast(
-            glm::inverse(static_cast<glm::dquat>(_rotation))
+            glm::inverse(_rotation.data())
         );
         _cachedViewRotationMatrix.isDirty = false;
     //}
@@ -189,10 +186,17 @@ const glm::dquat& Camera::rotationQuaternion() const {
     return _rotation;
 }
 
+CameraPose Camera::pose() const {
+    return {
+        .position = _position,
+        .rotation = _rotation
+    };
+}
+
 const glm::dmat4& Camera::combinedViewMatrix() const {
     //if (_cachedCombinedViewMatrix.isDirty) {
         const glm::dmat4 cameraTranslation = glm::inverse(
-            glm::translate(glm::dmat4(1.0), static_cast<glm::dvec3>(_position))
+            glm::translate(glm::dmat4(1.0), _position.data())
         );
         _cachedCombinedViewMatrix.datum =
             glm::dmat4(sgctInternal.viewMatrix()) *
@@ -213,22 +217,6 @@ void Camera::invalidateCache() {
     _cachedSinMaxFov.isDirty = true;
 }
 
-void Camera::serialize(std::ostream& os) const {
-    const glm::dvec3 p = positionVec3();
-    const glm::dquat q = rotationQuaternion();
-    os << p.x << " " << p.y << " " << p.z << '\n';
-    os << q.x << " " << q.y << " " << q.z << " " << q.w << '\n';
-}
-
-void Camera::deserialize(std::istream& is) {
-    glm::dvec3 p;
-    is >> p.x >> p.y >> p.z;
-    glm::dquat q;
-    is >> q.x >> q.y >> q.z >> q.w;
-    setPositionVec3(p);
-    setRotation(q);
-}
-
 Camera::SgctInternal::SgctInternal(const SgctInternal& o)
     : _viewMatrix(o._viewMatrix)
     , _projectionMatrix(o._projectionMatrix)
@@ -236,20 +224,20 @@ Camera::SgctInternal::SgctInternal(const SgctInternal& o)
 {}
 
 void Camera::SgctInternal::setSceneMatrix(glm::mat4 sceneMatrix) {
-    const std::lock_guard lock(_mutex);
+    const std::unique_lock lock(_mutex);
 
     _sceneMatrix = std::move(sceneMatrix);
 }
 
 void Camera::SgctInternal::setViewMatrix(glm::mat4 viewMatrix) {
-    const std::lock_guard lock(_mutex);
+    const std::unique_lock lock(_mutex);
 
     _viewMatrix = std::move(viewMatrix);
     _cachedViewProjectionMatrix.isDirty = true;
 }
 
 void Camera::SgctInternal::setProjectionMatrix(glm::mat4 projectionMatrix) {
-    const std::lock_guard lock(_mutex);
+    const std::unique_lock lock(_mutex);
 
     _projectionMatrix = std::move(projectionMatrix);
     _cachedViewProjectionMatrix.isDirty = true;
@@ -268,7 +256,7 @@ const glm::mat4& Camera::SgctInternal::projectionMatrix() const {
 }
 
 const glm::mat4& Camera::SgctInternal::viewProjectionMatrix() const {
-    const std::lock_guard lock(_mutex);
+    const std::unique_lock lock(_mutex);
     _cachedViewProjectionMatrix.datum = _projectionMatrix * _viewMatrix;
     _cachedViewProjectionMatrix.isDirty = false;
     return _cachedViewProjectionMatrix.datum;

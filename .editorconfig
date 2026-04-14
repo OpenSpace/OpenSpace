@@ -13,3 +13,6 @@ trim_trailing_whitespace = true
 
 [data/**.asset]
 indent_size = 2
+
+[**.glsl]
+indent_size = 2

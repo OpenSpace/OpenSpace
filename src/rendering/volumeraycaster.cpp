@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,8 +33,8 @@ bool VolumeRaycaster::isCameraInside(const RenderData&, glm::vec3&) {
     return false;
 }
 
-void VolumeRaycaster::setMaxSteps(int nsteps) {
-    _rayCastMaxSteps = nsteps;
+void VolumeRaycaster::setMaxSteps(int nSteps) {
+    _rayCastMaxSteps = nSteps;
 }
 
 int VolumeRaycaster::maxSteps() const {

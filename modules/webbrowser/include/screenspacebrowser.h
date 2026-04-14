@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,10 +27,12 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
+#include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <modules/webbrowser/include/webrenderhandler.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/vector/uvec2property.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -58,7 +60,6 @@ namespace openspace {
 
 class BrowserInstance;
 class ScreenSpaceRenderHandler;
-class WebKeyboardHandler;
 
 class ScreenSpaceBrowser : public ScreenSpaceRenderable {
 public:
@@ -70,15 +71,14 @@ public:
 
     void render(const RenderData& renderData) override;
     void update() override;
-    bool isReady() const override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    properties::UVec2Property _dimensions;
+    UVec2Property _dimensions;
     std::unique_ptr<BrowserInstance> _browserInstance;
     bool _isDimensionsDirty = false;
-    properties::TriggerProperty _reload;
+    TriggerProperty _reload;
 
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {
@@ -92,15 +92,16 @@ private:
     CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
 
 private:
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
-    properties::StringProperty _url;
+    StringProperty _url;
 
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
 
     bool _useAcceleratedRendering = false;
     bool _isUrlDirty = false;
 };
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__

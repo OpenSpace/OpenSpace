@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 
 namespace openspace {
 
-namespace scripting { struct LuaLibrary; }
+struct LuaLibrary;
 
 /**
  * This singleton class represents the current simulation time in OpenSpace. It internally
@@ -60,7 +60,9 @@ public:
      */
     static double convertTime(const std::string& time);
 
-    /// \overload static double convertTime(const std::string& time)
+    /**
+     * \overload static double convertTime(const std::string& time).
+     */
     static double convertTime(const char* time);
 
     /**
@@ -137,6 +139,13 @@ public:
     std::string_view UTC() const;
 
     /**
+     * Returns the current time as a formatted date string. The date string can be
+     * formatted using the SPICE picture parameters as described in
+     * https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html
+     */
+    std::string_view string(const std::string& format) const;
+
+    /**
      * Returns the current time as a ISO 8601 formatted, i.e YYYY-MM-DDThh:mm:ssZ.
      *
      * \return The current time as a ISO 8601 formatted string
@@ -175,7 +184,7 @@ public:
      * \return The Lua library that contains all Lua functions available to change the
      *         time
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     double _time;

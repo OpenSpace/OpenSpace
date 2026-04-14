@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/configuration.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/lua/lua_helper.h>
+
+using namespace openspace;
 
 namespace {
 
@@ -30,7 +34,7 @@ namespace {
  * Returns the name of the profile with which OpenSpace was started.
  */
 [[codegen::luawrap]] std::string profileName() {
-    std::string p = openspace::global::configuration->profile;
+    std::string p = global::configuration->profile.profile;
     const std::string builtInPath = absPath("${PROFILES}").string();
     const std::string userPath = absPath("${USER_PROFILES}").string();
 
@@ -46,10 +50,17 @@ namespace {
 }
 
 /**
-* Returns the full path of the profile with which OpenSpace was started.
-*/
+ * Returns the full path of the profile with which OpenSpace was started.
+ */
 [[codegen::luawrap]] std::filesystem::path profilePath() {
-    return openspace::global::configuration->profile;
+    return global::configuration->profile.profile;
+}
+
+/**
+ * Returns the enabled add-ons of the profile that was started.
+ */
+[[codegen::luawrap]] std::vector<std::string> profileAddons() {
+    return global::configuration->profile.addons;
 }
 
 /**
@@ -62,10 +73,8 @@ namespace {
  * file that already exists should be overwritten, which is 'false' by default.
  */
 [[codegen::luawrap]] void saveSettingsToProfile(std::optional<std::string> saveFilePath,
-                                                bool overwrite = true)
+                                                bool shouldOverwrite = true)
 {
-    using namespace openspace;
-
     if (!saveFilePath.has_value()) {
         std::time_t t = std::time(nullptr);
         std::tm* utcTime = std::gmtime(&t);
@@ -80,19 +89,21 @@ namespace {
             utcTime->tm_min,
             utcTime->tm_sec
         );
-        std::filesystem::path path = global::configuration->profile;
+        std::filesystem::path path = global::configuration->profile.profile;
         path.replace_extension();
         std::string newFile = std::format("{}_{}", path, time);
         std::string sourcePath = std::format(
-            "{}/{}.profile", absPath("${USER_PROFILES}"), global::configuration->profile
+            "{}/{}.profile",
+            absPath("${USER_PROFILES}"), global::configuration->profile.profile
         );
         std::string destPath = std::format(
-            "{}/{}.profile", absPath("${PROFILES}"), global::configuration->profile
+            "{}/{}.profile",
+            absPath("${PROFILES}"), global::configuration->profile.profile
         );
         if (!std::filesystem::is_regular_file(sourcePath)) {
             sourcePath = std::format(
                 "{}/{}.profile",
-                absPath("${USER_PROFILES}"), global::configuration->profile
+                absPath("${USER_PROFILES}"), global::configuration->profile.profile
             );
         }
         LINFOC(
@@ -100,25 +111,25 @@ namespace {
             std::format("Saving a copy of the old profile as '{}'", newFile)
         );
         std::filesystem::copy(sourcePath, destPath);
-        saveFilePath = global::configuration->profile;
+        saveFilePath = global::configuration->profile.profile;
     }
     if (saveFilePath->empty()) {
         throw ghoul::lua::LuaError("Save filepath string is empty");
     }
 
-    const properties::PropertyOwner& root = *global::rootPropertyOwner;
+    const PropertyOwner& root = *global::rootPropertyOwner;
     std::string currentTime = std::string(global::timeManager->time().ISO8601());
-    interaction::NavigationState navState = global::navigationHandler->navigationState();
+    NavigationState navState = global::navigationHandler->navigationState();
     global::profile->saveCurrentSettingsToProfile(root, currentTime, navState);
-    global::configuration->profile = *saveFilePath;
+    global::configuration->profile.profile = *saveFilePath;
 
-    if (saveFilePath->find('/') != std::string::npos) {
+    if (saveFilePath->contains('/')) {
         throw ghoul::lua::LuaError("Profile filename must not contain (/) elements");
     }
-    else if (saveFilePath->find(':') != std::string::npos) {
+    else if (saveFilePath->contains(':')) {
         throw ghoul::lua::LuaError("Profile filename must not contain (:) elements");
     }
-    else if (saveFilePath->find('.') != std::string::npos) {
+    else if (saveFilePath->contains('.')) {
         throw ghoul::lua::LuaError(
             "Only provide the filename to save without file extension"
         );
@@ -131,7 +142,7 @@ namespace {
         absFilename = absPath("${USER_PROFILES}/" + *saveFilePath + ".profile").string();
     }
 
-    if (std::filesystem::is_regular_file(absFilename) && !overwrite) {
+    if (std::filesystem::is_regular_file(absFilename) && !shouldOverwrite) {
         throw ghoul::lua::LuaError(
             std::format(
                 "Unable to save profile '{}'. File of same name already exists",
@@ -140,29 +151,23 @@ namespace {
         );
     }
 
-    std::ofstream outFile;
-    // @TODO (abock, 2020-06-15) Replace with non-throwing stream
-    try {
-        outFile.open(absFilename, std::ofstream::out);
-    }
-    catch (const std::ofstream::failure& e) {
-        throw ghoul::lua::LuaError(
-            std::format(
-                "Exception opening profile file for write '{}': {}", absFilename, e.what()
-            )
-        );
+    std::ofstream outFile = std::ofstream(absFilename, std::ofstream::out);
+    if (!outFile.good()) {
+        throw ghoul::lua::LuaError(std::format(
+            "Exception opening profile file for write '{}'", absFilename
+        ));
     }
 
     try {
         outFile << global::profile->serialize();
     }
-    catch (const std::ofstream::failure& e) {
-        throw ghoul::lua::LuaError(
-            std::format("Data write error to file '{}': {}", absFilename, e.what())
-        );
+    catch (const std::ofstream::failure&) {
+        throw ghoul::lua::LuaError(std::format(
+            "Data write error to file '{}'", absFilename
+        ));
     }
 }
 
-#include "profile_lua_codegen.cpp"
-
 } // namespace
+
+#include "profile_lua_codegen.cpp"

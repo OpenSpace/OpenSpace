@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,14 +28,11 @@ namespace openspace {
 
 BrickCover::BrickCover() {}
 
-BrickCover::BrickCover(int numBricks) {
-    lowX = 0;
-    lowY = 0;
-    lowZ = 0;
-    highX = numBricks;
-    highY = numBricks;
-    highZ = numBricks;
-}
+BrickCover::BrickCover(int numBricks)
+    : highX(numBricks)
+    , highY(numBricks)
+    , highZ(numBricks)
+{}
 
 BrickCover BrickCover::split(bool x, bool y, bool z) const {
     BrickCover child;

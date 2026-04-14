@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,52 +27,54 @@
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumemetadata.h>
 #include <modules/volume/rawvolumewriter.h>
-#include <openspace/documentation/verifier.h>
+#include <modules/volume/volumegridtype.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/defer.h>
-#include <filesystem>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
+#include <algorithm>
+#include <ios>
 #include <fstream>
+#include <limits>
 
 namespace {
     struct [[codegen::Dictionary(GenerateRawVolumeTask)]] Parameters {
-        // The Lua function used to compute the cell values
+        // The Lua function used to compute the cell values.
         std::string valueFunction [[codegen::annotation("A Lua expression that returns a "
             "function taking three numbers as arguments (x, y, z) and returning a "
             "number")]];
 
-        // The raw volume file to export data to
+        // The raw volume file to export data to.
         std::string rawVolumeOutput [[codegen::annotation("A valid filepath")]];
 
-        // The lua dictionary file to export metadata to
+        // The lua dictionary file to export metadata to.
         std::string dictionaryOutput [[codegen::annotation("A valid filepath")]];
 
-        // The timestamp that is written to the metadata of this volume
+        // The timestamp that is written to the metadata of this volume.
         std::string time;
 
-        // A vector representing the number of cells in each dimension
+        // A vector representing the number of cells in each dimension.
         glm::ivec3 dimensions;
 
-        // A vector representing the lower bound of the domain
+        // A vector representing the lower bound of the domain.
         glm::dvec3 lowerDomainBound;
 
-        // A vector representing the upper bound of the domain
+        // A vector representing the upper bound of the domain.
         glm::dvec3 upperDomainBound;
     };
-#include "generaterawvolumetask_codegen.cpp"
 } // namespace
+#include "generaterawvolumetask_codegen.cpp"
 
-namespace openspace::volume {
+namespace openspace {
 
-documentation::Documentation GenerateRawVolumeTask::Documentation() {
-    return codegen::doc<Parameters>("generate_raw_volume_task");
+Documentation GenerateRawVolumeTask::Documentation() {
+    return codegen::doc<Parameters>("volume_task_generaterawvolume");
 }
 
 GenerateRawVolumeTask::GenerateRawVolumeTask(const ghoul::Dictionary& dictionary) {
@@ -101,8 +103,8 @@ std::string GenerateRawVolumeTask::description() {
 }
 
 void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallback) {
-    // Spice kernel is required for time conversions.
-    // Todo: Make this dependency less hard coded.
+    // SPICE kernel is required for time conversion
+    // @TODO: Make this dependency less hard coded
     SpiceManager::KernelHandle kernel = SpiceManager::ref().loadKernel(
         absPath("${DATA}/assets/spice/naif0012.tls")
     );
@@ -111,7 +113,7 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
         SpiceManager::ref().unloadKernel(kernel);
     };
 
-    volume::RawVolume<float> rawVolume(_dimensions);
+    RawVolume<float> rawVolume(_dimensions);
     progressCallback(0.1f);
 
     ghoul::lua::LuaState state;
@@ -154,25 +156,26 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
         std::filesystem::create_directories(directory);
     }
 
-    volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath);
+    RawVolumeWriter<float> writer(_rawVolumeOutputPath);
     writer.write(rawVolume);
 
     progressCallback(0.9f);
 
-    RawVolumeMetadata metadata;
-    metadata.time = Time::convertTime(_time);
-    metadata.dimensions = _dimensions;
-    metadata.hasDomainUnit = true;
-    metadata.domainUnit = "m";
-    metadata.hasValueUnit = true;
-    metadata.valueUnit = "K";
-    metadata.gridType = VolumeGridType::Cartesian;
-    metadata.hasDomainBounds = true;
-    metadata.lowerDomainBound = _lowerDomainBound;
-    metadata.upperDomainBound = _upperDomainBound;
-    metadata.hasValueRange = true;
-    metadata.minValue = minVal;
-    metadata.maxValue = maxVal;
+    RawVolumeMetadata metadata = {
+        .dimensions = _dimensions,
+        .gridType = VolumeGridType::Cartesian,
+        .time = Time::convertTime(_time),
+        .hasValueRange = true,
+        .minValue = minVal,
+        .maxValue = maxVal,
+        .hasValueUnit = true,
+        .valueUnit = "K",
+        .hasDomainBounds = true,
+        .lowerDomainBound = _lowerDomainBound,
+        .upperDomainBound = _upperDomainBound,
+        .hasDomainUnit = true,
+        .domainUnit = "m"
+    };
 
     const ghoul::Dictionary outputDictionary = metadata.dictionary();
     const std::string metadataString = ghoul::formatLua(outputDictionary);
@@ -183,4 +186,4 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     progressCallback(1.f);
 }
 
-} // namespace openspace::volume
+} // namespace openspace

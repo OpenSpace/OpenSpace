@@ -1,0 +1,46 @@
+local globe = asset.require("scene/solarsystem/planets/jupiter/jupiter")
+
+
+
+local texturesPath = asset.resource({
+  Name = "Jupiter Textures",
+  Type = "HttpSynchronization",
+  Identifier = "jupiter_textures",
+  Version = 3
+})
+
+
+local Layer = {
+  Identifier = "JunoCassini",
+  FilePath = texturesPath .. "jupiter_juno_cassini.png",
+  Enabled = asset.enabled,
+  ZIndex = 5,
+  Name = "Merged Cassini and Juno",
+  CacheSettings = { Enabled = false }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Jupiter.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Jupiter.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "Merged Cassini and Juno global map of Jupiter",
+  Description = [[A global map of Jupiter in equirectangular projection, suitable for
+    wrapping onto globes in 3D visualization software. It updates the Cassini map of
+    Jupiter with JunoCam images of Jupiter's poles, so is a better product for simulating
+    views of Jupiter from above and below the equatorial plane]],
+  Author = [[NASA / JPL-Caltech / SSI / Southwest Research Institute / Malin Space
+    Science Systems / Italian Space Agency (ASI) / Italian National Institute for
+    Astrophysics (INAF) / JIRAM / Björn Jónsson]],
+  URL = "https://www.planetary.org/space-images/merged-cassini-and-juno",
+  License = "Attribution 3.0 Unported (CC BY 3.0)",
+}

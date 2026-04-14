@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,8 +33,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class DashboardItemElapsedTime : public DashboardTextItem {
 public:
     explicit DashboardItemElapsedTime(const ghoul::Dictionary& dictionary);
@@ -42,14 +40,14 @@ public:
 
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::StringProperty _formatString;
-    properties::StringProperty _referenceTime;
+    StringProperty _formatString;
+    StringProperty _referenceTime;
     double _referenceJ2000 = 0.0;
-    properties::BoolProperty _simplifyTime;
-    properties::OptionProperty _lowestTimeUnit;
+    BoolProperty _simplifyTime;
+    OptionProperty _lowestTimeUnit;
 };
 
 } // namespace openspace

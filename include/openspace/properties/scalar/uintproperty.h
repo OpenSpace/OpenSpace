@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,17 +26,18 @@
 #define __OPENSPACE_CORE___UINTPROPERTY___H__
 
 #include <openspace/properties/numericalproperty.h>
+
 #include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 /**
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type `unsigned int`.
+ * This class is a concrete implementation of TemplateProperty with the type
+ * `unsigned int`.
  */
 class UIntProperty : public NumericalProperty<unsigned int> {
 public:
-    UIntProperty(Property::PropertyInfo info, unsigned int value = 0,
+    explicit UIntProperty(PropertyInfo info, unsigned int value = 0,
         unsigned int minValue = std::numeric_limits<unsigned int>::lowest(),
         unsigned int maxValue = std::numeric_limits<unsigned int>::max(),
         unsigned int stepValue = 1);
@@ -53,6 +54,6 @@ private:
     unsigned int toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___UINTPROPERTY___H__

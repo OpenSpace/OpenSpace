@@ -12,7 +12,7 @@ local modelFolder = asset.resource({
   Version = 1
 })
 
-local Object = {
+local Item = {
   Type = "ScreenSpaceRenderableRenderable",
   Identifier = "ScreenSpaceRenderableRenderable_Example_Model",
   Transform = {
@@ -39,9 +39,9 @@ local Object = {
 }
 
 asset.onInitialize(function()
-  openspace.addScreenSpaceRenderable(Object)
+  openspace.addScreenSpaceRenderable(Item)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(Object)
+  openspace.removeScreenSpaceRenderable(Item)
 end)

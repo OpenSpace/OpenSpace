@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,17 +32,10 @@
 #include <memory>
 
 namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
 
 namespace openspace {
 
 struct Image;
-struct LinePoint;
-struct RenderData;
-struct UpdateData;
 
 class RenderablePlaneProjection : public Renderable {
 public:
@@ -52,12 +45,10 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void loadTexture();
@@ -75,8 +66,8 @@ private:
     bool _textureIsDirty = false;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
     std::string _spacecraft;
     std::string _instrument;
     std::string _defaultTarget;

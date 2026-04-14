@@ -1,0 +1,83 @@
+local LockCurrent = {
+  Identifier = "os.temporalLayer.LockCurrent",
+  Name = "Lock Focus Node Temporal Layers",
+  Command = [[
+    local j2000 = openspace.time.currentTime()
+    local dateTime = openspace.time.convertTime(j2000)
+    local focusName = openspace.propertyValue("NavigationHandler.OrbitalNavigator.Anchor")
+    openspace.setPropertyValue("Scene." .. focusName .. ".*.FixedTime", dateTime)
+    openspace.setPropertyValue("Scene." .. focusName .. ".*.UseFixedTime", true)
+  ]],
+  Documentation = [[Set fixed date for all temporal layers for the currently 
+    focused node.]],
+  GuiPath = "/Solar System",
+  IsLocal = false
+}
+
+local UnlockCurrent = {
+  Identifier = "os.temporalLayer.UnlockCurrent",
+  Name = "Unlock Focus Node Temporal Layers",
+  Command = [[
+    local j2000 = openspace.time.currentTime()
+    local dateTime = openspace.time.convertTime(j2000)
+    local focusName = openspace.propertyValue("NavigationHandler.OrbitalNavigator.Anchor")
+    openspace.setPropertyValue("Scene." .. focusName .. ".*.UseFixedTime", false)
+    openspace.setPropertyValue("Scene." .. focusName .. ".*.FixedTime", "")
+  ]],
+  Documentation = [[Removes fixed date for all temporal layers for the currently
+     focused node.]],
+  GuiPath = "/Solar System",
+  IsLocal = false
+}
+
+local LockAll = {
+  Identifier = "os.temporalLayer.LockAll",
+  Name = "Lock All Temporal Layers",
+  Command = [[
+    local j2000 = openspace.time.currentTime()
+    local dateTime = openspace.time.convertTime(j2000)
+    openspace.setPropertyValue("Scene.*.FixedTime", dateTime)
+    openspace.setPropertyValue("Scene.*.UseFixedTime", true)
+  ]],
+  Documentation = "Set fixed date for all temporal layers in the scene.",
+  GuiPath = "/Solar System",
+  IsLocal = false
+}
+
+local UnlockAll = {
+  Identifier = "os.temporalLayer.UnlockAll",
+  Name = "Unlock All Temporal Layers",
+  Command = [[
+    openspace.setPropertyValue("Scene.*.UseFixedTime", false)
+    openspace.setPropertyValue("Scene.*.FixedTime", "")
+  ]],
+  Documentation = "Removes fixed date for all temporal layers in the scene.",
+  GuiPath = "/Solar System",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(LockCurrent);
+  openspace.action.registerAction(UnlockCurrent);
+  openspace.action.registerAction(LockAll);
+  openspace.action.registerAction(UnlockAll);
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(UnlockAll);
+  openspace.action.removeAction(LockAll);
+  openspace.action.removeAction(UnlockCurrent);
+  openspace.action.removeAction(LockCurrent);
+end)
+
+
+asset.meta = {
+  Name = "Temporal Layers - Lock Date",
+  Version = "1.0",
+  Description = [[Provides actions for locking and unlocking temporal layers to the
+     current date.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

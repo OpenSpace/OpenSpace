@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,42 +22,44 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace::globebrowsing {
+#include <modules/globebrowsing/src/lruthreadpool.h>
+#include <utility>
 
-template<typename KeyType>
+namespace openspace {
+
+template <typename KeyType>
 LRUThreadPoolWorker<KeyType>::LRUThreadPoolWorker(LRUThreadPool<KeyType>& pool)
     : _pool(pool)
 {}
 
-template<typename KeyType>
+template <typename KeyType>
 void LRUThreadPoolWorker<KeyType>::operator()() {
     std::function<void()> task;
     while (true) {
-        // acquire lock
+        // Acquire lock
         {
             std::unique_lock lock(_pool._queueMutex);
 
-            // look for a work item
+            // Look for a work item
             while (!_pool._stop && _pool._queuedTasks.isEmpty()) {
-                // if there are none wait for notification
+                // If there are none wait for notification
                 _pool._condition.wait(lock);
             }
 
-            if (_pool._stop) { // exit if the pool is stopped
+            if (_pool._stop) {
+                // Exit if the pool is stopped
                 return;
             }
 
-            // get the task from the queue
+            // Get the task from the queue
             task = _pool._queuedTasks.popMRU().second;
+        }
 
-        }// release lock
-
-        // execute the task
         task();
     }
 }
 
-template<typename KeyType>
+template <typename KeyType>
 LRUThreadPool<KeyType>::LRUThreadPool(size_t numThreads, size_t queueSize)
     : _queuedTasks(queueSize)
 {
@@ -66,33 +68,33 @@ LRUThreadPool<KeyType>::LRUThreadPool(size_t numThreads, size_t queueSize)
     }
 }
 
-template<typename KeyType>
+template <typename KeyType>
 LRUThreadPool<KeyType>::LRUThreadPool(const LRUThreadPool& toCopy)
     : LRUThreadPool(toCopy._workers.size(), toCopy._queuedTasks.maximumCacheSize())
 {}
 
-// the destructor joins all threads
-template<typename KeyType>
+// The destructor joins all threads
+template <typename KeyType>
 LRUThreadPool<KeyType>::~LRUThreadPool() {
     {
-        std::unique_lock lock(_queueMutex);
+        const std::unique_lock lock(_queueMutex);
         _stop = true;
     }
     _condition.notify_all();
 
-    // join them
+    // Join them
     for (size_t i = 0; i < _workers.size(); i++) {
         _workers[i].join();
     }
 }
 
-// add new work item to the pool
-template<typename KeyType>
+// Add new work item to the pool
+template <typename KeyType>
 void LRUThreadPool<KeyType>::enqueue(std::function<void()> f, KeyType key) {
     {
-        std::unique_lock<std::mutex> lock(_queueMutex);
+        const std::unique_lock lock(_queueMutex);
 
-        // add the task
+        // Add the task
         //_queuedTasks.put(key, f);
         const std::vector<std::pair<KeyType, std::function<void()>>>& unfinishedTasks =
             _queuedTasks.putAndFetchPopped(key, f);
@@ -103,31 +105,31 @@ void LRUThreadPool<KeyType>::enqueue(std::function<void()> f, KeyType key) {
         }
     }
 
-    // wake up one thread
+    // Wake up one thread
     _condition.notify_one();
 }
 
-template<typename KeyType>
+template <typename KeyType>
 bool LRUThreadPool<KeyType>::touch(KeyType key) {
-    std::unique_lock<std::mutex> lock(_queueMutex);
+    const std::unique_lock lock(_queueMutex);
     return _queuedTasks.touch(key);
 }
 
-template<typename KeyType>
+template <typename KeyType>
 std::vector<KeyType> LRUThreadPool<KeyType>::getUnqueuedTasksKeys() {
     std::vector<KeyType> toReturn = _unqueuedTasks;
     {
-        std::unique_lock<std::mutex> lock(_queueMutex);
+        const std::unique_lock lock(_queueMutex);
         _unqueuedTasks.clear();
     }
     return toReturn;
 }
 
-template<typename KeyType>
+template <typename KeyType>
 std::vector<KeyType> LRUThreadPool<KeyType>::getQueuedTasksKeys() {
     std::vector<KeyType> queuedTasks;
     {
-        std::unique_lock<std::mutex> lock(_queueMutex);
+        const std::unique_lock lock(_queueMutex);
         while (!_queuedTasks.isEmpty()) {
             queuedTasks.push_back(_queuedTasks.popMRU().first);
         }
@@ -135,10 +137,10 @@ std::vector<KeyType> LRUThreadPool<KeyType>::getQueuedTasksKeys() {
     return queuedTasks;
 }
 
-template<typename KeyType>
+template <typename KeyType>
 void LRUThreadPool<KeyType>::clearEnqueuedTasks() {
-    std::unique_lock<std::mutex> lock(_queueMutex);
+    const std::unique_lock lock(_queueMutex);
     _queuedTasks.clear();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

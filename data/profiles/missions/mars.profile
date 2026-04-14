@@ -33,20 +33,6 @@
     315360000.0,
     630720000.0
   ],
-  "keybindings": [
-    {
-      "action": "os.insight.Setup",
-      "key": "I"
-    },
-    {
-      "action": "os.insight.DisableLayers",
-      "key": "SHIFT+I"
-    },
-    {
-      "action": "os.perseverance.Setup",
-      "key": "P"
-    }
-  ],
   "mark_nodes": [
     "Mars",
     "Insight",
@@ -70,6 +56,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 4
+    "minor": 5
   }
 }

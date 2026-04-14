@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,12 +24,12 @@
 
 #include <openspace/util/httprequest.h>
 
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <curl/curl.h>
-#include <filesystem>
+#include <array>
+#include <cstdint>
+#include <utility>
 
 namespace openspace {
 
@@ -96,7 +96,7 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
         curl,
         CURLOPT_XFERINFOFUNCTION,
         +[](void* userData, int64_t nTotalDownloadBytes, int64_t nDownloadedBytes,
-           int64_t, int64_t)
+            int64_t, int64_t)
         {
             HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
 
@@ -253,8 +253,6 @@ bool HttpDownload::teardown() {
     return true;
 }
 
-
-
 std::atomic_int HttpFileDownload::nCurrentFileHandles = 0;
 std::mutex HttpFileDownload::_directoryCreationMutex;
 
@@ -272,7 +270,7 @@ HttpFileDownload::HttpFileDownload(std::string url, std::filesystem::path destin
 
 bool HttpFileDownload::setup() {
     {
-        const std::lock_guard g(_directoryCreationMutex);
+        const std::unique_lock lock(_directoryCreationMutex);
         const std::filesystem::path d = _destination.parent_path();
         if (!std::filesystem::is_directory(d)) {
             std::filesystem::create_directories(d);
@@ -290,7 +288,6 @@ bool HttpFileDownload::setup() {
     if (_file.good()) {
         return true;
     }
-
 
 #ifdef WIN32
     // GetLastError() gives more details than errno.
@@ -317,7 +314,7 @@ bool HttpFileDownload::setup() {
         std::format("Cannot open file '{}': {}", _destination, message)
     );
     return false;
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     if (errno) {
 #ifdef __unix__
         std::array<char, 256> buffer;
@@ -330,7 +327,7 @@ bool HttpFileDownload::setup() {
             )
         );
         return false;
-#else // ^^^ __unix__ / !__unix__ vvv
+#else // ^^^^ __unix__ / !__unix__ vvvv
         LERRORC(
             "HttpFileDownload",
             std::format(

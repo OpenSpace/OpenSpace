@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,6 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
+#include <string>
+
+using namespace openspace;
+
 namespace {
 
 /**
@@ -29,7 +35,7 @@ namespace {
  * to the file that should be loaded.
  */
 [[codegen::luawrap]] void add(std::string assetName) {
-    openspace::global::openSpaceEngine->assetManager().add(assetName);
+    global::openSpaceEngine->assetManager().add(assetName);
 }
 
 /**
@@ -38,7 +44,7 @@ namespace {
  * file.
  */
 [[codegen::luawrap]] void remove(std::string assetName) {
-    openspace::global::openSpaceEngine->assetManager().remove(assetName);
+    global::openSpaceEngine->assetManager().remove(assetName);
 }
 
 /**
@@ -47,14 +53,13 @@ namespace {
  * only be loaded instead.
  */
 [[codegen::luawrap]] void reload(std::string assetName) {
-    openspace::global::openSpaceEngine->assetManager().reload(assetName);
+    global::openSpaceEngine->assetManager().reload(assetName);
 }
 
 /**
- * Removes all assets that are currently loaded
+ * Removes all assets that are currently loaded.
  */
 [[codegen::luawrap]] void removeAll() {
-    using namespace openspace;
     std::vector<const Asset*> as = global::openSpaceEngine->assetManager().rootAssets();
     std::reverse(as.begin(), as.end());
     for (const Asset* asset : as) {
@@ -68,7 +73,6 @@ namespace {
  * tested.
  */
 [[codegen::luawrap]] bool isLoaded(std::string assetName) {
-    using namespace openspace;
     std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
     for (const Asset* a : as) {
         if (a->path() == assetName) {
@@ -83,7 +87,6 @@ namespace {
  * containing the paths to all loaded assets.
  */
 [[codegen::luawrap]] std::vector<std::filesystem::path> allAssets() {
-    using namespace openspace;
     std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
     std::vector<std::filesystem::path> res;
     res.reserve(as.size());
@@ -98,7 +101,6 @@ namespace {
  * either through a profile or by calling the `openspace.asset.add` method.
  */
 [[codegen::luawrap]] std::vector<std::filesystem::path> rootAssets() {
-    using namespace openspace;
     std::vector<const Asset*> as = global::openSpaceEngine->assetManager().rootAssets();
     std::vector<std::filesystem::path> res;
     res.reserve(as.size());
@@ -108,6 +110,20 @@ namespace {
     return res;
 }
 
-#include "assetmanager_lua_codegen.cpp"
+/**
+ * Returns the path to all parents that are still interested in this Asset e.g., through
+ * 'asset.require()'.
+ */
+[[codegen::luawrap]] std::vector<std::filesystem::path> parents(std::string assetName) {
+    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
+    for (const Asset* a : as) {
+        if (a->path() == assetName) {
+            return a->initializedParents();
+        }
+    }
+    return std::vector<std::filesystem::path>();
+}
 
 } // namespace
+
+#include "assetmanager_lua_codegen.cpp"

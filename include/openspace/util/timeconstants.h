@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,17 +28,20 @@
 #include <chrono>
 
 namespace openspace::timeconstants {
-    constexpr double SecondsPerYear = 31556952; // seconds in average Gregorian year
-    constexpr double SecondsPerMonth = SecondsPerYear / 12;
-    constexpr double SecondsPerDay = static_cast<double>(
-        std::chrono::seconds(std::chrono::hours(24)).count()
-    );
-    constexpr double SecondsPerHour = static_cast<double>(
-        std::chrono::seconds(std::chrono::hours(1)).count()
-    );
-    constexpr double SecondsPerMinute = static_cast<double>(
-        std::chrono::seconds(std::chrono::minutes(1)).count()
-    );
+
+// Seconds in average Gregorian year
+constexpr double SecondsPerYear = 31556952;
+constexpr double SecondsPerMonth = SecondsPerYear / 12;
+constexpr double SecondsPerDay = static_cast<double>(
+    std::chrono::seconds(std::chrono::hours(24)).count()
+);
+constexpr double SecondsPerHour = static_cast<double>(
+    std::chrono::seconds(std::chrono::hours(1)).count()
+);
+constexpr double SecondsPerMinute = static_cast<double>(
+    std::chrono::seconds(std::chrono::minutes(1)).count()
+);
+
 } // openspace::timeconstants
 
 #endif // __OPENSPACE_CORE___TIMECONSTANTS___H__

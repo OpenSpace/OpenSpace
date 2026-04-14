@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,43 +26,77 @@
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
-#include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
+#include <modules/globebrowsing/src/tileindex.h>
+#include <modules/globebrowsing/src/tiletextureinitdata.h>
+#include <openspace/data/colormaploader.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <algorithm>
+#include <array>
+#include <cstring>
 #include <ctime>
 #include <iomanip>
-#include <iostream>
+#include <limits>
+#include <optional>
 #include <sstream>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view TimePlaceholder = "${OpenSpaceTimeId}";
 
-    constexpr openspace::properties::Property::PropertyInfo UseFixedTimeInfo = {
+    constexpr Property::PropertyInfo UseFixedTimeInfo = {
         "UseFixedTime",
-        "Use Fixed Time",
+        "Use fixed time",
         "If this value is enabled, the time-varying timevarying dataset will always use "
         "the time that is specified in the 'FixedTime' property, rather than using the "
         "actual time from OpenSpace.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FixedTimeInfo = {
+    constexpr Property::PropertyInfo FixedTimeInfo = {
         "FixedTime",
-        "Fixed Time",
+        "Fixed time",
         "If the 'UseFixedTime' is enabled, this time will be used instead of the actual "
         "time taken from OpenSpace for the displayed tiles.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
+
+    std::string_view timeStringify(const std::string& format, const Time& t) {
+        ZoneScoped;
+
+        constexpr int BufferSize = 64;
+        ghoul_assert(format.size() < BufferSize, "Format string too long");
+
+        char FormatBuf[BufferSize];
+        std::memset(FormatBuf, '\0', BufferSize);
+        std::memcpy(FormatBuf, format.c_str(), format.size());
+
+        char* OutBuf = reinterpret_cast<char*>(
+            global::memoryManager->TemporaryMemory.allocate(BufferSize)
+        );
+        std::memset(OutBuf, '\0', BufferSize);
+
+        const double time = t.j2000Seconds();
+        SpiceManager::ref().dateFromEphemerisTime(time, OutBuf, BufferSize, FormatBuf);
+        return std::string_view(OutBuf, format.size());
+    }
 
     struct [[codegen::Dictionary(TemporalTileProvider)]] Parameters {
         // [[codegen::verbatim(UseFixedTimeInfo.description)]]
@@ -79,17 +113,17 @@ namespace {
         // a given start and end time, temporal resolution, and perscriptive time format
         // is used to generate the information used by GDAL to access the data. In the
         // `folder` method, a folder and a time format is provided and each file in the
-        // folder is scanned using the time format instead
+        // folder is scanned using the time format instead.
         Mode mode;
 
         struct Prototyped {
             struct Time {
-                // The (inclusive) starting time of the temporal image range
+                // The (inclusive) starting time of the temporal image range.
                 std::string start;
-                // The (inclusive) ending time of the temporal image range
+                // The (inclusive) ending time of the temporal image range.
                 std::string end;
             };
-            // The starting and ending times for the range of values
+            // The starting and ending times for the range of values.
             Time time;
 
             // The temporal resolution between each image
@@ -105,7 +139,7 @@ namespace {
             // the image layer. Any occurance of `${OpenSpaceTimeId}` in this prototype
             // is replaced with the current date according to the remaining information
             // such as the resolution and the format and the resulting text is used to
-            // load the corresponding images
+            // load the corresponding images.
             std::string prototype;
 
         };
@@ -114,7 +148,7 @@ namespace {
         struct Folder {
             // The folder that is parsed for files. Every file in the provided directory
             // is checked against the provided format and added if it adheres to said
-            // format
+            // format.
             std::filesystem::path folder [[codegen::directory()]];
 
             // The format of files that is pared in the provided folder. The format string
@@ -125,42 +159,20 @@ namespace {
         std::optional<Folder> folder;
 
         // Determines whether this tile provider should interpolate between two adjacent
-        // layers
+        // layers.
         std::optional<bool> interpolation;
 
         // If provided, the tile provider will use this color map to convert a greyscale
-        // image to color
+        // image to color.
         std::optional<std::string> colormap;
     };
+} // namespace
 #include "temporaltileprovider_codegen.cpp"
 
-    std::string_view timeStringify(const std::string& format, const openspace::Time& t) {
-        ZoneScoped;
+namespace openspace {
 
-        constexpr int BufferSize = 64;
-        ghoul_assert(format.size() < BufferSize, "Format string too long");
-
-        using namespace openspace;
-
-        char FormatBuf[BufferSize];
-        std::memset(FormatBuf, '\0', BufferSize);
-        std::memcpy(FormatBuf, format.c_str(), format.size());
-
-        char* OutBuf = reinterpret_cast<char*>(
-            global::memoryManager->TemporaryMemory.allocate(BufferSize)
-        );
-        std::memset(OutBuf, '\0', BufferSize);
-
-        const double time = t.j2000Seconds();
-        SpiceManager::ref().dateFromEphemerisTime(time, OutBuf, BufferSize, FormatBuf);
-        return std::string_view(OutBuf, format.size());
-    }
-} // namespace
-
-namespace openspace::globebrowsing {
-
-documentation::Documentation TemporalTileProvider::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_temporaltileprovider");
+Documentation TemporalTileProvider::Documentation() {
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_temporal");
 }
 
 TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
@@ -202,7 +214,8 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
         Time end = Time::now();
         _prototyped.startTimeJ2000 = start.j2000Seconds();
         if (p.prototyped->time.end == "Yesterday") {
-            end.advanceTime(-60.0 * 60.0 * 24.0); // Go back one day
+            // Go back one day
+            end.advanceTime(-60.0 * 60.0 * 24.0);
         }
         else if (p.prototyped->time.end != "Today") {
             _prototyped.endTimeJ2000 = Time(p.prototyped->time.end).j2000Seconds();
@@ -252,11 +265,11 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
             ss >> std::get_time(&tm, p.folder->format.c_str());
             if (!ss.fail()) {
                 std::string date;
-                if (p.folder->format.find("%j") != std::string::npos) {
+                if (p.folder->format.contains("%j")) {
                     // If the user asked for a day-of-year, the day-of-month and the month
                     // fields will not be set and calls to std::asctime will assert
-                    // unfortunately.  Luckily, Spice understands DOY date formats, so
-                    // we can specify those directly and noone would use a DOY and a DOM
+                    // unfortunately. Luckily, Spice understands DOY date formats, so we
+                    // can specify those directly and noone would use a DOY and a DOM
                     // time string in the same format string, right?  Right?!
                     date = std::format(
                         "{}-{}T{}:{}:{}",
@@ -297,8 +310,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
         if (_folder.files.empty()) {
             throw ghoul::RuntimeError(std::format(
                 "Error loading layer '{}'. Folder '{}' does not contain any files that "
-                "matched the time format",
-                _identifier, _folder.folder
+                "matched the time format", _identifier, _folder.folder
             ));
         }
     }
@@ -307,11 +319,9 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     if (_isInterpolating) {
         _interpolateTileProvider = std::make_unique<InterpolateTileProvider>(dictionary);
         _interpolateTileProvider->initialize();
-        _interpolateTileProvider->colormap =
-            ghoul::io::TextureReader::ref().loadTexture(_colormap, 1);
-        _interpolateTileProvider->colormap->uploadTexture();
-        _interpolateTileProvider->colormap->setFilter(
-            ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+        _interpolateTileProvider->colormap = dataloader::colormap::loadColorMapTexture(
+            _colormap,
+            { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
         );
     }
 }
@@ -455,7 +465,7 @@ DefaultTileProvider* TemporalTileProvider::retrieveTileProvider(const Time& t) {
             }
             default:
                 throw ghoul::MissingCaseException();
-        };
+        }
     }();
 
     DefaultTileProvider tileProvider = createTileProvider(timeStr);
@@ -477,9 +487,7 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, false>(
         _folder.files.cbegin(),
         _folder.files.cend(),
         time.j2000Seconds(),
-        [](const std::pair<double, std::string>& p, double t) {
-            return p.first < t;
-        }
+        [](const std::pair<double, std::string>& p, double t) { return p.first < t; }
     );
 
     if (it != _folder.files.cbegin()) {
@@ -499,9 +507,7 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, true>(
         _folder.files.cbegin(),
         _folder.files.cend(),
         time.j2000Seconds(),
-        [](const std::pair<double, std::string>& p, double t) {
-            return p.first < t;
-        }
+        [](const std::pair<double, std::string>& p, double t) { return p.first < t; }
     );
 
     auto curr = next != _folder.files.cbegin() ? next - 1 : next;
@@ -534,7 +540,7 @@ TileProvider*
 TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Prototype, false>(
                                                                          const Time& time)
 {
-    Time tCopy(time);
+    Time tCopy = Time(time);
     if (_prototyped.timeQuantizer.quantize(tCopy, true)) {
         return retrieveTileProvider(tCopy);
     }
@@ -561,36 +567,36 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Prototype, true>(
 
     _interpolateTileProvider->t1 = retrieveTileProvider(tCopy);
 
-    // if the images are for each hour
+    // If the images are for each hour
     if (_prototyped.temporalResolution == "1h") {
         constexpr int Hour = 60 * 60;
-        // the second tile to interpolate between
+        // The second tile to interpolate between
         nextTile.advanceTime(Hour);
-        // the tile after the second tile
+        // The tile after the second tile
         nextNextTile.advanceTime(2 * Hour);
-        // the tile before the first tile
+        // The tile before the first tile
         prevTile.advanceTime(-Hour + 1);
-        // to make sure that an image outside the dataset is not searched for both
-        // ends of the dataset are calculated
+        // To make sure that an image outside the dataset is not searched for both ends of
+        // the dataset are calculated
         secondToLast.advanceTime(-Hour);
         secondToFirst.advanceTime(Hour);
     }
-    // if the images are for each month
+    // If the images are for each month
     if (_prototyped.temporalResolution == "1M") {
         constexpr int Day = 24 * 60 * 60;
 
-        // the second tile to interpolate between
+        // The second tile to interpolate between
         nextTile.advanceTime(32 * Day);
-        // the tile after the second tile
+        // The tile after the second tile
         nextNextTile.advanceTime(64 * Day);
-        // the tile before the first tile
+        // The tile before the first tile
         prevTile.advanceTime(-2 * Day);
-        // to make sure that an image outside the dataset is not searched for both
-        // ends of the dataset are calculated
+        // To make sure that an image outside the dataset is not searched for both ends of
+        // the dataset are calculated
         secondToLast.advanceTime(-2 * Day);
         secondToFirst.advanceTime(32 * Day);
 
-        // since months vary in length the time is set to the first of each month
+        // Since months vary in length the time is set to the first of each month
         auto setToFirstOfMonth = [](Time& t) {
             std::string timeString = std::string(t.ISO8601());
             timeString[8] = '0';
@@ -605,7 +611,7 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Prototype, true>(
         setToFirstOfMonth(secondToFirst);
     }
 
-    // the necessary tile providers are loaded if they exist within the timespan
+    // The necessary tile providers are loaded if they exist within the timespan
     if (secondToLast.j2000Seconds() > time.j2000Seconds() &&
         secondToFirst.j2000Seconds() < time.j2000Seconds())
     {
@@ -671,37 +677,42 @@ TemporalTileProvider::InterpolateTileProvider::InterpolateTileProvider(
 {
     ZoneScoped;
 
-    glGenFramebuffers(1, &fbo);
-    glGenVertexArrays(1, &vaoQuad);
-    glGenBuffers(1, &vboQuad);
-    glBindVertexArray(vaoQuad);
-    glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
+    glCreateFramebuffers(1, &fbo);
+
+    glCreateBuffers(1, &vboQuad);
     // Quad for fullscreen with vertex (xy) and texture coordinates (uv)
-    constexpr std::array<GLfloat, 24> VertexData = {
-        // x    y    u    v
-        -1.f, -1.f, 0.f, 0.f,
-         1.f,  1.f, 1.f, 1.f,
-        -1.f,  1.f, 0.f, 1.f,
-        -1.f, -1.f, 0.f, 0.f,
-         1.f, -1.f, 1.f, 0.f,
-         1.f,  1.f, 1.f, 1.f
+    struct Vertex {
+        glm::vec2 position;
+        glm::vec2 texCoords;
     };
-    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
-    // vertex coordinates at location 0
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
-    glEnableVertexAttribArray(0);
-    // texture coords at location 1
-    glVertexAttribPointer(
+    constexpr std::array<Vertex, 6> VertexData = {
+        Vertex { glm::vec2(-1.f, -1.f), glm::vec2(0.f, 0.f) },
+        Vertex { glm::vec2(1.f,  1.f), glm::vec2(1.f, 1.f) },
+        Vertex { glm::vec2(-1.f,  1.f), glm::vec2(0.f, 1.f) },
+        Vertex { glm::vec2(-1.f, -1.f), glm::vec2(0.f, 0.f) },
+        Vertex { glm::vec2(1.f, -1.f), glm::vec2(1.f, 0.f) },
+        Vertex { glm::vec2(1.f,  1.f), glm::vec2(1.f, 1.f) }
+    };
+    glNamedBufferStorage(vboQuad, 6 * sizeof(VertexData), VertexData.data(), GL_NONE_BIT);
+
+    glCreateVertexArrays(1, &vaoQuad);
+    glVertexArrayVertexBuffer(vaoQuad, 0, vboQuad, 0, sizeof(Vertex));
+
+    glEnableVertexArrayAttrib(vaoQuad, 0);
+    glVertexArrayAttribFormat(vaoQuad, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(vaoQuad, 0, 0);
+
+    glEnableVertexArrayAttrib(vaoQuad, 1);
+    glVertexArrayAttribFormat(
+        vaoQuad,
         1,
         2,
         GL_FLOAT,
         GL_FALSE,
-        4 * sizeof(GLfloat),
-        reinterpret_cast<void*>(2 * sizeof(GLfloat))
+        offsetof(Vertex, texCoords)
     );
-    glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    glVertexArrayAttribBinding(vaoQuad, 1, 0);
+
     shaderProgram = global::renderEngine->buildRenderProgram(
         "InterpolatingProgram",
         absPath("${MODULE_GLOBEBROWSING}/shaders/interpolate_vs.glsl"),
@@ -721,18 +732,22 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     ZoneScoped;
     TracyGpuZone("tile");
 
-    // prev and next are the two tiles to interpolate between
+    // Prev and next are the two tiles to interpolate between
     const Tile prev = t1->tile(tileIndex);
     const Tile next = t2->tile(tileIndex);
-    // the tile before and the tile after the interpolation interval are loaded so the
+    // The tile before and the tile after the interpolation interval are loaded so the
     // interpolation goes smoother. It is on purpose that we are not actually storing the
     // return tile here, we just want to trigger the load already
     before->tile(tileIndex);
     future->tile(tileIndex);
-    const cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
+    const ProviderTileKey key = { tileIndex, uniqueIdentifier };
 
     if (!prev.texture || !next.texture) {
-        return Tile{ nullptr, std::nullopt, Tile::Status::Unavailable };
+        return {
+            .texture = nullptr,
+            .metaData = std::nullopt,
+            .status = Tile::Status::Unavailable
+        };
     }
 
     // The data for initializing the texture
@@ -749,7 +764,7 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     Tile ourTile;
     // The texture that will contain the interpolated image
     ghoul::opengl::Texture* writeTexture = nullptr;
-    cache::MemoryAwareTileCache* tileCache =
+    MemoryAwareTileCache* tileCache =
         global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
     if (tileCache->exist(key)) {
         ourTile = tileCache->get(key);
@@ -768,16 +783,17 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFBO);
     global::renderEngine->openglStateCache().viewport(viewport.data());
     // Bind render texture to FBO
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, *writeTexture, 0);
+    glNamedFramebufferTexture(fbo, GL_COLOR_ATTACHMENT0, *writeTexture, 0);
     glDisable(GL_BLEND);
     const GLenum textureBuffers = GL_COLOR_ATTACHMENT0;
-    glDrawBuffers(1, &textureBuffers);
+    glNamedFramebufferDrawBuffers(fbo, 1, &textureBuffers);
+
 
     // Setup our own viewport settings
-    const GLsizei w = static_cast<GLsizei>(writeTexture->width());
-    const GLsizei h = static_cast<GLsizei>(writeTexture->height());
+    const GLsizei w = static_cast<GLsizei>(writeTexture->dimensions().x);
+    const GLsizei h = static_cast<GLsizei>(writeTexture->dimensions().y);
     glViewport(0, 0, w, h);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
     GLint id = 0;
@@ -788,18 +804,15 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
 
     // The texture that will give the color for the interpolated texture
     ghoul::opengl::TextureUnit colormapUnit;
-    colormapUnit.activate();
-    colormap->bind();
+    colormapUnit.bind(*colormap);
     shaderProgram->setUniform("colormapTexture", colormapUnit);
 
     ghoul::opengl::TextureUnit prevUnit;
-    prevUnit.activate();
-    prev.texture->bind();
+    prevUnit.bind(*prev.texture);
     shaderProgram->setUniform("prevTexture", prevUnit);
 
     ghoul::opengl::TextureUnit nextUnit;
-    nextUnit.activate();
-    next.texture->bind();
+    nextUnit.bind(*next.texture);
     shaderProgram->setUniform("nextTexture", nextUnit);
 
     // Render to the texture
@@ -846,15 +859,15 @@ void TemporalTileProvider::InterpolateTileProvider::reset() {
 }
 
 int TemporalTileProvider::InterpolateTileProvider::minLevel() {
-    return glm::max(t1->minLevel(), t2->minLevel());
+    return std::max(t1->minLevel(), t2->minLevel());
 }
 
 int TemporalTileProvider::InterpolateTileProvider::maxLevel() {
-    return glm::min(t1->maxLevel(), t2->maxLevel());
+    return std::min(t1->maxLevel(), t2->maxLevel());
 }
 
 float TemporalTileProvider::InterpolateTileProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,24 +27,17 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
+#include <modules/globebrowsing/src/basictypes.h>
+#include <modules/globebrowsing/src/tileindex.h>
 #include <modules/video/include/videoplayer.h>
-#include <openspace/properties/misc/triggerproperty.h>
-#include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/properties/vector/ivec2property.h>
-#include <ghoul/glm.h>
 
-// libmpv
-#include <client.h>
-#include <render_gl.h>
+namespace openspace {
 
-namespace openspace { struct Documentation; }
-
-namespace openspace::globebrowsing {
+struct ChunkTile;
 
 class VideoTileProvider : public TileProvider {
 public:
     explicit VideoTileProvider(const ghoul::Dictionary& dictionary);
-    ~VideoTileProvider() override;
 
     void update() override final;
     void reset() override final;
@@ -56,7 +49,7 @@ public:
     Tile::Status tileStatus(const TileIndex& tileIndex) override final;
     TileDepthTransform depthTransform() override final;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void internalInitialize() override final;
@@ -70,6 +63,6 @@ private:
     VideoPlayer _videoPlayer;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VIDEO___VIDEOTILEPROVIDER___H__

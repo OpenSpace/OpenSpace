@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,28 +31,33 @@
 #elif defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-#endif
+#endif // __clang__
 
-#include <modules/touch/ext/libTUIO11/TUIO/TuioListener.h>
-#include <modules/touch/ext/libTUIO11/TUIO/TuioClient.h>
+#include <TuioClient.h>
+#include <TuioListener.h>
+#include <TuioTime.h>
 
 #ifdef __clang__
 #pragma clang diagnostic pop
 #elif defined(__GNUC__)
 #pragma GCC diagnostic pop
-#endif
+#endif // __clang__
 
 #include <openspace/util/touch.h>
-#include <ghoul/glm.h>
-#include <math.h>
 #include <mutex>
 #include <vector>
+
+namespace TUIO {
+    class TuioBlob;
+    class TuioCursor;
+    class TuioObject;
+} // namespace TUIO
 
 namespace openspace {
 
 class TuioEar : public TUIO::TuioListener {
 public:
-    TuioEar();
+    explicit TuioEar(int port = 3333);
     ~TuioEar();
 
     /**

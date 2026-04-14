@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,21 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/iswa/rendering/iswabasegroup.h>
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/screenspacerenderable.h>
+#include <ghoul/format.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/dictionary.h>
+#include <memory>
+#include <utility>
+
+using namespace openspace;
 
 namespace {
 
-// Adds a IswaCygnet.
+/**
+ * Adds a IswaCygnet.
+ */
 [[codegen::luawrap]] void addCygnet(int id = -1, std::string type = "Texture",
                                     std::string group = "")
 {
-    openspace::IswaManager::ref().addIswaCygnet(id, type, group);
+    IswaManager::ref().addIswaCygnet(id, type, group);
 }
 
-// Adds a Screen Space Cygnets.
+/**
+ * Adds a Screen Space Cygnets.
+ */
 [[codegen::luawrap]] void addScreenSpaceCygnet(ghoul::Dictionary d) {
-    using namespace openspace;
-
     int id = static_cast<int>(d.value<double>("CygnetId"));
     std::map<int, std::shared_ptr<CygnetInfo>> cygnetInformation =
         IswaManager::ref().cygnetInformation();
@@ -68,17 +79,19 @@ namespace {
     }
 }
 
-// Remove a Cygnets.
+/**
+ * Remove a Cygnets.
+ */
 [[codegen::luawrap]] void removeCygnet(std::string name) {
-    openspace::global::scriptEngine->queueScript(
+    global::scriptEngine->queueScript(
         "openspace.removeSceneGraphNode('" + name + "')"
     );
 }
 
-// Remove a Screen Space Cygnets.
+/**
+ * Remove a Screen Space Cygnets.
+ */
 [[codegen::luawrap]] void removeScreenSpaceCygnet(int id) {
-    using namespace openspace;
-
     std::map<int, std::shared_ptr<CygnetInfo>> cygnetInformation =
         IswaManager::ref().cygnetInformation();
     if (cygnetInformation.find(id) == cygnetInformation.end()) {
@@ -96,10 +109,10 @@ namespace {
     global::scriptEngine->queueScript(script);
 }
 
-// Remove a group of Cygnets.
+/**
+ * Remove a group of Cygnets.
+ */
 [[codegen::luawrap]] void removeGroup(std::string name) {
-    using namespace openspace;
-
     std::map<std::string, std::shared_ptr<IswaBaseGroup>> groups =
         IswaManager::ref().groups();
     if (groups.find(name) != groups.end()) {
@@ -107,21 +120,27 @@ namespace {
     }
 }
 
-// Adds a cdf files to choose from.
+/**
+ * Adds a cdf files to choose from.
+ */
 [[codegen::luawrap]] void addCdfFiles(std::string path) {
-    openspace::IswaManager::ref().addCdfFiles(path);
+    IswaManager::ref().addCdfFiles(path);
 }
 
-// Adds KameleonPlanes from cdf file.
+/**
+ * Adds KameleonPlanes from cdf file.
+ */
 [[codegen::luawrap]] void addKameleonPlanes(std::string group, int pos) {
-    openspace::IswaManager::ref().addKameleonCdf(group, pos);
+    IswaManager::ref().addKameleonCdf(group, pos);
 }
 
-// Sets the base url.
+/**
+ * Sets the base URL.
+ */
 [[codegen::luawrap]] void setBaseUrl(std::string url) {
-    openspace::IswaManager::ref().setBaseUrl(url);
+    IswaManager::ref().setBaseUrl(url);
 }
-
-#include "iswamanager_lua_codegen.cpp"
 
 } // namespace
+
+#include "iswamanager_lua_codegen.cpp"

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,21 +26,25 @@
 
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconversion.h>
-#include <ghoul/font/font.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <optional>
 
 namespace {
+    using namespace openspace;
+
+    constexpr std::string_view _loggerCat = "DashboardItemDistance";
+
     enum Type {
         Node = 0,
         NodeSurface,
@@ -48,62 +52,60 @@ namespace {
         Camera
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SourceTypeInfo = {
+    constexpr Property::PropertyInfo SourceTypeInfo = {
         "SourceType",
-        "Source Type",
+        "Source type",
         "The type of position that is used as the source to calculate the distance.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SourceNodeIdentifierInfo = {
+    constexpr Property::PropertyInfo SourceNodeIdentifierInfo = {
         "SourceNodeIdentifier",
-        "Source Node Identifier",
+        "Source node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the source for computing the distance.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DestinationTypeInfo = {
+    constexpr Property::PropertyInfo DestinationTypeInfo = {
         "DestinationType",
-        "Destination Type",
+        "Destination type",
         "The type of position that is used as the destination to calculate the distance.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        DestinationNodeIdentifierInfo =
-    {
+    constexpr Property::PropertyInfo DestinationNodeIdentifierInfo = {
         "DestinationNodeIdentifier",
-        "Destination Node Identifier",
+        "Destination node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the destination for computing the distance.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SimplificationInfo = {
+    constexpr Property::PropertyInfo SimplificationInfo = {
         "Simplification",
         "Simplification",
         "If this value is enabled, the distance is displayed in nuanced units, such as "
         "km, AU, light years, parsecs, etc. If this value is disabled, the unit can be "
         "explicitly requested.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
+    constexpr Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
-        "Requested Unit",
+        "Requested unit",
         "If the simplification is disabled, this distance unit is used as a destination "
         "to convert the meters into.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
+    constexpr Property::PropertyInfo FormatStringInfo = {
         "FormatString",
-        "Format String",
+        "Format string",
         "The format string that is used for formatting the distance string.  This format "
         "receives four parameters:  The name of the source, the name of the destination "
         "the value of the distance and the unit of the distance.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `DashboardItem` displays the distance between two points. The points can be
@@ -144,12 +146,12 @@ namespace {
         // [[codegen::verbatim(FormatStringInfo.description)]]
         std::optional<std::string> formatString;
     };
-#include "dashboarditemdistance_codegen.cpp"
 } // namespace
+#include "dashboarditemdistance_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemDistance::Documentation() {
+Documentation DashboardItemDistance::Documentation() {
     return codegen::doc<Parameters>(
         "base_dashboarditem_distance",
         DashboardTextItem::Documentation()
@@ -162,13 +164,13 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     , _requestedUnit(RequestedUnitInfo)
     , _formatString(FormatStringInfo, "Distance from {} to {}: {:f} {}")
     , _source{
-        properties::OptionProperty(SourceTypeInfo),
-        properties::StringProperty(SourceNodeIdentifierInfo),
+        OptionProperty(SourceTypeInfo),
+        StringProperty(SourceNodeIdentifierInfo),
         nullptr
     }
     , _destination{
-        properties::OptionProperty(DestinationTypeInfo),
-        properties::StringProperty(DestinationNodeIdentifierInfo),
+        OptionProperty(DestinationTypeInfo),
+        StringProperty(DestinationNodeIdentifierInfo),
         nullptr
     }
 {
@@ -182,7 +184,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     });
     _source.type.onChange([this]() {
         _source.nodeIdentifier.setVisibility(
-            properties::Property::Visibility(
+            Property::Visibility(
                 _source.type == Type::Node || _source.type == Type::NodeSurface
             )
         );
@@ -196,10 +198,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
             _source.nodeIdentifier = *p.sourceNodeIdentifier;
         }
         else {
-            LERRORC(
-                "DashboardItemDistance",
-                "Node type was selected for source but no node specified"
-            );
+            LERROR("Node type was selected for source but no node specified");
         }
     }
     addProperty(_source.nodeIdentifier);
@@ -212,7 +211,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     });
     _destination.type.onChange([this]() {
         _destination.nodeIdentifier.setVisibility(
-            properties::Property::Visibility(
+            Property::Visibility(
                 _source.type == Type::Node || _source.type == Type::NodeSurface
             )
         );
@@ -225,10 +224,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
             _destination.nodeIdentifier = *p.destinationNodeIdentifier;
         }
         else {
-            LERRORC(
-                "DashboardItemDistance",
-                "Node type was selected for destination but no node specified"
-            );
+            LERROR("Node type was selected for destination but no node specified");
         }
     }
     addProperty(_destination.nodeIdentifier);
@@ -266,18 +262,17 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
             );
 
             if (!mainComp.node) {
-                LERRORC(
-                    "DashboardItemDistance",
-                    "Could not find node '" + mainComp.nodeIdentifier.value() + "'"
-                );
-                return { glm::dvec3(0.0), "Node" };
+                LERROR(std::format(
+                    "Could not find node '{}'", mainComp.nodeIdentifier.value()
+                ));
+                return std::pair(glm::dvec3(0.0), "Node");
             }
         }
     }
 
     switch (mainComp.type) {
         case Type::Node:
-            return { mainComp.node->worldPosition(), mainComp.node->guiName() };
+            return std::pair(mainComp.node->worldPosition(), mainComp.node->guiName());
         case Type::NodeSurface:
         {
             glm::dvec3 otherPos;
@@ -294,22 +289,25 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
             const glm::dvec3 dir = glm::normalize(otherPos - thisPos);
             const glm::dvec3 dirLen = dir * glm::dvec3(mainComp.node->boundingSphere());
 
-            return { thisPos + dirLen, "surface of " + mainComp.node->guiName() };
+            return std::pair(thisPos + dirLen, "surface of " + mainComp.node->guiName());
         }
         case Type::Focus: {
             const SceneGraphNode* anchor =
                 global::navigationHandler->orbitalNavigator().anchorNode();
             if (!anchor) {
-                return { glm::dvec3(0.0), "Unknown" };
+                return std::pair(glm::dvec3(0.0), "Unknown");
             }
             else {
-                return { anchor->worldPosition(), "focus" };
+                return std::pair(anchor->worldPosition(), "focus");
             }
         }
         case Type::Camera:
-            return { global::renderEngine->scene()->camera()->positionVec3(), "camera" };
+            return std::pair(
+                global::renderEngine->scene()->camera()->position(),
+                "camera"
+            );
         default:
-            return { glm::dvec3(0.0), "Unknown" };
+            return std::pair(glm::dvec3(0.0), "Unknown");
     }
 }
 
@@ -353,7 +351,7 @@ void DashboardItemDistance::update() {
         _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
     }
     catch (const std::format_error&) {
-        LERRORC("DashboardItemDate", "Illegal format string");
+        LERROR("Illegal format string");
     }
 }
 

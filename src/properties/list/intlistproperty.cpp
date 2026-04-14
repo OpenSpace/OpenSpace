@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,15 +24,12 @@
 
 #include <openspace/properties/list/intlistproperty.h>
 
-#include <openspace/json.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/stringhelper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
-IntListProperty::IntListProperty(Property::PropertyInfo info, std::vector<int> values)
+IntListProperty::IntListProperty(PropertyInfo info, std::vector<int> values)
     : ListProperty(std::move(info), std::move(values))
 {}
 
@@ -57,4 +54,4 @@ std::string IntListProperty::stringValue() const {
     return json.dump();
 }
 
-} // namespace openspace::properties
+} // namespace openspace

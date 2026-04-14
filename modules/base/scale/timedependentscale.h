@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,23 +33,22 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class TimeDependentScale : public Scale {
 public:
     explicit TimeDependentScale(const ghoul::Dictionary& dictionary);
 
     glm::dvec3 scaleValue(const UpdateData& data) const override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::StringProperty _referenceDate;
-    properties::DoubleProperty _speed;
-    properties::BoolProperty _clampToPositive;
+    StringProperty _referenceDate;
+    DoubleProperty _speed;
+    BoolProperty _clampToPositive;
 
     mutable bool _cachedReferenceDirty = true;
-    mutable double _cachedReference = 0.0; // in seconds past the J2000 epoch
+    // In seconds past the J2000 epoch
+    mutable double _cachedReference = 0.0;
 };
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,21 +26,23 @@
 
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/documentation/documentation.h>
+#include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/texture.h>
+#include <ghoul/misc/dictionary.h>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "TextureCygnet";
+
+    struct [[codegen::Dictionary(RenderableTextureCygnet)]] Parameters {};
 } // namespace
+#include "renderabletexturecygnet_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableTextureCygnet::Documentation() {
-    documentation::Documentation doc = RenderableIswaCygnet::Documentation();
-    doc.name = "RenderableTextureCygnet";
-    doc.id = "iswa_renderable_texturecygnet";
-    return doc;
+Documentation RenderableTextureCygnet::Documentation() {
+    return codegen::doc<Parameters>("iswa_renderable_texturecygnet");
 }
 
 RenderableTextureCygnet::RenderableTextureCygnet(const ghoul::Dictionary& dictionary)
@@ -50,24 +52,17 @@ RenderableTextureCygnet::RenderableTextureCygnet(const ghoul::Dictionary& dictio
 }
 
 bool RenderableTextureCygnet::updateTexture() {
-    using namespace ghoul;
-
-    std::unique_ptr<opengl::Texture> texture = io::TextureReader::ref().loadTexture(
+    _textures[0] = ghoul::io::texture::loadTexture(
         reinterpret_cast<void*>(_imageFile.buffer),
         _imageFile.size,
         2,
+        { .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap },
         _imageFile.format
     );
 
-    if (texture) {
-        LDEBUG(std::format(
-            "Loaded texture from image iswa cygnet with id '{}'", _data.id
-        ));
-        texture->uploadTexture();
-        // Textures of planets looks much smoother with AnisotropicMipMap
-        texture->setFilter(opengl::Texture::FilterMode::LinearMipMap);
-        _textures[0] = std::move(texture);
-    }
+    LDEBUG(std::format(
+        "Loaded texture from image iswa cygnet with id '{}'", _data.id
+    ));
 
     return false;
 }
@@ -95,7 +90,7 @@ bool RenderableTextureCygnet::downloadTextureResource(double timestamp) {
 }
 
 bool RenderableTextureCygnet::updateTextureResource() {
-    // if The future is done then get the new imageFile
+    // If the future is done then get the new imageFile
     DownloadManager::MemoryFile imageFile;
     if (_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
         imageFile = _futureObject.get();
@@ -116,7 +111,7 @@ bool RenderableTextureCygnet::updateTextureResource() {
 }
 
 bool RenderableTextureCygnet::readyToRender() const {
-    return isReady() && ((!_textures.empty()) && _textures[0]);
+    return !_textures.empty() && _textures[0];
 }
 
-} //namespace openspace
+} // namespace openspace

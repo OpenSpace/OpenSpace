@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,28 +27,24 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/navigation/keyframenavigator.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/scripting/lualibrary.h>
-
-#include <functional>
+#include <limits>
 #include <optional>
-#include <queue>
 #include <string>
 #include <vector>
 
 namespace ghoul { class Dictionary; }
-namespace openspace::documentation { struct Documentation; }
 
-namespace openspace::scripting {
+namespace openspace {
 
+struct Documentation;
 struct LuaLibrary;
 
 /**
  * Maintains an ordered list of `ScheduledScript`s and provides a simple interface for
  * retrieveing scheduled scripts.
  */
-class ScriptScheduler : public properties::PropertyOwner {
+class ScriptScheduler : public PropertyOwner {
 public:
     ScriptScheduler();
 
@@ -85,7 +81,7 @@ public:
      * Removes all scripts for the schedule.
      *
      * \param group An int that specifies which group to clear. If none given then all
-     *              scripts are cleared from the schedule
+     *        scripts are cleared from the schedule
      */
     void clearSchedule(std::optional<int> group = std::nullopt);
 
@@ -95,8 +91,8 @@ public:
      * of this method.
      *
      * \param newTime A j2000 time value specifying the new time stamp that the script
-     *        scheduler should progress to.
-     * \return vector with the scheduled scripts that should be run from begining to end
+     *        scheduler should progress to
+     * \return Vector with the scheduled scripts that should be run from begining to end
      */
     std::vector<std::string> progressTo(double newTime);
 
@@ -113,26 +109,26 @@ public:
     /**
      * Function that returns all scripts currently loaded in the script scheduler.
      *
-     * \param group An int specifying which group to return, if empty all scripts
-     *              will be returned
-     * \return a vector of all scripts that has been loaded
+     * \param group An int specifying which group to return, if empty all scripts will be
+     *        returned
+     * \return A vector of all scripts that has been loaded
      */
     std::vector<ScheduledScript> allScripts(
         std::optional<int> group = std::nullopt) const;
 
     static LuaLibrary luaLibrary();
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::BoolProperty _enabled;
-    properties::BoolProperty _shouldRunAllTimeJump;
+    BoolProperty _enabled;
+    BoolProperty _shouldRunAllTimeJump;
     std::vector<ScheduledScript> _scripts;
 
     int _currentIndex = 0;
     double _currentTime = 0;
 };
 
-} // namespace openspace::scripting
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SCRIPTSCHEDULER___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,18 +27,17 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/base/rendering/renderabletrail.h>
 #include <modules/space/kepler.h>
-#include <modules/space/translation/keplertranslation.h>
+#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/objectmanager.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/programobject.h>
+#include <limits>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class RenderableOrbitalKepler : public Renderable {
 public:
@@ -47,88 +46,108 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    struct Appearance : properties::PropertyOwner {
+    struct Appearance : PropertyOwner {
         Appearance();
+
         /// Specifies the base color of the line/point
-        properties::Vec3Property color;
+        Vec3Property color;
         /// Line width for the line rendering part
-        properties::FloatProperty trailWidth;
+        FloatProperty trailWidth;
         /// Point size exponent for the point rendering part
-        properties::FloatProperty pointSizeExponent;
+        FloatProperty pointSizeExponent;
         /// The option determining which rendering method to use
-        properties::BoolProperty enableMaxSize;
+        BoolProperty enableMaxSize;
         /// The option enables or disables Max Angular Size limit
-        properties::FloatProperty maxSize;
+        FloatProperty maxSize;
         /// Max angular size between vector cameraToPoint and edge of the point
-        properties::OptionProperty renderingModes;
+        OptionProperty renderingModes;
+        /// Specifies rendering orientation when rendering points
+        OptionProperty pointRenderOption;
         /// Specifies a multiplicative factor that fades out the trail line
-        properties::FloatProperty trailFade;
+        FloatProperty trailFade;
         /// Specifies if the point outline should be enabled
-        properties::BoolProperty enableOutline;
+        BoolProperty enableOutline;
         /// Specifies the color of the point outline
-        properties::Vec3Property outlineColor;
+        Vec3Property outlineColor;
         /// Specifies how much if the point should be covered by the outline
-        properties::FloatProperty outlineWidth;
+        FloatProperty outlineWidth;
+
+        bool isRenderTypeDirty = false;
     };
 
     void updateBuffers();
-    void calculateSegmentsForPoints(const RenderData& data);
-    void calculateSegmentsForTrails(const RenderData& data);
+    void threadedSegmentCalculations(int threadId, const UpdateData& data);
 
+    const int _nThreads = 0;
+    std::vector<int> _threadIds;
+    std::vector<int> _orbitsPerThread;
+    std::vector<int> _vertexBufferOffset;
+
+    bool _renderTrails = false;
+    bool _renderPoints = false;
+    bool _forceUpdate = false;
     bool _updateDataBuffersAtNextRender = false;
-    long long _numObjects = 0;
+
+    unsigned int _nOrbits = 0;
     GLsizei _lineDrawCount = 0;
-    properties::UIntProperty _segmentQuality;
-    properties::UIntProperty _startRenderIdx;
-    properties::UIntProperty _sizeRender;
-    std::vector<GLint> _segmentSizeRaw;
+    std::vector<GLint> _segmentsPerOrbit;
     std::vector<GLint> _startIndexPoints;
     std::vector<GLint> _segmentSizePoints;
     std::vector<GLint> _startIndexTrails;
     std::vector<GLint> _segmentSizeTrails;
     std::vector<kepler::Parameters> _parameters;
 
-    /// The layout of the VBOs
+    /**
+     * Extra data for more efficient updating of vectors.
+     */
+    struct UpdateInfo {
+        double timestamp = std::numeric_limits<double>::min();
+        double timePerStep = 0.0;
+    };
+    std::vector<UpdateInfo> _updateHelper;
+
+    /**
+     * The layout of the VBOs.
+     */
     struct TrailVBOLayout {
         float x = 0.f;
         float y = 0.f;
         float z = 0.f;
-        float time = 0.f;
+        double time = 0.0;
         double epoch = 0.0;
         double period = 0.0;
     };
-
     /// The backend storage for the vertex buffer object containing all points
     std::vector<TrailVBOLayout> _vertexBufferData;
+
+    ghoul::opengl::ProgramObject* _trailProgram = nullptr;
+    ghoul::opengl::ProgramObject* _pointProgram = nullptr;
+    UIntProperty _segmentQuality;
+    UIntProperty _startRenderIdx;
+    UIntProperty _sizeRender;
+    StringProperty _path;
+    BoolProperty _contiguousMode;
+    kepler::Format _format;
+    RenderableOrbitalKepler::Appearance _appearance;
 
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;
 
-    ghoul::opengl::ProgramObject* _trailProgram = nullptr;
-    ghoul::opengl::ProgramObject* _pointProgram = nullptr;
-    properties::StringProperty _path;
-    properties::BoolProperty _contiguousMode;
-    kepler::Format _format;
-    RenderableOrbitalKepler::Appearance _appearance;
-
-    // Line cache
+    /// Line cache
     UniformCache(modelViewTransform, projectionTransform, trailFadeExponent,
-        colorFadeCutoffValue, inGameTime, color, opacity)
-        _uniformTrailCache;
+        colorFadeCutoffValue, inGameTime, color, opacity) _uniformTrailCache;
 
-    // Point cache
-    UniformCache(modelTransform, viewTransform, projectionTransform,
-        cameraPositionWorld, cameraUpWorld,  inGameTime, color,
-        pointSizeExponent, enableMaxSize, maxSize, enableOutline,
-        outlineColor, outlineWeight, opacity)
-        _uniformPointCache;
+    /// Point cache
+    UniformCache(modelTransform, viewTransform, projectionTransform, renderOption,
+        cameraViewDirectionUp, cameraViewDirectionRight, cameraPositionWorld,
+        cameraUpWorld, inGameTime, color, pointSizeExponent, enableMaxSize, maxSize,
+        enableOutline, outlineColor, outlineWeight, opacity) _uniformPointCache;
 };
 
 } // namespace openspace

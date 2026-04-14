@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef _OUTSIDE___GLSL_
+#define _OUTSIDE___GLSL_
+
 #include <#{fragmentPath}>
+
 
 void getEntry(inout vec3 entryPos, inout float entryDepth) {
   // fetch entry point from rendered fragment
@@ -30,3 +34,5 @@ void getEntry(inout vec3 entryPos, inout float entryDepth) {
   entryPos = f.color.xyz;
   entryDepth = f.depth;
 }
+
+#endif // _OUTSIDE___GLSL_

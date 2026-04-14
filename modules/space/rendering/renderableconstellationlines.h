@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,19 +27,14 @@
 
 #include <modules/space/rendering/renderableconstellationsbase.h>
 
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/util/distanceconversion.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <unordered_map>
 
-namespace ghoul::filesystem { class File; }
-namespace ghoul::fontrendering { class Font; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
-
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class RenderableConstellationLines : public RenderableConstellationsBase {
 public:
@@ -50,22 +45,20 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     struct ConstellationLine {
         bool isEnabled = true;
         std::string name;
-        int lineIndex;
-        int colorIndex;
-        int numV;
-        GLuint vaoArray;
-        GLuint vboArray;
+        int lineIndex = 0;
+        int colorIndex = 0;
+        int numV = 0;
+        GLuint vao = 0;
+        GLuint vbo = 0;
         std::vector<GLfloat> vertices;
     };
 
@@ -80,8 +73,8 @@ private:
      */
     void selectionPropertyHasChanged() override;
 
-    properties::StringProperty _speckFile;
-    properties::BoolProperty _drawElements;
+    StringProperty _speckFile;
+    BoolProperty _drawElements;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, opacity,

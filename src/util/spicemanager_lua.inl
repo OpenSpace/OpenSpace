@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
+#include <ghoul/format.h>
+#include <cstring>
+#include <fstream>
 #include <ios>
+#include <iterator>
+#include <memory>
+#include <variant>
+#include <utility>
+
+using namespace openspace;
 
 namespace {
 
@@ -39,7 +49,7 @@ namespace {
         if (!std::filesystem::is_regular_file(k)) {
             throw ghoul::lua::LuaError(std::format("Kernel file '{}' did not exist", k));
         }
-        openspace::SpiceManager::ref().loadKernel(k);
+        SpiceManager::ref().loadKernel(k);
     }
     else {
         std::vector<std::string> ks = std::get<std::vector<std::string>>(kernel);
@@ -49,7 +59,7 @@ namespace {
                     "Kernel file '{}' did not exist", k
                 ));
             }
-            openspace::SpiceManager::ref().loadKernel(k);
+            SpiceManager::ref().loadKernel(k);
         }
     }
 }
@@ -62,20 +72,20 @@ namespace {
                                std::variant<std::string, std::vector<std::string>> kernel)
 {
     if (std::holds_alternative<std::string>(kernel)) {
-        openspace::SpiceManager::ref().unloadKernel(std::get<std::string>(kernel));
+        SpiceManager::ref().unloadKernel(std::get<std::string>(kernel));
     }
     else {
         for (const std::string& k : std::get<std::vector<std::string>>(kernel)) {
-            openspace::SpiceManager::ref().unloadKernel(k);
+            SpiceManager::ref().unloadKernel(k);
         }
     }
 }
 
 /**
- * Returns a list of all loaded kernels
+ * Returns a list of all loaded kernels.
  */
 [[codegen::luawrap]] std::vector<std::filesystem::path> kernels() {
-    return openspace::SpiceManager::ref().loadedKernels();
+    return SpiceManager::ref().loadedKernels();
 }
 
 /**
@@ -84,7 +94,7 @@ namespace {
  */
 [[codegen::luawrap]] std::map<std::string, std::string> spiceBodies(bool includeBuiltIn) {
     std::vector<std::pair<int, std::string>> bodies =
-        openspace::SpiceManager::ref().spiceBodies(includeBuiltIn);
+        SpiceManager::ref().spiceBodies(includeBuiltIn);
 
     std::map<std::string, std::string> res;
     for (const std::pair<int, std::string>& p : bodies) {
@@ -95,14 +105,13 @@ namespace {
 
 /**
  * Returns the rotationMatrix for a given body in a frame of reference at a specific time.
+ *
  * Example:
  * openspace.spice.rotationMatrix('INSIGHT_LANDER_CRUISE','MARS', '2018 NOV 26 19:45:34')
  */
 [[codegen::luawrap]] glm::dmat3 rotationMatrix(std::string body, std::string frame,
                                                std::string date)
 {
-    using namespace openspace;
-
     const double ephemerisTime = SpiceManager::ref().ephemerisTimeFromDate(date);
     glm::dmat3 rotationMatrix = SpiceManager::ref().frameTransformationMatrix(
         body,
@@ -115,14 +124,13 @@ namespace {
 /**
  * Returns the position for a given body relative to another body, in a given frame of
  * reference, at a specific time.
+ *
  * Example:
  * openspace.spice.position('INSIGHT', 'MARS',' GALACTIC', '2018 NOV 26 19:45:34')
  */
 [[codegen::luawrap]] glm::dvec3 position(std::string target, std::string observer,
                                          std::string frame, std::string date)
 {
-    using namespace openspace;
-
     const double ephemerisTime = SpiceManager::ref().ephemerisTimeFromDate(date);
     glm::dvec3 position = SpiceManager::ref().targetPosition(
         target,
@@ -139,7 +147,7 @@ namespace {
  * The last parameter is only used if there are multiple craft specified in the provided
  * TLE file and is selecting which (0-based index) of the list to create a kernel from.
  *
- * This function returns the SPICE ID of the object for which the kernel was created
+ * This function returns the SPICE ID of the object for which the kernel was created.
  */
 [[codegen::luawrap]] int convertTLEtoSPK(std::filesystem::path tle,
                                          std::filesystem::path spk,
@@ -150,7 +158,7 @@ namespace {
     SpiceInt n = 0;
 
     //
-    // First exact the constants required by a type 10 SPK kernel.
+    // First exact the constants required by a type 10 SPK kernel
     //
 
     std::array<double, 8> constants;
@@ -181,6 +189,9 @@ namespace {
     //
     // Load the TLE file
     //
+    if (!std::filesystem::exists(tle)) {
+        throw ghoul::RuntimeError(std::format("Could not find TLE file '{}'", tle));
+    }
     std::ifstream f = std::ifstream(tle, std::ios::binary);
     std::string contents = std::string(
         std::istreambuf_iterator<char>(f),
@@ -188,18 +199,18 @@ namespace {
     );
 
     // The TLE files returned by Celestrak are of the 3-line variant where the first line
-    // contains a human-readable name for the spacecraft
-    // files are encoded with Windows line endings (CRLF)
+    // contains a human-readable name for the spacecraft files are encoded with Windows
+    // line endings (CRLF)
 
     std::vector<std::string> lines = ghoul::tokenizeString(contents, '\n');
 
-    // erase carriage return characters
+    // Erase carriage return characters
     for (std::string& line : lines) {
         line.erase(std::remove(begin(line), end(line), '\r'), end(line));
     }
 
     const size_t nElements = lines.size() / 3;
-    if (elementToExtract > nElements) {
+    if (elementToExtract > static_cast<int>(nElements)) {
         throw ghoul::RuntimeError(std::format(
             "Error loading {}. Element number {} requested, but only {} found",
             tle, nElements, elementToExtract
@@ -231,13 +242,13 @@ namespace {
 
     // Convert the Two Line Elements lines to the element sets
     SpiceDouble epoch;
-    std::array<SpiceDouble, 10> elems;
+    std::array<SpiceDouble, 10> elems = {};
     getelm_c(1950, TLEColumnWidth + 1, spiceLines, &epoch, elems.data());
 
     // The size of a type SPK10 spice kernel is not affected by the time validity, so we
     // just pick the greatest one
-    SpiceDouble first = -std::numeric_limits<double>::max();
-    SpiceDouble last = std::numeric_limits<double>::max();
+    constexpr SpiceDouble first = -std::numeric_limits<double>::max();
+    constexpr SpiceDouble last = std::numeric_limits<double>::max();
 
     // Extract the body id
     std::vector<std::string> tokens = ghoul::tokenizeString(line2, ' ');
@@ -285,6 +296,6 @@ namespace {
     return bodyId;
 }
 
-#include "spicemanager_lua_codegen.cpp"
-
 } // namespace
+
+#include "spicemanager_lua_codegen.cpp"

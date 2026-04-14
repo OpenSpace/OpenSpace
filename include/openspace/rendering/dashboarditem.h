@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,14 +29,15 @@
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/glm.h>
+#include <memory>
 
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 
-class DashboardItem : public properties::PropertyOwner {
+class DashboardItem : public PropertyOwner {
 public:
     static std::unique_ptr<DashboardItem> createFromDictionary(
         const ghoul::Dictionary& dictionary
@@ -59,10 +60,10 @@ public:
      */
     virtual void render(glm::vec2& penPosition) = 0;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    properties::BoolProperty _enabled;
+    BoolProperty _enabled;
 };
 
 } // openspace

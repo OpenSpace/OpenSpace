@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,30 +25,29 @@
 #include <modules/base/dashboard/dashboarditemtext.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/engine/globals.h>
-#include <ghoul/font/font.h>
-#include <ghoul/misc/profiling.h>
+#include <ghoul/misc/dictionary.h>
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TextInfo = {
         "Text",
         "Text",
         "The text to be displayed.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(DashboardItemText)]] Parameters {
         // [[codegen::verbatim(TextInfo.description)]]
         std::optional<std::string> text;
     };
-#include "dashboarditemtext_codegen.cpp"
 } // namespace
+#include "dashboarditemtext_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemText::Documentation() {
+Documentation DashboardItemText::Documentation() {
     return codegen::doc<Parameters>(
         "base_dashboarditem_text",
         DashboardTextItem::Documentation()

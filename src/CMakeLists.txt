@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2025                                                                #
+# Copyright (c) 2014-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -27,6 +27,8 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/set_openspace_compile_settings.cmake
 set(OPENSPACE_SOURCE
   openspace.cpp
   camera/camera.cpp
+  camera/camerapose.cpp
+  data/colormaploader.cpp
   data/csvloader.cpp
   data/dataloader.cpp
   data/datamapping.cpp
@@ -51,23 +53,21 @@ set(OPENSPACE_SOURCE
   events/eventengine_lua.inl
   interaction/actionmanager.cpp
   interaction/actionmanager_lua.inl
-  interaction/camerainteractionstates.cpp
+  interaction/interactionhandler.cpp
   interaction/interactionmonitor.cpp
-  interaction/mouseinputstate.cpp
   interaction/joystickinputstate.cpp
-  interaction/joystickcamerastates.cpp
   interaction/keybindingmanager.cpp
   interaction/keybindingmanager_lua.inl
   interaction/keyframerecordinghandler.cpp
   interaction/keyframerecordinghandler_lua.inl
   interaction/keyboardinputstate.cpp
-  interaction/mousecamerastates.cpp
-  interaction/scriptcamerastates.cpp
+  interaction/mouseinputstate.cpp
   interaction/sessionrecording.cpp
   interaction/sessionrecordinghandler.cpp
   interaction/sessionrecordinghandler_lua.inl
+  interaction/touchinputstate.cpp
+  interaction/touchmarker.cpp
   interaction/websocketinputstate.cpp
-  interaction/websocketcamerastates.cpp
   interaction/tasks/convertrecformattask.cpp
   mission/mission.cpp
   mission/missionmanager.cpp
@@ -78,13 +78,23 @@ set(OPENSPACE_SOURCE
   navigation/navigationhandler.cpp
   navigation/navigationhandler_lua.inl
   navigation/navigationstate.cpp
-  navigation/orbitalnavigator.cpp
-  navigation/orbitalnavigator_lua.inl
+  navigation/orbitalnavigator/directmanipulation.cpp
+  navigation/orbitalnavigator/idlemotion.cpp
+  navigation/orbitalnavigator/joystickcamerastates.cpp
+  navigation/orbitalnavigator/mousecamerastates.cpp
+  navigation/orbitalnavigator/orbitalcamerastates.cpp
+  navigation/orbitalnavigator/orbitalinputhandler.cpp
+  navigation/orbitalnavigator/orbitalnavigator.cpp
+  navigation/orbitalnavigator/orbitalnavigator_lua.inl
+  navigation/orbitalnavigator/scriptcamerastates.cpp
+  navigation/orbitalnavigator/touchcamerastates.cpp
+  navigation/orbitalnavigator/websocketcamerastates.cpp
   navigation/path.cpp
   navigation/pathcurve.cpp
   navigation/pathnavigator.cpp
   navigation/pathnavigator_lua.inl
   navigation/waypoint.cpp
+  network/messagestructures.cpp
   network/messagestructureshelper.cpp
   network/parallelconnection.cpp
   network/parallelpeer.cpp
@@ -132,6 +142,7 @@ set(OPENSPACE_SOURCE
   rendering/dashboarditem.cpp
   rendering/dashboardtextitem.cpp
   rendering/framebufferrenderer.cpp
+  rendering/deferredcaster.cpp
   rendering/deferredcastermanager.cpp
   rendering/fadeable.cpp
   rendering/helper.cpp
@@ -142,7 +153,10 @@ set(OPENSPACE_SOURCE
   rendering/renderable.cpp
   rendering/renderengine.cpp
   rendering/renderengine_lua.inl
+  rendering/screenspacerenderableframebuffer.cpp
   rendering/screenspacerenderable.cpp
+  rendering/screenspacerenderabletext.cpp
+  rendering/shadowmapping.cpp
   rendering/texturecomponent.cpp
   rendering/transferfunction.cpp
   rendering/volumeraycaster.cpp
@@ -167,11 +181,41 @@ set(OPENSPACE_SOURCE
   scripting/scriptscheduler_lua.inl
   scripting/systemcapabilitiesbinding.cpp
   scripting/systemcapabilitiesbinding_lua.inl
+  topic/connection.cpp
+  topic/connectionpool.cpp
+  topic/jsonconverters.cpp
+  topic/notificationlog.cpp
+  topic/serverinterface.cpp
+  topic/server.cpp
+  topic/topics/actionkeybindtopic.cpp
+  topic/topics/authorizationtopic.cpp
+  topic/topics/bouncetopic.cpp
+  topic/topics/camerapathtopic.cpp
+  topic/topics/cameratopic.cpp
+  topic/topics/documentationtopic.cpp
+  topic/topics/downloadeventtopic.cpp
+  topic/topics/enginemodetopic.cpp
+  topic/topics/errorlogtopic.cpp
+  topic/topics/eventtopic.cpp
+  topic/topics/flightcontrollertopic.cpp
+  topic/topics/getpropertytopic.cpp
+  topic/topics/luascripttopic.cpp
+  topic/topics/missiontopic.cpp
+  topic/topics/profiletopic.cpp
+  topic/topics/propertytreetopic.cpp
+  topic/topics/sessionrecordingtopic.cpp
+  topic/topics/setpropertytopic.cpp
+  topic/topics/subscriptiontopic.cpp
+  topic/topics/timetopic.cpp
+  topic/topics/topic.cpp
+  topic/topics/triggerpropertytopic.cpp
+  topic/topics/versiontopic.cpp
   util/blockplaneintersectiongeometry.cpp
   util/boxgeometry.cpp
   util/collisionhelper.cpp
   util/coordinateconversion.cpp
   util/distanceconversion.cpp
+  util/downloadeventengine.cpp
   util/dynamicfilesequencedownloader.cpp
   util/ellipsoid.cpp
   util/factorymanager.cpp
@@ -187,6 +231,7 @@ set(OPENSPACE_SOURCE
   util/sphere.cpp
   util/spicemanager.cpp
   util/spicemanager_lua.inl
+  util/syncable.cpp
   util/syncbuffer.cpp
   util/tstring.cpp
   util/histogram.cpp
@@ -205,20 +250,11 @@ set(OPENSPACE_SOURCE
   util/versionchecker.cpp
 )
 
-if (APPLE)
-  set(OPENSPACE_SOURCE
-    ${OPENSPACE_SOURCE}
-    interaction/touchbar.mm
-  )
-  set_source_files_properties(
-    interaction/touchbar.mm
-    PROPERTIES SKIP_PRECOMPILE_HEADERS ON
-  )
-endif ()
 set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/json.h
   ${PROJECT_SOURCE_DIR}/include/openspace/camera/camera.h
   ${PROJECT_SOURCE_DIR}/include/openspace/camera/camerapose.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/data/colormaploader.h
   ${PROJECT_SOURCE_DIR}/include/openspace/data/csvloader.h
   ${PROJECT_SOURCE_DIR}/include/openspace/data/dataloader.h
   ${PROJECT_SOURCE_DIR}/include/openspace/data/datamapping.h
@@ -244,24 +280,18 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/events/eventengine.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/action.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/actionmanager.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/delayedvariable.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/delayedvariable.inl
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/camerainteractionstates.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/mouseinputstate.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/interactionhandler.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/interactionmonitor.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/interpolator.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/interpolator.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/joystickinputstate.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/joystickcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keybindingmanager.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keyboardinputstate.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keyframerecordinghandler.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/mousecamerastates.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/scriptcamerastates.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/mouseinputstate.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/sessionrecording.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/sessionrecordinghandler.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/touchinputstate.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/touchmarker.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/websocketinputstate.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/websocketcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/tasks/convertrecformattask.h
   ${PROJECT_SOURCE_DIR}/include/openspace/mission/mission.h
   ${PROJECT_SOURCE_DIR}/include/openspace/mission/missionmanager.h
@@ -270,7 +300,18 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/keyframenavigator.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/navigationhandler.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/navigationstate.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/directmanipulation.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/dampenedvelocity.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/dampenedvelocity.inl
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/idlemotion.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/joystickcamerastates.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/mousecamerastates.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/orbitalcamerastates.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/orbitalinputhandler.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/orbitalnavigator.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/scriptcamerastates.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/touchcamerastates.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/websocketcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/path.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/pathcurve.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/pathnavigator.h
@@ -339,7 +380,10 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/raycastermanager.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/renderable.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/renderengine.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/rendering/screenspacerenderableframebuffer.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/screenspacerenderable.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/rendering/screenspacerenderabletext.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/rendering/shadowmapping.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/texturecomponent.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/transferfunction.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/volumeraycaster.h
@@ -358,6 +402,35 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/scripting/scriptengine.h
   ${PROJECT_SOURCE_DIR}/include/openspace/scripting/scriptscheduler.h
   ${PROJECT_SOURCE_DIR}/include/openspace/scripting/systemcapabilitiesbinding.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/connection.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/connectionpool.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/jsonconverters.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/notificationlog.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/serverinterface.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/server.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/actionkeybindtopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/authorizationtopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/bouncetopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/camerapathtopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/cameratopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/documentationtopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/downloadeventtopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/enginemodetopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/errorlogtopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/eventtopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/flightcontrollertopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/getpropertytopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/luascripttopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/missiontopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/profiletopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/propertytreetopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/sessionrecordingtopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/setpropertytopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/subscriptiontopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/timetopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/topic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/triggerpropertytopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/versiontopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/blockplaneintersectiongeometry.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/boxgeometry.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/collisionhelper.h
@@ -368,12 +441,15 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/util/coordinateconversion.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/distanceconstants.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/distanceconversion.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/util/downloadeventengine.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/dynamicfilesequencedownloader.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/ellipsoid.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/factorymanager.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/factorymanager.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/util/geodetic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/httprequest.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/util/interpolator.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/util/interpolator.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/util/job.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/json_helper.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/json_helper.inl
@@ -411,12 +487,35 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/util/histogram.h
 )
 
-if (APPLE)
-  set(OPENSPACE_HEADER
-    ${OPENSPACE_HEADER}
-    ${PROJECT_SOURCE_DIR}/include/openspace/interaction/touchbar.h
-  )
-endif ()
+set(OPENSPACE_SHADERS
+  ${PROJECT_SOURCE_DIR}/shaders/blending.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/core/screenspace_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/core/screenspace_vs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/core/xyzuvrgba_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/core/xyzuvrgba_vs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/exitframebuffer_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/fxaa_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/fxaa_vs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/hdr_and_filtering_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/hdr_and_filtering_vs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/inside.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/mergedownscaledvolume_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/mergedownscaledvolume_vs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/outside.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/raycastframebuffer_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/renderframebuffer_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/resolveframebuffer_vs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/powerscaling/powerscaling_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/powerscaling/powerscaling_vs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/powerscaling/powerscalingmath.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/floatoperations.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/fragment.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/hdr.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/rand.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/render_fs.glsl
+)
+source_group("Shader Files" FILES ${OPENSPACE_SHADERS})
+
 
 # Place files into source groups
 foreach (file ${OPENSPACE_SOURCE} ${OPENSPACE_HEADER})
@@ -444,7 +543,11 @@ endforeach ()
 ##########################################################################################
 # Create OpenSpace target
 ##########################################################################################
-add_library(openspace-core STATIC ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
+add_library(
+  openspace-core
+  STATIC
+  ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE} ${OPENSPACE_SHADERS}
+)
 target_include_directories(openspace-core SYSTEM
   PUBLIC
     # In order to use the date library
@@ -520,9 +623,6 @@ configure_file(
   @ONLY
 )
 
-if (APPLE)
-  target_link_libraries(openspace-core INTERFACE external-system-apple)
-endif ()
 if (WIN32)
   target_link_libraries(openspace-core PUBLIC "pdh")
 endif ()

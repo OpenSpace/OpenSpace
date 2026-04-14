@@ -17,7 +17,6 @@ local Object = {
     Type = "RenderableOrbitalKepler",
     Path = sssb .. "sssb_data_chiron-type_comet.csv",
     Format = "SBDB",
-    Segments = 200,
     SegmentQuality = 10,
     Color = { 0.15, 0.1, 1.0 },
     TrailFade = 25,

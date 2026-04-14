@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,20 +26,24 @@
 #define __OPENSPACE_CORE___EVENTENGINE___H__
 
 #include <openspace/events/event.h>
-#include <openspace/scripting/lualibrary.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/memorypool.h>
+#include <functional>
+#include <optional>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace openspace {
 
-namespace events { struct Event; }
+struct LuaLibrary;
 
 class EventEngine {
 public:
     using ScriptCallback = std::function<void(ghoul::Dictionary)>;
 
     struct ActionInfo {
-        events::Event::Type type;
+        Event::Type type;
         uint32_t id = std::numeric_limits<uint32_t>::max();
         bool isEnabled = true;
         std::string action;
@@ -59,7 +63,7 @@ public:
      *
      * \return The first event stored in the EventEngine or nullptr if no event exists
      */
-    events::Event* firstEvent() const;
+    Event* firstEvent() const;
 
     /**
      * Publish a new event of type T by providing optional arguments Args to the Event's
@@ -74,9 +78,9 @@ public:
     void publishEvent(Args&&... args);
 
     /**
-     * This function cleans up the memory for all published events.After this function
-     * has been called, no previously published events are valid any longer. This means
-     * that pointers retrieved from events before this call must be kept beyond this call.
+     * This function cleans up the memory for all published events.After this function has
+     * been called, no previously published events are valid any longer. This means that
+     * pointers retrieved from events before this call must be kept beyond this call.
      */
     void postFrameCleanup();
 
@@ -91,7 +95,7 @@ public:
      *        checked and only if an event passes the filter, the corresponding action is
      *        triggered
      */
-    void registerEventAction(events::Event::Type type, std::string identifier,
+    void registerEventAction(Event::Type type, std::string identifier,
         std::optional<ghoul::Dictionary> filter = std::nullopt);
 
     /**
@@ -101,8 +105,7 @@ public:
      * \param type The type for which a new topic is registered
      * \param callback The callback function that will be called on triggered event
     */
-    void registerEventTopic(size_t topicId, events::Event::Type type,
-        ScriptCallback callback);
+    void registerEventTopic(size_t topicId, Event::Type type, ScriptCallback callback);
 
     /**
      * Removing registration for a type/action combination.
@@ -111,8 +114,7 @@ public:
      * \param identifier The identifier of the action that should be unregistered
      * \param filter The optional filter applied to the event-action combination
      */
-    void unregisterEventAction(events::Event::Type type,
-        const std::string& identifier,
+    void unregisterEventAction(Event::Type type, const std::string& identifier,
         const std::optional<ghoul::Dictionary>& filter = std::nullopt);
 
     /**
@@ -129,7 +131,7 @@ public:
      * \param topicId The id of the topic that should be unregistered
      * \param type The type of the topic that should be unregistered
     */
-    void unregisterEventTopic(size_t topicId, events::Event::Type type);
+    void unregisterEventTopic(size_t topicId, Event::Type type);
 
     /**
      * Returns the list of all registered actions, sorted by their identifiers.
@@ -143,8 +145,7 @@ public:
      *
      * \return The unordered map of all registered actions
      */
-    const std::unordered_map<events::Event::Type, std::vector<ActionInfo>>&
-        eventActions() const;
+    const std::unordered_map<Event::Type, std::vector<ActionInfo>>& eventActions() const;
 
     /**
      * Enables the event identified by the \p identifier. If the event is already enabled,
@@ -171,25 +172,25 @@ public:
     /**
      * Triggers all topics that are registered for events that are in the current event
      * queue.
-    */
+     */
     void triggerTopics() const;
 
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     /// The storage space in which Events are stored
     ghoul::MemoryPool<4096> _memory;
     /// The first event in the chain of events stored in the memory pool
-    events::Event* _firstEvent = nullptr;
+    Event* _firstEvent = nullptr;
     /// The last event in the chain of events stored in the memory pool
-    events::Event* _lastEvent = nullptr;
+    Event* _lastEvent = nullptr;
 
     /// The type is duplicated in the ActionInfo as well, but we want it in the ActionInfo
     /// to be able to return them to a caller and we want it in this unordered_map to make
     /// the lookup really fast. So having this extra wasted memory is probably worth it
-    std::unordered_map<events::Event::Type, std::vector<ActionInfo>> _eventActions;
+    std::unordered_map<Event::Type, std::vector<ActionInfo>> _eventActions;
 
-    std::unordered_map<events::Event::Type, std::vector<TopicInfo>> _eventTopics;
+    std::unordered_map<Event::Type, std::vector<TopicInfo>> _eventTopics;
 
     static uint32_t nextRegisteredEventId;
 

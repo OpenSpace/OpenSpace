@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,6 @@
 
 #include <openspace/data/datamapping.h>
 #include <ghoul/glm.h>
-#include <ghoul/misc/boolean.h>
-#include <ghoul/misc/csvreader.h>
 #include <filesystem>
 #include <optional>
 #include <string>
@@ -37,12 +35,11 @@
 namespace openspace::dataloader {
 
 /**
- * A dataset representing objects with positions and various other data columns.
- * Based on the SPECK format originally used for the digital universe datasets.
- * Mostly used for point-data.
+ * A dataset representing objects with positions and various other data columns. Based on
+ * the SPECK format originally used for the digital universe datasets. Mostly used for
+ * point-data.
  *
- * The read data files may also have associated texture values to be used for the
- * points.
+ * The read data files may also have associated texture values to be used for the points.
  */
 struct Dataset {
     struct Variable {
@@ -67,15 +64,15 @@ struct Dataset {
     };
     std::vector<Entry> entries;
 
-    /// This variable can be used to get an understanding of the world scale size of
-    /// the dataset
+    /// This variable can be used to get an understanding of the world scale size of the
+    /// dataset
     float maxPositionComponent = 0.f;
 
     bool isEmpty() const;
 
     int index(std::string_view variableName) const;
     bool normalizeVariable(std::string_view variableName);
-    glm::vec2 findValueRange(int variableIndex) const;
+    glm::vec2 findValueRange(size_t variableIndex) const;
     glm::vec2 findValueRange(std::string_view variableName) const;
 };
 
@@ -99,7 +96,6 @@ struct ColorMap {
 };
 
 namespace data {
-
     Dataset loadFile(std::filesystem::path path,
         std::optional<DataMapping> specs = std::nullopt);
 
@@ -108,11 +104,9 @@ namespace data {
 
     Dataset loadFileWithCache(std::filesystem::path path,
         std::optional<DataMapping> specs = std::nullopt);
-
 } // namespace data
 
 namespace label {
-
     Labelset loadFile(std::filesystem::path path,
         std::optional<DataMapping> specs = std::nullopt);
 
@@ -125,7 +119,6 @@ namespace label {
 } // namespace label
 
 namespace color {
-
     ColorMap loadFile(std::filesystem::path path,
         std::optional<DataMapping> specs = std::nullopt);
 
@@ -133,7 +126,6 @@ namespace color {
     void saveCachedFile(const ColorMap& colorMap, const std::filesystem::path& path);
 
     ColorMap loadFileWithCache(std::filesystem::path path);
-
 } // namespace color
 
 } // namespace openspace::dataloader

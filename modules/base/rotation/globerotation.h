@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,7 +44,7 @@ public:
     void update(const UpdateData& data) override;
     glm::dmat3 matrix(const UpdateData& data) const override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void fillAttachedNode();
@@ -57,12 +57,12 @@ private:
      */
     glm::vec3 computeSurfacePosition(double latitude, double longitude) const;
 
-    properties::StringProperty _sceneGraphNode;
-    properties::DoubleProperty _latitude;
-    properties::DoubleProperty _longitude;
-    properties::DoubleProperty _angle;
-    properties::BoolProperty _useHeightmap;
-    properties::BoolProperty _useCamera;
+    StringProperty _sceneGraphNode;
+    DoubleProperty _latitude;
+    DoubleProperty _longitude;
+    DoubleProperty _angle;
+    BoolProperty _useHeightmap;
+    BoolProperty _useCamera;
 
     SceneGraphNode* _attachedNode = nullptr;
 

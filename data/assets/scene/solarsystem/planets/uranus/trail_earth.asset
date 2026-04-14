@@ -1,5 +1,6 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local coreKernels = asset.require("spice/core")
+local uranusKernels = asset.require("./kernels")
 
 
 
@@ -11,7 +12,7 @@ local UranusTrailEarth = {
     Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = coreKernels.ID.Uranus,
+      Target = uranusKernels.ID.Uranus,
       Observer = coreKernels.ID.Earth
     },
     Color = { 0.6, 0.95, 1.0 },

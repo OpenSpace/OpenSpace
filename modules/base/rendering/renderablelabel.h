@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,25 +34,11 @@
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <memory>
 
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
-
-namespace ghoul::filesystem { class File; }
 namespace ghoul::fontrendering { class Font; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
 
 namespace openspace {
-
-struct RenderData;
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
-
-struct LinePoint;
 
 class RenderableLabel : public Renderable {
 public:
@@ -60,27 +46,24 @@ public:
 
     void initialize() override;
     void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     void setLabelText(const std::string & newText);
 
 protected:
-    properties::OptionProperty _blendMode;
+    OptionProperty _blendMode;
 
-    properties::StringProperty _text;
+    StringProperty _text;
 
     float unit(int unit) const;
 
     std::string_view toString(int unit) const;
 
-    // Data may require some type of transformation prior the spice transformation being
-    // applied
+    /// Data may require some type of transformation prior the spice transformation being
+    /// applied
     glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 
 private:
@@ -89,17 +72,17 @@ private:
 
     float computeFadeFactor(float distanceNodeToCamera) const;
 
-    properties::Vec3Property _color;
-    properties::FloatProperty _fontSize;
-    properties::FloatProperty _size;
-    properties::IVec2Property _minMaxSize;
+    Vec3Property _color;
+    FloatProperty _fontSize;
+    FloatProperty _size;
+    IVec2Property _minMaxSize;
 
-    properties::BoolProperty _enableFadingEffect;
-    properties::Vec2Property _fadeWidths;
-    properties::Vec2Property _fadeDistances;
-    properties::OptionProperty _fadeUnitOption;
+    BoolProperty _enableFadingEffect;
+    Vec2Property _fadeWidths;
+    Vec2Property _fadeDistances;
+    OptionProperty _fadeUnitOption;
 
-    properties::OptionProperty _orientationOption;
+    OptionProperty _orientationOption;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 

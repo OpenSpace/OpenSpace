@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,14 +35,8 @@ namespace openspace {
  * A double buffered implementation of the Syncable interface. Users are encouraged to
  * used this class as a default way to synchronize different C++ data types using the
  * SyncEngine.
- *
- * This class aims to handle the synchronization parts and yet act like a regular
- * instance of T. Implicit casts are supported, however, when accessing member functions
- * or variables, user may have to do explicit casts.
- *
- * `((T&) t).method();`
  */
-template<class T>
+template <class T>
 class SyncData : public Syncable {
 public:
     SyncData() = default;
@@ -75,9 +69,9 @@ public:
     const T& data() const;
 
 protected:
-    virtual void encode(SyncBuffer* syncBuffer) override;
-    virtual void decode(SyncBuffer* syncBuffer) override;
-    virtual void postSync(bool isMaster) override;
+    void encode(SyncBuffer* syncBuffer) override;
+    void decode(SyncBuffer* syncBuffer) override;
+    void postSync(bool isMaster) override;
 
     T _data;
     T _doubleBufferedData;

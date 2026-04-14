@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,19 +25,22 @@
 #include <modules/base/rotation/luarotation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/dictionary.h>
 #include <chrono>
+#include <filesystem>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ScriptInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ScriptInfo = {
         "Script",
         "Script",
         "This value is the path to the Lua script that will be executed to compute the "
@@ -48,7 +51,7 @@ namespace {
         "milliseconds past the J2000 epoch as the third argument. It computes the "
         "rotation value factors returned as a table containing the 9 values that make up "
         "the resulting rotation matrix.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `Rotation` type generates the rotation for the attached scene graph node by
@@ -60,13 +63,13 @@ namespace {
         // [[codegen::verbatim(ScriptInfo.description)]]
         std::filesystem::path script;
     };
-#include "luarotation_codegen.cpp"
 } // namespace
+#include "luarotation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation LuaRotation::Documentation() {
-    return codegen::doc<Parameters>("base_transform_rotation_lua");
+Documentation LuaRotation::Documentation() {
+    return codegen::doc<Parameters>("base_rotation_lua");
 }
 
 LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary)

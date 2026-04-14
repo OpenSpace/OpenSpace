@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,11 +30,11 @@
 #include <ghoul/glm.h>
 #include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 class UVec4Property : public NumericalProperty<glm::uvec4> {
 public:
-    UVec4Property(Property::PropertyInfo info, glm::uvec4 value = glm::uvec4(0),
+    explicit UVec4Property(PropertyInfo info, glm::uvec4 value = glm::uvec4(0),
         glm::uvec4 minValue = glm::uvec4(std::numeric_limits<unsigned int>::lowest()),
         glm::uvec4 maxValue = glm::uvec4(std::numeric_limits<unsigned int>::max()),
         glm::uvec4 stepValue = glm::uvec4(1));
@@ -51,6 +51,6 @@ private:
     glm::uvec4 toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___UVEC4PROPERTY___H__

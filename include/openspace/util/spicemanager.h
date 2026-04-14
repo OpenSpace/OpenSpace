@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,6 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/util/memorymanager.h>
-#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/boolean.h>
@@ -58,7 +57,7 @@
 
 namespace openspace {
 
-namespace scripting { struct LuaLibrary; }
+struct LuaLibrary;
 
 void throwSpiceError(const std::string& errorMessage);
 
@@ -69,7 +68,7 @@ public:
     using TransformMatrix = std::array<double, 36>;
     using KernelHandle = unsigned int;
 
-    struct SpiceException : public ghoul::RuntimeError {
+    struct SpiceException final : public ghoul::RuntimeError {
         explicit SpiceException(std::string msg);
     };
 
@@ -169,7 +168,7 @@ public:
      * \throw std::out_of_range if \p method is not a valid string
      * \pre \p method must not be empty
      */
-    static FieldOfViewMethod fieldOfViewMethodFromString(const std::string& method);
+    static FieldOfViewMethod fieldOfViewMethodFromString(std::string_view method);
 
     /**
      * The possible values for terminator type method of the terminatorEllipse method.
@@ -189,7 +188,7 @@ public:
      * \throw std::out_of_range if \p type is not a valid string
      * \pre \p type must not be empty
      */
-    static TerminatorType terminatorTypeFromString(const std::string& type);
+    static TerminatorType terminatorTypeFromString(std::string_view type);
 
     static void initialize();
     static void deinitialize();
@@ -209,11 +208,11 @@ public:
      *
      * \throw SpiceException If the loading of the kernel \p filePath failed if, for
      *        example, \p filePath is not a valid SPICE kernel
-     * \pre \p filePath must not be empty.
-     * \pre \p filePath must be an absolute or relative path pointing to an existing file.
+     * \pre \p filePath must not be empty
+     * \pre \p filePath must be an absolute or relative path pointing to an existing file
      * \post The kernel is loaded or has its reference counter incremented and the handle
      *       to the kernel is returned. The returned value is never equal to
-     *       `KernelHandle(0)`.
+     *       `KernelHandle(0)`
      *
      * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/furnsh_c.html
      */
@@ -227,9 +226,9 @@ public:
      * \param kernelId The unique identifier that was returned from the call to
      *        #loadKernel which loaded the kernel
      *
-     * \pre \p kernelId must be a valid handle.
-     * \pre \p kernelId cannot be equal to `KernelHandle(0)`.
-     * \post The kernel identified by \p kernelId is unloaded.
+     * \pre \p kernelId must be a valid handle
+     * \pre \p kernelId cannot be equal to `KernelHandle(0)`
+     * \post The kernel identified by \p kernelId is unloaded
      *
      * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
      */
@@ -251,9 +250,9 @@ public:
      * \param filePath The path of the kernel that should be unloaded
      *
      * \throw SpiceException If the \p filePath has not been previously used to
-     *        successfully load a kernel.
-     * \pre \p filePath must not be empty.
-     * \post The kernel identified by \p filePath is unloaded.
+     *        successfully load a kernel
+     * \pre \p filePath must not be empty
+     * \post The kernel identified by \p filePath is unloaded
      *
      * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
      */
@@ -282,7 +281,7 @@ public:
      * \return `list` of SPK kernels for \p target, `empty` list if none loaded
      *
      * \throw SpiceException If \p target does not name a valid SPICE object
-     * \pre \p target must not be empty.
+     * \pre \p target must not be empty
      */
     std::vector<std::pair<double, double>> spkCoverage(const std::string& target) const;
 
@@ -310,7 +309,7 @@ public:
      * \return `list` of CK kernels for \p target, `empty` list if none loaded
      *
      * \throw SpiceException If \p target does not name a valid SPICE object
-     * \pre \p target must not be empty.
+     * \pre \p target must not be empty
      */
     std::vector<std::pair<double, double>> ckCoverage(const std::string& target) const;
 
@@ -321,35 +320,6 @@ public:
      * \return `list` of Spice frames with ID(int) and Name(string)
      */
     std::vector<std::pair<int, std::string>> spiceBodies(bool builtInFrames) const;
-
-    /**
-     * Determines whether values exist for some \p item for any body, identified by its
-     * \p naifId, in the kernel pool by passing it to the `bodfnd_c` function.
-     *
-     * \param naifId NAIF ID code of body
-     * \param item The item to find
-     * \return `true` if the function succeeded, `false` otherwise
-     *
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
-     */
-    bool hasValue(int naifId, const std::string& item) const;
-
-    /**
-     * Determines whether values exist for some \p item for any \p body in the kernel pool
-     * by passing it to the `bodfnd_c` function.
-     *
-     * \param body The name of the body that should be sampled
-     * \param item The item to find in the \p body
-     * \return `true` if the function succeeded, `false` otherwise
-     *
-     * \throw SpiceException If \p body does not name a valid SPICE object
-     * \pre \p body must not be empty
-     * \pre \p item must not be empty
-     *
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
-     */
-    bool hasValue(const std::string& body, const std::string& item) const;
 
     /**
      * Returns the NAIF ID for a specific \p body using the `bods2c_c` function.
@@ -373,7 +343,7 @@ public:
      * \param body The body for which the presence of a valid ID should be checked
      * \return `true` if the \p body has a NAIF ID, `false` otherwise
      *
-     * \pre \p body must not be empty.
+     * \pre \p body must not be empty
      */
     bool hasNaifId(const std::string& body) const;
 
@@ -400,118 +370,6 @@ public:
      * \pre \p frame must not be empty
      */
     bool hasFrameId(const std::string& frame) const;
-
-    /**
-     * Retrieves a single \p value for a certain \p body. This method succeeds iff \p body
-     * is the name of a valid body, \p value is a value associated with the body, and the
-     * value consists of only a single `double` value. If all conditions are true, the
-     * value is retrieved using the method `bodvrd_c` and stored in \p v.
-     *
-     * \param body The name of the body whose value should be retrieved or the NAIF ID of
-     *        this body
-     * \param value The value that should be retrieved, this value is case-sensitive
-     * \param v The destination for the retrieved value
-     *
-     * \throw SpiceException If the \p body does not name a valid body, \p value is not a
-     *        valid item for the \p body or the retrieved value is not a single value
-     * \pre \p body must not be empty
-     * \pre \p value must not be empty
-     *
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
-     */
-    void getValue(const std::string& body, const std::string& value, double& v) const;
-
-    /**
-     * Retrieves a \p value with two components for a certain \p body. This method
-     * succeeds iff \p body is the name of a valid body, \p value is a value associated
-     * with the body, and the value consists of two `double` values. If all conditions
-     * are true, the value is retrieved using the method `bodvrd_c` and stored in \p v.
-     *
-     * \param body The name of the body whose value should be retrieved or the NAIF ID of
-     *        this body
-     * \param value The value that should be retrieved, this value is case-sensitive
-     * \param v The destination for the retrieved value
-     *
-     * \throw SpiceException If the \p body does not name a valid body, \p value is not a
-     *        valid item for the \p body or the retrieved value is not a two-component
-     *        value
-     * \pre \p body must not be empty
-     * \pre \p value must not be empty
-     *
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
-     */
-    void getValue(const std::string& body, const std::string& value, glm::dvec2& v) const;
-
-    /**
-     * Retrieves a \p value with three components for a certain \p body. This method
-     * succeeds iff \p body is the name of a valid body, \p value is a value associated
-     * with the body, and the value consists of three `double` values. If all conditions
-     * are true, the value is retrieved using the method `bodvrd_c` and stored in \p v.
-     *
-     * \param body The name of the body whose value should be retrieved or the NAIF ID of
-     *        this body
-     * \param value The value that should be retrieved, this value is case-sensitive
-     * \param v The destination for the retrieved value
-     *
-     * \throw SpiceException If the \p body does not name a valid body, \p value is not a
-     *        valid item for the \p body or the retrieved value is not a three-component
-     *        value
-     * \pre \p body must not be empty
-     * \pre \p value must not be empty
-     *
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
-     */
-    void getValue(const std::string& body, const std::string& value, glm::dvec3& v) const;
-
-    /**
-     * Retrieves a \p value with four components for a certain \p body. This method
-     * succeeds iff \p body is the name of a valid body, \p value is a value associated
-     * with the body, and the value consists of four `double` values. If all conditions
-     * are true, the value is retrieved using the method `bodvrd_c` and stored in \p v.
-     *
-     * \param body The name of the body whose value should be retrieved or the NAIF ID of
-     *        this body
-     * \param value The value that should be retrieved, this value is case-sensitive
-     * \param v The destination for the retrieved value
-     *
-     * \throw SpiceException If the \p body does not name a valid body, \p value is not a
-     *        valid item for the \p body or the retrieved value is not a four-component
-     *        value
-     * \pre \p body must not be empty.
-     * \pre \p value must not be empty.
-     *
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
-     */
-    void getValue(const std::string& body, const std::string& value, glm::dvec4& v) const;
-
-    /**
-     * Retrieves a \p value with an arbitrary number of components for a certain \p body.
-     * This method succeeds iff \p body is the name of a valid body, \p value is a value
-     * associated with the body, and the value consists of the correct number of `double`
-     * values. If all conditions are true, the value is retrieved using the method
-     * `bodvrd_c` and stored in \p v.
-     *
-     * \param body The name of the body whose value should be retrieved or the NAIF ID of
-     *        this body
-     * \param value The value that should be retrieved, this value is case-sensitive
-     * \param v The destination for the retrieved value. The `vector` must be
-     *          preallocated to the correct size of components that should be retrieved
-     *
-     * \throw SpiceException If the \p body does not name a valid body, \p value is not a
-     *        valid item for the \p body or the retrieved value does not contain the
-     *        correct number of components
-     * \pre \p body must not be empty.
-     * \pre \p value must not be empty.
-     *
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
-     */
-    void getValue(const std::string& body, const std::string& value,
-        std::vector<double>& v) const;
 
     /**
      * Converts the value \p craftTicks of the internal clock for the spacecraft
@@ -613,6 +471,9 @@ public:
 
     std::string dateFromEphemerisTime(double ephemerisTime, const char* format);
 
+    void dateFromEphemerisTime(double ephemerisTime, char* outBuf, int bufferSize,
+        const std::string& format = "YYYY MON DDTHR:MN:SC.### ::RND") const;
+
     /**
      * Returns the \p position of a \p target body relative to an \p observer in a
      * specific \p referenceFrame, optionally corrected for \p lightTime (planetary
@@ -633,7 +494,7 @@ public:
      * \throw SpiceException If the \p target or \p observer do not name a valid NAIF
      *        object, \p referenceFrame does not name a valid reference frame or if there
      *        is not sufficient data available to compute the position or neither the
-     *        target nor the observer have coverage.
+     *        target nor the observer have coverage
      * \pre \p target must not be empty
      * \pre \p observer must not be empty
      * \pre \p referenceFrame must not be empty
@@ -686,8 +547,8 @@ public:
      * \param ephemerisTime Time at which to get the transformation matrix
      * \return The transformation matrix
      *
-     * \throw SpiceException If the transformation matrix between \p from and \p to
-     *        cannot be determined
+     * \throw SpiceException If the transformation matrix between \p from and \p to cannot
+     *        be determined
      * \pre \p from must not be empty
      * \pre \p to must not be empty
      */
@@ -735,7 +596,7 @@ public:
      * \throw SpiceException If the \p target or \p observer do not name the same NAIF
      *        object, the \p target or \p observer name the same NAIF object or are in the
      *        same location, the \p referenceFrame or \p fovFrame are not recognized,
-     *        insufficient kernel information has been loaded.
+     *        insufficient kernel information has been loaded
      * \pre \p target must not be empty
      * \pre \p observer must not be empty
      * \pre \p The \p target and \p observer must be different strings
@@ -842,8 +703,8 @@ public:
      * \return The TransformMatrix containing the transformation matrix that defines the
      *         transformation from the \p sourceFrame to the \p destinationFrame
      *
-     * \throw SpiceException If the \p sourceFrame or the \p destinationFrame is
-     *        not a valid frame
+     * \throw SpiceException If the \p sourceFrame or the \p destinationFrame is not a
+     *        valid frame
      * \pre \p sourceFrame must not be empty
      * \pre \p destinatoinFrame must not be empty
      *
@@ -895,7 +756,9 @@ public:
         const std::string& destinationFrame, double ephemerisTimeFrom,
         double ephemerisTimeTo) const;
 
-    /// The structure returned by the #fieldOfView methods
+    /**
+     * The structure returned by the #fieldOfView methods.
+     */
     struct FieldOfViewResult {
         /**
          * The rough shape of the returned field of view.
@@ -960,8 +823,8 @@ public:
      * The structure retuned by the #terminatorEllipse method.
      */
     struct TerminatorEllipseResult {
-        /// The vector from the target body at #targetEphemerisTime to the observer at
-        /// the original time
+        /// The vector from the target body at #targetEphemerisTime to the observer at the
+        /// original time
         glm::dvec3 observerPosition = glm::dvec3(0.0);
 
         /// The full list of terminator points specified in the original reference frame
@@ -1025,18 +888,18 @@ public:
     /**
      * Returns the current SpiceManager's exception strategy. See #setExceptionHandling.
      *
-     * \return The current exception handling strategy.
+     * \return The current exception handling strategy
      */
     UseException exceptionHandling() const;
 
     /**
      * Returns the path to the most current leap second kernel.
      *
-     * \return The path to the most current leap second kernel.
+     * \return The path to the most current leap second kernel
      */
     static std::filesystem::path leapSecondKernel();
 
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     /**
@@ -1107,11 +970,11 @@ private:
      * \param ephemerisTime The time for which an estimated position is desirable
      * \param lightTime If the \p aberrationCorrection is different from
      *        AbberationCorrection::Type::None, this variable will contain the light time
-     *        between the observer and the target.
+     *        between the observer and the target
      * \return The position of the \p target relative to the \p origin
      *
-     * \throw SpiceException If the \p target or \p origin are not valid NAIF
-     *        objects or if there is no position for the \p target at any time
+     * \throw SpiceException If the \p target or \p origin are not valid NAIF objects or
+     *        if there is no position for the \p target at any time
      * \pre \p target must not be empty
      * \pre \p observer must not be empty
      * \pre \p referenceFrame must not be empty
@@ -1137,7 +1000,7 @@ private:
      *
      * \throw SpiceException If there is no coverage available for the specified
      *        \p sourceFrame and \p destinationFrame or the reference frames do not name a
-     *        valid NAIF frame.
+     *        valid NAIF frame
      * \pre \p fromFrame must not be empty
      * \pre \p toFrame must not be empty
      */
@@ -1150,7 +1013,7 @@ private:
     void loadLeapSecondsSpiceKernel();
 
     /**
-     * Loads pre defined geophysical constants kernel (geophysical.ker)
+     * Loads pre defined geophysical constants kernel (geophysical.ker).
      */
     void loadGeophysicalConstantsKernel();
 
@@ -1158,7 +1021,7 @@ private:
     /// A list of all loaded kernels
     std::vector<KernelInformation> _loadedKernels;
 
-    // Map: id, vector of pairs. Pair: Start time, end time;
+    // Map: id, vector of pairs. Pair: Start time, end time
     std::map<int, std::vector<std::pair<double, double>>> _ckIntervals;
     std::map<int, std::vector<std::pair<double, double>>> _spkIntervals;
     std::map<int, std::set<double>> _ckCoverageTimes;

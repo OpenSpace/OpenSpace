@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,15 +31,12 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
-
-namespace ghoul::opengl { class Texture; }
+#include <utility>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 /**
- * A specialization of the RenderablePointCloud that supports interpolation beetween
+ * A specialization of the RenderablePointCloud that supports interpolation between
  * different positions for the points.
  */
 class RenderableInterpolatedPoints : public RenderablePointCloud {
@@ -47,7 +44,7 @@ public:
     explicit RenderableInterpolatedPoints(const ghoul::Dictionary& dictionary);
     ~RenderableInterpolatedPoints() override = default;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     void initialize() override;
@@ -94,20 +91,20 @@ private:
     float computeCurrentUpperValue() const;
     std::pair<size_t, size_t> interpolationIndices(unsigned int index) const;
 
-    struct Interpolation : public properties::PropertyOwner {
+    struct Interpolation : public PropertyOwner {
         Interpolation();
-        properties::FloatProperty value;
-        properties::UIntProperty nSteps;
+        FloatProperty value;
+        UIntProperty nSteps;
 
-        properties::TriggerProperty goToNextStep;
-        properties::TriggerProperty goToPrevStep;
-        properties::TriggerProperty interpolateToNextStep;
-        properties::TriggerProperty interpolateToPrevStep;
-        properties::TriggerProperty interpolateToEnd;
-        properties::TriggerProperty interpolateToStart;
-        properties::FloatProperty speed;
+        TriggerProperty goToNextStep;
+        TriggerProperty goToPrevStep;
+        TriggerProperty interpolateToNextStep;
+        TriggerProperty interpolateToPrevStep;
+        TriggerProperty interpolateToEnd;
+        TriggerProperty interpolateToStart;
+        FloatProperty speed;
 
-        properties::BoolProperty useSpline;
+        BoolProperty useSpline;
     };
     Interpolation _interpolation;
 

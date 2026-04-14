@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,23 +24,29 @@
 
 #include <openspace/mission/missionmanager.h>
 
-#include <openspace/events/eventengine.h>
 #include <openspace/engine/globals.h>
-#include <openspace/scripting/scriptengine.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
+#include <openspace/scripting/lualibrary.h>
 #include <ghoul/misc/assert.h>
-#include <filesystem>
+#include <ghoul/misc/exception.h>
+#include <utility>
 
 #include "missionmanager_lua.inl"
 
+namespace {
+    struct MissionManagerException final : public ghoul::RuntimeError {
+        explicit MissionManagerException(std::string msg)
+            : ghoul::RuntimeError(std::move(msg), "MissionManager")
+        {}
+    };
+} // namespace
+
 namespace openspace {
 
-MissionManager::MissionManagerException::MissionManagerException(std::string error)
-    : ghoul::RuntimeError(std::move(error), "MissionManager")
+MissionManager::MissionManager()
+    : _currentMission(_missionMap.end())
 {}
-
-MissionManager::MissionManager() : _currentMission(_missionMap.end()) {}
 
 void MissionManager::setCurrentMission(const std::string& identifier) {
     ghoul_assert(!identifier.empty(), "missionName must not be empty");
@@ -49,15 +55,13 @@ void MissionManager::setCurrentMission(const std::string& identifier) {
     if (it == _missionMap.end()) {
         throw MissionManagerException("Mission has not been loaded");
     }
-    else {
-        _currentMission = it;
-    }
+
+    _currentMission = it;
 }
 
 bool MissionManager::hasCurrentMission() const {
     return _currentMission != _missionMap.end();
 }
-
 
 std::string MissionManager::loadMission(Mission mission) {
     // Changing the values might invalidate the _currentMission iterator
@@ -72,7 +76,7 @@ std::string MissionManager::loadMission(Mission mission) {
         setCurrentMission(currentMission);
     }
 
-    global::eventEngine->publishEvent<events::EventMissionAdded>(identifier);
+    global::eventEngine->publishEvent<EventMissionAdded>(identifier);
     return identifier;
 }
 
@@ -85,7 +89,7 @@ void MissionManager::unloadMission(const std::string& identifier) {
         _currentMission = _missionMap.end();
     }
 
-    global::eventEngine->publishEvent<events::EventMissionRemoved>(identifier);
+    global::eventEngine->publishEvent<EventMissionRemoved>(identifier);
     _missionMap.erase(it);
 }
 
@@ -97,6 +101,7 @@ const Mission& MissionManager::currentMission() {
     if (_currentMission == _missionMap.end()) {
         throw MissionManagerException("No current mission has been specified");
     }
+
     return _currentMission->second;
 }
 
@@ -104,7 +109,7 @@ const std::map<std::string, Mission>& MissionManager::missionMap() {
     return _missionMap;
 }
 
-scripting::LuaLibrary MissionManager::luaLibrary() {
+LuaLibrary MissionManager::luaLibrary() {
     return {
         "",
         {
@@ -116,5 +121,4 @@ scripting::LuaLibrary MissionManager::luaLibrary() {
     };
 }
 
-// Singleton
-}  // namespace openspace
+} // namespace openspace

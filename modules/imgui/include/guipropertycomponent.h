@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,19 +27,14 @@
 
 #include <modules/imgui/include/guicomponent.h>
 
-#include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/misc/boolean.h>
 #include <functional>
-#include <string>
-#include <vector>
 
-namespace openspace::properties {
-    class Property;
-    class PropertyOwner;
-} // namespace openspace::properties
+namespace openspace {
 
-namespace openspace::gui {
+class Property;
+class PropertyOwner;
 
 class GuiPropertyComponent : public GuiComponent {
 public:
@@ -48,22 +43,22 @@ public:
     GuiPropertyComponent(std::string identifier, std::string guiName,
         UseTreeLayout useTree = UseTreeLayout::No);
 
-    void setPropertyOwners(std::vector<properties::PropertyOwner*> propertyOwners);
+    void setPropertyOwners(std::vector<PropertyOwner*> propertyOwners);
     void setPropertyOwnerFunction(
-        std::function<std::vector<properties::PropertyOwner*>()> func);
+        std::function<std::vector<PropertyOwner*>()> func);
 
     void render() override;
 
 protected:
-    void renderPropertyOwner(properties::PropertyOwner* owner);
-    void renderProperty(properties::Property* prop, properties::PropertyOwner* owner);
+    void renderPropertyOwner(PropertyOwner* owner);
+    void renderProperty(Property* prop, PropertyOwner* owner);
 
-    std::vector<properties::PropertyOwner*> _propertyOwners;
-    std::function<std::vector<properties::PropertyOwner*>()> _propertyOwnerFunction;
+    std::vector<PropertyOwner*> _propertyOwners;
+    std::function<std::vector<PropertyOwner*>()> _propertyOwnerFunction;
 
-    properties::BoolProperty _useTreeLayout;
+    BoolProperty _useTreeLayout;
 };
 
-} // namespace openspace::gui
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_IMGUI___GUIPROPERTYCOMPONENT___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,26 +24,21 @@
 
 #include <modules/base/rendering/renderableswitch.h>
 
-#include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/crc32.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/texture.h>
-#include <fstream>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo DistanceThresholdInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo DistanceThresholdInfo = {
         "DistanceThreshold",
-        "Distance Threshold",
+        "Distance threshold",
         "Threshold in meters for when the switch happens between the two renderables.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // A RenderableSwitch can be used to render one of two renderables depending on the
@@ -52,31 +47,29 @@ namespace {
     // The two renderables are specified separately: `RenderableNear` and `RenderableFar`.
     // These can be any renderable types.
     //
-    // The `DistanceThreshold` property determines which renderable will be shown.
-    // If the camera is closer to the object than the threshold, `RenderableNear` is used,
+    // The `DistanceThreshold` property determines which renderable will be shown. If the
+    // camera is closer to the object than the threshold, `RenderableNear` is used,
     // otherwise, `RenderableFar` is rendered.
     struct [[codegen::Dictionary(RenderableSwitch)]] Parameters {
         // The renderable to show when the camera is closer to the object than the
         // threshold.
         std::optional<ghoul::Dictionary>
-            renderableNear [[codegen::reference("renderable")]];
+            renderableNear [[codegen::reference("core_renderable")]];
 
         // The renderable to show when the camera is further away than the threshold.
         std::optional<ghoul::Dictionary>
-            renderableFar [[codegen::reference("renderable")]];
+            renderableFar [[codegen::reference("core_renderable")]];
 
         // [[codegen::verbatim(DistanceThresholdInfo.description)]]
         std::optional<double> distanceThreshold [[codegen::greater(0.f)]];
     };
-#include "renderableswitch_codegen.cpp"
 } // namespace
+#include "renderableswitch_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableSwitch::Documentation() {
-    return codegen::doc<Parameters>(
-        "base_renderable_switch"
-    );
+Documentation RenderableSwitch::Documentation() {
+    return codegen::doc<Parameters>("base_renderable_switch");
 }
 
 RenderableSwitch::RenderableSwitch(const ghoul::Dictionary& dictionary)
@@ -88,7 +81,7 @@ RenderableSwitch::RenderableSwitch(const ghoul::Dictionary& dictionary)
     if (!p.renderableNear.has_value() && !p.renderableFar.has_value()) {
         throw ghoul::RuntimeError(
             "Either a RenderableNear or a RenderableFar (or both) has to be provided, "
-            "but omitting both is invalid."
+            "but omitting both is invalid"
         );
     }
 
@@ -158,12 +151,6 @@ void RenderableSwitch::deinitializeGL() {
     }
 }
 
-bool RenderableSwitch::isReady() const {
-    const bool near = _renderableNear ? _renderableNear->isReady() : true;
-    const bool far = _renderableFar ? _renderableFar->isReady() : true;
-    return near && far;
-}
-
 void RenderableSwitch::update(const UpdateData& data) {
     ghoul_assert(_renderableNear || _renderableFar, "No renderable");
 
@@ -177,7 +164,7 @@ void RenderableSwitch::update(const UpdateData& data) {
 }
 
 void RenderableSwitch::render(const RenderData& data, RendererTasks& tasks) {
-    glm::dvec3 cameraPosition = data.camera.positionVec3();
+    glm::dvec3 cameraPosition = data.camera.position();
     glm::dvec3 modelPosition = data.modelTransform.translation;
 
     if (glm::distance(cameraPosition, modelPosition) < _distanceThreshold) {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,8 +35,6 @@ namespace openspace {
 
 class SceneGraphNode;
 
-namespace documentation { struct Documentation; }
-
 class DashboardItemAngle : public DashboardTextItem {
 public:
     explicit DashboardItemAngle(const ghoul::Dictionary& dictionary);
@@ -44,13 +42,13 @@ public:
 
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     struct Component {
-        properties::OptionProperty type;
-        properties::StringProperty nodeIdentifier;
-        SceneGraphNode* node;
+        OptionProperty type;
+        StringProperty nodeIdentifier;
+        SceneGraphNode* node = nullptr;
     };
 
     static std::pair<glm::dvec3, std::string> positionAndLabel(Component& comp);

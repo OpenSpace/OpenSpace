@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,21 +35,20 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/glm.h>
 #include <optional>
-#include <string_view>
 
 namespace geos::io { class GeoJSONFeature; }
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 class RenderableGlobe;
 
-struct GeoJsonProperties : public properties::PropertyOwner {
+struct GeoJsonProperties : public PropertyOwner {
     GeoJsonProperties();
 
     void createFromDictionary(const ghoul::Dictionary& dictionary,
         const RenderableGlobe& globe);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     /**
      * These are based on the KML specification.
@@ -69,34 +68,36 @@ struct GeoJsonProperties : public properties::PropertyOwner {
         Center
     };
 
-    struct Tessellation : public properties::PropertyOwner {
+    struct Tessellation : public PropertyOwner {
         Tessellation();
-        properties::BoolProperty enabled;
-        properties::BoolProperty useLevel;
-        properties::IntProperty level;
-        properties::FloatProperty distance;
+        BoolProperty enabled;
+        BoolProperty useLevel;
+        IntProperty level;
+        FloatProperty distance;
     } tessellation;
 
     AltitudeMode altitudeMode() const;
     PointTextureAnchor pointTextureAnchor() const;
 
-    properties::FloatProperty opacity;
-    properties::Vec3Property color;
-    properties::FloatProperty fillOpacity;
-    properties::Vec3Property fillColor;
-    properties::FloatProperty lineWidth;
+    FloatProperty opacity;
+    Vec3Property color;
+    FloatProperty fillOpacity;
+    Vec3Property fillColor;
+    FloatProperty lineWidth;
 
-    properties::FloatProperty pointSize;
-    properties::StringProperty pointTexture;
-    properties::OptionProperty pointAnchorOption;
+    FloatProperty pointSize;
+    StringProperty pointTexture;
+    OptionProperty pointAnchorOption;
 
-    properties::BoolProperty extrude;
-    properties::BoolProperty performShading;
-    properties::OptionProperty altitudeModeOption;
+    BoolProperty extrude;
+    BoolProperty performShading;
+    OptionProperty altitudeModeOption;
 };
 
-// Optional versions of all the properties above, that can be read from a geoJson file
-// and used to override any default values
+/**
+ * Optional versions of all the properties above, that can be read from a geoJson file and
+ * used to override any default values.
+ */
 struct GeoJsonOverrideProperties {
     std::optional<std::string> name;
 
@@ -107,7 +108,7 @@ struct GeoJsonOverrideProperties {
     std::optional<float> lineWidth;
 
     std::optional<float> pointSize;
-    std::optional<std::string> pointTexture;
+    std::optional<std::filesystem::path> pointTexture;
     std::optional<GeoJsonProperties::PointTextureAnchor> pointTextureAnchor;
 
     std::optional<bool> extrude;
@@ -123,7 +124,7 @@ struct GeoJsonOverrideProperties {
 GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& feature);
 
 struct PropertySet {
-    /// This value set should be a reference to the main component's propertyowner
+    /// This value set should be a reference to the main component's PropertyOwner
     GeoJsonProperties& defaultValues;
     /// This is a unique set of properties to use for overriding the default values
     GeoJsonOverrideProperties overrideValues;
@@ -135,7 +136,7 @@ struct PropertySet {
     float lineWidth() const;
 
     float pointSize() const;
-    std::string pointTexture() const;
+    std::filesystem::path pointTexture() const;
     GeoJsonProperties::PointTextureAnchor pointTextureAnchor() const;
 
     bool extrude() const;
@@ -150,6 +151,6 @@ struct PropertySet {
     bool hasOverrideTexture() const;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GEOJSONPROPERTIES___H__

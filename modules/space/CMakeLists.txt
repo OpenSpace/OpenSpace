@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2025                                                                #
+# Copyright (c) 2014-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -74,19 +74,21 @@ set(SHADER_FILES
   shaders/constellationbounds_vs.glsl
   shaders/constellationlines_fs.glsl
   shaders/constellationlines_vs.glsl
+  shaders/eclipsecone_fs.glsl
+  shaders/eclipsecone_vs.glsl
+  shaders/fluxnodes_fs.glsl
+  shaders/fluxnodes_vs.glsl
+  shaders/habitablezone_vs.glsl
+  shaders/habitablezone_fs.glsl
   shaders/keplerpoints_fs.glsl
   shaders/keplerpoints_gs.glsl
   shaders/keplerpoints_vs.glsl
   shaders/keplertrails_fs.glsl
   shaders/keplertrails_vs.glsl
-  shaders/fluxnodes_fs.glsl
-  shaders/fluxnodes_vs.glsl
-  shaders/habitablezone_vs.glsl
-  shaders/habitablezone_fs.glsl
   shaders/rings_vs.glsl
   shaders/rings_fs.glsl
   shaders/star_fs.glsl
-  shaders/star_ge.glsl
+  shaders/star_gs.glsl
   shaders/star_vs.glsl
   shaders/travelspeed_fs.glsl
   shaders/travelspeed_vs.glsl

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,9 @@
 
 #include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/vector/vec2property.h>
+#include <set>
 
 namespace openspace {
 
@@ -45,15 +47,15 @@ protected:
     void registerProperties();
     void createDataProcessor();
 
-    properties::BoolProperty _useLog;
-    properties::BoolProperty _useHistogram;
-    properties::BoolProperty _autoFilter;
-    properties::Vec2Property _normValues;
-    properties::Vec2Property _backgroundValues;
-    properties::StringProperty _transferFunctionsFile;
-    properties::SelectionProperty _dataOptions;
+    BoolProperty _useLog;
+    BoolProperty _useHistogram;
+    BoolProperty _autoFilter;
+    Vec2Property _normValues;
+    Vec2Property _backgroundValues;
+    StringProperty _transferFunctionsFile;
+    SelectionProperty _dataOptions;
 };
 
-} //namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_ISWA___ISWADATAGROUP___H__

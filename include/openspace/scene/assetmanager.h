@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,17 +25,20 @@
 #ifndef __OPENSPACE_CORE___ASSETMANAGER___H__
 #define __OPENSPACE_CORE___ASSETMANAGER___H__
 
-#include <ghoul/lua/luastate.h>
 #include <filesystem>
-#include <optional>
-#include <unordered_map>
 #include <list>
+#include <memory>
+#include <optional>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+namespace ghoul::lua { class LuaState; }
 
 namespace openspace {
 
-namespace scripting { struct LuaLibrary; }
-
 class Asset;
+struct LuaLibrary;
 class ResourceSynchronization;
 
 /**
@@ -61,6 +64,7 @@ public:
      *        relative to the base directory (the path starting with . or ..), an absolute
      *        path (that path starting with *:/ or /) or relative to the global asset root
      *        (if the path starts any other way)
+     *
      * \pre \p path must not be the empty string
      */
     void add(const std::string& path);
@@ -73,6 +77,7 @@ public:
      *        relative to the base directory (the path starting with . or ..), an absolute
      *        path (that path starting with *:/ or /) or relative to the global asset root
      *        (if the path starts any other way)
+     *
      * \pre \p path must not be the empty string
      */
     void remove(const std::string& path);
@@ -86,6 +91,7 @@ public:
      *        relative to the base directory (the path starting with . or ..), an absolute
      *        path (that path starting with *:/ or /) or relative to the global asset root
      *        (if the path starts any other way)
+     *
      * \pre \p path must not be the empty string
      */
     void reload(const std::string& path);
@@ -96,7 +102,7 @@ public:
      */
     void update();
 
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
     /**
      * Returns all assets that have been loaded by the AssetManager. The order of the
@@ -135,7 +141,7 @@ public:
      * \param parent The parent of the loaded asset file or `nullptr` if the asset is a
      *        root asset
      *
-     * \pre \p asset must not be a nullptr
+     * \pre \p asset must not be a `nullptr`
      */
     bool loadAsset(Asset* asset, Asset* parent);
 
@@ -146,7 +152,7 @@ public:
      *
      * \param asset The asset that should get unloaded
      *
-     * \pre \p asset must not be a nullptr
+     * \pre \p asset must not be a `nullptr`
      */
     void unloadAsset(Asset* asset);
 
@@ -223,7 +229,9 @@ private:
     // ResourceSynchronizations
     //
 
-    /// Collection that stores the assets that have requested each ResourceSynchronization
+    /**
+     * Collection that stores the assets that have requested each ResourceSynchronization.
+     */
     struct SyncItem {
         std::unique_ptr<ResourceSynchronization> synchronization;
         std::vector<Asset*> assets;

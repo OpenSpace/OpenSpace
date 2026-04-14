@@ -201,8 +201,7 @@ function addExoplanetSystem(data)
         Identifier = "StarTexture",
         FilePath = openspace.absPath(starTexture),
         BlendMode = "Color",
-        Enabled = true,
-        CacheSettings = { Enabled = false }
+        Enabled = true
       }
     }
   else
@@ -211,8 +210,7 @@ function addExoplanetSystem(data)
         Identifier = "NoDataStarTexture",
         FilePath = openspace.absPath(starNoDataTexture),
         BlendMode = "Color",
-        Enabled = true,
-        CacheSettings = { Enabled = false }
+        Enabled = true
       }
     }
   end
@@ -506,8 +504,7 @@ function addExoplanetSystem(data)
           Identifier = "PlanetTexture",
           Name = "Planet Texture",
           FilePath = openspace.absPath(defaultPlanetTexture),
-          Enabled = true,
-          CacheSettings = { Enabled = false }
+          Enabled = true
         }
         table.insert(planetColorLayers, PlanetTextureLayer)
         ambientIntensity = 0.15

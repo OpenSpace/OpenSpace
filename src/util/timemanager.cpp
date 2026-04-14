@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,81 +27,83 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
-#include <openspace/network/parallelpeer.h>
+#include <openspace/scene/profile.h>
 #include <openspace/scripting/scriptscheduler.h>
-#include <openspace/util/keys.h>
-#include <openspace/util/timeline.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/invariants.h>
 #include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <deque>
+#include <iterator>
+#include <string>
+#include <string_view>
+#include <variant>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "TimeManager";
 
     // Properties for time interpolation
-    // These are used when setting the time from lua time interpolation functions,
-    // when called without arguments.
+    // These are used when setting the time from Lua time interpolation functions when
+    // called without arguments
 
-    constexpr openspace::properties::Property::PropertyInfo
-    DefaultTimeInterpolationDurationInfo = {
+    constexpr Property::PropertyInfo DefaultTimeInterpolationDurationInfo = {
         "DefaultTimeInterpolationDuration",
-        "Default Time Interpolation Duration",
+        "Default time interpolation duration",
         "The default duration taken to interpolate between times."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-    DefaultDeltaTimeInterpolationDurationInfo = {
+    constexpr Property::PropertyInfo DefaultDeltaTimeInterpolationDurationInfo = {
         "DefaultDeltaTimeInterpolationDuration",
-        "Default Delta Time Interpolation Duration",
+        "Default delta time interpolation duration",
         "The default duration taken to interpolate between delta times."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        DefaultPauseInterpolationDurationInfo = {
+    constexpr Property::PropertyInfo DefaultPauseInterpolationDurationInfo = {
         "DefaultPauseInterpolationDuration",
-        "Default Pause Interpolation Duration",
+        "Default pause interpolation duration",
         "The default duration taken to transition to the paused state, when "
         "interpolating."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        DefaultUnpauseInterpolationDurationInfo = {
+    constexpr Property::PropertyInfo DefaultUnpauseInterpolationDurationInfo = {
         "DefaultUnpauseInterpolationDuration",
-        "Default Unpause Interpolation Duration",
+        "Default unpause interpolation duration",
         "The default duration taken to transition to the unpaused state, when "
         "interpolating."
     };
 
     constexpr std::string_view DeltaTimeStepsGuiPath = "/Time/Simulation Speed/Steps";
-
     constexpr std::string_view DeltaTimeActionPrefix = "core.time.delta_time";
 
     bool isPlayingBackSessionRecording() {
-        using namespace openspace;
-
         return (global::openSpaceEngine->currentMode() ==
                 OpenSpaceEngine::Mode::SessionRecordingPlayback);
     }
 
     double currentApplicationTimeForInterpolation() {
-        using namespace openspace;
-
         if (global::sessionRecordingHandler->isSavingFramesDuringPlayback()) {
             return global::sessionRecordingHandler->currentApplicationInterpolationTime();
         }
         else {
             return global::windowDelegate->applicationTime();
+        }
     }
-}
-
 } // namespace
 
 namespace openspace {
 
 TimeManager::TimeManager()
-    : properties::PropertyOwner({ "TimeManager", "Time Manager" })
+    : PropertyOwner({ "TimeManager", "Time Manager" })
     , _defaultTimeInterpolationDuration(
         DefaultTimeInterpolationDurationInfo,
         2.f,
@@ -181,7 +183,7 @@ void TimeManager::preSynchronization(double dt) {
     removeKeyframesBefore(_latestConsumedTimestamp);
     progressTime(dt);
 
-    // Notify observers about time changes if any.
+    // Notify observers about time changes if any
     const double newTime = time().j2000Seconds();
 
     if (newTime != _lastTime) {
@@ -189,7 +191,7 @@ void TimeManager::preSynchronization(double dt) {
         using K = CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _timeChangeCallbacks) {
-            ZoneScopedN("tcc");
+            ZoneScopedN("time change callback");
             it.second();
         }
     }
@@ -201,7 +203,7 @@ void TimeManager::preSynchronization(double dt) {
         using K = CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _deltaTimeChangeCallbacks) {
-            ZoneScopedN("dtcc");
+            ZoneScopedN("delta time change callback");
             it.second();
         }
     }
@@ -217,7 +219,7 @@ void TimeManager::preSynchronization(double dt) {
         using K = CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _timelineChangeCallbacks) {
-            ZoneScopedN("tlcc");
+            ZoneScopedN("timeline change callback");
             it.second();
         }
     }
@@ -264,14 +266,19 @@ TimeManager::TimeKeyframeData TimeManager::interpolate(double applicationTime) {
                 (lastPastKeyframe->data.pause ? 0.0 : lastPastKeyframe->data.delta)
         );
         return TimeKeyframeData {
-            predictedTime,
-            lastPastKeyframe->data.delta,
-            false,
-            false
+            .time = predictedTime,
+            .delta = lastPastKeyframe->data.delta,
+            .pause = false,
+            .jump = false
         };
     }
-    // As the last option, fall back on the current time.
-    return TimeKeyframeData { _currentTime, _targetDeltaTime, _timePaused, false };
+    // As the last option, fall back on the current time
+    return TimeKeyframeData {
+        .time = _currentTime,
+        .delta = _targetDeltaTime,
+        .pause = _timePaused,
+        .jump = false
+    };
 }
 
 void TimeManager::progressTime(double dt) {
@@ -295,8 +302,7 @@ void TimeManager::progressTime(double dt) {
     // _latestConsumedTimestamp: a.timestamp
 
     if (_shouldSetTime) {
-        // Setting the time using `setTimeNextFrame`
-        // will override any timeline operations.
+        // Setting the time using `setTimeNextFrame` will override any timeline operations
         _currentTime.data().setTime(_timeNextFrame.j2000Seconds());
         _integrateFromTime.data().setTime(_timeNextFrame.j2000Seconds());
 
@@ -339,8 +345,7 @@ void TimeManager::progressTime(double dt) {
         true;
 
     if (hasFutureKeyframes && hasPastKeyframes && !firstFutureKeyframe->data.jump) {
-        // If keyframes exist before and after this frame,
-        // interpolate between those.
+        // If keyframes exist before and after this frame, interpolate between those
         const TimeKeyframeData interpolated = interpolate(
             *lastPastKeyframe,
             *firstFutureKeyframe,
@@ -354,8 +359,7 @@ void TimeManager::progressTime(double dt) {
         applyKeyframeData(lastPastKeyframe->data, dt);
     }
     else if (!isPaused()) {
-        // If there are no keyframes to consider
-        // and time is not paused, just advance time.
+        // If there are no keyframes to consider and time is not paused, just advance time
         _deltaTime = _targetDeltaTime;
         _currentTime.data().advanceTime(dt * _deltaTime);
     }
@@ -374,7 +378,7 @@ TimeManager::TimeKeyframeData TimeManager::interpolate(
     // interpolatedTime = (1 - t)y1 + t*y2 + t(1 - t)(a(1 - t) + bt), where
     // a = k1 * deltaAppTime - deltaSimTime,
     // b = -k2 * deltaAppTime + deltaSimTime,
-    // with y1 = pastTime, y2 = futureTime, k1 = past dt, k2 = future dt.
+    // with y1 = pastTime, y2 = futureTime, k1 = past dt, k2 = future dt
 
     const double pastSimTime = past.data.time.j2000Seconds();
     const double futureSimTime = future.data.time.j2000Seconds();
@@ -389,23 +393,21 @@ TimeManager::TimeKeyframeData TimeManager::interpolate(
     const double b = -futureDerivative * deltaAppTime + deltaSimTime;
 
     const double interpolatedTime =
-        (1 - t)*pastSimTime + t * futureSimTime + t * (1 - t)*(a*(1 - t) + b * t);
+        (1 - t) * pastSimTime + t * futureSimTime + t * (1 - t) * (a * (1 - t) + b * t);
 
     // Derivative of interpolated time.
-    // Division by deltaAppTime to get appTime derivative
-    // as opposed to t (in [0, 1]) derivative.
+    // Division by deltaAppTime to get appTime derivative as opposed to t (in [0, 1])
+    // derivative
     const double interpolatedDeltaTime =
         (3 * a*t*t - 4 * a*t + a - 3 * b*t*t + 2 * b*t - pastSimTime + futureSimTime) /
         deltaAppTime;
 
-    TimeKeyframeData data {
-        Time(interpolatedTime),
-        interpolatedDeltaTime,
-        past.data.pause,
-        past.data.jump
+    return TimeKeyframeData {
+        .time = Time(interpolatedTime),
+        .delta = interpolatedDeltaTime,
+        .pause = past.data.pause,
+        .jump = past.data.jump
     };
-
-    return data;
 }
 
 void TimeManager::applyKeyframeData(const TimeKeyframeData& keyframe, double dt) {
@@ -523,15 +525,16 @@ void TimeManager::addDeltaTimesKeybindings() {
         const std::string s = std::format("{:.0f}", step);
 
         std::string identifier = std::format("{}.{}", DeltaTimeActionPrefix, s);
-        interaction::Action action;
-        action.identifier = identifier;
-        action.command = std::format("openspace.time.interpolateDeltaTime({})", s);
-        action.documentation = std::format(
-            "Setting the simulation speed to {} seconds per realtime second", s
-        );
-        action.name = std::format("Set: {}", s);
-        action.guiPath = DeltaTimeStepsGuiPath;
-        action.isLocal = interaction::Action::IsLocal::Yes;
+        Action action = {
+            .identifier = identifier,
+            .command = std::format("openspace.time.interpolateDeltaTime({})", s),
+            .name = std::format("Set: {}", s),
+            .documentation = std::format(
+                "Setting the simulation speed to {} seconds per realtime second", s
+            ),
+            .guiPath = std::string(DeltaTimeStepsGuiPath),
+            .isLocal = Action::IsLocal::Yes
+        };
         global::actionManager->registerAction(std::move(action));
         global::keybindingManager->bindKey(key, mod, std::move(identifier));
         _deltaTimeStepKeybindings.push_back(KeyWithModifier{ key, mod });
@@ -575,8 +578,8 @@ void TimeManager::addDeltaTimesKeybindings() {
 void TimeManager::clearDeltaTimesKeybindings() {
     // Iterate over all of the registered actions with the common prefix that we created
     // in the addDeltaTimesKeybindings function
-    const std::vector<interaction::Action> actions = global::actionManager->actions();
-    for (const interaction::Action& action : actions) {
+    const std::vector<Action> actions = global::actionManager->actions();
+    for (const Action& action : actions) {
         if (action.identifier.starts_with(DeltaTimeActionPrefix)) {
             global::actionManager->removeAction(action.identifier);
         }
@@ -824,7 +827,8 @@ std::optional<double> TimeManager::nextDeltaTimeStep() {
     );
 
     if (nextStepIterator == _deltaTimeSteps.end()) {
-        return std::nullopt; // should not get here
+        // Should not get here
+        return std::nullopt;
     }
 
     return *nextStepIterator;
@@ -841,7 +845,8 @@ std::optional<double> TimeManager::previousDeltaTimeStep() {
     );
 
     if (lowerBoundIterator == _deltaTimeSteps.begin()) {
-        return std::nullopt; // should not get here
+        // Should not get here
+        return std::nullopt;
     }
 
     const std::vector<double>::iterator prevStepIterator = lowerBoundIterator - 1;
@@ -865,11 +870,11 @@ bool TimeManager::hasPreviousDeltaTimeStep() const {
 }
 
 void TimeManager::setNextDeltaTimeStep() {
-    interpolateNextDeltaTimeStep(0);
+    interpolateNextDeltaTimeStep(0.0);
 }
 
 void TimeManager::setPreviousDeltaTimeStep() {
-    interpolatePreviousDeltaTimeStep(0);
+    interpolatePreviousDeltaTimeStep(0.0);
 }
 
 void TimeManager::interpolateNextDeltaTimeStep(double durationSeconds) {
@@ -891,7 +896,7 @@ void TimeManager::interpolatePreviousDeltaTimeStep(double durationSeconds) {
 }
 
 void TimeManager::setPause(bool pause) {
-    interpolatePause(pause, 0);
+    interpolatePause(pause, 0.0);
 }
 
 void TimeManager::interpolatePause(bool pause, double interpolationDuration) {
@@ -929,7 +934,7 @@ void TimeManager::interpolatePause(bool pause, double interpolationDuration) {
         currentApplicationTimeForInterpolation();
 
     clearKeyframes();
-    if (interpolationDuration > 0) {
+    if (interpolationDuration > 0.0) {
         addKeyframe(now, currentKeyframe);
     }
     addKeyframe(now + interpolationDuration, futureKeyframe);
@@ -943,33 +948,32 @@ double TimeManager::previousApplicationTimeForInterpolation() const {
     // two identical frames are generated at the begin & end. This only happens when the
     // application time is forced to discrete intervals for a fixed rendering framerate.
     // Using the previous frame render time fixes this problem. This doesn't adversely
-    // affect playback without frames.
+    // affect playback without frames
     return _previousApplicationTime;
 }
 
 void TimeManager::setTimeFromProfile(const Profile& p) {
-    if (p.time.has_value()) {
-        switch (p.time->type) {
-            case Profile::Time::Type::Relative:
-            {
-                const std::string t = Time::currentWallTime();
-                std::variant<std::string, double> t2 =
-                    Time::advancedTime(t, p.time->value);
-                ghoul_assert(std::holds_alternative<std::string>(t2), "Wrong type");
-                _currentTime.data() = Time(std::get<std::string>(t2));
-                break;
-            }
-            case Profile::Time::Type::Absolute:
-                _currentTime.data() = Time(p.time->value);
-                break;
-        }
-
-        setPause(p.time->startPaused);
-    }
-    else {
+    if (!p.time.has_value()) {
         // No value was specified so we are using 'now' instead
         _currentTime.data() = Time::now();
+        return;
     }
+
+    switch (p.time->type) {
+        case Profile::Time::Type::Relative:
+        {
+            const std::string t = Time::currentWallTime();
+            std::variant<std::string, double> t2 = Time::advancedTime(t, p.time->value);
+            ghoul_assert(std::holds_alternative<std::string>(t2), "Wrong type");
+            _currentTime.data() = Time(std::get<std::string>(t2));
+            break;
+        }
+        case Profile::Time::Type::Absolute:
+            _currentTime.data() = Time(p.time->value);
+            break;
+    }
+
+    setPause(p.time->startPaused);
 }
 
 } // namespace openspace

@@ -16,8 +16,7 @@ local Layer = {
   Enabled = asset.enabled,
   ZIndex = 100,
   FilePath = texturesPath .. "alsimap_02122015.png",
-  BlendMode = "Multiply",
-  CacheSettings = { Enabled = false }
+  BlendMode = "Multiply"
 }
 
 

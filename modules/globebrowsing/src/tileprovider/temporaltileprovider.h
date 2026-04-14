@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,16 +28,29 @@
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
 #include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
-#include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
+#include <modules/globebrowsing/src/timequantizer.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <filesystem>
+#include <unordered_map>
+#include <utility>
 
-namespace openspace::globebrowsing {
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
+
+namespace openspace {
+
+class Time;
 
 /**
  * Provide `Tile`s from web map services that have temporal resolution.
  *
  * TemporalTileProviders are instantiated using a ghoul::Dictionary, and must define a
- * filepath to a Openspace Temporal dataset description file. This is an xml-file that
- * defines the same meta data as the GDAL wms description
+ * filepath to a Openspace Temporal dataset description file. This is an XML-file that
+ * defines the same meta data as the GDAL WMS description
  * (http://www.gdal.org/frmt_wms.html), but augmented with some extra tags describing the
  * temporal properties of the dataset.
  *
@@ -56,7 +69,7 @@ public:
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     enum class Mode {
@@ -97,7 +110,7 @@ private:
 
     TileProvider* tileProvider(const Time& time);
 
-    Mode _mode;
+    Mode _mode = Mode::Prototype;
 
     struct {
         double startTimeJ2000 = 0.0;
@@ -117,8 +130,8 @@ private:
     } _folder;
 
     ghoul::Dictionary _initDict;
-    properties::BoolProperty _useFixedTime;
-    properties::StringProperty _fixedTime;
+    BoolProperty _useFixedTime;
+    StringProperty _fixedTime;
     bool _fixedTimeDirty = true;
 
     TileProvider* _currentTileProvider = nullptr;
@@ -130,6 +143,6 @@ private:
     std::unique_ptr<InterpolateTileProvider> _interpolateTileProvider;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__TEMPORALTILEPROVIDER___H__

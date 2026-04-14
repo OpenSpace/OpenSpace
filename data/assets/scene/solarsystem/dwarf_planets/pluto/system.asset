@@ -1,4 +1,5 @@
 asset.require("./trail")
+asset.require("./trail_barycentric")
 asset.require("./pluto")
 asset.require("./charon/charon")
 asset.require("./charon/charon_trail")

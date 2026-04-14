@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -59,13 +59,12 @@
 
 #include <ghoul/misc/stringconversion.h>
 #include <array>
-#include <map>
+#include <cstdint>
 #include <string>
-#include <unordered_map>
+#include <string_view>
+#include <type_traits>
 
 namespace openspace {
-
-//////////////////////////////////////////////////////////////////////////////////////////
 
 enum class KeyAction : uint8_t {
     Release = 0,
@@ -89,8 +88,6 @@ constexpr KeyAction operator|=(KeyAction& lhs, KeyAction rhs) {
     return (lhs | rhs);
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-
 enum class KeyModifier : uint8_t {
     None       = 0x00,
     Shift      = 0x01,
@@ -103,7 +100,7 @@ constexpr KeyModifier operator|(KeyModifier lhs, KeyModifier rhs) {
     return static_cast<KeyModifier>(
         static_cast<std::underlying_type_t<KeyModifier>>(lhs) |
         static_cast<std::underlying_type_t<KeyModifier>>(rhs)
-        );
+    );
 }
 
 constexpr KeyModifier operator|=(KeyModifier& lhs, KeyModifier rhs) {
@@ -128,8 +125,6 @@ constexpr bool hasKeyModifier(KeyModifier lhs, KeyModifier rhs) {
     return static_cast<std::underlying_type_t<KeyModifier>>(lhs) &
         static_cast<std::underlying_type_t<KeyModifier>>(rhs);
 }
-
-//////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Key : uint16_t {
     Unknown        =  uint16_t(-1),
@@ -384,13 +379,11 @@ constexpr std::array<KeyInfo, 120> KeyInfos = {
     KeyInfo { Key::Menu,           "Menu",          "MENU"          }
 };
 
-//////////////////////////////////////////////////////////////////////////////////////////
-
 struct KeyWithModifier {
     Key key = Key::Unknown;
     KeyModifier modifier = KeyModifier::None;
 
-    auto operator<=>(const KeyWithModifier&) const = default;
+    auto operator<=>(const KeyWithModifier&) const noexcept = default;
 };
 
 constexpr inline bool isKeypadKey(Key key) noexcept {
@@ -408,16 +401,14 @@ std::string keyToString(KeyWithModifier keyWithModifier);
 } // namespace openspace
 
 namespace ghoul {
+    template <>
+    std::string to_string(const openspace::Key& key);
 
-template <>
-std::string to_string(const openspace::Key& key);
+    template <>
+    std::string to_string(const openspace::KeyModifier& mod);
 
-template <>
-std::string to_string(const openspace::KeyModifier& mod);
-
-template <>
-std::string to_string(const openspace::KeyWithModifier& keyMod);
-
+    template <>
+    std::string to_string(const openspace::KeyWithModifier& keyMod);
 } // namespace ghoul
 
 #endif // __OPENSPACE_CORE___KEYS___H__

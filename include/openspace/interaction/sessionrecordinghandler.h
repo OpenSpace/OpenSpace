@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,10 +30,21 @@
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scripting/lualibrary.h>
+#include <chrono>
+#include <filesystem>
+#include <functional>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
-namespace openspace::interaction {
+namespace openspace {
 
-class SessionRecordingHandler : public properties::PropertyOwner {
+class Property;
+
+class SessionRecordingHandler : public PropertyOwner {
 public:
     enum class SessionState {
         Idle = 0,
@@ -96,15 +107,18 @@ public:
      * Starts a recording session, which will save data to the provided filename according
      * to the data format specified, and will continue until recording is stopped using
      * stopRecording() method.
-     *
-     * \return `true` if recording to file starts without errors
      */
     void startRecording();
 
     /**
      * Used to stop a recording in progress. If open, the recording file will be closed,
      * and all keyframes deleted from memory.
+     *
      * \param filename File saved with recorded keyframes
+     * \param dataMode Determines whether the recording is stored as an ASCII or as a
+     *        binary file
+     * \param overwrite Specifies whether an existing file should be overwritten if it
+     *        already exists
      */
     void stopRecording(const std::filesystem::path& filename, DataMode dataMode,
         bool overwrite = false);
@@ -119,16 +133,16 @@ public:
     /**
      * Starts a playback session, which can run in one of three different time modes.
      *
-     * \param filename File containing recorded keyframes to play back. The file path is
-     *                 relative to the base recordings directory specified in the config
-     *                 file by the RECORDINGS variable
-     * \param timeMode Which of the 3 time modes to use for time reference during
+     * \param timeline The session recording timeline that should be played back
      * \param loop If true then the file will playback in loop mode, continuously looping
      *        back to the beginning until it is manually stopped
      * \param shouldWaitForFinishedTiles If true, the playback will wait for tiles to be
      *        finished before progressing to the next frame. This value is only used when
      *        `enableTakeScreenShotDuringPlayback` was called before. Otherwise this value
      *        will be ignored
+     * \param saveScreenshotFps If this value is specified, screenshots will be taken at
+     *        the provided framerate. If the value is not specified, no screenshots will
+     *        be taken
      */
     void startPlayback(SessionRecording timeline, bool loop,
         bool shouldWaitForFinishedTiles, std::optional<int> saveScreenshotFps);
@@ -155,18 +169,6 @@ public:
     void setPlaybackPause(bool pause);
 
     /**
-     * Enables that rendered frames should be saved during playback.
-     *
-     * \param fps Number of frames per second.
-     */
-    //void enableTakeScreenShotDuringPlayback(int fps);
-
-    /**
-     * Used to disable that renderings are saved during playback.
-     */
-    //void disableTakeScreenShotDuringPlayback();
-
-    /**
      * Used to check if a session playback is in progress.
      *
      * \return `true` if playback is in progress
@@ -185,7 +187,7 @@ public:
     /**
      * Used to obtain the state of idle/recording/playback.
      *
-     * \return int value of state as defined by struct SessionState
+     * \return The current session state
      */
     SessionState state() const;
 
@@ -201,7 +203,7 @@ public:
      * \return The Lua library that contains all Lua functions available to affect the
      *         interaction
      */
-    static openspace::scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
     /**
      * Used to request a callback for notification of playback state change.
@@ -214,7 +216,7 @@ public:
     /**
      * Removes the callback for notification of playback state change.
      *
-     * \param callback Function handle for the callback
+     * \param handle Function handle for the callback
      */
     void removeStateChangeCallback(CallbackHandle handle);
 
@@ -235,7 +237,7 @@ public:
      *
      * \param prop The property being set
      */
-    void savePropertyBaseline(properties::Property& prop);
+    void savePropertyBaseline(Property& prop);
 
 private:
     void tickPlayback(double dt);
@@ -248,9 +250,9 @@ private:
     void checkIfScriptUsesScenegraphNode(std::string_view script) const;
 
 
-    properties::BoolProperty _renderPlaybackInformation;
-    properties::BoolProperty _ignoreRecordedScale;
-    properties::BoolProperty _addModelMatrixinAscii;
+    BoolProperty _renderPlaybackInformation;
+    BoolProperty _ignoreRecordedScale;
+    BoolProperty _addModelMatrixinAscii;
 
     struct {
         double elapsedTime = 0.0;
@@ -284,6 +286,6 @@ private:
     std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SESSIONRECORDINGHANDLER___H__

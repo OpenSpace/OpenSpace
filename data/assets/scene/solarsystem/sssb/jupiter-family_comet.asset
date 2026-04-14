@@ -17,7 +17,6 @@ local Object = {
     Type = "RenderableOrbitalKepler",
     Path = sssb .. "sssb_data_jupiter-family_comet.csv",
     Format = "SBDB",
-    Segments = 200,
     SegmentQuality = 10,
     Color = { 0.2, 0.8, 0.2 },
     TrailFade = 28,

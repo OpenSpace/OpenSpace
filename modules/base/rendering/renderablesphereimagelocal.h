@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,16 +27,10 @@
 
 #include <modules/base/rendering/renderablesphere.h>
 
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/rendering/texturecomponent.h>
 
-namespace ghoul::opengl { class Texture; }
-
 namespace openspace {
-
-struct RenderData;
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
 
 class RenderableSphereImageLocal : public RenderableSphere {
 public:
@@ -46,18 +40,15 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
 private:
-
-    properties::StringProperty _texturePath;
+    StringProperty _texturePath;
 
     std::unique_ptr<TextureComponent> _texture;
 };

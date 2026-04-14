@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,12 +27,13 @@
 
 #include <string>
 
-namespace openspace::fls { // (F)ield(L)ines(S)equence
+namespace openspace {
 
 enum class Model : int {
     Batsrus = 0,
     Enlil,
     Pfss,
+    Mas,
     Invalid
 };
 
@@ -42,6 +43,6 @@ constexpr float AuToMeter = 149597870700.f; // Astronomical Units
 constexpr float ReToMeter = 6371000.f; // Earth radius
 constexpr float RsToMeter = 695700000.f; // Sun radius
 
-} // namespace openspace::fls
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___COMMONS___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,16 +24,12 @@
 
 #include <openspace/properties/list/doublelistproperty.h>
 
-#include <openspace/json.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/stringhelper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
-DoubleListProperty::DoubleListProperty(Property::PropertyInfo info,
-                                       std::vector<double> values)
+DoubleListProperty::DoubleListProperty(PropertyInfo info, std::vector<double> values)
     : ListProperty(std::move(info), std::move(values))
 {}
 
@@ -58,4 +54,4 @@ std::string DoubleListProperty::stringValue() const {
     return json.dump();
 }
 
-} // namespace openspace::properties
+} // namespace openspace

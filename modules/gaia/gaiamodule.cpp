@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,20 +24,26 @@
 
 #include <modules/gaia/gaiamodule.h>
 
-#include <modules/gaia/tasks/constructoctreetask.h>
 #include <modules/gaia/rendering/renderablegaiastars.h>
+#include <modules/gaia/tasks/constructoctreetask.h>
 #include <modules/gaia/tasks/readfitstask.h>
 #include <modules/gaia/tasks/readspecktask.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/task.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/templatefactory.h>
+#include <vector>
 
 namespace openspace {
 
-GaiaModule::GaiaModule() : OpenSpaceModule(Name) {}
+GaiaModule::GaiaModule()
+    : OpenSpaceModule(Name)
+{}
 
 void GaiaModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul::TemplateFactory<Renderable>* fRenderable =
@@ -52,16 +58,16 @@ void GaiaModule::internalInitialize(const ghoul::Dictionary&) {
     fTask->registerClass<ConstructOctreeTask>("ConstructOctreeTask");
 }
 
-std::vector<documentation::Documentation> GaiaModule::documentations() const {
+std::vector<Documentation> GaiaModule::documentations() const {
     return {
         RenderableGaiaStars::Documentation(),
         ReadFitsTask::Documentation(),
         ReadSpeckTask::Documentation(),
-        ConstructOctreeTask::Documentation(),
+        ConstructOctreeTask::Documentation()
     };
 }
 
-scripting::LuaLibrary GaiaModule::luaLibrary() const {
+LuaLibrary GaiaModule::luaLibrary() const {
     return {
         .name = "gaia",
         .scripts = {

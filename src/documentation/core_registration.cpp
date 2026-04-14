@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,7 +38,9 @@
 #include <openspace/mission/missionmanager.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
+#include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/navigation/path.h>
+#include <openspace/navigation/pathnavigator.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/colormappingcomponent.h>
 #include <openspace/rendering/dashboard.h>
@@ -50,9 +52,9 @@
 #include <openspace/scene/lightsource.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scene/rotation.h>
+#include <openspace/scene/scale.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scale.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scene/timeframe.h>
 #include <openspace/scripting/scriptengine.h>
@@ -62,10 +64,12 @@
 #include <openspace/util/task.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timerange.h>
+#include <openspace/topic/server.h>
+#include <openspace/topic/serverinterface.h>
 
 namespace openspace {
 
-void registerCoreClasses(documentation::DocumentationEngine& engine) {
+void registerCoreClasses(DocumentationEngine& engine) {
     engine.addDocumentation(LogFactoryDocumentation());
 
     engine.addDocumentation(DashboardItem::Documentation());
@@ -86,14 +90,16 @@ void registerCoreClasses(documentation::DocumentationEngine& engine) {
 
     engine.addDocumentation(dataloader::DataMapping::Documentation());
 
-    engine.addDocumentation(interaction::NavigationState::Documentation());
-    engine.addDocumentation(interaction::Path::Documentation());
+    engine.addDocumentation(NavigationState::Documentation());
+    engine.addDocumentation(Path::Documentation());
+    engine.addDocumentation(ServerInterface::Documentation());
+    engine.addDocumentation(Server::Documentation());
 }
 
 // NOTE: should this be in the documentation/core_reg.cpp file? Seems to be here just
 //       because it has the same method name (and similar implementaiton) as the
 //       documentation version.
-void registerCoreClasses(scripting::ScriptEngine& engine) {
+void registerCoreClasses(ScriptEngine& engine) {
     engine.addLibrary(Dashboard::luaLibrary());
     engine.addLibrary(EventEngine::luaLibrary());
     engine.addLibrary(MissionManager::luaLibrary());
@@ -105,16 +111,16 @@ void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(SpiceManager::luaLibrary());
     engine.addLibrary(Scene::luaLibrary());
     engine.addLibrary(Time::luaLibrary());
-    engine.addLibrary(interaction::ActionManager::luaLibrary());
-    engine.addLibrary(interaction::KeybindingManager::luaLibrary());
-    engine.addLibrary(interaction::KeyframeRecordingHandler::luaLibrary());
-    engine.addLibrary(interaction::NavigationHandler::luaLibrary());
-    engine.addLibrary(interaction::OrbitalNavigator::luaLibrary());
-    engine.addLibrary(interaction::PathNavigator::luaLibrary());
-    engine.addLibrary(interaction::SessionRecordingHandler::luaLibrary());
-    engine.addLibrary(scripting::ScriptScheduler::luaLibrary());
-    engine.addLibrary(scripting::generalSystemCapabilities());
-    engine.addLibrary(scripting::openglSystemCapabilities());
+    engine.addLibrary(ActionManager::luaLibrary());
+    engine.addLibrary(KeybindingManager::luaLibrary());
+    engine.addLibrary(KeyframeRecordingHandler::luaLibrary());
+    engine.addLibrary(NavigationHandler::luaLibrary());
+    engine.addLibrary(OrbitalNavigator::luaLibrary());
+    engine.addLibrary(PathNavigator::luaLibrary());
+    engine.addLibrary(SessionRecordingHandler::luaLibrary());
+    engine.addLibrary(ScriptScheduler::luaLibrary());
+    engine.addLibrary(generalSystemCapabilities());
+    engine.addLibrary(openglSystemCapabilities());
 }
 
 } // namespace openspace

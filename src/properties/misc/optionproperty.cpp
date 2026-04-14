@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,17 +24,17 @@
 
 #include <openspace/properties/misc/optionproperty.h>
 
-#include <openspace/util/json_helper.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
-#include <limits>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "OptionProperty";
 
     constexpr std::string_view OptionsKey = "options";
 
-    using Option = openspace::properties::OptionProperty::Option;
+    using Option = OptionProperty::Option;
 
     bool addOptionInternal(int value, std::string desc, std::vector<Option>& options) {
         Option option = { .value = value, .description = std::move(desc) };
@@ -55,8 +55,7 @@ namespace {
     }
 } // namespace
 
-namespace openspace::properties {
-
+namespace openspace {
 
 OptionProperty::OptionProperty(PropertyInfo info)
     : NumericalProperty<int>(
@@ -164,12 +163,7 @@ std::string OptionProperty::getDescriptionByValue(int value) {
         }
     );
 
-    if (it != _options.end()) {
-        return it->description;
-    }
-    else {
-        return "";
-    }
+    return it != _options.end() ? it->description : "";
 }
 
 void OptionProperty::getLuaValue(lua_State* state) const {
@@ -234,4 +228,4 @@ int OptionProperty::toValue(lua_State* state) const {
     }
 }
 
-} // namespace openspace::properties
+} // namespace openspace

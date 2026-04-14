@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,39 +24,41 @@
 
 #include <modules/iswa/rendering/iswabasegroup.h>
 
-#include <openspace/json.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "IswaBaseGroup";
-    using json = nlohmann::json;
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AlphaInfo = {
+    constexpr Property::PropertyInfo AlphaInfo = {
         "Alpha",
         "Alpha",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
+    constexpr Property::PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 } // namespace
 
 namespace openspace {
 
 IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
-    : properties::PropertyOwner({ std::move(name) })
+    : PropertyOwner({ std::move(name) })
     , _enabled(EnabledInfo, true)
     , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
     , _delete(DeleteInfo)
@@ -76,13 +78,13 @@ bool IswaBaseGroup::isType(const std::string& type) const {
 }
 
 void IswaBaseGroup::updateGroup() {
-    LDEBUG("Group " + identifier() + " published updateGroup");
+    LDEBUG(std::format("Group {} published updateGroup", identifier()));
     _groupEvent.publish("updateGroup", ghoul::Dictionary());
 }
 
 void IswaBaseGroup::clearGroup() {
     _groupEvent.publish("clearGroup", ghoul::Dictionary());
-    LDEBUG("Group " + identifier() + " published clearGroup");
+    LDEBUG(std::format("Group {} published clearGroup", identifier()));
     unregisterProperties();
 }
 
@@ -96,14 +98,14 @@ ghoul::Event<ghoul::Dictionary>& IswaBaseGroup::groupEvent() {
 
 void IswaBaseGroup::registerProperties() {
     _enabled.onChange([this]() {
-        LDEBUG("Group " + identifier() + " published enabledChanged");
+        LDEBUG(std::format("Group {} published enabledChanged", identifier()));
         ghoul::Dictionary d;
         d.setValue("enabled", _enabled.value());
         _groupEvent.publish("enabledChanged", d);
     });
 
     _alpha.onChange([this]() {
-        LDEBUG("Group " + identifier() + " published alphaChanged");
+        LDEBUG(std::format("Group {} published alphaChanged", identifier()));
         ghoul::Dictionary d;
         d.setValue("alpha", static_cast<double>(_alpha));
         _groupEvent.publish("alphaChanged", d);
@@ -119,4 +121,4 @@ void IswaBaseGroup::unregisterProperties() {
     _registered = false;
 }
 
-} //namespace openspace
+} // namespace openspace

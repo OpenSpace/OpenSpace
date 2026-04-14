@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 #include <ghoul/glm.h>
 
-namespace openspace::collision {
+namespace openspace {
 
 /**
  * Calculate the intersection of a line segment and a sphere. The line segment is defined
@@ -42,18 +42,18 @@ namespace openspace::collision {
  * \param center The center point for the sphere
  * \param r The radius of the sphere
  * \param intersectionPoint A variable to store the resulting intersection point in
- * \return True if the line between \p p1 and \p p2 intersects the sphere given by
- *         \p r and \p center, and false otherwise
+ * \return `true` if the line between \p p1 and \p p2 intersects the sphere given by \p r
+ *         and \p center, and `false` otherwise
  */
 bool lineSphereIntersection(const glm::dvec3& p1, const glm::dvec3& p2,
     const glm::dvec3& center, double r, glm::dvec3& intersectionPoint);
 
 /**
  * Check if the point \p p is inside of the sphere defined by radius \p r and center
- * point \p c
+ * point \p c.
  */
 bool isPointInsideSphere(const glm::dvec3& p, const glm::dvec3& c, double r);
 
-} // namespace openspace::collision
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___COLLISIONHELPER___H__

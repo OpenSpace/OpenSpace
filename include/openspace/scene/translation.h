@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,22 +31,22 @@
 #include <ghoul/glm.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <functional>
+#include <limits>
 
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
+struct Documentation;
 struct UpdateData;
 
-namespace documentation {  struct Documentation; }
-
-class Translation : public properties::PropertyOwner {
+class Translation : public PropertyOwner {
 public:
     static ghoul::mm_unique_ptr<Translation> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
     explicit Translation(const ghoul::Dictionary& dictionary);
-    virtual ~Translation() override = default;
+    ~Translation() override = default;
 
     virtual void initialize();
 
@@ -59,7 +59,7 @@ public:
     // invalidates potentially stored points, for example in trails
     void onParameterChange(std::function<void()> callback);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     void notifyObservers() const;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 class TileProviderByLevel : public TileProvider {
 public:
@@ -42,7 +42,7 @@ public:
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     std::vector<int> _providerIndices;
@@ -53,6 +53,6 @@ private:
     TileProvider* levelProvider(int level) const;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__TILEPROVIDERBYLEVEL___H__

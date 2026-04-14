@@ -1,0 +1,47 @@
+-- Basic
+-- This asset creates a translation that places coordinate axes on the surface of a
+-- planetary body. Note that this examples only the position of the coordinate axes, but
+-- leaves the orientation unchanged, causing their rotation to be inherited from the
+-- parent node.
+
+-- The example needs a `RenderableGlobe` as a parent to function
+local Globe = {
+  Identifier = "GlobeTranslation_Example_Globe",
+  Renderable = {
+    Type = "RenderableGlobe"
+  },
+  GUI = {
+    Name = "GlobeTranslation - Basic (Globe)",
+    Path = "/Examples"
+  }
+}
+
+local Node = {
+  Identifier = "GlobeTranslation_Example",
+  Parent = "GlobeTranslation_Example_Globe",
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = "GlobeTranslation_Example_Globe",
+      Latitude = 20.0,
+      Longitude = -45.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "GlobeTranslation - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Globe)
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+  openspace.removeSceneGraphNode(Globe)
+end)

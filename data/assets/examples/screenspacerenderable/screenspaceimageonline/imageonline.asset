@@ -1,7 +1,7 @@
 -- Basic
 -- Create a screenspace image plane that shows the content of an image from a web URL.
 
-local Object = {
+local Item = {
   Type = "ScreenSpaceImageOnline",
   Identifier = "ScreenSpaceImageOnline_Example",
   URL = "https://data.openspaceproject.com/moon_mars/apollo8/earthrise.jpg",
@@ -9,9 +9,9 @@ local Object = {
 }
 
 asset.onInitialize(function()
-  openspace.addScreenSpaceRenderable(Object)
+  openspace.addScreenSpaceRenderable(Item)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(Object)
+  openspace.removeScreenSpaceRenderable(Item)
 end)

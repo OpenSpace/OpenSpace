@@ -13,15 +13,27 @@ local labelsPath = asset.resource({
 })
 
 
-local Moon = {
-  Identifier = "Moon",
+local MoonInertial = {
+  Identifier = "MoonInertial",
   Parent = transforms.EarthBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
       Target = coreKernels.ID.Moon,
       Observer = coreKernels.ID.EarthBarycenter
-    },
+    }
+  },
+  GUI = {
+    Path = "/Solar System/Planets/Earth/Moon",
+    Focusable = false,
+    Hidden = false
+  }
+}
+
+local Moon = {
+  Identifier = "Moon",
+  Parent = MoonInertial.Identifier,
+  Transform = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = coreKernels.Frame.Moon,
@@ -31,6 +43,7 @@ local Moon = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 1738140,
+    ModelSpaceRenderingCutoffLevel = 12,
     ShadowGroup = {
       Sources = {
         { Name = sunAsset.Sun.Identifier, Radius = 696300000 },
@@ -113,6 +126,7 @@ local ToggleMoonShading = {
 
 
 asset.onInitialize(function()
+  openspace.addSceneGraphNode(MoonInertial)
   openspace.addSceneGraphNode(Moon)
   openspace.addSceneGraphNode(MoonLabel)
 
@@ -126,8 +140,10 @@ asset.onDeinitialize(function()
 
   openspace.removeSceneGraphNode(MoonLabel)
   openspace.removeSceneGraphNode(Moon)
+  openspace.removeSceneGraphNode(MoonInertial)
 end)
 
+asset.export(MoonInertial)
 asset.export(Moon)
 asset.export(MoonLabel)
 asset.export("FocusMoon", FocusMoon.Identifier)

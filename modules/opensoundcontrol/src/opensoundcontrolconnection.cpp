@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,8 @@
 #include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ip/IpEndpointName.h>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "OpenSoundControlConnection";
@@ -38,14 +40,9 @@ namespace openspace {
 
 OpenSoundControlConnection::OpenSoundControlConnection(const std::string& ip, int port)
     : _socket(IpEndpointName(ip.c_str(), port))
-    , _buffer(new char[BufferSize])
-    , _stream(osc::OutboundPacketStream(_buffer, BufferSize))
-{
-}
-
-OpenSoundControlConnection::~OpenSoundControlConnection() {
-    delete[] _buffer;
-}
+    , _buffer(std::vector<char>(BufferSize))
+    , _stream(osc::OutboundPacketStream(_buffer.data(), BufferSize))
+{}
 
 void OpenSoundControlConnection::send(const std::string& label,
                                       const std::vector<OpenSoundControlDataType>& data)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,8 @@
 #include <openspace/util/geodetic.h>
 #include <algorithm>
 #include <array>
-#include <vector>
+#include <cmath>
+#include <cstdlib>
 
 namespace {
     constexpr size_t MaxIterations = 8;
@@ -35,8 +36,10 @@ namespace {
 
 namespace openspace {
 
-Ellipsoid::Ellipsoid(glm::dvec3 radii) : _radii(std::move(radii)) {
-    // If the radii is equal to 0, all of the calculations below fail and result in nan's
+Ellipsoid::Ellipsoid(glm::dvec3 radii)
+    : _radii(std::move(radii))
+{
+    // If the radii is equal to 0, all of the calculations below fail and result in nans
     // being raised all over the place
     if (glm::length(radii) > 0.0) {
         updateInternalCache();
@@ -83,7 +86,7 @@ glm::dvec3 Ellipsoid::geodeticSurfaceProjection(const glm::dvec3& p) const {
         s = glm::dot(p2 / (_cached.radiiSquared * d2), glm::dvec3(1.0)) - 1.0;
 
         dSdA = -2.0 * glm::dot(p2 / (_cached.radiiToTheFourth * d3), glm::dvec3(1.0));
-        ++nIterations;
+        nIterations++;
     }
     while (std::abs(s) > Epsilon && nIterations < MaxIterations);
 
@@ -99,7 +102,6 @@ glm::dvec3 Ellipsoid::geodeticSurfaceNormalForGeocentricallyProjectedPoint(
 
 glm::dvec3 Ellipsoid::geodeticSurfaceNormal(const Geodetic2& geodetic2) const {
     const double cosLat = std::cos(geodetic2.lat);
-    //geodetic2.lon = geodetic2.lon > M_PI ? geodetic2.lon - M_PI * 2 : geodetic2.lon;
     return glm::dvec3(
         cosLat * std::cos(geodetic2.lon),
         cosLat * std::sin(geodetic2.lon),
@@ -147,7 +149,7 @@ double Ellipsoid::greatCircleDistance(const Geodetic2& p1, const Geodetic2& p2) 
 
 Geodetic2 Ellipsoid::cartesianToGeodetic2(const glm::dvec3& p) const {
     const glm::dvec3 normal = geodeticSurfaceNormalForGeocentricallyProjectedPoint(p);
-    return glm::length(normal) ?
+    return glm::length(normal) != 0.0 ?
         Geodetic2 {
             std::asin(normal.z / glm::length(normal)),
             std::atan2(normal.y, normal.x)
@@ -156,8 +158,8 @@ Geodetic2 Ellipsoid::cartesianToGeodetic2(const glm::dvec3& p) const {
 }
 
 glm::dvec3 Ellipsoid::cartesianSurfacePosition(const Geodetic2& geodetic2) const {
-    // Position on surface : height = 0
-    return cartesianPosition(Geodetic3({ geodetic2, 0 }));
+    // Position on surface: height = 0
+    return cartesianPosition(Geodetic3({ geodetic2, 0.0 }));
 }
 
 glm::dvec3 Ellipsoid::cartesianPosition(const Geodetic3& geodetic3) const {

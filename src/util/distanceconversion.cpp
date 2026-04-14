@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,10 +24,8 @@
 
 #include <openspace/util/distanceconversion.h>
 
-#include <openspace/util/distanceconstants.h>
 #include <openspace/util/timeconstants.h>
-
-#include <ghoul/glm.h>
+#include <cstdlib>
 
 namespace openspace {
 
@@ -36,7 +34,7 @@ std::pair<double, std::string_view> simplifyDistance(double meters,
 {
     constexpr double GraceFactor = 0.5;
 
-    const double metersVal = glm::abs(meters);
+    const double metersVal = std::abs(meters);
 
     if (metersVal == 0.0) {
         return { 0.0, forceSingularForm ? "meter" : "meters"};

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,12 +31,6 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul::opengl {
-    class ProgramObject;
-} // namespace ghoul::opengl
-
-namespace openspace::documentation { struct Documentation; }
-
 namespace openspace {
 
 class RenderableBoxGrid : public Renderable {
@@ -46,12 +40,10 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     struct Vertex {
@@ -60,17 +52,16 @@ protected:
 
     ghoul::opengl::ProgramObject* _gridProgram = nullptr;
 
-    properties::Vec3Property _color;
-    properties::FloatProperty _lineWidth;
-    properties::Vec3Property _size;
+    Vec3Property _color;
+    FloatProperty _lineWidth;
+    Vec3Property _size;
 
     bool _gridIsDirty = true;
 
-    GLuint _vaoID = 0;
-    GLuint _vBufferID = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 
     GLenum _mode = GL_LINE_STRIP;
-    std::vector<Vertex> _varray;
 };
 
 }// namespace openspace

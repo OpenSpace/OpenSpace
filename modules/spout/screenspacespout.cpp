@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,30 +27,32 @@
 #include <modules/spout/screenspacespout.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/textureunit.h>
 #include <optional>
+#include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo NameInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo NameInfo = {
         "SpoutName",
-        "Spout Sender Name",
+        "Spout sender name",
         "This value explicitly sets the Spout receiver to use a specific name. If this "
         "is not a valid name, an empty image is used.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ScreenSpaceSpout)]] Parameters {
         // [[codegen::verbatim(NameInfo.description)]]
         std::optional<std::string> spoutName;
     };
-#include "screenspacespout_codegen.cpp"
-
 } // namespace
+#include "screenspacespout_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceSpout::Documentation() {
+Documentation ScreenSpaceSpout::Documentation() {
     return codegen::doc<Parameters>("spout_screenspace_spout");
 }
 
@@ -75,22 +77,15 @@ void ScreenSpaceSpout::deinitializeGL() {
     ScreenSpaceRenderable::deinitializeGL();
 }
 
-bool ScreenSpaceSpout::isReady() const {
-    return ScreenSpaceRenderable::isReady() && !_spoutReceiver.isReceiving();
-}
-
 void ScreenSpaceSpout::update() {
     ScreenSpaceRenderable::update();
     _spoutReceiver.updateReceiver();
 }
 
-void ScreenSpaceSpout::bindTexture() {
-    _spoutReceiver.saveGLTextureState();
-    glBindTexture(GL_TEXTURE_2D, _spoutReceiver.spoutTexture());
-}
-
-void ScreenSpaceSpout::unbindTexture() {
-    _spoutReceiver.restoreGLTextureState();
+void ScreenSpaceSpout::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    if (_spoutReceiver.isReceiving()) {
+        unit.bind(_spoutReceiver.spoutTexture());
+    }
 }
 
 } // namespace openspace

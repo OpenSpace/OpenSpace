@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,13 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileproviderbylevel.h>
 
+#include <modules/globebrowsing/src/tileindex.h>
 #include <openspace/documentation/documentation.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <limits>
+#include <utility>
 
 namespace {
     // This tile provider will switch between different tile providers specified within
@@ -57,13 +63,13 @@ namespace {
         // not the user.
         int layerGroupID [[codegen::private()]];
     };
-#include "tileproviderbylevel_codegen.cpp"
 } // namespace
+#include "tileproviderbylevel_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation TileProviderByLevel::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_tileproviderbylevel");
+Documentation TileProviderByLevel::Documentation() {
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_bylevel");
 }
 
 TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
@@ -87,8 +93,13 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
 
         const std::string provId = tileProviderDict.value<std::string>("Identifier");
         tp->setIdentifier(provId);
-        const std::string providerName = tileProviderDict.value<std::string>("Name");
-        tp->setGuiName(providerName);
+        if (tileProviderDict.hasValue<std::string>("Name")) {
+            const std::string providerName = tileProviderDict.value<std::string>("Name");
+            tp->setGuiName(providerName);
+        }
+        else {
+            tp->setGuiName(provId);
+        }
         addPropertySubOwner(tp.get());
 
         _levelTileProviders.push_back(std::move(tp));
@@ -98,7 +109,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
             _providerIndices.resize(provider.maxLevel + 1, -1);
         }
 
-        // map this level to the tile provider index
+        // Map this level to the tile provider index
         _providerIndices[provider.maxLevel] =
             static_cast<int>(_levelTileProviders.size()) - 1;
     }
@@ -153,7 +164,7 @@ TileProvider* TileProviderByLevel::levelProvider(int level) const {
 }
 
 TileDepthTransform TileProviderByLevel::depthTransform() {
-    return { 0.f, 1.f };
+    return { .scale = 0.f, .offset = 1.f };
 }
 
 void TileProviderByLevel::update() {
@@ -180,4 +191,4 @@ float TileProviderByLevel::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

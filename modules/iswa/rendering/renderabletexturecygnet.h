@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,8 +29,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 /**
  * This class exist to abstract away the loading of images from iSWA and updating of the
  * textures for child geometries. The class specifies the minimum interface that child
@@ -41,7 +39,7 @@ public:
     explicit RenderableTextureCygnet(const ghoul::Dictionary& dictionary);
     ~RenderableTextureCygnet() = default;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     bool updateTexture() override;
@@ -52,6 +50,7 @@ protected:
 private:
     DownloadManager::MemoryFile _imageFile;
 };
-} //namespace openspace
+
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_ISWA___RENDERABLETEXTURECYGNET___H__

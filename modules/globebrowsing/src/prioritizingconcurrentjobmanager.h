@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,11 +27,13 @@
 
 #include <modules/globebrowsing/src/lruthreadpool.h>
 #include <openspace/util/concurrentqueue.h>
+#include <memory>
 #include <mutex>
+#include <vector>
 
-namespace openspace { template <typename T> struct Job; }
+namespace openspace {
 
-namespace openspace::globebrowsing {
+template <typename T> struct Job;
 
 /**
  * Concurrent job manager which prioritizes which jobs to work on depending on which ones
@@ -39,7 +41,7 @@ namespace openspace::globebrowsing {
  * which is used to identify jobs. In case a job need to be explicitly ended. It can be
  * identified using its key.
  */
-template<typename P, typename KeyType>
+template <typename P, typename KeyType>
 class PrioritizingConcurrentJobManager {
 public:
     explicit PrioritizingConcurrentJobManager(LRUThreadPool<KeyType> pool);
@@ -63,7 +65,7 @@ public:
      * Bumps the job identified with `key` to the beginning of the queue. In case the job
      * was not already enqueued the function simply returns false and no state is changed.
      *
-     * \param key this is the identifier of the job to bump
+     * \param key The identifier of the job to bump
      * \return `true` if the job was found, else returns false
      */
     bool touch(KeyType key);
@@ -76,7 +78,7 @@ public:
     void clearEnqueuedJobs();
 
     /**
-     * \return one finished job
+     * \return One finished job
      */
     std::shared_ptr<Job<P>> popFinishedJob();
 
@@ -89,7 +91,7 @@ private:
     LRUThreadPool<KeyType> _threadPool;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #include "prioritizingconcurrentjobmanager.inl"
 

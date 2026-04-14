@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,47 +36,61 @@
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
+#include <algorithm>
+#include <cstdarg>
+#include <cstddef>
+#include <cstring>
+#include <filesystem>
+#include <utility>
 
 // #define SHOW_IMGUI_HELPERS
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "GUI";
     constexpr std::string_view GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
     constexpr float FontSize = 14.f;
 
     ImFont* captionFont = nullptr;
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "This setting determines whether this object will be visible or not.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CollapsedInfo = {
+    constexpr Property::PropertyInfo CollapsedInfo = {
         "Collapsed",
-        "Is Collapsed",
+        "Is collapsed",
         "This setting determines whether this window is collapsed or not.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowHelpInfo = {
+    constexpr Property::PropertyInfo ShowHelpInfo = {
         "ShowHelpText",
         "Show tooltip help",
         "If this value is enabled these kinds of tooltips are shown for most properties "
         "explaining what impact they have on the visuals.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HelpTextDelayInfo = {
+    constexpr Property::PropertyInfo HelpTextDelayInfo = {
         "HelpTextDelay",
-        "Tooltip Delay (in s)",
+        "Tooltip delay (in s)",
         "This value determines the delay in seconds after which the tooltip is shown.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 } // namespace
 
@@ -92,7 +106,7 @@ ImGUIModule::ImGUIModule()
     : OpenSpaceModule(Name)
     , _isEnabled(EnabledInfo, false)
     , _isCollapsed(CollapsedInfo, false)
-    , _sceneProperty("Scene", "Scene", gui::GuiPropertyComponent::UseTreeLayout::Yes)
+    , _sceneProperty("Scene", "Scene", GuiPropertyComponent::UseTreeLayout::Yes)
     , _property("Settings", "Settings")
     , _showHelpText(ShowHelpInfo, true)
     , _helpTextDelay(HelpTextDelayInfo, 1.f, 0.f, 10.f)
@@ -100,32 +114,28 @@ ImGUIModule::ImGUIModule()
     addProperty(_isEnabled);
     addProperty(_isCollapsed);
 
-    for (gui::GuiComponent* comp : _components) {
+    for (GuiComponent* comp : _components) {
         addPropertySubOwner(comp);
     }
     _spaceTime.setEnabled(true);
 
-    {
-        auto showHelpTextFunc = [this]() {
-            for (gui::GuiComponent* comp : _components) {
-                comp->setShowHelpTooltip(_showHelpText);
-            }
-        };
-        showHelpTextFunc();
-        _showHelpText.onChange(std::move(showHelpTextFunc));
-        addProperty(_showHelpText);
-    }
+    auto showHelpTextFunc = [this]() {
+        for (GuiComponent* comp : _components) {
+            comp->setShowHelpTooltip(_showHelpText);
+        }
+    };
+    showHelpTextFunc();
+    _showHelpText.onChange(std::move(showHelpTextFunc));
+    addProperty(_showHelpText);
 
-    {
-        auto helpTextDelayFunc = [this]() {
-            for (gui::GuiComponent* comp : _components) {
-                comp->setShowHelpTooltipDelay(_helpTextDelay);
-            }
-        };
-        helpTextDelayFunc();
-        _helpTextDelay.onChange(std::move(helpTextDelayFunc));
-        addProperty(_helpTextDelay);
-    }
+    auto helpTextDelayFunc = [this]() {
+        for (GuiComponent* comp : _components) {
+            comp->setShowHelpTooltipDelay(_helpTextDelay);
+        }
+    };
+    helpTextDelayFunc();
+    _helpTextDelay.onChange(std::move(helpTextDelayFunc));
+    addProperty(_helpTextDelay);
 
     global::callback::draw2D->emplace_back([this]() {
         ZoneScopedN("ImGUI");
@@ -155,9 +165,7 @@ ImGUIModule::ImGUIModule()
     });
 
     global::callback::keyboard->emplace_back(
-        [this](Key key, KeyModifier mod, KeyAction action,
-               IsGuiWindow isGuiWindow) -> bool
-        {
+        [this](Key key, KeyModifier mod, KeyAction action, IsGuiWindow isGuiWindow) {
             ZoneScopedN("ImGUI");
 
             if (!isGuiWindow || !_isEnabled || !_hasContext) {
@@ -168,9 +176,7 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::character->emplace_back(
-        [this](unsigned int codepoint, KeyModifier modifier,
-               IsGuiWindow isGuiWindow) -> bool
-        {
+        [this](unsigned int codepoint, KeyModifier modifier, IsGuiWindow isGuiWindow) {
             ZoneScopedN("ImGUI");
 
             if (!isGuiWindow || !_isEnabled || !_hasContext) {
@@ -191,7 +197,7 @@ ImGUIModule::ImGUIModule()
 
     global::callback::mouseButton->emplace_back(
         [this](MouseButton button, MouseAction action, KeyModifier,
-               IsGuiWindow isGuiWindow) -> bool
+               IsGuiWindow isGuiWindow)
         {
             ZoneScopedN("ImGUI");
 
@@ -211,7 +217,7 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::mouseScrollWheel->emplace_back(
-        [this](double, double posY, IsGuiWindow isGuiWindow) -> bool {
+        [this](double, double posY, IsGuiWindow isGuiWindow) {
             ZoneScopedN("ImGUI");
 
             if (!isGuiWindow || !_isEnabled || !_hasContext) {
@@ -222,7 +228,7 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::touchDetected->emplace_back(
-        [this](TouchInput input) -> bool {
+        [this](TouchInput input) {
             if (!_isEnabled || !_hasContext) {
                 return false;
             }
@@ -231,7 +237,7 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::touchUpdated->emplace_back(
-        [this](TouchInput input) -> bool {
+        [this](TouchInput input) {
             if (!_isEnabled || !_hasContext) {
                 return false;
             }
@@ -252,16 +258,14 @@ ImGUIModule::ImGUIModule()
 void ImGUIModule::internalInitialize(const ghoul::Dictionary&) {
     LDEBUGC("ImGUIModule", "Initializing GUI");
 
-    _sceneProperty.setPropertyOwnerFunction(
-        []() {
-            const Scene* scene = global::renderEngine->scene();
-            const std::vector<SceneGraphNode*>& nodes = scene ?
-                scene->allSceneGraphNodes() :
-                std::vector<SceneGraphNode*>();
+    _sceneProperty.setPropertyOwnerFunction([]() {
+        const Scene* scene = global::renderEngine->scene();
+        const std::vector<SceneGraphNode*>& nodes = scene ?
+            scene->allSceneGraphNodes() :
+            std::vector<SceneGraphNode*>();
 
-            return std::vector<properties::PropertyOwner*>(nodes.begin(), nodes.end());
-        }
-    );
+        return std::vector<PropertyOwner*>(nodes.begin(), nodes.end());
+    });
 
     _property.setPropertyOwners({
         global::screenSpaceRootPropertyOwner,
@@ -281,7 +285,7 @@ void ImGUIModule::internalDeinitialize() {
         ImGui::DestroyContext(ctx);
     }
 
-    for (gui::GuiComponent* comp : _components) {
+    for (GuiComponent* comp : _components) {
         comp->deinitialize();
     }
 
@@ -296,14 +300,14 @@ void ImGUIModule::internalInitializeGL() {
 
 #ifdef WIN32
     strcpy_s(_iniFileBuffer.data(), file.string().size() + 1, file.string().c_str());
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
     strcpy(_iniFileBuffer.data(), file.c_str());
-#endif
+#endif // WIN32
 
-    const int nWindows = global::windowDelegate->nWindows();
+    const size_t nWindows = global::windowDelegate->nWindows();
     _contexts.resize(nWindows);
 
-    for (int i = 0; i < nWindows; i++) {
+    for (size_t i = 0; i < nWindows; i++) {
         _contexts[i] = ImGui::CreateContext();
         ImGui::SetCurrentContext(_contexts[i]);
 
@@ -391,7 +395,7 @@ void ImGUIModule::internalInitializeGL() {
 
     _hasContext = true;
 
-    for (gui::GuiComponent* comp : _components) {
+    for (GuiComponent* comp : _components) {
         comp->initialize();
     }
 
@@ -406,72 +410,69 @@ void ImGUIModule::internalInitializeGL() {
     {
         unsigned char* texData = nullptr;
         glm::ivec2 texSize = glm::ivec2(0, 0);
-        for (int i = 0; i < nWindows; i++) {
+        for (size_t i = 0; i < nWindows; i++) {
             ImGui::SetCurrentContext(_contexts[i]);
 
             ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&texData, &texSize.x, &texSize.y);
         }
+
         _fontTexture = std::make_unique<ghoul::opengl::Texture>(
-            texData,
-            glm::uvec3(texSize.x, texSize.y, 1),
-            GL_TEXTURE_2D
+            ghoul::opengl::Texture::FormatInit {
+                .dimensions = glm::uvec3(texSize.x, texSize.y, 1),
+                .type = GL_TEXTURE_2D,
+                .format = ghoul::opengl::Texture::Format::RGBA,
+                .dataType = GL_UNSIGNED_BYTE
+            },
+            ghoul::opengl::Texture::SamplerInit {},
+            reinterpret_cast<std::byte*>(texData)
         );
-        _fontTexture->setName("Gui Text");
-        _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
-        _fontTexture->uploadTexture();
+        _fontTexture->setName("GUI Text");
     }
-    for (int i = 0; i < nWindows; i++) {
+    for (size_t i = 0; i < nWindows; i++) {
         const uintptr_t texture = static_cast<GLuint>(*_fontTexture);
         ImGui::SetCurrentContext(_contexts[i]);
         ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(texture);
     }
 
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
+    glCreateBuffers(1, &vbo);
+    glNamedBufferData(vbo, 0, nullptr, GL_DYNAMIC_DRAW);
 
-    glGenBuffers(1, &vboElements);
+    glCreateBuffers(1, &vboElements);
 
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glCreateVertexArrays(1, &vao);
+    glVertexArrayVertexBuffer(vao, 0, vbo, 0, sizeof(ImDrawVert));
+    glVertexArrayElementBuffer(vao, vboElements);
 
     const GLuint positionAttrib = _program->attributeLocation("in_position");
-    const GLuint uvAttrib = _program->attributeLocation("in_uv");
-    const GLuint colorAttrib = _program->attributeLocation("in_color");
+    glEnableVertexArrayAttrib(vao, positionAttrib);
+    glVertexArrayAttribFormat(vao, positionAttrib, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(vao, positionAttrib, 0);
 
-    glEnableVertexAttribArray(positionAttrib);
-    glVertexAttribPointer(
-        positionAttrib,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(ImDrawVert),
-        nullptr
-    );
-
-    glEnableVertexAttribArray(uvAttrib);
-    glVertexAttribPointer(
+    const GLuint uvAttrib = _program->attributeLocation("in_texCoords");
+    glEnableVertexArrayAttrib(vao, uvAttrib);
+    glVertexArrayAttribFormat(
+        vao,
         uvAttrib,
         2,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(ImDrawVert),
-        reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, uv))
+        offsetof(ImDrawVert, uv)
     );
+    glVertexArrayAttribBinding(vao, uvAttrib, 0);
 
-    glEnableVertexAttribArray(colorAttrib);
-    glVertexAttribPointer(
+    const GLuint colorAttrib = _program->attributeLocation("in_color");
+    glEnableVertexArrayAttrib(vao, colorAttrib);
+    glVertexArrayAttribFormat(
+        vao,
         colorAttrib,
         4,
         GL_UNSIGNED_BYTE,
         GL_TRUE,
-        sizeof(ImDrawVert),
-        reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, col))
+        offsetof(ImDrawVert, col)
     );
-    glBindVertexArray(0);
+    glVertexArrayAttribBinding(vao, colorAttrib, 0);
 
-    for (gui::GuiComponent* comp : _components) {
+    for (GuiComponent* comp : _components) {
         comp->initializeGL();
     }
 }
@@ -484,14 +485,14 @@ void ImGUIModule::internalDeinitializeGL() {
     glDeleteBuffers(1, &vbo);
     glDeleteBuffers(1, &vboElements);
 
-    for (gui::GuiComponent* comp : _components) {
+    for (GuiComponent* comp : _components) {
         comp->deinitializeGL();
     }
 }
 
 void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
-                             const glm::vec2& dpiScaling, const glm::vec2& mousePos,
-                             uint32_t mouseButtonsPressed)
+                              const glm::vec2& dpiScaling, const glm::vec2& mousePos,
+                              uint32_t mouseButtonsPressed)
 {
     const int iWindow = global::windowDelegate->currentWindowId();
     ImGui::SetCurrentContext(_contexts[iWindow]);
@@ -513,41 +514,41 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }
 
-   //
-   // Render
-   ImGui::SetNextWindowCollapsed(_isCollapsed);
+    //
+    // Render
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
 
-   ImGui::Begin("OpenSpace GUI", nullptr);
+    ImGui::Begin("OpenSpace GUI", nullptr);
 
-   _isCollapsed = ImGui::IsWindowCollapsed();
+    _isCollapsed = ImGui::IsWindowCollapsed();
 
-   for (gui::GuiComponent* comp : _components) {
-       bool enabled = comp->isEnabled();
-       ImGui::Checkbox(comp->guiName().c_str(), &enabled);
-       comp->setEnabled(enabled);
-   }
+    for (GuiComponent* comp : _components) {
+        bool enabled = comp->isEnabled();
+        ImGui::Checkbox(comp->guiName().c_str(), &enabled);
+        comp->setEnabled(enabled);
+    }
 
 #ifdef SHOW_IMGUI_HELPERS
-   ImGui::Checkbox("ImGUI Internals", &_showInternals);
-   if (_showInternals) {
-       ImGui::Begin("Style Editor");
-       ImGui::ShowStyleEditor();
-       ImGui::End();
+    ImGui::Checkbox("ImGUI Internals", &_showInternals);
+    if (_showInternals) {
+        ImGui::Begin("Style Editor");
+        ImGui::ShowStyleEditor();
+        ImGui::End();
 
-       ImGui::Begin("Test Window");
-       ImGui::ShowDemoWindow();
-       ImGui::End();
+        ImGui::Begin("Test Window");
+        ImGui::ShowDemoWindow();
+        ImGui::End();
 
-       ImGui::Begin("Metrics Window");
-       ImGui::ShowMetricsWindow();
-       ImGui::End();
-   }
-#endif
+        ImGui::Begin("Metrics Window");
+        ImGui::ShowMetricsWindow();
+        ImGui::End();
+    }
+#endif // SHOW_IMGUI_HELPERS
 
-   ImGui::End();
+    ImGui::End();
 
 
-    for (gui::GuiComponent* comp : _components) {
+    for (GuiComponent* comp : _components) {
         if (comp->isEnabled()) {
             comp->render();
         }
@@ -581,8 +582,7 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
     glEnable(GL_SCISSOR_TEST);
 
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    _fontTexture->bind();
+    unit.bind(*_fontTexture);
 
     // Setup orthographic projection matrix
     const float width = ImGui::GetIO().DisplaySize.x;
@@ -605,17 +605,15 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
         const ImDrawList* cmdList = drawData->CmdLists[i];
         const ImDrawIdx* indexBufferOffset = nullptr;
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(
-            GL_ARRAY_BUFFER,
+        glNamedBufferData(
+            vbo,
             cmdList->VtxBuffer.size() * sizeof(ImDrawVert),
             reinterpret_cast<const GLvoid*>(&cmdList->VtxBuffer.front()),
             GL_STREAM_DRAW
         );
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboElements);
-        glBufferData(
-            GL_ELEMENT_ARRAY_BUFFER,
+        glNamedBufferData(
+            vboElements,
             cmdList->IdxBuffer.size() * sizeof(ImDrawIdx),
             reinterpret_cast<const GLvoid*>(&cmdList->IdxBuffer.front()),
             GL_STREAM_DRAW
@@ -692,8 +690,8 @@ bool ImGUIModule::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
         io.KeyAlt = hasAlt;
     }
 
-    // Even if the event is not consumed,
-    // set keys and modifiers to false when they are released.
+    // Even if the event is not consumed, set keys and modifiers to false when they are
+    // released
     if (action == KeyAction::Release) {
         io.KeysDown[keyIndex] = false;
     }

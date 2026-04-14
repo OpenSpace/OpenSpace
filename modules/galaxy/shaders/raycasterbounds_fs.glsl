@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,15 +25,15 @@
 #include "floatoperations.glsl"
 #include "fragment.glsl"
 
-in vec3 modelPosition;
-in vec4 viewPosition;
+in Data {
+  vec3 modelPosition;
+  vec4 viewPosition;
+} in_data;
 
 
 Fragment getFragment() {
   Fragment frag;
-  vec3 pos = modelPosition + 0.5;
-  frag.color = vec4(pos, 1.0);
-
-  frag.depth = safeLength(viewPosition);
+  frag.color = vec4(in_data.modelPosition + 0.5, 1.0);
+  frag.depth = safeLength(in_data.viewPosition);
   return frag;
 }

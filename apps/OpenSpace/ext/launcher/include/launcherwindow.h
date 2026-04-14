@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,14 +27,17 @@
 
 #include <QMainWindow>
 
-#include "sgctedit/sgctedit.h"
 #include <openspace/scene/profile.h>
-#include <sgct/config.h>
-#include <sgct/error.h>
-#include <QApplication>
 #include <filesystem>
 #include <optional>
+#include <string>
 
+class QBoxLayout;
+class QComboBox;
+class QKeyEvent;
+class QLabel;
+class QPushButton;
+class QStandardItemModel;
 class SplitComboBox;
 
 namespace openspace { struct Configuration; }
@@ -64,9 +67,9 @@ public:
     /**
       * Returns the selected profile name when the launcher window closed.
       *
-      * \return The path to the selected profile
+      * \return The path to the selected profile and the list of selected add-ons
       */
-    std::string selectedProfile() const;
+    std::pair<std::string, std::vector<std::string>> selectedProfile() const;
 
     /**
       * Returns the selected SGCT window configuration when the launcher window closed.
@@ -119,6 +122,10 @@ private:
     // profile and configurations
     void updateStartButton() const;
 
+    void updatePlaceholderText();
+
+    void updateAddonsBox(const std::string& profile);
+
     const std::filesystem::path _assetPath;
     const std::filesystem::path _userAssetPath;
     const std::filesystem::path _configPath;
@@ -128,6 +135,10 @@ private:
     bool _shouldLaunch = false;
 
     SplitComboBox* _profileBox = nullptr;
+    struct {
+        QComboBox* combobox = nullptr;
+        QStandardItemModel* model = nullptr;
+    } _addonBox;
     SplitComboBox* _windowConfigBox = nullptr;
     QPushButton* _editProfileButton = nullptr;
     QPushButton* _editWindowButton = nullptr;

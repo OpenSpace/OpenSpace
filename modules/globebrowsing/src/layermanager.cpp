@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,15 +27,17 @@
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <algorithm>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-LayerManager::LayerManager() : properties::PropertyOwner({ "Layers" }) {}
+LayerManager::LayerManager() : PropertyOwner({ "Layers" }) {}
 
 void LayerManager::initialize(
                   const std::map<layers::Group::ID, std::vector<ghoul::Dictionary>>& dict)
@@ -78,7 +80,7 @@ Layer* LayerManager::addLayer(layers::Group::ID id, const ghoul::Dictionary& lay
     try {
         return _layerGroups[static_cast<size_t>(id)]->addLayer(layerDict);
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const SpecificationError& e) {
         logError(e);
         return nullptr;
     }
@@ -153,4 +155,4 @@ void LayerManager::onChange(const std::function<void(Layer*)>& callback) {
     }
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

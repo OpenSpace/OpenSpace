@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,20 +26,13 @@
 
 namespace openspace {
 
-BrickSelection::BrickSelection() {}
-
 BrickSelection::BrickSelection(int numBricks, int numTimeSteps, SplitType splitType_,
                                float splitPoints_)
-{
-    cover = BrickCover(numBricks);
-    lowT = 0;
-    highT = numTimeSteps;
-    brickIndex = 0;
-    splitType = splitType_;
-    splitPoints = splitPoints_;
-    nSpatialSplits = 0;
-    nTemporalSplits = 0;
-}
+    : splitPoints(splitPoints_)
+    , splitType(splitType_)
+    , cover(BrickCover(numBricks))
+    , highT(numTimeSteps)
+{}
 
 BrickSelection BrickSelection::splitSpatially(bool x, bool y, bool z,
                                               unsigned int childBrickIndex,

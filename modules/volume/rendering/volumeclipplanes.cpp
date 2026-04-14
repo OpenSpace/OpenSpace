@@ -3,7 +3,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,11 +26,12 @@
 #include <modules/volume/rendering/volumeclipplanes.h>
 
 #include <ghoul/misc/dictionary.h>
+#include <utility>
 
-namespace openspace::volume {
+namespace openspace {
 
 VolumeClipPlanes::VolumeClipPlanes(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "" }) // @TODO Missing name
+    : PropertyOwner({ "" }) // @TODO Missing name
     // @TODO Missing documentation
     , _nClipPlanes({ "nClipPlanes", "Number of clip planes", "" }, 0, 0, 10)
 {
@@ -68,4 +69,4 @@ std::vector<glm::vec2> VolumeClipPlanes::offsets() {
     return offsets;
 }
 
-} // namespace openspace::volume
+} // namespace openspace

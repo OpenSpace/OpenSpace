@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (SpaceStations)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_stations",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=stations&FORMAT=kvn",
+  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=kvn",
   Filename = "stations.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -53,6 +53,6 @@ asset.meta = {
   Name = "Satellites SpaceStations",
   Description = "Satellites asset for SpaceStations. Data from Celestrak",
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/NORAD/elements/",
+  URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
 }

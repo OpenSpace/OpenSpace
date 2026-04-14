@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2025                                                                #
+# Copyright (c) 2014-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -125,24 +125,26 @@ set(SHADER_FILES
   shaders/advanced_rings_vs.glsl
   shaders/advanced_rings_fs.glsl
   shaders/blending.glsl
+  shaders/ellipsoid.glsl
   shaders/geojson_fs.glsl
   shaders/geojson_points_fs.glsl
   shaders/geojson_points_gs.glsl
   shaders/geojson_points_vs.glsl
   shaders/geojson_vs.glsl
   shaders/globalrenderer_vs.glsl
+  shaders/interpolate_fs.glsl
+  shaders/interpolate_vs.glsl
   shaders/localrenderer_vs.glsl
   shaders/renderer_fs.glsl
-  shaders/rings_vs.glsl
   shaders/rings_fs.glsl
-  shaders/rings_geom_vs.glsl
   shaders/rings_geom_fs.glsl
+  shaders/rings_geom_vs.glsl
+  shaders/rings_vs.glsl
   shaders/texturetilemapping.glsl
   shaders/tile.glsl
   shaders/tileheight.glsl
   shaders/tilevertexskirt.glsl
 )
-
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
@@ -178,6 +180,12 @@ endif () # WIN32
 begin_dependency("GEOS")
 add_subdirectory(ext/geos SYSTEM)
 target_link_libraries(openspace-module-globebrowsing PRIVATE geos)
+
+if (MSVC)
+  target_compile_options(geos PRIVATE "/W0")
+else ()
+  target_compile_options(geos PRIVATE "-w")
+endif ()
 
 set_property(TARGET geos PROPERTY FOLDER "External")
 set_property(TARGET geos_c PROPERTY FOLDER "External")

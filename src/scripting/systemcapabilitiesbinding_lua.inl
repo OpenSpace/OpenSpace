@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,6 +23,15 @@
  ****************************************************************************************/
 
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/stringconversion.h>
+#include <ghoul/misc/stringhelper.h>
+#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <ghoul/systemcapabilities/version.h>
+#include <cctype>
+#include <vector>
+#include <string>
+#include <string_view>
 
 namespace {
 
@@ -84,31 +93,41 @@ namespace {
     return memory;
 }
 
-// Returns the number of cores.
+/**
+ * Returns the number of cores.
+ */
 [[codegen::luawrap]] int cores() {
     int nCores = static_cast<int>(CpuCap.cores());
     return nCores;
 }
 
-// Returns the cache line size.
+/**
+ * Returns the cache line size.
+ */
 [[codegen::luawrap]] int cacheLineSize() {
     int cls = static_cast<int>(CpuCap.cacheLineSize());
     return cls;
 }
 
-// Returns the L2 associativity.
+/**
+ * Returns the L2 associativity.
+ */
 [[codegen::luawrap("L2Associativity")]] int l2Associativity() {
     int assoc = static_cast<int>(CpuCap.L2Associativity());
     return assoc;
 }
 
-// Returns the cache size.
+/**
+ * Returns the cache size.
+ */
 [[codegen::luawrap]] int cacheSize() {
     int cs = static_cast<int>(CpuCap.cacheSize());
     return cs;
 }
 
-// Returns all supported exteions as comma-separated string.
+/**
+ * Returns all supported exteions as comma - separated string.
+ */
 [[codegen::luawrap("extensions")]] std::string cpuExtensions() {
     std::string ext = CpuCap.extensions();
     return ext;
@@ -141,35 +160,43 @@ namespace {
     return supported;
 }
 
-// Returns the maximum OpenGL version that is supported on this platform.
+/**
+ * Returns the maximum OpenGL version that is supported on this platform.
+ */
 [[codegen::luawrap]] std::string openGLVersion() {
     ghoul::systemcapabilities::Version version = OpenGLCap.openGLVersion();
     return ghoul::to_string(version);
 }
 
 /**
- * Returns the value of a call to `glGetString(GL_VENDOR)`. This will give
- * detailed information about the vendor of the main graphics card. This string can be
- * used if the automatic Vendor detection failed.
+ * Returns the value of a call to `glGetString(GL_VENDOR)`. This will give detailed
+ * information about the vendor of the main graphics card. This string can be used if the
+ * automatic Vendor detection failed.
  */
 [[codegen::luawrap]] std::string glslCompiler() {
     std::string compiler = OpenGLCap.glslCompiler();
     return compiler;
 }
 
-// Returns the vendor of the main graphics card.
+/**
+ * Returns the vendor of the main graphics card.
+ */
 [[codegen::luawrap]] std::string gpuVendor() {
     std::string_view vendor = OpenGLCap.gpuVendorString();
     return std::string(vendor);
 }
 
-// Returns all available extensions as a list of names.
+/**
+ * Returns all available extensions as a list of names.
+ */
 [[codegen::luawrap("extensions")]] std::vector<std::string> gpuExtensions() {
     std::vector<std::string> extensions = OpenGLCap.extensions();
     return extensions;
 }
 
-// Checks is a specific `extension` is supported or not.
+/**
+ * Checks is a specific `extension` is supported or not.
+ */
 [[codegen::luawrap]] bool isExtensionSupported(std::string extension) {
     bool isSupported = OpenGLCap.isExtensionSupported(extension);
     return isSupported;
@@ -184,13 +211,17 @@ namespace {
     return units;
 }
 
-// Returns the largest dimension for a 2D texture on this graphics card.
+/**
+ * Returns the largest dimension for a 2D texture on this graphics card.
+ */
 [[codegen::luawrap]] int max2DTextureSize() {
     int size = OpenGLCap.max2DTextureSize();
     return size;
 }
 
-// Returns the largest dimension for a 3D texture on this graphics card.
+/**
+ * Returns the largest dimension for a 3D texture on this graphics card.
+ */
 [[codegen::luawrap]] int max3DTextureSize() {
     int size = OpenGLCap.max3DTextureSize();
     return size;
@@ -223,6 +254,6 @@ namespace {
     return bindings;
 }
 
-#include "systemcapabilitiesbinding_lua_codegen.cpp"
-
 } // namespace
+
+#include "systemcapabilitiesbinding_lua_codegen.cpp"

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,21 +25,23 @@
 #include <modules/kameleonvolume/kameleonvolumemodule.h>
 
 #include <modules/kameleonvolume/rendering/renderablekameleonvolume.h>
-#include <modules/kameleonvolume/tasks/kameleonmetadatatojsontask.h>
 #include <modules/kameleonvolume/tasks/kameleondocumentationtask.h>
+#include <modules/kameleonvolume/tasks/kameleonmetadatatojsontask.h>
 #include <modules/kameleonvolume/tasks/kameleonvolumetorawtask.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/task.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 
-KameleonVolumeModule::KameleonVolumeModule() : OpenSpaceModule(Name) {}
+KameleonVolumeModule::KameleonVolumeModule()
+    : OpenSpaceModule(Name)
+{}
 
 void KameleonVolumeModule::internalInitialize(const ghoul::Dictionary&) {
-    using namespace kameleonvolume;
-
     ghoul::TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
@@ -52,9 +54,7 @@ void KameleonVolumeModule::internalInitialize(const ghoul::Dictionary&) {
     fTask->registerClass<KameleonVolumeToRawTask>("KameleonVolumeToRawTask");
 }
 
-std::vector<documentation::Documentation> KameleonVolumeModule::documentations() const {
-    using namespace kameleonvolume;
-
+std::vector<Documentation> KameleonVolumeModule::documentations() const {
     return { KameleonMetadataToJsonTask::documentation() };
 }
 

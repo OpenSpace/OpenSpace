@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,8 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -36,57 +37,43 @@ namespace openspace {
 
 class SceneGraphNode;
 
-namespace documentation { struct Documentation; }
-
 class RenderableTravelSpeed : public Renderable {
 public:
     explicit RenderableTravelSpeed(const ghoul::Dictionary& dictionary);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
     void initializeGL() override;
     void initialize() override;
     void deinitializeGL() override;
-
-    bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
 private:
-    void calculateVerticesPositions();
-    void calculateDirectionVector();
     void updateVertexData();
     void reinitiateTravel();
+
     UniformCache(lineColor, opacity) _uniformCache;
 
-    properties::StringProperty _targetName;
+    StringProperty _targetIdentifier;
     SceneGraphNode* _targetNode = nullptr;
-    properties::DoubleProperty _travelSpeed;
-    properties::FloatProperty _indicatorLength;
-    properties::FloatProperty _fadeLength;
-    properties::FloatProperty _lineWidth;
-    properties::Vec3Property _lineColor;
+    DoubleProperty _travelSpeed;
+    FloatProperty _indicatorLength;
+    FloatProperty _fadeLength;
+    FloatProperty _lineWidth;
+    Vec3Property _lineColor;
 
-    struct VertexPositions {
-        glm::vec3 endOfFade;
-        glm::vec3 betweenLightAndFade;
-        glm::vec3 headOfLight;
-    };
-    VertexPositions _vertexPositions;
-
-    glm::dvec3 _sourcePosition;
-    glm::dvec3 _targetPosition;
     double _travelTime = 0.0;
     glm::dvec3 _directionVector;
     double _initiationTime = -1.0;
-    double _arrivalTime;
+    double _arrivalTime = -1.0;
     double _timeSinceStart = -1.0;
 
     ghoul::opengl::ProgramObject* _shaderProgram = nullptr;
     // The vertex attribute location for position must correlate to layout location in
     // vertex shader
-    GLuint _vaoId = 0;
-    GLuint _vBufferId = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 };
 
 } // namespace openspace

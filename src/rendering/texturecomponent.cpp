@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,9 +25,10 @@
 #include <openspace/rendering/texturecomponent.h>
 
 #include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "TextureComponent";
@@ -64,65 +65,32 @@ void TextureComponent::setShouldWatchFileForChanges(bool value) {
     _shouldWatchFile = value;
 }
 
-void TextureComponent::setShouldPurgeFromRAM(bool value) {
-    _shouldPurgeFromRAM = value;
-}
-
-void TextureComponent::bind() {
-    ghoul_assert(_texture, "Texture must be loaded before binding");
-    _texture->bind();
-}
-
-void TextureComponent::uploadToGpu() {
-    if (!_texture) {
-        LERROR("Could not upload texture to GPU. Texture not loaded");
-        return;
-    }
-    _texture->uploadTexture();
-    _texture->setFilter(_filterMode);
-    _texture->setWrapping(_wrappingMode);
-    if (_shouldPurgeFromRAM) {
-        _texture->purgeFromRAM();
-    }
-}
-
 void TextureComponent::loadFromFile(const std::filesystem::path& path) {
     if (path.empty()) {
         return;
     }
 
-    using namespace ghoul::io;
-    using namespace ghoul::opengl;
-
-    std::filesystem::path absolutePath = absPath(path);
-
-    std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-        absolutePath,
-        _nDimensions
-    );
-
-    if (texture) {
-        LDEBUG(std::format("Loaded texture from '{}'", absolutePath));
-        _texture = std::move(texture);
-
-        _textureFile = std::make_unique<ghoul::filesystem::File>(absolutePath);
-        if (_shouldWatchFile) {
-            _textureFile->setCallback([this]() { _fileIsDirty = true; });
+    _texture = ghoul::io::texture::loadTexture(
+        path,
+        _nDimensions,
+        ghoul::opengl::Texture::SamplerInit {
+            .filter = _filterMode,
+            .wrapping = _wrappingMode
         }
+    );
+    LDEBUG(std::format("Loaded texture from '{}'", path));
 
-        _fileIsDirty = false;
-        _textureIsDirty = true;
+    _textureFile = std::make_unique<ghoul::filesystem::File>(path);
+    if (_shouldWatchFile) {
+        _textureFile->setCallback([this]() { _fileIsDirty = true; });
     }
+
+    _fileIsDirty = false;
 }
 
 void TextureComponent::update() {
     if (_fileIsDirty) {
         loadFromFile(_textureFile->path());
-    }
-
-    if (_textureIsDirty) {
-        uploadToGpu();
-        _textureIsDirty = false;
     }
 }
 } // namespace openspace

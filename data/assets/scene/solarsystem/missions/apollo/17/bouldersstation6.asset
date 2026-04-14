@@ -11,18 +11,45 @@ local models = asset.resource({
 })
 
 
-local Station6Frag1Holder = {
-  Identifier = "Station_6_Fragment1",
+local Station6Frag1 = {
+  Identifier = "Apollo17Station6Frag1",
   Parent = moon.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = moon.Moon.Identifier,
-      Longitude = -360 + 30.80068,
+      Longitude = 30.8007,
       Latitude = 20.2903,
-      Altitude = -2562.6,
+      Altitude = 0.4,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = moon.Moon.Identifier,
+      Longitude = 30.8007,
+      Latitude = 20.2903,
+      Altitude = 0,
       UseHeightmap = false
     }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "A17-S6-frag1.obj",
+    RotationVector = { 270.0, 60.0, 0.0 },
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    },
+    PerformShading = true,
+    AmbientIntensity = 0.4,
+    DiffuseIntensity = 0.0,
+    SpecularIntensity = 0.0,
+    EnableFaceCulling = false,
+    ModelScale = 0.1
   },
   GUI = {
     Name = "Station 6 Fragment 1",
@@ -30,74 +57,31 @@ local Station6Frag1Holder = {
   }
 }
 
-local Station6Frag1Model = {
-  Identifier = "Station6Frag1Model",
-  Parent = Station6Frag1Holder.Identifier,
-  Transform = {
-    Translation = {
-      Type = "GlobeTranslation",
-      Globe = moon.Moon.Identifier,
-      Longitude = -360 + 30.8007,
-      Latitude = 20.2903,
-      Altitude = -2562.6,
-      UseHeightmap = false
-    },
-    Scale = {
-      Type = "StaticScale",
-      Scale = 0.1
-    }
-  },
-  Renderable = {
-    Type = "RenderableModel",
-    GeometryFile = models .. "A17-S6-frag1.obj",
-    RotationVector = { 235.909088, 165.000000, 286.299194 },
-    LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
-    },
-    PerformShading = false,
-    EnableFaceCulling = false
-  },
-  GUI = {
-    Name = "Station 6 Fragment 1 Model",
-    Path = "/Solar System/Missions/Apollo/17/Station 6"
-  }
-}
-
-local Station6Frag23Holder = {
-  Identifier = "Station_6_Fragments_2_3",
+local Station6Frag2 = {
+  Identifier = "Apollo17Station6Fragment2",
   Parent = moon.Moon.Identifier,
-  GUI = {
-    Name = "Station 6 Fragments 2 & 3 Holder",
-    Path = "/Solar System/Missions/Apollo/17/Station 6"
-  }
-}
-
-local Station6Frag2Model = {
-  Identifier = "A17S6F5",
-  Parent = Station6Frag23Holder.Identifier,
   Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = 0.14
-    },
     Translation = {
       Type = "GlobeTranslation",
       Globe = moon.Moon.Identifier,
-      Longitude = -360 + 30.80055,
+      Longitude = 30.80055,
       Latitude = 20.289808,
-      Altitude = -2566.5,
+      Altitude = 0.5,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = moon.Moon.Identifier,
+      Longitude = 30.80055,
+      Latitude = 20.289808,
+      Altitude = 0,
       UseHeightmap = false
     }
   },
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = models .. "station6_boulder_frag2.obj",
-    RotationVector = { 336.959991, 210.239990, 325.984253 },
+    RotationVector = { 0.0, 132.0, 0.0 },
     LightSources = {
       sun.LightSource,
       {
@@ -106,36 +90,44 @@ local Station6Frag2Model = {
         Intensity = 0.5
       }
     },
-    PerformShading = false,
-    EnableFaceCulling = false
+    PerformShading = true,
+    AmbientIntensity = 0.4,
+    DiffuseIntensity = 0.0,
+    SpecularIntensity = 0.0,
+    EnableFaceCulling = false,
+    ModelScale = 0.15
   },
   GUI = {
-    Name = "Station 6 Fragment 2 Model",
+    Name = "Station 6 Fragment 2",
     Path = "/Solar System/Missions/Apollo/17/Station 6"
   }
 }
 
-local Station6Frag3Model = {
-  Identifier = "A17S6F3",
-  Parent = Station6Frag23Holder.Identifier,
+local Station6Frag3 = {
+  Identifier = "Apollo17Station6Fragment3",
+  Parent = moon.Moon.Identifier,
   Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = 0.14
-    },
     Translation = {
       Type = "GlobeTranslation",
       Globe = moon.Moon.Identifier,
-      Longitude = -360 + 30.80053,
+      Longitude = 30.80053,
       Latitude = 20.29030,
-      Altitude = -2563.0,
-      UseHeightMap = false
+      Altitude = -1,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = moon.Moon.Identifier,
+      Longitude = 30.80053,
+      Latitude = 20.29030,
+      Altitude = 0,
+      UseHeightmap = false
     }
   },
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = models .. "station6_boulder_frag3.obj",
-    RotationVector = { 293.181824, 255.000000, 4.090910 },
+    RotationVector = { 0.0, 170.0, 0.0 },
     LightSources = {
       sun.LightSource,
       {
@@ -144,37 +136,35 @@ local Station6Frag3Model = {
         Intensity = 0.5
       }
     },
-    PerformShading = false,
-    EnableFaceCulling = false
+    PerformShading = true,
+    EnableFaceCulling = false,
+    AmbientIntensity = 0.4,
+    DiffuseIntensity = 0.0,
+    SpecularIntensity = 0.0,
+    ModelScale = 0.14
   },
   GUI = {
-    Name = "Station 6 Fragment 3 Model",
+    Name = "Station 6 Fragment 3",
     Path = "/Solar System/Missions/Apollo/17/Station 6"
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Station6Frag1Holder)
-  openspace.addSceneGraphNode(Station6Frag1Model)
-  openspace.addSceneGraphNode(Station6Frag23Holder)
-  openspace.addSceneGraphNode(Station6Frag2Model)
-  openspace.addSceneGraphNode(Station6Frag3Model)
+  openspace.addSceneGraphNode(Station6Frag1)
+  openspace.addSceneGraphNode(Station6Frag2)
+  openspace.addSceneGraphNode(Station6Frag3)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Station6Frag3Model)
-  openspace.removeSceneGraphNode(Station6Frag2Model)
-  openspace.removeSceneGraphNode(Station6Frag23Holder)
-  openspace.removeSceneGraphNode(Station6Frag1Model)
-  openspace.removeSceneGraphNode(Station6Frag1Holder)
+  openspace.removeSceneGraphNode(Station6Frag3)
+  openspace.removeSceneGraphNode(Station6Frag2)
+  openspace.removeSceneGraphNode(Station6Frag1)
 end)
 
-asset.export(Station6Frag1Holder)
-asset.export(Station6Frag1Model)
-asset.export(Station6Frag23Holder)
-asset.export(Station6Frag2Model)
-asset.export(Station6Frag3Model)
+asset.export(Station6Frag1)
+asset.export(Station6Frag2)
+asset.export(Station6Frag3)
 
 
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace::volume {
+namespace openspace {
 
 template <typename VolumeType>
 VolumeSampler<VolumeType>::VolumeSampler(const VolumeType* volume,
@@ -44,9 +44,10 @@ typename VolumeType::VoxelType VolumeSampler<VolumeType>::sample(
     const glm::ivec3 flooredPos = static_cast<glm::ivec3>(glm::floor(position));
     const glm::vec3 t = glm::fract(position);
 
-    // t is now in interval [0, 1[ (never 1)
-    const glm::ivec3 minCoords = flooredPos - _filterSize / 2; // min coord to sample from
-    // max coords to sample from, including interpolation.
+    // `t` is now in interval [0, 1[ (never 1)
+    // Min coord to sample from
+    const glm::ivec3 minCoords = flooredPos - _filterSize / 2;
+    // Max coords to sample from, including interpolation
     const glm::ivec3 maxCoords = minCoords + _filterSize;
     const glm::ivec3 clampCeiling = _volume->dimensions() - glm::ivec3(1);
 
@@ -90,4 +91,4 @@ typename VolumeType::VoxelType VolumeSampler<VolumeType>::sample(
     return value;
 }
 
-} // namespace openspace::volume
+} // namespace openspace

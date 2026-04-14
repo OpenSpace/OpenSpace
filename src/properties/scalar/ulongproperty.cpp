@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,10 +24,9 @@
 
 #include <openspace/properties/scalar/ulongproperty.h>
 
-#include <openspace/util/json_helper.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 ULongProperty::ULongProperty(Property::PropertyInfo info, unsigned long value,
                              unsigned long minValue, unsigned long maxValue,
@@ -61,4 +60,4 @@ std::string ULongProperty::stringValue() const {
     return formatJson(_value);
 }
 
-} // namespace openspace::properties
+} // namespace openspace

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2025                                                                #
+# Copyright (c) 2014-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -28,17 +28,25 @@
 
 function(DownloadNodeJs version download_dir)
   if (MSVC)
-    set(basename "node")
-    set(filename "${basename}.exe")
-    set(path "v${version}/win-x64/${filename}")
-  elseif (APPLE)
-    set(basename "node-v${version}-darwin-x64")
-    set(filename "${basename}.tar.gz")
-    set(path "v${version}/${filename}")
+    if (CMAKE_SYSTEM_PROCESSOR MATCHES "ARM64|aarch64")
+      set(basename "node")
+      set(filename "${basename}.exe")
+      set(path "v${version}/win-arm64/${filename}")
+    else () # Default to x64
+      set(basename "node")
+      set(filename "${basename}.exe")
+      set(path "v${version}/win-x64/${filename}")
+    endif ()
   elseif (UNIX)
-    set(basename "node-v${version}-linux-x64")
-    set(filename "${basename}.tar.xz")
-    set(path "v${version}/${filename}")
+    if (CMAKE_SYSTEM_PROCESSOR MATCHES "ARM64|aarch64")
+      set(basename "node-v${version}-linux-arm64")
+      set(filename "${basename}.tar.xz")
+      set(path "v${version}/${filename}")
+    else () # Default to x64
+      set(basename "node-v${version}-linux-x64")
+      set(filename "${basename}.tar.xz")
+      set(path "v${version}/${filename}")
+    endif ()
   endif ()
 
   # Create the file if it doesn't exist
@@ -63,15 +71,7 @@ function(DownloadNodeJs version download_dir)
   message(STATUS "URL: ${NODEJS_DOWNLOAD_URL}")
 
   # Extract the binary distribution for unix
-  if (APPLE)
-    # Apple uses tar.gz
-    message(STATUS "Extracting Node.js: ${NODEJS_DOWNLOAD_PATH} in ${download_dir}")
-    execute_process(
-      COMMAND tar xzf ${NODEJS_DOWNLOAD_PATH}
-      WORKING_DIRECTORY ${download_dir}
-    )
-  endif ()
-  if (UNIX AND NOT APPLE)
+  if (UNIX)
     # Linux uses tar.xz
     message(STATUS "Extracting Node.js: ${NODEJS_DOWNLOAD_PATH} in ${download_dir}")
     execute_process(

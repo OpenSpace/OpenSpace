@@ -6,7 +6,7 @@ local kernels = asset.resource({
   Name = "Neptune Spice Kernels",
   Type = "HttpSynchronization",
   Identifier = "neptune_kernels",
-  Version = 2
+  Version = 3
 })
 
 
@@ -16,8 +16,11 @@ local ID = {
   Hippocamp = 814,
   Larissa = "LARISSA",
   Naiad = "NAIAD",
+  Neptune = "NEPTUNE",
+  Nereid = "NEREID",
   Proteus = "PROTEUS",
-  Thalassa = "THALASSA"
+  Thalassa = "THALASSA",
+  Triton = "TRITON"
 }
 
 local Frame = {

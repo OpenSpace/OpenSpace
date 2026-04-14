@@ -49,8 +49,8 @@ local Node_Invert = {
     }
   },
   GUI = {
-    Name = "Fading (Inverted)",
-    Path = "/Examples/RenderablePointCloud/Advanced",
+    Name = "RenderablePointCloud - Fading (Inverted)",
+    Path = "/Examples/Advanced",
     Description = [[Example of a point cloud with inverted distance-based fading
       (the points are visible when the camera is close to the origin, and invisible
       when further away)]]

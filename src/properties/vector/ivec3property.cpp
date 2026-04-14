@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,15 +24,12 @@
 
 #include <openspace/properties/vector/ivec3property.h>
 
-#include <openspace/util/json_helper.h>
-#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
-IVec3Property::IVec3Property(Property::PropertyInfo info, glm::ivec3 value,
-                             glm::ivec3 minValue, glm::ivec3 maxValue,
-                             glm::ivec3 stepValue)
+IVec3Property::IVec3Property(PropertyInfo info, glm::ivec3 value, glm::ivec3 minValue,
+                             glm::ivec3 maxValue, glm::ivec3 stepValue)
     : NumericalProperty<glm::ivec3>(
         std::move(info),
         std::move(value),
@@ -62,4 +59,4 @@ std::string IVec3Property::stringValue() const {
     return formatJson(_value);
 }
 
-} // namespace openspace::properties
+} // namespace openspace

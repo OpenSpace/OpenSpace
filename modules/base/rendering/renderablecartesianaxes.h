@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,16 +27,8 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/matrix/dmat4property.h>
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
-
-namespace ghoul::opengl { class ProgramObject; }
-
-namespace openspace::documentation { struct Documentation; }
 
 namespace openspace {
 
@@ -48,11 +40,9 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     struct Vertex {
@@ -61,13 +51,13 @@ protected:
 
     ghoul::opengl::ProgramObject* _program;
 
-    properties::Vec3Property _xColor;
-    properties::Vec3Property _yColor;
-    properties::Vec3Property _zColor;
+    Vec3Property _xColor;
+    Vec3Property _yColor;
+    Vec3Property _zColor;
 
-    GLuint _vaoId = 0;
-    GLuint _vBufferId = 0;
-    GLuint _iBufferId = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
+    GLuint _ibo = 0;
 };
 
 }// namespace openspace

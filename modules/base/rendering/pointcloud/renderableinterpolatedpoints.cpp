@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,111 +30,113 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/interpolator.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <optional>
+#include <filesystem>
+#include <limits>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableInterpolatedPoints";
 
     void triggerInterpolation(std::string_view identifier, float v, float d) {
-        using namespace openspace;
-
         std::string script = std::format(
             "openspace.setPropertyValueSingle(\"{}\", {}, {})",
             identifier, v, d
         );
-        // No syncing, as this was triggered from a property change (which happened
-        // based on an already synced script)
+        // No syncing, as this was triggered from a property change (which happened based
+        // on an already synced script)
         global::scriptEngine->queueScript({
             .code = script,
-            .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
-            .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+            .synchronized = ScriptEngine::Script::ShouldBeSynchronized::No,
+            .sendToRemote = ScriptEngine::Script::ShouldSendToRemote::No
         });
     }
 
-    constexpr openspace::properties::Property::PropertyInfo InterpolationValueInfo = {
+    constexpr Property::PropertyInfo InterpolationValueInfo = {
         "Value",
         "Value",
-        "The value used for interpolation. The max value is set from the number of "
-        "steps in the dataset, so a step of one corresponds to one step in the dataset "
-        "and values in-between will be determined using interpolation.",
-        openspace::properties::Property::Visibility::NoviceUser
+        "The value used for interpolation. The max value is set from the number of steps "
+        "in the dataset, so a step of one corresponds to one step in the dataset and "
+        "values in-between will be determined using interpolation.",
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StepsInfo = {
+    constexpr Property::PropertyInfo StepsInfo = {
         "NumberOfSteps",
-        "Number of Steps",
+        "Number of steps",
         "The number of steps available in the dataset, including the initial positions.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo JumpToNextInfo = {
+    constexpr Property::PropertyInfo JumpToNextInfo = {
         "JumpToNext",
-        "Jump to Next",
+        "Jump to next",
         "Immediately set the interpolation value to correspond to the next set of point "
         "positions compared to the current.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo JumpToPrevInfo = {
+    constexpr Property::PropertyInfo JumpToPrevInfo = {
         "JumpToPrevious",
-        "Jump to Previous",
+        "Jump to previous",
         "Immediately set the interpolation value to correspond to the previous set of "
         "point positions compared to the current.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InterpolateToNextInfo = {
+    constexpr Property::PropertyInfo InterpolateToNextInfo = {
         "InterpolateToNext",
-        "Interpolate to Next",
+        "Interpolate to next",
         "Trigger an interpolation to the next set of point positions. The duration of "
         "the interpolation is set based on the Interpolaton Speed property.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InterpolateToPrevInfo = {
+    constexpr Property::PropertyInfo InterpolateToPrevInfo = {
         "InterpolateToPrevious",
-        "Interpolate to Previous",
+        "Interpolate to previous",
         "Trigger an interpolation to the previous set of point positions. The duration "
         "of the interpolation is set based on the Interpolaton Speed property.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InterpolateToEndInfo = {
+    constexpr Property::PropertyInfo InterpolateToEndInfo = {
         "InterpolateToEnd",
-        "Interpolate to End",
+        "Interpolate to end",
         "Trigger an interpolation all the way to the final set of positions. The "
         "duration of the interpolation is set based on the Interpolaton Speed property.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InterpolateToStartInfo = {
+    constexpr Property::PropertyInfo InterpolateToStartInfo = {
         "InterpolateToStart",
-        "Interpolate to Start",
+        "Interpolate to start",
         "Trigger an inverted interpolation to the initial set of positions. The duration "
         "of the interpolation is set based on the Interpolaton Speed property.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InterpolationSpeedInfo = {
+    constexpr Property::PropertyInfo InterpolationSpeedInfo = {
         "Speed",
-        "Interpolation Speed",
+        "Interpolation speed",
         "Affects how long the interpolation takes when triggered using one of the "
         "trigger properties. A value of 1 means that a step takes 1 second.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseSplineInfo = {
+    constexpr Property::PropertyInfo UseSplineInfo = {
         "UseSplineInterpolation",
-        "Use Spline Interpolation",
+        "Use spline interpolation",
         "If true, the points will be interpolated using a Catmull-Rom spline instead of "
         "linearly. This leads to a smoother transition at the breakpoints, i.e. between "
         "each step.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // RenderableInterpolatedPoints is a version of the RenderablePointCloud class, where
@@ -168,21 +170,20 @@ namespace {
         // Initial settings for the interpolation.
         std::optional<Interpolation> interpolation;
     };
-
+} // namespace
 #include "renderableinterpolatedpoints_codegen.cpp"
-}  // namespace
 
 namespace openspace {
 
-documentation::Documentation RenderableInterpolatedPoints::Documentation() {
+Documentation RenderableInterpolatedPoints::Documentation() {
     return codegen::doc<Parameters>(
-        "base_renderableinterpolatedpoints",
+        "base_renderable_interpolatedpoints",
         RenderablePointCloud::Documentation()
     );
 }
 
 RenderableInterpolatedPoints::Interpolation::Interpolation()
-    : properties::PropertyOwner({ "Interpolation", "Interpolation", "" })
+    : PropertyOwner({ "Interpolation", "Interpolation", "" })
     , value(InterpolationValueInfo, 0.f, 0.f, 1.f)
     , nSteps(StepsInfo, 1)
     , goToNextStep(JumpToNextInfo)
@@ -214,16 +215,16 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
     addProperty(interpolateToStart);
 
     interpolateToNextStep.onChange([this]() {
-        const float prevValue = glm::floor(value);
-        const float newValue = glm::min(prevValue + 1.f, value.maxValue());
+        const float prevValue = std::floor(value);
+        const float newValue = std::min(prevValue + 1.f, value.maxValue());
         const float duration = 1.f / speed;
         triggerInterpolation(value.uri(), newValue, duration);
     });
     addProperty(interpolateToNextStep);
 
     interpolateToPrevStep.onChange([this]() {
-        const float prevValue = glm::ceil(value);
-        const float newValue = glm::max(prevValue - 1.f, value.minValue());
+        const float prevValue = std::ceil(value);
+        const float newValue = std::max(prevValue - 1.f, value.minValue());
         const float duration = 1.f / speed;
         triggerInterpolation(value.uri(), newValue, duration);
     });
@@ -232,14 +233,14 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
     addProperty(speed);
 
     goToNextStep.onChange([this]() {
-        float prevValue = glm::floor(value);
-        value = glm::min(prevValue + 1.f, value.maxValue());
+        float prevValue = std::floor(value);
+        value = std::min(prevValue + 1.f, value.maxValue());
     });
     addProperty(goToNextStep);
 
     goToPrevStep.onChange([this]() {
-        float prevValue = glm::ceil(value);
-        value = glm::max(prevValue - 1.f, value.minValue());
+        float prevValue = std::ceil(value);
+        value = std::max(prevValue - 1.f, value.minValue());
     });
     addProperty(goToPrevStep);
 
@@ -267,7 +268,7 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
 
     _interpolation.value.onChange([this]() {
         bool passedAKnot =
-            glm::ceil(_interpolation.value) != glm::ceil(_prevInterpolationValue);
+            std::ceil(_interpolation.value) != std::ceil(_prevInterpolationValue);
 
         if (passedAKnot) {
             _dataIsDirty = true;
@@ -343,7 +344,7 @@ void RenderableInterpolatedPoints::deinitializeShaders() {
 
 void RenderableInterpolatedPoints::setExtraUniforms() {
     float t0 = computeCurrentLowerValue();
-    float t = glm::clamp(_interpolation.value - t0, 0.f, 1.f);
+    float t = std::clamp(_interpolation.value - t0, 0.f, 1.f);
 
     _program->setUniform("interpolationValue", t);
     _program->setUniform("useSpline", useSplineInterpolation());
@@ -392,24 +393,24 @@ void RenderableInterpolatedPoints::addPositionDataForPoint(unsigned int index,
     glm::dvec3 position0 = transformedPosition(e0);
     glm::dvec3 position1 = transformedPosition(e1);
 
-    const double r = glm::max(glm::length(position0), glm::length(position1));
-    maxRadius = glm::max(maxRadius, r);
+    const double r = std::max(glm::length(position0), glm::length(position1));
+    maxRadius = std::max(maxRadius, r);
 
-    for (int j = 0; j < 3; ++j) {
+    for (int j = 0; j < 3; j++) {
         result.push_back(static_cast<float>(position0[j]));
     }
 
-    for (int j = 0; j < 3; ++j) {
+    for (int j = 0; j < 3; j++) {
         result.push_back(static_cast<float>(position1[j]));
     }
 
     if (useSplineInterpolation()) {
-        // Compute the extra positions, before and after the other ones. But make sure
-        // we do not overflow the allowed bound for the current interpolation step
-        int beforeIndex = glm::max(static_cast<int>(firstIndex - _nDataPoints), 0);
+        // Compute the extra positions, before and after the other ones. But make sure we
+        // do not overflow the allowed bound for the current interpolation step
+        int beforeIndex = std::max(static_cast<int>(firstIndex - _nDataPoints), 0);
         int maxT = static_cast<int>(_interpolation.value.maxValue() - 1.f);
         int maxAllowedindex = maxT * _nDataPoints + index;
-        int afterIndex = glm::min(
+        int afterIndex = std::min(
             static_cast<int>(secondIndex + _nDataPoints),
             maxAllowedindex
         );
@@ -419,11 +420,11 @@ void RenderableInterpolatedPoints::addPositionDataForPoint(unsigned int index,
         glm::dvec3 positionBefore = transformedPosition(e00);
         glm::dvec3 positionAfter = transformedPosition(e11);
 
-        for (int j = 0; j < 3; ++j) {
+        for (int j = 0; j < 3; j++) {
             result.push_back(static_cast<float>(positionBefore[j]));
         }
 
-        for (int j = 0; j < 3; ++j) {
+        for (int j = 0; j < 3; j++) {
             result.push_back(static_cast<float>(positionAfter[j]));
         }
     }
@@ -444,9 +445,9 @@ void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int inde
 
     if (hasSizeData()) {
         const int sizeParamIndex = currentSizeParameterIndex();
-        // @TODO: Consider more detailed control over the scaling. Currently the value
-        // is multiplied with the value as is. Should have similar mapping properties
-        // as the color mapping
+        // @TODO: Consider more detailed control over the scaling. Currently the value is
+        // multiplied with the value as is. Should have similar mapping properties as the
+        // color mapping
 
         // Convert to diameter if data is given as radius
         float multiplier = _sizeSettings.sizeMapping->isRadius ? 2.f : 1.f;
@@ -456,7 +457,7 @@ void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int inde
 }
 
 void RenderableInterpolatedPoints::addOrientationDataForPoint(unsigned int index,
-                                                        std::vector<float>& result) const
+                                                         std::vector<float>& result) const
 {
     auto [firstIndex, secondIndex] = interpolationIndices(index);
     const dataloader::Dataset::Entry& e0 = _dataset.entries[firstIndex];
@@ -478,11 +479,11 @@ void RenderableInterpolatedPoints::addOrientationDataForPoint(unsigned int index
 
 void RenderableInterpolatedPoints::initializeBufferData() {
     if (_vao == 0) {
-        glGenVertexArrays(1, &_vao);
+        glCreateVertexArrays(1, &_vao);
         LDEBUG(std::format("Generating Vertex Array id '{}'", _vao));
     }
     if (_vbo == 0) {
-        glGenBuffers(1, &_vbo);
+        glCreateBuffers(1, &_vbo);
         LDEBUG(std::format("Generating Vertex Buffer Object id '{}'", _vbo));
     }
 
@@ -492,7 +493,7 @@ void RenderableInterpolatedPoints::initializeBufferData() {
     // Allocate the memory for the buffer (we will want to upload the data quite often)
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_DYNAMIC_DRAW);
+    glNamedBufferData(_vbo, bufferSize, nullptr, GL_DYNAMIC_DRAW);
 
     int offset = 0;
 
@@ -500,8 +501,8 @@ void RenderableInterpolatedPoints::initializeBufferData() {
     offset = bufferVertexAttribute("in_position1", 3, attibsPerPoint, offset);
 
     if (useSplineInterpolation()) {
-        offset = bufferVertexAttribute("in_position_before", 3, attibsPerPoint, offset);
-        offset = bufferVertexAttribute("in_position_after", 3, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_positionBefore", 3, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_positionAfter", 3, attibsPerPoint, offset);
     }
 
     if (hasColorData()) {
@@ -537,37 +538,32 @@ void RenderableInterpolatedPoints::updateBufferData() {
 
     // Regenerate data and update buffer
     std::vector<float> slice = createDataSlice();
-
-    glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, slice.size() * sizeof(float), slice.data());
-
-    glBindVertexArray(0);
+    glNamedBufferSubData(_vbo, 0, slice.size() * sizeof(float), slice.data());
 
     _dataIsDirty = false;
 }
 
 bool RenderableInterpolatedPoints::isAtKnot() const {
     float v = _interpolation.value;
-    return (v - glm::floor(v)) < std::numeric_limits<float>::epsilon();
+    return (v - std::floor(v)) < std::numeric_limits<float>::epsilon();
 }
 
 float RenderableInterpolatedPoints::computeCurrentLowerValue() const {
-    float t0 = glm::floor(_interpolation.value);
+    float t0 = std::floor(_interpolation.value);
 
     if (isAtKnot()) {
         t0 = t0 - 1.f;
     }
 
     const float maxTValue = _interpolation.value.maxValue();
-    const float maxAllowedT0 = glm::max(maxTValue - 1.f, 0.f);
-    t0 = glm::clamp(t0, 0.f, maxAllowedT0);
+    const float maxAllowedT0 = std::max(maxTValue - 1.f, 0.f);
+    t0 = std::clamp(t0, 0.f, maxAllowedT0);
     return t0;
 }
 
 float RenderableInterpolatedPoints::computeCurrentUpperValue() const {
     const float t0 = computeCurrentLowerValue();
-    const float t1 = glm::clamp(t0 + 1.f, 0.f, _interpolation.value.maxValue());
+    const float t1 = std::clamp(t0 + 1.f, 0.f, _interpolation.value.maxValue());
     return t1;
 }
 
@@ -582,7 +578,7 @@ RenderableInterpolatedPoints::interpolationIndices(unsigned int index) const
     const size_t lower = size_t(t0Index * _nDataPoints + index);
     const size_t upper = size_t(t1Index * _nDataPoints + index);
 
-    return { lower, upper };
+    return std::pair(lower, upper);
 }
 
 } // namespace openspace

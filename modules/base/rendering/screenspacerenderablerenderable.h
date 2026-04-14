@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,41 +25,35 @@
 #ifndef __OPENSPACE_MODULE_BASE___SCREENSPACERENDERABLERENDERABLE___H__
 #define __OPENSPACE_MODULE_BASE___SCREENSPACERENDERABLERENDERABLE___H__
 
-#include <modules/base//rendering/screenspaceframebuffer.h>
+#include <openspace/rendering/screenspacerenderableframebuffer.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 
 namespace openspace {
-
-namespace properties { class PropertyOwner; }
 
 class Renderable;
 class Rotation;
 class Scale;
 class Translation;
 
-namespace documentation { struct Documentation; }
-
-class ScreenSpaceRenderableRenderable : public ScreenSpaceFramebuffer {
+class ScreenSpaceRenderableRenderable : public ScreenSpaceRenderableFramebuffer {
 public:
-    using RenderFunction = std::function<void()>;
-
     explicit ScreenSpaceRenderableRenderable(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceRenderableRenderable() override;
+    ~ScreenSpaceRenderableRenderable() override;
 
     void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     struct {
-        ghoul::mm_unique_ptr<properties::PropertyOwner> parent = nullptr;
+        ghoul::mm_unique_ptr<PropertyOwner> parent = nullptr;
         ghoul::mm_unique_ptr<Translation> translation = nullptr;
         ghoul::mm_unique_ptr<Rotation> rotation = nullptr;
         ghoul::mm_unique_ptr<Scale> scale = nullptr;
@@ -67,13 +61,13 @@ private:
     ghoul::mm_unique_ptr<Renderable> _renderable = nullptr;
 
     double _previousTime = 0.0;
-    properties::DoubleProperty _time;
-    properties::Vec3Property _cameraPosition;
-    properties::Vec3Property _cameraCenter;
-    properties::Vec3Property _cameraUp;
-    properties::FloatProperty _cameraFov;
+    DoubleProperty _time;
+    Vec3Property _cameraPosition;
+    Vec3Property _cameraCenter;
+    Vec3Property _cameraUp;
+    FloatProperty _cameraFov;
 };
 
-} //namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_BASE___SCREENSPACERENDERABLERENDERABLE___H__

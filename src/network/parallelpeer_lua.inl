@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,15 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/lua/lua_helper.h>
+#include <utility>
+
+using namespace openspace;
 
 namespace {
 
 [[codegen::luawrap]] void joinServer(std::string port, std::string address,
                                      std::string serverName, std::string password,
                                      std::string hostpassword = "",
-                                     std::string name = "Anonymous") {
-    using namespace openspace;
+                                     std::string name = "Anonymous")
+{
     if (global::windowDelegate->isMaster()) {
         ParallelPeer* peer = global::parallelPeer;
         peer->setPort(std::move(port));
@@ -43,38 +45,42 @@ namespace {
     }
 }
 
-// Connect to parallel.
+/**
+ * Connect to parallel.
+ */
 [[codegen::luawrap]] void connect() {
-    using namespace openspace;
     if (global::windowDelegate->isMaster()) {
         global::parallelPeer->connect();
     }
 }
 
-// Disconnect from parallel.
+/**
+ * Disconnect from parallel.
+ */
 [[codegen::luawrap]] void disconnect() {
-    using namespace openspace;
     if (global::windowDelegate->isMaster()) {
         global::parallelPeer->disconnect();
     }
 }
 
-// Request to be the host for this session.
+/**
+ * Request to be the host for this session.
+ */
 [[codegen::luawrap]] void requestHostship() {
-    using namespace openspace;
     if (global::windowDelegate->isMaster()) {
         global::parallelPeer->requestHostship();
     }
 }
 
-// Resign hostship.
+/**
+ * Resign hostship.
+ */
 [[codegen::luawrap]] void resignHostship() {
-    using namespace openspace;
     if (global::windowDelegate->isMaster()) {
         global::parallelPeer->resignHostship();
     }
 }
 
-#include "parallelpeer_lua_codegen.cpp"
-
 } // namespace
+
+#include "parallelpeer_lua_codegen.cpp"

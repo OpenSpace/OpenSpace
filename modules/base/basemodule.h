@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,8 +39,8 @@ public:
     BaseModule();
     ~BaseModule() override = default;
 
-    std::vector<documentation::Documentation> documentations() const override;
-    std::vector<scripting::LuaLibrary> luaLibraries() const override;
+    std::vector<openspace::Documentation> documentations() const override;
+    std::vector<LuaLibrary> luaLibraries() const override;
 
     static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
     static ghoul::opengl::TextureManager TextureManager;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,15 +24,13 @@
 
 #include <modules/toyvolume/rendering/toyvolumeraycaster.h>
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/blockplaneintersectiongeometry.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/glm.h>
+#include <ghoul/format.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
-#include <sstream>
-#include <vector>
+#include <cmath>
+#include <utility>
 
 namespace {
     constexpr std::string_view GlslRaycastPath =
@@ -73,7 +71,6 @@ void ToyVolumeRaycaster::renderEntryPoints(const RenderData& data,
 void ToyVolumeRaycaster::renderExitPoints(const RenderData& data,
                                           ghoul::opengl::ProgramObject& program)
 {
-    // Uniforms
     program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
     program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
@@ -136,7 +133,7 @@ std::filesystem::path ToyVolumeRaycaster::raycasterPath() const {
 }
 
 std::filesystem::path ToyVolumeRaycaster::helperPath() const {
-    return ""; // no helper file
+    return "";
 }
 
 void ToyVolumeRaycaster::setColor(glm::vec4 color) {

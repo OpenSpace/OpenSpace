@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,52 +26,54 @@
 
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/ellipsoid.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
-#include <optional>
+#include <ghoul/misc/templatefactory.h>
+#include <variant>
+#include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view KeyType = "Type";
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "Determines whether this object will be visible or not.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
+    constexpr Property::PropertyInfo RenderableTypeInfo = {
         "Type",
-        "Renderable Type",
+        "Renderable type",
         "The type of the renderable.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderableRenderBinModeInfo =
-    {
+    constexpr Property::PropertyInfo RenderableRenderBinModeInfo = {
         "RenderBinMode",
-        "Render Bin Mode",
+        "Render bin mode",
         "A value that specifies if the renderable should be rendered in the Background, "
         "Opaque, Pre-/PostDeferredTransparency, Overlay, or Sticker rendering step.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DimInAtmosphereInfo = {
+    constexpr Property::PropertyInfo DimInAtmosphereInfo = {
         "DimInAtmosphere",
-        "Dim In Atmosphere",
+        "Dim in atmosphere",
         "Decides if the object should be dimmed (i.e. faded out) when the camera is in "
         "the sunny part of an atmosphere.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This is the base class for all `Renderable` types. These objects are responsible
@@ -116,13 +118,13 @@ namespace {
         // [[codegen::verbatim(DimInAtmosphereInfo.description)]]
         std::optional<bool> dimInAtmosphere;
     };
-#include "renderable_codegen.cpp"
 } // namespace
+#include "renderable_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation Renderable::Documentation() {
-    return codegen::doc<Parameters>("renderable");
+Documentation Renderable::Documentation() {
+    return codegen::doc<Parameters>("core_renderable");
 }
 
 ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
@@ -135,7 +137,7 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
     }
 
     // This should be done in the constructor instead with noexhaustive
-    documentation::testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
+    testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
 
     const std::string renderableType = dictionary.value<std::string>(KeyType);
     ghoul::TemplateFactory<Renderable>* factory =
@@ -150,10 +152,8 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
     return ghoul::mm_unique_ptr<Renderable>(result);
 }
 
-
-
 Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings settings)
-    : properties::PropertyOwner({ "Renderable" })
+    : PropertyOwner({ "Renderable" })
     , _enabled(EnabledInfo, true)
     , _renderableType(RenderableTypeInfo, "Renderable")
     , _dimInAtmosphere(DimInAtmosphereInfo, false)
@@ -192,21 +192,25 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings s
     _enabled = p.enabled.value_or(_enabled);
     addProperty(_enabled);
     _enabled.onChange([this]() {
+        if (!_parent) {
+            return;
+        }
+
         if (isEnabled()) {
-            global::eventEngine->publishEvent<events::EventRenderableEnabled>(_parent);
+            global::eventEngine->publishEvent<EventRenderableEnabled>(_parent);
         }
         else {
-            global::eventEngine->publishEvent<events::EventRenderableDisabled>(_parent);
+            global::eventEngine->publishEvent<EventRenderableDisabled>(_parent);
         }
     });
 
     _opacity = p.opacity.value_or(_opacity);
-    // We don't add the property here as subclasses should decide on their own whether
-    // they to expose the opacity or not
+    // We don't add the opacity property here as subclasses should decide on their own
+    // whether they to expose the opacity or not
 
     addProperty(Fadeable::_fade);
 
-    // set type for UI
+    // Set type for UI
     _renderableType = p.type.value_or(_renderableType);
     _renderableType.setReadOnly(true);
     addProperty(_renderableType);
@@ -252,11 +256,11 @@ std::string_view Renderable::typeAsString() const noexcept {
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
                                                  const glm::dvec3& targetModelSpace) const
 {
-    const glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
+    const glm::dvec3 dirFromCenterToTarget = glm::normalize(targetModelSpace);
     return {
-        directionFromCenterToTarget * _parent->interactionSphere(),
-        directionFromCenterToTarget,
-        0.0
+        .centerToReferenceSurface = dirFromCenterToTarget * _parent->interactionSphere(),
+        .referenceSurfaceOutDirection = dirFromCenterToTarget,
+        .heightToSurface = 0.0
     };
 }
 
@@ -291,10 +295,6 @@ bool Renderable::isVisible() const {
     return _enabled && Fadeable::isVisible();
 }
 
-bool Renderable::isReady() const {
-    return true;
-}
-
 bool Renderable::isEnabled() const {
     return _enabled;
 }
@@ -304,8 +304,8 @@ bool Renderable::shouldUpdateIfDisabled() const noexcept {
 }
 
 void Renderable::onEnabledChange(std::function<void(bool)> callback) {
-    _enabled.onChange([this, c = std::move(callback)]() {
-        c(isEnabled());
+    _enabled.onChange([this, cb = std::move(callback)]() {
+        cb(isEnabled());
     });
 }
 
@@ -399,4 +399,4 @@ std::tuple<glm::dmat4, glm::dmat4, glm::dmat4> Renderable::calcAllTransforms(
     };
 }
 
-}  // namespace openspace
+} // namespace openspace

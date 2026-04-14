@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,14 +25,21 @@
 #include "launcherwindow.h"
 
 #include "profile/profileedit.h"
+#include "sgctedit/sgctedit.h"
 #include "backgroundimage.h"
 #include "notificationwindow.h"
 #include "settingsdialog.h"
 #include "splitcombobox.h"
+#include "usericon.h"
+#include <openspace/engine/configuration.h>
+#include <openspace/engine/settings.h>
 #include <openspace/openspace.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include <sgct/config.h>
+#include <QComboBox>
 #include <QFile>
 #include <QKeyEvent>
 #include <QLabel>
@@ -40,9 +47,12 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QStandardItemModel>
-#include <filesystem>
-#include <fstream>
+#include <QVBoxLayout>
+#include <cassert>
 #include <iostream>
+#include <set>
+#include <stdexcept>
+#include <utility>
 
 using namespace openspace;
 
@@ -74,16 +84,17 @@ namespace {
         constexpr QRect EditProfileButton(
             LeftRuler, TopRuler + 180, SmallItemWidth, SmallItemHeight
         );
-        constexpr QRect OptionsLabel(LeftRuler + 10, TopRuler + 230, 151, 24);
-        constexpr QRect WindowConfigBox(LeftRuler, TopRuler + 260, ItemWidth, ItemHeight);
+        constexpr QRect AddonBox(LeftRuler, TopRuler + 210, ItemWidth, SmallItemHeight);
+        constexpr QRect OptionsLabel(LeftRuler + 10, TopRuler + 255, 151, 24);
+        constexpr QRect WindowConfigBox(LeftRuler, TopRuler + 285, ItemWidth, ItemHeight);
         constexpr QRect NewWindowButton(
-            LeftRuler + 160, TopRuler + 330, SmallItemWidth, SmallItemHeight
+            LeftRuler + 160, TopRuler + 355, SmallItemWidth, SmallItemHeight
         );
         constexpr QRect EditWindowButton(
-            LeftRuler, TopRuler + 330, SmallItemWidth, SmallItemHeight
+            LeftRuler, TopRuler + 355, SmallItemWidth, SmallItemHeight
         );
         constexpr QRect StartButton(
-            LeftRuler, TopRuler + 400, ItemWidth, ItemHeight
+            LeftRuler, TopRuler + 425, ItemWidth, ItemHeight
         );
         constexpr QRect VersionString(
             5, MainScreenHeight - SmallItemHeight, ItemWidth, SmallItemHeight
@@ -148,12 +159,22 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
 
     {
         QFile file(":/qss/launcher.qss");
-        file.open(QFile::ReadOnly);
-        const QString styleSheet = QLatin1String(file.readAll());
-        setStyleSheet(styleSheet);
+        const bool success = file.open(QFile::ReadOnly);
+        if (!success) {
+            QMessageBox::critical(
+                this,
+                "Missing QSS",
+                "Could not find launcher.qss"
+            );
+        }
+        else {
+            const QString styleSheet = QLatin1String(file.readAll());
+            setStyleSheet(styleSheet);
+        }
     }
 
     QWidget* centralWidget = new QWidget;
+    setCentralWidget(centralWidget);
 
     {
         // Yes, this looks weird to create an object but not keeping the pointer around,
@@ -166,7 +187,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
             centralWidget
         );
     }
-    
+
     {
         QLabel* logoImage = new QLabel(centralWidget);
         logoImage->setObjectName("clear");
@@ -190,9 +211,6 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         labelChoose->setObjectName("label_choose");
     }
 
-    // Creating the profile box _after_ the Edit and New buttons as the comboboxes
-    // `selectionChanged` signal will trigger that will try to make changes to the edit
-    // button
     _profileBox = new SplitComboBox(
         centralWidget,
         _userProfilePath,
@@ -203,7 +221,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         [](const std::filesystem::path& p) { return p.extension() == ".profile"; },
         [](const std::filesystem::path& p) {
             try {
-                Profile profile(p);
+                Profile profile = Profile(p);
                 if (profile.meta.has_value() && profile.meta->description.has_value()) {
                     return *profile.meta->description;
                 }
@@ -216,7 +234,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     _profileBox->setGeometry(geometry::ProfileBox);
     _profileBox->setAccessibleName("Choose profile");
     _profileBox->setEnabled(profileEnabled);
-    _profileBox->populateList(globalConfig.profile);
+    _profileBox->populateList(globalConfig.profile.profile);
     connect(
         _profileBox, &SplitComboBox::selectionChanged,
         this, &LauncherWindow::selectProfile
@@ -225,7 +243,6 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         _profileBox, &SplitComboBox::selectionChanged,
         this, &LauncherWindow::updateStartButton
     );
-
 
     _editProfileButton = new QPushButton("Edit", centralWidget);
     _editProfileButton->setObjectName("small");
@@ -240,7 +257,9 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     {
         // Set up the default value for the edit button
         std::string selection = std::get<1>(_profileBox->currentSelection());
-        _editProfileButton->setEnabled(std::filesystem::exists(selection));
+        const bool exists = std::filesystem::exists(selection);
+        const bool isUser = selection.starts_with(_userProfilePath.string());
+        _editProfileButton->setEnabled(isUser && exists);
     }
 
     {
@@ -276,6 +295,32 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         );
         menu->addActions({ newEmpty, newFromCurrent });
         newProfileButton->setMenu(menu);
+    }
+
+    _addonBox.combobox = new QComboBox(centralWidget);
+    _addonBox.combobox->setObjectName("config");
+    _addonBox.combobox->setGeometry(geometry::AddonBox);
+    _addonBox.combobox->setPlaceholderText("Addons");
+    _addonBox.combobox->setAccessibleName("Select Addons");
+    _addonBox.model = new QStandardItemModel;
+    connect(
+        _addonBox.model,
+        &QStandardItemModel::itemChanged,
+        this,
+        &LauncherWindow::updatePlaceholderText
+    );
+
+
+    _addonBox.combobox->setModel(_addonBox.model);
+    updateAddonsBox(globalConfig.profile.profile + ".profile");
+    for (const std::string& addon : globalConfig.profile.addons) {
+        for (int i = 0; i < _addonBox.model->rowCount(); i++) {
+            QStandardItem* item = _addonBox.model->item(i);
+            std::string id = item->data().toString().toStdString();
+            if (id == addon) {
+                item->setData(Qt::Checked, Qt::CheckStateRole);
+            }
+        }
     }
 
 
@@ -321,7 +366,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     connect(
         _windowConfigBox, &SplitComboBox::selectionChanged,
         this, &LauncherWindow::selectConfiguration
-    ); 
+    );
     connect(
         _windowConfigBox, &SplitComboBox::selectionChanged,
         this, &LauncherWindow::updateStartButton
@@ -382,9 +427,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     {
         QLabel* versionLabel = new QLabel(centralWidget);
         versionLabel->setVisible(true);
-        versionLabel->setText(
-            QString::fromStdString(std::string(OPENSPACE_VERSION_STRING_FULL))
-        );
+        versionLabel->setText(QString::fromStdString(std::string(OPENSPACE_VERSION)));
         versionLabel->setObjectName("version-info");
         versionLabel->setGeometry(geometry::VersionString);
     }
@@ -405,8 +448,6 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
             this, &LauncherWindow::openSettings
         );
     }
-
-    setCentralWidget(centralWidget);
 }
 
 void LauncherWindow::editProfile() {
@@ -443,6 +484,8 @@ void LauncherWindow::selectProfile(std::optional<std::string> selection) {
                 "Cannot edit the selected profile as it is one of the built-in profiles"
             );
         }
+
+        updateAddonsBox(*selection);
     }
 }
 
@@ -691,13 +734,162 @@ void LauncherWindow::updateStartButton() const {
     _startButton->setEnabled(!profilePath.empty() && !configPath.empty());
 }
 
+void LauncherWindow::updatePlaceholderText() {
+    int count = 0;
+    for (int i = 0; i < _addonBox.model->rowCount(); i++) {
+        QStandardItem* item = _addonBox.model->item(i);
+        const int state = item->data(Qt::CheckStateRole).toInt();
+        const bool checked = state == Qt::Checked;
+        if (checked) {
+            count++;
+        }
+    }
+
+    if (count > 0) {
+        std::string text = std::format("Addons ({} selected)", count);
+        _addonBox.combobox->setPlaceholderText(QString::fromStdString(text));
+    }
+    else {
+        _addonBox.combobox->setPlaceholderText("Addons");
+    }
+}
+
+void LauncherWindow::updateAddonsBox(const std::string& profile) {
+    // Get a list of all of the potential variants
+    std::vector<std::filesystem::path> addonsCore = ghoul::filesystem::walkDirectory(
+        _profilePath,
+        ghoul::filesystem::Recursive::Yes,
+        ghoul::filesystem::Sorted::Yes,
+        [](const std::filesystem::path& path) { return path.extension() == ".addon"; }
+    );
+    std::vector<std::filesystem::path> addonsUser = ghoul::filesystem::walkDirectory(
+        _userProfilePath,
+        ghoul::filesystem::Recursive::Yes,
+        ghoul::filesystem::Sorted::Yes,
+        [](const std::filesystem::path& path) { return path.extension() == ".addon"; }
+    );
+
+    // First clear the model of the previous results
+    _addonBox.model->clear();
+
+    // Then recreate the new ones
+    const std::filesystem::path coreCandidate = _profilePath / profile;
+    const std::filesystem::path userCandidate = _userProfilePath / profile;
+
+    ghoul_assert(
+        std::filesystem::exists(coreCandidate) || std::filesystem::exists(userCandidate),
+        "One of the two options must exist"
+    );
+
+    Profile p = Profile(
+        // User path has precedence
+        std::filesystem::exists(userCandidate) ? userCandidate : coreCandidate
+    );
+
+    QIcon icon = userIcon();
+
+    auto toItem = [&icon](const Addon& addon, bool isUser) {
+        std::string name = isUser ? std::format(" {}", addon.name) : addon.name;
+        QStandardItem* item = new QStandardItem(QString::fromStdString(name));
+        if (isUser) {
+            item->setIcon(icon);
+        }
+
+        item->setToolTip(QString::fromStdString(addon.description));
+
+        item->setData(QString::fromStdString(addon.identifier));
+        item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+        item->setData(Qt::Unchecked, Qt::CheckStateRole);
+        return item;
+    };
+
+    const bool hasProfileAddons =
+        !p.addons.custom.empty() || !p.addons.recommended.empty();
+    const bool hasGlobalAddons = !addonsCore.empty() || !addonsUser.empty();
+
+    // Stores the list of the adds explicitly mentioned by the profile so that we can
+    // filter them out from the automatically populated list
+    std::set<std::string> profileAddons;
+
+
+    if (hasProfileAddons) {
+        QStandardItem* header = new QStandardItem("Recommended");
+        header->setEnabled(false);
+        _addonBox.model->appendRow(header);
+
+        // First the custom
+        for (const Addon& addon : p.addons.custom) {
+            profileAddons.insert(addon.identifier);
+
+            constexpr bool IsUserFolder = false;
+            QStandardItem* i = toItem(addon, IsUserFolder);
+            _addonBox.model->appendRow(i);
+        }
+        // Then the recommended
+        for (const Addon& addon : p.addons.recommended) {
+            profileAddons.insert(addon.identifier);
+
+            constexpr bool IsUserFolder = false;
+            QStandardItem* i = toItem(addon, IsUserFolder);
+            _addonBox.model->appendRow(i);
+        }
+    }
+
+    if (hasGlobalAddons) {
+        QStandardItem* header = new QStandardItem("Other");
+        header->setEnabled(false);
+        _addonBox.model->appendRow(header);
+
+        // First the addons found in the user folder
+        for (const std::filesystem::path& path : addonsUser) {
+            Addon addon = loadAddonFromFile(path);
+
+            if (profileAddons.contains(addon.identifier)) {
+                continue;
+            }
+
+            constexpr bool IsUserFolder = true;
+            QStandardItem* i = toItem(addon, IsUserFolder);
+            _addonBox.model->appendRow(i);
+        }
+        // Then add all of the addons found in the core
+        for (const std::filesystem::path& path : addonsCore) {
+            Addon addon = loadAddonFromFile(path);
+
+            if (profileAddons.contains(addon.identifier)) {
+                continue;
+            }
+
+            constexpr bool IsUserFolder = false;
+            QStandardItem* i = toItem(addon, IsUserFolder);
+            _addonBox.model->appendRow(i);
+        }
+    }
+
+    const bool hasAddons = hasProfileAddons || hasGlobalAddons;
+    _addonBox.combobox->setEnabled(hasAddons);
+
+    updatePlaceholderText();
+}
+
 bool LauncherWindow::wasLaunchSelected() const {
     return _shouldLaunch;
 }
 
-std::string LauncherWindow::selectedProfile() const {
-    // The user data stores the full path to the profile
-    return std::get<1>(_profileBox->currentSelection());
+std::pair<std::string, std::vector<std::string>> LauncherWindow::selectedProfile() const {
+    const std::string profile = std::get<1>(_profileBox->currentSelection());
+    std::vector<std::string> variants;
+    for (int i = 0; i < _addonBox.model->rowCount(); i++) {
+        QStandardItem* item = _addonBox.model->item(i);
+        const int state = item->data(Qt::CheckStateRole).toInt();
+        const bool checked = state == Qt::Checked;
+        if (checked) {
+            const std::string id = item->data().toString().toStdString();
+            variants.push_back(id);
+        }
+    }
+
+    return std::pair(profile, variants);
 }
 
 std::string LauncherWindow::selectedWindowConfig() const {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,7 +62,7 @@ public:
 
     enum class TraceDirection {
         FORWARD = 1,
-        BACK    = -1
+        BACK = -1
     };
 
     enum class FieldlineEnd {
@@ -85,14 +85,15 @@ public:
     bool open(const std::filesystem::path& filename);
     void close();
 
-    float* uniformSampledValues(const std::string& var,
+    std::vector<float> uniformSampledValues(const std::string& var,
         const glm::size3_t& outDimensions) const;
 
-    float* uniformSliceValues(const std::string& var, const glm::size3_t& outDimensions,
-        float zSlice) const;
+    std::vector<float> uniformSliceValues(const std::string& var,
+        const glm::size3_t& outDimensions, float zSlice) const;
 
-    float* uniformSampledVectorValues(const std::string& xVar, const std::string& yVar,
-        const std::string& zVar, const glm::size3_t& outDimensions) const;
+    std::vector<float> uniformSampledVectorValues(const std::string& xVar,
+        const std::string& yVar, const std::string& zVar,
+        const glm::size3_t& outDimensions) const;
 
     Fieldlines classifiedFieldLines(const std::string& xVar, const std::string& yVar,
         const std::string& zVar, const std::vector<glm::vec3>& seedPoints,

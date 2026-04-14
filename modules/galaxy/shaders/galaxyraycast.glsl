@@ -29,6 +29,7 @@ uniform float absorptionMultiply#{id} = 50.0;
 uniform float emissionMultiply#{id} = 1500.0;
 uniform sampler3D galaxyTexture#{id};
 
+
 void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
                  inout vec3 accumulatedAlpha, inout float stepSize)
 {
@@ -45,7 +46,7 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
 
   // Source textures currently are square-rooted to avoid dithering in the shadows.
   // So square them back
-  sampledColor = sampledColor*sampledColor;
+  sampledColor = sampledColor * sampledColor;
 
   // Fudge for the dust "spreading"
   sampledColor.a = clamp(sampledColor.a, 0.0, 1.0);
@@ -53,8 +54,8 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
 
   // Absorption probability
   float scaledDensity = sampledColor.a * stepSize * absorptionMultiply#{id};
-  vec3 alphaTint = vec3(0.3, 0.54, 0.85);
-  vec3 absorption = alphaTint * scaledDensity;
+  const vec3 AlphaTint = vec3(0.3, 0.54, 0.85);
+  vec3 absorption = AlphaTint * scaledDensity;
 
   // Extinction
   vec3 extinction = exp(-absorption);

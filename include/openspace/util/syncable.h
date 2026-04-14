@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,14 +37,14 @@ public:
     virtual ~Syncable() = default;
 
 protected:
-    // Allowing SyncEngine synchronization methods and at the same time hiding them
-    // from the used of implementations of the interface
+    // Allowing SyncEngine synchronization methods and at the same time hiding them from
+    // the used of implementations of the interface
     friend class SyncEngine;
 
-    virtual void preSync(bool /*isMaster*/) {}
-    virtual void encode(SyncBuffer* /*syncBuffer*/) = 0;
-    virtual void decode(SyncBuffer* /*syncBuffer*/) = 0;
-    virtual void postSync(bool /*isMaster*/) {}
+    virtual void preSync(bool isMaster);
+    virtual void encode(SyncBuffer* syncBuffer) = 0;
+    virtual void decode(SyncBuffer* syncBuffer) = 0;
+    virtual void postSync(bool isMaster);
 };
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,22 +26,23 @@
 
 #include <modules/multiresvolume/rendering/atlasmanager.h>
 #include <modules/multiresvolume/rendering/tsp.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
+#include <glm/gtx/std_based_type.hpp>
+#include <cstdlib>
 
 namespace {
     constexpr std::string_view GlslRaycastPath =
-        "${MODULES}/multiresvolume/shaders/raycast.glsl";
+        "${MODULE_MULTIRESVOLUME}/shaders/raycast.glsl";
     constexpr std::string_view GlslHelperPath =
-        "${MODULES}/multiresvolume/shaders/helper.glsl";
+        "${MODULE_MULTIRESVOLUME}/shaders/helper.glsl";
     constexpr std::string_view GlslBoundsVsPath =
-        "${MODULES}/multiresvolume/shaders/bounds_vs.glsl";
+        "${MODULE_MULTIRESVOLUME}/shaders/bounds_vs.glsl";
     constexpr std::string_view GlslBoundsFsPath =
-        "${MODULES}/multiresvolume/shaders/bounds_fs.glsl";
+        "${MODULE_MULTIRESVOLUME}/shaders/bounds_fs.glsl";
 } // namespace
 
 namespace openspace {
@@ -49,8 +50,7 @@ namespace openspace {
 MultiresVolumeRaycaster::MultiresVolumeRaycaster(std::shared_ptr<TSP> tsp,
                                                std::shared_ptr<AtlasManager> atlasManager,
                                        std::shared_ptr<TransferFunction> transferFunction)
-    : _boundingBox(glm::vec3(1.f))
-    , _tsp(tsp)
+    : _tsp(tsp)
     , _atlasManager(atlasManager)
     , _transferFunction(transferFunction)
 {}
@@ -68,7 +68,7 @@ void MultiresVolumeRaycaster::renderEntryPoints(const RenderData& data,
 {
     program.setUniform("modelTransform", _modelTransform);
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
-    program.setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
+    program.setUniform("campos", glm::vec4(data.camera.position(), 1.f));
     program.setUniform("objpos", glm::vec4(data.modelTransform.translation, 0.f));
     program.setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
     program.setUniform("scaling", glm::vec2(1.f, 0.f));
@@ -84,7 +84,7 @@ void MultiresVolumeRaycaster::renderExitPoints(const RenderData& data,
 {
     program.setUniform("modelTransform", _modelTransform);
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
-    program.setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
+    program.setUniform("campos", glm::vec4(data.camera.position(), 1.f));
     program.setUniform("objpos", glm::vec4(data.modelTransform.translation, 0.f));
     program.setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
     program.setUniform("scaling", glm::vec2(1.f, 0.f));
@@ -101,18 +101,15 @@ void MultiresVolumeRaycaster::preRaycast(const RaycastData& data,
                                          ghoul::opengl::ProgramObject& program)
 {
     std::string id = std::to_string(data.id);
-    //program.setUniform("opacity_" + std::to_string(id), visible ? 1.f : 0.f);
     program.setUniform("stepSizeCoefficient_" + id, _stepSizeCoefficient);
 
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
-    _tfUnit->activate();
-    _transferFunction->texture().bind();
-    program.setUniform("transferFunction_" + id, _tfUnit->unitNumber());
+    _tfUnit->bind(_transferFunction->texture());
+    program.setUniform("transferFunction_" + id, *_tfUnit);
 
     _atlasUnit = std::make_unique<ghoul::opengl::TextureUnit>();
-    _atlasUnit->activate();
-    _atlasManager->textureAtlas().bind();
-    program.setUniform("textureAtlas_" + id, _atlasUnit->unitNumber());
+    _atlasUnit->bind(_atlasManager->textureAtlas());
+    program.setUniform("textureAtlas_" + id, *_atlasUnit);
 
     _atlasMapBinding = std::make_unique<ghoul::opengl::BufferBinding<
         ghoul::opengl::bufferbinding::Buffer::ShaderStorage
@@ -139,12 +136,10 @@ void MultiresVolumeRaycaster::preRaycast(const RaycastData& data,
 bool MultiresVolumeRaycaster::isCameraInside(const RenderData& data,
                                              glm::vec3& localPosition)
 {
-    // Camera rig position in world coordinates.
-    glm::vec4 rigWorldPos = glm::vec4(data.camera.positionVec3(), 1.0);
-    //rigWorldPos /= data.camera.scaling().x * pow(10.0, data.camera.scaling().y);
-    //glm::mat4 invSgctMatrix = glm::inverse(data.camera.viewMatrix());
+    // Camera rig position in world coordinates
+    glm::vec4 rigWorldPos = glm::vec4(data.camera.position(), 1.0);
 
-    // Camera position in world coordinates.
+    // Camera position in world coordinates
     glm::vec4 camWorldPos = rigWorldPos;
     glm::vec3 objPos = static_cast<glm::vec3>(data.modelTransform.translation);
 
@@ -158,13 +153,10 @@ bool MultiresVolumeRaycaster::isCameraInside(const RenderData& data,
     }
 
     glm::mat4 scaledModelTransform = modelTransform / divisor;
-
     glm::vec4 modelPos = (glm::inverse(scaledModelTransform) / divisor) * camWorldPos;
-
-
     localPosition = (glm::vec3(modelPos) + glm::vec3(0.5f));
-    return (localPosition.x > 0 && localPosition.y > 0 && localPosition.z > 0 &&
-            localPosition.x < 1 && localPosition.y < 1 && localPosition.z < 1);
+    return (localPosition.x > 0.f && localPosition.y > 0.f && localPosition.z > 0.f &&
+            localPosition.x < 1.f && localPosition.y < 1.f && localPosition.z < 1.f);
 }
 
 void MultiresVolumeRaycaster::postRaycast(const RaycastData&,
@@ -187,7 +179,7 @@ std::filesystem::path MultiresVolumeRaycaster::raycasterPath() const {
 }
 
 std::filesystem::path MultiresVolumeRaycaster::helperPath() const {
-    return absPath(GlslHelperPath); // no helper file
+    return absPath(GlslHelperPath);
 }
 
 void MultiresVolumeRaycaster::setModelTransform(glm::mat4 transform) {

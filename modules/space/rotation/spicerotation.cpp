@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,45 +25,45 @@
 #include <modules/space/rotation/spicerotation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <optional>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo SourceInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo SourceInfo = {
         "SourceFrame",
         "Source",
         "This value specifies the source frame that is used as the basis for the "
         "coordinate transformation. This has to be a valid SPICE name.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DestinationInfo = {
+    constexpr Property::PropertyInfo DestinationInfo = {
         "DestinationFrame",
         "Destination",
         "This value specifies the destination frame that is used for the coordinate "
         "transformation. This has to be a valid SPICE name.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FixedDateInfo = {
+    constexpr Property::PropertyInfo FixedDateInfo = {
         "FixedDate",
-        "Fixed Date",
-        "A time to lock the rotation to. Setting this to an empty string will "
-        "unlock the time and return to rotation based on current simulation time.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "Fixed date",
+        "A time to lock the rotation to. Setting this to an empty string will unlock the "
+        "time and return to rotation based on current simulation time.",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TimeOffsetInfo = {
+    constexpr Property::PropertyInfo TimeOffsetInfo = {
         "TimeOffset",
-        "Time Offset",
+        "Time offset",
         "A time offset, in seconds, added to the simulation time (or Fixed Date if any), "
         "at which to compute the rotation.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
-
 
     // This `Rotation` type uses [SPICE](https://naif.jpl.nasa.gov/naif/) kernels to
     // provide rotation information for the attached scene graph node. SPICE is a library
@@ -81,7 +81,7 @@ namespace {
 
         // This value specifies the destination frame that is used for the coordinate
         // transformation. This has to be a valid SPICE name. If this value is not
-        // specified, a reference frame of 'GALACTIC' is used instead
+        // specified, a reference frame of 'GALACTIC' is used instead.
         std::optional<std::string> destinationFrame;
 
         // [[codegen::verbatim(FixedDateInfo.description)]]
@@ -90,13 +90,13 @@ namespace {
         // [[codegen::verbatim(TimeOffsetInfo.description)]]
         std::optional<float> timeOffset;
     };
-#include "spicerotation_codegen.cpp"
 } // namespace
+#include "spicerotation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation SpiceRotation::Documentation() {
-    return codegen::doc<Parameters>("space_transform_rotation_spice");
+Documentation SpiceRotation::Documentation() {
+    return codegen::doc<Parameters>("space_rotation_spice");
 }
 
 SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)

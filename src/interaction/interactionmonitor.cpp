@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,30 +26,37 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo IdleTimeInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo IdleTimeInfo = {
         "IdleTime",
-        "Idle Time",
+        "Idle time",
         "Time in seconds that has passed from latest registered interaction until the "
         "application goes idle.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IsInActiveStateInfo = {
+    constexpr Property::PropertyInfo IsInActiveStateInfo = {
         "IsInActiveState",
-        "Is State Active",
+        "Is state active",
         "Keeps track whether the interaction session is in active state or not. False if "
         "application is in idle state, true if it is in active state.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
 InteractionMonitor::InteractionMonitor()
-    : properties::PropertyOwner({ "InteractionMonitor", "Interaction Monitor" })
+    : PropertyOwner({
+        "InteractionMonitor",
+        "Interaction Monitor",
+        "Keeps track of the last time any interaction happened in the application and "
+        "whether the software is in an active state. It stays in active state for a "
+        "certain time after the last interaction happened."
+    })
     , _isInActiveState(IsInActiveStateInfo, false)
     , _idleTime(IdleTimeInfo, 120.f, 0.f, 300.f)
 {
@@ -79,4 +86,4 @@ void InteractionMonitor::markInteraction() {
     _isInActiveState = true;
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

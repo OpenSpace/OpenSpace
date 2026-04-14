@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,15 +25,20 @@
 #include <openspace/util/taskloader.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/task.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/luastate.h>
+#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <algorithm>
 #include <filesystem>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "TaskRunner";
@@ -77,9 +82,12 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& 
         return std::vector<std::unique_ptr<Task>>();
     }
 
+    ghoul::lua::LuaState state;
+    global::scriptEngine->initializeLuaState(state);
+
     ghoul::Dictionary tasksDictionary;
     try {
-        ghoul::lua::loadDictionaryFromFile(absTasksFile, tasksDictionary);
+        ghoul::lua::loadDictionaryFromFile(absTasksFile, tasksDictionary, state);
     }
     catch (const ghoul::RuntimeError& e) {
         LERROR(std::format(
@@ -92,7 +100,7 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& 
     try {
         return tasksFromDictionary(tasksDictionary);
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const SpecificationError& e) {
         LERROR(std::format("Could not load tasks file '{}': {}", absTasksFile, e.what()));
         logError(e);
 

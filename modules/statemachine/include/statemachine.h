@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,11 +27,15 @@
 
 #include <modules/statemachine/include/state.h>
 #include <modules/statemachine/include/transition.h>
+#include <filesystem>
+#include <string>
 #include <vector>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 
 class StateMachine {
 public:
@@ -51,12 +55,12 @@ public:
     /**
      * Saves the state machine to a .dot file, as a directed graph.
      *
-     * \param filename This is the full name of the file, including the directory,
-     *        but without the extension
+     * \param filename This is the full name of the file, including the directory, but
+     *        without the extension
      */
     void saveToDotFile(const std::filesystem::path& filename) const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     int findTransitionTo(const std::string& state) const;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,28 +25,44 @@
 #include <modules/base/rendering/screenspacedashboard.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <optional>
+#include <utility>
 
 #include "screenspacedashboard_lua.inl"
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo UseMainInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo UseMainInfo = {
         "UseMainDashboard",
         "Use main dashboard",
         "If true, this ScreenSpaceDashboard will use the main dashboard instead of "
         "creating an independent one.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
+    // ScreenSpaceDashboard is a screen-space renderable for displaying dashboard content
+    // as a 2D overlay on top of the scene. Unlike world-space objects, it is anchored to
+    // the screen rather than to any location in the 3D environment, which makes it
+    // suitable for HUD-style information displays.
+    //
+    // The class acts as a container and renderer for [DashboardItem](#core_dashboarditem)
+    // instances. These items can present textual or status-oriented information such as
+    // time, camera state, mission data, frame rate, or other runtime values. The
+    // dashboard is rendered into a framebuffer-backed screen-space surface and then
+    // composited into the final view.
+    //
+    // ScreenSpaceDashboard supports two usage patterns. It can either render the
+    // application’s shared main dashboard, or it can host its own independent dashboard
+    // instance. This makes it useful both for reusing a global information overlay and
+    // for creating dedicated screen-space panels with their own item composition.
     struct [[codegen::Dictionary(ScreenSpaceDashboard)]] Parameters {
         std::optional<std::string> identifier [[codegen::private()]];
 
@@ -57,19 +73,19 @@ namespace {
         // ScreenSpaceDashboard. This value must not be specified if `UseMainDashboard` is
         // specified.
         std::optional<std::vector<ghoul::Dictionary>>
-            items [[codegen::reference("dashboarditem")]];
+            items [[codegen::reference("core_dashboarditem")]];
     };
-#include "screenspacedashboard_codegen.cpp"
 } // namespace
+#include "screenspacedashboard_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceDashboard::Documentation() {
+Documentation ScreenSpaceDashboard::Documentation() {
     return codegen::doc<Parameters>("base_screenspace_dashboard");
 }
 
 ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
-    : ScreenSpaceFramebuffer(dictionary)
+    : ScreenSpaceRenderableFramebuffer(dictionary)
     , _useMainDashboard(UseMainInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -98,7 +114,7 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
 }
 
 void ScreenSpaceDashboard::initializeGL() {
-    ScreenSpaceFramebuffer::initializeGL();
+    ScreenSpaceRenderableFramebuffer::initializeGL();
 
     addRenderFunction([this]() {
         glm::vec2 penPosition = glm::vec2(0.f, _size.value().x);
@@ -128,7 +144,7 @@ const Dashboard& ScreenSpaceDashboard::dashboard() const {
     return _dashboard;
 }
 
-scripting::LuaLibrary ScreenSpaceDashboard::luaLibrary() {
+LuaLibrary ScreenSpaceDashboard::luaLibrary() {
     return {
         "dashboard",
         {
@@ -137,4 +153,5 @@ scripting::LuaLibrary ScreenSpaceDashboard::luaLibrary() {
         }
     };
 }
+
 } // namespace openspace

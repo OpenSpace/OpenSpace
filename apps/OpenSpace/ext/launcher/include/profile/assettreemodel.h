@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,8 +28,14 @@
 #include <QAbstractItemModel>
 
 #include "assettreeitem.h"
-#include "openspace/scene/profile.h"
+#include <openspace/scene/profile.h>
+#include <QString>
+#include <QVariant>
 #include <memory>
+#include <string>
+#include <vector>
+
+class QObject;
 
 class AssetTreeModel final : public QAbstractItemModel {
 Q_OBJECT
@@ -133,7 +139,7 @@ public:
         int role = Qt::EditRole) final;
 
     /**
-      * Returns a vector of all #Asset%s selected in the tree view.
+      * Returns a vector of all Asset%s selected in the tree view.
       *
       * \param outputPaths The vector of paths that were selected
       * \param outputItems The vector of AssetTreeItem that were selected
@@ -146,7 +152,7 @@ public:
       * structure.
       *
       * \param assetBasePath The base path where to find all assets
-      * \param assetBasePath The base path where to find user assets
+      * \param userAssetBasePath The base path where to find user assets
       */
     void importModelData(const std::string& assetBasePath,
         const std::string& userAssetBasePath);

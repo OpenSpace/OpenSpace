@@ -35,24 +35,6 @@
     315360000.0,
     630720000.0
   ],
-  "keybindings": [
-    {
-      "action": "os.2012july.ResetLoop",
-      "key": "R"
-    },
-    {
-      "action": "os.2012july.DarkSun",
-      "key": "D"
-    },
-    {
-      "action": "os.2012july.LoopEnlil",
-      "key": "E"
-    },
-    {
-      "action": "os.2012july.LoopBatsrus",
-      "key": "B"
-    }
-  ],
   "mark_nodes": [
     "Earth",
     "Mars",
@@ -93,6 +75,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 4
+    "minor": 5
   }
 }

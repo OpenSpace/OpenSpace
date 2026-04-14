@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,12 +27,11 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <modules/touch/include/touchmarker.h>
-#include <modules/touch/include/touchinteraction.h>
-#include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/util/touch.h>
 #include <memory>
+#include <set>
 
 namespace openspace {
 
@@ -40,7 +39,7 @@ class TuioEar;
 
 #ifdef WIN32
 class Win32TouchHook;
-#endif //WIN32
+#endif // WIN32
 
 class TouchModule : public OpenSpaceModule {
 public:
@@ -49,47 +48,25 @@ public:
     TouchModule();
     ~TouchModule();
 
-    /**
-     * Function to check if the given renderable type is one that should use direct
-     * manipulation.
-     */
-    bool isDefaultDirectTouchType(std::string_view renderableType) const;
-
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;
 
 private:
     /**
-     * Returns true if new touch input occured since the last frame.
+     * Process TUIO touch input that occured since the last frame.
      */
-    bool processNewInput();
-
-    void clearInputs();
-
-    void addTouchInput(TouchInput input);
-    void updateOrAddTouchInput(TouchInput input);
-    void removeTouchInput(TouchInput input);
+    void processNewInput();
 
     std::unique_ptr<TuioEar> _ear;
-    TouchInteraction _touch;
-    TouchMarker _markers;
-    std::vector<TouchInputHolder> _touchPoints;
-    std::vector<TouchInput> _deferredRemovals;
-    std::vector<TouchInput> _lastTouchInputs;
 
-    properties::BoolProperty _touchIsEnabled;
-    properties::BoolProperty _hasActiveTouchEvent;
-    properties::StringListProperty _defaultDirectTouchRenderableTypes;
+    IntProperty _tuioPort;
+    BoolProperty _hasActiveTouchEvent;
 
-    // A sorted version of the list in the property
-    std::set<std::string> _sortedDefaultRenderableTypes;
-
-    // contains an id and the Point that was processed last frame
+    /// Contains an id and the Point that was processed last frame
     glm::ivec2 _webPositionCallback = glm::ivec2(0);
 #ifdef WIN32
     std::unique_ptr<Win32TouchHook> _win32TouchHook;
-#endif //WIN32
-    bool _tap = false;
+#endif // WIN32
 };
 
 } // namespace openspace

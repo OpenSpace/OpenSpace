@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,11 +29,12 @@
 #include <modules/globebrowsing/src/rawtiledatareader.h>
 #include <modules/globebrowsing/src/tileindex.h>
 #include <ghoul/misc/boolean.h>
-#include <map>
+#include <memory>
 #include <optional>
 #include <set>
+#include <string>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 struct RawTile;
 
@@ -44,8 +45,8 @@ struct RawTile;
 class AsyncTileDataProvider {
 public:
     /**
-     * \param name is the name for this provider
-     * \param rawTileDataReader is the reader that will be used for the asynchronous tile
+     * \param name The name for this provider
+     * \param rawTileDataReader The reader that will be used for the asynchronous tile
      *        loading
      */
     AsyncTileDataProvider(std::string name,
@@ -112,6 +113,6 @@ private:
     bool _shouldBeDeleted = false;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATAPROVIDER___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,20 +28,20 @@
 #include <openspace/util/tstring.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
+#include <cstdint>
+#include <filesystem>
+#include <string_view>
 
 namespace openspace {
-    namespace properties { class Property; }
 
-    class Camera;
-    class Layer;
-    class Profile;
-    class Renderable;
-    class SceneGraphNode;
-    class ScreenSpaceRenderable;
-    class Time;
-} // namespace openspace
-
-namespace openspace::events {
+class Camera;
+class Layer;
+class Profile;
+class Property;
+class Renderable;
+class SceneGraphNode;
+class ScreenSpaceRenderable;
+class Time;
 
 struct Event {
     // Steps to add a new event type:
@@ -60,7 +60,7 @@ struct Event {
     enum class Type : uint8_t {
         ParallelConnection,
         ProfileLoadingFinished,
-        AssetLoadingFinished,
+        AssetLoading,
         ApplicationShutdown,
         CameraFocusTransition,
         TimeOfInterestReached,
@@ -152,17 +152,32 @@ struct EventProfileLoadingFinished : public Event {
 };
 
 /**
-* This event is created when the loading of all assets are finished. This is emitted
-* regardless of whether it is the initial startup of a profile, or any subsequent asset
-* being loaded e.g., through add or drag-and-drop.
-*/
-struct EventAssetLoadingFinished : public Event {
-    static constexpr Type Type = Event::Type::AssetLoadingFinished;
+ * This event is created whenever the loading state of an assets changes. An asset can
+ * enter one of four states: `Loading`, `Loaded`, `Unloaded`, or `Error`. This event is
+ * emitted regardless of whether it is the initial startup of a profile, or any subsequent
+ * asset being added or revmoed e.g., through add or drag-and-drop.
+ */
+struct EventAssetLoading : public Event {
+    static constexpr Type Type = Event::Type::AssetLoading;
+
+    enum class State {
+        Loaded,
+        Loading,
+        Unloaded,
+        Error
+    };
 
     /**
-     * Creates an instance of an AssetLoadingFinished event.
+     * Creates an instance of an AssetLoading event.
+     *
+     * \param assetPath_ The path to the asset
+     * \param newState The new state of the asset given by 'asstPath_'; is one of
+     *        `Loading`, `Loaded`, `Unloaded`, or `Error`
      */
-    EventAssetLoadingFinished();
+    EventAssetLoading(const std::filesystem::path& assetPath_, State newState);
+
+    std::filesystem::path assetPath;
+    State state;
 };
 
 /**
@@ -191,9 +206,9 @@ struct EventApplicationShutdown : public Event {
 
 /**
  * This event is created when the camera transitions between different interaction sphere
- * distances. Right now, only movement relative to camera's focus node is considered.
- * Each scene graph node has an interaction sphere radius that serves as the reference
- * distance for all spheres.
+ * distances. Right now, only movement relative to camera's focus node is considered. Each
+ * scene graph node has an interaction sphere radius that serves as the reference distance
+ * for all spheres.
  * ```
  * Diagram of events for a camera moving from right-to-left. Interaction sphere is 'O' in
  * middle, and ')' are spherical boundaries. The approach factor, reach factor, and
@@ -226,8 +241,8 @@ struct EventCameraFocusTransition : public Event {
      * \param transition_ The transition type that the camera just finished; is one of
      *        `Approaching`, `Reaching`, `Receding`, or `Exiting`
      *
-     * \pre camera_ must not be nullptr
-     * \pre node_ must not be nullptr
+     * \pre camera_ must not be `nullptr`
+     * \pre node_ must not be `nullptr`
      */
     EventCameraFocusTransition(const Camera* camera_, const SceneGraphNode* node_,
         Transition transition_);
@@ -314,8 +329,8 @@ struct EventPlanetEclipsed : public Event {
      * \param eclipsee_ The scene graph node that is eclipsed by another object
      * \param eclipser_ The scene graph node that is eclipsing the other object
      *
-     * \pre eclipsee_ must not be nullptr
-     * \pre eclipser_ must not be nullptr
+     * \pre eclipsee_ must not be `nullptr`
+     * \pre eclipser_ must not be `nullptr`
      */
     EventPlanetEclipsed(const SceneGraphNode* eclipsee_, const SceneGraphNode* eclipser_);
 
@@ -335,9 +350,9 @@ struct EventInterpolationFinished : public Event {
      *
      * \param property_ The property whose interpolation has finished
      *
-     * \pre property_ must not be nullptr
+     * \pre property_ must not be `nullptr`
      */
-    EventInterpolationFinished(const properties::Property* property_);
+    EventInterpolationFinished(const Property* property_);
     const tstring property;
 };
 
@@ -355,8 +370,8 @@ struct EventFocusNodeChanged : public Event {
      * \param oldNode_ The scene graph node which was the old focus node
      * \param newNode_ The scene graph node that is the new focus node
      *
-     * \pre oldNode_ must not be nullptr
-     * \pre newNode_ must not be nullptr
+     * \pre oldNode_ must not be `nullptr`
+     * \pre newNode_ must not be `nullptr`
      */
     EventFocusNodeChanged(const SceneGraphNode* oldNode_, const SceneGraphNode* newNode_);
 
@@ -498,7 +513,7 @@ struct EventRenderableEnabled : public Event {
      *
      * \param node_ The identifier of the node that contains the renderable
      *
-     * \pre node_ must not be nullptr
+     * \pre node_ must not be `nullptr`
      */
     explicit EventRenderableEnabled(const SceneGraphNode* node_);
 
@@ -517,7 +532,7 @@ struct EventRenderableDisabled : public Event {
      *
      * \param node_ The identifier of that node that contains the renderable
      *
-     * \pre node_ must not be nullptr
+     * \pre node_ must not be `nullptr`
      */
     explicit EventRenderableDisabled(const SceneGraphNode* node_);
 
@@ -525,7 +540,7 @@ struct EventRenderableDisabled : public Event {
 };
 
 /**
- * This event is created when the a camera path is started
+ * This event is created when the a camera path is started.
  */
 struct EventCameraPathStarted : public Event {
     static constexpr Type Type = Event::Type::CameraPathStarted;
@@ -544,7 +559,7 @@ struct EventCameraPathStarted : public Event {
 };
 
 /**
- * This event is created when the a camera path is finished
+ * This event is created when the a camera path is finished.
  */
 struct EventCameraPathFinished : public Event {
     static constexpr Type Type = Event::Type::CameraPathFinished;
@@ -589,8 +604,8 @@ struct EventScheduledScriptExecuted : public Event {
 };
 
 /**
- * This event is created when the custom ordering for a specific branch in the Scene
- * GUI tree is changed. It signals to the UI that the tree should be updated.
+ * This event is created when the custom ordering for a specific branch in the Scene GUI
+ * tree is changed. It signals to the UI that the tree should be updated.
  */
 struct EventGuiTreeUpdated : public Event {
     static constexpr Type Type = Event::Type::GuiTreeUpdated;
@@ -623,6 +638,6 @@ struct CustomEvent : public Event {
     const tstring payload;
 };
 
-} // namespace openspace::events
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___EVENT___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,16 +26,19 @@
 #define __OPENSPACE_MODULE_SKYBROWSER___TARGETBROWSERPAIR___H__
 
 #include <modules/skybrowser/include/utility.h>
+#include <ghoul/glm.h>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
 struct ImageData;
+class RenderableSkyTarget;
 class SceneGraphNode;
 class ScreenSpaceSkyBrowser;
-class RenderableSkyTarget;
-class ScreenSpaceRenderable;
 
 class TargetBrowserPair {
 public:
@@ -105,6 +108,7 @@ public:
     void loadImageCollection(const std::string& collection);
     void setImageOpacity(const std::string& imageUrl, float opacity);
     void hideChromeInterface();
+
 private:
     // Target and browser
     RenderableSkyTarget* _targetRenderable = nullptr;
@@ -112,9 +116,9 @@ private:
     SceneGraphNode* _targetNode = nullptr;
 
     // Animation
-    skybrowser::Animation<double> _fovAnimation = skybrowser::Animation(0.0, 0.0, 0.0);
-    skybrowser::Animation<glm::dvec3> _targetAnimation =
-        skybrowser::Animation(glm::dvec3(0.0), glm::dvec3(0.0), 0.0);
+    Animation<double> _fovAnimation = Animation(0.0, 0.0, 0.0);
+    Animation<glm::dvec3> _targetAnimation =
+        Animation(glm::dvec3(0.0), glm::dvec3(0.0), 0.0);
     bool _targetIsAnimating = false;
     bool _fovIsAnimating = false;
 

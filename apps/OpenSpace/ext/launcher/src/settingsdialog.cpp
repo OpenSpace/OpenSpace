@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,17 +25,22 @@
 #include "settingsdialog.h"
 
 #include "profile/line.h"
-
+#include <openspace/engine/configuration.h>
+#include <openspace/properties/property.h>
+#include <ghoul/misc/assert.h>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QLabel>
-#include <QLineEdit>
-#include <QMessageBox>
 #include <QPushButton>
+#include <optional>
+#include <string>
+#include <utility>
 
-SettingsDialog::SettingsDialog(openspace::Settings settings, QWidget* parent)
+using namespace openspace;
+
+SettingsDialog::SettingsDialog(Settings settings, QWidget* parent)
     : QDialog(parent)
     , _currentEdit(std::move(settings))
 {
@@ -113,7 +118,7 @@ void SettingsDialog::createWidgets() {
             _rememberLastProfile,
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             &QCheckBox::checkStateChanged,
-#else // ^^^^ >=6.7.0 // !WIN32 <6.7.0
+#else // ^^^^ >=6.7.0 // <6.7.0
             &QCheckBox::stateChanged,
 #endif // (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             [this]() {
@@ -173,7 +178,7 @@ void SettingsDialog::createWidgets() {
             _rememberLastConfiguration,
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             &QCheckBox::checkStateChanged,
-#else // ^^^^ >=6.7.0 // !WIN32 <6.7.0
+#else // ^^^^ >=6.7.0 // <6.7.0
             &QCheckBox::stateChanged,
 #endif // (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             [this]() {
@@ -218,7 +223,7 @@ void SettingsDialog::createWidgets() {
             _propertyVisibility,
             &QComboBox::textActivated,
             [this](const QString& value) {
-                using Visibility = openspace::properties::Property::Visibility;
+                using Visibility = Property::Visibility;
                 if (value == "Novice User") {
                     _currentEdit.visibility = Visibility::NoviceUser;
                 }
@@ -252,7 +257,7 @@ void SettingsDialog::createWidgets() {
             _bypassLauncher,
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             &QCheckBox::checkStateChanged,
-#else // ^^^^ >=6.7.0 // !WIN32 <6.7.0
+#else // ^^^^ >=6.7.0 // <6.7.0
             &QCheckBox::stateChanged,
 #endif // (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             [this]() {
@@ -308,8 +313,7 @@ void SettingsDialog::createWidgets() {
             _layerServer,
             &QComboBox::textActivated,
             [this](const QString& value) {
-                _currentEdit.layerServer =
-                    openspace::stringToLayerServer(value.toStdString());
+                _currentEdit.layerServer = stringToLayerServer(value.toStdString());
                 updateSaveButton();
             }
         );
@@ -328,7 +332,7 @@ void SettingsDialog::createWidgets() {
             _mrf.isEnabled,
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             &QCheckBox::checkStateChanged,
-#else // ^^^^ >=6.7.0 // !WIN32 <6.7.0
+#else // ^^^^ >=6.7.0 // <6.7.0
             &QCheckBox::stateChanged,
 #endif // (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             [this]() {
@@ -391,9 +395,7 @@ void SettingsDialog::createWidgets() {
     layout->addWidget(_dialogButtons, 19, 1, 1, 1, Qt::AlignRight);
 }
 
-void SettingsDialog::loadFromSettings(const openspace::Settings& settings) {
-    using namespace openspace;
-
+void SettingsDialog::loadFromSettings(const Settings& settings) {
     if (settings.configuration.has_value()) {
         _configuration->setText(QString::fromStdString(*settings.configuration));
     }
@@ -409,7 +411,7 @@ void SettingsDialog::loadFromSettings(const openspace::Settings& settings) {
     }
 
     if (settings.visibility.has_value()) {
-        using Visibility = openspace::properties::Property::Visibility;
+        using Visibility = Property::Visibility;
         const Visibility vis = *settings.visibility;
         switch (vis) {
             case Visibility::NoviceUser:
@@ -437,7 +439,7 @@ void SettingsDialog::loadFromSettings(const openspace::Settings& settings) {
     if (settings.layerServer.has_value()) {
         Configuration::LayerServer server = *settings.layerServer;
         _layerServer->setCurrentText(
-            QString::fromStdString(openspace::layerServerToString(std::move(server)))
+            QString::fromStdString(layerServerToString(std::move(server)))
         );
     }
 

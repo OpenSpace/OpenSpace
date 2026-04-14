@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,14 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/actionmanager.h>
+#include <openspace/scripting/lualibrary.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/exception.h>
+#include <algorithm>
+#include <cstdint>
+#include <string_view>
+#include <utility>
 
 #include "eventengine_lua.inl"
 
@@ -42,7 +49,7 @@ uint32_t EventEngine::nextRegisteredEventId = 0;
 uint64_t EventEngine::nEvents = 0;
 #endif // _DEBUG
 
-events::Event* EventEngine::firstEvent() const {
+Event* EventEngine::firstEvent() const {
     return _firstEvent;
 }
 
@@ -55,15 +62,16 @@ void EventEngine::postFrameCleanup() {
 #endif // _DEBUG
 }
 
-void EventEngine::registerEventAction(events::Event::Type type, std::string identifier,
+void EventEngine::registerEventAction(Event::Type type, std::string identifier,
                                       std::optional<ghoul::Dictionary> filter)
 {
-    ActionInfo ai;
-    ai.id = nextRegisteredEventId;
-    ai.isEnabled = true;
-    ai.type = type;
-    ai.action = std::move(identifier);
-    ai.filter = std::move(filter);
+    ActionInfo ai = {
+        .type = type,
+        .id = nextRegisteredEventId,
+        .isEnabled = true,
+        .action = std::move(identifier),
+        .filter = std::move(filter)
+    };
     const auto it = _eventActions.find(type);
     if (it != _eventActions.end()) {
         it->second.push_back(ai);
@@ -75,7 +83,7 @@ void EventEngine::registerEventAction(events::Event::Type type, std::string iden
     nextRegisteredEventId++;
 }
 
-void EventEngine::registerEventTopic(size_t topicId, events::Event::Type type,
+void EventEngine::registerEventTopic(size_t topicId, Event::Type type,
                                      ScriptCallback callback)
 {
     TopicInfo ti;
@@ -85,8 +93,7 @@ void EventEngine::registerEventTopic(size_t topicId, events::Event::Type type,
     _eventTopics[type].push_back(ti);
 }
 
-void EventEngine::unregisterEventAction(events::Event::Type type,
-                                        const std::string& identifier,
+void EventEngine::unregisterEventAction(Event::Type type, const std::string& identifier,
                                         const std::optional<ghoul::Dictionary>& filter)
 {
     const auto it = _eventActions.find(type);
@@ -129,33 +136,31 @@ void EventEngine::unregisterEventAction(uint32_t identifier) {
     ));
 }
 
-void EventEngine::unregisterEventTopic(size_t topicId, events::Event::Type type) {
+void EventEngine::unregisterEventTopic(size_t topicId, Event::Type type) {
     const auto it = _eventTopics.find(type);
-    if (it != _eventTopics.end()) {
-        const auto jt = std::find_if(
-            it->second.begin(), it->second.end(),
-            [topicId](const TopicInfo& ti) {
-                return ti.id == topicId;
-            }
-        );
-        if (jt != it->second.end()) {
-            it->second.erase(jt);
+    if (it == _eventTopics.end()) {
+        LWARNING(std::format("Could not find registered event '{}'", toString(type)));
+        return;
+    }
 
-            // This might have been the last action so we might need to remove the
-            // entry alltogether
-            if (it->second.empty()) {
-                _eventTopics.erase(it);
-            }
-        }
-        else {
-            LWARNING(std::format("Could not find registered event '{}' with topicId: {}",
-                events::toString(type), topicId)
-            );
+    const auto jt = std::find_if(
+        it->second.begin(),
+        it->second.end(),
+        [topicId](const TopicInfo& ti) { return ti.id == topicId; }
+    );
+    if (jt != it->second.end()) {
+        it->second.erase(jt);
+
+        // This might have been the last action so we might need to remove the entry
+        // alltogether
+        if (it->second.empty()) {
+            _eventTopics.erase(it);
         }
     }
     else {
-        LWARNING(std::format("Could not find registered event '{}'",
-            events::toString(type))
+        LWARNING(std::format(
+            "Could not find registered event '{}' with topicId: {}",
+            toString(type), topicId)
         );
     }
 }
@@ -163,21 +168,21 @@ void EventEngine::unregisterEventTopic(size_t topicId, events::Event::Type type)
 std::vector<EventEngine::ActionInfo> EventEngine::registeredActions() const {
     std::vector<EventEngine::ActionInfo> result;
     result.reserve(_eventActions.size());
-    using Type = events::Event::Type;
+    using Type = Event::Type;
     for (const std::pair<const Type, std::vector<ActionInfo>>& p : _eventActions) {
         result.insert(result.end(), p.second.begin(), p.second.end());
     }
     return result;
 }
 
-const std::unordered_map<events::Event::Type, std::vector<EventEngine::ActionInfo>>&
+const std::unordered_map<Event::Type, std::vector<EventEngine::ActionInfo>>&
 EventEngine::eventActions() const
 {
     return _eventActions;
 }
 
 void EventEngine::enableEvent(uint32_t identifier) {
-    using Type = events::Event::Type;
+    using Type = Event::Type;
     for (std::pair<const Type, std::vector<ActionInfo>>& p : _eventActions) {
         for (ActionInfo& ai : p.second) {
             if (ai.id == identifier) {
@@ -189,7 +194,7 @@ void EventEngine::enableEvent(uint32_t identifier) {
 }
 
 void EventEngine::disableEvent(uint32_t identifier) {
-    using Type = events::Event::Type;
+    using Type = Event::Type;
     for (std::pair<const Type, std::vector<ActionInfo>>& p : _eventActions) {
         for (ActionInfo& ai : p.second) {
             if (ai.id == identifier) {
@@ -206,7 +211,7 @@ void EventEngine::triggerActions() const {
         return;
     }
 
-    const events::Event* e = _firstEvent;
+    const Event* e = _firstEvent;
     while (e) {
         const auto it = _eventActions.find(e->type);
         if (it != _eventActions.end()) {
@@ -220,7 +225,7 @@ void EventEngine::triggerActions() const {
                     global::actionManager->triggerAction(
                         ai.action,
                         params,
-                        interaction::ActionManager::ShouldBeSynchronized::No
+                        ActionManager::ShouldBeSynchronized::No
                     );
                 }
             }
@@ -236,7 +241,7 @@ void EventEngine::triggerTopics() const {
         return;
     }
 
-    const events::Event* e = _firstEvent;
+    const Event* e = _firstEvent;
     while (e) {
         const auto it = _eventTopics.find(e->type);
 
@@ -251,7 +256,7 @@ void EventEngine::triggerTopics() const {
     }
 }
 
-scripting::LuaLibrary EventEngine::luaLibrary() {
+LuaLibrary EventEngine::luaLibrary() {
     return {
         "event",
         {

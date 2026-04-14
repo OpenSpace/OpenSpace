@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+using namespace openspace;
+
 namespace {
 
 /**
@@ -29,20 +31,18 @@ namespace {
  * and Moons.
  */
 [[codegen::luawrap]] void addPlanets(ghoul::Dictionary planets) {
-    openspace::TelemetryModule* module =
-        openspace::global::moduleEngine->module<openspace::TelemetryModule>();
+    TelemetryModule* module = global::moduleEngine->module<TelemetryModule>();
     if (!module) {
         throw ghoul::lua::LuaError("Could not find the Telemetry Module");
         return;
     }
-    openspace::TelemetryBase* ptr = module->telemetry("PlanetsSonification");
+    TelemetryBase* ptr = module->telemetry("PlanetsSonification");
     if (!ptr) {
         throw ghoul::lua::LuaError("Could not find the Planets Sonification");
         return;
     }
 
-    openspace::PlanetsSonification* planetsSonification =
-        dynamic_cast<openspace::PlanetsSonification*>(ptr);
+    PlanetsSonification* planetsSonification = dynamic_cast<PlanetsSonification*>(ptr);
 
     if (!planetsSonification) {
         throw ghoul::lua::LuaError("Could not cast to PlanetsSonification");
@@ -54,6 +54,6 @@ namespace {
     }
 }
 
-#include "planetssonification_lua_codegen.cpp"
-
 } // namespace
+
+#include "planetssonification_lua_codegen.cpp"

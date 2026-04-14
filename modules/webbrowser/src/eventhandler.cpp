@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,56 +28,69 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keyboardinputstate.h>
-#include <openspace/navigation/navigationhandler.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <string_view>
+#include <utility>
+#include <vector>
+
+#ifdef WIN32
+#include <Windows.h>
+#endif // WIN32
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "WebBrowser:EventHandler";
 
     /**
      * Map from GLFW key codes to windows key codes, supported by JS and CEF.
      * See http://keycode.info/ for lookup
      *
-     * \param key
-     * \return the key code, if mapped or the GLFW key code
+     * \param key The key that we need to make
+     * \return The key code, if mapped or the GLFW key code
      */
-    int mapFromGlfwToWindows(openspace::Key key) {
+    int mapFromGlfwToWindows(Key key) {
         switch (key) {
-            case openspace::Key::BackSpace:      return 8;
-            case openspace::Key::Tab:            return 9;
-            case openspace::Key::Enter:          return 13;
-            case openspace::Key::KeypadEnter:    return 13;
-            case openspace::Key::LeftShift:      return 16;
-            case openspace::Key::RightShift:     return 16;
-            case openspace::Key::LeftControl:    return 17;
-            case openspace::Key::RightControl:   return 17;
-            case openspace::Key::LeftAlt:        return 18;
-            case openspace::Key::RightAlt:       return 18;
-            case openspace::Key::Escape:         return 27;
-            case openspace::Key::Left:           return 37;
-            case openspace::Key::Up:             return 38;
-            case openspace::Key::Right:          return 39;
-            case openspace::Key::Down:           return 40;
-            case openspace::Key::Delete:         return 46;
-            case openspace::Key::Keypad0:        return 96;
-            case openspace::Key::Keypad1:        return 97;
-            case openspace::Key::Keypad2:        return 98;
-            case openspace::Key::Keypad3:        return 99;
-            case openspace::Key::Keypad4:        return 100;
-            case openspace::Key::Keypad5:        return 101;
-            case openspace::Key::Keypad6:        return 102;
-            case openspace::Key::Keypad7:        return 103;
-            case openspace::Key::Keypad8:        return 104;
-            case openspace::Key::Keypad9:        return 105;
-            case openspace::Key::KeypadMultiply: return 106;
-            case openspace::Key::KeypadAdd:      return 107;
-            case openspace::Key::KeypadSubtract: return 109;
-            case openspace::Key::KeypadDecimal:  return 110;
-            case openspace::Key::KeypadDivide:   return 111;
-            default:                          return static_cast<int>(key);
+            case Key::BackSpace:      return 8;
+            case Key::Tab:            return 9;
+            case Key::Enter:          return 13;
+            case Key::KeypadEnter:    return 13;
+            case Key::LeftShift:      return 16;
+            case Key::RightShift:     return 16;
+            case Key::LeftControl:    return 17;
+            case Key::RightControl:   return 17;
+            case Key::LeftAlt:        return 18;
+            case Key::RightAlt:       return 18;
+            case Key::Escape:         return 27;
+            case Key::Left:           return 37;
+            case Key::Up:             return 38;
+            case Key::Right:          return 39;
+            case Key::Down:           return 40;
+            case Key::Delete:         return 46;
+            case Key::Keypad0:        return 96;
+            case Key::Keypad1:        return 97;
+            case Key::Keypad2:        return 98;
+            case Key::Keypad3:        return 99;
+            case Key::Keypad4:        return 100;
+            case Key::Keypad5:        return 101;
+            case Key::Keypad6:        return 102;
+            case Key::Keypad7:        return 103;
+            case Key::Keypad8:        return 104;
+            case Key::Keypad9:        return 105;
+            case Key::KeypadMultiply: return 106;
+            case Key::KeypadAdd:      return 107;
+            case Key::KeypadSubtract: return 109;
+            case Key::KeypadDecimal:  return 110;
+            case Key::KeypadDivide:   return 111;
+            default:                  return static_cast<int>(key);
         }
     }
 
@@ -87,57 +100,59 @@ namespace {
     // There is an issue for proper cross-platform key events in CEF:
     // https://bitbucket.org/chromiumembedded/cef/issues/1750
     // For now, the 'important' keys are inserted here manually.
-    int mapFromGlfwToNative(openspace::Key key) {
+    int mapFromGlfwToNative(Key key) {
         switch (key) {
-            case openspace::Key::BackSpace:   return 51;
-            case openspace::Key::LeftControl: return 59;
-            case openspace::Key::LeftSuper:   return 55;
-            case openspace::Key::Enter:       return 36;
-            case openspace::Key::Left:        return 123;
-            case openspace::Key::Right:       return 124;
-            case openspace::Key::Up:          return 126;
-            case openspace::Key::Down:        return 127;
-            case openspace::Key::A:           return 97;
-            case openspace::Key::Num0:        return 82;
-            case openspace::Key::Num1:        return 83;
-            case openspace::Key::Num2:        return 84;
-            case openspace::Key::Num3:        return 85;
-            case openspace::Key::Num4:        return 86;
-            case openspace::Key::Num5:        return 87;
-            case openspace::Key::Num6:        return 88;
-            case openspace::Key::Num7:        return 89;
-            case openspace::Key::Num8:        return 91; // Note: 91, not 90.
-            case openspace::Key::Num9:        return 92;
-            default:                          return static_cast<int>(key);
+            case Key::BackSpace:   return 51;
+            case Key::LeftControl: return 59;
+            case Key::LeftSuper:   return 55;
+            case Key::Enter:       return 36;
+            case Key::Left:        return 123;
+            case Key::Right:       return 124;
+            case Key::Up:          return 126;
+            case Key::Down:        return 127;
+            case Key::A:           return 97;
+            case Key::Num0:        return 82;
+            case Key::Num1:        return 83;
+            case Key::Num2:        return 84;
+            case Key::Num3:        return 85;
+            case Key::Num4:        return 86;
+            case Key::Num5:        return 87;
+            case Key::Num6:        return 88;
+            case Key::Num7:        return 89;
+            case Key::Num8:        return 91; // Note: 91, not 90.
+            case Key::Num9:        return 92;
+            default:               return static_cast<int>(key);
         }
     }
 
-    int16_t mapFromGlfwToCharacter(openspace::Key key) {
+    int16_t mapFromGlfwToCharacter(Key key) {
         return static_cast<int16_t>(key);
     }
 
-    // This is needed to avoid the backspace up event to trigger backspace.
-    int16_t mapFromGlfwToUnmodifiedCharacter(openspace::Key key) {
+    /**
+     * This is needed to avoid the backspace up event to trigger backspace.
+     */
+    int16_t mapFromGlfwToUnmodifiedCharacter(Key key) {
         switch (key) {
-            case openspace::Key::BackSpace:   return 127;
-            case openspace::Key::A:           return 97;
-            default:                          return static_cast<int16_t>(key);
+            case Key::BackSpace:   return 127;
+            case Key::A:           return 97;
+            default:               return static_cast<int16_t>(key);
         }
     }
 
-    uint32_t mapToCefModifiers(openspace::KeyModifier modifiers) {
+    uint32_t mapToCefModifiers(KeyModifier modifiers) {
         uint32_t cefModifiers = 0;
         // Based on cef_event_flags_t in cef_types.h
-        if (hasKeyModifier(modifiers, openspace::KeyModifier::Shift)) {
+        if (hasKeyModifier(modifiers, KeyModifier::Shift)) {
             cefModifiers |= 1 << 1;
         }
-        if (hasKeyModifier(modifiers, openspace::KeyModifier::Control)) {
+        if (hasKeyModifier(modifiers, KeyModifier::Control)) {
             cefModifiers |= 1 << 2;
         }
-        if (hasKeyModifier(modifiers, openspace::KeyModifier::Alt)) {
+        if (hasKeyModifier(modifiers, KeyModifier::Alt)) {
             cefModifiers |= 1 << 3;
         }
-        if (hasKeyModifier(modifiers, openspace::KeyModifier::Super)) {
+        if (hasKeyModifier(modifiers, KeyModifier::Super)) {
             cefModifiers |= 1 << 7;
         }
         return cefModifiers;
@@ -166,7 +181,6 @@ namespace {
         return 4;
 #endif // WIN32
     }
-
 } // namespace
 
 namespace openspace {
@@ -257,7 +271,7 @@ void EventHandler::initialize() {
 
             _validTouchStates.emplace_back(input);
 
-            global::interactionMonitor->markInteraction();
+            global::interactionHandler->markInteraction();
             return true;
         }
     );
@@ -292,7 +306,7 @@ void EventHandler::initialize() {
                 _leftButton.down = true;
                 _browserInstance->sendMouseMoveEvent(mouseEvent());
 #endif // WIN32
-                global::interactionMonitor->markInteraction();
+                global::interactionHandler->markInteraction();
                 return true;
             }
             else if (it != _validTouchStates.cend()) {
@@ -354,18 +368,18 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action,
         return false;
     }
 
-    global::interactionMonitor->markInteraction();
+    global::interactionHandler->markInteraction();
     MouseButtonState& state = (button == MouseButton::Left) ? _leftButton : _rightButton;
 
     int clickCount = BrowserInstance::SingleClick;
 
-    // click or release?
+    // Click or release?
     if (action == MouseAction::Release) {
         state.down = false;
     }
     else {
         if (isDoubleClick(state)) {
-            ++clickCount;
+            clickCount++;
         }
         else {
             state.lastClickTime = std::chrono::high_resolution_clock::now();
@@ -391,7 +405,7 @@ bool EventHandler::isDoubleClick(const MouseButtonState& button) const {
         return false;
     }
 
-    // check position
+    // Check position
     const float maxDist = maxDoubleClickDistance() / 2.f;
     const bool x = std::abs(_mousePosition.x - button.lastClickPosition.x) < maxDist;
     const bool y = std::abs(_mousePosition.y - button.lastClickPosition.y) < maxDist;
@@ -406,7 +420,7 @@ bool EventHandler::mousePositionCallback(double x, double y) {
     _mousePosition =
         global::windowDelegate->mousePositionViewportRelative(_mousePosition);
     _browserInstance->sendMouseMoveEvent(mouseEvent());
-    global::interactionMonitor->markInteraction();
+    global::interactionHandler->markInteraction();
 
     // Let the mouse event trickle on
     return false;
@@ -414,7 +428,7 @@ bool EventHandler::mousePositionCallback(double x, double y) {
 
 bool EventHandler::mouseWheelCallback(glm::ivec2 delta) {
 #ifdef WIN32
-    // scroll wheel returns very low numbers on Windows machines
+    // Scroll wheel returns very low numbers on Windows machines
     delta.x *= 50;
     delta.y *= 50;
 #endif // WIN32
@@ -451,7 +465,7 @@ bool EventHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction act
     // The `Enter` key does not produce a `charCallback` event like other character keys.
     // Some web elements (e.g., buttons) rely on receiving a char event in addition to
     // `keydown` to properly register an `onClick`. Since GLFW does not generate this
-    // event for Enter, we manually invoke it to ensure expected behavior.
+    // event for Enter, we manually invoke it to ensure expected behavior
     constexpr int EnterKeyCode = 13;
     if (keyEvent.windows_key_code == EnterKeyCode && keyEvent.type == KEYEVENT_KEYDOWN) {
         return charCallback(static_cast<unsigned int>(Key::Enter), modifier);
@@ -537,7 +551,7 @@ CefTouchEvent EventHandler::touchEvent(const TouchInput& input,
     event.y = windowPos.y;
     event.type = eventType;
     const std::vector<std::pair<Key, KeyModifier>>& keyMods =
-        global::navigationHandler->keyboardInputState().pressedKeys();
+        global::interactionHandler->keyboardInputState().pressedKeys();
     for (const std::pair<Key, KeyModifier>& p : keyMods) {
         const KeyModifier mods = p.second;
         event.modifiers |= static_cast<uint32_t>(mapToCefModifiers(mods));

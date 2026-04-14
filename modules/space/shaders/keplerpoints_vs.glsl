@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,28 +24,33 @@
 
 #version __CONTEXT__
 
-layout (location = 0) in vec4 vertexData; // 1: x, 2: y, 3: z, 4: timeOffset,
-layout (location = 1) in vec2 orbitData; // 1: epoch, 2: period
+layout (location = 0) in vec3 in_vertexData; // 1: x, 2: y, 3: z
+layout (location = 1) in dvec3 in_orbitData; // 1: timeOffset, 2: epoch, 3: period
+
+out Data {
+  flat float currentRevolutionFraction;
+  flat float vertexRevolutionFraction;
+} out_data;
 
 uniform double inGameTime;
 
-flat out float currentRevolutionFraction;
-flat out float vertexRevolutionFraction;
 
 void main() {
-  float epoch = orbitData.x;
-  float period = orbitData.y;
+  double timeOffset = in_orbitData.x;
+  double epoch = in_orbitData.y;
+  double period = in_orbitData.z;
 
   // calculate nr of periods, get fractional part to know where the vertex closest to the
   // debris part is right now
   double numOfRevolutions = (inGameTime - epoch) / period;
-  currentRevolutionFraction = float(numOfRevolutions - double(int(numOfRevolutions)));
-  if (currentRevolutionFraction < 0.0) {
-    currentRevolutionFraction += 1.0;
+  out_data.currentRevolutionFraction =
+    float(numOfRevolutions - double(int(numOfRevolutions)));
+  if (out_data.currentRevolutionFraction < 0.0) {
+    out_data.currentRevolutionFraction += 1.0;
   }
 
   // Same procedure for the current vertex
-  vertexRevolutionFraction = vertexData.w / period;
+  out_data.vertexRevolutionFraction = float(timeOffset / period);
 
-  gl_Position = vec4(vertexData.xyz, 1.0);
+  gl_Position = vec4(in_vertexData, 1.0);
 }

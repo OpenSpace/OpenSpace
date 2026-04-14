@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,12 +30,11 @@
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <filesystem>
+#include <future>
 
 namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class ScreenSpaceTimeVaryingImageOnline : public ScreenSpaceRenderable {
 public:
@@ -45,16 +44,16 @@ public:
     void deinitializeGL() override;
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
     void loadJsonData(const std::filesystem::path& path);
     void computeSequenceEndTime();
     void loadImage(const std::string& imageUrl);
     int activeIndex(double currentTime) const;
 
-    properties::StringProperty _jsonFilePath;
+    StringProperty _jsonFilePath;
 
     std::future<DownloadManager::MemoryFile> _imageFuture;
     std::map<double, std::string> _urls;

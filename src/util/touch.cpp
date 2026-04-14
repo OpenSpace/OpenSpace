@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,41 +27,43 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <cmath>
+#include <cstdlib>
 
 namespace openspace {
 
-TouchInput::TouchInput(size_t touchDeviceId_, size_t fingerId_, float x_, float y_,
+TouchInput::TouchInput(size_t touchDeviceId_, size_t fingerId_, glm::vec2 pos_,
                        double timestamp_)
     : touchDeviceId(touchDeviceId_)
     , fingerId(fingerId_)
-    , x(x_)
-    , y(y_)
+    , pos(std::move(pos_))
     , timestamp(timestamp_)
 {}
 
 glm::vec2 TouchInput::screenCoordinates(const glm::vec2& resolution) const {
-    return { std::floor(x * resolution.x + 0.5f), std::floor(y * resolution.y + 0.5f) };
+    return glm::vec2(
+        std::floor(pos.x * resolution.x + 0.5f),
+        std::floor(pos.y * resolution.y + 0.5f)
+    );
 }
 
 glm::vec2 TouchInput::currentWindowCoordinates() const {
     const glm::vec2 res = global::windowDelegate->currentSubwindowSize();
-    return { std::floor(x * res.x + 0.5f), std::floor(y * res.y + 0.5f) };
+    return glm::vec2(std::floor(pos.x * res.x + 0.5f), std::floor(pos.y * res.y + 0.5f));
 }
 
 bool TouchInput::isMoving() const {
-    return dx != 0.f || dy != 0.f;
+    return dPos.x != 0.f || dPos.y != 0.f;
 }
 
-float TouchInput::distanceToPos(float otherX, float otherY) const {
-    const float distX = x - otherX;
-    const float distY = y - otherY;
-    return std::sqrt(distX*distX + distY*distY);
+float TouchInput::distanceToPos(const glm::vec2& other) const {
+    const glm::vec2 dist = pos - other;
+    return glm::length(dist);
 }
 
-float TouchInput::angleToPos(float otherX, float otherY) const {
-    const float side = x - otherX;
-    const float height = y - otherY;
-    const float distance = distanceToPos(otherX, otherY);
+float TouchInput::angleToPos(const glm::vec2& other) const {
+    const float side = pos.x - other.x;
+    const float height = pos.y - other.y;
+    const float distance = distanceToPos(other);
 
     float angle = glm::half_pi<float>() + std::asin(side / distance);
     if (height < 0.f) {
@@ -72,7 +74,7 @@ float TouchInput::angleToPos(float otherX, float otherY) const {
 }
 
 TouchInputHolder::TouchInputHolder(TouchInput input)
-    : _inputs{ input }
+    : _inputs({ input })
     , _firstInput(input)
     , _touchDeviceId(input.touchDeviceId)
     , _fingerId(input.fingerId)
@@ -83,12 +85,11 @@ bool TouchInputHolder::tryAddInput(TouchInput input) {
         _inputs.emplace_front(input);
         return true;
     }
-    constexpr double ONE_MS = 0.001;
     const TouchInput& lastInput = latestInput();
-    input.dx = input.x - lastInput.x;
-    input.dy = input.y - lastInput.y;
+    input.dPos = input.pos - lastInput.pos;
 
-    const bool sameTimeAsLastInput = (input.timestamp - lastInput.timestamp) < ONE_MS;
+    constexpr double OneMs = 0.001;
+    const bool sameTimeAsLastInput = (input.timestamp - lastInput.timestamp) < OneMs;
     bool successful = false;
     if (!sameTimeAsLastInput && isMoving()) {
         _inputs.emplace_front(input);
@@ -114,7 +115,7 @@ void TouchInputHolder::clearInputs() {
     _inputs.clear();
 }
 
-bool TouchInputHolder::holdsInput(const TouchInput &input) const {
+bool TouchInputHolder::holdsInput(const TouchInput& input) const {
     return input.fingerId == _fingerId && input.touchDeviceId == _touchDeviceId;
 }
 
@@ -133,7 +134,7 @@ float TouchInputHolder::speedX() const {
     const TouchInput& currentInput = _inputs[0];
     const TouchInput& previousInput = _inputs[1];
     const float dt = static_cast<float>(currentInput.timestamp - previousInput.timestamp);
-    return currentInput.dx / dt;
+    return currentInput.dPos.x / dt;
 }
 
 float TouchInputHolder::speedY() const {
@@ -143,8 +144,7 @@ float TouchInputHolder::speedY() const {
     const TouchInput& currentInput = _inputs[0];
     const TouchInput& previousInput = _inputs[1];
     const float dt = static_cast<float>(currentInput.timestamp - previousInput.timestamp);
-
-    return currentInput.dy / dt;
+    return currentInput.dPos.y / dt;
 }
 
 bool TouchInputHolder::isMoving() const {
@@ -158,15 +158,12 @@ float TouchInputHolder::gestureDistance() const {
     if (_inputs.size() <= 1) {
         return 0.f;
     }
-    float distX = 0.f;
-    float distY = 0.f;
-    const float startX = _inputs.front().x;
-    const float startY = _inputs.front().y;
+    glm::vec2 dist = glm::vec2(0.f);
+    const glm::vec2 start = _inputs.front().pos;
     for (const TouchInput& input : _inputs) {
-        distX += std::abs(input.x - startX);
-        distY += std::abs(input.y - startY);
+        dist += glm::abs(input.pos - start);
     }
-    return std::sqrt(distX*distX + distY*distY);
+    return glm::length(dist);
 }
 
 double TouchInputHolder::gestureTime() const {

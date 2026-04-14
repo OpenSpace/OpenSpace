@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,25 +25,49 @@
 #ifndef __OPENSPACE_CORE___PROFILE___H__
 #define __OPENSPACE_CORE___PROFILE___H__
 
-#include <openspace/engine/globals.h>
-#include <openspace/properties/propertyowner.h>
 #include <openspace/util/keys.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/exception.h>
+#include <map>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <variant>
 #include <vector>
+#include <filesystem>
 
 namespace openspace {
 
-namespace interaction { struct NavigationState; }
+struct LuaLibrary;
+struct NavigationState;
+class PropertyOwner;
 
-namespace scripting { struct LuaLibrary; }
+struct Addon {
+    struct Version {
+        int major = 0;
+        int minor = 0;
+
+        bool operator==(const Version&) const noexcept = default;
+    };
+    static constexpr Version CurrentVersion = Version{ 1, 0 };
+
+    std::string identifier;
+    std::string name;
+    std::string description;
+    std::vector<std::string> assets;
+    Version version;
+
+    // The enabled state is not stored in the profile file
+    bool isEnabled = false;
+
+    bool operator==(const Addon&) const noexcept = default;
+};
+
+Addon loadAddonFromFile(const std::filesystem::path& path);
 
 class Profile {
 public:
-    struct ParsingError : public ghoul::RuntimeError {
+    struct ParsingError final : public ghoul::RuntimeError {
         enum class Severity { Info, Warning, Error };
 
         ParsingError(Severity severity_, std::string msg);
@@ -51,19 +75,18 @@ public:
         Severity severity;
     };
 
-    // Version
     struct Version {
         int major = 0;
         int minor = 0;
 
-        auto operator<=>(const Version&) const = default;
+        bool operator==(const Version&) const noexcept = default;
     };
     struct Module {
         std::string name;
         std::optional<std::string> loadedInstruction;
         std::optional<std::string> notLoadedInstruction;
 
-        auto operator<=>(const Module&) const = default;
+        bool operator==(const Module&) const noexcept = default;
     };
     struct Meta {
         std::optional<std::string> name;
@@ -73,7 +96,7 @@ public:
         std::optional<std::string> url;
         std::optional<std::string> license;
 
-        auto operator<=>(const Meta&) const = default;
+        bool operator==(const Meta&) const noexcept = default;
     };
 
     struct Property {
@@ -86,7 +109,7 @@ public:
         std::string name;
         std::string value;
 
-        auto operator<=>(const Property&) const = default;
+        bool operator==(const Property&) const noexcept = default;
     };
 
     struct Action {
@@ -97,14 +120,14 @@ public:
         bool isLocal = false;
         std::string script;
 
-        auto operator<=>(const Action&) const = default;
+        bool operator==(const Action&) const noexcept = default;
     };
 
     struct Keybinding {
         KeyWithModifier key;
         std::string action;
 
-        auto operator<=>(const Keybinding&) const = default;
+        bool operator==(const Keybinding&) const noexcept = default;
     };
 
     struct Time {
@@ -117,7 +140,7 @@ public:
         std::string value;
         bool startPaused = false;
 
-        auto operator<=>(const Time&) const = default;
+        bool operator==(const Time&) const noexcept = default;
     };
 
     struct CameraGoToNode {
@@ -126,7 +149,7 @@ public:
         std::string anchor;
         std::optional<double> height;
 
-        auto operator<=>(const CameraGoToNode&) const = default;
+        bool operator==(const CameraGoToNode&) const noexcept = default;
     };
 
     struct CameraNavState {
@@ -140,7 +163,7 @@ public:
         std::optional<double> yaw;
         std::optional<double> pitch;
 
-        auto operator<=>(const CameraNavState&) const = default;
+        bool operator==(const CameraNavState&) const noexcept = default;
     };
 
     struct CameraGoToGeo {
@@ -151,23 +174,35 @@ public:
         double longitude = 0.0;
         std::optional<double> altitude;
 
-        auto operator<=>(const CameraGoToGeo&) const = default;
+        bool operator==(const CameraGoToGeo&) const noexcept = default;
     };
 
     using CameraType = std::variant<CameraGoToNode, CameraNavState, CameraGoToGeo>;
+
+    struct Addons {
+        std::vector<std::string> recommendedPaths;
+        std::vector<Addon> custom;
+
+        // The realized recommended Addons are not stored back into the JSON
+        std::vector<Addon> recommended;
+        std::vector<Addon> general;
+
+        bool operator==(const Addons&) const noexcept = default;
+    };
+
 
     Profile() = default;
     explicit Profile(const std::filesystem::path& path);
     std::string serialize() const;
 
-    auto operator<=>(const Profile&) const = default;
+    bool operator==(const Profile&) const noexcept = default;
 
     /**
      * Saves all current settings, starting from the profile that was loaded at startup,
      * and all of the property & asset changes that were made since startup.
      */
-    void saveCurrentSettingsToProfile(const properties::PropertyOwner& rootOwner,
-        std::string currentTime, interaction::NavigationState navState);
+    void saveCurrentSettingsToProfile(const PropertyOwner& rootOwner,
+        std::string currentTime, NavigationState navState);
 
     /**
      * Adds a new asset and checks for duplicates unless the `ignoreUpdates` member is
@@ -175,10 +210,12 @@ public:
      */
     void addAsset(const std::string& path);
 
-    /// Removes an asset unless the `ignoreUpdates` member is set to `true`
+    /**
+     * Removes an asset unless the `ignoreUpdates` member is set to `true`.
+     */
     void removeAsset(const std::string& path);
 
-    static constexpr Version CurrentVersion = Version{ 1, 4 };
+    static constexpr Version CurrentVersion = Version{ 1, 5 };
 
     Version version = CurrentVersion;
     std::vector<Module> modules;
@@ -193,6 +230,7 @@ public:
     std::vector<std::string> markNodes;
     std::vector<std::string> additionalScripts;
     std::map<std::string, bool> uiPanelVisibility;
+    Addons addons;
 
     bool ignoreUpdates = false;
 
@@ -202,7 +240,7 @@ public:
      *
      * \return The Lua library that contains all Lua functions available for profiles
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 };
 
 } // namespace openspace

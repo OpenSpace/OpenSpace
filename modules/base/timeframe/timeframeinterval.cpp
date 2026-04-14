@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,38 +25,42 @@
 #include <modules/base/timeframe/timeframeinterval.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
+#include <ghoul/misc/dictionary.h>
 #include <optional>
+#include <string>
+#include <variant>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo HasStartInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo HasStartInfo = {
         "HasStart",
-        "Has Start",
+        "Has start",
         "If enabled, this TimeFrame will be inactive before the Start.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StartInfo = {
+    constexpr Property::PropertyInfo StartInfo = {
         "Start",
         "Start",
         "Specifies the time when this TimeFrame becomes active.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HasEndInfo = {
+    constexpr Property::PropertyInfo HasEndInfo = {
         "HasEnd",
-        "Has End",
+        "Has end",
         "If enabled, this TimeFrame will be inactive after the End.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EndInfo = {
+    constexpr Property::PropertyInfo EndInfo = {
         "End",
         "End",
         "Specifies the time when this TimeFrame becomes inactive.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `TimeFrame`'s validity is determined by a single start and end time in between
@@ -71,13 +75,13 @@ namespace {
         // [[codegen::verbatim(EndInfo.description)]]
         std::optional<std::variant<double, std::string>> end;
     };
-#include "timeframeinterval_codegen.cpp"
 } // namespace
+#include "timeframeinterval_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation TimeFrameInterval::Documentation() {
-    return codegen::doc<Parameters>("base_time_frame_interval");
+Documentation TimeFrameInterval::Documentation() {
+    return codegen::doc<Parameters>("base_timeframe_interval");
 }
 
 TimeFrameInterval::TimeFrameInterval(const ghoul::Dictionary& dictionary)

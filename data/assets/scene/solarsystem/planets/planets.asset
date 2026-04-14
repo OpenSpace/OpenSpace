@@ -1,4 +1,5 @@
 asset.require("./mercury/mercury")
+asset.require("./mercury/trail")
 
 asset.require("./venus/venus")
 asset.require("./venus/trail")
@@ -13,20 +14,25 @@ asset.require("./earth/moon/moon")
 asset.require("./earth/moon/trail")
 
 asset.require("./mars/mars")
+asset.require("./mars/trail")
 asset.require("./mars/atmosphere")
 asset.require("./mars/moons/phobos")
 asset.require("./mars/moons/deimos")
 
 asset.require("./jupiter/jupiter")
+asset.require("./jupiter/trail")
 asset.require("./jupiter/major_moons")
 
 asset.require("./saturn/saturn")
+asset.require("./saturn/trail")
 asset.require("./saturn/major_moons")
 
 asset.require("./uranus/uranus")
+asset.require("./uranus/trail")
 asset.require("./uranus/major_moons")
 
 asset.require("./neptune/neptune")
+asset.require("./neptune/trail")
 asset.require("./neptune/major_moons")
 
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,16 +29,17 @@
 
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <functional>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-struct LayerRenderSettings : public properties::PropertyOwner {
+struct LayerRenderSettings : public PropertyOwner {
     LayerRenderSettings();
 
-    properties::FloatProperty gamma;
-    properties::FloatProperty multiplier;
-    properties::FloatProperty offset;
-    properties::TriggerProperty setDefault;
+    FloatProperty gamma;
+    FloatProperty multiplier;
+    FloatProperty offset;
+    TriggerProperty setDefault;
 
     void onChange(const std::function<void()>& callback);
 
@@ -53,6 +54,6 @@ struct LayerRenderSettings : public properties::PropertyOwner {
     glm::vec4 performLayerSettings(const glm::vec4& currentValue) const;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERRENDERSETTINGS___H__

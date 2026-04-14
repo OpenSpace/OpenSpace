@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,12 +26,13 @@
 #define __OPENSPACE_CORE___LUALIBRARY___H__
 
 #include <filesystem>
+#include <optional>
 #include <string>
 #include <vector>
 
 struct lua_State;
 
-namespace openspace::scripting {
+namespace openspace {
 
 /**
  * This structure represents a Lua library, itself consisting of a unique #name and an
@@ -44,7 +45,7 @@ struct LuaLibrary {
      * the function.
      */
     struct Function {
-        using lua_CFunction =int(*)(lua_State* L);
+        using lua_CFunction = int(*)(lua_State* L);
 
         /// The name of the function
         std::string name;
@@ -62,7 +63,7 @@ struct LuaLibrary {
         std::vector<Argument> arguments;
         /// Information about the type that this function returns
         std::string returnType;
-        /// A help text describing what the function does/
+        /// A help text describing what the function does
         std::string helpText;
         /// The source location where the implementation for this Lua file is located
         struct {
@@ -90,6 +91,6 @@ struct LuaLibrary {
     void merge(LuaLibrary rhs);
 };
 
-} // namespace openspace::scripting
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___LUALIBRARY___H__

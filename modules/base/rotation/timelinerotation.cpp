@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,19 +25,22 @@
 #include <modules/base/rotation/timelinerotation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/time.h>
+#include <ghoul/misc/dictionary.h>
 #include <optional>
+#include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ShouldInterpolateInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ShouldInterpolateInfo = {
         "ShouldInterpolate",
-        "Should Interpolate",
+        "Should interpolate",
         "If this value is set to 'true', an interpolation is applied between the given "
         "keyframes. If this value is set to 'false', the interpolation is not applied.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `Rotation` uses a timeline of other `Rotation` classes to calculate the
@@ -46,20 +49,20 @@ namespace {
     // interpolate between two adjacent keyframes.
     struct [[codegen::Dictionary(TimelineRotation)]] Parameters {
         // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
-        // that are valid Rotation objects
+        // that are valid Rotation objects.
         std::map<std::string, ghoul::Dictionary> keyframes
-            [[codegen::reference("core_transform_rotation")]];
+            [[codegen::reference("core_rotation")]];
 
         // [[codegen::verbatim(ShouldInterpolateInfo.description)]]
         std::optional<bool> shouldInterpolate;
     };
-#include "timelinerotation_codegen.cpp"
 } // namespace
+#include "timelinerotation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation TimelineRotation::Documentation() {
-    return codegen::doc<Parameters>("base_transform_rotation_keyframe");
+Documentation TimelineRotation::Documentation() {
+    return codegen::doc<Parameters>("base_rotation_keyframe");
 }
 
 TimelineRotation::TimelineRotation(const ghoul::Dictionary& dictionary)

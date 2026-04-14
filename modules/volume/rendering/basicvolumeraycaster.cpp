@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,8 +25,6 @@
 #include <modules/volume/rendering/basicvolumeraycaster.h>
 
 #include <modules/volume/rendering/volumeclipplanes.h>
-#include <modules/volume/transferfunctionhandler.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/glm.h>
@@ -35,7 +33,10 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/texture.h>
-#include <sstream>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 namespace {
     constexpr std::string_view GlslRaycast = "${MODULE_VOLUME}/shaders/raycast.glsl";
@@ -44,11 +45,11 @@ namespace {
     constexpr std::string_view GlslBoundsFs = "${MODULE_VOLUME}/shaders/bounds_fs.glsl";
 } // namespace
 
-namespace openspace::volume {
+namespace openspace {
 
 BasicVolumeRaycaster::BasicVolumeRaycaster(
                                     std::shared_ptr<ghoul::opengl::Texture> volumeTexture,
-                            std::shared_ptr<openspace::TransferFunction> transferFunction,
+                                       std::shared_ptr<TransferFunction> transferFunction,
                                              std::shared_ptr<VolumeClipPlanes> clipPlanes)
     : _clipPlanes(std::move(clipPlanes))
     , _volumeTexture(std::move(volumeTexture))
@@ -119,14 +120,12 @@ void BasicVolumeRaycaster::preRaycast(const RaycastData& data,
 
     _transferFunction->update();
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
-    _tfUnit->activate();
-    _transferFunction->texture().bind();
-    program.setUniform("transferFunction_" + id, _tfUnit->unitNumber());
+    _tfUnit->bind(_transferFunction->texture());
+    program.setUniform("transferFunction_" + id, *_tfUnit);
 
     _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
-    _textureUnit->activate();
-    _volumeTexture->bind();
-    program.setUniform("volumeTexture_" + id, _textureUnit->unitNumber());
+    _textureUnit->bind(*_volumeTexture);
+    program.setUniform("volumeTexture_" + id, *_textureUnit);
 
     program.setUniform("gridType_" + id, static_cast<int>(_gridType));
 
@@ -178,7 +177,7 @@ std::filesystem::path BasicVolumeRaycaster::helperPath() const {
 }
 
 void BasicVolumeRaycaster::setTransferFunction(
-                            std::shared_ptr<openspace::TransferFunction> transferFunction)
+                                       std::shared_ptr<TransferFunction> transferFunction)
 {
     _transferFunction = std::move(transferFunction);
 }
@@ -233,4 +232,4 @@ void BasicVolumeRaycaster::setModelTransform(glm::mat4 transform) {
     _modelTransform = std::move(transform);
 }
 
-} // namespace openspace::volume
+} // namespace openspace

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2025                                                                #
+# Copyright (c) 2014-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -36,9 +36,16 @@ set(SOURCE_FILES
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
+set(SHADER_FILES
+  shaders/bounds_fs.glsl
+  shaders/bounds_vs.glsl
+  shaders/raycast.glsl
+)
+source_group("Shader Files" FILES ${SHADER_FILES})
+
 create_new_module(
   "ToyVolume"
   toyvolume_module
   STATIC
-  ${HEADER_FILES} ${SOURCE_FILES}
+  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )

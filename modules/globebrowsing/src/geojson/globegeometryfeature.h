@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,27 +25,29 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEGEOMETRYFEATURE___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEGEOMETRYFEATURE___H__
 
-#include <openspace/properties/propertyowner.h>
-
-#include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/geojson/geojsonproperties.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/texturecomponent.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <chrono>
+#include <memory>
+#include <string>
 #include <vector>
 
-namespace openspace::documentation { struct Documentation; }
-namespace rendering::helper {
+namespace geos::geom { class Geometry; }
+namespace ghoul::opengl { class ProgramObject; }
+
+namespace openspace {
+
+namespace rendering {
     struct LightSourceRenderData;
     struct VertexXYZNormal;
-} // namespace rendering::helper
-
-namespace geos::geom { class Geometry; }
-
-namespace openspace::globebrowsing {
-
+} // namespace rendering
+struct Documentation;
+struct Geodetic2;
+struct Geodetic3;
+struct RenderData;
 class RenderableGlobe;
 
 /**
@@ -54,11 +56,12 @@ class RenderableGlobe;
  */
 class GlobeGeometryFeature {
 public:
+    using Vertex = rendering::VertexXYZNormal;
+
     GlobeGeometryFeature(const RenderableGlobe& globe,
         GeoJsonProperties& defaultProperties,
         GeoJsonOverrideProperties& overrideProperties);
 
-    using Vertex = rendering::helper::VertexXYZNormal;
 
     // TODO: Use instead of numbers
     //enum class RenderPass {
@@ -91,11 +94,10 @@ public:
      * Each geometry feature might translate into several render features.
      */
     struct RenderFeature {
-        void initializeBuffers();
-
         RenderType type = RenderType::Uninitialized;
         GLuint vaoId = 0;
-        GLuint vboId = 0;
+        GLuint vertexVboId = 0;
+        GLuint heightVboId = 0;
         size_t nVertices = 0;
         bool isExtrusionFeature = false;
 
@@ -114,7 +116,7 @@ public:
         float pointSizeScale;
         float lineWidthScale;
         PointRenderMode& pointRenderMode;
-        rendering::helper::LightSourceRenderData& lightSourceData;
+        rendering::LightSourceRenderData& lightSourceData;
     };
 
     std::string key() const;
@@ -189,12 +191,6 @@ private:
     std::vector<double> getCurrentReferencePointsHeights() const;
 
     /**
-     * Buffer the static data for the vertices.
-     */
-    void bufferVertexData(const RenderFeature& feature,
-        const std::vector<Vertex>& vertexData);
-
-    /**
      * Buffer the dynamic height data for the vertices, based on the height map.
      */
     void bufferDynamicHeightData(const RenderFeature& feature);
@@ -229,6 +225,6 @@ private:
     ghoul::opengl::ProgramObject* _pointsProgram = nullptr;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEGEOMETRYFEATURE___H__

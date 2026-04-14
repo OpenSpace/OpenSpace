@@ -1,0 +1,12 @@
+
+{
+  "version": { "major": 1, "minor": 0 },
+  "identifier": "addon3",
+  "name": "Addon 3",
+  "description": "Description addon 3.",
+  "assets": [
+    "educational/epicycle",
+    "spice/core",
+    "util/add_marker"
+  ]
+}

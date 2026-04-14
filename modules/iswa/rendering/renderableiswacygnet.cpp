@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,30 +30,35 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/rendering/transferfunction.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/designpattern/event.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+#include <cmath>
+#include <cstdlib>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "IswaCygnet";
 
-    constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
+    constexpr Property::PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
-    constexpr openspace::properties::Property::PropertyInfo AlphaInfo = {
+    constexpr Property::PropertyInfo AlphaInfo = {
         "Alpha",
         "Alpha",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableIswaCygnet)]] Parameters {
@@ -68,12 +73,12 @@ namespace {
 
         std::optional<double> xOffset;
     };
-#include "renderableiswacygnet_codegen.cpp"
 } // namespace
+#include "renderableiswacygnet_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableIswaCygnet::Documentation() {
+Documentation RenderableIswaCygnet::Documentation() {
     return codegen::doc<Parameters>("iswa_renderable_iswacygnet");
 }
 
@@ -101,12 +106,7 @@ RenderableIswaCygnet::RenderableIswaCygnet(const ghoul::Dictionary& dictionary)
 
     double xOffset = p.xOffset.value_or(0.0);
 
-    glm::vec3 scale = glm::vec3(
-        _data.gridMax.x - _data.gridMin.x,
-        _data.gridMax.y - _data.gridMin.y,
-        _data.gridMax.z - _data.gridMin.z
-    );
-    _data.scale = scale;
+    _data.scale = _data.gridMax - _data.gridMin;
 
     glm::vec3 offset = glm::vec3(
         (_data.gridMin.x +
@@ -158,10 +158,6 @@ void RenderableIswaCygnet::deinitializeGL() {
     }
 }
 
-bool RenderableIswaCygnet::isReady() const {
-    return !_shader;
-}
-
 void RenderableIswaCygnet::render(const RenderData& data, RendererTasks&) {
     if (!readyToRender()) {
         return;
@@ -175,24 +171,20 @@ void RenderableIswaCygnet::render(const RenderData& data, RendererTasks&) {
     }
     transform = transform * _rotation;
 
-    glm::vec4 pposition =
+    const glm::vec4 pposition =
         static_cast<glm::vec4>(glm::dvec4(data.modelTransform.translation, 0.0)) +
-        transform * glm::vec4(
-            _data.spatialScale.x * _data.offset,
-            _data.spatialScale.w
-        );
-    glm::vec3 position =
-        glm::vec3(pposition) * static_cast<float>(pow(10.f, pposition.w));
+        transform * glm::vec4(_data.spatialScale.x * _data.offset, _data.spatialScale.w);
+    const glm::vec3 position =
+        glm::vec3(pposition) * static_cast<float>(std::pow(10.f, pposition.w));
 
-    // Activate shader
     _shader->activate();
     glEnable(GL_ALPHA_TEST);
     glDisable(GL_CULL_FACE);
 
-    _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _shader->setUniform("ModelTransform", transform);
+    _shader->setUniform("viewProjection", data.camera.viewProjectionMatrix());
+    _shader->setUniform("modelTransform", transform);
 
-    _shader->setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
+    _shader->setUniform("campos", glm::vec4(data.camera.position(), 1.f));
     _shader->setUniform("objpos", glm::vec4(position, 0.f));
     _shader->setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
     _shader->setUniform("scaling", glm::vec2(1.f, 0.f));
@@ -210,8 +202,8 @@ void RenderableIswaCygnet::update(const UpdateData&) {
         return;
     }
 
-    // the texture resource is downloaded ahead of time, so we need to
-    // now if we are going backwards or forwards
+    // The texture resource is downloaded ahead of time, so we need to now if we are going
+    // backwards or forwards
     _openSpaceTime = global::timeManager->time().j2000Seconds();
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()
@@ -223,7 +215,7 @@ void RenderableIswaCygnet::update(const UpdateData&) {
     );
 
     const bool timeToUpdate =
-        (fabs(_openSpaceTime - _lastUpdateOpenSpaceTime) >= _data.updateTime &&
+        (std::abs(_openSpaceTime - _lastUpdateOpenSpaceTime) >= _data.updateTime &&
         (_realTime.count() - _lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
 
     if (_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
@@ -233,20 +225,18 @@ void RenderableIswaCygnet::update(const UpdateData&) {
         }
     }
 
-    if (_textureDirty && _data.updateTime != 0 && timeToUpdate) {
+    if (_textureDirty && (_data.updateTime != 0) && timeToUpdate) {
         updateTexture();
         _textureDirty = false;
 
-        double clockwiseSign = (global::timeManager->deltaTime() > 0) ? 1.0 : -1.0;
-        downloadTextureResource(_openSpaceTime + clockwiseSign * _data.updateTime);
+        const double clockwiseSgn = (global::timeManager->deltaTime() > 0.0) ? 1.0 : -1.0;
+        downloadTextureResource(_openSpaceTime + clockwiseSgn * _data.updateTime);
         _lastUpdateRealTime = _realTime;
         _lastUpdateOpenSpaceTime = _openSpaceTime;
     }
 
-    if (!_transferFunctions.empty()) {
-        for (TransferFunction& tf : _transferFunctions) {
-            tf.update();
-        }
+    for (TransferFunction& tf : _transferFunctions) {
+        tf.update();
     }
 }
 
@@ -273,7 +263,7 @@ void RenderableIswaCygnet::initializeTime() {
 void RenderableIswaCygnet::initializeGroup() {
     _group = IswaManager::ref().iswaGroup(_data.groupName);
 
-    //Subscribe to enable and delete property
+    // Subscribe to enable and delete property
     ghoul::Event<ghoul::Dictionary>& groupEvent = _group->groupEvent();
 
     groupEvent.subscribe(
@@ -306,4 +296,4 @@ void RenderableIswaCygnet::initializeGroup() {
     );
 }
 
-} //namespace openspace
+} // namespace openspace

@@ -15,13 +15,12 @@ local AddSunTrail = {
       date = openspace.time.UTC()
     end
 
-    local datePlus = openspace.time.advancedTime(date, '1d')
-
-    date = string.sub(date, 1, string.find(date, "T") - 1)
-    datePlus = string.sub(datePlus, 1, string.find(datePlus, "T") - 1)
+    dateSub = string.sub(date, 1, string.find(date, "T") - 1)
+    date = dateSub .. "T00:00:00Z"
+    local datePlus = dateSub .. "T23:59:59Z"
 
     local SunTrailEarth = {
-      Identifier = "SunTrailEarth" .. date,
+      Identifier = "SunTrailEarth" .. dateSub,
       Parent = "Earth",
       Renderable = {
         Type = "RenderableTrailTrajectory",
@@ -40,12 +39,16 @@ local AddSunTrail = {
       },
       Tag = { "sun_trail" },
       GUI = {
-        Name = "Sun Trail " .. date,
+        Name = "Sun Trail " .. dateSub,
         Path = "/Night Sky/Sun Trails",
       }
     }
- 
-    openspace.addSceneGraphNode(SunTrailEarth)
+
+    if not openspace.hasSceneGraphNode(SunTrailEarth.Identifier) then
+      openspace.addSceneGraphNode(SunTrailEarth)
+    else
+      openspace.printWarning("Sun trail for date " .. dateSub .. " already exists.")
+    end
   ]],
   Documentation = [[
     Adds a trail for the sun, if an argument is provided, that date will be used instead of now

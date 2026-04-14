@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,9 +23,11 @@
  ****************************************************************************************/
 
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/opengl/texture.h>
+#include <utility>
 
-namespace openspace::volume {
+namespace openspace {
 
 template <typename VoxelType>
 TextureSliceVolumeReader<VoxelType>::TextureSliceVolumeReader(
@@ -44,7 +46,7 @@ void TextureSliceVolumeReader<VoxelType>::initialize() {
     ghoul_assert(_paths.size() > 0, "No paths to read slices from");
 
     std::shared_ptr<ghoul::opengl::Texture> firstSlice =
-        ghoul::io::TextureReader::ref().loadTexture(_paths[0], 2);
+        ghoul::io::texture::loadTexture(_paths[0], 2);
 
     glm::uvec3 dimensions = firstSlice->dimensions();
     _sliceDimensions = glm::uvec2(dimensions.x, dimensions.y);
@@ -55,7 +57,8 @@ void TextureSliceVolumeReader<VoxelType>::initialize() {
 template <typename VoxelType>
 VoxelType TextureSliceVolumeReader<VoxelType>::get(const glm::ivec3& coordinates) const {
     ghoul::opengl::Texture& slice = getSlice(coordinates.z);
-    return slice.texel<VoxelType>(glm::uvec2(coordinates.x, coordinates.y));
+    slice.downloadTexture();
+    return slice.texel<VoxelType>(glm::uvec3(coordinates.x, coordinates.y, 0));
 }
 
 template <typename VoxelType>
@@ -80,7 +83,7 @@ TextureSliceVolumeReader<VoxelType>::getSlice(int sliceIndex) const
 
     if (!_cache.has(sliceIndex)) {
         std::shared_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::TextureReader::ref().loadTexture(_paths[sliceIndex], 2);
+            ghoul::io::texture::loadTexture(_paths[sliceIndex], 2);
 
         ghoul_assert(
             glm::ivec2(texture->dimensions()) == _sliceDimensions,
@@ -91,4 +94,4 @@ TextureSliceVolumeReader<VoxelType>::getSlice(int sliceIndex) const
     return *_cache.get(sliceIndex).get();
 }
 
-} // namespace openspace::volume
+} // namespace openspace

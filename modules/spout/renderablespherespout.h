@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,8 +33,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class RenderableSphereSpout : public RenderableSphere {
 public:
     explicit RenderableSphereSpout(const ghoul::Dictionary& dictionary);
@@ -42,13 +40,12 @@ public:
     void deinitializeGL() override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    void bindTexture() override;
-    void unbindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
-    spout::SpoutReceiverPropertyProxy _spoutReceiver;
+    SpoutReceiverPropertyProxy _spoutReceiver;
 };
 
 } // namespace openspace

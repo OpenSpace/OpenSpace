@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,14 +24,11 @@
 
 #include <openspace/interaction/websocketinputstate.h>
 
-#include <ghoul/misc/exception.h>
 #include <ghoul/misc/invariants.h>
-#include <ghoul/misc/stringconversion.h>
 #include <algorithm>
-#include <map>
 #include <numeric>
 
-namespace openspace::interaction {
+namespace openspace {
 
 float WebsocketInputStates::axis(int axis) const {
     ghoul_precondition(axis >= 0, "axis must be 0 or positive");
@@ -63,12 +60,10 @@ bool WebsocketInputStates::button(int button, WebsocketAction action) const {
         end(),
         [button, action](const std::pair<const size_t, const WebsocketInputState *> state)
         {
-            return state.second->isConnected ?
-                (state.second->buttons[button] == action)
-                : false;
+            return state.second->isConnected && (state.second->buttons[button] == action);
         }
     );
     return res;
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

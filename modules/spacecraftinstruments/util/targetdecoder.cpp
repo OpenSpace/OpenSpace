@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@ TargetDecoder::TargetDecoder(const ghoul::Dictionary& dictionary) {
     for (size_t i = 0; i < _names.size(); i++) {
         const std::string key = std::to_string(i + 1);
         if (dictionary.hasKey(key) && dictionary.hasValue<std::string>(key)) {
-            _names[i] = dictionary.value<std::string>(key);;
+            _names[i] = dictionary.value<std::string>(key);
         }
     }
 }

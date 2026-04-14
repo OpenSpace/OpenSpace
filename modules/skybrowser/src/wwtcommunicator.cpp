@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,13 +24,12 @@
 
 #include <modules/skybrowser/include/wwtcommunicator.h>
 
-#include <modules/cefwebgui/include/guirenderhandler.h>
-#include <modules/cefwebgui/include/guikeyboardhandler.h>
-#include <modules/skybrowser/include/utility.h>
-#include <modules/webbrowser/include/webkeyboardhandler.h>
-#include <modules/webbrowser/webbrowsermodule.h>
+#include <modules/webbrowser/include/browserinstance.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
-#include <deque>
+#include <algorithm>
+#include <iterator>
 
 namespace {
     // WWT messages
@@ -94,8 +93,8 @@ namespace {
     ghoul::Dictionary setLayerOrderMessage(const std::string& imageUrl, int order) {
         static int MessageCounter = 0;
 
-        // The lower the layer order, the more towards the back the image is placed
-        // 0 is the background
+        // The lower the layer order, the more towards the back the image is placed 0 is
+        // the background
         using namespace std::string_literals;
 
         ghoul::Dictionary msg;
@@ -123,7 +122,7 @@ void WwtCommunicator::selectImage(const std::string& url) {
         // Push newly selected image to front
         _selectedImages.emplace_front(url, 1.0);
 
-        // If wwt has not loaded the collection yet, wait with passing the message
+        // If WWT has not loaded the collection yet, wait with passing the message
         if (_isImageCollectionLoaded) {
             addImageLayerToWwt(url);
         }
@@ -197,7 +196,7 @@ bool WwtCommunicator::isImageCollectionLoaded() const {
     return _isImageCollectionLoaded;
 }
 
-SelectedImageDeque::iterator WwtCommunicator::findSelectedImage(
+std::deque<std::pair<std::string, double>>::iterator WwtCommunicator::findSelectedImage(
                                                               const std::string& imageUrl)
 {
     auto it = std::find_if(
@@ -284,6 +283,5 @@ void WwtCommunicator::executeJavascript(const std::string& script) const {
         frame->ExecuteJavaScript(script, frame->GetURL(), 0);
     }
 }
-
 
 } // namespace openspace

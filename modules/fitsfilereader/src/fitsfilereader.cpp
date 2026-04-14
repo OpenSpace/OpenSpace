@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,9 +27,14 @@
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
+#include <cstdlib>
 #include <fstream>
+#include <iterator>
+#include <sstream>
+#include <string_view>
+#include <utility>
 
 #ifdef WIN32
 #pragma warning (push)
@@ -43,7 +48,6 @@
 #ifdef WIN32
 #pragma warning (pop)
 #endif // WIN32
-
 
 using namespace CCfits;
 
@@ -109,15 +113,13 @@ std::shared_ptr<std::unordered_map<std::string, T>> FitsFileReader::readHeader(
             keywords.begin(),
             keywords.end(),
             values.begin(),
-            std::inserter(
-                result,
-                result.end()
-            ),
-            [](std::string key, T value) { return std::make_pair(key, value); }
+            std::inserter(result, result.end()),
+            [](std::string key, T value) { return std::pair(key, value); }
         );
         return std::make_shared<std::unordered_map<std::string, T>>(std::move(result));
-    } catch (const FitsException& e) {
-        LERROR("Could not read FITS header. " + e.message());
+    }
+    catch (const FitsException& e) {
+        LERROR(std::format("Could not read FITS header. {}", e.message()));
     }
     return nullptr;
 }
@@ -132,13 +134,14 @@ std::shared_ptr<T> FitsFileReader::readHeaderValue(const std::string key) {
         T value;
         image.readKey(key, value);
         return std::make_unique<T>(value);
-    } catch (FitsException& e) {
-        LERROR("Could not read FITS key. " + e.message());
+    }
+    catch (FitsException& e) {
+        LERROR(std::format("Could not read FITS key. {}", e.message()));
     }
     return nullptr;
 }
 
-template<typename T>
+template <typename T>
 std::shared_ptr<TableData<T>> FitsFileReader::readTable(const std::filesystem::path& path,
                                               const std::vector<std::string>& columnNames,
                                                                              int startRow,
@@ -147,19 +150,18 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(const std::filesystem::p
                                                                              bool readAll)
 {
     // We need to lock reading when using multithreads because CCfits can't handle
-    // multiple I/O drivers.
-    const std::lock_guard g(_mutex);
+    // multiple I/O drivers
+    const std::unique_lock lock(_mutex);
 
     try {
         _infile = std::make_unique<FITS>(path.string(), Read, readAll);
 
-        // Make sure FITS file is not a Primary HDU Object (aka an image).
+        // Make sure FITS file is not a Primary HDU Object (aka an image)
         if (!isPrimaryHDU()) {
             const ExtHDU& table = _infile->extension(hduIdx);
             const int numCols = static_cast<int>(columnNames.size());
             const int numRowsInTable = static_cast<int>(table.rows());
             std::unordered_map<string, std::vector<T>> contents;
-            //LINFO("Read file: " + _infile->name());
 
             const int firstRow = std::max(startRow, 1);
 
@@ -169,12 +171,11 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(const std::filesystem::p
 
             for (int i = 0; i < numCols; i++) {
                 std::vector<T> columnData;
-                //LINFO("Read column: " + columnNames[i]);
                 table.column(columnNames[i]).read(columnData, firstRow, endRow);
                 contents[columnNames[i]] = columnData;
             }
 
-            // Create TableData object of table contents.
+            // Create TableData object of table contents
             TableData<T> loadedTable = {
                 .contents = std::move(contents),
                 .readRows = static_cast<int>(table.rows()),
@@ -185,7 +186,7 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(const std::filesystem::p
             return std::make_shared<TableData<T>>(std::move(loadedTable));
         }
     }
-    catch (FitsException& e) {
+    catch (const FitsException& e) {
         LERROR(std::format(
             "Could not read FITS table from file '{}'. Make sure it's not an image file",
             e.message()
@@ -206,7 +207,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
         firstRow = 1;
     }
 
-    // Define what columns to read.
+    // Define what columns to read
     std::vector<std::string> allColumnNames = {
         "Position_X",
         "Position_Y",
@@ -227,7 +228,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
         "Tycho_V_Mag_Err"
     };
 
-    // Append additional filter parameters to default rendering parameters.
+    // Append additional filter parameters to default rendering parameters
     allColumnNames.insert(
         allColumnNames.end(),
         filterColumnNames.begin(),
@@ -289,7 +290,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
     std::vector<float> tycho_b_err = std::move(tableContent[allColumnNames[15]]);
     std::vector<float> tycho_v_err = std::move(tableContent[allColumnNames[16]]);
 
-    // Construct data array. OBS: ORDERING IS IMPORTANT! This is where slicing happens.
+    // Construct data array. OBS: Ordering is important. This is where slicing happens.
     for (int i = 0; i < nStars * multiplier; i++) {
         std::vector<float> values(nValuesPerStar);
         size_t idx = 0;
@@ -300,12 +301,12 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
         // B-V Color
         // Velocity [X, Y, Z]
 
-        // Store positions.
+        // Store positions
         values[idx++] = posXcol[i % nStars];
         values[idx++] = posYcol[i % nStars];
         values[idx++] = posZcol[i % nStars];
 
-        // Return early if star doesn't have a measured position.
+        // Return early if star doesn't have a measured position
         if (values[0] == -999 && values[1] == -999 && values[2] == -999) {
             nNullArr++;
             continue;
@@ -315,7 +316,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
         values[idx++] = magCol[i % nStars] == -999 ? 20.f : magCol[i % nStars];
         values[idx++] = tycho_b[i % nStars] - tycho_v[i % nStars];
 
-        // Store velocity. Convert it to m/s with help by parallax.
+        // Store velocity. Convert it to m/s with help by parallax
         values[idx++] = convertMasPerYearToMeterPerSecond(
             velXcol[i % nStars],
             parallax[i % nStars]
@@ -329,7 +330,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
             parallax[i % nStars]
         );
 
-        // Store additional parameters to filter by.
+        // Store additional parameters to filter by
         values[idx++] = parallax[i % nStars];
         values[idx++] = parallax_err[i % nStars];
         values[idx++] = pr_mot_ra[i % nStars];
@@ -341,14 +342,14 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
         values[idx++] = tycho_v[i % nStars];
         values[idx++] = tycho_v_err[i % nStars];
 
-        // Read extra columns, if any. This will slow down the sorting tremendously!
-        for (int col = defaultCols; col < nColumnsRead; ++col) {
+        // Read extra columns, if any. This will slow down the sorting tremendously
+        for (int col = defaultCols; col < nColumnsRead; col++) {
             std::vector<float> vecData = std::move(tableContent[allColumnNames[col]]);
             values[idx++] = vecData[i];
         }
 
         for (int j = 0; j < nValuesPerStar; j++) {
-            // The astronomers in Vienna use -999 as default value. Change it to 0.
+            // The astronomers in Vienna use -999 as default value. Change it to 0
             if (values[j] == -999) {
                 values[j] = 0.f;
             }
@@ -360,164 +361,6 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
         fullData.insert(fullData.end(), values.begin(), values.end());
     }
 
-    // Define what columns to read.
-    /*auto allColumnNames = std::vector<std::string>({
-        "ra",
-        "dec",
-        "parallax",
-        "pmra",
-        "pmdec",
-        "phot_g_mean_mag",
-        "phot_bp_mean_mag",
-        "phot_rp_mean_mag",
-        "radial_velocity",
-        });
-    // Append additional filter parameters to default rendering parameters.
-    allColumnNames.insert(allColumnNames.end(), filterColumnNames.begin(),
-        filterColumnNames.end());
-
-    std::string allNames = "Columns to read: \n";
-    for (auto colName : allColumnNames) {
-        allNames += colName + "\n";
-    }
-    LINFO(allNames);
-
-    // Read columns from FITS file. If rows aren't specified then full table will be read.
-    auto table = readTable<float>(filePath, allColumnNames, firstRow, lastRow);
-
-    if (!table) {
-        throw ghoul::RuntimeError(std::format("Failed to open Fits file '{}'", filePath));
-    }
-
-    int nStars = table->readRows - firstRow + 1;
-
-    int nNullArr = 0;
-    size_t nColumnsRead = allColumnNames.size();
-    size_t defaultCols = 9; // Number of columns that are copied by predefined code.
-    if (nColumnsRead != defaultCols) {
-        LINFO("Additional columns will be read! Consider add column in code for "
-            "significant speedup");
-    }
-    // Declare how many values to save per star
-    nValuesPerStar = 8;
-
-    // Copy columns to local variables.
-    std::unordered_map<std::string, std::vector<float>>& tableContent = table->contents;
-
-    std::vector<float> ra = std::move(tableContent[allColumnNames[0]]);
-    std::vector<float> dec = std::move(tableContent[allColumnNames[1]]);
-    std::vector<float> parallax = std::move(tableContent[allColumnNames[2]]);
-    std::vector<float> pmra = std::move(tableContent[allColumnNames[3]]);
-    std::vector<float> pmdec = std::move(tableContent[allColumnNames[4]]);
-    std::vector<float> meanMagG = std::move(tableContent[allColumnNames[5]]);
-    std::vector<float> meanMagBp = std::move(tableContent[allColumnNames[6]]);
-    std::vector<float> meanMagRp = std::move(tableContent[allColumnNames[7]]);
-    std::vector<float> radial_vel = std::move(tableContent[allColumnNames[8]]);
-
-    // Construct data array. OBS: ORDERING IS IMPORTANT! This is where slicing happens.
-    for (int i = 0; i < nStars; i++) {
-        std::vector<float> values(nValuesPerStar);
-        size_t idx = 0;
-
-        // Default order for rendering:
-        // Position [X, Y, Z]
-        // Mean G-band Magnitude
-        // Bp-Rp Color
-        // Velocity [X, Y, Z]
-
-        // Return early if star doesn't have a measured position.
-        if (std::isnan(ra[i]) || std::isnan(dec[i])) {
-            nNullArr++;
-            continue;
-        }
-
-        // Store positions. Set to a default distance if parallax doesn't exist.
-        float radiusInKiloParsec = 9.0;
-        if (!std::isnan(parallax[i])) {
-            // Parallax is in milliArcseconds -> distance in kiloParsecs
-            // https://gea.esac.esa.int/archive/documentation/GDR2/Gaia_archive/
-            // chap_datamodel/sec_dm_main_tables/ssec_dm_gaia_source.html
-            radiusInKiloParsec = 1.0 / parallax[i];
-        }
-        // Convert to Galactic Coordinates from Galactic Lon & Lat.
-        // https://gea.esac.esa.int/archive/documentation/GDR2/Data_processing/
-        // chap_cu3ast/sec_cu3ast_intro/ssec_cu3ast_intro_tansforms.html#SSS1
-        //values[idx++] = radiusInKiloParsec * cos(glm::radians(b_latitude[i])) *
-        //cos(glm::radians(l_longitude[i])); // Pos X
-        //values[idx++] = radiusInKiloParsec * cos(glm::radians(b_latitude[i])) *
-        //sin(glm::radians(l_longitude[i])); // Pos Y
-        //values[idx++] = radiusInKiloParsec * sin(glm::radians(b_latitude[i])); // Pos Z
-
-
-        // Convert ICRS Equatorial Ra and Dec to Galactic latitude and longitude.
-        glm::mat3 aPrimG = glm::mat3(
-            // Col 0
-            glm::vec3(-0.0548755604162154, 0.4941094278755837, -0.8676661490190047),
-            // Col 1
-            glm::vec3(-0.8734370902348850, -0.4448296299600112, -0.1980763734312015),
-            // Col 2
-            glm::vec3(-0.4838350155487132, 0.7469822444972189, 0.4559837761750669)
-        );
-        glm::vec3 rICRS = glm::vec3(
-            cos(glm::radians(ra[i])) * cos(glm::radians(dec[i])),
-            sin(glm::radians(ra[i])) * cos(glm::radians(dec[i])),
-            sin(glm::radians(dec[i]))
-        );
-        glm::vec3 rGal = aPrimG * rICRS;
-        values[idx++] = radiusInKiloParsec * rGal.x; // Pos X
-        values[idx++] = radiusInKiloParsec * rGal.y; // Pos Y
-        values[idx++] = radiusInKiloParsec * rGal.z; // Pos Z
-
-        // Store magnitude render value. (Set default to high mag = low brightness)
-        values[idx++] = std::isnan(meanMagG[i]) ? 20.f : meanMagG[i]; // Mean G-band Mag
-
-        // Store color render value. (Default value is bluish stars)
-        values[idx++] = std::isnan(meanMagBp[i]) && std::isnan(meanMagRp[i]) ? 0.f
-            : meanMagBp[i] - meanMagRp[i]; // Bp-Rp Color
-
-        // Store velocity.
-        if (std::isnan(pmra[i])) pmra[i] = 0.f;
-        if (std::isnan(pmdec[i])) pmdec[i] = 0.f;
-
-        // Convert Proper Motion from ICRS [Ra,Dec] to Galactic Tanget Vector [l,b].
-        glm::vec3 uICRS = glm::vec3(
-            -sin(glm::radians(ra[i])) * pmra[i] -
-            cos(glm::radians(ra[i])) * sin(glm::radians(dec[i])) * pmdec[i],
-            cos(glm::radians(ra[i])) * pmra[i] -
-            sin(glm::radians(ra[i])) * sin(glm::radians(dec[i])) * pmdec[i],
-            cos(glm::radians(dec[i]))  * pmdec[i]
-        );
-        glm::vec3 pmVecGal = aPrimG * uICRS;
-
-        // Convert to Tangential vector [m/s] from Proper Motion vector [mas/yr]
-        float tanVelX = 1000.0 * 4.74 * radiusInKiloParsec * pmVecGal.x;
-        float tanVelY = 1000.0 * 4.74 * radiusInKiloParsec * pmVecGal.y;
-        float tanVelZ = 1000.0 * 4.74 * radiusInKiloParsec * pmVecGal.z;
-
-        // Calculate True Space Velocity [m/s] if we have the radial velocity
-        if (!std::isnan(radial_vel[i])) {
-            // Calculate Radial Velocity in the direction of the star.
-            // radial_vel is given in [km/s] -> convert to [m/s].
-            float radVelX = 1000.0 * radial_vel[i] * rGal.x;
-            float radVelY = 1000.0 * radial_vel[i] * rGal.y;
-            float radVelZ = 1000.0 * radial_vel[i] * rGal.z;
-
-            // Use Pythagoras theorem for the final Space Velocity [m/s].
-            values[idx++] = sqrt(pow(radVelX, 2) + pow(tanVelX, 2)); // Vel X [U]
-            values[idx++] = sqrt(pow(radVelY, 2) + pow(tanVelY, 2)); // Vel Y [V]
-            values[idx++] = sqrt(pow(radVelZ, 2) + pow(tanVelZ, 2)); // Vel Z [W]
-        }
-        // Otherwise use the vector [m/s] we got from proper motion.
-        else {
-            radial_vel[i] = 0.f;
-            values[idx++] = tanVelX; // Vel X [U]
-            values[idx++] = tanVelY; // Vel Y [V]
-            values[idx++] = tanVelZ; // Vel Z [W]
-        }
-
-        fullData.insert(fullData.end(), values.begin(), values.end());
-    }*/
-
     LINFO(std::format("{} out of {} read stars were null arrays", nNullArr, nStars));
     LINFO(std::format("Multiplier: {}", multiplier));
 
@@ -527,18 +370,15 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
 std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& filePath,
                                                  int& nRenderValues)
 {
-    std::vector<float> fullData;
 
-    std::ifstream fileStream(filePath);
+    std::ifstream fileStream = std::ifstream(filePath);
 
     if (!fileStream.good()) {
         LERROR(std::format("Failed to open Speck file '{}'", filePath));
-        return fullData;
+        return std::vector<float>();
     }
 
     int nValuesPerStar = 0;
-    int nNullArr = 0;
-    size_t nStars = 0;
 
     // The beginning of the speck file has a header that either contains comments
     // (signaled by a preceding '#') or information about the structure of the file
@@ -556,7 +396,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
             line.substr(0, 7) != "texture" && line.substr(0, 10) != "maxcomment")
         {
             // We read a line that doesn't belong to the header, so we have to jump back
-            // before the beginning of the current line.
+            // before the beginning of the current line
             fileStream.seekg(position);
             break;
         }
@@ -595,19 +435,22 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
     // 13 texture               13 speed
     //                          14 texture
 
+    int nNullArr = 0;
+    size_t nStars = 0;
+    std::vector<float> fullData;
     do {
         std::vector<float> readValues(nValuesPerStar);
         nStars++;
 
         ghoul::getline(fileStream, line);
-        std::stringstream str(line);
+        std::stringstream str = std::stringstream(line);
 
-        // Read values.
+        // Read values
         for (int i = 0; i < nValuesPerStar; i++) {
             str >> readValues[i];
         }
 
-        // Check if star is a nullArray.
+        // Check if star is a nullArray
         bool nullArray = true;
         for (const float f : readValues) {
             if (f != 0.f) {
@@ -616,7 +459,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
             }
         }
 
-        // Insert to data if we found some values.
+        // Insert to data if we found some values
         if (!nullArray) {
             // Re-order data here because Octree expects the data in correct order when
             // read.
@@ -631,8 +474,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
 
             // Gaia DR1 data from AMNH measures positions in Parsec, but
             // RenderableGaiaStars expects kiloParsec (because fits file from Vienna had
-            // in kPc).
-            // Thus we need to convert positions twice atm.
+            // in kPc). Thus we need to convert positions twice atm
             renderValues[0] = readValues[0] / 1000.f; // PosX
             renderValues[1] = readValues[1] / 1000.f; // PosY
             renderValues[2] = readValues[2] / 1000.f; // PosZ
@@ -655,9 +497,11 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
     return fullData;
 }
 
-// This is pretty annoying, the read method is not derived from the HDU class
-// in CCfits - need to explicitly cast to the sub classes to access read
-template<typename T>
+/**
+ * This is pretty annoying, the read method is not derived from the HDU class in CCfits -
+ * need to explicitly cast to the sub classes to access read.
+ */
+template <typename T>
 std::shared_ptr<ImageData<T>> FitsFileReader::readImageInternal(ExtHDU& image) {
    try {
         std::valarray<T> contents;
@@ -669,13 +513,13 @@ std::shared_ptr<ImageData<T>> FitsFileReader::readImageInternal(ExtHDU& image) {
         };
         return std::make_shared<ImageData<T>>(im);
     }
-   catch (const FitsException& e) {
-        LERROR("Could not read FITS image EXTHDU. " + e.message());
+    catch (const FitsException& e) {
+        LERROR(std::format("Could not read FITS image EXTHDU. {}", e.message()));
     }
     return nullptr;
 }
 
-template<typename T>
+template <typename T>
 std::shared_ptr<ImageData<T>> FitsFileReader::readImageInternal(PHDU& image) {
     try {
         std::valarray<T> contents;
@@ -688,9 +532,12 @@ std::shared_ptr<ImageData<T>> FitsFileReader::readImageInternal(PHDU& image) {
         return std::make_shared<ImageData<T>>(im);
     }
     catch (const FitsException& e) {
-        LERROR("Could not read FITS image PHDU. " + e.message());
+        LERROR(std::format("Could not read FITS image PHDU. {}", e.message()));
     }
     return nullptr;
 }
+
+template std::shared_ptr<TableData<float>> FitsFileReader::readTable(
+    const std::filesystem::path&, const std::vector<std::string>&, int, int, int, bool);
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,15 +24,12 @@
 
 #include <openspace/properties/matrix/mat2property.h>
 
-#include <openspace/util/json_helper.h>
-#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
-Mat2Property::Mat2Property(Property::PropertyInfo info, glm::mat2x2 value,
-                           glm::mat2x2 minValue, glm::mat2x2 maxValue,
-                           glm::mat2x2 stepValue)
+Mat2Property::Mat2Property(PropertyInfo info, glm::mat2x2 value, glm::mat2x2 minValue,
+                           glm::mat2x2 maxValue, glm::mat2x2 stepValue)
     : NumericalProperty<glm::mat2x2>(
         std::move(info),
         std::move(value),
@@ -62,4 +59,4 @@ std::string Mat2Property::stringValue() const {
     return formatJson(_value);
 }
 
-}  // namespace openspace::properties
+} // namespace openspace

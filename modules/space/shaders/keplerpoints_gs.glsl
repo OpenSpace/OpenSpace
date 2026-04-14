@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,53 +24,74 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScalingMath.hglsl"
+#include "powerscaling/powerscalingmath.glsl"
 
 layout(lines) in;
-flat in float currentRevolutionFraction[];
-flat in float vertexRevolutionFraction[];
+in Data {
+  flat float currentRevolutionFraction;
+  flat float vertexRevolutionFraction;
+} in_data[];
+
+layout(triangle_strip, max_vertices = 4) out;
+out Data {
+  vec4 viewSpace;
+  vec2 texCoords;
+  float projectionViewDepth;
+} out_data;
 
 uniform dmat4 modelTransform;
 uniform dmat4 viewTransform;
 uniform mat4 projectionTransform;
-uniform dvec3 cameraPositionWorld;
-uniform vec3 cameraUpWorld;
 uniform float pointSizeExponent;
 uniform bool enableMaxSize;
 uniform float maxSize;
+uniform int renderOption;
 
-layout(triangle_strip, max_vertices = 4) out;
-out float projectionViewDepth;
-out vec4 viewSpace;
-out vec2 texCoord;
+// Camera View Direction
+uniform vec3 cameraViewDirectionUp;
+uniform vec3 cameraViewDirectionRight;
+
+// Camera Normal
+uniform dvec3 cameraPositionWorld;
+uniform vec3 cameraUpWorld;
+
+const int RenderOptionCameraViewDirection = 0;
+const int RenderOptionCameraPositionNormal = 1;
+
 
 void main() {
   // cFrac is how far along the trail orbit the head of the trail is.
   // v0Frac and v1Frac are how far the two vertices that creates the current line strip
   // are along the trail orbit. The variables span between 0 and 1, where 0 is the
   // beginning of the trail and 1 is the end of the trail (a full orbit).
-  float cFrac = currentRevolutionFraction[0];
-  float v0Frac = vertexRevolutionFraction[0];
-  float v1Frac = vertexRevolutionFraction[1];
+  float cFrac = in_data[0].currentRevolutionFraction;
+  float v0Frac = in_data[0].vertexRevolutionFraction;
+  float v1Frac = in_data[1].vertexRevolutionFraction;
 
   // Interpolate position of current position of the trail head
-  float dFrac = abs(cFrac - v0Frac);
-  float vFrac = abs(v1Frac - v0Frac);
+  float dFrac = cFrac - v0Frac;
+  float vFrac = v1Frac - v0Frac;
   float percentage = dFrac / vFrac;
 
-  vec4 v0Weighted = (1.0 - percentage) * gl_in[0].gl_Position;
-  vec4 v1Weighted = percentage * gl_in[1].gl_Position;
-  vec4 pos = v0Weighted + v1Weighted;
-  // ==========================
+  vec4 pos = mix(gl_in[0].gl_Position, gl_in[1].gl_Position, percentage);
 
   // Calculate current vertex position to world space
   dvec4 vertPosWorldSpace = modelTransform * pos;
-
-  // Calculate new axis for plane
   vec3 camPosToVertPos = vec3(cameraPositionWorld - vertPosWorldSpace.xyz);
-  vec3 normal = normalize(camPosToVertPos);
-  vec3 right = normalize(cross(cameraUpWorld, normal));
-  vec3 up = normalize(cross(normal, right));
+
+  vec3 up;
+  vec3 right;
+  // Calculate new axis for plane
+  if (renderOption == RenderOptionCameraViewDirection) {
+    up = cameraViewDirectionUp;
+    right = cameraViewDirectionRight;
+  }
+  else {
+    // Camera Position Normal
+    vec3 normal = normalize(camPosToVertPos);
+    right = normalize(cross(cameraUpWorld, normal));
+    up = normalize(cross(normal, right));
+  }
 
   // Calculate size of points
   float initialSize = pow(10.0, pointSizeExponent);
@@ -79,7 +100,7 @@ void main() {
 
   float opp = length(right);
   float adj = length(camPosToVertPos);
-  float angle = atan(opp/adj);
+  float angle = atan(opp / adj);
   float maxAngle = radians(maxSize * 0.5);
 
   // Controls the point size
@@ -90,41 +111,37 @@ void main() {
   }
 
   // Calculate and set corners of the new quad
-  dvec4 p0World = vertPosWorldSpace + vec4(up-right, 0.0);
-  dvec4 p1World = vertPosWorldSpace + vec4(-right-up,0.0);
-  dvec4 p2World = vertPosWorldSpace + vec4(right+up, 0.0);
-  dvec4 p3World = vertPosWorldSpace + vec4(right-up, 0.0);
+  dvec4 p0World = vertPosWorldSpace + vec4(up - right, 0.0);
+  dvec4 p1World = vertPosWorldSpace + vec4(-right - up, 0.0);
+  dvec4 p2World = vertPosWorldSpace + vec4(right + up, 0.0);
+  dvec4 p3World = vertPosWorldSpace + vec4(right - up, 0.0);
 
   // Set some additional out parameters
-  viewSpace = z_normalization(
+  out_data.viewSpace = z_normalization(
     vec4(projectionTransform * viewTransform * modelTransform * pos)
   );
-  projectionViewDepth = viewSpace.w;
+  out_data.projectionViewDepth = out_data.viewSpace.w;
 
-  dmat4 ViewProjectionTransform = projectionTransform * viewTransform;
+  dmat4 viewProjectionTransform = projectionTransform * viewTransform;
 
   // left-top
-  vec4 p0Screen = z_normalization(vec4(ViewProjectionTransform * p0World));
-  gl_Position = p0Screen;
-  texCoord = vec2(0.0, 0.0);
+  gl_Position = z_normalization(vec4(viewProjectionTransform * p0World));
+  out_data.texCoords = vec2(0.0, 0.0);
   EmitVertex();
 
   // left-bot
-  vec4 p1Screen = z_normalization(vec4(ViewProjectionTransform * p1World));
-  gl_Position = p1Screen;
-  texCoord = vec2(1.0, 0.0);
+  gl_Position = z_normalization(vec4(viewProjectionTransform * p1World));
+  out_data.texCoords = vec2(1.0, 0.0);
   EmitVertex();
 
   // right-top
-  vec4 p2Screen = z_normalization(vec4(ViewProjectionTransform * p2World));
-  gl_Position = p2Screen;
-  texCoord = vec2(0.0, 1.0);
+  gl_Position = z_normalization(vec4(viewProjectionTransform * p2World));
+  out_data.texCoords = vec2(0.0, 1.0);
   EmitVertex();
 
   // right-bot
-  vec4 p3Screen = z_normalization(vec4(ViewProjectionTransform * p3World));
-  gl_Position = p3Screen;
-  texCoord = vec2(1.0, 1.0);
+  gl_Position = z_normalization(vec4(viewProjectionTransform * p3World));
+  out_data.texCoords = vec2(1.0, 1.0);
   EmitVertex();
 
   EndPrimitive();

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,10 +27,12 @@
 layout (location = 0) in vec2 in_position;
 layout (location = 1) in vec2 in_texCoords;
 
-out vec2 texCoord;
+out Data {
+  vec2 texCoords;
+} out_data;
 
 
 void main() {
-  texCoord = in_texCoords;
+  out_data.texCoords = in_texCoords;
   gl_Position = vec4(in_position, 0.0, 1.0);
 }

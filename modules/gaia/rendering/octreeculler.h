@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,12 +40,11 @@ namespace openspace {
  */
 class OctreeCuller {
 public:
-
     /**
      * \param viewFrustum This is the view space in normalized device coordinates space.
      *        Hence it is an axis aligned bounding box and not a real frustum
      */
-    explicit OctreeCuller(globebrowsing::AABB3 viewFrustum);
+    explicit OctreeCuller(AABB3 viewFrustum);
 
     ~OctreeCuller() = default;
 
@@ -66,8 +65,8 @@ private:
      */
     void createNodeBounds(const std::vector<glm::dvec4>& corners, const glm::dmat4& mvp);
 
-    const globebrowsing::AABB3 _viewFrustum;
-    globebrowsing::AABB3 _nodeBounds;
+    const AABB3 _viewFrustum;
+    AABB3 _nodeBounds;
 };
 
 } // namespace openspace

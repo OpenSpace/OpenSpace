@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,18 +24,21 @@
 
 #include <modules/volume/rendering/volumeclipplanes.h>
 
+#include <modules/volume/rendering/volumeclipplane.h>
 #include <openspace/documentation/documentation.h>
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo NormalInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo NormalInfo = {
         "Normal",
         "Normal",
         // @TODO Missing documentation
         ""
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OffsetsInfo = {
+    constexpr Property::PropertyInfo OffsetsInfo = {
         "Offsets",
         "Offsets",
         // @TODO Missing documentation
@@ -49,13 +52,13 @@ namespace {
         // [[codegen::verbatim(OffsetsInfo.description)]]
         glm::vec3 offsets;
     };
-#include "volumeclipplane_codegen.cpp"
 } // namespace
+#include "volumeclipplane_codegen.cpp"
 
-namespace openspace::volume {
+namespace openspace {
 
 VolumeClipPlane::VolumeClipPlane(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "" }) // @TODO Missing name
+    : PropertyOwner({ "" }) // @TODO Missing name
     , _normal(
         NormalInfo,
         glm::vec3(1.f, 0.f, 0.f),
@@ -86,4 +89,4 @@ glm::vec2 VolumeClipPlane::offsets() const {
     return _offsets;
 }
 
-} // namespace openspace::volume
+} // namespace openspace

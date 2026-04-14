@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,9 +26,11 @@
 
 #include <openspace/properties/misc/optionproperty.h>
 
+using namespace openspace;
+
 TEST_CASE("Regression: 527", "[regression]") {
     // Error in OptionProperty if values not starting at 0 are used
-    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
+    OptionProperty p({ "id", "gui", "desc" });
 
     p.addOptions({
         { -1, "a" },

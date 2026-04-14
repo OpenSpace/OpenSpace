@@ -3,25 +3,30 @@
   "commands": [
     {
       "type": "asset",
-      "value": "examples/renderable/renderablemodel/model_vertex_colors.asset"
+      "value": "examples/renderable/renderablemodel/advanced/model_shader.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
     },
     {
       "type": "navigationstate",
       "value": {
-        "anchor": "RenderableModel_Example_Shader",
+        "anchor": "Root",
         "position": [
-          -1.4308015710550517,
-          1.5322656483545825,
-          1.446271943930593
+          1.2920014356651963,
+          1.199386656952609,
+          1.3523478842471102
         ],
-        "pitch": -0.000239491221873302,
         "up": [
-          0.08343251916771802,
-          0.7241074954380635,
-          -0.6846220488676531
+          -0.38231583249387135,
+          0.8417129797960237,
+          -0.3812530181748292
         ],
-        "yaw": -0.0059474377778890525,
-        "timestamp": "2024 JUL 09 12:00:10"
+        "timestamp": "2025 AUG 30 12:32:46"
       }
     },
     {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,15 +25,17 @@
 #include <modules/base/scale/nonuniformstaticscale.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ScaleInfo = {
         "Scale",
         "Scale",
         "These values are used as scaling factors for the scene graph node that this "
         "transformation is attached to relative to its parent.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
     // This Scale type scales the scene graph node that it is attached to by a fixed
@@ -50,13 +52,13 @@ namespace {
         // [[codegen::verbatim(ScaleInfo.description)]]
         glm::dvec3 scale;
     };
-#include "nonuniformstaticscale_codegen.cpp"
 } // namespace
+#include "nonuniformstaticscale_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation NonUniformStaticScale::Documentation() {
-    return codegen::doc<Parameters>("base_transform_scale_nonuniformstatic");
+Documentation NonUniformStaticScale::Documentation() {
+    return codegen::doc<Parameters>("base_scale_nonuniformstatic");
 }
 
 NonUniformStaticScale::NonUniformStaticScale(const ghoul::Dictionary& dictionary)

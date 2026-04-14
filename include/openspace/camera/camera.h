@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,28 +27,32 @@
 
 #include <openspace/util/syncdata.h>
 #include <ghoul/glm.h>
+#include <istream>
 #include <mutex>
+#include <ostream>
+#include <vector>
 
 namespace openspace {
 
 struct CameraPose;
 class SceneGraphNode;
+class Syncable;
 
 /**
  * This class still needs some more love. Suggested improvements:
- * - Accessors should return constant references to double precision class members.
- * - Remove the scaling variable (What is it used for?)
- * - Remove the maxFov and sinMaxfov variables. Redundant since the fov is embedded within
- *   the perspective projection matrix
- * - Remove focusposition, part of the integration with the scale graph. The "focus
- *   position" should not be needed since we assume the camera is always positioned
- *   relative to its origin. When orbiting another object (not in origin), the focus
- *   position should probably be handled outside the camera class (interaction handler)
- *   since it does not affect the state of the camera (only how it interacts)
- * - The class might need some more reasonable accessors depending on use cases. (up
- *   vector world space?)
- * - Make clear which function returns a combined view matrix (things that are dependent
- *   on the separate sgct nodes).
+ *   - Accessors should return constant references to double precision class members
+ *   - Remove the scaling variable (What is it used for?)
+ *   - Remove the maxFov and sinMaxfov variables. Redundant since the fov is embedded
+ *     within the perspective projection matrix
+ *   - Remove focusposition, part of the integration with the scale graph. The "focus
+ *     position" should not be needed since we assume the camera is always positioned
+ *     relative to its origin. When orbiting another object (not in origin), the focus
+ *     position should probably be handled outside the camera class (interaction handler)
+ *     since it does not affect the state of the camera (only how it interacts)
+ *   - The class might need some more reasonable accessors depending on use cases. (up
+ *     vector world space?)
+ *   - Make clear which function returns a combined view matrix (things that are dependent
+ *     on the separate sgct nodes)
  */
 class Camera {
 public:
@@ -56,7 +60,7 @@ public:
      * Used to explicitly show which variables within the Camera class that are used
      * for caching.
      */
-    template<typename T>
+    template <typename T>
     struct Cached {
         T datum = T(0);
         bool isDirty = true;
@@ -66,9 +70,8 @@ public:
     Camera(const Camera& o);
     ~Camera() = default;
 
-    // Mutators
     void setPose(CameraPose pose);
-    void setPositionVec3(glm::dvec3 pos);
+    void setPosition(glm::dvec3 pos);
     void setRotation(glm::dquat rotation);
     void setScaling(float scaling);
     void setMaxFov(float fov);
@@ -79,10 +82,8 @@ public:
     // Relative mutators
     void rotate(const glm::dquat& rotation);
 
-    // Accessors
-    // Remove Vec3 from the name when psc is gone
-    const glm::dvec3& positionVec3() const;
-    glm::dvec3 eyePositionVec3() const;
+    const glm::dvec3& position() const;
+    glm::dvec3 eyePosition() const;
     const glm::dvec3& unsynchedPositionVec3() const;
     const glm::dvec3& viewDirectionWorldSpace() const;
     const glm::dvec3& lookUpVectorCameraSpace() const;
@@ -90,6 +91,7 @@ public:
     const glm::dmat4& viewRotationMatrix() const;
     const glm::dmat4& viewScaleMatrix() const;
     const glm::dquat& rotationQuaternion() const;
+    CameraPose pose() const;
     float maxFov() const;
     float sinMaxFov() const;
     SceneGraphNode* parent() const;
@@ -97,20 +99,16 @@ public:
     float atmosphereDimmingFactor() const;
 
     // @TODO this should simply be called viewMatrix!
-    // Or it needs to be changed so that it actually is combined. Right now it is
-    // only the view matrix that is the same for all SGCT cameras.
-    // Right now this function returns the actual combined matrix which makes some
-    // of the old calls to the function wrong..
+    // Or it needs to be changed so that it actually is combined. Right now it is only the
+    // view matrix that is the same for all SGCT cameras. Right now this function returns
+    // the actual combined matrix which makes some of the old calls to the function wrong
     const glm::dmat4& combinedViewMatrix() const;
 
     void invalidateCache();
 
-    void serialize(std::ostream& os) const;
-    void deserialize(std::istream& is);
-
     /**
-     * Handles SGCT's internal matrices. Also caches a calculated viewProjection
-     * matrix. This is the data that is different for different cameras within SGCT.
+     * Handles SGCT's internal matrices. Also caches a calculated viewProjection matrix.
+     * This is the data that is different for different cameras within SGCT.
      */
     class SgctInternal {
         friend class Camera;

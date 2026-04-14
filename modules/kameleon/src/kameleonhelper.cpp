@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 #include <openspace/util/time.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <string_view>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -34,6 +35,7 @@
 #pragma warning (disable : 4619)
 #endif // _MSC_VER
 
+#include <ccmc/Attribute.h>
 #include <ccmc/Kameleon.h>
 #include <ccmc/FileReader.h>
 
@@ -41,12 +43,11 @@
 #pragma warning (pop)
 #endif // _MSC_VER
 
-
 namespace {
     constexpr std::string_view _loggerCat = "KameleonHelper";
 } // namespace
 
-namespace openspace::kameleonHelper {
+namespace openspace {
 
 std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFilePath) {
     auto kameleon = std::make_unique<ccmc::Kameleon>();
@@ -55,8 +56,7 @@ std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFileP
 
     if (kamStatus != ccmc::FileReader::OK) {
         LERROR(std::format(
-            "Failed to create a Kameleon Object from file '{}'",
-            cdfFilePath
+            "Failed to create a Kameleon Object from file '{}'", cdfFilePath
         ));
        return nullptr;
     }
@@ -68,19 +68,17 @@ std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFileP
  * Extract the time for the simulation. Time is returned as a J2000 double.
  *
  * *NOTE!* The function has only been tested for some BATSRUS and ENLIL and may need to
- *         be updated to work with other models!
+ *         be updated to work with other models
  */
 double getTime(ccmc::Kameleon* kameleon, double manualOffset) {
     // Inspiration from 'void KameleonInterpolator::setEphemTime()' which doesn't seem to
-    // exist in the version of Kameleon that is included in OpenSpace. Alterations
-    // done to fit here.
-    // As a new version of Kameleon is included in OpenSpace this function may prove to be
-    // redundant!
+    // exist in the version of Kameleon that is included in OpenSpace. Alterations done to
+    // fit here. As a new version of Kameleon is included in OpenSpace this function may
+    // prove to be redundant
 
     std::string seqStartStr;
     if (kameleon->doesAttributeExist("start_time")) {
-        seqStartStr =
-                kameleon->getGlobalAttribute("start_time").getAttributeString();
+        seqStartStr = kameleon->getGlobalAttribute("start_time").getAttributeString();
     }
     else if (kameleon->doesAttributeExist("tim_rundate_cal")) {
         seqStartStr =
@@ -123,8 +121,8 @@ double getTime(ccmc::Kameleon* kameleon, double manualOffset) {
     }
     else {
         LWARNING(
-            "No starting time attribute could be found in the .cdf file. Starting "
-            "time is set to 01.JAN.2000 12:00"
+            "No starting time attribute could be found in the .cdf file. Starting time "
+            "is set to 01.JAN.2000 12:00"
         );
     }
 
@@ -134,8 +132,10 @@ double getTime(ccmc::Kameleon* kameleon, double manualOffset) {
 
     double seqStartDbl;
     if (seqStartStr.length() == 24) {
-        seqStartDbl = Time::convertTime(
-            seqStartStr.substr(0, seqStartStr.length() - 2)
+        seqStartDbl = Time::convertTime(seqStartStr);
+        ghoul_assert(
+            seqStartDbl != stod(seqStartStr.substr(0,4)),
+            "Somehow the time double got = to the year of your input time string"
         );
     }
     else {
@@ -167,4 +167,4 @@ double getTime(ccmc::Kameleon* kameleon, double manualOffset) {
     return seqStartDbl + stateStartOffset + manualOffset;
 }
 
-} // namespace openspace::kameleonHelper {
+} // namespace openspace

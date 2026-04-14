@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,15 +33,10 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/rendering/texturecomponent.h>
 #include <openspace/util/planegeometry.h>
-#include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/uniformcache.h>
-
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; } // namespace ghoul::opengl
+#include <memory>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class RenderableOrbitDisc : public Renderable {
 public:
@@ -51,12 +46,10 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     /**
@@ -64,11 +57,11 @@ private:
      */
     float planeSize() const;
 
-    properties::StringProperty _texturePath;
-    properties::FloatProperty _size;
-    properties::FloatProperty _eccentricity;
-    properties::Vec2Property _offset;
-    properties::Vec3Property _multiplyColor;
+    StringProperty _texturePath;
+    FloatProperty _size;
+    FloatProperty _eccentricity;
+    Vec2Property _offset;
+    Vec3Property _multiplyColor;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
     UniformCache(modelViewProjectionTransform, offset, opacity, discTexture,

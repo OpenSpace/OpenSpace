@@ -14,7 +14,8 @@ local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "callisto_os.tif",
   Enabled = asset.enabled,
-  ZIndex = 5
+  ZIndex = 5,
+  CacheSettings = { Enabled = false }
 }
 
 

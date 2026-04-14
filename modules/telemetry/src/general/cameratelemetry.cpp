@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,11 +24,17 @@
 
 #include <modules/telemetry/include/general/cameratelemetry.h>
 
+#include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/util/distanceconversion.h>
+#include <cstdlib>
+#include <limits>
 
 namespace {
+    using namespace openspace;
+
     // Indices for data items
     constexpr int NumDataItems = 9;
     constexpr int CameraPosXIndex = 0;
@@ -41,52 +47,49 @@ namespace {
     constexpr int CameraSpeedIndex = 7;
     constexpr int CameraSpeedUnitIndex = 8;
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        CameraTelemetryInfo =
-    {
+    static const PropertyOwner::PropertyOwnerInfo CameraTelemetryInfo = {
         "CameraTelemetryInfo",
         "Camera Telemetry",
         "Telemetry that sends out camera information to the Open Sound Control receiver."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CameraSpeedDistanceUnitInfo =
-    {
+    constexpr Property::PropertyInfo CameraSpeedDistanceUnitInfo = {
         "CameraSpeedDistanceUnit",
-        "Camera Speed Unit (Distance)",
+        "Camera speed unit (distance)",
         "Choose a distance unit that is used for the camera speed. "
         "For example, if the distacne unit 'Kilometer' is chosen, then the unit used for "
         "the camera speed will be kilometers per second.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
+    const PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
         "Precision",
         "Precision",
         "Settings for the precision of the camera telemetry information."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PositionPrecisionInfo = {
+    constexpr Property::PropertyInfo PositionPrecisionInfo = {
         "PositionPrecision",
-        "Position Precision",
+        "Position precision",
         "The precision in meters used to determin when to send updated camera positional "
         "data to the Open Sound Control receiver.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RotationPrecisionInfo = {
+    constexpr Property::PropertyInfo RotationPrecisionInfo = {
         "RotationPrecision",
-        "Rotation Precision",
-        "The precision used to determin when to send updated camera rotational "
-        "data to the Open Sound Control receiver.",
-        openspace::properties::Property::Visibility::User
+        "Rotation precision",
+        "The precision used to determin when to send updated camera rotational data to "
+        "the Open Sound Control receiver.",
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SpeedPrecisionInfo = {
+    constexpr Property::PropertyInfo SpeedPrecisionInfo = {
         "SpeedPrecision",
-        "Speed Precision",
+        "Speed precision",
         "The precision in meters per second used to determin when to send updated camera "
         "speed data to the Open Sound Control receiver.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 } // namespace
 
@@ -97,8 +100,11 @@ CameraTelemetry::CameraTelemetry(const std::string& ip, int port)
     , _cameraSpeedDistanceUnitOption(CameraSpeedDistanceUnitInfo)
     , _precisionProperties(CameraTelemetry::PrecisionProperties(PrecisionInfo))
 {
-    for (int i = 0; i < DistanceUnitNames.size(); ++i) {
-        _cameraSpeedDistanceUnitOption.addOption(i, DistanceUnitNames[i].singular.data());
+    for (size_t i = 0; i < DistanceUnitNames.size(); i++) {
+        _cameraSpeedDistanceUnitOption.addOption(
+            static_cast<int>(i),
+            DistanceUnitNames[i].singular.data()
+        );
     }
 
     _cameraSpeedDistanceUnitOption.setValue(static_cast<int>(DistanceUnit::Kilometer));
@@ -108,8 +114,8 @@ CameraTelemetry::CameraTelemetry(const std::string& ip, int port)
 }
 
 CameraTelemetry::PrecisionProperties::PrecisionProperties(
-                               properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
-    : properties::PropertyOwner(precisionInfo)
+                               PropertyOwner::PropertyOwnerInfo precisionInfo)
+    : PropertyOwner(precisionInfo)
     , positionPrecision(PositionPrecisionInfo, 1000.0, 0.0, 1.0e+25)
     , rotationPrecision(RotationPrecisionInfo, 0.05, 0.0, 10.0)
     , speedPrecision(SpeedPrecisionInfo, 1000.0, 0.0, std::numeric_limits<double>::max())
@@ -124,12 +130,12 @@ CameraTelemetry::PrecisionProperties::PrecisionProperties(
 }
 
 bool CameraTelemetry::updateData(const Camera* camera) {
-    const glm::dvec3 cameraPosition = camera->positionVec3();
+    const glm::dvec3 cameraPosition = camera->position();
     const double distanceMoved = glm::length(_cameraPosition - cameraPosition);
 
     const glm::dquat cameraRotation = camera->rotationQuaternion();
-    // To check if the rotation has changed above the precision threshold, check the
-    // angle and axis of the quaternion seperatly
+    // To check if the rotation has changed above the precision threshold, check the angle
+    // and axis of the quaternion seperatly
     const double rotationAngleDifference = std::abs(_cameraRotation.w - cameraRotation.w);
     const double rotationAxisDifference = glm::length(
         glm::dvec3(_cameraRotation.x, _cameraRotation.y, _cameraRotation.z) -
@@ -176,7 +182,7 @@ bool CameraTelemetry::updateData(const Camera* camera) {
 }
 
 void CameraTelemetry::sendData() {
-    std::string label = "/Camera";
+    constexpr std::string_view Label = "/Camera";
     std::vector<OpenSoundControlDataType> data(NumDataItems);
 
     data[CameraPosXIndex] = _cameraPosition.x;
@@ -193,7 +199,7 @@ void CameraTelemetry::sendData() {
         _cameraSpeedDistanceUnitOption.value()
     );
 
-    _connection->send(label, data);
+    _connection->send(std::string(Label), data);
 }
 
 } // namespace openspace

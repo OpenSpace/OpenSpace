@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,21 +24,24 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec3 in_position;
-out vec4 vs_position;
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
+out Data {
+  vec4 position;
+} out_data;
+
+uniform mat4 viewProjection;
+uniform mat4 modelTransform;
 
 
 void main() {
-  vec4 tmp = vec4(in_position, 0.0);
-  vs_position = tmp;
-
-  vec4 position = pscTransform(tmp, ModelTransform);
-  vs_position = tmp;
-  position = ViewProjection * position;
-  gl_Position =  z_normalization(position);
+  vec4 pos = vec4(in_position, 0.0);
+  // @TODO (2026-03-19, emmbr) This should be looked over so the pscTransform is not
+  // needed or reimplemented. It currently changes the input pos attribute, which is
+  // confusing
+  vec4 position = pscTransform(pos, modelTransform);
+  out_data.position = pos;
+  gl_Position = z_normalization(viewProjection * position);
 }

@@ -1,6 +1,6 @@
 <GDAL_WMS>
   <Service name="TMS">
-    <ServerUrl>http://openspace.sci.utah.edu/Mercury/MessengerMDR/tile/${z}/${y}/${x}</ServerUrl>
+    <ServerUrl>http://sci-us.wms.openspaceproject.com/Mercury/MessengerMDR/tile/${z}/${y}/${x}</ServerUrl>
   </Service>
   <DataWindow>
     <UpperLeftX>-180.0</UpperLeftX>

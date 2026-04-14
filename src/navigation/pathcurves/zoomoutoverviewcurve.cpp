@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,28 +24,26 @@
 
 #include <openspace/navigation/pathcurves/zoomoutoverviewcurve.h>
 
-#include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/waypoint.h>
-#include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/projection.hpp>
-#include <algorithm>
-#include <vector>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "ZoomOutOverviewCurve";
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
-// Go far out to get a view of both tagets, aimed to match lookAt orientation
+/**
+ * Go far out to get a view of both tagets, aimed to match lookAt orientation.
+ */
 ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint& end) {
     const double startNodeRadius = start.validBoundingSphere();
     const double endNodeRadius = end.validBoundingSphere();
 
-    if (!start.node() || !end.node()) { // guard, but should never happen
+    if (!start.node() || !end.node()) {
         LERROR("Something went wrong. The start or end node does not exist");
         return;
     }
@@ -75,8 +73,8 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
         const glm::dvec3& n2 = endTangentDir;
         const glm::dvec3 halfWayPos = start.position() + 0.5 * startPosToEndPos;
 
-        // Decide the step direction for the "overview point" based on the directions
-        // at the start and end of the path, to try to get a nice curve shape
+        // Decide the step direction for the "overview point" based on the directions at
+        // the start and end of the path, to try to get a nice curve shape
         glm::dvec3 goodStepDirection;
         if (glm::dot(n1, n2) < 0.0) {
             // Facing in different directions => step in direction of the cross product
@@ -110,4 +108,4 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
     initializeParameterData();
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

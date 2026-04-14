@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,20 +24,22 @@
 
 #version __CONTEXT__
 
-layout(location = 0) in vec4 vertPosition;
+layout(location = 0) in vec4 in_position;
 
-out vec3 modelPosition;
-out vec4 viewPosition;
+out Data {
+  vec4 viewPosition;
+  vec3 modelPosition;
+} out_data;
 
 uniform mat4 projectionTransform;
 uniform mat4 modelViewTransform;
 
 
 void main() {
-    modelPosition = vertPosition.xyz;
-    viewPosition = modelViewTransform*vertPosition;
+  out_data.modelPosition = in_position.xyz;
+  out_data.viewPosition = modelViewTransform * in_position;
 
-    // project the position to view space
-    gl_Position = projectionTransform * viewPosition;
-    gl_Position.z = 1.0;
+  // project the position to view space
+  gl_Position = projectionTransform * out_data.viewPosition;
+  gl_Position.z = 1.0;
 }

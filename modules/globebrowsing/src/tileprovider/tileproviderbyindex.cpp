@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,11 @@
 #include <modules/globebrowsing/src/tileprovider/tileproviderbyindex.h>
 
 #include <openspace/documentation/documentation.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <limits>
+#include <utility>
 
 namespace {
     // This TileProvider provides the ability to override the contents for tiles at
@@ -78,13 +83,13 @@ namespace {
         // not the user.
         int layerGroupID [[codegen::private()]];
     };
-#include "tileproviderbyindex_codegen.cpp"
 } // namespace
+#include "tileproviderbyindex_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation TileProviderByIndex::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_tileproviderbyindex");
+Documentation TileProviderByIndex::Documentation() {
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_byindex");
 }
 
 TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
@@ -170,4 +175,4 @@ float TileProviderByIndex::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

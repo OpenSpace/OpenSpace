@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,15 +23,18 @@
  ****************************************************************************************/
 
 #include <ghoul/lua/lua_helper.h>
+#include <openspace/rendering/renderengine.h>
+
+using namespace openspace;
 
 namespace {
 
-// Adds a new dashboard item to an existing SceenSpaceDashboard.
+/**
+ * Adds a new dashboard item to an existing SceenSpaceDashboard.
+ */
 [[codegen::luawrap]] void addDashboardItemToScreenSpace(std::string identifier,
                                                         ghoul::Dictionary dashboard)
 {
-    using namespace openspace;
-
     ScreenSpaceRenderable* ssr = global::renderEngine->screenSpaceRenderable(identifier);
     if (!ssr) {
         throw ghoul::lua::LuaError("Provided name is not a ScreenSpace item");
@@ -47,10 +50,10 @@ namespace {
     dash->dashboard().addDashboardItem(DashboardItem::createFromDictionary(dashboard));
 }
 
-// Removes all dashboard items from an existing ScreenSpaceDashboard.
+/**
+ * Removes all dashboard items from an existing ScreenSpaceDashboard.
+ */
 [[codegen::luawrap]] void removeDashboardItemsFromScreenSpace(std::string identifier) {
-    using namespace openspace;
-
     ScreenSpaceRenderable* ssr = global::renderEngine->screenSpaceRenderable(identifier);
     if (!ssr) {
         throw ghoul::lua::LuaError("Provided identifier is not a ScreenSpace item");
@@ -66,6 +69,6 @@ namespace {
     dash->dashboard().clearDashboardItems();
 }
 
-#include "screenspacedashboard_lua_codegen.cpp"
-
 } // namespace
+
+#include "screenspacedashboard_lua_codegen.cpp"

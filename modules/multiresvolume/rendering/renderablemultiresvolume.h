@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,18 +34,11 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <chrono>
 #include <filesystem>
-
-namespace ghoul { class Dictionary; }
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+#include <memory>
 
 namespace openspace {
 
 class AtlasManager;
-class BrickSelector;
 class ErrorHistogramManager;
 class HistogramManager;
 class LocalErrorHistogramManager;
@@ -73,37 +66,28 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
-    virtual void update(const UpdateData& data) override;
-    virtual void render(const RenderData& data, RendererTasks& tasks) override;
-
-    //virtual void preResolve(ghoul::opengl::ProgramObject* program) override;
-    //virtual std::string getHeaderPath() override;
-    //virtual std::string getHelperPath() override;
-    //virtual std::vector<ghoul::opengl::Texture*> getTextures() override;
-    //virtual std::vector<unsigned int> getBuffers() override;
+    void update(const UpdateData& data) override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
 
 private:
-    properties::BoolProperty _useGlobalTime;
-    properties::BoolProperty _loop;
-    // used to vary time, if not using global time nor looping
-    properties::IntProperty _currentTime;
-    properties::IntProperty _memoryBudget;
-    properties::IntProperty _streamingBudget;
-    properties::FloatProperty _stepSizeCoefficient;
-    properties::StringProperty _selectorName;
-    properties::BoolProperty _statsToFile;
-    properties::StringProperty _statsToFileName;
-    properties::IntProperty _scalingExponent;
-    properties::Vec3Property _translation;
-    properties::Vec3Property _rotation;
-    properties::Vec3Property _scaling;
+    BoolProperty _useGlobalTime;
+    BoolProperty _loop;
+    /// Used to vary time, if not using global time nor looping
+    IntProperty _currentTime;
+    IntProperty _memoryBudget;
+    IntProperty _streamingBudget;
+    FloatProperty _stepSizeCoefficient;
+    StringProperty _selectorName;
+    BoolProperty _statsToFile;
+    StringProperty _statsToFileName;
+    IntProperty _scalingExponent;
+    Vec3Property _translation;
+    Vec3Property _rotation;
+    Vec3Property _scaling;
 
-    double _time;
-    double _startTime;
-    double _endTime;
-
+    double _time = 0.0;
+    double _startTime = 0.0;
+    double _endTime = 0.0;
 
     // Stats timers
     std::string _statsFileName;
@@ -111,9 +95,9 @@ private:
     std::chrono::system_clock::time_point _frameStart;
     std::chrono::duration<double> _selectionDuration;
     std::chrono::duration<double> _uploadDuration;
-    unsigned int _nDiskReads;
-    unsigned int _nUsedBricks;
-    unsigned int _nStreamedBricks;
+    unsigned int _nDiskReads = 0;
+    unsigned int _nUsedBricks = 0;
+    unsigned int _nStreamedBricks = 0;
 
     int _timestep = 0;
 

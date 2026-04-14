@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,19 +27,14 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
 
-namespace ghoul::opengl { class ProgramObject; }
-
 namespace openspace {
-
-namespace documentation { struct Documentation; }
-class Translation;
 
 /**
  * Generates an arrow shape that points from the start node to the end node.
@@ -52,19 +47,18 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    struct Shading : properties::PropertyOwner {
+    struct Shading : PropertyOwner {
         Shading();
 
-        properties::BoolProperty enabled;
-        properties::FloatProperty ambientIntensity;
-        properties::FloatProperty diffuseIntensity;
-        properties::FloatProperty specularIntensity;
+        BoolProperty enabled;
+        FloatProperty ambientIntensity;
+        FloatProperty diffuseIntensity;
+        FloatProperty specularIntensity;
     };
 
     void updateShapeTransforms(const RenderData& data);
@@ -73,21 +67,21 @@ private:
 
     ghoul::opengl::ProgramObject* _shaderProgram = nullptr;
 
-    properties::StringProperty _start;
-    properties::StringProperty _end;
-    properties::Vec3Property _color;
+    StringProperty _start;
+    StringProperty _end;
+    Vec3Property _color;
 
-    properties::UIntProperty _segments;
-    properties::BoolProperty _invertArrowDirection;
+    UIntProperty _segments;
+    BoolProperty _invertArrowDirection;
 
-    properties::FloatProperty _arrowHeadSize;
-    properties::FloatProperty _arrowHeadWidthFactor;
+    FloatProperty _arrowHeadSize;
+    FloatProperty _arrowHeadWidthFactor;
 
-    properties::FloatProperty _offsetDistance;
-    properties::BoolProperty _useRelativeOffset;
-    properties::FloatProperty _length;
-    properties::BoolProperty _useRelativeLength;
-    properties::FloatProperty _width;
+    FloatProperty _offsetDistance;
+    BoolProperty _useRelativeOffset;
+    FloatProperty _length;
+    BoolProperty _useRelativeLength;
+    FloatProperty _width;
 
     glm::dmat4 _cylinderTranslation = glm::dmat4(1.0);
     glm::dmat4 _cylinderScale = glm::dmat4(1.0);
