@@ -81,10 +81,9 @@ namespace {
     };
 
     /**
-     * This `Renderable` renders a disc around a planetary orbit to visualize properties
-     * such as positional uncertainty along the orbit. The disc width is defined as a
-     * deviation from the semi-major axis, with separate values for the inner and outer
-     * offsets.
+     * Renders a disc around a planetary orbit to visualize properties such as positional
+     * uncertainty along the orbit. The disc width is defined as a deviation from the
+     * semi-major axis, with separate values for the inner and outer offsets.
      */
     struct [[codegen::Dictionary(RenderableOrbitDisc)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]

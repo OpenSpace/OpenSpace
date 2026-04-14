@@ -75,8 +75,8 @@ namespace {
     };
 
     /**
-     * This `Renderable` type represents a star's habitable zone, with boundaries computed
-     * from its effective temperature and luminosity.
+     * Represents a star's habitable zone, with boundaries computed from its effective
+     * temperature and luminosity.
      *
      * The inner and outer boundaries of the habitable zone are computed using formulas
      * from Kopparapu et al. (2013) for an Earth-like rocky planet. The model defines both
