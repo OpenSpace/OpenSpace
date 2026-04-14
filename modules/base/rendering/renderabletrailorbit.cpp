@@ -143,17 +143,17 @@ namespace openspace {
 //    0     1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
 //                    <------ newer in time                              oldest
 //
-// Thus making the floating point traverse backwards through the array and element 0
-// being the newest fixed point. If the time processes backwards, the floating point
-// moves towards the upper areas of the array instead.
+// Thus making the floating point traverse backwards through the array and element 0 being
+// the newest fixed point. If the time processes backwards, the floating point moves
+// towards the upper areas of the array instead.
 // In both cases, only the values that have been changed will be uploaded to the GPU.
 //
 // For the rendering, this is achieved by using an index buffer that is twice the size of
 // the vertex buffer containing identical two sequences indexing the vertex array.
 // In an example of size 8:
-// --------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------
 // |0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15| 0| 1| 2| 3| 4| 5| 6| 7| 8|9|10|11|12|13|14|15|
-// --------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------
 //  0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
 //
 // The rendering step needs to know only the offset into the array (denoted by FF as the
@@ -164,7 +164,7 @@ namespace openspace {
 // 10 11 12 13 14 15 00 01 02 03 04 05 06 07 08 09
 //
 // NB: This method was implemented without a ring buffer before by manually shifting the
-// items in memory as was shown to be much slower than the current system        ---abock
+// items in memory as was shown to be much slower than the current system         ---abock
 
 Documentation RenderableTrailOrbit::Documentation() {
     return codegen::doc<Parameters>(
@@ -197,7 +197,7 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     _limitToTimeRange.onChange([&]() {
         _needsFullSweep = true;
         _indexBufferDirty = true;
-        });
+    });
     addProperty(_limitToTimeRange);
 
     // Start time in ISO 8601 format
@@ -338,8 +338,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             }
         }
         else {
-            // The lambda expression that will upload parts of the array starting at
-            // begin and containing length number of elements
+            // The lambda expression that will upload parts of the array starting at begin
+            // and containing length number of elements
             auto upload = [this](int begin, int length) {
                 glNamedBufferSubData(
                     _primaryRenderInformation._vbo,
@@ -369,8 +369,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
                     upload(i, n);
                 }
                 else {
-                    // The current index is too close to the wrap around part, so we
-                    // need to split the upload into two parts:
+                    // The current index is too close to the wrap around part, so we need
+                    // to split the upload into two parts:
                     // 1. from the current index to the end of the array
                     // 2. the rest starting from the beginning of the array
                     const int first = s - i;
@@ -394,8 +394,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
                     upload(i+1 - n, n);
                 }
                 else {
-                    // The current index is too close to the beginning of the array, so
-                    // we need to split the upload into two parts:
+                    // The current index is too close to the beginning of the array, so we
+                    // need to split the upload into two parts:
                     //   1. From the beginning of the array to the current index
                     //   2. Filling the back of the array with the rest
                     const int b = n - (i + 1);
@@ -439,7 +439,7 @@ RenderableTrailOrbit::PhaseType RenderableTrailOrbit::trailPhase(double time) {
 }
 
 RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
-                                                                const UpdateData& data)
+                                                                   const UpdateData& data)
 {
     const double time = data.time.j2000Seconds();
     if (_needsFullSweep) {
@@ -471,53 +471,54 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         // How much time has passed since the last permanent point
         const double delta = time - _lastPointTime;
 
-    // We'd like to test for equality with 0 here, but due to rounding issues, we won't
-    // get there. If this check is not here, we will trigger the positive or negative
-    // branch below even though we don't have to
-    //
-    // This might become a bigger issue if we are starting to look at very short time
-    // intervals
+        // We'd like to test for equality with 0 here, but due to rounding issues, we
+        // won't get there. If this check is not here, we will trigger the positive or
+        // negative branch below even though we don't have to
+        //
+        // This might become a bigger issue if we are starting to look at very short time
+        // intervals
 
-    if (std::abs(delta) < Epsilon) {
-        return {
-            .floatingPointNeedsUpdate = false,
-            .permanentPointsNeedUpdate = false,
-            .nUpdated = 0
-        };
-    }
-
-    if (delta > 0.0) {
-        // Check whether we need to drop a new permanent point. This is only the case if
-        // enough (> secondsPerPoint) time has passed since the last permanent point
-        if (std::abs(delta) < secondsPerPoint) {
+        if (std::abs(delta) < Epsilon) {
             return {
-                .floatingPointNeedsUpdate = true,
+                .floatingPointNeedsUpdate = false,
                 .permanentPointsNeedUpdate = false,
                 .nUpdated = 0
             };
         }
 
-        // See how many points we need to drop
-        const uint64_t nNewPoints = static_cast<uint64_t>(
-            floor(delta / secondsPerPoint)
-        );
+        if (delta > 0.0) {
+            // Check whether we need to drop a new permanent point. This is only the case
+            // if enough (> secondsPerPoint) time has passed since the last permanent
+            // point
+            if (std::abs(delta) < secondsPerPoint) {
+                return {
+                    .floatingPointNeedsUpdate = true,
+                    .permanentPointsNeedUpdate = false,
+                    .nUpdated = 0
+                };
+            }
 
-        // If we would need to generate more new points than there are total points in
-        // the array, it is faster to regenerate the entire array
-        if (nNewPoints >= static_cast<uint64_t>(_resolution)) {
-            fullSweep(data.time.j2000Seconds());
-            return {
-                .floatingPointNeedsUpdate = false,
-                .permanentPointsNeedUpdate = true,
-                .nUpdated = UpdateReport::All
-            };
-        }
+            // See how many points we need to drop
+            const uint64_t nNewPoints = static_cast<uint64_t>(
+                floor(delta / secondsPerPoint)
+            );
+
+            // If we would need to generate more new points than there are total points in
+            // the array, it is faster to regenerate the entire array
+            if (nNewPoints >= static_cast<uint64_t>(_resolution)) {
+                fullSweep(data.time.j2000Seconds());
+                return {
+                    .floatingPointNeedsUpdate = false,
+                    .permanentPointsNeedUpdate = true,
+                    .nUpdated = UpdateReport::All
+                };
+            }
 
             for (uint64_t i = 0; i < nNewPoints; i++) {
                 _lastPointTime += secondsPerPoint;
 
-                // Get the new permanent point and write it into the (previously)
-                // floating location
+                // Get the new permanent point and write it into the (previously) floating
+                // location
                 const glm::vec3 p = translationPosition(Time(_lastPointTime));
                 _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
@@ -530,32 +531,32 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
                 }
             }
 
-            // The previously oldest permanent point has been moved nNewPoints steps 
-            // into the future
+            // The previously oldest permanent point has been moved nNewPoints steps into
+            // the future
             _firstPointTime += nNewPoints * secondsPerPoint;
 
-        return {
-            .floatingPointNeedsUpdate = false,
-            .permanentPointsNeedUpdate = true,
-            .nUpdated = static_cast<int>(nNewPoints)
-        };
-    }
-    else {
-        // See how many new points needs to be generated. Delta is negative, so we need
-        // to invert the ratio
-        const int nNewPoints =
-            -(static_cast<int>(floor(delta / secondsPerPoint)));
-
-        // If we would need to generate more new points than there are total points in
-        // the array, it is faster to regenerate the entire array
-        if (nNewPoints >= _resolution) {
-            fullSweep(data.time.j2000Seconds());
             return {
                 .floatingPointNeedsUpdate = false,
                 .permanentPointsNeedUpdate = true,
-                .nUpdated = UpdateReport::All
+                .nUpdated = static_cast<int>(nNewPoints)
             };
         }
+        else {
+            // See how many new points needs to be generated. Delta is negative, so we
+            // need to invert the ratio
+            const int nNewPoints =
+                -(static_cast<int>(floor(delta / secondsPerPoint)));
+
+            // If we would need to generate more new points than there are total points in
+            // the array, it is faster to regenerate the entire array
+            if (nNewPoints >= _resolution) {
+                fullSweep(data.time.j2000Seconds());
+                return {
+                    .floatingPointNeedsUpdate = false,
+                    .permanentPointsNeedUpdate = true,
+                    .nUpdated = UpdateReport::All
+                };
+            }
 
             for (int i = 0; i < nNewPoints; i++) {
                 _firstPointTime -= secondsPerPoint;
@@ -565,17 +566,19 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
                 const glm::vec3 p = translationPosition(Time(_firstPointTime));
                 _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
-            // if we are on the upper bounds of the array, we start at 0
-            if (_primaryRenderInformation.first == _primaryRenderInformation.count - 1) {
-                // If it is at the beginning, set it to the end first
-                _primaryRenderInformation.first = 0;
+                // if we are on the upper bounds of the array, we start at 0
+                if (_primaryRenderInformation.first ==
+                    _primaryRenderInformation.count - 1)
+                {
+                    // If it is at the beginning, set it to the end first
+                    _primaryRenderInformation.first = 0;
+                }
+                else {
+                    // Move the current pointer fowards one step to be used as the new
+                    // floating
+                    _primaryRenderInformation.first++;
+                }
             }
-            else {
-                // Move the current pointer fowards one step  to be used as the new
-                // floating
-                _primaryRenderInformation.first++;
-            }
-        }
 
             // The previously youngest point has become nNewPoints steps older
             _lastPointTime -= nNewPoints * secondsPerPoint;

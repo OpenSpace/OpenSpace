@@ -103,8 +103,8 @@ private:
     * Determines which type of render phase the trail is in. Result depends is
     * calculated based on ingame time, start time and end time.
     *
-    * \param time The current ingame time in j2000 epoch.
-    * \return Integer 0 to 2 representing phase (Enum: Beginning, Normal, End)
+    * \param time The current ingame time in j2000 epoch
+    * \return Beginning, Normal, or End
     */
     PhaseType trailPhase(double time);
 
