@@ -36,16 +36,13 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePolygonCloud";
 
-    // A RenderablePolygonCloud is a RenderablePointCloud where the shape of the points is
-    // a uniform polygon with a given number of sides instead of a texture. For instance,
-    // PolygonSides = 5 results in the points being rendered as pentagons.
+    // This is a [RenderablePointCloud](#base_renderable_pointcloud) where the shape of
+    // the points is a uniform polygon with a given number of sides instead of a texture.
+    // For instance, `PolygonSides` = 5 results in the points being rendered as pentagons.
     //
     // Note that while this renderable inherits the texture component from
-    // RenderablePointCloud, any added texture information will be ignored in favor of the
-    // polygon shape.
-    //
-    // See documentation of RenderablePointCloud for details on the other parts of the
-    // point cloud rendering.
+    // [RenderablePointCloud](#base_renderable_pointcloud), any added texture information
+    // will be ignored in favor of the polygon shape.
     struct [[codegen::Dictionary(RenderablePolygonCloud)]] Parameters {
         // The number of sides for the polygon used to represent each point. Default is
         // 3, i.e. to use triangles.

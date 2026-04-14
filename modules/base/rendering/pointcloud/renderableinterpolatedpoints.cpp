@@ -139,17 +139,16 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // RenderableInterpolatedPoints is a version of the RenderablePointCloud class, where
-    // the dataset may contain multiple time steps that can be interpolated between. It
-    // supports interpolation of both of positions and data values used for color mapping
-    // or size.
+    // This `Renderable` is a version of the
+    // [RenderablePointCloud](#base_renderable_pointcloud) class, where the dataset may
+    // contain multiple time steps that can be interpolated between. It supports
+    // interpolation of both of positions and data values used for color mapping or size.
     //
     // The dataset should be structured in a way so that the first N rows correspond to
     // the first set of positions for the objects, the next N rows to the second set of
     // positions, and so on. The number of objects in the dataset must be specified in the
     // asset.
     //
-    // MultiTexture:
     // Note that if using multiple textures for the points based on values in the dataset,
     // the used texture will be decided based on the first N set of points.
     struct [[codegen::Dictionary(RenderableInterpolatedPoints)]] Parameters {
