@@ -96,7 +96,7 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     }
 
     LDEBUG("Creating Polygon Texture");
-    constexpr gl::GLsizei TexSize = 512;
+    constexpr GLsizei TexSize = 512;
 
     // We don't use the helper function for the format and internal format here, as we
     // don't want the compression to be used for the polygon texture and we always want
@@ -122,7 +122,7 @@ void RenderablePolygonCloud::initializeCustomTexture() {
         TexSize,
         TexSize,
         0,
-        gl::GLenum(textureFormat.format),
+        GLenum(textureFormat.format),
         GL_UNSIGNED_BYTE,
         nullptr
     );
@@ -138,7 +138,7 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     glGetTextureImage(
         _pTexture,
         0,
-        gl::GLenum(textureFormat.format),
+        GLenum(textureFormat.format),
         GL_UNSIGNED_BYTE,
         arraySize,
         pixels.data()

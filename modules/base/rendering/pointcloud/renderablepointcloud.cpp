@@ -1074,7 +1074,7 @@ void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
         format.internalFormat,
         format.resolution.x,
         format.resolution.y,
-        static_cast<gl::GLsizei>(nLayers)
+        static_cast<GLsizei>(nLayers)
     );
 
     if (format.format == ghoul::opengl::Texture::Format::Red) {
@@ -1101,11 +1101,11 @@ void RenderablePointCloud::fillAndUploadTextureLayer(unsigned int textureId,
         0, // Mipmap number
         0, // xoffset
         0, // yoffset
-        gl::GLint(layer), // zoffset
-        gl::GLsizei(format.resolution.x), // width
-        gl::GLsizei(format.resolution.y), // height
+        GLint(layer), // zoffset
+        GLsizei(format.resolution.x), // width
+        GLsizei(format.resolution.y), // height
         1, // depth
-        gl::GLenum(format.format),
+        GLenum(format.format),
         GL_UNSIGNED_BYTE, // type
         pixelData.data()
     );
