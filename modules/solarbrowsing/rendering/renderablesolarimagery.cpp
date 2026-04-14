@@ -481,10 +481,6 @@ void RenderableSolarImagery::deinitializeGL() {
     _frustumShader = nullptr;
 }
 
-bool RenderableSolarImagery::isReady() const {
-    return _planeShader && _frustumShader;
-}
-
 void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     updateImageryTexture();
     const glm::dvec3& sunPositionWorld = sceneGraphNode("Sun")->worldPosition();

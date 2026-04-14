@@ -138,10 +138,6 @@ void RenderableSolarImageryProjection::deinitializeGL() {
     _shader = nullptr;
 }
 
-bool RenderableSolarImageryProjection::isReady() const {
-    return _shader != nullptr;
-}
-
 void RenderableSolarImageryProjection::update(const UpdateData&) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
