@@ -80,6 +80,9 @@ protected:
     bool _isDimensionsDirty = false;
     TriggerProperty _reload;
 
+    StringProperty _key;
+    TriggerProperty _triggerKey;
+
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {
     public:
@@ -89,13 +92,11 @@ private:
         void setTexture(GLuint t);
     };
 
-    CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
-
-private:
     void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
     StringProperty _url;
 
+    CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
 
     bool _useAcceleratedRendering = false;
