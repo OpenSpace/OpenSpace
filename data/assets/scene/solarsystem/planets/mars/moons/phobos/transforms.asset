@@ -1,0 +1,49 @@
+local transforms = asset.require("../../transforms")
+local kernels = asset.require("../../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local PhobosTransform = {
+  Identifier = "PhobosTransform",
+  Parent = transforms.MarsBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Phobos,
+      Observer = coreKernels.ID.MarsBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Phobos,
+      DestinationFrame = coreKernels.Frame.Galactic
+    },
+  },
+  GUI = {
+    Name = "Phobos Transform",
+    Path = "/Solar System/Planets/Mars/Moons/Phobos",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PhobosTransform)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PhobosTransform)
+end)
+
+asset.export(PhobosTransform)
+
+
+
+asset.meta = {
+  Name = "Phobos Transform",
+  Description = "Transform for Phobos",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,4 +1,4 @@
-local globe = asset.require("../../phobos_globe")
+local phobosAsset = asset.require("scene/solarsystem/planets/mars/moons/phobos/globe")
 
 
 
@@ -38,11 +38,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Phobos_Globe.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(phobosAsset.Phobos.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Phobos_Globe.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(phobosAsset.Phobos.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export(Layer)

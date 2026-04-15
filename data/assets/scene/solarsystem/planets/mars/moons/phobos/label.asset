@@ -1,0 +1,49 @@
+local transforms = asset.require("./transforms")
+
+
+
+local PhobosLabel = {
+  Identifier = "PhobosLabel",
+  Parent = transforms.PhobosTransform.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Text = "Phobos",
+    FontSize = 70.0,
+    Size = 5.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 30.0, 1000.0 },
+    FadeWidths = { 30.0, 2000.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Phobos Label",
+    Path = "/Solar System/Planets/Mars/Moons/Phobos",
+    Focusable = false,
+    Description = "Label for Mars' moon Phobos"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PhobosLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PhobosLabel)
+end)
+
+asset.export(PhobosLabel)
+
+
+
+asset.meta = {
+  Name = "Phobos Label",
+  Description = "Label for Phobos",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

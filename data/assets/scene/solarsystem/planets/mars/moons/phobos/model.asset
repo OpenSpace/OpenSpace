@@ -1,0 +1,57 @@
+local transforms = asset.require("./transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+local model = asset.resource({
+  Name = "Phobos Model",
+  Type = "HttpSynchronization",
+  Identifier = "phobos_model",
+  Version = 1
+})
+
+
+local PhobosModel = {
+  Identifier = "PhobosModel",
+  Parent = transforms.PhobosTransform.Identifier,
+  InteractionSphere = 15000,
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = model .. "Phobos_1_1000.glb",
+    ModelScale = "Kilometer",
+    RotationVector = { 90.0, 0.0, 90.0 },
+    AmbientIntensity = 0.02,
+    SpecularIntensity = 0.0,
+    LightSources = {
+      sunAsset.LightSource
+    },
+    PerformShading = true
+  },
+  Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
+  GUI = {
+    Name = "Phobos",
+    Path = "/Solar System/Planets/Mars/Moons/Phobos",
+    Description = "One of two moons of Mars"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PhobosModel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PhobosModel)
+end)
+
+asset.export(PhobosModel)
+
+
+
+asset.meta = {
+  Name = "Phobos",
+  Description = "RenderableModel for Phobos",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

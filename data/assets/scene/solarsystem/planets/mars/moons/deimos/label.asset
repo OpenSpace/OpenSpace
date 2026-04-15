@@ -1,0 +1,49 @@
+local transforms = asset.require("./transforms")
+
+
+
+local DeimosLabel = {
+  Identifier = "DeimosLabel",
+  Parent = transforms.DeimosTransform.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Text = "Deimos",
+    FontSize = 70.0,
+    Size = 5.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 50.0, 1000.0 },
+    FadeWidths = { 50.0, 2000.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Deimos Label",
+    Path = "/Solar System/Planets/Mars/Moons/Deimos",
+    Focusable = false,
+    Description = "Label for Mars' moon Deimos"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(DeimosLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(DeimosLabel)
+end)
+
+asset.export(DeimosLabel)
+
+
+
+asset.meta = {
+  Name = "Deimos Label",
+  Description = "Label for Deimos",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,4 +1,4 @@
-local globe = asset.require("../../deimos_globe")
+local deimosAsset = asset.require("scene/solarsystem/planets/mars/moons/deimos/globe")
 
 
 
@@ -16,11 +16,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Deimos_Globe.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(deimosAsset.Deimos.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Deimos_Globe.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(deimosAsset.Deimos.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export("layer", Layer)
