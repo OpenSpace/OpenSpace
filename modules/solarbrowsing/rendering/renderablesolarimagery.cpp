@@ -180,7 +180,7 @@ namespace {
         };
         // The root directory containing solar imagery organized by instrument. Each
         // subdirectory represents an instrument and contains its observation images.
-        std::filesystem::path imageDirectory [[codegen::directory()]];
+        std::string imageDirectory;
 
         // The instrument to display on startup (e.g., "AIA-171"). If not specified,
         // the first available instrument is used.
@@ -344,7 +344,7 @@ namespace openspace {
 
         addProperty(Fadeable::_opacity);
 
-        _imageDirectory = p.imageDirectory;
+        _imageDirectory = std::filesystem::path(p.imageDirectory);
         if (p.transferFunctions.has_value()) {
             for (std::string_view key : p.transferFunctions->keys()) {
                 if (!p.transferFunctions->hasValue<std::string>(key)) {
@@ -457,9 +457,13 @@ namespace openspace {
             }
         }
 
-        _imageMetadataMap = loadImageMetadata(p.imageDirectory);
+        if (_enableDynamicDownload && !std::filesystem::exists(_imageDirectory)) {
+            std::filesystem::create_directories(_imageDirectory);
+        }
+
+        _imageMetadataMap = loadImageMetadata(_imageDirectory);
         _tfMap = loadTransferFunctions(
-            p.imageDirectory,
+            _imageDirectory,
             _imageMetadataMap,
             _configuredTransferFunctions
         );

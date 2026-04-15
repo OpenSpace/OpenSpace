@@ -47,6 +47,8 @@ local SolarImagery = {
     -- <Instrument>.txt under ImageDirectory. Paths can point anywhere, but here we
     -- point them to user-provided colortables.
     TransferFunctions = {
+      ["AIA-94"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/AIA-94.txt"),
+      ["AIA-131"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/AIA-131.txt"),
       ["AIA-171"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/AIA-171.txt"),
       ["AIA-193"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/AIA-193.txt"),
       ["AIA-211"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/AIA-211.txt"),
@@ -67,6 +69,8 @@ local SolarImagery = {
       Enable = true,
       SpacecraftName = "SDO",
       InstrumentNames = {
+        "AIA-94",
+        "AIA-131",
         "AIA-171",
         "AIA-193",
         "AIA-211",
@@ -78,7 +82,7 @@ local SolarImagery = {
         "HMI-continuum",
         "HMI-magnetogram"
       },
-      InstrumentSourceIds = { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 },
+      InstrumentSourceIds = { 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 },
       CadenceSeconds = 3600.0,
       PrefetchFramesBefore = 1,
       PrefetchFramesAfter = 3,

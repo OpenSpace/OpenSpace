@@ -1,0 +1,70 @@
+local stereo_a = asset.require("scene/solarsystem/missions/stereo/stereo_a")
+
+local SolarImagery = {
+  Identifier = "SolarImagery_STEREO_A_Dynamic",
+  Parent = stereo_a.Position.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = stereo_a.MissionBegin,
+    End = stereo_a.MissionEnd
+  },
+  Renderable = {
+    Type = "RenderableSolarImagery",
+    ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing_runtime/stereo-a"),
+    StartInstrument = "EUVI-A-171",
+    TransferFunctions = {
+      ["EUVI-A-171"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/stereoA/EUVI-A-171.txt"),
+      ["EUVI-A-195"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/stereoA/EUVI-A-195.txt"),
+      ["EUVI-A-284"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/stereoA/EUVI-A-284.txt"),
+      ["EUVI-A-304"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/stereoA/EUVI-A-304.txt"),
+      ["COR1-A"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/stereoA/COR1-A.txt"),
+      ["COR2-A"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/stereoA/COR2-A.txt")
+    },
+    DynamicDownload = {
+      Enable = true,
+      SpacecraftName = "STEREO_A",
+      InstrumentNames = {
+        "EUVI-A-171",
+        "EUVI-A-195",
+        "EUVI-A-284",
+        "EUVI-A-304",
+        "COR1-A",
+        "COR2-A"
+      },
+      InstrumentSourceIds = { 20, 21, 22, 23, 28, 29 },
+      CadenceSeconds = 3600.0,
+      PrefetchFramesBefore = 1,
+      PrefetchFramesAfter = 3,
+      MaxConcurrentDownloads = 2,
+      SaveDownloadsOnShutdown = true,
+      RetryBackoffSeconds = 30.0,
+      MaxRetries = 2
+    },
+    DownsamplingLevel = 2,
+    BlackTransparencyThreshold = 0.01,
+    Contrast = 0.0,
+    Gamma = 0.9
+  },
+  GUI = {
+    Name = "STEREO A Dynamic Imagery",
+    Path = "/Solar System/Solar Imagery"
+  }
+}
+
+asset.onInitialize(function ()
+  openspace.addSceneGraphNode(SolarImagery)
+end)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(SolarImagery)
+end)
+
+asset.export("Imagery", SolarImagery)
+
+asset.meta = {
+  Name = "STEREO A Dynamic Solar Imagery",
+  Description = [[Runtime-streamed STEREO A SECCHI imagery from Helioviewer.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,58 @@
+local soho = asset.require("scene/solarsystem/missions/soho/soho")
+
+local SolarImagery = {
+  Identifier = "SolarImagery_SOHO_LASCO_C3_Dynamic",
+  Parent = soho.Position.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = soho.MissionBegin,
+    End = soho.MissionEnd
+  },
+  Renderable = {
+    Type = "RenderableSolarImagery",
+    ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing_runtime/soho/lasco-c3"),
+    StartInstrument = "LASCO-C3",
+    TransferFunctions = {
+      ["LASCO-C3"] = asset.resource("colortables/LASCO-C3.txt")
+    },
+    DynamicDownload = {
+      Enable = true,
+      SpacecraftName = "SOHO",
+      Instrument = "LASCO-C3",
+      SourceId = 5,
+      CadenceSeconds = 3600.0,
+      PrefetchFramesBefore = 1,
+      PrefetchFramesAfter = 3,
+      MaxConcurrentDownloads = 2,
+      SaveDownloadsOnShutdown = true,
+      RetryBackoffSeconds = 30.0,
+      MaxRetries = 2
+    },
+    DownsamplingLevel = 2,
+    BlackTransparencyThreshold = 0.01,
+    Contrast = 0.0,
+    Gamma = 0.9
+  },
+  GUI = {
+    Name = "SOHO LASCO C3 Dynamic Imagery",
+    Path = "/Solar System/Solar Imagery"
+  }
+}
+
+asset.onInitialize(function ()
+  openspace.addSceneGraphNode(SolarImagery)
+end)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(SolarImagery)
+end)
+
+asset.export("Imagery", SolarImagery)
+
+asset.meta = {
+  Name = "SOHO LASCO C3 Dynamic Solar Imagery",
+  Description = [[Runtime-streamed SOHO LASCO C3 white-light imagery from Helioviewer.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

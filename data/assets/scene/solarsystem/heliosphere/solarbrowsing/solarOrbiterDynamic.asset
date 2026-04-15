@@ -1,0 +1,62 @@
+local solarorbiter = asset.require("scene/solarsystem/missions/solarorbiter/solarorbiter")
+
+local SolarImagery = {
+  Identifier = "SolarImagery_Solar_Orbiter_Dynamic",
+  Parent = solarorbiter.Position.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = solarorbiter.MissionBegin,
+    End = solarorbiter.MissionEnd
+  },
+  Renderable = {
+    Type = "RenderableSolarImagery",
+    ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing_runtime/solar-orbiter"),
+    StartInstrument = "EUI-174",
+    TransferFunctions = {
+      ["EUI-174"] = asset.resource("colortables/EUI-174.txt"),
+      ["EUI-304"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/AIA-304.txt")
+    },
+    DynamicDownload = {
+      Enable = true,
+      SpacecraftName = "SOLO",
+      InstrumentNames = {
+        "EUI-174",
+        "EUI-304"
+      },
+      InstrumentSourceIds = { 84, 85 },
+      CadenceSeconds = 3600.0,
+      PrefetchFramesBefore = 1,
+      PrefetchFramesAfter = 3,
+      MaxConcurrentDownloads = 2,
+      SaveDownloadsOnShutdown = true,
+      RetryBackoffSeconds = 30.0,
+      MaxRetries = 2
+    },
+    DownsamplingLevel = 2,
+    BlackTransparencyThreshold = 0.01,
+    Contrast = 0.0,
+    Gamma = 0.9
+  },
+  GUI = {
+    Name = "Solar Orbiter Dynamic Imagery",
+    Path = "/Solar System/Solar Imagery"
+  }
+}
+
+asset.onInitialize(function ()
+  openspace.addSceneGraphNode(SolarImagery)
+end)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(SolarImagery)
+end)
+
+asset.export("Imagery", SolarImagery)
+
+asset.meta = {
+  Name = "Solar Orbiter Dynamic Solar Imagery",
+  Description = [[Runtime-streamed Solar Orbiter EUI imagery from Helioviewer.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

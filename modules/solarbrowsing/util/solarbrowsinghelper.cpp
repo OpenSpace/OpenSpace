@@ -358,14 +358,14 @@ std::optional<std::string> instrumentFromHelioviewerFilename(
     }
 
     const std::string spacecraftAndInstrument = stem.substr(separator + 2);
-    const size_t firstUnderscore = spacecraftAndInstrument.find('_');
-    if (firstUnderscore == std::string::npos ||
-        firstUnderscore + 1 >= spacecraftAndInstrument.size())
+    const size_t lastUnderscore = spacecraftAndInstrument.rfind('_');
+    if (lastUnderscore == std::string::npos ||
+        lastUnderscore + 1 >= spacecraftAndInstrument.size())
     {
         return std::nullopt;
     }
 
-    return spacecraftAndInstrument.substr(firstUnderscore + 1);
+    return spacecraftAndInstrument.substr(lastUnderscore + 1);
 }
 
 std::string isoStringFromUnixTimestamp(double unixTimestamp, bool includeMilliseconds) {

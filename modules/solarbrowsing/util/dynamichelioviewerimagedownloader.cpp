@@ -193,11 +193,23 @@ void DynamicHelioviewerImageDownloader::pollListingRequest(double currentTimeJ20
 
         try {
             nlohmann::json json = nlohmann::json::parse(listingString.c_str());
-            const std::vector<double> frames = json["frames"].get<std::vector<double>>();
+            std::vector<double> frames;
+            if (json.contains("frames") && !json["frames"].is_null()) {
+                frames = json["frames"].get<std::vector<double>>();
+            }
 
-            std::string* message = json["message"].get_ptr<std::string*>();
-            if (message && !message->empty()) {
-                LWARNING(*message);
+            if (json.contains("message") && json["message"].is_string()) {
+                const std::string message = json["message"].get<std::string>();
+                if (!message.empty()) {
+                    LWARNING(message);
+                }
+            }
+
+            if (frames.empty()) {
+                LINFO(std::format(
+                    "No Helioviewer frames available for instrument '{}' in requested window",
+                    _instrument
+                ));
             }
 
             for (double unixTimestamp : frames) {

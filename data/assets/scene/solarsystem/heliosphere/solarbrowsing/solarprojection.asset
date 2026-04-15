@@ -5,14 +5,23 @@ local goesImagery = asset.require("./goesimagery")
 local sohoImagery = asset.require("${USER_ASSETS}/soho/sohoimagery")
 local solarOrbiterImagery = asset.require("${USER_ASSETS}/solarorbiter/model.asset")
 
+local sdoDynamicImagery = asset.require("./sdoDynamic")
+local stereoDynamicImagery = asset.require("./stereoADynamic")
+local goesDynamicImagery = asset.require("./goesCcor1Dynamic")
+local sohoDynamicImagery = asset.require("./sohoDynamic")
+local solarOrbiterDynamicImagery = asset.require("./solarOrbiterDynamic")
+
 local SolarImageryProjection = {
   Identifier = "SunProjection_Stereo_Sdo",
   Parent = sunTransforms.SunIAU.Identifier,
   Renderable = {
     Type = "RenderableSolarImageryProjection",
     DependentNodes = {
-      stereoImagery.Imagery.Identifier,
-      sdoImagery.Imagery.Identifier
+      sdoDynamicImagery.Imagery.Identifier,
+      stereoDynamicImagery.Imagery.Identifier,
+      goesDynamicImagery.Imagery.Identifier,
+      sohoDynamicImagery.Imagery.Identifier,
+      solarOrbiterDynamicImagery.Imagery.Identifier,
     }
   },
   GUI = {

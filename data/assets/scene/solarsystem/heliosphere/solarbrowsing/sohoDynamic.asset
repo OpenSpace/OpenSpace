@@ -1,0 +1,70 @@
+local soho = asset.require("scene/solarsystem/missions/soho/soho")
+
+local SolarImagery = {
+  Identifier = "SolarImagery_SOHO_Dynamic",
+  Parent = soho.Position.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = soho.MissionBegin,
+    End = soho.MissionEnd
+  },
+  Renderable = {
+    Type = "RenderableSolarImagery",
+    ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing_runtime/soho"),
+    StartInstrument = "EIT-171",
+    TransferFunctions = {
+      ["EIT-171"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/AIA-171.txt"),
+      ["EIT-195"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/AIA-193.txt"),
+      ["EIT-284"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/AIA-211.txt"),
+      ["EIT-304"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/AIA-304.txt"),
+      ["MDI-continuum"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/HMI-continuum.txt"),
+      ["MDI-magnetogram"] = openspace.absPath("${USER_ASSETS}/solarbrowsing/colortables/HMI-magnetogram.txt")
+    },
+    DynamicDownload = {
+      Enable = true,
+      SpacecraftName = "SOHO",
+      InstrumentNames = {
+        "EIT-171",
+        "EIT-195",
+        "EIT-284",
+        "EIT-304",
+        "MDI-continuum",
+        "MDI-magnetogram"
+      },
+      InstrumentSourceIds = { 0, 1, 2, 3, 7, 6 },
+      CadenceSeconds = 3600.0,
+      PrefetchFramesBefore = 1,
+      PrefetchFramesAfter = 3,
+      MaxConcurrentDownloads = 2,
+      SaveDownloadsOnShutdown = true,
+      RetryBackoffSeconds = 30.0,
+      MaxRetries = 2
+    },
+    DownsamplingLevel = 2,
+    BlackTransparencyThreshold = 0.01,
+    Contrast = 0.0,
+    Gamma = 0.9
+  },
+  GUI = {
+    Name = "SOHO Dynamic Imagery",
+    Path = "/Solar System/Solar Imagery"
+  }
+}
+
+asset.onInitialize(function ()
+  openspace.addSceneGraphNode(SolarImagery)
+end)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(SolarImagery)
+end)
+
+asset.export("Imagery", SolarImagery)
+
+asset.meta = {
+  Name = "SOHO Dynamic Solar Imagery",
+  Description = [[Runtime-streamed SOHO EIT and MDI imagery from Helioviewer.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
