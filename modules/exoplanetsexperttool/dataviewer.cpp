@@ -24,9 +24,9 @@
 
 #include <modules/exoplanetsexperttool/dataviewer.h>
 
-#include <modules/exoplanets/exoplanetshelper.h>
 #include <modules/exoplanetsexperttool/columnfilter.h>
 #include <modules/exoplanetsexperttool/datahelper.h>
+#include <modules/exoplanetsexperttool/dataloader.h>
 #include <modules/exoplanetsexperttool/exoplanetsexperttoolmodule.h>
 #include <modules/exoplanetsexperttool/rendering/renderableexoplanetglyphcloud.h>
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
@@ -36,8 +36,6 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/query/query.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
@@ -128,20 +126,20 @@ namespace {
 #endif
     }
 
-    constexpr const openspace::properties::Property::PropertyInfo ExternalSelectionInfo =
+    constexpr const openspace::Property::PropertyInfo ExternalSelectionInfo =
     {
         "ExternalSelection",
         "External Selection from Webpage",
         "Contains the indices of the rows in the data file that should be included, "
         "based on the filtering on the external webpage.",
-        openspace::properties::Property::Visibility::Hidden
+        openspace::Property::Visibility::Hidden
     };
 }
 
 namespace openspace::exoplanets {
 
 DataViewer::DataViewer(std::string identifier, std::string guiName)
-    : properties::PropertyOwner({ std::move(identifier), std::move(guiName) })
+    : PropertyOwner({ std::move(identifier), std::move(guiName) })
     , _externalSelection(ExternalSelectionInfo)
 {
     _externalSelection.setReadOnly(true);
@@ -432,7 +430,7 @@ void DataViewer::initializeRenderables() {
 }
 
 void DataViewer::initializeCallbacks() {
-    properties::Property* anchorProperty =
+    Property* anchorProperty =
         global::navigationHandler->orbitalNavigator().property("Anchor");
 
     if (!anchorProperty) {
@@ -1101,7 +1099,7 @@ void DataViewer::handleDoubleClickHoveredPlanet(int index) {
 
 void DataViewer::updateFilteredRowsProperty(std::optional<std::vector<size_t>> customIndices) {
     auto mod = global::moduleEngine->module<ExoplanetsExpertToolModule>();
-    properties::Property* filteredRowsProperty = mod->property("FilteredDataRows");
+    Property* filteredRowsProperty = mod->property("FilteredDataRows");
     if (filteredRowsProperty) {
         std::vector<std::string> indices;
 

@@ -38,7 +38,7 @@ namespace {
     constexpr char LessOperator = '<';
     constexpr char EqualsOperator = '=';
     constexpr char NotOperator = '!';
-    constexpr char* NullOperator = "null";
+    constexpr const char* NullOperator = "null";
 
     bool contains(const char* op, const std::string& str, size_t& pos) {
         pos = str.find(op);
@@ -73,7 +73,7 @@ const char* ColumnFilter::NumericFilterDescription =
     "Combine multiple conditions with comma. Ex: '> 30, !null'";
 
 ColumnFilter::ColumnFilter(std::string query, Type type)
-    : _query(query), _type(type)
+    : _type(type), _query(query)
 {
     _subqueries = ghoul::tokenizeString(_query, Separator);
 

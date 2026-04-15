@@ -47,7 +47,7 @@ namespace {
 namespace openspace::exoplanets::gui {
 
 Gui::Gui(std::string identifier, std::string guiName)
-    : properties::PropertyOwner({ std::move(identifier), std::move(guiName) })
+    : PropertyOwner({ std::move(identifier), std::move(guiName) })
     , _dataViewer("DataViewer")
 {
     addPropertySubOwner(_dataViewer);

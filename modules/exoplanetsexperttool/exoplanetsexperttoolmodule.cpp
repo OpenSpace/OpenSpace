@@ -25,38 +25,33 @@
 #include <modules/exoplanetsexperttool/exoplanetsexperttoolmodule.h>
 
 #include <modules/exoplanetsexperttool/rendering/renderableexoplanetglyphcloud.h>
-#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/navigation/navigationhandler.h>
-#include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
 #include <string_view>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "ExoplanetsExpertToolModule";
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "Decides if the GUI for this module should be enabled."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowInfoAtStartupInfo = {
+    constexpr Property::PropertyInfo ShowInfoAtStartupInfo = {
         "ShowInfoAtStartup",
         "Show Info at Startup",
         "If true, an info window is shown when starting the application, containing "
         "information about the research projecs and contact info for feedback."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DataConfigFileInfo = {
+    constexpr Property::PropertyInfo DataConfigFileInfo = {
         "DataConfigFile",
         "Data Config File",
         "The path to a file that dictates which dataset to load, what columns to use for "
@@ -64,12 +59,12 @@ namespace {
         "filters."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilteredDataRowsInfo = {
+    constexpr Property::PropertyInfo FilteredDataRowsInfo = {
         "FilteredDataRows",
         "Filtered Data Rows",
         "Contains the indices of the rows in the data file that are currently being "
         "shown in the tool.",
-        openspace::properties::Property::Visibility::Hidden
+        Property::Visibility::Hidden
     };
 
     struct [[codegen::Dictionary(ExoplanetsExpertToolModule)]] Parameters {
@@ -364,7 +359,7 @@ void ExoplanetsExpertToolModule::internalInitialize(const ghoul::Dictionary& dic
     );
 }
 
-std::vector<documentation::Documentation>
+std::vector<openspace::Documentation>
 ExoplanetsExpertToolModule::documentations() const
 {
     return {

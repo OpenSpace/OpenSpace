@@ -45,6 +45,8 @@
 #include <string_view>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "ExoplanetGlyphCloud";
 
     enum RenderOption {
@@ -52,26 +54,26 @@ namespace {
         PositionNormal
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
+    constexpr Property::PropertyInfo ScaleInfo = {
         "Scale",
         "Scale",
         "A scale value controlling the size of the glyphs."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
+    constexpr Property::PropertyInfo SelectionInfo = {
         "Selection",
         "Selection",
         "A list of indices of selected points to be highlighted."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseFixedWidthInfo = {
+    constexpr Property::PropertyInfo UseFixedWidthInfo = {
         "UseFixedWidth",
         "Use fixed width",
         "If true, all the rings representing the planets will have the very same width. "
         "Otherwise, the width of each ring decreases a bit as the radius gets larger."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OrientationRenderOptionInfo =
+    constexpr Property::PropertyInfo OrientationRenderOptionInfo =
     {
         "OrientationRenderOption",
         "Orientation render option",
@@ -81,10 +83,10 @@ namespace {
         "Normal\" rotates the points towards the position of the camera (useful for "
         "spherical displays, like dome theaters). In both these cases the points will "
         "be billboarded towards the camera.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DarkenFactorInfo = {
+    constexpr Property::PropertyInfo DarkenFactorInfo = {
         "DarkenFactor",
         "Darker factor (on highlight)",
         "The factor t use when darkening the glyph when in highlight mode (triggered by "
@@ -118,7 +120,7 @@ namespace {
 
 namespace openspace::exoplanets {
 
-documentation::Documentation RenderableExoplanetGlyphCloud::Documentation() {
+Documentation RenderableExoplanetGlyphCloud::Documentation() {
     return codegen::doc<Parameters>(
         "exoplanetsexperttool_renderable_exoplanetglyphcloud"
     );
@@ -243,10 +245,6 @@ int RenderableExoplanetGlyphCloud::hoveredIndex() const {
     return _currentlyHoveredIndex;
 }
 
-bool RenderableExoplanetGlyphCloud::isReady() const {
-    return _program != nullptr;
-}
-
 void RenderableExoplanetGlyphCloud::initialize() {
     global::syncEngine->addSyncables({ &_currentlyHoveredIndex, &_shouldHighlightHovered });
 }
@@ -354,7 +352,7 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
     _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
     _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));
 
-    _program->setUniform(_uniformCache.cameraPosition, data.camera.positionVec3());
+    _program->setUniform(_uniformCache.cameraPosition, data.camera.position());
     _program->setUniform(
         _uniformCache.cameraLookUp,
         glm::vec3(data.camera.lookUpVectorWorldSpace())

@@ -30,16 +30,14 @@
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/rendering/labelscomponent.h>
 #include <openspace/util/syncdata.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <array>
 
-namespace openspace::documentation { struct Documentation; }
+namespace openspace { struct Documentation; }
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl { class ProgramObject; }
@@ -64,14 +62,12 @@ public:
 
     void initializeSelectionCallbacks();
 
-    bool isReady() const override;
-
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
     void updateDataIfChanged();
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void createGlyphIdTexture(const glm::uvec3 dimensions);
@@ -86,13 +82,13 @@ private:
         right, cameraPosition, cameraLookUp, isHighlightMode, darkenFactor
     ) _uniformCache;
 
-    properties::FloatProperty _scale;
-    properties::IntListProperty _selectedIndices;
-    properties::BoolProperty _useFixedRingWidth;
+    FloatProperty _scale;
+    IntListProperty _selectedIndices;
+    BoolProperty _useFixedRingWidth;
 
-    properties::OptionProperty _renderOption;
+    OptionProperty _renderOption;
 
-    properties::FloatProperty _darkenFactor;
+    FloatProperty _darkenFactor;
 
     struct GlyphData {
         glm::vec3 position;

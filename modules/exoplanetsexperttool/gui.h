@@ -30,11 +30,9 @@
 #include <modules/exoplanetsexperttool/dataviewer.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
-#include <openspace/util/touch.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <array>
 
 struct ImGuiContext;
 struct ImPlotContext;
@@ -46,7 +44,7 @@ namespace ghoul::opengl {
 
 namespace openspace::exoplanets::gui {
 
-class Gui : public properties::PropertyOwner {
+class Gui : public PropertyOwner {
 public:
     Gui(std::string identifier, std::string guiName = "");
     ~Gui();

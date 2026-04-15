@@ -76,15 +76,15 @@ public:
     // Decode the data that should be synced to the other nodes
     void decode(SyncBuffer* syncBuffer) override;
 
-    std::vector<documentation::Documentation> documentations() const override;
+    std::vector<openspace::Documentation> documentations() const override;
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
 
-    properties::BoolProperty _enabled;
-    properties::BoolProperty _showInfoWindowAtStartup;
-    properties::IntListProperty _filteredRows;
-    properties::StringProperty _dataConfigFile;
+    BoolProperty _enabled;
+    BoolProperty _showInfoWindowAtStartup;
+    IntListProperty _filteredRows;
+    StringProperty _dataConfigFile;
 
     exoplanets::gui::Gui _gui;
     glm::vec2 _mousePosition = glm::vec2(0.f);

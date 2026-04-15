@@ -27,14 +27,12 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <modules/exoplanetsexperttool/dataloader.h>
 #include <modules/exoplanetsexperttool/datastructures.h>
 #include <modules/exoplanetsexperttool/views/colormappingview.h>
 #include <modules/exoplanetsexperttool/views/columnselectionview.h>
 #include <modules/exoplanetsexperttool/views/filteringview.h>
 #include <modules/exoplanetsexperttool/views/systemview.h>
 #include <openspace/properties/list/intlistproperty.h>
-#include <openspace/properties/misc/optionproperty.h>
 #include <ghoul/glm.h>
 #include <memory>
 #include <optional>
@@ -44,7 +42,7 @@
 
 namespace openspace::exoplanets {
 
-class DataViewer : public properties::PropertyOwner {
+class DataViewer : public PropertyOwner {
 public:
     DataViewer(std::string identifier, std::string guiName = "");
 
@@ -159,7 +157,7 @@ private:
 
     bool _externalSelectionChanged = false;
     std::string _lastExternalSelectionTimeStamp;
-    properties::IntListProperty _externalSelection;
+    IntListProperty _externalSelection;
 
     // Keep track of whether ctrl is held, to prevent undesired interaction
     // when interacting with glyphs
