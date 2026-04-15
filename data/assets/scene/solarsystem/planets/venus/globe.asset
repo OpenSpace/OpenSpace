@@ -1,0 +1,73 @@
+asset.require("./trail")
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
+
+
+
+local labelsPath = asset.resource({
+  Name = "Venus Labels",
+  Type = "HttpSynchronization",
+  Identifier = "venus_labels",
+  Version = 1
+})
+
+
+local Venus = {
+  Identifier = "Venus",
+  Parent = transforms.VenusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.Venus,
+      Observer = coreKernels.ID.VenusBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.Venus,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    --Radii = { 6051900.0, 6051900.0, 6051800.0 },
+    Radii = { 6051900.0, 6051900.0, 6051900.0 },
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "venus.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 11.0,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 2000000.0, 7000000.0 },
+      DistanceEPS = 4000000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "planet_solarSystem", "planet_terrestrial" },
+  GUI = {
+    Name = "Venus",
+    Path = "/Solar System/Planets/Venus"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Venus)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Venus)
+end)
+
+asset.export(Venus)
+
+
+
+asset.meta = {
+  Name = "Venus",
+  Description = "Venus globe with labels",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
