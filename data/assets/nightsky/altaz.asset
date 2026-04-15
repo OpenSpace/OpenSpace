@@ -61,7 +61,7 @@ local AltAzGrid = {
     RenderBinMode = "PostDeferredTransparent"
 
   },
-  Tag = { "nightsky_marking" },
+  Tag = { "nightsky_marking", "altaz_marking" },
   GUI = {
     Name = "Altitude-Azimuth Grid",
     Description = [[A local Altitude/Azimuth grid centered around your position on a
@@ -96,7 +96,7 @@ local AltAzGridLabels = {
     Opacity = 0.65,
     RenderBinMode = "PostDeferredTransparent"
   },
-  Tag = { "nightsky_marking" },
+  Tag = { "nightsky_marking", "altaz_marking" },
   GUI = {
     Name = "Altitude-Azimuth Grid Labels",
     Description = [[Labels for the Altitude-Azimuth Grid]],

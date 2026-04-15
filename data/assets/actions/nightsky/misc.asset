@@ -85,6 +85,49 @@ local RemoveTickMarksBand = {
     IsLocal = false
 }
 
+local hideAllAltAzElements = {
+  Identifier = "os.nightsky.HideAllAltAzElements",
+  Name = "Hide All Alt/Az Elements",
+  Command = [[
+    openspace.fadeOut("{altaz_marking}")
+  ]],
+  Documentation = "Hides all alt/az markings",
+  GuiPath = "/Night Sky/Clear Sky Actions",
+  IsLocal = false
+}
+
+local hideAllEclipticElements = {
+  Identifier = "os.nightsky.HideAllEclipticElements",
+  Name = "Hide All Ecliptic Elements",
+  Command = [[
+    openspace.fadeOut("{ecliptic_marking}")
+  ]],
+  Documentation = "Hides all ecliptic markings",
+  GuiPath = "/Night Sky/Clear Sky Actions",
+  IsLocal = false
+}
+
+local hideAllEquatorialElements = {
+  Identifier = "os.nightsky.HideAllEquatorialElements",
+  Name = "Hide All Equatorial Elements",
+  Command = [[
+      openspace.fadeOut("{equatorial_marking}")
+  ]],
+  Documentation = "Hides all equatorial markings",
+  GuiPath = "/Night Sky/Clear Sky Actions",
+  IsLocal = false
+}
+
+local hideAllConstellationElements = {
+  Identifier = "os.nightsky.HideAllConstellationElements",
+  Name = "Hide All Constellation Elements",
+  Command = [[
+    openspace.fadeOut("{constellation_marking}")
+  ]],
+  Documentation = "Hides all constellation markings",
+  GuiPath = "/Night Sky/Clear Sky Actions",
+  IsLocal = false
+}
 
 asset.onInitialize(function()
   openspace.action.registerAction(FadeInConstellationLabels)
@@ -93,6 +136,10 @@ asset.onInitialize(function()
   openspace.action.registerAction(HideAllMarkings)
   openspace.action.registerAction(AddTickMarksBand)
   openspace.action.registerAction(RemoveTickMarksBand)
+  openspace.action.registerAction(hideAllAltAzElements)
+  openspace.action.registerAction(hideAllEclipticElements)
+  openspace.action.registerAction(hideAllEquatorialElements)
+  openspace.action.registerAction(hideAllConstellationElements)
 end)
 
 asset.onDeinitialize(function()
@@ -102,6 +149,10 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(ShowConstellationElements)
   openspace.action.removeAction(FadeOutConstellationLabels)
   openspace.action.removeAction(FadeInConstellationLabels)
+  openspace.action.removeAction(hideAllAltAzElements)
+  openspace.action.removeAction(hideAllEclipticElements)
+  openspace.action.removeAction(hideAllEquatorialElements)
+  openspace.action.removeAction(hideAllConstellationElements)
 end)
 
 asset.export("FadeInConstellationLabels", FadeInConstellationLabels.Identifier)
@@ -110,3 +161,7 @@ asset.export("ShowConstellationElements", ShowConstellationElements.Identifier)
 asset.export("HideAllMarkings", HideAllMarkings.Identifier)
 asset.export("AddTickMarksBand", AddTickMarksBand.Identifier)
 asset.export("RemoveTickMarksBand", RemoveTickMarksBand.Identifier)
+asset.export("hideAllAltAzElements", hideAllAltAzElements.Identifier)
+asset.export("hideAllEclipticElements", hideAllEclipticElements.Identifier)
+asset.export("hideAllEquatorialElements", hideAllEquatorialElements.Identifier)
+asset.export("hideAllConstellationElements", hideAllConstellationElements.Identifier)
