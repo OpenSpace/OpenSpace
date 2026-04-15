@@ -1,0 +1,49 @@
+local transforms = asset.require("./transforms")
+
+
+
+local NereidLabel = {
+  Identifier = "NereidLabel",
+  Parent = transforms.NereidPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Text = "Nereid",
+    FontSize = 50.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 15.0 },
+    FadeWidths = { 1, 15.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Nereid Label",
+    Path = "/Solar System/Planets/Neptune/Major Moons/Nereid",
+    Focusable = false,
+    Description = "Label for Neptune's moon Nereid"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NereidLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(NereidLabel)
+end)
+
+asset.export(NereidLabel)
+
+
+
+asset.meta = {
+  Name = "Nereid Label",
+  Description = [[Label for Neptune's moon: Nereid.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

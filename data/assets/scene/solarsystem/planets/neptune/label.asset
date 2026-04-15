@@ -1,0 +1,51 @@
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
+local neptuneKernels = asset.require("./kernels095")
+
+
+
+local NeptuneLabel = {
+  Identifier = "NeptuneLabel",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Text = "Neptune",
+    FontSize = 70.0,
+    Size = 9.0,
+    MinMaxSize = { 1, 80 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 6.0, 120.0 },
+    FadeWidths = { 2.0, 150.0 }
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "Neptune Label",
+    Path = "/Solar System/Planets/Neptune",
+    Focusable = false,
+    Description = "Main planet label for Neptune"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NeptuneLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(NeptuneLabel)
+end)
+
+asset.export(NeptuneLabel)
+
+
+
+asset.meta = {
+  Name = "Neptune Label",
+  Description = "Label for Neptune",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

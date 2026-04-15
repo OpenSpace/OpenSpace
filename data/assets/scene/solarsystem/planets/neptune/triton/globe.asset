@@ -1,0 +1,38 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Triton = {
+  Identifier = "Triton",
+  Parent = transforms.TritonPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2709000, 2706000, 2705000 }
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_neptune", "moon_major_neptune" },
+  GUI = {
+    Name = "Triton",
+    Path = "/Solar System/Planets/Neptune/Major Moons/Triton"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Triton)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Triton)
+end)
+
+asset.export(Triton)
+
+
+
+asset.meta = {
+  Name = "Triton",
+  Description = [[Globe asset containing Neptune's moon Triton]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
