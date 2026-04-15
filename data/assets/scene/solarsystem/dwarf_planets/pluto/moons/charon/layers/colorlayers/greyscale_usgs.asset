@@ -1,4 +1,4 @@
-local charon = asset.require("../../charon")
+local charonAsset = asset.require("scene/solarsystem/dwarf_planets/pluto/moons/charon/globe")
 
 
 
@@ -12,11 +12,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(charon.Charon.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(charonAsset.Charon.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(charon.Charon.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(charonAsset.Charon.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export("layer", Layer)

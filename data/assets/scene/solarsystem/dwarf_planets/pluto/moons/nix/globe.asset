@@ -1,0 +1,43 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Nix = {
+  Identifier = "Nix",
+  Parent = transforms.NixPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 45000, 45000, 45000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_dwarf",
+    "moon_pluto",
+    "moon_minor",
+    "moon_minor_pluto"
+  },
+  GUI = {
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Nix"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Nix)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Nix)
+end)
+
+asset.export(Nix)
+
+
+
+asset.meta = {
+  Name = "Nix",
+  Description = "Globe for Pluto's moon Nix",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

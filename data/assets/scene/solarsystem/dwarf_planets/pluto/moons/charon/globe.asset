@@ -1,0 +1,61 @@
+local transforms = asset.require("./transforms")
+
+
+
+local labelsPath = asset.resource({
+  Name = "Pluto Labels",
+  Type = "HttpSynchronization",
+  Identifier = "pluto_labels",
+  Version = 1
+})
+
+local Charon = {
+  Identifier = "Charon",
+  Parent = transforms.CharonPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6.035E5, 6.035E5, 6.035E5 },
+    Labels = {
+      FileName = labelsPath .. "charon.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 9.0,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      Distances = { 800000.0, 2000000.0 },
+      DistanceEPS = 250000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_dwarf",
+    "moon_pluto",
+    "moon_major",
+    "moon_major_pluto"
+  },
+  GUI = {
+    Path = "/Solar System/Dwarf Planets/Pluto/Charon"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Charon)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Charon)
+end)
+
+asset.export(Charon)
+
+
+
+asset.meta = {
+  Name = "Charon",
+  Description = "Charon globe",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

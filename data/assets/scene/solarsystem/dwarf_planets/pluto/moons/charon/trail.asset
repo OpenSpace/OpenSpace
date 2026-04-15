@@ -1,16 +1,17 @@
-local transforms = asset.require("../transforms")
-local kernels = asset.require("../kernels")
+local plutoAsset = asset.require("scene/solarsystem/dwarf_planets/pluto/transforms")
+local plutoKernels = asset.require("scene/solarsystem/dwarf_planets/pluto/kernels")
+
 
 
 local CharonBarycentricTrail = {
   Identifier = "CharonBarycentricTrail",
-  Parent = transforms.PlutoBarycenter.Identifier,
+  Parent = plutoAsset.PlutoBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels.ID.Charon,
-      Observer = kernels.ID.PlutoBarycenter
+      Target = plutoKernels.ID.Charon,
+      Observer = plutoKernels.ID.PlutoBarycenter
     },
     Color = { 0.00, 0.62, 1.00 },
     Period = 6.38723,

@@ -1,0 +1,43 @@
+local transforms = asset.require("scene/solarsystem/dwarf_planets/pluto/transforms")
+local kernels = asset.require("scene/solarsystem/dwarf_planets/pluto/kernels")
+
+
+
+local HydraPosition = {
+  Identifier = "HydraPosition",
+  Parent = transforms.PlutoBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Hydra,
+      Observer = kernels.ID.PlutoBarycenter
+    }
+  },
+  GUI = {
+    Name = "Hydra Position",
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Hydra",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(HydraPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(HydraPosition)
+end)
+
+asset.export(HydraPosition)
+
+
+
+asset.meta = {
+  Name = "Hydra Transforms",
+  Description = "Position for Pluto's moon Hydra",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
