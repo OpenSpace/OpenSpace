@@ -122,8 +122,8 @@ namespace {
         return diffPos;
     }
 
-    // This `Renderable` connects two scene graph nodes by drawing a line between them.
-    // The line will update dynamically if the position of the nodes change.
+    // Connects two scene graph nodes by drawing a line between them. The line will update
+    // dynamically if the position of the nodes change.
     //
     // One use case for the `RenderableNodeLine` is to visualize the distance between two
     // objects. For this, a [RenderableDistanceLabel](#base_renderable_distancelabel) can

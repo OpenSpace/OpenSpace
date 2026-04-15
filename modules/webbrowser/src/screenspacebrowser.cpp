@@ -79,12 +79,11 @@ namespace {
         Property::Visibility::NoviceUser
     };
 
-    // This `ScreenSpaceRenderable` can be used to render a webpage in front of the
-    // camera. This can be used to show various dynamic content, for example using the
-    // scripting API.
+    // Can be used to render a webpage in front of the camera. This can be used to show
+    // various dynamic content, for example using the scripting API.
     //
-    // Note that mouse input will not be passed to the rendered view, so it will not be
-    // possible to interact with the web page.
+    // Note that mouse or keyboard input will not be passed to the rendered view, so it
+    // will not be possible to interact with the webpage.
     struct [[codegen::Dictionary(ScreenSpaceBrowser)]] Parameters {
         // A unique identifier for this screen space browser.
         std::optional<std::string> identifier [[codegen::identifier()]];

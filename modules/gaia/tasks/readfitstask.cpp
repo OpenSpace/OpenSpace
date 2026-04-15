@@ -45,12 +45,12 @@ namespace {
     constexpr std::string_view _loggerCat = "ReadFitsTask";
 
     struct [[codegen::Dictionary(ReadFitsTask)]] Parameters {
-        // If SingleFileProcess is set to true then this specifies the path to a single
+        // If `SingleFileProcess` is set to true then this specifies the path to a single
         // FITS file that will be read. Otherwise it specifies the path to a folder with
         // multiple FITS files that are to be read.
         std::string inFileOrFolderPath;
 
-        // If SingleFileProcess is set to true then this specifies the name (including
+        // If `SingleFileProcess` is set to true then this specifies the name (including
         // entire path) to the output file. Otherwise it specifies the path to the output
         // folder which to export binary star data to.
         std::string outFileOrFolderPath;

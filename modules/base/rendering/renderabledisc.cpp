@@ -65,8 +65,7 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // This renderable can be used to create a circular disc that is colored based on a
-    // one-dimensional texture.
+    // Renders a circular disc that is colored based on a one-dimensional texture.
     //
     // The disc will be filled i.e. a full circle, per default, but may also be made with
     // a hole in the center using the `Width` parameter.

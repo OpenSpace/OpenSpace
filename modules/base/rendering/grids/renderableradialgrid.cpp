@@ -85,8 +85,8 @@ namespace {
         "The labels for the grid."
     };
 
-    // This `Renderable` creates a planar circular grid with a given size. Optionally, it
-    // may have a hole in the center.
+    // Creates a planar circular grid with a given size. Optionally, it may have a hole in
+    // the center.
     //
     // The size is determined by two radii values: The first (inner) radius defines the
     // hole in the center. The second (outer) radius defines the full grid size. To create

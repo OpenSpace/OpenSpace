@@ -166,8 +166,8 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // This `Renderable` represents a simple sphere with an image. Per default, the
-    // sphere uses an equirectangular projection for the image mapping.
+    // Creates a simple sphere textured with an image. Per default, the sphere uses an
+    // equirectangular projection for the image mapping.
     //
     // The `Orientation` parameter determines whether the provided image is shown on
     // the inside, outside, or both sides of the sphere.

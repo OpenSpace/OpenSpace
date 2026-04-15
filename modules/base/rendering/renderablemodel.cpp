@@ -206,11 +206,11 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // This `Renderable` shows a three-dimensional model. The provided model may contain
-    // textures and animations and is affected by the optionally-provided light sources.
-    // Each model's scale can be adapted by the `ModelScale` and `InvertModelScale`
-    // parameters to account for discrepancies in the units that a model was created in.
-    // See the Documentation page "Scaling of models" for more detailed information.
+    // Renders a 3D model. The provided model may contain textures and animations and is
+    // affected by the optionally-provided light sources. Each model's scale can be
+    // adapted by the `ModelScale` and `InvertModelScale` parameters to account for
+    // discrepancies in the units that a model was created in. See the Documentation
+    // page "Scaling of models" for more detailed information.
     //
     // Limitation: At the time, only animations of the "Keyframe" type are supported. See
     // each specific model format to see if it supports that type of animation.

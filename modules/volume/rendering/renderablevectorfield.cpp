@@ -123,9 +123,8 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // A RenderableVectorField can be used to render vectors from a given 3D volumetric
-    // dataset or a sparse point-like dataset, optionally including color mapping and
-    // custom filtering via Lua script.
+    // Renders vectors from a given 3D volumetric dataset or a sparse point-like dataset,
+    // optionally including color mapping and custom filtering via Lua script.
     //
     // If `mode` is set to `Volume`, the vector field is defined on a regular 3D grid
     // specified by `Dimensions`, and occupies the spatial domain defined by `MinDomain`

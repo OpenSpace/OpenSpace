@@ -39,8 +39,8 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // This `ScreenSpaceRenderable` can be used for debugging OpenGL textures. It renders
-    // the content of an existing texture, based on a provided OpenGL texture name.
+    // Useful for debugging OpenGL textures. It renders the content of an existing
+    // texture, based on a provided OpenGL texture name.
     struct [[codegen::Dictionary(ScreenSpaceDebugPlane)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::optional<int> texture;

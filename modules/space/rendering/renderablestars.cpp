@@ -315,12 +315,11 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // RenderableStars renders large star catalogs as a point-based star field using data
-    // loaded from a SPECK file or a CSV file (see
-    // [here](/building-content/point-data/data-formats) for more information on the
-    // available data formats). It is intended for astronomical datasets where each entry
-    // represents a star with position and optional physical metadata such as color index,
-    // luminosity, magnitude, and motion.
+    // Renders large star catalogs as a point-based star field using data loaded from a
+    // SPECK file or a CSV file (see [here](/building-content/point-data/data-formats)
+    // for more information on the available data formats). It is intended for
+    // astronomical datasets where each entry represents a star with position and optional
+    // physical metadata such as color index, luminosity, magnitude, and motion.
     //
     // Visually, each star is drawn as a billboarded light source made up of one or two
     // textured components: a central core and a surrounding glare.

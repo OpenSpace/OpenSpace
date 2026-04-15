@@ -57,14 +57,13 @@ namespace {
         Property::Visibility::NoviceUser
     };
 
-    // Similarly to the
+    // A 3D model that acts as a projection target for spacecraft instrument images,
+    // similarly to
     // [RenderablePlaneProjection](spacecraftinstruments_renderable_planeprojection) and
-    // [RenderablePlanetProjection](spacecraftinstruments_renderable_planetprojection),
-    // this Renderable type servers as a potential target for image projections from a
-    // spacecraft's instrument. This renderable will determine whenever an image in a
-    // currently loaded image sequence is projected whether that instrument's field of
-    // view intersects this model and will correctly project the captured image onto the
-    // model.
+    // [RenderablePlanetProjection](spacecraftinstruments_renderable_planetprojection).
+    //
+    // Images from a loaded image sequence will be projected onto the model if the
+    // instrument’s field-of-view intersects it.
     struct [[codegen::Dictionary(RenderableModelProjection)]] Parameters {
         // The file or files that should be loaded, that specifies the model to load. The
         // file can contain filesystem tokens or can be specified relative to the

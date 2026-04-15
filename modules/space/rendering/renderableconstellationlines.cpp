@@ -89,9 +89,7 @@ namespace {
     // @TODO (2025-01-07, emmbr) Also need to update description of names file and labels
     // as part of the labels rewrite
 
-    // This renderable can be used to draw constellations using lines. Each constellation
-    // corresponds to a group of lines between 3D positions that represent the star
-    // positions.
+    // Draws constellations as lines between 3D star positions grouped per constellation.
     //
     // Each constellation is given an abbreviation that acts as the identifier of the
     // constellation. These abbreviations can be mapped to full names in the

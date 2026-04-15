@@ -62,9 +62,9 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // This Scale type provides the ability to scale an object dynamically as time in the
-    // simulation passes. The provided `ReferenceDate`, specifies when the total scale
-    // should be equal to 0 and the scales grows by `Speed` meters for every second in the
+    // Provides the ability to scale an object dynamically as time in the simulation
+    // passes. The provided `ReferenceDate`, specifies when the total scale should be
+    // equal to 0 and the scale grows by `Speed` meters for every second in the
     // simulation. If `ClampToPositive` is specified as `true`, then the resulting scale
     // will always be positive or 0 if the simulation time is before the `ReferenceDate`.
     //

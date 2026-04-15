@@ -41,8 +41,8 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // A RenderableSwitch can be used to render one of two renderables depending on the
-    // distance between the camera and the object's position.
+    // Can be used to render one of two renderables depending on the distance between the
+    // camera and the object's position.
     //
     // The two renderables are specified separately: `RenderableNear` and `RenderableFar`.
     // These can be any renderable types.

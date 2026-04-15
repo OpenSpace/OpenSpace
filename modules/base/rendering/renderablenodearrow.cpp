@@ -204,8 +204,8 @@ namespace {
         }
     }
 
-    // A RenderableNodeArrow can be used to create a 3D arrow pointing in the direction
-    // of one scene graph node to another.
+    // Can be used to create a 3D arrow pointing in the direction from one scene graph
+    // node to another.
     //
     // The arrow will be placed at the `StartNode` at a distance of the provided `Offset`
     // value. Per default, the `Length` and `Offset` of the arrow is specified in meters,

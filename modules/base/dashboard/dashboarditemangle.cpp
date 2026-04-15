@@ -103,7 +103,7 @@ namespace {
         Property::Visibility::User
     };
 
-    // This `DashboardItem` shows the angle between the lines `Source`->`Reference` and
+    // Shows the angle between the lines `Source`->`Reference` and
     // `Source`->`Destination`. Each of `Source`, `Reference`, and `Destination` can be
     // either the identifier of a node, the current focus node, or the position of the
     // camera. The angle cannot be calculated if two of these three items are located in

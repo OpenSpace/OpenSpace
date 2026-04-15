@@ -137,16 +137,16 @@ namespace {
         "Falloff exponent of the circle outlining the simulation."
     };
 
-    // This `Renderable` type is capable of rendering a number of different molecules on a
-    // moving path using periodic boundary conditions. This can be used to show, for
-    // example the distribution of different molecules or atoms in a specific spatial
-    // region, such as the atmosphere of a planet.
+
+    // Renders a molecular dynamics simulation with multiple molecule types in a periodic
+    // boundary box. This can for example be used to show the distribution of different
+    // molecules or atoms in a specific spatial region, such as a planet's atmosphere.
     //
     // Multiple molecules can be provided and for each the path containing the structural
     // data and the count of molecules has to be provided. Specifying the trajectory file
     // that describes the movement of each individual molecule in its own relative frame,
     // is optional.
-    struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
+    struct [[codegen::Dictionary(RenderableSimulationBox)]] Parameters {
         struct MoleculeData {
             // The path to a molecule file that contains the structural information for
             // the molecule.
