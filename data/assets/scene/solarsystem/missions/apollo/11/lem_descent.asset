@@ -1,4 +1,4 @@
-local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/globe")
 -- The following keyframe data was converted from the_last_four_minutes_2019-06-09.kml,
 -- which is available at http://apollo.mem-tek.com/GoogleMoonKMZ.html
 

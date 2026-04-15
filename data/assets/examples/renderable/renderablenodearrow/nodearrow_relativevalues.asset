@@ -8,7 +8,7 @@
 -- the size of the start node, i.e. Earth.
 
 local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
-local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/globe")
 
 local Node = {
   Identifier = "RenderableNodeArrow_Example_Relative",

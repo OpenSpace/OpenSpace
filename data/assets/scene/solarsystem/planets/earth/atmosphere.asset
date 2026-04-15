@@ -1,5 +1,5 @@
 asset.require("scene/solarsystem/sun/sun")
-asset.require("./moon/moon")
+asset.require("./moon/globe")
 local transforms = asset.require("./earth")
 
 

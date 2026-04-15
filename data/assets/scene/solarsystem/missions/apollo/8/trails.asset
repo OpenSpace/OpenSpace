@@ -1,5 +1,5 @@
 local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
-local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/globe")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 

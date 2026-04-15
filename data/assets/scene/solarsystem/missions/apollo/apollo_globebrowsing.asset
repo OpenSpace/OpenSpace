@@ -1,4 +1,4 @@
-local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/globe")
 -- This is technically not necessary, but we need to ensure that the default layers load
 -- first before we add the layers from this assets or else the default layers might be
 -- initialized later, causing them to appear **after** these layers

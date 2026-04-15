@@ -1,0 +1,49 @@
+local moon = asset.require("./globe")
+
+
+
+local MoonLabel = {
+  Identifier = "MoonLabel",
+  Parent = moon.Moon.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Text = "Moon",
+    FontSize = 70.0,
+    Size = 6.0,
+    MinMaxSize = { 1, 40 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.4, 10.0 },
+    FadeWidths = { 0.1, 10.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Moon Label",
+    Path = "/Solar System/Planets/Earth/Moon",
+    Focusable = false,
+    Description = "Label for Earth's Moon"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MoonLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MoonLabel)
+end)
+
+asset.export(MoonLabel)
+
+
+
+asset.meta = {
+  Name = "Moon Label",
+  Description = "Label for the Moon globe",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,5 +1,6 @@
 asset.require("../actions")
-local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moonTransform = asset.require("scene/solarsystem/planets/earth/moon/transform")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/globe")
 local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
@@ -16,7 +17,7 @@ local models = asset.resource({
 
 local Apollo15 = {
   Identifier = "Apollo15",
-  Parent = moonAsset.MoonInertial.Identifier,
+  Parent = moonTransform.MoonInertial.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "1971-07-30T02:22:00.00",
