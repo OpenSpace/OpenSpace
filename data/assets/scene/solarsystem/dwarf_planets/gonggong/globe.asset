@@ -2,9 +2,9 @@ local transforms = asset.require("./transforms")
 
 
 
-local Planet = {
-  Identifier = "GonggongGlobe",
-  Parent = transforms.Position.Identifier,
+local Gonggong = {
+  Identifier = "Gonggong",
+  Parent = transforms.GonggongPosition.Identifier,
   Transform = {
     Rotation = {
       Type = "ConstantRotation",
@@ -24,14 +24,14 @@ local Planet = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Planet)
+  openspace.addSceneGraphNode(Gonggong)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Planet)
+  openspace.removeSceneGraphNode(Gonggong)
 end)
 
-asset.export("Planet", Planet)
+asset.export(Gonggong)
 
 
 
