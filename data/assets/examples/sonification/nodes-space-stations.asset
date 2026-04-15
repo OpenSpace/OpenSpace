@@ -13,7 +13,7 @@
 -- documentation:
 -- https://docs.openspaceproject.com/latest/creating-data-assets/modules/telemetry/sonification.html
 
-asset.require("scene/solarsystem/planets/earth/satellites/misc/iss")
+asset.require("scene/solarsystem/planets/earth/satellites/iss/iss")
 asset.require("scene/solarsystem/planets/earth/satellites/misc/tiangong")
 
 asset.onInitialize(function ()

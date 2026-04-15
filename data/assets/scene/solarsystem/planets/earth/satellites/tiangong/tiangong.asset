@@ -1,0 +1,13 @@
+asset.require("./trail")
+asset.require("./model")
+asset.require("./label", false)
+
+
+
+asset.meta = {
+  Name = "Tiangong",
+  Description = "Meta asset for Tiangong",
+  Author = "Dan Tell",
+  URL = "www.calacademy.org",
+  License = "CC-BY"
+}

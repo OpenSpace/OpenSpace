@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 local coreKernels = asset.require("spice/core")
 
 
@@ -15,11 +15,11 @@ local omm = asset.resource({
 
 local HubblePosition = {
   Identifier = "HubblePosition",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Transform = {
     Translation = {
       Type = "GPTranslation",
-      Observer = transforms.EarthInertial.Identifier,
+      Observer = earthAsset.EarthInertial.Identifier,
       File = omm .. "hst.txt",
       Format = "OMM"
     },
@@ -38,52 +38,22 @@ local HubblePosition = {
   }
 }
 
-local HubbleTrail = {
-  Identifier = "HubbleTrail",
-  Parent = transforms.EarthInertial.Identifier,
-  Renderable = {
-    Type = "RenderableTrailOrbit",
-    Translation = {
-      Type = "GPTranslation",
-      Observer = transforms.EarthInertial.Identifier,
-      File = omm .. "hst.txt",
-      Format = "OMM"
-    },
-    RenderBinMode = "PostDeferredTransparent",
-    Color = { 0.0, 0.902, 0.6 },
-    Fade = 1.5,
-    Resolution = 320
-  },
-  Tag = { "earth_satellites", "hubble" },
-  GUI = {
-    Name = "Hubble Trail",
-    Path = "/Solar System/Planets/Earth/Satellites/Hubble",
-    Focusable = false
-  }
-}
-
 
 asset.onInitialize(function()
-  local hubble = openspace.space.readKeplerFile(omm .. "hst.txt", "OMM")
-  HubbleTrail.Renderable.Period = hubble[1].Period / (60 * 60 * 24)
-
   openspace.addSceneGraphNode(HubblePosition)
-  openspace.addSceneGraphNode(HubbleTrail)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(HubbleTrail)
   openspace.removeSceneGraphNode(HubblePosition)
 end)
 
 asset.export(HubblePosition)
-asset.export(HubbleTrail)
 
 
 
 asset.meta = {
-  Name = "Hubble Space Telescope Trail",
-  Description = "Position and Trail for Hubble Space Telescope, trail from Celestrak",
+  Name = "Hubble Space Telescope Position",
+  Description = "Position for Hubble Space Telescope, trail from Celestrak",
   Author = "Dan Tell",
   URL = "www.calacademy.org",
   License = "CC-BY"

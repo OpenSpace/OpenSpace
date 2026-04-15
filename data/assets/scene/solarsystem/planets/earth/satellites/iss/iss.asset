@@ -1,0 +1,14 @@
+asset.require("./trail")
+asset.require("./model")
+asset.require("./actions", false)
+asset.require("./label", false)
+
+
+
+asset.meta = {
+  Name = "International Space Station",
+  Description = "Meta asset for the International Space Station",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.org/NORAD/elements/",
+  License = "CC-BY"
+}

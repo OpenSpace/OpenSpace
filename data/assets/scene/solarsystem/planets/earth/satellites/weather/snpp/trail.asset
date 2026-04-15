@@ -1,0 +1,62 @@
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+
+
+
+local omm = asset.resource({
+  Name = "Satellite OMM Data (SNPP)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_snpp",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?CATNR=37849&FORMAT=kvn",
+  Filename = "SNPP.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local SNPPTrail = {
+  Identifier = "SNPP_trail",
+  Parent = earthAsset.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "GPTranslation",
+      Observer = earthAsset.EarthInertial.Identifier,
+      File = omm .. "SNPP.txt",
+      Format = "OMM",
+      RenderBinMode = "PostDeferredTransparent"
+    },
+    Color = { 0.9, 0.6715, 0.0 },
+    Fade = 1.5,
+    Resolution = 320
+  },
+  Tag = { "earth_satellites", "SNPP" },
+  GUI = {
+    Name = "SNPP Trail",
+    Path = "/Solar System/Planets/Earth/Satellites/SNPP",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  local s = openspace.space.readKeplerFile(omm .. "SNPP.txt", "OMM")
+  SNPPTrail.Renderable.Period = s[1].Period / (60 * 60 * 24)
+
+  openspace.addSceneGraphNode(SNPPTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SNPPTrail)
+end)
+
+asset.export(SNPPTrail)
+
+
+
+asset.meta = {
+  Name = "SNPP Trail",
+  Description = [[Trail for SNPP. Trail data from Celestrak. Can be used in conjunction
+    with VIIRS SNPP (Temporal) layer for Earth]],
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.org/",
+  License = "NASA"
+}
