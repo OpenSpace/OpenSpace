@@ -1,11 +1,10 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
 local transforms = asset.require("./transforms")
 
 
 
-local Planet = {
-  Identifier = "QuaoarGlobe",
-  Parent = transforms.Position.Identifier,
+local Quaoar = {
+  Identifier = "Quaoar",
+  Parent = transforms.QuaoarPosition.Identifier,
   Transform = {
     Rotation = {
       Type = "ConstantRotation",
@@ -26,14 +25,14 @@ local Planet = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Planet)
+  openspace.addSceneGraphNode(Quaoar)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Planet)
+  openspace.removeSceneGraphNode(Quaoar)
 end)
 
-asset.export("Planet", Planet)
+asset.export(Quaoar)
 
 
 
