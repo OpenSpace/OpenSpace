@@ -9,8 +9,7 @@ asset.require("./base_blank")
 asset.require("scene/digitaluniverse/sdss")
 
 -- Specifying which other assets should be loaded in this scene
-asset.require("scene/solarsystem/sun/sun")
-asset.require("scene/solarsystem/sun/glare")
+asset.require("scene/solarsystem/sun")
 asset.require("scene/solarsystem/sun/habitablezone")
 asset.require("scene/solarsystem/sun/default_layers")
 asset.require("scene/solarsystem/planets/planets")
