@@ -1,6 +1,6 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local jwstTransforms = asset.require("scene/solarsystem/telescopes/jwst/transforms")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+local jwstAsset = asset.require("scene/solarsystem/telescopes/jwst/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local hudf = asset.require("./hudf_image")
 
 
@@ -12,7 +12,7 @@ local Distance = 9.2E15
 -- distance = 9.2E15 m (set to size of view sphere)
 local HUDFPosition = {
   Identifier = "HUDFPosition",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Transform = {
     Translation = {
       Type = "StaticTranslation",
@@ -54,11 +54,11 @@ local HUDFJWSTLine = {
     Start = "2021 DEC 25 12:50:00",
     End = "2024 JAN 22"
   },
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableNodeLine",
     StartNode = HUDFPosition.Identifier,
-    EndNode = jwstTransforms.JWSTPosition.Identifier,
+    EndNode = jwstAsset.JWSTPosition.Identifier,
     Color = { 0.5, 0.5, 0.5 },
     LineWidth = 2
   },

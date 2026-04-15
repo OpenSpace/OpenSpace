@@ -1,11 +1,11 @@
-local transforms = asset.require("../model")
+local model = asset.require("../model")
 local kernels = asset.require("../kernels")
 
 
 
 local SimbioSys_HRIC_FPA = {
   Identifier = "BepiColomboMPO_SIMBIOSYS_HRIC_FPA",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -28,7 +28,7 @@ local SimbioSys_HRIC_FPA = {
 
 local SimbioSys_HRIC_F550 = {
   Identifier = "BepiColomboMPO_SIMBIOSYS_HRIC_F550",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -51,7 +51,7 @@ local SimbioSys_HRIC_F550 = {
 
 local SimbioSys_HRIC_FPAN = {
   Identifier = "BepiColomboMPO_SIMBIOSYS_HRIC_FPAN",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -74,7 +74,7 @@ local SimbioSys_HRIC_FPAN = {
 
 local SimbioSys_HRIC_F750 = {
   Identifier = "BepiColomboMPO_SIMBIOSYS_HRIC_F750",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -97,7 +97,7 @@ local SimbioSys_HRIC_F750 = {
 
 local SimbioSys_HRIC_F880 = {
   Identifier = "BepiColomboMPO_SIMBIOSYS_HRIC_F880",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -120,7 +120,7 @@ local SimbioSys_HRIC_F880 = {
 
 local SimbioSys_STC_L = {
   Identifier = "BepiColomboMPO_SIMBIOSYS_STC_L",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -143,7 +143,7 @@ local SimbioSys_STC_L = {
 
 local SimbioSys_STC_H = {
   Identifier = "BepiColomboMPO_SIMBIOSYS_STC_H",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -166,7 +166,7 @@ local SimbioSys_STC_H = {
 
 local SimbioSys_STC_L_F920 = {
   Identifier = "BepiColomboMPO_SIMBIOSYS_STC_L_F920",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -189,7 +189,7 @@ local SimbioSys_STC_L_F920 = {
 
 local SimbioSys_STC_L_F550 = {
   Identifier = "BepiColomboMPO_SIMBIOSYS_STC_L_F550",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -212,7 +212,7 @@ local SimbioSys_STC_L_F550 = {
 
 local SimbioSys_STC_L_P700 = {
   Identifier = "BepiColomboMPO_SIMBIOSYS_STC_L_P700",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -235,7 +235,7 @@ local SimbioSys_STC_L_P700 = {
 
 local SimbioSys_STC_H_P700 = {
   Identifier = "BepiColomboMPO_SIMBIOSYS_STC_H_P700",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -258,7 +258,7 @@ local SimbioSys_STC_H_P700 = {
 
 local SimbioSys_STC_H_F420 = {
   Identifier = "BepiColomboMPO_SIMBIOSYS_STC_H_F420",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -281,7 +281,7 @@ local SimbioSys_STC_H_F420 = {
 
 local SimbioSys_STC_H_F750 = {
   Identifier = "BepiColomboMPO_SIMBIOSYS_STC_H_F750",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -304,7 +304,7 @@ local SimbioSys_STC_H_F750 = {
 
 local SimbioSys_VIHI = {
   Identifier = "BepiColomboMPO_SIMBIOSYS_VIHI",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,

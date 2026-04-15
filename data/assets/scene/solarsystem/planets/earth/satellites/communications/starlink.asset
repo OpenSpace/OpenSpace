@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
@@ -16,7 +16,7 @@ local omm = asset.resource({
 
 local StarlinkSatellites = {
   Identifier = "StarlinkSatellites",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "starlink.txt",

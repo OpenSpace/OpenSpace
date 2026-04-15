@@ -1,4 +1,4 @@
-local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
@@ -38,13 +38,13 @@ local ExamplePolygonDiffHeights = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExamplePolygon)
-  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExamplePolygonDiffHeights)
+  openspace.globebrowsing.addGeoJson(earthAsset.Earth.Identifier, ExamplePolygon)
+  openspace.globebrowsing.addGeoJson(earthAsset.Earth.Identifier, ExamplePolygonDiffHeights)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, ExamplePolygon)
-  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, ExamplePolygonDiffHeights)
+  openspace.globebrowsing.deleteGeoJson(earthAsset.Earth.Identifier, ExamplePolygon)
+  openspace.globebrowsing.deleteGeoJson(earthAsset.Earth.Identifier, ExamplePolygonDiffHeights)
 end)
 
 asset.export(ExamplePolygon)

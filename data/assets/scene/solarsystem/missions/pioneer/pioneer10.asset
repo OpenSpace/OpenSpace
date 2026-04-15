@@ -1,5 +1,5 @@
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local model = asset.require("scene/solarsystem/missions/pioneer/pioneermodel")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+local model = asset.require("./pioneermodel")
 local coreKernels = asset.require("spice/core")
 
 
@@ -16,7 +16,7 @@ local Pioneer10ID = -23
 
 local Pioneer10 = {
   Identifier = "Pioneer_10",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
@@ -34,7 +34,7 @@ local Pioneer10 = {
 
 local Pioneer10Trail = {
   Identifier = "Pioneer_10Trail",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {

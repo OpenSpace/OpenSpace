@@ -1,4 +1,4 @@
-local mars = asset.require("scene/solarsystem/planets/mars/mars")
+local marsAsset = asset.require("scene/solarsystem/planets/mars/mars")
 
 
 
@@ -15,11 +15,11 @@ local Longitude = 16.1924
 
 local MarsMolecules1km = {
   Identifier = "MarsMolecules1km",
-  Parent = mars.Mars.Identifier,
+  Parent = marsAsset.Mars.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = mars.Mars.Identifier,
+      Globe = marsAsset.Mars.Identifier,
       Latitude = Latitude,
       Longitude = Longitude,
       Altitude = 1000.0

@@ -1,4 +1,4 @@
-local titan = asset.require("scene/solarsystem/planets/saturn/titan/titan")
+local titanAsset = asset.require("scene/solarsystem/planets/saturn/titan/titan")
 
 
 
@@ -36,11 +36,11 @@ local Longitude = 16.1924
 
 local TitanMolecules1km = {
   Identifier = "TitanMolecules1km",
-  Parent = titan.Titan.Identifier,
+  Parent = titanAsset.Titan.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = titan.Titan.Identifier,
+      Globe = titanAsset.Titan.Identifier,
       Latitude = Latitude,
       Longitude = Longitude,
       Altitude = 1000.0
@@ -83,11 +83,11 @@ local TitanMolecules1km = {
 
 local TitanMoleculesMethaneCloud = {
   Identifier = "TitanMoleculesMethaneCloud20km",
-  Parent = titan.Titan.Identifier,
+  Parent = titanAsset.Titan.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = titan.Titan.Identifier,
+      Globe = titanAsset.Titan.Identifier,
       Latitude = Latitude,
       Longitude = Longitude,
       Altitude = 20000.0
@@ -131,11 +131,11 @@ local TitanMoleculesMethaneCloud = {
 
 local TitanMoleculesEthaneCloud = {
   Identifier = "TitanMoleculesEthaneCloud45km",
-  Parent = titan.Titan.Identifier,
+  Parent = titanAsset.Titan.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = titan.Titan.Identifier,
+      Globe = titanAsset.Titan.Identifier,
       Latitude = Latitude,
       Longitude = Longitude,
       Altitude = 45000.0

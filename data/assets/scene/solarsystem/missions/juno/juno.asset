@@ -1,7 +1,7 @@
 asset.require("scene/solarsystem/missions/juno/mission")
 asset.require("scene/solarsystem/planets/jupiter/layers/colorlayers/jupiter_video")
-local transforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
-local sun = asset.require("scene/solarsystem/sun/transforms")
+local jupiterAsset = asset.require("scene/solarsystem/planets/jupiter/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -23,7 +23,7 @@ local RotationMatrix = {
 
 local Juno = {
   Identifier = "Juno",
-  Parent = transforms.JupiterBarycenter.Identifier,
+  Parent = jupiterAsset.JupiterBarycenter.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "2011-08-07T17:15:00",
@@ -46,7 +46,7 @@ local Juno = {
     GeometryFile = model .. "Juno.obj",
     ModelTransform = RotationMatrix,
     LightSources = {
-      sun.LightSource,
+      sunAsset.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
@@ -61,7 +61,7 @@ local Juno = {
 
 local JunoTrail = {
   Identifier = "JunoTrail",
-  Parent = transforms.JupiterBarycenter.Identifier,
+  Parent = jupiterAsset.JupiterBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {

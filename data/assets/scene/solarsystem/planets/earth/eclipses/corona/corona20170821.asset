@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -12,7 +12,7 @@ local videos = asset.resource({
 
 local Plane = {
   Identifier = "CoronaVideoPlane",
-  Parent = transforms.SunIAU.Identifier,
+  Parent = sunAsset.SunIAU.Identifier,
   Transform = {
     Rotation = {
       Type = "StaticRotation",

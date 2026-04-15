@@ -1,4 +1,4 @@
-local globe = asset.require("../../earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
@@ -58,17 +58,17 @@ local LayerLaninaWinter = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerElninoSummer)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerElninoWinter)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerLaninaSummer)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerLaninaWinter)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerElninoSummer)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerElninoWinter)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerLaninaSummer)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerLaninaWinter)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerLaninaWinter)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerLaninaSummer)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerElninoWinter)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerElninoSummer)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerLaninaWinter)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerLaninaSummer)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerElninoWinter)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerElninoSummer)
 end)
 
 asset.export(LayerElninoSummer)

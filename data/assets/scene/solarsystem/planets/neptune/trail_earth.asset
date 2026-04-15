@@ -1,5 +1,4 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
-local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 local coreKernels = asset.require("spice/core")
 local neptuneKernels = asset.require("./kernels095")
 
@@ -7,7 +6,7 @@ local neptuneKernels = asset.require("./kernels095")
 
 local NeptuneTrailEarth = {
   Identifier = "NeptuneTrailEarth",
-  Parent = earthTransforms.EarthBarycenter.Identifier,
+  Parent = earthAsset.EarthBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
     Enabled = false,

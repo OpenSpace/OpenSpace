@@ -1,11 +1,11 @@
-local transforms = asset.require("../model")
+local model = asset.require("../model")
 local kernels = asset.require("../kernels")
 
 
 
 local MGNS = {
   Identifier = "BepiColomboMPO_MGNS",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,

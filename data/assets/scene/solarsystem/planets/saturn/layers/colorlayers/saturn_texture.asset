@@ -1,4 +1,4 @@
-local globe = asset.require("../../saturn")
+local saturnAsset = asset.require("scene/solarsystem/planets/saturn/saturn")
 
 
 
@@ -19,11 +19,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Saturn.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(saturnAsset.Saturn.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Saturn.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(saturnAsset.Saturn.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export("layer", Layer)

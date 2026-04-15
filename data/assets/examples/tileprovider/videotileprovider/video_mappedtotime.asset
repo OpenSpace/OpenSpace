@@ -3,7 +3,7 @@
 -- simulation time. In this case, the video will play from 20:00 to 21:00 on January 29,
 -- 2023 in the simulation.
 
-local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
 -- The video file is here downloaded from a URL. This code returns the path to a folder
 -- where the file is stored after download
@@ -33,9 +33,9 @@ local Layer = {
 }
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(earth.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(earth.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", Layer)
 end)

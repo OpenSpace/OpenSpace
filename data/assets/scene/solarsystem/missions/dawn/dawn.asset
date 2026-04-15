@@ -1,6 +1,5 @@
 asset.require("scene/solarsystem/missions/dawn/mission")
-local transforms = asset.require("scene/solarsystem/sun/transforms")
-local sun = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -22,7 +21,7 @@ local models = asset.resource({
 
 
 local LightSources = {
-  sun.LightSource,
+  sunAsset.LightSource,
   {
     Identifier = "Camera",
     Type = "CameraLightSource",
@@ -32,7 +31,7 @@ local LightSources = {
 
 local DawnPosition = {
   Identifier = "DawnPosition",
-  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
@@ -75,7 +74,7 @@ local Dawn = {
 
 local DawnTrail = {
   Identifier = "DawnTrail",
-  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {

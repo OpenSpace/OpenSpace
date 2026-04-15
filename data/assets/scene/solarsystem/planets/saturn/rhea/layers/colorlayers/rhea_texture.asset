@@ -1,4 +1,4 @@
-local globe = asset.require("../../rhea")
+local rheaAsset = asset.require("scene/solarsystem/planets/saturn/rhea/rhea")
 
 
 
@@ -19,11 +19,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Rhea.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(rheaAsset.Rhea.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Rhea.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(rheaAsset.Rhea.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export("layer", Layer)

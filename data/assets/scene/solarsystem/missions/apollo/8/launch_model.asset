@@ -1,5 +1,5 @@
-local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local sun = asset.require("scene/solarsystem/sun/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -17,7 +17,7 @@ local ApolloSpiceId = -908
 
 local Apollo8Launch = {
   Identifier = "Apollo8Launch",
-  Parent = earth_transforms.EarthIAU.Identifier,
+  Parent = earthAsset.EarthIAU.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "1968 DEC 21",
@@ -56,7 +56,7 @@ local Apollo8LaunchModel = {
     GeometryFile = models .. "ApolloCSM.osmodel",
     ModelScale = 0.0001,
     LightSources = {
-      sun.LightSource
+      sunAsset.LightSource
     },
     PerformShading = true
   },

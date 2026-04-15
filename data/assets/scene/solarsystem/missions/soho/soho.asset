@@ -1,6 +1,6 @@
 local coreKernels = asset.require("spice/core")
 local kernels = asset.require("./kernels")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -18,7 +18,7 @@ local MissionEnd = "2026 MAY 13 23:51:09"
 
 local SohoPosition = {
   Identifier = "SOHO_Position",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
@@ -47,7 +47,7 @@ local Soho = {
     Rotation = {
       Type = "FixedRotation",
       Attached = "SOHO_Model",
-      YAxis = sunTransforms.SunCenter.Identifier,
+      YAxis = sunAsset.SunCenter.Identifier,
       -- The z = 1.0 seems to helps additional stabalization since we don't have CK
       -- kernels
       ZAxis = { 0.0, 1.0, 1.0 },
@@ -58,7 +58,7 @@ local Soho = {
     Type = "RenderableModel",
     GeometryFile = models .. "soho.fbx",
     RotationVector = { 0.0, 270.0, 0.0 },
-    LightSources = { sunTransforms.LightSource },
+    LightSources = { sunAsset.LightSource },
     AmbientIntensity = 0.2,
     SpecularIntensity = 0.0
   },
@@ -71,7 +71,7 @@ local Soho = {
 
 local SohoTrail = {
   Identifier = "SOHO_Trail",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = MissionBegin,

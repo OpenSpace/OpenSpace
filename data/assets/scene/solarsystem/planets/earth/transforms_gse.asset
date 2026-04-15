@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 local coreKernels = asset.require("spice/core")
 
 
@@ -16,7 +16,7 @@ local Frame = {
 
 local GeocentricSolarEcliptic = {
   Identifier = "GeocentricSolarEcliptic",
-  Parent = transforms.EarthCenter.Identifier,
+  Parent = earthAsset.EarthCenter.Identifier,
   Transform = {
     Rotation = {
       Type = "SpiceRotation",

@@ -1,5 +1,5 @@
-local sun = asset.require("scene/solarsystem/sun/transforms")
-local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 
 
@@ -13,11 +13,11 @@ local models = asset.resource({
 
 local Station2Boulder1 = {
   Identifier = "Apollo17Station2Boulder1",
-  Parent = moon.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon.Moon.Identifier,
+      Globe = moonAsset.Moon.Identifier,
       Longitude = -360 + 30.5294692,
       Latitude = 20.098824,
       Altitude = -2442.8,
@@ -33,7 +33,7 @@ local Station2Boulder1 = {
     GeometryFile = models .. "b1-v2.obj",
     RotationVector = { 243.243256, 206.270264, 309.677429 },
     LightSources = {
-      sun.LightSource,
+      sunAsset.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
@@ -51,11 +51,11 @@ local Station2Boulder1 = {
 
 local Station2Boulder2 = {
   Identifier = "Apollo17Station2Boulder2",
-  Parent = moon.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon.Moon.Identifier,
+      Globe = moonAsset.Moon.Identifier,
       Longitude = -360 + 30.5287892,
       Latitude = 20.098240,
       Altitude = -2434.6,
@@ -71,7 +71,7 @@ local Station2Boulder2 = {
     GeometryFile = models .. "b2model.obj",
     RotationVector = { 66.162155, 7.783780, 114.193550 },
     LightSources = {
-      sun.LightSource,
+      sunAsset.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
@@ -89,11 +89,11 @@ local Station2Boulder2 = {
 
 local Station2Boulder3 = {
   Identifier = "Apollo17Station2Boulder3",
-  Parent = moon.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon.Moon.Identifier,
+      Globe = moonAsset.Moon.Identifier,
       Longitude = -360 + 30.5294692,
       Latitude = 20.098610,
       Altitude = -2441.55,
@@ -109,7 +109,7 @@ local Station2Boulder3 = {
     GeometryFile = models .. "b3model.obj",
     RotationVector = { 161.513519, 243.243256, 65.806450 },
     LightSources = {
-      sun.LightSource,
+      sunAsset.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",

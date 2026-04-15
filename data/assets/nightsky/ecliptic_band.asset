@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -18,7 +18,7 @@ local EclipticRotationMatrix = {
 
 local EclipticLine = {
   Identifier = "EclipticLine",
-  Parent = transforms.SolarSystemBarycenter.Name,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -31,11 +31,11 @@ local EclipticLine = {
   },
   Renderable = {
     Type = "RenderableRadialGrid",
+    Enabled = asset.enabled,
     Opacity = 0.8,
     Color = { 0.5, 0.24, 0.24 },
     LineWidth = 4.0,
-    GridSegments = {1 , 1},
-    Enabled = asset.enabled
+    GridSegments = { 1, 1 }
   },
   Tag = { "nightsky_marking" },
   GUI = {
@@ -47,7 +47,7 @@ local EclipticLine = {
 
 local EclipticBand = {
   Identifier = "EclipticBand",
-  Parent = transforms.SolarSystemBarycenter.Name,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
@@ -62,8 +62,7 @@ local EclipticBand = {
     DisableFadeInOut = true,
     Orientation = "Inside",
     Opacity = 0.99,
-    Enabled = asset.enabled,
-    RenderBinMode = "PostDeferredTransparent",
+    RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "nightsky_marking" },
   GUI = {

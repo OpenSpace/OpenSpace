@@ -1,4 +1,4 @@
-local globe = asset.require("../../mercury")
+local mercuryAsset = asset.require("scene/solarsystem/planets/mercury/mercury")
 
 
 
@@ -17,11 +17,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "HeightLayers", Layer)
+  openspace.globebrowsing.addLayer(mercuryAsset.Mercury.Identifier, "HeightLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Mercury.Identifier, "HeightLayers", Layer)
+  openspace.globebrowsing.deleteLayer(mercuryAsset.Mercury.Identifier, "HeightLayers", Layer)
 end)
 
 asset.export("layer", Layer)

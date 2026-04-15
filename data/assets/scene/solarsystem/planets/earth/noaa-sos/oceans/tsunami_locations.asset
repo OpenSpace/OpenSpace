@@ -1,4 +1,4 @@
-local globe = asset.require("../../earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
@@ -73,18 +73,18 @@ local Legend = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerGray)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerNeutral)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerEvents)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerBase)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerGray)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerNeutral)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerEvents)
   openspace.addScreenSpaceRenderable(Legend)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerEvents)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerNeutral)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerGray)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerEvents)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerNeutral)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerGray)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerBase)
   openspace.removeScreenSpaceRenderable(Legend)
 end)
 

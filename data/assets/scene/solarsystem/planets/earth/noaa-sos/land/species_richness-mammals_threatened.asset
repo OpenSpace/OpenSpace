@@ -1,4 +1,4 @@
-local globe = asset.require("../../earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
@@ -50,15 +50,15 @@ local Labels = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer4096)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerWithBackground)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", Layer4096)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerWithBackground)
   openspace.addScreenSpaceRenderable(Labels)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeScreenSpaceRenderable(Labels)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerWithBackground)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer4096)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerWithBackground)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", Layer4096)
 end)
 
 asset.export(Layer4096)

@@ -1,4 +1,4 @@
-local globe = asset.require("../../europa")
+local europaAsset = asset.require("scene/solarsystem/planets/jupiter/europa/europa")
 
 
 
@@ -21,11 +21,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Europa.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(europaAsset.Europa.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Europa.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(europaAsset.Europa.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export("layer", Layer)

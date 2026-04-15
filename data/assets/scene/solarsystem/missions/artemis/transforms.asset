@@ -1,4 +1,4 @@
-local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -6,7 +6,7 @@ local coreKernels = asset.require("spice/core")
 
 local ArtemisPosition = {
   Identifier = "ArtemisPosition",
-  Parent = earthTransforms.EarthCenter.Identifier,
+  Parent = earthAsset.EarthCenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",

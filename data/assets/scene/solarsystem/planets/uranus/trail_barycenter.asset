@@ -1,11 +1,11 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local coreKernels = asset.require("spice/core")
 
 
 
 local UranusBarycenterTrail = {
   Identifier = "UranusBarycenterTrail",
-  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
     Enabled = false,

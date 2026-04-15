@@ -1,5 +1,4 @@
-local transform = asset.require("scene/solarsystem/sun/transforms")
-local sun = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -15,7 +14,7 @@ local modelFolder = asset.resource({
 
 local BepiColombo = {
   Identifier = "BepiColombo",
-  Parent = transform.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
@@ -48,7 +47,7 @@ local Model = {
     GeometryFile = modelFolder .. "bepi_mcs.fbx",
     ModelScale = 0.00075, -- The number has been determined by eyeballing it
     LightSources = {
-      sun.LightSource
+      sunAsset.LightSource
     },
     PerformShading = true,
     AmbientIntensity = 0.075

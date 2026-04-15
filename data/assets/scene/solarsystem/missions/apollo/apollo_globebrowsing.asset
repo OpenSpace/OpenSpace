@@ -1,4 +1,4 @@
-local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 -- This is technically not necessary, but we need to ensure that the default layers load
 -- first before we add the layers from this assets or else the default layers might be
 -- initialized later, causing them to appear **after** these layers
@@ -64,10 +64,10 @@ local DisableApolloSites = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addBlendingLayersFromDirectory(heightmaps, moon.Moon.Identifier)
-  openspace.globebrowsing.addBlendingLayersFromDirectory(basemaps, moon.Moon.Identifier)
-  openspace.globebrowsing.addBlendingLayersFromDirectory(naclighting, moon.Moon.Identifier)
-  openspace.globebrowsing.addBlendingLayersFromDirectory(stations, moon.Moon.Identifier)
+  openspace.globebrowsing.addBlendingLayersFromDirectory(heightmaps, moonAsset.Moon.Identifier)
+  openspace.globebrowsing.addBlendingLayersFromDirectory(basemaps, moonAsset.Moon.Identifier)
+  openspace.globebrowsing.addBlendingLayersFromDirectory(naclighting, moonAsset.Moon.Identifier)
+  openspace.globebrowsing.addBlendingLayersFromDirectory(stations, moonAsset.Moon.Identifier)
 
   openspace.action.registerAction(ToggleKaguyaLayer)
   openspace.action.registerAction(DisableApolloSites)

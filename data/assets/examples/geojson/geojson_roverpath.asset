@@ -1,4 +1,4 @@
-local mars = asset.require("scene/solarsystem/planets/mars/mars")
+local marsAsset = asset.require("scene/solarsystem/planets/mars/mars")
 
 
 
@@ -23,11 +23,11 @@ local ExampleRoverPath = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addGeoJson(mars.Mars.Identifier, ExampleRoverPath)
+  openspace.globebrowsing.addGeoJson(marsAsset.Mars.Identifier, ExampleRoverPath)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteGeoJson(mars.Mars.Identifier, ExampleRoverPath)
+  openspace.globebrowsing.deleteGeoJson(marsAsset.Mars.Identifier, ExampleRoverPath)
 end)
 
 asset.export(ExampleRoverPath)

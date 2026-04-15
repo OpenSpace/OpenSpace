@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 local coreKernels = asset.require("spice/core")
 
 
@@ -15,12 +15,12 @@ local omm = asset.resource({
 
 local Terra = {
   Identifier = "Terra",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   InteractionSphere = 30,
   Transform = {
     Translation = {
       Type = "GPTranslation",
-      Observer = transforms.EarthInertial.Identifier,
+      Observer = earthAsset.EarthInertial.Identifier,
       File = omm .. "Terra.txt",
       Format = "OMM"
     },
@@ -39,12 +39,13 @@ local Terra = {
 
 local TerraTrail = {
   Identifier = "Terra_trail",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
+    Enabled = false,
     Translation = {
       Type = "GPTranslation",
-      Observer = transforms.EarthInertial.Identifier,
+      Observer = earthAsset.EarthInertial.Identifier,
       File = omm .. "Terra.txt",
       Format = "OMM",
       RenderBinMode = "PostDeferredTransparent"

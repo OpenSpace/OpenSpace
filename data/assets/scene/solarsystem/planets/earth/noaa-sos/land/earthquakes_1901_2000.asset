@@ -1,4 +1,4 @@
-local globe = asset.require("../../earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
@@ -78,21 +78,21 @@ local Legend = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerAllquakes)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerQuakeBasemap)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerPlateBoundaries)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerQuakesGte6p5)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerQuakesGte8)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerAllquakes)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerQuakeBasemap)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerPlateBoundaries)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerQuakesGte6p5)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerQuakesGte8)
   openspace.addScreenSpaceRenderable(Legend)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeScreenSpaceRenderable(Legend)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerQuakeBasemap)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerQuakesGte8)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerQuakesGte6p5)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerPlateBoundaries)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerAllquakes)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerQuakeBasemap)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerQuakesGte8)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerQuakesGte6p5)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerPlateBoundaries)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerAllquakes)
 end)
 
 asset.export(LayerAllquakes)

@@ -1,4 +1,4 @@
-local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 local data = asset.require("../annular_data")
 
 
@@ -17,11 +17,11 @@ local Layer = {
 
 asset.onInitialize(function()
   -- @TODO:  The file contains a non-simple geometry which is currently not supported
-  -- openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Layer)
+  -- openspace.globebrowsing.addGeoJson(earthAsset.Earth.Identifier, Layer)
 end)
 
 asset.onDeinitialize(function()
-  -- openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Layer)
+  -- openspace.globebrowsing.deleteGeoJson(earthAsset.Earth.Identifier, Layer)
 end)
 
 

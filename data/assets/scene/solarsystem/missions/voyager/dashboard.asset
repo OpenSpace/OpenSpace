@@ -1,6 +1,6 @@
 local voyager1 = asset.require("./voyager1")
 local voyager2 = asset.require("./voyager2")
-local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 local DistanceVoyager1 = {
@@ -10,7 +10,7 @@ local DistanceVoyager1 = {
   SourceType = "Node",
   SourceNodeIdentifier = voyager1.Voyager_1.Identifier,
   DestinationType = "Node",
-  DestinationNodeIdentifier = earth.Earth.Identifier,
+  DestinationNodeIdentifier = earthAsset.Earth.Identifier,
   Enabled = asset.enabled
 }
 
@@ -21,7 +21,7 @@ local DistanceVoyager2 = {
   SourceType = "Node",
   SourceNodeIdentifier = voyager2.Voyager_2.Identifier,
   DestinationType = "Node",
-  DestinationNodeIdentifier = earth.Earth.Identifier,
+  DestinationNodeIdentifier = earthAsset.Earth.Identifier,
   Enabled = asset.enabled
 }
 

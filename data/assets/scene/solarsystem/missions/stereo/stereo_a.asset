@@ -1,6 +1,6 @@
 local coreKernels = asset.require("spice/core")
 local kernels = asset.require("./kernels")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -18,7 +18,7 @@ local MissionEnd = "2026 FEB 11 19:51:09"
 
 local StereoPosition = {
   Identifier = "STEREO_A_Position",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
@@ -47,7 +47,7 @@ local StereoA = {
     Rotation = {
       Type = "FixedRotation",
       Attached = "STEREO_A_Model",
-      YAxis = sunTransforms.SunCenter.Identifier,
+      YAxis = sunAsset.SunCenter.Identifier,
       ZAxis = { 0.0, 1.0, 0.0 },
       ZAxisOrthogonal = true
     }
@@ -57,7 +57,7 @@ local StereoA = {
     GeometryFile = models .. "STEREO.fbx",
     -- Arbitrarily chose 260 degree as it results in slightly better visuals when rolling
     RotationVector = { 0.0, 260.0, 0.0 },
-    LightSources = { sunTransforms.LightSource },
+    LightSources = { sunAsset.LightSource },
     AmbientIntensity = 0.2,
     SpecularIntensity = 0.0
   },
@@ -70,7 +70,7 @@ local StereoA = {
 
 local StereoTrail = {
   Identifier = "STEREO_A_Trail",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = MissionBegin,

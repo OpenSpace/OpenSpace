@@ -5,7 +5,7 @@
 -- the Solar System barycenter. Some appearance related properties are also changed to
 -- customize the look of the arrow, but default values are used for its size.
 
-local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local Node = {
@@ -15,7 +15,7 @@ local Node = {
   Renderable = {
     Type = "RenderableNodeArrow",
     StartNode = sunTransforms.SolarSystemBarycenter.Identifier,
-    EndNode = earth.Earth.Identifier,
+    EndNode = earthAsset.Earth.Identifier,
     -- Point to start node instead of end node
     Invert = true,
     -- Give the arrow a custom color (here a dark red)

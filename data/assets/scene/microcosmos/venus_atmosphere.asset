@@ -1,4 +1,4 @@
-local venus = asset.require("scene/solarsystem/planets/venus/venus")
+local venusAsset = asset.require("scene/solarsystem/planets/venus/venus")
 
 
 
@@ -36,11 +36,11 @@ local Longitude = 16.1924
 
 local VenusMolecules10km = {
   Identifier = "VenusMolecules10km",
-  Parent = venus.Venus.Identifier,
+  Parent = venusAsset.Venus.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = venus.Venus.Identifier,
+      Globe = venusAsset.Venus.Identifier,
       Latitude = Latitude,
       Longitude = Longitude,
       Altitude = 10000.0
@@ -78,11 +78,11 @@ local VenusMolecules10km = {
 
 local VenusMolecules50km = {
   Identifier = "VenusMolecules50km",
-  Parent = venus.Venus.Identifier,
+  Parent = venusAsset.Venus.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = venus.Venus.Identifier,
+      Globe = venusAsset.Venus.Identifier,
       Latitude = Latitude,
       Longitude = Longitude,
       Altitude = 30000.0
@@ -120,11 +120,11 @@ local VenusMolecules50km = {
 
 local VenusMolecules50kmCloud = {
   Identifier = "VenusMolecules50kmCloud",
-  Parent = venus.Venus.Identifier,
+  Parent = venusAsset.Venus.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = venus.Venus.Identifier,
+      Globe = venusAsset.Venus.Identifier,
       Latitude = Latitude,
       Longitude = Longitude,
       Altitude = 50000.0

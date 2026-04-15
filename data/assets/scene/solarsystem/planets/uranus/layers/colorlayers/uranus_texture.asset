@@ -1,4 +1,4 @@
-local globe = asset.require("../../uranus")
+local uranusAsset = asset.require("scene/solarsystem/planets/uranus/uranus")
 
 
 
@@ -19,11 +19,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Uranus.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(uranusAsset.Uranus.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Uranus.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(uranusAsset.Uranus.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export("layer", Layer)

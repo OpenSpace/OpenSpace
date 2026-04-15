@@ -1,4 +1,4 @@
-local globe = asset.require("../../earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
@@ -84,11 +84,11 @@ local Label1 = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerCombined)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerExtent)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerGain)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerLoss)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerMap)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerCombined)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerExtent)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerGain)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerLoss)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerMap)
   openspace.addScreenSpaceRenderable(Label)
   openspace.addScreenSpaceRenderable(Label1)
 end)
@@ -96,11 +96,11 @@ end)
 asset.onDeinitialize(function()
   openspace.removeScreenSpaceRenderable(Label1)
   openspace.removeScreenSpaceRenderable(Label)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerMap)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerLoss)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerGain)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerExtent)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerCombined)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerMap)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerLoss)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerGain)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerExtent)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerCombined)
 end)
 
 asset.export(LayerCombined)

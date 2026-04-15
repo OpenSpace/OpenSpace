@@ -1,4 +1,4 @@
-local globe = asset.require("../../earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
@@ -69,13 +69,13 @@ asset.onInitialize(function()
     openspace.unzipFile(syncedDirectory .. "sat-4.zip", satDestination, true)
   end
 
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerNames)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerSat)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerNames)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerSat)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerSat)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerNames)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerSat)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerNames)
 end)
 
 asset.export(LayerNames)

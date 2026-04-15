@@ -1,4 +1,4 @@
-local sun = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
 
 
@@ -21,7 +21,7 @@ local ArtemisModel = {
       Attached = "ArtemisModel",
       XAxis = { 1.0, 0.0, 0.0 },
       XAxisOrthogonal = true,
-      YAxis = sun.SunCenter.Identifier,
+      YAxis = sunAsset.SunCenter.Identifier,
       YAxisInvert = true
     }
   },
@@ -29,7 +29,7 @@ local ArtemisModel = {
     Type = "RenderableModel",
     GeometryFile = models .. "artemis.glb",
     LightSources = {
-      sun.LightSource
+      sunAsset.LightSource
     },
     AmbientIntensity = 0.05
   },

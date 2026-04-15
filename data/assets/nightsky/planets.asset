@@ -1,8 +1,8 @@
-local mercury = asset.require("scene/solarsystem/planets/mercury/transforms")
-local venus = asset.require("scene/solarsystem/planets/venus/transforms")
-local mars = asset.require("scene/solarsystem/planets/mars/transforms")
-local jupiter = asset.require("scene/solarsystem/planets/jupiter/transforms")
-local saturn = asset.require("scene/solarsystem/planets/saturn/transforms")
+local mercuryAsset = asset.require("scene/solarsystem/planets/mercury/transforms")
+local venusAsset = asset.require("scene/solarsystem/planets/venus/transforms")
+local marsAsset = asset.require("scene/solarsystem/planets/mars/transforms")
+local jupiterAsset = asset.require("scene/solarsystem/planets/jupiter/transforms")
+local saturnAsset = asset.require("scene/solarsystem/planets/saturn/transforms")
 
 
 
@@ -23,7 +23,7 @@ local csv = asset.resource({
 
 local Mercury = {
   Identifier = "NightSkyMercury",
-  Parent = mercury.MercuryBarycenter.Identifier,
+  Parent = mercuryAsset.MercuryBarycenter.Identifier,
   Renderable = {
     Type = "RenderablePointCloud",
     File = csv .. "zeropointdata.csv",
@@ -56,7 +56,7 @@ local Mercury = {
 
 local Venus = {
   Identifier = "NightSkyVenus",
-  Parent = venus.VenusBarycenter.Identifier,
+  Parent = venusAsset.VenusBarycenter.Identifier,
   Renderable = {
     Type = "RenderablePointCloud",
     File = csv .. "zeropointdata.csv",
@@ -89,7 +89,7 @@ local Venus = {
 
 local Mars = {
   Identifier = "NightSkyMars",
-  Parent = mars.MarsBarycenter.Identifier,
+  Parent = marsAsset.MarsBarycenter.Identifier,
   Renderable = {
     Type = "RenderablePointCloud",
     File = csv .. "zeropointdata.csv",
@@ -120,7 +120,7 @@ local Mars = {
 
 local Jupiter = {
   Identifier = "NightSkyJupiter",
-  Parent = jupiter.JupiterBarycenter.Identifier,
+  Parent = jupiterAsset.JupiterBarycenter.Identifier,
   Renderable = {
     Type = "RenderablePointCloud",
     File = csv .. "zeropointdata.csv",
@@ -153,7 +153,7 @@ local Jupiter = {
 
 local Saturn = {
   Identifier = "NightSkySaturn",
-  Parent = saturn.SaturnBarycenter.Identifier,
+  Parent = saturnAsset.SaturnBarycenter.Identifier,
   Renderable = {
     Type = "RenderablePointCloud",
     File = csv .. "zeropointdata.csv",

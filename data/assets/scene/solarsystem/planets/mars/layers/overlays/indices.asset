@@ -1,4 +1,4 @@
-local globe = asset.require("../../mars")
+local marsAsset = asset.require("scene/solarsystem/planets/mars/mars")
 
 
 
@@ -10,11 +10,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Mars.Identifier, "Overlays", Layer)
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "Overlays", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Mars.Identifier, "Overlays", Layer)
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "Overlays", Layer)
 end)
 
 asset.export("layer", Layer)

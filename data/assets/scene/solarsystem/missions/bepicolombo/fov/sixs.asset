@@ -1,11 +1,11 @@
-local transforms = asset.require("../model")
+local model = asset.require("../model")
 local kernels = asset.require("../kernels")
 
 
 
 local SixsX1 = {
   Identifier = "BepiColomboMPO_SixsX1",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -28,7 +28,7 @@ local SixsX1 = {
 
 local SixsX2 = {
   Identifier = "BepiColomboMPO_SixsX2",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -51,7 +51,7 @@ local SixsX2 = {
 
 local SixsX3 = {
   Identifier = "BepiColomboMPO_SixsX3",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,

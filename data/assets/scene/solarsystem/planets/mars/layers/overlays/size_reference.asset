@@ -1,4 +1,4 @@
-local globe = asset.require("../../mars")
+local marsAsset = asset.require("scene/solarsystem/planets/mars/mars")
 
 
 
@@ -7,16 +7,16 @@ local Layer = {
   Name = "Size Reference",
   Enabled = asset.enabled,
   Type = "SizeReferenceTileProvider",
-  Radii = globe.Mars.Renderable.Radii
+  Radii = marsAsset.Mars.Renderable.Radii
 }
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Mars.Identifier, "Overlays", Layer)
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "Overlays", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Mars.Identifier, "Overlays", Layer)
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "Overlays", Layer)
 end)
 
 asset.export("layer", Layer)

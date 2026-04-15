@@ -1,4 +1,4 @@
-local globe = asset.require("../../earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
@@ -41,15 +41,15 @@ local LayerLabels = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "Overlays", LayerCombined)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "Overlays", LayerCurrents)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "Overlays", LayerLabels)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "Overlays", LayerCombined)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "Overlays", LayerCurrents)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "Overlays", LayerLabels)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "Overlays", LayerLabels)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "Overlays", LayerCurrents)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "Overlays", LayerCombined)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "Overlays", LayerLabels)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "Overlays", LayerCurrents)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "Overlays", LayerCombined)
 end)
 
 asset.export(LayerCombined)

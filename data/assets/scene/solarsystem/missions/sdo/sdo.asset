@@ -1,7 +1,7 @@
 local coreKernels = asset.require("spice/core")
 local kernels = asset.require("./kernels")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local earthTransform = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
@@ -22,7 +22,7 @@ local MissionEnd = "2026 JUN 12 07:11:59"
 -- will still be off and wobble as time progress
 local SdoPosition = {
   Identifier = "SDO_Position",
-  Parent = earthTransform.EarthBarycenter.Identifier,
+  Parent = earthAsset.EarthBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
@@ -51,7 +51,7 @@ local Sdo = {
     Rotation = {
       Type = "FixedRotation",
       Attached = "SDO_Model",
-      YAxis = sunTransforms.SunCenter.Identifier,
+      YAxis = sunAsset.SunCenter.Identifier,
       ZAxis = { 0.0, 0.0, 1.0 },
       ZAxisOrthogonal = true
     }
@@ -60,7 +60,7 @@ local Sdo = {
     Type = "RenderableModel",
     GeometryFile = models .. "sdo.glb",
     RotationVector = { 90.0, 0.0, 0.0 },
-    LightSources = { sunTransforms.LightSource },
+    LightSources = { sunAsset.LightSource },
     AmbientIntensity = 0.2,
     SpecularIntensity = 0.0
   },
@@ -73,7 +73,7 @@ local Sdo = {
 
 local SdoTrail = {
   Identifier = "SDO_Trail",
-  Parent = earthTransform.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = MissionBegin,

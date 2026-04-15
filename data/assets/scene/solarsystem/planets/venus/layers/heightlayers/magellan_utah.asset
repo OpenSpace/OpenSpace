@@ -1,4 +1,4 @@
-local globe = asset.require("../../venus")
+local venusAsset = asset.require("scene/solarsystem/planets/venus/venus")
 
 
 
@@ -26,11 +26,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Venus.Identifier, "HeightLayers", Layer)
+  openspace.globebrowsing.addLayer(venusAsset.Venus.Identifier, "HeightLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Venus.Identifier, "HeightLayers", Layer)
+  openspace.globebrowsing.deleteLayer(venusAsset.Venus.Identifier, "HeightLayers", Layer)
 end)
 
 asset.export("layer", Layer)

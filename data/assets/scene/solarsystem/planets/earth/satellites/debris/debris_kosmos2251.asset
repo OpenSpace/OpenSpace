@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
@@ -14,7 +14,7 @@ local omm = asset.resource({
 
 local DebrisCosmos = {
   Identifier = "DebrisCosmos-2251",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "cosmos-2251-debris.txt",

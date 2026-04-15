@@ -1,9 +1,9 @@
-local sun = asset.require("scene/solarsystem/sun/transforms")
-local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 
 
-local lem_model = asset.resource({
+local lemModel = asset.resource({
   Name = "Apollo Lem Models",
   Type = "HttpSynchronization",
   Identifier = "apollo_lem_model",
@@ -13,11 +13,11 @@ local lem_model = asset.resource({
 
 local Apollo11Lem = {
   Identifier = "Apollo11Lem",
-  Parent = moon.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon.Moon.Identifier,
+      Globe = moonAsset.Moon.Identifier,
       Longitude = 23.47306,
       Latitude = 0.67402,
       Altitude = -1927.65,
@@ -25,7 +25,7 @@ local Apollo11Lem = {
     },
     Rotation = {
       Type = "GlobeRotation",
-      Globe = moon.Moon.Identifier,
+      Globe = moonAsset.Moon.Identifier,
       Longitude = 23.47306,
       Latitude = 0.67402
     }
@@ -47,10 +47,10 @@ local Apollo11LemModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = lem_model .. "LM-2_ver2clean.obj",
+    GeometryFile = lemModel .. "LM-2_ver2clean.obj",
     RotationVector = { -90.0, 283.86999, 0 },
     LightSources = {
-      sun.LightSource,
+      sunAsset.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",

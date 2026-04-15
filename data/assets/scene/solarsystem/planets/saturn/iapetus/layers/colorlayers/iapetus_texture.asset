@@ -1,4 +1,4 @@
-local globe = asset.require("../../iapetus")
+local iapetusAsset = asset.require("scene/solarsystem/planets/saturn/iapetus/iapetus")
 
 
 
@@ -19,11 +19,11 @@ local layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Iapetus.Identifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(iapetusAsset.Iapetus.Identifier, "ColorLayers", layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Iapetus.Identifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(iapetusAsset.Iapetus.Identifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)

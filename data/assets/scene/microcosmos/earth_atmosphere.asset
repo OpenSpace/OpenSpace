@@ -1,4 +1,4 @@
-local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
@@ -30,11 +30,11 @@ local Longitude = 16.1924
 -- Troposphere
 local EarthMoleculesTroposphere = {
   Identifier = "EarthMoleculesTroposphere",
-  Parent = earth.Earth.Identifier,
+  Parent = earthAsset.Earth.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = earth.Earth.Identifier,
+      Globe = earthAsset.Earth.Identifier,
       Latitude = Latitude,
       Longitude = Longitude,
       Altitude = 10000.0
@@ -80,11 +80,11 @@ local EarthMoleculesTroposphere = {
 -- Thermosphere
 local EarthMoleculesThermosphere = {
   Identifier = "EarthMoleculesThermosphere",
-  Parent = earth.Earth.Identifier,
+  Parent = earthAsset.Earth.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = earth.Earth.Identifier,
+      Globe = earthAsset.Earth.Identifier,
       Latitude = Latitude,
       Longitude = Longitude,
       Altitude = 100000.0
