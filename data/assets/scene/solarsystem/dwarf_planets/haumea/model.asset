@@ -1,4 +1,4 @@
-local sun = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
 
 
@@ -11,9 +11,9 @@ local modelFolder = asset.resource({
 })
 
 
-local Planet = {
+local HaumeaModel = {
   Identifier = "HaumeaModel",
-  Parent = transforms.Position.Identifier,
+  Parent = transforms.HaumeaPosition.Identifier,
   Transform = {
     Rotation = {
       Type = "ConstantRotation",
@@ -28,7 +28,7 @@ local Planet = {
     AmbientIntensity = 0.0,
     ModelScale = "Kilometer",
     LightSources = {
-      sun.LightSource
+      sunAsset.LightSource
     }
   },
   GUI = {
@@ -41,14 +41,14 @@ local Planet = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Planet)
+  openspace.addSceneGraphNode(HaumeaModel)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Planet)
+  openspace.removeSceneGraphNode(HaumeaModel)
 end)
 
-asset.export("Planet", Planet)
+asset.export(HaumeaModel)
 
 
 
