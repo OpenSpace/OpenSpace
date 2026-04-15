@@ -1,4 +1,4 @@
-asset.require("./layers/colorlayers/cassini_iss_global_mosaic_4km_local", true)
+asset.require("./colorlayers/cassini_iss_global_mosaic_4km_local", true)
 
 
 

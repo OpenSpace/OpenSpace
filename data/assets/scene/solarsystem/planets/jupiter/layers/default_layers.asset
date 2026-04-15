@@ -1,4 +1,4 @@
-asset.require("./layers/colorlayers/jupiter_juno_cassini", true)
+asset.require("./colorlayers/jupiter_juno_cassini", true)
 
 
 

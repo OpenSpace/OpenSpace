@@ -1,7 +1,7 @@
-asset.require("./layers/base_layers", true)
-asset.require("./layers/utah_layers", true)
-asset.require("./layers/sweden_layers", false)
-asset.require("./layers/newyork_layers", false)
+asset.require("./base_layers", true)
+asset.require("./utah_layers", true)
+asset.require("./sweden_layers", false)
+asset.require("./newyork_layers", false)
 
 
 

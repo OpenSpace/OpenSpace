@@ -1,4 +1,4 @@
-asset.require("./layers/colorlayers/greyscale_usgs", true)
+asset.require("./colorlayers/greyscale_usgs", true)
 
 
 

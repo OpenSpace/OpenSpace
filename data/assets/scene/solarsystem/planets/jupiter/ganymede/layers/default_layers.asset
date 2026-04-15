@@ -1,4 +1,4 @@
-asset.require("./layers/colorlayers/ganymede_texture", true)
+asset.require("./colorlayers/ganymede_texture", true)
 
 
 

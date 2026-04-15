@@ -1,4 +1,4 @@
-asset.require("./layers/colorlayers/callisto_texture", true)
+asset.require("./colorlayers/callisto_texture", true)
 
 
 

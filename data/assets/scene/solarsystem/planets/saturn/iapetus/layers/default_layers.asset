@@ -1,4 +1,4 @@
-asset.require("./layers/colorlayers/iapetus_texture", true)
+asset.require("./colorlayers/iapetus_texture", true)
 
 
 

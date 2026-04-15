@@ -1,4 +1,4 @@
-asset.require("./layers/colorlayers/io_texture", true)
+asset.require("./colorlayers/io_texture", true)
 
 
 

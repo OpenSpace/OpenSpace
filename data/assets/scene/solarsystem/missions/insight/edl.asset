@@ -1,5 +1,5 @@
 asset.require("./actions")
-asset.require("scene/solarsystem/planets/mars/default_layers")
+asset.require("scene/solarsystem/planets/mars/layers/default_layers")
 local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local marsAsset = asset.require("scene/solarsystem/planets/mars/globe")
 local marsKernels = asset.require("scene/solarsystem/planets/mars/kernels")

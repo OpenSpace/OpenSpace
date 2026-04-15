@@ -1,4 +1,4 @@
-asset.require("./layers/colorlayers/mimas_texture", true)
+asset.require("./colorlayers/mimas_texture", true)
 
 
 

@@ -1,4 +1,4 @@
-asset.require("./layers/colorlayers/dione_texture", true)
+asset.require("./colorlayers/dione_texture", true)
 
 
 

@@ -1,4 +1,4 @@
-asset.require("./layers/colorlayers/uranus_texture", true)
+asset.require("./colorlayers/uranus_texture", true)
 
 
 

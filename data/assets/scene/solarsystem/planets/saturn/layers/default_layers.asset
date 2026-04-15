@@ -1,4 +1,4 @@
-asset.require("./layers/colorlayers/saturn_texture", true)
+asset.require("./colorlayers/saturn_texture", true)
 
 
 

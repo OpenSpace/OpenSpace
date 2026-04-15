@@ -1,4 +1,4 @@
-asset.require("./layers/colorlayers/neptune_texture", true)
+asset.require("./colorlayers/neptune_texture", true)
 
 
 
