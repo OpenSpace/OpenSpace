@@ -1,0 +1,49 @@
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local TethysPosition = {
+  Identifier = "TethysPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Tethys,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Tethys,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "Tethys Position",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Tethys",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(TethysPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TethysPosition)
+end)
+
+asset.export(TethysPosition)
+
+
+
+asset.meta = {
+  Name = "Tethys Position",
+  Description = "Tethys position",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,4 +1,4 @@
-local enceladusAsset = asset.require("scene/solarsystem/planets/saturn/enceladus/enceladus")
+local enceladusAsset = asset.require("scene/solarsystem/planets/saturn/enceladus/globe")
 
 
 

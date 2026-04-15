@@ -1,0 +1,46 @@
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local HyperionPosition = {
+  Identifier = "HyperionPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Hyperion,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+    -- The IAU report does not give an orientation model for Hyperion.
+    -- Hyperion's rotation is chaotic and not predictable for long periods.
+  },
+  GUI = {
+    Name = "Hyperion Position",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Hyperion",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(HyperionPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(HyperionPosition)
+end)
+
+asset.export(HyperionPosition)
+
+
+
+asset.meta = {
+  Name = "Hyperion Position",
+  Description = "Hyperion position",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
