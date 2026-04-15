@@ -3,7 +3,7 @@
 -- parent node (Earth) to the target node (Jupiter). The travel speed is here set to 1
 -- light-hour per second.
 
-local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 local jupiterAsset = asset.require("scene/solarsystem/planets/jupiter/jupiter")
 
 local Node = {

@@ -3,7 +3,7 @@
 -- light from the parent node (Earth) to the target node (the Moon). By default, the
 -- length of the line is set to match the distance traveled over 1 second.
 
-local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 local Node = {

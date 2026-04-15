@@ -1,156 +1,17 @@
-local transforms = asset.require("./transforms")
-
-
-
-local labelsPath = asset.resource({
-  Name = "Earth Labels",
-  Type = "HttpSynchronization",
-  Identifier = "earth_labels",
-  Version = 1
-})
-
-
--- local EarthEllipsoid = { 6378137.0, 6378137.0, 6356752.314245 }
-local EarthEllipsoid = { 6378137.0, 6378137.0, 6378137.0 }
-
-local Earth = {
-  Identifier = "Earth",
-  Parent = transforms.EarthIAU.Identifier,
-  Renderable = {
-    Type = "RenderableGlobe",
-    Radii = EarthEllipsoid,
-    PerformShading = false,
-    ShadowGroup = {
-      Sources = {
-        { Name = "Sun", Radius = 696300000 },
-      },
-      Casters = {
-        { Name = "Moon", Radius = 1737000 },
-      }
-    },
-    Labels = {
-      Enabled = false,
-      FileName = labelsPath .. "Earth.labels",
-      AlignmentOption = "Horizontally", -- or Circularly
-      FontSize = 20.0,
-      Size = 5.0,
-      FadeInEnabled = true,
-      FadeOutEnabled = true,
-      FadeDistances = { 10000.0, 300000.0 },
-      DistanceEPS = 1500000.0,
-      Color = { 1.0, 0.0, 0.0 }
-    }
-  },
-  Tag = { "planet_solarSystem", "planet_terrestrial" },
-  GUI = {
-    Name = "Earth",
-    Path = "/Solar System/Planets/Earth",
-    Description = "Third rock from the Sun"
-  }
-}
-
-local EarthLabel = {
-  Identifier = "EarthLabel",
-  Parent = Earth.Identifier,
-  Renderable = {
-    Type = "RenderableLabel",
-    Enabled = false,
-    Text = "Earth",
-    FontSize = 70.0,
-    Size = 8.50,
-    MinMaxSize = { 1, 50 },
-    OrientationOption = "Camera View Direction",
-    BlendMode = "Additive",
-    EnableFading = true,
-    FadeUnit = "au",
-    FadeDistances = { 1.5, 30.0 },
-    FadeWidths = { 1.0, 40.0 }
-  },
-  Tag = { "solarsystem_labels" },
-  GUI = {
-    Name = "Earth Label",
-    Path = "/Solar System/Planets/Earth",
-    Description = "Main label for Earth",
-    Focusable = false
-  }
-}
-
-local FocusEarth = {
-  Identifier = "os.solarsystem.FocusEarth",
-  Name = "Focus on Earth",
-  Command = [[
-    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "")
-    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth")
-    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
-  ]],
-  Documentation = "Set camera focus on the Earth",
-  GuiPath = "/Solar System/Earth",
-  IsLocal = false
-}
-
-local ToggleSatelliteTrails = {
-  Identifier = "os.solarsystem.ToggleSatelliteTrails",
-  Name = "Toggle satellite trails",
-  Command = [[openspace.toggleFade("{earth_satellites~space_stations}.Renderable")]],
-  Documentation = [[
-    Toggle trails on or off for the satellites around Earth (excluding space stations)
-  ]],
-  GuiPath = "/Solar System/Earth",
-  IsLocal = false
-}
-
-local ToggleSpaceStations = {
-  Identifier = "os.solarsystem.ToggleSpaceStations",
-  Name = "Toggle space stations",
-  Command = [[openspace.toggleFade("{space_stations}.Renderable")]],
-  Documentation = [[
-    Toggle visiblity of the space stations around Earth (including their trail).
-  ]],
-  GuiPath = "/Solar System/Earth",
-  IsLocal = false
-}
-
-local ToggleSpaceStationTrails = {
-  Identifier = "os.solarsystem.ToggleSpaceStationTrails",
-  Name = "Toggle space station trails",
-  Command = [[openspace.toggleFade("{space_stations&trails}.Renderable")]],
-  Documentation = [[
-    Toggle visiblity of the trails for the space stations around Earth.
-  ]],
-  GuiPath = "/Solar System/Earth",
-  IsLocal = false
-}
-
-
-asset.onInitialize(function()
-  openspace.addSceneGraphNode(Earth)
-  openspace.addSceneGraphNode(EarthLabel)
-
-  openspace.action.registerAction(FocusEarth)
-  openspace.action.registerAction(ToggleSatelliteTrails)
-  openspace.action.registerAction(ToggleSpaceStations)
-  openspace.action.registerAction(ToggleSpaceStationTrails)
-end)
-
-asset.onDeinitialize(function()
-  openspace.action.removeAction(ToggleSpaceStationTrails)
-  openspace.action.removeAction(ToggleSpaceStations)
-  openspace.action.removeAction(ToggleSatelliteTrails)
-  openspace.action.removeAction(FocusEarth)
-
-  openspace.removeSceneGraphNode(EarthLabel)
-  openspace.removeSceneGraphNode(Earth)
-end)
-
-asset.export(Earth)
-asset.export(EarthLabel)
+asset.require("./globe")
+asset.require("./actions")
+asset.require("./trail")
+asset.require("./atmosphere")
+asset.require("./markers")
+asset.require("./label")
+asset.require("./moon/moon")
 
 
 
 asset.meta = {
   Name = "Earth",
-  Description = "Earth is a special planet with special needs",
+  Description = "Earth globe, trail, and label",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

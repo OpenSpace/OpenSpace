@@ -1,4 +1,4 @@
-local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 
 
 local Name = "Temperature Anomaly: (NASA) - 1884 - 2012"

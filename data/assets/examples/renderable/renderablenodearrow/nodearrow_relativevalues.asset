@@ -7,7 +7,7 @@
 -- that is suitable for the scene graph nodes they refer to. Here it is set based on
 -- the size of the start node, i.e. Earth.
 
-local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 local Node = {
