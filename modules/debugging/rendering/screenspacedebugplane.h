@@ -35,12 +35,12 @@ class ScreenSpaceDebugPlane : public ScreenSpaceRenderable {
 public:
     explicit ScreenSpaceDebugPlane(const ghoul::Dictionary& dictionary);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
-    properties::IntProperty _texture;
+    IntProperty _texture;
 };
 
 } // namespace openspace

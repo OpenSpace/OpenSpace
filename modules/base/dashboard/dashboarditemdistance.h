@@ -43,21 +43,21 @@ public:
 
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     struct Component {
-        properties::OptionProperty type;
-        properties::StringProperty nodeIdentifier;
+        OptionProperty type;
+        StringProperty nodeIdentifier;
         SceneGraphNode* node;
     };
 
     std::pair<glm::dvec3, std::string> positionAndLabel(Component& mainComp,
         Component& otherComp) const;
 
-    properties::BoolProperty _doSimplification;
-    properties::OptionProperty _requestedUnit;
-    properties::StringProperty _formatString;
+    BoolProperty _doSimplification;
+    OptionProperty _requestedUnit;
+    StringProperty _formatString;
 
     Component _source;
     Component _destination;

@@ -33,23 +33,23 @@
 namespace {
     struct [[codegen::Dictionary(State)]] Parameters {
         // A string that will be used to identify the state. Cannot be the same as
-        // any other state in the machine
+        // any other state in the machine.
         std::string identifier;
 
         // A string containing a Lua script that will be executed when the state
-        // is entered, i.e on a transition from another state
+        // is entered, i.e on a transition from another state.
         std::optional<std::string> enter;
 
         // A string containing a Lua script that will be executed when the state
-        // is exited, i.e on a transition to another state
+        // is exited, i.e on a transition to another state.
         std::optional<std::string> exit;
     };
-#include "state_codegen.cpp"
 } // namespace
+#include "state_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation State::Documentation() {
+Documentation State::Documentation() {
     return codegen::doc<Parameters>("statemachine_state");
 }
 
@@ -57,8 +57,8 @@ State::State(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _name = p.identifier;
-    _enter = p.enter.value_or("");
-    _exit = p.exit.value_or("");
+    _enter = p.enter.value_or(_enter);
+    _exit = p.exit.value_or(_exit);
 }
 
 void State::enter() const {

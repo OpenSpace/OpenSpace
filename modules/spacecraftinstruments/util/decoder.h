@@ -48,6 +48,6 @@ protected:
     Decoder() = default;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___DECODER___H__

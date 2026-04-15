@@ -37,29 +37,31 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
         "Sets the URL of the texture that is displayed on this screen space plane. If "
         "this value is changed, the image at the new path will automatically be loaded "
         "and displayed.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    // A `RenderablePlaneImageOnline` creates a textured 3D plane, where the texture image
-    // is loaded from the internet though a web URL.
+    // Creates a textured 3D plane, where the texture image is loaded from the internet
+    // through a web URL.
     struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];
     };
-#include "renderableplaneimageonline_codegen.cpp"
 } // namespace
+#include "renderableplaneimageonline_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderablePlaneImageOnline::Documentation() {
+Documentation RenderablePlaneImageOnline::Documentation() {
     return codegen::doc<Parameters>(
-        "base_renderable_plane_image_online",
+        "base_renderable_planeimageonline",
         RenderablePlane::Documentation()
     );
 }
@@ -140,7 +142,7 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
         }
 
         try {
-            _texture = ghoul::io::TextureReader::ref().loadTexture(
+            _texture = ghoul::io::texture::loadTexture(
                 reinterpret_cast<void*>(imageFile.buffer),
                 imageFile.size,
                 2,
@@ -174,7 +176,7 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
                 _textureDimensions = textureDim;
             }
         }
-        catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
+        catch (const ghoul::io::texture::InvalidLoadException& e) {
             _textureIsDirty = false;
             LERRORC(e.component, e.message);
         }

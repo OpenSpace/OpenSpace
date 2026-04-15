@@ -38,7 +38,9 @@
 
 namespace openspace {
 
-SpoutModule::SpoutModule() : OpenSpaceModule(Name) {}
+SpoutModule::SpoutModule()
+    : OpenSpaceModule(Name)
+{}
 
 void SpoutModule::internalInitialize(const ghoul::Dictionary&) {
 #ifdef WIN32
@@ -55,7 +57,7 @@ void SpoutModule::internalInitialize(const ghoul::Dictionary&) {
 #endif // WIN32
 }
 
-std::vector<documentation::Documentation> SpoutModule::documentations() const {
+std::vector<Documentation> SpoutModule::documentations() const {
     return {
         ScreenSpaceSpout::Documentation(),
         RenderablePlaneSpout::Documentation(),

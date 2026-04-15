@@ -37,45 +37,47 @@
 #include <filesystem>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "The path to a file with a one-dimensional texture to be used for the disc "
-        "color. The leftmost color will be innermost color when rendering the disc, "
-        "and the rightmost color will be the outermost color.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "color. The leftmost color will be innermost color when rendering the disc, and "
+        "the rightmost color will be the outermost color.",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "The size of the semi-major axis of the orbit in meters.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EccentricityInfo = {
+    constexpr Property::PropertyInfo EccentricityInfo = {
         "Eccentricity",
         "Eccentricity",
         "The eccentricity of the orbit, which is the deviation from a perfect circle.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {
+    constexpr Property::PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
         "The width of the disc, given as two values that specify the lower and upper "
-        "deviation from the semi major axis, respectively. The values are relative "
-        "to the size of the semi-major axis. That is, 0 means no deviation from the "
+        "deviation from the semi major axis, respectively. The values are relative to "
+        "the size of the semi-major axis. That is, 0 means no deviation from the "
         "semi-major axis and 1 is a whole semi-major axis's worth of deviation.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
+    constexpr Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
         "Multiply color",
         "If set, the disc's texture is multiplied with this color. Useful for applying a "
         "color grayscale images.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
     struct [[codegen::Dictionary(RenderableOrbitDisc)]] Parameters {
@@ -94,13 +96,13 @@ namespace {
         // [[codegen::verbatim(MultiplyColorInfo.description)]]
         std::optional<glm::vec3> multiplyColor [[codegen::color()]];
     };
-#include "renderableorbitdisc_codegen.cpp"
 } // namespace
+#include "renderableorbitdisc_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableOrbitDisc::Documentation() {
-    return codegen::doc<Parameters>("exoplanets_renderableorbitdisc");
+Documentation RenderableOrbitDisc::Documentation() {
+    return codegen::doc<Parameters>("exoplanets_renderable_orbitdisc");
 }
 
 RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
@@ -128,7 +130,7 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     addProperty(_texturePath);
 
     _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
-    _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
+    _multiplyColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_multiplyColor);
 
     _eccentricity = p.eccentricity;
@@ -138,15 +140,11 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     addProperty(Fadeable::_opacity);
 }
 
-bool RenderableOrbitDisc::isReady() const {
-    return _shader && _texture && _plane;
-}
-
 void RenderableOrbitDisc::initialize() {
     _texture = std::make_unique<TextureComponent>(1);
     _texture->setFilterMode(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
     _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
-    _plane = std::make_unique<PlaneGeometry>(planeSize());
+    _plane = std::make_unique<PlaneGeometry>(glm::vec2(planeSize()));
 }
 
 void RenderableOrbitDisc::initializeGL() {
@@ -198,7 +196,6 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
 
     _shader->deactivate();
 
-    // Restores GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();
@@ -211,7 +208,7 @@ void RenderableOrbitDisc::update(const UpdateData&) {
     }
 
     if (_planeIsDirty) [[unlikely]] {
-        _plane->updateSize(planeSize());
+        _plane->updateSize(glm::vec2(planeSize()));
         _planeIsDirty = false;
     }
 

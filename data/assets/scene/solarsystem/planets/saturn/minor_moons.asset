@@ -3,7 +3,9 @@ asset.require("./minor/inuit_group")
 asset.require("./minor/norse_group")
 asset.require("./minor/other_group")
 asset.require("./minor/shepherd_group")
-
+asset.require("./minor/march_2025_discoveries-1")
+asset.require("./minor/march_2025_discoveries-2")
+asset.require("./minor/may_2023_discoveries")
 
 
 local SaturnMinorMoonsOn = {

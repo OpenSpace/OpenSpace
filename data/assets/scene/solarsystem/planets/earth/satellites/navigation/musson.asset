@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Russian LEO Navigation)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_musson",
-  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=musson&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=musson&FORMAT=kvn",
   Filename = "musson.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -51,6 +51,6 @@ asset.meta = {
   Description = [[Satellites asset for Navigation Russian LEO Navigation. Data from
     Celestrak]],
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/NORAD/elements/",
+  URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
 }

@@ -26,10 +26,10 @@
 
 #include <ghoul/lua/lua_types.h>
 
-namespace openspace::properties {
+namespace openspace {
 
-LongProperty::LongProperty(Property::PropertyInfo info, long value,
-                           long minValue, long maxValue, long stepValue)
+LongProperty::LongProperty(PropertyInfo info, long value, long minValue, long maxValue,
+                           long stepValue)
     : NumericalProperty<long>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
@@ -53,4 +53,4 @@ std::string LongProperty::stringValue() const {
     return formatJson(_value);
 }
 
-} // namespace openspace::properties
+} // namespace openspace

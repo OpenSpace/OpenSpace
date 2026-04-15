@@ -15,7 +15,7 @@
     {
       "type": "navigationstate",
       "value": {
-        "anchor": "TimelineScale_Example",
+        "anchor": "TimelineScale_Example_NoInterpolation",
         "position": [
           -2.2844822677113674,
           -1.7458797903641945,

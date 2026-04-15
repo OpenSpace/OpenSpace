@@ -3,7 +3,7 @@
   "commands": [
     {
       "type": "asset",
-      "value": "examples/screenspacerenderable/screenspaceinsetblackout/screenspaceinsetblackout.asset"
+      "value": "examples/screenspacerenderable/screenspaceinsetblackout/insetblackout_calibration_pattern.asset"
     },
     {
       "type": "screenshot"

@@ -28,21 +28,13 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/network/messagestructures.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <algorithm>
 #include <cmath>
 #include <utility>
 
-namespace openspace::interaction {
-
-KeyframeNavigator::CameraPose::CameraPose(datamessagestructures::CameraKeyframe&& kf)
-    : position(std::move(kf._position))
-    , rotation(std::move(kf._rotation))
-    , focusNode(std::move(kf._focusNode))
-    , scale(kf._scale)
-    , followFocusNodeRotation(kf._followNodeRotation)
-{}
+namespace openspace {
 
 void KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes) {
     const double now = currentTime();
@@ -76,7 +68,7 @@ void KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
         foundPrevKeyframe = true;
     }
     else {
-        // If there is no keyframe before: Only use the next keyframe.
+        // If there is no keyframe before: Only use the next keyframe
         prevTime = nextTime;
         prevKeyframe = nextKeyframe;
         t = 1;
@@ -108,8 +100,7 @@ void KeyframeNavigator::updateCamera(Camera* camera, const CameraPose& prevPose,
     glm::dquat prevKeyframeCameraRotation = prevPose.rotation;
     glm::dquat nextKeyframeCameraRotation = nextPose.rotation;
 
-    // Transform position and rotation based on focus node rotation
-    // (if following rotation)
+    // Transform position and rotation based on focus node rotation (if following)
     if (prevPose.followFocusNodeRotation) {
         prevKeyframeCameraRotation = glm::dquat(
             prevFocusNode->worldRotationMatrix() *
@@ -132,7 +123,7 @@ void KeyframeNavigator::updateCamera(Camera* camera, const CameraPose& prevPose,
     nextKeyframeCameraPosition += nextFocusNode->worldPosition();
 
     // Linear interpolation
-    t = std::max(0.0, std::min(1.0, t));
+    t = std::clamp(t, 0.0, 1.0);
     glm::dvec3 nowCameraPosition =
         prevKeyframeCameraPosition * (1.0 - t) + nextKeyframeCameraPosition * t;
     glm::dquat nowCameraRotation = glm::slerp(
@@ -141,24 +132,24 @@ void KeyframeNavigator::updateCamera(Camera* camera, const CameraPose& prevPose,
         t
     );
 
-    camera->setPositionVec3(std::move(nowCameraPosition));
+    camera->setPosition(std::move(nowCameraPosition));
     camera->setRotation(std::move(nowCameraRotation));
 
-    // We want to affect view scaling, such that we achieve
-    // logarithmic interpolation of distance to an imagined focus node.
-    // To do this, we interpolate the scale reciprocal logarithmically.
+    // We want to affect view scaling, such that we achieve logarithmic interpolation of
+    // distance to an imagined focus node. To do this, we interpolate the scale reciprocal
+    // logarithmically
     if (!ignoreFutureKeyframes) {
-        const float prevInvScaleExp = glm::log(1.f / prevPose.scale);
-        const float nextInvScaleExp = glm::log(1.f / nextPose.scale);
+        const float prevInvScaleExp = std::log(1.f / prevPose.scale);
+        const float nextInvScaleExp = std::log(1.f / nextPose.scale);
         const float interpolatedInvScaleExp = static_cast<float>(
             prevInvScaleExp * (1.0 - t) + nextInvScaleExp * t
         );
-        camera->setScaling(1.f / glm::exp(interpolatedInvScaleExp));
+        camera->setScaling(1.f / std::exp(interpolatedInvScaleExp));
     }
 }
 
 double KeyframeNavigator::currentTime() const {
-    return (global::windowDelegate->applicationTime() - _referenceTimestamp);
+    return global::windowDelegate->applicationTime() - _referenceTimestamp;
 }
 
 void KeyframeNavigator::setReferenceTime(double referenceTimestamp) {
@@ -186,4 +177,4 @@ size_t KeyframeNavigator::nKeyframes() const {
     return _cameraPoseTimeline.nKeyframes();
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

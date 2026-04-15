@@ -43,7 +43,7 @@ namespace {
     struct Panel {
         std::string id;
         std::string name;
-        bool isVisible;
+        bool isVisible = false;
     };
 
     void from_json(const nlohmann::json& j, Panel& layout) {

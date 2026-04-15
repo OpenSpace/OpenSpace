@@ -33,25 +33,26 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo NameInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo NameInfo = {
         "SpoutName",
         "Spout sender name",
         "This value explicitly sets the Spout receiver to use a specific name. If this "
         "is not a valid name, an empty image is used.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ScreenSpaceSpout)]] Parameters {
         // [[codegen::verbatim(NameInfo.description)]]
         std::optional<std::string> spoutName;
     };
-#include "screenspacespout_codegen.cpp"
-
 } // namespace
+#include "screenspacespout_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceSpout::Documentation() {
+Documentation ScreenSpaceSpout::Documentation() {
     return codegen::doc<Parameters>("spout_screenspace_spout");
 }
 
@@ -76,17 +77,15 @@ void ScreenSpaceSpout::deinitializeGL() {
     ScreenSpaceRenderable::deinitializeGL();
 }
 
-bool ScreenSpaceSpout::isReady() const {
-    return ScreenSpaceRenderable::isReady() && !_spoutReceiver.isReceiving();
-}
-
 void ScreenSpaceSpout::update() {
     ScreenSpaceRenderable::update();
     _spoutReceiver.updateReceiver();
 }
 
 void ScreenSpaceSpout::bindTexture(ghoul::opengl::TextureUnit& unit) {
-    unit.bind(_spoutReceiver.spoutTexture());
+    if (_spoutReceiver.isReceiving()) {
+        unit.bind(_spoutReceiver.spoutTexture());
+    }
 }
 
 } // namespace openspace

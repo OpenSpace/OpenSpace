@@ -62,9 +62,8 @@ namespace {
     }
 } // namespace
 
-ActionDialog::ActionDialog(QWidget* parent,
-                           std::vector<openspace::Profile::Action>* actions,
-                           std::vector<openspace::Profile::Keybinding>* keybindings)
+ActionDialog::ActionDialog(QWidget* parent, std::vector<Profile::Action>* actions,
+                           std::vector<Profile::Keybinding>* keybindings)
     : QDialog(parent)
     , _actions(actions)
     , _actionData(*_actions)
@@ -460,7 +459,7 @@ void ActionDialog::actionAdd() {
 }
 
 void ActionDialog::actionRemove() {
-    const openspace::Profile::Action* action = selectedAction();
+    const Profile::Action* action = selectedAction();
     ghoul_assert(action, "An action must exist at this point");
 
     ghoul_assert(
@@ -512,7 +511,7 @@ void ActionDialog::actionRemove() {
                 _keybindingWidgets.action->addItem(QString::fromStdString(a.identifier));
             }
             clearKeybindingFields();
-            //Save the updated actions to the profile
+            // Save the updated actions to the profile
             if (_actions) {
                 *_actions = _actionData;
             }
@@ -524,14 +523,14 @@ void ActionDialog::actionRemove() {
 }
 
 void ActionDialog::actionDuplicate() {
-    const openspace::Profile::Action* action = selectedAction();
+    const Profile::Action* action = selectedAction();
     ghoul_assert(action, "An action must exist at this point");
 
     ghoul_assert(
         _actionWidgets.list->count() == static_cast<int>(_actionData.size()),
         "Action list and data has desynced"
     );
-    const openspace::Profile::Action act = *action;
+    const Profile::Action act = *action;
 
     _actionData.push_back(act);
     _actionWidgets.list->addItem("");
@@ -573,7 +572,7 @@ void ActionDialog::actionSelected() {
         _actionWidgets.removeButton->setEnabled(false);
         _actionWidgets.duplicateButton->setEnabled(false);
         _actionWidgets.saveButtons->setEnabled(false);
-        //Keybinding panel must also be in valid state to re-enable main start button
+        // Keybinding panel must also be in valid state to re-enable main start button
         if (_mainButton && !_keybindingWidgets.saveButtons->isEnabled()) {
             _mainButton->setEnabled(true);
         }
@@ -651,7 +650,7 @@ void ActionDialog::actionSaved() {
     for (const Profile::Action& a : _actionData) {
         _keybindingWidgets.action->addItem(QString::fromStdString(a.identifier));
     }
-    //Save the updated actions to the profile
+    // Save the updated actions to the profile
     if (_actions) {
         *_actions = _actionData;
     }
@@ -727,7 +726,7 @@ void ActionDialog::keybindingRemove() {
             clearKeybindingFields();
             _keybindingsData.erase(_keybindingsData.begin() + i);
             delete _keybindingWidgets.list->takeItem(static_cast<int>(i));
-            //Save the updated keybindings to the profile
+            // Save the updated keybindings to the profile
             if (_keybindings) {
                 *_keybindings = _keybindingsData;
             }
@@ -782,7 +781,7 @@ void ActionDialog::keybindingSelected() {
         _keybindingWidgets.addButton->setEnabled(true);
         _keybindingWidgets.removeButton->setEnabled(false);
         _keybindingWidgets.saveButtons->setEnabled(false);
-        //Action panel must also be in valid state to re-enable main start button
+        // Action panel must also be in valid state to re-enable main start button
         if (_mainButton && !_actionWidgets.saveButtons->isEnabled()) {
             _mainButton->setEnabled(true);
         }
@@ -799,8 +798,8 @@ void ActionDialog::keybindingSaved() {
         QMessageBox::critical(this, "Missing key", "Key must have an assignment");
         return;
     }
-    //A selection can be made from the combo box without typing text, but selecting from
-    //the combo will fill the text, so using the text box as criteria covers both cases.
+    // A selection can be made from the combo box without typing text, but selecting from
+    // the combo will fill the text, so using the text box as criteria covers both cases
     if (_keybindingWidgets.actionText->text().isEmpty()) {
         QMessageBox::critical(this, "Missing action", "Key action must not be empty");
         return;
@@ -824,7 +823,7 @@ void ActionDialog::keybindingSaved() {
     keybinding->action = _keybindingWidgets.actionText->text().toStdString();
 
     updateListItem(_keybindingWidgets.list->currentItem(), *keybinding);
-    //Save the updated keybindings to the profile
+    // Save the updated keybindings to the profile
     if (_keybindings) {
         *_keybindings = _keybindingsData;
     }

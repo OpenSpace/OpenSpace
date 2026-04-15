@@ -43,6 +43,8 @@
 #include <memory>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableTravelSpeed";
 
     struct VertexPositions {
@@ -51,61 +53,60 @@ namespace {
         glm::vec3 headOfLight;
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SpeedInfo = {
+    constexpr Property::PropertyInfo SpeedInfo = {
         "TravelSpeed",
         "Speed of travel",
         "A value for how fast the speed indicator should travel, in meters per second. "
         "The default value is the speed of light.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
+    constexpr Property::PropertyInfo TargetInfo = {
         "TargetNode",
         "Target object",
         "The identifier of the scene graph node to target with the speed indicator. The "
         "speed indicator will travel from the parent node to this scene graph node.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
+    constexpr Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
         "An RGB color for the line.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "This value specifies the line width.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IndicatorLengthInfo = {
+    constexpr Property::PropertyInfo IndicatorLengthInfo = {
         "IndicatorLength",
         "Indicator length",
         "The length of the speed indicator line, given in seconds. The length will be "
         "computed as the speed times this value. For example, a value of 1 will make it "
         "as long as the distance it would travel over one second with the specified "
         "speed.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeLengthInfo = {
+    constexpr Property::PropertyInfo FadeLengthInfo = {
         "FadeLength",
         "Fade length",
         "The length of the faded tail of the speed indicator, given in seconds. The "
         "length of the tail will be computed as the speed times this value. For example, "
         "a value of 1 will make it as long as the distance it would travel over one "
         "second. A linear fade will be applied over this distance to create the tail.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    // This `Renderable` can be used to visualize a certain travel speed using a line that
-    // moves at the provided speed from a start object to a target. The start position
-    // will be set from the `Parent` of this scene graph node, and the end position is
-    // set from the provided `Target` scene graph node. Per default, the speed is set to
-    // the speed of light.
+    // Visualizes a certain travel speed using a line that moves at the provided speed
+    // from a start object to a target. The start position will be set from the `Parent`
+    // of this scene graph node, and the end position is set from the provided `Target`
+    // scene graph node. Per default, the speed is set to the speed of light.
     //
     // The length of the travelling line is set based on the travel speed and can be used
     // to show more information related to the distance traveled. For example, a length
@@ -134,13 +135,13 @@ namespace {
         // [[codegen::verbatim(FadeLengthInfo.description)]]
         std::optional<float> fadeLength [[codegen::greater(0.f)]];
     };
-#include "renderabletravelspeed_codegen.cpp"
 } // namespace
+#include "renderabletravelspeed_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableTravelSpeed::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_renderabletravelspeed");
+Documentation RenderableTravelSpeed::Documentation() {
+    return codegen::doc<Parameters>("space_renderable_travelspeed");
 }
 
 RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary)
@@ -163,7 +164,7 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
     setRenderBin(RenderBin::Overlay);
 
     _lineColor = p.color.value_or(_lineColor);
-    _lineColor.setViewOption(properties::Property::ViewOptions::Color);
+    _lineColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_lineColor);
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
@@ -247,7 +248,7 @@ void RenderableTravelSpeed::updateVertexData() {
 
     // This if statment is there to not start the line from behind the source node
     if (_timeSinceStart < _indicatorLength) {
-        positions.betweenLightAndFade = glm::vec3(0.0, 0.0, 0.0); // = source node
+        positions.betweenLightAndFade = glm::vec3(0.0, 0.0, 0.0);
     }
     else {
         positions.betweenLightAndFade =
@@ -256,7 +257,7 @@ void RenderableTravelSpeed::updateVertexData() {
 
     // This if statment is there to not start the line from behind the source node
     if (_timeSinceStart < (_indicatorLength + _fadeLength)) {
-        positions.endOfFade = glm::vec3(0.0, 0.0, 0.0); // = source node
+        positions.endOfFade = glm::vec3(0.0, 0.0, 0.0);
     }
     else {
         positions.endOfFade = _travelSpeed *
@@ -271,10 +272,6 @@ void RenderableTravelSpeed::reinitiateTravel() {
     _arrivalTime = _initiationTime + _travelTime;
 }
 
-bool RenderableTravelSpeed::isReady() const{
-    return _shaderProgram != nullptr;
-}
-
 void RenderableTravelSpeed::update(const UpdateData& data) {
     if (_initiationTime == -1.0) {
         _initiationTime = data.time.j2000Seconds();
@@ -284,9 +281,11 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
     SceneGraphNode* sourceNode = parent();
     ghoul_assert(sourceNode, "Renderable have to be owned by scene graph node");
 
-    // Target position, in the reference frame of the source node (to correctly inherit parent transform)
+    // Target position, in the reference frame of the source node (to correctly inherit
+    // parent transform)
     glm::dvec3 targetPosition = glm::dvec3(
-        glm::inverse(sourceNode->modelTransform()) * glm::dvec4(_targetNode->worldPosition(), 1.0)
+        glm::inverse(sourceNode->modelTransform()) *
+        glm::dvec4(_targetNode->worldPosition(), 1.0)
     );
 
     // Assumes source position is at origin, i.e. the parent node position
@@ -299,7 +298,8 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
         _timeSinceStart = currentTime - _initiationTime;
         updateVertexData();
     }
-    else { // in case we've reached the target
+    else {
+        // In case we've reached the target
         reinitiateTravel();
     }
 }
@@ -326,4 +326,5 @@ void RenderableTravelSpeed::render(const RenderData& data, RendererTasks&) {
 
     _shaderProgram->deactivate();
 }
+
 } // namespace openspace

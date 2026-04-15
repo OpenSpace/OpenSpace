@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace::properties {
+namespace openspace {
 
 template <typename T>
 TemplateProperty<T>::TemplateProperty(Property::PropertyInfo info, T value)
@@ -71,4 +71,4 @@ const std::type_info& TemplateProperty<T>::type() const {
     return typeid(T);
 }
 
-}  // namespace openspace::properties
+} // namespace openspace

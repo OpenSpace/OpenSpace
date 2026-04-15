@@ -29,15 +29,14 @@
 
 #include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 /**
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type `int`.
+ * This class is a concrete implementation of TemplateProperty with the type `int`.
  */
 class IntProperty : public NumericalProperty<int> {
 public:
-    explicit IntProperty(Property::PropertyInfo info, int value = 0,
+    explicit IntProperty(PropertyInfo info, int value = 0,
         int minValue = std::numeric_limits<int>::lowest(),
         int maxValue = std::numeric_limits<int>::max(), int stepValue = 1);
 
@@ -53,6 +52,6 @@ private:
     int toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___INTPROPERTY___H__

@@ -35,34 +35,36 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "ScreenSpaceImageOnline";
 
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
+    constexpr Property::PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
         "The URL of the texture to be displayed on this screen space plane. If changed, "
         "the image at the new path will automatically be loaded and displayed. The "
         "default size of the plane will be set based on the size of the image.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    // This `ScreenSpaceRenderable` can be used to display an image from a web URL.
+    // Displays an image from a web URL on a plane in screen space.
     //
     // To load an image from a local file on disk, see
-    // [`ScreenSpaceImageLocal`](#base_screenspace_image_local).
+    // [`ScreenSpaceImageLocal`](#base_screenspace_imagelocal).
     struct [[codegen::Dictionary(ScreenSpaceImageOnline)]] Parameters {
         std::optional<std::string> identifier;
 
         // [[codegen::verbatim(TextureInfo.description)]]
         std::optional<std::string> url [[codegen::key("URL")]];
     };
-#include "screenspaceimageonline_codegen.cpp"
 } // namespace
+#include "screenspaceimageonline_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceImageOnline::Documentation() {
-    return codegen::doc<Parameters>("base_screenspace_image_online");
+Documentation ScreenSpaceImageOnline::Documentation() {
+    return codegen::doc<Parameters>("base_screenspace_imageonline");
 }
 
 ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary)
@@ -114,9 +116,8 @@ void ScreenSpaceImageOnline::update() {
 
         try {
             // @TODO (2026-02-18, abock): This code was settings the swizzle mask only if
-            //                            the returned image was having a single Red
-            //                            channel. This can't currently be expressed
-            //                            unfortunately
+            // the returned image was having a single Red channel. This can't currently be
+            // expressed unfortunately
             ghoul::opengl::Texture::SamplerInit samplerInit = {
                 // TODO: AnisotropicMipMap crashes on ATI cards ---abock
                 //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
@@ -124,7 +125,7 @@ void ScreenSpaceImageOnline::update() {
                 //.swizzleMask = std::array<GLenum, 4>{ GL_RED, GL_RED, GL_RED, GL_ONE }
             };
 
-            _texture = ghoul::io::TextureReader::ref().loadTexture(
+            _texture = ghoul::io::texture::loadTexture(
                 reinterpret_cast<void*>(imageFile.buffer),
                 imageFile.size,
                 2,
@@ -135,7 +136,7 @@ void ScreenSpaceImageOnline::update() {
             _objectSize = _texture->dimensions();
             _textureIsDirty = false;
         }
-        catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
+        catch (const ghoul::io::texture::InvalidLoadException& e) {
             _textureIsDirty = false;
             LERRORC(e.component, e.message);
         }

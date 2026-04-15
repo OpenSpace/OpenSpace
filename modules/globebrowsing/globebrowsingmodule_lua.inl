@@ -32,6 +32,8 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/stringhelper.h>
 
+using namespace openspace;
+
 namespace {
 
 /**
@@ -40,18 +42,15 @@ namespace {
  * layer.
  *
  * \param globeIdentifier The identifier of the scene graph node of which to add the
- *                        layer. The renderable of the scene graph node must be a
- *                        [RenderableGlobe](#globebrowsing_renderableglobe)
+ *        layer. The renderable of the scene graph node must be a
+ *        [RenderableGlobe](#globebrowsing_renderable_globe)
  * \param layerGroup The identifier of the layer group in which to add the layer
- * \param layer A dictionary defining the layer. See [this page](#globebrowsing_layer)
- *              for details on what fields and settings the dictionary may contain
+ * \param layer A dictionary defining the layer. See [this page](#globebrowsing_layer) for
+ *        details on what fields and settings the dictionary may contain
  */
 [[codegen::luawrap]] void addLayer(std::string globeIdentifier, std::string layerGroup,
                                    ghoul::Dictionary layer)
 {
-    using namespace openspace;
-    using namespace globebrowsing;
-
     // Get the node and make sure it exists
     SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(globeIdentifier);
     if (!n) {
@@ -82,20 +81,17 @@ namespace {
 
 /**
  * Removes a layer from the specified globe.
-
+ *
  * \param globeIdentifier The identifier of the scene graph node of which to remove the
- *                        layer. The renderable of the scene graph node must be a
- *                        [RenderableGlobe](#globebrowsing_renderableglobe)
+ *        layer. The renderable of the scene graph node must be a
+ *        [RenderableGlobe](#globebrowsing_renderable_globe)
  * \param layerGroup The identifier of the layer group from which to remove the layer
  * \param layerOrName Either the identifier for the layer or a dictionary with the
- *                    `Identifier` key that is used instead
+ *        `Identifier` key that is used instead
  */
 [[codegen::luawrap]] void deleteLayer(std::string globeIdentifier, std::string layerGroup,
                                  std::variant<std::string, ghoul::Dictionary> layerOrName)
 {
-    using namespace openspace;
-    using namespace globebrowsing;
-
     // Get the node and make sure it exists
     SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(globeIdentifier);
     if (!n) {
@@ -140,9 +136,6 @@ namespace {
 [[codegen::luawrap]] std::vector<std::string> layers(std::string globeIdentifier,
                                                      std::string layerGroup)
 {
-    using namespace openspace;
-    using namespace globebrowsing;
-
     SceneGraphNode* n = sceneGraphNode(globeIdentifier);
     if (!n) {
         throw ghoul::lua::LuaError("Unknown globe name: " + globeIdentifier);
@@ -180,17 +173,14 @@ namespace {
  * \param globeIdentifier The identifier of the globe
  * \param layerGroup The identifier of the layer group
  * \param source The original position of the layer that should be moved, either as an
- *               index in the list or the identifier of the layer to be moved
+ *        index in the list or the identifier of the layer to be moved
  * \param destination The new position in the list, either as an index in the list or as
- *                    the identifier of the layer after which to place the moved layer
+ *        the identifier of the layer after which to place the moved layer
  */
 [[codegen::luawrap]] void moveLayer(std::string globeIdentifier, std::string layerGroup,
                                     std::variant<int, std::string> source,
                                     std::variant<int, std::string> destination)
 {
-    using namespace openspace;
-    using namespace globebrowsing;
-
     if (source == destination) {
         return;
     }
@@ -273,9 +263,6 @@ namespace {
  */
 [[codegen::luawrap]] void goToChunk(std::string globeIdentifier, int x, int y, int level)
 {
-    using namespace openspace;
-    using namespace globebrowsing;
-
     SceneGraphNode* n = sceneGraphNode(globeIdentifier);
     if (!n) {
         throw ghoul::lua::LuaError("Unknown globe name: " + globeIdentifier);
@@ -294,14 +281,11 @@ namespace {
  * (degrees and meters).
  *
  * \param useEyePosition If true, use the view direction of the camera instead of the
- *                       camera position
+ *        camera position
  */
 [[codegen::luawrap]] std::tuple<double, double, double> geoPositionForCamera(
                                                               bool useEyePosition = false)
 {
-    using namespace openspace;
-    using namespace globebrowsing;
-
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
     // focus vs anchor
     const RenderableGlobe* globe = module->castFocusNodeRenderableToGlobe();
@@ -310,7 +294,7 @@ namespace {
     }
     Camera* camera = global::navigationHandler->camera();
 
-    glm::dvec3 cameraPosition = camera->positionVec3();
+    glm::dvec3 cameraPosition = camera->position();
 
 
     const SceneGraphNode* anchor =
@@ -320,7 +304,7 @@ namespace {
     glm::dvec3 target;
 
     // @TODO (04-08-2022, micahnyc)
-    // adjust this to use the camera lookat
+    // Adjust this to use the camera lookat
     // once we fix this calculation, then we just add true to the function call in the
     // asset
     if (useEyePosition) {
@@ -354,15 +338,13 @@ namespace {
  * Loads and parses the WMS capabilities XML file from a remote server.
  *
  * \param name The name of the capabilities that can be used to later refer to the set of
- *             capabilities
+ *        capabilities
  * \param globe The identifier of the globe for which this server is applicable
  * \param url The URL at which the capabilities file can be found
  */
 [[codegen::luawrap]] void loadWMSCapabilities(std::string name, std::string globe,
                                               std::string url)
 {
-    using namespace openspace;
-    using namespace globebrowsing;
     global::moduleEngine->module<GlobeBrowsingModule>()->loadWMSCapabilities(
         std::move(name),
         std::move(globe),
@@ -378,8 +360,6 @@ namespace {
  * \param name The name of the WMS server to remove
  */
 [[codegen::luawrap]] void removeWMSServer(std::string name) {
-    using namespace openspace;
-    using namespace globebrowsing;
     global::moduleEngine->module<GlobeBrowsingModule>()->removeWMSServer(name);
 }
 
@@ -392,9 +372,6 @@ namespace {
  * \param name The name of the WMS server for which to get the information
  */
 [[codegen::luawrap]] std::vector<ghoul::Dictionary> capabilitiesWMS(std::string name) {
-    using namespace openspace;
-    using namespace globebrowsing;
-
     GlobeBrowsingModule::Capabilities cap =
         global::moduleEngine->module<GlobeBrowsingModule>()->capabilities(name);
 
@@ -414,14 +391,11 @@ namespace {
  *
  * \param globeIdentifier The identifier of the scene graph node for the globe
  * \param table A table with information about the GeoJson layer. See
- *              [this page](#globebrowsing_geojsoncomponent) for details on what fields
- *              and settings the table may contain
+ *        [this page](#globebrowsing_geojsoncomponent) for details on what fields and
+ *        settings the table may contain
  */
 [[codegen::luawrap]] void addGeoJson(std::string globeIdentifier, ghoul::Dictionary table)
 {
-    using namespace openspace;
-    using namespace globebrowsing;
-
     // Get the node and make sure it exists
     SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(globeIdentifier);
     if (!n) {
@@ -443,15 +417,12 @@ namespace {
  * specified globe.
  *
  * \param globeIdentifier The identifier of the scene graph node for the globe
- * \param tableOrIdentifier Either an identifier for the GeoJson layer to be removed, or
- *                          a table that includes the identifier
+ * \param tableOrIdentifier Either an identifier for the GeoJson layer to be removed, or a
+ *        table that includes the identifier
  */
 [[codegen::luawrap]] void deleteGeoJson(std::string globeIdentifier,
                           std::variant<std::string, ghoul::Dictionary> tableOrIdentifier)
 {
-    using namespace openspace;
-    using namespace globebrowsing;
-
     // Get the node and make sure it exists
     SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(globeIdentifier);
     if (!n) {
@@ -483,8 +454,8 @@ namespace {
 
 /**
  * Add a GeoJson layer from the given file name and add it to the current anchor node,
- * if it is a globe. Note that you might have to increase the height offset for the
- * added feature to be visible on the globe, if using a height map.
+ * if it is a globe. Note that you might have to increase the height offset for the added
+ * feature to be visible on the globe, if using a height map.
  *
  * \param filename The path to the GeoJSON file
  * \param name An optional name that the loaded feature will get in the user interface
@@ -492,9 +463,6 @@ namespace {
 [[codegen::luawrap]] void addGeoJsonFromFile(std::string filename,
                                              std::optional<std::string> name)
 {
-    using namespace openspace;
-    using namespace globebrowsing;
-
     std::filesystem::path path = absPath(filename);
     if (!std::filesystem::is_regular_file(path)) {
         throw ghoul::lua::LuaError(std::format(
@@ -548,8 +516,6 @@ namespace {
  *         indicating the first item in the list that does not have a WMS server
  */
 [[codegen::luawrap]] ghoul::Dictionary globes() {
-    using namespace openspace;
-    using namespace globebrowsing;
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
 
     std::vector<SceneGraphNode*> nodes =
@@ -615,8 +581,6 @@ namespace {
  * \return A list of WMS server info containing its name and URL
  */
 [[codegen::luawrap]] std::vector<ghoul::Dictionary> urlInfo(std::string globe) {
-    using namespace openspace;
-    using namespace globebrowsing;
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
     std::vector<GlobeBrowsingModule::UrlInfo> info = module->urlInfo(globe);
 
@@ -631,7 +595,7 @@ namespace {
     return res;
 }
 
-#include "globebrowsingmodule_lua_codegen.cpp"
-
 } // namespace
+
+#include "globebrowsingmodule_lua_codegen.cpp"
 

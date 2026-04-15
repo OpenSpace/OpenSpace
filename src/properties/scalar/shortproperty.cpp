@@ -26,9 +26,9 @@
 
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
-ShortProperty::ShortProperty(Property::PropertyInfo info, short value, short minValue,
+ShortProperty::ShortProperty(PropertyInfo info, short value, short minValue,
                              short maxValue, short stepValue)
     : NumericalProperty<short>(std::move(info), value, minValue, maxValue, stepValue)
 {}
@@ -53,4 +53,4 @@ std::string ShortProperty::stringValue() const {
     return formatJson(_value);
 }
 
-} // namespace openspace::properties
+} // namespace openspace

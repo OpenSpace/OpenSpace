@@ -35,10 +35,6 @@
 
 namespace openspace {
 
-DataProcessorText::DataProcessorText() : DataProcessor() {}
-
-DataProcessorText::~DataProcessorText() {}
-
 std::vector<std::string> DataProcessorText::readMetadata(const std::string& data,
                                                          glm::size3_t& dimensions)
 {
@@ -46,38 +42,42 @@ std::vector<std::string> DataProcessorText::readMetadata(const std::string& data
         return std::vector<std::string>();
     }
 
-    //The intresting part of the file looks like this:
-    //# Output data: field with 61x61=3721 elements
-    //# x           y           z           N           V_x         B_x
+    // The intresting part of the file looks like this:
+    //
+    // # Output data: field with 61x61=3721 elements
+    // # x           y           z           N           V_x         B_x
 
     // The string where the interesting data begins
     constexpr std::string_view info = "# Output data: field with ";
     std::vector<std::string> options;
     std::string line;
-    std::stringstream memorystream(data);
+    std::stringstream memorystream = std::stringstream(data);
     while (ghoul::getline(memorystream, line)) {
-        if (line.find(info) == 0) {
-            line = line.substr(info.size());
-            std::stringstream ss(line);
+        if (line.find(info) != 0) {
+            continue;
+        }
 
-            std::string token;
-            ghoul::getline(ss, token, 'x');
-            const int x = std::stoi(token);
+        line = line.substr(info.size());
+        std::stringstream ss = std::stringstream(line);
 
-            ghoul::getline(ss, token, '=');
-            const int y = std::stoi(token);
+        std::string token;
+        ghoul::getline(ss, token, 'x');
+        const int x = std::stoi(token);
 
-            dimensions = glm::size3_t(x, y, 1);
+        ghoul::getline(ss, token, '=');
+        const int y = std::stoi(token);
 
-            ghoul::getline(memorystream, line);
-            line = line.substr(1); //because of the # char
+        dimensions = glm::size3_t(x, y, 1);
 
-            ss = std::stringstream(line);
-            std::string option;
-            while (ss >> option) {
-                if (_coordinateVariables.find(option) == _coordinateVariables.end()) {
-                    options.push_back(option);
-                }
+        ghoul::getline(memorystream, line);
+        // Because of the # char
+        line = line.substr(1);
+
+        ss = std::stringstream(line);
+        std::string option;
+        while (ss >> option) {
+            if (_coordinateVariables.find(option) == _coordinateVariables.end()) {
+                options.push_back(option);
             }
         }
     }
@@ -85,7 +85,7 @@ std::vector<std::string> DataProcessorText::readMetadata(const std::string& data
 }
 
 void DataProcessorText::addDataValues(const std::string& data,
-                                      properties::SelectionProperty& dataOptions)
+                                      SelectionProperty& dataOptions)
 {
     int numOptions = static_cast<int>(dataOptions.options().size());
     initializeVectors(numOptions);
@@ -95,25 +95,25 @@ void DataProcessorText::addDataValues(const std::string& data,
     }
 
     std::string line;
-    std::stringstream memorystream(data);
+    std::stringstream memorystream = std::stringstream(data);
 
-    // for standard diviation in the add() function
+    // For standard diviation in the add() function
     std::vector<float> sum(numOptions, 0.f);
     std::vector<std::vector<float>> optionValues(numOptions);
 
-    // for each data point
+    // For each data point
     while (ghoul::getline(memorystream, line)) {
         if (!line.empty() && line[0] == '#') {
             continue;
         }
 
         std::vector<float> values;
-        std::istringstream ss(line);
+        std::istringstream ss = std::istringstream(line);
         std::string val;
         int skip = 0;
-        //for each data option (variable)
+        // For each data option (variable)
         while (ss >> val) {
-            // first three values are coordinates
+            // First three values are coordinates
             if (skip < 3) {
                 skip++;
                 continue;
@@ -142,26 +142,27 @@ void DataProcessorText::addDataValues(const std::string& data,
     add(optionValues, sum);
 }
 
-std::vector<float*> DataProcessorText::processData(const std::string& data,
-                                                   properties::SelectionProperty& options,
-                                                                 glm::size3_t& dimensions)
+std::vector<std::vector<float>> DataProcessorText::processData(const std::string& data,
+                                                               SelectionProperty& options,
+                                                               glm::size3_t& dimensions)
 {
     // The update of the selection properties broke this and we don't have the data to
     // actually test whether this update works. So if you are getting a crash around here
     // this is why
 
     if (data.empty()) {
-        return std::vector<float*>();
+        return std::vector<std::vector<float>>();
     }
 
     std::string line;
-    std::stringstream memorystream(data);
+    std::stringstream memorystream = std::stringstream(data);
 
     const std::set<std::string>& selectedOptions = options.value();
     const std::vector<std::string>& allOptions = options.options();
     std::vector<int> selectedOptionsIndices;
 
-    std::vector<float*> dataOptions(options.options().size(), nullptr);
+    std::vector<std::vector<float>> dataOptions =
+        std::vector<std::vector<float>>(options.options().size());
     for (const std::string& o : selectedOptions) {
         auto it = std::find(allOptions.begin(), allOptions.end(), o);
         ghoul_assert(
@@ -170,7 +171,7 @@ std::vector<float*> DataProcessorText::processData(const std::string& data,
         );
         int idx = static_cast<int>(std::distance(allOptions.begin(), it));
         selectedOptionsIndices.push_back(idx);
-        dataOptions[idx] = new float[dimensions.x * dimensions.y] { 0.f };
+        dataOptions[idx] = std::vector<float>(dimensions.x * dimensions.y, 0.f);
     }
 
     int numValues = 0;
@@ -207,7 +208,6 @@ std::vector<float*> DataProcessorText::processData(const std::string& data,
     calculateFilterValues(selectedOptionsIndices);
 
     return dataOptions;
-//#endif
 }
 
-} //namespace openspace
+} // namespace openspace

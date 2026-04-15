@@ -45,12 +45,12 @@ void ShenBrickSelector::setTemporalTolerance(float temporalTolerance) {
 
 void ShenBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
     int numTimeSteps = _tsp->header().numTimesteps;
-    BrickCover coveredBricks(_tsp->header().xNumBricks);
+    BrickCover coveredBricks = BrickCover(_tsp->header().xNumBricks);
     selectBricks(timestep, 0, 0, 0, numTimeSteps, coveredBricks, bricks);
 }
 
 /**
- * Traverse the Octree in the BST root
+ * Traverse the Octree in the BST root.
  */
 void ShenBrickSelector::traverseOT(int timestep, unsigned int brickIndex,
                                    BrickCover coveredBricks, std::vector<int>& bricks)

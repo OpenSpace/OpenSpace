@@ -26,7 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/navigation/navigationhandler.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>
@@ -34,43 +34,45 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ShowWhenEnabledInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ShowWhenEnabledInfo = {
         "ShowWhenEnabled",
         "Show when enabled",
         "Show text when the input is enabled.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowWhenDisabledInfo = {
+    constexpr Property::PropertyInfo ShowWhenDisabledInfo = {
         "ShowWhenDisabled",
         "Show when disabled",
         "Show text when the input is disabled.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowKeyboardInfo = {
+    constexpr Property::PropertyInfo ShowKeyboardInfo = {
         "ShowKeyboard",
         "Show keyboard information",
         "Display the state of the keyboard input.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowMouseInfo = {
+    constexpr Property::PropertyInfo ShowMouseInfo = {
         "ShowMouse",
         "Show mouse information",
         "Display the state of the mouse input.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowJoystickInfo = {
+    constexpr Property::PropertyInfo ShowJoystickInfo = {
         "ShowJoystick",
         "Show joystick information",
         "Display the state of the joystick input.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    // This `DashboardItem` shows the current state of the different methods to provide
-    // user input: keyboard, mouse, and/or joystick.
+    // Shows the current state of the different methods to provide user input: keyboard,
+    // mouse, and/or joystick.
     //
     // Each input method has the ability to be selectively disabled, meaning that all
     // inputs from that input method are ignored by the system entirely.
@@ -90,12 +92,12 @@ namespace {
         // [[codegen::verbatim(ShowJoystickInfo.description)]]
         std::optional<bool> showJoystick;
     };
-#include "dashboarditeminputstate_codegen.cpp"
 } // namespace
+#include "dashboarditeminputstate_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemInputState::Documentation() {
+Documentation DashboardItemInputState::Documentation() {
     return codegen::doc<Parameters>(
         "base_dashboarditem_inputstate",
         DashboardTextItem::Documentation()
@@ -133,7 +135,7 @@ void DashboardItemInputState::update() {
 
     std::vector<std::string> text;
     if (_showKeyboard) {
-        if (global::navigationHandler->disabledKeybindings()) {
+        if (global::interactionHandler->disabledKeybindings()) {
             if (_showWhenDisabled) {
                 text.emplace_back("Keyboard shortcuts disabled");
             }
@@ -146,7 +148,7 @@ void DashboardItemInputState::update() {
     }
 
     if (_showMouse) {
-        if (global::navigationHandler->disabledMouse()) {
+        if (global::interactionHandler->disabledMouse()) {
             if (_showWhenDisabled) {
                 text.emplace_back("Mouse input disabled");
             }
@@ -159,7 +161,7 @@ void DashboardItemInputState::update() {
     }
 
     if (_showJoystick) {
-        if (global::navigationHandler->disabledJoystick()) {
+        if (global::interactionHandler->disabledJoystick()) {
             if (_showWhenDisabled) {
                 text.emplace_back("Joystick input disabled");
             }

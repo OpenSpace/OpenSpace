@@ -44,14 +44,12 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) final override;
 
     ghoul::opengl::Texture& baseTexture() const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     glm::mat4 attitudeParameters(double time, const glm::vec3& up);
@@ -87,7 +85,7 @@ private:
     bool _shouldCapture = false;
 
     glm::vec3 _sunPosition = glm::vec3(0.f);
-    properties::BoolProperty _performShading;
+    BoolProperty _performShading;
 };
 
 } // namespace openspace

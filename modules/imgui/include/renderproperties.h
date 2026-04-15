@@ -30,77 +30,77 @@
 
 namespace openspace {
 
-namespace properties { class Property; }
+class Property;
 
 BooleanType(ShowToolTip);
 
-void renderBoolProperty(properties::Property* prop, const std::string& ownerName,
+void renderBoolProperty(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderOptionProperty(properties::Property* prop, const std::string& ownerName,
+void renderOptionProperty(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderSelectionProperty(properties::Property* prop, const std::string& ownerName,
+void renderSelectionProperty(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderStringProperty(properties::Property* prop, const std::string& ownerName,
+void renderStringProperty(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderIntListProperty(properties::Property* prop, const std::string& ownerName,
+void renderIntListProperty(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderDoubleListProperty(properties::Property* prop, const std::string& ownerName,
+void renderDoubleListProperty(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderStringListProperty(properties::Property* prop, const std::string& ownerName,
+void renderStringListProperty(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderDoubleProperty(properties::Property* prop, const std::string& ownerName,
+void renderDoubleProperty(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderIntProperty(properties::Property* prop, const std::string& ownerName,
+void renderIntProperty(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderIVec2Property(properties::Property* prop, const std::string& ownerName,
+void renderIVec2Property(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderIVec3Property(properties::Property* prop, const std::string& ownerName,
+void renderIVec3Property(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderIVec4Property(properties::Property* prop, const std::string& ownerName,
+void renderIVec4Property(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderFloatProperty(properties::Property* prop, const std::string& ownerName,
+void renderFloatProperty(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderVec2Property(properties::Property* prop, const std::string& ownerName,
+void renderVec2Property(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderVec3Property(properties::Property* prop, const std::string& ownerName,
+void renderVec3Property(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderVec4Property(properties::Property* prop, const std::string& ownerName,
+void renderVec4Property(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderDVec2Property(properties::Property* prop, const std::string& ownerName,
+void renderDVec2Property(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderDVec3Property(properties::Property* prop, const std::string& ownerName,
+void renderDVec3Property(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderDVec4Property(properties::Property* prop, const std::string& ownerName,
+void renderDVec4Property(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderDMat2Property(properties::Property* prop, const std::string& ownerName,
+void renderDMat2Property(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderDMat3Property(properties::Property* prop, const std::string& ownerName,
+void renderDMat3Property(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderDMat4Property(properties::Property* prop, const std::string& ownerName,
+void renderDMat4Property(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
-void renderTriggerProperty(properties::Property* prop, const std::string& ownerName,
+void renderTriggerProperty(Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, float tooltipDelay = 1.f);
 
 } // namespace openspace

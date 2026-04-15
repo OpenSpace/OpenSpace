@@ -27,7 +27,7 @@
 #include <modules/imgui/include/imgui_include.h>
 #include <ghoul/filesystem/filesystem.h>
 
-namespace openspace::gui {
+namespace openspace {
 
 GuiFilePathComponent::GuiFilePathComponent() : GuiComponent("FilePaths", "File Paths") {}
 
@@ -58,4 +58,4 @@ void GuiFilePathComponent::render() {
     ImGui::End();
 }
 
-} // namespace openspace::gui
+} // namespace openspace

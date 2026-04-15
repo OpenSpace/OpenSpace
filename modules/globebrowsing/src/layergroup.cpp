@@ -41,22 +41,24 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "LayerGroup";
 
-    constexpr openspace::properties::Property::PropertyInfo BlendTileInfo = {
+    constexpr Property::PropertyInfo BlendTileInfo = {
         "BlendTileLevels",
         "Blend between levels",
         "If this value is enabled, images between different levels are interpolated, "
         "rather than switching between levels abruptly. This makes transitions smoother "
         "and more visually pleasing.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 } // namespace
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 LayerGroup::LayerGroup(layers::Group group)
-    : properties::PropertyOwner({ std::string(group.identifier), std::string(group.name)})
+    : PropertyOwner({ std::string(group.identifier), std::string(group.name)})
     , _groupId(group.id)
     , _levelBlendingEnabled(BlendTileInfo, true)
 {
@@ -100,10 +102,7 @@ void LayerGroup::update() {
 Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     ZoneScoped;
 
-    const documentation::TestResult res = documentation::testSpecification(
-        Layer::Documentation(),
-        layerDict
-    );
+    const TestResult res = testSpecification(Layer::Documentation(), layerDict);
     if (!res.success) {
         LERROR("Error adding layer. " + ghoul::to_string(res));
     }
@@ -115,7 +114,7 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     const std::string identifier = layerDict.value<std::string>("Identifier");
     if (hasPropertySubOwner(identifier)) {
         LINFO("Layer with identifier '" + identifier + "' already exists");
-        _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
+        _levelBlendingEnabled.setVisibility(Property::Visibility::User);
         return nullptr;
     }
 
@@ -156,7 +155,7 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     };
     std::stable_sort(_subOwners.begin(), _subOwners.end(), compareZIndexSubOwners);
 
-    _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
+    _levelBlendingEnabled.setVisibility(Property::Visibility::User);
     return ptr;
 }
 
@@ -165,29 +164,29 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
          it != _layers.end();
          it++)
     {
-        if (it->get()->identifier() == layerName) {
-            // we need to make a copy as the layername is only a reference
-            // which will no longer be valid once it is deleted
-            removePropertySubOwner(it->get());
-            (*it)->deinitialize();
-
-            // We need to keep the name of the layer since we only get it as a reference
-            // and the name needs to survive the deletion
-            const std::string lName = layerName;
-            _layers.erase(it);
-            update();
-            if (_onChangeCallback) {
-                _onChangeCallback(nullptr);
-            }
-            LINFO(std::format("Deleted layer {}", lName));
-
-            if (_layers.empty()) {
-                _levelBlendingEnabled.setVisibility(
-                    properties::Property::Visibility::Hidden
-                );
-            }
-            return;
+        if (it->get()->identifier() != layerName) {
+            continue;
         }
+
+        // We need to make a copy as the layername is only a reference which will no
+        // longer be valid once it is deleted
+        removePropertySubOwner(it->get());
+        (*it)->deinitialize();
+
+        // We need to keep the name of the layer since we only get it as a reference and
+        // the name needs to survive the deletion
+        const std::string lName = layerName;
+        _layers.erase(it);
+        update();
+        if (_onChangeCallback) {
+            _onChangeCallback(nullptr);
+        }
+        LINFO(std::format("Deleted layer {}", lName));
+
+        if (_layers.empty()) {
+            _levelBlendingEnabled.setVisibility(Property::Visibility::Hidden);
+        }
+        return;
     }
     LERROR("Could not find layer " + layerName);
 }
@@ -273,7 +272,7 @@ void LayerGroup::moveLayer(int oldPosition, int newPosition) {
     renderable->invalidateShader();
 
     // Notify that the layers are in a different order
-    global::eventEngine->publishEvent<events::EventPropertyTreeUpdated>(uri());
+    global::eventEngine->publishEvent<EventPropertyTreeUpdated>(uri());
 }
 
 std::vector<Layer*> LayerGroup::layers() const {
@@ -309,4 +308,4 @@ bool LayerGroup::isHeightLayer() const {
     return _groupId == layers::Group::ID::HeightLayers;
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

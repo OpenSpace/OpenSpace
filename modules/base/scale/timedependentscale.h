@@ -39,15 +39,16 @@ public:
 
     glm::dvec3 scaleValue(const UpdateData& data) const override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::StringProperty _referenceDate;
-    properties::DoubleProperty _speed;
-    properties::BoolProperty _clampToPositive;
+    StringProperty _referenceDate;
+    DoubleProperty _speed;
+    BoolProperty _clampToPositive;
 
     mutable bool _cachedReferenceDirty = true;
-    mutable double _cachedReference = 0.0; // in seconds past the J2000 epoch
+    // In seconds past the J2000 epoch
+    mutable double _cachedReference = 0.0;
 };
 
 } // namespace openspace

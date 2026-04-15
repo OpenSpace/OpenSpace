@@ -32,13 +32,13 @@
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/texture.h>
 #include <optional>
 #include <utility>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 TextTileProvider::TextTileProvider(TileTextureInitData initData_, size_t fontSize_)
     : initData(std::move(initData_))
@@ -68,7 +68,7 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
     ZoneScoped;
     TracyGpuZone("tile");
 
-    const cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
+    const ProviderTileKey key = { tileIndex, uniqueIdentifier };
     Tile tile = tileCache->get(key);
     if (!tile.texture) {
         ghoul::opengl::Texture* texture = tileCache->texture(initData);
@@ -96,7 +96,11 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
 
         fontRenderer->render(*font, position, text, color);
 
-        tile = Tile{ texture, std::nullopt, Tile::Status::OK };
+        tile = {
+            .texture = texture,
+            .metaData = std::nullopt,
+            .status = Tile::Status::OK
+        };
         tileCache->put(key, initData.hashKey, tile);
 
         // Reset FBO, shader program and viewport
@@ -113,4 +117,4 @@ void TextTileProvider::reset() {
     tileCache->clear();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

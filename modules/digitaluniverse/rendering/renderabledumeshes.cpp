@@ -48,82 +48,84 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableDUMeshes";
 
     constexpr int RenderOptionViewDirection = 0;
     constexpr int RenderOptionPositionNormal = 1;
 
-    constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
+    constexpr Property::PropertyInfo TextColorInfo = {
         "TextColor",
         "Text color",
         "The text color for the astronomical object.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
+    constexpr Property::PropertyInfo TextOpacityInfo = {
         "TextOpacity",
         "Text opacity",
-        "Determines the transparency of the text label, where 1 is completely opaque "
-        "and 0 fully transparent.",
-        openspace::properties::Property::Visibility::NoviceUser
+        "Determines the transparency of the text label, where 1 is completely opaque and "
+        "0 fully transparent.",
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
+    constexpr Property::PropertyInfo TextSizeInfo = {
         "TextSize",
         "Text size",
         "The text size for the astronomical object labels.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelFileInfo = {
+    constexpr Property::PropertyInfo LabelFileInfo = {
         "LabelFile",
         "Label file",
         "The path to the label file that contains information about the astronomical "
         "objects being rendered.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
+    constexpr Property::PropertyInfo LabelMinMaxSizeInfo = {
         "TextMinMaxSize",
         "Text min/max size",
         "The minimum and maximum size (in pixels) of the text for the labels for the "
         "astronomical objects being rendered.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "If the DU mesh is of wire type, this value determines the width of the lines.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
+    constexpr Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw elements",
         "Enables/Disables the drawing of the astronomical objects.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
+    constexpr Property::PropertyInfo DrawLabelInfo = {
         "DrawLabels",
         "Draw labels",
         "Determines whether labels should be drawn or hidden.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MeshColorInfo = {
+    constexpr Property::PropertyInfo MeshColorInfo = {
         "MeshColor",
         "Meshes colors",
         "The defined colors for the meshes to be rendered.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
+    constexpr Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
         "Render option",
         "Debug option for rendering of billboards and texts.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableDUMeshes)]] Parameters {
@@ -167,13 +169,13 @@ namespace {
         // [[codegen::verbatim(MeshColorInfo.description)]]
         std::optional<std::vector<glm::vec3>> meshColor;
     };
+} // namespace
 #include "renderabledumeshes_codegen.cpp"
-}  // namespace
 
 namespace openspace {
 
-documentation::Documentation RenderableDUMeshes::Documentation() {
-    return codegen::doc<Parameters>("digitaluniverse_renderabledumeshes");
+Documentation RenderableDUMeshes::Documentation() {
+    return codegen::doc<Parameters>("digitaluniverse_renderable_dumeshes");
 }
 
 RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
@@ -231,7 +233,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
 
         _textColor = p.textColor.value_or(_textColor);
         _hasLabel = p.textColor.has_value();
-        _textColor.setViewOption(properties::Property::ViewOptions::Color);
+        _textColor.setViewOption(Property::ViewOptions::Color);
         addProperty(_textColor);
         _textColor.onChange([this]() { _textColorIsDirty = true; });
 
@@ -242,7 +244,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         addProperty(_textSize);
 
         _textMinMaxSize = p.textMinMaxSize.value_or(_textMinMaxSize);
-        _textMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+        _textMinMaxSize.setViewOption(Property::ViewOptions::MinMaxRange);
         addProperty(_textMinMaxSize);
     }
 
@@ -252,11 +254,6 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
             _meshColorMap.insert({ static_cast<int>(i) + 1, ops[i] });
         }
     }
-}
-
-bool RenderableDUMeshes::isReady() const {
-    return (_program != nullptr) &&
-        (!_renderingMeshesMap.empty() || (!_labelset.entries.empty()));
 }
 
 void RenderableDUMeshes::initialize() {
@@ -315,7 +312,6 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
 {
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(false);
     glEnable(GL_DEPTH_TEST);
 
@@ -349,7 +345,6 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     glBindVertexArray(0);
     _program->deactivate();
 
-    // Restores GL State
     global::renderEngine->openglStateCache().resetDepthState();
     global::renderEngine->openglStateCache().resetBlendState();
 }
@@ -371,7 +366,7 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
         .mvpMatrix = modelViewProjectionMatrix,
         .orthoRight = orthoRight,
         .orthoUp = orthoUp,
-        .cameraPos = data.camera.positionVec3(),
+        .cameraPos = data.camera.position(),
         .cameraLookUp = data.camera.lookUpVectorWorldSpace()
     };
 
@@ -477,8 +472,8 @@ bool RenderableDUMeshes::readSpeckFile() {
             break;
         }
 
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
+        // Guard against wrong line endings (copying files between operating systems)
+        // causes lines to have a final \r
         if (!line.empty() && line.back() == '\r') {
             line = line.substr(0, line.length() - 1);
         }
@@ -497,7 +492,7 @@ bool RenderableDUMeshes::readSpeckFile() {
             // where textnum is the index of the texture;
             // colorindex is the index of the color for the mesh
             // and style is solid, wire or point (for now we support only wire)
-            std::stringstream str(line);
+            std::stringstream str = std::stringstream(line);
 
             RenderingMesh mesh;
             mesh.meshIndex = meshIndex;
@@ -537,17 +532,17 @@ bool RenderableDUMeshes::readSpeckFile() {
             } while (dummy != "{");
 
             ghoul::getline(file, line);
-            std::stringstream dim(line);
+            std::stringstream dim = std::stringstream(line);
             dim >> mesh.numU >> mesh.numV;
 
-            // We can now read the vertices data:
+            // We can now read the vertices data
             for (int l = 0; l < mesh.numU * mesh.numV; l++) {
                 ghoul::getline(file, line);
                 if (line.substr(0, 1) == "}") {
                     break;
                 }
 
-                std::stringstream lineData(line);
+                std::stringstream lineData = std::stringstream(line);
 
                 // Try to read three values for the position
                 glm::vec3 pos;

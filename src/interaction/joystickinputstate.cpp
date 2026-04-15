@@ -29,7 +29,41 @@
 #include <algorithm>
 #include <numeric>
 
-namespace openspace::interaction {
+namespace openspace {
+
+void JoystickInputState::initializeAxesAndButtons() {
+    axes.resize(nAxes);
+    buttons.resize(nButtons);
+    std::fill(axes.begin(), axes.end(), 0.f);
+    std::fill(buttons.begin(), buttons.end(), JoystickAction::Idle);
+}
+
+void JoystickInputState::updateButtonState(bool isPressed, int buttonIndex) {
+    if (isPressed) {
+        switch (buttons[buttonIndex]) {
+            case JoystickAction::Idle:
+            case JoystickAction::Release:
+                buttons[buttonIndex] = JoystickAction::Press;
+                break;
+            case JoystickAction::Press:
+            case JoystickAction::Repeat:
+                buttons[buttonIndex] = JoystickAction::Repeat;
+                break;
+        }
+    }
+    else {
+        switch (buttons[buttonIndex]) {
+            case JoystickAction::Idle:
+            case JoystickAction::Release:
+                buttons[buttonIndex] = JoystickAction::Idle;
+                break;
+            case JoystickAction::Press:
+            case JoystickAction::Repeat:
+                buttons[buttonIndex] = JoystickAction::Release;
+                break;
+        }
+    }
+}
 
 int JoystickInputStates::numAxes(const std::string& joystickName) const {
     if (joystickName.empty()) {
@@ -88,7 +122,7 @@ float JoystickInputStates::axis(const std::string& joystickName, int axis) const
 
         // If multiple joysticks are connected, we might get values outside the -1,1 range
         // by summing them up
-        return glm::clamp(res, -1.f, 1.f);
+        return std::clamp(res, -1.f, 1.f);
     }
 
     for (const JoystickInputState& state : *this) {
@@ -125,4 +159,4 @@ bool JoystickInputStates::button(const std::string& joystickName, int button,
     return false;
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

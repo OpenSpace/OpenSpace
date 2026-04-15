@@ -40,15 +40,13 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& tasks) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    properties::DoubleProperty _distanceThreshold;
+    DoubleProperty _distanceThreshold;
 
     ghoul::mm_unique_ptr<Renderable> _renderableNear;
     ghoul::mm_unique_ptr<Renderable> _renderableFar;

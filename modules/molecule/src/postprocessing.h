@@ -103,6 +103,6 @@ struct Settings {
 void postprocess(const Settings& settings, const glm::mat4& viewMat,
     const glm::mat4& projMat);
 
-}  // namespace postprocessing
+} // namespace postprocessing
 
 #endif // __OPENSPACE_MODULE_MOLECULE___POSTPROCESSING___H__

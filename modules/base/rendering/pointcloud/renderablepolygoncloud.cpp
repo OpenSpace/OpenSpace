@@ -36,9 +36,9 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePolygonCloud";
 
-    // A RenderablePolygonCloud is a RenderablePointCloud where the shape of the points
-    // is a uniform polygon with a given number of sides instead of a texture. For
-    // instance, PolygonSides = 5 results in the points being rendered as pentagons.
+    // A RenderablePolygonCloud is a RenderablePointCloud where the shape of the points is
+    // a uniform polygon with a given number of sides instead of a texture. For instance,
+    // PolygonSides = 5 results in the points being rendered as pentagons.
     //
     // Note that while this renderable inherits the texture component from
     // RenderablePointCloud, any added texture information will be ignored in favor of the
@@ -51,15 +51,14 @@ namespace {
         // 3, i.e. to use triangles.
         std::optional<int> polygonSides [[codegen::greaterequal(3)]];
     };
-
+} // namespace
 #include "renderablepolygoncloud_codegen.cpp"
-}  // namespace
 
 namespace openspace {
 
-documentation::Documentation RenderablePolygonCloud::Documentation() {
+Documentation RenderablePolygonCloud::Documentation() {
     return codegen::doc<Parameters>(
-        "base_renderablepolygoncloud",
+        "base_renderable_polygoncloud",
         RenderablePointCloud::Documentation()
     );
 }
@@ -99,9 +98,9 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     LDEBUG("Creating Polygon Texture");
     constexpr gl::GLsizei TexSize = 512;
 
-    // We don't use the helper function for the format and internal format here,
-    // as we don't want the compression to be used for the polygon texture and we
-    // always want alpha. This is also why we do not need to update the texture
+    // We don't use the helper function for the format and internal format here, as we
+    // don't want the compression to be used for the polygon texture and we always want
+    // alpha. This is also why we do not need to update the texture
     bool useAlpha = true;
     gl::GLenum format = gl::GLenum(glFormat(useAlpha));
     gl::GLenum internalFormat = GL_RGBA8;
@@ -152,7 +151,6 @@ void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,
 {
     LDEBUG("Rendering to Texture");
 
-    // Saves initial Application's OpenGL State
     GLint defaultFBO = 0;
     std::array<GLint, 4> viewport;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
@@ -189,7 +187,7 @@ void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,
         );
 
     program->activate();
-    constexpr glm::vec4 Black = glm::vec4(0.f, 0.f, 0.f, 0.f);
+    constexpr glm::vec4 Black = glm::vec4(0.f);
     glClearNamedFramebufferfv(textureFBO, GL_COLOR, 0, glm::value_ptr(Black));
 
     program->setUniform("sides", _nPolygonSides);

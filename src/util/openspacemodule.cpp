@@ -43,7 +43,7 @@ namespace {
 namespace openspace {
 
 OpenSpaceModule::OpenSpaceModule(std::string name)
-    : properties::PropertyOwner({ std::move(name) })
+    : PropertyOwner({ std::move(name) })
 {}
 
 void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
@@ -52,7 +52,7 @@ void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
 
     const std::string upperIdentifier = ghoul::toUpperCase(identifier());
 
-    std::string moduleToken = "${" + std::string(ModuleBaseToken) + upperIdentifier + "}";
+    std::string moduleToken = std::format("${{{}{}}}", ModuleBaseToken, upperIdentifier);
 
     std::filesystem::path path = modulePath();
     if (!path.empty()) {
@@ -85,24 +85,20 @@ void OpenSpaceModule::deinitializeGL() {
     internalDeinitializeGL();
 }
 
-std::vector<documentation::Documentation> OpenSpaceModule::documentations() const {
+std::vector<Documentation> OpenSpaceModule::documentations() const {
     return {};
 }
 
-documentation::Documentation OpenSpaceModule::Documentation() {
+Documentation OpenSpaceModule::Documentation() {
     return {};
 }
 
-scripting::LuaLibrary OpenSpaceModule::luaLibrary() const {
+LuaLibrary OpenSpaceModule::luaLibrary() const {
     return {};
 }
 
-std::vector<scripting::LuaLibrary> OpenSpaceModule::luaLibraries() const {
+std::vector<LuaLibrary> OpenSpaceModule::luaLibraries() const {
     return {};
-}
-
-ghoul::systemcapabilities::Version OpenSpaceModule::requiredOpenGLVersion() const {
-    return { 3, 3, 0 };
 }
 
 std::vector<std::string> OpenSpaceModule::requiredOpenGLExtensions() const {

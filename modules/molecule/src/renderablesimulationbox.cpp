@@ -26,10 +26,10 @@
 
 #include <modules/molecule/moleculemodule.h>
 #include <modules/molecule/src/cache.h>
-#include <modules/molecule/src/util.h>
 #include <modules/molecule/src/coloring.h>
 #include <modules/molecule/src/loader.h>
 #include <modules/molecule/src/postprocessing.h>
+#include <modules/molecule/src/util.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
@@ -55,96 +55,98 @@
 #include <string_view>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableSimulationBox";
 
-    constexpr openspace::properties::Property::PropertyInfo RepresentationInfo = {
+    constexpr Property::PropertyInfo RepresentationInfo = {
         "Representation",
         "Representation type",
         "The visual representation type to use for the molecule."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColoringInfo = {
+    constexpr Property::PropertyInfo ColoringInfo = {
         "Coloring",
         "Coloring",
         "The color mapping for the atoms."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RepScaleInfo = {
+    constexpr Property::PropertyInfo RepScaleInfo = {
         "RepScale",
         "Representation scale",
         "Thickness of the atoms when using the Space Fill or Licorice representations."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AnimationSpeedInfo = {
+    constexpr Property::PropertyInfo AnimationSpeedInfo = {
         "AnimationSpeed",
         "Animation speed",
         "Playback speed of the animation (in frames per second)."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SimulationSpeedInfo = {
+    constexpr Property::PropertyInfo SimulationSpeedInfo = {
         "SimulationSpeed",
         "Simulation speed",
         "Adjust the speed of the simulation (seconds per second)."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LinearVelocityInfo = {
+    constexpr Property::PropertyInfo LinearVelocityInfo = {
         "LinearVelocity",
         "Linear velocity",
         "Average linear velocity at the start of the simulation (m/s)."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AngularVelocityInfo = {
+    constexpr Property::PropertyInfo AngularVelocityInfo = {
         "AngularVelocity",
         "Angular velocity",
         "Average angular velocity at the start of the simulation (radians/s)."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SimulationBoxInfo = {
+    constexpr Property::PropertyInfo SimulationBoxInfo = {
         "SimulationBox",
         "Simulation box",
         "Size of the periodic simulation box."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CollisionRadiusInfo = {
+    constexpr Property::PropertyInfo CollisionRadiusInfo = {
         "CollisionRadius",
         "Collision radius",
         "Radius of the collision sphere around molecules."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilterInfo = {
+    constexpr Property::PropertyInfo FilterInfo = {
         "Filter",
         "Filter",
         "The filter used to remove parts of the dataset."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CircleColorInfo = {
+    constexpr Property::PropertyInfo CircleColorInfo = {
         "CircleColor",
         "Circle color",
         "Color of the circle outlining the simulation."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CircleWidthInfo = {
+    constexpr Property::PropertyInfo CircleWidthInfo = {
         "CircleWidth",
         "Circle width",
         "Width of the circle outlining the simulation."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CircleFalloffInfo = {
+    constexpr Property::PropertyInfo CircleFalloffInfo = {
         "CircleFalloff",
         "Circle falloff",
         "Falloff exponent of the circle outlining the simulation."
     };
 
-    // This `Renderable` type is capable of rendering a number of different molecules on a
-    // moving path using periodic boundary conditions. This can be used to show, for
-    // example the distribution of different molecules or atoms in a specific spatial
-    // region, such as the atmosphere of a planet.
+
+    // Renders a molecular dynamics simulation with multiple molecule types in a periodic
+    // boundary box. This can for example be used to show the distribution of different
+    // molecules or atoms in a specific spatial region, such as a planet's atmosphere.
     //
     // Multiple molecules can be provided and for each the path containing the structural
     // data and the count of molecules has to be provided. Specifying the trajectory file
     // that describes the movement of each individual molecule in its own relative frame,
     // is optional.
-    struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
+    struct [[codegen::Dictionary(RenderableSimulationBox)]] Parameters {
         struct MoleculeData {
             // The path to a molecule file that contains the structural information for
             // the molecule.
@@ -220,14 +222,13 @@ namespace {
         // [[codegen::verbatim(CircleFalloffInfo.description)]]
         std::optional<float> circleFalloff;
     };
-
-#include "renderablesimulationbox_codegen.cpp"
 } // namespace
+#include "renderablesimulationbox_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableSimulationBox::Documentation() {
-    return codegen::doc<Parameters>("molecule_renderablesimulationbox");
+Documentation RenderableSimulationBox::Documentation() {
+    return codegen::doc<Parameters>("molecule_renderable_simulationbox");
 }
 
 RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictionary)
@@ -257,7 +258,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
         for (Molecules& mol : _molecules) {
             const molecule::rep::Type t =
                 static_cast<molecule::rep::Type>(_representation.value());
-            molecule::util::updateRepType(mol.data.drawRep, t, _repScale);
+            molecule::updateRepType(mol.data.drawRep, t, _repScale);
         }
     };
 
@@ -268,7 +269,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
             const std::string& filter = _filter;
             if (!filter.empty() && filter != "" && filter != "all") {
                 str_t str = { filter.data(), static_cast<int64_t>(filter.length()) };
-                char errBuf[1024];
+                std::array<char, 1024> buf = { '\0' };
 
                 const bool success = md_filter(
                     &mask,
@@ -276,11 +277,11 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
                     &mol.data.molecule,
                     nullptr,
                     nullptr,
-                    errBuf,
-                    sizeof(errBuf)
+                    buf.data(),
+                    static_cast<int>(buf.size())
                 );
                 if (!success) {
-                    LERROR(std::format("Invalid filter expression: {}", errBuf));
+                    LERROR(std::format("Invalid filter expression: {}", buf.data()));
                     md_bitfield_clear(&mask);
                     md_bitfield_set_range(&mask, 0, mol.data.molecule.atom.count);
                 }
@@ -291,10 +292,10 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
 
             const molecule::rep::Type t =
                 static_cast<molecule::rep::Type>(_representation.value());
-            molecule::util::updateRepType(mol.data.drawRep, t, _repScale);
+            molecule::updateRepType(mol.data.drawRep, t, _repScale);
             const molecule::rep::Color c =
                 static_cast<molecule::rep::Color>(_coloring.value());
-            molecule::util::updateRepColor(mol.data.drawRep, mol.data.molecule, c, mask);
+            molecule::updateRepColor(mol.data.drawRep, mol.data.molecule, c, mask);
         }
     };
 
@@ -357,7 +358,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     addProperty(_filter);
 
     _circleColor = p.circleColor.value_or(_circleColor);
-    _circleColor.setViewOption(properties::Property::ViewOptions::Color);
+    _circleColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_circleColor);
 
     _circleWidth = p.circleWidth.value_or(_circleWidth);
@@ -434,10 +435,10 @@ void RenderableSimulationBox::initializeGL() {
 
         const molecule::rep::Type t =
             static_cast<molecule::rep::Type>(_representation.value());
-        molecule::util::updateRepType(mol.data.drawRep, t, _repScale);
+        molecule::updateRepType(mol.data.drawRep, t, _repScale);
         const molecule::rep::Color c =
             static_cast<molecule::rep::Color>(_coloring.value());
-        molecule::util::updateRepColor(mol.data.drawRep, mol.data.molecule, c, mask);
+        molecule::updateRepColor(mol.data.drawRep, mol.data.molecule, c, mask);
     }
 }
 
@@ -448,12 +449,8 @@ void RenderableSimulationBox::deinitializeGL() {
     _billboard.program = nullptr;
 }
 
-bool RenderableSimulationBox::isReady() const {
-    return true;
-}
-
 void RenderableSimulationBox::update(const UpdateData& data) {
-    // avoid updating if not in view, as it can be quite expensive.
+    // Avoid updating if not in view, as it can be quite expensive
     if (!_renderableInView) {
         return;
     }
@@ -464,7 +461,7 @@ void RenderableSimulationBox::update(const UpdateData& data) {
     double dt = tCur - data.previousFrameTime.j2000Seconds();
 
     for (Molecules& mol : _molecules) {
-        // update animation
+        // Update animation
         if (mol.data.trajectory) {
             // Emulate PingPong animation by manipulating the local time t_local per
             // trajectory
@@ -474,10 +471,10 @@ void RenderableSimulationBox::update(const UpdateData& data) {
                 frame = 2.0 * numFrames - frame;
             }
 
-            molecule::util::interpolateFrame(
+            molecule::interpolateFrame(
                 mol.data.molecule,
                 mol.data.trajectory,
-                molecule::util::InterpolationType::Cubic,
+                molecule::InterpolationType::Cubic,
                 frame
             );
             md_gl_molecule_set_atom_position(
@@ -491,7 +488,7 @@ void RenderableSimulationBox::update(const UpdateData& data) {
             );
         }
 
-        // update simulation
+        // Update simulation
         updateSimulation(mol.data, dt * _simulationSpeed);
     }
 }
@@ -499,16 +496,16 @@ void RenderableSimulationBox::update(const UpdateData& data) {
 void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     global::renderEngine->openglStateCache().loadCurrentGLState();
 
-    // compute distance from camera to molecule
-    glm::vec3 forward = data.modelTransform.translation - data.camera.positionVec3();
+    // Compute distance from camera to molecule
+    glm::vec3 forward = data.modelTransform.translation - data.camera.position();
     glm::vec3 dir = data.camera.viewDirectionWorldSpace();
 
-    // "signed" distance from camera to object.
+    // "Signed" distance from camera to object
     const float distance = length(forward) * sign(glm::dot(dir, forward));
-    // we apply artificial scaling to everything to cheat a bit with the unit system:
+    // We apply artificial scaling to everything to cheat a bit with the unit system
     const float fakeScaling = 100.f / distance;
 
-    // distance < 0 means behind the camera, 1E4 is arbitrary.
+    // Distance < 0 means behind the camera, 1E4 is arbitrary
     if (distance < 0.f || distance > 1E4) {
         return;
     }
@@ -517,7 +514,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
 
     // Because the molecule is small, a scaling of the view matrix causes the molecule to
     // be moved out of view in clip space. Resetting the scaling for the molecule is fine
-    // for now. This will have an impact on stereoscopic depth though.
+    // for now. This will have an impact on stereoscopic depth though
     Camera camCopy = data.camera;
     camCopy.setScaling(0.1f);
 
@@ -560,19 +557,19 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         .shaders = &mod->shaders(),
         .draw_operations = { static_cast<uint32_t>(drawOps.size()), drawOps.data() },
         .view_transform = {
-            glm::value_ptr(viewMatrix),
-            glm::value_ptr(projMatrix),
-            nullptr,
-            nullptr
+            .view_matrix = glm::value_ptr(viewMatrix),
+            .projection_matrix = glm::value_ptr(projMatrix),
+            .prev_view_matrix = nullptr,
+            .prev_projection_matrix = nullptr
         },
         .options = 0
     };
 
-    // draw molecule offscreen
+    // Draw molecule offscreen
     GLint defaultFbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
     glBindFramebuffer(GL_FRAMEBUFFER, mod->fbo());
-    // shading rendering of mold
+    // Shading rendering of mold
     const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
     glDrawBuffers(2, bufs);
 
@@ -601,7 +598,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
 
 
-    // draw billboard pre-rendered with molecule inside
+    // Draw billboard pre-rendered with molecule inside
     const glm::dmat4 billboardModel =
         camCopy.combinedViewMatrix() *
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
@@ -649,7 +646,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableSimulationBox::updateSimulation(Molecules::Data& mol, double dt) {
-    // update positions / rotations
+    // Update positions / rotations
     for (Molecules::Data::State& molecule : mol.states) {
         molecule.position += molecule.direction * dt;
         molecule.position = glm::mod(molecule.position, _simulationBox.value());
@@ -658,9 +655,9 @@ void RenderableSimulationBox::updateSimulation(Molecules::Data& mol, double dt) 
 
     const double collRadiusSquared = _collisionRadius * _collisionRadius;
 
-    // compute collisions
-    // those collisions are really simplistic, they assume spherical boundaries, equal
-    // mass, and are order-dependent.
+    // Compute collisions
+    // Those collisions are really simplistic, they assume spherical boundaries, equal
+    // mass, and are order-dependent
     for (auto it1 = mol.states.begin(); it1 != mol.states.end(); it1++) {
         for (auto it2 = std::next(it1); it2 != mol.states.end(); it2++) {
             Molecules::Data::State& m1 = *it1;
@@ -669,24 +666,26 @@ void RenderableSimulationBox::updateSimulation(Molecules::Data& mol, double dt) 
             glm::dvec3 distVec = m2.position - m1.position;
             double distSquared = glm::dot(distVec, distVec);
 
-            // collision detected
-            if (distSquared < collRadiusSquared &&
-                glm::dot(m1.direction, m2.direction) < 0.f)
+            if (distSquared >= collRadiusSquared ||
+                glm::dot(m1.direction, m2.direction) >= 0.f)
             {
-                double dist = std::sqrt(distSquared);
-                double intersection = 2.0 * _collisionRadius - dist;
-                // swap the direction components normal to the collision plane from the 2
-                // molecules. (simplistic elastic collision of 2 spheres with same mass)
-                glm::dvec3 dir = distVec / dist;
-                glm::dvec3 compM1 = dir * glm::dot(m1.direction, dir);
-                glm::dvec3 compM2 = -dir * glm::dot(m2.direction, -dir);
-                m1.direction = m1.direction - compM1 + compM2;
-                m2.direction = m2.direction - compM2 + compM1;
-
-                // move the spheres away from each other (not intersecting)
-                m1.position += -dir * intersection;
-                m2.position += dir * intersection;
+                continue;
             }
+
+            // Collision detected
+            double dist = std::sqrt(distSquared);
+            double intersection = 2.0 * _collisionRadius - dist;
+            // Swap the direction components normal to the collision plane from the 2
+            // molecules. (simplistic elastic collision of 2 spheres with same mass)
+            glm::dvec3 dir = distVec / dist;
+            glm::dvec3 compM1 = dir * glm::dot(m1.direction, dir);
+            glm::dvec3 compM2 = -dir * glm::dot(m2.direction, -dir);
+            m1.direction = m1.direction - compM1 + compM2;
+            m2.direction = m2.direction - compM2 + compM1;
+
+            // Move the spheres away from each other (not intersecting)
+            m1.position += -dir * intersection;
+            m2.position += dir * intersection;
         }
     }
 }
@@ -697,7 +696,7 @@ void RenderableSimulationBox::initMolecule(Molecules::Data& mol,
 {
     LDEBUG(std::format("Loading molecule file '{}'", molFile));
 
-    // free previously loaded molecule
+    // Free previously loaded molecule
     freeMolecule(mol);
 
     const md_molecule_t* molecule = molecule::loadMolecule(molFile);

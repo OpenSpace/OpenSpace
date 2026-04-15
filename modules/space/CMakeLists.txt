@@ -88,7 +88,7 @@ set(SHADER_FILES
   shaders/rings_vs.glsl
   shaders/rings_fs.glsl
   shaders/star_fs.glsl
-  shaders/star_ge.glsl
+  shaders/star_gs.glsl
   shaders/star_vs.glsl
   shaders/travelspeed_fs.glsl
   shaders/travelspeed_vs.glsl

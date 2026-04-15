@@ -26,18 +26,18 @@
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/defer.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -47,6 +47,8 @@
 #include <variant>
 
 namespace {
+    using namespace openspace;
+
     struct Vertex {
         glm::vec4 position;
         glm::vec2 texCoords;
@@ -63,8 +65,7 @@ namespace {
         Additive
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OrientationRenderOptionInfo =
-    {
+    constexpr Property::PropertyInfo OrientationRenderOptionInfo = {
         "OrientationRenderOption",
         "Orientation render option",
         "Controls how the plane will be oriented. \"Camera View Direction\" rotates the "
@@ -75,85 +76,82 @@ namespace {
         "slightly different way. In contrast, \"Fixed Rotation\" does not rotate the "
         "plane at all based on the camera and should be used the plane should be "
         "oriented in a fixed way.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MirrorBacksideInfo = {
+    constexpr Property::PropertyInfo MirrorBacksideInfo = {
         "MirrorBackside",
         "Mirror backside of image plane",
         "If false, the image plane will not be mirrored when viewed from the backside. "
         "This is usually desirable when the image shows data at a specific location, but "
         "not if it is displaying text for example.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "The size of the plane in meters.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AutoScaleInfo = {
+    constexpr Property::PropertyInfo AutoScaleInfo = {
         "AutoScale",
         "Auto scale",
         "Decides whether the plane should automatically adjust in size to match the "
         "aspect ratio of the content. Otherwise it will remain in the given size."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScaleByDistanceInfo = {
+    constexpr Property::PropertyInfo ScaleByDistanceInfo = {
         "ScaleByDistance",
         "Scale by distance",
-        "Decides whether the plane should automatically adjust in size to based on "
-        "the distance to the camera. Otherwise it will remain in the given size.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "Decides whether the plane should automatically adjust in size to based on the "
+        "distance to the camera. Otherwise it will remain in the given size.",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ApparentSizeMultiplierInfo = {
+    constexpr Property::PropertyInfo ApparentSizeMultiplierInfo = {
         "ApparentSizeMultiplier",
         "Apparent size multiplier",
         "Value that controls the visual size of the object when using distance scaling."
         "A value of 1.0 results in a natural angular size based on camera distance and "
-        "field of view. Smaller values (e.g., 0.01) make the object appear smaller, while"
-        " larger values make it appear bigger.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "field of view. Smaller values (e.g., 0.01) make the object appear smaller, "
+        "while larger values make it appear bigger.",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScaleByDistanceMaxHeightInfo =
-    {
+    constexpr Property::PropertyInfo ScaleByDistanceMaxHeightInfo = {
         "ScaleByDistanceMaxHeight",
         "Scale by distance max height",
         "The maximum height in meters a plane can get when using distance scaling.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScaleByDistanceMinHeightInfo =
-    {
+    constexpr Property::PropertyInfo ScaleByDistanceMinHeightInfo = {
         "ScaleByDistanceMinHeight",
         "Scale by distance min height",
         "The minimum height in meters a plane can get when using distance scaling.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
+    constexpr Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending mode",
         "Determines the blending mode that is applied to this plane.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
+    constexpr Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
         "Multiply color",
-        "An RGB color to multiply with the plane's texture. Useful for applying "
-        "a color to grayscale images.",
-        openspace::properties::Property::Visibility::User
+        "An RGB color to multiply with the plane's texture. Useful for applying a color "
+        "to grayscale images.",
+        Property::Visibility::User
     };
 
-    // A `RenderablePlane` is a renderable that will shows some form of contents projected
-    // on a two-dimensional plane, which in turn is placed in three-dimensional space as
-    // any other `Renderable`. It is possible to specify the `Size` of the plane, whether
-    // it should always face the camera (`Billboard`), and other parameters shown below.
+    // Displays some form of content (usually an image) on a plane. Settable parameters
+    // include the `Size` of the plane, whether it should always face the camera
+    // (`Billboard`), and others shown below.
     struct [[codegen::Dictionary(RenderablePlane)]] Parameters {
         enum class [[codegen::map(RenderOption)]] RenderOption {
             ViewDirection [[codegen::key("Camera View Direction")]],
@@ -198,7 +196,7 @@ namespace {
             std::optional<float> scaleByDistanceMinHeight [[codegen::greater(0.f)]];
         };
 
-        // Settings for scaling points based on camera distance
+        // Settings for scaling points based on camera distance.
         std::optional<DistanceScalingSettings> distanceScalingSettings;
 
         enum class [[codegen::map(BlendMode)]] BlendMode {
@@ -211,18 +209,18 @@ namespace {
         // [[codegen::verbatim(MultiplyColorInfo.description)]]
         std::optional<glm::vec3> multiplyColor [[codegen::color()]];
     };
-#include "renderableplane_codegen.cpp"
 } // namespace
+#include "renderableplane_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderablePlane::Documentation() {
+Documentation RenderablePlane::Documentation() {
     return codegen::doc<Parameters>("base_renderable_plane");
 }
 
 RenderablePlane::DistanceScalingSettings::DistanceScalingSettings(
     const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "DistanceScaling", "Distance Scaling", "" })
+    : PropertyOwner({ "DistanceScaling", "Distance Scaling", "" })
     , scaleByDistance(ScaleByDistanceInfo, false)
     , apparentSizeMultiplier(ApparentSizeMultiplierInfo, 1.f)
     , scaleByDistanceMaxHeight(ScaleByDistanceMaxHeightInfo, 2000.f)
@@ -334,14 +332,10 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     addProperty(_autoScale);
 
     _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
-    _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
+    _multiplyColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_multiplyColor);
 
     setBoundingSphere(glm::compMax(_size.value()));
-}
-
-bool RenderablePlane::isReady() const {
-    return _shader != nullptr;
 }
 
 void RenderablePlane::initializeGL() {
@@ -409,16 +403,18 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     if (_distanceScalingSettings.scaleByDistance) {
         if (global::windowDelegate->isFisheyeRendering()) {
-            LWARNINGC("RenderablePlane",
-                "Distance scaling is disabled in Fisheye rendering mode.");
+            LWARNINGC(
+                "RenderablePlane",
+                "Distance scaling is disabled in Fisheye rendering mode"
+            );
             _distanceScalingSettings.scaleByDistance = false;
         }
         else {
-            const glm::dvec3 cameraPosition = data.camera.positionVec3();
+            const glm::dvec3 cameraPosition = data.camera.position();
             const glm::dvec3 modelPosition = data.modelTransform.translation;
 
-            const double fovDegrees = static_cast<double>(
-                                             global::windowDelegate->horizFieldOfView(0));
+            const double fovDegrees =
+                static_cast<double>(global::windowDelegate->horizFieldOfView(0));
             const double fovRadians = glm::radians(fovDegrees);
             const double halfFovTan = std::tan(fovRadians * 0.5);
 
@@ -429,19 +425,14 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
             projectedHeight = std::clamp(
                 projectedHeight,
-                static_cast<double>(
-                               _distanceScalingSettings.scaleByDistanceMinHeight.value()),
-                static_cast<double>(
-                                _distanceScalingSettings.scaleByDistanceMaxHeight.value())
+                static_cast<double>(_distanceScalingSettings.scaleByDistanceMinHeight),
+                static_cast<double>(_distanceScalingSettings.scaleByDistanceMaxHeight)
             );
 
-            const glm::vec2 currentSize = _size.value();
+            const glm::vec2 currentSize = _size;
             if (currentSize.y > 0.f) {
-                const double scaleFactor = projectedHeight / static_cast<double>(
-                                                                           currentSize.y);
-                const glm::vec2 scaledSize = currentSize * static_cast<float>(
-                                                                             scaleFactor);
-                _size.setValue(scaledSize);
+                const double scale = projectedHeight / static_cast<double>(currentSize.y);
+                _size = currentSize * static_cast<float>(scale);
             }
         }
     }
@@ -461,7 +452,6 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     defer { unbindTexture(); };
 
     _shader->setUniform(_uniformCache.colorTexture, unit);
-
     _shader->setUniform(_uniformCache.multiplyColor, _multiplyColor);
 
     const bool additiveBlending = (_blendMode == static_cast<int>(BlendMode::Additive));
@@ -513,7 +503,7 @@ void RenderablePlane::createPlane() {
         Vertex{ glm::vec4( sizeX,  sizeY, 0.f, 0.f), glm::vec2(1.f, 1.f) }
     };
 
-    glNamedBufferSubData(_vbo, 0, sizeof(vertexData), vertexData.data());
+    glNamedBufferSubData(_vbo, 0, vertexData.size() * sizeof(Vertex), vertexData.data());
 }
 
 glm::dmat4 RenderablePlane::rotationMatrix(const RenderData& data) const {
@@ -555,7 +545,7 @@ glm::dmat4 RenderablePlane::rotationMatrix(const RenderData& data) const {
             );
 
             const glm::dvec3 normal = glm::normalize(
-                data.camera.positionVec3() - objPosWorld
+                data.camera.position() - objPosWorld
             );
             const glm::dvec3 newRight = glm::normalize(
                 glm::cross(data.camera.lookUpVectorWorldSpace(), normal)

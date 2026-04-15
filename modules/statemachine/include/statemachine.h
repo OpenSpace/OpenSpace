@@ -35,7 +35,7 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 
 class StateMachine {
 public:
@@ -55,12 +55,12 @@ public:
     /**
      * Saves the state machine to a .dot file, as a directed graph.
      *
-     * \param filename This is the full name of the file, including the directory,
-     *        but without the extension
+     * \param filename This is the full name of the file, including the directory, but
+     *        without the extension
      */
     void saveToDotFile(const std::filesystem::path& filename) const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     int findTransitionTo(const std::string& state) const;

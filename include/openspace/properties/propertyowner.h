@@ -30,7 +30,7 @@
 #include <string_view>
 #include <vector>
 
-namespace openspace::properties {
+namespace openspace {
 
 class Property;
 
@@ -62,11 +62,11 @@ public:
      * The constructor of PropertyOwner.
      *
      * \param info The PropertyOwnerInfo struct that contains the
-     *             #PropertyOwnerInfo::identifier, #PropertyOwnerInfo::guiName, and
-     *             #PropertyOwnerInfo::description of this PropertyOwner
+     *        PropertyOwnerInfo::identifier, PropertyOwnerInfo::guiName, and
+     *        PropertyOwnerInfo::description of this PropertyOwner
      *
-     * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any whitespaces
-     * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any `.`
+     * \pre The \p info 's PropertyOwnerInfo::identifier must not contain any whitespaces
+     * \pre The \p info 's PropertyOwnerInfo::identifier must not contain any `.`
      */
     explicit PropertyOwner(PropertyOwnerInfo info);
 
@@ -156,7 +156,7 @@ public:
      * only the last part of the identifier is referring to a Property owned by a
      * PropertyOwner named by the second-but-last name.
      *
-     * \param uri The uri or identifier of the Property that should be extracted
+     * \param uri The URI or identifier of the Property that should be extracted
      * \return If the Property cannot be found, `nullptr` is returned, otherwise the
      *         pointer to the Property is returned
      */
@@ -165,23 +165,23 @@ public:
     /**
      * Retrieves a PropertyOwner identified by \p uri from this PropertyOwner. If \p uri
      * does not contain a `.` it is an identifier and must refer to a PropertyOwner
-     * directly owned by this PropertyOwner. If the uri contains one or more `.`, the
+     * directly owned by this PropertyOwner. If the URI contains one or more `.`, the
      * first part of the name will be recursively extracted and used as a name for a sub-
-     * owner and only the last part of the uri is referring to a PropertyOwner owned by a
+     * owner and only the last part of the URI is referring to a PropertyOwner owned by a
      * PropertyOwner named by the second-but-last name.
      *
-     * \param uri The uri or identifier of the PropertyOwner that should be extracted
+     * \param uri The URI or identifier of the PropertyOwner that should be extracted
      * \return If the PropertyOwner cannot be found, `nullptr` is returned, otherwise the
      *         pointer to the PropertyOwner is returned
      */
     PropertyOwner* propertyOwner(std::string_view uri) const;
 
     /**
-     * Returns a uri for this PropertyOwner. This is created by looking up all the owners
+     * Returns a URI for this PropertyOwner. This is created by looking up all the owners
      * of this PropertyOwner. The owner identifiers are separated by ".", which make up
-     * the uri of this PropertyOwner.
+     * the URI of this PropertyOwner.
      *
-     * \return The uri of this PropertyOwner
+     * \return The URI of this PropertyOwner
      */
     std::string uri() const;
 
@@ -264,7 +264,9 @@ public:
      */
     void addProperty(Property* prop);
 
-    /// \see Property::addProperty(Property*)
+    /**
+     * \see Property::addProperty(Property*).
+     */
     void addProperty(Property& prop);
 
     /**
@@ -277,7 +279,9 @@ public:
      */
     void addPropertySubOwner(PropertyOwner* owner);
 
-    /// \see PropertyOwner::addPropertySubOwner(PropertyOwner*)
+    /**
+     * \see PropertyOwner::addPropertySubOwner(PropertyOwner*).
+     */
     void addPropertySubOwner(PropertyOwner& owner);
 
     /**
@@ -289,7 +293,9 @@ public:
      */
     void removeProperty(Property* prop);
 
-    /// \see PropertyOwner::removeProperty(Property*)
+    /**
+     * \see PropertyOwner::removeProperty(Property*).
+     */
     void removeProperty(Property& prop);
 
     /**
@@ -299,7 +305,9 @@ public:
      */
     void removePropertySubOwner(PropertyOwner* owner);
 
-    /// \see PropertyOwner::removePropertySubOwner(PropertyOwner*)
+    /**
+     * \see PropertyOwner::removePropertySubOwner(PropertyOwner*).
+     */
     void removePropertySubOwner(PropertyOwner& owner);
 
     /**
@@ -354,11 +362,13 @@ protected:
     bool _isUriCacheDirty = true;
 
 private:
-    /// Will regenerate the uri caches for this property owner and all directly or
-    /// indirectly owned properties
+    /**
+     * Will regenerate the uri caches for this property owner and all directly or
+     * indirectly owned properties.
+     */
     void updateUriCaches();
 };
 
-}  // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___PROPERTYOWNER___H__

@@ -27,11 +27,11 @@
 
 #include <openspace/properties/misc/listproperty.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 class IntListProperty : public ListProperty<int> {
 public:
-    explicit IntListProperty(Property::PropertyInfo info,
+    explicit IntListProperty(PropertyInfo info,
         std::vector<int> values = std::vector<int>());
 
     std::string_view className() const override final;
@@ -47,6 +47,6 @@ private:
     std::vector<int> toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___INTLISTPROPERTY___H__

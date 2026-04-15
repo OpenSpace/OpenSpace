@@ -1,0 +1,31 @@
+-- Sparse
+-- This example creates a vector field visualization from a sparse point-cloud datase,
+-- provided in a CSV data file with one row per vector.
+--
+-- Optionally, one can specify the column names for the position and direction. Otherwise,
+-- x, y, z, and vx, vy, vz are assumed as the position and direction columns,
+-- respectively.
+
+local Node = {
+  Identifier = "RenderableVectorField_Example_Sparse",
+  Renderable = {
+    Type = "RenderableVectorField",
+    Mode = "Sparse",
+    VectorFieldScale = 15.0,
+    Sparse = {
+      FilePath = asset.resource("../renderablepointcloud/data/dummydata.csv")
+    }
+  },
+  GUI = {
+    Name = "RenderableVectorField - Sparse",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

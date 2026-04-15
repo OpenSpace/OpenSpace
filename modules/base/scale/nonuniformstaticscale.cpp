@@ -28,20 +28,22 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ScaleInfo = {
         "Scale",
         "Scale",
         "These values are used as scaling factors for the scene graph node that this "
         "transformation is attached to relative to its parent.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    // This Scale type scales the scene graph node that it is attached to by a fixed
-    // amount that does not change over time. It is possible to change the fixed scale
-    // after starting the application, but it otherwise remains unchanged. The scaling is
-    // a simple multiplication so that a `Scale` value of 10 means that the object will be
-    // 10 times larger than its original size. In comparison to the StaticScale type, this
-    // type has the ability to scale an object by different amounts for each direction.
+    // Scales the scene graph node that it is attached to by a fixed amount that does not
+    // change over time. It is possible to change the fixed scale after starting the
+    // application, but it otherwise remains unchanged. The scaling is a simple
+    // multiplication so that a `Scale` value of 10 means that the object will be 10 times
+    // larger than its original size. In comparison to the StaticScale type, this type has
+    // the ability to scale an object by different amounts for each direction.
     //
     // This type can be used to adjust the aspect ratio of Renderable types, for example
     // to make a RenderableSphericalGrid that is not a perfect spherical grid, but a
@@ -50,13 +52,13 @@ namespace {
         // [[codegen::verbatim(ScaleInfo.description)]]
         glm::dvec3 scale;
     };
-#include "nonuniformstaticscale_codegen.cpp"
 } // namespace
+#include "nonuniformstaticscale_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation NonUniformStaticScale::Documentation() {
-    return codegen::doc<Parameters>("base_transform_scale_nonuniformstatic");
+Documentation NonUniformStaticScale::Documentation() {
+    return codegen::doc<Parameters>("base_scale_nonuniformstatic");
 }
 
 NonUniformStaticScale::NonUniformStaticScale(const ghoul::Dictionary& dictionary)

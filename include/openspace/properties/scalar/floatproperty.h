@@ -29,15 +29,14 @@
 
 #include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 /**
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type `float`.
+ * This class is a concrete implementation of TemplateProperty with the type `float`.
  */
 class FloatProperty : public NumericalProperty<float> {
 public:
-    explicit FloatProperty(Property::PropertyInfo info, float value = 0.f,
+    explicit FloatProperty(PropertyInfo info, float value = 0.f,
         float minValue = std::numeric_limits<float>::lowest(),
         float maxValue = std::numeric_limits<float>::max(), float stepValue = 0.01f);
 
@@ -53,6 +52,6 @@ private:
     float toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___FLOATPROPERTY___H__

@@ -68,7 +68,7 @@ local PerseveranceNode = {
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = marsKernels.Frame.Mars,
+      SourceFrame = coreKernels.Frame.Mars,
       DestinationFrame = coreKernels.Frame.Galactic
     }
   },

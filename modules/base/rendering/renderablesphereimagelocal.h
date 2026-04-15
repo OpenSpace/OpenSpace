@@ -40,17 +40,15 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
 private:
-    properties::StringProperty _texturePath;
+    StringProperty _texturePath;
 
     std::unique_ptr<TextureComponent> _texture;
 };

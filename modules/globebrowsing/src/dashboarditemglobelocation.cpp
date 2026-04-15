@@ -39,27 +39,28 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo DisplayFormatInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo DisplayFormatInfo = {
         "DisplayFormat",
         "Display format",
         "Choosing the format in which the camera location is displayed.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SignificantDigitsInfo = {
+    constexpr Property::PropertyInfo SignificantDigitsInfo = {
         "SignificantDigits",
         "Significant digits",
         "Determines the number of significant digits that are shown in the location "
         "text.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    // This `DashboardItem` shows the longitude/latitude location of the camera and its
-    // distance to the current focus node. If the current focus node is Earth, these are
-    // provided in the WGS84 reference frame; if the focus is on another planetary body,
-    // it is in the native coordinate frame for that planetary body. If the current focus
-    // node is not a planetary body, a position of (0,0) with a distance of 0 will be
-    // displayed.
+    // Shows the longitude/latitude location of the camera and its distance to the current
+    // focus node. If the current focus node is Earth, these are provided in the WGS84
+    // reference frame; if the focus is on another planetary body, it is in the native
+    // coordinate frame for that planetary body. If the current focus node is not a
+    // planetary body, a position of (0,0) with a distance of 0 will be displayed.
     struct [[codegen::Dictionary(DashboardItemGlobeLocation)]] Parameters {
         enum class DisplayFormat {
             DecimalDegrees,
@@ -72,12 +73,12 @@ namespace {
         // [[codegen::verbatim(SignificantDigitsInfo.description)]]
         std::optional<int> significantDigits;
     };
-#include "dashboarditemglobelocation_codegen.cpp"
 } // namespace
+#include "dashboarditemglobelocation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemGlobeLocation::Documentation() {
+Documentation DashboardItemGlobeLocation::Documentation() {
     return codegen::doc<Parameters>(
         "globebrowsing_dashboarditem_globelocation",
         DashboardTextItem::Documentation()

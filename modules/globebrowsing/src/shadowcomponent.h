@@ -43,11 +43,11 @@ namespace ghoul {
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 struct RenderData;
 struct UpdateData;
 
-class ShadowComponent : public properties::PropertyOwner {
+class ShadowComponent : public PropertyOwner {
 public:
     struct ShadowMapData {
         glm::dmat4 shadowMatrix = glm::dmat4(1.0);
@@ -60,13 +60,11 @@ public:
     void initializeGL();
     void deinitializeGL();
 
-    bool isReady() const;
-
     RenderData begin(const RenderData& data);
     void end();
     void update(const UpdateData& data);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     bool isEnabled() const;
 
@@ -85,10 +83,10 @@ private:
 
     ShadowMapData _shadowData;
 
-    // DEBUG
-    properties::TriggerProperty _saveDepthTexture;
-    properties::IntProperty _distanceFraction;
-    properties::BoolProperty _enabled;
+    // Debug
+    TriggerProperty _saveDepthTexture;
+    IntProperty _distanceFraction;
+    BoolProperty _enabled;
 
     int _shadowDepthTextureHeight = 4096;
     int _shadowDepthTextureWidth = 4096;
@@ -101,7 +99,7 @@ private:
     GLuint _positionInLightSpaceTexture = 0;
     GLuint _shadowFBO = 0;
     GLint _currentFBO = 0;
-    std::array<GLint, 4> _viewport;
+    std::array<GLint, 4> _viewport = { 0, 0, 0, 0 };
 
     GLboolean _faceCulling;
     GLboolean _polygonOffSet;
@@ -118,7 +116,7 @@ private:
 
     std::unique_ptr<Camera> _lightCamera;
 
-    // DEBUG
+    // Debug
     bool _executeDepthTextureSave = false;
 };
 

@@ -36,7 +36,7 @@ namespace {
     constexpr std::string_view _loggerCat = "ReadFileJob";
 } // namespace
 
-namespace openspace::gaia {
+namespace openspace {
 
 ReadFileJob::ReadFileJob(std::filesystem::path filePath,
                          std::vector<std::string> allColumns, int firstRow, int lastRow,
@@ -49,11 +49,11 @@ ReadFileJob::ReadFileJob(std::filesystem::path filePath,
     , _nValuesPerStar(nValuesPerStar)
     , _allColumns(std::move(allColumns))
     , _fitsFileReader(std::move(fitsReader))
-    , _octants(8)
+    , _octants(std::vector<std::vector<float>>(8))
 {}
 
 void ReadFileJob::execute() {
-    // Read columns from FITS file. If rows aren't specified then full table will be read.
+    // Read columns from FITS file. If rows aren't specified then full table will be read
     const std::shared_ptr<TableData<float>> table = _fitsFileReader->readTable<float>(
         _inFilePath,
         _allColumns,
@@ -77,10 +77,10 @@ void ReadFileJob::execute() {
         );
     }
 
-    // Copy columns to local variables.
+    // Copy columns to local variables
     std::unordered_map<std::string, std::vector<float>>& tableContent = table->contents;
 
-    // Default columns parameters.
+    // Default columns parameters
     std::vector<float> ra = std::move(tableContent[_allColumns[0]]);
     std::vector<float> ra_err = std::move(tableContent[_allColumns[1]]);
     std::vector<float> dec = std::move(tableContent[_allColumns[2]]);
@@ -101,7 +101,7 @@ void ReadFileJob::execute() {
     std::vector<float> radial_vel_err = std::move(tableContent[_allColumns[17]]);
 
 
-    // Construct data array. OBS: ORDERING IS IMPORTANT! This is where slicing happens.
+    // Construct data array. OBS: Ordering is important. This is where slicing happens
     for (int i = 0; i < nStars; i++) {
         std::vector<float> values(_nValuesPerStar);
         size_t idx = 0;
@@ -116,22 +116,21 @@ void ReadFileJob::execute() {
         // -- G-Rp Color
         // Velocity [X, Y, Z]
 
-        // Return early if star doesn't have a measured position.
+        // Return early if star doesn't have a measured position
         if (std::isnan(ra[i]) || std::isnan(dec[i])) {
             continue;
         }
 
-        // Store positions. Set to a default distance if parallax doesn't exist.
+        // Store positions. Set to a default distance if parallax doesn't exist
         float radiusInKiloParsec = 9.0;
         if (!std::isnan(parallax[i])) {
             // Parallax is in milliArcseconds -> distance in kiloParsecs
             // https://gea.esac.esa.int/archive/documentation/GDR2/Gaia_archive/
             // chap_datamodel/sec_dm_main_tables/ssec_dm_gaia_source.html
-            //LINFO("Parallax: " + std::to_string(parallax[i]));
             radiusInKiloParsec = 1.f / parallax[i];
         }
 
-        // Convert ICRS Equatorial Ra and Dec to Galactic latitude and longitude.
+        // Convert ICRS Equatorial Ra and Dec to Galactic latitude and longitude
         const glm::mat3 aPrimG = glm::mat3(
             // Col 0
             glm::vec3(-0.0548755604162154, 0.4941094278755837, -0.8676661490190047),
@@ -182,22 +181,16 @@ void ReadFileJob::execute() {
 
         // Calculate True Space Velocity [m/s] if we have the radial velocity
         if (!std::isnan(radial_vel[i])) {
-            // Calculate Radial Velocity in the direction of the star.
+            // Calculate Radial Velocity in the direction of the star
             // radial_vel is given in [km/s] -> convert to [m/s]
             const float radVelX = 1000.f * radial_vel[i] * rGal.x;
             const float radVelY = 1000.f * radial_vel[i] * rGal.y;
             const float radVelZ = 1000.f * radial_vel[i] * rGal.z;
 
             // Use Pythagoras theorem for the final Space Velocity [m/s]
-            values[idx++] = static_cast<float>(
-                std::sqrt(std::pow(radVelX, 2) + std::pow(tanVelX, 2)) // Vel X [U]
-            );
-            values[idx++] = static_cast<float>(
-                std::sqrt(std::pow(radVelY, 2) + std::pow(tanVelY, 2)) // Vel Y [V]
-            );
-            values[idx++] = static_cast<float>(
-                std::sqrt(std::pow(radVelZ, 2) + std::pow(tanVelZ, 2)) // Vel Z [W]
-            );
+            values[idx++] = glm::length(glm::vec2(radVelX, tanVelX)); // Vel X [U]
+            values[idx++] = glm::length(glm::vec2(radVelY, tanVelY)); // Vel Y [V]
+            values[idx++] = glm::length(glm::vec2(radVelZ, tanVelZ)); // Vel Z [W]
         }
         // Otherwise use the vector [m/s] we got from proper motion
         else {
@@ -250,4 +243,4 @@ std::vector<std::vector<float>> ReadFileJob::product() {
     return _octants;
 }
 
-} // namespace openspace::gaia
+} // namespace openspace

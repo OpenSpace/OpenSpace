@@ -30,7 +30,6 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-
     // The base class of all tasks. Specify the Type property to create one of the
     // available task types. This property should be included in the same table object
     // as the properties of the specific task.
@@ -42,15 +41,15 @@ namespace {
     struct [[codegen::Dictionary(Task)]] Parameters {
         // This key specifies the type of Task that gets created. It has to be one of the
         // valid Tasks that are available for creation (see the FactoryDocumentation for a
-        // list of possible Tasks), which depends on the configration of the application
+        // list of possible Tasks), which depends on the configration of the application.
         std::string type [[codegen::annotation("A valid Task created by a factory")]];
     };
-#include "task_codegen.cpp"
 } // namespace
+#include "task_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation Task::documentation() {
+Documentation Task::documentation() {
     return codegen::doc<Parameters>("core_task");
 }
 

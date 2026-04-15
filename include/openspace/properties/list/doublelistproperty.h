@@ -27,11 +27,11 @@
 
 #include <openspace/properties/misc/listproperty.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 class DoubleListProperty : public ListProperty<double> {
 public:
-    explicit DoubleListProperty(Property::PropertyInfo info,
+    explicit DoubleListProperty(PropertyInfo info,
         std::vector<double> values = std::vector<double>());
 
     std::string_view className() const override final;
@@ -47,6 +47,6 @@ private:
     std::vector<double> toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___DOUBLELISTPROPERTY___H__

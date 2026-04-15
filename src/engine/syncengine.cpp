@@ -38,7 +38,7 @@ SyncEngine::SyncEngine(unsigned int syncBufferSize)
     ghoul_assert(syncBufferSize > 0, "syncBufferSize must be bigger than 0");
 }
 
-// Should be called on sgct master
+// Will be called on SGCT master
 std::vector<std::byte> SyncEngine::encodeSyncables() {
     for (Syncable* syncable : _syncables) {
         syncable->encode(&_syncBuffer);
@@ -49,7 +49,7 @@ std::vector<std::byte> SyncEngine::encodeSyncables() {
     return data;
 }
 
-// Should be called on sgct clients
+// Will be called on SGCT clients
 void SyncEngine::decodeSyncables(std::vector<std::byte> data) {
     _syncBuffer.setData(std::move(data));
     for (Syncable* syncable : _syncables) {
@@ -62,8 +62,8 @@ void SyncEngine::decodeSyncables(std::vector<std::byte> data) {
 void SyncEngine::preSynchronization(IsMaster isMaster) {
     ZoneScoped;
 
-    // We use a raw for-loop because a syncable can add to the `_syncables` list which
-    // can invalidate the pointers of a range-based for-loop
+    // We use a raw for-loop because a syncable can add to the `_syncables` list which can
+    // invalidate the pointers of a range-based for-loop
     for (size_t i = 0; i < _syncables.size(); i++) {
         _syncables[i]->preSync(isMaster);
     }
@@ -72,8 +72,8 @@ void SyncEngine::preSynchronization(IsMaster isMaster) {
 void SyncEngine::postSynchronization(IsMaster isMaster) {
     ZoneScoped;
 
-    // We use a raw for-loop because a syncable can add to the `_syncables` list which
-    // can invalidate the pointers of a range-based for-loop
+    // We use a raw for-loop because a syncable can add to the `_syncables` list which can
+    // invalidate the pointers of a range-based for-loop
     for (size_t i = 0; i < _syncables.size(); i++) {
         _syncables[i]->postSync(isMaster);
     }

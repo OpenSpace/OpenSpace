@@ -74,9 +74,9 @@ namespace {
 
     constexpr int MaxNumberLocationSamples = 1000;
 
-    constexpr std::chrono::milliseconds TTL(5000);
+    constexpr std::chrono::milliseconds TTL = std::chrono::milliseconds(5000);
 
-    constexpr std::chrono::milliseconds RefreshRate(16);
+    constexpr std::chrono::milliseconds RefreshRate = std::chrono::milliseconds(16);
 
     bool rectOverlaps(glm::vec2 lhsLl, glm::vec2 lhsUr, glm::vec2 rhsLl, glm::vec2 rhsUr)
     {
@@ -152,7 +152,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
 
     {
         // Logo stuff
-        _logoTexture = ghoul::io::TextureReader::ref().loadTexture(
+        _logoTexture = ghoul::io::texture::loadTexture(
             absPath("${DATA}/openspace-logo.png"),
             2
         );
@@ -214,20 +214,20 @@ void LoadingScreen::exec(AssetManager& manager, Scene& scene) {
                     return
                         static_cast<float>(sync->nSynchronizedBytes()) /
                         static_cast<float>(sync->nTotalBytes());
-                    }(*it);
+                }(*it);
 
-                    progressInfo.currentSize = (*it)->nSynchronizedBytes();
-                    if ((*it)->nTotalBytesIsKnown()) {
-                        progressInfo.totalSize = (*it)->nTotalBytes();
-                    }
+                progressInfo.currentSize = (*it)->nSynchronizedBytes();
+                if ((*it)->nTotalBytesIsKnown()) {
+                    progressInfo.totalSize = (*it)->nTotalBytes();
+                }
 
-                    updateItem(
-                        (*it)->identifier(),
-                        (*it)->name(),
-                        LoadingScreen::ItemStatus::Started,
-                        progressInfo
-                    );
-                    it++;
+                updateItem(
+                    (*it)->identifier(),
+                    (*it)->name(),
+                    LoadingScreen::ItemStatus::Started,
+                    progressInfo
+                );
+                it++;
             }
             else if ((*it)->isRejected()) {
                 updateItem(
@@ -267,7 +267,7 @@ void LoadingScreen::exec(AssetManager& manager, Scene& scene) {
         if (finishedLoading) {
             break;
         }
-    } // while(true)
+    }
 
     setPhase(LoadingScreen::Phase::Initialization);
 
@@ -327,12 +327,12 @@ void LoadingScreen::render() {
     //
     // Render logo
     //
-    rendering::helper::renderBox(
-        glm::vec2(1.f) - ((LogoCenter + glm::vec2(1.f)) / 2.f),
+    rendering::renderBox(
+        glm::vec2(1.f) - (LogoCenter + glm::vec2(1.f)) / 2.f,
         size,
         glm::vec4(1.f),
         *_logoTexture,
-        rendering::helper::Anchor::Center
+        rendering::Anchor::Center
     );
 
     //
@@ -362,7 +362,7 @@ void LoadingScreen::render() {
     glm::vec2 messageLl = glm::vec2(0.f);
     glm::vec2 messageUr = glm::vec2(0.f);
     if (_showMessage) {
-        const std::lock_guard guard(_messageMutex);
+        const std::unique_lock lock(_messageMutex);
 
         const glm::vec2 bboxMessage = _messageFont->boundingBox(_message);
 
@@ -383,16 +383,16 @@ void LoadingScreen::render() {
     glDisable(GL_DEPTH_TEST);
     if (_showLog) {
         constexpr glm::vec4 DarkGray = glm::vec4(glm::vec3(0.04f), 1.f);
-        rendering::helper::renderBox(
+        rendering::renderBox(
             glm::vec2(0.f, 1.f),
             glm::vec2(1.f, LogBackgroundPosition),
             DarkGray,
-            rendering::helper::Anchor::SW
+            rendering::Anchor::SW
         );
     }
 
     if (_showNodeNames) {
-        const std::lock_guard guard(_itemsMutex);
+        const std::unique_lock lock(_itemsMutex);
 
         const auto now = std::chrono::system_clock::now();
 
@@ -564,8 +564,8 @@ void LoadingScreen::render() {
 
     }
 
-    // Render log messages last to make them slightly more visible if a download item
-    // is slightly overlapping
+    // Render log messages last to make them slightly more visible if a download item is
+    // slightly overlapping
     if (_showLog) {
         renderLogMessages();
     }
@@ -605,7 +605,7 @@ void LoadingScreen::renderLogMessages() const {
             std::string word;
             while (is >> word) {
                 charactersSinceNewLine += static_cast<int>(word.size());
-                // Insert a new line when we exceede messageLength
+                // Insert a new line when we exceed messageLength
                 if (charactersSinceNewLine > MessageLength) {
                     result << '\n';
                     charactersSinceNewLine = static_cast<int>(word.size());
@@ -655,7 +655,7 @@ void LoadingScreen::renderLogMessages() const {
 }
 
 void LoadingScreen::postMessage(std::string message) {
-    const std::lock_guard guard(_messageMutex);
+    const std::unique_lock lock(_messageMutex);
     _message = std::move(message);
 }
 
@@ -688,11 +688,11 @@ void LoadingScreen::updateItem(const std::string& itemIdentifier,
                                ProgressInfo progressInfo)
 {
     if (!_showNodeNames) {
-        // If we don't want to show the node names, we can disable the updating which
-        // also would create any of the text information
+        // If we don't want to show the node names, we can disable the updating which also
+        // would create any of the text information
         return;
     }
-    const std::lock_guard guard(_itemsMutex);
+    const std::unique_lock lock(_itemsMutex);
 
     auto it = std::find_if(
         _items.begin(),

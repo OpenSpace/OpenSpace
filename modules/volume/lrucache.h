@@ -28,7 +28,7 @@
 #include <list>
 #include <utility>
 
-namespace openspace::volume {
+namespace openspace {
 
 template <
     typename KeyType,
@@ -56,6 +56,6 @@ private:
     size_t _capacity;
 };
 
-} // namespace openspace::volume
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME___LRUCACHE___H__

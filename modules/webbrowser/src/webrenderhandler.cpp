@@ -90,10 +90,10 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintEle
         return;
     }
 
-    // Copy the updated rectangle line by line.
+    // Copy the updated rectangle line by line
     for (int y = lowerUpdatingRectBound.y; y < upperUpdatingRectBound.y; y++) {
         const int lineOffset = y * w + lowerUpdatingRectBound.x;
-        // Chromium stores image upside down compared to OpenGL, so we flip it:
+        // Chromium stores image upside down compared to OpenGL, so we flip it
         const int invLineOffset = (h - y - 1) * w + lowerUpdatingRectBound.x;
         const int rectWidth = upperUpdatingRectBound.x - lowerUpdatingRectBound.x;
         std::copy(
@@ -103,7 +103,7 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintEle
         );
     }
 
-    // Add the dirty rect bounds to the GPU texture dirty rect.
+    // Add the dirty rect bounds to the GPU texture dirty rect
     _lowerDirtyRectBound = glm::min(lowerUpdatingRectBound, _lowerDirtyRectBound);
     _upperDirtyRectBound = glm::max(upperUpdatingRectBound, _upperDirtyRectBound);
     _needsRepaint = false;
@@ -161,7 +161,7 @@ void WebRenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser>,
 
     // @TODO (2025-02-17, abock) The following line will cause a crash on AMD cards if
     // accelerated rendering is enabled. I wasn't able to figure out why, but this is
-    // the reason accelerated rendering is disabled for AMD.
+    // the reason accelerated rendering is disabled for AMD
 
     // Allocate immutable storage for the texture for the data from the memory object
     // Use GL_RGBA8 since it is 4 bytes
@@ -290,7 +290,7 @@ bool WebRenderHandler::hasContent(int x, int y) {
             return false;
         }
         int index = x + _browserBufferSize.x * (_browserBufferSize.y - y - 1);
-        index = glm::clamp(index, 0, static_cast<int>(_browserBuffer.size() - 1));
+        index = std::clamp(index, 0, static_cast<int>(_browserBuffer.size() - 1));
         return _browserBuffer[index].a != 0;
     }
 }

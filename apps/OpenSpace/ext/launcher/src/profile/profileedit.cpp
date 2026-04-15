@@ -99,7 +99,7 @@ namespace {
 
     std::string summarizeProperties(const std::vector<Profile::Property>& properties) {
         std::string results;
-        for (openspace::Profile::Property p : properties) {
+        for (Profile::Property p : properties) {
             results += std::format("{} = {}<br>", p.name, p.value);
         }
         return results;

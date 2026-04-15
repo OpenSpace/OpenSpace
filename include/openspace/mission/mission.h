@@ -36,7 +36,7 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation {  struct Documentation; }
+struct Documentation;
 
 struct Milestone {
     std::string name;
@@ -145,7 +145,7 @@ public:
      * \param time The time in which the subphases have to be active in order to be
      *        included
      * \param maxDepth The maximum levels of subphases that will be considered. If this
-     *        value is equal to `-1`, an infinite depth will be considered.
+     *        value is equal to `-1`, an infinite depth will be considered
      * \return A list of MissionPhases that cover the provided \p time
      */
     Trace phaseTrace(double time, int maxDepth = -1) const;
@@ -156,7 +156,7 @@ public:
      *
      * \return The Documentation that describes the required structure for a Dictionary
      */
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     /**

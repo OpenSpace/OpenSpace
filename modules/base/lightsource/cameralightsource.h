@@ -38,10 +38,10 @@ public:
     glm::vec3 directionViewSpace(const RenderData& renderData) const override;
     float intensity() const override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::FloatProperty _intensity;
+    FloatProperty _intensity;
 };
 
 } // namespace openspace

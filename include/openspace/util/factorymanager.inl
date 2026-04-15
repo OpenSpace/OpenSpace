@@ -44,4 +44,4 @@ ghoul::TemplateFactory<T>* FactoryManager::factory() const {
     throw FactoryNotFoundError(typeid(T).name());
 }
 
-}  // namespace openspace
+} // namespace openspace

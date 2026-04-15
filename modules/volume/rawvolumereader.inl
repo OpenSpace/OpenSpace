@@ -26,7 +26,7 @@
 #include <ghoul/misc/profiling.h>
 #include <fstream>
 
-namespace openspace::volume {
+namespace openspace {
 
 template <typename VoxelType>
 RawVolumeReader<VoxelType>::RawVolumeReader(const std::filesystem::path& path,
@@ -123,4 +123,4 @@ std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read(bool inve
     }
 }
 
-} // namespace openspace::volume
+} // namespace openspace

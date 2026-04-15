@@ -38,9 +38,32 @@
 
 namespace openspace {
 
-namespace interaction { struct NavigationState; }
-namespace properties { class PropertyOwner; }
-namespace scripting { struct LuaLibrary; }
+struct LuaLibrary;
+struct NavigationState;
+class PropertyOwner;
+
+struct Addon {
+    struct Version {
+        int major = 0;
+        int minor = 0;
+
+        bool operator==(const Version&) const noexcept = default;
+    };
+    static constexpr Version CurrentVersion = Version{ 1, 0 };
+
+    std::string identifier;
+    std::string name;
+    std::string description;
+    std::vector<std::string> assets;
+    Version version;
+
+    // The enabled state is not stored in the profile file
+    bool isEnabled = false;
+
+    bool operator==(const Addon&) const noexcept = default;
+};
+
+Addon loadAddonFromFile(const std::filesystem::path& path);
 
 class Profile {
 public:
@@ -52,7 +75,6 @@ public:
         Severity severity;
     };
 
-    // Version
     struct Version {
         int major = 0;
         int minor = 0;
@@ -157,6 +179,18 @@ public:
 
     using CameraType = std::variant<CameraGoToNode, CameraNavState, CameraGoToGeo>;
 
+    struct Addons {
+        std::vector<std::string> recommendedPaths;
+        std::vector<Addon> custom;
+
+        // The realized recommended Addons are not stored back into the JSON
+        std::vector<Addon> recommended;
+        std::vector<Addon> general;
+
+        bool operator==(const Addons&) const noexcept = default;
+    };
+
+
     Profile() = default;
     explicit Profile(const std::filesystem::path& path);
     std::string serialize() const;
@@ -167,8 +201,8 @@ public:
      * Saves all current settings, starting from the profile that was loaded at startup,
      * and all of the property & asset changes that were made since startup.
      */
-    void saveCurrentSettingsToProfile(const properties::PropertyOwner& rootOwner,
-        std::string currentTime, interaction::NavigationState navState);
+    void saveCurrentSettingsToProfile(const PropertyOwner& rootOwner,
+        std::string currentTime, NavigationState navState);
 
     /**
      * Adds a new asset and checks for duplicates unless the `ignoreUpdates` member is
@@ -176,10 +210,12 @@ public:
      */
     void addAsset(const std::string& path);
 
-    /// Removes an asset unless the `ignoreUpdates` member is set to `true`
+    /**
+     * Removes an asset unless the `ignoreUpdates` member is set to `true`.
+     */
     void removeAsset(const std::string& path);
 
-    static constexpr Version CurrentVersion = Version{ 1, 4 };
+    static constexpr Version CurrentVersion = Version{ 1, 5 };
 
     Version version = CurrentVersion;
     std::vector<Module> modules;
@@ -194,6 +230,7 @@ public:
     std::vector<std::string> markNodes;
     std::vector<std::string> additionalScripts;
     std::map<std::string, bool> uiPanelVisibility;
+    Addons addons;
 
     bool ignoreUpdates = false;
 
@@ -203,7 +240,7 @@ public:
      *
      * \return The Lua library that contains all Lua functions available for profiles
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 };
 
 } // namespace openspace

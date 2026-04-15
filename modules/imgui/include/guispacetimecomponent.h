@@ -29,7 +29,7 @@
 
 #include <openspace/util/timeconversion.h>
 
-namespace openspace::gui {
+namespace openspace {
 
 class GuiSpaceTimeComponent : public GuiComponent {
 public:
@@ -54,6 +54,6 @@ private:
     std::string _timeUnits;
 };
 
-} // namespace openspace::gui
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_IMGUI___GUISPACETIMECOMPONENT___H__

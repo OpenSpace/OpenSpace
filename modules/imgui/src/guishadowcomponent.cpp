@@ -36,7 +36,7 @@ namespace {
     const ImVec2 WindowSize = ImVec2(350, 500);
 } // namespace
 
-namespace openspace::gui {
+namespace openspace {
 
 GuiShadowComponent::GuiShadowComponent()
     : GuiComponent("ShadowMaps", "Shadow Maps")
@@ -55,7 +55,7 @@ void GuiShadowComponent::render() {
     const std::vector<std::string> groups = renderer.shadowGroups();
 
     for (const std::string& group : groups) {
-        shadowmapping::ShadowInfo sm = renderer.shadowInformation(group);
+        ShadowInfo sm = renderer.shadowInformation(group);
         std::string lightSource = sm.lightSource->identifier();
 
         ImGui::BeginGroup();
@@ -65,14 +65,12 @@ void GuiShadowComponent::render() {
         for (const SceneGraphNode* node : sm.targets) {
             ghoul_assert(node, "No SceneGraphNode");
             ghoul_assert(node->renderable(), "No Renderable");
-            const shadowmapping::Shadower* shadower =
-                dynamic_cast<const shadowmapping::Shadower*>(node->renderable());
+            const Shadower* shadower = dynamic_cast<const Shadower*>(node->renderable());
             ghoul_assert(shadower, "No shadower");
 
             std::string id = node->identifier();
             ImGui::Text("  %s", id.c_str());
             ImGui::Text("    Is Enabled: %d", node->renderable()->isEnabled());
-            ImGui::Text("    Is Ready: %d", node->renderable()->isReady());
             ImGui::Text("    Is Casting Shadow: %d", shadower->isCastingShadow());
 
         }
@@ -83,4 +81,4 @@ void GuiShadowComponent::render() {
     ImGui::End();
 }
 
-} // namespace openspace::gui
+} // namespace openspace

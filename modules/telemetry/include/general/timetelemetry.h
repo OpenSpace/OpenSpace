@@ -55,13 +55,13 @@ private:
      */
     void sendData() override;
 
-    struct PrecisionProperties : properties::PropertyOwner {
-        PrecisionProperties(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
+    struct PrecisionProperties : PropertyOwner {
+        PrecisionProperties(PropertyOwner::PropertyOwnerInfo precisionInfo);
 
-        properties::DoubleProperty timePrecision;
+        DoubleProperty timePrecision;
     };
 
-    properties::OptionProperty _timeUnitOption;
+    OptionProperty _timeUnitOption;
     PrecisionProperties _precisionProperties;
 
     double _timeSpeed = 0.0;

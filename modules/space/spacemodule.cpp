@@ -34,10 +34,10 @@
 #include <modules/space/rendering/renderablestars.h>
 #include <modules/space/rendering/renderabletravelspeed.h>
 #include <modules/space/timeframe/timeframekernel.h>
-#include <modules/space/translation/keplertranslation.h>
-#include <modules/space/translation/spicetranslation.h>
 #include <modules/space/translation/gptranslation.h>
 #include <modules/space/translation/horizonstranslation.h>
+#include <modules/space/translation/keplertranslation.h>
+#include <modules/space/translation/spicetranslation.h>
 #include <modules/space/rotation/spicerotation.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
@@ -57,27 +57,28 @@
 #include "spacemodule_lua.inl"
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo SpiceExceptionInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo SpiceExceptionInfo = {
         "ShowExceptions",
         "Show exceptions",
         "If enabled, errors from SPICE will be thrown and show up in the log. If "
         "disabled, the errors will be ignored silently.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(SpaceModule)]] Parameters {
         // [[codegen::verbatim(SpiceExceptionInfo.description)]]
         std::optional<bool> showExceptions;
     };
-#include "spacemodule_codegen.cpp"
-
 } // namespace
+#include "spacemodule_codegen.cpp"
 
 namespace openspace {
 
 ghoul::opengl::ProgramObjectManager SpaceModule::ProgramObjectManager;
 
-documentation::Documentation SpaceModule::Documentation() {
+Documentation SpaceModule::Documentation() {
     return codegen::doc<Parameters>("module_space");
 }
 
@@ -141,7 +142,7 @@ void SpaceModule::internalDeinitializeGL() {
     ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
 }
 
-std::vector<documentation::Documentation> SpaceModule::documentations() const {
+std::vector<Documentation> SpaceModule::documentations() const {
     return {
         HorizonsTranslation::Documentation(),
         KeplerTranslation::Documentation(),
@@ -160,7 +161,7 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
     };
 }
 
-scripting::LuaLibrary SpaceModule::luaLibrary() const {
+LuaLibrary SpaceModule::luaLibrary() const {
     return {
         .name = "space",
         .functions = {

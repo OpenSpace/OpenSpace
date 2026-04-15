@@ -25,8 +25,8 @@
 #include <modules/kameleonvolume/kameleonvolumemodule.h>
 
 #include <modules/kameleonvolume/rendering/renderablekameleonvolume.h>
-#include <modules/kameleonvolume/tasks/kameleonmetadatatojsontask.h>
 #include <modules/kameleonvolume/tasks/kameleondocumentationtask.h>
+#include <modules/kameleonvolume/tasks/kameleonmetadatatojsontask.h>
 #include <modules/kameleonvolume/tasks/kameleonvolumetorawtask.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
@@ -37,11 +37,11 @@
 
 namespace openspace {
 
-KameleonVolumeModule::KameleonVolumeModule() : OpenSpaceModule(Name) {}
+KameleonVolumeModule::KameleonVolumeModule()
+    : OpenSpaceModule(Name)
+{}
 
 void KameleonVolumeModule::internalInitialize(const ghoul::Dictionary&) {
-    using namespace kameleonvolume;
-
     ghoul::TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
@@ -54,9 +54,7 @@ void KameleonVolumeModule::internalInitialize(const ghoul::Dictionary&) {
     fTask->registerClass<KameleonVolumeToRawTask>("KameleonVolumeToRawTask");
 }
 
-std::vector<documentation::Documentation> KameleonVolumeModule::documentations() const {
-    using namespace kameleonvolume;
-
+std::vector<Documentation> KameleonVolumeModule::documentations() const {
     return { KameleonMetadataToJsonTask::documentation() };
 }
 

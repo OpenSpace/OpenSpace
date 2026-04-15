@@ -43,12 +43,12 @@ public:
 
     bool initialize();
 
-    bool buildBrickList(BufferIndex bufferIndex, std::vector<int>& brickRequest);
+    void buildBrickList(BufferIndex bufferIndex, std::vector<int>& brickRequest);
 
-    bool fillVolume(float* in, float* out, unsigned int x, unsigned int y,
-        unsigned int z);
+    void fillVolume(float* in, float* out, unsigned int x, unsigned int y,
+        unsigned int z) const;
     bool diskToPBO(BufferIndex pboIndex);
-    bool pboToAtlas(BufferIndex pboIndex);
+    void pboToAtlas(BufferIndex pboIndex);
 
     ghoul::opengl::Texture* textureAtlas();
     unsigned int pbo(BufferIndex pboIndex) const;
@@ -56,7 +56,7 @@ public:
 
 private:
     void incrementCoordinates();
-    unsigned int linearCoordinates(int x, int y, int z);
+    unsigned int linearCoordinates(int x, int y, int z) const;
     void coordinatesFromLinear(int idx, int& x, int& y, int& z);
 
     TSP* _tsp = nullptr;
@@ -81,7 +81,7 @@ private:
     int _yCoord = 0;
     int _zCoord = 0;
 
-    // Texture where the actual atlas is kept
+    /// Texture where the actual atlas is kept
     ghoul::opengl::Texture* _textureAtlas = nullptr;
 
     std::vector<std::vector<int>> _brickLists;
@@ -89,7 +89,7 @@ private:
     bool _hasReadHeader = false;
     bool _atlasInitialized = false;
 
-    // PBOs
+    /// PBOs
     unsigned int _pboHandle[2];
 
     // Caching, one for each PBO

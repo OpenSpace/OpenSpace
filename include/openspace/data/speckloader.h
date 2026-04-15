@@ -30,7 +30,6 @@
 #include <optional>
 
 namespace openspace::dataloader {
-    struct ColorMap;
     struct Dataset;
     struct Labelset;
 } // namespace openspace::dataloader
@@ -41,8 +40,6 @@ Dataset loadSpeckFile(std::filesystem::path path,
     std::optional<DataMapping> specs = std::nullopt);
 
 Labelset loadLabelFile(std::filesystem::path path);
-
-ColorMap loadCmapFile(std::filesystem::path path);
 
 } // namespace openspace::dataloader::speck
 

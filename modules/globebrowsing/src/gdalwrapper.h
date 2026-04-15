@@ -30,19 +30,19 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 /**
  * Singleton class interfacing with global GDAL functions.
  */
-class GdalWrapper : public properties::PropertyOwner {
+class GdalWrapper : public PropertyOwner {
 public:
     /**
      * Create the singleton. Must be called before the class can be used.
      *
-     * \param maximumCacheSize is the current maximum cache size GDAL can use for caching
+     * \param maximumCacheSize The current maximum cache size GDAL can use for caching
      *        blocks in memory given in bytes
-     * \param maximumMaximumCacheSize is the maximum cache size GDAL can use for caching
+     * \param maximumMaximumCacheSize The maximum cache size GDAL can use for caching
      *        blocks in memory given in bytes
      */
     static void create(size_t maximumCacheSize, size_t maximumMaximumCacheSize);
@@ -58,12 +58,12 @@ private:
 
     void setGdalProxyConfiguration();
 
-    properties::BoolProperty _logGdalErrors;
-    properties::IntProperty _gdalMaximumCacheSize;
+    BoolProperty _logGdalErrors;
+    IntProperty _gdalMaximumCacheSize;
 
     static GdalWrapper* _singleton;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_WRAPPER___H__

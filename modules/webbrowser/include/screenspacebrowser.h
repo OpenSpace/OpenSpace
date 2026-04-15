@@ -71,15 +71,17 @@ public:
 
     void render(const RenderData& renderData) override;
     void update() override;
-    bool isReady() const override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    properties::UVec2Property _dimensions;
+    UVec2Property _dimensions;
     std::unique_ptr<BrowserInstance> _browserInstance;
     bool _isDimensionsDirty = false;
-    properties::TriggerProperty _reload;
+    TriggerProperty _reload;
+
+    StringProperty _key;
+    TriggerProperty _triggerKey;
 
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {
@@ -90,13 +92,11 @@ private:
         void setTexture(GLuint t);
     };
 
-    CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
-
-private:
     void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
-    properties::StringProperty _url;
+    StringProperty _url;
 
+    CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
 
     bool _useAcceleratedRendering = false;

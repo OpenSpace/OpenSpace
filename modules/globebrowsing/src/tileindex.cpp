@@ -26,7 +26,7 @@
 
 #include <ghoul/misc/assert.h>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 bool operator==(const TileIndex& lhs, const TileIndex& rhs) {
     return (lhs.x == rhs.x) && (lhs.y == rhs.y) && (lhs.level == rhs.level);
@@ -92,4 +92,4 @@ TileIndex::TileHashKey TileIndex::hashKey() const {
     return key;
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

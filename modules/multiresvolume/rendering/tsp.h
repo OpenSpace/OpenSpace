@@ -37,15 +37,15 @@ namespace openspace {
 class TSP {
 public:
     struct Header {
-        unsigned int gridType;
-        unsigned int numOrigTimesteps;
-        unsigned int numTimesteps;
-        unsigned int xBrickDim;
-        unsigned int yBrickDim;
-        unsigned int zBrickDim;
-        unsigned int xNumBricks;
-        unsigned int yNumBricks;
-        unsigned int zNumBricks;
+        unsigned int gridType = 0;
+        unsigned int numOrigTimesteps = 0;
+        unsigned int numTimesteps = 0;
+        unsigned int xBrickDim = 0;
+        unsigned int yBrickDim = 0;
+        unsigned int zBrickDim = 0;
+        unsigned int xNumBricks = 0;
+        unsigned int yNumBricks = 0;
+        unsigned int zNumBricks = 0;
     };
 
     enum NodeData {
@@ -59,8 +59,10 @@ public:
     explicit TSP(const std::filesystem::path& filename);
     ~TSP();
 
-    // load performs readHeader, readCache, writeCache and construct
-    // in the correct sequence
+    /**
+     * Load performs readHeader, readCache, writeCache and construct in the correct
+     * sequence.
+     */
     bool load();
 
     bool readHeader();
@@ -113,11 +115,11 @@ private:
     std::ifstream _file;
     std::streampos _dataOffset;
 
-    // Holds the actual structure
+    /// Holds the actual structure
     std::vector<int> _data;
     GLuint _dataSSBO = 0;
 
-    // Data from file
+    /// Data from file
     Header _header;
 
     // Additional metadata
@@ -139,6 +141,6 @@ private:
     float _medianTemporalError = 0.f;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_MULTIRESVOLUME___TSP___H__

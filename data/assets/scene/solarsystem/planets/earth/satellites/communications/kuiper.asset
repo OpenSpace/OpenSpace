@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Kuiper)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_kuiper",
-  Url = "https://celestrak.org/NORAD/elements/supplemental/sup-gp.php?FILE=kuiper&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=kuiper&FORMAT=kvn",
   Filename = "kuiper.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -52,6 +52,6 @@ asset.meta = {
   Name = "Satellites Communications - Kuiper",
   Description = "Satellites asset for Communications - Kuipter. Data from Celestrak",
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/NORAD/elements/",
+  URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
 }

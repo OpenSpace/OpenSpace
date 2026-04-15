@@ -51,14 +51,14 @@
 #include <cstdint>
 #include <memory>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 class Layer;
 
 struct BoundingHeights {
     float min;
     float max;
-    bool available;
+    bool isAvailable;
     bool tileOK;
 };
 
@@ -93,7 +93,7 @@ enum class ShadowCompType {
  * A RenderableGlobe is a globe modeled as an ellipsoid using a chunked LOD algorithm for
  * rendering.
  */
-class RenderableGlobe : public Renderable, public shadowmapping::Shadowee {
+class RenderableGlobe : public Renderable, public Shadowee {
 public:
     explicit RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() override = default;
@@ -101,7 +101,6 @@ public:
     void initializeGL() override;
     void deinitialize() override;
     void deinitializeGL() override;
-    bool isReady() const override;
 
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
@@ -123,7 +122,7 @@ public:
     // Will cause the shaders to be recompiled
     void invalidateShader();
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     static constexpr int MinSplitDepth = 2;
@@ -225,38 +224,38 @@ private:
     void updateChunk(Chunk& chunk, const RenderData& data, const glm::dmat4& mvp) const;
     void freeChunkNode(Chunk* n);
 
-    properties::BoolProperty _performShading;
-    properties::BoolProperty _useAccurateNormals;
-    properties::FloatProperty _ambientIntensity;
-    properties::StringProperty _lightSourceNodeName;
+    BoolProperty _performShading;
+    BoolProperty _useAccurateNormals;
+    FloatProperty _ambientIntensity;
+    StringProperty _lightSourceNodeName;
 
-    properties::BoolProperty _renderAtDistance;
-    properties::BoolProperty _eclipseShadowsEnabled;
-    properties::BoolProperty _eclipseHardShadows;
-    properties::FloatProperty _targetLodScaleFactor;
-    properties::FloatProperty _currentLodScaleFactor;
-    properties::FloatProperty _orenNayarRoughness;
-    properties::IntProperty _nActiveLayers;
+    BoolProperty _renderAtDistance;
+    BoolProperty _eclipseShadowsEnabled;
+    BoolProperty _eclipseHardShadows;
+    FloatProperty _targetLodScaleFactor;
+    FloatProperty _currentLodScaleFactor;
+    FloatProperty _orenNayarRoughness;
+    IntProperty _nActiveLayers;
 
     struct {
-        properties::BoolProperty showChunkEdges;
-        properties::BoolProperty levelByProjectedAreaElseDistance;
-        properties::TriggerProperty resetTileProviders;
-        properties::BoolProperty performFrustumCulling;
-        properties::BoolProperty performHorizonCulling;
-        properties::IntProperty modelSpaceRenderingCutoffLevel;
-        properties::IntProperty dynamicLodIterationCount;
+        BoolProperty showChunkEdges;
+        BoolProperty levelByProjectedAreaElseDistance;
+        TriggerProperty resetTileProviders;
+        BoolProperty performFrustumCulling;
+        BoolProperty performHorizonCulling;
+        IntProperty modelSpaceRenderingCutoffLevel;
+        IntProperty dynamicLodIterationCount;
     } _debugProperties;
 
-    properties::PropertyOwner _debugPropertyOwner;
+    PropertyOwner _debugPropertyOwner;
 
     struct {
-        properties::BoolProperty shadowMapping;
-        properties::FloatProperty zFightingPercentage;
-        properties::IntProperty nShadowSamples;
+        BoolProperty shadowMapping;
+        FloatProperty zFightingPercentage;
+        IntProperty nShadowSamples;
     } _shadowMappingProperties;
 
-    properties::PropertyOwner _shadowMappingPropertyOwner;
+    PropertyOwner _shadowMappingPropertyOwner;
 
     Ellipsoid _ellipsoid;
     SkirtedGrid _grid;
@@ -276,7 +275,7 @@ private:
     Chunk _leftRoot;  // Covers all negative longitudes
     Chunk _rightRoot; // Covers all positive longitudes
 
-    // Two different shader programs. One for global and one for local rendering.
+    // Two different shader programs. One for global and one for local rendering
     struct {
         std::unique_ptr<ghoul::opengl::ProgramObject> program;
         bool updatedSinceLastCall = false;
@@ -321,6 +320,6 @@ private:
     ghoul::Dictionary _labelsDictionary;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLEGLOBE___H__

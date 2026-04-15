@@ -48,37 +48,39 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableConstellationLines";
 
-    constexpr openspace::properties::Property::PropertyInfo FileInfo = {
+    constexpr Property::PropertyInfo FileInfo = {
         "File",
         "Constellation data file path",
         "The path to a SPECK file that contains the data for the constellation lines.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
+    constexpr Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw elements",
         "Enables/Disables the drawing of the constellations.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UnitInfo = {
+    constexpr Property::PropertyInfo UnitInfo = {
         "Unit",
         "Unit",
         "The distance unit used for the constellation lines data.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorsInfo = {
+    constexpr Property::PropertyInfo ColorsInfo = {
         "Colors",
         "Constellation colors",
         "A list of colors to use for the constellations. A data file may include several "
         "groups of constellations, where each group can have a distinct color. The index "
         "for the color parameter for each constellation in the data file corresponds to "
         "the order of the colors in this list.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // @TODO (2025-01-07, emmbr) I did not add any description of the file format below,
@@ -87,9 +89,7 @@ namespace {
     // @TODO (2025-01-07, emmbr) Also need to update description of names file and labels
     // as part of the labels rewrite
 
-    // This renderable can be used to draw constellations using lines. Each constellation
-    // corresponds to a group of lines between 3D positions that represent the star
-    // positions.
+    // Draws constellations as lines between 3D star positions grouped per constellation.
     //
     // Each constellation is given an abbreviation that acts as the identifier of the
     // constellation. These abbreviations can be mapped to full names in the
@@ -125,12 +125,12 @@ namespace {
         // [[codegen::verbatim(ColorsInfo.description)]]
         std::optional<std::vector<glm::vec3>> colors;
     };
+} // namespace
 #include "renderableconstellationlines_codegen.cpp"
-}  // namespace
 
 namespace openspace {
 
-documentation::Documentation RenderableConstellationLines::Documentation() {
+Documentation RenderableConstellationLines::Documentation() {
     return codegen::doc<Parameters>(
         "space_renderable_constellationlines",
         RenderableConstellationsBase::Documentation()
@@ -201,16 +201,6 @@ void RenderableConstellationLines::selectionPropertyHasChanged() {
     }
 }
 
-bool RenderableConstellationLines::isReady() const {
-    const bool isReady = _program && !_renderingConstellationsMap.empty();
-
-    // If we have labels, they also need to be loaded
-    if (_hasLabels) {
-        return isReady && RenderableConstellationsBase::isReady();
-    }
-    return isReady;
-}
-
 void RenderableConstellationLines::initialize() {
     RenderableConstellationsBase::initialize();
 
@@ -263,8 +253,8 @@ void RenderableConstellationLines::initializeGL() {
 void RenderableConstellationLines::deinitializeGL() {
     using ConstellationKeyValuePair = std::pair<const int, ConstellationLine>;
     for (const ConstellationKeyValuePair& pair : _renderingConstellationsMap) {
-        glDeleteVertexArrays(1, &pair.second.vaoArray);
-        glDeleteBuffers(1, &pair.second.vboArray);
+        glDeleteVertexArrays(1, &pair.second.vao);
+        glDeleteBuffers(1, &pair.second.vbo);
     }
 
     if (_program) {
@@ -300,7 +290,7 @@ void RenderableConstellationLines::renderConstellations(const RenderData&,
             _constellationColorMap[pair.second.colorIndex]
         );
 
-        glBindVertexArray(pair.second.vaoArray);
+        glBindVertexArray(pair.second.vao);
 
         glLineWidth(_lineWidth);
         glDrawArrays(GL_LINE_STRIP, 0, pair.second.numV);
@@ -310,7 +300,6 @@ void RenderableConstellationLines::renderConstellations(const RenderData&,
     glBindVertexArray(0);
     _program->deactivate();
 
-    // Restores GL State
     global::renderEngine->openglStateCache().resetDepthState();
     global::renderEngine->openglStateCache().resetBlendState();
 }
@@ -363,8 +352,8 @@ void RenderableConstellationLines::loadData() {
             break;
         }
 
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
+        // Guard against wrong line endings (copying files between operating systems)
+        // causes lines to have a final \r
         if (!line.empty() && line.back() == '\r') {
             line = line.substr(0, line.length() - 1);
         }
@@ -373,7 +362,7 @@ void RenderableConstellationLines::loadData() {
             continue;
         }
 
-        if (const size_t found = line.find("mesh");  found == std::string::npos) {
+        if (!line.contains("mesh")) {
             continue;
         }
 
@@ -391,7 +380,7 @@ void RenderableConstellationLines::loadData() {
         str >> dummy; // color index command
         do {
             if (dummy == "-c") {
-                str >> constellationLine.colorIndex; // color index
+                str >> constellationLine.colorIndex;
             }
             else {
                 LWARNING(std::format(
@@ -412,7 +401,7 @@ void RenderableConstellationLines::loadData() {
 
         id >> dummy; // id command
         dummy.clear();
-        ghoul::getline(id, identifier); // identifier
+        ghoul::getline(id, identifier);
         ghoul::trimWhitespace(identifier);
         constellationLine.name = constellationFullName(identifier);
 
@@ -465,25 +454,21 @@ void RenderableConstellationLines::createConstellations() {
     LDEBUG("Creating constellations");
 
     for (std::pair<const int, ConstellationLine>& p : _renderingConstellationsMap) {
-        GLuint vbo = 0;
-        glCreateBuffers(1, &vbo);
+        glCreateBuffers(1, &p.second.vbo);
         glNamedBufferStorage(
-            vbo,
+            p.second.vbo,
             p.second.vertices.size() * sizeof(GLfloat),
             p.second.vertices.data(),
             GL_NONE_BIT
         );
-        p.second.vboArray = vbo;
 
-        GLuint vao = 0;
-        glCreateVertexArrays(1, &vao);
-        glVertexArrayVertexBuffer(vao, 0, vbo, 0, 3 * sizeof(float));
-        p.second.vaoArray = vao;
+        glCreateVertexArrays(1, &p.second.vao);
+        glVertexArrayVertexBuffer(p.second.vao, 0, p.second.vbo, 0, 3 * sizeof(float));
 
         // in_position
-        glEnableVertexArrayAttrib(vao, 0);
-        glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
-        glVertexArrayAttribBinding(vao, 0, 0);
+        glEnableVertexArrayAttrib(p.second.vao, 0);
+        glVertexArrayAttribFormat(p.second.vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+        glVertexArrayAttribBinding(p.second.vao, 0, 0);
     }
 }
 

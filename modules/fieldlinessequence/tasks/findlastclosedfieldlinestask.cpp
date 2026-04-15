@@ -38,31 +38,30 @@ namespace {
     constexpr std::string_view _loggerCat = "FindLastClosedFieldlinesTask";
 
     struct [[codegen::Dictionary(FindLastClosedFieldlinesTask)]] Parameters {
-        // The folder to the cdf files to extract data from
+        // The folder to the cdf files to extract data from.
         std::filesystem::path input [[codegen::directory()]];
 
-        // The name of the kameleon variable to use for tracing, like b for magnetic
-        // or u for velocity or even electric?
+        // The name of the kameleon variable to use for tracing, like b for magnetic or u
+        // for velocity or even electric?
         std::optional<std::string> tracingVar;
 
-        // number of points to work with
+        // Number of points to work with.
         std::optional<int> numberOfPointsOnBoundary;
 
-        // this will determine how accurate to the boundary it will get
-        // every iteration the seedpoint will move closer to the boundary,
-        // the distance it moves will be halfed each iteration until that
-        // distance is less than this threshold.
+        // This will determine how accurate to the boundary it will get every iteration
+        // the seedpoint will move closer to the boundary, the distance it moves will be
+        // halfed each iteration until that distance is less than this threshold.
         std::optional<float> threshold;
 
-        // The folder to write the files to
+        // The folder to write the files to.
         std::filesystem::path output [[codegen::directory()]];
     };
-#include "findlastclosedfieldlinestask_codegen.cpp"
 } // namespace
+#include "findlastclosedfieldlinestask_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation FindLastClosedFieldlinesTask::Documentation() {
+Documentation FindLastClosedFieldlinesTask::Documentation() {
     return codegen::doc<Parameters>("fieldlinessequence_task_findlastclosedfieldlines");
 }
 
@@ -106,8 +105,7 @@ void FindLastClosedFieldlinesTask::perform(const Task::ProgressCallback& progres
     for (const std::filesystem::path& cdfPath : _sourceFiles) {
         ZoneScopedN("Per Path");
 
-        std::unique_ptr<ccmc::Kameleon> kameleon =
-            kameleonhelper::createKameleonObject(cdfPath.string());
+        std::unique_ptr<ccmc::Kameleon> kameleon = createKameleonObject(cdfPath.string());
         ccmc::Tracer tracer(kameleon.get());
         if (kameleon->doesAttributeExist("r_body")) {
             auto innerBoundary = kameleon->getVariableAttribute("r_body", "r_body");
@@ -120,8 +118,8 @@ void FindLastClosedFieldlinesTask::perform(const Task::ProgressCallback& progres
         FieldlinesState state;
         const std::string& modelname = kameleon->getModelName();
         LINFO(std::format("Model name: {}", modelname));
-        state.setModel(fls::stringToModel(modelname));
-        state.setTriggerTime(kameleonhelper::getTime(kameleon.get(),0.0));
+        state.setModel(stringToModel(modelname));
+        state.setTriggerTime(getTime(kameleon.get(),0.0));
 
         std::vector<std::string> variableNames;
         std::vector<std::string> magVariableNames;
@@ -136,8 +134,7 @@ void FindLastClosedFieldlinesTask::perform(const Task::ProgressCallback& progres
                     magVariableNames.push_back(kameleon->getVariableName(i + 2));
                     LINFO(std::format(
                         "Magnitude variable name : {}, {}, {}",
-                        name,
-                        kameleon->getVariableName(i + 1),
+                        name, kameleon->getVariableName(i + 1),
                         kameleon->getVariableName(i + 2)
                     ));
                     i += 2;
@@ -148,10 +145,10 @@ void FindLastClosedFieldlinesTask::perform(const Task::ProgressCallback& progres
                 }
             }
         }
-        // This checks if t or T is already in there, and if not, it makes sure
-        // that p and rho is there before adding the key string "T = p/rho" for
-        // later calculating and adding the temperature parameter in the
-        // kameleon fieldline helper function addExtraQuantities later.
+        // This checks if t or T is already in there, and if not, it makes sure that p and
+        // rho is there before adding the key string "T = p/rho" for later calculating and
+        // adding the temperature parameter in the Kameleon fieldline helper function
+        // addExtraQuantities later
         auto t = std::find(variableNames.begin(), variableNames.end(), "t");
         auto T = std::find(variableNames.begin(), variableNames.end(), "T");
         auto p = std::find(variableNames.begin(), variableNames.end(), "p");
@@ -161,13 +158,15 @@ void FindLastClosedFieldlinesTask::perform(const Task::ProgressCallback& progres
         {
             variableNames.push_back("T = p/rho");
         }
-        // either take input of the names wanting to save:
+        // Either take input of the names wanting to save:
         // con: requires knowing the exact names, more difficult running script
-        // pro: easy way to include P/rho = temperature, smaller data.
+        // pro: easy way to include P/rho = temperature, smaller data
+        //
         // or
-        // save all and check if both P and rho are there:
+        //
+        // Save all and check if both P and rho are there:
         // con: bigger files, longer tracing time(?)
-        // pro: easier to run task, guaranties temp will be there if possible.
+        // pro: easier to run task, guaranties temp will be there if possible
         std::vector<ccmc::Fieldline> fieldlines =
             tracer.getLastClosedFieldlines(_numberOfPointsOnBoundary, 1, 5.1f, 300);
 
@@ -180,13 +179,13 @@ void FindLastClosedFieldlinesTask::perform(const Task::ProgressCallback& progres
             state.addLine(vertices);
         }
 
-        fls::addExtraQuantities(kameleon.get(), variableNames, magVariableNames, state);
+        addExtraQuantities(kameleon.get(), variableNames, magVariableNames, state);
         switch (state.model()) {
-            case fls::Model::Batsrus:
-                state.scalePositions(fls::ReToMeter);
+            case Model::Batsrus:
+                state.scalePositions(ReToMeter);
                 break;
-            case fls::Model::Enlil:
-                state.convertLatLonToCartesian(fls::AuToMeter);
+            case Model::Enlil:
+                state.convertLatLonToCartesian(AuToMeter);
                 break;
             default:
                 break;
@@ -199,4 +198,4 @@ void FindLastClosedFieldlinesTask::perform(const Task::ProgressCallback& progres
     progressCallback(1.f);
 }
 
-} //namespace openspace
+} // namespace openspace

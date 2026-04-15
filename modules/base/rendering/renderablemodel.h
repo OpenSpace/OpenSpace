@@ -44,7 +44,7 @@ namespace openspace {
 
 class LightSource;
 
-class RenderableModel : public Renderable, public shadowmapping::Shadower {
+class RenderableModel : public Renderable, public Shadower {
 public:
     explicit RenderableModel(const ghoul::Dictionary& dictionary);
     ~RenderableModel() override = default;
@@ -55,12 +55,10 @@ public:
     void createDepthMapResources();
     void releaseDepthMapResources();
 
-    bool isReady() const override;
-
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     enum class AnimationMode {
@@ -83,26 +81,26 @@ private:
     std::string _animationStart;
     AnimationMode _animationMode = AnimationMode::Once;
     double _animationTimeScale = 1.0;
-    properties::BoolProperty _enableAnimation;
+    BoolProperty _enableAnimation;
 
-    properties::FloatProperty _ambientIntensity;
-    properties::FloatProperty _diffuseIntensity;
-    properties::FloatProperty _specularIntensity;
-    properties::FloatProperty _specularPower;
+    FloatProperty _ambientIntensity;
+    FloatProperty _diffuseIntensity;
+    FloatProperty _specularIntensity;
+    FloatProperty _specularPower;
 
-    properties::BoolProperty _performShading;
-    properties::BoolProperty _enableFaceCulling;
-    properties::DMat4Property _modelTransform;
-    properties::Vec3Property _pivot;
-    properties::DoubleProperty _modelScale;
-    properties::Vec3Property _rotationVec;
+    BoolProperty _performShading;
+    BoolProperty _enableFaceCulling;
+    DMat4Property _modelTransform;
+    Vec3Property _pivot;
+    DoubleProperty _modelScale;
+    Vec3Property _rotationVec;
 
-    properties::BoolProperty _enableDepthTest;
-    properties::OptionProperty _blendingFuncOption;
-    properties::BoolProperty _renderWireframe;
+    BoolProperty _enableDepthTest;
+    OptionProperty _blendingFuncOption;
+    BoolProperty _renderWireframe;
 
-    properties::BoolProperty _useOverrideColor;
-    properties::Vec4Property _overrideColor;
+    BoolProperty _useOverrideColor;
+    Vec4Property _overrideColor;
 
     std::filesystem::path _vertexShaderPath;
     std::filesystem::path _fragmentShaderPath;
@@ -123,7 +121,7 @@ private:
     std::vector<float> _lightIntensitiesBuffer;
     std::vector<glm::vec3> _lightDirectionsViewSpaceBuffer;
 
-    properties::PropertyOwner _lightSourcePropertyOwner;
+    PropertyOwner _lightSourcePropertyOwner;
 
     // Framebuffer and screen space quad
     GLuint _framebuffer = 0;
@@ -131,7 +129,7 @@ private:
     GLuint _vbo = 0;
     bool _shouldRenderTwice = false;
 
-    // Opacity program
+    /// Opacity program
     ghoul::opengl::ProgramObject* _quadProgram = nullptr;
     UniformCache(opacity, colorTexture, depthTexture, viewport,
         resolution) _uniformOpacityCache;
@@ -142,6 +140,6 @@ private:
     ghoul::opengl::ProgramObject* _depthMapProgram = nullptr;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__

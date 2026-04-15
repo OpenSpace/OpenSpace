@@ -36,7 +36,7 @@
 namespace {
     constexpr std::string_view _loggerCat = "VideoTileProvider";
 
-    // This `TileProvider` can be used to render a video on the globe.
+    // Renders a video on the globe.
     //
     // The video can either be played back based on a given simulation time
     // (`PlaybackMode` MapToSimulationTime) or through the user interface (for
@@ -46,20 +46,16 @@ namespace {
     // Note that, unless playback is mapped to simulation time, the video must be started
     // manually via the user interface.
     struct [[codegen::Dictionary(VideoTileProvider)]] Parameters {};
-#include "videotileprovider_codegen.cpp"
 } // namespace
+#include "videotileprovider_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation VideoTileProvider::Documentation() {
-     documentation::Documentation doc = codegen::doc<Parameters>(
-         "video_videotileprovider"
-     );
-
-    documentation::Documentation vp = VideoPlayer::Documentation();
-    doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
-
-    return doc;
+Documentation VideoTileProvider::Documentation() {
+    return codegen::doc<Parameters>(
+        "video_tileprovider_video",
+        VideoPlayer::Documentation()
+    );
 }
 
 VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
@@ -69,7 +65,7 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_videoPlayer);
 }
 
-globebrowsing::Tile VideoTileProvider::tile(const globebrowsing::TileIndex& tileIndex) {
+Tile VideoTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped;
 
     if (!_videoPlayer.isInitialized()) {
@@ -81,7 +77,7 @@ globebrowsing::Tile VideoTileProvider::tile(const globebrowsing::TileIndex& tile
         LINFO("Framebuffer is not complete");
     }
 
-    // For now, don't use the cache as we're trying to debug the problem w playback
+    // For now, don't use the cache as we're trying to debug the problem with playback
     const uint64_t hash = tileIndex.hashKey();
     auto foundTile = _tileCache.find(hash);
     const bool textureChanged = foundTile != _tileCache.end() &&
@@ -162,4 +158,4 @@ void VideoTileProvider::internalDeinitialize() {
     _videoPlayer.destroy();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

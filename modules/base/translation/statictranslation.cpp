@@ -28,27 +28,29 @@
 #include <openspace/util/updatestructures.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo PositionInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo PositionInfo = {
         "Position",
         "Position",
         "This value is used as a static offset (in meters) that is applied to the scene "
         "graph node that this transformation is attached to relative to its parent.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    // This `Translation` provides a fixed translation to the attached scene graph node
-    // that does not change unless the `Position` property is changed.
+    // Provides a fixed translation to the attached scene graph node that does not change
+    // unless the `Position` property is changed.
     struct [[codegen::Dictionary(StaticTranslation)]] Parameters {
         // [[codegen::verbatim(PositionInfo.description)]]
         glm::dvec3 position;
     };
-#include "statictranslation_codegen.cpp"
 } // namespace
+#include "statictranslation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation StaticTranslation::Documentation() {
-    return codegen::doc<Parameters>("base_transform_translation_static");
+Documentation StaticTranslation::Documentation() {
+    return codegen::doc<Parameters>("base_translation_static");
 }
 
 StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)

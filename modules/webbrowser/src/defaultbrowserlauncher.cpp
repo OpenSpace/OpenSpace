@@ -41,7 +41,7 @@ bool DefaultBrowserLauncher::OnBeforePopup(CefRefPtr<CefBrowser>, CefRefPtr<CefF
                                            CefRefPtr<CefDictionaryValue>&,
                                            bool*)
 {
-    // never permit CEF popups, always launch in default browser
+    // Never permit CEF popups, always launch in default browser
 #ifdef WIN32
     std::string url = targetUrl.ToString();
     LDEBUGC("DefaultBrowserLauncher", "Launching default browser: " + url);

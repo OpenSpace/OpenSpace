@@ -31,9 +31,9 @@
 #include <string>
 #include <vector>
 
-namespace openspace::documentation { struct Documentation; }
+namespace openspace {
 
-namespace openspace::exoplanets {
+struct Documentation;
 
 struct ExoplanetDataEntry {
     /// Orbital semi-major axis in AU
@@ -148,9 +148,9 @@ struct ExoplanetSystem {
     std::vector<ExoplanetDataEntry> planetsData;
 
     ghoul::Dictionary toDataDictionary() const;
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 };
 
-} // namespace openspace::exoplanets
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_EXOPLANETS___DATASTRUCTURE___H__

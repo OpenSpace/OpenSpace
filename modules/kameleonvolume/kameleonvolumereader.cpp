@@ -40,14 +40,14 @@
 #pragma warning (disable : 4800) // #pragma warning: there is no warning number '4800'
 #endif // WIN32
 
+#include <ccmc/Attribute.h>
+#include <ccmc/BATSRUS.h>
+#include <ccmc/CCMCTime.h>
+#include <ccmc/ENLIL.h>
+#include <ccmc/FileReader.h>
+#include <ccmc/Interpolator.h>
 #include <ccmc/Kameleon.h>
 #include <ccmc/Model.h>
-#include <ccmc/FileReader.h>
-#include <ccmc/BATSRUS.h>
-#include <ccmc/ENLIL.h>
-#include <ccmc/CCMCTime.h>
-#include <ccmc/Attribute.h>
-#include <ccmc/Interpolator.h>
 
 #ifdef WIN32
 #pragma warning (pop)
@@ -68,11 +68,9 @@ namespace {
     float globalAttribute(ccmc::Model& model, const std::string& attribute) {
         return model.getGlobalAttribute(attribute).getAttributeFloat();
     }
-
-
 } // namespace
 
-namespace openspace::kameleonvolume {
+namespace openspace {
 
 KameleonVolumeReader::KameleonVolumeReader(std::filesystem::path path)
     : _path(std::move(path))
@@ -80,7 +78,7 @@ KameleonVolumeReader::KameleonVolumeReader(std::filesystem::path path)
     if (!std::filesystem::is_regular_file(_path)) {
         throw ghoul::FileNotFoundError(_path);
     }
-    _kameleon = kameleonhelper::createKameleonObject(_path.string());
+    _kameleon = createKameleonObject(_path.string());
 
     // Possibly use a kameleon interpolator instead of a model interpolator?
     _interpolator = std::unique_ptr<ccmc::Interpolator>(
@@ -90,7 +88,7 @@ KameleonVolumeReader::KameleonVolumeReader(std::filesystem::path path)
 
 KameleonVolumeReader::~KameleonVolumeReader() {}
 
-std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
+std::unique_ptr<RawVolume<float>> KameleonVolumeReader::readFloatVolume(
                                                              const glm::uvec3& dimensions,
                                                               const std::string& variable,
                                                         const glm::vec3& lowerDomainBound,
@@ -109,7 +107,7 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
     );
 }
 
-std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
+std::unique_ptr<RawVolume<float>> KameleonVolumeReader::readFloatVolume(
                                                              const glm::uvec3& dimensions,
                                                               const std::string& variable,
                                                               const glm::vec3& lowerBound,
@@ -123,7 +121,7 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
     minValue = std::numeric_limits<float>::max();
     maxValue = -std::numeric_limits<float>::max();
 
-    auto volume = std::make_unique<volume::RawVolume<float>>(dimensions);
+    auto volume = std::make_unique<RawVolume<float>>(dimensions);
 
     const glm::vec3 dims = volume->dimensions();
     const glm::vec3 diff = upperBound - lowerBound;
@@ -209,7 +207,7 @@ std::vector<std::string> KameleonVolumeReader::globalAttributeNames() const {
 }
 
 std::array<std::string, 3> KameleonVolumeReader::gridVariableNames() const {
-    return openspace::gridVariables(_kameleon->model);
+    return gridVariables(_kameleon->model);
 }
 
 void KameleonVolumeReader::addAttributeToDictionary(ghoul::Dictionary& dictionary,
@@ -327,7 +325,7 @@ std::string KameleonVolumeReader::getVisUnit(const std::string& variable) const 
 std::string KameleonVolumeReader::time() const {
     double start =
         ccmc::Time(simulationStart()).getEpoch();
-    // Get elapsed time in seconds and convert to milliseconds.
+    // Get elapsed time in seconds and convert to milliseconds
     double elapsed = elapsedTime() * 1000;
     return ccmc::Time(start + elapsed).toString();
 }
@@ -346,4 +344,4 @@ void KameleonVolumeReader::setReaderCallback(Callback cb) {
     _readerCallback = std::move(cb);
 };
 
-} // namespace openspace::kameleonvolume
+} // namespace openspace

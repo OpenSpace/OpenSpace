@@ -34,7 +34,7 @@
 
 // Implementation based on http://progsch.net/wordpress/?p=81
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 template <typename KeyType> class LRUThreadPool;
 
@@ -80,7 +80,7 @@ private:
     friend class LRUThreadPoolWorker<KeyType>;
 
     std::vector<std::thread> _workers;
-    cache::LRUCache<KeyType, std::function<void()>, DefaultHasher> _queuedTasks;
+    LRUCache<KeyType, std::function<void()>, DefaultHasher> _queuedTasks;
     std::vector<KeyType> _unqueuedTasks;
     std::mutex _queueMutex;
     std::condition_variable _condition;
@@ -88,7 +88,7 @@ private:
     bool _stop = false;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #include "lruthreadpool.inl"
 

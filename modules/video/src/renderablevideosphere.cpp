@@ -30,10 +30,10 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    // This `Renderable` creates a textured 3D sphere where the texture is a video. Per
-    // default, the sphere uses an equirectangular projection for the image mapping
-    // and hence expects a video in equirectangular format. However, it can also be used
-    // to play fisheye videos by changing the `TextureProjection`.
+    // Creates a textured 3D sphere where the texture is a video. Per default, the sphere
+    // uses an equirectangular projection for the image mapping and hence expects a video
+    // in equirectangular format. However, it can also be used to play fisheye videos by
+    // changing the `TextureProjection`.
     //
     // The video can either be played back based on a given simulation time
     // (`PlaybackMode` MapToSimulationTime) or through the user interface (for
@@ -43,18 +43,18 @@ namespace {
     // Note that, unless playback is mapped to simulation time, the video must be started
     // manually via the user interface.
     struct [[codegen::Dictionary(RenderableVideoSphere)]] Parameters {};
-#include "renderablevideosphere_codegen.cpp"
 } // namespace
+#include "renderablevideosphere_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableVideoSphere::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>(
-        "video_renderablevideosphere",
+Documentation RenderableVideoSphere::Documentation() {
+    openspace::Documentation doc = codegen::doc<Parameters>(
+        "video_renderable_videosphere",
         RenderableSphere::Documentation()
     );
 
-    documentation::Documentation vp = VideoPlayer::Documentation();
+    openspace::Documentation vp = VideoPlayer::Documentation();
     doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
 
     return doc;
@@ -65,10 +65,6 @@ RenderableVideoSphere::RenderableVideoSphere(const ghoul::Dictionary& dictionary
     , _videoPlayer(dictionary)
 {
     addPropertySubOwner(_videoPlayer);
-}
-
-bool RenderableVideoSphere::isReady() const {
-    return RenderableSphere::isReady() && _videoPlayer.isInitialized();
 }
 
 void RenderableVideoSphere::initializeGL() {

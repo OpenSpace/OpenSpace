@@ -38,7 +38,9 @@
 #include <filesystem>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ScriptInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ScriptInfo = {
         "Script",
         "Script",
         "This value is the path to the Lua script that will be executed to compute the "
@@ -49,25 +51,24 @@ namespace {
         "milliseconds past the J2000 epoch as the third argument. It computes the "
         "rotation value factors returned as a table containing the 9 values that make up "
         "the resulting rotation matrix.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    // This `Rotation` type generates the rotation for the attached scene graph node by
-    // calling the provided Lua script to create the full matrix used to orient the scene
-    // graph node. The returned matrix must be a valid rotation matrix. The script
-    // parameter describes in greater detail how the Lua script file should be
-    // constructed.
+    // Generates the rotation for the attached scene graph node by calling the provided
+    // Lua script to create the full matrix used to orient the scene graph node. The
+    // returned matrix must be a valid rotation matrix. The script parameter describes in
+    // greater detail how the Lua script file should be constructed.
     struct [[codegen::Dictionary(LuaRotation)]] Parameters {
         // [[codegen::verbatim(ScriptInfo.description)]]
         std::filesystem::path script;
     };
-#include "luarotation_codegen.cpp"
 } // namespace
+#include "luarotation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation LuaRotation::Documentation() {
-    return codegen::doc<Parameters>("base_transform_rotation_lua");
+Documentation LuaRotation::Documentation() {
+    return codegen::doc<Parameters>("base_rotation_lua");
 }
 
 LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary)

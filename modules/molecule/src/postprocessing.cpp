@@ -1,3 +1,27 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2026                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
 /*-----------------------------------------------------------------------
   Copyright (c) 2014, NVIDIA. All rights reserved.
 
@@ -291,13 +315,13 @@ void initialize(int width, int height) {
     );
 
     glObj.linearDepth.texture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::Red,
             .dataType = GL_FLOAT
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
@@ -312,52 +336,52 @@ void initialize(int width, int height) {
     );
 
     glObj.targets.texColor[0] = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGB,
             .dataType = GL_FLOAT,
             .internalFormat = GL_R11F_G11F_B10F
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
     glObj.targets.texColor[1] = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGB,
             .dataType = GL_FLOAT,
             .internalFormat = GL_R11F_G11F_B10F
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
 
     glObj.targets.texTemporalBuffer[0] = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGB,
             .dataType = GL_FLOAT,
             .internalFormat = GL_R11F_G11F_B10F
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
 
     glObj.targets.texTemporalBuffer[1] = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGB,
             .dataType = GL_FLOAT,
             .internalFormat = GL_R11F_G11F_B10F
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
@@ -520,14 +544,14 @@ void initialize(int width, int height) {
     );
 
     glObj.bokehDof.halfRes.colorCoc = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width / 2, height / 2, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGBA,
             .dataType = GL_FLOAT,
             .internalFormat = GL_RGBA16F
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
@@ -575,7 +599,7 @@ void initialize(int width, int height) {
     );
 
     glObj.velocity.texTilemax = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(
                 glObj.texWidth / VelocityTileSize,
                 glObj.texHeight / VelocityTileSize,
@@ -586,13 +610,13 @@ void initialize(int width, int height) {
             .dataType = GL_FLOAT,
             .internalFormat = GL_RG16F
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
 
     glObj.velocity.texNeighbormax = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(
                 glObj.texWidth / VelocityTileSize,
                 glObj.texHeight / VelocityTileSize,
@@ -603,7 +627,7 @@ void initialize(int width, int height) {
             .dataType = GL_FLOAT,
             .internalFormat = GL_RG16F
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
@@ -660,39 +684,39 @@ void initialize(int width, int height) {
     }
 
     glObj.ssao.texRandom = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(AORandomTexSize, AORandomTexSize, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGBA,
             .dataType = GL_SHORT,
             .internalFormat = GL_RGBA16_SNORM
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .filter = ghoul::opengl::Texture::FilterMode::Nearest
         },
         reinterpret_cast<std::byte*>(buffer.data())
     );
 
     glObj.ssao.hbao.texture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::Red,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
 
     glObj.ssao.blur.texture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::Red,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
@@ -894,7 +918,7 @@ void applySsao(const ghoul::opengl::Texture& linearDepthTex,
         projScl = static_cast<float>(height) / projInfo.y;
     }
 
-    HBAOData data = {
+    const HBAOData data = {
         .radiusToScreen = radius * 0.5f * projScl,
         .negInvR2 = -1.f / (radius * radius),
         .nDotVBias = std::clamp(bias, 0.f, 1.f - std::numeric_limits<float>::epsilon()),
@@ -907,7 +931,6 @@ void applySsao(const ghoul::opengl::Texture& linearDepthTex,
         },
         .projInfo = projInfo
     };
-
     glNamedBufferSubData(glObj.ssao.uboHbaoData, 0, sizeof(HBAOData), &data);
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.ssao.hbao.fbo);
@@ -986,7 +1009,12 @@ void applySsao(const ghoul::opengl::Texture& linearDepthTex,
         {
             ghoul::GLDebugGroup<1> group("BLUR 2nd");
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastFbo);
-            glViewport(lastViewport[0], lastViewport[1], lastViewport[2], lastViewport[3]);
+            glViewport(
+                lastViewport[0],
+                lastViewport[1],
+                lastViewport[2],
+                lastViewport[3]
+            );
             normalUnit.bind(*glObj.ssao.blur.texture);
             program.setUniform(uniforms.invResDir, 0.f, 1.f / glObj.texHeight);
 
@@ -1053,8 +1081,8 @@ void applyTemporalAa(const ghoul::opengl::Texture& linearDepthTex,
     glGetIntegerv(GL_DRAW_BUFFER, &boundBuffer);
 
     const GLenum drawBuffers[2] = {
-        GL_COLOR_ATTACHMENT2 + dstBuf,   // tex_temporal_buffer[0 or 1]
-        static_cast<GLenum>(boundBuffer) // assume that this is part of the same gbuffer
+        GL_COLOR_ATTACHMENT2 + dstBuf,
+        static_cast<GLenum>(boundBuffer)
     };
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.targets.fbo);
@@ -1425,7 +1453,12 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             glDrawArrays(GL_TRIANGLES, 0, 3);
             glBindVertexArray(0);
 
-            glViewport(prevViewport[0], prevViewport[1], prevViewport[2], prevViewport[3]);
+            glViewport(
+                prevViewport[0],
+                prevViewport[1],
+                prevViewport[2],
+                prevViewport[3]
+            );
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
         }
 
@@ -1589,4 +1622,4 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
     glColorMask(lastColormask[0], lastColormask[1], lastColormask[2], lastColormask[3]);
 }
 
-}  // namespace postprocessing
+} // namespace postprocessing

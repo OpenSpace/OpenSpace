@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Intelsat)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_intelsat",
-  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=intelsat&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=intelsat&FORMAT=kvn",
   Filename = "intelsat.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -50,6 +50,6 @@ asset.meta = {
   Name = "Satellites Communications - Intelsat",
   Description = "Satellites asset for Communications - Intelsat. Data from Celestrak",
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/NORAD/elements/",
+  URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
 }

@@ -33,7 +33,7 @@
 #include <memory>
 #include <optional>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 struct RawTile {
     enum class ReadError {
@@ -52,6 +52,6 @@ struct RawTile {
     GLuint pbo = 0;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___RAWTILE___H__

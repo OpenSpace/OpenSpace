@@ -30,7 +30,7 @@
 #include <ghoul/glm.h>
 #include <filesystem>
 
-namespace openspace::volume {
+namespace openspace {
 
 class GenerateRawVolumeTask : public Task {
 public:
@@ -39,7 +39,7 @@ public:
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     std::filesystem::path _rawVolumeOutputPath;
@@ -53,6 +53,6 @@ private:
     std::string _valueFunctionLua;
 };
 
-} // namespace openspace::volume
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__

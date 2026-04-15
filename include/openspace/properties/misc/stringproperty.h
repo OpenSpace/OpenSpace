@@ -27,11 +27,11 @@
 
 #include <openspace/properties/templateproperty.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 class StringProperty : public TemplateProperty<std::string> {
 public:
-    explicit StringProperty(Property::PropertyInfo info, std::string value = "");
+    explicit StringProperty(PropertyInfo info, std::string value = "");
 
     std::string_view className() const override final;
     ghoul::lua::LuaTypes typeLua() const override final;
@@ -49,6 +49,6 @@ private:
     std::string toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___STRINGPROPERTY___H__

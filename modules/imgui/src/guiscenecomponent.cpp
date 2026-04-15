@@ -29,69 +29,66 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/misc/assert.h>
 
 namespace {
+    using namespace openspace;
+
     const ImVec2 Size = ImVec2(350, 500);
 
-    void renderSceneGraphNode(const openspace::SceneGraphNode& node,
-                              const openspace::Time& time)
-    {
-        using namespace openspace;
-
-        if (ImGui::TreeNode(node.identifier().c_str())) {
-            const std::vector<SceneGraphNode*> children = node.children();
-            for (SceneGraphNode* c : children) {
-                renderSceneGraphNode(*c, time);
-            }
-
-            bool timeRangeActive = node.isTimeFrameActive();
-            ImGui::Checkbox("Time Range Active", &timeRangeActive);
-
-            const Renderable* renderable = node.renderable();
-            if (renderable) {
-                CaptionText("Renderable");
-                bool enabled = renderable->isEnabled();
-                ImGui::Checkbox("Enabled", &enabled);
-
-                bool isVisible = renderable->isVisible();
-                ImGui::Checkbox("Is Visible", &isVisible);
-
-                bool shouldUpdateIfDisabled = renderable->shouldUpdateIfDisabled();
-                ImGui::Checkbox("Should update if disabled", &shouldUpdateIfDisabled);
-
-                bool isReady = renderable->isReady();
-                ImGui::Checkbox("Is Ready", &isReady);
-
-                const Renderable::RenderBin bin = renderable->renderBin();
-                const std::string binStr = [](Renderable::RenderBin b) {
-                    switch (b) {
-                        case Renderable::RenderBin::Background:
-                            return "Background";
-                        case Renderable::RenderBin::Opaque:
-                            return "Opaque";
-                        case Renderable::RenderBin::PreDeferredTransparent:
-                            return "PreDeferredTransparent";
-                        case Renderable::RenderBin::PostDeferredTransparent:
-                            return "PostDeferredTransparent";
-                        case Renderable::RenderBin::Overlay:
-                            return "Overlay";
-                        default:
-                            throw ghoul::MissingCaseException();
-                    }
-                }(bin);
-                ImGui::Text("RenderBin: %s", binStr.c_str());
-            }
-            ImGui::TreePop();
+    void renderSceneGraphNode(const SceneGraphNode& node, const Time& time) {
+        if (!ImGui::TreeNode(node.identifier().c_str())) {
+            return;
         }
+
+        const std::vector<SceneGraphNode*> children = node.children();
+        for (SceneGraphNode* c : children) {
+            renderSceneGraphNode(*c, time);
+        }
+
+        bool timeRangeActive = node.isTimeFrameActive();
+        ImGui::Checkbox("Time Range Active", &timeRangeActive);
+
+        const Renderable* renderable = node.renderable();
+        if (renderable) {
+            CaptionText("Renderable");
+            bool enabled = renderable->isEnabled();
+            ImGui::Checkbox("Enabled", &enabled);
+
+            bool isVisible = renderable->isVisible();
+            ImGui::Checkbox("Is Visible", &isVisible);
+
+            bool shouldUpdateIfDisabled = renderable->shouldUpdateIfDisabled();
+            ImGui::Checkbox("Should update if disabled", &shouldUpdateIfDisabled);
+
+            const Renderable::RenderBin bin = renderable->renderBin();
+            const std::string binStr = [](Renderable::RenderBin b) {
+                switch (b) {
+                    case Renderable::RenderBin::Background:
+                        return "Background";
+                    case Renderable::RenderBin::Opaque:
+                        return "Opaque";
+                    case Renderable::RenderBin::PreDeferredTransparent:
+                        return "PreDeferredTransparent";
+                    case Renderable::RenderBin::PostDeferredTransparent:
+                        return "PostDeferredTransparent";
+                    case Renderable::RenderBin::Overlay:
+                        return "Overlay";
+                    default:
+                        throw ghoul::MissingCaseException();
+                }
+            }(bin);
+            ImGui::Text("RenderBin: %s", binStr.c_str());
+        }
+        ImGui::TreePop();
     }
 } // namespace
 
-namespace openspace::gui {
+namespace openspace {
 
 GuiSceneComponent::GuiSceneComponent() : GuiComponent("SceneView", "Scene View") {}
 
@@ -110,4 +107,4 @@ void GuiSceneComponent::render() {
     ImGui::End();
 }
 
-} // namespace openspace::gui
+} // namespace openspace

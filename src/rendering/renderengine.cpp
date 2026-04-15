@@ -32,10 +32,10 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/rendering/dashboard.h>
-#include <openspace/rendering/helper.h>
 #include <openspace/rendering/framebufferrenderer.h>
+#include <openspace/rendering/helper.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -55,11 +55,6 @@
 #include <ghoul/io/model/modelreader.h>
 #include <ghoul/io/model/modelreaderassimp.h>
 #include <ghoul/io/model/modelreaderbinary.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/io/texture/texturereadercmap.h>
-#include <ghoul/io/texture/texturereaderstb.h>
-#include <ghoul/io/texture/texturewriter.h>
-#include <ghoul/io/texture/texturewriterstb.h>
 #include <ghoul/logging/loglevel.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
@@ -74,12 +69,14 @@
 #include <array>
 #include <cmath>
 #include <ctime>
+#include <thread>
 #include <utility>
 
 #include "renderengine_lua.inl"
-#include <thread>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderEngine";
 
     constexpr std::chrono::seconds ScreenLogTimeToLive(15);
@@ -88,75 +85,84 @@ namespace {
     constexpr std::string_view KeyFontMono = "Mono";
     constexpr std::string_view KeyFontLight = "Light";
 
-    constexpr openspace::properties::Property::PropertyInfo ShowOverlayClientsInfo = {
+    constexpr Property::PropertyInfo ShowOverlayClientsInfo = {
         "ShowOverlayOnClients",
         "Show overlay information on clients",
         "If this value is enabled, the overlay information text is also automatically "
         "rendered on client nodes. This values is disabled by default.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowLogInfo = {
+    constexpr Property::PropertyInfo ShowLogInfo = {
         "ShowLog",
         "Show the on-screen log",
         "This value determines whether the on-screen log will be shown or hidden. Even "
         "if it is shown, all 'Debug' and 'Trace' level messages are omitted from this "
         "log.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo VerticalLogOffsetInfo = {
+    constexpr Property::PropertyInfo VerticalLogOffsetInfo = {
         "VerticalLogOffset",
         "Vertical log offset",
         "The vertical offset for the on-screen log in [0,1] coordinates, a factor that "
         "is scaled with the vertical resolution.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowVersionInfo = {
+    constexpr Property::PropertyInfo ShowVersionInfo = {
         "ShowVersion",
         "Shows the version on-screen information",
         "This value determines whether the Git version information (branch and commit) "
         "hash are shown on the screen.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowCameraInfo = {
+    constexpr Property::PropertyInfo ShowCameraInfo = {
         "ShowCamera",
         "Shows camera information",
         "This value determines whether the information about the current camera state is "
         "shown on the screen.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScreenshotWindowIdsInfo = {
+    constexpr Property::PropertyInfo ScreenshotWindowIdsInfo = {
         "ScreenshotWindowId",
         "Screenshow window ids",
         "The list of window identifiers whose screenshot will be taken the next time "
         "anyone triggers a screenshot. If this list is empty (the default), all windows "
         "will have their screenshot taken. Id's that do not exist are silently ignored.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ApplyWarpingInfo = {
+    constexpr Property::PropertyInfo ApplyWarpingInfo = {
         "ApplyWarpingScreenshot",
         "Apply warping to screenshots",
         "This value determines whether a warping should be applied before taking a "
         "screenshot. If it is enabled, all post processing is applied as well, which "
         "includes everything rendered on top of the rendering, such as the user "
         "interface.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScreenshotUseDateInfo = {
-        "ScreenshotUseDate",
-        "Screenshot folder uses date",
+    constexpr Property::PropertyInfo UseNewScreenshotFolderInfo = {
+        "UseNewScreenshotFolder",
+        "Use New Screenshot Folder",
+        "If this property is triggered, a new screenshot folder is created and the "
+        "numbering for screenshots is reset to start at 0. Note, this property only does "
+        "something if `ScreenshotUseDateTime` is set to `true`.",
+        Property::Visibility::AdvancedUser
+    };
+
+    constexpr Property::PropertyInfo ScreenshotUseDateTimeInfo = {
+        "ScreenshotUseDateTime",
+        "Screenshot folder uses datetime",
         "If this value is set to 'true', screenshots will be saved to a folder that "
         "contains the time at which this value was enabled.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableMasterInfo = {
+    constexpr Property::PropertyInfo DisableMasterInfo = {
         "DisableMasterRendering",
         "Disable master rendering",
         "If this value is enabled, the rendering on the master node will be disabled. "
@@ -164,137 +170,135 @@ namespace {
         "still respond to user input. This setting is reasonably only useful in the case "
         "of multi-pipeline environments, such as planetariums, where the output of the "
         "master node is not required and performance can be gained by disabling it.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GlobalRotationInfo = {
+    constexpr Property::PropertyInfo GlobalRotationInfo = {
         "GlobalRotation",
         "Global rotation",
-        "Applies a global view rotation. Use this to rotate the position of the "
-        "focus node away from the default location on the screen. This setting "
-        "persists even when a new focus node is selected. Defined using pitch, yaw, "
-        "roll in radians.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "Applies a global view rotation. Use this to rotate the position of the focus "
+        "node away from the default location on the screen. This setting persists even "
+        "when a new focus node is selected. Defined using pitch, yaw, roll in radians.",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScreenSpaceRotationInfo = {
+    constexpr Property::PropertyInfo ScreenSpaceRotationInfo = {
         "ScreenSpaceRotation",
         "Screen space rotation",
         "Applies a rotation to all screen space renderables. Defined using pitch, yaw, "
         "roll in radians.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MasterRotationInfo = {
+    constexpr Property::PropertyInfo MasterRotationInfo = {
         "MasterRotation",
         "Master rotation",
         "Applies a view rotation for only the master node, defined using pitch, yaw, "
         "roll in radians.This can be used to compensate the master view direction for "
         "tilted display systems in clustered immersive environments.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableHDRPipelineInfo = {
+    constexpr Property::PropertyInfo DisableHDRPipelineInfo = {
         "DisableHDRPipeline",
         "Disable HDR rendering",
         "If this value is enabled, the rendering will disable the HDR color handling and "
         "the LDR color pipeline will be used. Be aware of possible over exposure in the "
         "final colors.",
-        openspace::properties::Property::Visibility::Hidden
+        Property::Visibility::Hidden
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HDRExposureInfo = {
+    constexpr Property::PropertyInfo HDRExposureInfo = {
         "HDRExposure",
         "HDR exposure",
         "This value determines the amount of light per unit area reaching the equivalent "
         "of an electronic image sensor.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
+    constexpr Property::PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma correction",
         "Gamma, is the nonlinear operation used to encode and decode luminance or "
-        "tristimulus values in the image",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "tristimulus values in the image.",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HueInfo = {
+    constexpr Property::PropertyInfo HueInfo = {
         "Hue",
         "Hue",
         "Hue.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SaturationInfo = {
+    constexpr Property::PropertyInfo SaturationInfo = {
         "Saturation",
         "Saturation",
         "Saturation.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ValueInfo = {
+    constexpr Property::PropertyInfo ValueInfo = {
         "Value",
         "Value",
         "Value.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FramerateLimitInfo = {
+    constexpr Property::PropertyInfo FramerateLimitInfo = {
         "FramerateLimit",
         "Framerate limit",
         "If set to a value bigger than 0, the framerate will be limited to that many "
         "frames per second without using V-Sync.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HorizFieldOfViewInfo = {
+    constexpr Property::PropertyInfo HorizFieldOfViewInfo = {
         "HorizFieldOfView",
         "Horizontal field of view",
-        "Adjusts the degrees of the horizontal field of view. The vertical field of "
-        "view will be automatically adjusted to match, according to the current "
-        "aspect ratio.",
-        openspace::properties::Property::Visibility::User
+        "Adjusts the degrees of the horizontal field of view. The vertical field of view "
+        "will be automatically adjusted to match, according to the current aspect ratio.",
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GlobalBlackoutFactorInfo = {
+    constexpr Property::PropertyInfo GlobalBlackoutFactorInfo = {
         "BlackoutFactor",
         "Blackout factor",
         "The blackout factor of the rendering. This can be used for fading in or out the "
         "rendering window.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ApplyBlackoutToMasterInfo = {
+    constexpr Property::PropertyInfo ApplyBlackoutToMasterInfo = {
         "ApplyBlackoutToMaster",
         "Apply blackout to master",
         "If this value is 'true', the blackout factor is applied to the master node. "
         "Regardless of this value, the clients will always adhere to the factor.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FXAAInfo = {
+    constexpr Property::PropertyInfo FXAAInfo = {
         "FXAA",
         "Enable FXAA",
         "Enable FXAA.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledFontColorInfo = {
+    constexpr Property::PropertyInfo EnabledFontColorInfo = {
         "EnabledFontColor",
         "Enabled font color",
         "The font color used for enabled options.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisabledFontColorInfo = {
+    constexpr Property::PropertyInfo DisabledFontColorInfo = {
         "DisabledFontColor",
         "Disabled font color",
         "The font color used for disabled options.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo WindowingInfo = {
+    const PropertyOwner::PropertyOwnerInfo WindowingInfo = {
         "Windowing",
         "Windowing",
         "Contains properties that concern the specific rendering settings of individual "
@@ -306,7 +310,7 @@ namespace {
 namespace openspace {
 
 RenderEngine::Window::Window(PropertyOwnerInfo info, size_t id)
-    : properties::PropertyOwner(info)
+    : PropertyOwner(info)
     , horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.f)
 {
     horizFieldOfView.onChange([this, id]() {
@@ -318,7 +322,7 @@ RenderEngine::Window::Window(PropertyOwnerInfo info, size_t id)
 }
 
 RenderEngine::RenderEngine()
-    : properties::PropertyOwner({ "RenderEngine", "Render Engine" })
+    : PropertyOwner({ "RenderEngine", "Render Engine" })
     , _showOverlayOnClients(ShowOverlayClientsInfo, false)
     , _showLog(ShowLogInfo, true)
     , _verticalLogOffset(VerticalLogOffsetInfo, 0.f, 0.f, 1.f)
@@ -326,7 +330,8 @@ RenderEngine::RenderEngine()
     , _showCameraInfo(ShowCameraInfo, true)
     , _screenshotWindowIds(ScreenshotWindowIdsInfo)
     , _applyWarping(ApplyWarpingInfo, false)
-    , _screenshotUseDate(ScreenshotUseDateInfo, false)
+    , _useNewScreenfolder(UseNewScreenshotFolderInfo)
+    , _screenshotUseDateTime(ScreenshotUseDateTimeInfo, false)
     , _disableMasterRendering(DisableMasterInfo, false)
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
     , _applyBlackoutToMaster(ApplyBlackoutToMasterInfo, true)
@@ -407,20 +412,47 @@ RenderEngine::RenderEngine()
     addProperty(_screenshotWindowIds);
     addProperty(_applyWarping);
 
-    _screenshotUseDate.onChange([this]() {
+    _useNewScreenfolder.onChange([this]() {
+        // If there is no screenshot folder or if we are not using the date, we don't need
+        // to do anything
+        if (!FileSys.hasRegisteredToken("${STARTUP_SCREENSHOT}") ||
+            !_screenshotUseDateTime)
+        {
+            return;
+        }
+
+        const std::time_t now = std::time(nullptr);
+        std::tm* nowTime = std::localtime(&now);
+        std::array<char, 128> date;
+        strftime(date.data(), sizeof(date), "%Y-%m-%d-%H-%M-%S", nowTime);
+
+        const std::filesystem::path newFolder = absPath(
+            "${STARTUP_SCREENSHOT}/" + std::string(date.data())
+        );
+
+        FileSys.registerPathToken(
+            "${SCREENSHOTS}",
+            newFolder,
+            ghoul::filesystem::FileSystem::Override::Yes
+        );
+        global::windowDelegate->setScreenshotFolder(absPath("${SCREENSHOTS}"));
+    });
+    addProperty(_useNewScreenfolder);
+
+    _screenshotUseDateTime.onChange([this]() {
         // If there is no screenshot folder, don't bother with handling the change
         if (!FileSys.hasRegisteredToken("${STARTUP_SCREENSHOT}")) {
             return;
         }
 
-        if (_screenshotUseDate) {
+        if (_screenshotUseDateTime) {
             // Going from 'false' -> 'true'
             // We might need to create the folder first
 
             const std::time_t now = std::time(nullptr);
             std::tm* nowTime = std::localtime(&now);
             std::array<char, 128> date;
-            strftime(date.data(), sizeof(date), "%Y-%m-%d-%H-%M", nowTime);
+            strftime(date.data(), sizeof(date), "%Y-%m-%d-%H-%M-%S", nowTime);
 
             const std::filesystem::path newFolder = absPath(
                 "${STARTUP_SCREENSHOT}/" + std::string(date.data())
@@ -443,7 +475,7 @@ RenderEngine::RenderEngine()
         }
         global::windowDelegate->setScreenshotFolder(absPath("${SCREENSHOTS}"));
     });
-    addProperty(_screenshotUseDate);
+    addProperty(_screenshotUseDateTime);
 
     addPropertySubOwner(_windowing);
     // Adding the actual window owners later in the initialize, as we don't know yet how
@@ -455,10 +487,10 @@ RenderEngine::RenderEngine()
     addProperty(_masterRotation);
     addProperty(_disableMasterRendering);
 
-    _enabledFontColor.setViewOption(properties::Property::ViewOptions::Color);
+    _enabledFontColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_enabledFontColor);
 
-    _disabledFontColor.setViewOption(properties::Property::ViewOptions::Color);
+    _disabledFontColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_disabledFontColor);
 }
 
@@ -477,27 +509,11 @@ void RenderEngine::initialize() {
     _screenSpaceRotation = global::configuration->screenSpaceRotation;
     _masterRotation = global::configuration->masterRotation;
     _disableMasterRendering = global::configuration->isRenderingOnMasterDisabled;
-    _screenshotUseDate = global::configuration->shouldUseScreenshotDate;
+    _screenshotUseDateTime = global::configuration->shouldUseScreenshotDateTime;
 
-    ghoul::io::TextureReader::ref().addReader(
-        std::make_unique<ghoul::io::TextureReaderSTB>()
-    );
-
-    ghoul::io::TextureReader::ref().addReader(
-        std::make_unique<ghoul::io::TextureReaderCMAP>()
-    );
-
-    ghoul::io::TextureWriter::ref().addWriter(
-        std::make_unique<ghoul::io::TextureWriterSTB>()
-    );
-
-    ghoul::io::ModelReader::ref().addReader(
-        std::make_unique<ghoul::io::ModelReaderAssimp>()
-    );
-
-    ghoul::io::ModelReader::ref().addReader(
-        std::make_unique<ghoul::io::ModelReaderBinary>()
-    );
+    using namespace ghoul::io;
+    ModelReader::ref().addReader(std::make_unique<ModelReaderAssimp>());
+    ModelReader::ref().addReader(std::make_unique<ModelReaderBinary>());
 }
 
 void RenderEngine::initializeGL() {
@@ -507,7 +523,7 @@ void RenderEngine::initializeGL() {
 
     for (size_t i = 0; i < global::windowDelegate->nWindows(); i++) {
         std::string name = global::windowDelegate->nameForWindow(i);
-        properties::PropertyOwner::PropertyOwnerInfo info = {
+        PropertyOwner::PropertyOwnerInfo info = {
             .identifier = std::format("Window_{}", i),
             .guiName = name.empty() ? std::format("Window {}", i) : name
         };
@@ -521,7 +537,7 @@ void RenderEngine::initializeGL() {
     _renderer.setHDRExposure(_hdrExposure);
     _renderer.initialize();
 
-    // set the close clip plane and the far clip plane to extreme values while in
+    // Set the close clip plane and the far clip plane to extreme values while in
     // development
     global::windowDelegate->setNearFarClippingPlane(0.001f, 1000.f);
 
@@ -576,9 +592,13 @@ void RenderEngine::updateScene() {
     const Time& integrateFromTime = global::timeManager->integrateFromTime();
 
     _scene->update({
-        TransformData{ glm::dvec3(0.0), glm::dmat3(1.0), glm::dvec3(1.0) },
-        currentTime,
-        integrateFromTime
+        .modelTransform = {
+            .translation = glm::dvec3(0.0),
+            .rotation = glm::dmat3(1.0),
+            .scale = glm::dvec3(1.0)
+        },
+        .time = currentTime,
+        .previousFrameTime = integrateFromTime
     });
 
     LTRACE("RenderEngine::updateSceneGraph(end)");
@@ -691,8 +711,6 @@ void RenderEngine::registerShadowCaster(const std::string& shadowGroup,
                                         SceneGraphNode* shadower,
                                         SceneGraphNode* shadowee)
 {
-    using namespace shadowmapping;
-
     ghoul_assert(!shadowGroup.empty(), "No shadowGroup specified");
     ghoul_assert(lightSource, "No light source specified");
     ghoul_assert(shadower, "No shadower specified");
@@ -718,8 +736,6 @@ void RenderEngine::removeShadowCaster(const std::string& shadowGroup,
                                       SceneGraphNode* shadower,
                                       SceneGraphNode* shadowee)
 {
-    using namespace shadowmapping;
-
     ghoul_assert(!shadowGroup.empty(), "No shadowGroup specified");
     ghoul_assert(shadower, "No shadower specified");
     ghoul_assert(shadowee, "No shadowee specified");
@@ -791,7 +807,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         for (const std::unique_ptr<ScreenSpaceRenderable>& ssr :
             *global::screenSpaceRenderables)
         {
-            if (ssr->isEnabled() && ssr->isReady()) {
+            if (ssr->isEnabled()) {
                 ssrs.push_back(ssr.get());
             }
         }
@@ -884,11 +900,7 @@ void RenderEngine::renderOverlays(const ShutdownInformation& shutdownInfo) {
 void RenderEngine::renderEndscreen() {
     glEnable(GL_BLEND);
 
-    rendering::helper::renderBox(
-        glm::vec2(0.f),
-        glm::vec2(1.f),
-        glm::vec4(0.f, 0.f, 0.f, 0.5f)
-    );
+    rendering::renderBox(glm::vec2(0.f), glm::vec2(1.f), glm::vec4(0.f, 0.f, 0.f, 0.5f));
 
     const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
     const glm::ivec2 res =
@@ -914,12 +926,8 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 
     // t = 1.f -> start of shutdown counter    t = 0.f -> timer has reached shutdown
     const float t = 1.f - (timer / fullTime);
-
-    rendering::helper::renderBox(
-        glm::vec2(0.f),
-        glm::vec2(1.f),
-        glm::vec4(0.f, 0.f, 0.f, ghoul::circularEaseOut(t))
-    );
+    const float eased = ghoul::circularEaseOut(t);
+    rendering::renderBox(glm::vec2(0.f), glm::vec2(1.f), glm::vec4(0.f, 0.f, 0.f, eased));
 
     // No need to print the text if we are just about to finish since otherwise we'll be
     // overplotting the actual "shutdown in progress" text
@@ -1004,7 +1012,7 @@ bool RenderEngine::isHdrDisabled() const {
 }
 
 /**
- * Build a program object for rendering with the used renderer
+ * Build a program object for rendering with the used renderer.
  */
 std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
                                                                   const std::string& name,
@@ -1014,11 +1022,11 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
 {
     ghoul::Dictionary dict = std::move(data);
 
-    // set path to the current renderer's main fragment shader
+    // Set path to the current renderer's main fragment shader
     dict.setValue("rendererData", _rendererData);
-    // parameterize the main fragment shader program with specific contents.
-    // fsPath should point to a shader file defining a Fragment getFragment() function
-    // instead of a void main() setting glFragColor, glFragDepth, etc.
+    // Parameterize the main fragment shader program with specific contents. `fsPath`
+    // should point to a shader file defining a Fragment getFragment() function instead of
+    // a void main() setting glFragColor, glFragDepth, etc
     dict.setValue("fragmentPath", fsPath);
 
     using namespace ghoul::opengl;
@@ -1036,8 +1044,8 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
 }
 
 /**
-* Build a program object for rendering with the used renderer
-*/
+ * Build a program object for rendering with the used renderer.
+ */
 std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
                                                                   const std::string& name,
                                                       const std::filesystem::path& vsPath,
@@ -1048,9 +1056,9 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     ghoul::Dictionary dict = std::move(data);
     dict.setValue("rendererData", _rendererData);
 
-    // parameterize the main fragment shader program with specific contents.
-    // fsPath should point to a shader file defining a Fragment getFragment() function
-    // instead of a void main() setting glFragColor, glFragDepth, etc.
+    // Parameterize the main fragment shader program with specific contents. `fsPath`
+    // should point to a shader file defining a Fragment getFragment() function instead of
+    // a void main() setting glFragColor, glFragDepth, etc
     dict.setValue("fragmentPath", fsPath);
 
     using namespace ghoul::opengl;
@@ -1098,9 +1106,9 @@ void RenderEngine::setResolveData(ghoul::Dictionary resolveData) {
 }
 
 void RenderEngine::takeScreenshot() {
-    // We only create the directory here, as we don't want to spam the users
-    // screenshot folder everytime we start OpenSpace even when we are not taking any
-    // screenshots. So the first time we actually take one, we create the folder:
+    // We only create the directory here, as we don't want to spam the users screenshot
+    // folder everytime we start OpenSpace even when we are not taking any screenshots. So
+    // the first time we actually take one, we create the folder
 
     if (!std::filesystem::is_directory(absPath("${SCREENSHOTS}"))) {
         std::filesystem::create_directories(absPath("${SCREENSHOTS}"));
@@ -1113,7 +1121,7 @@ void RenderEngine::takeScreenshot() {
 }
 
 /**
- * Resets the screenshot index to 0
+ * Resets the screenshot index to 0.
  */
 void RenderEngine::resetScreenshotNumber() {
     _latestScreenshotNumber = 0;
@@ -1124,7 +1132,7 @@ unsigned int RenderEngine::latestScreenshotNumber() const {
     return _latestScreenshotNumber;
 }
 
-scripting::LuaLibrary RenderEngine::luaLibrary() {
+LuaLibrary RenderEngine::luaLibrary() {
     return {
         "",
         {
@@ -1211,7 +1219,7 @@ std::vector<ScreenSpaceRenderable*> RenderEngine::screenSpaceRenderables() const
         global::screenSpaceRenderables->begin(),
         global::screenSpaceRenderables->end(),
         res.begin(),
-        [](const std::unique_ptr<ScreenSpaceRenderable>& p) { return p.get(); }
+        std::mem_fn(&std::unique_ptr<ScreenSpaceRenderable>::get)
     );
     return res;
 }
@@ -1233,8 +1241,7 @@ void RenderEngine::renderCameraInformation() {
     constexpr float YSeparation = 5.f;
     constexpr float XSeparation = 5.f;
 
-    const interaction::OrbitalNavigator& nav =
-        global::navigationHandler->orbitalNavigator();
+    const OrbitalNavigator& nav = global::navigationHandler->orbitalNavigator();
 
     using FR = ghoul::fontrendering::FontRenderer;
 
@@ -1299,9 +1306,9 @@ void RenderEngine::renderVersionInformation() {
 
             std::string versionString = std::string(OPENSPACE_VERSION);
             const VersionChecker::SemanticVersion current {
-                OPENSPACE_VERSION_MAJOR,
-                OPENSPACE_VERSION_MINOR,
-                OPENSPACE_VERSION_PATCH
+                .major = OPENSPACE_VERSION_MAJOR,
+                .minor = OPENSPACE_VERSION_MINOR,
+                .patch = OPENSPACE_VERSION_PATCH
             };
             if (current < ver) {
                 versionString += std::format(

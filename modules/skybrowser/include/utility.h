@@ -32,9 +32,8 @@
 #include <ratio>
 #include <type_traits>
 
-namespace openspace::skybrowser {
+namespace openspace {
 
-// Constants
 constexpr double ScreenSpaceZ = -2.1;
 constexpr double CelestialSphereRadius = 4.0 * distanceconstants::Parsec;
 
@@ -72,7 +71,6 @@ glm::dvec3 galacticToEquatorial(const glm::dvec3& coords);
  */
 glm::dvec3 equatorialToGalactic(const glm::dvec3& coords);
 
-// Conversion to screenspace from local camera / pixels
 /**
  * Converts from local camera coordinates to screenspace coordinates. The screenspace
  * coordinates are placed on the screenspace plane which has the z-coordinate as -2.1.
@@ -90,7 +88,6 @@ glm::dvec3 localCameraToScreenSpace3d(const glm::dvec3& coords);
  */
 glm::vec2 pixelToScreenSpace2d(const glm::vec2& mouseCoordinate);
 
-// Conversion local camera space <-> galactic / equatorial
 /**
  * Converts from Cartesian equatorial coordinates in epoch J2000 to local camera space.
  *
@@ -124,19 +121,19 @@ glm::dvec3 localCameraToGalactic(const glm::dvec3& coords);
  */
 glm::dvec3 localCameraToEquatorial(const glm::dvec3& coords);
 
-// Camera roll and direction
 /**
  * Returns the angle between the up direction of the OpenSpace camera and the equatorial
  * North Pole direction.
  *
  * \return Angle in degrees between the OpenSpace camera's up direction vector and the
- *         equatorial North Pole direction.
+ *         equatorial North Pole direction
  */
 double targetRoll(const glm::dvec3& up, const glm::dvec3& forward);
 
 /**
  * Returns the view direction of the OpenSpace camera in galactic coordinates.
- * \return View direction of the OpenSpace camera in Cartesian galactic coordinates.
+ *
+ * \return View direction of the OpenSpace camera in Cartesian galactic coordinates
  */
 glm::dvec3 cameraDirectionGalactic();
 
@@ -145,7 +142,7 @@ glm::dvec3 cameraDirectionGalactic();
  * J2000.
  *
  * \return View direction of the OpenSpace camera in Cartesian equatorial coordinates in
- *         epoch J2000.
+ *         epoch J2000
  */
 glm::dvec3 cameraDirectionEquatorial();
 
@@ -172,7 +169,6 @@ glm::dvec2 fovWindow();
  */
 bool isCoordinateInView(const glm::dvec3& equatorial);
 
-// Animation for target and camera
 /**
  * Returns the angle between two vectors.
  *
@@ -239,7 +235,7 @@ public:
             return _start + diff;
         }
         else if constexpr (std::is_same_v<T, glm::dvec3>) {
-            const glm::dmat4 rotMat = skybrowser::incrementalAnimationMatrix(
+            const glm::dmat4 rotMat = incrementalAnimationMatrix(
                 glm::normalize(_start),
                 glm::normalize(_goal),
                 ghoul::exponentialEaseOut(percentageSpent())
@@ -261,7 +257,7 @@ public:
         const double increment = percentage - _lastPercentage;
         _lastPercentage = percentage;
 
-        glm::dmat4 rotMat = skybrowser::incrementalAnimationMatrix(
+        glm::dmat4 rotMat = incrementalAnimationMatrix(
             glm::normalize(_start),
             glm::normalize(_goal),
             increment
@@ -289,6 +285,6 @@ private:
     std::chrono::system_clock::time_point _startTime;
 };
 
-} // namespace openspace::skybrowser
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SKYBROWSER___UTILITY___H__

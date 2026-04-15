@@ -41,16 +41,16 @@ namespace ghoul::opengl {
     class Texture;
 } // namespace ghoul::opengl
 
-namespace openspace { class Time; }
+namespace openspace {
 
-namespace openspace::globebrowsing {
+class Time;
 
 /**
  * Provide `Tile`s from web map services that have temporal resolution.
  *
  * TemporalTileProviders are instantiated using a ghoul::Dictionary, and must define a
- * filepath to a Openspace Temporal dataset description file. This is an xml-file that
- * defines the same meta data as the GDAL wms description
+ * filepath to a Openspace Temporal dataset description file. This is an XML-file that
+ * defines the same meta data as the GDAL WMS description
  * (http://www.gdal.org/frmt_wms.html), but augmented with some extra tags describing the
  * temporal properties of the dataset.
  *
@@ -69,7 +69,7 @@ public:
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     enum class Mode {
@@ -110,7 +110,7 @@ private:
 
     TileProvider* tileProvider(const Time& time);
 
-    Mode _mode;
+    Mode _mode = Mode::Prototype;
 
     struct {
         double startTimeJ2000 = 0.0;
@@ -130,8 +130,8 @@ private:
     } _folder;
 
     ghoul::Dictionary _initDict;
-    properties::BoolProperty _useFixedTime;
-    properties::StringProperty _fixedTime;
+    BoolProperty _useFixedTime;
+    StringProperty _fixedTime;
     bool _fixedTimeDirty = true;
 
     TileProvider* _currentTileProvider = nullptr;
@@ -143,6 +143,6 @@ private:
     std::unique_ptr<InterpolateTileProvider> _interpolateTileProvider;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__TEMPORALTILEPROVIDER___H__

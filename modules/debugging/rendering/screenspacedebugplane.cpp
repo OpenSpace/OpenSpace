@@ -30,25 +30,27 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "The OpenGL name of the texture that is displayed on this plane.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    // This `ScreenSpaceRenderable` can be used for debugging OpenGL textures. It renders
-    // the content of an existing texture, based on a provided OpenGL texture name.
+    // Useful for debugging OpenGL textures. It renders the content of an existing
+    // texture, based on a provided OpenGL texture name.
     struct [[codegen::Dictionary(ScreenSpaceDebugPlane)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::optional<int> texture;
     };
-#include "screenspacedebugplane_codegen.cpp"
 } // namespace
+#include "screenspacedebugplane_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceDebugPlane::Documentation() {
+Documentation ScreenSpaceDebugPlane::Documentation() {
     return codegen::doc<Parameters>("debugging_screenspace_debugplane");
 }
 

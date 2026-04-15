@@ -41,6 +41,42 @@
 
 using namespace openspace;
 
+namespace {
+    class PathTokenPushPopStack {
+    public:
+        explicit PathTokenPushPopStack(const std::filesystem::path& newPath)
+            : _profilePath(absPath("${PROFILES}"))
+            , _userProfilePath(absPath("${USER_PROFILES}"))
+        {
+            using Override = ghoul::filesystem::FileSystem::Override;
+
+            std::filesystem::create_directories(absPath("${TEMPORARY}/empty"));
+
+            FileSys.registerPathToken("${PROFILES}", newPath, Override::Yes);
+            FileSys.registerPathToken(
+                "${USER_PROFILES}",
+                "${TEMPORARY}/empty",
+                Override::Yes
+            );
+        }
+
+        ~PathTokenPushPopStack() {
+            using Override = ghoul::filesystem::FileSystem::Override;
+
+            FileSys.registerPathToken("${PROFILES}", _profilePath, Override::Yes);
+            FileSys.registerPathToken(
+                "${USER_PROFILES}",
+                _userProfilePath,
+                Override::Yes
+            );
+        }
+
+    private:
+        const std::filesystem::path _profilePath;
+        const std::filesystem::path _userProfilePath;
+    };
+}
+
 //
 // Minimal
 // The absolute minimal profile that can be loaded
@@ -543,6 +579,75 @@ TEST_CASE("Basic Additional Scripts", "[profile]") {
     CHECK(profile == ref);
 }
 
+TEST_CASE("Basic Addon Custom", "[profile]") {
+    constexpr std::string_view File = "${TESTDIR}/profile/basic/addon_custom.profile";
+
+    PathTokenPushPopStack pushpop(absPath("${TESTDIR}/profile"));
+    Profile profile = Profile(absPath(File));
+    // Removing the general addons since we only want to consider the custom addons and
+    // not depend on the other tests
+    profile.addons.general.clear();
+    
+    Profile ref;
+    ref.version = Profile::CurrentVersion;
+    ref.addons.custom.push_back({
+        .identifier = "basic_custom_addon_test",
+        .name = "Basic Custom Addon Test",
+        .description = "Description for Basic Custom Addon",
+        .assets = { "util/calibration", "util/dpiscaling" },
+        .version = Addon::CurrentVersion
+    });
+
+    CHECK(profile == ref);
+}
+
+TEST_CASE("Basic Addon Recommended", "[profile]") {
+    constexpr std::string_view File =
+        "${TESTDIR}/profile/basic/addon_recommended.profile";
+
+    PathTokenPushPopStack pushpop(absPath("${TESTDIR}/profile"));
+    Profile profile = Profile(absPath(File));
+    // Removing the general addons since we only want to consider the recommended addons
+    // and not depend on the other tests
+    profile.addons.general.clear();
+
+    Profile ref;
+    ref.version = Profile::CurrentVersion;
+    ref.addons.recommendedPaths.push_back("basic/addons/addon2");
+    ref.addons.recommended.push_back(
+        loadAddonFromFile(absPath("${TESTDIR}/profile/basic/addons/addon2.addon"))
+    );
+
+    CHECK(profile == ref);
+}
+
+TEST_CASE("Basic Addon Recommended w/ general", "[profile]") {
+    constexpr std::string_view File =
+        "${TESTDIR}/profile/basic/addon_recommended.profile";
+
+    PathTokenPushPopStack pushpop(absPath("${TESTDIR}/profile"));
+    Profile profile = Profile(absPath(File));
+
+    Profile ref;
+    ref.version = Profile::CurrentVersion;
+    ref.addons.recommendedPaths.push_back("basic/addons/addon2");
+    ref.addons.recommended.push_back(
+        loadAddonFromFile(absPath("${TESTDIR}/profile/basic/addons/addon2.addon"))
+    );
+    ref.addons.general.push_back(
+        loadAddonFromFile(absPath("${TESTDIR}/profile/basic/addons/addon1.addon"))
+    );
+    ref.addons.general.push_back(
+        loadAddonFromFile(absPath("${TESTDIR}/profile/basic/addons/addon2.addon"))
+    );
+    ref.addons.general.push_back(
+        loadAddonFromFile(absPath("${TESTDIR}/profile/basic/addons/addon3.addon"))
+    );
+
+    CHECK(profile == ref);
+}
+
+
 //
 // Integration
 //
@@ -779,7 +884,7 @@ TEST_CASE("Remove asset (ignored)", "[profile]") {
     CHECK(profile.assets[1] == "asset2");
 }
 
-TEST_CASE("Removing non-exisiting asset", "[profile]") {
+TEST_CASE("Removing non-existing asset", "[profile]") {
     Profile profile;
     profile.version = Profile::CurrentVersion;
 
@@ -789,7 +894,7 @@ TEST_CASE("Removing non-exisiting asset", "[profile]") {
     CHECK_NOTHROW(profile.removeAsset("unknown-asset"));
 }
 
-TEST_CASE("Removing non-exisiting asset (ignored)", "[profile]") {
+TEST_CASE("Removing non-existing asset (ignored)", "[profile]") {
     Profile profile;
     profile.version = Profile::CurrentVersion;
 
@@ -804,17 +909,17 @@ TEST_CASE("Removing non-exisiting asset (ignored)", "[profile]") {
 // Save settings to profile
 //
 TEST_CASE("Save settings to profile", "[profile]") {
-    properties::PropertyOwner owner({ "base" });
+    PropertyOwner owner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner.addProperty(p1);
-    properties::StringProperty p2(properties::Property::PropertyInfo("p2", "c", "d"));
+    StringProperty p2(Property::PropertyInfo("p2", "c", "d"));
     owner.addProperty(p2);
 
     p1 = 2.f;
     p2 = "test-string";
 
-    interaction::NavigationState state;
+    NavigationState state;
     state.anchor = "anchor";
     state.aim = "aim";
     state.referenceFrame = "refFrame";
@@ -895,6 +1000,15 @@ TEST_CASE("Version 1.0 -> 1.4", "[profile]") {
     CHECK(src == dst);
 }
 
+TEST_CASE("Version 1.0 -> 1.5", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_10.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_15.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
 TEST_CASE("Version 1.1 -> 1.2", "[profile]") {
     constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_11.profile";
     constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_12.profile";
@@ -922,6 +1036,15 @@ TEST_CASE("Version 1.1 -> 1.4", "[profile]") {
     CHECK(src == dst);
 }
 
+TEST_CASE("Version 1.1 -> 1.5", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_11.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_15.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
 TEST_CASE("Version 1.2 -> 1.3", "[profile]") {
     constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_12.profile";
     constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_13.profile";
@@ -940,9 +1063,36 @@ TEST_CASE("Version 1.2 -> 1.4", "[profile]") {
     CHECK(src == dst);
 }
 
+TEST_CASE("Version 1.2 -> 1.5", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_12.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_15.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
 TEST_CASE("Version 1.3 -> 1.4", "[profile]") {
     constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_13.profile";
     constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_14.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.3 -> 1.5", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_13.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_15.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK(src == dst);
+}
+
+TEST_CASE("Version 1.4 -> 1.5", "[profile]") {
+    constexpr std::string_view Src = "${TESTDIR}/profile/conversion/version_14.profile";
+    constexpr std::string_view Dest = "${TESTDIR}/profile/conversion/version_15.profile";
 
     Profile src = Profile(absPath(Src));
     Profile dst = Profile(absPath(Dest));

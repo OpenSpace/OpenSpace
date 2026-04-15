@@ -62,7 +62,6 @@ public:
     std::vector<std::pair<float, float>> getDecimated(int numBins) const;
 
     void normalize();
-    void print() const;
     void generateEqualizer();
     Histogram equalize();
     float equalize(float) const;
@@ -84,6 +83,6 @@ private:
     int _numValues = 0;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___HISTOGRAM___H__

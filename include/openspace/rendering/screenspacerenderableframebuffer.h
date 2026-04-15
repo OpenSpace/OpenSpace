@@ -50,16 +50,15 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
     void render(const RenderData& renderData) override;
-    bool isReady() const override;
 
     void addRenderFunction(RenderFunction renderFunction);
     void removeAllRenderFunctions();
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     void createFramebuffer();
-    properties::Vec2Property _size;
+    Vec2Property _size;
 
 private:
     void bindTexture(ghoul::opengl::TextureUnit& unit) override;
@@ -70,8 +69,9 @@ private:
     std::vector<std::function<void()>> _renderFunctions;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<ghoul::opengl::Texture> _depthTexture;
 };
 
-} //namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SCREENSPACERENDERABLEFRAMEBUFFER___H__

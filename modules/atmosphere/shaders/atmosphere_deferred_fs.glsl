@@ -401,7 +401,6 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
 
     // Below Horizon
     mu = muHorizon + InterpolationEpsilon;
-    //r0 = sqrt(r2 + t2 + 2.0 * r * t * mu);
     r0 = sqrt(halfCosineLaw1 + halfCosineLaw2 * mu);
 
     mu0 = (r * mu + t) * (1.0 / r0);
@@ -590,7 +589,6 @@ void main() {
 
   // Distance of the pixel in the gBuffer to the observer
   // JCC (12/12/2017): AMD distance function is buggy.
-  //double pixelDepth = distance(cameraPositionInObject.xyz, positionObjectsCoords.xyz);
   double pixelDepth = length(camPosObj - positionObjectsCoords);
 
   // JCC (12/13/2017): Trick to remove floating error in texture.

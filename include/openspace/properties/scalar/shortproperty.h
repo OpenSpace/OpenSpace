@@ -29,15 +29,14 @@
 
 #include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 /**
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type `short`.
+ * This class is a concrete implementation of TemplateProperty with the type `short`.
  */
 class ShortProperty : public NumericalProperty<short> {
 public:
-    explicit ShortProperty(Property::PropertyInfo info, short value = short(0),
+    explicit ShortProperty(PropertyInfo info, short value = short(0),
         short minValue = std::numeric_limits<short>::lowest(),
         short maxValue = std::numeric_limits<short>::max(),
         short stepValue = short(1));
@@ -54,6 +53,6 @@ private:
     short toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SHORTPROPERTY___H__

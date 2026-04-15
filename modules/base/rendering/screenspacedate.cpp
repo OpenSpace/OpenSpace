@@ -35,29 +35,30 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo FormatStringInfo = {
         "FormatString",
         "Format string",
         "The format text describing how this dashboard item renders its text. This text "
         "must contain exactly one {} which is a placeholder that will contain the date "
         "in the format as specified by `TimeFormat`.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TimeFormatInfo = {
+    constexpr Property::PropertyInfo TimeFormatInfo = {
         "TimeFormat",
         "Time format",
         "The format string used for formatting the date/time before being passed to the "
         "string in FormatString. See "
         "https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html for full "
         "information about how to structure this format.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    // This `ScreenSpaceRenderable` shows the current in-game simulation time. The
-    // `FormatString` and the `TimeFormat` options provide the ability to customize the
-    // output that is printed. See these two parameters for more information on how to
-    // structure the inputs.
+    // Shows the current in-game simulation time. The `FormatString` and the `TimeFormat`
+    // options provide the ability to customize the output that is printed. See these two
+    // parameters for more information on how to structure the inputs.
     struct [[codegen::Dictionary(ScreenSpaceTextDate)]] Parameters {
         // [[codegen::verbatim(FormatStringInfo.description)]]
         std::optional<std::string> formatString;
@@ -65,12 +66,12 @@ namespace {
         // [[codegen::verbatim(TimeFormatInfo.description)]]
         std::optional<std::string> timeFormat;
     };
-#include "screenspacedate_codegen.cpp"
 } // namespace
+#include "screenspacedate_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceDate::Documentation() {
+Documentation ScreenSpaceDate::Documentation() {
     return codegen::doc<Parameters>(
         "base_screenspace_date",
         ScreenSpaceRenderableText::Documentation()

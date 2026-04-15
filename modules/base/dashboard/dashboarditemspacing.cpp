@@ -29,26 +29,27 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo SpacingInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo SpacingInfo = {
         "Spacing",
         "Spacing",
         "This value determines the spacing (in pixels) that this item represents. The "
         "default value is 15.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    // This `DashboardItem` adds a variable amount of spacing between two other
-    // `DashboardItem`s.
+    // Adds a variable amount of spacing between two other `DashboardItem`s.
     struct [[codegen::Dictionary(DashboardItemSpacing)]] Parameters {
         // [[codegen::verbatim(SpacingInfo.description)]]
         std::optional<float> spacing;
     };
-#include "dashboarditemspacing_codegen.cpp"
 } // namespace
+#include "dashboarditemspacing_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemSpacing::Documentation() {
+Documentation DashboardItemSpacing::Documentation() {
     return codegen::doc<Parameters>(
         "base_dashboarditem_spacing",
         DashboardItem::Documentation()

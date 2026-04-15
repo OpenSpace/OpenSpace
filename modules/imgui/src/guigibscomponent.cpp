@@ -35,7 +35,7 @@ namespace {
     const ImVec2 WindowSize = ImVec2(350, 500);
 } // namespace
 
-namespace openspace::gui {
+namespace openspace {
 
 GuiGIBSComponent::GuiGIBSComponent()
     : GuiComponent("GIBS", "GIBS")
@@ -74,7 +74,6 @@ void GuiGIBSComponent::render() {
         TemporalResolutionBuffer.size()
     );
 
-    //static std::array<char, 64> TemporalFormatBuffer;
     // @TODO Replace with dropdown menu
     constexpr std::array<const char*, 5> TemporalFormats = {
         // @FRAGILE: Synchronized with tileprovider.cpp `from_string` method
@@ -153,4 +152,4 @@ void GuiGIBSComponent::render() {
     ImGui::End();
 }
 
-} // namespace openspace::gui
+} // namespace openspace

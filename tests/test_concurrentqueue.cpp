@@ -26,9 +26,9 @@
 
 #include <openspace/util/concurrentqueue.h>
 
-TEST_CASE("ConcurrentQueue: Basic", "[concurrentqueue]") {
-    using namespace openspace;
+using namespace openspace;
 
+TEST_CASE("ConcurrentQueue: Basic", "[concurrentqueue]") {
     ConcurrentQueue<int> q1;
     q1.push(4);
     const int val = q1.pop();

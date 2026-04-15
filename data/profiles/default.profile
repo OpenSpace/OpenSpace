@@ -7,6 +7,14 @@
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/planets/earth/noaa-sos/overlays/latlon_grid-white"
   ],
+  "addons": {
+    "recommended": [
+      "addons/asteroids",
+      "addons/dwarf_planets",
+      "addons/interstellar_objects",
+      "addons/minor_moons"
+    ]
+  },
   "camera": {
     "altitude": 17000000.0,
     "anchor": "Earth",
@@ -71,6 +79,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 4
+    "minor": 5
   }
 }

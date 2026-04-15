@@ -26,6 +26,8 @@
 
 namespace openspace {
 
-KameleonModule::KameleonModule() : OpenSpaceModule(Name) {}
+KameleonModule::KameleonModule()
+    : OpenSpaceModule(Name)
+{}
 
 } // namespace openspace

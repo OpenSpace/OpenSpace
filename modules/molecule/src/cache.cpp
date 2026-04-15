@@ -39,7 +39,15 @@
 #include <string_view>
 #include <unordered_map>
 
+FrameData::~FrameData() {
+    if (lock) {
+        md_frame_cache_frame_lock_release(lock);
+    }
+}
+
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "MoleculeManager";
 
     constexpr uint64_t MdCachedTrajMagic = 0x234236423674DBA2;
@@ -71,7 +79,6 @@ namespace {
         const md_molecule_t* mol;
         bool deperiodizeOnLoad;
     };
-
 
     std::unordered_map<size_t, md_molecule_t> molecules;
     std::unordered_map<size_t, md_trajectory_i*> trajectories;
@@ -253,7 +260,8 @@ namespace {
                     frameData->x,
                     frameData->y,
                     frameData->z,
-                    cell, mol
+                    cell,
+                    mol
                 );
             }
         }
@@ -388,8 +396,6 @@ namespace {
         ghoul_assert(traj->inst, "Trajectory has not data");
         ghoul_assert(molecule, "Missing molecular data");
 
-        using namespace openspace;
-
         if (molecule->backbone.range_count == 0) {
             return;
         }
@@ -432,8 +438,8 @@ namespace {
                     md_free(default_allocator, coords, bytes);
                 };
 
-                // Overwrite the coordinate section, since we will load trajectory
-                // frame data into these
+                // Overwrite the coordinate section, since we will load trajectory frame
+                // data into these
                 mol.atom.x = coords + stride * 0;
                 mol.atom.y = coords + stride * 1;
                 mol.atom.z = coords + stride * 2;
@@ -458,12 +464,6 @@ namespace {
     }
 } // namespace
 
-FrameData::~FrameData() {
-    if (lock) {
-        md_frame_cache_frame_lock_release(lock);
-    }
-}
-
 namespace molecule {
 
 const md_molecule_t* loadMolecule(std::filesystem::path file, bool isCoarseGrained) {
@@ -475,7 +475,7 @@ const md_molecule_t* loadMolecule(std::filesystem::path file, bool isCoarseGrain
         return &entry->second;
     }
 
-    md_molecule_api* api = load::moleculeApi(file);
+    md_molecule_api* api = moleculeApi(file);
     if (!api) {
         throw ghoul::RuntimeError("Failed to find molecule loader api", "MOLD");
     }
@@ -505,7 +505,7 @@ const md_trajectory_i* loadTrajectory(std::filesystem::path file,
         return entry->second;
     }
 
-    md_trajectory_api* api = load::trajectoryApi(file);
+    md_trajectory_api* api = trajectoryApi(file);
     if (!api) {
         throw ghoul::RuntimeError("Failed to find trajectory loader api", "MOLD");
     }
@@ -559,8 +559,6 @@ const md_trajectory_i* loadTrajectory(std::filesystem::path file,
 
 void prefetchFrames(const md_trajectory_i* traj, std::span<int64_t> frames) {
     ghoul_assert(traj, "No trajectory provided");
-
-    using namespace openspace;
 
     if (!traj->inst) {
         return;

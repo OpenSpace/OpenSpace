@@ -30,18 +30,16 @@
 
 namespace {
     struct Vertex {
-        GLfloat x;
-        GLfloat y;
-        GLfloat s;
-        GLfloat t;
+        float x;
+        float y;
+        float s;
+        float t;
     };
 } // namespace
 
 namespace openspace {
 
 PlaneGeometry::PlaneGeometry(glm::vec2 size) : _size(std::move(size)) {}
-
-PlaneGeometry::PlaneGeometry(float size) : PlaneGeometry(glm::vec2(size, size)) {}
 
 void PlaneGeometry::initialize() {
     glCreateBuffers(1, &_vbo);
@@ -59,7 +57,7 @@ void PlaneGeometry::initialize() {
     updateGeometry();
 }
 
-void PlaneGeometry::deinitialize() {
+void PlaneGeometry::deinitialize() const {
     glDeleteVertexArrays(1, &_vao);
     glDeleteBuffers(1, &_vbo);
 }
@@ -73,10 +71,6 @@ void PlaneGeometry::render() const {
 void PlaneGeometry::updateSize(const glm::vec2& size) {
     _size = size;
     updateGeometry();
-}
-
-void PlaneGeometry::updateSize(float size) {
-    updateSize(glm::vec2(size));
 }
 
 void PlaneGeometry::updateGeometry() const {

@@ -25,7 +25,7 @@
 #include <ghoul/misc/assert.h>
 #include <modules/globebrowsing/src/prioritizingconcurrentjobmanager.h>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 template <typename P, typename KeyType>
 PrioritizingConcurrentJobManager<P, KeyType>::PrioritizingConcurrentJobManager(
@@ -39,7 +39,7 @@ void PrioritizingConcurrentJobManager<P, KeyType>::enqueueJob(std::shared_ptr<Jo
 {
     _threadPool.enqueue([this, job]() {
         job->execute();
-        std::lock_guard lock(_finishedJobsMutex);
+        const std::unique_lock lock(_finishedJobsMutex);
         _finishedJobs.push(job);
     }, key);
 }
@@ -70,7 +70,7 @@ template <typename P, typename KeyType>
 std::shared_ptr<Job<P>> PrioritizingConcurrentJobManager<P, KeyType>::popFinishedJob() {
     ghoul_assert(!_finishedJobs.empty(), "There is no finished job to pop");
 
-    std::lock_guard lock(_finishedJobsMutex);
+    const std::unique_lock lock(_finishedJobsMutex);
     std::shared_ptr<Job<P>> result = _finishedJobs.pop();
     return result;
 }
@@ -80,4 +80,4 @@ size_t PrioritizingConcurrentJobManager<P, KeyType>::numFinishedJobs() const {
     return _finishedJobs.size();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

@@ -28,30 +28,32 @@
 #include <openspace/util/updatestructures.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ScaleInfo = {
         "Scale",
         "Scale",
         "This value is used as a scaling factor for the scene graph node that this "
         "transformation is attached to relative to its parent.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    // This Scale type scales the scene graph node that it is attached to by a fixed
-    // amount that does not change over time. It is possible to change the fixed scale
-    // after starting the application, but it otherwise remains unchanged. The scaling is
-    // a simple multiplication so that a `Scale` value of 10 means that the object will be
-    // 10 times larger than its original size.
+    // Scales the scene graph node that it is attached to by a fixed amount that does not
+    // change over time. It is possible to change the fixed scale after starting the
+    // application, but it otherwise remains unchanged. The scaling is a simple
+    // multiplication so that a `Scale` value of 10 means that the object will be 10 times
+    // larger than its original size.
     struct [[codegen::Dictionary(StaticScale)]] Parameters {
         // [[codegen::verbatim(ScaleInfo.description)]]
         double scale;
     };
-#include "staticscale_codegen.cpp"
 } // namespace
+#include "staticscale_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation StaticScale::Documentation() {
-    return codegen::doc<Parameters>("base_transform_scale_static");
+Documentation StaticScale::Documentation() {
+    return codegen::doc<Parameters>("base_scale_static");
 }
 
 StaticScale::StaticScale(const ghoul::Dictionary& dictionary)

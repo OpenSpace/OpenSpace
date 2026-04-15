@@ -31,11 +31,12 @@
 #include <filesystem>
 
 namespace ghoul { class Dictionary; }
-namespace openspace::scripting { struct LuaLibrary; }
 
-namespace openspace::interaction {
+namespace openspace {
 
-class KeyframeRecordingHandler : public properties::PropertyOwner {
+struct LuaLibrary;
+
+class KeyframeRecordingHandler : public PropertyOwner {
 public:
     KeyframeRecordingHandler();
 
@@ -45,13 +46,13 @@ public:
     void removeKeyframe(int index);
     void updateKeyframe(int index);
     void moveKeyframe(int index, double sequenceTime);
-    void saveSequence(std::filesystem::path filename);
+    void saveSequence(std::filesystem::path filename) const;
     void loadSequence(std::filesystem::path filename);
     void play();
     bool hasKeyframeRecording() const;
     std::vector<ghoul::Dictionary> keyframes() const;
 
-    static openspace::scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     SessionRecording _timeline;

@@ -29,12 +29,14 @@
 #include <variant>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Rotation",
         "This value is the used as a 3x3 rotation matrix that is applied to the scene "
         "graph node that this transformation is attached to relative to its parent.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // Conversion from rotation matrix to euler angles, given that the rotation is a pure
@@ -58,9 +60,9 @@ namespace {
         return res;
     }
 
-    // A StaticRotation is using a fixed and constant rotation factor that does not change
-    // over time. The rotation value is provided as a property that can be changed at
-    // runtime, but it will not change automatically over time.
+    // Creates a fixed and constant rotation that does not change over time. The rotation
+    // value is provided as a property that can be changed at runtime, but it will not
+    // change automatically over time.
     struct [[codegen::Dictionary(StaticRotation)]] Parameters {
         // Stores the static rotation as a vector containing Euler angles, a quaternion
         // representation, or a rotation matrix.
@@ -76,13 +78,13 @@ namespace {
         // values are assumed to be in row-major order.
         std::variant<glm::dvec3, glm::dvec4, glm::dmat3x3> rotation;
     };
-#include "staticrotation_codegen.cpp"
 } // namespace
+#include "staticrotation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation StaticRotation::Documentation() {
-    return codegen::doc<Parameters>("base_transform_rotation_static");
+Documentation StaticRotation::Documentation() {
+    return codegen::doc<Parameters>("base_rotation_static");
 }
 
 StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary)

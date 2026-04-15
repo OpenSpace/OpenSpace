@@ -50,9 +50,9 @@
 
 namespace openspace {
 
-namespace scripting { struct LuaLibrary; }
 class AssetManager;
 class LoadingScreen;
+struct LuaLibrary;
 class Scene;
 
 /**
@@ -64,8 +64,7 @@ struct ShutdownInformation {
     bool inShutdown = false;
     /// Total amount of time the application will wait before actually shutting down
     float waitTime = 0.f;
-    /// Current state of the countdown; if it reaches '0', the application will
-    /// close
+    /// Current state of the countdown; if it reaches '0', the application will close
     float timer = 0.f;
 };
 
@@ -73,13 +72,14 @@ struct CommandlineArguments {
     std::optional<std::string> configuration;
     std::optional<std::string> windowConfig;
     std::optional<std::string> profile;
+    std::optional<std::string> profileAddons;
     std::optional<std::string> propertyVisibility;
     std::optional<bool> bypassLauncher;
 
     std::optional<std::string> task;
 };
 
-class OpenSpaceEngine : public properties::PropertyOwner {
+class OpenSpaceEngine : public PropertyOwner {
 public:
     /**
      * A mode that specifies which part of the system is currently in control. The mode
@@ -121,7 +121,7 @@ public:
     std::vector<std::byte> encode();
     void decode(std::vector<std::byte> data);
 
-    properties::Property::Visibility visibility() const;
+    Property::Visibility visibility() const;
     void toggleShutdownMode();
 
     Mode currentMode() const;
@@ -134,14 +134,14 @@ public:
     CallbackHandle addModeChangeCallback(ModeChangeCallback cb);
     void removeModeChangeCallback(CallbackHandle handle);
 
-    // Guaranteed to return a valid pointer
     AssetManager& assetManager();
+    // Guaranteed to return a valid pointer
     LoadingScreen* loadingScreen();
 
     void invalidatePropertyCache();
     void invalidatePropertyOwnerCache();
-    const std::vector<properties::Property*>& allProperties() const;
-    const std::vector<properties::PropertyOwner*>& allPropertyOwners() const;
+    const std::vector<Property*>& allProperties() const;
+    const std::vector<PropertyOwner*>& allPropertyOwners() const;
 
     void createUserDirectoriesIfNecessary();
 
@@ -152,7 +152,7 @@ public:
      * Returns the Lua library that contains all Lua functions available to affect the
      * application.
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     void loadAssets();
@@ -160,11 +160,11 @@ private:
 
     void runGlobalCustomizationScripts();
 
-    properties::BoolProperty _printEvents;
-    properties::OptionProperty _visibility;
-    properties::BoolProperty _showPropertyConfirmationDialog;
-    properties::FloatProperty _fadeOnEnableDuration;
-    properties::BoolProperty _disableAllMouseInputs;
+    BoolProperty _printEvents;
+    OptionProperty _visibility;
+    BoolProperty _showPropertyConfirmationDialog;
+    FloatProperty _fadeOnEnableDuration;
+    BoolProperty _disableAllMouseInputs;
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
@@ -188,24 +188,23 @@ private:
     std::vector<std::pair<CallbackHandle, ModeChangeCallback>> _modeChangeCallbacks;
 
     mutable bool _isAllPropertiesCacheDirty = true;
-    mutable std::vector<properties::Property*> _allPropertiesCache;
+    mutable std::vector<Property*> _allPropertiesCache;
 
     mutable bool _isAllPropertyOwnersCacheDirty = true;
-    mutable std::vector<properties::PropertyOwner*> _allPropertyOwnersCache;
+    mutable std::vector<PropertyOwner*> _allPropertyOwnersCache;
 };
 
 /**
- * Sets the camera position using the time contents of a profile. The function will
- * set an absolute position or a go-to-geolocation command using the globebrowsing
- * module.
+ * Sets the camera position using the time contents of a profile. The function will set an
+ * absolute position or a go-to-geolocation command using the globebrowsing module.
  *
  * \param p The Profile to be read
  */
 void setCameraFromProfile(const Profile& p);
 
 /**
- * Reads a list of modules from a profile, and executes scripts based on whether or
- * not the corresponding module is loaded.
+ * Reads a list of modules from a profile, and executes scripts based on whether or not
+ * the corresponding module is loaded.
  *
  * \param p The Profile to be read
  */
@@ -226,18 +225,17 @@ void setActionsFromProfile(const Profile& p);
 void setKeybindingsFromProfile(const Profile& p);
 
 /**
- * Reads list of nodes from profile to be marked as interesting nodes.
- * If any nodes are listed, a script to mark these will be queued with the
- * script engine.
+ * Reads list of nodes from profile to be marked as interesting nodes. If any nodes are
+ * listed, a script to mark these will be queued with the script engine.
  *
  * \param p The Profile to be read
  */
 void setMarkInterestingNodesFromProfile(const Profile& p);
 
 /**
- * Reads list of "additional scripts" that are added to the profile to be run
- * at the end of the initialization. Any openspace lua commands are allowed,
- * and will be added to the script queue.
+ * Reads list of "additional scripts" that are added to the profile to be run at the end
+ * of the initialization. Any openspace lua commands are allowed, and will be added to the
+ * script queue.
  *
  * \param p The Profile to be read
  */

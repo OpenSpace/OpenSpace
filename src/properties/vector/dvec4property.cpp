@@ -26,11 +26,10 @@
 
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
-DVec4Property::DVec4Property(Property::PropertyInfo info, glm::dvec4 value,
-                             glm::dvec4 minValue, glm::dvec4 maxValue,
-                             glm::dvec4 stepValue)
+DVec4Property::DVec4Property(PropertyInfo info, glm::dvec4 value, glm::dvec4 minValue,
+                             glm::dvec4 maxValue, glm::dvec4 stepValue)
     : NumericalProperty<glm::dvec4>(
         std::move(info),
         std::move(value),
@@ -60,4 +59,4 @@ std::string DVec4Property::stringValue() const {
     return formatJson(_value);
 }
 
-} // namespace openspace::properties
+} // namespace openspace

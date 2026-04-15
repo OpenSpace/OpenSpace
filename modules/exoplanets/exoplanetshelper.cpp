@@ -35,16 +35,16 @@
 #include <ghoul/misc/stringhelper.h>
 #include <glm/gtx/transform.hpp>
 #include <cmath>
-#include <fstream>
-#include <sstream>
 #include <filesystem>
+#include <fstream>
 #include <memory>
+#include <sstream>
 
 namespace {
     constexpr std::string_view _loggerCat = "ExoplanetsModule";
 } // namespace
 
-namespace openspace::exoplanets {
+namespace openspace {
 
 bool isValidPosition(const glm::vec3& pos) {
     return !glm::any(glm::isnan(pos));
@@ -64,12 +64,10 @@ glm::vec3 computeStarColor(float bv) {
     const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
     const std::filesystem::path bvColormapPath = module->bvColormapPath();
 
-    std::ifstream colorMap(absPath(bvColormapPath), std::ios::in);
+    std::ifstream colorMap = std::ifstream(absPath(bvColormapPath), std::ios::in);
 
     if (!colorMap.good()) {
-        LERROR(std::format(
-            "Failed to open colormap data file '{}'", absPath(bvColormapPath)
-        ));
+        LERROR(std::format("Failed to open colormap data file '{}'", bvColormapPath));
         return glm::vec3(0.f);
     }
 
@@ -83,7 +81,7 @@ glm::vec3 computeStarColor(float bv) {
     }
 
     // The first line is the width of the image, i.e number of values
-    std::istringstream ss(line);
+    std::istringstream ss = std::istringstream(line);
     int nValues = 0;
     ss >> nValues;
 
@@ -94,7 +92,7 @@ glm::vec3 computeStarColor(float bv) {
         ghoul::getline(colorMap, color);
     }
 
-    std::istringstream colorStream(color);
+    std::istringstream colorStream = std::istringstream(color);
     glm::vec3 rgb;
     colorStream >> rgb.r >> rgb.g >> rgb.b;
     return rgb;
@@ -119,7 +117,7 @@ glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float omega) {
 }
 
 glm::dmat3 computeSystemRotation(const glm::dvec3& starPosition) {
-    const glm::dvec3 sunPosition = glm::dvec3(0.0, 0.0, 0.0);
+    const glm::dvec3 sunPosition = glm::dvec3(0.0);
     const glm::dvec3 starToSunVec = glm::normalize(sunPosition - starPosition);
     const glm::dvec3 galacticNorth = glm::dvec3(0.0, 0.0, 1.0);
 
@@ -156,8 +154,8 @@ glm::dmat3 computeSystemRotation(const glm::dvec3& starPosition) {
 }
 
 void sanitizeNameString(std::string& s) {
-    // We want to avoid quotes and apostrophes in names, since they cause problems
-    // when a string is translated to a script call
+    // We want to avoid quotes and apostrophes in names, since they cause problems when a
+    // string is translated to a script call
     s.erase(remove(s.begin(), s.end(), '\"'), s.end());
     s.erase(remove(s.begin(), s.end(), '\''), s.end());
 }
@@ -181,4 +179,4 @@ void updateStarDataFromNewPlanet(StarData& starData, const ExoplanetDataEntry& p
     }
 }
 
-} // namespace openspace::exoplanets
+} // namespace openspace

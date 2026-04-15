@@ -37,10 +37,14 @@
 #include <cmath>
 #include <cstddef>
 
+// @TODO: This class is not properly working anymore and needs to be substantially
+// rewritten. When doing so, make sure that any color property uses three values, not
+// four. The opacity should be handled separately
+
 namespace {
     struct VBOData {
-        std::array<float, 3> position;
-        std::array<float, 4> color;
+        glm::vec3 position;
+        glm::vec4 color;
     };
 
     struct [[codegen::Dictionary(RenderableCrawlingLine)]] Parameters {
@@ -60,21 +64,17 @@ namespace {
             // The color at the end of the line.
             glm::vec4 end [[codegen::color()]];
         };
-        // The colors used for the crawling line, given as one color at the start of
-        // the line and one at the end.
+        // The colors used for the crawling line, given as one color at the start of the
+        // line and one at the end.
         Color color;
     };
-#include "renderablecrawlingline_codegen.cpp"
 } // namespace
-
-// @TODO:  This class is not properly working anymore and needs to be substantially
-//         rewritten. When doing so, make sure that any color property uses three
-//         values, not four. The opacity should be handled separately
+#include "renderablecrawlingline_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableCrawlingLine::Documentation() {
-    return codegen::doc<Parameters>("spacecraftinstruments_renderablecrawlingline");
+Documentation RenderableCrawlingLine::Documentation() {
+    return codegen::doc<Parameters>("spacecraftinstruments_renderable_crawlingline");
 }
 
 RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictionary)
@@ -87,10 +87,6 @@ RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictiona
     _instrumentName = p.instrument;
     _lineColorBegin = p.color.start;
     _lineColorEnd = p.color.end;
-}
-
-bool RenderableCrawlingLine::isReady() const {
-    return _program != nullptr;
 }
 
 void RenderableCrawlingLine::initializeGL() {
@@ -168,16 +164,16 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
 
     std::array<VBOData, 2> vboData = {
         VBOData {
-            { 0.f, 0.f, 0.f },
-            { _lineColorBegin.r, _lineColorBegin.g, _lineColorBegin.b, _lineColorBegin.a }
+            .position = glm::vec3(0.f),
+            .color = _lineColorBegin
         },
         VBOData {
-            {
-                target.x * powf(10, target.w),
-                target.y * powf(10, target.w),
-                target.z * powf(10, target.w)
-            },
-            { _lineColorEnd.r,  _lineColorEnd.g,  _lineColorEnd.b,  _lineColorEnd.a }
+            .position = glm::vec3(
+                target.x * std::pow(10, target.w),
+                target.y * std::pow(10, target.w),
+                target.z * std::pow(10, target.w)
+            ),
+            .color = _lineColorEnd
         }
     };
 

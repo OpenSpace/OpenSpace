@@ -41,22 +41,24 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo FilePathInfo = {
         "FilePath",
         "File path",
         "The path of the GDAL file or the image file that is to be used in this tile "
         "provider.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TilePixelSizeInfo = {
+    constexpr Property::PropertyInfo TilePixelSizeInfo = {
         "TilePixelSize",
         "Tile pixel size",
         "This value is the preferred size (in pixels) for each tile. Choosing the right "
         "value is a tradeoff between more efficiency (larger images) and better quality "
         "(smaller images). The tile pixel size has to be smaller than the size of the "
         "complete image if a single image is used.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     enum class [[codegen::stringify()]] Compression {
@@ -66,60 +68,60 @@ namespace {
     };
 
     struct [[codegen::Dictionary(DefaultTileProvider)]] Parameters {
-        // User-facing name of this tile provider
+        // User-facing name of this tile provider.
         std::optional<std::string> name;
 
-        // Identifier of the enclosing layer to which tiles are provided
+        // Identifier of the enclosing layer to which tiles are provided.
         std::optional<std::string> identifier;
 
         // The path to the file that is loaded by GDAL to produce tiles. Since GDAL
         // supports it, this can also be the textual representation of the contents of a
-        // loading file
+        // loading file.
         std::string filePath;
 
-        // The layer into which this tile provider is loaded
+        // The layer into which this tile provider is loaded.
         int layerGroupID;
 
         // [[codegen::verbatim(TilePixelSizeInfo.description)]]
         std::optional<int> tilePixelSize;
 
-        // Determines if the tiles should be preprocessed before uploading to the GPU
+        // Determines if the tiles should be preprocessed before uploading to the GPU.
         std::optional<bool> performPreProcessing;
 
         struct CacheSettings {
-            // Specifies whether to use caching or not
+            // Specifies whether to use caching or not.
             std::optional<bool> enabled;
 
-            // The compression algorithm to use for MRF cached tiles
+            // The compression algorithm to use for MRF cached tiles.
             enum class [[codegen::map(Compression)]] Compression {
                 PNG = 0,
                 JPEG,
                 LERC
             };
 
-            // The compression algorithm to use for cached tiles
+            // The compression algorithm to use for cached tiles.
             std::optional<Compression> compression;
 
-            // The quality setting of the compression alogrithm, only valid for JPEG
+            // The quality setting of the compression alogrithm, only valid for JPEG.
             std::optional<int> quality [[codegen::inrange(0, 100)]];
 
-            // The block-size of the MRF cache
+            // The block-size of the MRF cache.
             std::optional<int> blockSize [[codegen::greater(0)]];
         };
-        // Specifies the cache settings that should be applied to this layer
+        // Specifies the cache settings that should be applied to this layer.
         std::optional<CacheSettings> cacheSettings;
 
-        // The name of the enclosing globe
+        // The name of the enclosing globe.
         std::optional<std::string> globeName;
 
     };
-#include "defaulttileprovider_codegen.cpp"
 } // namespace
+#include "defaulttileprovider_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation DefaultTileProvider::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_defaulttileprovider");
+Documentation DefaultTileProvider::Documentation() {
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_default");
 }
 
 DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
@@ -139,7 +141,6 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     _layerGroupID = layers::Group::ID(p.layerGroupID);
 
     // 2. Initialize default values for any optional Keys
-    // getValue does not work for integers
     const int pixelSize = p.tilePixelSize.value_or(0);
 
     // Only preprocess height layers by default
@@ -150,9 +151,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     auto it = std::find_if(
         layers::Groups.begin(),
         layers::Groups.end(),
-        [id = _layerGroupID](const layers::Group& gi) {
-            return gi.id == id;
-        }
+        [id = _layerGroupID](const layers::Group& gi) { return gi.id == id; }
     );
 
     std::string layerGroup =
@@ -219,13 +218,17 @@ Tile DefaultTileProvider::tile(const TileIndex& tileIndex) {
 
     ghoul_assert(_asyncTextureDataProvider, "No data provider");
     if (tileIndex.level > maxLevel()) {
-        return Tile{ nullptr, std::nullopt, Tile::Status::OutOfRange };
+        return {
+            .texture = nullptr,
+            .metaData = std::nullopt,
+            .status = Tile::Status::OutOfRange
+        };
     }
-    const cache::ProviderTileKey key = {
+    const ProviderTileKey key = {
         .tileIndex = tileIndex,
         .providerID = uniqueIdentifier
     };
-    cache::MemoryAwareTileCache* tileCache =
+    MemoryAwareTileCache* tileCache =
         global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
     Tile tile = tileCache->get(key);
     if (!tile.texture) {
@@ -243,11 +246,11 @@ Tile::Status DefaultTileProvider::tileStatus(const TileIndex& index) {
         return Tile::Status::OutOfRange;
     }
 
-    const cache::ProviderTileKey key = {
+    const ProviderTileKey key = {
         .tileIndex = index,
         .providerID = uniqueIdentifier
     };
-    cache::MemoryAwareTileCache* tileCache =
+    MemoryAwareTileCache* tileCache =
         global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
     return tileCache->get(key).status;
 }
@@ -263,11 +266,11 @@ void DefaultTileProvider::update() {
 
     std::optional<RawTile> tile = _asyncTextureDataProvider->popFinishedRawTile();
     if (tile) {
-        const cache::ProviderTileKey key = {
+        const ProviderTileKey key = {
             .tileIndex = tile->tileIndex,
             .providerID = uniqueIdentifier
         };
-        cache::MemoryAwareTileCache* tileCache =
+        MemoryAwareTileCache* tileCache =
             global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
         ghoul_assert(!tileCache->exist(key), "Tile must not be existing in cache");
         tileCache->createTileAndPut(key, std::move(*tile));
@@ -302,4 +305,4 @@ float DefaultTileProvider::noDataValueAsFloat() {
     return _asyncTextureDataProvider->noDataValueAsFloat();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

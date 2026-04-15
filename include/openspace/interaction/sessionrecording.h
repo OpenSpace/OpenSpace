@@ -34,7 +34,7 @@
 
 namespace ghoul { class Dictionary; }
 
-namespace openspace::interaction {
+namespace openspace {
 
 enum class DataMode {
     Ascii = 0,
@@ -59,9 +59,11 @@ struct SessionRecording {
 
     bool hasCameraFrame() const noexcept;
 
-    // Call the provided \p function for all entries of the specified type \tparam T. The
-    // function calls will be ordered by the entries timestamps. If the callback function
-    // returns `true`, the loop is aborted
+    /**
+     * Call the provided \p function for all entries of the specified type \tparam T . The
+     * function calls will be ordered by the entries timestamps. If the callback function
+     * returns `true`, the loop is aborted.
+     */
     template <typename T>
     void forAll(std::function<bool (const T&)> function) {
         for (const Entry& e : entries) {
@@ -82,6 +84,6 @@ void saveSessionRecording(const std::filesystem::path& filename,
 std::vector<ghoul::Dictionary> sessionRecordingToDictionary(
     const SessionRecording& recording);
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SESSIONRECORDING___H__

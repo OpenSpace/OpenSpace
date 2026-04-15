@@ -37,28 +37,30 @@
 #include <memory>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color used for the grid lines.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the grid lines. The larger number, the thicker the lines.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr Property::PropertyInfo SizeInfo = {
         "Size",
         "Grid size",
         "The size of each dimension of the box, in meters.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    // A RenderableBoxGrid creates a 3D box that is rendered using grid lines.
+    // Creates a 3D box that is rendered using grid lines.
     //
     // Per default the box is given a uniform size of 1x1x1 meters. It can then be scaled
     // to the desired size. Alternatively, the size in each dimension can be specified.
@@ -72,12 +74,12 @@ namespace {
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<glm::vec3> size;
     };
-#include "renderableboxgrid_codegen.cpp"
 } // namespace
+#include "renderableboxgrid_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableBoxGrid::Documentation() {
+Documentation RenderableBoxGrid::Documentation() {
     return codegen::doc<Parameters>("base_renderable_boxgrid");
 }
 
@@ -92,7 +94,7 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     addProperty(Fadeable::_opacity);
 
     _color = p.color.value_or(_color);
-    _color.setViewOption(properties::Property::ViewOptions::Color);
+    _color.setViewOption(Property::ViewOptions::Color);
     addProperty(_color);
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
@@ -101,10 +103,6 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     _size = p.size.value_or(_size);
     _size.onChange([this]() { _gridIsDirty = true; });
     addProperty(_size);
-}
-
-bool RenderableBoxGrid::isReady() const {
-    return _gridProgram != nullptr;
 }
 
 void RenderableBoxGrid::initializeGL() {
@@ -154,7 +152,6 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
-    // Change GL state:
     glLineWidth(_lineWidth);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
@@ -167,7 +164,6 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&) {
 
     _gridProgram->deactivate();
 
-    // Restore GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
     global::renderEngine->openglStateCache().resetDepthState();

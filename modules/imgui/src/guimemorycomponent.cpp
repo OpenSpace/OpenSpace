@@ -51,7 +51,7 @@ namespace {
     }
 } // namespace
 
-namespace openspace::gui {
+namespace openspace {
 
 GuiMemoryComponent::GuiMemoryComponent()
     : GuiComponent("memory_information", "Memory Information")
@@ -80,4 +80,4 @@ void GuiMemoryComponent::render() {
     ImGui::End();
 }
 
-} // namespace openspace::gui
+} // namespace openspace

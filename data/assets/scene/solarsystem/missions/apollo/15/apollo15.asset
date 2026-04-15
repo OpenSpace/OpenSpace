@@ -16,7 +16,7 @@ local models = asset.resource({
 
 local Apollo15 = {
   Identifier = "Apollo15",
-  Parent = moon.Moon.Identifier,
+  Parent = moon.MoonInertial.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "1971-07-30T02:22:00.00",
@@ -27,11 +27,11 @@ local Apollo15 = {
       Type = "SpiceTranslation",
       Target = kernels.ID.Apollo15,
       Observer = coreKernels.ID.Moon,
-      Frame = coreKernels.Frame.Moon
+      Frame = coreKernels.Frame.Galactic
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = kernels.Frame.Apollo15Metric,
+      SourceFrame = kernels.Frame.Apollo15Mapping,
       DestinationFrame = coreKernels.Frame.Galactic
     }
   },
@@ -39,6 +39,9 @@ local Apollo15 = {
     Type = "RenderableModel",
     GeometryFile = models .. "ApolloCSM.osmodel",
     ModelScale = 0.0001,
+    -- Empirically determined to make the direction of the Metric cam during flight point
+    -- at the Moon
+    RotationVector = { 0.0, 325.45, 0.0 },
     LightSources = {
       sun.LightSource
     },

@@ -35,23 +35,23 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 
 /**
  * This is a component that can be used to hold parameters and properties for scaling
  * point cloud points (or other data-based entities) based a parameter in a dataset.
  */
-struct SizeMappingComponent : public properties::PropertyOwner {
+struct SizeMappingComponent : public PropertyOwner {
     SizeMappingComponent();
     explicit SizeMappingComponent(const ghoul::Dictionary& dictionary);
     ~SizeMappingComponent() override = default;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
-    properties::BoolProperty enabled;
-    properties::OptionProperty parameterOption;
-    properties::FloatProperty scaleFactor;
-    properties::BoolProperty isRadius;
+    BoolProperty enabled;
+    OptionProperty parameterOption;
+    FloatProperty scaleFactor;
+    BoolProperty isRadius;
 };
 
 } // namespace openspace

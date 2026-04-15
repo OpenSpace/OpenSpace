@@ -27,7 +27,7 @@
 
 #include <string>
 
-namespace openspace::volume {
+namespace openspace {
 
 enum class VolumeGridType : int {
     Cartesian = 0,
@@ -37,6 +37,6 @@ enum class VolumeGridType : int {
 VolumeGridType parseGridType(const std::string& gridType);
 std::string gridTypeToString(VolumeGridType gridType);
 
-} // namespace openspace::volume
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE___H__

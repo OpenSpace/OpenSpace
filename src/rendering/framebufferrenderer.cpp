@@ -40,8 +40,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/openglstatecache.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -56,7 +56,7 @@
 namespace {
     constexpr std::string_view _loggerCat = "FramebufferRenderer";
 
-    constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
+    constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32f, 1e32f, 1e32f, 1.f);
 
     constexpr std::string_view ExitFragmentShaderPath =
         "${SHADERS}/framebuffer/exitframebuffer_fs.glsl";
@@ -78,9 +78,6 @@ namespace {
 
 namespace openspace {
 
-//============================//
-//=====  Reuse textures  =====//
-//============================//
 GLuint FramebufferRenderer::additionalColorTexture1() const {
     // Gives access to the currently NOT used pingPongTexture
     const int unusedPingPongIndex = _pingPongIndex == 0 ? 1 : 0;
@@ -88,40 +85,30 @@ GLuint FramebufferRenderer::additionalColorTexture1() const {
 }
 
 GLuint FramebufferRenderer::additionalColorTexture2() const {
-    // Gives access to the exitColorTexture
     return _exitColorTexture;
 }
 
 GLuint FramebufferRenderer::additionalColorTexture3() const {
-    // Gives access to the fxaaTexture
     return _fxaaBuffers.fxaaTexture;
 }
 
 GLuint FramebufferRenderer::additionalDepthTexture() const {
-    // Gives access to the exitDepthTexture
     return _exitDepthTexture;
 }
 
-//=============================//
-//=====  Access G-buffer  =====//
-//=============================//
 GLuint FramebufferRenderer::gBufferColorTexture() const {
-    // Gives access to the color texture of the G-buffer
     return _gBuffers.colorTexture;
 }
 
 GLuint FramebufferRenderer::gBufferPositionTexture() const {
-    // Gives access to the position texture of the G-buffer
     return _gBuffers.positionTexture;
 }
 
 GLuint FramebufferRenderer::gBufferNormalTexture() const {
-    // Gives access to the normal texture of the G-buffer
     return _gBuffers.normalTexture;
 }
 
 GLuint FramebufferRenderer::gBufferDepthTexture() const {
-    // Gives access to the depth texture of the G-buffer
     return _gBuffers.depthTexture;
 }
 
@@ -131,21 +118,23 @@ void FramebufferRenderer::initialize() {
 
     LDEBUG("Initializing FramebufferRenderer");
 
-    constexpr std::array<GLfloat, 12> VertexData = {
-        // x     y
-        -1.f, -1.f,
-         1.f,  1.f,
-        -1.f,  1.f,
-        -1.f, -1.f,
-         1.f, -1.f,
-         1.f,  1.f,
+    struct Vertex {
+        glm::vec2 position;
+    };
+    constexpr std::array<Vertex, 6> VertexData = {
+        Vertex { glm::vec2(-1.f, -1.f) },
+        Vertex { glm::vec2( 1.f,  1.f) },
+        Vertex { glm::vec2(-1.f,  1.f) },
+        Vertex { glm::vec2(-1.f, -1.f) },
+        Vertex { glm::vec2( 1.f, -1.f) },
+        Vertex { glm::vec2( 1.f,  1.f) }
     };
 
     glCreateBuffers(1, &_vbo);
-    glNamedBufferStorage(_vbo, sizeof(VertexData), VertexData.data(), GL_NONE_BIT);
+    glNamedBufferStorage(_vbo, 6 * sizeof(Vertex), VertexData.data(), GL_NONE_BIT);
 
     glCreateVertexArrays(1, &_vao);
-    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 2 * sizeof(GLfloat));
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
 
     glEnableVertexArrayAttrib(_vao, 0);
     glVertexArrayAttribFormat(_vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
@@ -197,9 +186,6 @@ void FramebufferRenderer::initialize() {
     updateRendererData();
     updateRaycastData();
 
-    //==============================//
-    //=====  GBuffers Buffers  =====//
-    //==============================//
     glNamedFramebufferTexture(
         _gBuffers.framebuffer,
         GL_COLOR_ATTACHMENT0,
@@ -230,9 +216,6 @@ void FramebufferRenderer::initialize() {
         LERROR("Main framebuffer is not complete");
     }
 
-    //==============================//
-    //=====  PingPong Buffers  =====//
-    //==============================//
     glNamedFramebufferTexture(
         _pingPongBuffers.framebuffer,
         GL_COLOR_ATTACHMENT0,
@@ -257,9 +240,6 @@ void FramebufferRenderer::initialize() {
         LERROR("Ping pong buffer is not complete");
     }
 
-    //======================================//
-    //=====  Volume Rendering Buffers  =====//
-    //======================================//
     // Builds Exit Framebuffer
     glNamedFramebufferTexture(
         _exitFramebuffer,
@@ -279,9 +259,6 @@ void FramebufferRenderer::initialize() {
         LERROR("Exit framebuffer is not complete");
     }
 
-    //===================================//
-    //==========  FXAA Buffers  =========//
-    //===================================//
     glNamedFramebufferTexture(
         _fxaaBuffers.fxaaFramebuffer,
         GL_COLOR_ATTACHMENT0,
@@ -294,9 +271,6 @@ void FramebufferRenderer::initialize() {
         LERROR("FXAA framebuffer is not complete");
     }
 
-    //================================================//
-    //=====  Downscale Volume Rendering Buffers  =====//
-    //================================================//
     glNamedFramebufferTexture(
         _downscaleVolumeRendering.framebuffer,
         GL_COLOR_ATTACHMENT0,
@@ -345,10 +319,10 @@ void FramebufferRenderer::initialize() {
     glDisablei(GL_BLEND, 1);
     glDisablei(GL_BLEND, 2);
 
-    // glClampColor is weird as it requires a GLenum in the function definition, but
+    // `glClampColor` is weird as it requires a GLenum in the function definition, but
     // the OpenGL standard says that it only accepts GL_FALSE and GL_TRUE, which are
     // of type GLboolean *eye rolling*
-    // GLenum(0) == GLboolen(0) == GL_FALSE
+    // GLenum(0) == GLboolean(0) == GL_FALSE
     glClampColor(GL_CLAMP_READ_COLOR, GLenum(0));
 
     glEnable(GL_DEPTH_TEST);
@@ -356,7 +330,6 @@ void FramebufferRenderer::initialize() {
     // Default GL State for Blending
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Save State in Cache
     global::renderEngine->openglStateCache().loadCurrentGLState();
 }
 
@@ -366,8 +339,7 @@ void FramebufferRenderer::deinitialize() {
 
     LINFO("Deinitializing FramebufferRenderer");
 
-    for (std::pair<const std::string, shadowmapping::ShadowInfo>& shadowMap : _shadowMaps)
-    {
+    for (std::pair<const std::string, ShadowInfo>& shadowMap : _shadowMaps) {
         glDeleteTextures(1, &shadowMap.second.depthMap.texture);
         glDeleteFramebuffers(1, &shadowMap.second.fbo);
     }
@@ -418,8 +390,9 @@ void FramebufferRenderer::registerShadowCaster(const std::string& shadowGroup,
     if (!_shadowMaps.contains(shadowGroup)) {
         constexpr int DepthMapResolutionMultiplier = 4;
 
-        shadowmapping::ShadowInfo info;
-        info.lightSource = lightSource;
+        ShadowInfo info = {
+            .lightSource = lightSource
+        };
 
         info.depthMap.resolution = glm::min(
             global::renderEngine->renderingResolution() * DepthMapResolutionMultiplier,
@@ -443,7 +416,7 @@ void FramebufferRenderer::registerShadowCaster(const std::string& shadowGroup,
         glTextureParameteri(info.depthMap.texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTextureParameteri(info.depthMap.texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         glTextureParameteri(info.depthMap.texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        constexpr glm::vec4 borderColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
+        constexpr glm::vec4 borderColor = glm::vec4(1.f);
         glTextureParameterfv(
             info.depthMap.texture,
             GL_TEXTURE_BORDER_COLOR,
@@ -464,14 +437,14 @@ void FramebufferRenderer::registerShadowCaster(const std::string& shadowGroup,
     }
 
 
-    shadowmapping::ShadowInfo& shadowMap = _shadowMaps[shadowGroup];
+    ShadowInfo& shadowMap = _shadowMaps[shadowGroup];
     shadowMap.targets.push_back(target);
 
     if (shadowMap.lightSource != lightSource) {
         throw ghoul::RuntimeError(std::format(
             "Registering shadow group with different light source. Originally registered "
             "with light source '{}', now with '{}'. The light source for each shadow "
-            "group has to be unique.",
+            "group has to be unique",
             shadowMap.lightSource->identifier(), lightSource->identifier()
         ));
     }
@@ -485,13 +458,9 @@ void FramebufferRenderer::removeShadowCaster(const std::string& shadowGroup,
             "Could not find shadow group '{}'", shadowGroup
         ));
     }
-    shadowmapping::ShadowInfo& shadowMap = _shadowMaps[shadowGroup];
+    ShadowInfo& shadowMap = _shadowMaps[shadowGroup];
 
-    auto it = std::find(
-        shadowMap.targets.begin(),
-        shadowMap.targets.end(),
-        target
-    );
+    auto it = std::find(shadowMap.targets.begin(), shadowMap.targets.end(), target);
     if (it == shadowMap.targets.end()) {
         throw ghoul::RuntimeError(std::format(
             "Could not find shadowing target '{}'", target->identifier()
@@ -508,9 +477,7 @@ void FramebufferRenderer::removeShadowCaster(const std::string& shadowGroup,
     }
 }
 
-shadowmapping::ShadowInfo FramebufferRenderer::shadowInformation(
-                                                     const std::string& shadowGroup) const
-{
+ShadowInfo FramebufferRenderer::shadowInformation(const std::string& shadowGroup) const {
     ghoul_assert(_shadowMaps.contains(shadowGroup), "Shadow group not registered");
     return _shadowMaps.at(shadowGroup);
 }
@@ -627,11 +594,13 @@ void FramebufferRenderer::updateDownscaleTextures() const {
     );
     glTextureParameteri(
         _downscaleVolumeRendering.depthbuffer,
-        GL_TEXTURE_MAG_FILTER, GL_LINEAR
+        GL_TEXTURE_MAG_FILTER,
+        GL_LINEAR
     );
     glTextureParameteri(
         _downscaleVolumeRendering.depthbuffer,
-        GL_TEXTURE_MIN_FILTER, GL_LINEAR
+        GL_TEXTURE_MIN_FILTER,
+        GL_LINEAR
     );
 }
 
@@ -683,7 +652,6 @@ void FramebufferRenderer::writeDownscaledVolume(const glm::ivec4& viewport) {
 
     _downscaledVolumeProgram->deactivate();
 
-    // Restores OpenGL Rendering State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
 }
@@ -1200,7 +1168,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     global::renderEngine->openglStateCache().setViewportState(vp.data());
     const glm::ivec4 viewport = glm::ivec4(vp[0], vp[1], vp[2], vp[3]);
 
-    // Reset Render Pipeline State
     global::renderEngine->openglStateCache().resetCachedStates();
 
     _pingPongIndex = 0;
@@ -1253,10 +1220,10 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         scene->render(data, tasks);
     }
 
-    // Run Volume Tasks
     {
         TracyGpuZone("Raycaster Tasks")
         const ghoul::GLDebugGroup group("Raycaster Tasks");
+        // Run Volume Tasks
         performRaycasterTasks(tasks.raycasterTasks, viewport);
     }
 
@@ -1307,7 +1274,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
-    // Disabling depth test for filtering and hdr
+    // Disabling depth test for filtering and HDR
     glDisable(GL_DEPTH_TEST);
 
     if (_enableFXAA) {
@@ -1318,7 +1285,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     }
     else {
         // When applying the TMO, the result is saved to the default FBO to be displayed
-        // by the Operating System. Also, the resolve procedure is executed in this step.
+        // by the Operating System. Also, the resolve procedure is executed in this step
         glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
     }
 
@@ -1348,21 +1315,19 @@ void FramebufferRenderer::renderDepthMaps() {
     GLint prevVp[4];
     glGetIntegerv(GL_VIEWPORT, prevVp);
 
-    for (std::pair<const std::string, shadowmapping::ShadowInfo>& shadowMap : _shadowMaps)
-    {
+    for (std::pair<const std::string, ShadowInfo>& shadowMap : _shadowMaps) {
         glm::dvec3 vmin = glm::dvec3(std::numeric_limits<double>::max());
         glm::dvec3 vmax = glm::dvec3(-std::numeric_limits<double>::max());
 
-        std::vector<const shadowmapping::Shadower*> toRender;
+        std::vector<const Shadower*> toRender;
         toRender.reserve(shadowMap.second.targets.size());
         for (const SceneGraphNode* node : shadowMap.second.targets) {
             ghoul_assert(node, "No SceneGraphNode");
             ghoul_assert(node->renderable(), "No Renderable");
 
-            const shadowmapping::Shadower* shadower =
-                dynamic_cast<const shadowmapping::Shadower*>(node->renderable());
+            const Shadower* shadower = dynamic_cast<const Shadower*>(node->renderable());
             if (shadower && node->renderable()->isEnabled() &&
-                shadower->isCastingShadow() && node->renderable()->isReady())
+                shadower->isCastingShadow())
             {
                 const double fsz = shadower->shadowFrustumSize();
                 const glm::dvec3 center = shadower->center();
@@ -1402,16 +1367,15 @@ void FramebufferRenderer::renderDepthMaps() {
         );
         glClear(GL_DEPTH_BUFFER_BIT);
 
-        for (const shadowmapping::Shadower* shadower : toRender) {
+        for (const Shadower* shadower : toRender) {
             shadower->renderForDepthMap(shadowMap.second.viewProjectionMatrix);
         }
     }
 
-    // Restore previous FBO and viewport
     glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
     glViewport(prevVp[0], prevVp[1], prevVp[2], prevVp[3]);
-  
 }
+
 void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks,
                                                 const glm::ivec4& viewport)
 {
@@ -1424,7 +1388,6 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
 
         glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        //global::renderEngine->openglStateCache().viewport(glm::value_ptr(viewport));
 
         ghoul::opengl::ProgramObject* exitProgram = _exitPrograms[raycaster].get();
         if (exitProgram) {
@@ -1559,70 +1522,66 @@ void FramebufferRenderer::performDeferredTasks(
         ghoul::opengl::ProgramObject* deferredcastProgram =
             _deferredcastPrograms[deferredcaster].get();
 
-        if (deferredcastProgram) {
-            _pingPongIndex = _pingPongIndex == 0 ? 1 : 0;
-            const int fromIndex = _pingPongIndex == 0 ? 1 : 0;
-            glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
-            glDisablei(GL_BLEND, 0);
-            glDisablei(GL_BLEND, 1);
-
-            deferredcastProgram->activate();
-
-            // adding G-Buffer
-            ghoul::opengl::TextureUnit mainDColorTextureUnit;
-            mainDColorTextureUnit.bind(_pingPongBuffers.colorTexture[fromIndex]);
-            deferredcastProgram->setUniform("mainColorTexture", mainDColorTextureUnit);
-
-            deferredcastProgram->setUniform(
-                "viewport",
-                static_cast<float>(viewport[0]),
-                static_cast<float>(viewport[1]),
-                static_cast<float>(viewport[2]),
-                static_cast<float>(viewport[3])
-            );
-            deferredcastProgram->setUniform("resolution", glm::vec2(_resolution));
-
-
-            ghoul::opengl::TextureUnit mainPositionTextureUnit;
-            mainPositionTextureUnit.bind(_gBuffers.positionTexture);
-            deferredcastProgram->setUniform(
-                "mainPositionTexture",
-                mainPositionTextureUnit
-            );
-
-            ghoul::opengl::TextureUnit mainNormalTextureUnit;
-            mainNormalTextureUnit.bind(_gBuffers.normalTexture);
-            deferredcastProgram->setUniform("mainNormalTexture", mainNormalTextureUnit);
-
-            deferredcaster->preRaycast(
-                deferredcasterTask.renderData,
-                _deferredcastData[deferredcaster],
-                *deferredcastProgram
-            );
-
-            glDisable(GL_DEPTH_TEST);
-            glDepthMask(false);
-
-            glBindVertexArray(_vao);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-            glBindVertexArray(0);
-
-            glDepthMask(true);
-            glEnable(GL_DEPTH_TEST);
-
-            deferredcaster->postRaycast(
-                deferredcasterTask.renderData,
-                _deferredcastData[deferredcaster],
-                *deferredcastProgram
-            );
-
-            deferredcastProgram->deactivate();
-        }
-        else {
+        if (!deferredcastProgram) {
             LWARNING(
                 "Deferredcaster is not attached when trying to perform deferred task"
             );
+            continue;
         }
+
+        _pingPongIndex = _pingPongIndex == 0 ? 1 : 0;
+        const int fromIndex = _pingPongIndex == 0 ? 1 : 0;
+        glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
+        glDisablei(GL_BLEND, 0);
+        glDisablei(GL_BLEND, 1);
+
+        deferredcastProgram->activate();
+
+        // Adding G-Buffer
+        ghoul::opengl::TextureUnit mainDColorTextureUnit;
+        mainDColorTextureUnit.bind(_pingPongBuffers.colorTexture[fromIndex]);
+        deferredcastProgram->setUniform("mainColorTexture", mainDColorTextureUnit);
+
+        deferredcastProgram->setUniform(
+            "viewport",
+            static_cast<float>(viewport[0]),
+            static_cast<float>(viewport[1]),
+            static_cast<float>(viewport[2]),
+            static_cast<float>(viewport[3])
+        );
+        deferredcastProgram->setUniform("resolution", glm::vec2(_resolution));
+
+        ghoul::opengl::TextureUnit mainPositionTextureUnit;
+        mainPositionTextureUnit.bind(_gBuffers.positionTexture);
+        deferredcastProgram->setUniform("mainPositionTexture", mainPositionTextureUnit);
+
+        ghoul::opengl::TextureUnit mainNormalTextureUnit;
+        mainNormalTextureUnit.bind(_gBuffers.normalTexture);
+        deferredcastProgram->setUniform("mainNormalTexture", mainNormalTextureUnit);
+
+        deferredcaster->preRaycast(
+            deferredcasterTask.renderData,
+            _deferredcastData[deferredcaster],
+            *deferredcastProgram
+        );
+
+        glDisable(GL_DEPTH_TEST);
+        glDepthMask(false);
+
+        glBindVertexArray(_vao);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+
+        glDepthMask(true);
+        glEnable(GL_DEPTH_TEST);
+
+        deferredcaster->postRaycast(
+            deferredcasterTask.renderData,
+            _deferredcastData[deferredcaster],
+            *deferredcastProgram
+        );
+
+        deferredcastProgram->deactivate();
     }
 }
 

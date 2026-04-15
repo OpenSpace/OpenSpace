@@ -155,8 +155,6 @@ int main(int argc, char** argv) {
     commandlineParser.setCommandLine({ argv, argv + argc });
     commandlineParser.execute();
 
-    //FileSys.setCurrentDirectory(launchDirectory);
-
     if (tasksPath.has_value()) {
         performTasks(*tasksPath);
         return 0;

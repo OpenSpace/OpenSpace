@@ -35,8 +35,8 @@ namespace openspace {
 template <typename T> struct Job;
 
 /**
- * Templated Concurrent Job Manager
- * This class is used execute specific jobs on one (1) parallel thread
+ * Templated Concurrent Job Manager. This class is used execute specific jobs on one (1)
+ * parallel thread.
  */
 template <typename P>
 class ConcurrentJobManager {

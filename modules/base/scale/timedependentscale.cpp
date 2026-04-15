@@ -32,37 +32,39 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ReferenceDateInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ReferenceDateInfo = {
         "ReferenceDate",
         "Reference date",
         "The date at which this scale will be 0. The current value of the scale is "
         "computed by taking the difference between the current time and the reference "
         "date and multiplying it by the speed. This field must be formatted as: "
         "YYYY-MM-DDThh:mm:ss.uuu  where h is a 24h clock and u microseconds.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SpeedInfo = {
+    constexpr Property::PropertyInfo SpeedInfo = {
         "Speed",
         "Speed",
         "The speed at which the value grows or shrinks. The units for this are meters "
         "per second. The default value is 1 m/s.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ClampToPositiveInfo = {
+    constexpr Property::PropertyInfo ClampToPositiveInfo = {
         "ClampToPositive",
         "Clamp to positive",
         "If this value is true, the velocity computation will be clamped to a positive "
         "value if the current simulation time is before the `ReferenceDate`. This is "
         "useful for instantaneous events that only propagate forwards in time. The "
         "default value is 'true'.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    // This Scale type provides the ability to scale an object dynamically as time in the
-    // simulation passes. The provided `ReferenceDate`, specifies when the total scale
-    // should be equal to 0 and the scales grows by `Speed` meters for every second in the
+    // Provides the ability to scale an object dynamically as time in the simulation
+    // passes. The provided `ReferenceDate`, specifies when the total scale should be
+    // equal to 0 and the scale grows by `Speed` meters for every second in the
     // simulation. If `ClampToPositive` is specified as `true`, then the resulting scale
     // will always be positive or 0 if the simulation time is before the `ReferenceDate`.
     //
@@ -78,13 +80,13 @@ namespace {
         // [[codegen::verbatim(ClampToPositiveInfo.description)]]
         std::optional<bool> clampToPositive;
     };
-#include "timedependentscale_codegen.cpp"
 } // namespace
+#include "timedependentscale_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation TimeDependentScale::Documentation() {
-    return codegen::doc<Parameters>("base_transform_scale_timedependent");
+Documentation TimeDependentScale::Documentation() {
+    return codegen::doc<Parameters>("base_scale_timedependent");
 }
 
 TimeDependentScale::TimeDependentScale(const ghoul::Dictionary& dictionary)

@@ -33,14 +33,15 @@
 #include <utility>
 
 namespace {
-    // This tile provider will switch between different tile providers specified within
-    // based on the level of detail that is requested by the Globe. All other things being
-    // equal, this corresponds to the distance of the camera to the planet, with a closer
-    // distance resulting in a higher lever. Due to technical reasons, the available
-    // levels are in the range [2, 22] and each increase in levels corresponds to a
-    // doubling in the effective resolution. For a given requested level, the tile
-    // provider that has the largest `MaxLevel` that is not greater than the requested
-    // level will be used.
+    // Switches between different specified tile providers based on the level of detail
+    // that is requested by the Globe. All other things being equal, this corresponds to
+    // the distance of the camera to the planet, with a closer distance resulting in a
+    // higher level.
+    //
+    // Due to technical reasons, the available levels are in the range [2, 22] and each
+    // increase in levels corresponds to a doubling in the effective resolution. For a
+    // given requested level, the tile provider that has the largest `MaxLevel` that is
+    // not greater than the requested level will be used.
     struct [[codegen::Dictionary(TileProviderByLevel)]] Parameters {
         // Each collection describes a distinct layer which can be toggled at a specified
         // max level at which it is requested.
@@ -63,13 +64,13 @@ namespace {
         // not the user.
         int layerGroupID [[codegen::private()]];
     };
-#include "tileproviderbylevel_codegen.cpp"
 } // namespace
+#include "tileproviderbylevel_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation TileProviderByLevel::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_tileproviderbylevel");
+Documentation TileProviderByLevel::Documentation() {
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_bylevel");
 }
 
 TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
@@ -109,7 +110,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
             _providerIndices.resize(provider.maxLevel + 1, -1);
         }
 
-        // map this level to the tile provider index
+        // Map this level to the tile provider index
         _providerIndices[provider.maxLevel] =
             static_cast<int>(_levelTileProviders.size()) - 1;
     }
@@ -164,7 +165,7 @@ TileProvider* TileProviderByLevel::levelProvider(int level) const {
 }
 
 TileDepthTransform TileProviderByLevel::depthTransform() {
-    return { 0.f, 1.f };
+    return { .scale = 0.f, .offset = 1.f };
 }
 
 void TileProviderByLevel::update() {
@@ -191,4 +192,4 @@ float TileProviderByLevel::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

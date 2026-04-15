@@ -42,20 +42,21 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "ScreenSpaceTimeVaryingImageOnline";
 
-    constexpr openspace::properties::Property::PropertyInfo FileInfo = {
+    constexpr Property::PropertyInfo FileInfo = {
         "FilePath",
         "File path",
         "The file path to the data containing information about when to display which "
         "image.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    // This `ScreenSpaceRenderable` displays an image based on the current in-game
-    // simulation time. The image shown is selected from a JSON file containing
-    // timestamp-URL pairs. The image with the closest timestamp before or equal to the
-    // current time is displayed.
+    // Displays an image based on the current in-game simulation time. The image shown is
+    // selected from a JSON file containing timestamp-URL pairs. The image with the
+    // closest timestamp before or equal to the current time is displayed.
     //
     // Example JSON format:
     // {
@@ -68,13 +69,13 @@ namespace {
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path filePath;
     };
-#include "screenspacetimevaryingimageonline_codegen.cpp"
 } // namespace
+#include "screenspacetimevaryingimageonline_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceTimeVaryingImageOnline::Documentation() {
-    return codegen::doc<Parameters>("base_screenspace_time_varying_image_online");
+Documentation ScreenSpaceTimeVaryingImageOnline::Documentation() {
+    return codegen::doc<Parameters>("base_screenspace_timevaryingimageonline");
 }
 
 ScreenSpaceTimeVaryingImageOnline::ScreenSpaceTimeVaryingImageOnline(
@@ -85,9 +86,7 @@ ScreenSpaceTimeVaryingImageOnline::ScreenSpaceTimeVaryingImageOnline(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _jsonFilePath = p.filePath.string();
-    _jsonFilePath.onChange([this]() {
-        loadJsonData(_jsonFilePath.value());
-    });
+    _jsonFilePath.onChange([this]() { loadJsonData(_jsonFilePath.value()); });
     addProperty(_jsonFilePath);
 }
 
@@ -182,9 +181,8 @@ void ScreenSpaceTimeVaryingImageOnline::update() {
 
         try {
             // @TODO (2026-02-18, abock): This code was settings the swizzle mask only if
-            //                            the returned image was having a single Red
-            //                            channel. This can't currently be expressed
-            //                            unfortunately
+            // the returned image was having a single Red channel. This can't currently be
+            // expressed unfortunately
             ghoul::opengl::Texture::SamplerInit samplerInit = {
                 // TODO: AnisotropicMipMap crashes on ATI cards ---abock
                 //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
@@ -192,7 +190,7 @@ void ScreenSpaceTimeVaryingImageOnline::update() {
                 //.swizzleMask = std::array<GLenum, 4>{ GL_RED, GL_RED, GL_RED, GL_ONE }
             };
 
-            _texture = ghoul::io::TextureReader::ref().loadTexture(
+            _texture = ghoul::io::texture::loadTexture(
                 reinterpret_cast<void*>(imageFile.buffer),
                 imageFile.size,
                 2,
@@ -202,7 +200,7 @@ void ScreenSpaceTimeVaryingImageOnline::update() {
 
             _objectSize = _texture->dimensions();
         }
-        catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
+        catch (const ghoul::io::texture::InvalidLoadException& e) {
             LERRORC(e.component, e.message);
         }
     }

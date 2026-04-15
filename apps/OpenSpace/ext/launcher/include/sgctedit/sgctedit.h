@@ -49,7 +49,7 @@ public:
      * configuration editor. Used when editing an existing config.
      *
      * \param cluster The #sgct::config::Cluster object containing all data of the
-     *                imported window cluster configuration.
+     *                imported window cluster configuration
      * \param configName The name of the window configuration filename
      * \param configBasePath The path to the folder where default config files reside
      * \param parent Pointer to parent Qt widget

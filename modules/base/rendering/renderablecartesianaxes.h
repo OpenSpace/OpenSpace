@@ -40,11 +40,9 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     struct Vertex {
@@ -53,9 +51,9 @@ protected:
 
     ghoul::opengl::ProgramObject* _program;
 
-    properties::Vec3Property _xColor;
-    properties::Vec3Property _yColor;
-    properties::Vec3Property _zColor;
+    Vec3Property _xColor;
+    Vec3Property _yColor;
+    Vec3Property _zColor;
 
     GLuint _vao = 0;
     GLuint _vbo = 0;

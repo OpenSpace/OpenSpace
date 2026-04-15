@@ -24,9 +24,9 @@
 
 #include <openspace/rendering/transferfunction.h>
 
+#include <openspace/data/colormaploader.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
@@ -72,23 +72,25 @@ void TransferFunction::setPath(const std::filesystem::path& filepath) {
 }
 
 ghoul::opengl::Texture& TransferFunction::texture() {
-    ghoul_assert(_texture != nullptr, "Transfer function is null");
+    ghoul_assert(_texture, "Transfer function is null");
     update();
     return *_texture;
 }
 
 void TransferFunction::update() {
-    if (_needsUpdate) {
-        if (_filepath.extension() == ".txt") {
-            setTextureFromTxt();
-        }
-        else {
-            setTextureFromImage();
-        }
-        _needsUpdate = false;
-        if (_tfChangedCallback) {
-            _tfChangedCallback(*this);
-        }
+    if (!_needsUpdate) {
+        return;
+    }
+
+    if (_filepath.extension() == ".txt") {
+        setTextureFromTxt();
+    }
+    else {
+        setTextureFromImage();
+    }
+    _needsUpdate = false;
+    if (_tfChangedCallback) {
+        _tfChangedCallback(*this);
     }
 }
 
@@ -121,11 +123,11 @@ void TransferFunction::setTextureFromTxt() {
         }
         else if (key == "lower") {
             iss >> lower;
-            lower = glm::clamp(lower, 0.f, 1.f);
+            lower = std::clamp(lower, 0.f, 1.f);
         }
         else if (key == "upper") {
             iss >> upper;
-            upper = glm::clamp(upper, lower, 1.f);
+            upper = std::clamp(upper, lower, 1.f);
         }
         else if (key == "mappingkey") {
             float intensity = 0.f;
@@ -151,7 +153,7 @@ void TransferFunction::setTextureFromTxt() {
         mappingKeys.emplace_back(upper, mappingKeys.back().color);
     }
 
-    // allocate new float array with zeros
+    // Allocate new float array with zeros
     float* transferFunction = new float[width * 4];
     for (int i = 0; i < 4 * width; i++) {
         transferFunction[i] = 0.f;
@@ -195,8 +197,6 @@ void TransferFunction::setTextureFromTxt() {
         }
     }
 
-    // no need to deallocate transferFunction. Ownership is transferred to the Texture.
-
     _texture = std::make_unique<ghoul::opengl::Texture>(
         ghoul::opengl::Texture::FormatInit{
             .dimensions = glm::uvec3(width, 1, 1),
@@ -204,7 +204,7 @@ void TransferFunction::setTextureFromTxt() {
             .format = ghoul::opengl::Texture::Format::RGBA,
             .dataType = GL_FLOAT
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         },
         reinterpret_cast<std::byte*>(transferFunction)
@@ -212,9 +212,8 @@ void TransferFunction::setTextureFromTxt() {
 }
 
 void TransferFunction::setTextureFromImage() {
-    _texture = ghoul::io::TextureReader::ref().loadTexture(
+    _texture = dataloader::colormap::loadColorMapTexture(
         _filepath,
-        1,
         { .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge }
     );
 }
@@ -226,7 +225,7 @@ glm::vec4 TransferFunction::sample(size_t offset) {
 
     const int nPixels = _texture->dimensions().x;
 
-    // Clamp to range.
+    // Clamp to range
     if (offset >= static_cast<size_t>(nPixels)) {
         offset = nPixels - 1;
     }

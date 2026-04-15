@@ -46,16 +46,16 @@ namespace {
         // tile provider with the earliest time will be used for all dates prior to that
         // date and the provider with the latest time will be used for all dates
         // afterwards. In between, a provider is used from the specified time until the
-        // time of the next provider
+        // time of the next provider.
         std::map<std::string, ghoul::Dictionary> providers;
     };
-#include "tileproviderbydate_codegen.cpp"
 } // namespace
+#include "tileproviderbydate_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation TileProviderByDate::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_tileproviderbydate");
+Documentation TileProviderByDate::Documentation() {
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_bydate");
 }
 
 TileProviderByDate::TileProviderByDate(const ghoul::Dictionary& dictionary) {
@@ -182,4 +182,4 @@ float TileProviderByDate::noDataValueAsFloat() {
     return _currentTileProvider ? _currentTileProvider->noDataValueAsFloat() : 1;
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

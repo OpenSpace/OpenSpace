@@ -38,7 +38,9 @@
 #include <filesystem>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ScriptInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ScriptInfo = {
         "Script",
         "Script",
         "This value is the path to the Lua script that will be executed to compute the "
@@ -48,24 +50,24 @@ namespace {
         "the last frame as the second argument, and the current wall time as "
         "milliseconds past the J2000 epoch the third argument and computes the three "
         "scaling factors returned as a table.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    // This `Scale` type generates the scale values for the attached scene graph node by
-    // calling the provided Lua script. The script must return three scaling factors, one
-    // for each principal axis. The script parameter describes in greater detail how the
-    // Lua script file should be constructed.
+    // Generates the scale values for the attached scene graph node by calling the
+    // provided Lua script. The script must return three scaling factors, one for each
+    // principal axis. The script parameter describes in greater detail how the Lua
+    // script file should be constructed.
     struct [[codegen::Dictionary(LuaScale)]] Parameters {
         // [[codegen::verbatim(ScriptInfo.description)]]
         std::filesystem::path script;
     };
-#include "luascale_codegen.cpp"
 } // namespace
+#include "luascale_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation LuaScale::Documentation() {
-    return codegen::doc<Parameters>("base_transform_scale_lua");
+Documentation LuaScale::Documentation() {
+    return codegen::doc<Parameters>("base_scale_lua");
 }
 
 LuaScale::LuaScale(const ghoul::Dictionary& dictionary)
