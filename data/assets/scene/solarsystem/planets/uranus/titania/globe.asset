@@ -1,0 +1,45 @@
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
+
+
+
+local Titania = {
+  Identifier = "Titania",
+  Parent = transforms.TitaniaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1576800, 1576800, 1576800 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_major",
+    "moon_major_uranus"
+  },
+  GUI = {
+    Name = "Titania",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Titania"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Titania)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Titania)
+end)
+
+asset.export(Titania)
+
+
+
+asset.meta = {
+  Name = "Titania Globe",
+  Description = [[Position for Globe]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,45 @@
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
+
+
+
+local Oberon = {
+  Identifier = "Oberon",
+  Parent = transforms.OberonPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1522800, 1522800, 1522800 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_major",
+    "moon_major_uranus"
+  },
+  GUI = {
+    Name = "Oberon",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Oberon"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Oberon)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Oberon)
+end)
+
+asset.export(Oberon)
+
+
+
+asset.meta = {
+  Name = "Oberon Globe",
+  Description = [[Globe for Oberon]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,13 +1,12 @@
 asset.require("./globe")
 asset.require("./trail")
-asset.require("./major_moons")
 asset.require("./label", false)
 
 
 
 asset.meta = {
-  Name = "Uranus",
-  Description = [[Trail, Model, Label, Moons of Uranus.]],
+  Name = "Titania",
+  Description = [[Trail, Model and Label of Titania.]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",
   License = "MIT"

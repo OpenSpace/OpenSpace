@@ -1,0 +1,44 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Miranda = {
+  Identifier = "Miranda",
+  Parent = transforms.MirandaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 471600, 468000, 466000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_major",
+    "moon_major_uranus"
+  },
+  GUI = {
+    Name = "Miranda",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Miranda"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Miranda)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Miranda)
+end)
+
+asset.export(Miranda)
+
+
+
+asset.meta = {
+  Name = "Miranda Globe",
+  Description = [[Miranda Globe]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

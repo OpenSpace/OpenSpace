@@ -1,0 +1,53 @@
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local UmbrielTrail = {
+  Identifier = "UmbrielTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Umbriel,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 4.144177,
+    Resolution = 1000
+  },
+  Tag = {
+     "moonTrail_solarSystem",
+     "moonTrail_giants",
+     "moonTrail_uranus",
+     "moonTrail_major_uranus"
+  },
+  GUI = {
+    Name = "Umbriel Trail",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(UmbrielTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(UmbrielTrail)
+end)
+
+asset.export(UmbrielTrail)
+
+
+
+asset.meta = {
+  Name = "Miranda Trail",
+  Description = [[Miranda Trail]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
