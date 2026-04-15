@@ -1,0 +1,51 @@
+local transforms = asset.require("./transforms")
+
+
+
+local BorisovLabel = {
+  Identifier = "2I_BorisovLabel",
+  Parent = transforms.BorisovPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Text = "2I/Borisov",
+    FontSize = 70.0,
+    Size = 8.50,
+    MinMaxSize = { 1, 50 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 1.5, 50.0 },
+    FadeWidths = { 1.0, 40.0 }
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "2I/Borisov Label",
+    Path = "/Solar System/Interstellar/Borisov",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(BorisovLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(BorisovLabel)
+end)
+
+asset.export(BorisovLabel)
+
+
+
+asset.meta = {
+  Name = "2I/Borisov Label",
+  Description = [[This asset contains the label of 2I/Borisov from 2015 JAN 01 00:00:00 to
+    2050 JAN 01 00:00:00. Data from JPL Horizons]],
+  Author = "OpenSpace Team",
+  URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
+  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All
+    documents available from this server may be protected under the U.S. and Foreign
+    Copyright Laws]]
+}

@@ -1,0 +1,51 @@
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+local trajectory = asset.resource({
+  Name = "3I/ATLAS Trajectory",
+  Type = "HttpSynchronization",
+  Identifier = "atlas_horizons",
+  Version = 1
+})
+
+
+local AtlasPosition = {
+  Identifier = "3I_AtlasPosition",
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = trajectory .. "i3_atlas.hrz"
+    }
+  },
+  GUI = {
+    Name = "3I/ATLAS",
+    Path = "/Solar System/Interstellar/ATLAS",
+    Description = [[Position of 3I/ATLAS from 2020 JUL 01 00:00:00 to 2030 JUL 01
+      00:00:00. Data from JPL Horizons.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(AtlasPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(AtlasPosition)
+end)
+
+-- As the identifier starts with a number, it is not a valid Lua identifier
+asset.export("AtlasPosition", AtlasPosition)
+
+
+
+asset.meta = {
+  Name = "3I/ATLAS Position",
+  Description = [[This asset contains the position of 3I/ATLAS from 2020 JUL 01 00:00:00
+    to 2030 JUL 01 00:00:00. Data from JPL Horizons.]],
+  Author = "OpenSpace Team",
+  URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
+  License = "NASA"
+}
