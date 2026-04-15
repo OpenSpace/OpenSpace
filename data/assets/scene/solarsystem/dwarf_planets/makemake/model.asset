@@ -1,4 +1,4 @@
-local sun = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
 
 
@@ -11,9 +11,9 @@ local modelFolder = asset.resource({
 })
 
 
-local Planet = {
-  Identifier = "MakemakeGlobe",
-  Parent = transforms.Position.Identifier,
+local MakemakeModel = {
+  Identifier = "MakemakeModel",
+  Parent = transforms.MakemakePosition.Identifier,
   Transform = {
     Rotation = {
       Type = "ConstantRotation",
@@ -28,7 +28,7 @@ local Planet = {
     AmbientIntensity = 0.0,
     ModelScale = "Kilometer",
     LightSources = {
-      sun.LightSource
+      sunAsset.LightSource
     }
   },
   GUI = {
@@ -41,20 +41,20 @@ local Planet = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Planet)
+  openspace.addSceneGraphNode(MakemakeModel)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Planet)
+  openspace.removeSceneGraphNode(MakemakeModel)
 end)
 
-asset.export("Planet", Planet)
+asset.export(MakemakeModel)
 
 
 
 asset.meta = {
-  Name = "Makemake Globe",
-  Description = [[Globe of Makemake]],
+  Name = "Makemake Model",
+  Description = [[Model of Makemake]],
   Author = "OpenSpace Team",
   URL = "https://solarsystem.nasa.gov/planets/dwarf-planets/makemake/in-depth/",
   License = "MIT"
