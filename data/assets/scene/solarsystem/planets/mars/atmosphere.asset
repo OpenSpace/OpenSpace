@@ -1,10 +1,10 @@
-local transforms = asset.require("./mars")
+local globe = asset.require("./globe")
 
 
 
 local Atmosphere = {
   Identifier = "MarsAtmosphere",
-  Parent = transforms.Mars.Identifier,
+  Parent = globe.Mars.Identifier,
   Renderable = {
     Type = "RenderableAtmosphere",
     -- Atmosphere radius in Km

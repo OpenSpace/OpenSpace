@@ -78,7 +78,7 @@ else
   vrt_folders["Moon"] = nil
 end
 if AddMercuryLayers then
-  asset.require("../scene/solarsystem/planets/mercury/mercury")
+  asset.require("../scene/solarsystem/planets/mercury/globe")
 else
   vrt_folders["Mercury"] = nil
 end

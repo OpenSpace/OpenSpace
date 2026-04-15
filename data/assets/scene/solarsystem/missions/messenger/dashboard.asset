@@ -1,4 +1,4 @@
-local mercuryAsset = asset.require("scene/solarsystem/planets/mercury/mercury")
+local mercuryAsset = asset.require("scene/solarsystem/planets/mercury/globe")
 local messengerAsset = asset.require("./messenger")
 
 

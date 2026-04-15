@@ -1,5 +1,5 @@
-local earth = asset.require("scene/solarsystem/planets/earth/globe")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
+local sunAsset = asset.require("scene/solarsystem/sun/sun")
 
 
 
@@ -7,8 +7,8 @@ local SunEarthLine = {
   Identifier = "RenderableNodeLine_Sun_Earth",
   Renderable = {
     Type = "RenderableNodeLine",
-    StartNode = sun.Sun.Identifier,
-    EndNode = earth.Earth.Identifier
+    StartNode = sunAsset.Sun.Identifier,
+    EndNode = earthAsset.Earth.Identifier
   },
   GUI = {
     Name = "Sun-Earth Line",

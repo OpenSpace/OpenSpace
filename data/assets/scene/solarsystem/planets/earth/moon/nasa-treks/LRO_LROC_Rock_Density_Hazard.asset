@@ -4,7 +4,7 @@
 -- files. In particular in the case of errors, prefer to change that script rather
 -- than the individual files
 
-local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/globe").Moon.Identifier
+local globeIdentifier = asset.require("scene/solarsystem/planets/earth/moon/globe").Moon.Identifier
 
 
 
