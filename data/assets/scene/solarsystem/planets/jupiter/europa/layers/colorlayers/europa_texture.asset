@@ -1,4 +1,4 @@
-local europaAsset = asset.require("scene/solarsystem/planets/jupiter/europa/europa")
+local europaAsset = asset.require("scene/solarsystem/planets/jupiter/europa/globe")
 
 
 

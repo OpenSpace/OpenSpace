@@ -4,7 +4,7 @@
 -- light-hour per second.
 
 local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
-local jupiterAsset = asset.require("scene/solarsystem/planets/jupiter/jupiter")
+local jupiterAsset = asset.require("scene/solarsystem/planets/jupiter/globe")
 
 local Node = {
   Identifier = "RenderableTravelSpeed_Example_TravelSpeed",
