@@ -1,4 +1,4 @@
-local sun = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
 
 
@@ -13,7 +13,7 @@ local models = asset.resource({
 
 local VestaModel = {
   Identifier = "VestaModel",
-  Parent = transforms.Position.Identifier,
+  Parent = transforms.VestaPosition.Identifier,
   Transform = {
     Rotation = {
       Type = "ConstantRotation",
@@ -27,7 +27,7 @@ local VestaModel = {
     SpecularIntensity = 0.0,
     AmbientIntensity = 0.0,
     LightSources = {
-      sun.LightSource
+      sunAsset.LightSource
     }
   },
   GUI = {
@@ -46,7 +46,7 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(VestaModel)
 end)
 
-asset.export("Planet", VestaModel)
+asset.export(VestaModel)
 
 
 
