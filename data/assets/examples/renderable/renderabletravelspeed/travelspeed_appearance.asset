@@ -4,7 +4,7 @@
 -- Earth to Mars. The line will move according to the speed of light.
 
 local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
-local marsAsset = asset.require("scene/solarsystem/planets/mars/mars")
+local marsAsset = asset.require("scene/solarsystem/planets/mars/globe")
 
 local Node = {
   Identifier = "RenderableTravelSpeed_Example_LengthAndWidth",

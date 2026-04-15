@@ -1,111 +1,16 @@
-local transforms = asset.require("./transforms")
-local coreKernels = asset.require("spice/core")
-local marsKernels = asset.require("./kernels")
-
-
-
-local labelsPath = asset.resource({
-  Name = "Mars Labels",
-  Type = "HttpSynchronization",
-  Identifier = "mars_labels",
-  Version = 1
-})
-
-
--- local MarsRadii = { 3396190.0, 3396190.0, 3376200.0 }
-local MarsRadii = { 3396190.0, 3396190.0, 3396190.0 }
-
-local Mars = {
-  Identifier = "Mars",
-  Parent = transforms.MarsBarycenter.Identifier,
-  Transform = {
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = marsKernels.ID.Mars,
-      Observer = coreKernels.ID.MarsBarycenter
-    },
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = coreKernels.Frame.Mars,
-      DestinationFrame = coreKernels.Frame.Galactic
-    }
-  },
-  Renderable = {
-    Type = "RenderableGlobe",
-    Radii = MarsRadii,
-    Labels = {
-      Enabled = false,
-      FileName = labelsPath .. "mars.labels",
-      AlignmentOption = "Horizontally", -- or Circularly
-      FontSize = 20.0,
-      Size = 8.7,
-      FadeInEnabled = true,
-      FadeOutEnabled = true,
-      FadeDistances = { 750000.0, 2000000.0 },
-      DistanceEPS = 2500000.0,
-      Color = { 1.0, 1.0, 0.0 }
-    }
-  },
-  Tag = { "planet_solarSystem", "planet_terrestrial" },
-  GUI = {
-    Name = "Mars",
-    Path = "/Solar System/Planets/Mars",
-    Description = "Main globe for Mars with labels and map layers"
-  }
-}
-
-local MarsLabel = {
-  Identifier = "MarsLabel",
-  Parent = Mars.Identifier,
-  Renderable = {
-    Type = "RenderableLabel",
-    Enabled = false,
-    Text = "Mars",
-    FontSize = 70.0,
-    Size = 8.50,
-    MinMaxSize = { 1, 50 },
-    OrientationOption = "Camera View Direction",
-    BlendMode = "Additive",
-    TransformationMatrix = {
-      1.0, 0.0, 0.0, -8.0E6,
-      0.0, 1.0, 0.0, 0.0,
-      0.0, 0.0, 1.0, 1.0E7,
-      0.0, 0.0, 0.0, 1.0
-    },
-    EnableFading = true,
-    FadeUnit = "au",
-    FadeDistances = { 1.5, 40.0 },
-    FadeWidths = { 1.0, 50.0 }
-  },
-  Tag = { "solarsystem_labels" },
-  GUI = {
-    Name = "Mars Label",
-    Path = "/Solar System/Planets/Mars",
-    Focusable = false,
-    Description = "Main label for Mars"
-  }
-}
-
-
-asset.onInitialize(function()
-  openspace.addSceneGraphNode(Mars)
-  openspace.addSceneGraphNode(MarsLabel)
-end)
-
-asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(MarsLabel)
-  openspace.removeSceneGraphNode(Mars)
-end)
-
-asset.export(Mars)
-asset.export(MarsLabel)
+asset.require("./globe")
+asset.require("./trail")
+asset.require("./atmosphere")
+asset.require("./moons/phobos/phobos")
+asset.require("./moons/deimos/deimos")
+asset.require("./label")
 
 
 
 asset.meta = {
   Name = "Mars",
-  Description = "Mars globe, and main globe label",
+  Description = [[Trail, Model, Label, and Moons of Mars.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
-  License = "MIT license"
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
 }

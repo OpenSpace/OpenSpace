@@ -1,4 +1,4 @@
-local marsAsset = asset.require("scene/solarsystem/planets/mars/mars")
+local marsAsset = asset.require("scene/solarsystem/planets/mars/globe")
 local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local sunAsset = asset.require("scene/solarsystem/sun/transforms")

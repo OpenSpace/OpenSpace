@@ -68,7 +68,7 @@ local vrt_folders = {
 -- Add require statements for assets exporting the neccessary globes
 -- here we add Mars, Moon and Mercury:
 if AddMarsLayers then
-  asset.require("../scene/solarsystem/planets/mars/mars")
+  asset.require("../scene/solarsystem/planets/mars/globe")
 else
   vrt_folders["Mars"] = nil
 end

@@ -8,7 +8,7 @@
 -- same way as we do for Earth and Mars in this asset.
 
 local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
-local marsAsset = asset.require("scene/solarsystem/planets/mars/mars")
+local marsAsset = asset.require("scene/solarsystem/planets/mars/globe")
 
 local Node = {
   Identifier = "RenderableNodeLine_Example",
