@@ -64,6 +64,9 @@ public:
     struct TouchPoint {
         size_t id = 0;
         glm::dvec2 position = glm::dvec2(0.0);
+
+        // Position on first touch down
+        glm::dvec2 initialPosition = glm::dvec2(0.0);
     };
 
     DirectManipulation();
@@ -100,6 +103,9 @@ private:
      */
     void updateNodeSurfacePoints(const std::vector<TouchPoint>& touchPoints);
 
+    std::optional<glm::dvec3> computeSurfacePoint(const glm::dvec2& touchPosition,
+        const SceneGraphNode* node) const;
+
     bool isValidDirectTouchNode() const;
     bool isWithinDirectTouchDistance() const;
 
@@ -120,6 +126,8 @@ private:
     std::set<std::string> _sortedDefaultRenderableTypes;
 
     std::vector<SelectedBody> _selectedNodeSurfacePoints;
+
+    glm::dvec2 _firstMousePressPos = glm::dvec2(0.0);
 };
 
 } // namespace openspace

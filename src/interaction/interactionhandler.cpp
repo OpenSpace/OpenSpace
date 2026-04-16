@@ -251,22 +251,29 @@ MouseButton InteractionHandler::secondaryMouseButton() const {
     return _invertMouseButtons ? MouseButton::Button1 : MouseButton::Button2;
 }
 
+bool InteractionHandler::isMouseFirstPress() const {
+    return _mouseVisualizer.isMouseFirstPress;
+}
+
+glm::vec2 InteractionHandler::mouseClickPosition() const {
+    return _mouseVisualizer.clickPosition;
+}
+
 void InteractionHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
     if (_disableMouseInputs) {
         return;
     }
     _mouseInputState.mouseButtonCallback(button, action);
 
-    if (_mouseVisualizer.enable) {
-        if (action == MouseAction::Press) {
-            _mouseVisualizer.isMouseFirstPress = true;
-            _mouseVisualizer.isMousePressed = true;
-        }
-        else if (action == MouseAction::Release) {
-            _mouseVisualizer.isMousePressed = false;
-            _mouseVisualizer.currentPosition = glm::vec2(0.f);
-            _mouseVisualizer.clickPosition = glm::vec2(0.f);
-        }
+    // The mouse visualizer keeps track of some useful states - let's alway update them
+    if (action == MouseAction::Press) {
+        _mouseVisualizer.isMouseFirstPress = true;
+        _mouseVisualizer.isMousePressed = true;
+    }
+    else if (action == MouseAction::Release) {
+        _mouseVisualizer.isMousePressed = false;
+        _mouseVisualizer.clickPosition = glm::vec2(0.f);
+        _mouseVisualizer.currentPosition = glm::vec2(0.f);
     }
 
     markInteraction();
@@ -278,7 +285,7 @@ void InteractionHandler::mousePositionCallback(double x, double y) {
     }
     _mouseInputState.mousePositionCallback(x, y);
 
-    if (_mouseVisualizer.enable && _mouseVisualizer.isMousePressed) {
+    if (_mouseVisualizer.isMousePressed) {
         if (_mouseVisualizer.isMouseFirstPress) {
             _mouseVisualizer.clickPosition = glm::vec2(x, y);
             _mouseVisualizer.isMouseFirstPress = false;

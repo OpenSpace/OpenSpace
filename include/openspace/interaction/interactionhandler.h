@@ -35,7 +35,6 @@
 #include <openspace/interaction/touchmarker.h>
 #include <openspace/interaction/websocketinputstate.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec4property.h>
 
@@ -74,6 +73,9 @@ public:
     bool isPrimaryMouseButtonInverted() const;
     MouseButton primaryMouseButton() const;
     MouseButton secondaryMouseButton() const;
+
+    bool isMouseFirstPress() const;
+    glm::vec2 mouseClickPosition() const;
 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
