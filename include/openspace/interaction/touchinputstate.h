@@ -59,6 +59,7 @@ public:
 
     bool isTap() const;
     bool isDoubleTap() const;
+    bool isTripleTap() const;
     void setMaxDoubleTapTime(unsigned int milliseconds);
 
     const std::vector<TouchInputHolder>& touchPoints() const;
@@ -84,8 +85,10 @@ private:
 
     bool _isTap = false;
     bool _isDoubleTap = false;
+    bool _isTripleTap = false;
 
     std::chrono::milliseconds _lastTapTime;
+    std::chrono::milliseconds _lastDoubleTapTime;
     unsigned int _maxDoubleTapTimeInterval = 300; // milliseconds
 };
 

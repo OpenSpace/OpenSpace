@@ -68,6 +68,10 @@ bool TouchInputState::isDoubleTap() const {
     return _isDoubleTap;
 }
 
+bool TouchInputState::isTripleTap() const {
+    return _isTripleTap;
+}
+
 void TouchInputState::setMaxDoubleTapTime(unsigned int milliseconds)  {
     _maxDoubleTapTimeInterval = milliseconds;
 }
@@ -148,11 +152,27 @@ void TouchInputState::updateOrAddTouchInput(TouchInput input) {
 
 void TouchInputState::removeTouchInput(TouchInput input) {
     _deferredRemovals.emplace_back(input);
+
+    // Update so the holder has the final gesture data
+    TouchInputHolder& inputHolder = _touchPoints.front();
+    if (inputHolder.holdsInput(input)) {
+        inputHolder.tryAddInput(input);
+    }
 }
 
 void TouchInputState::clearTapData() {
+    // Reset the timers so we don't keep detecting the combo taps if tapping continuously.
+    // After a triple, we should start on single tap again
+    if (_isDoubleTap || _isTripleTap) {
+        _lastTapTime = std::chrono::milliseconds::zero();
+    }
+    if (_isTripleTap) {
+        _lastDoubleTapTime = std::chrono::milliseconds::zero();
+    }
+
     _isTap = false;
     _isDoubleTap = false;
+    _isTripleTap = false;
 }
 
 void TouchInputState::evaluateTap(TouchInput lastRemovedInput) {
@@ -162,17 +182,22 @@ void TouchInputState::evaluateTap(TouchInput lastRemovedInput) {
         return;
     }
 
-    inputHolder.tryAddInput(lastRemovedInput);
     const bool isWithinTapTime = inputHolder.gestureTime() < 0.18;
-
-    LINFOC("Touch", std::format("GESTURETIME: {}", inputHolder.gestureTime()));
-    LINFOC("Touch", std::format("LastTaptime: {}", _lastTapTime));
 
     if (isWithinTapTime) {
         std::chrono::milliseconds time = now();
 
-        if ((time - _lastTapTime).count() < _maxDoubleTapTimeInterval) {
-            _isDoubleTap = true; // TODO: Check position
+        // @TODO (emmbr26, 2026-04-16) We should also check that the positions of the taps
+        // match. Now you can quickly tap with both hand on multiple sides of the screen
+        // and it wil register as a multi-tap. But I don't consider this too much of an
+        // issue right now.
+
+        if ((time - _lastDoubleTapTime).count() < _maxDoubleTapTimeInterval) {
+            _isTripleTap = true;
+        }
+        else if ((time - _lastTapTime).count() < _maxDoubleTapTimeInterval) {
+            _isDoubleTap = true;
+            _lastDoubleTapTime = time;
         }
         else {
             _isTap = true;
