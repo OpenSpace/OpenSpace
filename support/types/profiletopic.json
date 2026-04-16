@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "data": {
+      "additionalProperties": false,
+      "properties": {
+        "addons": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "author": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "filePath": {
+          "type": "string"
+        },
+        "hasStartedBefore": {
+          "type": "boolean"
+        },
+        "license": {
+          "type": "string"
+        },
+        "markNodes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "uiPanelVisibility": {
+          "additionalProperties": {
+            "type": "boolean"
+          },
+          "type": "object"
+        },
+        "url": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "uiPanelVisibility",
+        "markNodes",
+        "filePath",
+        "addons"
+      ],
+      "type": "object"
+    },
+    "topicId": {
+      "const": "profile"
+    },
+    "topicPayload": {
+      "additionalProperties": false,
+      "type": "object"
+    }
+  },
+  "required": [
+    "topicId",
+    "topicPayload",
+    "data"
+  ],
+  "title": "ProfileTopic",
+  "type": "object"
+}
