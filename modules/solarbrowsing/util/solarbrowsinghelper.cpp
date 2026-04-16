@@ -719,14 +719,49 @@ std::optional<ImageMetadata> parseJ2kMetadata(const std::filesystem::path& fileP
             "PLATESCL"
         );
 
-        if (!plateScl.has_value()) {
-            LERROR(std::format("Could not find NAXIS1 tag {}", filePath));
-            return std::nullopt;
+        if (plateScl.has_value()) {
+            const float plateScale = std::stof(std::string(*plateScl));
+            im.scale = 1.f / (plateScale / 2.f);
+            im.isCoronaGraph = true;
         }
+        else {
+            std::optional<std::string_view> solarR = extractInnerXml(*metaData, "SOLAR_R");
+            if (!solarR.has_value()) {
+                solarR = extractInnerXml(*metaData, "R_SUN");
+            }
+            if (!solarR.has_value()) {
+                solarR = extractInnerXml(*metaData, "RSUN_OBS");
+            }
 
-        const float plateScale = std::stof(std::string(*plateScl));
-        im.scale = 1.f / (plateScale / 2.f);
-        im.isCoronaGraph = true;
+            if (solarR.has_value()) {
+                const float solarRadiusPixels = std::stof(std::string(*solarR));
+                im.scale = solarRadiusPixels / (im.fullResolution / 2.f);
+                im.isCoronaGraph = false;
+            }
+            else {
+                std::optional<std::string_view> rsunObs = extractInnerXml(
+                    bufferView,
+                    "RSUN_OBS"
+                );
+                std::optional<std::string_view> cDelt1 = extractInnerXml(
+                    bufferView,
+                    "CDELT1"
+                );
+
+                if (!rsunObs.has_value() || !cDelt1.has_value()) {
+                    LERROR(std::format(
+                        "SOHO image missing PLATESCL and solar-radius metadata {}",
+                        filePath
+                    ));
+                    return std::nullopt;
+                }
+
+                const float rSunObsValue = std::stof(std::string(*rsunObs));
+                const float cDelt1Value = std::stof(std::string(*cDelt1));
+                im.scale = (rSunObsValue / cDelt1Value) / (im.fullResolution / 2.f);
+                im.isCoronaGraph = false;
+            }
+        }
     }
     else if (*telescop == "SDO") {
         std::optional<std::string_view> rsunObs = extractInnerXml(
