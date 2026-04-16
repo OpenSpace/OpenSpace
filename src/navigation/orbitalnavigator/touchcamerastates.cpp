@@ -87,54 +87,62 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
     LDEBUG(std::format("Interpreted interaction: {}", interactionNames.at(action)));
 #endif // TOUCH_DEBUG_MODE
 
-    const TouchInputHolder& currentInput = touchPoints.at(0);
+    const TouchInputHolder& currentInput = touchPoints[0];
 
-    const glm::vec2 windowSize = glm::vec2(global::windowDelegate->currentWindowSize());
-    const float aspectRatio = windowSize.x / windowSize.y;
+    const TouchInput& startFinger0 = touchPoints[0].firstInput();
+    const TouchInput& endFinger0 = touchPoints[0].latestInput();
+
+    auto normalizeByAspectRatio = [&](glm::dvec2 vec) {
+        const glm::vec2 windowSize =
+            glm::vec2(global::windowDelegate->currentWindowSize());
+
+        const float aspectRatio = windowSize.x / windowSize.y;
+        return glm::dvec2(vec.x * aspectRatio, vec.y);
+    };
 
     switch (action) {
         case InteractionType::Rotation: {
             // Add rotation velocity
-            glm::dvec2 diff = currentInput.latestInput().pos - currentInput.firstInput().pos;
+            glm::dvec2 diff = normalizeByAspectRatio(glm::dvec2(
+                endFinger0.pos - startFinger0.pos
+            ));
             constexpr glm::dvec2 Scale = glm::dvec2(5.0);
             updateVelocities.globalRotation = Scale * _sensitivity * -diff;
             break;
         }
         case InteractionType::Pinch: {
-            // Add zooming velocity - dependent on distance difference between contact
-            // points this/first frame
-            const TouchInput& startFinger0 = touchPoints[0].firstInput();
+            ghoul_assert(touchPoints.size() > 1, "Pinch needs at least two touch points");
             const TouchInput& startFinger1 = touchPoints[1].firstInput();
-            const glm::dvec2 startVec0 = glm::dvec2(
-                startFinger0.pos.x * aspectRatio,
-                startFinger0.pos.y
-            );
-            const glm::dvec2 startVec1 = glm::dvec2(
-                startFinger1.pos.x * aspectRatio,
-                startFinger1.pos.y
-            );
+            const TouchInput& endFinger1 = touchPoints[1].latestInput();
+
+            // Add zooming velocity
+            const glm::dvec2 startVec0 = normalizeByAspectRatio(glm::dvec2(
+                startFinger0.pos
+            ));
+            const glm::dvec2 startVec1 = normalizeByAspectRatio(glm::dvec2(
+                startFinger1.pos
+            ));
             double distToCentroidStart = glm::length(startVec0 - startVec1) / 2.0;
 
-            const TouchInput& endFinger0 = touchPoints[0].latestInput();
-            const TouchInput& endFinger1 = touchPoints[1].latestInput();
-            const glm::dvec2 endVec0 = glm::dvec2(
-                endFinger0.pos.x * aspectRatio,
-                endFinger0.pos.y
-            );
-            const glm::dvec2 endVec1 = glm::dvec2(
-                endFinger1.pos.x * aspectRatio,
-                endFinger1.pos.y
-            );
+
+            const glm::dvec2 endVec0 = normalizeByAspectRatio(glm::dvec2(
+                endFinger0.pos
+            ));
+            const glm::dvec2 endVec1 = normalizeByAspectRatio(glm::dvec2(
+                endFinger1.pos
+            ));
             double distToCentroidEnd = glm::length(endVec0 - endVec1) / 2.0;
 
             double zoomFactor = distToCentroidEnd - distToCentroidStart;
 
-            const double Scale = 100.0;
+            const double Scale = 10.0;
             updateVelocities.zoom = Scale * zoomFactor * _sensitivity;
 
             break;
         }
         case InteractionType::Roll: {
+            ghoul_assert(touchPoints.size() > 1, "Roll needs at least two touch points");
+
             // Add global roll rotation velocity
             double rollFactor = 0.0;
             for (const TouchInputHolder& touchPoint : touchPoints) {
@@ -162,14 +170,19 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
             break;
         }
         case InteractionType::Pan: {
-            // Add local rotation velocity
-            const glm::dvec2 Scale = glm::dvec2(3.0);
+            ghoul_assert(touchPoints.size() > 1, "Pan needs at least two touch points");
 
-            updateVelocities.localRotation = _sensitivity * Scale * glm::dvec2(
+            // Add local rotation velocity
+            const glm::dvec2 Scale = glm::dvec2(2.0);
+
+            // Here we don't use the difference between the first and current position,
+            // but instead the speed of the movement, to allow for more responsive panning
+            glm::dvec2 speed = normalizeByAspectRatio(glm::dvec2(
                 currentInput.speedX(),
                 currentInput.speedY()
-            );
+            ));
 
+            updateVelocities.localRotation = _sensitivity * Scale * speed;
             break;
         }
         case InteractionType::None:
