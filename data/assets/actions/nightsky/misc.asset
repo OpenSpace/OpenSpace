@@ -9,7 +9,14 @@ local textures = asset.resource({
 local FadeInConstellationLabels = {
   Identifier = "os.nightsky.FadeInConstellationLabels",
   Name = "Fade In Constellation Labels",
-  Command = [[openspace.fadeIn("Scene.Constellations.Renderable.Labels",nil)]],
+  Command = [[
+    local currentVisibility = openspace.propertyValue("Scene.Constellations.Renderable.Enabled")
+    if not currentVisibility then
+      openspace.setPropertyValueSingle("Scene.Constellations.Renderable.DrawElements", false)
+      openspace.fadeIn("Scene.Constellations.Renderable")
+    end
+    openspace.fadeIn("Scene.Constellations.Renderable.Labels",nil)
+  ]],
   Documentation = "Fades in the constllation labels",
   GuiPath = "/Constellations/Lines",
   IsLocal = false
@@ -28,10 +35,15 @@ local ShowConstellationElements = {
   Identifier = "os.nightsky.ShowConstellationElements",
   Name = "Show Constellation Elements",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.Constellations.Renderable.DrawElements', true)
-    openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Fade', 0)
-    local fadeSpeed = openspace.propertyValue("OpenSpaceEngine.FadeDuration")
-	  openspace.fadeIn("Scene.Constellations.Renderable", fadeSpeed, "")
+    local labelsVisible = openspace.propertyValue("Scene.Constellations.Renderable.Labels.Enabled")
+    if not labelsVisible then
+      openspace.setPropertyValueSingle('Scene.Constellations.Renderable.DrawElements', true)
+      openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Fade', 0)
+      local fadeSpeed = openspace.propertyValue("OpenSpaceEngine.FadeDuration")
+      openspace.fadeIn("Scene.Constellations.Renderable", fadeSpeed, "")
+    else
+      openspace.setPropertyValueSingle('Scene.Constellations.Renderable.DrawElements', true)
+    end
   ]],
   Documentation = "Shows the constellation lines with consideration of label state",
   GuiPath = "/Constellations/Lines",
@@ -89,7 +101,7 @@ local hideAllAltAzElements = {
   Identifier = "os.nightsky.HideAllAltAzElements",
   Name = "Hide All Alt/Az Elements",
   Command = [[
-    openspace.fadeOut("{altaz_marking}")
+    openspace.fadeOut("{altaz_marking}.Renderable")
   ]],
   Documentation = "Hides all alt/az markings",
   GuiPath = "/Night Sky/Clear Sky Actions",
@@ -100,7 +112,7 @@ local hideAllEclipticElements = {
   Identifier = "os.nightsky.HideAllEclipticElements",
   Name = "Hide All Ecliptic Elements",
   Command = [[
-    openspace.fadeOut("{ecliptic_marking}")
+    openspace.fadeOut("{ecliptic_marking}.Renderable")
   ]],
   Documentation = "Hides all ecliptic markings",
   GuiPath = "/Night Sky/Clear Sky Actions",
@@ -111,7 +123,7 @@ local hideAllEquatorialElements = {
   Identifier = "os.nightsky.HideAllEquatorialElements",
   Name = "Hide All Equatorial Elements",
   Command = [[
-      openspace.fadeOut("{equatorial_marking}")
+      openspace.fadeOut("{equatorial_marking}.Renderable")
   ]],
   Documentation = "Hides all equatorial markings",
   GuiPath = "/Night Sky/Clear Sky Actions",
@@ -122,7 +134,8 @@ local hideAllConstellationElements = {
   Identifier = "os.nightsky.HideAllConstellationElements",
   Name = "Hide All Constellation Elements",
   Command = [[
-    openspace.fadeOut("{constellation_marking}")
+    openspace.fadeOut("{constellation_marking}.Renderable")
+    openspace.fadeOut("Scene.Constellations.Renderable.Labels")
   ]],
   Documentation = "Hides all constellation markings",
   GuiPath = "/Night Sky/Clear Sky Actions",
