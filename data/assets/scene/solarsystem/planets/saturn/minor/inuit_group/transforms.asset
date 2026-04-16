@@ -1,0 +1,191 @@
+local transforms = asset.require("scene/solarsystem/planets/saturn/transforms")
+local kernels454 = asset.require("scene/solarsystem/planets/saturn/kernels454")
+local coreKernels = asset.require("spice/core")
+
+
+
+local KiviuqPosition = {
+  Identifier = "KiviuqPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.Kiviuq,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Kiviuq Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local IjiraqPosition = {
+  Identifier = "IjiraqPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.Ijiraq,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Ijiraq Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Ijiraq",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local PaaliaqPosition = {
+  Identifier = "PaaliaqPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.Paaliaq,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Paaliaq Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Paaliaq",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local SiarnaqPosition = {
+  Identifier = "SiarnaqPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.Siarnaq,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Siarnaq Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local TarqeqPosition = {
+  Identifier = "TarqeqPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.Tarqeq,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Tarqeq Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Tarqeq",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2004S29Position = {
+  Identifier = "S2004S29Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2004S29,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2004 S 29 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S29",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2004S31Position = {
+  Identifier = "S2004S31Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2004S31,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2004 S 31 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S31",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S01Position = {
+  Identifier = "S2019S01Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S01,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 01 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2019S01",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(KiviuqPosition)
+  openspace.addSceneGraphNode(IjiraqPosition)
+  openspace.addSceneGraphNode(PaaliaqPosition)
+  openspace.addSceneGraphNode(SiarnaqPosition)
+  openspace.addSceneGraphNode(TarqeqPosition)
+  openspace.addSceneGraphNode(S2004S29Position)
+  openspace.addSceneGraphNode(S2004S31Position)
+  openspace.addSceneGraphNode(S2019S01Position)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2019S01Position)
+  openspace.removeSceneGraphNode(S2004S31Position)
+  openspace.removeSceneGraphNode(S2004S29Position)
+  openspace.removeSceneGraphNode(TarqeqPosition)
+  openspace.removeSceneGraphNode(SiarnaqPosition)
+  openspace.removeSceneGraphNode(PaaliaqPosition)
+  openspace.removeSceneGraphNode(IjiraqPosition)
+  openspace.removeSceneGraphNode(KiviuqPosition)
+end)
+
+asset.export(KiviuqPosition)
+asset.export(IjiraqPosition)
+asset.export(PaaliaqPosition)
+asset.export(SiarnaqPosition)
+asset.export(TarqeqPosition)
+asset.export(S2004S29Position)
+asset.export(S2004S31Position)
+asset.export(S2019S01Position)
+
+
+
+asset.meta = {
+  Name = "Saturn Inuit Group Moons Positions",
+  Description = [[Asset containing positions for Saturn's Inuit Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,313 @@
+local transforms = asset.require("scene/solarsystem/planets/saturn/transforms")
+local kernels = asset.require("scene/solarsystem/planets/saturn/kernels")
+local kernels415 = asset.require("scene/solarsystem/planets/saturn/kernels415")
+local kernels454 = asset.require("scene/solarsystem/planets/saturn/kernels454")
+local coreKernels = asset.require("spice/core")
+
+
+
+local AegaeonTrail = {
+  Identifier = "AegaeonTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Aegaeon,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 0.80812,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Aegaeon Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Aegaeon",
+    Focusable = false
+  }
+}
+
+local MethoneTrail = {
+  Identifier = "MethoneTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Methone,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1.00957,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Methone Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Methone",
+    Focusable = false
+  }
+}
+
+local AntheTrail = {
+  Identifier = "AntheTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Anthe,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1.05089,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Anthe Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Anthe",
+    Focusable = false
+  }
+}
+
+local PalleneTrail = {
+  Identifier = "PalleneTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Pallene,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1.370218,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Pallene Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Pallene",
+    Focusable = false
+  }
+}
+
+local TelestoTrail = {
+  Identifier = "TelestoTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Telesto,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1.887802,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Telesto Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Telesto",
+    Focusable = false
+  }
+}
+
+local CalypsoTrail = {
+  Identifier = "CalypsoTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Calypso,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1.887802,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Calypso Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Calypso",
+    Focusable = false
+  }
+}
+
+local HeleneTrail = {
+  Identifier = "HeleneTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Helene,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 2.736915,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Helene Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Helene",
+    Focusable = false
+  }
+}
+
+local PolydeucesTrail = {
+  Identifier = "PolydeucesTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Polydeuces,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 2.736915,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Polydeuces Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Polydeuces",
+    Focusable = false
+  }
+}
+
+local S2004S24Trail = {
+  Identifier = "S2004S24Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2004S24,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1293.85,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 24 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/S2004S24",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(AegaeonTrail)
+  openspace.addSceneGraphNode(MethoneTrail)
+  openspace.addSceneGraphNode(AntheTrail)
+  openspace.addSceneGraphNode(PalleneTrail)
+  openspace.addSceneGraphNode(TelestoTrail)
+  openspace.addSceneGraphNode(CalypsoTrail)
+  openspace.addSceneGraphNode(HeleneTrail)
+  openspace.addSceneGraphNode(PolydeucesTrail)
+  openspace.addSceneGraphNode(S2004S24Trail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(AegaeonTrail)
+  openspace.removeSceneGraphNode(MethoneTrail)
+  openspace.removeSceneGraphNode(AntheTrail)
+  openspace.removeSceneGraphNode(PalleneTrail)
+  openspace.removeSceneGraphNode(TelestoTrail)
+  openspace.removeSceneGraphNode(CalypsoTrail)
+  openspace.removeSceneGraphNode(HeleneTrail)
+  openspace.removeSceneGraphNode(PolydeucesTrail)
+  openspace.removeSceneGraphNode(S2004S24Trail)
+end)
+
+asset.export(AegaeonTrail)
+asset.export(MethoneTrail)
+asset.export(AntheTrail)
+asset.export(PalleneTrail)
+asset.export(TelestoTrail)
+asset.export(CalypsoTrail)
+asset.export(HeleneTrail)
+asset.export(PolydeucesTrail)
+asset.export(S2004S24Trail)
+
+
+
+asset.meta = {
+  Name = "Saturn Other Group Moons Trails",
+  Description = [[Asset containing trails for Saturn's Other Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

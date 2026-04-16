@@ -1,0 +1,117 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Albiorix = {
+  Identifier = "Albiorix",
+  Parent = transforms.AlbiorixPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 32000, 32000, 32000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_gallic",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Albiorix",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Albiorix"
+  }
+}
+
+local Bebhionn = {
+  Identifier = "Bebhionn",
+  Parent = transforms.BebhionnPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_gallic",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Bebhionn",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Bebhionn"
+  }
+}
+
+local Erriapus = {
+  Identifier = "Erriapus",
+  Parent = transforms.ErriapusPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 10000, 10000, 10000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_gallic",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Erriapus",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Erriapus"
+  }
+}
+
+local Tarvos = {
+  Identifier = "Tarvos",
+  Parent = transforms.TarvosPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 15000, 15000, 15000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_gallic",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Tarvos",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Tarvos"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Albiorix)
+  openspace.addSceneGraphNode(Bebhionn)
+  openspace.addSceneGraphNode(Erriapus)
+  openspace.addSceneGraphNode(Tarvos)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Tarvos)
+  openspace.removeSceneGraphNode(Erriapus)
+  openspace.removeSceneGraphNode(Bebhionn)
+  openspace.removeSceneGraphNode(Albiorix)
+end)
+
+asset.export(Albiorix)
+asset.export(Bebhionn)
+asset.export(Erriapus)
+asset.export(Tarvos)
+
+
+
+asset.meta = {
+  Name = "Saturn Gallic Group Moons Globes",
+  Description = [[Asset containing globes for Saturn's Gallic Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

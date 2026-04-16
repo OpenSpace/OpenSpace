@@ -1,0 +1,1533 @@
+local transforms = asset.require("./transforms")
+
+
+
+local S2019S2 = {
+  Identifier = "S2019S2",
+  Parent = transforms.S2019S2Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 2",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S2"
+  }
+}
+
+local S2019S3 = {
+  Identifier = "S2019S3",
+  Parent = transforms.S2019S3Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 3",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S3"
+  }
+}
+
+local S2020S1 = {
+  Identifier = "S2020S1",
+  Parent = transforms.S2020S1Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2020 S 1",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2020S1"
+  }
+}
+
+local S2020S2 = {
+  Identifier = "S2020S2",
+  Parent = transforms.S2020S2Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2020 S 2",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S2"
+  }
+}
+
+local S2004S40 = {
+  Identifier = "S2004S40",
+  Parent = transforms.S2004S40Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 40",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S40"
+  }
+}
+
+local S2006S9 = {
+  Identifier = "S2006S9",
+  Parent = transforms.S2006S9Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 9",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S9"
+  }
+}
+
+local S2007S5 = {
+  Identifier = "S2007S5",
+  Parent = transforms.S2007S5Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2007 S 5",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S5"
+  }
+}
+
+local S2020S3 = {
+  Identifier = "S2020S3",
+  Parent = transforms.S2020S3Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2020 S 3",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2020S3"
+  }
+}
+
+local S2019S4 = {
+  Identifier = "S2019S4",
+  Parent = transforms.S2019S4Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 4",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S4"
+  }
+}
+
+local S2004S41 = {
+  Identifier = "S2004S41",
+  Parent = transforms.S2004S41Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 41",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S41"
+  }
+}
+
+local S2020S4 = {
+  Identifier = "S2020S4",
+  Parent = transforms.S2020S4Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2020 S 4",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2020S4"
+  }
+}
+
+local S2020S5 = {
+  Identifier = "S2020S5",
+  Parent = transforms.S2020S5Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2020 S 5",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2020S5"
+  }
+}
+
+local S2007S6 = {
+  Identifier = "S2007S6",
+  Parent = transforms.S2007S6Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2007 S 6",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S6"
+  }
+}
+
+local S2004S42 = {
+  Identifier = "S2004S42",
+  Parent = transforms.S2004S42Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 42",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S42"
+  }
+}
+
+local S2006S10 = {
+  Identifier = "S2006S10",
+  Parent = transforms.S2006S10Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 10",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S10"
+  }
+}
+
+local S2019S5 = {
+  Identifier = "S2019S5",
+  Parent = transforms.S2019S5Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 5",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S5"
+  }
+}
+
+local S2004S43 = {
+  Identifier = "S2004S43",
+  Parent = transforms.S2004S43Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 43",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S43"
+  }
+}
+
+local S2004S44 = {
+  Identifier = "S2004S44",
+  Parent = transforms.S2004S44Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.5, 2.5, 2.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 44",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S44"
+  }
+}
+
+local S2004S45 = {
+  Identifier = "S2004S45",
+  Parent = transforms.S2004S45Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 45",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2004S45"
+  }
+}
+
+local S2006S11 = {
+  Identifier = "S2006S11",
+  Parent = transforms.S2006S11Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 11",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S11"
+  }
+}
+
+local S2006S12 = {
+  Identifier = "S2006S12",
+  Parent = transforms.S2006S12Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 12",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2006S12"
+  }
+}
+
+local S2019S6 = {
+  Identifier = "S2019S6",
+  Parent = transforms.S2019S6Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.5, 2.5, 2.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 6",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2019S6"
+  }
+}
+
+local S2006S13 = {
+  Identifier = "S2006S13",
+  Parent = transforms.S2006S13Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 13",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S13"
+  }
+}
+
+local S2019S7 = {
+  Identifier = "S2019S7",
+  Parent = transforms.S2019S7Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 7",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S7"
+  }
+}
+
+local S2019S8 = {
+  Identifier = "S2019S8",
+  Parent = transforms.S2019S8Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 8",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S8"
+  }
+}
+
+local S2019S9 = {
+  Identifier = "S2019S9",
+  Parent = transforms.S2019S9Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 9",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S9"
+  }
+}
+
+local S2004S46 = {
+  Identifier = "S2004S46",
+  Parent = transforms.S2004S46Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 46",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2004S46"
+  }
+}
+
+local S2019S10 = {
+  Identifier = "S2019S10",
+  Parent = transforms.S2019S10Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 10",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S10"
+  }
+}
+
+local S2004S47 = {
+  Identifier = "S2004S47",
+  Parent = transforms.S2004S47Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 47",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S47"
+  }
+}
+
+local S2019S11 = {
+  Identifier = "S2019S11",
+  Parent = transforms.S2019S11Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 11",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2019S11"
+  }
+}
+
+local S2006S14 = {
+  Identifier = "S2006S14",
+  Parent = transforms.S2006S14Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 14",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S14"
+  }
+}
+
+local S2019S12 = {
+  Identifier = "S2019S12",
+  Parent = transforms.S2019S12Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 12",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S12"
+  }
+}
+
+local S2020S6 = {
+  Identifier = "S2020S6",
+  Parent = transforms.S2020S6Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2020 S 6",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S6"
+  }
+}
+
+local S2019S13 = {
+  Identifier = "S2019S13",
+  Parent = transforms.S2019S13Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 13",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S13"
+  }
+}
+
+local S2005S4 = {
+  Identifier = "S2005S4",
+  Parent = transforms.S2005S4Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.5, 2.5, 2.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2005 S 4",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2005S4"
+  }
+}
+
+local S2007S7 = {
+  Identifier = "S2007S7",
+  Parent = transforms.S2007S7Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2007 S 7",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S7"
+  }
+}
+
+local S2007S8 = {
+  Identifier = "S2007S8",
+  Parent = transforms.S2007S8Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2007 S 8",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2007S8"
+  }
+}
+
+local S2020S7 = {
+  Identifier = "S2020S7",
+  Parent = transforms.S2020S7Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2020 S 7",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S7"
+  }
+}
+
+local S2019S14 = {
+  Identifier = "S2019S14",
+  Parent = transforms.S2019S14Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 14",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2019S14"
+  }
+}
+
+local S2019S15 = {
+  Identifier = "S2019S15",
+  Parent = transforms.S2019S15Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 15",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S15"
+  }
+}
+
+local S2005S5 = {
+  Identifier = "S2005S5",
+  Parent = transforms.S2005S5Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2005 S 5",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2005S5"
+  }
+}
+
+local S2006S15 = {
+  Identifier = "S2006S15",
+  Parent = transforms.S2006S15Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 15",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S15"
+  }
+}
+
+local S2006S16 = {
+  Identifier = "S2006S16",
+  Parent = transforms.S2006S16Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 16",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S16"
+  }
+}
+
+local S2006S17 = {
+  Identifier = "S2006S17",
+  Parent = transforms.S2006S17Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 17",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S17"
+  }
+}
+
+local S2004S48 = {
+  Identifier = "S2004S48",
+  Parent = transforms.S2004S48Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 48",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S48"
+  }
+}
+
+local S2020S8 = {
+  Identifier = "S2020S8",
+  Parent = transforms.S2020S8Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2020 S 8",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S8"
+  }
+}
+
+local S2004S49 = {
+  Identifier = "S2004S49",
+  Parent = transforms.S2004S49Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 49",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S49"
+  }
+}
+
+local S2004S50 = {
+  Identifier = "S2004S50",
+  Parent = transforms.S2004S50Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 50",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S50"
+  }
+}
+
+local S2006S18 = {
+  Identifier = "S2006S18",
+  Parent = transforms.S2006S18Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 18",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S18"
+  }
+}
+
+local S2019S16 = {
+  Identifier = "S2019S16",
+  Parent = transforms.S2019S16Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 16",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S16"
+  }
+}
+
+local S2019S17 = {
+  Identifier = "S2019S17",
+  Parent = transforms.S2019S17Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 17",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S17"
+  }
+}
+
+local S2019S18 = {
+  Identifier = "S2019S18",
+  Parent = transforms.S2019S18Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 18",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S18"
+  }
+}
+
+local S2019S19 = {
+  Identifier = "S2019S19",
+  Parent = transforms.S2019S19Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 19",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S19"
+  }
+}
+
+local S2019S20 = {
+  Identifier = "S2019S20",
+  Parent = transforms.S2019S20Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 20",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S20"
+  }
+}
+
+local S2006S19 = {
+  Identifier = "S2006S19",
+  Parent = transforms.S2006S19Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 19",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S19"
+  }
+}
+
+local S2004S51 = {
+  Identifier = "S2004S51",
+  Parent = transforms.S2004S51Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 51",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S51"
+  }
+}
+
+local S2020S9 = {
+  Identifier = "S2020S9",
+  Parent = transforms.S2020S9Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2020 S 9",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S9"
+  }
+}
+
+local S2004S52 = {
+  Identifier = "S2004S52",
+  Parent = transforms.S2004S52Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 52",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S52"
+  }
+}
+
+local S2007S9 = {
+  Identifier = "S2007S9",
+  Parent = transforms.S2007S9Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2007 S 9",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S9"
+  }
+}
+
+local S2004S53 = {
+  Identifier = "S2004S53",
+  Parent = transforms.S2004S53Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 53",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S53"
+  }
+}
+
+local S2020S10 = {
+  Identifier = "S2020S10",
+  Parent = transforms.S2020S10Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1.5, 1.5, 1.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2020 S 10",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S10"
+  }
+}
+
+local S2019S21 = {
+  Identifier = "S2019S21",
+  Parent = transforms.S2019S21Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.0, 2.0, 2.0 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 21",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S21"
+  }
+}
+
+local S2006S20 = {
+  Identifier = "S2006S20",
+  Parent = transforms.S2006S20Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2.5, 2.5, 2.5 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 20",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S20"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(S2019S2)
+  openspace.addSceneGraphNode(S2019S3)
+  openspace.addSceneGraphNode(S2020S1)
+  openspace.addSceneGraphNode(S2020S2)
+  openspace.addSceneGraphNode(S2004S40)
+  openspace.addSceneGraphNode(S2006S9)
+  openspace.addSceneGraphNode(S2007S5)
+  openspace.addSceneGraphNode(S2020S3)
+  openspace.addSceneGraphNode(S2019S4)
+  openspace.addSceneGraphNode(S2004S41)
+  openspace.addSceneGraphNode(S2020S4)
+  openspace.addSceneGraphNode(S2020S5)
+  openspace.addSceneGraphNode(S2007S6)
+  openspace.addSceneGraphNode(S2004S42)
+  openspace.addSceneGraphNode(S2006S10)
+  openspace.addSceneGraphNode(S2019S5)
+  openspace.addSceneGraphNode(S2004S43)
+  openspace.addSceneGraphNode(S2004S44)
+  openspace.addSceneGraphNode(S2004S45)
+  openspace.addSceneGraphNode(S2006S11)
+  openspace.addSceneGraphNode(S2006S12)
+  openspace.addSceneGraphNode(S2019S6)
+  openspace.addSceneGraphNode(S2006S13)
+  openspace.addSceneGraphNode(S2019S7)
+  openspace.addSceneGraphNode(S2019S8)
+  openspace.addSceneGraphNode(S2019S9)
+  openspace.addSceneGraphNode(S2004S46)
+  openspace.addSceneGraphNode(S2019S10)
+  openspace.addSceneGraphNode(S2004S47)
+  openspace.addSceneGraphNode(S2019S11)
+  openspace.addSceneGraphNode(S2006S14)
+  openspace.addSceneGraphNode(S2019S12)
+  openspace.addSceneGraphNode(S2020S6)
+  openspace.addSceneGraphNode(S2019S13)
+  openspace.addSceneGraphNode(S2005S4)
+  openspace.addSceneGraphNode(S2007S7)
+  openspace.addSceneGraphNode(S2007S8)
+  openspace.addSceneGraphNode(S2020S7)
+  openspace.addSceneGraphNode(S2019S14)
+  openspace.addSceneGraphNode(S2019S15)
+  openspace.addSceneGraphNode(S2005S5)
+  openspace.addSceneGraphNode(S2006S15)
+  openspace.addSceneGraphNode(S2006S16)
+  openspace.addSceneGraphNode(S2006S17)
+  openspace.addSceneGraphNode(S2004S48)
+  openspace.addSceneGraphNode(S2020S8)
+  openspace.addSceneGraphNode(S2004S49)
+  openspace.addSceneGraphNode(S2004S50)
+  openspace.addSceneGraphNode(S2006S18)
+  openspace.addSceneGraphNode(S2019S16)
+  openspace.addSceneGraphNode(S2019S17)
+  openspace.addSceneGraphNode(S2019S18)
+  openspace.addSceneGraphNode(S2019S19)
+  openspace.addSceneGraphNode(S2019S20)
+  openspace.addSceneGraphNode(S2006S19)
+  openspace.addSceneGraphNode(S2004S51)
+  openspace.addSceneGraphNode(S2020S9)
+  openspace.addSceneGraphNode(S2004S52)
+  openspace.addSceneGraphNode(S2007S9)
+  openspace.addSceneGraphNode(S2004S53)
+  openspace.addSceneGraphNode(S2020S10)
+  openspace.addSceneGraphNode(S2019S21)
+  openspace.addSceneGraphNode(S2006S20)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2006S20)
+  openspace.removeSceneGraphNode(S2019S21)
+  openspace.removeSceneGraphNode(S2020S10)
+  openspace.removeSceneGraphNode(S2004S53)
+  openspace.removeSceneGraphNode(S2007S9)
+  openspace.removeSceneGraphNode(S2004S52)
+  openspace.removeSceneGraphNode(S2020S9)
+  openspace.removeSceneGraphNode(S2004S51)
+  openspace.removeSceneGraphNode(S2006S19)
+  openspace.removeSceneGraphNode(S2019S20)
+  openspace.removeSceneGraphNode(S2019S19)
+  openspace.removeSceneGraphNode(S2019S18)
+  openspace.removeSceneGraphNode(S2019S17)
+  openspace.removeSceneGraphNode(S2019S16)
+  openspace.removeSceneGraphNode(S2006S18)
+  openspace.removeSceneGraphNode(S2004S50)
+  openspace.removeSceneGraphNode(S2004S49)
+  openspace.removeSceneGraphNode(S2020S8)
+  openspace.removeSceneGraphNode(S2004S48)
+  openspace.removeSceneGraphNode(S2006S17)
+  openspace.removeSceneGraphNode(S2006S16)
+  openspace.removeSceneGraphNode(S2006S15)
+  openspace.removeSceneGraphNode(S2005S5)
+  openspace.removeSceneGraphNode(S2019S15)
+  openspace.removeSceneGraphNode(S2019S14)
+  openspace.removeSceneGraphNode(S2020S7)
+  openspace.removeSceneGraphNode(S2007S8)
+  openspace.removeSceneGraphNode(S2007S7)
+  openspace.removeSceneGraphNode(S2005S4)
+  openspace.removeSceneGraphNode(S2019S13)
+  openspace.removeSceneGraphNode(S2020S6)
+  openspace.removeSceneGraphNode(S2019S12)
+  openspace.removeSceneGraphNode(S2006S14)
+  openspace.removeSceneGraphNode(S2019S11)
+  openspace.removeSceneGraphNode(S2004S47)
+  openspace.removeSceneGraphNode(S2019S10)
+  openspace.removeSceneGraphNode(S2004S46)
+  openspace.removeSceneGraphNode(S2019S9)
+  openspace.removeSceneGraphNode(S2019S8)
+  openspace.removeSceneGraphNode(S2019S7)
+  openspace.removeSceneGraphNode(S2006S13)
+  openspace.removeSceneGraphNode(S2019S6)
+  openspace.removeSceneGraphNode(S2006S12)
+  openspace.removeSceneGraphNode(S2006S11)
+  openspace.removeSceneGraphNode(S2004S45)
+  openspace.removeSceneGraphNode(S2004S44)
+  openspace.removeSceneGraphNode(S2004S43)
+  openspace.removeSceneGraphNode(S2019S5)
+  openspace.removeSceneGraphNode(S2006S10)
+  openspace.removeSceneGraphNode(S2004S42)
+  openspace.removeSceneGraphNode(S2007S6)
+  openspace.removeSceneGraphNode(S2020S5)
+  openspace.removeSceneGraphNode(S2020S4)
+  openspace.removeSceneGraphNode(S2004S41)
+  openspace.removeSceneGraphNode(S2019S4)
+  openspace.removeSceneGraphNode(S2020S3)
+  openspace.removeSceneGraphNode(S2007S5)
+  openspace.removeSceneGraphNode(S2006S9)
+  openspace.removeSceneGraphNode(S2004S40)
+  openspace.removeSceneGraphNode(S2020S2)
+  openspace.removeSceneGraphNode(S2020S1)
+  openspace.removeSceneGraphNode(S2019S3)
+  openspace.removeSceneGraphNode(S2019S2)
+end)
+
+asset.export(S2019S2)
+asset.export(S2019S3)
+asset.export(S2020S1)
+asset.export(S2020S2)
+asset.export(S2004S40)
+asset.export(S2006S9)
+asset.export(S2007S5)
+asset.export(S2020S3)
+asset.export(S2019S4)
+asset.export(S2004S41)
+asset.export(S2020S4)
+asset.export(S2020S5)
+asset.export(S2007S6)
+asset.export(S2004S42)
+asset.export(S2006S10)
+asset.export(S2019S5)
+asset.export(S2004S43)
+asset.export(S2004S44)
+asset.export(S2004S45)
+asset.export(S2006S11)
+asset.export(S2006S12)
+asset.export(S2019S6)
+asset.export(S2006S13)
+asset.export(S2019S7)
+asset.export(S2019S8)
+asset.export(S2019S9)
+asset.export(S2004S46)
+asset.export(S2019S10)
+asset.export(S2004S47)
+asset.export(S2019S11)
+asset.export(S2006S14)
+asset.export(S2019S12)
+asset.export(S2020S6)
+asset.export(S2019S13)
+asset.export(S2005S4)
+asset.export(S2007S7)
+asset.export(S2007S8)
+asset.export(S2020S7)
+asset.export(S2019S14)
+asset.export(S2019S15)
+asset.export(S2005S5)
+asset.export(S2006S15)
+asset.export(S2006S16)
+asset.export(S2006S17)
+asset.export(S2004S48)
+asset.export(S2020S8)
+asset.export(S2004S49)
+asset.export(S2004S50)
+asset.export(S2006S18)
+asset.export(S2019S16)
+asset.export(S2019S17)
+asset.export(S2019S18)
+asset.export(S2019S19)
+asset.export(S2019S20)
+asset.export(S2006S19)
+asset.export(S2004S51)
+asset.export(S2020S9)
+asset.export(S2004S52)
+asset.export(S2007S9)
+asset.export(S2004S53)
+asset.export(S2020S10)
+asset.export(S2019S21)
+asset.export(S2006S20)
+
+
+
+asset.meta = {
+  Name = "Saturn Moons Globes -- May 2023 Discoveries",
+  Description = [[Asset containing globes for the Saturn's moons discovered in May 2023.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
