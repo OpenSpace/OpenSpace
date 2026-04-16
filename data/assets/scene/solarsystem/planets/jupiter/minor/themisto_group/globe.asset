@@ -1,0 +1,45 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Themisto = {
+  Identifier = "Themisto",
+  Parent = transforms.ThemistoPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 8000, 8000, 8000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_themisto",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Themisto",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Themisto Group/Themisto"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Themisto)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Themisto)
+end)
+
+asset.export(Themisto)
+
+
+
+asset.meta = {
+  Name = "Jupiter Themisto Group Moons Globes",
+  Description = [[Asset containing the globes for Jupiter's Themisto Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

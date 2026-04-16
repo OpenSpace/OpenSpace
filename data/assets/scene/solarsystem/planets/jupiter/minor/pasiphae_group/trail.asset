@@ -1,0 +1,759 @@
+local transforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
+local kernels347 = asset.require("scene/solarsystem/planets/jupiter/kernels347")
+local coreKernels = asset.require("spice/core")
+
+
+
+local EuporieTrail = {
+  Identifier = "EuporieTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Euporie,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 538.78,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Euporie Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Euporie",
+    Focusable = false
+  }
+}
+
+local S2003J18Trail = {
+  Identifier = "S2003J18Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2003J18,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 587.38,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 18 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J18",
+    Focusable = false
+  }
+}
+
+local HelikeTrail = {
+  Identifier = "HelikeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Helike,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 601.40,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Helike Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Helike",
+    Focusable = false
+  }
+}
+
+local OrthosieTrail = {
+  Identifier = "OrthosieTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Orthosie,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 602.62,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Orthosie Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Orthosie",
+    Focusable = false
+  }
+}
+
+local S2016J1Trail = {
+  Identifier = "S2016J1Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2016J1,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 603.83,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2016 J 1 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J1",
+    Focusable = false
+  }
+}
+
+local S2003J15Trail = {
+  Identifier = "S2003J15Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2003J15,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 699.68,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 15 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J15",
+    Focusable = false
+  }
+}
+
+local AoedeTrail = {
+  Identifier = "AoedeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Aoede,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 714.66,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Aoede Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Aoede",
+    Focusable = false
+  }
+}
+
+local CallirrhoeTrail = {
+  Identifier = "CallirrhoeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Callirrhoe,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 727.11,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Callirrhoe Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Callirrhoe",
+    Focusable = false
+  }
+}
+
+local EurydomeTrail = {
+  Identifier = "EurydomeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Eurydome,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 723.36,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Eurydome Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Eurydome",
+    Focusable = false
+  }
+}
+
+local KoreTrail = {
+  Identifier = "KoreTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Kore,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 776.02,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Kore Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Kore",
+    Focusable = false
+  }
+}
+
+local CylleneTrail = {
+  Identifier = "CylleneTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Cyllene,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 731.10,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Cyllene Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Cyllene",
+    Focusable = false
+  }
+}
+
+local S2011J2Trail = {
+  Identifier = "S2011J2Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2011J2,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 731.32,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2011 J 2 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2011J2",
+    Focusable = false
+  }
+}
+
+local S2017J1Trail = {
+  Identifier = "S2017J1Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2017J1,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 734.15,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 1 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J1",
+    Focusable = false
+  }
+}
+
+local S2003J4Trail = {
+  Identifier = "S2003J4Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2003J4,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 739.29,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 4 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J4",
+    Focusable = false
+  }
+}
+
+local PasiphaeTrail = {
+  Identifier = "PasiphaeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Pasiphae,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 731.10,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Pasiphae Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Pasiphae",
+    Focusable = false
+  }
+}
+
+local HegemoneTrail = {
+  Identifier = "HegemoneTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Hegemone,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 745.50,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Hegemone Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Hegemone",
+    Focusable = false
+  }
+}
+
+local SinopeTrail = {
+  Identifier = "SinopeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Sinope,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 739.33,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Sinope Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sinope",
+    Focusable = false
+  }
+}
+
+local SpondeTrail = {
+  Identifier = "SpondeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Sponde,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 771.60,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Sponde Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sponde",
+    Focusable = false
+  }
+}
+
+local AutonoeTrail = {
+  Identifier = "AutonoeTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Autonoe,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 772.17,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Autonoe Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Autonoe",
+    Focusable = false
+  }
+}
+
+local MegacliteTrail = {
+  Identifier = "MegacliteTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Megaclite,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 792.44,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Megaclite Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Megaclite",
+    Focusable = false
+  }
+}
+
+local S2016J4Trail = {
+  Identifier = "S2016J4Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2016J4,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 743.69,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2016 J 4 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J4",
+    Focusable = false
+  }
+}
+
+local S2017J6Trail = {
+  Identifier = "S2017J6Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2017J6,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 683.0,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 6 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J6",
+    Focusable = false
+  }
+}
+
+local S2003J23Trail = {
+  Identifier = "S2003J23Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2003J23,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 792.00,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_pasiphae",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 23 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J23",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(EuporieTrail)
+  openspace.addSceneGraphNode(S2003J18Trail)
+  openspace.addSceneGraphNode(HelikeTrail)
+  openspace.addSceneGraphNode(OrthosieTrail)
+  openspace.addSceneGraphNode(S2016J1Trail)
+  openspace.addSceneGraphNode(S2003J15Trail)
+  openspace.addSceneGraphNode(AoedeTrail)
+  openspace.addSceneGraphNode(CallirrhoeTrail)
+  openspace.addSceneGraphNode(EurydomeTrail)
+  openspace.addSceneGraphNode(KoreTrail)
+  openspace.addSceneGraphNode(CylleneTrail)
+  openspace.addSceneGraphNode(S2011J2Trail)
+  openspace.addSceneGraphNode(S2017J1Trail)
+  openspace.addSceneGraphNode(S2003J4Trail)
+  openspace.addSceneGraphNode(PasiphaeTrail)
+  openspace.addSceneGraphNode(HegemoneTrail)
+  openspace.addSceneGraphNode(SinopeTrail)
+  openspace.addSceneGraphNode(SpondeTrail)
+  openspace.addSceneGraphNode(AutonoeTrail)
+  openspace.addSceneGraphNode(MegacliteTrail)
+  openspace.addSceneGraphNode(S2016J4Trail)
+  openspace.addSceneGraphNode(S2017J6Trail)
+  openspace.addSceneGraphNode(S2003J23Trail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2003J23Trail)
+  openspace.removeSceneGraphNode(S2017J6Trail)
+  openspace.removeSceneGraphNode(S2016J4Trail)
+  openspace.removeSceneGraphNode(MegacliteTrail)
+  openspace.removeSceneGraphNode(AutonoeTrail)
+  openspace.removeSceneGraphNode(SpondeTrail)
+  openspace.removeSceneGraphNode(SinopeTrail)
+  openspace.removeSceneGraphNode(HegemoneTrail)
+  openspace.removeSceneGraphNode(PasiphaeTrail)
+  openspace.removeSceneGraphNode(S2003J4Trail)
+  openspace.removeSceneGraphNode(S2017J1Trail)
+  openspace.removeSceneGraphNode(S2011J2Trail)
+  openspace.removeSceneGraphNode(CylleneTrail)
+  openspace.removeSceneGraphNode(KoreTrail)
+  openspace.removeSceneGraphNode(EurydomeTrail)
+  openspace.removeSceneGraphNode(CallirrhoeTrail)
+  openspace.removeSceneGraphNode(AoedeTrail)
+  openspace.removeSceneGraphNode(S2003J15Trail)
+  openspace.removeSceneGraphNode(S2016J1Trail)
+  openspace.removeSceneGraphNode(OrthosieTrail)
+  openspace.removeSceneGraphNode(HelikeTrail)
+  openspace.removeSceneGraphNode(S2003J18Trail)
+  openspace.removeSceneGraphNode(EuporieTrail)
+end)
+
+asset.export(EuporieTrail)
+asset.export(S2003J18Trail)
+asset.export(HelikeTrail)
+asset.export(OrthosieTrail)
+asset.export(S2016J1Trail)
+asset.export(S2003J15Trail)
+asset.export(AoedeTrail)
+asset.export(CallirrhoeTrail)
+asset.export(EurydomeTrail)
+asset.export(KoreTrail)
+asset.export(CylleneTrail)
+asset.export(S2011J2Trail)
+asset.export(S2017J1Trail)
+asset.export(S2003J4Trail)
+asset.export(PasiphaeTrail)
+asset.export(HegemoneTrail)
+asset.export(SinopeTrail)
+asset.export(SpondeTrail)
+asset.export(AutonoeTrail)
+asset.export(MegacliteTrail)
+asset.export(S2016J4Trail)
+asset.export(S2017J6Trail)
+asset.export(S2003J23Trail)
+
+
+
+asset.meta = {
+  Name = "Jupiter Pasiphae Group Moons Trails",
+  Description = [[Asset containing trails for Jupiter's Pasiphae Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

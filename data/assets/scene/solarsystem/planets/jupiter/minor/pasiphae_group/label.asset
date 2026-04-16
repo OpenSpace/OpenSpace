@@ -1,0 +1,826 @@
+local transforms = asset.require("./transforms")
+
+
+
+local EuporieLabel = {
+  Identifier = "EuporieLabel",
+  Parent = transforms.EuporiePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Euporie",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "Euporie Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Euporie",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Euporie (Pasiphae group)"
+  }
+}
+
+local S2003J18Label = {
+  Identifier = "S2003J18Label",
+  Parent = transforms.S2003J18Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2003 J 18",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "S/2003 J 18 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J18",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2003 J 18 (Pasiphae group)"
+  }
+}
+
+local HelikeLabel = {
+  Identifier = "HelikeLabel",
+  Parent = transforms.HelikePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Helike",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "Helike Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Helike",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Helike (Pasiphae group)"
+  }
+}
+
+local OrthosieLabel = {
+  Identifier = "OrthosieLabel",
+  Parent = transforms.OrthosiePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Orthosie",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "Orthosie Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Orthosie",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Orthosie (Pasiphae group)"
+  }
+}
+
+local S2016J1Label = {
+  Identifier = "S2016J1Label",
+  Parent = transforms.S2016J1Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2016 J 1",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "S/2016 J 1 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J1",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2016 J 1 (Pasiphae group)"
+  }
+}
+
+local S2003J15Label = {
+  Identifier = "S2003J15Label",
+  Parent = transforms.S2003J15Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2003 J 15",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "S/2003 J 15 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J15",
+    Focusable = false,
+    Description = "Label for Jupiter's moon OrthosiS/2003 J 15e (Pasiphae group)"
+  }
+}
+
+local AoedeLabel = {
+  Identifier = "AoedeLabel",
+  Parent = transforms.AoedePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Aoede",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "Aoede Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Aoede",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Aoede (Pasiphae group)"
+  }
+}
+
+local CallirrhoeLabel = {
+  Identifier = "CallirrhoeLabel",
+  Parent = transforms.CallirrhoePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Callirrhoe",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "Callirrhoe Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Callirrhoe",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Callirrhoe (Pasiphae group)"
+  }
+}
+
+local EurydomeLabel = {
+  Identifier = "EurydomeLabel",
+  Parent = transforms.EurydomePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Eurydome",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "Eurydome Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Eurydome",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Eurydome (Pasiphae group)"
+  }
+}
+
+local KoreLabel = {
+  Identifier = "KoreLabel",
+  Parent = transforms.KorePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Kore",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "Kore Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Kore",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Kore (Pasiphae group)"
+  }
+}
+
+local CylleneLabel = {
+  Identifier = "CylleneLabel",
+  Parent = transforms.CyllenePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Cyllene",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "Cyllene Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Cyllene",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Cyllene (Pasiphae group)"
+  }
+}
+
+local S2011J2Label = {
+  Identifier = "S2011J2Label",
+  Parent = transforms.S2011J2Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2011 J 2",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "S/2011 J 2 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2011J2",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2011 J 2 (Pasiphae group)"
+  }
+}
+
+local S2017J1Label = {
+  Identifier = "S2017J1Label",
+  Parent = transforms.S2017J1Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2017 J 1",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "S/2017 J 1 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J1",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2017 J 1 (Pasiphae group)"
+  }
+}
+
+local S2003J4Label = {
+  Identifier = "S2003J4Label",
+  Parent = transforms.S2003J4Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2003 J 4",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "S/2003 J 4 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J4",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2003 J 4 (Pasiphae group)"
+  }
+}
+
+local PasiphaeLabel = {
+  Identifier = "PasiphaeLabel",
+  Parent = transforms.PasiphaePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Pasiphae",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "Pasiphae Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Pasiphae",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Pasiphae (Pasiphae group)"
+  }
+}
+
+local HegemoneLabel = {
+  Identifier = "HegemoneLabel",
+  Parent = transforms.HegemonePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Hegemone",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "Hegemone Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Hegemone",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Hegemone (Pasiphae group)"
+  }
+}
+
+local SinopeLabel = {
+  Identifier = "SinopeLabel",
+  Parent = transforms.SinopePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Sinope",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "Sinope Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sinope",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Sinope (Pasiphae group)"
+  }
+}
+
+local SpondeLabel = {
+  Identifier = "SpondeLabel",
+  Parent = transforms.SpondePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Sponde",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "Sponde Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sponde",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Sponde (Pasiphae group)"
+  }
+}
+
+local AutonoeLabel = {
+  Identifier = "AutonoeLabel",
+  Parent = transforms.AutonoePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Autonoe",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "Autonoe Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Autonoe",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Autonoe (Pasiphae group)"
+  }
+}
+
+local MegacliteLabel = {
+  Identifier = "MegacliteLabel",
+  Parent = transforms.MegaclitePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Megaclite",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "Megaclite Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Megaclite",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Megaclite (Pasiphae group)"
+  }
+}
+
+local S2016J4Label = {
+  Identifier = "S2016J4Label",
+  Parent = transforms.S2016J4Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2016 J 4",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "S/2016 J 4 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J4",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2016 J 4 (Pasiphae group)"
+  }
+}
+
+local S2017J6Label = {
+  Identifier = "S2017J6Label",
+  Parent = transforms.S2017J6Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2017 J 6",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "S/2017 J 6 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J6",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2017 J 6 (Pasiphae group)"
+  }
+}
+
+local S2003J23Label = {
+  Identifier = "S2003J23Label",
+  Parent = transforms.S2003J23Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2003 J 23",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 140.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
+  GUI = {
+    Name = "S/2003 J 23 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J23",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2003 J 23 (Pasiphae group)"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(EuporieLabel)
+  openspace.addSceneGraphNode(S2003J18Label)
+  openspace.addSceneGraphNode(HelikeLabel)
+  openspace.addSceneGraphNode(OrthosieLabel)
+  openspace.addSceneGraphNode(S2016J1Label)
+  openspace.addSceneGraphNode(S2003J15Label)
+  openspace.addSceneGraphNode(AoedeLabel)
+  openspace.addSceneGraphNode(CallirrhoeLabel)
+  openspace.addSceneGraphNode(EurydomeLabel)
+  openspace.addSceneGraphNode(KoreLabel)
+  openspace.addSceneGraphNode(CylleneLabel)
+  openspace.addSceneGraphNode(S2011J2Label)
+  openspace.addSceneGraphNode(S2017J1Label)
+  openspace.addSceneGraphNode(S2003J4Label)
+  openspace.addSceneGraphNode(PasiphaeLabel)
+  openspace.addSceneGraphNode(HegemoneLabel)
+  openspace.addSceneGraphNode(SinopeLabel)
+  openspace.addSceneGraphNode(SpondeLabel)
+  openspace.addSceneGraphNode(AutonoeLabel)
+  openspace.addSceneGraphNode(MegacliteLabel)
+  openspace.addSceneGraphNode(S2016J4Label)
+  openspace.addSceneGraphNode(S2017J6Label)
+  openspace.addSceneGraphNode(S2003J23Label)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2003J23Label)
+  openspace.removeSceneGraphNode(S2017J6Label)
+  openspace.removeSceneGraphNode(S2016J4Label)
+  openspace.removeSceneGraphNode(MegacliteLabel)
+  openspace.removeSceneGraphNode(AutonoeLabel)
+  openspace.removeSceneGraphNode(SpondeLabel)
+  openspace.removeSceneGraphNode(SinopeLabel)
+  openspace.removeSceneGraphNode(HegemoneLabel)
+  openspace.removeSceneGraphNode(PasiphaeLabel)
+  openspace.removeSceneGraphNode(S2003J4Label)
+  openspace.removeSceneGraphNode(S2017J1Label)
+  openspace.removeSceneGraphNode(S2011J2Label)
+  openspace.removeSceneGraphNode(CylleneLabel)
+  openspace.removeSceneGraphNode(KoreLabel)
+  openspace.removeSceneGraphNode(EurydomeLabel)
+  openspace.removeSceneGraphNode(CallirrhoeLabel)
+  openspace.removeSceneGraphNode(AoedeLabel)
+  openspace.removeSceneGraphNode(S2003J15Label)
+  openspace.removeSceneGraphNode(S2016J1Label)
+  openspace.removeSceneGraphNode(OrthosieLabel)
+  openspace.removeSceneGraphNode(HelikeLabel)
+  openspace.removeSceneGraphNode(S2003J18Label)
+  openspace.removeSceneGraphNode(EuporieLabel)
+end)
+
+asset.export(EuporieLabel)
+asset.export(S2003J18Label)
+asset.export(HelikeLabel)
+asset.export(OrthosieLabel)
+asset.export(S2016J1Label)
+asset.export(S2003J15Label)
+asset.export(AoedeLabel)
+asset.export(CallirrhoeLabel)
+asset.export(EurydomeLabel)
+asset.export(KoreLabel)
+asset.export(CylleneLabel)
+asset.export(S2011J2Label)
+asset.export(S2017J1Label)
+asset.export(S2003J4Label)
+asset.export(PasiphaeLabel)
+asset.export(HegemoneLabel)
+asset.export(SinopeLabel)
+asset.export(SpondeLabel)
+asset.export(AutonoeLabel)
+asset.export(MegacliteLabel)
+asset.export(S2016J4Label)
+asset.export(S2017J6Label)
+asset.export(S2003J23Label)
+
+
+
+asset.meta = {
+  Name = "Jupiter Pasiphae Group Moons Labels",
+  Description = [[Asset containing labels for Jupiter's Pasiphae Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

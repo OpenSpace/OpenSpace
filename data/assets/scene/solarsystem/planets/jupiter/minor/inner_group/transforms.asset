@@ -1,0 +1,109 @@
+local transforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
+local kernels347 = asset.require("scene/solarsystem/planets/jupiter/kernels347")
+local coreKernels = asset.require("spice/core")
+
+
+
+local MetisPosition = {
+  Identifier = "MetisPosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Metis,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Metis Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Metis",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local AdrasteaPosition = {
+  Identifier = "AdrasteaPosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Adrastea,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Adrastea Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Adrastea",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local AmaltheaPosition = {
+  Identifier = "AmaltheaPosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Amalthea,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Amalthea Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Amalthea",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local ThebePosition = {
+  Identifier = "ThebePosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Thebe,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Thebe Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Thebe",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MetisPosition)
+  openspace.addSceneGraphNode(AdrasteaPosition)
+  openspace.addSceneGraphNode(AmaltheaPosition)
+  openspace.addSceneGraphNode(ThebePosition)
+end)
+
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MetisPosition)
+  openspace.removeSceneGraphNode(AdrasteaPosition)
+  openspace.removeSceneGraphNode(AmaltheaPosition)
+  openspace.removeSceneGraphNode(ThebePosition)
+end)
+
+
+asset.export(MetisPosition)
+asset.export(AdrasteaPosition)
+asset.export(AmaltheaPosition)
+asset.export(ThebePosition)
+
+
+
+asset.meta = {
+  Name = "Jupiter Inner Group Moons Positions",
+  Description = [[Asset containing positions for Jupiter's Inner Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

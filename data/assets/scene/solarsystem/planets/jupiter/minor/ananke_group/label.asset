@@ -1,0 +1,755 @@
+local transforms = asset.require("./transforms")
+
+
+
+local S2010J2Label = {
+  Identifier = "S2010J2Label",
+  Parent = transforms.S2010J2Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2010 J 2",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "S/2010 J 2 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2010J2",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2010 J 2 (Ananke group)"
+  }
+}
+
+local ThelxinoeLabel = {
+  Identifier = "ThelxinoeLabel",
+  Parent = transforms.ThelxinoePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Thelxinoe",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "Thelxinoe Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thelxinoe",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Thelxinoe (Ananke group)"
+  }
+}
+
+local EuantheLabel = {
+  Identifier = "EuantheLabel",
+  Parent = transforms.EuanthePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Euanthe",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "Euanthe Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Euanthe",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Euanthe (Ananke group)"
+  }
+}
+
+local IocasteLabel = {
+  Identifier = "IocasteLabel",
+  Parent = transforms.IocastePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Iocaste",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "Iocaste Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Iocaste",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Iocaste (Ananke group)"
+  }
+}
+
+local S2003J16Label = {
+  Identifier = "S2003J16Label",
+  Parent = transforms.S2003J16Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2003 J 16",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "S/2003 J 16 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J16",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2003 J 16 (Ananke group)"
+  }
+}
+
+local PraxidikeLabel = {
+  Identifier = "PraxidikeLabel",
+  Parent = transforms.PraxidikePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Praxidike",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "Praxidike Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Praxidike",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Praxidike (Ananke group)"
+  }
+}
+
+local HarpalykeLabel = {
+  Identifier = "HarpalykeLabel",
+  Parent = transforms.HarpalykePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Harpalyke",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "Harpalyke Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Harpalyke",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Harpalyke (Ananke group)"
+  }
+}
+
+local MnemeLabel = {
+  Identifier = "MnemeLabel",
+  Parent = transforms.MnemePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Mneme",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "Mneme Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Mneme",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Mneme (Ananke group)"
+  }
+}
+
+local HermippeLabel = {
+  Identifier = "HermippeLabel",
+  Parent = transforms.HermippePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Hermippe",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "Hermippe Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Hermippe",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Hermippe (Ananke group)"
+  }
+}
+
+local ThyoneLabel = {
+  Identifier = "ThyoneLabel",
+  Parent = transforms.ThyonePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Thyone",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "Thyone Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thyone",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Thyone (Ananke group)"
+  }
+}
+
+local AnankeLabel = {
+  Identifier = "AnankeLabel",
+  Parent = transforms.AnankePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Ananke",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "Ananke Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Ananke",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Ananke (Ananke group)"
+  }
+}
+
+local S2021J1Label = {
+  Identifier = "S2021J1Label",
+  Parent = transforms.S2021J1Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2021 J 1",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "S/2021 J 1 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J1",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2021 J 1 (Ananke group)"
+  }
+}
+
+local S2021J2Label = {
+  Identifier = "S2021J2Label",
+  Parent = transforms.S2021J2Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2021 J 2",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "S/2021 J 2 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J2",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2021 J 2 (Ananke group)"
+  }
+}
+
+local S2021J3Label = {
+  Identifier = "S2021J3Label",
+  Parent = transforms.S2021J3Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2021 J 3",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "S/2021 J 3 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J3",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2021 J 3 (Ananke group)"
+  }
+}
+
+local S2022J3Label = {
+  Identifier = "S2022J3Label",
+  Parent = transforms.S2022J3Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2022 J 3",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "S/2022 J 3 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2022J3",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2022 J 3 (Ananke group)"
+  }
+}
+
+local S2017J3Label = {
+  Identifier = "S2017J3Label",
+  Parent = transforms.S2017J3Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2017 J 3",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "S/2017 J 3 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J3",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2017 J 3 (Ananke group)"
+  }
+}
+
+local S2017J7Label = {
+  Identifier = "S2017J7Label",
+  Parent = transforms.S2017J7Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2017 J 7",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "S/2017 J 7 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J7",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2017 J 7 (Ananke group)"
+  }
+}
+
+local S2017J9Label = {
+  Identifier = "S2017J9Label",
+  Parent = transforms.S2017J9Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2017 J 9",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "S/2017 J 9 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J9",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2017 J 9 (Ananke group)"
+  }
+}
+
+local S2003J2Label = {
+  Identifier = "S2003J2Label",
+  Parent = transforms.S2003J2Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2003 J 2",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "S/2003 J 2 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J2",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2003 J 2 (Ananke group)"
+  }
+}
+
+local S2003J12Label = {
+  Identifier = "S2003J12Label",
+  Parent = transforms.S2003J12Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2003 J 12",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "S/2003 J 12 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J12",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2003 J 12 (Ananke group)"
+  }
+}
+
+local S2017J10Label = {
+  Identifier = "S2017J10Label",
+  Parent = transforms.S2017J10Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2017 J 10",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "S/2017 J 10 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J10",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2017 J 10 (Ananke group)"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(S2010J2Label)
+  openspace.addSceneGraphNode(ThelxinoeLabel)
+  openspace.addSceneGraphNode(EuantheLabel)
+  openspace.addSceneGraphNode(IocasteLabel)
+  openspace.addSceneGraphNode(S2003J16Label)
+  openspace.addSceneGraphNode(PraxidikeLabel)
+  openspace.addSceneGraphNode(HarpalykeLabel)
+  openspace.addSceneGraphNode(MnemeLabel)
+  openspace.addSceneGraphNode(HermippeLabel)
+  openspace.addSceneGraphNode(ThyoneLabel)
+  openspace.addSceneGraphNode(AnankeLabel)
+  openspace.addSceneGraphNode(S2021J1Label)
+  openspace.addSceneGraphNode(S2021J2Label)
+  openspace.addSceneGraphNode(S2021J3Label)
+  openspace.addSceneGraphNode(S2022J3Label)
+  openspace.addSceneGraphNode(S2017J3Label)
+  openspace.addSceneGraphNode(S2017J7Label)
+  openspace.addSceneGraphNode(S2017J9Label)
+  openspace.addSceneGraphNode(S2003J2Label)
+  openspace.addSceneGraphNode(S2003J12Label)
+  openspace.addSceneGraphNode(S2017J10Label)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2017J10Label)
+  openspace.removeSceneGraphNode(S2003J12Label)
+  openspace.removeSceneGraphNode(S2003J2Label)
+  openspace.removeSceneGraphNode(S2017J9Label)
+  openspace.removeSceneGraphNode(S2017J7Label)
+  openspace.removeSceneGraphNode(S2017J3Label)
+  openspace.removeSceneGraphNode(S2022J3Label)
+  openspace.removeSceneGraphNode(S2021J3Label)
+  openspace.removeSceneGraphNode(S2021J2Label)
+  openspace.removeSceneGraphNode(S2021J1Label)
+  openspace.removeSceneGraphNode(AnankeLabel)
+  openspace.removeSceneGraphNode(ThyoneLabel)
+  openspace.removeSceneGraphNode(HermippeLabel)
+  openspace.removeSceneGraphNode(MnemeLabel)
+  openspace.removeSceneGraphNode(HarpalykeLabel)
+  openspace.removeSceneGraphNode(PraxidikeLabel)
+  openspace.removeSceneGraphNode(S2003J16Label)
+  openspace.removeSceneGraphNode(IocasteLabel)
+  openspace.removeSceneGraphNode(EuantheLabel)
+  openspace.removeSceneGraphNode(ThelxinoeLabel)
+  openspace.removeSceneGraphNode(S2010J2Label)
+end)
+
+asset.export(S2010J2Label)
+asset.export(ThelxinoeLabel)
+asset.export(EuantheLabel)
+asset.export(IocasteLabel)
+asset.export(S2003J16Label)
+asset.export(PraxidikeLabel)
+asset.export(HarpalykeLabel)
+asset.export(MnemeLabel)
+asset.export(HermippeLabel)
+asset.export(ThyoneLabel)
+asset.export(AnankeLabel)
+asset.export(S2021J1Label)
+asset.export(S2021J2Label)
+asset.export(S2021J3Label)
+asset.export(S2022J3Label)
+asset.export(S2017J3Label)
+asset.export(S2017J7Label)
+asset.export(S2017J9Label)
+asset.export(S2017J10Label)
+asset.export(S2003J2Label)
+asset.export(S2003J12Label)
+
+
+
+asset.meta = {
+  Name = "Jupiter Ananke Group Moons Labels",
+  Description = [[Asset containing labels for Jupiter's Ananke Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

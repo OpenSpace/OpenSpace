@@ -1,0 +1,506 @@
+local transforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
+local kernels347 = asset.require("scene/solarsystem/planets/jupiter/kernels347")
+local coreKernels = asset.require("spice/core")
+
+
+
+local EuporiePosition = {
+  Identifier = "EuporiePosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Euporie,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Euporie Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Euporie",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2003J18Position = {
+  Identifier = "S2003J18Position",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2003J18,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2003 J 18 Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J18",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local HelikePosition = {
+  Identifier = "HelikePosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Helike,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Helike Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Helike",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local OrthosiePosition = {
+  Identifier = "OrthosiePosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Orthosie,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Orthosie Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Orthosie",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2016J1Position = {
+  Identifier = "S2016J1Position",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2016J1,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2016 J 1 Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J1",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2003J15Position = {
+  Identifier = "S2003J15Position",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2003J15,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2003 J 15 Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J15",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local AoedePosition = {
+  Identifier = "AoedePosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Aoede,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Aoede Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Aoede",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local CallirrhoePosition = {
+  Identifier = "CallirrhoePosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Callirrhoe,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Callirrhoe Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Callirrhoe",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local EurydomePosition = {
+  Identifier = "EurydomePosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Eurydome,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Eurydome Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Eurydome",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local KorePosition = {
+  Identifier = "KorePosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Kore,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Kore Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Kore",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local CyllenePosition = {
+  Identifier = "CyllenePosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Cyllene,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Cyllene Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Cyllene",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2011J2Position = {
+  Identifier = "S2011J2Position",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2011J2,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2011 J 2 Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2011J2",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2017J1Position = {
+  Identifier = "S2017J1Position",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2017J1,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2017 J 1 Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J1",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2003J4Position = {
+  Identifier = "S2003J4Position",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2003J4,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2003 J 4 Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J4",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local PasiphaePosition = {
+  Identifier = "PasiphaePosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Pasiphae,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Pasiphae Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Pasiphae",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local HegemonePosition = {
+  Identifier = "HegemonePosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Hegemone,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Hegemone Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Hegemone",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local SinopePosition = {
+  Identifier = "SinopePosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Sinope,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Sinope Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sinope",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local SpondePosition = {
+  Identifier = "SpondePosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Sponde,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Sponde Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sponde",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local AutonoePosition = {
+  Identifier = "AutonoePosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Autonoe,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Autonoe Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Autonoe",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local MegaclitePosition = {
+  Identifier = "MegaclitePosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Megaclite,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Megaclite Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Megaclite",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2016J4Position = {
+  Identifier = "S2016J4Position",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2016J4,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2016 J 4 Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J4",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2017J6Position = {
+  Identifier = "S2017J6Position",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2017J6,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2017 J 6 Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J6",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2003J23Position = {
+  Identifier = "S2003J23Position",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2003J23,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2003 J 23 Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J23",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(EuporiePosition)
+  openspace.addSceneGraphNode(S2003J18Position)
+  openspace.addSceneGraphNode(HelikePosition)
+  openspace.addSceneGraphNode(OrthosiePosition)
+  openspace.addSceneGraphNode(S2016J1Position)
+  openspace.addSceneGraphNode(S2003J15Position)
+  openspace.addSceneGraphNode(AoedePosition)
+  openspace.addSceneGraphNode(CallirrhoePosition)
+  openspace.addSceneGraphNode(EurydomePosition)
+  openspace.addSceneGraphNode(KorePosition)
+  openspace.addSceneGraphNode(CyllenePosition)
+  openspace.addSceneGraphNode(S2011J2Position)
+  openspace.addSceneGraphNode(S2017J1Position)
+  openspace.addSceneGraphNode(S2003J4Position)
+  openspace.addSceneGraphNode(PasiphaePosition)
+  openspace.addSceneGraphNode(HegemonePosition)
+  openspace.addSceneGraphNode(SinopePosition)
+  openspace.addSceneGraphNode(SpondePosition)
+  openspace.addSceneGraphNode(AutonoePosition)
+  openspace.addSceneGraphNode(MegaclitePosition)
+  openspace.addSceneGraphNode(S2016J4Position)
+  openspace.addSceneGraphNode(S2017J6Position)
+  openspace.addSceneGraphNode(S2003J23Position)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2003J23Position)
+  openspace.removeSceneGraphNode(S2017J6Position)
+  openspace.removeSceneGraphNode(S2016J4Position)
+  openspace.removeSceneGraphNode(MegaclitePosition)
+  openspace.removeSceneGraphNode(AutonoePosition)
+  openspace.removeSceneGraphNode(SpondePosition)
+  openspace.removeSceneGraphNode(SinopePosition)
+  openspace.removeSceneGraphNode(HegemonePosition)
+  openspace.removeSceneGraphNode(PasiphaePosition)
+  openspace.removeSceneGraphNode(S2003J4Position)
+  openspace.removeSceneGraphNode(S2017J1Position)
+  openspace.removeSceneGraphNode(S2011J2Position)
+  openspace.removeSceneGraphNode(CyllenePosition)
+  openspace.removeSceneGraphNode(KorePosition)
+  openspace.removeSceneGraphNode(EurydomePosition)
+  openspace.removeSceneGraphNode(CallirrhoePosition)
+  openspace.removeSceneGraphNode(AoedePosition)
+  openspace.removeSceneGraphNode(S2003J15Position)
+  openspace.removeSceneGraphNode(S2016J1Position)
+  openspace.removeSceneGraphNode(OrthosiePosition)
+  openspace.removeSceneGraphNode(HelikePosition)
+  openspace.removeSceneGraphNode(S2003J18Position)
+  openspace.removeSceneGraphNode(EuporiePosition)
+end)
+
+asset.export(EuporiePosition)
+asset.export(S2003J18Position)
+asset.export(HelikePosition)
+asset.export(OrthosiePosition)
+asset.export(S2016J1Position)
+asset.export(S2003J15Position)
+asset.export(AoedePosition)
+asset.export(CallirrhoePosition)
+asset.export(EurydomePosition)
+asset.export(KorePosition)
+asset.export(CyllenePosition)
+asset.export(S2011J2Position)
+asset.export(S2017J1Position)
+asset.export(S2003J4Position)
+asset.export(PasiphaePosition)
+asset.export(HegemonePosition)
+asset.export(SinopePosition)
+asset.export(SpondePosition)
+asset.export(AutonoePosition)
+asset.export(MegaclitePosition)
+asset.export(S2016J4Position)
+asset.export(S2017J6Position)
+asset.export(S2003J23Position)
+
+
+
+asset.meta = {
+  Name = "Jupiter Pasiphae Group Moons Positions",
+  Description = [[Asset containing positions for Jupiter's Pasiphae Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

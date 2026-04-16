@@ -1,0 +1,13 @@
+asset.require("./globe")
+asset.require("./label")
+asset.require("./trail")
+
+
+
+asset.meta = {
+  Name = "Meta asset for the Jupiter Carpo Group Moons",
+  Description = [[Meta asset for the Jupiter Carpo Group Moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

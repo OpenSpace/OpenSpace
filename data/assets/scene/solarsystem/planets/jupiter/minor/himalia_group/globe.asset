@@ -1,0 +1,237 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Leda = {
+  Identifier = "Leda",
+  Parent = transforms.LedaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 16000, 16000, 16000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_himalia",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Leda",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Leda"
+  }
+}
+
+local Himalia = {
+  Identifier = "Himalia",
+  Parent = transforms.HimaliaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 170000, 170000, 170000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_himalia",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Himalia",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Himalia"
+  }
+}
+
+local Lysithea = {
+  Identifier = "Lysithea",
+  Parent = transforms.LysitheaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 36000, 36000, 36000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_himalia",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Lysithea",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Lysithea"
+  }
+}
+
+local Elara = {
+  Identifier = "Elara",
+  Parent = transforms.ElaraPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 86000, 86000, 86000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_himalia",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Elara",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Elara"
+  }
+}
+
+local Dia = {
+  Identifier = "Dia",
+  Parent = transforms.DiaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_himalia",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Dia",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Dia"
+  }
+}
+
+local S2011J3 = {
+  Identifier = "S2011J3",
+  Parent = transforms.S2011J3Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_himalia",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2011 J 3",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/S2011J3"
+  }
+}
+
+local S2018J2 = {
+  Identifier = "S2018J2",
+  Parent = transforms.S2018J2Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_himalia",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2018 J 2",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/S2018J2"
+  }
+}
+
+local Pandia = {
+  Identifier = "Pandia",
+  Parent = transforms.PandiaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_himalia",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Pandia",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Pandia"
+  }
+}
+
+local Ersa = {
+  Identifier = "Ersa",
+  Parent = transforms.ErsaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_himalia",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Ersa",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Ersa"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Leda)
+  openspace.addSceneGraphNode(Himalia)
+  openspace.addSceneGraphNode(Lysithea)
+  openspace.addSceneGraphNode(Elara)
+  openspace.addSceneGraphNode(Dia)
+  openspace.addSceneGraphNode(S2011J3)
+  openspace.addSceneGraphNode(S2018J2)
+  openspace.addSceneGraphNode(Pandia)
+  openspace.addSceneGraphNode(Ersa)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Ersa)
+  openspace.removeSceneGraphNode(Pandia)
+  openspace.removeSceneGraphNode(S2018J2)
+  openspace.removeSceneGraphNode(S2011J3)
+  openspace.removeSceneGraphNode(Dia)
+  openspace.removeSceneGraphNode(Elara)
+  openspace.removeSceneGraphNode(Lysithea)
+  openspace.removeSceneGraphNode(Himalia)
+  openspace.removeSceneGraphNode(Leda)
+end)
+
+asset.export(Leda)
+asset.export(Himalia)
+asset.export(Lysithea)
+asset.export(Elara)
+asset.export(Dia)
+asset.export(S2011J3)
+asset.export(S2018J2)
+asset.export(Pandia)
+asset.export(Ersa)
+
+
+
+asset.meta = {
+  Name = "Jupiter Himalia Group Moons Globes",
+  Description = [[Asset containing globes for Jupiter's Himalia Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

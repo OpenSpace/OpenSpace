@@ -1,0 +1,65 @@
+local transforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
+local kernels347 = asset.require("scene/solarsystem/planets/jupiter/kernels347")
+local coreKernels = asset.require("spice/core")
+
+
+
+local CarpoPosition = {
+  Identifier = "CarpoPosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Carpo,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Carpo Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/Carpo",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2018J4Position = {
+  Identifier = "S2018J4Position",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2018J4,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2018 J 4 Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/S2018J4",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(CarpoPosition)
+  openspace.addSceneGraphNode(S2018J4Position)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2018J4Position)
+  openspace.removeSceneGraphNode(CarpoPosition)
+end)
+
+asset.export(CarpoPosition)
+asset.export(S2018J4Position)
+
+
+
+asset.meta = {
+  Name = "Jupiter Carpo Group Moons Positions",
+  Description = [[Asset containing positions for Jupiter's Carpo Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
