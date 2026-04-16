@@ -1,5 +1,6 @@
 asset.require("./globe")
 asset.require("./trail")
+asset.require("./actions")
 asset.require("./label", false)
 
 

@@ -8,6 +8,7 @@ local MercuryLabel = {
   Parent = transforms.MercuryBarycenter.Identifier,
   Renderable = {
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "Mercury",
     FontSize = 70.0,
     Size = 8.5,

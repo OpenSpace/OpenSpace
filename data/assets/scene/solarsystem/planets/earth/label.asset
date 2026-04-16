@@ -7,6 +7,7 @@ local EarthLabel = {
   Parent = transforms.EarthBarycenter.Identifier,
   Renderable = {
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "Earth",
     FontSize = 70.0,
     Size = 8.50,

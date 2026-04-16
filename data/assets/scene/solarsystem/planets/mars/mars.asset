@@ -3,7 +3,7 @@ asset.require("./trail")
 asset.require("./atmosphere")
 asset.require("./moons/phobos/phobos")
 asset.require("./moons/deimos/deimos")
-asset.require("./label")
+asset.require("./label", false)
 
 
 

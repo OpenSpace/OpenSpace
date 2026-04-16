@@ -7,6 +7,7 @@ local MoonLabel = {
   Parent = moon.Moon.Identifier,
   Renderable = {
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "Moon",
     FontSize = 70.0,
     Size = 6.0,

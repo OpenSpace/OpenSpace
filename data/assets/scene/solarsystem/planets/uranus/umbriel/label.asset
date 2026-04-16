@@ -8,6 +8,7 @@ local UmbrielLabel = {
   Parent = transforms.UmbrielPosition.Identifier,
   Renderable = {
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "Umbriel",
     FontSize = 70.0,
     Size = 7.4,

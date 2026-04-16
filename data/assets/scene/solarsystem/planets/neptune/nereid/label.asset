@@ -7,6 +7,7 @@ local NereidLabel = {
   Parent = transforms.NereidPosition.Identifier,
   Renderable = {
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "Nereid",
     FontSize = 50.0,
     Size = 7.0,

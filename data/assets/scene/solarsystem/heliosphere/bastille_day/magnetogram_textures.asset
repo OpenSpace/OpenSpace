@@ -1,4 +1,4 @@
-local sunAsset = asset.require("scene/solarsystem/sun/sun")
+local sunAsset = asset.require("scene/solarsystem/sun/globe")
 local magnetogramDirectory = asset.require("./magnetogram")
 
 

@@ -7,6 +7,7 @@ local RheaLabel = {
   Parent = transforms.RheaPosition.Identifier,
   Renderable = {
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "Rhea",
     FontSize = 70.0,
     Size = 6.0,

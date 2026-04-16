@@ -7,6 +7,7 @@ local AtlasLabel = {
   Parent = transforms.AtlasPosition.Identifier,
   Renderable = {
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "3I/ATLAS",
     FontSize = 70.0,
     Size = 8.50,

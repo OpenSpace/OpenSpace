@@ -7,6 +7,7 @@ local EnceladusLabel = {
   Parent = transforms.EnceladusPosition.Identifier,
   Renderable = {
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "Enceladus",
     FontSize = 70.0,
     Size = 6.0,

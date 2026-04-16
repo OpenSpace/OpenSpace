@@ -7,6 +7,7 @@ local CeresLabel = {
   Parent = transforms.CeresPosition.Identifier,
   Renderable = {
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "Ceres",
     FontSize = 70.0,
     Size = 8.66,

@@ -6,6 +6,7 @@ local TiangongLabel = {
   Parent = transforms.TiangongPosition.Identifier,
   Renderable = {
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "Tiangong",
     FontSize = 70.0,
     Size = 3.4,

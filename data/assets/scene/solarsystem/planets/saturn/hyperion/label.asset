@@ -7,6 +7,7 @@ local HyperionLabel = {
   Parent = transforms.HyperionPosition.Identifier,
   Renderable = {
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "Hyperion",
     FontSize = 70.0,
     Size = 6.2,

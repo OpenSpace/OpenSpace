@@ -56,6 +56,7 @@ local EclipticBand = {
   },
   Renderable = {
     Type = "RenderableSphereImageLocal",
+    Enabled = asset.enabled,
     Texture = textures .. "ecliptic.png",
     Size = 9.46377307652E17,
     Segments = 50,

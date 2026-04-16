@@ -7,6 +7,7 @@ local TitanLabel = {
   Parent = transforms.TitanPosition.Identifier,
   Renderable = {
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "Titan",
     FontSize = 70.0,
     Size = 6.2,

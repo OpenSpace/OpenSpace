@@ -9,6 +9,7 @@ local NeptuneLabel = {
   Parent = transforms.NeptuneBarycenter.Identifier,
   Renderable = {
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "Neptune",
     FontSize = 70.0,
     Size = 9.0,

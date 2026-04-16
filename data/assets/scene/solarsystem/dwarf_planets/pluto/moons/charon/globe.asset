@@ -22,7 +22,7 @@ local Charon = {
       Size = 9.0,
       FadeInEnabled = true,
       FadeOutEnabled = true,
-      Distances = { 800000.0, 2000000.0 },
+      FadeDistances = { 800000.0, 2000000.0 },
       DistanceEPS = 250000.0,
       Color = { 1.0, 1.0, 0.0 }
     }

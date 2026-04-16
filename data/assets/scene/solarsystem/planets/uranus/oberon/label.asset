@@ -8,6 +8,7 @@ local OberonLabel = {
   Parent = transforms.OberonPosition.Identifier,
   Renderable = {
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "Oberon",
     FontSize = 70.0,
     Size = 7.4,

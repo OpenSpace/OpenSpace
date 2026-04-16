@@ -2,7 +2,7 @@ asset.require("./globe")
 asset.require("./trail")
 asset.require("./trail_earth", false)
 asset.require("./atmosphere")
-asset.require("./label")
+asset.require("./label", false)
 
 
 

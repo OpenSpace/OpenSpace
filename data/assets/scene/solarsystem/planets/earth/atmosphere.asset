@@ -1,5 +1,5 @@
-asset.require("scene/solarsystem/sun/sun")
-asset.require("./moon/globe")
+local sunAsset = asset.require("scene/solarsystem/sun/globe")
+local moonAsset = asset.require("./moon/globe")
 local globe = asset.require("./globe")
 
 
@@ -54,10 +54,10 @@ local Atmosphere = {
     },
     ShadowGroup = {
       Sources = {
-        { Name = "Sun", Radius = 696300000 }
+        { Name = sunAsset.Sun.Identifier, Radius = 696300000 }
       },
       Casters = {
-        { Name = "Moon", Radius = 1737000 }
+        { Name = moonAsset.Moon.Identifier, Radius = 1737000 }
       }
     }
   },

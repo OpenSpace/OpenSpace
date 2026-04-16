@@ -7,6 +7,7 @@ local MarsLabel = {
   Parent = transforms.MarsBarycenter.Identifier,
   Renderable = {
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "Mars",
     FontSize = 70.0,
     Size = 8.50,

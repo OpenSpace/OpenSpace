@@ -8,6 +8,7 @@ local AquaLabel = {
   Parent = transforms.AquaPosition.Identifier,
   Renderable = {
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "Aqua",
     FontSize = 70.0,
     Size = 4.0,

@@ -8,6 +8,7 @@ local SNPPLabel = {
   Parent = transforms.SNPPPosition.Identifier,
   Renderable = {
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "SNPP",
     FontSize = 70.0,
     Size = 4.0,

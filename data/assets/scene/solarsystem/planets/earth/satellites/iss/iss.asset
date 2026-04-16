@@ -1,6 +1,6 @@
 asset.require("./trail")
 asset.require("./model")
-asset.require("./actions", false)
+asset.require("./actions")
 asset.require("./label", false)
 
 

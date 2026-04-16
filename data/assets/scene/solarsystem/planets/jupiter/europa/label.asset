@@ -9,6 +9,7 @@ local EuropaLabel = {
   Parent = globe.Europa.Identifier,
   Renderable = {
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "Europa",
     FontSize = 70.0,
     Size = 6.0,
