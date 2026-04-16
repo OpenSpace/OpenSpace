@@ -1,7 +1,21 @@
-asset.require("./base_layers", false)
-asset.require("./local_layers", true)
-asset.require("./sweden_layers", false)
-asset.require("./newyork_layers", false)
+asset.require("./base_layers")
+asset.require("./local_layers")
+
+local server = openspace.layerServer();
+if (server == "All") then
+  asset.require("./newyork_layers")
+  asset.require("./sweden_layers")
+elseif (server == "NewYork") then
+  asset.require("./newyork_layers")
+elseif (server == "Sweden") then
+  asset.require("./sweden_layers")
+elseif (server == "Utah") then
+  -- Using the New York server as a fallback
+  asset.require("./newyork_layers")
+end
+
+asset.require("./sweden_layers")
+asset.require("./newyork_layers")
 
 
 
