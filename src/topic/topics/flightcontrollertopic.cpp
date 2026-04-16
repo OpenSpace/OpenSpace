@@ -157,10 +157,7 @@ Schema FlightControllerTopic::Schema() {
               "type": "object",
               "properties": {
                 "type": { "const": "inputState" },
-                "inputState": { "$ref": "#/$defs/AxisValues" },
-                  "additionalProperties": false,
-                  "required": ["values"]
-                }
+                "inputState": { "$ref": "#/$defs/AxisValues" }
               },
               "additionalProperties": false,
               "required": ["type", "inputState"]
@@ -182,6 +179,7 @@ Schema FlightControllerTopic::Schema() {
           "additionalProperties": false,
           "required": ["topicId", "topicPayload", "data"]
         }
+
     )");
 
     return { "flightcontrollertopic", schema };
