@@ -62,16 +62,7 @@
       "additionalProperties": false,
       "properties": {
         "inputState": {
-          "additionalProperties": false,
-          "properties": {
-            "values": {
-              "$ref": "#/$defs/AxisValues"
-            }
-          },
-          "required": [
-            "values"
-          ],
-          "type": "object"
+          "$ref": "#/$defs/AxisValues"
         },
         "type": {
           "const": "inputState"
