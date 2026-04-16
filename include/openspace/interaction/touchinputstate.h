@@ -75,6 +75,9 @@ private:
     void updateOrAddTouchInput(TouchInput input);
     void removeTouchInput(TouchInput input);
 
+    void clearTapData();
+    void evaluateTap(TouchInput lastRemovedInput);
+
     std::vector<TouchInputHolder> _touchPoints;
     std::vector<TouchInput> _deferredRemovals;
     std::vector<TouchInput> _lastTouchInputs;
@@ -82,7 +85,7 @@ private:
     bool _isTap = false;
     bool _isDoubleTap = false;
 
-    std::chrono::milliseconds _time;
+    std::chrono::milliseconds _lastTapTime;
     unsigned int _maxDoubleTapTimeInterval = 300; // milliseconds
 };
 

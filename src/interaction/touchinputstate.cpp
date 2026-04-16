@@ -24,10 +24,21 @@
 
 #include <openspace/interaction/touchinputstate.h>
 
+#include <ghoul/logging/logmanager.h>
+#include <format>
+
+namespace {
+    std::chrono::milliseconds now() {
+        return std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::high_resolution_clock::now().time_since_epoch()
+        );
+    }
+}
+
 namespace openspace {
 
 void TouchInputState::initialize() {
-    _time = std::chrono::duration_cast<std::chrono::milliseconds>(
+    _lastTapTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::high_resolution_clock::now().time_since_epoch()
     );
 }
@@ -99,6 +110,13 @@ void TouchInputState::processTouchInput(const std::vector<TouchInput>& inputs,
 }
 
 void TouchInputState::clearInputs() {
+    // Clear old tap data and evaluate new tap gesture so we have it for next frame
+    clearTapData();
+    if (_touchPoints.size() == 1 && _deferredRemovals.size() == 1) {
+        // All fingers lifted => evaluate tap
+        evaluateTap(_deferredRemovals.back());
+    }
+
     for (const TouchInput& input : _deferredRemovals) {
         for (TouchInputHolder& inputHolder : _touchPoints) {
             if (inputHolder.holdsInput(input)) {
@@ -109,10 +127,6 @@ void TouchInputState::clearInputs() {
         }
     }
     _deferredRemovals.clear();
-
-    // Reset tap detected state (TODO Can this really be done here? every frame..?)
-    _isDoubleTap = false;
-    _isTap = false;
 }
 
 void TouchInputState::updateLastTouchPoints() {
@@ -134,39 +148,37 @@ void TouchInputState::updateOrAddTouchInput(TouchInput input) {
 
 void TouchInputState::removeTouchInput(TouchInput input) {
     _deferredRemovals.emplace_back(input);
+}
 
-    // Check for "tap" gesture
-    if (_touchPoints.size() == 1 && _deferredRemovals.size() == 1) {
-        TouchInputHolder& inputHolder = _touchPoints.front();
+void TouchInputState::clearTapData() {
+    _isTap = false;
+    _isDoubleTap = false;
+}
 
-        if (inputHolder.holdsInput(input)) {
-            inputHolder.tryAddInput(input);
-            // @TODO: Thís is copied from tuioear.cpp, should be configurable? Or
-            // moved to the module that takes tuio input?
-            // Magic values taken from tuioear.cpp:
-            const bool isWithinTapTime = inputHolder.gestureTime() < 0.18;
-            // This makes the tap detection much less responsive,
-            // so disable it for now (emmbr, 2025-01-07)
-            const bool wasStationary = true; //inputHolder.gestureDistance() < 0.0004f;
+void TouchInputState::evaluateTap(TouchInput lastRemovedInput) {
+    TouchInputHolder& inputHolder = _touchPoints.front();
 
-            if (isWithinTapTime && wasStationary && _touchPoints.size() == 1 &&
-                _deferredRemovals.size() == 1)
-            {
-                // Check for double tap
-                std::chrono::milliseconds timestamp =
-                    std::chrono::duration_cast<std::chrono::milliseconds>(
-                        std::chrono::high_resolution_clock::now().time_since_epoch()
-                    );
+    if (!inputHolder.holdsInput(lastRemovedInput)) {
+        return;
+    }
 
-                if ((timestamp - _time).count() < _maxDoubleTapTimeInterval) {
-                    _isDoubleTap = true;
-                }
-                else {
-                    _isTap = true;
-                }
-                _time = timestamp;
-            }
+    inputHolder.tryAddInput(lastRemovedInput);
+    const bool isWithinTapTime = inputHolder.gestureTime() < 0.18;
+
+    LINFOC("Touch", std::format("GESTURETIME: {}", inputHolder.gestureTime()));
+    LINFOC("Touch", std::format("LastTaptime: {}", _lastTapTime));
+
+    if (isWithinTapTime) {
+        std::chrono::milliseconds time = now();
+
+        if ((time - _lastTapTime).count() < _maxDoubleTapTimeInterval) {
+            _isDoubleTap = true; // TODO: Check position
         }
+        else {
+            _isTap = true;
+        }
+
+        _lastTapTime = time;
     }
 }
 
