@@ -25,6 +25,7 @@
 #include <openspace/topic/topics/missiontopic.h>
 
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
@@ -38,12 +39,116 @@
 namespace openspace {
 
 void MissionTopic::handleJson(const nlohmann::json&) {
-    const nlohmann::json data = { {"missions", missionJson()} };
+    nlohmann::json data;
+    data["missions"] = missionJson();
     _connection->sendJson(wrappedPayload(data));
 }
 
 bool MissionTopic::isDone() const {
     return true;
+}
+
+Schema MissionTopic::Schema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "$defs": {
+            "Milestone": {
+              "type": "object",
+              "properties": {
+                "date": { "type": "string" },
+                "name": { "type": "string" },
+                "description": { "type": "string" },
+                "image": { "type": "string" },
+                "link": { "type": "string" },
+                "actions": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              },
+              "additionalProperties": false,
+              "required": ["date", "name"]
+            },
+            "MissionPhase": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "description": { "type": "string" },
+                "image": { "type": "string" },
+                "link": { "type": "string" },
+                "actions": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "timerange": {
+                  "type": "object",
+                  "properties": {
+                    "start": { "type": "string" },
+                    "end": { "type": "string" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["start", "end"]
+                },
+                "phases": {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/MissionPhase" }
+                },
+                "milestones": {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/Milestone" }
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "description",
+                "image",
+                "link",
+                "actions",
+                "timerange",
+                "phases",
+                "milestones"
+              ]
+            },
+            "MissionEntry": {
+              "type": "object",
+              "properties": {
+                "mission": { "$ref": "#/$defs/MissionPhase" },
+                "captureTimes": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              },
+              "additionalProperties": false,
+              "required": ["mission", "captureTimes"]
+            },
+            "MissionMap": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/MissionEntry" }
+            }
+          },
+          "title": "MissionTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "missions" },
+            "topicPayload": {
+              "type": "object",
+              "additionalProperties": false
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "missions": { "$ref": "#/$defs/MissionMap" }
+              },
+              "additionalProperties": false,
+              "required": ["missions"]
+            }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+    )");
+
+    return { "missiontopic", schema };
 }
 
 nlohmann::json MissionTopic::missionJson() const {
@@ -64,7 +169,8 @@ nlohmann::json MissionTopic::missionJson() const {
     }
     nlohmann::json json;
     for (auto const& [identifier, mission] : missions) {
-        nlohmann::json missionJson = createPhaseJson(mission);
+        nlohmann::json missionJson;
+        missionJson["mission"] = createPhaseJson(mission);
         missionJson["capturetimes"] = captureTimesString;
         json[identifier] = missionJson;
     }

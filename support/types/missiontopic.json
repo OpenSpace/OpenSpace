@@ -1,0 +1,152 @@
+{
+  "$defs": {
+    "Milestone": {
+      "additionalProperties": false,
+      "properties": {
+        "actions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "date": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        },
+        "link": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "date",
+        "name"
+      ],
+      "type": "object"
+    },
+    "MissionEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "captureTimes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "mission": {
+          "$ref": "#/$defs/MissionPhase"
+        }
+      },
+      "required": [
+        "mission",
+        "captureTimes"
+      ],
+      "type": "object"
+    },
+    "MissionMap": {
+      "additionalProperties": {
+        "$ref": "#/$defs/MissionEntry"
+      },
+      "type": "object"
+    },
+    "MissionPhase": {
+      "additionalProperties": false,
+      "properties": {
+        "actions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "description": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        },
+        "link": {
+          "type": "string"
+        },
+        "milestones": {
+          "items": {
+            "$ref": "#/$defs/Milestone"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "phases": {
+          "items": {
+            "$ref": "#/$defs/MissionPhase"
+          },
+          "type": "array"
+        },
+        "timerange": {
+          "additionalProperties": false,
+          "properties": {
+            "end": {
+              "type": "string"
+            },
+            "start": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "start",
+            "end"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "image",
+        "link",
+        "actions",
+        "timerange",
+        "phases",
+        "milestones"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "data": {
+      "additionalProperties": false,
+      "properties": {
+        "missions": {
+          "$ref": "#/$defs/MissionMap"
+        }
+      },
+      "required": [
+        "missions"
+      ],
+      "type": "object"
+    },
+    "topicId": {
+      "const": "missions"
+    },
+    "topicPayload": {
+      "additionalProperties": false,
+      "type": "object"
+    }
+  },
+  "required": [
+    "topicId",
+    "topicPayload",
+    "data"
+  ],
+  "title": "MissionTopic",
+  "type": "object"
+}

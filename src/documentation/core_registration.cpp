@@ -77,6 +77,7 @@
 #include <openspace/topic/topics/eventtopic.h>
 #include <openspace/topic/topics/flightcontrollertopic.h>
 #include <openspace/topic/topics/luascripttopic.h>
+#include <openspace/topic/topics/missiontopic.h>
 #include <openspace/topic/topics/profiletopic.h>
 #include <openspace/topic/topics/timetopic.h>
 
@@ -121,6 +122,7 @@ void registerCoreSchemas(DocumentationEngine& engine) {
     engine.addSchema(EventTopic::Schema());
     engine.addSchema(FlightControllerTopic::Schema());
     engine.addSchema(LuaScriptTopic::Schema());
+    engine.addSchema(MissionTopic::Schema());
     engine.addSchema(ProfileTopic::Schema());
     engine.addSchema(TimeTopic::Schema());
 }
