@@ -24,6 +24,7 @@
 
 #include "openspace/topic/topics/sessionrecordingtopic.h"
 
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/topic/connection.h>
 #include <ghoul/logging/logmanager.h>
@@ -31,14 +32,6 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "SessionRecordingTopic";
-
-    constexpr std::string_view SubscribeEvent = "start_subscription";
-    constexpr std::string_view UnsubscribeEvent = "stop_subscription";
-    constexpr std::string_view RefreshEvent = "refresh";
-
-    constexpr const char* PropertiesKey = "properties";
-    constexpr const char* FilesKey = "files";
-    constexpr const char* StateKey = "state";
 } // namespace
 
 namespace openspace {
@@ -55,44 +48,41 @@ SessionRecordingTopic::~SessionRecordingTopic() {
 
 void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
     const std::string event = json.at("event").get<std::string>();
-    if (event != SubscribeEvent && event != UnsubscribeEvent &&
-        event != RefreshEvent)
-    {
-        LERROR("Unsupported event");
+
+    if (event == "stop_subscription") {
         _isDone = true;
         return;
     }
 
-    if (event == UnsubscribeEvent) {
-        _isDone = true;
+    // @TODO (anden88 2026-04-16): There was a "refresh" command one could send that would
+    // send the jsondata back (or rather, any event string would do this) Do we need or
+    // want to bring back a "refresh" command?
+    if (event != "start_subscription") {
         return;
     }
 
-    if (json.find(PropertiesKey) != json.end()) {
-        if (!json.at(PropertiesKey).is_array()) {
-            LERROR("Properties must be an array of strings");
+    const std::vector<std::string> properties =
+        json.at("properties").get<std::vector<std::string>>();
+
+    if (properties.empty()) {
+        return;
+    }
+
+    for (const std::string& property : properties) {
+        if (property == "files") {
+            _sendFiles = true;
         }
-        const nlohmann::json requestedProperties =
-            json.at(PropertiesKey).get<nlohmann::json>();
-        for (const auto& p : requestedProperties) {
-            if (!p.is_string()) {
-                _isDone = true;
-                LERROR("Properties must be an array of strings");
-                return;
-            }
-            const std::string v = p.get<std::string>();
-            if (v == FilesKey) {
-                _sendFiles = true;
-            }
-            if (v == StateKey) {
-                _sendState = true;
-            }
+        else if (property == "state") {
+            _sendState = true;
+        }
+        else {
+            LWARNING(std::format("Got unknown property '{}'", property));
         }
     }
 
     sendJsonData();
 
-    if (event == SubscribeEvent && _sendState) {
+    if (_sendState) {
         _stateCallbackHandle = global::sessionRecordingHandler->addStateChangeCallback(
             [this]() {
                 const SessionRecordingHandler::SessionState currentState =
@@ -108,6 +98,69 @@ void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
 
 bool SessionRecordingTopic::isDone() const {
     return _isDone;
+}
+
+Schema SessionRecordingTopic::Schema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "$defs": {
+            "SessionState": {
+              "type": "string",
+              "enum": ["idle", "recording", "playing", "playing-paused"],
+              "tsEnumNames": ["Idle", "Recording", "Playing", "Paused"]
+            }
+          },
+          "title": "SessionRecordingTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "sessionRecording" },
+            "topicPayload": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "event": { "const": "start_subscription" },
+                    "properties": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": ["files", "state"],
+                        "minItems": 1
+                      }
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": ["event", "properties"]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "event": { "const": "stop_subscription" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["event"]
+                }
+              ]
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "state": { "$ref": "#/$defs/SessionState" },
+                "files": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+    )");
+
+    return { "sessionrecordingtopic", schema };
 }
 
 void SessionRecordingTopic::sendJsonData() {
@@ -128,10 +181,10 @@ void SessionRecordingTopic::sendJsonData() {
                 stateString = "idle";
                 break;
         }
-        stateJson[StateKey] = stateString;
+        stateJson["state"] = stateString;
     }
     if (_sendFiles) {
-        stateJson[FilesKey] = global::sessionRecordingHandler->playbackList();
+        stateJson["files"] = global::sessionRecordingHandler->playbackList();
     }
     if (!stateJson.empty()) {
         _connection->sendJson(wrappedPayload(stateJson));

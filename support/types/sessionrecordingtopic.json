@@ -1,0 +1,89 @@
+{
+  "$defs": {
+    "SessionState": {
+      "enum": [
+        "idle",
+        "recording",
+        "playing",
+        "playing-paused"
+      ],
+      "tsEnumNames": [
+        "Idle",
+        "Recording",
+        "Playing",
+        "Paused"
+      ],
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "data": {
+      "additionalProperties": false,
+      "properties": {
+        "files": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "state": {
+          "$ref": "#/$defs/SessionState"
+        }
+      },
+      "type": "object"
+    },
+    "topicId": {
+      "const": "sessionRecording"
+    },
+    "topicPayload": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "event": {
+              "const": "start_subscription"
+            },
+            "properties": {
+              "items": {
+                "enum": [
+                  "files",
+                  "state"
+                ],
+                "minItems": 1,
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "event",
+            "properties"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "event": {
+              "const": "stop_subscription"
+            }
+          },
+          "required": [
+            "event"
+          ],
+          "type": "object"
+        }
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "topicId",
+    "topicPayload",
+    "data"
+  ],
+  "title": "SessionRecordingTopic",
+  "type": "object"
+}
