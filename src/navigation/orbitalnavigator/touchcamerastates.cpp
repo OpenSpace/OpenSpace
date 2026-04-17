@@ -30,6 +30,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
+    using namespace openspace;
     constexpr std::string_view _loggerCat = "TouchCameraStates";
 
     double validAngleDiff(double lastAngle, double currentAngle) {
@@ -44,6 +45,14 @@ namespace {
             return currentAngle - lastAngle;
         }
     }
+
+    glm::dvec2 normalizeByAspectRatio(glm::dvec2 vec) {
+        const glm::vec2 windowSize =
+            glm::vec2(global::windowDelegate->currentWindowSize());
+
+        const float aspectRatio = windowSize.x / windowSize.y;
+        return glm::dvec2(vec.x * aspectRatio, vec.y);
+    };
 } // namespace
 
 namespace openspace {
@@ -91,14 +100,6 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
 
     const TouchInput& startFinger0 = touchPoints[0].firstInput();
     const TouchInput& endFinger0 = touchPoints[0].latestInput();
-
-    auto normalizeByAspectRatio = [&](glm::dvec2 vec) {
-        const glm::vec2 windowSize =
-            glm::vec2(global::windowDelegate->currentWindowSize());
-
-        const float aspectRatio = windowSize.x / windowSize.y;
-        return glm::dvec2(vec.x * aspectRatio, vec.y);
-    };
 
     switch (action) {
         case InteractionType::Rotation: {
