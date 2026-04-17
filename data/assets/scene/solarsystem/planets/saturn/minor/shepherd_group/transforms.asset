@@ -29,7 +29,9 @@ local PrometheusPosition = {
   },
   GUI = {
     Name = "Prometheus Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Prometheus"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Prometheus",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -45,7 +47,9 @@ local PandoraPosition = {
   },
   GUI = {
     Name = "Pandora Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pandora"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pandora",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -61,7 +65,9 @@ local AtlasPosition = {
   },
   GUI = {
     Name = "Atlas Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Atlas"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Atlas",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -77,7 +83,9 @@ local JanusPosition = {
   },
   GUI = {
     Name = "Janus Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Janus"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Janus",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -93,7 +101,9 @@ local EpimetheusPosition = {
   },
   GUI = {
     Name = "Epimetheus Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Epimetheus"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Epimetheus",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -109,7 +119,9 @@ local DaphnisPosition = {
   },
   GUI = {
     Name = "Daphnis Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Daphnis"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Daphnis",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -125,7 +137,9 @@ local PanPosition = {
   },
   GUI = {
     Name = "Pan Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pan"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pan",
+    Focusable = false,
+    Hidden = true
   }
 }
 

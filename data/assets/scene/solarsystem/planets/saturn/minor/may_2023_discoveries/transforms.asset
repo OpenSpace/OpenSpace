@@ -16,7 +16,9 @@ local S2019S2Position = {
   },
   GUI = {
     Name = "S/2019 S 2 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S2"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S2",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -32,7 +34,9 @@ local S2019S3Position = {
   },
   GUI = {
     Name = "S/2019 S 3 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S3"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S3",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -48,7 +52,9 @@ local S2020S1Position = {
   },
   GUI = {
     Name = "S/2020 S 1 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2020S1"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2020S1",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -64,7 +70,9 @@ local S2020S2Position = {
   },
   GUI = {
     Name = "S/2020 S 2 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S2"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S2",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -80,7 +88,9 @@ local S2004S40Position = {
   },
   GUI = {
     Name = "S/2004 S 40 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S40"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S40",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -96,7 +106,9 @@ local S2006S9Position = {
   },
   GUI = {
     Name = "S/2006 S 9 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S9"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S9",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -112,7 +124,9 @@ local S2007S5Position = {
   },
   GUI = {
     Name = "S/2007 S 5 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S5"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S5",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -128,7 +142,9 @@ local S2020S3Position = {
   },
   GUI = {
     Name = "S/2020 S 3 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2020S3"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2020S3",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -144,7 +160,9 @@ local S2019S4Position = {
   },
   GUI = {
     Name = "S/2019 S 4 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S4"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S4",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -160,7 +178,9 @@ local S2004S41Position = {
   },
   GUI = {
     Name = "S/2004 S 41 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S41"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S41",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -176,7 +196,9 @@ local S2020S4Position = {
   },
   GUI = {
     Name = "S/2020 S 4 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2020S4"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2020S4",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -192,7 +214,9 @@ local S2020S5Position = {
   },
   GUI = {
     Name = "S/2020 S 5 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2020S5"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2020S5",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -208,7 +232,9 @@ local S2007S6Position = {
   },
   GUI = {
     Name = "S/2007 S 6 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S6"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S6",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -224,7 +250,9 @@ local S2004S42Position = {
   },
   GUI = {
     Name = "S/2004 S 42 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S42"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S42",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -240,7 +268,9 @@ local S2006S10Position = {
   },
   GUI = {
     Name = "S/2006 S 10 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S10"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S10",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -256,7 +286,9 @@ local S2019S5Position = {
   },
   GUI = {
     Name = "S/2019 S 5 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S5"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S5",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -272,7 +304,9 @@ local S2004S43Position = {
   },
   GUI = {
     Name = "S/2004 S 43 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S43"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S43",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -288,7 +322,9 @@ local S2004S44Position = {
   },
   GUI = {
     Name = "S/2004 S 44 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S44"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S44",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -304,7 +340,9 @@ local S2004S45Position = {
   },
   GUI = {
     Name = "S/2004 S 45 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2004S45"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2004S45",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -320,7 +358,9 @@ local S2006S11Position = {
   },
   GUI = {
     Name = "S/2006 S 11 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S11"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S11",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -336,7 +376,9 @@ local S2006S12Position = {
   },
   GUI = {
     Name = "S/2006 S 12 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2006S12"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2006S12",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -352,7 +394,9 @@ local S2019S6Position = {
   },
   GUI = {
     Name = "S/2019 S 6 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2019S6"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2019S6",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -368,7 +412,9 @@ local S2006S13Position = {
   },
   GUI = {
     Name = "S/2006 S 13 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S13"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S13",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -384,7 +430,9 @@ local S2019S7Position = {
   },
   GUI = {
     Name = "S/2019 S 7 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S7"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S7",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -400,7 +448,9 @@ local S2019S8Position = {
   },
   GUI = {
     Name = "S/2019 S 8 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S8"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S8",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -416,7 +466,9 @@ local S2019S9Position = {
   },
   GUI = {
     Name = "S/2019 S 9 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S9"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S9",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -432,7 +484,9 @@ local S2004S46Position = {
   },
   GUI = {
     Name = "S/2004 S 46 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2004S46"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2004S46",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -448,7 +502,9 @@ local S2019S10Position = {
   },
   GUI = {
     Name = "S/2019 S 10 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S10"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S10",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -464,7 +520,9 @@ local S2004S47Position = {
   },
   GUI = {
     Name = "S/2004 S 47 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S47"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S47",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -480,7 +538,9 @@ local S2019S11Position = {
   },
   GUI = {
     Name = "S/2019 S 11 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2019S11"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2019S11",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -496,7 +556,9 @@ local S2006S14Position = {
   },
   GUI = {
     Name = "S/2006 S 14 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S14"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S14",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -512,7 +574,9 @@ local S2019S12Position = {
   },
   GUI = {
     Name = "S/2019 S 12 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S12"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S12",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -528,7 +592,9 @@ local S2020S6Position = {
   },
   GUI = {
     Name = "S/2020 S 6 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S6"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S6",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -544,7 +610,9 @@ local S2019S13Position = {
   },
   GUI = {
     Name = "S/2019 S 13 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S13"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S13",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -560,7 +628,9 @@ local S2005S4Position = {
   },
   GUI = {
     Name = "S/2005 S 4 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2005S4"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2005S4",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -576,7 +646,9 @@ local S2007S7Position = {
   },
   GUI = {
     Name = "S/2007 S 7 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S7"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S7",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -592,7 +664,9 @@ local S2007S8Position = {
   },
   GUI = {
     Name = "S/2007 S 8 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2007S8"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2007S8",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -608,7 +682,9 @@ local S2020S7Position = {
   },
   GUI = {
     Name = "S/2020 S 7 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S7"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S7",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -624,7 +700,9 @@ local S2019S14Position = {
   },
   GUI = {
     Name = "S/2019 S 14 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2019S14"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2019S14",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -640,7 +718,9 @@ local S2019S15Position = {
   },
   GUI = {
     Name = "S/2019 S 15 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S15"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S15",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -656,7 +736,9 @@ local S2005S5Position = {
   },
   GUI = {
     Name = "S/2005 S 5 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2005S5"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2005S5",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -672,7 +754,9 @@ local S2006S15Position = {
   },
   GUI = {
     Name = "S/2006 S 15 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S15"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S15",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -688,7 +772,9 @@ local S2006S16Position = {
   },
   GUI = {
     Name = "S/2006 S 16 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S16"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S16",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -704,7 +790,9 @@ local S2006S17Position = {
   },
   GUI = {
     Name = "S/2006 S 17 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S17"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S17",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -720,7 +808,9 @@ local S2004S48Position = {
   },
   GUI = {
     Name = "S/2004 S 48 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S48"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S48",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -736,7 +826,9 @@ local S2020S8Position = {
   },
   GUI = {
     Name = "S/2020 S 8 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S8"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S8",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -752,7 +844,9 @@ local S2004S49Position = {
   },
   GUI = {
     Name = "S/2004 S 49 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S49"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S49",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -768,7 +862,9 @@ local S2004S50Position = {
   },
   GUI = {
     Name = "S/2004 S 50 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S50"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S50",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -784,7 +880,9 @@ local S2006S18Position = {
   },
   GUI = {
     Name = "S/2006 S 18 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S18"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S18",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -800,7 +898,9 @@ local S2019S16Position = {
   },
   GUI = {
     Name = "S/2019 S 16 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S16"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S16",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -816,7 +916,9 @@ local S2019S17Position = {
   },
   GUI = {
     Name = "S/2019 S 17 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S17"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S17",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -832,7 +934,9 @@ local S2019S18Position = {
   },
   GUI = {
     Name = "S/2019 S 18 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S18"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S18",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -848,7 +952,9 @@ local S2019S19Position = {
   },
   GUI = {
     Name = "S/2019 S 19 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S19"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S19",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -864,7 +970,9 @@ local S2019S20Position = {
   },
   GUI = {
     Name = "S/2019 S 20 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S20"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S20",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -880,7 +988,9 @@ local S2006S19Position = {
   },
   GUI = {
     Name = "S/2006 S 19 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S19"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S19",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -896,7 +1006,9 @@ local S2004S51Position = {
   },
   GUI = {
     Name = "S/2004 S 51 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S51"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S51",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -912,7 +1024,9 @@ local S2020S9Position = {
   },
   GUI = {
     Name = "S/2020 S 9 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S9"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S9",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -928,7 +1042,9 @@ local S2004S52Position = {
   },
   GUI = {
     Name = "S/2004 S 52 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S52"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S52",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -944,7 +1060,9 @@ local S2007S9Position = {
   },
   GUI = {
     Name = "S/2007 S 9 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S9"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S9",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -960,7 +1078,9 @@ local S2004S53Position = {
   },
   GUI = {
     Name = "S/2004 S 53 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S53"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S53",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -976,7 +1096,9 @@ local S2020S10Position = {
   },
   GUI = {
     Name = "S/2020 S 10 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S10"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S10",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -992,7 +1114,9 @@ local S2019S21Position = {
   },
   GUI = {
     Name = "S/2019 S 21 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S21"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S21",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -1008,7 +1132,9 @@ local S2006S20Position = {
   },
   GUI = {
     Name = "S/2006 S 20 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S20"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S20",
+    Focusable = false,
+    Hidden = true
   }
 }
 

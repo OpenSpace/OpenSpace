@@ -17,7 +17,9 @@ local PhoebePosition = {
   },
   GUI = {
     Name = "Phoebe Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -33,7 +35,9 @@ local SkathiPosition = {
   },
   GUI = {
     Name = "Skathi Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skathi"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skathi",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -49,7 +53,9 @@ local S2007S2Position = {
   },
   GUI = {
     Name = "S/2007 S 2 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S2"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S2",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -65,7 +71,9 @@ local SkollPosition = {
   },
   GUI = {
     Name = "Skoll Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skoll"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skoll",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -81,7 +89,9 @@ local S2004S13Position = {
   },
   GUI = {
     Name = "S/2004 S 13 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S13"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S13",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -97,7 +107,9 @@ local GreipPosition = {
   },
   GUI = {
     Name = "Greip Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Greip"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Greip",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -113,7 +125,9 @@ local HyrrokkinPosition = {
   },
   GUI = {
     Name = "Hyrrokkin Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hyrrokkin"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hyrrokkin",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -129,7 +143,9 @@ local JarnsaxaPosition = {
   },
   GUI = {
     Name = "Jarnsaxa Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Jarnsaxa"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Jarnsaxa",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -145,7 +161,9 @@ local MundilfariPosition = {
   },
   GUI = {
     Name = "Mundilfari Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -161,7 +179,9 @@ local S2006S1Position = {
   },
   GUI = {
     Name = "S/2006 S 1 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S1"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S1",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -177,7 +197,9 @@ local S2004S17Position = {
   },
   GUI = {
     Name = "S/2004 S 17 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S17"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S17",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -193,7 +215,9 @@ local BergelmirPosition = {
   },
   GUI = {
     Name = "Bergelmir Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bergelmir"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bergelmir",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -209,7 +233,9 @@ local NarviPosition = {
   },
   GUI = {
     Name = "Narvi Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Narvi"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Narvi",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -225,7 +251,9 @@ local SuttungrPosition = {
   },
   GUI = {
     Name = "Suttungr Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Suttungr"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Suttungr",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -241,7 +269,9 @@ local HatiPosition = {
   },
   GUI = {
     Name = "Hati Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hati"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hati",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -257,7 +287,9 @@ local S2004S12Position = {
   },
   GUI = {
     Name = "S/2004 S 12 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S12"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S12",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -273,7 +305,9 @@ local FarbautiPosition = {
   },
   GUI = {
     Name = "Farbauti Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Farbauti"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Farbauti",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -289,7 +323,9 @@ local ThrymrPosition = {
   },
   GUI = {
     Name = "Thrymr Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thrymr"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thrymr",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -305,7 +341,9 @@ local AegirPosition = {
   },
   GUI = {
     Name = "Aegir Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Aegir"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Aegir",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -321,7 +359,9 @@ local S2007S3Position = {
   },
   GUI = {
     Name = "S/2007 S 3 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S3"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S3",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -337,7 +377,9 @@ local BestlaPosition = {
   },
   GUI = {
     Name = "Bestla Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bestla"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bestla",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -353,7 +395,9 @@ local S2004S7Position = {
   },
   GUI = {
     Name = "S/2004 S 7 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S7"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S7",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -369,7 +413,9 @@ local S2006S3Position = {
   },
   GUI = {
     Name = "S/2006 S 3 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S3"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S3",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -385,7 +431,9 @@ local FenrirPosition = {
   },
   GUI = {
     Name = "Fenrir Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fenrir"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fenrir",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -401,7 +449,9 @@ local SurturPosition = {
   },
   GUI = {
     Name = "Surtur Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Surtur"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Surtur",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -417,7 +467,9 @@ local KariPosition = {
   },
   GUI = {
     Name = "Kari Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -433,7 +485,9 @@ local YmirPosition = {
   },
   GUI = {
     Name = "Ymir Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Ymir"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Ymir",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -449,7 +503,9 @@ local LogePosition = {
   },
   GUI = {
     Name = "Loge Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Loge"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Loge",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -465,7 +521,9 @@ local FornjotPosition = {
   },
   GUI = {
     Name = "Fornjot Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fornjot"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fornjot",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -481,7 +539,9 @@ local GridrPosition = {
   },
   GUI = {
     Name = "Gridr Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gridr"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gridr",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -497,7 +557,9 @@ local AngrbodaPosition = {
   },
   GUI = {
     Name = "Angrboda Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Angrboda"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Angrboda",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -513,7 +575,9 @@ local SkrymirPosition = {
   },
   GUI = {
     Name = "Skrymir Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skrymir"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skrymir",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -529,7 +593,9 @@ local GerdPosition = {
   },
   GUI = {
     Name = "Gerd Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gerd"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gerd",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -545,7 +611,9 @@ local S2004S26Position = {
   },
   GUI = {
     Name = "S/2004 S 26 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S26"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S26",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -561,7 +629,9 @@ local EggtherPosition = {
   },
   GUI = {
     Name = "Eggther Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Eggther"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Eggther",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -577,7 +647,9 @@ local BeliPosition = {
   },
   GUI = {
     Name = "Beli Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Beli"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Beli",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -593,7 +665,9 @@ local GunnlodPosition = {
   },
   GUI = {
     Name = "Gunnlod Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gunnlod"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gunnlod",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -609,7 +683,9 @@ local ThiazziPosition = {
   },
   GUI = {
     Name = "Thiazzi Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thiazzi"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thiazzi",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -625,7 +701,9 @@ local S2004S34Position = {
   },
   GUI = {
     Name = "S/2004 S 34 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S34"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S34",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -641,7 +719,9 @@ local AlvaldiPosition = {
   },
   GUI = {
     Name = "Alvaldi Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Alvaldi"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Alvaldi",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -657,7 +737,9 @@ local GeirrodPosition = {
   },
   GUI = {
     Name = "Geirrod Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Geirrod"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Geirrod",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -673,7 +755,9 @@ local S2004S28Position = {
   },
   GUI = {
     Name = "S/2004 S 28 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S28"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S28",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -689,7 +773,9 @@ local S2004S21Position = {
   },
   GUI = {
     Name = "S/2004 S 21 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S21"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S21",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -705,7 +791,9 @@ local S2004S36Position = {
   },
   GUI = {
     Name = "S/2004 S 36 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S36"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S36",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -721,7 +809,9 @@ local S2004S37Position = {
   },
   GUI = {
     Name = "S/2004 S 37 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S37"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S37",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -737,7 +827,9 @@ local S2004S39Position = {
   },
   GUI = {
     Name = "S/2004 S 39 Position",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S39"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S39",
+    Focusable = false,
+    Hidden = true
   }
 }
 
