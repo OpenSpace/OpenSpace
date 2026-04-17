@@ -53,6 +53,33 @@ namespace {
         const float aspectRatio = windowSize.x / windowSize.y;
         return glm::dvec2(vec.x * aspectRatio, vec.y);
     };
+
+    double computeRollFactor(const glm::dvec2& centroid,
+                             const std::vector<TouchInputHolder>& touchPoints,
+                             const std::vector<TouchInput>& lastProcessed)
+    {
+        double rollFactor = 0.0;
+        for (const TouchInputHolder& touchPoint : touchPoints) {
+            const auto it = std::find_if(
+                lastProcessed.begin(),
+                lastProcessed.end(),
+                [&touchPoint](const TouchInput& input) {
+                    return touchPoint.holdsInput(input);
+                }
+            );
+
+            if (it == lastProcessed.end()) {
+                continue;
+            }
+
+            const TouchInput& lastTouchPoint = *it;
+
+            float firstAngle = lastTouchPoint.angleToPos(centroid);
+            float currentAngle = touchPoint.latestInput().angleToPos(centroid);
+            rollFactor += validAngleDiff(firstAngle, currentAngle);
+        }
+        return rollFactor;
+     };
 } // namespace
 
 namespace openspace {
@@ -130,21 +157,21 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
 
             double zoomFactor = distToCenterEnd - distToCenterStart;
 
-            constexpr double Scale = 10.0;
-            updateVelocities.zoom = _sensitivity * Scale * zoomFactor;
+            constexpr double ZoomScale = 5.0;
+            updateVelocities.zoom = _sensitivity * ZoomScale * zoomFactor;
+
+            // Also apply rolling of fingers as part of the zooming gesture, so we can
+            // orient the view while zooming
+            double rollFactor = computeRollFactor(_centroid, touchPoints, lastProcessed);
+            constexpr double RollScale = 50.0;
+            updateVelocities.globalRoll = _sensitivity * RollScale * -rollFactor;
             break;
         }
         case InteractionType::Roll: {
-            // Add global roll rotation velocity
-            ghoul_assert(touchPoints.size() > 1, "Roll needs at least two touch points");
-
-            double rollFactor = 0.0;
-            for (const TouchInputHolder& touchPoint : touchPoints) {
-                float firstAngle = touchPoint.firstInput().angleToPos(_centroid);
-                float currentAngle = touchPoint.latestInput().angleToPos(_centroid);
-                rollFactor += validAngleDiff(firstAngle, currentAngle);
-            }
-            constexpr double Scale = 0.5;
+            // Apply global rotation velocity
+            // Note that whe a pure roll gesture was detected, we don't want to zoom
+            double rollFactor = computeRollFactor(_centroid, touchPoints, lastProcessed);
+            constexpr double Scale = 50.0;
             updateVelocities.globalRoll = _sensitivity * Scale * -rollFactor;
             break;
         }
@@ -253,7 +280,7 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
         }
     }
 
-    // Rolling may use more that two fingers
+    // Rolling may use two fingers or more
 
     // We have roll if one finger is still, or the total roll angles around the centroid
     // is over a given threshold (all fingers are moving)
@@ -314,9 +341,9 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
         double angleDiff = validAngleDiff(lastAngle, currentAngle);
 
         if (std::abs(angleDiff) < RollAngleThreshold) {
-            // Found a finger that is not rolling, no need to continue. S
+            // Found a finger that is not rolling, no need to continue
             allFingersRotating = false;
-            break; // No point continuing once this is set
+            break;
         }
     }
 
