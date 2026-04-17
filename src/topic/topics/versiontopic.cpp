@@ -24,6 +24,7 @@
 
 #include "openspace/topic/topics/versiontopic.h"
 
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/openspace.h>
 #include <openspace/topic/connection.h>
@@ -68,6 +69,50 @@ void VersionTopic::handleJson(const nlohmann::json&) {
 
 bool VersionTopic::isDone() const {
     return true;
+}
+
+Schema VersionTopic::Schema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "$defs": {
+            "SemanticVersion": {
+              "type": "object",
+              "properties": {
+                "major": { "type": "integer" },
+                "minor": { "type": "integer" },
+                "patch": { "type": "integer" }
+              },
+              "additionalProperties": false,
+              "required": ["major", "minor", "patch"]
+            }
+          },
+          "title": "VersionTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "version" },
+            "topicPayload": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false,
+              "required": []
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "openSpaceVersion": { "$ref": "#/$defs/SemanticVersion" },
+                "socketApiVersion": { "$ref": "#/$defs/SemanticVersion" },
+                "latestOpenSpaceVersion": { "$ref": "#/$defs/SemanticVersion" }
+              },
+              "additionalProperties": false,
+              "required": ["openSpaceVersion", "socketApiVersion"]
+            }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+    )");
+
+    return { "versiontopic", schema };
 }
 
 } // namespace openspace

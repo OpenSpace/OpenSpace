@@ -1,0 +1,63 @@
+{
+  "$defs": {
+    "SemanticVersion": {
+      "additionalProperties": false,
+      "properties": {
+        "major": {
+          "type": "integer"
+        },
+        "minor": {
+          "type": "integer"
+        },
+        "patch": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "major",
+        "minor",
+        "patch"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "data": {
+      "additionalProperties": false,
+      "properties": {
+        "latestOpenSpaceVersion": {
+          "$ref": "#/$defs/SemanticVersion"
+        },
+        "openSpaceVersion": {
+          "$ref": "#/$defs/SemanticVersion"
+        },
+        "socketApiVersion": {
+          "$ref": "#/$defs/SemanticVersion"
+        }
+      },
+      "required": [
+        "openSpaceVersion",
+        "socketApiVersion"
+      ],
+      "type": "object"
+    },
+    "topicId": {
+      "const": "version"
+    },
+    "topicPayload": {
+      "additionalProperties": false,
+      "properties": {},
+      "required": [],
+      "type": "object"
+    }
+  },
+  "required": [
+    "topicId",
+    "topicPayload",
+    "data"
+  ],
+  "title": "VersionTopic",
+  "type": "object"
+}
