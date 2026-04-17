@@ -1,0 +1,225 @@
+local transforms = asset.require("./transforms")
+
+
+
+local HalimedeLabel = {
+  Identifier = "HalimedeLabel",
+  Parent = transforms.HalimedePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Halimede",
+    FontSize = 70.0,
+    Size = 7.4,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Halimede Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Halimede",
+    Focusable = false,
+    Description = "Label for Neptune's moon Halimede (Irregular Prograde Moons)"
+  }
+}
+
+local PsamatheLabel = {
+  Identifier = "PsamatheLabel",
+  Parent = transforms.PsamathePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Psamathe",
+    FontSize = 70.0,
+    Size = 7.4,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Psamathe Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Psamathe",
+    Focusable = false,
+    Description = "Label for Neptune's moon Psamathe (Irregular Prograde Moons)"
+  }
+}
+
+local SaoLabel = {
+  Identifier = "SaoLabel",
+  Parent = transforms.SaoPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Sao",
+    FontSize = 70.0,
+    Size = 7.4,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Sao Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Sao",
+    Focusable = false,
+    Description = "Label for Neptune's moon Sao (Irregular Prograde Moons)"
+  }
+}
+
+local LaomedeiaLabel = {
+  Identifier = "LaomedeiaLabel",
+  Parent = transforms.LaomedeiaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Laomedeia",
+    FontSize = 70.0,
+    Size = 7.4,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Laomedeia Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Laomedeia",
+    Focusable = false,
+    Description = "Label for Neptune's moon Laomedeia (Irregular Prograde Moons)"
+  }
+}
+
+local NesoLabel = {
+  Identifier = "NesoLabel",
+  Parent = transforms.NesoPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Neso",
+    FontSize = 70.0,
+    Size = 7.4,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Neso Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Neso",
+    Focusable = false,
+    Description = "Label for Neptune's moon Neso (Irregular Prograde Moons)"
+  }
+}
+
+local S2002N5Label = {
+  Identifier = "S2002N5Label",
+  Parent = transforms.S2002N5Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S2002N5",
+    FontSize = 70.0,
+    Size = 7.4,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2002 N 5 Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Retrograde Moons/S2002N5",
+    Focusable = false,
+    Description = "Label for Neptune's moon S2002N5 (Irregular Retrograde Moons)"
+  }
+}
+
+local S2021N1Label = {
+  Identifier = "S2021N1Label",
+  Parent = transforms.S2021N1Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S2021N1",
+    FontSize = 70.0,
+    Size = 7.4,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 250.0 },
+    FadeWidths = { 1, 250.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2021 N 1 Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/S2021N1",
+    Focusable = false,
+    Description = "Label for Neptune's moon S2021N1 (Irregular Prograde Moons)"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(HalimedeLabel)
+  openspace.addSceneGraphNode(PsamatheLabel)
+  openspace.addSceneGraphNode(SaoLabel)
+  openspace.addSceneGraphNode(LaomedeiaLabel)
+  openspace.addSceneGraphNode(NesoLabel)
+  openspace.addSceneGraphNode(S2002N5Label)
+  openspace.addSceneGraphNode(S2021N1Label)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2021N1Label)
+  openspace.removeSceneGraphNode(S2002N5Label)
+  openspace.removeSceneGraphNode(NesoLabel)
+  openspace.removeSceneGraphNode(LaomedeiaLabel)
+  openspace.removeSceneGraphNode(SaoLabel)
+  openspace.removeSceneGraphNode(PsamatheLabel)
+  openspace.removeSceneGraphNode(HalimedeLabel)
+end)
+
+asset.export(HalimedeLabel)
+asset.export(PsamatheLabel)
+asset.export(SaoLabel)
+asset.export(LaomedeiaLabel)
+asset.export(NesoLabel)
+asset.export(S2002N5Label)
+asset.export(S2021N1Label)
+
+
+
+asset.meta = {
+  Name = "Neptune Irregular Prograde and Retrograde Moons Labels",
+  Description = [[Asset containing labels for Neptune' irregular prograde and retrograde
+    moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,190 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Halimede = {
+  Identifier = "Halimede",
+  Parent = transforms.HalimedePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 62000, 62000, 62000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_irregular_prograde",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Halimede",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Halimede"
+  }
+}
+
+local Psamathe = {
+  Identifier = "Psamathe",
+  Parent = transforms.PsamathePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 40000, 40000, 40000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_irregular_prograde",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Psamathe",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Psamathe"
+  }
+}
+
+local Sao = {
+  Identifier = "Sao",
+  Parent = transforms.SaoPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 44000, 44000, 44000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_irregular_prograde",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Sao",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Sao"
+  }
+}
+
+local Laomedeia = {
+  Identifier = "Laomedeia",
+  Parent = transforms.LaomedeiaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 42000, 42000, 42000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_irregular_prograde",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Laomedeia",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Laomedeia"
+  }
+}
+
+local Neso = {
+  Identifier = "Neso",
+  Parent = transforms.NesoPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 60000, 60000, 60000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_irregular_prograde",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Neso",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Neso"
+  }
+}
+
+local S2002N5 = {
+  Identifier = "S2002N5",
+  Parent = transforms.S2002N5Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 11500, 11500, 11500 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_irregular_retrograde",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "S/2002 N 5",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Retrograde Moons/S2002N5"
+  }
+}
+
+local S2021N1 = {
+  Identifier = "S2021N1",
+  Parent = transforms.S2021N1Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 7000, 7000, 7000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_irregular_prograde",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "S/2021 N 1",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/S2021N1"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Halimede)
+  openspace.addSceneGraphNode(Psamathe)
+  openspace.addSceneGraphNode(Sao)
+  openspace.addSceneGraphNode(Laomedeia)
+  openspace.addSceneGraphNode(Neso)
+  openspace.addSceneGraphNode(S2002N5)
+  openspace.addSceneGraphNode(S2021N1)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2021N1)
+  openspace.removeSceneGraphNode(S2002N5)
+  openspace.removeSceneGraphNode(Neso)
+  openspace.removeSceneGraphNode(Laomedeia)
+  openspace.removeSceneGraphNode(Sao)
+  openspace.removeSceneGraphNode(Psamathe)
+  openspace.removeSceneGraphNode(Halimede)
+end)
+
+asset.export(Halimede)
+asset.export(Psamathe)
+asset.export(Sao)
+asset.export(Laomedeia)
+asset.export(Neso)
+asset.export(S2002N5)
+asset.export(S2021N1)
+
+
+
+asset.meta = {
+  Name = "Neptune Irregular Prograde and Retrograde Moons Globes",
+  Description = [[Asset containing globes for Neptune' irregular prograde and retrograde
+    moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

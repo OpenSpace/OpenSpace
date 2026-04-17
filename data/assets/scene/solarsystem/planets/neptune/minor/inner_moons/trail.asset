@@ -1,0 +1,240 @@
+local transforms = asset.require("scene/solarsystem/planets/neptune/transforms")
+local kernel = asset.require("scene/solarsystem/planets/neptune/kernels095")
+local coreKernels = asset.require("spice/core")
+
+
+
+local NaiadTrail = {
+  Identifier = "NaiadTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Naiad,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 0.294,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "Naiad Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Naiad",
+    Focusable = false
+  }
+}
+
+local ThalassaTrail = {
+  Identifier = "ThalassaTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Thalassa,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 0.311,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "Thalassa Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Thalassa",
+    Focusable = false
+  }
+}
+
+local DespinaTrail = {
+  Identifier = "DespinaTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Despina,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 0.335,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "Despina Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Despina",
+    Focusable = false
+  }
+}
+
+local GalateaTrail = {
+  Identifier = "GalateaTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Galatea,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 0.429,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "Galatea Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Galatea",
+    Focusable = false
+  }
+}
+
+local LarissaTrail = {
+  Identifier = "LarissaTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Larissa,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 0.555,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "Larissa Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Larissa",
+    Focusable = false
+  }
+}
+
+local HippocampTrail = {
+  Identifier = "HippocampTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Hippocamp,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 0.936,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "Hippocamp Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Hippocamp",
+    Focusable = false
+  }
+}
+
+local ProteusTrail = {
+  Identifier = "ProteusTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Proteus,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 1.122,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor",
+    "moonTrail_minor_neptune"
+  },
+  GUI = {
+    Name = "Proteus Trail",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Proteus",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NaiadTrail)
+  openspace.addSceneGraphNode(ThalassaTrail)
+  openspace.addSceneGraphNode(DespinaTrail)
+  openspace.addSceneGraphNode(GalateaTrail)
+  openspace.addSceneGraphNode(LarissaTrail)
+  openspace.addSceneGraphNode(HippocampTrail)
+  openspace.addSceneGraphNode(ProteusTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(ProteusTrail)
+  openspace.removeSceneGraphNode(HippocampTrail)
+  openspace.removeSceneGraphNode(LarissaTrail)
+  openspace.removeSceneGraphNode(GalateaTrail)
+  openspace.removeSceneGraphNode(DespinaTrail)
+  openspace.removeSceneGraphNode(ThalassaTrail)
+  openspace.removeSceneGraphNode(NaiadTrail)
+end)
+
+asset.export(NaiadTrail)
+asset.export(ThalassaTrail)
+asset.export(DespinaTrail)
+asset.export(GalateaTrail)
+asset.export(LarissaTrail)
+asset.export(HippocampTrail)
+asset.export(ProteusTrail)
+
+
+
+asset.meta = {
+  Name = "Neptune Inner Moons Trails",
+  Description = [[Asset containing trails for Neptune' inner prograde moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

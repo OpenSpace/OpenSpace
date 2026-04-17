@@ -1,0 +1,170 @@
+local transforms = asset.require("scene/solarsystem/planets/neptune/transforms")
+local kernel = asset.require("scene/solarsystem/planets/neptune/kernels095")
+local coreKernels = asset.require("spice/core")
+
+
+
+local NaiadPosition = {
+  Identifier = "NaiadPosition",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Naiad,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    }
+  },
+  GUI = {
+    Name = "Naiad Position",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Naiad",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local ThalassaPosition = {
+  Identifier = "ThalassaPosition",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Thalassa,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    }
+  },
+  GUI = {
+    Name = "Thalassa Position",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Thalassa",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local DespinaPosition = {
+  Identifier = "DespinaPosition",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Despina,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    }
+  },
+  GUI = {
+    Name = "Despina Position",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Despina",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local GalateaPosition = {
+  Identifier = "GalateaPosition",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Galatea,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    }
+  },
+  GUI = {
+    Name = "Galatea Position",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Galatea",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local LarissaPosition = {
+  Identifier = "LarissaPosition",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Larissa,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    }
+  },
+  GUI = {
+    Name = "Larissa Position",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Larissa",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local HippocampPosition = {
+  Identifier = "HippocampPosition",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Hippocamp,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    }
+  },
+  GUI = {
+    Name = "Hippocamp Position",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Hippocamp",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local ProteusPosition = {
+  Identifier = "ProteusPosition",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Proteus,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    }
+  },
+  GUI = {
+    Name = "Proteus Position",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Proteus",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NaiadPosition)
+  openspace.addSceneGraphNode(ThalassaPosition)
+  openspace.addSceneGraphNode(DespinaPosition)
+  openspace.addSceneGraphNode(GalateaPosition)
+  openspace.addSceneGraphNode(LarissaPosition)
+  openspace.addSceneGraphNode(HippocampPosition)
+  openspace.addSceneGraphNode(ProteusPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(ProteusPosition)
+  openspace.removeSceneGraphNode(HippocampPosition)
+  openspace.removeSceneGraphNode(LarissaPosition)
+  openspace.removeSceneGraphNode(GalateaPosition)
+  openspace.removeSceneGraphNode(DespinaPosition)
+  openspace.removeSceneGraphNode(ThalassaPosition)
+  openspace.removeSceneGraphNode(NaiadPosition)
+end)
+
+asset.export(NaiadPosition)
+asset.export(ThalassaPosition)
+asset.export(DespinaPosition)
+asset.export(GalateaPosition)
+asset.export(LarissaPosition)
+asset.export(HippocampPosition)
+asset.export(ProteusPosition)
+
+
+
+asset.meta = {
+  Name = "Neptune Inner Moons Globe",
+  Description = [[Asset containing globes for Neptune' inner prograde moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
