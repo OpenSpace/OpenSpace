@@ -86,14 +86,84 @@ namespace {
         // days in seconds      : 86400
         // 30 days in seconds   : 2592000
         // 1 year in seconds    : 31556926
-        std::string_view min = Time(minTime).ISO8601();
-        std::string_view max = Time(maxTime).ISO8601();
+        const std::string min = std::format("{}Z", Time(minTime).ISO8601());
+        const std::string max = std::format("{}Z", Time(maxTime).ISO8601());
 
         return std::format("{}{}&time.min={}&time.max={}", baseUrl, dataID, min, max);
     }
 } // namepace
 
 namespace openspace {
+
+std::pair<double, double> DynamicFileSequenceDownloader::parseDataInfoResponse(
+                                                       const nlohmann::json& json)
+{
+    if (!json.contains("datafeeds") || !json["datafeeds"].is_array()) {
+        throw ghoul::RuntimeError(
+            "ISWA metadata response missing array 'datafeeds'"
+        );
+    }
+
+    const nlohmann::json& datafeeds = json["datafeeds"];
+    if (datafeeds.empty() || !datafeeds[0].is_object()) {
+        throw ghoul::RuntimeError("ISWA metadata response missing object 'datafeeds[0]'");
+    }
+
+    const nlohmann::json& datafeed = datafeeds[0];
+    if (!datafeed.contains("availability") || !datafeed["availability"].is_object()) {
+        throw ghoul::RuntimeError(
+            "ISWA metadata response missing object 'datafeeds[0].availability'"
+        );
+    }
+
+    const nlohmann::json& availability = datafeed["availability"];
+
+    if (!availability.contains("startDate") || !availability["startDate"].is_string()) {
+        throw ghoul::RuntimeError(
+            "ISWA metadata response missing string 'datafeeds[0].availability.startDate'"
+        );
+    }
+    if (!availability.contains("stopDate") || !availability["stopDate"].is_string()) {
+        throw ghoul::RuntimeError(
+            "ISWA metadata response missing string 'datafeeds[0].availability.stopDate'"
+        );
+    }
+
+    return {
+        Time::convertTime(availability["startDate"].get<std::string>()),
+        Time::convertTime(availability["stopDate"].get<std::string>())
+    };
+}
+
+std::vector<std::pair<std::string, std::string>>
+DynamicFileSequenceDownloader::parseAvailableFilesResponse(const nlohmann::json& json)
+{
+    if (!json.contains("files") || !json["files"].is_array()) {
+        throw ghoul::RuntimeError("ISWA file response missing array 'files'");
+    }
+
+    std::vector<std::pair<std::string, std::string>> files;
+    files.reserve(json["files"].size());
+
+    for (const nlohmann::json& element : json["files"]) {
+        if (!element.is_object()) {
+            throw ghoul::RuntimeError("ISWA file response contains non-object file entry");
+        }
+        if (!element.contains("timestamp") || !element["timestamp"].is_string()) {
+            throw ghoul::RuntimeError("ISWA file entry missing string 'timestamp'");
+        }
+        if (!element.contains("url") || !element["url"].is_string()) {
+            throw ghoul::RuntimeError("ISWA file entry missing string 'url'");
+        }
+
+        files.emplace_back(
+            element["timestamp"].get<std::string>(),
+            element["url"].get<std::string>()
+        );
+    }
+
+    return files;
+}
 
 DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
                                                             const std::string& identifier,
@@ -212,16 +282,16 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
                 throw ghoul::RuntimeError("Empty HTTP response");
             }
             nlohmann::json jsonResult = nlohmann::json::parse(responseText);
+            const std::pair<double, double> timeRange = parseDataInfoResponse(jsonResult);
             success = true;
-            _dataMinTime = Time::convertTime(
-                jsonResult["availability"]["startDate"].get<std::string>()
-            );
-            _dataMaxTime = Time::convertTime(
-                jsonResult["availability"]["stopDate"].get<std::string>()
-            );
+            _dataMinTime = timeRange.first;
+            _dataMaxTime = timeRange.second;
         }
         catch (const nlohmann::json::parse_error& e) {
             LWARNING(std::format("JSON parse error: {}", e.what()));
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LWARNING(std::format("ISWA metadata schema error: {}", e.what()));
         }
 
         if (!success) {
@@ -283,10 +353,14 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
             }
 
             jsonResult = nlohmann::json::parse(data);
+            parseAvailableFilesResponse(jsonResult);
             success = true;
         }
         catch (const nlohmann::json::parse_error& ex) {
             LERROR(std::format("JSON parsing error: '{}'", ex.what()));
+        }
+        catch (const ghoul::RuntimeError& ex) {
+            LERROR(std::format("ISWA file schema error: '{}'", ex.what()));
         }
 
         if (!success) {
@@ -311,10 +385,13 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
         return;
     }
 
+    const std::vector<std::pair<std::string, std::string>> files =
+        parseAvailableFilesResponse(jsonResult);
+
     int index = 0;
-    for (const nlohmann::json& element : jsonResult["files"]) {
-        std::string timestamp = element["timestamp"].get<std::string>();
-        std::string url = element["url"].get<std::string>();
+    for (const std::pair<std::string, std::string>& fileInfo : files) {
+        const std::string& timestamp = fileInfo.first;
+        const std::string& url = fileInfo.second;
 
         // An example of how one element in the list from the JSON-result look like:
         // timestamp = "2022-11-13T16:14:00.000";
