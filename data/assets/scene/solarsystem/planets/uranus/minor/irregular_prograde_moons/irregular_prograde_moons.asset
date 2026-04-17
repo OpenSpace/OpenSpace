@@ -1,0 +1,13 @@
+asset.require("./globe")
+asset.require("./trail")
+asset.require("./label", false)
+
+
+
+asset.meta = {
+  Name = "Meta asset for the Uranus Irregular Prograde Moons",
+  Description = [[Meta asset for the Uranus Irregular Prograde Moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,412 @@
+local transforms = asset.require("./transforms")
+
+
+
+local CordeliaLabel = {
+  Identifier = "CordeliaLabel",
+  Parent = transforms.CordeliaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Cordelia",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Cordelia Label",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cordelia",
+    Focusable = false
+  }
+}
+
+local OpheliaLabel = {
+  Identifier = "OpheliaLabel",
+  Parent = transforms.OpheliaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Ophelia",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Ophelia Label",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Ophelia",
+    Focusable = false
+  }
+}
+
+local BiancaLabel = {
+  Identifier = "BiancaLabel",
+  Parent = transforms.BiancaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Bianca",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Bianca Label",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Bianca",
+    Focusable = false
+  }
+}
+
+local CressidaLabel = {
+  Identifier = "CressidaLabel",
+  Parent = transforms.CressidaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Cressida",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Cressida Label",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cressida",
+    Focusable = false
+  }
+}
+
+local DesdemonaLabel = {
+  Identifier = "DesdemonaLabel",
+  Parent = transforms.DesdemonaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Desdemona",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Desdemona Label",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Desdemona",
+    Focusable = false
+  }
+}
+
+local JulietLabel = {
+  Identifier = "JulietLabel",
+  Parent = transforms.JulietPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Juliet",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Juliet Label",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Juliet",
+    Focusable = false
+  }
+}
+
+local PortiaLabel = {
+  Identifier = "PortiaLabel",
+  Parent = transforms.PortiaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Portia",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Portia Label",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Portia",
+    Focusable = false
+  }
+}
+
+local RosalindLabel = {
+  Identifier = "RosalindLabel",
+  Parent = transforms.RosalindPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Rosalind",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Rosalind Label",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Rosalind",
+    Focusable = false
+  }
+}
+
+local CupidLabel = {
+  Identifier = "CupidLabel",
+  Parent = transforms.CupidPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Cupid",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Cupid Label",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cupid",
+    Focusable = false
+  }
+}
+
+local BelindaLabel = {
+  Identifier = "BelindaLabel",
+  Parent = transforms.BelindaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Belinda",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Belinda Label",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Belinda",
+    Focusable = false
+  }
+}
+
+local PerditaLabel = {
+  Identifier = "PerditaLabel",
+  Parent = transforms.PerditaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Perdita",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Perdita Label",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Perdita",
+    Focusable = false
+  }
+}
+
+local PuckLabel = {
+  Identifier = "PuckLabel",
+  Parent = transforms.PuckPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Puck",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Puck Label",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Puck",
+    Focusable = false
+  }
+}
+
+local MabLabel = {
+  Identifier = "MabLabel",
+  Parent = transforms.MabPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Mab",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Mab Label",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Mab",
+    Focusable = false
+  }
+}
+
+local S2025U1Label = {
+  Identifier = "S2025U1Label",
+  Parent = transforms.S2025U1Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2025 U 1",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2025 U 1 Label",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/S2025U1",
+    Focusable = false
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(CordeliaLabel)
+  openspace.addSceneGraphNode(OpheliaLabel)
+  openspace.addSceneGraphNode(BiancaLabel)
+  openspace.addSceneGraphNode(CressidaLabel)
+  openspace.addSceneGraphNode(DesdemonaLabel)
+  openspace.addSceneGraphNode(JulietLabel)
+  openspace.addSceneGraphNode(PortiaLabel)
+  openspace.addSceneGraphNode(RosalindLabel)
+  openspace.addSceneGraphNode(CupidLabel)
+  openspace.addSceneGraphNode(BelindaLabel)
+  openspace.addSceneGraphNode(PerditaLabel)
+  openspace.addSceneGraphNode(PuckLabel)
+  openspace.addSceneGraphNode(MabLabel)
+  openspace.addSceneGraphNode(S2025U1Label)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(CordeliaLabel)
+  openspace.removeSceneGraphNode(OpheliaLabel)
+  openspace.removeSceneGraphNode(BiancaLabel)
+  openspace.removeSceneGraphNode(CressidaLabel)
+  openspace.removeSceneGraphNode(DesdemonaLabel)
+  openspace.removeSceneGraphNode(JulietLabel)
+  openspace.removeSceneGraphNode(PortiaLabel)
+  openspace.removeSceneGraphNode(RosalindLabel)
+  openspace.removeSceneGraphNode(CupidLabel)
+  openspace.removeSceneGraphNode(BelindaLabel)
+  openspace.removeSceneGraphNode(PerditaLabel)
+  openspace.removeSceneGraphNode(PuckLabel)
+  openspace.removeSceneGraphNode(MabLabel)
+  openspace.removeSceneGraphNode(S2025U1Label)
+end)
+
+asset.export(CordeliaLabel)
+asset.export(OpheliaLabel)
+asset.export(BiancaLabel)
+asset.export(CressidaLabel)
+asset.export(DesdemonaLabel)
+asset.export(JulietLabel)
+asset.export(PortiaLabel)
+asset.export(RosalindLabel)
+asset.export(CupidLabel)
+asset.export(BelindaLabel)
+asset.export(PerditaLabel)
+asset.export(PuckLabel)
+asset.export(MabLabel)
+asset.export(S2025U1Label)
+
+
+
+asset.meta = {
+  Name = "Uranus Irregular Retrograde Moons Labels",
+  Description = [[Asset containing labels for Uranus' irregular retrograde moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
