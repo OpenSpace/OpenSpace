@@ -107,7 +107,7 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
             glm::dvec2 diff = normalizeByAspectRatio(glm::dvec2(
                 endFinger0.pos - startFinger0.pos
             ));
-            constexpr glm::dvec2 Scale = glm::dvec2(5.0);
+            constexpr glm::dvec2 Scale = glm::dvec2(3.0);
             updateVelocities.globalRotation = _sensitivity * Scale * -diff;
             break;
         }
@@ -144,7 +144,7 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
                 float currentAngle = touchPoint.latestInput().angleToPos(_centroid);
                 rollFactor += validAngleDiff(firstAngle, currentAngle);
             }
-            constexpr double Scale = 1.0;
+            constexpr double Scale = 0.5;
             updateVelocities.globalRoll = _sensitivity * Scale * -rollFactor;
             break;
         }
@@ -159,7 +159,7 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
                 currentInput.speedY()
             ));
 
-            constexpr glm::dvec2 Scale = glm::dvec2(1.0);
+            constexpr glm::dvec2 Scale = glm::dvec2(0.8);
             updateVelocities.localRotation = _sensitivity * Scale * speed;
             break;
         }
