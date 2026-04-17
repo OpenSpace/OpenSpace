@@ -165,7 +165,7 @@ Schema DocumentationTopic::Schema() {
               "additionalProperties": false,
               "required": ["name", "identifier", "classes"]
             },
-            "Keybind": {
+            "DocsKeybind": {
               "type": "object",
               "properties": {
                 "name": { "type": "string" },
@@ -180,7 +180,7 @@ Schema DocumentationTopic::Schema() {
                 "name": { "const": "Keybindings" },
                 "keybindings": {
                   "type": "array",
-                  "items": { "$ref": "#/$defs/Keybind" }
+                  "items": { "$ref": "#/$defs/DocsKeybind" }
                 }
               },
               "additionalProperties": false,

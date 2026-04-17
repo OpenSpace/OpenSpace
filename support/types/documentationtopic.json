@@ -88,6 +88,22 @@
       ],
       "type": "object"
     },
+    "DocsKeybind": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "action"
+      ],
+      "type": "object"
+    },
     "DocumentationMember": {
       "additionalProperties": false,
       "properties": {
@@ -189,28 +205,12 @@
       ],
       "type": "object"
     },
-    "Keybind": {
-      "additionalProperties": false,
-      "properties": {
-        "action": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "name",
-        "action"
-      ],
-      "type": "object"
-    },
     "KeyboardData": {
       "additionalProperties": false,
       "properties": {
         "keybindings": {
           "items": {
-            "$ref": "#/$defs/Keybind"
+            "$ref": "#/$defs/DocsKeybind"
           },
           "type": "array"
         },
