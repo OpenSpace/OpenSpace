@@ -1,4 +1,4 @@
-local mimasAsset = asset.require("scene/solarsystem/planets/saturn/mimas/mimas")
+local mimasAsset = asset.require("scene/solarsystem/planets/saturn/mimas/globe")
 
 
 

@@ -1,4 +1,4 @@
-local dioneAsset = asset.require("scene/solarsystem/planets/saturn/dione/dione")
+local dioneAsset = asset.require("scene/solarsystem/planets/saturn/dione/globe")
 
 
 

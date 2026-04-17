@@ -1,0 +1,44 @@
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local TitaniaPosition = {
+  Identifier = "TitaniaPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Titania,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Titania Position",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Titania",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(TitaniaPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TitaniaPosition)
+end)
+
+asset.export(TitaniaPosition)
+
+
+
+asset.meta = {
+  Name = "Titania Position",
+  Description = [[Position for Titania]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

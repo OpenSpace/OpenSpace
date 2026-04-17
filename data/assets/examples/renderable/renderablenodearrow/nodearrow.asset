@@ -6,8 +6,8 @@
 -- that is suitable for the scene graph nodes they refer to. Here it is set based on
 -- the size of the Earth.
 
-local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
-local marsAsset = asset.require("scene/solarsystem/planets/mars/mars")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
+local marsAsset = asset.require("scene/solarsystem/planets/mars/globe")
 
 local Node = {
   Identifier = "RenderableNodeArrow_Example",

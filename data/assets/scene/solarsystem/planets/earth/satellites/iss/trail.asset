@@ -1,0 +1,62 @@
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+local coreKernels = asset.require("spice/core")
+
+
+
+local omm = asset.resource({
+  Name = "Satellite OMM Data (ISS)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_iss",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?CATNR=25544&FORMAT=kvn",
+  Filename = "ISS.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local IssTrail = {
+  Identifier = "ISS_trail",
+  Parent = earthAsset.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "GPTranslation",
+      Observer = earthAsset.EarthInertial.Identifier,
+      File = omm .. "ISS.txt",
+      Format = "OMM"
+    },
+    RenderBinMode = "PostDeferredTransparent",
+    Color = { 0.9, 0.6715, 0.0 },
+    Fade = 1.5,
+    Resolution = 320
+  },
+  Tag = { "earth_satellites", "ISS", "space_stations", "trails" },
+  GUI = {
+    Name = "ISS Trail",
+    Path = "/Solar System/Planets/Earth/Satellites/ISS",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  local i = openspace.space.readKeplerFile(omm .. "ISS.txt", "OMM")
+  IssTrail.Renderable.Period = i[1].Period / (60 * 60 * 24)
+
+  openspace.addSceneGraphNode(IssTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(IssTrail)
+end)
+
+asset.export(IssTrail)
+
+
+
+asset.meta = {
+  Name = "International Space Station Trail",
+  Description = "Trail for ISS. Trail data from Celestrak.",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.org/NORAD/elements/",
+  License = "CC-BY"
+}

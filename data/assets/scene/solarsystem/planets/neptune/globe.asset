@@ -1,0 +1,53 @@
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
+local neptuneKernels = asset.require("./kernels095")
+
+
+
+local Neptune = {
+  Identifier = "Neptune",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = neptuneKernels.ID.Neptune,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.Neptune,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 24764000.0, 24764000.0, 24314000.0 }
+  },
+  Tag = { "planet_solarSystem", "planet_giants" },
+  GUI = {
+    Name = "Neptune",
+    Path = "/Solar System/Planets/Neptune",
+    Description = "Neptune globe"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Neptune)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Neptune)
+end)
+
+asset.export(Neptune)
+
+
+
+asset.meta = {
+  Name = "Neptune",
+  Description = "Neptune globe",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

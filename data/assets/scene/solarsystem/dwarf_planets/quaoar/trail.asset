@@ -1,11 +1,11 @@
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
 
 
 
-local Trail = {
+local QuaoarTrail = {
   Identifier = "QuaoarTrail",
-  Parent = sunTransforms.SunEclipJ2000.Identifier,
+  Parent = sunAsset.SunEclipJ2000.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
     Enabled = asset.enabled,
@@ -26,14 +26,14 @@ local Trail = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Trail)
+  openspace.addSceneGraphNode(QuaoarTrail)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Trail)
+  openspace.removeSceneGraphNode(QuaoarTrail)
 end)
 
-asset.export("Trail", Trail)
+asset.export(QuaoarTrail)
 
 
 

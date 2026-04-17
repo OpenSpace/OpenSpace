@@ -1,0 +1,50 @@
+local transforms = asset.require("./transforms")
+
+
+
+local HyperionLabel = {
+  Identifier = "HyperionLabel",
+  Parent = transforms.HyperionPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Hyperion",
+    FontSize = 70.0,
+    Size = 6.2,
+    MinMaxSize = { 1, 35 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.5, 20.0 },
+    FadeWidths = { 0.3, 20.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Hyperion Label",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Hyperion",
+    Focusable = false,
+    Description = "Label for Saturn's moon Hyperion"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(HyperionLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(HyperionLabel)
+end)
+
+asset.export(HyperionLabel)
+
+
+
+asset.meta = {
+  Name = "Hyperion Label",
+  Description = "Label for Hyperion",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

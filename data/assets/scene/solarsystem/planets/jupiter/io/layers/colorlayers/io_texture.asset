@@ -1,4 +1,4 @@
-local ioAsset = asset.require("scene/solarsystem/planets/jupiter/io/io")
+local ioAsset = asset.require("scene/solarsystem/planets/jupiter/io/globe")
 
 
 

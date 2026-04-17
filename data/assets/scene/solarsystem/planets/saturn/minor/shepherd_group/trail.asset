@@ -1,0 +1,260 @@
+local transforms = asset.require("scene/solarsystem/planets/saturn/transforms")
+local kernels415 = asset.require("scene/solarsystem/planets/saturn/kernels415")
+local coreKernels = asset.require("spice/core")
+
+
+
+local syncedKernels = asset.resource({
+  Name = "Saturn Shepherd Moons Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_shepherd_kernels",
+  Version = 1
+})
+
+
+local kernels = {
+  syncedKernels .. "sat415.bsp",
+  syncedKernels .. "sat393_daphnis.bsp"
+}
+
+local PrometheusTrail = {
+  Identifier = "PrometheusTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Prometheus,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 0.612990038,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_shepherd",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Prometheus Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Prometheus",
+    Focusable = false
+  }
+}
+
+local PandoraTrail = {
+  Identifier = "PandoraTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Pandora,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 0.628504213,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_shepherd",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Pandora Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pandora",
+    Focusable = false
+  }
+}
+
+local AtlasTrail = {
+  Identifier = "AtlasTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Atlas,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 0.6016947883,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_shepherd",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Atlas Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Atlas",
+    Focusable = false
+  }
+}
+
+local JanusTrail = {
+  Identifier = "JanusTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Janus,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 0.694660342,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_shepherd",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Janus Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Janus",
+    Focusable = false
+  }
+}
+
+local EpimetheusTrail = {
+  Identifier = "EpimetheusTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Epimetheus,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 0.694333517,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_shepherd",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Epimetheus Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Epimetheus",
+    Focusable = false
+  }
+}
+
+local DaphnisTrail = {
+  Identifier = "DaphnisTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Daphnis,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 0.5940798,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_shepherd",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Daphnis Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Daphnis",
+    Focusable = false
+  }
+}
+
+local PanTrail = {
+  Identifier = "PanTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Pan,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 0.575050718,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_shepherd",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Pan Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pan",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PrometheusTrail)
+  openspace.addSceneGraphNode(PandoraTrail)
+  openspace.addSceneGraphNode(AtlasTrail)
+  openspace.addSceneGraphNode(JanusTrail)
+  openspace.addSceneGraphNode(EpimetheusTrail)
+  openspace.addSceneGraphNode(DaphnisTrail)
+  openspace.addSceneGraphNode(PanTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PrometheusTrail)
+  openspace.removeSceneGraphNode(PandoraTrail)
+  openspace.removeSceneGraphNode(AtlasTrail)
+  openspace.removeSceneGraphNode(JanusTrail)
+  openspace.removeSceneGraphNode(EpimetheusTrail)
+  openspace.removeSceneGraphNode(DaphnisTrail)
+  openspace.removeSceneGraphNode(PanTrail)
+end)
+
+asset.export(PrometheusTrail)
+asset.export(PandoraTrail)
+asset.export(AtlasTrail)
+asset.export(JanusTrail)
+asset.export(EpimetheusTrail)
+asset.export(DaphnisTrail)
+asset.export(PanTrail)
+
+
+
+asset.meta = {
+  Name = "Saturn Shepherd Moons Trails",
+  Description = [[Asset containing trails for Saturn's Shepherd moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

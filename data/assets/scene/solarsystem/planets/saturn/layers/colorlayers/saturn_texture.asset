@@ -1,4 +1,4 @@
-local saturnAsset = asset.require("scene/solarsystem/planets/saturn/saturn")
+local saturnAsset = asset.require("scene/solarsystem/planets/saturn/globe")
 
 
 

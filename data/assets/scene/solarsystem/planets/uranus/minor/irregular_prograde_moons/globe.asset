@@ -1,0 +1,45 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Margaret = {
+  Identifier = "Margaret",
+  Parent = transforms.MargaretPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 20000, 20000, 20000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_irregular_prograde",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Margaret",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Prograde Moons/Margaret"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Margaret)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Margaret)
+end)
+
+asset.export(Margaret)
+
+
+
+asset.meta = {
+  Name = "Uranus Irregular Prograde Moons Globes",
+  Description = [[Asset containing globes for Uranus' irregular prograde moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

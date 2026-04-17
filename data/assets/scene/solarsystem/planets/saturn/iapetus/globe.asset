@@ -1,0 +1,60 @@
+local transforms = asset.require("./transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local labelsPath = asset.resource({
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
+})
+
+
+local Iapetus = {
+  Identifier = "Iapetus",
+  Parent = transforms.IapetusPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = 734000,
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "iapetus.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 8.7,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 600000.0, 3500000.0 },
+      DistanceEPS = 250000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_major_saturn" },
+  GUI = {
+    Name = "Iapetus",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Iapetus"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Iapetus)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Iapetus)
+end)
+
+asset.export(Iapetus)
+
+
+
+asset.meta = {
+  Name = "Iapetus",
+  Description = "Iapetus globe",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

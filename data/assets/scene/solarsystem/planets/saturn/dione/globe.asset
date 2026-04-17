@@ -1,0 +1,59 @@
+local transforms = asset.require("./transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local labelsPath = asset.resource({
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
+})
+
+
+local Dione = {
+  Identifier = "Dione",
+  Parent = transforms.DionePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = 561400,
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "dione.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 8.7,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 500000.0, 3500000.0 },
+      DistanceEPS = 200000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_major_saturn" },
+  GUI = {
+    Path = "/Solar System/Planets/Saturn/Major Moons/Dione"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Dione)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Dione)
+end)
+
+asset.export(Dione)
+
+
+
+asset.meta = {
+  Name = "Dione",
+  Description = "Dione globe",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

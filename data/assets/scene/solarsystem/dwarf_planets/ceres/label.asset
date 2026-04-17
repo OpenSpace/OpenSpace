@@ -1,0 +1,46 @@
+local transforms = asset.require("./transforms")
+
+
+
+local CeresLabel = {
+  Identifier = "CeresLabel",
+  Parent = transforms.CeresPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Ceres",
+    FontSize = 70.0,
+    Size = 8.66,
+    MinMaxSize = { 1, 100 },
+    BlendMode = "Additive",
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "Ceres Label",
+    Path = "/Solar System/Dwarf Planets/Ceres",
+    Focusable = false,
+    Description = "Label for Ceres, visible at the solarsystem overview zoom level"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(CeresLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(CeresLabel)
+end)
+
+asset.export(CeresLabel)
+
+
+
+asset.meta = {
+  Name = "Ceres Label",
+  Description = "Label for Ceres",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

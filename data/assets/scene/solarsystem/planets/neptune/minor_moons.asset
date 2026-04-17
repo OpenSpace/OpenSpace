@@ -1,5 +1,5 @@
-asset.require("./inner_moons")
-asset.require("./irregular_moons")
+asset.require("./minor/inner_moons/inner_moons")
+asset.require("./minor/irregular_moons/irregular_moons")
 
 
 

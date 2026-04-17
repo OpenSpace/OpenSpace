@@ -1,0 +1,13 @@
+asset.require("./globe")
+asset.require("./trail")
+asset.require("./label", false)
+
+
+
+asset.meta = {
+  Name = "Meta asset for the Saturn Moons discovered in May 2023",
+  Description = [[Meta asset for Saturn Moons discovered in May 2023.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

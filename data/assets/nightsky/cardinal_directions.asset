@@ -1,4 +1,4 @@
-local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 
 
 
@@ -59,7 +59,7 @@ local CardinalDirectionSphere = {
     RenderBinMode = "PostDeferredTransparent",
     DisableDepth = true
   },
-  Tag = {"nightsky_marking"},
+  Tag = { "nightsky_marking" },
   GUI = {
     Name = "Cardinal Directions",
     Description = [[A textured sphere showing the cardinal directions.

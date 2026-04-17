@@ -1,10 +1,10 @@
-local transforms = asset.require("./titan")
+local globe = asset.require("./globe")
 
 
 
 local Atmosphere = {
   Identifier = "TitanAtmosphere",
-  Parent = transforms.Titan.Identifier,
+  Parent = globe.Titan.Identifier,
   Renderable = {
     Type = "RenderableAtmosphere",
     -- Atmosphere radius in Km

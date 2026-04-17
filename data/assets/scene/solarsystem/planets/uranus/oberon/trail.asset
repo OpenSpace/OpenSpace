@@ -1,0 +1,53 @@
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local OberonTrail = {
+  Identifier = "OberonTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Oberon,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 13.463239,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_major_uranus"
+  },
+  GUI = {
+    Name = "Oberon Trail",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Oberon",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(OberonTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(OberonTrail)
+end)
+
+asset.export(OberonTrail)
+
+
+
+asset.meta = {
+  Name = "Oberon Trail",
+  Description = [[Trail for Oberon]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

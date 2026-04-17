@@ -1,0 +1,53 @@
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local TitaniaTrail = {
+  Identifier = "TitaniaTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Titania,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 8.705872,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_major_uranus"
+  },
+  GUI = {
+    Name = "Titania Trail",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Titania",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(TitaniaTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TitaniaTrail)
+end)
+
+asset.export(TitaniaTrail)
+
+
+
+asset.meta = {
+  Name = "Titania Trail",
+  Description = [[Position for Trail]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

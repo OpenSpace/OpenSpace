@@ -1,0 +1,49 @@
+local transforms = asset.require("scene/solarsystem/planets/mars/transforms")
+local kernels = asset.require("scene/solarsystem/planets/mars/kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local PhobosTrail = {
+  Identifier = "PhobosTrail",
+  Parent = transforms.MarsBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Phobos,
+      Observer = coreKernels.ID.MarsBarycenter
+    },
+    Color = { 1.0, 0.605, 0.420 },
+    Period = 0.31891023,
+    Resolution = 1000
+  },
+  Tag = { "moonTrail_solarSystem", "moonTrail_terrestrial", "moonTrail_mars" },
+  GUI = {
+    Name = "Phobos Trail",
+    Path = "/Solar System/Planets/Mars/Moons/Phobos",
+    Focusable = false,
+    Description = "Trail for Phobos"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PhobosTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PhobosTrail)
+end)
+
+asset.export(PhobosTrail)
+
+
+
+asset.meta = {
+  Name = "Phobos",
+  Description = "Trail for Phobos",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

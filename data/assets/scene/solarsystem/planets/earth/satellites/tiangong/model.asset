@@ -1,0 +1,60 @@
+local transforms = asset.require("./transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+
+
+local models = asset.resource({
+  Name = "Tiangong Models",
+  Type = "HttpSynchronization",
+  Identifier = "tiangong_model",
+  Version = 1
+})
+
+
+local TiangongModel = {
+  Identifier = "Tiangong",
+  Parent = transforms.TiangongPosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "Tiangong",
+      XAxis = { 0.01, -0.09, 1.0 },
+      XAxisOrthogonal = true,
+      YAxis = earthAsset.EarthInertial.Identifier
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = asset.resource(models .. "tiangong.glb"),
+    LightSources = {
+      sunAsset.LightSource
+    },
+    PerformShading = true
+  },
+  Tag = { "earth_satellites", "Tiangong", "space_stations" },
+  GUI = {
+    Name = "Tiangong",
+    Path = "/Solar System/Planets/Earth/Satellites/Tiangong"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(TiangongModel)
+  openspace.setPropertyValueSingle("Scene.Tiangong.Rotation.yAxisInvertObject", true)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TiangongModel)
+end)
+
+asset.export(TiangongModel)
+
+
+
+asset.meta = {
+  Name = "Tiangong Model",
+  Description = [[Model for Tiangong. Model from Turbosquid.]],
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.org/"
+}

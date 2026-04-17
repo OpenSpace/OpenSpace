@@ -1,0 +1,61 @@
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
+
+
+
+local modelFolder = asset.resource({
+  Name = "Eris Model",
+  Type = "HttpSynchronization",
+  Identifier = "eris_model",
+  Version = 1
+})
+
+
+local ErisModel = {
+  Identifier = "ErisModel",
+  Parent = transforms.ErisPosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "ConstantRotation",
+      RotationAxis = { 0.0, 0.0, 1.0 },
+      RotationRate = 1.0 / (25.9 * 60.0 * 60.0)
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = modelFolder .. "Eris_1_2326.glb",
+    SpecularIntensity = 0.0,
+    AmbientIntensity = 0.0,
+    ModelScale = "Kilometer",
+    LightSources = {
+      sunAsset.LightSource
+    }
+  },
+  GUI = {
+    Name = "Eris",
+    Path = "/Solar System/Dwarf Planets/Eris",
+    Description = [[A 3D model of Eris, Credit: NASA Visualization Technology
+      Applications and Development (VTAD)."]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(ErisModel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(ErisModel)
+end)
+
+asset.export(ErisModel)
+
+
+
+asset.meta = {
+  Name = "Eris Model",
+  Description = [[Model of Eris]],
+  Author = "OpenSpace Team",
+  URL = "https://solarsystem.nasa.gov/planets/dwarf-planets/haumea/in-depth/",
+  License = "JPL/NASA"
+}

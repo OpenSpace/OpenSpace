@@ -1,0 +1,49 @@
+local transforms = asset.require("scene/solarsystem/planets/mars/transforms")
+local kernels = asset.require("scene/solarsystem/planets/mars/kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local DeimosTrail = {
+  Identifier = "DeimosTrail",
+  Parent = transforms.MarsBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Deimos,
+      Observer = coreKernels.ID.MarsBarycenter
+    },
+    Color = { 1.0, 0.605, 0.420 },
+    Period = 1.263,
+    Resolution = 1000
+  },
+  Tag = { "moonTrail_solarSystem", "moonTrail_terrestrial", "moonTrail_mars" },
+  GUI = {
+    Name = "Deimos Trail",
+    Path = "/Solar System/Planets/Mars/Moons/Deimos",
+    Focusable = false,
+    Description = "Trail for Deimos"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(DeimosTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(DeimosTrail)
+end)
+
+asset.export(DeimosTrail)
+
+
+
+asset.meta = {
+  Name = "Deimos",
+  Description = "Trail for Deimos",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,7 +1,7 @@
-local hydraAsset = asset.require("scene/solarsystem/dwarf_planets/pluto/minor/hydra")
-local kerberosAsset = asset.require("scene/solarsystem/dwarf_planets/pluto/minor/kerberos")
-local nixAsset = asset.require("scene/solarsystem/dwarf_planets/pluto/minor/nix")
-local styxAsset = asset.require("scene/solarsystem/dwarf_planets/pluto/minor/styx")
+local hydraAsset = asset.require("scene/solarsystem/dwarf_planets/pluto/moons/hydra/globe")
+local kerberosAsset = asset.require("scene/solarsystem/dwarf_planets/pluto/moons/kerberos/globe")
+local nixAsset = asset.require("scene/solarsystem/dwarf_planets/pluto/moons/nix/globe")
+local styxAsset = asset.require("scene/solarsystem/dwarf_planets/pluto/moons/styx/globe")
 
 
 

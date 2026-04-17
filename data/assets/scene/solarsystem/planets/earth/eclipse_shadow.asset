@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local transforms = asset.require("scene/solarsystem/planets/earth/moon/globe")
 local coreKernels = asset.require("spice/core")
 
 

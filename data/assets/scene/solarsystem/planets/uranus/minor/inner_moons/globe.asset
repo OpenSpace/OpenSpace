@@ -1,0 +1,357 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Cordelia = {
+  Identifier = "Cordelia",
+  Parent = transforms.CordeliaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 40000, 40000, 40000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Cordelia",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cordelia"
+  }
+}
+
+local Ophelia = {
+  Identifier = "Ophelia",
+  Parent = transforms.OpheliaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 43000, 43000, 43000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Ophelia",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Ophelia"
+  }
+}
+
+local Bianca = {
+  Identifier = "Bianca",
+  Parent = transforms.BiancaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 64000, 46000, 46000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Bianca",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Bianca"
+  }
+}
+
+local Cressida = {
+  Identifier = "Cressida",
+  Parent = transforms.CressidaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 80000, 80000, 80000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Cressida",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cressida"
+  }
+}
+
+local Desdemona = {
+  Identifier = "Desdemona",
+  Parent = transforms.DesdemonaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 64000, 64000, 64000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Desdemona",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Desdemona"
+  }
+}
+
+local Juliet = {
+  Identifier = "Juliet",
+  Parent = transforms.JulietPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 94000, 94000, 94000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Juliet",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Juliet"
+  }
+}
+
+local Portia = {
+  Identifier = "Portia",
+  Parent = transforms.PortiaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 135000, 135000, 135000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Portia",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Portia"
+  }
+}
+
+local Rosalind = {
+  Identifier = "Rosalind",
+  Parent = transforms.RosalindPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 72000, 72000, 72000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Rosalind",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Rosalind"
+  }
+}
+
+local Cupid = {
+  Identifier = "Cupid",
+  Parent = transforms.CupidPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 18000, 18000, 18000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Cupid",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cupid"
+  }
+}
+
+local Belinda = {
+  Identifier = "Belinda",
+  Parent = transforms.BelindaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 90000, 90000, 90000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Belinda",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Belinda"
+  }
+}
+
+local Perdita = {
+  Identifier = "Perdita",
+  Parent = transforms.PerditaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 30000, 30000, 30000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Perdita",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Perdita"
+  }
+}
+
+local Puck = {
+  Identifier = "Puck",
+  Parent = transforms.PuckPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 162000, 162000, 162000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Puck",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Puck"
+  }
+}
+
+local Mab = {
+  Identifier = "Mab",
+  Parent = transforms.MabPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 25000, 25000, 25000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Mab",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Mab"
+  }
+}
+
+local S2025U1 = {
+  Identifier = "S2025U1",
+  Parent = transforms.S2025U1Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 5000, 5000, 5000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "S/2025 U 1",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/S2025U1"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Cordelia)
+  openspace.addSceneGraphNode(Ophelia)
+  openspace.addSceneGraphNode(Bianca)
+  openspace.addSceneGraphNode(Cressida)
+  openspace.addSceneGraphNode(Desdemona)
+  openspace.addSceneGraphNode(Juliet)
+  openspace.addSceneGraphNode(Portia)
+  openspace.addSceneGraphNode(Rosalind)
+  openspace.addSceneGraphNode(Cupid)
+  openspace.addSceneGraphNode(Belinda)
+  openspace.addSceneGraphNode(Perdita)
+  openspace.addSceneGraphNode(Puck)
+  openspace.addSceneGraphNode(Mab)
+  openspace.addSceneGraphNode(S2025U1)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Cordelia)
+  openspace.removeSceneGraphNode(Ophelia)
+  openspace.removeSceneGraphNode(Bianca)
+  openspace.removeSceneGraphNode(Cressida)
+  openspace.removeSceneGraphNode(Desdemona)
+  openspace.removeSceneGraphNode(Juliet)
+  openspace.removeSceneGraphNode(Portia)
+  openspace.removeSceneGraphNode(Rosalind)
+  openspace.removeSceneGraphNode(Cupid)
+  openspace.removeSceneGraphNode(Belinda)
+  openspace.removeSceneGraphNode(Perdita)
+  openspace.removeSceneGraphNode(Puck)
+  openspace.removeSceneGraphNode(Mab)
+  openspace.removeSceneGraphNode(S2025U1)
+end)
+
+asset.export(Cordelia)
+asset.export(Ophelia)
+asset.export(Bianca)
+asset.export(Cressida)
+asset.export(Desdemona)
+asset.export(Juliet)
+asset.export(Portia)
+asset.export(Rosalind)
+asset.export(Cupid)
+asset.export(Belinda)
+asset.export(Perdita)
+asset.export(Puck)
+asset.export(Mab)
+asset.export(S2025U1)
+
+
+
+asset.meta = {
+  Name = "Uranus Irregular Retrograde Moons Globes",
+  Description = [[Asset containing globes for Uranus' irregular retrograde moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

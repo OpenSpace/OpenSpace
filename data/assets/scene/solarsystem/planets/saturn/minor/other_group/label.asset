@@ -1,0 +1,327 @@
+local transforms = asset.require("./transforms")
+
+
+
+local AegaeonLabel = {
+  Identifier = "AegaeonLabel",
+  Parent = transforms.AegaeonPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Aegaeon",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1500.0 },
+    FadeWidths = { 100.0, 1500.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "Aegaeon Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Aegaeon",
+    Focusable = false
+  }
+}
+
+local MethoneLabel = {
+  Identifier = "MethoneLabel",
+  Parent = transforms.MethonePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Methone",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1500.0 },
+    FadeWidths = { 100.0, 1500.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "Methone Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Methone",
+    Focusable = false
+  }
+}
+
+local AntheLabel = {
+  Identifier = "AntheLabel",
+  Parent = transforms.AnthePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Anthe",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1500.0 },
+    FadeWidths = { 100.0, 1500.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "Anthe Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Anthe",
+    Focusable = false
+  }
+}
+
+local PalleneLabel = {
+  Identifier = "PalleneLabel",
+  Parent = transforms.PallenePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Pallene",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1500.0 },
+    FadeWidths = { 100.0, 1500.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "Pallene Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Pallene",
+    Focusable = false
+  }
+}
+
+local TelestoLabel = {
+  Identifier = "TelestoLabel",
+  Parent = transforms.TelestoPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Telesto",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1500.0 },
+    FadeWidths = { 100.0, 1500.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "Telesto Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Telesto",
+    Focusable = false
+  }
+}
+
+local CalypsoLabel = {
+  Identifier = "CalypsoLabel",
+  Parent = transforms.CalypsoPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Calypso",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1500.0 },
+    FadeWidths = { 100.0, 1500.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "Calypso Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Calypso",
+    Focusable = false
+  }
+}
+
+local HeleneLabel = {
+  Identifier = "HeleneLabel",
+  Parent = transforms.HelenePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Helene",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1500.0 },
+    FadeWidths = { 100.0, 1500.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "Helene Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Helene",
+    Focusable = false
+  }
+}
+
+local PolydeucesLabel = {
+  Identifier = "PolydeucesLabel",
+  Parent = transforms.PolydeucesPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Polydeuces",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1500.0 },
+    FadeWidths = { 100.0, 1500.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "Polydeuces Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Polydeuces",
+    Focusable = false
+  }
+}
+
+local S2004S24Label = {
+  Identifier = "S2004S24Label",
+  Parent = transforms.S2004S24Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 24",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 250.0, 1500.0 },
+    FadeWidths = { 100.0, 1500.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2004 S 24 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/S2004S24",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(AegaeonLabel)
+  openspace.addSceneGraphNode(MethoneLabel)
+  openspace.addSceneGraphNode(AntheLabel)
+  openspace.addSceneGraphNode(PalleneLabel)
+  openspace.addSceneGraphNode(TelestoLabel)
+  openspace.addSceneGraphNode(CalypsoLabel)
+  openspace.addSceneGraphNode(HeleneLabel)
+  openspace.addSceneGraphNode(PolydeucesLabel)
+  openspace.addSceneGraphNode(S2004S24Label)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(AegaeonLabel)
+  openspace.removeSceneGraphNode(MethoneLabel)
+  openspace.removeSceneGraphNode(AntheLabel)
+  openspace.removeSceneGraphNode(PalleneLabel)
+  openspace.removeSceneGraphNode(TelestoLabel)
+  openspace.removeSceneGraphNode(CalypsoLabel)
+  openspace.removeSceneGraphNode(HeleneLabel)
+  openspace.removeSceneGraphNode(PolydeucesLabel)
+  openspace.removeSceneGraphNode(S2004S24Label)
+end)
+
+asset.export(AegaeonLabel)
+asset.export(MethoneLabel)
+asset.export(AntheLabel)
+asset.export(PalleneLabel)
+asset.export(TelestoLabel)
+asset.export(CalypsoLabel)
+asset.export(HeleneLabel)
+asset.export(PolydeucesLabel)
+asset.export(S2004S24Label)
+
+
+
+asset.meta = {
+  Name = "Saturn Other Group Moons Labels",
+  Description = [[Asset containing labels for Saturn's Other Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

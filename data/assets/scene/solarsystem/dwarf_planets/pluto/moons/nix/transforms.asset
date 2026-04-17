@@ -1,0 +1,43 @@
+local plutoAsset = asset.require("scene/solarsystem/dwarf_planets/pluto/transforms")
+local plutoKernels = asset.require("scene/solarsystem/dwarf_planets/pluto/kernels")
+
+
+
+local NixPosition = {
+  Identifier = "NixPosition",
+  Parent = plutoAsset.PlutoBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = plutoKernels.ID.Nix,
+      Observer = plutoKernels.ID.PlutoBarycenter
+    }
+  },
+  GUI = {
+    Name = "Nix Position",
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Nix",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NixPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(NixPosition)
+end)
+
+asset.export(NixPosition)
+
+
+
+asset.meta = {
+  Name = "Nix Position",
+  Description = "Position for Pluto's moon Nix",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

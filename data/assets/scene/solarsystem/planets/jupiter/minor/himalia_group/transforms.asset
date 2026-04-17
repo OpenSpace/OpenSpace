@@ -1,0 +1,212 @@
+local transforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
+local kernels347 = asset.require("scene/solarsystem/planets/jupiter/kernels347")
+local coreKernels = asset.require("spice/core")
+
+
+
+local LedaPosition = {
+  Identifier = "LedaPosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Leda,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Leda Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Leda",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local HimaliaPosition = {
+  Identifier = "HimaliaPosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Himalia,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Himalia Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Himalia",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local LysitheaPosition = {
+  Identifier = "LysitheaPosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Lysithea,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Lysithea Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Lysithea",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local ElaraPosition = {
+  Identifier = "ElaraPosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Elara,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Elara Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Elara",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local DiaPosition = {
+  Identifier = "DiaPosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Dia,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Dia Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Dia",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2011J3Position = {
+  Identifier = "S2011J3Position",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2011J3,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2011 J 3 Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/S2011J3",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2018J2Position = {
+  Identifier = "S2018J2Position",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2018J2,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2018 J 2 Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/S2018J2",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local PandiaPosition = {
+  Identifier = "PandiaPosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Pandia,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Pandia Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Pandia",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local ErsaPosition = {
+  Identifier = "ErsaPosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Ersa,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Ersa Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Ersa",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(LedaPosition)
+  openspace.addSceneGraphNode(HimaliaPosition)
+  openspace.addSceneGraphNode(LysitheaPosition)
+  openspace.addSceneGraphNode(ElaraPosition)
+  openspace.addSceneGraphNode(DiaPosition)
+  openspace.addSceneGraphNode(S2011J3Position)
+  openspace.addSceneGraphNode(S2018J2Position)
+  openspace.addSceneGraphNode(PandiaPosition)
+  openspace.addSceneGraphNode(ErsaPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(ErsaPosition)
+  openspace.removeSceneGraphNode(PandiaPosition)
+  openspace.removeSceneGraphNode(S2018J2Position)
+  openspace.removeSceneGraphNode(S2011J3Position)
+  openspace.removeSceneGraphNode(DiaPosition)
+  openspace.removeSceneGraphNode(ElaraPosition)
+  openspace.removeSceneGraphNode(LysitheaPosition)
+  openspace.removeSceneGraphNode(HimaliaPosition)
+  openspace.removeSceneGraphNode(LedaPosition)
+end)
+
+asset.export(LedaPosition)
+asset.export(HimaliaPosition)
+asset.export(LysitheaPosition)
+asset.export(ElaraPosition)
+asset.export(DiaPosition)
+asset.export(S2011J3Position)
+asset.export(S2018J2Position)
+asset.export(PandiaPosition)
+asset.export(ErsaPosition)
+
+
+
+asset.meta = {
+  Name = "Jupiter Himalia Group Moons Positions",
+  Description = [[Asset containing positions for Jupiter's Himalia Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,13 @@
+asset.require("./globe")
+asset.require("./trail")
+asset.require("./label", false)
+
+
+
+asset.meta = {
+  Name = "Meta asset for the Jupiter Other Groups Moons",
+  Description = [[Meta asset for the Jupiter Other Groups Moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -5,7 +5,7 @@
 -- the Solar System barycenter. Some appearance related properties are also changed to
 -- customize the look of the arrow, but default values are used for its size.
 
-local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local Node = {

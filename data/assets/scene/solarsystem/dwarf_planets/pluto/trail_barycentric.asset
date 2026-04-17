@@ -1,6 +1,6 @@
 local transforms = asset.require("./transforms")
 local coreKernels = asset.require("spice/core")
-local plutoKernels = asset.require("./kernels")
+local kernels = asset.require("./kernels")
 
 
 
@@ -11,8 +11,8 @@ local PlutoTrailBarycentric = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = plutoKernels.ID.Pluto,
-      Observer = plutoKernels.ID.PlutoBarycenter
+      Target = kernels.ID.Pluto,
+      Observer = kernels.ID.PlutoBarycenter
     },
     Color = { 0.00, 0.62, 1.00 },
     Period = 6.38723,

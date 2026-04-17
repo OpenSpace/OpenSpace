@@ -1,0 +1,44 @@
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local UmbrielPosition = {
+  Identifier = "UmbrielPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Umbriel,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Umbriel Position",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(UmbrielPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(UmbrielPosition)
+end)
+
+asset.export(UmbrielPosition)
+
+
+
+asset.meta = {
+  Name = "Miranda Position",
+  Description = [[Miranda Position]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,30 @@
+asset.require("./base_layers")
+
+local server = openspace.layerServer();
+if (server == "All") then
+  asset.require("./newyork_layers")
+  asset.require("./sweden_layers")
+  asset.require("./utah_layers")
+elseif (server == "NewYork") then
+  asset.require("./newyork_layers")
+elseif (server == "Sweden") then
+  asset.require("./sweden_layers")
+elseif (server == "Utah") then
+  asset.require("./utah_layers")
+end
+
+
+
+asset.meta = {
+  Name = "Default Mercury Layers",
+  Description = [[Default Mercury layers are: Aluminium Abundance, Calcium Abundance,
+    Iron Abundance, Magnesium Abundance, Silicon Abundance, Messenger MDIS,
+    Messenger Mosaic, Messenger Mosaic2, Messenger BDR, Messenger HIE, Messenger HIW,
+    Messenger LOI, Messenger SHADE, Messenger MDR, Messenger MP3, and Messenger DEM (3D).
+
+    Layers loaded from all servers
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

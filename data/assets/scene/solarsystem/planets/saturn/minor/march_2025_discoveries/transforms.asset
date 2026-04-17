@@ -1,0 +1,2711 @@
+local transforms = asset.require("scene/solarsystem/planets/saturn/transforms")
+local kernels455 = asset.require("scene/solarsystem/planets/saturn/kernels455")
+local coreKernels = asset.require("spice/core")
+
+
+
+local S2004S54Position = {
+  Identifier = "S2004S54Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2004S54,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2004 S 54 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2004S54",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2004S55Position = {
+  Identifier = "S2004S55Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2004S55,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2004 S 55 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2004S55",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2004S56Position = {
+  Identifier = "S2004S56Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2004S56,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2004 S 56 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S56",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2004S57Position = {
+  Identifier = "S2004S57Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2004S57,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2004 S 57 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S57",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2004S58Position = {
+  Identifier = "S2004S58Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2004S58,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2004 S 58 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2004S58",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2004S59Position = {
+  Identifier = "S2004S59Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2004S59,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2004 S 59 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S59",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2004S60Position = {
+  Identifier = "S2004S60Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2004S60,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2004 S 60 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2004S60",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2004S61Position = {
+  Identifier = "S2004S61Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2004S61,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2004 S 61 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S61",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2005S6Position = {
+  Identifier = "S2005S6Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2005S6,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2005 S 6 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2005S6",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2005S7Position = {
+  Identifier = "S2005S7Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2005S7,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2005 S 7 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2005S7",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2006S21Position = {
+  Identifier = "S2006S21Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2006S21,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2006 S 21 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S21",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2006S22Position = {
+  Identifier = "S2006S22Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2006S22,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2006 S 22 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S22",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2006S23Position = {
+  Identifier = "S2006S23Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2006S23,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2006 S 23 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2006S23",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2006S24Position = {
+  Identifier = "S2006S24Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2006S24,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2006 S 24 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S24",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2006S25Position = {
+  Identifier = "S2006S25Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2006S25,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2006 S 25 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S25",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2006S26Position = {
+  Identifier = "S2006S26Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2006S26,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2006 S 26 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S26",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2006S27Position = {
+  Identifier = "S2006S27Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2006S27,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2006 S 27 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S27",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2006S28Position = {
+  Identifier = "S2006S28Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2006S28,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2006 S 28 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S28",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2006S29Position = {
+  Identifier = "S2006S29Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2006S29,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2006 S 29 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2006S29",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2007S10Position = {
+  Identifier = "S2007S10Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2007S10,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2007 S 10 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2007S10",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2007S11Position = {
+  Identifier = "S2007S11Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2007S11,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2007 S 11 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2007S11",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S22Position = {
+  Identifier = "S2019S22Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S22,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 22 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2019S22",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S23Position = {
+  Identifier = "S2019S23Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S23,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 23 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2019S23",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S24Position = {
+  Identifier = "S2019S24Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S24,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 24 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2019S24",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S25Position = {
+  Identifier = "S2019S25Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S25,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 25 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2019S25",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S26Position = {
+  Identifier = "S2019S26Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S26,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 26 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2019S26",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S27Position = {
+  Identifier = "S2019S27Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S27,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 27 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S27",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S28Position = {
+  Identifier = "S2019S28Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S28,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 28 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S28",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S29Position = {
+  Identifier = "S2019S29Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S29,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 29 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2019S29",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S30Position = {
+  Identifier = "S2019S30Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S30,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 30 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S30",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S31Position = {
+  Identifier = "S2019S31Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S31,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 31 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2019S31",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S32Position = {
+  Identifier = "S2019S32Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S32,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 32 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2019S32",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S33Position = {
+  Identifier = "S2019S33Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S33,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 33 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S33",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S34Position = {
+  Identifier = "S2019S34Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S34,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 34 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2019S34",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S35Position = {
+  Identifier = "S2019S35Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S35,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 35 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S35",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S36Position = {
+  Identifier = "S2019S36Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S36,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 36 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S36",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S37Position = {
+  Identifier = "S2019S37Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S37,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 37 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2019S37",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S38Position = {
+  Identifier = "S2019S38Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S38,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 38 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S38",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S39Position = {
+  Identifier = "S2019S39Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S39,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 39 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S39",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S40Position = {
+  Identifier = "S2019S40Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S40,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 40 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S40",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S41Position = {
+  Identifier = "S2019S41Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S41,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 41 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S41",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S42Position = {
+  Identifier = "S2019S42Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S42,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 42 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S42",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S43Position = {
+  Identifier = "S2019S43Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S43,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 43 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S43",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2019S44Position = {
+  Identifier = "S2019S44Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2019S44,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2019 S 44 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S44",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S11Position = {
+  Identifier = "S2020S11Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S11,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 11 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2020S11",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S12Position = {
+  Identifier = "S2020S12Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S12,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 12 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2020S12",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S13Position = {
+  Identifier = "S2020S13Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S13,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 13 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2020S13",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S14Position = {
+  Identifier = "S2020S14Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S14,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 14 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S14",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S15Position = {
+  Identifier = "S2020S15Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S15,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 15 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2020S15",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S16Position = {
+  Identifier = "S2020S16Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S16,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 16 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S16",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S17Position = {
+  Identifier = "S2020S17Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S17,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 17 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2020S17",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S18Position = {
+  Identifier = "S2020S18Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S18,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 18 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S18",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S19Position = {
+  Identifier = "S2020S19Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S19,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 19 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2020S19",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S20Position = {
+  Identifier = "S2020S20Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S20,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 20 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S20",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S21Position = {
+  Identifier = "S2020S21Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S21,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 21 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S21",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S22Position = {
+  Identifier = "S2020S22Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S22,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 22 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S22",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S23Position = {
+  Identifier = "S2020S23Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S23,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 23 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S23",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S24Position = {
+  Identifier = "S2020S24Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S24,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 24 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S24",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S25Position = {
+  Identifier = "S2020S25Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S25,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 25 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S25",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S26Position = {
+  Identifier = "S2020S26Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S26,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 26 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S26",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S27Position = {
+  Identifier = "S2020S27Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S27,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 27 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2020S27",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S28Position = {
+  Identifier = "S2020S28Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S28,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 28 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S28",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S29Position = {
+  Identifier = "S2020S29Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S29,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 29 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S29",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S30Position = {
+  Identifier = "S2020S30Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S30,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 30 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2020S30",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S31Position = {
+  Identifier = "S2020S31Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S31,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 31 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S31",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S32Position = {
+  Identifier = "S2020S32Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S32,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 32 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S32",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S33Position = {
+  Identifier = "S2020S33Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S33,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 33 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S33",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S34Position = {
+  Identifier = "S2020S34Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S34,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 34 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S34",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S35Position = {
+  Identifier = "S2020S35Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S35,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 35 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2020S35",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S36Position = {
+  Identifier = "S2020S36Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S36,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 36 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S36",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S37Position = {
+  Identifier = "S2020S37Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S37,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 37 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2020S37",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S38Position = {
+  Identifier = "S2020S38Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S38,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 38 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S38",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S39Position = {
+  Identifier = "S2020S39Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S39,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 39 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S39",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S40Position = {
+  Identifier = "S2020S40Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S40,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 40 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S40",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S41Position = {
+  Identifier = "S2020S41Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S41,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 41 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S41",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S42Position = {
+  Identifier = "S2020S42Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S42,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 42 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S42",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S43Position = {
+  Identifier = "S2020S43Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S43,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 43 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S43",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2020S44Position = {
+  Identifier = "S2020S44Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2020S44,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2020 S 44 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S44",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S1Position = {
+  Identifier = "S2023S1Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S1,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 1 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2023S1",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S2Position = {
+  Identifier = "S2023S2Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S2,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 2 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2023S2",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S3Position = {
+  Identifier = "S2023S3Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S3,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 3 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2023S3",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S4Position = {
+  Identifier = "S2023S4Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S4,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 4 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S4",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S5Position = {
+  Identifier = "S2023S5Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S5,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 5 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S5",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S6Position = {
+  Identifier = "S2023S6Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S6,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 6 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2023S6",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S7Position = {
+  Identifier = "S2023S7Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S7,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 7 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2023S7",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S8Position = {
+  Identifier = "S2023S8Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S8,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 8 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S8",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S9Position = {
+  Identifier = "S2023S9Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S9,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 9 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2023S9",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S10Position = {
+  Identifier = "S2023S10Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S10,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 10 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S10",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S11Position = {
+  Identifier = "S2023S11Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S11,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 11 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S11",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S12Position = {
+  Identifier = "S2023S12Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S12,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 12 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S12",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S13Position = {
+  Identifier = "S2023S13Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S13,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 13 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S13",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S14Position = {
+  Identifier = "S2023S14Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S14,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 14 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S14",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S15Position = {
+  Identifier = "S2023S15Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S15,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 15 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S15",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S16Position = {
+  Identifier = "S2023S16Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S16,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 16 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S16",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S17Position = {
+  Identifier = "S2023S17Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S17,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 17 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2023S17",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S18Position = {
+  Identifier = "S2023S18Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S18,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 18 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2023S18",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S19Position = {
+  Identifier = "S2023S19Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S19,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 19 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2023S19",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S20Position = {
+  Identifier = "S2023S20Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S20,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 20 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2023S20",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S21Position = {
+  Identifier = "S2023S21Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S21,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 21 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S21",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S22Position = {
+  Identifier = "S2023S22Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S22,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 22 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2023S22",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S23Position = {
+  Identifier = "S2023S23Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S23,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 23 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S23",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S24Position = {
+  Identifier = "S2023S24Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S24,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 24 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S24",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S25Position = {
+  Identifier = "S2023S25Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S25,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 25 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S25",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S26Position = {
+  Identifier = "S2023S26Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S26,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 26 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S26",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S27Position = {
+  Identifier = "S2023S27Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S27,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 27 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2023S27",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S28Position = {
+  Identifier = "S2023S28Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S28,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 28 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S28",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S29Position = {
+  Identifier = "S2023S29Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S29,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 29 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2023S29",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S30Position = {
+  Identifier = "S2023S30Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S30,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 30 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2023S30",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S31Position = {
+  Identifier = "S2023S31Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S31,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 31 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S31",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S32Position = {
+  Identifier = "S2023S32Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S32,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 32 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S32",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S33Position = {
+  Identifier = "S2023S33Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S33,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 33 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2023S33",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S34Position = {
+  Identifier = "S2023S34Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S34,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 34 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S34",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S35Position = {
+  Identifier = "S2023S35Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S35,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 35 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S35",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S36Position = {
+  Identifier = "S2023S36Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S36,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 36 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S36",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S37Position = {
+  Identifier = "S2023S37Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S37,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 37 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2023S37",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S38Position = {
+  Identifier = "S2023S38Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S38,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 38 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2023S38",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S39Position = {
+  Identifier = "S2023S39Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S39,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 39 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S39",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S40Position = {
+  Identifier = "S2023S40Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S40,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 40 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S40",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S41Position = {
+  Identifier = "S2023S41Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S41,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 41 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2023S41",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S42Position = {
+  Identifier = "S2023S42Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S42,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 42 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S42",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S43Position = {
+  Identifier = "S2023S43Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S43,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 43 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S43",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S44Position = {
+  Identifier = "S2023S44Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S44,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 44 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S44",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S45Position = {
+  Identifier = "S2023S45Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S45,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 45 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S45",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S46Position = {
+  Identifier = "S2023S46Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S46,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 46 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2023S46",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S47Position = {
+  Identifier = "S2023S47Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S47,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 47 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S47",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S48Position = {
+  Identifier = "S2023S48Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S48,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 48 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S48",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S49Position = {
+  Identifier = "S2023S49Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S49,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 49 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S49",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023S50Position = {
+  Identifier = "S2023S50Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels455.ID.S2023S50,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 S 50 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S50",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(S2004S54Position)
+  openspace.addSceneGraphNode(S2004S55Position)
+  openspace.addSceneGraphNode(S2004S56Position)
+  openspace.addSceneGraphNode(S2004S57Position)
+  openspace.addSceneGraphNode(S2004S58Position)
+  openspace.addSceneGraphNode(S2004S59Position)
+  openspace.addSceneGraphNode(S2004S60Position)
+  openspace.addSceneGraphNode(S2004S61Position)
+  openspace.addSceneGraphNode(S2005S6Position)
+  openspace.addSceneGraphNode(S2005S7Position)
+  openspace.addSceneGraphNode(S2006S21Position)
+  openspace.addSceneGraphNode(S2006S22Position)
+  openspace.addSceneGraphNode(S2006S23Position)
+  openspace.addSceneGraphNode(S2006S24Position)
+  openspace.addSceneGraphNode(S2006S25Position)
+  openspace.addSceneGraphNode(S2006S26Position)
+  openspace.addSceneGraphNode(S2006S27Position)
+  openspace.addSceneGraphNode(S2006S28Position)
+  openspace.addSceneGraphNode(S2006S29Position)
+  openspace.addSceneGraphNode(S2007S10Position)
+  openspace.addSceneGraphNode(S2007S11Position)
+  openspace.addSceneGraphNode(S2019S22Position)
+  openspace.addSceneGraphNode(S2019S23Position)
+  openspace.addSceneGraphNode(S2019S24Position)
+  openspace.addSceneGraphNode(S2019S25Position)
+  openspace.addSceneGraphNode(S2019S26Position)
+  openspace.addSceneGraphNode(S2019S27Position)
+  openspace.addSceneGraphNode(S2019S28Position)
+  openspace.addSceneGraphNode(S2019S29Position)
+  openspace.addSceneGraphNode(S2019S30Position)
+  openspace.addSceneGraphNode(S2019S31Position)
+  openspace.addSceneGraphNode(S2019S32Position)
+  openspace.addSceneGraphNode(S2019S33Position)
+  openspace.addSceneGraphNode(S2019S34Position)
+  openspace.addSceneGraphNode(S2019S35Position)
+  openspace.addSceneGraphNode(S2019S36Position)
+  openspace.addSceneGraphNode(S2019S37Position)
+  openspace.addSceneGraphNode(S2019S38Position)
+  openspace.addSceneGraphNode(S2019S39Position)
+  openspace.addSceneGraphNode(S2019S40Position)
+  openspace.addSceneGraphNode(S2019S41Position)
+  openspace.addSceneGraphNode(S2019S42Position)
+  openspace.addSceneGraphNode(S2019S43Position)
+  openspace.addSceneGraphNode(S2019S44Position)
+  openspace.addSceneGraphNode(S2020S11Position)
+  openspace.addSceneGraphNode(S2020S12Position)
+  openspace.addSceneGraphNode(S2020S13Position)
+  openspace.addSceneGraphNode(S2020S14Position)
+  openspace.addSceneGraphNode(S2020S15Position)
+  openspace.addSceneGraphNode(S2020S16Position)
+  openspace.addSceneGraphNode(S2020S17Position)
+  openspace.addSceneGraphNode(S2020S18Position)
+  openspace.addSceneGraphNode(S2020S19Position)
+  openspace.addSceneGraphNode(S2020S20Position)
+  openspace.addSceneGraphNode(S2020S21Position)
+  openspace.addSceneGraphNode(S2020S22Position)
+  openspace.addSceneGraphNode(S2020S23Position)
+  openspace.addSceneGraphNode(S2020S24Position)
+  openspace.addSceneGraphNode(S2020S25Position)
+  openspace.addSceneGraphNode(S2020S26Position)
+  openspace.addSceneGraphNode(S2020S27Position)
+  openspace.addSceneGraphNode(S2020S28Position)
+  openspace.addSceneGraphNode(S2020S29Position)
+  openspace.addSceneGraphNode(S2020S30Position)
+  openspace.addSceneGraphNode(S2020S31Position)
+  openspace.addSceneGraphNode(S2020S32Position)
+  openspace.addSceneGraphNode(S2020S33Position)
+  openspace.addSceneGraphNode(S2020S34Position)
+  openspace.addSceneGraphNode(S2020S35Position)
+  openspace.addSceneGraphNode(S2020S36Position)
+  openspace.addSceneGraphNode(S2020S37Position)
+  openspace.addSceneGraphNode(S2020S38Position)
+  openspace.addSceneGraphNode(S2020S39Position)
+  openspace.addSceneGraphNode(S2020S40Position)
+  openspace.addSceneGraphNode(S2020S41Position)
+  openspace.addSceneGraphNode(S2020S42Position)
+  openspace.addSceneGraphNode(S2020S43Position)
+  openspace.addSceneGraphNode(S2020S44Position)
+  openspace.addSceneGraphNode(S2023S1Position)
+  openspace.addSceneGraphNode(S2023S2Position)
+  openspace.addSceneGraphNode(S2023S3Position)
+  openspace.addSceneGraphNode(S2023S4Position)
+  openspace.addSceneGraphNode(S2023S5Position)
+  openspace.addSceneGraphNode(S2023S6Position)
+  openspace.addSceneGraphNode(S2023S7Position)
+  openspace.addSceneGraphNode(S2023S8Position)
+  openspace.addSceneGraphNode(S2023S9Position)
+  openspace.addSceneGraphNode(S2023S10Position)
+  openspace.addSceneGraphNode(S2023S11Position)
+  openspace.addSceneGraphNode(S2023S12Position)
+  openspace.addSceneGraphNode(S2023S13Position)
+  openspace.addSceneGraphNode(S2023S14Position)
+  openspace.addSceneGraphNode(S2023S15Position)
+  openspace.addSceneGraphNode(S2023S16Position)
+  openspace.addSceneGraphNode(S2023S17Position)
+  openspace.addSceneGraphNode(S2023S18Position)
+  openspace.addSceneGraphNode(S2023S19Position)
+  openspace.addSceneGraphNode(S2023S20Position)
+  openspace.addSceneGraphNode(S2023S21Position)
+  openspace.addSceneGraphNode(S2023S22Position)
+  openspace.addSceneGraphNode(S2023S23Position)
+  openspace.addSceneGraphNode(S2023S24Position)
+  openspace.addSceneGraphNode(S2023S25Position)
+  openspace.addSceneGraphNode(S2023S26Position)
+  openspace.addSceneGraphNode(S2023S27Position)
+  openspace.addSceneGraphNode(S2023S28Position)
+  openspace.addSceneGraphNode(S2023S29Position)
+  openspace.addSceneGraphNode(S2023S30Position)
+  openspace.addSceneGraphNode(S2023S31Position)
+  openspace.addSceneGraphNode(S2023S32Position)
+  openspace.addSceneGraphNode(S2023S33Position)
+  openspace.addSceneGraphNode(S2023S34Position)
+  openspace.addSceneGraphNode(S2023S35Position)
+  openspace.addSceneGraphNode(S2023S36Position)
+  openspace.addSceneGraphNode(S2023S37Position)
+  openspace.addSceneGraphNode(S2023S38Position)
+  openspace.addSceneGraphNode(S2023S39Position)
+  openspace.addSceneGraphNode(S2023S40Position)
+  openspace.addSceneGraphNode(S2023S41Position)
+  openspace.addSceneGraphNode(S2023S42Position)
+  openspace.addSceneGraphNode(S2023S43Position)
+  openspace.addSceneGraphNode(S2023S44Position)
+  openspace.addSceneGraphNode(S2023S45Position)
+  openspace.addSceneGraphNode(S2023S46Position)
+  openspace.addSceneGraphNode(S2023S47Position)
+  openspace.addSceneGraphNode(S2023S48Position)
+  openspace.addSceneGraphNode(S2023S49Position)
+  openspace.addSceneGraphNode(S2023S50Position)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2023S50Position)
+  openspace.removeSceneGraphNode(S2023S49Position)
+  openspace.removeSceneGraphNode(S2023S48Position)
+  openspace.removeSceneGraphNode(S2023S47Position)
+  openspace.removeSceneGraphNode(S2023S46Position)
+  openspace.removeSceneGraphNode(S2023S45Position)
+  openspace.removeSceneGraphNode(S2023S44Position)
+  openspace.removeSceneGraphNode(S2023S43Position)
+  openspace.removeSceneGraphNode(S2023S42Position)
+  openspace.removeSceneGraphNode(S2023S41Position)
+  openspace.removeSceneGraphNode(S2023S40Position)
+  openspace.removeSceneGraphNode(S2023S39Position)
+  openspace.removeSceneGraphNode(S2023S38Position)
+  openspace.removeSceneGraphNode(S2023S37Position)
+  openspace.removeSceneGraphNode(S2023S36Position)
+  openspace.removeSceneGraphNode(S2023S35Position)
+  openspace.removeSceneGraphNode(S2023S34Position)
+  openspace.removeSceneGraphNode(S2023S33Position)
+  openspace.removeSceneGraphNode(S2023S32Position)
+  openspace.removeSceneGraphNode(S2023S31Position)
+  openspace.removeSceneGraphNode(S2023S30Position)
+  openspace.removeSceneGraphNode(S2023S29Position)
+  openspace.removeSceneGraphNode(S2023S28Position)
+  openspace.removeSceneGraphNode(S2023S27Position)
+  openspace.removeSceneGraphNode(S2023S26Position)
+  openspace.removeSceneGraphNode(S2023S25Position)
+  openspace.removeSceneGraphNode(S2023S24Position)
+  openspace.removeSceneGraphNode(S2023S23Position)
+  openspace.removeSceneGraphNode(S2023S22Position)
+  openspace.removeSceneGraphNode(S2023S21Position)
+  openspace.removeSceneGraphNode(S2023S20Position)
+  openspace.removeSceneGraphNode(S2023S19Position)
+  openspace.removeSceneGraphNode(S2023S18Position)
+  openspace.removeSceneGraphNode(S2023S17Position)
+  openspace.removeSceneGraphNode(S2023S16Position)
+  openspace.removeSceneGraphNode(S2023S15Position)
+  openspace.removeSceneGraphNode(S2023S14Position)
+  openspace.removeSceneGraphNode(S2023S13Position)
+  openspace.removeSceneGraphNode(S2023S12Position)
+  openspace.removeSceneGraphNode(S2023S11Position)
+  openspace.removeSceneGraphNode(S2023S10Position)
+  openspace.removeSceneGraphNode(S2023S9Position)
+  openspace.removeSceneGraphNode(S2023S8Position)
+  openspace.removeSceneGraphNode(S2023S7Position)
+  openspace.removeSceneGraphNode(S2023S6Position)
+  openspace.removeSceneGraphNode(S2023S5Position)
+  openspace.removeSceneGraphNode(S2023S4Position)
+  openspace.removeSceneGraphNode(S2023S3Position)
+  openspace.removeSceneGraphNode(S2023S2Position)
+  openspace.removeSceneGraphNode(S2023S1Position)
+  openspace.removeSceneGraphNode(S2020S44Position)
+  openspace.removeSceneGraphNode(S2020S43Position)
+  openspace.removeSceneGraphNode(S2020S42Position)
+  openspace.removeSceneGraphNode(S2020S41Position)
+  openspace.removeSceneGraphNode(S2020S40Position)
+  openspace.removeSceneGraphNode(S2020S39Position)
+  openspace.removeSceneGraphNode(S2020S38Position)
+  openspace.removeSceneGraphNode(S2020S37Position)
+  openspace.removeSceneGraphNode(S2020S36Position)
+  openspace.removeSceneGraphNode(S2020S35Position)
+  openspace.removeSceneGraphNode(S2020S34Position)
+  openspace.removeSceneGraphNode(S2020S33Position)
+  openspace.removeSceneGraphNode(S2020S32Position)
+  openspace.removeSceneGraphNode(S2020S31Position)
+  openspace.removeSceneGraphNode(S2020S30Position)
+  openspace.removeSceneGraphNode(S2020S29Position)
+  openspace.removeSceneGraphNode(S2020S28Position)
+  openspace.removeSceneGraphNode(S2020S27Position)
+  openspace.removeSceneGraphNode(S2020S26Position)
+  openspace.removeSceneGraphNode(S2020S25Position)
+  openspace.removeSceneGraphNode(S2020S24Position)
+  openspace.removeSceneGraphNode(S2020S23Position)
+  openspace.removeSceneGraphNode(S2020S22Position)
+  openspace.removeSceneGraphNode(S2020S21Position)
+  openspace.removeSceneGraphNode(S2020S20Position)
+  openspace.removeSceneGraphNode(S2020S19Position)
+  openspace.removeSceneGraphNode(S2020S18Position)
+  openspace.removeSceneGraphNode(S2020S17Position)
+  openspace.removeSceneGraphNode(S2020S16Position)
+  openspace.removeSceneGraphNode(S2020S15Position)
+  openspace.removeSceneGraphNode(S2020S14Position)
+  openspace.removeSceneGraphNode(S2020S13Position)
+  openspace.removeSceneGraphNode(S2020S12Position)
+  openspace.removeSceneGraphNode(S2020S11Position)
+  openspace.removeSceneGraphNode(S2019S44Position)
+  openspace.removeSceneGraphNode(S2019S43Position)
+  openspace.removeSceneGraphNode(S2019S42Position)
+  openspace.removeSceneGraphNode(S2019S41Position)
+  openspace.removeSceneGraphNode(S2019S40Position)
+  openspace.removeSceneGraphNode(S2019S39Position)
+  openspace.removeSceneGraphNode(S2019S38Position)
+  openspace.removeSceneGraphNode(S2019S37Position)
+  openspace.removeSceneGraphNode(S2019S36Position)
+  openspace.removeSceneGraphNode(S2019S35Position)
+  openspace.removeSceneGraphNode(S2019S34Position)
+  openspace.removeSceneGraphNode(S2019S33Position)
+  openspace.removeSceneGraphNode(S2019S32Position)
+  openspace.removeSceneGraphNode(S2019S31Position)
+  openspace.removeSceneGraphNode(S2019S30Position)
+  openspace.removeSceneGraphNode(S2019S29Position)
+  openspace.removeSceneGraphNode(S2019S28Position)
+  openspace.removeSceneGraphNode(S2019S27Position)
+  openspace.removeSceneGraphNode(S2019S26Position)
+  openspace.removeSceneGraphNode(S2019S25Position)
+  openspace.removeSceneGraphNode(S2019S24Position)
+  openspace.removeSceneGraphNode(S2019S23Position)
+  openspace.removeSceneGraphNode(S2019S22Position)
+  openspace.removeSceneGraphNode(S2007S11Position)
+  openspace.removeSceneGraphNode(S2007S10Position)
+  openspace.removeSceneGraphNode(S2006S29Position)
+  openspace.removeSceneGraphNode(S2006S28Position)
+  openspace.removeSceneGraphNode(S2006S27Position)
+  openspace.removeSceneGraphNode(S2006S26Position)
+  openspace.removeSceneGraphNode(S2006S25Position)
+  openspace.removeSceneGraphNode(S2006S24Position)
+  openspace.removeSceneGraphNode(S2006S23Position)
+  openspace.removeSceneGraphNode(S2006S22Position)
+  openspace.removeSceneGraphNode(S2006S21Position)
+  openspace.removeSceneGraphNode(S2005S7Position)
+  openspace.removeSceneGraphNode(S2005S6Position)
+  openspace.removeSceneGraphNode(S2004S61Position)
+  openspace.removeSceneGraphNode(S2004S60Position)
+  openspace.removeSceneGraphNode(S2004S59Position)
+  openspace.removeSceneGraphNode(S2004S58Position)
+  openspace.removeSceneGraphNode(S2004S57Position)
+  openspace.removeSceneGraphNode(S2004S56Position)
+  openspace.removeSceneGraphNode(S2004S55Position)
+  openspace.removeSceneGraphNode(S2004S54Position)
+end)
+
+asset.export(S2004S54Position)
+asset.export(S2004S55Position)
+asset.export(S2004S56Position)
+asset.export(S2004S57Position)
+asset.export(S2004S58Position)
+asset.export(S2004S59Position)
+asset.export(S2004S60Position)
+asset.export(S2004S61Position)
+asset.export(S2005S6Position)
+asset.export(S2005S7Position)
+asset.export(S2006S21Position)
+asset.export(S2006S22Position)
+asset.export(S2006S23Position)
+asset.export(S2006S24Position)
+asset.export(S2006S25Position)
+asset.export(S2006S26Position)
+asset.export(S2006S27Position)
+asset.export(S2006S28Position)
+asset.export(S2006S29Position)
+asset.export(S2007S10Position)
+asset.export(S2007S11Position)
+asset.export(S2019S22Position)
+asset.export(S2019S23Position)
+asset.export(S2019S24Position)
+asset.export(S2019S25Position)
+asset.export(S2019S26Position)
+asset.export(S2019S27Position)
+asset.export(S2019S28Position)
+asset.export(S2019S29Position)
+asset.export(S2019S30Position)
+asset.export(S2019S31Position)
+asset.export(S2019S32Position)
+asset.export(S2019S33Position)
+asset.export(S2019S34Position)
+asset.export(S2019S35Position)
+asset.export(S2019S36Position)
+asset.export(S2019S37Position)
+asset.export(S2019S38Position)
+asset.export(S2019S39Position)
+asset.export(S2019S40Position)
+asset.export(S2019S41Position)
+asset.export(S2019S42Position)
+asset.export(S2019S43Position)
+asset.export(S2019S44Position)
+asset.export(S2020S11Position)
+asset.export(S2020S12Position)
+asset.export(S2020S13Position)
+asset.export(S2020S14Position)
+asset.export(S2020S15Position)
+asset.export(S2020S16Position)
+asset.export(S2020S17Position)
+asset.export(S2020S18Position)
+asset.export(S2020S19Position)
+asset.export(S2020S20Position)
+asset.export(S2020S21Position)
+asset.export(S2020S22Position)
+asset.export(S2020S23Position)
+asset.export(S2020S24Position)
+asset.export(S2020S25Position)
+asset.export(S2020S26Position)
+asset.export(S2020S27Position)
+asset.export(S2020S28Position)
+asset.export(S2020S29Position)
+asset.export(S2020S30Position)
+asset.export(S2020S31Position)
+asset.export(S2020S32Position)
+asset.export(S2020S33Position)
+asset.export(S2020S34Position)
+asset.export(S2020S35Position)
+asset.export(S2020S36Position)
+asset.export(S2020S37Position)
+asset.export(S2020S38Position)
+asset.export(S2020S39Position)
+asset.export(S2020S40Position)
+asset.export(S2020S41Position)
+asset.export(S2020S42Position)
+asset.export(S2020S43Position)
+asset.export(S2020S44Position)
+asset.export(S2023S1Position)
+asset.export(S2023S2Position)
+asset.export(S2023S3Position)
+asset.export(S2023S4Position)
+asset.export(S2023S5Position)
+asset.export(S2023S6Position)
+asset.export(S2023S7Position)
+asset.export(S2023S8Position)
+asset.export(S2023S9Position)
+asset.export(S2023S10Position)
+asset.export(S2023S11Position)
+asset.export(S2023S12Position)
+asset.export(S2023S13Position)
+asset.export(S2023S14Position)
+asset.export(S2023S15Position)
+asset.export(S2023S16Position)
+asset.export(S2023S17Position)
+asset.export(S2023S18Position)
+asset.export(S2023S19Position)
+asset.export(S2023S20Position)
+asset.export(S2023S21Position)
+asset.export(S2023S22Position)
+asset.export(S2023S23Position)
+asset.export(S2023S24Position)
+asset.export(S2023S25Position)
+asset.export(S2023S26Position)
+asset.export(S2023S27Position)
+asset.export(S2023S28Position)
+asset.export(S2023S29Position)
+asset.export(S2023S30Position)
+asset.export(S2023S31Position)
+asset.export(S2023S32Position)
+asset.export(S2023S33Position)
+asset.export(S2023S34Position)
+asset.export(S2023S35Position)
+asset.export(S2023S36Position)
+asset.export(S2023S37Position)
+asset.export(S2023S38Position)
+asset.export(S2023S39Position)
+asset.export(S2023S40Position)
+asset.export(S2023S41Position)
+asset.export(S2023S42Position)
+asset.export(S2023S43Position)
+asset.export(S2023S44Position)
+asset.export(S2023S45Position)
+asset.export(S2023S46Position)
+asset.export(S2023S47Position)
+asset.export(S2023S48Position)
+asset.export(S2023S49Position)
+asset.export(S2023S50Position)
+
+
+
+asset.meta = {
+  Name = "Saturn Moons Positions -- March 2025 Discoveries",
+  Description = [[Asset containing positions for Saturn's moons discovered in March 2025.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

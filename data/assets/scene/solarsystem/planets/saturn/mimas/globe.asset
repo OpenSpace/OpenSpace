@@ -1,0 +1,61 @@
+local transforms = asset.require("./transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local labelsPath = asset.resource({
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
+})
+
+
+local Mimas = {
+  Identifier = "Mimas",
+  Parent = transforms.MimasPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 207000, 197000, 191000 },
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "mimas.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 7.7,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 400000.0, 1000000.0 },
+      DistanceEPS = 25000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
+  GUI = {
+    Name = "Mimas",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Mimas",
+    Description = "That's no moon..."
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Mimas)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Mimas)
+end)
+
+asset.export(Mimas)
+
+
+
+asset.meta = {
+  Name = "Mimas",
+  Description = "Mimas globe",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

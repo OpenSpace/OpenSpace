@@ -1,4 +1,4 @@
-local ganymedeAsset = asset.require("scene/solarsystem/planets/jupiter/ganymede/ganymede")
+local ganymedeAsset = asset.require("scene/solarsystem/planets/jupiter/ganymede/globe")
 
 
 

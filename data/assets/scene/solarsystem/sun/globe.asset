@@ -1,0 +1,46 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Sun = {
+  Identifier = "Sun",
+  Parent = transforms.SunIAU.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Enabled = false,
+    Radii = { 695700000, 695700000, 695700000 },
+    LightSource = {
+      Identifier = "Camera",
+      Type = "CameraLightSource",
+      Intensity = 1.0
+    },
+    PerformShading = false
+  },
+  ApproachFactor = 15.0,
+  GUI = {
+    Name = "Sun Surface",
+    Path = "/Solar System/Sun",
+    Description = "Globe for the sun in our solar system"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Sun)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Sun)
+end)
+
+asset.export(Sun)
+
+
+
+asset.meta = {
+  Name = "Sun",
+  Description = "The Sun",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

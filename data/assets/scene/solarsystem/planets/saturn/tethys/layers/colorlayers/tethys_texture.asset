@@ -1,4 +1,4 @@
-local tethysAsset = asset.require("scene/solarsystem/planets/saturn/tethys/tethys")
+local tethysAsset = asset.require("scene/solarsystem/planets/saturn/tethys/globe")
 
 
 

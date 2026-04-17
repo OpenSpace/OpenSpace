@@ -1,0 +1,13 @@
+asset.require("./model")
+asset.require("./trail")
+asset.require("./label", false)
+
+
+
+asset.meta = {
+  Name = "Deimos",
+  Description = [[Trail, Model and Label of Deimos.]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

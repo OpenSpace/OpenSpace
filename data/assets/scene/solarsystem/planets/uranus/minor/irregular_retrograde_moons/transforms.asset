@@ -1,0 +1,212 @@
+local transforms = asset.require("scene/solarsystem/planets/uranus/transforms")
+local kernel = asset.require("scene/solarsystem/planets/uranus/kernels184")
+local coreKernels = asset.require("spice/core")
+
+
+
+local FranciscoPosition = {
+  Identifier = "FranciscoPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Francisco,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Francisco Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Francisco",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local CalibanPosition = {
+  Identifier = "CalibanPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Caliban,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "CalibanPosition",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Caliban",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local StephanoPosition = {
+  Identifier = "StephanoPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Stephano,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Stephano Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Stephano",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local TrinculoPosition = {
+  Identifier = "TrinculoPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Trinculo,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Trinculo Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Trinculo",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local SycoraxPosition = {
+  Identifier = "SycoraxPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Sycorax,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Sycorax Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Sycorax",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local ProsperoPosition = {
+  Identifier = "ProsperoPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Prospero,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Prospero Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Prospero",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local SetebosPosition = {
+  Identifier = "SetebosPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Setebos,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Setebos Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Setebos",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local FerdinandPosition = {
+  Identifier = "FerdinandPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Ferdinand,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Ferdinand Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Ferdinand",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2023U1Position = {
+  Identifier = "S2023U1Position",
+  Parent = transforms.UranusBarycenter.S2023U1,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.S2023U1,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2023 U 1 Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/S2023U1",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(FranciscoPosition)
+  openspace.addSceneGraphNode(CalibanPosition)
+  openspace.addSceneGraphNode(StephanoPosition)
+  openspace.addSceneGraphNode(TrinculoPosition)
+  openspace.addSceneGraphNode(SycoraxPosition)
+  openspace.addSceneGraphNode(ProsperoPosition)
+  openspace.addSceneGraphNode(SetebosPosition)
+  openspace.addSceneGraphNode(FerdinandPosition)
+  openspace.addSceneGraphNode(S2023U1Position)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2023U1Position)
+  openspace.removeSceneGraphNode(FerdinandPosition)
+  openspace.removeSceneGraphNode(SetebosPosition)
+  openspace.removeSceneGraphNode(ProsperoPosition)
+  openspace.removeSceneGraphNode(SycoraxPosition)
+  openspace.removeSceneGraphNode(TrinculoPosition)
+  openspace.removeSceneGraphNode(StephanoPosition)
+  openspace.removeSceneGraphNode(CalibanPosition)
+  openspace.removeSceneGraphNode(FranciscoPosition)
+end)
+
+asset.export(FranciscoPosition)
+asset.export(CalibanPosition)
+asset.export(StephanoPosition)
+asset.export(TrinculoPosition)
+asset.export(SycoraxPosition)
+asset.export(ProsperoPosition)
+asset.export(SetebosPosition)
+asset.export(FerdinandPosition)
+asset.export(S2023U1Position)
+
+
+
+asset.meta = {
+  Name = "Uranus Irregular Retrograde Moons Positions",
+  Description = [[Asset containing positions for Uranus' irregular retrograde moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

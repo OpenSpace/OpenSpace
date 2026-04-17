@@ -1,0 +1,214 @@
+local transforms = asset.require("scene/solarsystem/planets/saturn/transforms")
+local kernels = asset.require("scene/solarsystem/planets/saturn/kernels")
+local kernels415 = asset.require("scene/solarsystem/planets/saturn/kernels415")
+local kernels454 = asset.require("scene/solarsystem/planets/saturn/kernels454")
+local coreKernels = asset.require("spice/core")
+
+
+
+local AegaeonPosition = {
+  Identifier = "AegaeonPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Aegaeon,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Aegaeon Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Aegaeon",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local MethonePosition = {
+  Identifier = "MethonePosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Methone,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Methone Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Methone",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local AnthePosition = {
+  Identifier = "AnthePosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Anthe,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Anthe Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Anthe",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local PallenePosition = {
+  Identifier = "PallenePosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Pallene,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Pallene Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Pallene",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local TelestoPosition = {
+  Identifier = "TelestoPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Telesto,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Telesto Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Telesto",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local CalypsoPosition = {
+  Identifier = "CalypsoPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Calypso,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Calypso Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Calypso",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local HelenePosition = {
+  Identifier = "HelenePosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Helene,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Helene Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Helene",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local PolydeucesPosition = {
+  Identifier = "PolydeucesPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Polydeuces,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Polydeuces Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Polydeuces",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2004S24Position = {
+  Identifier = "S2004S24Position",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2004S24,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2004 S 24 Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/S2004S24",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(AegaeonPosition)
+  openspace.addSceneGraphNode(MethonePosition)
+  openspace.addSceneGraphNode(AnthePosition)
+  openspace.addSceneGraphNode(PallenePosition)
+  openspace.addSceneGraphNode(TelestoPosition)
+  openspace.addSceneGraphNode(CalypsoPosition)
+  openspace.addSceneGraphNode(HelenePosition)
+  openspace.addSceneGraphNode(PolydeucesPosition)
+  openspace.addSceneGraphNode(S2004S24Position)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(AegaeonPosition)
+  openspace.removeSceneGraphNode(MethonePosition)
+  openspace.removeSceneGraphNode(AnthePosition)
+  openspace.removeSceneGraphNode(PallenePosition)
+  openspace.removeSceneGraphNode(TelestoPosition)
+  openspace.removeSceneGraphNode(CalypsoPosition)
+  openspace.removeSceneGraphNode(HelenePosition)
+  openspace.removeSceneGraphNode(PolydeucesPosition)
+  openspace.removeSceneGraphNode(S2004S24Position)
+end)
+
+asset.export(AegaeonPosition)
+asset.export(MethonePosition)
+asset.export(AnthePosition)
+asset.export(PallenePosition)
+asset.export(TelestoPosition)
+asset.export(CalypsoPosition)
+asset.export(HelenePosition)
+asset.export(PolydeucesPosition)
+asset.export(S2004S24Position)
+
+
+
+asset.meta = {
+  Name = "Saturn Other Group Moons Positions",
+  Description = [[Asset containing positions for Saturn's Other Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

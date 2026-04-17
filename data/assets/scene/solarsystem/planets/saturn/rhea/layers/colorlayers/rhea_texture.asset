@@ -1,4 +1,4 @@
-local rheaAsset = asset.require("scene/solarsystem/planets/saturn/rhea/rhea")
+local rheaAsset = asset.require("scene/solarsystem/planets/saturn/rhea/globe")
 
 
 

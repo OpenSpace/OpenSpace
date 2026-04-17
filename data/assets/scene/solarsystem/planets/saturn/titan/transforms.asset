@@ -1,0 +1,49 @@
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local TitanPosition = {
+  Identifier = "TitanPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Titan,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Titan,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "Titan Position",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Titan",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(TitanPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TitanPosition)
+end)
+
+asset.export(TitanPosition)
+
+
+
+asset.meta = {
+  Name = "Titan Position",
+  Description = "Titan position",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

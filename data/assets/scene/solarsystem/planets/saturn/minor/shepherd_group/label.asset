@@ -1,0 +1,259 @@
+local transforms = asset.require("./transforms")
+
+
+
+local PrometheusLabel = {
+  Identifier = "PrometheusLabel",
+  Parent = transforms.PrometheusPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Prometheus",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_shepherd"
+  },
+  GUI = {
+    Name = "Prometheus Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Prometheus",
+    Focusable = false
+  }
+}
+
+local PandoraLabel = {
+  Identifier = "PandoraLabel",
+  Parent = transforms.PandoraPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Pandora",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_shepherd"
+  },
+  GUI = {
+    Name = "Pandora Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pandora",
+    Focusable = false
+  }
+}
+
+local AtlasLabel = {
+  Identifier = "AtlasLabel",
+  Parent = transforms.AtlasPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Atlas",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_shepherd"
+  },
+  GUI = {
+    Name = "Atlas Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Atlas",
+    Focusable = false
+  }
+}
+
+local JanusLabel = {
+  Identifier = "JanusLabel",
+  Parent = transforms.JanusPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Janus",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_shepherd"
+  },
+  GUI = {
+    Name = "Janus Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Janus",
+    Focusable = false
+  }
+}
+
+local EpimetheusLabel = {
+  Identifier = "EpimetheusLabel",
+  Parent = transforms.EpimetheusPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Epimetheus",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_shepherd"
+  },
+  GUI = {
+    Name = "Epimetheus Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Epimetheus",
+    Focusable = false
+  }
+}
+
+local DaphnisLabel = {
+  Identifier = "DaphnisLabel",
+  Parent = transforms.DaphnisPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Daphnis",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_shepherd"
+  },
+  GUI = {
+    Name = "Daphnis Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Daphnis",
+    Focusable = false
+  }
+}
+
+local PanLabel = {
+  Identifier = "PanLabel",
+  Parent = transforms.PanPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Pan",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 75.0, 1000.0 },
+    FadeWidths = { 25.0, 800.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_shepherd"
+  },
+  GUI = {
+    Name = "Pan Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pan",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PrometheusLabel)
+  openspace.addSceneGraphNode(PandoraLabel)
+  openspace.addSceneGraphNode(AtlasLabel)
+  openspace.addSceneGraphNode(JanusLabel)
+  openspace.addSceneGraphNode(EpimetheusLabel)
+  openspace.addSceneGraphNode(DaphnisLabel)
+  openspace.addSceneGraphNode(PanLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PrometheusLabel)
+  openspace.removeSceneGraphNode(PandoraLabel)
+  openspace.removeSceneGraphNode(AtlasLabel)
+  openspace.removeSceneGraphNode(JanusLabel)
+  openspace.removeSceneGraphNode(EpimetheusLabel)
+  openspace.removeSceneGraphNode(DaphnisLabel)
+  openspace.removeSceneGraphNode(PanLabel)
+end)
+
+asset.export(PrometheusLabel)
+asset.export(PandoraLabel)
+asset.export(AtlasLabel)
+asset.export(JanusLabel)
+asset.export(EpimetheusLabel)
+asset.export(DaphnisLabel)
+asset.export(PanLabel)
+
+
+
+asset.meta = {
+  Name = "Saturn Shepherd Moons Labels",
+  Description = [[Asset containing labels for Saturn's Shepherd moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,302 @@
+local transforms = asset.require("scene/solarsystem/planets/uranus/transforms")
+local kernel = asset.require("scene/solarsystem/planets/uranus/kernels184")
+local coreKernels = asset.require("spice/core")
+
+
+
+local FranciscoTrail = {
+  Identifier = "FranciscoTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Francisco,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 266.56,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Francisco Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Francisco",
+    Focusable = false
+  }
+}
+
+local CalibanTrail = {
+  Identifier = "CalibanTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Caliban,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 579.50,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Caliban Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Caliban",
+    Focusable = false
+  }
+}
+
+local StephanoTrail = {
+  Identifier = "StephanoTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Stephano,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 676.50,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Stephano Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Stephano",
+    Focusable = false
+  }
+}
+
+local TrinculoTrail = {
+  Identifier = "TrinculoTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Trinculo,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 758.10,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Trinculo Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Trinculo",
+    Focusable = false
+  }
+}
+
+local SycoraxTrail = {
+  Identifier = "SycoraxTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Sycorax,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 1283.4,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Sycorax Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Sycorax",
+    Focusable = false
+  }
+}
+
+local ProsperoTrail = {
+  Identifier = "ProsperoTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Prospero,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 1992.8,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Prospero Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Prospero",
+    Focusable = false
+  }
+}
+
+local SetebosTrail = {
+  Identifier = "SetebosTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Setebos,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 2202.3,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Setebos Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Setebos",
+    Focusable = false
+  }
+}
+
+local FerdinandTrail = {
+  Identifier = "FerdinandTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Ferdinand,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 2823.4,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Ferdinand Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Ferdinand",
+    Focusable = false
+  }
+}
+
+local S2023U1Trail = {
+  Identifier = "S2023U1Trail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.S2023U1,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 681,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "S/2023 U 1 Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/S2023U1",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(FranciscoTrail)
+  openspace.addSceneGraphNode(CalibanTrail)
+  openspace.addSceneGraphNode(StephanoTrail)
+  openspace.addSceneGraphNode(TrinculoTrail)
+  openspace.addSceneGraphNode(SycoraxTrail)
+  openspace.addSceneGraphNode(ProsperoTrail)
+  openspace.addSceneGraphNode(SetebosTrail)
+  openspace.addSceneGraphNode(FerdinandTrail)
+  openspace.addSceneGraphNode(S2023U1Trail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2023U1Trail)
+  openspace.removeSceneGraphNode(FerdinandTrail)
+  openspace.removeSceneGraphNode(SetebosTrail)
+  openspace.removeSceneGraphNode(ProsperoTrail)
+  openspace.removeSceneGraphNode(SycoraxTrail)
+  openspace.removeSceneGraphNode(TrinculoTrail)
+  openspace.removeSceneGraphNode(StephanoTrail)
+  openspace.removeSceneGraphNode(CalibanTrail)
+  openspace.removeSceneGraphNode(FranciscoTrail)
+end)
+
+asset.export(FranciscoTrail)
+asset.export(CalibanTrail)
+asset.export(StephanoTrail)
+asset.export(TrinculoTrail)
+asset.export(SycoraxTrail)
+asset.export(ProsperoTrail)
+asset.export(SetebosTrail)
+asset.export(FerdinandTrail)
+asset.export(S2023U1Trail)
+
+
+
+asset.meta = {
+  Name = "Uranus Irregular Retrograde Moons Trails",
+  Description = [[Asset containing trails for Uranus' irregular retrograde moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

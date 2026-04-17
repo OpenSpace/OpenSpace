@@ -1,6 +1,6 @@
 local voyager1 = asset.require("./voyager1")
 local voyager2 = asset.require("./voyager2")
-local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 
 
 local DistanceVoyager1 = {

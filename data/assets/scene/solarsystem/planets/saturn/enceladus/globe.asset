@@ -1,0 +1,60 @@
+local transforms = asset.require("./transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local labelsPath = asset.resource({
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
+})
+
+
+local Enceladus = {
+  Identifier = "Enceladus",
+  Parent = transforms.EnceladusPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = 252000,
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "enceladus.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 8.1,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 300000.0, 1000000.0 },
+      DistanceEPS = 100000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_major_saturn" },
+  GUI = {
+    Name = "Enceladus",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Enceladus"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Enceladus)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Enceladus)
+end)
+
+asset.export(Enceladus)
+
+
+
+asset.meta = {
+  Name = "Enceladus",
+  Description = "Enceladus globe and map layers",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

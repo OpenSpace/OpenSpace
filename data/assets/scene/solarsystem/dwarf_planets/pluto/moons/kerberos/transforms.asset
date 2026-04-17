@@ -1,0 +1,43 @@
+local plutoAsset = asset.require("scene/solarsystem/dwarf_planets/pluto/transforms")
+local plutoKernels = asset.require("scene/solarsystem/dwarf_planets/pluto/kernels")
+
+
+
+local KerberosPosition = {
+  Identifier = "KerberosPosition",
+  Parent = plutoAsset.PlutoBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = plutoKernels.ID.Kerberos,
+      Observer = plutoKernels.ID.PlutoBarycenter
+    }
+  },
+  GUI = {
+    Name = "Kerberos Position",
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Kerberos",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(KerberosPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(KerberosPosition)
+end)
+
+asset.export(KerberosPosition)
+
+
+
+asset.meta = {
+  Name = "Kerberos Transforms",
+  Description = "Position for Pluto's moon Kerberos",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

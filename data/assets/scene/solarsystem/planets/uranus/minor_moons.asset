@@ -1,6 +1,6 @@
-asset.require("./inner_moons")
-asset.require("./irregular_prograde_moons")
-asset.require("./irregular_retrograde_moons")
+asset.require("./minor/inner_moons/inner_moons")
+asset.require("./minor/irregular_prograde_moons/irregular_prograde_moons")
+asset.require("./minor/irregular_retrograde_moons/irregular_retrograde_moons")
 
 
 

@@ -1,11 +1,10 @@
-asset.require("./minor/gallic_group")
-asset.require("./minor/inuit_group")
-asset.require("./minor/norse_group")
-asset.require("./minor/other_group")
-asset.require("./minor/shepherd_group")
-asset.require("./minor/march_2025_discoveries-1")
-asset.require("./minor/march_2025_discoveries-2")
-asset.require("./minor/may_2023_discoveries")
+asset.require("./minor/gallic_group/gallic_group")
+asset.require("./minor/inuit_group/inuit_group")
+asset.require("./minor/norse_group/norse_group")
+asset.require("./minor/other_group/other_group")
+asset.require("./minor/shepherd_group/shepherd_group")
+asset.require("./minor/march_2025_discoveries/march_2025_discoveries")
+asset.require("./minor/may_2023_discoveries/may_2023_discoveries")
 
 
 local SaturnMinorMoonsOn = {

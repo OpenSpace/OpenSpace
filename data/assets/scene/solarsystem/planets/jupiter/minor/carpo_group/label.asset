@@ -1,0 +1,161 @@
+local transforms = asset.require("./transforms")
+
+
+
+local CarpoLabel = {
+  Identifier = "CarpoLabel",
+  Parent = transforms.CarpoPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Carpo",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.0, 100.0 },
+    FadeWidths = { 0.0, 100.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carpo"
+  },
+  GUI = {
+    Name = "Carpo Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/Carpo",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Carpo (Carpo group)"
+  }
+}
+
+local CarpoLabelNear = {
+  Identifier = "CarpoLabelNear",
+  Parent = transforms.CarpoPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Carpo",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.2, 1.0 },
+    FadeWidths = { 0.1, 0.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carpo"
+  },
+  GUI = {
+    Name = "Carpo Label (Near)",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/Carpo",
+    Focusable = false,
+    Description = "Transitional Label for close-range viewing of Carpo (Carpo group)"
+  }
+}
+
+local S2018J4Label = {
+  Identifier = "S2018J4Label",
+  Parent = transforms.S2018J4Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2018 J 4",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carpo"
+  },
+  GUI = {
+    Name = "S/2018 J 4 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/S2018J4",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S2018J4 (Carpo group)"
+  }
+}
+
+local S2018J4LabelNear = {
+  Identifier = "S2018J4LabelNear",
+  Parent = transforms.S2018J4Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S2018J4",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.2, 1.0 },
+    FadeWidths = { 0.1, 0.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carpo"
+  },
+  GUI = {
+    Name = "S2018J4 Label (Near)",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/S2018J4",
+    Focusable = false,
+    Description = "Transitional Label for close-range viewing of S2018J4 (Carpo group)"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(CarpoLabel)
+  openspace.addSceneGraphNode(CarpoLabelNear)
+  openspace.addSceneGraphNode(S2018J4Label)
+  openspace.addSceneGraphNode(S2018J4LabelNear)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2018J4LabelNear)
+  openspace.removeSceneGraphNode(S2018J4Label)
+  openspace.removeSceneGraphNode(CarpoLabelNear)
+  openspace.removeSceneGraphNode(CarpoLabel)
+end)
+
+asset.export(CarpoLabel)
+asset.export(CarpoLabelNear)
+asset.export(S2018J4Label)
+asset.export(S2018J4LabelNear)
+
+
+
+asset.meta = {
+  Name = "Jupiter Carpo Group Moons Labels",
+  Description = [[Asset containing labels for Jupiter's Carpo Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

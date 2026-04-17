@@ -1,12 +1,12 @@
-asset.require("scene/solarsystem/sun/sun")
-asset.require("./moon/moon")
-local transforms = asset.require("./earth")
+local sunAsset = asset.require("scene/solarsystem/sun/globe")
+local moonAsset = asset.require("./moon/globe")
+local globe = asset.require("./globe")
 
 
 
 local Atmosphere = {
   Identifier = "EarthAtmosphere",
-  Parent = transforms.Earth.Identifier,
+  Parent = globe.Earth.Identifier,
   Renderable = {
     Type = "RenderableAtmosphere",
     -- Atmosphere radius in Km
@@ -48,34 +48,16 @@ local Atmosphere = {
       -- Mie Phase Function Value (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
       G = 0.85
     },
-    -- Clear Sky
-    -- Mie = {
-    --     Coefficients = {
-    --         Scattering = {20e-3, 20e-3, 20e-3},
-    --         Extinction = 1.0/0.9,
-    --      }
-    --     H_M = 1.2,
-    --     G = 0.76,
-    -- },
-    -- Cloudy
-    -- Mie = {
-    --     Coefficients = {
-    --         Scattering = {3e-3, 3e-3, 3e-3},
-    --         Extinction = 1.0/0.9,
-    --      }
-    --     H_M = 3.0,
-    --     G = 0.65,
-    -- },
     Debug = {
       PreCalculatedTextureScale = 1.0,
       SaveCalculatedTextures = false
     },
     ShadowGroup = {
       Sources = {
-        { Name = "Sun", Radius = 696300000 }
+        { Name = sunAsset.Sun.Identifier, Radius = 696300000 }
       },
       Casters = {
-        { Name = "Moon", Radius = 1737000 }
+        { Name = moonAsset.Moon.Identifier, Radius = 1737000 }
       }
     }
   },

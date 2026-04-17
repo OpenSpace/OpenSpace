@@ -1,0 +1,317 @@
+local transforms = asset.require("scene/solarsystem/planets/uranus/transforms")
+local kernels = asset.require("scene/solarsystem/planets/uranus/kernels184")
+local coreKernels = asset.require("spice/core")
+
+
+
+local CordeliaPosition = {
+  Identifier = "CordeliaPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Cordelia,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Cordelia Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cordelia",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local OpheliaPosition = {
+  Identifier = "OpheliaPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Ophelia,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Ophelia Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Ophelia",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local BiancaPosition = {
+  Identifier = "BiancaPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Bianca,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Bianca Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Bianca",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local CressidaPosition = {
+  Identifier = "CressidaPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Cressida,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Cressida Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cressida",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local DesdemonaPosition = {
+  Identifier = "DesdemonaPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Desdemona,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Desdemona Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Desdemona",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local JulietPosition = {
+  Identifier = "JulietPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Juliet,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Juliet Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Juliet",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local PortiaPosition = {
+  Identifier = "PortiaPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Portia,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Portia Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Portia",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local RosalindPosition = {
+  Identifier = "RosalindPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Rosalind,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Rosalind Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Rosalind",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local CupidPosition = {
+  Identifier = "CupidPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Cupid,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Cupid Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cupid",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local BelindaPosition = {
+  Identifier = "BelindaPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Belinda,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Belinda Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Belinda",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local PerditaPosition = {
+  Identifier = "PerditaPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Perdita,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Perdita Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Perdita",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local PuckPosition = {
+  Identifier = "PuckPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Puck,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Puck Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Puck",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local MabPosition = {
+  Identifier = "MabPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Mab,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Mab Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Mab",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2025U1Position = {
+  Identifier = "S2025U1Position",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.S2025U1,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2025 U 1 Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/S2025U1",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(CordeliaPosition)
+  openspace.addSceneGraphNode(OpheliaPosition)
+  openspace.addSceneGraphNode(BiancaPosition)
+  openspace.addSceneGraphNode(CressidaPosition)
+  openspace.addSceneGraphNode(DesdemonaPosition)
+  openspace.addSceneGraphNode(JulietPosition)
+  openspace.addSceneGraphNode(PortiaPosition)
+  openspace.addSceneGraphNode(RosalindPosition)
+  openspace.addSceneGraphNode(CupidPosition)
+  openspace.addSceneGraphNode(BelindaPosition)
+  openspace.addSceneGraphNode(PerditaPosition)
+  openspace.addSceneGraphNode(PuckPosition)
+  openspace.addSceneGraphNode(MabPosition)
+  openspace.addSceneGraphNode(S2025U1Position)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(CordeliaPosition)
+  openspace.removeSceneGraphNode(OpheliaPosition)
+  openspace.removeSceneGraphNode(BiancaPosition)
+  openspace.removeSceneGraphNode(CressidaPosition)
+  openspace.removeSceneGraphNode(DesdemonaPosition)
+  openspace.removeSceneGraphNode(JulietPosition)
+  openspace.removeSceneGraphNode(PortiaPosition)
+  openspace.removeSceneGraphNode(RosalindPosition)
+  openspace.removeSceneGraphNode(CupidPosition)
+  openspace.removeSceneGraphNode(BelindaPosition)
+  openspace.removeSceneGraphNode(PerditaPosition)
+  openspace.removeSceneGraphNode(PuckPosition)
+  openspace.removeSceneGraphNode(MabPosition)
+  openspace.addSceneGraphNode(S2025U1Position)
+end)
+
+asset.export(CordeliaPosition)
+asset.export(OpheliaPosition)
+asset.export(BiancaPosition)
+asset.export(CressidaPosition)
+asset.export(DesdemonaPosition)
+asset.export(JulietPosition)
+asset.export(PortiaPosition)
+asset.export(RosalindPosition)
+asset.export(CupidPosition)
+asset.export(BelindaPosition)
+asset.export(PerditaPosition)
+asset.export(PuckPosition)
+asset.export(MabPosition)
+asset.export(S2025U1Position)
+
+
+
+asset.meta = {
+  Name = "Uranus Irregular Retrograde Moons Positions",
+  Description = [[Asset containing positions for Uranus' irregular retrograde moons.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

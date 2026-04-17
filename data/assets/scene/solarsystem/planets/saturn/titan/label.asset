@@ -1,0 +1,50 @@
+local transforms = asset.require("./transforms")
+
+
+
+local TitanLabel = {
+  Identifier = "TitanLabel",
+  Parent = transforms.TitanPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Titan",
+    FontSize = 70.0,
+    Size = 6.2,
+    MinMaxSize = { 1, 35 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.5, 20.0 },
+    FadeWidths = { 0.3, 20.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Titan Label",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Titan",
+    Focusable = false,
+    Description = "Label for Saturn's moon Titan"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(TitanLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TitanLabel)
+end)
+
+asset.export(TitanLabel)
+
+
+
+asset.meta = {
+  Name = "Titan Label",
+  Description = "Label for Titan",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,60 @@
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+local coreKernels = asset.require("spice/core")
+
+
+
+local omm = asset.resource({
+  Name = "Satellite OMM Data (SNPP)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_snpp",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?CATNR=37849&FORMAT=kvn",
+  Filename = "SNPP.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local SNPPPosition = {
+  Identifier = "SNPPPosition",
+  Parent = earthAsset.EarthInertial.Identifier,
+  InteractionSphere = 30,
+  Transform = {
+    Translation = {
+      Type = "GPTranslation",
+      Observer = earthAsset.EarthInertial.Identifier,
+      File = omm .. "SNPP.txt",
+      Format = "OMM"
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.Galactic,
+      DestinationFrame = coreKernels.Frame.J2000
+    }
+  },
+  Tag = { "earth_satellites", "SNPP" },
+  GUI = {
+    Name = "SNPP",
+    Path = "/Solar System/Planets/Earth/Satellites/SNPP"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SNPPPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SNPPPosition)
+end)
+
+asset.export(SNPPPosition)
+
+
+
+asset.meta = {
+  Name = "SNPP Position",
+  Description = [[Position for SNPP. Can be used in conjunction with VIIRS SNPP (Temporal)
+    layer for Earth]],
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.org/",
+  License = "NASA"
+}

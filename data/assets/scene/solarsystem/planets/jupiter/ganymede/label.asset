@@ -1,0 +1,50 @@
+local globe = asset.require("./globe")
+
+
+
+local GanymedeLabel = {
+  Identifier = "GanymedeLabel",
+  Parent = globe.Ganymede.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Ganymede",
+    FontSize = 70.0,
+    Size = 6.0,
+    MinMaxSize = { 1, 40 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.0, 10.0 },
+    FadeWidths = { 0.5, 10.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Ganymede Label",
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Ganymede",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Ganymede"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(GanymedeLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(GanymedeLabel)
+end)
+
+asset.export(GanymedeLabel)
+
+
+
+asset.meta = {
+  Name = "Ganymede Label",
+  Description = "Label for Ganymede",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
