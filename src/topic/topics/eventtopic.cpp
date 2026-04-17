@@ -91,7 +91,7 @@ void EventTopic::handleJson(const nlohmann::json& json) {
             auto onCallback = [this, event](ghoul::Dictionary params) {
                 // Include the fired event to the caller
                 params.setValue("Event", event);
-                _connection->sendJson(wrappedPayload(params));
+                sendData(params);
             };
 
             global::eventEngine->registerEventTopic(_topicId, type, onCallback);

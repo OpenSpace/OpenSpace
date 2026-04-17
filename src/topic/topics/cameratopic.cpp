@@ -97,7 +97,7 @@ void CameraTopic::sendCameraData() {
         { "subSolarLongitude", subSolar.y },
     };
 
-    _connection->sendJson(wrappedPayload(jsonData));
+    sendData(jsonData);
 }
 
 Schema CameraTopic::Schema() {

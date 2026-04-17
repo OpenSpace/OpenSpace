@@ -309,7 +309,9 @@ void Server::passDataToTopic(const std::string& topicType,
 {
     for (const ConnectionData& connectionData : _connections) {
         if (Topic* topic = connectionData.connection->findTopicByType(topicType)) {
-            topic->handleJson(jsonData);
+            if (!topic->isDone()) {
+                topic->sendData(jsonData);
+            }
         }
     }
 }

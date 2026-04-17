@@ -35,10 +35,6 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "PropertyTreeTopic";
-
-    constexpr std::string_view StartSubscription = "start_subscription";
-    constexpr std::string_view StopSubscription = "stop_subscription";
-    constexpr std::string_view PropertyChanged = "property_changed";
 } // namespace
 
 using nlohmann::json;
@@ -58,15 +54,11 @@ std::string PropertyTreeTopic::type() const {
 void PropertyTreeTopic::handleJson(const nlohmann::json& json) {
     const std::string& event = json.at("event").get<std::string>();
 
-    if (event == StartSubscription) {
+    if (event == "start_subscription") {
         _isSubscribedTo = true;
     }
-    if (event == StopSubscription) {
+    if (event == "stop_subscription") {
         _isSubscribedTo = false;
-    }
-    if (event == PropertyChanged && _isSubscribedTo) {
-        const nlohmann::json& payload = json.at("payload").get<nlohmann::json>();
-        _connection->sendJson(wrappedPayload(payload));
     }
 }
 

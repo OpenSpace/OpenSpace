@@ -230,9 +230,4 @@ nlohmann::json ActionKeybindTopic::action(const std::string& identifier) const {
     return action;
 }
 
-void ActionKeybindTopic::sendData(nlohmann::json data) const {
-    nlohmann::json payload = wrappedPayload({ data });
-    _connection->sendJson(std::move(payload));
-}
-
 } // namespace openspace

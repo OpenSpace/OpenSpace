@@ -41,7 +41,7 @@ namespace openspace {
 void MissionTopic::handleJson(const nlohmann::json&) {
     nlohmann::json data;
     data["missions"] = missionJson();
-    _connection->sendJson(wrappedPayload(data));
+    sendData(data);
 }
 
 bool MissionTopic::isDone() const {

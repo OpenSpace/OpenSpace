@@ -40,7 +40,6 @@ public:
 
     static openspace::Schema Schema();
 private:
-    void sendData(nlohmann::json data) const;
     nlohmann::json allActionsKeybinds() const;
     nlohmann::json action(const std::string& identifier) const;
 };

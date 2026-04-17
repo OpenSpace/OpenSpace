@@ -256,11 +256,8 @@ void Property::notifyChangeListeners() {
         return;
     }
     nlohmann::json payload;
-    payload["event"] = "property_changed";
-    payload["payload"] = {
-        { "property", uri() },
-        { "value", nlohmann::json::parse(jsonValue()) }
-    };
+    payload["property"] = uri();
+    payload["value"] = nlohmann::json::parse(jsonValue());
     global::server->passDataToTopic("propertyTree", payload);
 }
 
@@ -275,11 +272,8 @@ void Property::notifyMetaDataChangeListeners() {
         return;
     }
     nlohmann::json payload;
-    payload["event"] = "property_changed";
-    payload["payload"] = {
-        { "property", uri() },
-        { "metaData", generateJsonDescription() }
-    };
+    payload["property"] = uri();
+    payload["metaData"] = generateJsonDescription();
     global::server->passDataToTopic("propertyTree", payload);
 }
 

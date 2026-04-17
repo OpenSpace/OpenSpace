@@ -38,16 +38,18 @@ public:
     virtual ~Topic() = default;
 
     void initialize(std::shared_ptr<Connection> connection, size_t topicId);
-    nlohmann::json wrappedPayload(const nlohmann::json& payload) const;
-    nlohmann::json wrappedError(std::string message = "Could not complete request",
-        int code = 500);
+    void sendData(const nlohmann::json& payload);
+    virtual std::string type() const;
     virtual void handleJson(const nlohmann::json& json) = 0;
     virtual bool isDone() const = 0;
-    virtual std::string type() const;
 
 protected:
     size_t _topicId = 0;
     std::shared_ptr<Connection> _connection;
+
+private:
+    nlohmann::json wrappedPayload(const nlohmann::json& payload) const;
+
 };
 
 } // namespace openspace

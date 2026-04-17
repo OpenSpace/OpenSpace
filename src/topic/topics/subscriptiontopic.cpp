@@ -63,13 +63,13 @@ void SubscriptionTopic::handleJson(const nlohmann::json& json) {
                 nlohmann::json payload = {
                     { "value", json::parse(_prop->jsonValue()) }
                 };
-                _connection->sendJson(wrappedPayload(payload));
+                sendData(payload);
             };
 
             auto onMetaDataChange = [this, k = uri]() {
                 nlohmann::json payload = {};
                 payload["metaData"] = _prop->generateJsonDescription();
-                _connection->sendJson(wrappedPayload(payload));
+                sendData(payload);
             };
 
             _onChangeHandle = _prop->onChange(onChange);

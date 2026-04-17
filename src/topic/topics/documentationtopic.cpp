@@ -53,7 +53,7 @@ void DocumentationTopic::handleJson(const nlohmann::json& json) {
         response = DocEng.generateLicenseListJson();
     }
 
-    _connection->sendJson(wrappedPayload(response));
+    sendData(response);
 }
 
 bool DocumentationTopic::isDone() const {

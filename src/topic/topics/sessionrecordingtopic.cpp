@@ -187,7 +187,7 @@ void SessionRecordingTopic::sendJsonData() {
         stateJson["files"] = global::sessionRecordingHandler->playbackList();
     }
     if (!stateJson.empty()) {
-        _connection->sendJson(wrappedPayload(stateJson));
+        sendData(stateJson);
     }
 }
 

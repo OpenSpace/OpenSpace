@@ -59,7 +59,7 @@ void ProfileTopic::handleJson(const nlohmann::json&) {
         data["version"] = global::profile->meta->version.value_or("");
     }
 
-    _connection->sendJson(wrappedPayload(data));
+    sendData(data);
 }
 
 bool ProfileTopic::isDone() const {

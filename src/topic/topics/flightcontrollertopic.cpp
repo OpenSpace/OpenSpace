@@ -179,7 +179,6 @@ Schema FlightControllerTopic::Schema() {
           "additionalProperties": false,
           "required": ["topicId", "topicPayload", "data"]
         }
-
     )");
 
     return { "flightcontrollertopic", schema };

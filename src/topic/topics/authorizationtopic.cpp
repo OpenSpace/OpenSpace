@@ -96,7 +96,6 @@ Schema AuthorizationTopic::Schema() {
           "additionalProperties": false,
           "required": ["topicId", "topicPayload", "data"]
         }
-
     )");
 
     return { "authorizationtopic", schema };
@@ -104,25 +103,25 @@ Schema AuthorizationTopic::Schema() {
 
 void AuthorizationTopic::handleJson(const nlohmann::json& json) {
     if (isDone()) {
-        _connection->sendJson(wrappedPayload(response(Status::Authorized)));
+        sendData(response(Status::Authorized));
     }
     else {
         try {
             const std::string providedPassword = json.at("password").get<std::string>();
             if (authorize(providedPassword)) {
                 _connection->setAuthorized(true);
-                _connection->sendJson(wrappedPayload(response(Status::Authorized)));
+                sendData(response(Status::Authorized));
                 LINFO("Client successfully authorized");
             }
             else {
-                _connection->sendJson(wrappedPayload(response(Status::IncorrecctKey)));
+                sendData(response(Status::IncorrecctKey));
             }
         }
         catch (const std::out_of_range&) {
-            _connection->sendJson(wrappedPayload(response(Status::BadRequest)));
+            sendData(response(Status::BadRequest));
         }
         catch (const std::domain_error&) {
-            _connection->sendJson(wrappedPayload(response(Status::BadRequest)));
+            sendData(response(Status::BadRequest));
         }
     }
 }
