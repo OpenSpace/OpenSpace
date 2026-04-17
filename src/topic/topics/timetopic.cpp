@@ -65,13 +65,13 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
         return;
     }
 
-    sendFullTimeData();
-    sendDeltaTimeSteps();
-
     if (event != "start_subscription") {
         _isDone = true;
         return;
     }
+
+    sendFullTimeData();
+    sendDeltaTimeSteps();
 
     _timeCallbackHandle = global::timeManager->addTimeChangeCallback([this]() {
         const auto now = std::chrono::system_clock::now();
