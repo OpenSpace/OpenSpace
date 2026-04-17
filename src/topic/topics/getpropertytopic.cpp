@@ -62,20 +62,20 @@ void GetPropertyTopic::handleJson(const nlohmann::json& json) {
     }
     else if (requestedKey == AllNodesValue) {
         const std::vector<SceneGraphNode*>& nodes = sceneGraph()->allSceneGraphNodes();
-        response = wrappedPayload(nodes);
+        response = nodes;
     }
     else if (requestedKey == AllScreenSpaceRenderablesValue) {
-        response = wrappedPayload({
+        response = {
             { "value", global::renderEngine->screenSpaceRenderables() }
-        });
+        };
     }
     else if (requestedKey == RootPropertyOwner) {
-        response = wrappedPayload(global::rootPropertyOwner);
+        response = global::rootPropertyOwner;
     }
     else {
         response = propertyFromKey(requestedKey);
     }
-    _connection->sendJson(response);
+    sendData(response);
 }
 
 bool GetPropertyTopic::isDone() const {
@@ -94,20 +94,20 @@ json GetPropertyTopic::allProperties() {
             }
         }
     };
-    return wrappedPayload(payload);
+    return payload;
 }
 
 json GetPropertyTopic::propertyFromKey(const std::string& key) {
     Property* prop = property(key);
     if (prop) {
-        return wrappedPayload(prop);
+        return prop;
     }
     PropertyOwner* node = propertyOwner(key);
     if (node) {
-        return wrappedPayload(node);
+        return node;
     }
 
-    return wrappedError(std::format("Property '{}' not found", key), 404);
+    throw ghoul::RuntimeError(std::format("Property '{}' not found", key));
 }
 
 } // namespace openspace

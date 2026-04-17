@@ -182,8 +182,7 @@ void TimeTopic::sendCurrentTime() {
     const json timeJson = {
         { "time", global::timeManager->time().ISO8601() }
     };
-    const json payload = wrappedPayload(timeJson);
-    _connection->sendJson(payload);
+    sendData(timeJson);
     _lastUpdateTime = std::chrono::system_clock::now();
 }
 
@@ -203,7 +202,7 @@ void TimeTopic::sendFullTimeData() {
     const json nextPrevJson = getNextPrevDeltaTimeStepJson();
     timeJson.insert(nextPrevJson.begin(), nextPrevJson.end());
 
-    _connection->sendJson(wrappedPayload(timeJson));
+    sendData(timeJson);
     _lastUpdateTime = std::chrono::system_clock::now();
     _lastPauseState = isPaused;
     _lastTargetDeltaTime = targetDeltaTime;
@@ -219,7 +218,7 @@ void TimeTopic::sendDeltaTimeSteps() {
     const json nextPrevJson = getNextPrevDeltaTimeStepJson();
     deltaTimeStepsJson.insert(nextPrevJson.begin(), nextPrevJson.end());
 
-    _connection->sendJson(wrappedPayload(deltaTimeStepsJson));
+    sendData(deltaTimeStepsJson);
     _lastDeltaTimeSteps = steps;
 }
 

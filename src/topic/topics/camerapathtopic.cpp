@@ -139,7 +139,7 @@ void CameraPathTopic::sendCameraPathData() {
         { "isPaused", pathNavigator.isPaused() }
     };
 
-    _connection->sendJson(wrappedPayload(jsonData));
+    sendData(jsonData);
 }
 
 } // namespace openspace

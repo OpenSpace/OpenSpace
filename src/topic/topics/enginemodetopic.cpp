@@ -116,7 +116,6 @@ Schema EngineModeTopic::Schema() {
           "additionalProperties": false,
           "required": ["topicId", "topicPayload", "data"]
         }
-
     )");
 
     return { "enginemodetopic", schema };
@@ -140,7 +139,7 @@ void EngineModeTopic::sendJsonData() {
     stateJson["mode"] = modeString;
 
     if (!stateJson.empty()) {
-        _connection->sendJson(wrappedPayload(stateJson));
+		sendData(stateJson);
     }
 }
 

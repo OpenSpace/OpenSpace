@@ -129,7 +129,7 @@ void ErrorLogTopic::createLog() {
             payload["level"] = ghoul::to_string(level);
         }
 
-        _connection->sendJson(wrappedPayload(std::move(payload)));
+        sendData(std::move(payload));
     };
 
     auto log = std::make_unique<NotificationLog>(

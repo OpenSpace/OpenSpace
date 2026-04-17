@@ -63,7 +63,7 @@ void VersionTopic::handleJson(const nlohmann::json&) {
         };
     }
 
-    _connection->sendJson(wrappedPayload(versionJson));
+    sendData(versionJson);
 }
 
 bool VersionTopic::isDone() const {
