@@ -29,12 +29,16 @@
 
 namespace openspace {
 
+struct Schema;
+
 class VersionTopic : public Topic {
 public:
     ~VersionTopic() override = default;
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
+
+    static openspace::Schema Schema();
 };
 
 } // namespace openspace
