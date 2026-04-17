@@ -109,7 +109,7 @@ void SkyBrowserTopic::sendBrowserData() {
     // Only send message if data actually changed
     if (jsonString != _lastUpdateJsonString) {
         const json jsonData = json::parse(jsonString.begin(), jsonString.end());
-        _connection->sendJson(wrappedPayload(jsonData));
+        sendData(jsonData);
     }
 
     // @TODO (2022-04-28, emmbr) The message is still sent very often; every time the
