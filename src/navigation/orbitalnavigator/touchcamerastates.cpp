@@ -54,12 +54,13 @@ namespace {
         return glm::dvec2(vec.x * aspectRatio, vec.y);
     };
 
-    double computeRollFactor(const glm::dvec2& centroid,
-                             const std::vector<TouchInputHolder>& touchPoints,
-                             const std::vector<TouchInput>& lastProcessed)
+    double computeFramewiseRollFactor(const glm::dvec2& centroid,
+                                      const std::vector<TouchInputHolder>& touchPoints,
+                                      const std::vector<TouchInput>& lastProcessed)
     {
         double rollFactor = 0.0;
         for (const TouchInputHolder& touchPoint : touchPoints) {
+            // Find the last processed touch point corresponding to tihs one
             const auto it = std::find_if(
                 lastProcessed.begin(),
                 lastProcessed.end(),
@@ -157,17 +158,29 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
             updateVelocities.zoom = _sensitivity * ZoomScale * zoomFactor;
 
             // Also apply rolling of fingers as part of the zooming gesture, so we can
-            // orient the view while zooming
-            double rollFactor = computeRollFactor(_centroid, touchPoints, lastProcessed);
+            // orient the view while zooming. Look at the difference since last frame
+            double rollFactor =
+                computeFramewiseRollFactor(_centroid, touchPoints, lastProcessed);
+
             constexpr double RollScale = 50.0;
             updateVelocities.globalRoll = _sensitivity * RollScale * -rollFactor;
             break;
         }
         case InteractionType::Roll: {
             // Apply global rotation velocity
-            // Note that whe a pure roll gesture was detected, we don't want to zoom
-            double rollFactor = computeRollFactor(_centroid, touchPoints, lastProcessed);
-            constexpr double Scale = 50.0;
+
+            // Note that with a pure roll gesture was detected, we don't want to zoom, and
+            // we check the total rotation since the first touch point so we can keep
+            // rolling when a gesture is being held
+
+            double rollFactor = 0.0;
+            for (const TouchInputHolder& touchPoint : touchPoints) {
+                float firstAngle = touchPoint.firstInput().angleToPos(_centroid);
+                float currentAngle = touchPoint.latestInput().angleToPos(_centroid);
+                rollFactor += validAngleDiff(firstAngle, currentAngle);
+            }
+
+            constexpr double Scale = 1.0;
             updateVelocities.globalRoll = _sensitivity * Scale * -rollFactor;
             break;
         }
