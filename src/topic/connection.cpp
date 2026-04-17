@@ -70,7 +70,7 @@ void Connection::handleMessage(const std::string& message) {
         LERROR(std::format("JSON handling error from: {}. {}", message, e.what()));
     }
     catch (const std::exception& e) {
-        LERROR(e.what());
+        LERROR(std::format("Unexpected error {}, from: {}", e.what(), message));
     }
     catch (...) {
         if (!isAuthorized()) {
