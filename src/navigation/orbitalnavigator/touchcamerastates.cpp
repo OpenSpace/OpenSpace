@@ -145,17 +145,13 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
             const TouchInput& startFinger1 = touchPoints[1].firstInput();
             const TouchInput& endFinger1 = touchPoints[1].latestInput();
 
-            glm::dvec2 diffVecStart = normalizeByAspectRatio(glm::dvec2(
+            glm::dvec2 diffStart = normalizeByAspectRatio(glm::dvec2(
                 startFinger0.pos - startFinger1.pos
             ));
-            double distToCenterStart = 0.5 * glm::length(diffVecStart);
-
-            glm::dvec2 diffVecEnd = normalizeByAspectRatio(glm::dvec2(
+            glm::dvec2 diffEnd = normalizeByAspectRatio(glm::dvec2(
                 endFinger0.pos - endFinger1.pos
             ));
-            double distToCenterEnd = 0.5 * glm::length(diffVecEnd);
-
-            double zoomFactor = distToCenterEnd - distToCenterStart;
+            double zoomFactor = glm::length(diffEnd) - glm::length(diffStart);
 
             constexpr double ZoomScale = 5.0;
             updateVelocities.zoom = _sensitivity * ZoomScale * zoomFactor;
