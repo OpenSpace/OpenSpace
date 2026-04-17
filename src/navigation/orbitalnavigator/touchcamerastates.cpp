@@ -180,7 +180,7 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
                 rollFactor += validAngleDiff(firstAngle, currentAngle);
             }
 
-            constexpr double Scale = 1.0;
+            constexpr double Scale = 0.5;
             updateVelocities.globalRoll = _sensitivity * Scale * -rollFactor;
             break;
         }
