@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "data": false,
+    "topicId": {
+      "const": "trigger"
+    },
+    "topicPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "property": {
+          "description": "Property URI to trigger",
+          "type": "string"
+        }
+      },
+      "required": ["property"],
+      "type": "object"
+    }
+  },
+  "required": ["topicId", "topicPayload", "data"],
+  "title": "TriggerPropertyTopic",
+  "type": "object"
+}

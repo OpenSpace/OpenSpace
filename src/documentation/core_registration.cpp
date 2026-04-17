@@ -81,6 +81,7 @@
 #include <openspace/topic/topics/profiletopic.h>
 #include <openspace/topic/topics/sessionrecordingtopic.h>
 #include <openspace/topic/topics/timetopic.h>
+#include <openspace/topic/topics/triggerpropertytopic.h>
 
 namespace openspace {
 
@@ -127,6 +128,7 @@ void registerCoreSchemas(DocumentationEngine& engine) {
     engine.addSchema(ProfileTopic::Schema());
     engine.addSchema(SessionRecordingTopic::Schema());
     engine.addSchema(TimeTopic::Schema());
+    engine.addSchema(TriggerPropertyTopic::Schema());
 }
 
 // NOTE: should this be in the documentation/core_reg.cpp file? Seems to be here just
