@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <modules/solarbrowsing/util/dynamicimagerytypes.h>
+
 #include <openspace/util/httprequest.h>
 
 #include <chrono>
@@ -60,6 +62,7 @@ public:
     const std::vector<std::filesystem::path>& downloadedFiles() const;
     void clearDownloaded();
     void deinitialize(bool saveDownloadsOnShutdown);
+    const RuntimeImageryStatus& status() const;
 
 private:
     struct RemoteFrame {
@@ -98,6 +101,7 @@ private:
     std::vector<RequestKey> desiredKeys(double currentTimeJ2000, double deltaTime) const;
     bool shouldRequestNewWindow(double currentTimeJ2000) const;
     bool shouldRetry(RequestKey key) const;
+    void updateStatusText();
 
     RequestKey requestKeyForTime(double j2000) const;
     double startTimeForKey(RequestKey key) const;
@@ -130,12 +134,15 @@ private:
     std::unordered_map<RequestKey, ActiveDownload> _activeDownloads;
     std::unordered_map<RequestKey, SteadyTimePoint> _failedUntil;
     std::unordered_map<RequestKey, int> _retryCounts;
+    std::unordered_map<RequestKey, FrameKnowledgeState> _frameKnowledge;
     std::unordered_set<RequestKey> _knownLocalKeys;
     std::unordered_set<RequestKey> _queuedKeys;
     std::unordered_set<std::string> _knownFiles;
     std::vector<std::filesystem::path> _downloadedFiles;
     std::vector<std::filesystem::path> _runtimeDownloadedFiles;
     InstrumentationCounters _instrumentation;
+    RuntimeImageryStatus _status;
+    std::vector<RequestKey> _lastDesiredKeys;
 };
 
 } // namespace openspace

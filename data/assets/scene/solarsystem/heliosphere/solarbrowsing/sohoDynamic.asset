@@ -6,7 +6,7 @@ local SolarImagery = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = soho.MissionBegin,
-    End = soho.MissionEnd
+    End = "2011 DEC 31 23:59:59"
   },
   Renderable = {
     Type = "RenderableSolarImagery",

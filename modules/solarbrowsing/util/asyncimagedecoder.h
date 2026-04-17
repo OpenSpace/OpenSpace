@@ -84,6 +84,8 @@ public:
      */
     void requestDecode(DecodeRequest request);
     void setVerboseFlag(bool verbose);
+    bool isQueuedOrActive(const DecodeRequest& request) const;
+    size_t queuedRequestCount() const;
 
 private:
     /**
@@ -112,10 +114,10 @@ private:
     std::atomic<bool> _stopRequest = false;
 
     // Request queue
-    std::mutex _queueMutex;
+    mutable std::mutex _queueMutex;
     std::condition_variable _queueCV;
     std::queue<DecodeRequest> _requestQueue;
-    std::unordered_map<std::filesystem::path, bool> _activeRequests;
+    std::unordered_map<std::string, bool> _activeRequests;
 };
 
 } //namespace openspace

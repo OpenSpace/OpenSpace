@@ -56,17 +56,42 @@ DynamicHelioviewerImageDownloader::DynamicHelioviewerImageDownloader(
         std::filesystem::create_directories(_outputFolder);
     }
 
+    _status.activeInstrument = _instrument;
+    _status.sourceId = _sourceId;
+    _status.availabilityState = ImageryAvailabilityState::NoData;
+    _status.statusText = "No data requested yet";
+
     scanForNewLocalFiles();
     clearDownloaded();
 }
 
 void DynamicHelioviewerImageDownloader::update(double currentTimeJ2000, double deltaTime) {
     const std::vector<RequestKey> requestedKeys = desiredKeys(currentTimeJ2000, deltaTime);
+    _lastDesiredKeys = requestedKeys;
+    _status.currentRequestKey = requestedKeys.empty() ? 0 : requestedKeys.front();
+    _status.requestedSimTimeJ2000 = currentTimeJ2000;
 
     pollListingRequest(currentTimeJ2000);
     reprioritizeQueue(requestedKeys, currentTimeJ2000);
     startQueuedDownloads();
     pollDownloads(currentTimeJ2000);
+
+    const bool allKnownEmpty =
+        !requestedKeys.empty() &&
+        std::all_of(
+            requestedKeys.begin(),
+            requestedKeys.end(),
+            [this](RequestKey key) {
+                auto it = _frameKnowledge.find(key);
+                return it != _frameKnowledge.end() && it->second == FrameKnowledgeState::KnownEmpty;
+            }
+        );
+
+    if (allKnownEmpty) {
+        _status.availabilityState = ImageryAvailabilityState::NoData;
+        updateStatusText();
+        return;
+    }
 
     const bool needListing = std::any_of(
         requestedKeys.begin(),
@@ -83,6 +108,19 @@ void DynamicHelioviewerImageDownloader::update(double currentTimeJ2000, double d
     {
         startListingRequest(currentTimeJ2000);
     }
+
+    if (_activeListingRequest) {
+        _status.availabilityState = ImageryAvailabilityState::WaitingForListing;
+    }
+    else if (!_activeDownloads.empty()) {
+        _status.availabilityState = ImageryAvailabilityState::WaitingForDownload;
+    }
+    else if (std::any_of(requestedKeys.begin(), requestedKeys.end(), [this](RequestKey key) {
+        return _knownLocalKeys.contains(key);
+    })) {
+        _status.availabilityState = ImageryAvailabilityState::DecodePending;
+    }
+    updateStatusText();
 }
 
 const std::vector<std::filesystem::path>&
@@ -137,6 +175,10 @@ void DynamicHelioviewerImageDownloader::deinitialize(bool saveDownloadsOnShutdow
     }
 }
 
+const RuntimeImageryStatus& DynamicHelioviewerImageDownloader::status() const {
+    return _status;
+}
+
 void DynamicHelioviewerImageDownloader::scanForNewLocalFiles() {
     ++_instrumentation.localScans;
     std::vector<std::filesystem::path> files = ghoul::filesystem::walkDirectory(
@@ -163,6 +205,7 @@ void DynamicHelioviewerImageDownloader::scanForNewLocalFiles() {
 
         _knownFiles.insert(filename);
         _knownLocalKeys.insert(key);
+        _frameKnowledge[key] = FrameKnowledgeState::KnownLocal;
         _availableFrames[key] = {
             .unixTimestamp = 0.0,
             .j2000Timestamp = *j2000,
@@ -206,10 +249,16 @@ void DynamicHelioviewerImageDownloader::pollListingRequest(double currentTimeJ20
             }
 
             if (frames.empty()) {
+                for (RequestKey key : _lastDesiredKeys) {
+                    if (!_knownLocalKeys.contains(key)) {
+                        _frameKnowledge[key] = FrameKnowledgeState::KnownEmpty;
+                    }
+                }
                 LINFO(std::format(
                     "No Helioviewer frames available for instrument '{}' in requested window",
                     _instrument
                 ));
+                _status.availabilityState = ImageryAvailabilityState::NoData;
             }
 
             for (double unixTimestamp : frames) {
@@ -227,6 +276,8 @@ void DynamicHelioviewerImageDownloader::pollListingRequest(double currentTimeJ20
 
                 auto it = _availableFrames.find(key);
                 if (it == _availableFrames.end()) {
+                    _frameKnowledge[key] = _knownLocalKeys.contains(key) ?
+                        FrameKnowledgeState::KnownLocal : FrameKnowledgeState::KnownRemote;
                     _availableFrames[key] = std::move(candidate);
                 }
                 else {
@@ -235,6 +286,8 @@ void DynamicHelioviewerImageDownloader::pollListingRequest(double currentTimeJ20
                     if (newDistance < oldDistance) {
                         it->second = std::move(candidate);
                     }
+                    _frameKnowledge[key] = _knownLocalKeys.contains(key) ?
+                        FrameKnowledgeState::KnownLocal : FrameKnowledgeState::KnownRemote;
                 }
             }
 
@@ -242,6 +295,7 @@ void DynamicHelioviewerImageDownloader::pollListingRequest(double currentTimeJ20
             _nextListingAllowedTime = SteadyTimePoint::min();
         }
         catch (const std::exception& e) {
+            _status.availabilityState = ImageryAvailabilityState::Error;
             LERROR(std::format(
                 "Failed to parse Helioviewer frame response [{}]",
                 e.what()
@@ -255,6 +309,7 @@ void DynamicHelioviewerImageDownloader::pollListingRequest(double currentTimeJ20
     }
     else if (request.hasFailed()) {
         request.wait();
+        _status.availabilityState = ImageryAvailabilityState::Error;
         LERROR(std::format(
             "Failed to fetch Helioviewer frame list from '{}'",
             request.url()
@@ -274,6 +329,7 @@ void DynamicHelioviewerImageDownloader::startListingRequest(double currentTimeJ2
     request->start();
 
     ++_instrumentation.listingsStarted;
+    _status.availabilityState = ImageryAvailabilityState::WaitingForListing;
     LINFO(std::format("Requesting Helioviewer frames: {}", request->url()));
     LDEBUG(std::format(
         "Helioviewer listing count for '{}' is now {}",
@@ -300,6 +356,7 @@ void DynamicHelioviewerImageDownloader::reprioritizeQueue(
             continue;
         }
 
+        _frameKnowledge[key] = FrameKnowledgeState::KnownRemote;
         nextQueue.push_back(key);
         nextQueuedKeys.insert(key);
     }
@@ -334,6 +391,7 @@ void DynamicHelioviewerImageDownloader::startQueuedDownloads() {
         request->start();
 
         ++_instrumentation.downloadsStarted;
+        _status.availabilityState = ImageryAvailabilityState::WaitingForDownload;
         LINFO(std::format("Downloading Helioviewer image: {}", request->url()));
         LDEBUG(std::format(
             "Helioviewer download count for '{}' is now {}",
@@ -371,6 +429,7 @@ void DynamicHelioviewerImageDownloader::pollDownloads(double currentTimeJ2000) {
                     std::chrono::duration<double>(_retryBackoffSeconds)
                 );
                 ++_retryCounts[download.key];
+                _frameKnowledge[download.key] = FrameKnowledgeState::RetryBackoff;
                 it = _activeDownloads.erase(it);
                 continue;
             }
@@ -388,6 +447,7 @@ void DynamicHelioviewerImageDownloader::pollDownloads(double currentTimeJ2000) {
                     std::chrono::duration<double>(_retryBackoffSeconds)
                 );
                 ++_retryCounts[download.key];
+                _frameKnowledge[download.key] = FrameKnowledgeState::RetryBackoff;
                 it = _activeDownloads.erase(it);
                 continue;
             }
@@ -395,6 +455,7 @@ void DynamicHelioviewerImageDownloader::pollDownloads(double currentTimeJ2000) {
             const std::string filename = download.finalPath.filename().string();
             _knownFiles.insert(filename);
             _knownLocalKeys.insert(download.key);
+            _frameKnowledge[download.key] = FrameKnowledgeState::KnownLocal;
             _downloadedFiles.push_back(download.finalPath);
             _runtimeDownloadedFiles.push_back(download.finalPath);
             _retryCounts.erase(download.key);
@@ -425,6 +486,7 @@ void DynamicHelioviewerImageDownloader::pollDownloads(double currentTimeJ2000) {
             _failedUntil[download.key] = wallClockNow() + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
                 std::chrono::duration<double>(_retryBackoffSeconds * multiplier)
             );
+            _frameKnowledge[download.key] = FrameKnowledgeState::RetryBackoff;
             it = _activeDownloads.erase(it);
             continue;
         }
@@ -487,6 +549,20 @@ bool DynamicHelioviewerImageDownloader::shouldRetry(RequestKey key) const
 
     auto retryIt = _retryCounts.find(key);
     return retryIt == _retryCounts.end() || retryIt->second <= _maxRetries;
+}
+
+void DynamicHelioviewerImageDownloader::updateStatusText() {
+    _status.queuedDownloads = _queuedDownloadKeys.size();
+    _status.activeDownloads = _activeDownloads.size();
+    _status.displayedFrameTimeJ2000 = std::nullopt;
+    _status.statusText = std::format(
+        "{}: instrument='{}', sourceId={}, queued={}, active={}",
+        toString(_status.availabilityState),
+        _status.activeInstrument,
+        _status.sourceId,
+        _status.queuedDownloads,
+        _status.activeDownloads
+    );
 }
 
 DynamicHelioviewerImageDownloader::RequestKey

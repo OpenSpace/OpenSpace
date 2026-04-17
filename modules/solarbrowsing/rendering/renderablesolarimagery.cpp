@@ -28,6 +28,7 @@
 #include <modules/solarbrowsing/solarbrowsingmodule.h>
 #include <modules/solarbrowsing/util/asyncimagedecoder.h>
 #include <modules/solarbrowsing/util/dynamichelioviewerimagedownloader.h>
+#include <modules/solarbrowsing/util/dynamicimagerytypes.h>
 #include <modules/solarbrowsing/util/solarbrowsinghelper.h>
 #include <modules/solarbrowsing/util/structs.h>
 #include <openspace/documentation/documentation.h>
@@ -145,6 +146,34 @@ namespace {
         "PredictFramesBefore",
         "Predict frames before",
         "Determines how many images to pre-fetch before the current image frame.",
+        Property::Visibility::AdvancedUser
+    };
+
+    constexpr Property::PropertyInfo RuntimeStatusInfo = {
+        "RuntimeStatus",
+        "Runtime status",
+        "Human-readable status for the current dynamic imagery state.",
+        Property::Visibility::AdvancedUser
+    };
+
+    constexpr Property::PropertyInfo DataAvailabilityStateInfo = {
+        "DataAvailabilityState",
+        "Data availability state",
+        "Current availability state for the active dynamic imagery instrument.",
+        Property::Visibility::AdvancedUser
+    };
+
+    constexpr Property::PropertyInfo DisplayedImageTimeInfo = {
+        "DisplayedImageTime",
+        "Displayed image time",
+        "Timestamp of the image currently shown on screen.",
+        Property::Visibility::AdvancedUser
+    };
+
+    constexpr Property::PropertyInfo CurrentSourceIdInfo = {
+        "CurrentSourceId",
+        "Current source id",
+        "HelioViewer source id used by the active dynamic imagery stream.",
         Property::Visibility::AdvancedUser
     };
 
@@ -328,6 +357,10 @@ namespace openspace {
     RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary)
         , _activeInstruments(ActiveInstrumentInfo)
+        , _runtimeStatus(RuntimeStatusInfo, "Idle")
+        , _dataAvailabilityState(DataAvailabilityStateInfo, "NoData")
+        , _displayedImageTime(DisplayedImageTimeInfo, "")
+        , _currentSourceIdStatus(CurrentSourceIdInfo, "-1")
         , _blackTransparencyThreshold(BlackTransparencyThresholdInfo, 0.01f, 0.0f, 0.1f)
         , _contrastValue(ContrastValueInfo, 0.f, -15.f, 15.f)
         , _enableBorder(EnableBorderInfo, false)
@@ -343,6 +376,14 @@ namespace openspace {
         const Parameters p = codegen::bake<Parameters>(dictionary);
 
         addProperty(Fadeable::_opacity);
+        _runtimeStatus.setReadOnly(true);
+        _dataAvailabilityState.setReadOnly(true);
+        _displayedImageTime.setReadOnly(true);
+        _currentSourceIdStatus.setReadOnly(true);
+        addProperty(_runtimeStatus);
+        addProperty(_dataAvailabilityState);
+        addProperty(_displayedImageTime);
+        addProperty(_currentSourceIdStatus);
 
         _imageDirectory = std::filesystem::path(p.imageDirectory);
         if (p.transferFunctions.has_value()) {
@@ -862,6 +903,8 @@ namespace openspace {
                 true
             );
 
+        updateRuntimeStatus(keyframe);
+
         requestPredictiveFrames(keyframe, data);
 
         if (_planeShader->isDirty()) {
@@ -870,6 +913,88 @@ namespace openspace {
 
         if (_frustumShader->isDirty()) {
             _frustumShader->rebuildFromFile();
+        }
+    }
+
+    void RenderableSolarImagery::updateRuntimeStatus(
+        const Keyframe<ImageMetadata>* displayedKeyframe)
+    {
+        if (_dynamicDownloader) {
+            _runtimeImageryStatus = _dynamicDownloader->status();
+        }
+        else {
+            _runtimeImageryStatus.activeInstrument = _currentActiveInstrument;
+            _runtimeImageryStatus.sourceId = -1;
+            _runtimeImageryStatus.requestedSimTimeJ2000 = global::timeManager->time().j2000Seconds();
+            _runtimeImageryStatus.availabilityState = displayedKeyframe ?
+                ImageryAvailabilityState::ShowingImage : ImageryAvailabilityState::NoData;
+        }
+
+        DecodeRequest request = {
+            .metadata = displayedKeyframe ? displayedKeyframe->data : ImageMetadata{},
+            .downsamplingLevel = _downsamplingLevel
+        };
+
+        if (displayedKeyframe) {
+            SolarBrowsingModule* module = global::moduleEngine->module<SolarBrowsingModule>();
+            const int imageSize = displayedKeyframe->data.fullResolution /
+                static_cast<int>(std::pow(2, _downsamplingLevel.value()));
+            std::filesystem::path path = displayedKeyframe->data.filePath;
+            std::filesystem::path cacheFile = module->cacheManager()->cachedFilename(
+                path.replace_extension(".bin"),
+                std::format("{}x{}", imageSize, imageSize)
+            );
+
+            if (_currentKeyframe == displayedKeyframe->id) {
+                _runtimeImageryStatus.availabilityState = ImageryAvailabilityState::ShowingImage;
+                _runtimeImageryStatus.displayedFrameTimeJ2000 = displayedKeyframe->timestamp;
+            }
+            else if (!std::filesystem::exists(cacheFile) &&
+                     _asyncDecoder->isQueuedOrActive(request))
+            {
+                _runtimeImageryStatus.availabilityState = ImageryAvailabilityState::DecodePending;
+                _runtimeImageryStatus.displayedFrameTimeJ2000 = std::nullopt;
+            }
+            else if (!std::filesystem::exists(cacheFile)) {
+                _runtimeImageryStatus.availabilityState = ImageryAvailabilityState::WaitingForDownload;
+                _runtimeImageryStatus.displayedFrameTimeJ2000 = std::nullopt;
+            }
+            else {
+                _runtimeImageryStatus.displayedFrameTimeJ2000 = displayedKeyframe->timestamp;
+            }
+        }
+        else {
+            _runtimeImageryStatus.displayedFrameTimeJ2000 = std::nullopt;
+        }
+
+        _runtimeImageryStatus.decodeQueueSize = _asyncDecoder ? _asyncDecoder->queuedRequestCount() : 0;
+
+        const std::string newState = std::string(toString(_runtimeImageryStatus.availabilityState));
+        const std::string newDisplayedTime = _runtimeImageryStatus.displayedFrameTimeJ2000.has_value() ?
+            std::string(Time(*_runtimeImageryStatus.displayedFrameTimeJ2000).ISO8601()) : "";
+        const std::string newSourceId = std::to_string(_runtimeImageryStatus.sourceId);
+        const std::string newRuntimeStatus = std::format(
+            "{} | instrument={} | sourceId={} | displayed={} | queued={} | active={} | decodeQueue={}",
+            newState,
+            _runtimeImageryStatus.activeInstrument,
+            _runtimeImageryStatus.sourceId,
+            newDisplayedTime.empty() ? "none" : newDisplayedTime,
+            _runtimeImageryStatus.queuedDownloads,
+            _runtimeImageryStatus.activeDownloads,
+            _runtimeImageryStatus.decodeQueueSize
+        );
+
+        if (_dataAvailabilityState.value() != newState) {
+            _dataAvailabilityState = newState;
+        }
+        if (_displayedImageTime.value() != newDisplayedTime) {
+            _displayedImageTime = newDisplayedTime;
+        }
+        if (_currentSourceIdStatus.value() != newSourceId) {
+            _currentSourceIdStatus = newSourceId;
+        }
+        if (_runtimeStatus.value() != newRuntimeStatus) {
+            _runtimeStatus = newRuntimeStatus;
         }
     }
 
@@ -1038,6 +1163,10 @@ namespace openspace {
         return _tfMap[_currentActiveInstrument].get();
     }
 
+    const RuntimeImageryStatus& RenderableSolarImagery::runtimeStatus() const {
+        return _runtimeImageryStatus;
+    }
+
     const std::unique_ptr<ghoul::opengl::Texture>&
         RenderableSolarImagery::imageryTexture() const
     {
@@ -1097,7 +1226,7 @@ namespace openspace {
                     reinterpret_cast<std::byte*>(buffer.data())
                 );
 
-                LINFO(std::format(
+                LDEBUG(std::format(
                     "Cleared solar image for instrument '{}' at simulation time {}",
                     _currentActiveInstrument,
                     global::timeManager->time().ISO8601()
@@ -1144,7 +1273,7 @@ namespace openspace {
                 reinterpret_cast<std::byte*>(data.buffer.data())
             );
 
-            LINFO(std::format(
+            LDEBUG(std::format(
                 "Showing solar image '{}' for instrument '{}' at image time {} "
                 "(simulation time {})",
                 keyframe->data.filePath.filename(),

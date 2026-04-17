@@ -28,7 +28,9 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/solarbrowsing/util/dynamichelioviewerimagedownloader.h>
+#include <modules/solarbrowsing/util/dynamicimagerytypes.h>
 #include <modules/solarbrowsing/util/structs.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
@@ -73,6 +75,7 @@ namespace openspace {
         static openspace::Documentation Documentation();
 
         TransferFunction* transferFunction();
+        const RuntimeImageryStatus& runtimeStatus() const;
         const std::unique_ptr<ghoul::opengl::Texture>& imageryTexture() const;
         float blackTransparencyThreshold() const;
         float contrastValue() const;
@@ -99,6 +102,7 @@ namespace openspace {
         void updateImageryTexture();
         int addInstrumentOption(std::string instrument);
         std::optional<int> instrumentOptionValue(std::string_view instrument) const;
+        void updateRuntimeStatus(const Keyframe<ImageMetadata>* displayedKeyframe);
         void ensureDynamicDownloader();
         void ingestDownloadedFiles();
         void ingestFile(const std::filesystem::path& filePath,
@@ -111,6 +115,10 @@ namespace openspace {
         void createFrustum() const;
 
         OptionProperty _activeInstruments;
+        StringProperty _runtimeStatus;
+        StringProperty _dataAvailabilityState;
+        StringProperty _displayedImageTime;
+        StringProperty _currentSourceIdStatus;
         FloatProperty _blackTransparencyThreshold;
         FloatProperty _contrastValue;
         BoolProperty _enableBorder;
@@ -180,6 +188,7 @@ namespace openspace {
         bool _enableDynamicDownload = false;
         bool _saveDownloadsOnShutdown = true;
         std::unique_ptr<DynamicHelioviewerImageDownloader> _dynamicDownloader;
+        RuntimeImageryStatus _runtimeImageryStatus;
     };
 
 } // namespace openspace

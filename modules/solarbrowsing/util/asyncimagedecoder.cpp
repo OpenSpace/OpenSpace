@@ -142,4 +142,17 @@ void AsyncImageDecoder::setVerboseFlag(bool verbose) {
     _verbose = verbose;
 }
 
+bool AsyncImageDecoder::isQueuedOrActive(const DecodeRequest& request) const {
+    const std::string key = std::format(
+        "{}_ds_{}", request.metadata.filePath, request.downsamplingLevel
+    );
+    std::lock_guard<std::mutex> lock(_queueMutex);
+    return _activeRequests.contains(key);
+}
+
+size_t AsyncImageDecoder::queuedRequestCount() const {
+    std::lock_guard<std::mutex> lock(_queueMutex);
+    return _requestQueue.size();
+}
+
 } // namespace openspace
