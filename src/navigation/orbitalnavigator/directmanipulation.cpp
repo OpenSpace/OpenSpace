@@ -380,27 +380,31 @@ void DirectManipulation::updateCameraFromInput() {
         }
     }
 
-    // Did all the first touch points intersect the node? Otherwise, we stick to regular
-    // touch
-    bool initialTouchValid = true;
-    for (const TouchPoint& point : touchPoints) {
-        if (!computeSurfacePoint(point.initialPosition, anchor).has_value()) {
-            initialTouchValid = false;
-            break;
-        }
-    }
-
-    if (!_enabled || touchPoints.empty() || !initialTouchValid) {
+    if (!_enabled || touchPoints.empty()) {
         // No fingers, no input. Or, the first touch points did not touch the node
         _selectedNodeSurfacePoints.clear();
         _isActive = false;
+        _invalidFirstTouch = false;
         return;
+    }
+
+    if (_lastNSurfacePoints == 0 && !_selectedNodeSurfacePoints.empty()) {
+        // This is the first touch intersecting the object! Check if all the initial touch points
+        // intersected the surface
+        _invalidFirstTouch = false;
+        for (const TouchPoint& point : touchPoints) {
+            if (!computeSurfacePoint(point.initialPosition, anchor).has_value()) {
+                _invalidFirstTouch = true;
+                break;
+            }
+        }
     }
 
     bool isValidNode = isValidDirectTouchNode();
     bool isCloseEnough = isWithinDirectTouchDistance();
 
-    bool isValidTouchPoints = !_selectedNodeSurfacePoints.empty() &&
+    bool isValidTouchPoints = !_invalidFirstTouch && !
+        _selectedNodeSurfacePoints.empty() &&
         touchPoints.size() == _selectedNodeSurfacePoints.size() &&
         std::equal(
             touchPoints.begin(),
@@ -420,6 +424,8 @@ void DirectManipulation::updateCameraFromInput() {
     else {
         _isActive = false;
     }
+
+    _lastNSurfacePoints = static_cast<int>(_selectedNodeSurfacePoints.size());
 
     if (isCloseEnough && isValidNode) {
         updateNodeSurfacePoints(touchPoints);

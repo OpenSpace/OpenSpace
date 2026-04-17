@@ -126,8 +126,10 @@ private:
     std::set<std::string> _sortedDefaultRenderableTypes;
 
     std::vector<SelectedBody> _selectedNodeSurfacePoints;
+    int _lastNSurfacePoints = 0;
 
     glm::dvec2 _firstMousePressPos = glm::dvec2(0.0);
+    bool _invalidFirstTouch = false;
 };
 
 } // namespace openspace
