@@ -443,6 +443,7 @@ local S2017J10 = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(S2010J2)
   openspace.addSceneGraphNode(Thelxinoe)

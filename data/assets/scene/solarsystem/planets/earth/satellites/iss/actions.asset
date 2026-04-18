@@ -11,6 +11,7 @@ local FocusIss = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.action.registerAction(FocusIss)
 end)

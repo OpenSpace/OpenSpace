@@ -25,6 +25,7 @@ local L3Trail = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(L3Trail)
 end)

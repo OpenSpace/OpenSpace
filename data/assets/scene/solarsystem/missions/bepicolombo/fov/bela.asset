@@ -72,6 +72,7 @@ local BelaTransmitterRed = {
   }
 }
 
+
 asset.onInitialize(function()
   -- Circle shapes are currently not supported
   -- openspace.addSceneGraphNode(BelaReceiver)

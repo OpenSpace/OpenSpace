@@ -73,6 +73,7 @@ local labels = {
   label_09, label_10, label_11, label_12, label_13, label_14, label_15, label_16
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", Layer)
 

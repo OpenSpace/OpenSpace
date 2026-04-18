@@ -674,6 +674,7 @@ local S2017J10Label = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(S2010J2Label)
   openspace.addSceneGraphNode(ThelxinoeLabel)

@@ -6,6 +6,7 @@ local Item = {
   Type = "DashboardItemParallelConnection"
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Item)
 end)

@@ -139,6 +139,7 @@ local Layer = {
     of Earth's nocturnal landscape. See the individual layers for more information.]]
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "NightLayers", Layer)
 end)

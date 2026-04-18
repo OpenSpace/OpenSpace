@@ -352,6 +352,7 @@ local S2025U1Label = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(CordeliaLabel)
   openspace.addSceneGraphNode(OpheliaLabel)

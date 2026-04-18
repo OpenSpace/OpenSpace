@@ -382,6 +382,7 @@ local S2017J10Position = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(S2010J2Position)
   openspace.addSceneGraphNode(ThelxinoePosition)

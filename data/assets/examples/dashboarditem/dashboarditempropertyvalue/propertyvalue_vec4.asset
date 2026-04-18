@@ -8,6 +8,7 @@ local Item = {
   DisplayString = "Font Color (enabled): ({}, {}, {}, {})"
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Item)
 end)

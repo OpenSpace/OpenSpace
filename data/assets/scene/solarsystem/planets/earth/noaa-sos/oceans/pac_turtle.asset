@@ -40,6 +40,7 @@ local Layer = {
   Description = Description
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", Layer)
 end)

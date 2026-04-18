@@ -153,6 +153,7 @@ local SetBandColorsAction = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EclipticLine)
   openspace.addSceneGraphNode(EclipticBand)

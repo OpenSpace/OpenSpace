@@ -21,6 +21,7 @@ local Item = {
   Video = video
 }
 
+
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(Item)
 end)
