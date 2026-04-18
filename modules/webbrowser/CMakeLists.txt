@@ -88,6 +88,19 @@ file(COPY ${CEF_ROOT}/Release/
   FILES_MATCHING PATTERN *
 )
 
+if (UNIX)
+  # CEF bundles a stripped-down libvulkan.so.1 that lacks symbols. Because the CEF directory
+  # is on the executable's RUNPATH, this stub gets loaded instead of the system Vulkan loader,
+  # breaking libraries that need the full symbol set
+  # We remove the bundled copies so the dynamic linker falls through to the system libvulkan
+  file(
+    REMOVE
+    "${CEF_ROOT}/Debug/libvulkan.so.1"
+    "${CEF_ROOT}/Release/libvulkan.so.1"
+    "${CEF_ROOT}/RelWithDebInfo/libvulkan.so.1"
+  )
+endif ()
+
 ##########################################################################################
 
 # Add the CEF binary distribution's cmake/ directory to the module path.
