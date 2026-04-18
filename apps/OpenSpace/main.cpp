@@ -773,10 +773,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.currentWindowSize = []() {
         ZoneScoped;
 
-        return glm::ivec2(
-            currentWindow->windowResolution().x,
-            currentWindow->windowResolution().y
-        );
+        return glm::ivec2(currentWindow->windowSize().x, currentWindow->windowSize().y);
     };
     sgctDelegate.currentSubwindowSize = []() {
         ZoneScoped;
@@ -785,19 +782,19 @@ void setSgctDelegateFunctions() {
             case Window::StereoMode::SideBySide:
             case Window::StereoMode::SideBySideInverted:
                 return glm::ivec2(
-                    currentWindow->windowResolution().x / 2,
-                    currentWindow->windowResolution().y
+                    currentWindow->windowSize().x / 2,
+                    currentWindow->windowSize().y
                 );
             case Window::StereoMode::TopBottom:
             case Window::StereoMode::TopBottomInverted:
                 return glm::ivec2(
-                    currentWindow->windowResolution().x,
-                    currentWindow->windowResolution().y / 2
+                    currentWindow->windowSize().x,
+                    currentWindow->windowSize().y / 2
                 );
             default:
                 return glm::ivec2(
-                    currentWindow->windowResolution().x * currentViewport->size().x,
-                    currentWindow->windowResolution().y * currentViewport->size().y
+                    currentWindow->windowSize().x * currentViewport->size().x,
+                    currentWindow->windowSize().y * currentViewport->size().y
                 );
         }
     };
@@ -832,7 +829,7 @@ void setSgctDelegateFunctions() {
         ZoneScoped;
 
         if (currentViewport) {
-            const ivec2 res = currentWindow->windowResolution();
+            const ivec2 res = currentWindow->windowSize();
             const vec2 size = currentViewport->size();
             return glm::ivec2(size.x * res.x, size.y * res.y);
         }
@@ -847,7 +844,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.firstWindowResolution = []() {
         ZoneScoped;
         sgct::Window* window = Engine::instance().windows().front().get();
-        return glm::ivec2(window->windowResolution().x, window->windowResolution().y);
+        return glm::ivec2(window->windowSize().x, window->windowSize().y);
     };
     sgctDelegate.guiWindowResolution = []() {
         ZoneScoped;
@@ -863,7 +860,7 @@ void setSgctDelegateFunctions() {
             guiWin = Engine::instance().windows().front().get();
         }
 
-        return glm::ivec2(guiWin->windowResolution().x, guiWin->windowResolution().y);
+        return glm::ivec2(guiWin->windowSize().x, guiWin->windowSize().y);
     };
     sgctDelegate.osDpiScaling = []() {
         ZoneScoped;
@@ -1041,7 +1038,7 @@ void setSgctDelegateFunctions() {
                 continue;
             }
 
-            const sgct::ivec2 res = window->windowResolution();
+            const sgct::ivec2 res = window->windowSize();
             for (const std::unique_ptr<Viewport>& viewport : window->viewports()) {
                 const sgct::vec2 pos = viewport->position();
                 const sgct::vec2 size = viewport->size();
@@ -1324,31 +1321,11 @@ int main(int argc, char* argv[]) {
         std::filesystem::path base = findConfiguration().parent_path();
         FileSys.registerPathToken("${BASE}", std::move(base));
 
-        // The previous incarnation of this was initializing GLFW to get the primary
-        // monitor's resolution, but that had some massive performance implications as
-        // there was some issue with the swap buffer handling inside of GLFW. My
-        // assumption is that GLFW doesn't like being initialized, destroyed, and then
-        // initialized again. Therefore we are using the platform specific functions now
-#ifdef WIN32
-        glm::ivec2 size = glm::ivec2(1920, 1080);
-        DEVMODEW dm;
-        std::memset(&dm, 0, sizeof(DEVMODEW));
-        dm.dmSize = sizeof(DEVMODEW);
-        BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
-        if (success) {
-            size.x = dm.dmPelsWidth;
-            size.y = dm.dmPelsHeight;
-        }
-#else // ^^^^ WIN32 // !WIN32 vvvv
-        const glm::ivec2 size = glm::ivec2(1920, 1080);
-#endif // WIN32
-
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
         *global::configuration = loadConfigurationFromFile(
             configurationFilePath,
-            findSettings(),
-            size
+            findSettings()
         );
 
         // Override configuration with commandline arguments
@@ -1412,16 +1389,11 @@ int main(int argc, char* argv[]) {
     global::openSpaceEngine->registerPathTokens();
 
     // Call profile GUI
-    const std::string labelFromCfgFile = " (from .cfg)";
     std::string windowCfgPreset;
     if (commandlineArguments.windowConfig.has_value()) {
         windowCfgPreset = std::format(
             "{} (from CLI)", global::configuration->windowConfiguration
         );
-    }
-    else if (!global::configuration->sgctConfigNameInitialized.empty()) {
-        windowCfgPreset =
-            global::configuration->sgctConfigNameInitialized + labelFromCfgFile;
     }
     else {
         windowCfgPreset = global::configuration->windowConfiguration;
@@ -1478,29 +1450,9 @@ int main(int argc, char* argv[]) {
             configurationFilePath = findConfiguration();
         }
 
-        // The previous incarnation of this was initializing GLFW to get the primary
-        // monitor's resolution, but that had some massive performance implications as
-        // there was some issue with the swap buffer handling inside of GLFW. My
-        // assumption is that GLFW doesn't like being initialized, destroyed, and then
-        // initialized again. Therefore we are using the platform specific functions now
-#ifdef WIN32
-        glm::ivec2 size = glm::ivec2(1920, 1080);
-        DEVMODEW dm;
-        std::memset(&dm, 0, sizeof(DEVMODEW));
-        dm.dmSize = sizeof(DEVMODEW);
-        BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
-        if (success) {
-            size.x = dm.dmPelsWidth;
-            size.y = dm.dmPelsHeight;
-        }
-#else // ^^^^ WIN32 // !WIN32 vvvv
-        const glm::ivec2 size = glm::ivec2(1920, 1080);
-#endif // WIN32
-
         *global::configuration = loadConfigurationFromFile(
             configurationFilePath,
-            findSettings(),
-            size
+            findSettings()
         );
 
         auto [profile, addons] = launcher.selectedProfile();
@@ -1510,20 +1462,7 @@ int main(int argc, char* argv[]) {
         std::string config = windowConfiguration;
         isGeneratedWindowConfig = false;
         if (!commandlineArguments.windowConfig.has_value()) {
-            config = launcher.selectedWindowConfig();
-            if (config.contains(labelFromCfgFile)) {
-                if (!config.contains("sgct.config")) {
-                    config = config.substr(
-                        0,
-                        config.length() - labelFromCfgFile.length()
-                    );
-                }
-                else {
-                    config = windowConfiguration;
-                    isGeneratedWindowConfig = true;
-                }
-            }
-            global::configuration->windowConfiguration = config;
+            global::configuration->windowConfiguration = launcher.selectedWindowConfig();
         }
 #else // ^^^^ OPENSPACE_HAS_LAUNCHER // !OPENSPACE_HAS_LAUNCHER
         glfwInit();
