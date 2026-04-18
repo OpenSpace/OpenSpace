@@ -114,6 +114,6 @@ asset.meta = {
   Name = "Jupiter Pasiphae Other Moons Trails",
   Description = [[Asset containing trails for Jupiter's Other Group moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

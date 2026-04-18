@@ -90,6 +90,6 @@ asset.meta = {
     performance then SPICE but lower resolution. Data is from shortly after mission
     launches until January 1st, 2030]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

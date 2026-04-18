@@ -45,6 +45,6 @@ asset.meta = {
   Name = "Pluto Barycenter Trail",
   Description = "Trail of Pluto Barycenter as observed by the Sun",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

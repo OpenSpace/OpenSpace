@@ -45,6 +45,6 @@ asset.meta = {
   Name = "Phobos Label",
   Description = "Label for Phobos",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -44,6 +44,6 @@ asset.meta = {
   Name = "Triton Position",
   Description = [[Position for Neptune's moon Triton]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

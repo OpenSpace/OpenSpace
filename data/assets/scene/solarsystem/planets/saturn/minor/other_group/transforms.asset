@@ -209,6 +209,6 @@ asset.meta = {
   Name = "Saturn Other Group Moons Positions",
   Description = [[Asset containing positions for Saturn's Other Group moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

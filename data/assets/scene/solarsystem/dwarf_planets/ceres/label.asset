@@ -41,6 +41,6 @@ asset.meta = {
   Name = "Ceres Label",
   Description = "Label for Ceres",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

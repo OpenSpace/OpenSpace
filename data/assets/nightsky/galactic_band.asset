@@ -86,7 +86,7 @@ asset.meta = {
   Description = [[A line representation of the Galactic Equator plane, including actions
     to toggle, hide and show it.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }
 

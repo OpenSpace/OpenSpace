@@ -38,6 +38,6 @@ asset.meta = {
   Description = [[GeoJson example asset with points that are facing the camera
     (default)]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

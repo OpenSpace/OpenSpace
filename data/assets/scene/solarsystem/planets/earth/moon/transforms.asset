@@ -37,6 +37,6 @@ asset.meta = {
   Name = "Moon Transforms",
   Description = "Moon transforms",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -42,6 +42,6 @@ asset.meta = {
   Name = "HGA",
   Description = "Shows the field-view for the High Gain Antenna of the MPO spacecraft.",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

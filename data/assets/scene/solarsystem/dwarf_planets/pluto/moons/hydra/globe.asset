@@ -32,6 +32,6 @@ asset.meta = {
   Name = "Hydra Globe",
   Description = "Globe for Pluto's moon Hydra",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

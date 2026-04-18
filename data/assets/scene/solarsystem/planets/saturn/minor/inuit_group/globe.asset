@@ -208,6 +208,6 @@ asset.meta = {
   Name = "Saturn Inuit Group Moons",
   Description = [[Asset containing globes for  Saturn's Inuit Group moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

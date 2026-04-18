@@ -61,6 +61,6 @@ asset.meta = {
   Version = "1.0",
   Description = "A static version of Earth transform GSM Reference Frame. Geocentric Solar Magnetospheric",
   Author = "CCMC",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

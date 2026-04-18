@@ -51,6 +51,6 @@ asset.meta = {
     scintillator as its anticoincidence shield.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

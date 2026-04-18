@@ -48,6 +48,6 @@ asset.meta = {
   Description = [[Includes a circular marker that shows the position on the night sky
     of the object hovered in the sky browser UI]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

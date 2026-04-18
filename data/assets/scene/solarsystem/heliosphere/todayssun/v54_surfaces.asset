@@ -309,6 +309,6 @@ asset.meta = {
     Group, while GONG-ADAPT is a model based on GONG, where ADAPT stands for Air Force
     Data Assimilative Photospheric Flux Transport.]],
   Author = "CCMC",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -21,6 +21,6 @@ asset.meta = {
   Name = "Dashboard - Date",
   Description = "This asset provides a Date dashboard item",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -46,6 +46,6 @@ asset.meta = {
     The trajectory of the Juice spacecraft relative to Ganymede
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

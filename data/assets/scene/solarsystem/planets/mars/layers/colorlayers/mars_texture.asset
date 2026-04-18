@@ -36,6 +36,6 @@ asset.meta = {
   Name = "Mars Texutre",
   Description = "Jpg texture for Mars, available for offline use",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

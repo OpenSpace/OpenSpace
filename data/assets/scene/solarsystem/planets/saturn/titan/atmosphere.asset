@@ -65,6 +65,6 @@ asset.meta = {
   Name = "Titan Atmosphere",
   Description = "RenderableAtmosphere for Titan",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

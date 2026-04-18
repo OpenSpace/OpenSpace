@@ -122,6 +122,6 @@ asset.meta = {
   Description = [[This asset adds the SOHO (Solar and Heliospheric Observatory) model,
     including the trajectory for the entire duration of the SOHO mission.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

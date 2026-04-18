@@ -6,6 +6,6 @@ asset.meta = {
   Name = "Default Saturn Layers",
   Description = "Default Saturn layers are: Saturn texture",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -88,6 +88,6 @@ asset.meta = {
   Description = [[Meta asset containing five moon groups: Gallic, Inuit, Norse, Shepherd
     moons and Other]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

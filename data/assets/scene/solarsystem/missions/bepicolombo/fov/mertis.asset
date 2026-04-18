@@ -98,6 +98,6 @@ asset.meta = {
     better than 500 m for approximately 5-10 percent of the surface.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

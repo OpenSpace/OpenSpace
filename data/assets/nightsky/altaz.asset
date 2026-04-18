@@ -179,6 +179,6 @@ asset.meta = {
     planetary surface. The asset also includes some actions to toggle, hide or
     show the grid.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

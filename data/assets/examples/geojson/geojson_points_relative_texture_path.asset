@@ -46,6 +46,6 @@ asset.meta = {
     (default). This example is using a relative path to specify the location of the image
     that is to be used.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

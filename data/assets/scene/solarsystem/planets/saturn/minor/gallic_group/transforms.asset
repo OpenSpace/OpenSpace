@@ -102,6 +102,6 @@ asset.meta = {
   Name = "Saturn Gallic Group Moons Positions",
   Description = [[Asset containing positions for Saturn's Gallic Group moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

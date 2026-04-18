@@ -131,6 +131,6 @@ asset.meta = {
     are called NUV Ca and NUV K detectors.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

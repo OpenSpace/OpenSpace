@@ -68,6 +68,6 @@ asset.meta = {
   it provides an action to cycle through the textures. See magnetogram.asset for details
   of the textures]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -121,6 +121,6 @@ asset.meta = {
   Description = [[This asset adds the STEREO-A (Solar TErrestrial RElations Observatory)
     model, including the trajectory for the entire duration of the STEREO mission.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

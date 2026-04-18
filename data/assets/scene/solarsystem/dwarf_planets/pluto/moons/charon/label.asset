@@ -45,6 +45,6 @@ asset.meta = {
   Name = "Charon Label",
   Description = "Label for Charon",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -75,6 +75,6 @@ asset.meta = {
   Name = "Artemis-1 Trails",
   Description = "Trail of Artemis-1 in respect to Earth and the Moon",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

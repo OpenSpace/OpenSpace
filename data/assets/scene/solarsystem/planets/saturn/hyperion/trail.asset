@@ -48,6 +48,6 @@ asset.meta = {
   Name = "Hyperion Trail",
   Description = "Trail of Saturn's moon Hyperion as observed by Saturn",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

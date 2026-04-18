@@ -40,6 +40,6 @@ asset.meta = {
   Name = "Mercury Magnesium Abundance",
   Description = "Magnesium Abundance layer for Mercury globe",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

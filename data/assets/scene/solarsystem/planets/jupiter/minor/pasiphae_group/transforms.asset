@@ -501,6 +501,6 @@ asset.meta = {
   Name = "Jupiter Pasiphae Group Moons Positions",
   Description = [[Asset containing positions for Jupiter's Pasiphae Group moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

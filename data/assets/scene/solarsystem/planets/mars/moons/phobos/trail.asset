@@ -44,6 +44,6 @@ asset.meta = {
   Name = "Phobos",
   Description = "Trail for Phobos",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

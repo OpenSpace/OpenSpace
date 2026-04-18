@@ -54,6 +54,6 @@ asset.meta = {
   Description = [[Meta asset containing eight moon groups: Ananke, Carme, Carpo, Himalia,
     Pasiphae, Themisto, Inner, and Other]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

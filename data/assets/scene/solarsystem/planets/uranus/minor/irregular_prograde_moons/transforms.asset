@@ -39,6 +39,6 @@ asset.meta = {
   Name = "Uranus Irregular Prograde Moons Positions",
   Description = [[Asset containing positions for Uranus' irregular prograde moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

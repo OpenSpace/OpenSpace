@@ -86,6 +86,6 @@ asset.meta = {
   Name = "Earth Atmosphere",
   Description = "RenderableAtmosphere for Earth",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -152,6 +152,6 @@ asset.meta = {
   Description = [[Sun transform: HEE, HEEQ, HEEQ180 and a 60-degree fixed rotation that WSA
    is using.]],
   Author = "CCMC",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

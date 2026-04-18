@@ -39,6 +39,6 @@ asset.meta = {
   Name = "Lagrange Point L2 to Sun Line",
   Description = [[Lagrange point L2 to Sun line]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -44,6 +44,6 @@ asset.meta = {
   Name = "Saturn Trail",
   Description = "Trail of Saturn's Barycenter",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

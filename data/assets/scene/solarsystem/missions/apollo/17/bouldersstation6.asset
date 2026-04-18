@@ -173,6 +173,6 @@ asset.meta = {
   Description = [[This asset shows 3D models of the fragments at station 6, which have
     been reconstructed from the imagery taken of the Apollo 17 crew.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

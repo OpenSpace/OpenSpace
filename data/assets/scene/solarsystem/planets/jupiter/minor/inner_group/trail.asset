@@ -148,6 +148,6 @@ asset.meta = {
   Name = "Jupiter Inner Group Moons Trails",
   Description = [[Asset containing trails for Jupiter's Inner Group moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

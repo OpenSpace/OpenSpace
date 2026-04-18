@@ -38,6 +38,6 @@ asset.meta = {
   Name = "Venus Transforms",
   Description = "Spice translation for Venus Barycenter",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

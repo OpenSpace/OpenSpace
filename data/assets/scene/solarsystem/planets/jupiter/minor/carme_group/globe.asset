@@ -734,6 +734,6 @@ asset.meta = {
   Name = "Jupiter Carme Group Moons Globes",
   Description = [[Asset containing globes for Jupiter's Carme Group moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -45,6 +45,6 @@ asset.meta = {
   Name = "Mars Trail from Earth",
   Description = "Trail of Mars, parented to Earth with Earth as the SPICE observer",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

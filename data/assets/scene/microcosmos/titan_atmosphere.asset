@@ -206,6 +206,6 @@ asset.meta = {
   Description = [[Visualizes Titan's atmosphere at the molecular scale as well as showing
     a methane cloud at 20km altitude and an ethane cloud at 45km altitude.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

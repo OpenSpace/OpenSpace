@@ -38,6 +38,6 @@ asset.meta = {
   Name = "Kerberos Transforms",
   Description = "Position for Pluto's moon Kerberos",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

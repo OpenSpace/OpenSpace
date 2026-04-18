@@ -82,6 +82,6 @@ asset.meta = {
   Description = [[Pioneer 10 Model and Trail. Driven by SPICE data for high accuracy from
     March 3rd, 1972 to January 2nd, 1990]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

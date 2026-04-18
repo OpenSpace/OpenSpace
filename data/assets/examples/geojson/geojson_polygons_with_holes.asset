@@ -37,6 +37,6 @@ asset.meta = {
   Name = "GeoJson Example - Polygon with holes",
   Description = [[GeoJson example asset with polygon that has holes in it]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

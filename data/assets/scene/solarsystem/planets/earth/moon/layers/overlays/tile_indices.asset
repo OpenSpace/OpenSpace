@@ -26,6 +26,6 @@ asset.meta = {
   Name = "Moon Tile Indices",
   Description = "Tile index layer for Moon globe",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

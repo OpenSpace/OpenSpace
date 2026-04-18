@@ -38,6 +38,6 @@ asset.meta = {
   Name = "Hydra Transforms",
   Description = "Position for Pluto's moon Hydra",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

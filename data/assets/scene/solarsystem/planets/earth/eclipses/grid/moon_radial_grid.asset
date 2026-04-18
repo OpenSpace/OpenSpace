@@ -43,6 +43,6 @@ asset.meta = {
   Name = "Moon Orbital Plane",
   Description = "A grid that shows the orbital plane of the Moon",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

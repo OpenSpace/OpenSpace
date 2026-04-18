@@ -166,6 +166,6 @@ asset.meta = {
   Description = [[Asset containing globes for Neptune' irregular prograde and retrograde
     moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

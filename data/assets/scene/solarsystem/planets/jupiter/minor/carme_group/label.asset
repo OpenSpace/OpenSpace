@@ -1064,6 +1064,6 @@ asset.meta = {
   Name = "Jupiter Carme Group Moons Labels",
   Description = [[Asset containing labels for Jupiter's Carme Group moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

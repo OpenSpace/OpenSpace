@@ -59,6 +59,6 @@ asset.meta = {
     https://elib.dlr.de/90175/1/2094.pdf for more information.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

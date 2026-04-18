@@ -45,6 +45,6 @@ asset.meta = {
   Name = "Saturn Trail from Earth",
   Description = "Alternate trail of Saturn",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

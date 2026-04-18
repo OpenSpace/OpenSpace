@@ -45,6 +45,6 @@ asset.meta = {
   Name = "Sun Label",
   Description = "Label for the Sun",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -101,6 +101,6 @@ asset.meta = {
   Name = "Bastille day actions",
   Description = "Asset with actions related to Bastille day",
   Author = "CCMC, OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -98,6 +98,6 @@ asset.meta = {
     actual position in Saint Louis, Missouri. But the asset also includes actions to move
     it to a position under the camera, or back to its original position.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

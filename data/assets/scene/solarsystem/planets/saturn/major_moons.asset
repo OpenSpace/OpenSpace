@@ -90,6 +90,6 @@ asset.meta = {
   Description = [[Meta asset containing Saturn's major moons: Dione, Enceladus, Hyperion,
     Iapetus, Mimas, Rhea, Tethys, and Titan]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -123,6 +123,6 @@ asset.meta = {
     a fixed rotation so sunshield always points toward the Sun.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

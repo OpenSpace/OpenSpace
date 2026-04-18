@@ -44,6 +44,6 @@ asset.meta = {
   Name = "Mercury Trail",
   Description = "Trail for Mercury's Barycenter",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

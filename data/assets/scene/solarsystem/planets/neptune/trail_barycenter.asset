@@ -44,6 +44,6 @@ asset.meta = {
   Name = "Neptune Trail",
   Description = "Trail of Neptune's Barycenter",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

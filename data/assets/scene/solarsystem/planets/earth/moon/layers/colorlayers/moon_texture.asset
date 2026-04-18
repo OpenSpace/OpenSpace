@@ -36,6 +36,6 @@ asset.meta = {
   Name = "Moon Texture",
   Description = "Offline lower resolution version of Moon WAC layer, available for offline use",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

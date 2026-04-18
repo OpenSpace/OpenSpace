@@ -6,6 +6,6 @@ asset.meta = {
   Name = "Default Neptune Layers",
   Description = "Default Neptune layers are: Neptune Texture",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

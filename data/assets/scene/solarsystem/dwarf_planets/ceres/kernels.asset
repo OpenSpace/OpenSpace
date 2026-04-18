@@ -42,6 +42,6 @@ asset.meta = {
   Name = "Ceres Spice Kernels",
   Description = "SPICE kernels for Ceres",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "NASA"
 }

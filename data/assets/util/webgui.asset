@@ -131,6 +131,6 @@ end)
 asset.meta = {
   Name = "WebGUI",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

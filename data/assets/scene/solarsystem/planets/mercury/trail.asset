@@ -43,6 +43,6 @@ asset.meta = {
   Name = "Mercury Trail",
   Description = "Main trail for Mercury",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

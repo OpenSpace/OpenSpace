@@ -60,6 +60,6 @@ asset.meta = {
   Name = "Jupiter Carpo Group Moons Positions",
   Description = [[Asset containing positions for Jupiter's Carpo Group moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

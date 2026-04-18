@@ -68,6 +68,6 @@ asset.meta = {
   Name = "Milky Way Volume",
   Description = "Volumetric rendering of Milky Way galaxy based on simulations from NAOJ",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT License"
 }

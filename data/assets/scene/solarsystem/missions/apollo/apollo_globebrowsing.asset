@@ -85,6 +85,6 @@ asset.meta = {
   Description = [[This asset defines actions that are used to control the visibility of
     features on the Moon's surface as they related to the different landing sites.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

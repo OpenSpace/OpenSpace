@@ -45,6 +45,6 @@ asset.meta = {
   Name = "Deimos Label",
   Description = "Label for Deimos",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

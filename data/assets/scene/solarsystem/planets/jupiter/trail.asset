@@ -43,6 +43,6 @@ asset.meta = {
   Name = "Jupiter Trail",
   Description = "Trail of Jupiter as observed by the Sun",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -236,6 +236,6 @@ asset.meta = {
   Description = [[Asset containing trails for Neptune' irregular prograde and retrograde
     moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

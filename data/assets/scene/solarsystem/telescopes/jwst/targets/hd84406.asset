@@ -35,6 +35,6 @@ asset.meta = {
   Name = "HD 84406 Star Image",
   Description = "Screenspace image of the HD 84406 Star",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

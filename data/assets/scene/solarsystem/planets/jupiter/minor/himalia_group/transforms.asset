@@ -207,6 +207,6 @@ asset.meta = {
   Name = "Jupiter Himalia Group Moons Positions",
   Description = [[Asset containing positions for Jupiter's Himalia Group moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

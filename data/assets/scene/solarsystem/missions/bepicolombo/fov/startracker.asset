@@ -101,6 +101,6 @@ asset.meta = {
     decoupled from the box.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

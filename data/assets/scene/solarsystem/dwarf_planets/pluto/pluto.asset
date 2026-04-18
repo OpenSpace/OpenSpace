@@ -16,6 +16,6 @@ asset.meta = {
   Description = [[Meta asset for the Pluto system, containing : Pluto, Pluto Trail,
     Charon, Charon Trail, Hydra, Kerberos, Nix, and Styx]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -42,6 +42,6 @@ asset.meta = {
   Description = [[This asset downloads and provides the kernels needed for the Apollo 11
     launch, trans-lunar injection, and moon orbit.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

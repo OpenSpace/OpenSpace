@@ -121,6 +121,6 @@ asset.meta = {
   Name = "Jupiter Pasiphae Other Moons Labels",
   Description = [[Asset containing labels for Jupiter's Other Group moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -70,6 +70,6 @@ asset.meta = {
   Name = "Venus Atmosphere",
   Description = "Atmosphere of Venus",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

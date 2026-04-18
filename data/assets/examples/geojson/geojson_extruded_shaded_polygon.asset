@@ -46,6 +46,6 @@ asset.meta = {
   Description = [[GeoJson example asset demonstrating how to apply shading from light
     sources on polygons]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

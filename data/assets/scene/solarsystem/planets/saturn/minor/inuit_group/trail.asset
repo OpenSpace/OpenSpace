@@ -274,6 +274,6 @@ asset.meta = {
   Name = "Saturn Inuit Group Moons Trails",
   Description = [[Asset containing trails for Saturn's Inuit Group moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

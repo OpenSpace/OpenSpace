@@ -67,6 +67,6 @@ asset.meta = {
   Name = "Mars Atmosphere",
   Description = [[Visualizes Mars' atmosphere at the molecular scale.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

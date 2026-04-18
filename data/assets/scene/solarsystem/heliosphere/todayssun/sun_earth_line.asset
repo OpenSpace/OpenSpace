@@ -38,6 +38,6 @@ asset.meta = {
   Description = [[A line between the Sun and the Earth to help with spatial
     orientation.]],
   Author = "CCMC",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -66,6 +66,6 @@ asset.meta = {
   Name = "Europa",
   Description = "Europa globe",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

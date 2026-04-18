@@ -40,6 +40,6 @@ asset.meta = {
   Name = "Jupiter Themisto Group Moons Globes",
   Description = [[Asset containing the globes for Jupiter's Themisto Group moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

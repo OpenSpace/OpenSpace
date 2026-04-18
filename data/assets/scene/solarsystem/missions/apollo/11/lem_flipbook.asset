@@ -56,6 +56,6 @@ asset.meta = {
   Description = [[This asset provides georeferenced images of the Apollo 11 landing site,
     taken with different illumination angles.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

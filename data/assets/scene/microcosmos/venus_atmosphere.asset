@@ -196,6 +196,6 @@ asset.meta = {
   Description = [[Visualizes Venus' atmosphere at the molecular scale at the surface
     level and at 50km altitude. Additional visualizes a cloud of sulfuric acid.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

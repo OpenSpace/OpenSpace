@@ -45,6 +45,6 @@ asset.meta = {
   Name = "Nereid Label",
   Description = [[Label for Neptune's moon: Nereid.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

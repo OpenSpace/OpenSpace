@@ -35,6 +35,6 @@ asset.meta = {
   Name = "Jupiter Texutre",
   Description = "Default texture for Jupiter",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

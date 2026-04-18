@@ -45,6 +45,6 @@ asset.meta = {
   Name = "Mimas Label",
   Description = "Label for Mimas",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -44,6 +44,6 @@ asset.meta = {
   Name = "Venus Trail from Earth",
   Description = "Trail of Venus as observed by the Earth",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

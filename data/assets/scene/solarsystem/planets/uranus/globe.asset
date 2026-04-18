@@ -47,6 +47,6 @@ asset.meta = {
   Name = "Uranus",
   Description = "Uranus globe",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

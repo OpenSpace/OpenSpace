@@ -408,6 +408,6 @@ asset.meta = {
   Name = "Uranus Irregular Retrograde Moons Labels",
   Description = [[Asset containing labels for Uranus' irregular retrograde moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -49,6 +49,6 @@ asset.meta = {
   Name = "Tethys Trail",
   Description = "Main trail for Tethys",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

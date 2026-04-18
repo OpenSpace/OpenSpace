@@ -48,6 +48,6 @@ asset.meta = {
   Name = "Kerberos Trail",
   Description = "Trail for Pluto's moon Kerberos",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -276,6 +276,6 @@ asset.meta = {
   Description = [[A collection of night sky versions of the planets Mercury, Venus,
     Mars, Jupiter and Saturn, including actions to toggle, hide and show them.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

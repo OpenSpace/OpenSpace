@@ -169,6 +169,6 @@ asset.meta = {
     texture of the sphere to different styles.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

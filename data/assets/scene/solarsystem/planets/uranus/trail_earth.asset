@@ -45,6 +45,6 @@ asset.meta = {
   Name = "Uranus Trail from Earth",
   Description = "Alternate trail of Uranus, as observed by the Earth rather then the Sun",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

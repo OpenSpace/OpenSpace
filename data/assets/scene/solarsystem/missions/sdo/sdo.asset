@@ -127,6 +127,6 @@ asset.meta = {
     Model credits: https://sketchfab.com/3d-models/solar-dynamics-observatory-8a40c426c12f48ff9fef4897283ef1d2
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

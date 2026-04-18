@@ -143,6 +143,6 @@ asset.meta = {
     water are shown in correct proportions. In the thermosphere, the proportions are
     reduced to represent the atmospheric thinning at those altitudes.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

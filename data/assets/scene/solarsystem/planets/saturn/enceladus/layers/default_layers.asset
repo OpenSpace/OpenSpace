@@ -23,6 +23,6 @@ asset.meta = {
     Layers loaded from all available servers
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

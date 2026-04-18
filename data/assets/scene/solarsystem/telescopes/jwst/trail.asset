@@ -192,6 +192,6 @@ asset.meta = {
     Trail of James Webb Space Telescope in respect to Earth, L2 and the Sun
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

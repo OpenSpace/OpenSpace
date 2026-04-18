@@ -46,6 +46,6 @@ asset.meta = {
   Description = [[Alternate trail of Neptune, as observed by the Earth rather then the
     Sun]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

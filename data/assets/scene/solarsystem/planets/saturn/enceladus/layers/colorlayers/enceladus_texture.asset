@@ -34,6 +34,6 @@ asset.meta = {
   Name = "Enceladus Texture",
   Description = "Default jpg texture for Enceladus",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

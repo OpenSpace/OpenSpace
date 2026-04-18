@@ -6,6 +6,6 @@ asset.meta = {
   Name = "Default Titan Layers",
   Description = "Default Titan layers are: Cassini ISS Global Mosaic",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

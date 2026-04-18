@@ -7,6 +7,6 @@ asset.meta = {
   Name = "Default Ceres Layers",
   Description = "Default Ceres layers are: LAMO",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

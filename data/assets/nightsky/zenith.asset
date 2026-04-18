@@ -138,6 +138,6 @@ asset.meta = {
   Description = [[A dot representation of the Local Zenith (based on the current
     camera positon), including actions to toggle, hide and show it.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

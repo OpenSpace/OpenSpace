@@ -36,6 +36,6 @@ asset.meta = {
   Name = "Deimos Globe",
   Description = "RenderableGlobe for Deimos",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

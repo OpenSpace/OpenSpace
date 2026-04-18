@@ -2034,6 +2034,6 @@ asset.meta = {
   Name = "Saturn Moons Trails -- May 2023 Discoveries",
   Description = [[Asset containing trails for the Saturn's moons discovered in May 2023.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

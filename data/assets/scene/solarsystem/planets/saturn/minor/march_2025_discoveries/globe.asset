@@ -3087,6 +3087,6 @@ asset.meta = {
   Name = "Saturn Moons Globes -- March 2025 Discoveries",
   Description = [[Asset containing globes for Saturn's moons discovered in March 2025.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

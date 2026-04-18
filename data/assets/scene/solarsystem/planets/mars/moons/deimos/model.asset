@@ -52,6 +52,6 @@ asset.meta = {
   Name = "Deimos",
   Description = "RenderableModel for Deimos",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

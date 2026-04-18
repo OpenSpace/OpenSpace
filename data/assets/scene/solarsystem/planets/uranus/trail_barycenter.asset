@@ -44,6 +44,6 @@ asset.meta = {
   Name = "Uranus Trail",
   Description = "Trail of Uranus' Barycenter",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

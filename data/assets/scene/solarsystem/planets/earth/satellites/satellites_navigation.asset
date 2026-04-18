@@ -13,6 +13,6 @@ asset.meta = {
   Description = [[Meta asset for navigation satellites of Earth. Containing groups:
     beidou, galileo, glosnass, gps, musson, nnss, and sbas]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

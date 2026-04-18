@@ -230,6 +230,6 @@ asset.meta = {
   Description = [[This asset shows the location of the different landing sites of the
     Apollo missions on the Moon by placing the missions' insignias.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

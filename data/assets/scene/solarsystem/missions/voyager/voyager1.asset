@@ -257,6 +257,6 @@ asset.meta = {
     NASA Visualization Technology Applications And Development (VTAD)
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -69,6 +69,6 @@ asset.meta = {
   Name = "BepiColombo Trails",
   Description = "This asset contains the trails for the BepiColombo spacecraft relative to the Sun and Mercury.",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

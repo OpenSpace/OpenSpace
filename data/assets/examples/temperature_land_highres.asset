@@ -63,6 +63,6 @@ asset.meta = {
   Name = "Climate Earth Layers",
   Description = "ERA5 data",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

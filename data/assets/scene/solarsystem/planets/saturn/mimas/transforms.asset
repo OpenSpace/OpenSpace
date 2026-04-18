@@ -43,6 +43,6 @@ asset.meta = {
   Name = "Mimas Position",
   Description = "Mimas position",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

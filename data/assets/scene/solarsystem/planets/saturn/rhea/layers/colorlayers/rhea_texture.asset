@@ -34,6 +34,6 @@ asset.meta = {
   Name = "Rhea Texutre",
   Description = "Default jpg texture for Rhea",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

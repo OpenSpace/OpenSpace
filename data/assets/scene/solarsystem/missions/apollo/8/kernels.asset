@@ -43,6 +43,6 @@ asset.meta = {
   Description = [[This asset downloads and provides the kernels needed for the Apollo 8
     launch and the orientation of the capsule during the Earthrise moment]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -51,6 +51,6 @@ asset.meta = {
   Name = "Mars Label",
   Description = "Label for Mars",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -6,6 +6,6 @@ asset.meta = {
   Name = "Default Jupiter Layers",
   Description = "Default Jupiter layers are: 'Merged Cassini and Juno global map of Jupiter'",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

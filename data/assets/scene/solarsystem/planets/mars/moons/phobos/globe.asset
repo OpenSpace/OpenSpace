@@ -36,6 +36,6 @@ asset.meta = {
   Name = "Phobos Globe",
   Description = "RenderableGlobe for Phobos",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

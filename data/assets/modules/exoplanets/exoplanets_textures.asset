@@ -65,6 +65,6 @@ asset.meta = {
   Description = [[Adds all textures that are required for the exoplanet system
     visualizations]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

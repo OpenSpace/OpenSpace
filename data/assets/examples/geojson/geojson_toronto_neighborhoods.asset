@@ -40,6 +40,6 @@ asset.meta = {
   Description = [[GeoJson example asset that shows the neighborhoods of the city Toronto,
     Canada, as polygons. Data source: https://handsondataviz.org/geojsonio.html]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

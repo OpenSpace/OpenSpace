@@ -33,6 +33,6 @@ asset.meta = {
   Name = "Triton",
   Description = [[Globe asset containing Neptune's moon Triton]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

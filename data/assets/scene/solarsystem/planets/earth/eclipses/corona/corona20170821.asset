@@ -67,6 +67,6 @@ asset.meta = {
   Name = "Corona 2017-08-21",
   Description = "An SDO video of the Sun for the day 2017-08-21",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

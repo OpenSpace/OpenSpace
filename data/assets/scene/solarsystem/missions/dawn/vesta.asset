@@ -152,6 +152,6 @@ asset.meta = {
   Name = "Vesta",
   Description = "Vesta model projection and trail",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

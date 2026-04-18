@@ -98,6 +98,6 @@ asset.meta = {
     energetic solar protons and electrons.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

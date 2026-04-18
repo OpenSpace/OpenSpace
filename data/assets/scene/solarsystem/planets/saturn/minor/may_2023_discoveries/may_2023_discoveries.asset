@@ -8,6 +8,6 @@ asset.meta = {
   Name = "Meta asset for the Saturn Moons discovered in May 2023",
   Description = [[Meta asset for Saturn Moons discovered in May 2023.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -40,6 +40,6 @@ asset.meta = {
   Name = "Oberon Globe",
   Description = [[Globe for Oberon]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -50,6 +50,6 @@ asset.meta = {
     improves the success of scientific objectives and allows for additional objectives.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

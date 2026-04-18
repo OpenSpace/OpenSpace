@@ -184,6 +184,6 @@ asset.meta = {
   Name = "Neptune Inner Moons Globe",
   Description = [[Asset containing globes for Neptune' inner prograde moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

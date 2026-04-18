@@ -85,6 +85,6 @@ asset.meta = {
   Description = [[This asset provides a 3D model of the Apollo Lunar Module/Lunar
     Excursion Module.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

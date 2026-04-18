@@ -48,6 +48,6 @@ asset.meta = {
   Name = "Oberon Trail",
   Description = [[Trail for Oberon]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

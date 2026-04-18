@@ -9,6 +9,6 @@ asset.meta = {
   Description = [[Meta asset for the Sun in our solar system. Contains the Sun globe and
   Sun glare texture]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

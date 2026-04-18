@@ -104,6 +104,6 @@ asset.meta = {
     capsule after the trans-lunar injection, and finally a Moon-centered trail that shows
     the trajectory of the spacecraft in the Moon's reference frame.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

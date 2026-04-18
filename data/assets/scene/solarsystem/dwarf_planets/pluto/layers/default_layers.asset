@@ -6,6 +6,6 @@ asset.meta = {
   Name = "Default Pluto Layers",
   Description = "Default Pluto layers are: Black & White USGS",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

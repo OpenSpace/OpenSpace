@@ -47,6 +47,6 @@ asset.meta = {
   Name = "Neptune Label",
   Description = "Label for Neptune",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

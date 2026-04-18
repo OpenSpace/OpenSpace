@@ -1124,6 +1124,6 @@ asset.meta = {
     S2007S3, Bestla, S2004S7, S2006S3, Fenrir, Kari, Ymir, Loge, Fornjot. Blank globes and
     SPICE trails are generated for each moon]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

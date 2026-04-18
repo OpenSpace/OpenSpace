@@ -59,6 +59,6 @@ asset.meta = {
   Name = "James Webb Space Telescope Model",
   Description = [[James Webb Space Telescope animated model.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

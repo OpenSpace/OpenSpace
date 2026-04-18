@@ -213,6 +213,6 @@ asset.meta = {
     Sun at any point. It includes .osfls files (OpenSpace FieldLine Sequence) for field
     lines.]],
   Author = "CCMC",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -15,6 +15,6 @@ asset.meta = {
     Iron Abundance, Magnesium Abundance, Silicon Abundance, and Messenger DEM (3D).
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

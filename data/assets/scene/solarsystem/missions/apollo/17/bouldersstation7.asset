@@ -67,6 +67,6 @@ asset.meta = {
   Description = [[This asset shows the 3D model of the boulder found at station 7, which
     has been reconstructed from the imagery taken of the Apollo 17 crew.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

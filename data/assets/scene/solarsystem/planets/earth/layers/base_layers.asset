@@ -38,6 +38,6 @@ asset.meta = {
     Tile Indicies, Size Reference, and Modis Water Mask.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

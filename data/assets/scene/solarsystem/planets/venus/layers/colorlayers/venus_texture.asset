@@ -48,6 +48,6 @@ asset.meta = {
   Name = "Venus Texture",
   Description = "This asset supplies a default texture for Venus",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

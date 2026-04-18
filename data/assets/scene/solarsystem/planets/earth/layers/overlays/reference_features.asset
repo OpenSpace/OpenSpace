@@ -26,6 +26,6 @@ asset.meta = {
   Name = "Earth Reference Features",
   Description = "Reference Features layer for Earth globe",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

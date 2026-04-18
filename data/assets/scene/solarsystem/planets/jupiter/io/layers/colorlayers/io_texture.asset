@@ -34,6 +34,6 @@ asset.meta = {
   Name = "Io Texutre",
   Description = "Default jpg texture for Io",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

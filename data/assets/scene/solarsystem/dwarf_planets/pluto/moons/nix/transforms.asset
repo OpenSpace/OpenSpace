@@ -38,6 +38,6 @@ asset.meta = {
   Name = "Nix Position",
   Description = "Position for Pluto's moon Nix",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

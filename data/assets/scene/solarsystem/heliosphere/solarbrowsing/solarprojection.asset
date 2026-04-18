@@ -41,6 +41,6 @@ asset.meta = {
     STEREO-A onto the surface of the Sun, mapping images from their observing viewpoints
     onto the solar sphere.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

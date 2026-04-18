@@ -135,6 +135,6 @@ asset.meta = {
   Name = "Euclid Trails",
   Description = "This asset contains the trails for the Euclid spacecraft relative to the Earth and the Sun.",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -68,6 +68,6 @@ asset.meta = {
   Name = "Venus",
   Description = "Venus globe with labels",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

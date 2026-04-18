@@ -40,6 +40,6 @@ asset.meta = {
   Name = "Lagrange point L3 Position",
   Description = [[The position of L3 as calculated based on Earth's position offset by half a year.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

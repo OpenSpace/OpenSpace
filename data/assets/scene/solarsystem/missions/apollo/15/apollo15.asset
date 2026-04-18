@@ -98,6 +98,6 @@ asset.meta = {
   Description = [[This asset provides a 3D model and a Moon-centered trail of the Apollo
     15 command and service module.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -8,6 +8,6 @@ asset.meta = {
   Name = "Meta asset for the Saturn Inuit Group Moons",
   Description = [[Meta asset for the Saturn Inuit Group Moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

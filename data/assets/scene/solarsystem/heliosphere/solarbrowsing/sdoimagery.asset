@@ -79,6 +79,6 @@ asset.meta = {
   Description = [[Time-resolved solar imagery from NASA's Solar Dynamics Observatory
     (SDO), showing the Sun in multiple wavelengths captured by its onboard instruments.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

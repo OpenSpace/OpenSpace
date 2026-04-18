@@ -119,6 +119,6 @@ asset.meta = {
   Description = [[This asset adds the Solar Orbiter model, including the trajectory for
     the entire duration of the Solar Orbiter mission.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

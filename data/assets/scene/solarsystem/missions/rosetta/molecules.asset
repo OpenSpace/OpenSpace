@@ -457,6 +457,6 @@ asset.meta = {
   Description = [[Visualizes molecules that were found by Rosetta in the tail of comet
     67P/Churymov-Gerasimenko.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

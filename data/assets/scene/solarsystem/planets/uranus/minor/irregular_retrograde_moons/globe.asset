@@ -232,6 +232,6 @@ asset.meta = {
   Name = "Uranus Irregular Retrograde Moons Globes",
   Description = [[Asset containing globes for Uranus' irregular retrograde moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

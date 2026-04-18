@@ -84,6 +84,6 @@ asset.meta = {
   Name = "Neptune Major Moons",
   Description = "Meta asset containing Neptune's major moons Triton and Nereid",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -7,6 +7,6 @@ asset.meta = {
   Name = "Default Phobos Layers",
   Description = "Default Phobos layers are: Viking and Mars Express",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

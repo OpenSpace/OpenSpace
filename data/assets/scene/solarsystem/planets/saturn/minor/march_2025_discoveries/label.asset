@@ -3728,6 +3728,6 @@ asset.meta = {
   Name = "Saturn Moons Labels -- March 2025 Discoveries",
   Description = [[Asset containing labels for Saturn's moons discovered in March 2025.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

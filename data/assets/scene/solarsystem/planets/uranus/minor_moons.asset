@@ -85,6 +85,6 @@ asset.meta = {
   Description = [[Meta asset containing three moon groups: Inner Moons, Irregular Prograde
     Moons and Irregular Retrograde Moons]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

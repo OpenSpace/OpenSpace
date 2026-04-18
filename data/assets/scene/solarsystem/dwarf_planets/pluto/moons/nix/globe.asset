@@ -38,6 +38,6 @@ asset.meta = {
   Name = "Nix",
   Description = "Globe for Pluto's moon Nix",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

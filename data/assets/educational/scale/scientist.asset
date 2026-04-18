@@ -92,6 +92,6 @@ asset.meta = {
   Description = [[A 1:1 scale model of a human scientist, with actions to move
     it to a position under the camera, or back to its start position.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

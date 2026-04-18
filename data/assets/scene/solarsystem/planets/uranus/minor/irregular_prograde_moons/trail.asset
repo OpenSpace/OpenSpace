@@ -49,6 +49,6 @@ asset.meta = {
   Name = "Uranus Irregular Prograde Moons Trails",
   Description = [[Asset containing trails for Uranus' irregular prograde moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

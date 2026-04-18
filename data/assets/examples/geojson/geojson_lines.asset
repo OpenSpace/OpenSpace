@@ -37,6 +37,6 @@ asset.meta = {
   Name = "GeoJson Example - Lines",
   Description = [[GeoJson example asset with lines]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

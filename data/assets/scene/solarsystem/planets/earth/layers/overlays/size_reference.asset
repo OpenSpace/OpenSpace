@@ -27,6 +27,6 @@ asset.meta = {
   Name = "Earth Size Reference",
   Description = "Size reference layer for Earth globe",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

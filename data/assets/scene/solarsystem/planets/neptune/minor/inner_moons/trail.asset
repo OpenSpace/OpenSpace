@@ -235,6 +235,6 @@ asset.meta = {
   Name = "Neptune Inner Moons Trails",
   Description = [[Asset containing trails for Neptune' inner prograde moons.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -36,6 +36,6 @@ asset.meta = {
   Name = "Mercury Iron Abundance",
   Description = "Iron Abundance layer for Mercury globe",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }
