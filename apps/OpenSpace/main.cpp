@@ -1576,9 +1576,9 @@ int main(int argc, char* argv[]) {
         }
 
         settings.profileAddons = global::configuration->profile.addons;
-
-        settings.configuration =
-            isGeneratedWindowConfig ? "" : global::configuration->windowConfiguration;
+        if (!isGeneratedWindowConfig) {
+            settings.configuration = global::configuration->windowConfiguration;
+        }
 
         saveSettings(settings, findSettings());
     }
@@ -1646,13 +1646,13 @@ int main(int argc, char* argv[]) {
         Engine::destroy();
         global::openSpaceEngine->deinitialize();
         ghoul::deinitialize();
-        throw;
+        exit(EXIT_FAILURE);
     }
     catch (...) {
         global::openSpaceEngine->deinitialize();
         ghoul::deinitialize();
         Engine::destroy();
-        throw;
+        exit(EXIT_FAILURE);
     }
 
     LINFO("Starting rendering loop");
