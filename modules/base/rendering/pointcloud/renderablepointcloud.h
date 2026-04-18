@@ -61,7 +61,7 @@ struct TextureFormatHash {
 };
 
 /**
- * This class describes a point cloud renderable that can be used to draw billboraded
+ * This class describes a point cloud renderable that can be used to draw billboarded
  * points based on a data file with 3D positions. Alternatively the points can also be
  * colored and sized based on a separate column in the data file.
  */
