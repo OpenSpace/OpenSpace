@@ -521,12 +521,15 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
         if (!_hasFrustumSize) {
             const double bounds = _geometry->boundingRadius();
-            const double scale = _modelScale * glm::compMax(parent()->scale());
-            // The *2 is a fudge-factor to make the shadowing work for most cases
-            const float r = static_cast<float>(bounds * scale * 2.f);
-            _frustumSize = r;
-            _frustumSize.setMinValue(r * 0.1f);
-            _frustumSize.setMaxValue(r * 3.f);
+            PropertyOwner* p = owner();
+            if (dynamic_cast<SceneGraphNode*>(p)) {
+                const double scale = _modelScale * glm::compMax(parent()->scale());
+                // The *2 is a fudge-factor to make the shadowing work for most cases
+                const float r = static_cast<float>(bounds * scale * 2.f);
+                _frustumSize = r;
+                _frustumSize.setMinValue(r * 0.1f);
+                _frustumSize.setMaxValue(r * 3.f);
+            }
         }
     });
 
