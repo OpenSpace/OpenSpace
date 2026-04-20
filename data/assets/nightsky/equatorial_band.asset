@@ -30,7 +30,7 @@ local EquatorialLine = {
     LineWidth = 4.0,
     GridSegments = { 1, 1 }
   },
-  Tag = { "nightsky_marking" },
+  Tag = { "nightsky_marking", "equatorial_marking" },
   GUI = {
     Name = "Celestial Equator",
     Description = "A line representation of the Equatorial plane.",

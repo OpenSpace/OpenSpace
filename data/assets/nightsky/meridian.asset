@@ -47,7 +47,7 @@ local MeridianPlane = {
     GridSegments = { 1, 1 },
     Enabled = asset.enabled
   },
-  Tag = { "nightsky_marking" },
+  Tag = { "nightsky_marking", "altaz_marking" },
   GUI = {
     Name = "Local Meridian",
     Description = [[A line representation of the Local Meridian]],
