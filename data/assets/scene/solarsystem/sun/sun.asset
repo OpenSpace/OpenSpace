@@ -1,8 +1,8 @@
-asset.require("./globe")
+local Sun = asset.require("./globe").Sun
 asset.require("./glare")
 asset.require("./label", false)
 
-
+asset.export(Sun)
 
 asset.meta = {
   Name = "Sun",

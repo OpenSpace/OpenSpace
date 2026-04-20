@@ -1,9 +1,9 @@
-asset.require("./globe")
+local Moon = asset.require("./globe").Moon
 asset.require("./trail")
 asset.require("./actions")
 asset.require("./label", false)
 
-
+asset.export(Moon)
 
 asset.meta = {
   Name = "Moon meta asset",

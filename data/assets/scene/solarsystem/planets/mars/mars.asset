@@ -1,11 +1,11 @@
-asset.require("./globe")
+local Mars = asset.require("./globe").Mars
 asset.require("./trail")
 asset.require("./atmosphere")
 asset.require("./moons/phobos/phobos")
 asset.require("./moons/deimos/deimos")
 asset.require("./label", false)
 
-
+asset.export(Mars)
 
 asset.meta = {
   Name = "Mars",

@@ -1,4 +1,4 @@
-asset.require("./globe")
+local Earth = asset.require("./globe").Earth
 asset.require("./actions")
 asset.require("./trail")
 asset.require("./atmosphere")
@@ -6,7 +6,7 @@ asset.require("./markers")
 asset.require("./label", false)
 asset.require("./moon/moon")
 
-
+asset.export(Earth)
 
 asset.meta = {
   Name = "Earth",
