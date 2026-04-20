@@ -17,7 +17,7 @@ local FadeInConstellationLabels = {
     end
     openspace.fadeIn("Scene.Constellations.Renderable.Labels",nil)
   ]],
-  Documentation = "Fades in the constllation labels",
+  Documentation = "Fades in the constellation labels",
   GuiPath = "/Constellations/Lines",
   IsLocal = false
 }
@@ -37,10 +37,10 @@ local ShowConstellationElements = {
   Command = [[
     local labelsVisible = openspace.propertyValue("Scene.Constellations.Renderable.Labels.Enabled")
     if not labelsVisible then
-      openspace.setPropertyValueSingle('Scene.Constellations.Renderable.DrawElements', true)
-      openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Fade', 0)
+      openspace.setPropertyValueSingle("Scene.Constellations.Renderable.DrawElements", true)
+      openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Fade", 0)
       local fadeSpeed = openspace.propertyValue("OpenSpaceEngine.FadeDuration")
-      openspace.fadeIn("Scene.Constellations.Renderable", fadeSpeed, "")
+      openspace.fadeIn("Scene.Constellations.Renderable", fadeSpeed)
     else
       openspace.setPropertyValueSingle('Scene.Constellations.Renderable.DrawElements', true)
     end
@@ -166,6 +166,15 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(hideAllEclipticElements)
   openspace.action.removeAction(hideAllEquatorialElements)
   openspace.action.removeAction(hideAllConstellationElements)
+  openspace.action.removeAction(hideAllEquatorialElements)
+  openspace.action.removeAction(hideAllEclipticElements)
+  openspace.action.removeAction(hideAllAltAzElements)
+  openspace.action.removeAction(RemoveTickMarksBand)
+  openspace.action.removeAction(AddTickMarksBand)
+  openspace.action.removeAction(HideAllMarkings)
+  openspace.action.removeAction(ShowConstellationElements)
+  openspace.action.removeAction(FadeOutConstellationLabels)
+  openspace.action.removeAction(FadeInConstellationLabels)
 end)
 
 asset.export("FadeInConstellationLabels", FadeInConstellationLabels.Identifier)
@@ -174,7 +183,7 @@ asset.export("ShowConstellationElements", ShowConstellationElements.Identifier)
 asset.export("HideAllMarkings", HideAllMarkings.Identifier)
 asset.export("AddTickMarksBand", AddTickMarksBand.Identifier)
 asset.export("RemoveTickMarksBand", RemoveTickMarksBand.Identifier)
-asset.export("hideAllAltAzElements", hideAllAltAzElements.Identifier)
-asset.export("hideAllEclipticElements", hideAllEclipticElements.Identifier)
-asset.export("hideAllEquatorialElements", hideAllEquatorialElements.Identifier)
-asset.export("hideAllConstellationElements", hideAllConstellationElements.Identifier)
+asset.export("HideAllAltAzElements", hideAllAltAzElements.Identifier)
+asset.export("HideAllEclipticElements", hideAllEclipticElements.Identifier)
+asset.export("HideAllEquatorialElements", hideAllEquatorialElements.Identifier)
+asset.export("HideAllConstellationElements", hideAllConstellationElements.Identifier)
