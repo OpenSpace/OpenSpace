@@ -170,6 +170,11 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
+    // Renders a single text label in 3D space. The label is rendered as a billboard,
+    // that is, it is always oriented to face the camera.
+    //
+    // The label can be rendered with a fade-in effect based on the distance from the
+    // camera.
     struct [[codegen::Dictionary(RenderableLabel)]] Parameters {
         enum class [[codegen::map(BlendMode)]] BlendMode {
             Normal,

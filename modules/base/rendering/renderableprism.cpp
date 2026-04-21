@@ -92,6 +92,9 @@ namespace {
         Property::Visibility::User
     };
 
+    // Renders a prism shape defined by two polygonal shapes (base and top) connected by
+    // lines. The number of polygon segments is determined by the `Segments`
+    // property, with the same number being used for both the base and the top.
     struct [[codegen::Dictionary(RenderablePrism)]] Parameters {
         // [[codegen::verbatim(SegmentsInfo.description)]]
         int segments;
