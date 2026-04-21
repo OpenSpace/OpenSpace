@@ -132,9 +132,9 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
     switch (action) {
         case InteractionType::Rotation: {
             // Add rotation velocity
-            glm::dvec2 diff = normalizeByAspectRatio(glm::dvec2(
-                endFinger0.pos - startFinger0.pos
-            ));
+            glm::dvec2 diff = normalizeByAspectRatio(
+                glm::dvec2(endFinger0.pos - startFinger0.pos)
+            );
             constexpr glm::dvec2 Scale = glm::dvec2(3.0);
             updateVelocities.globalRotation = _sensitivity * Scale * -diff;
             break;
@@ -146,12 +146,12 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
             const TouchInput& startFinger1 = touchPoints[1].firstInput();
             const TouchInput& endFinger1 = touchPoints[1].latestInput();
 
-            glm::dvec2 diffStart = normalizeByAspectRatio(glm::dvec2(
-                startFinger0.pos - startFinger1.pos
-            ));
-            glm::dvec2 diffEnd = normalizeByAspectRatio(glm::dvec2(
-                endFinger0.pos - endFinger1.pos
-            ));
+            glm::dvec2 diffStart = normalizeByAspectRatio(
+                glm::dvec2(startFinger0.pos - startFinger1.pos)
+            );
+            glm::dvec2 diffEnd = normalizeByAspectRatio(
+                glm::dvec2(endFinger0.pos - endFinger1.pos)
+            );
             double zoomFactor = glm::length(diffEnd) - glm::length(diffStart);
 
             constexpr double ZoomScale = 5.0;
@@ -190,10 +190,9 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
 
             // Here we don't use the difference between the first and current position,
             // but instead the speed of the movement, to allow for more responsive panning
-            glm::dvec2 speed = normalizeByAspectRatio(glm::dvec2(
-                currentInput.speedX(),
-                currentInput.speedY()
-            ));
+            glm::dvec2 speed = normalizeByAspectRatio(
+                glm::dvec2(currentInput.speedX(), currentInput.speedY())
+            );
 
             constexpr glm::dvec2 Scale = glm::dvec2(0.8);
             updateVelocities.localRotation = _sensitivity * Scale * speed;
@@ -256,7 +255,7 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
         bool isFingerMoving1 = glm::length(dir1) > MoveEpsilon;
         bool areBothFingersMoving = isFingerMoving0 && isFingerMoving1;
 
-        // Pinch: movement in opposite directions (checked against the centroid).
+        // Pinch: movement in opposite directions (checked against the centroid)
 
         // Normalize directions relative to centroid
         glm::vec2 toCentroid0 = glm::normalize(_centroid - current0.pos);
@@ -266,7 +265,7 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
         float dot1 = isFingerMoving1 ? glm::dot(glm::normalize(dir1), toCentroid1) : 0.f;
 
         // Check if both moving toward or away from centroid (opposite directions)
-        const float OppositeThreshold = 0.3f;
+        constexpr float OppositeThreshold = 0.3f;
         if ((dot0 > OppositeThreshold && dot1 > OppositeThreshold) ||
             (dot0 < -OppositeThreshold && dot1 < -OppositeThreshold))
         {
@@ -299,7 +298,8 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
     for (const TouchInputHolder& inputHolder : inputs) {
         if (!inputHolder.isMoving()) {
             minDiff = 0.0;
-            break; // Found a still finger, no need to continue
+            // Found a still finger, no need to continue
+            break;
         }
 
         const auto it = std::find_if(
@@ -316,14 +316,13 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
         }
     }
 
-    const float InputStillThreshold = 0.0005f;
+    constexpr float InputStillThreshold = 0.0005f;
     bool hasStillFinger = std::abs(minDiff) < InputStillThreshold;
     if (hasStillFinger) {
         return InteractionType::Roll;
     }
 
-
-    // 2: All fingers are rotating around a still centroid
+    // 2: All fingers are rotating around a stationary centroid
     constexpr float CentroidStillThreshold = 0.0018f;
     float normalizedCentroidDist = glm::distance(_centroid, lastCentroid);
     normalizedCentroidDist /= static_cast<float>(inputs.size());

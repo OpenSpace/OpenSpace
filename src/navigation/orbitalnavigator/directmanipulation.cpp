@@ -346,7 +346,7 @@ void DirectManipulation::updateCameraFromInput() {
         global::interactionHandler->touchInputState().touchPoints();
 
     const SceneGraphNode* anchor = global::navigationHandler->anchorNode();
-    ghoul_assert(anchor != = nullptr, "Must have an anchor");
+    ghoul_assert(anchor != nullptr, "Must have an anchor");
 
     std::vector<TouchPoint> touchPoints;
     touchPoints.reserve(touchInputs.size());
@@ -384,17 +384,20 @@ void DirectManipulation::updateCameraFromInput() {
         // No fingers, no input. Or, the first touch points did not touch the node
         _selectedNodeSurfacePoints.clear();
         _isActive = false;
-        _invalidFirstTouch = false;
+        _isInvalidFirstTouch = false;
         return;
     }
 
     if (_lastNSurfacePoints == 0 && !_selectedNodeSurfacePoints.empty()) {
-        // This is the first touch intersecting the object! Check if all the initial touch points
-        // intersected the surface
-        _invalidFirstTouch = false;
+        // This is the first touch intersecting the object. Check if all the initial touch
+        // points intersected the surface
+        _isInvalidFirstTouch = false;
         for (const TouchPoint& point : touchPoints) {
-            if (!computeSurfacePoint(point.initialPosition, anchor).has_value()) {
-                _invalidFirstTouch = true;
+            std::optional<glm::dvec3> surfacePoint =
+                computeSurfacePoint(point.initialPosition, anchor);
+
+            if (!surfacePoint.has_value()) {
+                _isInvalidFirstTouch = true;
                 break;
             }
         }
@@ -403,7 +406,7 @@ void DirectManipulation::updateCameraFromInput() {
     bool isValidNode = isValidDirectTouchNode();
     bool isCloseEnough = isWithinDirectTouchDistance();
 
-    bool isValidTouchPoints = !_invalidFirstTouch && !
+    bool isValidTouchPoints = !_isInvalidFirstTouch && !
         _selectedNodeSurfacePoints.empty() &&
         touchPoints.size() == _selectedNodeSurfacePoints.size() &&
         std::equal(
@@ -473,17 +476,15 @@ void DirectManipulation::updateNodeSurfacePoints(
         std::optional<glm::dvec3> surfacePoint =
             computeSurfacePoint(touchPoint.position, anchor);
 
-        if (!surfacePoint.has_value()) {
-            continue;
+        if (surfacePoint.has_value()) {
+            // Note that node is saved as the direct input solver was initially
+            // implemented to handle touch contact points on multiple nodes
+            _selectedNodeSurfacePoints.push_back({
+                .id = touchPoint.id,
+                .node = anchor,
+                .coordinates = *surfacePoint
+            });
         }
-
-        // Note that node is saved as the direct input solver was initially
-        // implemented to handle touch contact points on multiple nodes
-        _selectedNodeSurfacePoints.push_back({
-            .id = touchPoint.id,
-            .node = anchor,
-            .coordinates = *surfacePoint
-        });
     }
 }
 
@@ -498,6 +499,9 @@ std::optional<glm::dvec3> DirectManipulation::computeSurfacePoint(
     // Normalized -1 to 1 coordinates on screen
     const double xCo = 2.0 * (touchPosition.x - 0.5);
     const double yCo = -2.0 * (touchPosition.y - 0.5);
+
+    glm::dvec2 co = 2.0 * glm::dvec2(touchPosition - 0.5);
+    co.y *= -1.0;
 
     const glm::dvec3 cursorInWorldSpace = camRotation *
         glm::dvec3(glm::inverse(camera->projectionMatrix()) *

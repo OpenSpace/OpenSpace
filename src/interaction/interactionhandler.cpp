@@ -265,7 +265,7 @@ void InteractionHandler::mouseButtonCallback(MouseButton button, MouseAction act
     }
     _mouseInputState.mouseButtonCallback(button, action);
 
-    // The mouse visualizer keeps track of some useful states - let's alway update them
+    // The mouse visualizer keeps track of some useful states - let's always update them
     if (action == MouseAction::Press) {
         _mouseVisualizer.isMouseFirstPress = true;
         _mouseVisualizer.isMousePressed = true;

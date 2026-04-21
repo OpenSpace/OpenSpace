@@ -24,16 +24,13 @@
 
 #include <openspace/interaction/touchinputstate.h>
 
-#include <ghoul/logging/logmanager.h>
-#include <format>
-
 namespace {
     std::chrono::milliseconds now() {
         return std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::high_resolution_clock::now().time_since_epoch()
         );
     }
-}
+} // namespace
 
 namespace openspace {
 
@@ -175,7 +172,7 @@ void TouchInputState::clearTapData() {
     _isTripleTap = false;
 }
 
-void TouchInputState::evaluateTap(TouchInput lastRemovedInput) {
+void TouchInputState::evaluateTap(const TouchInput& lastRemovedInput) {
     TouchInputHolder& inputHolder = _touchPoints.front();
 
     if (!inputHolder.holdsInput(lastRemovedInput)) {

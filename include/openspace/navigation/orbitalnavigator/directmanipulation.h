@@ -129,7 +129,7 @@ private:
     int _lastNSurfacePoints = 0;
 
     glm::dvec2 _firstMousePressPos = glm::dvec2(0.0);
-    bool _invalidFirstTouch = false;
+    bool _isInvalidFirstTouch = false;
 };
 
 } // namespace openspace

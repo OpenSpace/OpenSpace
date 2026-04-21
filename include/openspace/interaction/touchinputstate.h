@@ -77,7 +77,7 @@ private:
     void removeTouchInput(TouchInput input);
 
     void clearTapData();
-    void evaluateTap(TouchInput lastRemovedInput);
+    void evaluateTap(const TouchInput& lastRemovedInput);
 
     std::vector<TouchInputHolder> _touchPoints;
     std::vector<TouchInput> _deferredRemovals;
