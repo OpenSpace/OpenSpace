@@ -1,0 +1,43 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Kerberos = {
+  Identifier = "Kerberos",
+  Parent = transforms.KerberosPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 10000, 10000, 10000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_dwarf",
+    "moon_pluto",
+    "moon_minor",
+    "moon_minor_pluto"
+  },
+  GUI = {
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Kerberos"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Kerberos)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Kerberos)
+end)
+
+asset.export(Kerberos)
+
+
+
+asset.meta = {
+  Name = "Kerberos Globe",
+  Description = "Globe for Pluto's moon Kerberos",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

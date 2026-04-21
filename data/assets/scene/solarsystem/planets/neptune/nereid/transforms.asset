@@ -1,0 +1,49 @@
+local transforms = asset.require("../transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local NereidPosition = {
+  Identifier = "NereidPosition",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Nereid,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Nereid,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "Nereid Position",
+    Path = "/Solar System/Planets/Neptune/Major Moons/Nereid",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NereidPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(NereidPosition)
+end)
+
+asset.export(NereidPosition)
+
+
+
+asset.meta = {
+  Name = "Nereid Position",
+  Description = [[Position for Nereid]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

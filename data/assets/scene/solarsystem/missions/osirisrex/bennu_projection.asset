@@ -1,5 +1,5 @@
 local transforms = asset.require("./transforms")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -38,7 +38,6 @@ local BennuProjection = {
     }
   },
   Renderable = {
-    Enabled = true,
     Type = "RenderableModelProjection",
     Body = kernels.ID.Bennu,
     GeometryFile = models .. "Bennu_v20_200k_an.obj",
@@ -90,7 +89,7 @@ local BennuProjection = {
 
 local BennuTrail = {
   Identifier = "BennuTrail",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {

@@ -1,4 +1,4 @@
-local sun = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -14,7 +14,7 @@ local ModelRenderable = {
   Type = "RenderableModel",
   GeometryFile = modelFolder .. "pioneer.fbx",
   LightSources = {
-    sun.LightSource,
+    sunAsset.LightSource,
     {
       Identifier = "Camera",
       Type = "CameraLightSource",

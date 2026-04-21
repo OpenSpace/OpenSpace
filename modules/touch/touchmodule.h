@@ -53,7 +53,7 @@ protected:
 
 private:
     /**
-     * Process TUIO touch input that occured since the last frame.
+     * Process TUIO touch input that occurred since the last frame.
      */
     void processNewInput();
 

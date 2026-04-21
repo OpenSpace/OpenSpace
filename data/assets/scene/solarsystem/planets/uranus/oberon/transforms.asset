@@ -1,0 +1,44 @@
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local OberonPosition = {
+  Identifier = "OberonPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Oberon,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Oberon Position",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Oberon",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(OberonPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(OberonPosition)
+end)
+
+asset.export(OberonPosition)
+
+
+
+asset.meta = {
+  Name = "Oberon Position",
+  Description = [[Position for Oberon]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

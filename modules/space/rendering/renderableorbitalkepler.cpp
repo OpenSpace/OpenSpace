@@ -502,10 +502,6 @@ void RenderableOrbitalKepler::deinitializeGL() {
     _trailProgram = nullptr;
 }
 
-bool RenderableOrbitalKepler::isReady() const {
-    return _pointProgram != nullptr && _trailProgram != nullptr;
-}
-
 void RenderableOrbitalKepler::update(const UpdateData& data) {
     if (_updateDataBuffersAtNextRender) {
         updateBuffers();

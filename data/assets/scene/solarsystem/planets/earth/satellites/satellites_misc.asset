@@ -11,6 +11,6 @@ asset.meta = {
   Description = [[Meta asset for misc satellites of Earth. Containing groups:
     military, radar, cubesats, and other]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

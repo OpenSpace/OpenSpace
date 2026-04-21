@@ -101,7 +101,6 @@ public:
     void initializeGL() override;
     void deinitialize() override;
     void deinitializeGL() override;
-    bool isReady() const override;
 
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;

@@ -71,8 +71,8 @@ namespace {
         Property::Visibility::User
     };
 
-    // This `DashboardItem` shows the current state of the different methods to provide
-    // user input: keyboard, mouse, and/or joystick.
+    // Shows the current state of the different methods to provide user input: keyboard,
+    // mouse, and/or joystick.
     //
     // Each input method has the ability to be selectively disabled, meaning that all
     // inputs from that input method are ignored by the system entirely.

@@ -2,7 +2,7 @@
 -- This example loads a model and load the Sun to illuminate it.
 
 -- Load the asset of the Sun to illuminate the model
-local sun = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 -- Load the example model from OpenSpace servers
 -- If you want to use your own model, this block of code can be safely deleted
@@ -23,7 +23,7 @@ local Node = {
 
     -- Add the Sun as a light source to illuminate the model
     LightSources = {
-      sun.LightSource
+      sunAsset.LightSource
     }
   },
   GUI = {
@@ -31,6 +31,7 @@ local Node = {
     Path = "/Examples"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Node)

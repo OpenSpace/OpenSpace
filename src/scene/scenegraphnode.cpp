@@ -837,7 +837,7 @@ void SceneGraphNode::update(const UpdateData& data) {
 
     _modelTransformCached = translation * rotation * scaling;
 
-    if (_renderable && _renderable->isReady() &&
+    if (_renderable &&
         (_renderable->isEnabled() || _renderable->shouldUpdateIfDisabled()))
     {
         _renderable->update(newUpdateData);
@@ -849,7 +849,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     ZoneName(identifier().c_str(), identifier().size());
 
     if (_state != State::GLInitialized ||
-        !(_renderable && _renderable->isVisible() && _renderable->isReady()) ||
+        !(_renderable && _renderable->isVisible()) ||
         (!_renderable->matchesRenderBinMask(data.renderBinMask) &&
             !_renderable->matchesSecondaryRenderBin(data.renderBinMask)) ||
         !isTimeFrameActive())

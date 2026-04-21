@@ -1,0 +1,31 @@
+asset.require("./base_layers",)
+
+local server = openspace.layerServer();
+if (server == "All") then
+  asset.require("./newyork_layers")
+  asset.require("./sweden_layers")
+  asset.require("./utah_layers")
+elseif (server == "NewYork") then
+  asset.require("./newyork_layers")
+elseif (server == "Sweden") then
+  asset.require("./sweden_layers")
+elseif (server == "Utah") then
+  asset.require("./utah_layers")
+end
+
+
+
+asset.meta = {
+  Name = "Default Mars Layers",
+  Description = [[Default Mars layers are: Mars texture, CTX Blended, HiRISE,
+    HiRISE Local Set, MOC WA Color, Viking MDIM, MOLA Pseudo Color, MOLA HRSC,
+    Themis IR Day, Themis IR Night, CTX Mosaic, MDEM200M (3D), HiRISE Local Set DEM (3D),
+    Mola Elevation (3D), Tile Indicies, and Size Reference.
+
+
+    Layers loaded from all servers
+  ]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

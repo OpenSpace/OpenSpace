@@ -139,6 +139,7 @@ local LookingWest = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.action.registerAction(LookUp)
   openspace.action.registerAction(LevelHorizonYaw)

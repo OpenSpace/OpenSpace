@@ -1,0 +1,76 @@
+local transforms = asset.require("./transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/globe")
+local earthAsset = asset.require("../globe")
+local coreKernels = asset.require("spice/core")
+
+
+
+local labelsPath = asset.resource({
+  Name = "Moon Labels",
+  Type = "HttpSynchronization",
+  Identifier = "moon_labels",
+  Version = 1
+})
+
+
+local Moon = {
+  Identifier = "Moon",
+  Parent = transforms.MoonInertial.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.Moon,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = 1738140,
+    ModelSpaceRenderingCutoffLevel = 12,
+    ShadowGroup = {
+      Sources = {
+        { Name = sunAsset.Sun.Identifier, Radius = 696300000 },
+      },
+      Casters = {
+        { Name = earthAsset.Earth.Identifier, Radius = 6371000 },
+      }
+    },
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "moon.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 7.6,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 100000.0, 500000.0 },
+      DistanceEPS = 1350000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "moon_solarSystem", "moon_terrestrial", "moon_earth" },
+  GUI = {
+    Path = "/Solar System/Planets/Earth/Moon"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Moon)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Moon)
+end)
+
+asset.export(Moon)
+
+
+
+asset.meta = {
+  Name = "Moon",
+  Description = "Moon globe",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

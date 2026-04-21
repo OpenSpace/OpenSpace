@@ -1,4 +1,4 @@
-local globe = asset.require("../../mercury")
+local mercuryAsset = asset.require("scene/solarsystem/planets/mercury/globe")
 
 
 
@@ -21,11 +21,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(mercuryAsset.Mercury.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(mercuryAsset.Mercury.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export("layer", Layer)
@@ -36,6 +36,6 @@ asset.meta = {
   Name = "Mercury Calcium Abundance",
   Description = "Calcium Abundance layer for Mercury globe",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

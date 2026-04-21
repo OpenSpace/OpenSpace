@@ -236,10 +236,9 @@ namespace {
         Property::Visibility::User
     };
 
-    // This `Renderable` visualizes field lines, mainly a sequence of time steps but works
-    // with only one time step, too. A sequence is a data source consisting of multiple
-    // data files that each correspond to a specific time and is therefore time varying
-    // like the name of the renderable suggests.
+    // Visualizes field lines, typically across a sequence of time steps, but also
+    // supports a single step. A sequence is a data source consisting of multiple data
+    // files that each correspond to a specific time.
     //
     // `LoadingType` can be specified in two ways;
     //
@@ -1000,10 +999,6 @@ int RenderableFieldlinesSequence::updateActiveIndex(double currentTime) {
     else {
         return static_cast<int>(_files.size()) - 1;
     }
-}
-
-bool RenderableFieldlinesSequence::isReady() const {
-    return _shaderProgram != nullptr;
 }
 
 void RenderableFieldlinesSequence::updateDynamicDownloading(double currentTime,

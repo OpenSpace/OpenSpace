@@ -60,8 +60,6 @@ public:
     void initializeGL();
     void deinitializeGL();
 
-    bool isReady() const;
-
     RenderData begin(const RenderData& data);
     void end();
     void update(const UpdateData& data);

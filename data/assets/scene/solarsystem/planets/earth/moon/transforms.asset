@@ -1,0 +1,42 @@
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+local coreKernels = asset.require("spice/core")
+
+
+
+local MoonInertial = {
+  Identifier = "MoonInertial",
+  Parent = earthAsset.EarthBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.Moon,
+      Observer = coreKernels.ID.EarthBarycenter
+    }
+  },
+  GUI = {
+    Path = "/Solar System/Planets/Earth/Moon",
+    Focusable = false,
+    Hidden = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MoonInertial)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MoonInertial)
+end)
+
+asset.export(MoonInertial)
+
+
+
+asset.meta = {
+  Name = "Moon Transforms",
+  Description = "Moon transforms",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

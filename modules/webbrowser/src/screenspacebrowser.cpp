@@ -26,9 +26,11 @@
 
 #include <modules/webbrowser/webbrowsermodule.h>
 #include <modules/webbrowser/include/browserinstance.h>
+#include <modules/webbrowser/include/eventhandler.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/util/keys.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
@@ -47,6 +49,22 @@ namespace {
         Property::Visibility::User
     };
 
+    constexpr Property::PropertyInfo KeyInfo = {
+        "Key",
+        "Key",
+        "The string representation of a keyboard key. If a key is entered and the "
+        "`KeyTrigger` property is triggered, the entered key will be sent to the browser.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo TriggerKeyInfo = {
+        "TriggerKey",
+        "Trigger key",
+        "When this property is triggered, the text in the `Key` property will be used to "
+        "create a keyboard input that is then sent to the browser.",
+        Property::Visibility::User
+    };
+
     constexpr Property::PropertyInfo UrlInfo = {
         "Url",
         "URL",
@@ -61,12 +79,11 @@ namespace {
         Property::Visibility::NoviceUser
     };
 
-    // This `ScreenSpaceRenderable` can be used to render a webpage in front of the
-    // camera. This can be used to show various dynamic content, for example using the
-    // scripting API.
+    // Can be used to render a webpage in front of the camera. This can be used to show
+    // various dynamic content, for example using the scripting API.
     //
-    // Note that mouse input will not be passed to the rendered view, so it will not be
-    // possible to interact with the web page.
+    // Note that mouse or keyboard input will not be passed to the rendered view, so it
+    // will not be possible to interact with the webpage.
     struct [[codegen::Dictionary(ScreenSpaceBrowser)]] Parameters {
         // A unique identifier for this screen space browser.
         std::optional<std::string> identifier [[codegen::identifier()]];
@@ -98,8 +115,10 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _dimensions(DimensionsInfo, glm::uvec2(0), glm::uvec2(0), glm::uvec2(3000))
     , _reload(ReloadInfo)
-    , _renderHandler(new ScreenSpaceRenderHandler)
+    , _key(::KeyInfo)
+    , _triggerKey(TriggerKeyInfo)
     , _url(UrlInfo)
+    , _renderHandler(new ScreenSpaceRenderHandler)
     , _keyboardHandler(new WebKeyboardHandler)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -108,22 +127,35 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     identifier = makeUniqueIdentifier(identifier);
     setIdentifier(identifier);
 
+    addProperty(_key);
+    _triggerKey.onChange([this]() {
+        const KeyWithModifier key = stringToKey(_key);
+        CefKeyEvent k = EventHandler::toCefKeyEvent(key);
+
+        k.type = KEYEVENT_KEYDOWN;
+        _browserInstance->sendKeyEvent(k);
+
+        k.type = KEYEVENT_KEYUP;
+        _browserInstance->sendKeyEvent(k);
+    });
+    addProperty(_triggerKey);
+
     _url = p.url.value_or(_url);
+    _url.onChange([this]() { _isUrlDirty = true; });
+    addProperty(_url);
 
     _dimensions = p.dimensions.value_or(glm::vec2(1920, 1080));
+    _dimensions.onChange([this]() { _isDimensionsDirty = true; });
+    addProperty(_dimensions);
 
     _browserInstance = std::make_unique<BrowserInstance>(
         _renderHandler.get(),
         _keyboardHandler.get()
     );
 
-    _url.onChange([this]() { _isUrlDirty = true; });
-    _dimensions.onChange([this]() { _isDimensionsDirty = true; });
     _reload.onChange([this]() { _browserInstance->reloadBrowser(); });
-
-    addProperty(_url);
-    addProperty(_dimensions);
     addProperty(_reload);
+
     _useAcceleratedRendering = WebBrowserModule::canUseAcceleratedRendering();
 
     WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();
@@ -179,10 +211,6 @@ void ScreenSpaceBrowser::update() {
         _browserInstance->reshape(_dimensions.value());
         _isDimensionsDirty = false;
     }
-}
-
-bool ScreenSpaceBrowser::isReady() const {
-    return _shader != nullptr;
 }
 
 void ScreenSpaceBrowser::bindTexture(ghoul::opengl::TextureUnit& unit) {

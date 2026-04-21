@@ -30,8 +30,8 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    // This task converts a 3D model format from a format that is natively supported both
-    // by OpenSpace and common 3D modelling tools and converts it into an OpenSpace
+    // Converts a 3D model format from a format that is natively supported both by
+    // OpenSpace and common 3D modelling tools and converts it into an OpenSpace
     // proprietary format that can be loaded more efficiently, but more important can be
     // distributed without violating terms of service for various 3D model hosting
     // websites.

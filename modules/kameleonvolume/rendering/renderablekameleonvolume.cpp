@@ -441,10 +441,6 @@ void RenderableKameleonVolume::deinitializeGL() {
     }
 }
 
-bool RenderableKameleonVolume::isReady() const {
-    return true;
-}
-
 void RenderableKameleonVolume::update(const UpdateData&) {
     if (_raycaster) {
         _raycaster->setStepSize(_stepSize);

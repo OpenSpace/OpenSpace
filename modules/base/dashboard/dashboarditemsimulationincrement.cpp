@@ -93,10 +93,10 @@ namespace {
         return res;
     }
 
-    // This `DashboardItem` shows how fast the in-game time progresses. The display string
-    // for the `RegularFormat` is used when the current simulation increment is not
-    // changing, the `TransitionFormat` is used if the simulation increment is currently
-    // interpolating to a new value.
+    // Shows how fast the in-game time progresses. The display string for the
+    // `RegularFormat` is used when the current simulation increment is not changing, the
+    // `TransitionFormat` is used if the simulation increment is currently interpolating
+    // to a new value.
     struct [[codegen::Dictionary(DashboardItemSimulationIncrement)]] Parameters {
         // [[codegen::verbatim(SimplificationInfo.description)]]
         std::optional<bool> simplification;

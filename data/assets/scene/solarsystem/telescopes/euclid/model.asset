@@ -1,5 +1,5 @@
-local transform = asset.require("scene/solarsystem/planets/earth/transforms")
-local sun = asset.require("scene/solarsystem/sun/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -15,7 +15,7 @@ local modelFolder = asset.resource({
 
 local Euclid = {
   Identifier = "Euclid",
-  Parent = transform.EarthBarycenter.Identifier,
+  Parent = earthAsset.EarthBarycenter.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "2023 JUL 01 15:53:08.239",
@@ -30,7 +30,7 @@ local Euclid = {
     Rotation = {
       Type = "FixedRotation",
       Attached = "Euclid",
-      ZAxis = sun.SunCenter.Identifier,
+      ZAxis = sunAsset.SunCenter.Identifier,
       YAxis = { 0.0, 1.0, 0.0 },
       YAxisOrthogonal = true
     }
@@ -40,7 +40,7 @@ local Euclid = {
     GeometryFile = modelFolder .. "euclid.fbx",
     ModelScale = 30.0,
     LightSources = {
-      sun.LightSource
+      sunAsset.LightSource
     },
     PerformShading = true,
     AmbientIntensity = 0.075
@@ -68,6 +68,6 @@ asset.meta = {
   Name = "Euclid Model",
   Description = "This asset contains the model of ESA's Euclid spacecraft. The model is retrieved from https://scifleet.esa.int",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

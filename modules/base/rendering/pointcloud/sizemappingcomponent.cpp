@@ -72,9 +72,9 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // SizeMappingComponent is a reusable point-cloud helper that controls how per-point
-    // data influences rendered point size. It is intended for datasets where point size
-    // should convey meaning instead of remaining visually uniform.
+    // A reusable component for point-cloud rendering that controls how per-point data
+    // influences rendered point size. It is intended for datasets where point size should
+    // convey meaning instead of remaining visually uniform.
     //
     // When enabled, the component selects one data parameter from the loaded dataset and
     // uses that value as a multiplicative size input for each point. This makes it

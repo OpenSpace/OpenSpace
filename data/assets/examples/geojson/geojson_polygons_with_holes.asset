@@ -1,4 +1,4 @@
-local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 
 
 
@@ -22,11 +22,11 @@ local ExampleHoles = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExampleHoles)
+  openspace.globebrowsing.addGeoJson(earthAsset.Earth.Identifier, ExampleHoles)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, ExampleHoles)
+  openspace.globebrowsing.deleteGeoJson(earthAsset.Earth.Identifier, ExampleHoles)
 end)
 
 asset.export(ExampleHoles)
@@ -37,6 +37,6 @@ asset.meta = {
   Name = "GeoJson Example - Polygon with holes",
   Description = [[GeoJson example asset with polygon that has holes in it]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

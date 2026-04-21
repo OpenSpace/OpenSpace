@@ -1,0 +1,36 @@
+local solarOrbiter = asset.resource({
+  Name = "Solar Orbiter Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "solarorbiter_kernels",
+  Version = 1
+})
+
+-- Kernels from:
+-- https://spiftp.esac.esa.int/data/SPICE/SOLAR-ORBITER/
+-- https://s2e2.cosmos.esa.int/bitbucket/projects/SPICE_KERNELS/repos/solar-orbiter/browse/kernels
+local SolarOrbiterKernels = {
+  solarOrbiter .. "solo_ANC_soc-sc-fk_V09.tf",
+  solarOrbiter .. "solo_ANC_soc-orbit_20200210-20301120_L024_V1_00508_V01.bsp",
+  solarOrbiter .. "solo_ANC_soc-sclk_20260302_V01.tsc",
+  solarOrbiter .. "solo_ANC_soc-default-att_20200210-20301120_L024_V1_00508_V01.bc"
+}
+
+local ID = {
+  SolarOrbiter = -144
+}
+
+local Frame = {
+  SolarOrbiter = "SOLO_SRF"
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(SolarOrbiterKernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(SolarOrbiterKernels)
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)

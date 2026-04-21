@@ -68,22 +68,22 @@ local vrt_folders = {
 -- Add require statements for assets exporting the neccessary globes
 -- here we add Mars, Moon and Mercury:
 if AddMarsLayers then
-  asset.require("../scene/solarsystem/planets/mars/mars")
+  asset.require("../scene/solarsystem/planets/mars/globe")
 else
   vrt_folders["Mars"] = nil
 end
 if AddMoonLayers then
-  asset.require("../scene/solarsystem/planets/earth/moon/moon")
+  asset.require("../scene/solarsystem/planets/earth/moon/globe")
 else
   vrt_folders["Moon"] = nil
 end
 if AddMercuryLayers then
-  asset.require("../scene/solarsystem/planets/mercury/mercury")
+  asset.require("../scene/solarsystem/planets/mercury/globe")
 else
   vrt_folders["Mercury"] = nil
 end
 if AddEarthLayers then
-  asset.require("../scene/solarsystem/planets/earth/earth")
+  asset.require("../scene/solarsystem/planets/earth/globe")
 else
   vrt_folders["Earth"] = nil
 end
@@ -109,6 +109,6 @@ asset.meta = {
   Description = [[This asset adds planetary images that can be downloaded separately
   and placed in the OpenSpaceData folder]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -155,10 +155,6 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     addProperty(_colorFilter);
 }
 
-bool RenderableRings::isReady() const {
-    return _shader && _texture;
-}
-
 void RenderableRings::initializeGL() {
     _shader = global::renderEngine->buildRenderProgram(
         "RingProgram",

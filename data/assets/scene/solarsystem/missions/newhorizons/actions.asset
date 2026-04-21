@@ -265,6 +265,6 @@ asset.meta = {
   Name = "New Horizons actions",
   Description = "Actions for the New Horizons mission",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

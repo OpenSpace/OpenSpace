@@ -1,4 +1,4 @@
-local globe = asset.require("../../jupiter")
+local jupiterAsset = asset.require("scene/solarsystem/planets/jupiter/globe")
 
 
 
@@ -14,18 +14,17 @@ local Layer = {
   Type = "VideoTileProvider",
   Identifier = "JupiterVideo",
   Name = "Jupiter Video",
-  Enabled = true,
   ZIndex = 10,
   Video = data .. "/jupiter_movie_3600.mp4"
 }
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Jupiter.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(jupiterAsset.Jupiter.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Jupiter.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(jupiterAsset.Jupiter.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export("layer", Layer)

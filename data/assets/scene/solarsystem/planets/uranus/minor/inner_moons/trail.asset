@@ -1,0 +1,457 @@
+local transforms = asset.require("scene/solarsystem/planets/uranus/transforms")
+local kernels = asset.require("scene/solarsystem/planets/uranus/kernels184")
+local coreKernels = asset.require("spice/core")
+
+
+
+local CordeliaTrail = {
+  Identifier = "CordeliaTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Cordelia,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 0.335034,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Cordelia Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cordelia",
+    Focusable = false
+  }
+}
+
+local OpheliaTrail = {
+  Identifier = "OpheliaTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Ophelia,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 0.3764,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Ophelia Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Ophelia",
+    Focusable = false
+  }
+}
+
+local BiancaTrail = {
+  Identifier = "BiancaTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Bianca,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 0.434579,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Bianca Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Bianca",
+    Focusable = false
+  }
+}
+
+local CressidaTrail = {
+  Identifier = "CressidaTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Cressida,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 0.463570,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Cressida Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cressida",
+    Focusable = false
+  }
+}
+
+local DesdemonaTrail = {
+  Identifier = "DesdemonaTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Desdemona,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 0.473650,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Desdemona Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Desdemona",
+    Focusable = false
+  }
+}
+
+local JulietTrail = {
+  Identifier = "JulietTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Juliet,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 0.493065,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Juliet Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Juliet",
+    Focusable = false
+  }
+}
+
+local PortiaTrail = {
+  Identifier = "PortiaTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Portia,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 0.513196,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Portia Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Portia",
+    Focusable = false
+  }
+}
+
+local RosalindTrail = {
+  Identifier = "RosalindTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Rosalind,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 0.55846,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Rosalind Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Rosalind",
+    Focusable = false
+  }
+}
+
+local CupidTrail = {
+  Identifier = "CupidTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Cupid,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 0.618,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Cupid Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cupid",
+    Focusable = false
+  }
+}
+
+local BelindaTrail = {
+  Identifier = "BelindaTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Belinda,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 0.623527,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Belinda Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Belinda",
+    Focusable = false
+  }
+}
+
+local PerditaTrail = {
+  Identifier = "PerditaTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Perdita,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 0.638,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Perdita Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Perdita",
+    Focusable = false
+  }
+}
+
+local PuckTrail = {
+  Identifier = "PuckTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Puck,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 0.761833,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Puck Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Puck",
+    Focusable = false
+  }
+}
+
+local MabTrail = {
+  Identifier = "MabTrail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Mab,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 0.923,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "Mab Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Mab",
+    Focusable = false
+  }
+}
+
+local S2025U1Trail = {
+  Identifier = "S2025U1Trail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.S2025U1,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 0.923,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "S/2025 U 1 Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/S2025U1",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(CordeliaTrail)
+  openspace.addSceneGraphNode(OpheliaTrail)
+  openspace.addSceneGraphNode(BiancaTrail)
+  openspace.addSceneGraphNode(CressidaTrail)
+  openspace.addSceneGraphNode(DesdemonaTrail)
+  openspace.addSceneGraphNode(JulietTrail)
+  openspace.addSceneGraphNode(PortiaTrail)
+  openspace.addSceneGraphNode(RosalindTrail)
+  openspace.addSceneGraphNode(CupidTrail)
+  openspace.addSceneGraphNode(BelindaTrail)
+  openspace.addSceneGraphNode(PerditaTrail)
+  openspace.addSceneGraphNode(PuckTrail)
+  openspace.addSceneGraphNode(MabTrail)
+  openspace.addSceneGraphNode(S2025U1Trail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(CordeliaTrail)
+  openspace.removeSceneGraphNode(OpheliaTrail)
+  openspace.removeSceneGraphNode(BiancaTrail)
+  openspace.removeSceneGraphNode(CressidaTrail)
+  openspace.removeSceneGraphNode(DesdemonaTrail)
+  openspace.removeSceneGraphNode(JulietTrail)
+  openspace.removeSceneGraphNode(PortiaTrail)
+  openspace.removeSceneGraphNode(RosalindTrail)
+  openspace.removeSceneGraphNode(CupidTrail)
+  openspace.removeSceneGraphNode(BelindaTrail)
+  openspace.removeSceneGraphNode(PerditaTrail)
+  openspace.removeSceneGraphNode(PuckTrail)
+  openspace.removeSceneGraphNode(MabTrail)
+  openspace.removeSceneGraphNode(S2025U1Trail)
+end)
+
+asset.export(CordeliaTrail)
+asset.export(OpheliaTrail)
+asset.export(BiancaTrail)
+asset.export(CressidaTrail)
+asset.export(DesdemonaTrail)
+asset.export(JulietTrail)
+asset.export(PortiaTrail)
+asset.export(RosalindTrail)
+asset.export(CupidTrail)
+asset.export(BelindaTrail)
+asset.export(PerditaTrail)
+asset.export(PuckTrail)
+asset.export(MabTrail)
+asset.export(S2025U1Trail)
+
+
+
+asset.meta = {
+  Name = "Uranus Irregular Retrograde Moons Trails",
+  Description = [[Asset containing trails for Uranus' irregular retrograde moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

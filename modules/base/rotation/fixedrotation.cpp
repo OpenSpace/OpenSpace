@@ -193,9 +193,8 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // This `Rotation` calculates the rotation in such a way that the attached scene graph
-    // node will always be relative to some other direction or pointing at another scene
-    // graph node.
+    // Calculates the rotation in such a way that the attached scene graph node will
+    // always be relative to some other direction or pointing at another scene graph node.
     //
     // The first use-case of the `FixedRotation` needs exactly two of its three axes
     // (`XAxis`, `YAxis`, `ZAxis`) specified with the last axis being unspecified. The

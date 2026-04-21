@@ -75,6 +75,6 @@ asset.meta = {
   Name = "Default Keybindings",
   Description ="Asset with default key bindings that are useful for all profiles",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

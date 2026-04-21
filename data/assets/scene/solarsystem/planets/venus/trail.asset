@@ -1,11 +1,11 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local coreKernels = asset.require("spice/core")
 
 
 
 local VenusTrail = {
   Identifier = "VenusTrail",
-  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
@@ -42,6 +42,6 @@ asset.meta = {
   Name = "Venus Trail",
   Description = "Trail of Venus as observed by the Sun",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

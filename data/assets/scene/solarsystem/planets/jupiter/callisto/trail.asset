@@ -48,6 +48,6 @@ asset.meta = {
   Name = "Callisto Trail",
   Description = "Trail of Callisto as observed by the Jupiter",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

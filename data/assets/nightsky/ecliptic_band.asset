@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -18,7 +18,7 @@ local EclipticRotationMatrix = {
 
 local EclipticLine = {
   Identifier = "EclipticLine",
-  Parent = transforms.SolarSystemBarycenter.Name,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -31,13 +31,13 @@ local EclipticLine = {
   },
   Renderable = {
     Type = "RenderableRadialGrid",
+    Enabled = asset.enabled,
     Opacity = 0.8,
     Color = { 0.5, 0.24, 0.24 },
     LineWidth = 4.0,
-    GridSegments = {1 , 1},
-    Enabled = asset.enabled
+    GridSegments = { 1, 1 }
   },
-  Tag = { "nightsky_marking" },
+  Tag = { "nightsky_marking", "ecliptic_marking" },
   GUI = {
     Name = "Ecliptic",
     Description = "A line representation of the Ecliptic plane.",
@@ -47,7 +47,7 @@ local EclipticLine = {
 
 local EclipticBand = {
   Identifier = "EclipticBand",
-  Parent = transforms.SolarSystemBarycenter.Name,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
@@ -56,16 +56,16 @@ local EclipticBand = {
   },
   Renderable = {
     Type = "RenderableSphereImageLocal",
+    Enabled = asset.enabled,
     Texture = textures .. "ecliptic.png",
     Size = 9.46377307652E17,
     Segments = 50,
     DisableFadeInOut = true,
     Orientation = "Inside",
     Opacity = 0.99,
-    Enabled = asset.enabled,
-    RenderBinMode = "PostDeferredTransparent",
+    RenderBinMode = "PostDeferredTransparent"
   },
-  Tag = { "nightsky_marking" },
+  Tag = { "nightsky_marking", "ecliptic_marking" },
   GUI = {
     Name = "Ecliptic Band",
     Description = "A band representation of the Ecliptic plane.",
@@ -153,6 +153,7 @@ local SetBandColorsAction = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EclipticLine)
   openspace.addSceneGraphNode(EclipticBand)
@@ -197,6 +198,6 @@ asset.meta = {
   Description = [[A line and band representation of the Ecliptic plane, including actions
     to toggle, hide and show each of them.]],
   Author = "OpenSpace Team / Ken Murphy",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

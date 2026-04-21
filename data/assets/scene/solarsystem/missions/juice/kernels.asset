@@ -108,6 +108,6 @@ asset.meta = {
     GPHIO kernel provided by Ronan Modolo for the fieldline and plane data visualization
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

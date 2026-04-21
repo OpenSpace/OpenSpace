@@ -1,0 +1,1069 @@
+local transforms = asset.require("./transforms")
+
+
+
+local HerseLabel = {
+  Identifier = "HerseLabel",
+  Parent = transforms.HersePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Herse",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "Herse Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Herse",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Herse (Carme group)"
+  }
+}
+
+local AitneLabel = {
+  Identifier = "AitneLabel",
+  Parent = transforms.AitnePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Aitne",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "Aitne Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Aitne",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Aitne (Carme group)"
+  }
+}
+
+local KaleLabel = {
+  Identifier = "KaleLabel",
+  Parent = transforms.KalePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Kale",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "Kale Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kale",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Kale (Carme group)"
+  }
+}
+
+local TaygeteLabel = {
+  Identifier = "TaygeteLabel",
+  Parent = transforms.TaygetePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Taygete",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "Taygete Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Taygete",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Taygete (Carme group)"
+  }
+}
+
+local ChaldeneLabel = {
+  Identifier = "ChaldeneLabel",
+  Parent = transforms.ChaldenePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Chaldene",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "Chaldene Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Chaldene",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Chaldene (Carme group)"
+  }
+}
+
+local ErinomeLabel = {
+  Identifier = "ErinomeLabel",
+  Parent = transforms.ErinomePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Erinome",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "Erinome Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Erinome",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Erinome (Carme group)"
+  }
+}
+
+local KallichoreLabel = {
+  Identifier = "KallichoreLabel",
+  Parent = transforms.KallichorePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Kallichore",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "Kallichore Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kallichore",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Kallichore (Carme group)"
+  }
+}
+
+local KalykeLabel = {
+  Identifier = "KalykeLabel",
+  Parent = transforms.KalykePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Kalyke",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "Kalyke Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kalyke",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Kalyke (Carme group)"
+  }
+}
+
+local PasitheeLabel = {
+  Identifier = "PasitheeLabel",
+  Parent = transforms.PasitheePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Pasithee",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "Pasithee Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Pasithee",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Pasithee (Carme group)"
+  }
+}
+
+local S2010J1Label = {
+  Identifier = "S2010J1Label",
+  Parent = transforms.S2010J1Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2010 J 1",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "S/2010 J 1 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2010J1",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S2010J1 (Carme group)"
+  }
+}
+
+local EukeladeLabel = {
+  Identifier = "EukeladeLabel",
+  Parent = transforms.EukeladePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Eukelade",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "Eukelade Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Eukelade",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Eukelade (Carme group)"
+  }
+}
+
+local ArcheLabel = {
+  Identifier = "ArcheLabel",
+  Parent = transforms.ArchePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Arche",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "Arche Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Arche",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Arche (Carme group)"
+  }
+}
+
+local IsonoeLabel = {
+  Identifier = "IsonoeLabel",
+  Parent = transforms.IsonoePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Isonoe",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "Isonoe Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Isonoe",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Isonoe (Carme group)"
+  }
+}
+
+local CarmeLabel = {
+  Identifier = "CarmeLabel",
+  Parent = transforms.CarmePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Carme",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "Carme Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Carme",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Carme (Carme group)"
+  }
+}
+
+local S2003J5Label = {
+  Identifier = "S2003J5Label",
+  Parent = transforms.S2003J5Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2003 J 5",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "S/2003 J 5 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J5",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S2003J5 (Carme group)"
+  }
+}
+
+local S2018J3Label = {
+  Identifier = "S2018J3Label",
+  Parent = transforms.S2018J3Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2018 J 3",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "S/2018 J 3 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2018J3",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S2018J3 (Carme group)"
+  }
+}
+
+local S2021J4Label = {
+  Identifier = "S2021J4Label",
+  Parent = transforms.S2021J4Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2021 J 4",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "S/2021 J 4 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J4",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S2021J4 (Carme group)"
+  }
+}
+
+local S2021J5Label = {
+  Identifier = "S2021J5Label",
+  Parent = transforms.S2021J5Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2021 J 5",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "S/2021 J 5 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J5",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S2021J5 (Carme group)"
+  }
+}
+
+local S2021J6Label = {
+  Identifier = "S2021J6Label",
+  Parent = transforms.S2021J6Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2021 J 6",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "S/2021 J 6 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J6",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S2021J6 (Carme group)"
+  }
+}
+
+local S2016J3Label = {
+  Identifier = "S2016J3Label",
+  Parent = transforms.S2016J3Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2016 J 3",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "S/2016 J 3 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2016J3",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S2016J3 (Carme group)"
+  }
+}
+
+local S2022J1Label = {
+  Identifier = "S2022J1Label",
+  Parent = transforms.S2022J1Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2022 J 1",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "S/2022 J 1 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J1",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S2022J1 (Carme group)"
+  }
+}
+
+local S2022J2Label = {
+  Identifier = "S2022J2Label",
+  Parent = transforms.S2022J2Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2022 J 2",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "S/2022 J 2 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J2",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S2022J2 (Carme group)"
+  }
+}
+
+local S2017J2Label = {
+  Identifier = "S2017J2Label",
+  Parent = transforms.S2017J2Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2017 J 2",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "S/2017 J 2 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J2",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S2017J2 (Carme group)"
+  }
+}
+
+local S2017J5Label = {
+  Identifier = "S2017J5Label",
+  Parent = transforms.S2017J5Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2017 J 5",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "S/2017 J 5 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J5",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S2017J5 (Carme group)"
+  }
+}
+
+local S2017J8Label = {
+  Identifier = "S2017J8Label",
+  Parent = transforms.S2017J8Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2017 J 8",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "S/2017 J 8 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J8",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S2017J8 (Carme group)"
+  }
+}
+
+local S2011J1Label = {
+  Identifier = "S2011J1Label",
+  Parent = transforms.S2011J1Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2011 J 1",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "S/2011 J 1 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2011J1",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S2011J1 (Carme group)"
+  }
+}
+
+local S2003J9Label = {
+  Identifier = "S2003J9Label",
+  Parent = transforms.S2003J9Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2003 J 9",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "S/2003 J 9 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J9",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S2003J9 (Carme group)"
+  }
+}
+
+local S2003J10Label = {
+  Identifier = "S2003J10Label",
+  Parent = transforms.S2003J10Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2003 J 10",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 2.0, 125.0 },
+    FadeWidths = { 0.5, 50.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
+  GUI = {
+    Name = "S/2003 J 10 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J10",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S2003J10 (Carme group)"
+  }
+}
+
+local S2017J11Label = {
+  Identifier = "S2017J11Label",
+  Parent = transforms.S2017J11Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2017 J 11",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "S/2017 J 11 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J11",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2017 J 11 (Ananke group)"
+  }
+}
+
+local S2003J24Label = {
+  Identifier = "S2003J24Label",
+  Parent = transforms.S2017J11Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2003 J 24",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "S/2003 J 24 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J24",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2003 J 24 (Ananke group)"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(HerseLabel)
+  openspace.addSceneGraphNode(AitneLabel)
+  openspace.addSceneGraphNode(KaleLabel)
+  openspace.addSceneGraphNode(TaygeteLabel)
+  openspace.addSceneGraphNode(ChaldeneLabel)
+  openspace.addSceneGraphNode(ErinomeLabel)
+  openspace.addSceneGraphNode(KallichoreLabel)
+  openspace.addSceneGraphNode(KalykeLabel)
+  openspace.addSceneGraphNode(PasitheeLabel)
+  openspace.addSceneGraphNode(S2010J1Label)
+  openspace.addSceneGraphNode(EukeladeLabel)
+  openspace.addSceneGraphNode(ArcheLabel)
+  openspace.addSceneGraphNode(IsonoeLabel)
+  openspace.addSceneGraphNode(CarmeLabel)
+  openspace.addSceneGraphNode(S2003J5Label)
+  openspace.addSceneGraphNode(S2018J3Label)
+  openspace.addSceneGraphNode(S2021J4Label)
+  openspace.addSceneGraphNode(S2021J5Label)
+  openspace.addSceneGraphNode(S2021J6Label)
+  openspace.addSceneGraphNode(S2016J3Label)
+  openspace.addSceneGraphNode(S2022J1Label)
+  openspace.addSceneGraphNode(S2022J2Label)
+  openspace.addSceneGraphNode(S2017J2Label)
+  openspace.addSceneGraphNode(S2017J5Label)
+  openspace.addSceneGraphNode(S2017J8Label)
+  openspace.addSceneGraphNode(S2011J1Label)
+  openspace.addSceneGraphNode(S2003J9Label)
+  openspace.addSceneGraphNode(S2003J10Label)
+  openspace.addSceneGraphNode(S2017J11Label)
+  openspace.addSceneGraphNode(S2003J24Label)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2003J24Label)
+  openspace.removeSceneGraphNode(S2017J11Label)
+  openspace.removeSceneGraphNode(S2003J10Label)
+  openspace.removeSceneGraphNode(S2003J9Label)
+  openspace.removeSceneGraphNode(S2011J1Label)
+  openspace.removeSceneGraphNode(S2017J8Label)
+  openspace.removeSceneGraphNode(S2017J5Label)
+  openspace.removeSceneGraphNode(S2017J2Label)
+  openspace.removeSceneGraphNode(S2022J2Label)
+  openspace.removeSceneGraphNode(S2022J1Label)
+  openspace.removeSceneGraphNode(S2016J3Label)
+  openspace.removeSceneGraphNode(S2021J6Label)
+  openspace.removeSceneGraphNode(S2021J5Label)
+  openspace.removeSceneGraphNode(S2021J4Label)
+  openspace.removeSceneGraphNode(S2018J3Label)
+  openspace.removeSceneGraphNode(S2003J5Label)
+  openspace.removeSceneGraphNode(CarmeLabel)
+  openspace.removeSceneGraphNode(IsonoeLabel)
+  openspace.removeSceneGraphNode(ArcheLabel)
+  openspace.removeSceneGraphNode(EukeladeLabel)
+  openspace.removeSceneGraphNode(S2010J1Label)
+  openspace.removeSceneGraphNode(PasitheeLabel)
+  openspace.removeSceneGraphNode(KalykeLabel)
+  openspace.removeSceneGraphNode(KallichoreLabel)
+  openspace.removeSceneGraphNode(ErinomeLabel)
+  openspace.removeSceneGraphNode(ChaldeneLabel)
+  openspace.removeSceneGraphNode(TaygeteLabel)
+  openspace.removeSceneGraphNode(KaleLabel)
+  openspace.removeSceneGraphNode(AitneLabel)
+  openspace.removeSceneGraphNode(HerseLabel)
+end)
+
+asset.export(HerseLabel)
+asset.export(AitneLabel)
+asset.export(KaleLabel)
+asset.export(TaygeteLabel)
+asset.export(ChaldeneLabel)
+asset.export(ErinomeLabel)
+asset.export(KallichoreLabel)
+asset.export(KalykeLabel)
+asset.export(PasitheeLabel)
+asset.export(S2010J1Label)
+asset.export(EukeladeLabel)
+asset.export(ArcheLabel)
+asset.export(IsonoeLabel)
+asset.export(CarmeLabel)
+asset.export(S2003J5Label)
+asset.export(S2018J3Label)
+asset.export(S2021J4Label)
+asset.export(S2021J5Label)
+asset.export(S2021J6Label)
+asset.export(S2016J3Label)
+asset.export(S2022J1Label)
+asset.export(S2022J2Label)
+asset.export(S2017J2Label)
+asset.export(S2017J5Label)
+asset.export(S2017J8Label)
+asset.export(S2011J1Label)
+asset.export(S2003J9Label)
+asset.export(S2003J10Label)
+asset.export(S2003J24Label)
+asset.export(S2017J11Label)
+
+asset.meta = {
+  Name = "Jupiter Carme Group Moons Labels",
+  Description = [[Asset containing labels for Jupiter's Carme Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

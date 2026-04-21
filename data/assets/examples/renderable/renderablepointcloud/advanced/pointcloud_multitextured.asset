@@ -80,6 +80,7 @@ local Node_Speck = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Node)
   openspace.addSceneGraphNode(Node_Interpolated)

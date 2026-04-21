@@ -2,7 +2,7 @@ asset.require("./base_layers")
 asset.require("./colorlayers/messenger_mdis_utah", false)
 asset.require("./colorlayers/messenger_mosaic_utah", false)
 asset.require("./colorlayers/messenger_mosaic2_utah", false)
-asset.require("./colorlayers/messenger_bdr_utah", asset.enabled)
+asset.require("./colorlayers/messenger_bdr_utah", true)
 asset.require("./colorlayers/messenger_hie_utah", false)
 asset.require("./colorlayers/messenger_hiw_utah", false)
 asset.require("./colorlayers/messenger_loi_utah", false)
@@ -22,6 +22,6 @@ asset.meta = {
     Layers only loaded from the Utah server
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

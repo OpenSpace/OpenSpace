@@ -177,7 +177,7 @@ asset.meta = {
   Name = "OsirisRex Actions",
   Description = "Actions related to the OsirisRex mission",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }
 

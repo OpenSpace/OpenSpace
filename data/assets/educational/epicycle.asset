@@ -73,6 +73,6 @@ asset.meta = {
   Description = [[This asset includes the trails of the planets from earth.
     In addition, it provides some actions for manipulating them.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

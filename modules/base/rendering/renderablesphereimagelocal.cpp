@@ -41,8 +41,8 @@ namespace {
         Property::Visibility::User
     };
 
-    // This `Renderable` shows a sphere with an image provided by a local file on disk. To
-    // show a sphere with an image from an online source, see
+    // Shows a sphere with an image provided by a local file on disk. To show a sphere
+    // with an image from an online source, see
     // [RenderableSphereImageOnline](#base_screenspace_imageonline).
     //
     // Per default, the sphere uses an equirectangular projection for the image mapping
@@ -74,10 +74,6 @@ RenderableSphereImageLocal::RenderableSphereImageLocal(
     _texturePath = p.texture.string();
     _texturePath.onChange([this]() { _texture->loadFromFile(_texturePath.value()); });
     addProperty(_texturePath);
-}
-
-bool RenderableSphereImageLocal::isReady() const {
-    return RenderableSphere::isReady() && _texture;
 }
 
 void RenderableSphereImageLocal::initialize() {

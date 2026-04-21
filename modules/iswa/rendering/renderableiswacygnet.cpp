@@ -158,10 +158,6 @@ void RenderableIswaCygnet::deinitializeGL() {
     }
 }
 
-bool RenderableIswaCygnet::isReady() const {
-    return !_shader;
-}
-
 void RenderableIswaCygnet::render(const RenderData& data, RendererTasks&) {
     if (!readyToRender()) {
         return;

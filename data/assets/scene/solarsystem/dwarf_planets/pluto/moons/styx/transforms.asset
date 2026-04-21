@@ -1,0 +1,43 @@
+local plutoAsset = asset.require("scene/solarsystem/dwarf_planets/pluto/transforms")
+local plutoKernels = asset.require("scene/solarsystem/dwarf_planets/pluto/kernels")
+
+
+
+local StyxPosition = {
+  Identifier = "StyxPosition",
+  Parent = plutoAsset.PlutoBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = plutoKernels.ID.Styx,
+      Observer = plutoKernels.ID.PlutoBarycenter
+    }
+  },
+  GUI = {
+    Name = "Styx Position",
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Styx",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(StyxPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(StyxPosition)
+end)
+
+asset.export(StyxPosition)
+
+
+
+asset.meta = {
+  Name = "Styx Transforms",
+  Description = "Position for Pluto's moon Styx",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

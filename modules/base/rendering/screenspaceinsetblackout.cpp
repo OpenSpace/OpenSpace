@@ -207,11 +207,10 @@ namespace {
         Property::Visibility::Developer
     };
 
-    // A ScreenSpaceInsetBlackout can be used to render a screen-space shape used to black
-    // out part of the rendering. This can be useful in a dome environment where you have
-    // a secondary presentation projector that can project on the dome surface. The
-    // blackout is used to avoid overlapping rendering between the dome projectors and the
-    // presentation projector.
+    // Renders a screen-space shape used to black out part of the rendering. This can be
+    // useful in a dome environment where you have a secondary presentation projector that
+    // can project on the dome surface. The blackout is used to avoid overlapping
+    // rendering between the dome projectors and the presentation projector.
     struct [[codegen::Dictionary(ScreenSpaceInsetBlackout)]] Parameters {
         struct BlackoutShape {
             // List of corner positions for the blackout shape. The order of corner points

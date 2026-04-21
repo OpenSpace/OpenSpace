@@ -117,7 +117,7 @@ namespace {
         std::string identifier [[codegen::identifier()]];
 
         // A human-readable name for the user interface. If this is omitted, the
-        // identifier is used instead
+        // identifier is used instead.
         std::optional<std::string> name;
 
         // A human-readable description of the layer to be used in informational texts

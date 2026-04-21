@@ -36,16 +36,13 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePolygonCloud";
 
-    // A RenderablePolygonCloud is a RenderablePointCloud where the shape of the points is
-    // a uniform polygon with a given number of sides instead of a texture. For instance,
-    // PolygonSides = 5 results in the points being rendered as pentagons.
+    // This is a [RenderablePointCloud](#base_renderable_pointcloud) where the shape of
+    // the points is a uniform polygon with a given number of sides instead of a texture.
+    // For instance, `PolygonSides` = 5 results in the points being rendered as pentagons.
     //
     // Note that while this renderable inherits the texture component from
-    // RenderablePointCloud, any added texture information will be ignored in favor of the
-    // polygon shape.
-    //
-    // See documentation of RenderablePointCloud for details on the other parts of the
-    // point cloud rendering.
+    // [RenderablePointCloud](#base_renderable_pointcloud), any added texture information
+    // will be ignored in favor of the polygon shape.
     struct [[codegen::Dictionary(RenderablePolygonCloud)]] Parameters {
         // The number of sides for the polygon used to represent each point. Default is
         // 3, i.e. to use triangles.
@@ -96,14 +93,16 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     }
 
     LDEBUG("Creating Polygon Texture");
-    constexpr gl::GLsizei TexSize = 512;
+    constexpr GLsizei TexSize = 512;
 
     // We don't use the helper function for the format and internal format here, as we
     // don't want the compression to be used for the polygon texture and we always want
     // alpha. This is also why we do not need to update the texture
-    bool useAlpha = true;
-    gl::GLenum format = gl::GLenum(glFormat(useAlpha));
-    gl::GLenum internalFormat = GL_RGBA8;
+    TextureFormat textureFormat = {
+        .resolution = glm::uvec2(TexSize),
+        .format = ghoul::opengl::Texture::Format::RGBA,
+        .internalFormat = GL_RGBA8
+    };
 
     glCreateTextures(GL_TEXTURE_2D, 1, &_pTexture);
     glTextureParameteri(_pTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -116,11 +115,11 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
-        internalFormat,
+        textureFormat.internalFormat,
         TexSize,
         TexSize,
         0,
-        format,
+        GLenum(textureFormat.format),
         GL_UNSIGNED_BYTE,
         nullptr
     );
@@ -133,15 +132,20 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     unsigned int arraySize = TexSize * TexSize * nChannels;
     std::vector<std::byte> pixels;
     pixels.resize(arraySize);
-    glGetTextureImage(_pTexture, 0, format, GL_UNSIGNED_BYTE, arraySize, pixels.data());
+    glGetTextureImage(
+        _pTexture,
+        0,
+        GLenum(textureFormat.format),
+        GL_UNSIGNED_BYTE,
+        arraySize,
+        pixels.data()
+    );
 
     // Create array from data, size and format
     unsigned int id = 0;
     glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &id);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, id);
-    initAndAllocateTextureArray(id, glm::uvec2(TexSize), 1, useAlpha);
-    fillAndUploadTextureLayer(0, 0, 0, glm::uvec2(TexSize), useAlpha, pixels);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+    initAndAllocateTextureArray(id, textureFormat, 1);
+    fillAndUploadTextureLayer(id, 0, 0, 0, textureFormat, pixels);
 
     _textureIsInitialized = true;
 }

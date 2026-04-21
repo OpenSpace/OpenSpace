@@ -11,7 +11,7 @@
     "recommended": [
       "addons/asteroids",
       "addons/dwarf_planets",
-      "addons/interstellar",
+      "addons/interstellar_objects",
       "addons/minor_moons"
     ]
   },

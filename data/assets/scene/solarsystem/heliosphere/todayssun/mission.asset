@@ -50,6 +50,6 @@ asset.meta = {
   Description = [[This mission file provides information about the simulation model
     WSA.]],
   Author = "CCMC",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

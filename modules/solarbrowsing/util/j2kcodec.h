@@ -1,0 +1,81 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2026                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#ifndef __OPENSPACE_MODULE_SOLARBROWSING___J2KCODEC___H__
+#define __OPENSPACE_MODULE_SOLARBROWSING___J2KCODEC___H__
+
+#include <openjpeg.h>
+#include <filesystem>
+#include <memory>
+#include <string>
+
+namespace openspace {
+
+/**
+ * @TODO (mnoven): A simple wrapper around openjpeg. As of 08/24/17 openjpeg has 3 major
+ * bottlenecks which are listed below:
+ *
+ * 1. We can't perform decoding on multiple threads, this feature is not stable and
+ *    results in a segmentation fault. (anden88 2026-02-13) We can however let each thread
+ *    have its own instance of the `J2KCodec` class.
+ * 2. We want to be able to decode directly into our buffer without having to go through
+ *    the opj_image_t object.
+ *    See: https://github.com/uclouvain/openjpeg/issues/837
+ * 3. Decoding precison is always 32-bits integers, meaning conversion has to be done if
+ *    8-bytes are preferred.
+ *    See: https://github.com/uclouvain/openjpeg/issues/836
+ */
+
+struct ImageData {
+    int32_t* data;
+    uint32_t w;
+    uint32_t h;
+};
+
+class J2kCodec {
+public:
+    explicit J2kCodec(bool shouldPrintTiming = false);
+    ~J2kCodec();
+
+    // Decode into a client allocated buffer
+    void decodeIntoBuffer(const std::filesystem::path& path, unsigned char* buffer,
+        int resolutionLevel);
+
+private:
+    void destroy();
+    void createInfileStream(const std::filesystem::path& path);
+    void setupDecoder(int resolutionLevel);
+
+    opj_codec_t* _decoder = nullptr;
+    opj_dparameters_t _decoderParams;
+    opj_image_t* _image = nullptr;
+
+    std::filesystem::path _filePath;
+    opj_stream_t* _infileStream = nullptr;
+    bool _shouldPrintTiming = false;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SOLARBROWSING___J2KCODEC___H__

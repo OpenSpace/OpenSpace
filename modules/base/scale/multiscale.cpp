@@ -31,8 +31,7 @@
 #include <utility>
 
 namespace {
-    // This Scale type combines multiple individual scale operations that are applied one
-    // after the other.
+    // Combines multiple individual scale operations that are applied one after the other.
     struct [[codegen::Dictionary(MultiScale)]] Parameters {
         // The list of scales that are applied one after the other.
         std::vector<ghoul::Dictionary> scales [[codegen::reference("core_scale")]];

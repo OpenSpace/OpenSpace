@@ -54,6 +54,14 @@ public:
     static openspace::Documentation Documentation();
 
 private:
+	enum PhaseType {
+		Pre = 0,
+        Beginning,
+	    Normal,
+        Ending,
+	    Post
+	};
+
     /**
      * Performs a full sweep of the orbit and fills the entire vertex buffer object.
      *
@@ -91,6 +99,23 @@ private:
      */
     UpdateReport updateTrails(const UpdateData& data);
 
+    /**
+    * Determines which type of render phase the trail is in. Result depends is
+    * calculated based on ingame time, start time and end time.
+    *
+    * \param time The current ingame time in j2000 epoch
+    * \return Pre, Beginning, Normal, End or Post
+    */
+    PhaseType trailPhase(double time);
+
+    /// Determines if trail length should be forced to be one orbital period in length
+    BoolProperty _forceFullOrbitTrail;
+    /// Only shows full trail orbit trail between StartTime and EndTime
+    BoolProperty _limitToTimeRange;
+    /// The start time of the trail
+    StringProperty _startTime;
+    /// The end time of the trail
+    StringProperty _endTime;
     /// The orbital period of the RenderableTrail in days
     DoubleProperty _period;
     /// The number of points that should be sampled between _period and now
@@ -102,6 +127,8 @@ private:
     /// A dirty flag to determine whether the index buffer needs to be regenerated and
     /// then reuploaded
     bool _indexBufferDirty = true;
+	/// Previous phase such that we can track transitions to other phases
+	PhaseType _previousPhase = PhaseType::Normal;
 
     /// The time stamp of the oldest point in the array
     double _firstPointTime = 0.0;

@@ -1,0 +1,171 @@
+local transforms = asset.require("scene/solarsystem/planets/neptune/transforms")
+local kernels = asset.require("scene/solarsystem/planets/neptune/kernels104")
+local coreKernels = asset.require("spice/core")
+
+
+
+local HalimedePosition = {
+  Identifier = "HalimedePosition",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Halimede,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    }
+  },
+  GUI = {
+    Name = "Halimede Position",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Halimede",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local PsamathePosition = {
+  Identifier = "PsamathePosition",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Psamathe,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    }
+  },
+  GUI = {
+    Name = "Psamathe Position",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Psamathe",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local SaoPosition = {
+  Identifier = "SaoPosition",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Sao,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    }
+  },
+  GUI = {
+    Name = "Sao Position",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Sao",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local LaomedeiaPosition = {
+  Identifier = "LaomedeiaPosition",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Laomedeia,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    }
+  },
+  GUI = {
+    Name = "Laomedeia Position",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Laomedeia",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local NesoPosition = {
+  Identifier = "NesoPosition",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Neso,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    }
+  },
+  GUI = {
+    Name = "Neso Position",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/Neso",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2002N5Position = {
+  Identifier = "S2002N5Position",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.S2002N5,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2002 N 5 Position",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Retrograde Moons/S2002N5",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2021N1Position = {
+  Identifier = "S2021N1Position",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.S2021N1,
+      Observer = coreKernels.ID.NeptuneBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2021 N 1 Position",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Irregular Prograde Moons/S2021N1",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(HalimedePosition)
+  openspace.addSceneGraphNode(PsamathePosition)
+  openspace.addSceneGraphNode(SaoPosition)
+  openspace.addSceneGraphNode(LaomedeiaPosition)
+  openspace.addSceneGraphNode(NesoPosition)
+  openspace.addSceneGraphNode(S2002N5Position)
+  openspace.addSceneGraphNode(S2021N1Position)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2021N1Position)
+  openspace.removeSceneGraphNode(S2002N5Position)
+  openspace.removeSceneGraphNode(NesoPosition)
+  openspace.removeSceneGraphNode(LaomedeiaPosition)
+  openspace.removeSceneGraphNode(SaoPosition)
+  openspace.removeSceneGraphNode(PsamathePosition)
+  openspace.removeSceneGraphNode(HalimedePosition)
+end)
+
+asset.export(HalimedePosition)
+asset.export(PsamathePosition)
+asset.export(SaoPosition)
+asset.export(LaomedeiaPosition)
+asset.export(NesoPosition)
+asset.export(S2002N5Position)
+asset.export(S2021N1Position)
+
+
+
+asset.meta = {
+  Name = "Neptune Irregular Prograde and Retrograde Moons Globes",
+  Description = [[Asset containing globes for Neptune' irregular prograde and retrograde
+    moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

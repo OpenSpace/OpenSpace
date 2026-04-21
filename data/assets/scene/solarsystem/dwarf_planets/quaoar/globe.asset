@@ -1,0 +1,45 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Quaoar = {
+  Identifier = "Quaoar",
+  Parent = transforms.QuaoarPosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "ConstantRotation",
+      RotationAxis = { 0.0, 0.0, 1.0 },
+      RotationRate = 1.0 / (8.84 * 60.0 * 60.0)
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1138000, 1138000, 1036000 }
+  },
+  GUI = {
+    Name = "Quaoar",
+    Path = "/Solar System/Dwarf Planets/Quaoar",
+    Description = "Globe of Quaoar"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Quaoar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Quaoar)
+end)
+
+asset.export(Quaoar)
+
+
+
+asset.meta = {
+  Name = "Quaoar Globe",
+  Description = [[Globe of Quaoar]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

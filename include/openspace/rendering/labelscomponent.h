@@ -73,7 +73,6 @@ public:
 
     void loadLabels();
 
-    bool isReady() const;
     bool enabled() const;
 
     void render(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,

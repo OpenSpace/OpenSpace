@@ -1,4 +1,4 @@
-local globe = asset.require("../../earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 
 
 
@@ -10,11 +10,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "Overlays", Layer)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "Overlays", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "Overlays", Layer)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "Overlays", Layer)
 end)
 
 asset.export("layer", Layer)
@@ -25,6 +25,6 @@ asset.meta = {
   Name = "Earth Coastlines Layer",
   Description = "Coastlines layer for Earth globe",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

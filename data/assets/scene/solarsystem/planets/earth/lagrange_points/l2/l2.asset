@@ -119,6 +119,6 @@ asset.meta = {
   Description = [[Lagrange point L2 large and small nodes, and large and small
     labels]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -45,6 +45,6 @@ asset.meta = {
   Description = [[This asset provides the SPICE kernels for the Apollo 15 module that
     provide position and orientation information for the mission.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

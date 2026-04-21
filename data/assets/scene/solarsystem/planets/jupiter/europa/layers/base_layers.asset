@@ -6,6 +6,6 @@ asset.meta = {
   Name = "Base Europa Layers",
   Description = "Base Europa layers are: Europa Texture",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }
