@@ -146,7 +146,7 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
                 reinterpret_cast<void*>(imageFile.buffer),
                 imageFile.size,
                 2,
-                {
+                ghoul::opengl::Texture::SamplerInit{
                     .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
                 },
                 imageFile.format

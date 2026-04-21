@@ -173,7 +173,7 @@ void RenderablePlaneImageLocal::loadTexture() {
                 ghoul::io::texture::loadTexture(
                     absPath(path),
                     2,
-                    ghoul::opengl::Texture::SamplerInit {
+                    ghoul::opengl::Texture::SamplerInit{
                         .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
                     }
                 );
