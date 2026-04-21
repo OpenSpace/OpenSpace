@@ -2583,11 +2583,6 @@ bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk,
         _cachedInverseModelTransform * glm::dvec4(renderData.camera.position(), 1.0)
     );
 
-    const glm::dvec3 cameraGlobePos = geoPositionFromCamera();
-    if (cameraGlobePos.z == 0.0) {
-        return false; //dont cull at altitude 0 to avoid flicker
-    }
-
     const glm::dvec3& globeToCamera = cameraPos;
     const Geodetic2 camPosOnGlobe = _ellipsoid.cartesianToGeodetic2(globeToCamera);
     const Geodetic2 closestPatchPoint = patch.closestPoint(camPosOnGlobe);
