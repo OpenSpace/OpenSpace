@@ -1,6 +1,4 @@
 {
-  "skip_test": true,
-
   "profile": "spaceweather/todays_sun",
   "commands": [
     {
