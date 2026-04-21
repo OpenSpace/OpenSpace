@@ -1747,12 +1747,19 @@ bool operator==(const TextureFormat& l, const TextureFormat& r) {
 }
 
 size_t TextureFormatHash::operator()(const TextureFormat& k) const {
-    size_t res = 0;
-    res += static_cast<uint64_t>(k.resolution.x) << 32;
-    res += static_cast<uint64_t>(k.resolution.y) << 16;
-    res += int(k.format);
-    res += int(k.internalFormat);
-    return res;
+    size_t seed = 0;
+    
+    // Standard hash-combine pattern (similar to boost::hash_combine)
+    auto hash_combine = [](size_t& seed, size_t value) {
+        seed ^= value + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    };
+    
+    hash_combine(seed, std::hash<uint32_t>{}(k.resolution.x));
+    hash_combine(seed, std::hash<uint32_t>{}(k.resolution.y));
+    hash_combine(seed, std::hash<int>{}(static_cast<int>(k.format)));
+    hash_combine(seed, std::hash<int>{}(static_cast<int>(k.internalFormat)));
+    
+    return seed;
 }
 
 } // namespace openspace
