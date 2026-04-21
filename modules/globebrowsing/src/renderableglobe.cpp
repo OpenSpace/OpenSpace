@@ -638,7 +638,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         .levelByProjectedAreaElseDistance = BoolProperty(LevelProjectedAreaInfo, true),
         .resetTileProviders = TriggerProperty(ResetTileProviderInfo),
         .performFrustumCulling = BoolProperty(PerformFrustumCullingInfo, true),
-        .performHorizonCulling = BoolProperty(PerformHorizonCullingInfo, true),
+        .performHorizonCulling = BoolProperty(PerformHorizonCullingInfo, false),
         .modelSpaceRenderingCutoffLevel = IntProperty(ModelSpaceRenderingInfo, 14, 1, 22),
         .dynamicLodIterationCount = IntProperty(DynamicLodIterationCountInfo, 16, 4, 128)
     })
@@ -2582,6 +2582,11 @@ bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk,
     const glm::dvec3 cameraPos = glm::dvec3(
         _cachedInverseModelTransform * glm::dvec4(renderData.camera.position(), 1.0)
     );
+
+    const glm::dvec3 cameraGlobePos = geoPositionFromCamera();
+    if (cameraGlobePos.z == 0.0) {
+        return false; //dont cull at altitude 0 to avoid flicker
+    }
 
     const glm::dvec3& globeToCamera = cameraPos;
     const Geodetic2 camPosOnGlobe = _ellipsoid.cartesianToGeodetic2(globeToCamera);
