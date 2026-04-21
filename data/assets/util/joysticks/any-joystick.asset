@@ -84,6 +84,6 @@ asset.meta = {
     Checks the name on the connected controllers and adds the cooresponding joystick asset
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

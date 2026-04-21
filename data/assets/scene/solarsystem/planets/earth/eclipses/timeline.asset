@@ -2271,6 +2271,7 @@ local Timeline = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.loadMission(Timeline)
 end)
@@ -2285,6 +2286,6 @@ asset.meta = {
   Name = "Eclipses Timeline",
   Description = "A timeline that shows all of the eclipses in the past and next 100 years",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

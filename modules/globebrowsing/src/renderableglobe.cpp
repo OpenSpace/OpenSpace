@@ -504,10 +504,10 @@ namespace {
         }
     }
 
-    // RenderableGlobe is responsible for rendering planets, moons, and other ellipsoidal
-    // bodies with tiled surface data. It renders a globe as an ellipsoid whose appearance
-    // is assembled dynamically from one or more layer stacks, such as color imagery,
-    // elevation data, night textures, overlays, and water masks.
+    // Used for rendering planets, moons, and other ellipsoidal bodies with tiled surface
+    // data. It renders a globe as an ellipsoid whose appearance is assembled dynamically
+    // from one or more layer stacks, such as color imagery, elevation data, night
+    // textures, overlays, and water masks.
     //
     // The class is designed for large planetary datasets that cannot be drawn as a single
     // static mesh or texture. Instead, it divides the globe into chunks and continuously
@@ -879,10 +879,6 @@ void RenderableGlobe::deinitializeGL() {
     if (_shadowComponent) {
         _shadowComponent->deinitializeGL();
     }
-}
-
-bool RenderableGlobe::isReady() const {
-    return true;
 }
 
 void RenderableGlobe::render(const RenderData& data, RendererTasks&) {

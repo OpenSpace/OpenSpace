@@ -1,4 +1,4 @@
-local globe = asset.require("../../callisto")
+local callistoAsset = asset.require("scene/solarsystem/planets/jupiter/callisto/globe")
 
 
 
@@ -20,11 +20,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Callisto.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(callistoAsset.Callisto.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Callisto.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(callistoAsset.Callisto.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export("layer", Layer)
@@ -35,6 +35,6 @@ asset.meta = {
   Name = "Callisto Texutre",
   Description = "Default texture for Callisto",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

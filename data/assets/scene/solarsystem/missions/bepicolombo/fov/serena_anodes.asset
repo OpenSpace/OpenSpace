@@ -1,11 +1,11 @@
-local transforms = asset.require("../model")
+local model = asset.require("../model")
 local kernels = asset.require("../kernels")
 
 
 
 local SerenaElenaAN01 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN01",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -28,7 +28,7 @@ local SerenaElenaAN01 = {
 
 local SerenaElenaAN02 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN02",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -51,7 +51,7 @@ local SerenaElenaAN02 = {
 
 local SerenaElenaAN03 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN03",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -74,7 +74,7 @@ local SerenaElenaAN03 = {
 
 local SerenaElenaAN04 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN04",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -97,7 +97,7 @@ local SerenaElenaAN04 = {
 
 local SerenaElenaAN05 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN05",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -120,7 +120,7 @@ local SerenaElenaAN05 = {
 
 local SerenaElenaAN06 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN06",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -143,7 +143,7 @@ local SerenaElenaAN06 = {
 
 local SerenaElenaAN07 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN07",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -166,7 +166,7 @@ local SerenaElenaAN07 = {
 
 local SerenaElenaAN08 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN08",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -189,7 +189,7 @@ local SerenaElenaAN08 = {
 
 local SerenaElenaAN09 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN09",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -212,7 +212,7 @@ local SerenaElenaAN09 = {
 
 local SerenaElenaAN10 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN10",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -235,7 +235,7 @@ local SerenaElenaAN10 = {
 
 local SerenaElenaAN11 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN11",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -258,7 +258,7 @@ local SerenaElenaAN11 = {
 
 local SerenaElenaAN12 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN12",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -281,7 +281,7 @@ local SerenaElenaAN12 = {
 
 local SerenaElenaAN13 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN13",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -304,7 +304,7 @@ local SerenaElenaAN13 = {
 
 local SerenaElenaAN14 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN14",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -327,7 +327,7 @@ local SerenaElenaAN14 = {
 
 local SerenaElenaAN15 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN15",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -350,7 +350,7 @@ local SerenaElenaAN15 = {
 
 local SerenaElenaAN16 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN16",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -373,7 +373,7 @@ local SerenaElenaAN16 = {
 
 local SerenaElenaAN17 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN17",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -396,7 +396,7 @@ local SerenaElenaAN17 = {
 
 local SerenaElenaAN18 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN18",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -419,7 +419,7 @@ local SerenaElenaAN18 = {
 
 local SerenaElenaAN19 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN19",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -442,7 +442,7 @@ local SerenaElenaAN19 = {
 
 local SerenaElenaAN20 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN20",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -465,7 +465,7 @@ local SerenaElenaAN20 = {
 
 local SerenaElenaAN21 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN21",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -488,7 +488,7 @@ local SerenaElenaAN21 = {
 
 local SerenaElenaAN22 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN22",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -511,7 +511,7 @@ local SerenaElenaAN22 = {
 
 local SerenaElenaAN23 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN23",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -534,7 +534,7 @@ local SerenaElenaAN23 = {
 
 local SerenaElenaAN24 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN24",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -557,7 +557,7 @@ local SerenaElenaAN24 = {
 
 local SerenaElenaAN25 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN25",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -580,7 +580,7 @@ local SerenaElenaAN25 = {
 
 local SerenaElenaAN26 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN26",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -603,7 +603,7 @@ local SerenaElenaAN26 = {
 
 local SerenaElenaAN27 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN27",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -626,7 +626,7 @@ local SerenaElenaAN27 = {
 
 local SerenaElenaAN28 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN28",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -649,7 +649,7 @@ local SerenaElenaAN28 = {
 
 local SerenaElenaAN29 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN29",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -672,7 +672,7 @@ local SerenaElenaAN29 = {
 
 local SerenaElenaAN30 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN30",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -695,7 +695,7 @@ local SerenaElenaAN30 = {
 
 local SerenaElenaAN31 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN31",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -718,7 +718,7 @@ local SerenaElenaAN31 = {
 
 local SerenaElenaAN32 = {
   Identifier = "BepiColomboMPO_SerenaElena_AN32",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -825,6 +825,6 @@ asset.meta = {
     improves the success of scientific objectives and allows for additional objectives.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

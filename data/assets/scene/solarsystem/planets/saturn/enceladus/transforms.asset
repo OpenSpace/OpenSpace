@@ -1,0 +1,49 @@
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local EnceladusPosition = {
+  Identifier = "EnceladusPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Enceladus,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Enceladus,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "Enceladus Position",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Enceladus",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(EnceladusPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(EnceladusPosition)
+end)
+
+asset.export(EnceladusPosition)
+
+
+
+asset.meta = {
+  Name = "Enceladus Position",
+  Description = "Enceladus position",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

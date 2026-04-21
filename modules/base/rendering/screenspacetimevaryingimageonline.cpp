@@ -54,10 +54,9 @@ namespace {
         Property::Visibility::User
     };
 
-    // This `ScreenSpaceRenderable` displays an image based on the current in-game
-    // simulation time. The image shown is selected from a JSON file containing
-    // timestamp-URL pairs. The image with the closest timestamp before or equal to the
-    // current time is displayed.
+    // Displays an image based on the current in-game simulation time. The image shown is
+    // selected from a JSON file containing timestamp-URL pairs. The image with the
+    // closest timestamp before or equal to the current time is displayed.
     //
     // Example JSON format:
     // {

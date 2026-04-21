@@ -14,8 +14,8 @@ local subEarthLevelColorTable = transferFunctions .. "subearth_spec.txt"
 local currentSheetColorTable = transferFunctions .. "currentsheet_spec.txt"
 local opennessColorTable = transferFunctions .."openness_spec.txt"
 
-local infoURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id="
-local dataURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID="
+local infoURL = "https://iswa.ccmc.gsfc.nasa.gov/api/info?dataID="
+local dataURL = "https://iswa.ccmc.gsfc.nasa.gov/api/between?dataID="
 
 local sunRadius = 695700000.0
 
@@ -213,6 +213,6 @@ asset.meta = {
     Sun at any point. It includes .osfls files (OpenSpace FieldLine Sequence) for field
     lines.]],
   Author = "CCMC",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

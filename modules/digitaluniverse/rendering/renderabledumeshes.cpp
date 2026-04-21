@@ -256,10 +256,6 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     }
 }
 
-bool RenderableDUMeshes::isReady() const {
-    return _program && (!_renderingMeshesMap.empty() || (!_labelset.entries.empty()));
-}
-
 void RenderableDUMeshes::initialize() {
     const bool success = loadData();
     if (!success) {

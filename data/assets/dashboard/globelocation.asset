@@ -21,6 +21,6 @@ asset.meta = {
   Name = "Dashboard - GlobeLocation",
   Description = "This asset provides a GlobeLocation dashboard item",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

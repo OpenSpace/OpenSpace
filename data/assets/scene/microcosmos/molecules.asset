@@ -332,6 +332,6 @@ asset.meta = {
   Description = [[Visualizes a selection of different molecules to represent the
     functionality of the MolVis rendering framework.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

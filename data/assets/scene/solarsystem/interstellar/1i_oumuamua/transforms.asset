@@ -1,0 +1,51 @@
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+local trajectory = asset.resource({
+  Name = "'Oumuamua Trajectory",
+  Type = "HttpSynchronization",
+  Identifier = "oumuamua_horizons",
+  Version = 3
+})
+
+
+local OumuamuaPosition = {
+  Identifier = "1I_OumuamuaPosition",
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = trajectory .. "horizons_oumuamua.hrz"
+    }
+  },
+  GUI = {
+    Name = "1I/'Oumuamua",
+    Path = "/Solar System/Interstellar/'Oumuamua",
+    Description = [[Position of 'Oumuamua from 2014 JAN 01 00:00:00 to 2050 JAN 01
+      00:00:00. Data from JPL Horizons]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(OumuamuaPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(OumuamuaPosition)
+end)
+
+-- As the identifier starts with a number, it is not a valid Lua identifier
+asset.export("OumuamuaPosition", OumuamuaPosition)
+
+
+
+asset.meta = {
+  Name = "1I/'Oumuamua Position",
+  Description = [[This asset contains the position of 'Oumuamua from 2014 JAN 01 00:00:00
+    to 2050 JAN 01 00:00:00. Data from JPL Horizons.]],
+  Author = "OpenSpace Team",
+  URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
+  License = "NASA"
+}

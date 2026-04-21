@@ -1,4 +1,4 @@
-local pluto = asset.require("../../pluto")
+local plutoAsset = asset.require("scene/solarsystem/dwarf_planets/pluto/globe")
 
 
 
@@ -12,11 +12,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(pluto.Pluto.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(plutoAsset.Pluto.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(pluto.Pluto.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(plutoAsset.Pluto.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export("layer", Layer)

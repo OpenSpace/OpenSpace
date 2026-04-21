@@ -1,4 +1,4 @@
-local globe = asset.require("../../earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 
 
 
@@ -12,11 +12,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "WaterMasks", Layer)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "WaterMasks", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "WaterMasks", Layer)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "WaterMasks", Layer)
 end)
 
 asset.export("layer", Layer)
@@ -27,6 +27,6 @@ asset.meta = {
   Name = "Gebco WaterMask Layer (New York)",
   Description = "WaterMask layer for Earth globe",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

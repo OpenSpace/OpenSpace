@@ -50,7 +50,7 @@ namespace {
         Property::Visibility::User
     };
 
-    struct [[codegen::Dictionary(DashboardTextItem)]] Parameters {
+    struct [[codegen::Dictionary(ScreenSpaceRenderableText)]] Parameters {
         // [[codegen::verbatim(FontNameInfo.description)]]
         std::optional<std::string> fontName;
 
@@ -103,10 +103,6 @@ void ScreenSpaceRenderableText::deinitializeGL() {
     _texture = nullptr;
 
     ScreenSpaceRenderable::deinitializeGL();
-}
-
-bool ScreenSpaceRenderableText::isReady() const {
-    return _shader && _font && _texture;
 }
 
 void ScreenSpaceRenderableText::update() {

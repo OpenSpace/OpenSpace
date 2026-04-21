@@ -1,5 +1,5 @@
-local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local sun = asset.require("scene/solarsystem/sun/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -15,7 +15,7 @@ local models = asset.resource({
 
 local Apollo8 = {
   Identifier = "Apollo8",
-  Parent = earth_transforms.EarthBarycenter.Identifier,
+  Parent = earthAsset.EarthBarycenter.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "1968 DEC 21",
@@ -66,7 +66,7 @@ local Apollo8Model = {
     GeometryFile = models .. "ApolloCSM.osmodel",
     ModelScale = 0.0001,
     LightSources = {
-      sun.LightSource
+      sunAsset.LightSource
     },
     PerformShading = true
   },
@@ -117,6 +117,6 @@ asset.meta = {
   Description = [[Contains the 3D model of the Apollo 8 command module for use during the
     launch of the spacecraft from Earth and the Earthrise moment.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

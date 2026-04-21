@@ -33,14 +33,15 @@
 #include <utility>
 
 namespace {
-    // This tile provider will switch between different tile providers specified within
-    // based on the level of detail that is requested by the Globe. All other things being
-    // equal, this corresponds to the distance of the camera to the planet, with a closer
-    // distance resulting in a higher lever. Due to technical reasons, the available
-    // levels are in the range [2, 22] and each increase in levels corresponds to a
-    // doubling in the effective resolution. For a given requested level, the tile
-    // provider that has the largest `MaxLevel` that is not greater than the requested
-    // level will be used.
+    // Switches between different specified tile providers based on the level of detail
+    // that is requested by the Globe. All other things being equal, this corresponds to
+    // the distance of the camera to the planet, with a closer distance resulting in a
+    // higher level.
+    //
+    // Due to technical reasons, the available levels are in the range [2, 22] and each
+    // increase in levels corresponds to a doubling in the effective resolution. For a
+    // given requested level, the tile provider that has the largest `MaxLevel` that is
+    // not greater than the requested level will be used.
     struct [[codegen::Dictionary(TileProviderByLevel)]] Parameters {
         // Each collection describes a distinct layer which can be toggled at a specified
         // max level at which it is requested.

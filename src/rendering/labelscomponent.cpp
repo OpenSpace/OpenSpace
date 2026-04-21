@@ -276,10 +276,6 @@ void LabelsComponent::loadLabels() {
     }
 }
 
-bool LabelsComponent::isReady() const {
-    return !_labelset.entries.empty();
-}
-
 bool LabelsComponent::enabled() const {
     return _enabled;
 }

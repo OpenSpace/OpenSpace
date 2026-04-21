@@ -1,4 +1,4 @@
-local globe = asset.require("../../enceladus")
+local enceladusAsset = asset.require("scene/solarsystem/planets/saturn/enceladus/globe")
 
 
 
@@ -19,11 +19,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Enceladus.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(enceladusAsset.Enceladus.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Enceladus.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(enceladusAsset.Enceladus.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export("layer", Layer)
@@ -34,6 +34,6 @@ asset.meta = {
   Name = "Enceladus Texture",
   Description = "Default jpg texture for Enceladus",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

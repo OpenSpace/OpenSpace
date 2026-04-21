@@ -31,7 +31,7 @@
 #include <filesystem>
 
 namespace {
-    // This `ScreenSpaceRenderable` can be used to render a video in front of the camera.
+    // Can be used to render a video in front of the camera.
     //
     // The video can either be played back based on a given simulation time
     // (`PlaybackMode` MapToSimulationTime) or through the user interface (for

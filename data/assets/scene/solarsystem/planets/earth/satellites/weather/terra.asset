@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 local coreKernels = asset.require("spice/core")
 
 
@@ -7,7 +7,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Terra)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_terra",
-  Url = "http://www.celestrak.org/NORAD/elements/gp.php?CATNR=25994&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?CATNR=25994&FORMAT=kvn",
   Filename = "Terra.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -15,12 +15,12 @@ local omm = asset.resource({
 
 local Terra = {
   Identifier = "Terra",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   InteractionSphere = 30,
   Transform = {
     Translation = {
       Type = "GPTranslation",
-      Observer = transforms.EarthInertial.Identifier,
+      Observer = earthAsset.EarthInertial.Identifier,
       File = omm .. "Terra.txt",
       Format = "OMM"
     },
@@ -39,12 +39,13 @@ local Terra = {
 
 local TerraTrail = {
   Identifier = "Terra_trail",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
+    Enabled = false,
     Translation = {
       Type = "GPTranslation",
-      Observer = transforms.EarthInertial.Identifier,
+      Observer = earthAsset.EarthInertial.Identifier,
       File = omm .. "Terra.txt",
       Format = "OMM",
       RenderBinMode = "PostDeferredTransparent"
@@ -115,6 +116,6 @@ asset.meta = {
   Description = [[Trail for Terra. trail from Celestrak. Can be used in conjuntion with
     Terra Modis (Temporal) layer for Earth]],
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/",
+  URL = "https://celestrak.org/",
   License = "NASA"
 }

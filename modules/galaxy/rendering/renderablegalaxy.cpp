@@ -491,10 +491,6 @@ void RenderableGalaxy::deinitializeGL() {
     glDeleteBuffers(1, &_colorVbo);
 }
 
-bool RenderableGalaxy::isReady() const {
-    return true;
-}
-
 void RenderableGalaxy::update(const UpdateData& data) {
     if (!_raycaster) {
         return;

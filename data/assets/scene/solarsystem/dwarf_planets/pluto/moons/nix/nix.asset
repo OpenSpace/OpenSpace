@@ -1,0 +1,13 @@
+asset.require("./globe")
+asset.require("./trail")
+asset.require("./label", false)
+
+
+
+asset.meta = {
+  Name = "Nix",
+  Description = "Nix globe, trail, and label",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

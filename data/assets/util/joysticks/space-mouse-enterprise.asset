@@ -69,6 +69,6 @@ asset.meta = {
   Name = "Joystick controller: SpaceMouse enterprise (wired)",
   Description = "Joystick controller configuration for SpaceMouse enterprise (wired)",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

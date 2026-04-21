@@ -1,0 +1,190 @@
+local transforms = asset.require("scene/solarsystem/planets/saturn/transforms")
+local kernels415 = asset.require("scene/solarsystem/planets/saturn/kernels415")
+local coreKernels = asset.require("spice/core")
+
+
+
+local syncedKernels = asset.resource({
+  Name = "Saturn Shepherd Moons Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_shepherd_kernels",
+  Version = 1
+})
+
+
+local kernels = {
+  syncedKernels .. "sat415.bsp",
+  syncedKernels .. "sat393_daphnis.bsp"
+}
+
+local PrometheusPosition = {
+  Identifier = "PrometheusPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Prometheus,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Prometheus Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Prometheus",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local PandoraPosition = {
+  Identifier = "PandoraPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Pandora,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Pandora Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pandora",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local AtlasPosition = {
+  Identifier = "AtlasPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Atlas,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Atlas Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Atlas",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local JanusPosition = {
+  Identifier = "JanusPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Janus,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Janus Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Janus",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local EpimetheusPosition = {
+  Identifier = "EpimetheusPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Epimetheus,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Epimetheus Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Epimetheus",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local DaphnisPosition = {
+  Identifier = "DaphnisPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Daphnis,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Daphnis Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Daphnis",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local PanPosition = {
+  Identifier = "PanPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels415.ID.Pan,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Pan Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pan",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(syncedKernels .. "sat393_daphnis.bsp")
+  openspace.spice.loadKernel(syncedKernels .. "sat415.bsp")
+
+
+  openspace.addSceneGraphNode(PrometheusPosition)
+  openspace.addSceneGraphNode(PandoraPosition)
+  openspace.addSceneGraphNode(AtlasPosition)
+  openspace.addSceneGraphNode(JanusPosition)
+  openspace.addSceneGraphNode(EpimetheusPosition)
+  openspace.addSceneGraphNode(DaphnisPosition)
+  openspace.addSceneGraphNode(PanPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PrometheusPosition)
+  openspace.removeSceneGraphNode(PandoraPosition)
+  openspace.removeSceneGraphNode(AtlasPosition)
+  openspace.removeSceneGraphNode(JanusPosition)
+  openspace.removeSceneGraphNode(EpimetheusPosition)
+  openspace.removeSceneGraphNode(DaphnisPosition)
+  openspace.removeSceneGraphNode(PanPosition)
+
+
+  openspace.spice.unloadKernel(syncedKernels .. "sat415.bsp")
+  openspace.spice.unloadKernel(syncedKernels .. "sat393_daphnis.bsp")
+end)
+
+asset.export(PrometheusPosition)
+asset.export(PandoraPosition)
+asset.export(AtlasPosition)
+asset.export(JanusPosition)
+asset.export(EpimetheusPosition)
+asset.export(DaphnisPosition)
+asset.export(PanPosition)
+
+
+asset.meta = {
+  Name = "Saturn Shepherd Moons Positions",
+  Description = [[Asset containing positions for Saturn's Shepherd moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

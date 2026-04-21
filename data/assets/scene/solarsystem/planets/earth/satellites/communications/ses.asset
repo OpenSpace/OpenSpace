@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (SES)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_ses",
-  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=ses&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=ses&FORMAT=kvn",
   Filename = "ses.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -14,7 +14,7 @@ local omm = asset.resource({
 
 local SesSatellites = {
   Identifier = "SesSatellites",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "ses.txt",
@@ -50,6 +50,6 @@ asset.meta = {
   Name = "Satellites Communications - SES",
   Description = "Satellites asset for Communications - SES. Data from Celestrak",
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/NORAD/elements/",
+  URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
 }

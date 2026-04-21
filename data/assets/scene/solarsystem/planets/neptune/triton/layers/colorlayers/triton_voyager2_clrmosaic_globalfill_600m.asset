@@ -1,4 +1,4 @@
-local globe = asset.require("../../triton")
+local tritonAsset = asset.require("scene/solarsystem/planets/neptune/triton/globe")
 
 
 
@@ -25,11 +25,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Triton.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(tritonAsset.Triton.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Triton.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(tritonAsset.Triton.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export("Layer", Layer)

@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Search & Rescue (SARSAT))",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_sarsat",
-  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=sarsat&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=sarsat&FORMAT=kvn",
   Filename = "sarsat.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -14,7 +14,7 @@ local omm = asset.resource({
 
 local SarSatellites = {
   Identifier = "SarSatellites",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "sarsat.txt",
@@ -51,6 +51,6 @@ asset.meta = {
   Description = [[Satellites asset for Weather - Search & Rescue (SARSAT). Data from
     Celestrak]],
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/NORAD/elements/",
+  URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
 }

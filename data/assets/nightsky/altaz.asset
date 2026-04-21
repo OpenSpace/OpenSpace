@@ -1,4 +1,4 @@
-local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 
 
 
@@ -58,12 +58,10 @@ local AltAzGrid = {
     Opacity = 0.8,
     Color = { 0.2, 0.4, 0.2 },
     LineWidth = 2.0,
-    RenderBinMode = "PostDeferredTransparent",
-    LatSegments = 19,
-    LongSegments = 36
+    RenderBinMode = "PostDeferredTransparent"
 
   },
-  Tag = { "nightsky_marking" },
+  Tag = { "nightsky_marking", "altaz_marking" },
   GUI = {
     Name = "Altitude-Azimuth Grid",
     Description = [[A local Altitude/Azimuth grid centered around your position on a
@@ -98,7 +96,7 @@ local AltAzGridLabels = {
     Opacity = 0.65,
     RenderBinMode = "PostDeferredTransparent"
   },
-  Tag = { "nightsky_marking" },
+  Tag = { "nightsky_marking", "altaz_marking" },
   GUI = {
     Name = "Altitude-Azimuth Grid Labels",
     Description = [[Labels for the Altitude-Azimuth Grid]],
@@ -181,6 +179,6 @@ asset.meta = {
     planetary surface. The asset also includes some actions to toggle, hide or
     show the grid.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

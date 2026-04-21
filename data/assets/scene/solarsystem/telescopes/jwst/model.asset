@@ -1,4 +1,4 @@
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
 
 
@@ -28,7 +28,7 @@ local JWSTModel = {
     AnimationTimeScale = "Millisecond",
     AnimationMode = "Once",
     LightSources = {
-      sunTransforms.LightSource
+      sunAsset.LightSource
     },
     PerformShading = true
   },
@@ -59,6 +59,6 @@ asset.meta = {
   Name = "James Webb Space Telescope Model",
   Description = [[James Webb Space Telescope animated model.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

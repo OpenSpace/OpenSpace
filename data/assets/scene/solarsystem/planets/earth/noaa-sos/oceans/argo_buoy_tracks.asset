@@ -1,4 +1,4 @@
-local globe = asset.require("../../earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 
 
 
@@ -48,13 +48,13 @@ local Buoy = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", Layer)
   openspace.addScreenSpaceRenderable(Buoy)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeScreenSpaceRenderable(Buoy)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export(Layer)

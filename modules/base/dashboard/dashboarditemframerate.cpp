@@ -149,9 +149,9 @@ namespace {
         }
     }
 
-    // This `DashboardItem` provides information about the current framerate at which the
-    // rendering updates. The `FrametimeType` can have different values that will show
-    // different statistical aspects of the framerate.
+    // Displays information about the current framerate at which the rendering updates.
+    // The `FrametimeType` can have different values that will show different statistical
+    // aspects of the framerate.
     //
     //   - `Deltatime`: Shows the time in milliseconds it took to render the previous
     //     frame

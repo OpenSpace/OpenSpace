@@ -61,10 +61,9 @@ namespace {
         Property::Visibility::NoviceUser
     };
 
-    // The RenderableCartesianAxes can be used to render the local Cartesian coordinate
-    // system, or reference frame, of another scene graph node. The colors of the axes can
-    // be customized but are per default set to Red, Green and Blue, for the X-, Y- and
-    // Z-axis, respectively.
+    // Can be used to render the local Cartesian coordinate system, or reference frame,
+    // of another scene graph node. The colors of the axes can be customized but are per
+    // default set to Red, Green and Blue, for the X-, Y- and Z-axis, respectively.
     //
     // To add the axes, create a scene graph node with the RenderableCartesianAxes
     // renderable and add it as a child to the other scene graph node, i.e. specify the
@@ -112,12 +111,6 @@ RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictio
     _zColor = p.zColor.value_or(_zColor);
     _zColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_zColor);
-}
-
-bool RenderableCartesianAxes::isReady() const {
-    bool ready = true;
-    ready &= (_program != nullptr);
-    return ready;
 }
 
 void RenderableCartesianAxes::initializeGL() {

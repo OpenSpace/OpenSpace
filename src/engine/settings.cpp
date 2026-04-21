@@ -25,6 +25,7 @@
 #include <openspace/engine/settings.h>
 
 #include <openspace/json.h>
+#include <ghoul/misc/stringhelper.h>
 #include <fstream>
 #include <sstream>
 
@@ -56,6 +57,11 @@ namespace version1 {
             .rememberLastProfile = get_to<bool>(json, "profile-remember"),
             .bypassLauncher = get_to<bool>(json, "bypass"),
         };
+        // Normalize the path separate to the generic separator
+        if (settings.profile.has_value()) {
+            settings.profile = ghoul::replaceAll(*settings.profile, "\\", "/");
+        }
+
         std::optional<std::string> visibility = get_to<std::string>(json, "visibility");
         if (visibility.has_value()) {
             if (*visibility == "NoviceUser") {

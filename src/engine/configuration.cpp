@@ -49,10 +49,6 @@
 namespace {
     using namespace openspace;
 
-    // We can't use ${SCRIPTS} here as that hasn't been defined by this point
-    constexpr std::string_view InitialConfigHelper =
-        "${BASE}/scripts/configuration_helper.lua";
-
     struct [[codegen::Dictionary(Configuration)]] Parameters {
         // The SGCT configuration file that determines the window and view frustum
         // settings that are being used when OpenSpace is started.
@@ -519,8 +515,6 @@ ghoul::Dictionary Configuration::createDictionary() {
         res.setValue("HttpProxy", httpProxyDict);
     }
 
-    res.setValue("SgctConfigNameInitialized", sgctConfigNameInitialized);
-
     return res;
 }
 
@@ -530,15 +524,6 @@ void parseLuaState(Configuration& configuration) {
     // Shorten the rest of this function
     Configuration& c = configuration;
     const LuaState& s = c.state;
-
-    // The sgctConfigNameInitialized is a bit special
-    lua_getglobal(s, "sgctconfiginitializeString");
-    c.sgctConfigNameInitialized = ghoul::lua::value<std::string>(
-        s,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-
 
     // The configuration file sets all values as global variables, so we need to pull them
     // into a table first so that we can pass that table to the dictionary constructor
@@ -699,7 +684,6 @@ void patchConfiguration(Configuration& configuration, const Settings& settings) 
         settings.configuration.has_value())
     {
         configuration.windowConfiguration = *settings.configuration;
-        configuration.sgctConfigNameInitialized.clear();
     }
     if (settings.rememberLastProfile.value_or(false)) {
         if (settings.profile.has_value()) {
@@ -792,8 +776,7 @@ std::filesystem::path findConfiguration(const std::string& filename) {
 }
 
 Configuration loadConfigurationFromFile(const std::filesystem::path& configurationFile,
-                                        const std::filesystem::path& settingsFile,
-                                        const glm::ivec2& primaryMonitorResolution)
+                                        const std::filesystem::path& settingsFile)
 {
     ghoul_assert(std::filesystem::is_regular_file(configurationFile), "File must exist");
 
@@ -801,31 +784,6 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
     // Having the configuration not sandboxed is safe as there is no way for a third-party
     // file to have any input this early in the loading phase
     result.state = ghoul::lua::LuaState(ghoul::lua::LuaState::Sandboxed::No);
-
-    // Injecting the resolution of the primary screen into the Lua state
-    const std::string script = std::format(
-        "ScreenResolution = {{ x = {}, y = {} }}",
-        primaryMonitorResolution.x, primaryMonitorResolution.y
-    );
-    ghoul::lua::runScript(result.state, script);
-
-    // Local function to convert a dictionary to its JSON object's string representation
-    constexpr auto TableToJson = [](lua_State* state) {
-        if (!ghoul::lua::hasValue<ghoul::Dictionary>(state)) {
-            throw ghoul::lua::LuaError("TableToJson must receive a table object");
-        }
-        ghoul::Dictionary dict = ghoul::lua::value<ghoul::Dictionary>(state);
-        std::string stringRepresentation = formatJson(dict);
-        ghoul::lua::push(state, std::move(stringRepresentation));
-        return 1;
-    };
-    lua_pushcfunction(result.state, TableToJson);
-    lua_setglobal(result.state, "TableToJson");
-
-    // If there is an initial config helper file, load it into the state
-    if (std::filesystem::is_regular_file(absPath(InitialConfigHelper))) {
-        ghoul::lua::runScriptFile(result.state, absPath(InitialConfigHelper));
-    }
 
     // Load the configuration file into the state
     ghoul::lua::runScriptFile(result.state, configurationFile);

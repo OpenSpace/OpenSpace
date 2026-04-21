@@ -46,6 +46,6 @@ asset.meta = {
   Name = "Sun marker",
   Description = "Marker for the Sun, with a stick and label",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

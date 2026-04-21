@@ -116,8 +116,12 @@ namespace {
         );
 
     if (waitForCompletion) {
+        if (!future) {
+            // The download file already exists and override is disabled
+            return;
+        }
         while (!future->isFinished && future->errorMessage.empty()) {
-            // just wait
+            // Just wait
             LTRACEC("OpenSpaceEngine", std::format("waiting '{}'", future->errorMessage));
         }
     }

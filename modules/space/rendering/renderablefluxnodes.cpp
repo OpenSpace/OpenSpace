@@ -585,10 +585,6 @@ void RenderableFluxNodes::deinitializeGL() {
     }
 }
 
-bool RenderableFluxNodes::isReady() const {
-    return _shaderProgram != nullptr;
-}
-
 void RenderableFluxNodes::populateStartTimes() {
     std::filesystem::path timeFile;
     for (const std::filesystem::path& filePath : _binarySourceFiles) {

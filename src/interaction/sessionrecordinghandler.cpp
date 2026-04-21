@@ -232,7 +232,10 @@ void SessionRecordingHandler::tickPlayback(double dt) {
     );
 
     if (isSavingFramesDuringPlayback()) {
-        ghoul_assert(dt == _playback.saveScreenshots.deltaTime, "Misaligned delta times");
+        ghoul_assert(
+            dt == _playback.saveScreenshots.deltaTime || dt == 0.0,
+            "Misaligned delta times"
+        );
 
         // Check if renderable in focus is still resolving tile loading do not adjust time
         // while we are doing this, or take screenshot
@@ -458,6 +461,7 @@ void SessionRecordingHandler::setupPlayback(double startTime) {
         std::get<SessionRecording::Entry::Camera>(firstCamera->value).focusNode;
     auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), startFocusNode);
     if (it == _loadedNodes.end()) {
+        global::openSpaceEngine->setMode(OpenSpaceEngine::Mode::UserControl);
         throw SessionRecordingError(std::format(
             "Playback file requires scenegraph node '{}', which is not currently loaded",
             startFocusNode

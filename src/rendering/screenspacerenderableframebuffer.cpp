@@ -131,10 +131,6 @@ void ScreenSpaceRenderableFramebuffer::render(const RenderData& renderData) {
     draw(modelTransform, renderData);
 }
 
-bool ScreenSpaceRenderableFramebuffer::isReady() const {
-    return _shader && _texture;
-}
-
 void ScreenSpaceRenderableFramebuffer::addRenderFunction(RenderFunction renderFunction) {
     _renderFunctions.push_back(std::move(renderFunction));
 }

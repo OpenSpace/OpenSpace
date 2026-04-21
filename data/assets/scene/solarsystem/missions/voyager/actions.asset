@@ -84,6 +84,6 @@ asset.meta = {
   Name = "Voyager Actions",
   Description = "Actions related to the Voyager 1 and 2 missions",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

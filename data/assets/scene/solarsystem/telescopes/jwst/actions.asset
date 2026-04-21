@@ -140,6 +140,6 @@ asset.meta = {
   Name = "Actions - JWST",
   Description = "Actions related to the JWST mission",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

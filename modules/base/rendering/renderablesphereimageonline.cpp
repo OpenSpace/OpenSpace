@@ -64,9 +64,9 @@ namespace {
         );
     }
 
-    // This `Renderable` shows a sphere with an image provided by an online URL. The image
-    // will be downloaded when the `Renderable` is added to a scene graph node. To show a
-    // sphere with an image from a local file, see
+    // Shows a sphere with an image provided by an online URL. The image will be
+    // downloaded when the `Renderable` is added to a scene graph node. To show a sphere
+    // with an image from a local file, see
     // [RenderableSphereImageLocal](#base_screenspace_imagelocal).
     //
     // Per default, the sphere uses an equirectangular projection for the image mapping

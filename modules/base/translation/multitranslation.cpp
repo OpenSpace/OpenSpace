@@ -31,8 +31,7 @@
 #include <utility>
 
 namespace {
-    // This Translation type combines multiple translations that are applied one after the
-    // other.
+    // Combines multiple translations that are applied one after the other.
     struct [[codegen::Dictionary(MultiTranslation)]] Parameters {
         // The list of translations that are applied one after the other.
         std::vector<ghoul::Dictionary> translations

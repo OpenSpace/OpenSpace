@@ -119,6 +119,6 @@ asset.meta = {
   Description = [[The indications of L3 positions as calculated based on Earth's
    position offset by half a year.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

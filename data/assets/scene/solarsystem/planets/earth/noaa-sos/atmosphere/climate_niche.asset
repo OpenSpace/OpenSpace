@@ -1,4 +1,4 @@
-local globe = asset.require("../../earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 
 
 
@@ -73,19 +73,19 @@ local Colorbar = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerPrecip2020)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerPrecip2070)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerMat2020)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerMat2070)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerPrecip2020)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerPrecip2070)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerMat2020)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerMat2070)
   openspace.addScreenSpaceRenderable(Colorbar)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeScreenSpaceRenderable(Colorbar)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerMat2070)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerMat2020)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerPrecip2070)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerPrecip2020)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerMat2070)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerMat2020)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerPrecip2070)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerPrecip2020)
 end)
 
 asset.export(LayerPrecip2020)

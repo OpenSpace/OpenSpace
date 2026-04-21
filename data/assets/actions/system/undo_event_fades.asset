@@ -27,6 +27,6 @@ asset.meta = {
   Name = "Actions - Undo All Event Fading",
   Description = "Asset providing debug ability to undo all event fading",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

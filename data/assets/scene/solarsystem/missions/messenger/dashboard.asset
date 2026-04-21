@@ -1,5 +1,5 @@
-local mercury = asset.require("scene/solarsystem/planets/mercury/mercury")
-local messenger = asset.require("./messenger")
+local mercuryAsset = asset.require("scene/solarsystem/planets/mercury/globe")
+local messengerAsset = asset.require("./messenger")
 
 
 
@@ -8,9 +8,9 @@ local Distance = {
   Identifier = "MessengerDistance",
   GuiName = "Messenger - Mercury Distance",
   SourceType = "Node",
-  SourceNodeIdentifier = messenger.Messenger.Identifier,
+  SourceNodeIdentifier = messengerAsset.Messenger.Identifier,
   DestinationType = "Node",
-  DestinationNodeIdentifier = mercury.Mercury.Identifier
+  DestinationNodeIdentifier = mercuryAsset.Mercury.Identifier
 }
 
 

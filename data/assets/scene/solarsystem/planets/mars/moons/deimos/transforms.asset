@@ -1,0 +1,49 @@
+local transforms = asset.require("scene/solarsystem/planets/mars/transforms")
+local kernels = asset.require("scene/solarsystem/planets/mars/kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local DeimosTransform = {
+  Identifier = "DeimosTransform",
+  Parent = transforms.MarsBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Deimos,
+      Observer = coreKernels.ID.MarsBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Deimos,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "Deimos Transform",
+    Path = "/Solar System/Planets/Mars/Moons/Deimos",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(DeimosTransform)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(DeimosTransform)
+end)
+
+asset.export(DeimosTransform)
+
+
+
+asset.meta = {
+  Name = "Deimos Transform",
+  Description = "Transform for Deimos",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

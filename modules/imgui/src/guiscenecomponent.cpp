@@ -65,9 +65,6 @@ namespace {
             bool shouldUpdateIfDisabled = renderable->shouldUpdateIfDisabled();
             ImGui::Checkbox("Should update if disabled", &shouldUpdateIfDisabled);
 
-            bool isReady = renderable->isReady();
-            ImGui::Checkbox("Is Ready", &isReady);
-
             const Renderable::RenderBin bin = renderable->renderBin();
             const std::string binStr = [](Renderable::RenderBin b) {
                 switch (b) {

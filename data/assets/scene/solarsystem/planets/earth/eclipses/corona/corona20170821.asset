@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -12,7 +12,7 @@ local videos = asset.resource({
 
 local Plane = {
   Identifier = "CoronaVideoPlane",
-  Parent = transforms.SunIAU.Identifier,
+  Parent = sunAsset.SunIAU.Identifier,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
@@ -67,6 +67,6 @@ asset.meta = {
   Name = "Corona 2017-08-21",
   Description = "An SDO video of the Sun for the day 2017-08-21",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

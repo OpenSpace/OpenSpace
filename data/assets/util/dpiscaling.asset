@@ -33,6 +33,6 @@ asset.meta = {
     few selected places to make them scale better on "large resolution but small size"
     monitors]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

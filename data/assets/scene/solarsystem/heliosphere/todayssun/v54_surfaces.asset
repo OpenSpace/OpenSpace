@@ -11,8 +11,8 @@ local transferFunctions = asset.resource({
 
 local blueBlackRed = transferFunctions .. "blue-black-red.txt"
 
-local infoURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id="
-local dataURL = "https://iswaa-webservice1.ccmc.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID="
+local infoURL = "https://iswa.ccmc.gsfc.nasa.gov/api/info?dataID="
+local dataURL = "https://iswa.ccmc.gsfc.nasa.gov/api/between?dataID="
 
 local sunRadius = 695700000
 -- This small 0.2% increase is an arbitrary number but necessary to make sure it is not
@@ -309,6 +309,6 @@ asset.meta = {
     Group, while GONG-ADAPT is a model based on GONG, where ADAPT stands for Air Force
     Data Assimilative Photospheric Flux Transport.]],
   Author = "CCMC",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

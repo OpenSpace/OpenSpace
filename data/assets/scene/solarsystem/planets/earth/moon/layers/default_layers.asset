@@ -1,0 +1,27 @@
+local server = openspace.layerServer();
+if (server == "All") then
+  asset.require("./newyork_layers")
+  asset.require("./sweden_layers")
+  asset.require("./utah_layers")
+elseif (server == "NewYork") then
+  asset.require("./newyork_layers")
+elseif (server == "Sweden") then
+  asset.require("./sweden_layers")
+elseif (server == "Utah") then
+  asset.require("./utah_layers")
+end
+
+
+
+asset.meta = {
+  Name = "Default Moon layers",
+  Description = [[Default Moon layers are: WAC, Clem Uvvis, Uvvis Hybrid, Kaguya,
+    LRO LOLA Color Shaded Relief 388m v4, Lola Shade, and Lola DEM (3D).
+
+
+    Layers loaded from all servers
+  ]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

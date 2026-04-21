@@ -71,6 +71,6 @@ asset.meta = {
     https://www.cosmos.esa.int/web/esac-cmso/scifleet.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

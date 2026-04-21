@@ -1,4 +1,4 @@
-local sun = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
 
 
@@ -69,7 +69,7 @@ local OrionNebulaModel = {
     --PerformShading = false,
     RotationVector = { 0.0, 22.3, 0.0 },
     LightSources = {
-      sun.LightSource,
+      sunAsset.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
@@ -104,7 +104,7 @@ local OrionNebulaShocksModel = {
     --PerformShading = false,
     RotationVector = { 0.0, 22.3, 0.0 },
     LightSources = {
-      sun.LightSource,
+      sunAsset.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
@@ -139,7 +139,7 @@ local OrionNebulaProplydsModel = {
     --PerformShading = false,
     RotationVector = { 0.0, 22.3, 0.0 },
     LightSources = {
-      sun.LightSource,
+      sunAsset.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",

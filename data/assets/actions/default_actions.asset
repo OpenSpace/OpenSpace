@@ -326,6 +326,6 @@ asset.meta = {
   Name = "Actions - Default",
   Description = "Asset providing default actions that are useful in every profile",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

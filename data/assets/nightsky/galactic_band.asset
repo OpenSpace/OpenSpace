@@ -1,10 +1,10 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
 
 local GalacticEquator = {
   Identifier = "GalacticEquator",
-  Parent = transforms.SolarSystemBarycenter.Name,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -13,11 +13,11 @@ local GalacticEquator = {
   },
   Renderable = {
     Type = "RenderableRadialGrid",
+    Enabled = asset.enabled,
     Opacity = 0.8,
     Color = { 0.08, 0.40, 0.40 },
     LineWidth = 4.0,
-    GridSegments = { 1, 1 },
-    Enabled = asset.enabled
+    GridSegments = { 1, 1 }
   },
   Tag = { "nightsky_marking" },
   GUI = {
@@ -86,7 +86,7 @@ asset.meta = {
   Description = [[A line representation of the Galactic Equator plane, including actions
     to toggle, hide and show it.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }
 

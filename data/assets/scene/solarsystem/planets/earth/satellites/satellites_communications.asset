@@ -21,6 +21,6 @@ asset.meta = {
     geostationary, intelsat, ses, iridium, iridium_next, orbcomm, globalstar, amateur,
     experimental, other_comm, gorizont, raduga and molniya]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

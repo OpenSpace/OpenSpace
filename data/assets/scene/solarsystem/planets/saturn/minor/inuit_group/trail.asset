@@ -1,0 +1,279 @@
+local transforms = asset.require("scene/solarsystem/planets/saturn/transforms")
+local kernels454 = asset.require("scene/solarsystem/planets/saturn/kernels454")
+local coreKernels = asset.require("spice/core")
+
+
+
+local KiviuqTrail = {
+  Identifier = "KiviuqTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.Kiviuq,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 448.16,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_inuit",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Kiviuq Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq",
+    Focusable = false
+  }
+}
+
+local IjiraqTrail = {
+  Identifier = "IjiraqTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.Ijiraq,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 451.77,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_inuit",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Ijiraq Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Ijiraq",
+    Focusable = false
+  }
+}
+
+local PaaliaqTrail = {
+  Identifier = "PaaliaqTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.Paaliaq,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 692.98,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_inuit",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Paaliaq Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Paaliaq",
+    Focusable = false
+  }
+}
+
+local SiarnaqTrail = {
+  Identifier = "SiarnaqTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.Siarnaq,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 884.88,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_inuit",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Cyllene Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Cyllene",
+    Focusable = false
+  }
+}
+
+local TarqeqTrail = {
+  Identifier = "TarqeqTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.Tarqeq,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 894.86,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_inuit",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Tarqeq Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Tarqeq",
+    Focusable = false
+  }
+}
+
+local S2004S29Trail = {
+  Identifier = "S2004S29Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2004S29,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 858.77,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_inuit",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 29 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S29",
+    Focusable = false
+  }
+}
+
+local S2004S31Trail = {
+  Identifier = "S2004S31Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2004S31,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 853.80,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_inuit",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 31 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S31",
+    Focusable = false
+  }
+}
+
+local S2019S01Trail = {
+  Identifier = "S2019S01Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S01,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 443.78,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_inuit",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 01 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2019S01",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(KiviuqTrail)
+  openspace.addSceneGraphNode(IjiraqTrail)
+  openspace.addSceneGraphNode(PaaliaqTrail)
+  openspace.addSceneGraphNode(SiarnaqTrail)
+  openspace.addSceneGraphNode(TarqeqTrail)
+  openspace.addSceneGraphNode(S2004S29Trail)
+  openspace.addSceneGraphNode(S2004S31Trail)
+  openspace.addSceneGraphNode(S2019S01Trail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2019S01Trail)
+  openspace.removeSceneGraphNode(S2004S31Trail)
+  openspace.removeSceneGraphNode(S2004S29Trail)
+  openspace.removeSceneGraphNode(TarqeqTrail)
+  openspace.removeSceneGraphNode(SiarnaqTrail)
+  openspace.removeSceneGraphNode(PaaliaqTrail)
+  openspace.removeSceneGraphNode(IjiraqTrail)
+  openspace.removeSceneGraphNode(KiviuqTrail)
+end)
+
+asset.export(KiviuqTrail)
+asset.export(IjiraqTrail)
+asset.export(PaaliaqTrail)
+asset.export(SiarnaqTrail)
+asset.export(TarqeqTrail)
+asset.export(S2004S29Trail)
+asset.export(S2004S31Trail)
+asset.export(S2019S01Trail)
+
+
+
+asset.meta = {
+  Name = "Saturn Inuit Group Moons Trails",
+  Description = [[Asset containing trails for Saturn's Inuit Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

@@ -169,10 +169,6 @@ RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)
     addProperty(Fadeable::_opacity);
 }
 
-bool RenderablePrism::isReady() const {
-    return _shader != nullptr;
-}
-
 void RenderablePrism::initializeGL() {
     _shader = global::renderEngine->buildRenderProgram(
         "PrismProgram",

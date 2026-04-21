@@ -1,4 +1,4 @@
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local coreKernels = asset.require("spice/core")
 
 
@@ -12,7 +12,7 @@ local SunCentricFrameKernels = asset.resource({
 
 local HeliocentricEarthEquatorial180  = {
   Identifier = "HeliocentricEarthEquatorial180",
-  Parent = sunTransforms.SunCenter.Identifier,
+  Parent = sunAsset.SunCenter.Identifier,
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
@@ -43,7 +43,7 @@ local HeliocentricEarthEquatorial180  = {
 
 local HeliocentricEarthEquatorial = {
   Identifier = "HeliocentricEarthEquatorial",
-  Parent = sunTransforms.SunCenter.Identifier,
+  Parent = sunAsset.SunCenter.Identifier,
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
@@ -74,7 +74,7 @@ local HeliocentricEarthEquatorial = {
 
 local HeliocentricEarthEcliptic = {
   Identifier = "HeliocentricEarthEcliptic",
-  Parent = sunTransforms.SunCenter.Identifier,
+  Parent = sunAsset.SunCenter.Identifier,
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
@@ -152,6 +152,6 @@ asset.meta = {
   Description = [[Sun transform: HEE, HEEQ, HEEQ180 and a 60-degree fixed rotation that WSA
    is using.]],
   Author = "CCMC",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

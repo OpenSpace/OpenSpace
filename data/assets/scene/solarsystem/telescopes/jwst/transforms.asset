@@ -1,7 +1,7 @@
-local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local l2kernels = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/kernels")
-local l2transforms = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+local l2Kernels = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/kernels")
+local l2Asset = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -13,7 +13,7 @@ local L2orbitInsertionTime = "2022 JAN 25 00:00:00"
 
 local JWSTPosition = {
   Identifier = "JWSTPosition",
-  Parent = earthTransforms.EarthIAU.Identifier,
+  Parent = earthAsset.EarthIAU.Identifier,
   Transform = {
     Translation = {
       Type = "TimelineTranslation",
@@ -34,7 +34,7 @@ local JWSTPosition = {
         [L2orbitInsertionTime] = {
           Type = "SpiceTranslation",
           Target = kernels.ID.JWST,
-          Observer = l2kernels.ID.L2,
+          Observer = l2Kernels.ID.L2,
           Frame = coreKernels.Frame.Galactic
         }
       }
@@ -58,7 +58,7 @@ local JWSTRotation = {
       XAxis = { 1, 0, 0 },
       XAxisOrthogonal = true,
       YAxisInvert = true,
-      YAxis = sunTransforms.SolarSystemBarycenter.Identifier
+      YAxis = sunAsset.SolarSystemBarycenter.Identifier
     }
   },
   GUI = {
@@ -78,15 +78,15 @@ asset.onInitialize(function()
   -- Set correct parent during run-time
   openspace.scriptScheduler.loadScheduledScript(
     DetachTime,
-    [[openspace.setParent("JWSTPosition", "]] .. earthTransforms.EarthCenter.Identifier .. [[")]],
-    [[openspace.setParent("JWSTPosition", "]] .. earthTransforms.EarthIAU.Identifier .. [[")]],
+    [[openspace.setParent("JWSTPosition", "]] .. earthAsset.EarthCenter.Identifier .. [[")]],
+    [[openspace.setParent("JWSTPosition", "]] .. earthAsset.EarthIAU.Identifier .. [[")]],
     "",
     1 -- Not default group, never clear this script
   )
   openspace.scriptScheduler.loadScheduledScript(
     L2orbitInsertionTime,
-    [[openspace.setParent("JWSTPosition", "]] .. l2transforms.L2Position.Identifier .. [[")]],
-    [[openspace.setParent("JWSTPosition", "]] .. earthTransforms.EarthCenter.Identifier .. [[")]],
+    [[openspace.setParent("JWSTPosition", "]] .. l2Asset.L2Position.Identifier .. [[")]],
+    [[openspace.setParent("JWSTPosition", "]] .. earthAsset.EarthCenter.Identifier .. [[")]],
     "",
     1 -- Not default group, never clear this script
   )
@@ -94,11 +94,11 @@ asset.onInitialize(function()
   -- Set correct parent at the start
   local now = openspace.time.currentTime()
   if now < openspace.time.convertTime(DetachTime) then
-    openspace.setParent("JWSTPosition", earthTransforms.EarthIAU.Identifier)
+    openspace.setParent("JWSTPosition", earthAsset.EarthIAU.Identifier)
   elseif now > openspace.time.convertTime(L2orbitInsertionTime) then
-    openspace.setParent("JWSTPosition", l2transforms.L2Position.Identifier)
+    openspace.setParent("JWSTPosition", l2Asset.L2Position.Identifier)
   else
-    openspace.setParent("JWSTPosition", earthTransforms.EarthCenter.Identifier)
+    openspace.setParent("JWSTPosition", earthAsset.EarthCenter.Identifier)
   end
 end)
 
@@ -123,6 +123,6 @@ asset.meta = {
     a fixed rotation so sunshield always points toward the Sun.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

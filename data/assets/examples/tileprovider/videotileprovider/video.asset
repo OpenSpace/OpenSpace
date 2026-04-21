@@ -1,7 +1,7 @@
 -- Basic
 -- Adds a video as a layer on a globe, in this case Earth.
 
-local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 
 -- The video file is here downloaded from a URL. This code returns the path to a folder
 -- where the file is stored after download
@@ -23,10 +23,11 @@ local Layer = {
   Video = video
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(earth.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(earth.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", Layer)
 end)

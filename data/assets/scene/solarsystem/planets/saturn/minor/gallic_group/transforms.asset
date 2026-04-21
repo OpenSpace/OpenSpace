@@ -1,0 +1,107 @@
+local transforms = asset.require("scene/solarsystem/planets/saturn/transforms")
+local kernels454 = asset.require("scene/solarsystem/planets/saturn/kernels454")
+local coreKernels = asset.require("spice/core")
+
+
+
+local AlbiorixPosition = {
+  Identifier = "AlbiorixPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.Albiorix,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Albiorix Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Albiorix",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local BebhionnPosition = {
+  Identifier = "BebhionnPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.Bebhionn,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Bebhionn Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Bebhionn",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local ErriapusPosition = {
+  Identifier = "ErriapusPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.Erriapus,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Erriapus Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Erriapus",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local TarvosPosition = {
+  Identifier = "TarvosPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.Tarvos,
+      Observer = coreKernels.ID.SaturnBarycenter
+    }
+  },
+  GUI = {
+    Name = "Tarvos Position",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Tarvos",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(AlbiorixPosition)
+  openspace.addSceneGraphNode(BebhionnPosition)
+  openspace.addSceneGraphNode(ErriapusPosition)
+  openspace.addSceneGraphNode(TarvosPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TarvosPosition)
+  openspace.removeSceneGraphNode(ErriapusPosition)
+  openspace.removeSceneGraphNode(BebhionnPosition)
+  openspace.removeSceneGraphNode(AlbiorixPosition)
+end)
+
+asset.export(AlbiorixPosition)
+asset.export(BebhionnPosition)
+asset.export(ErriapusPosition)
+asset.export(TarvosPosition)
+
+
+
+asset.meta = {
+  Name = "Saturn Gallic Group Moons Positions",
+  Description = [[Asset containing positions for Saturn's Gallic Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

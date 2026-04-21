@@ -1,0 +1,53 @@
+local plutoAsset = asset.require("scene/solarsystem/dwarf_planets/pluto/transforms")
+local plutoKernels = asset.require("scene/solarsystem/dwarf_planets/pluto/kernels")
+
+
+
+local StyxTrail = {
+  Identifier = "StyxTrail",
+  Parent = plutoAsset.PlutoBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = plutoKernels.ID.Styx,
+      Observer = plutoKernels.ID.PlutoBarycenter
+    },
+    Color = { 0.00, 0.62, 1.00 },
+    Period = 20.16155,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_dwarf",
+    "moonTrail_pluto",
+    "moonTrail_minor",
+    "moonTrail_minor_pluto"
+  },
+  GUI = {
+    Name = "Styx Trail",
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Styx",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(StyxTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(StyxTrail)
+end)
+
+asset.export(StyxTrail)
+
+
+
+asset.meta = {
+  Name = "Styx Trail",
+  Description = "Trail for Pluto's moon Styx",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}
