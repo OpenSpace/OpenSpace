@@ -36,7 +36,8 @@ local ScaleModel = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = modelFolder .. "menara_kl_FBX.osmodel",
-    LightSources = { sunAsset.LightSource }
+    LightSources = { sunAsset.LightSource },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Kuala Lumpur Tower",

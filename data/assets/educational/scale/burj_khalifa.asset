@@ -37,7 +37,8 @@ local ScaleModel = {
     Type = "RenderableModel",
     GeometryFile = modelFolder .. "Burj_Khalifa.osmodel",
     LightSources = { sunAsset.LightSource },
-    ModelScale = "Centimeter"
+    ModelScale = "Centimeter",
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Burj Khalifa",

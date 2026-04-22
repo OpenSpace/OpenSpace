@@ -42,7 +42,8 @@ local ScaleModel = {
     GeometryFile = modelFolder .. "golden_gate.osmodel",
     ForceRenderInvisible = true,
     RotationVector = { 0.0, 95.4, 0.0 },
-    LightSources = { sunAsset.LightSource }
+    LightSources = { sunAsset.LightSource },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Golden Gate Bridge",
