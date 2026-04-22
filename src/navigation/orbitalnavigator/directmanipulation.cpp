@@ -346,21 +346,18 @@ DirectManipulation::DirectManipulation()
             const SceneGraphNode* anchor = global::navigationHandler->anchorNode();
             ghoul_assert(anchor != nullptr, "Must have an anchor");
 
-            std::optional<glm::dvec3> surfacePoint =
-                computeSurfacePoint(input.pos, anchor);
+            std::optional<glm::dvec3> sp = computeSurfacePoint(input.pos, anchor);
+            bool isValid = sp.has_value();
 
             // Check if this and all previous points are valid
-            _isValidFirstTouch = surfacePoint.has_value() &&
+            _isValidFirstTouch = isValid &&
                 std::all_of(
                     _firstTouchPoints.begin(),
                     _firstTouchPoints.end(),
                     [](const FirstTouchPoint& ftp) { return ftp.isValid; }
                 );
 
-            _firstTouchPoints.push_back({
-                .id = input.fingerId,
-                .isValid = surfacePoint.has_value()
-            });
+            _firstTouchPoints.push_back({ .id = input.fingerId, .isValid = isValid });
 
             return false;
         }
