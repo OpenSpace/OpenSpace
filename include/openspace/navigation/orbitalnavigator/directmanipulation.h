@@ -32,6 +32,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <ghoul/glm.h>
 #include <set>
+#include <vector>
 
 namespace openspace {
 
@@ -64,9 +65,6 @@ public:
     struct TouchPoint {
         size_t id = 0;
         glm::dvec2 position = glm::dvec2(0.0);
-
-        // Position on first touch down
-        glm::dvec2 initialPosition = glm::dvec2(0.0);
     };
 
     DirectManipulation();
@@ -126,10 +124,13 @@ private:
     std::set<std::string> _sortedDefaultRenderableTypes;
 
     std::vector<SelectedBody> _selectedNodeSurfacePoints;
-    int _lastNSurfacePoints = 0;
 
-    glm::dvec2 _firstMousePressPos = glm::dvec2(0.0);
-    bool _isInvalidFirstTouch = false;
+    struct FirstTouchPoint {
+        size_t id = 0;
+        bool isValid = false;
+    };
+    std::vector<FirstTouchPoint> _firstTouchPoints;
+    bool _isValidFirstTouch = false;
 };
 
 } // namespace openspace
