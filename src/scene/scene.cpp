@@ -909,7 +909,8 @@ LuaLibrary Scene::luaLibrary() {
                     { "value", "Nil | String | Number | Boolean | Table" },
                     { "duration", "Number?", "0.0" },
                     { "easing", "EasingFunction?", "Linear" },
-                    { "postscript", "String?", "" }
+                    { "postscript", "String?", "" },
+                    { "isBouncing", "Boolean?", "" }
                 },
                 "",
                 R"(Sets the property or properties identified by the URI to the specified
@@ -956,6 +957,10 @@ in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEas
 \\param postscript A Lua script that will be executed once the change of property value
 is completed. If a duration larger than 0 was provided, it is at the end of the
 interpolation. If 0 was provided, the script runs immediately
+\\param isBouncing If this value is set to `true`, the property will interpolate to the
+current value, then back to the original value, until manually stopped. In this mode, the
+\p postScript will be called each time the interpolation is at the starting value or final
+value
 )",
                 {
                     std::source_location::current().file_name(),
@@ -970,7 +975,8 @@ interpolation. If 0 was provided, the script runs immediately
                     { "value", "Nil | String | Number | Boolean | Table" },
                     { "duration", "Number?", "0.0" },
                     { "easing", "EasingFunction?", "Linear" },
-                    { "postscript", "String?", "" }
+                    { "postscript", "String?", "" },
+                    { "isBouncing", "Boolean?", "" }
                 },
                 "",
                 R"(Sets the single property identified by the URI to the specified value.
@@ -999,6 +1005,10 @@ in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEas
 \\param postscript This parameter specifies a Lua script that will be executed once the
 change of property value is completed. If a duration larger than 0 was provided, it is
 at the end of the interpolation. If 0 was provided, the script runs immediately
+\\param isBouncing If this value is set to `true`, the property will interpolate to the
+current value, then back to the original value, until manually stopped. In this mode, the
+\p postScript will be called each time the interpolation is at the starting value or final
+value
 )",
                 {
                     std::source_location::current().file_name(),
