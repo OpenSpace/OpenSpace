@@ -47,6 +47,7 @@
 #include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <cstring>
 #include <iterator>
 #include <limits>
@@ -640,7 +641,8 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
 
 void Scene::addPropertyInterpolation(Property* prop, float durationSeconds,
                                      std::string postScript,
-                                     ghoul::EasingFunction easingFunction)
+                                     ghoul::EasingFunction easingFunction,
+                                     bool isBouncing)
 {
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
     ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
@@ -668,6 +670,7 @@ void Scene::addPropertyInterpolation(Property* prop, float durationSeconds,
             info.durationSeconds = durationSeconds;
             info.postScript = std::move(postScript);
             info.easingFunction = func;
+            info.isBouncing = isBouncing;
             // If we found it, we can break since we make sure that each property is only
             // represented once in this
             return;
@@ -679,7 +682,8 @@ void Scene::addPropertyInterpolation(Property* prop, float durationSeconds,
         .beginTime = now,
         .durationSeconds = durationSeconds,
         .postScript = std::move(postScript),
-        .easingFunction = func
+        .easingFunction = func,
+        .isBouncing = isBouncing
     };
     _propertyInterpolationInfos.push_back(std::move(i));
 }
@@ -718,22 +722,52 @@ void Scene::updateInterpolations() {
         const long long us =
             duration_cast<std::chrono::microseconds>(now - i.beginTime).count();
 
-        const float t = std::clamp(
-            static_cast<float>(
-                static_cast<double>(us) /
-                static_cast<double>(i.durationSeconds * 1000000)
-            ),
-            0.f,
-            1.f
+        const float t = static_cast<float>(
+            static_cast<double>(us) /
+            static_cast<double>(i.durationSeconds * 1000000)
         );
+        const float tClamped = std::clamp(t, 0.f, 1.f);
+        const float tBounce = [t]() {
+            const float tMod = fmod(t, 2.f);
+            if (tMod <= 1.f) {
+                return tMod;
+            }
+            else {
+                return 2.f - tMod;
+            }
+        }();
+
+        if (i.isBouncing && i.bouncingShouldStop && i.bouncingShouldStopT == -1.f) {
+            i.bouncingShouldStopT = tBounce;
+            i.bouncingAbortTime = now;
+        }
+
+        const long long bouncingAbortUs =
+            duration_cast<std::chrono::microseconds>(now - i.bouncingAbortTime).count();
+        const float bouncingAbortT = static_cast<float>(
+            static_cast<double>(bouncingAbortUs) /
+            static_cast<double>(i.durationSeconds * 1000000)
+        );
+        const float bounceAbortT = glm::mix(i.bouncingShouldStopT, 0.f, bouncingAbortT);
+
+        const float finalT =
+            i.isBouncing ?
+            i.bouncingShouldStop ? bounceAbortT : tBounce :
+            tClamped;
+
 
         // This method might crash if someone deleted the property underneath us. We take
         // care of removing entire PropertyOwners, but we assume that Propertys live as
         // long as their SceneGraphNodes. This is true in general, but if Propertys are
         // created and destroyed often by the SceneGraphNode, this might become a problem
-        i.prop->interpolateValue(t, i.easingFunction);
+        i.prop->interpolateValue(finalT, i.easingFunction);
 
-        i.isExpired = (t == 1.f);
+        if (i.isBouncing) {
+            i.isExpired = i.bouncingShouldStop && (finalT < 0.f || finalT > 1.f);
+        }
+        else {
+            i.isExpired = (t >= 1.f);
+        }
 
         if (i.isExpired) {
             if (!i.postScript.empty()) {
@@ -761,6 +795,22 @@ void Scene::updateInterpolations() {
         ),
         _propertyInterpolationInfos.end()
     );
+}
+
+void Scene::stopInterpolation(Property* prop) {
+    auto it = std::find_if(
+        _propertyInterpolationInfos.begin(),
+        _propertyInterpolationInfos.end(),
+        [prop](const PropertyInterpolationInfo& info) { return info.prop == prop; }
+    );
+
+    if (it == _propertyInterpolationInfos.end()) {
+        throw ghoul::RuntimeError(std::format(
+            "The provided property '{}' is not interpolating", prop->uri()
+        ));
+    }
+
+    it->bouncingShouldStop = true;
 }
 
 void Scene::setPropertiesFromProfile(const Profile& p) {
@@ -792,7 +842,8 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
             0.0,
             groupName,
             ghoul::EasingFunction::Linear,
-            ""
+            "",
+            false
         );
         // Clear lua state stack
         lua_settop(L, 0);
@@ -969,6 +1020,7 @@ at the end of the interpolation. If 0 was provided, the script runs immediately
                     std::source_location::current().line()
                 }
             },
+            codegen::lua::StopPropertyBouncing,
             codegen::lua::HasProperty,
             codegen::lua::Property,
             codegen::lua::PropertyOwner,
