@@ -57,12 +57,14 @@ bool CollapsibleSection::eventFilter(QObject* watched, QEvent* event) {
         }
         if (mouseEvent->button() == Qt::RightButton && !_sectionKey.isEmpty()) {
             QMenu menu(this);
-            menu.addAction("Copy", this, [this]() {
-                emit copyRequested(_sectionKey);
-            });
-            QAction* pasteAction = menu.addAction("Paste", this, [this]() {
-                emit pasteRequested(_sectionKey);
-            });
+            menu.addAction(
+                "Copy",
+                this, [this]() { emit copyRequested(_sectionKey); }
+            );
+            QAction* pasteAction = menu.addAction(
+                "Paste",
+                this, [this]() { emit pasteRequested(_sectionKey); }
+            );
             pasteAction->setEnabled(_canPaste);
             menu.exec(_headerFrame->mapToGlobal(mouseEvent->position().toPoint()));
             return true;
@@ -76,14 +78,12 @@ void CollapsibleSection::updateChevron() {
 }
 
 void CollapsibleSection::setContentWidget(QWidget* widget) {
-    QVBoxLayout* layout = static_cast<QVBoxLayout*>(_contentFrame->layout());
-
-    // Explicitly delete previous content. The content frame itself stays alive,
-    // so Qt's parent-child cleanup won't trigger. Without this, old widgets
-    // would accumulate as hidden children on each call. deleteLater() is used
-    // because the widget may still be processing events.
-    while (layout->count() > 0) {
-        QLayoutItem* item = layout->takeAt(0);
+    // Explicitly delete previous content. The content frame itself stays alive, so Qt's
+    // parent-child cleanup won't trigger. Without this, old widgets would accumulate as
+    // hidden children on each call. deleteLater() is used because the widget may still be
+    // processing events
+    while (!_frameLayout->isEmpty()) {
+        QLayoutItem* item = _frameLayout->takeAt(0);
         if (item->widget()) {
             item->widget()->deleteLater();
         }
@@ -92,18 +92,14 @@ void CollapsibleSection::setContentWidget(QWidget* widget) {
 
     if (widget) {
         widget->setParent(_contentFrame);
-        layout->addWidget(widget);
+        _frameLayout->addWidget(widget);
     }
 
     _contentFrame->setVisible(_isExpanded && (widget != nullptr));
 }
 
 QWidget* CollapsibleSection::contentWidget() const {
-    const QVBoxLayout* layout = static_cast<const QVBoxLayout*>(_contentFrame->layout());
-    if (layout->count() == 0) {
-        return nullptr;
-    }
-    return layout->itemAt(0)->widget();
+    return _frameLayout->isEmpty() ? nullptr : _frameLayout->itemAt(0)->widget();
 }
 
 bool CollapsibleSection::isExpanded() const {
@@ -120,8 +116,8 @@ void CollapsibleSection::setMandatory(bool isMandatory) {
     _mandatoryLabel->setVisible(isMandatory);
 }
 
-void CollapsibleSection::setSectionKey(const QString& key) {
-    _sectionKey = key;
+void CollapsibleSection::setSectionKey(QString key) {
+    _sectionKey = std::move(key);
 }
 
 QString CollapsibleSection::sectionKey() const {
@@ -132,13 +128,13 @@ void CollapsibleSection::setPasteAvailable(bool isAvailable) {
     _canPaste = isAvailable;
 }
 
-void CollapsibleSection::setDocumentation(const QString& name, const QString& doc) {
-    _documentation.name = name;
-    _documentation.documentation = doc;
+void CollapsibleSection::setDocumentation(QString name, QString doc) {
+    _documentation.name = std::move(name);
+    _documentation.documentation = std::move(doc);
 }
 
-void CollapsibleSection::setDocumentation(const Documentation& info) {
-    _documentation = info;
+void CollapsibleSection::setDocumentation(Documentation info) {
+    _documentation = std::move(info);
 }
 
 void CollapsibleSection::toggleExpanded() {
@@ -149,7 +145,7 @@ void CollapsibleSection::buildUi(const QString& title) {
     setObjectName("accordion-item");
     setFrameShape(QFrame::NoFrame);  // border comes from QSS
 
-    QVBoxLayout* root = new QVBoxLayout(this);
+    QBoxLayout* root = new QVBoxLayout(this);
     root->setContentsMargins(0, 0, 0, 0);
     root->setSpacing(0);
 
@@ -161,7 +157,7 @@ void CollapsibleSection::buildUi(const QString& title) {
     _headerFrame->setCursor(Qt::PointingHandCursor);
     _headerFrame->installEventFilter(this);
 
-    QHBoxLayout* headerLayout = new QHBoxLayout(_headerFrame);
+    QBoxLayout* headerLayout = new QHBoxLayout(_headerFrame);
     headerLayout->setContentsMargins(12, 8, 12, 8);
     headerLayout->setSpacing(8);
 
@@ -177,8 +173,10 @@ void CollapsibleSection::buildUi(const QString& title) {
     _infoButton->setObjectName("section-info-button");
     _infoButton->setFixedSize(18, 18);
     _infoButton->setVisible(true);
-    connect(_infoButton, &QPushButton::clicked, this,
-        [this]() { emit documentationRequested(_documentation); });
+    connect(
+        _infoButton, &QPushButton::clicked,
+        this, [this]() { emit documentationRequested(_documentation); }
+    );
 
     // Chevron: transparent to mouse events so clicks reach the parent frame
     _chevronLabel = new QLabel(ChevronDown, _headerFrame);
@@ -202,9 +200,9 @@ void CollapsibleSection::buildUi(const QString& title) {
     _contentFrame->setFrameShape(QFrame::NoFrame);
     _contentFrame->setVisible(_isExpanded);
 
-    QVBoxLayout* contentLayout = new QVBoxLayout(_contentFrame);
-    contentLayout->setContentsMargins(16, 8, 16, 12);
-    contentLayout->setSpacing(0);
+    _frameLayout = new QVBoxLayout(_contentFrame);
+    _frameLayout->setContentsMargins(16, 8, 16, 12);
+    _frameLayout->setSpacing(0);
 
     root->addWidget(_headerFrame);
     root->addWidget(_contentFrame);
