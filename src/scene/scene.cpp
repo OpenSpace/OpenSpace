@@ -671,6 +671,9 @@ void Scene::addPropertyInterpolation(Property* prop, float durationSeconds,
             info.postScript = std::move(postScript);
             info.easingFunction = func;
             info.isBouncing = isBouncing;
+            info.bouncingShouldStop = false;
+            info.bouncingShouldStopT = -1.f;
+            info.bouncingAbortTime = std::chrono::time_point<std::chrono::steady_clock>();
             // If we found it, we can break since we make sure that each property is only
             // represented once in this
             return;
@@ -728,7 +731,7 @@ void Scene::updateInterpolations() {
         );
         const float tClamped = std::clamp(t, 0.f, 1.f);
         const float tBounce = [t]() {
-            const float tMod = fmod(t, 2.f);
+            const float tMod = std::fmod(t, 2.f);
             if (tMod <= 1.f) {
                 return tMod;
             }
@@ -798,6 +801,8 @@ void Scene::updateInterpolations() {
 }
 
 void Scene::stopInterpolation(Property* prop) {
+    ghoul_assert(prop, "No property provided");
+
     auto it = std::find_if(
         _propertyInterpolationInfos.begin(),
         _propertyInterpolationInfos.end(),
@@ -910,7 +915,7 @@ LuaLibrary Scene::luaLibrary() {
                     { "duration", "Number?", "0.0" },
                     { "easing", "EasingFunction?", "Linear" },
                     { "postscript", "String?", "" },
-                    { "isBouncing", "Boolean?", "" }
+                    { "isBouncing", "Boolean?", "false" }
                 },
                 "",
                 R"(Sets the property or properties identified by the URI to the specified
@@ -958,9 +963,7 @@ in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEas
 is completed. If a duration larger than 0 was provided, it is at the end of the
 interpolation. If 0 was provided, the script runs immediately
 \\param isBouncing If this value is set to `true`, the property will interpolate to the
-current value, then back to the original value, until manually stopped. In this mode, the
-\p postScript will be called each time the interpolation is at the starting value or final
-value
+provided new value, then back to the original value, until manually stopped.
 )",
                 {
                     std::source_location::current().file_name(),
@@ -1006,9 +1009,7 @@ in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEas
 change of property value is completed. If a duration larger than 0 was provided, it is
 at the end of the interpolation. If 0 was provided, the script runs immediately
 \\param isBouncing If this value is set to `true`, the property will interpolate to the
-current value, then back to the original value, until manually stopped. In this mode, the
-\p postScript will be called each time the interpolation is at the starting value or final
-value
+provided new value, then back to the original value, until manually stopped.
 )",
                 {
                     std::source_location::current().file_name(),

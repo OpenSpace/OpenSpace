@@ -177,9 +177,8 @@ public:
      *        finishes
      * \param easingFunction A function that determines who the interpolation occurs
      * \param isBouncing If this value is set to `true`, the property will interpolate to
-     *        the current value, then back to the original value, until manually stopped.
-     *        In this mode, the \p postScript will be called each time the interpolation
-     *        is at the starting value or final value
+     *        the provided new value, then back to the original value, until manually
+     *        stopped.
      *
      * \pre \p prop must not be `nullptr`
      * \pre \p durationSeconds must be positive and not 0

@@ -627,7 +627,7 @@ int propertySetValue(lua_State* L) {
         else {
             std::string msg = std::format(
                 "Unexpected type '{}' in argument 6",
-                ghoul::lua::luaTypeToString(lua_type(L, 5))
+                ghoul::lua::luaTypeToString(lua_type(L, 6))
             );
             return ghoul::lua::luaError(L, msg);
         }
@@ -643,6 +643,12 @@ int propertySetValue(lua_State* L) {
         }
 
         easingMethod = ghoul::easingFunctionFromName(easingMethodName);
+    }
+
+    if (isBouncing && interpolationDuration == 0.0) {
+        throw ghoul::lua::LuaError(
+            "When bouncing, a duration of 0 seconds is not allowed"
+        );
     }
 
     defer { lua_settop(L, 0); };
@@ -714,13 +720,17 @@ int propertyGetValue(lua_State* L) {
 namespace {
 
 /**
- * Stops the bouncing interpolation on the provided property. The interpolation will stop
- * when the value has reached the original value the next time.
+ * Stops the bouncing interpolation on the provided property and interpolate the value to
+ * the original starting value over the original duration.
+ * 
  *
  * \param uri The URI of the property whose bouncing interpolation should be stopped
  */
 [[codegen::luawrap]] void stopPropertyBouncing(std::string uri) {
     Property* prop = property(uri);
+    if (!prop) {
+        throw ghoul::lua::LuaError(std::format("Error finding property '{}'", uri));
+    }
     global::renderEngine->scene()->stopInterpolation(prop);
 }
 

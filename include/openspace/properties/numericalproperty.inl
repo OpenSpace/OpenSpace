@@ -158,6 +158,8 @@ template <typename T>
 void NumericalProperty<T>::interpolateValue(float t,
                                             ghoul::EasingFunc<float> easingFunction)
 {
+    t = std::clamp(t, 0.f, 1.f);
+
     if (easingFunction) {
         t = easingFunction(t);
     }
