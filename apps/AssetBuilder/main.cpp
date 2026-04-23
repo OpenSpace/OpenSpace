@@ -24,7 +24,6 @@
 
 #include <mainwindow.h>
 #include <schema/assetschema.h>
-
 #include <QApplication>
 #include <QFile>
 #include <QMessageBox>
