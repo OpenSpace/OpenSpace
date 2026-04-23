@@ -22,13 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___FORM_COLLAPSIBLESECTION___H__
-#define __OPENSPACE_ASSET_BUILDER___FORM_COLLAPSIBLESECTION___H__
-
-#include <documentation.h>
+#ifndef __OPENSPACE_ASSETBUILDER___FORM_COLLAPSIBLESECTION___H__
+#define __OPENSPACE_ASSETBUILDER___FORM_COLLAPSIBLESECTION___H__
 
 #include <QFrame>
 
+#include <documentation.h>
+
+class QBoxLayout;
 class QLabel;
 class QPushButton;
 
@@ -44,18 +45,18 @@ class CollapsibleSection final : public QFrame {
 Q_OBJECT
 public:
     /**
-     * \param title  Section header text
+     * \param title Section header text
      * \param parent Parent widget
      */
     explicit CollapsibleSection(const QString& title, QWidget* parent = nullptr);
 
     /**
-     * Replaces the body content widget. Any existing content is deleted.
-     * Pass nullptr to clear the body. The section takes ownership by
-     * reparenting the widget to the internal content frame, so Qt's
-     * parent-child hierarchy handles deletion automatically.
+     * Replaces the body content widget. Any existing content is deleted. Pass `nullptr`
+     * to clear the body. The section takes ownership by reparenting the widget to the
+     * internal content frame, so Qt' parent-child hierarchy handles deletion
+     * automatically.
      *
-     * \param widget The new content widget, or nullptr to clear
+     * \param widget The new content widget, or `nullptr` to clear
      */
     void setContentWidget(QWidget* widget);
 
@@ -87,31 +88,31 @@ public:
      * apply to individual member documentation.
      *
      * \param name Display name for the documentation panel
-     * \param doc  Markdown documentation text
+     * \param doc Markdown documentation text
      */
-    void setDocumentation(const QString& name, const QString& doc);
+    void setDocumentation(QString name, QString doc);
 
     /**
      * Stores a full Documentation for the info button to emit on click.
      *
      * \param info Complete documentation bundle
      */
-    void setDocumentation(const Documentation& info);
+    void setDocumentation(Documentation info);
 
     /**
-     * Shows a blue * in the header to indicate this field is required.
+     * Shows a blue `*` in the header to indicate this field is required.
      *
-     * \param isMandatory true to show the asterisk, false to hide it
+     * \param isMandatory `true` to show the asterisk, `false` to hide it
      */
     void setMandatory(bool isMandatory);
 
     /**
-     * Sets the property key for section copy/paste context menu.
-     * The key should be the schema member name (e.g. "Renderable", "GUI").
+     * Sets the property key for section copy/paste context menu. The key should be the
+     * schema member name (e.g. "Renderable", "GUI").
      *
      * \param key Schema member name used as the copy/paste identifier
      */
-    void setSectionKey(const QString& key);
+    void setSectionKey(QString key);
 
     /**
      * Returns the property key set by setSectionKey, or empty.
@@ -123,18 +124,24 @@ public:
     /**
      * Controls whether the Paste action is enabled in the context menu.
      *
-     * \param isAvailable true to enable paste, false to grey it out
+     * \param isAvailable `true` to enable paste, `false` to grey it out
      */
     void setPasteAvailable(bool isAvailable);
 
 signals:
-    /** Emitted when the user clicks the info button on a section with documentation. */
+    /**
+     * Emitted when the user clicks the info button on a section with documentation.
+     */
     void documentationRequested(const Documentation& info);
 
-    /** Emitted when the user clicks the copy button. */
+    /**
+     * Emitted when the user clicks the copy button.
+     */
     void copyRequested(const QString& key);
 
-    /** Emitted when the user clicks the paste button. */
+    /**
+     * Emitted when the user clicks the paste button.
+     */
     void pasteRequested(const QString& key);
 
 protected:
@@ -143,20 +150,26 @@ protected:
      * right-click shows the copy/paste context menu.
      *
      * \param watched The object that received the event (expected to be _headerFrame)
-     * \param event   The event to filter
-     * \return true if the event was handled, false to pass it through
+     * \param event The event to filter
+     * \return `true` if the event was handled, `false` to pass it through
      */
     bool eventFilter(QObject* watched, QEvent* event) override;
 
 private slots:
-    /** Toggles the expanded/collapsed state of the section. */
+    /**
+     * Toggles the expanded/collapsed state of the section.
+     */
     void toggleExpanded();
 
 private:
-    /** Creates the header and content frame layout. */
+    /**
+     * Creates the header and content frame layout.
+     */
     void buildUi(const QString& title);
 
-    /** Updates the chevron label to match the current expanded state. */
+    /**
+     * Updates the chevron label to match the current expanded state.
+     */
     void updateChevron();
 
     /// Section title text
@@ -173,6 +186,8 @@ private:
     QLabel* _chevronLabel = nullptr;
     /// Collapsible body frame
     QFrame* _contentFrame = nullptr;
+    /// Layout inside the content frame
+    QBoxLayout* _frameLayout = nullptr;
 
     /// Documentation bundle emitted when the info button is clicked
     Documentation _documentation;
@@ -185,4 +200,4 @@ private:
     bool _isExpanded = true;
 };
 
-#endif // __OPENSPACE_ASSET_BUILDER___FORM_COLLAPSIBLESECTION___H__
+#endif // __OPENSPACE_ASSETBUILDER___FORM_COLLAPSIBLESECTION___H__
