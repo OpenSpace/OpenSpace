@@ -1,7 +1,7 @@
 <RCC>
-    <qresource prefix="/">
-        <file>qss/assetbuilder.qss</file>
-        <file>schema/assetComponents.json</file>
-        <file>images/dropdown-arrow.svg</file>
-    </qresource>
+  <qresource prefix="/">
+    <file>qss/assetbuilder.qss</file>
+    <file>schema/assetComponents.json</file>
+    <file>images/dropdown-arrow.svg</file>
+  </qresource>
 </RCC>
