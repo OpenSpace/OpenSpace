@@ -132,7 +132,21 @@ enum class Format {
  * \throw ghoul::RuntimeError If the provided \p is not in the provided file
  * \pre \p file must be a file and must exist
  */
-std::vector<Parameters> readFile(std::filesystem::path file, Format format);
+std::vector<Parameters> readFile(const std::filesystem::path& file, Format format);
+
+/**
+ * Reads the object information from the provided files. Each file is loaded independently
+ * and then the results are concatenated.
+ *
+ * \param files The files containing the information about the objects
+ * \param format The format of the provided \p file
+ * \return Information about all of the contained objects in the \p files
+ *
+ * \throw ghoul::RuntimeError If the provided \p is not in the provided files
+ * \pre Each entry in \p files must be a file and must exist
+ */
+std::vector<Parameters> readFiles(const std::vector<std::filesystem::path>& files,
+    Format format);
 
 } // namespace openspace::kepler
 

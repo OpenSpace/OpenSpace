@@ -206,8 +206,9 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableOrbitalKepler)]] Parameters {
-        // [[codegen::verbatim(PathInfo.description)]]
-        std::filesystem::path path;
+        // The file path or paths to the data file to read. If multiple paths are provided
+        // the contents are concatenated.
+        std::variant<std::filesystem::path, std::vector<std::filesystem::path>> path;
 
         enum class [[codegen::map(openspace::kepler::Format)]] Format {
             // A NORAD-style Two-Line element.
@@ -427,7 +428,18 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _contiguousMode.onChange([this]() { _updateDataBuffersAtNextRender = true; });
     addProperty(_contiguousMode);
 
-    _path = p.path.string();
+    if (std::holds_alternative<std::filesystem::path>(p.path)) {
+        _path = { std::get<std::filesystem::path>(p.path).string()};
+    }
+    else {
+        std::vector<std::filesystem::path> paths =
+            std::get<std::vector<std::filesystem::path>>(p.path);
+        std::vector<std::string> ps;
+        for (const std::filesystem::path& path : paths) {
+            ps.push_back(path.string());
+        }
+        _path = std::move(ps);
+    }
     _path.onChange([this]() { _updateDataBuffersAtNextRender = true; });
     addProperty(_path);
 }
@@ -672,7 +684,13 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableOrbitalKepler::updateBuffers() {
-    _parameters = kepler::readFile(_path.value(), _format);
+    std::vector<std::string> ps = _path;
+    std::vector<std::filesystem::path> paths;
+    for (const std::string& p : ps) {
+        paths.push_back(p);
+    }
+
+    _parameters = kepler::readFiles(paths, _format);
     _nOrbits = static_cast<unsigned int>(_parameters.size());
 
     if (_startRenderIdx >= _nOrbits) {

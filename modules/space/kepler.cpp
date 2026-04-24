@@ -1077,7 +1077,7 @@ std::optional<std::vector<Parameters>> loadCache(const std::filesystem::path& fi
     return res;
 }
 
-std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
+std::vector<Parameters> readFile(const std::filesystem::path& file, Format format) {
     std::filesystem::path cachedFile = FileSys.cacheManager()->cachedFilename(file);
     if (std::filesystem::is_regular_file(cachedFile)) {
         LINFO(std::format(
@@ -1111,9 +1111,23 @@ std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
             break;
     }
 
-    LINFO(std::format("Saving cache '{}' for Kepler file '{}'", cachedFile, file));
-    saveCache(res, cachedFile);
+    if (!res.empty()) {
+        LINFO(std::format("Saving cache '{}' for Kepler file '{}'", cachedFile, file));
+        saveCache(res, cachedFile);
+    }
     return res;
+}
+
+std::vector<Parameters> readFiles(const std::vector<std::filesystem::path>& files,
+                                  Format format)
+{
+    std::vector<Parameters> result;
+
+    for (const std::filesystem::path& file : files) {
+        std::vector<Parameters> r = readFile(file, format);
+        result.insert(result.end(), r.begin(), r.end());
+    }
+    return result;
 }
 
 } // namespace openspace::kepler
