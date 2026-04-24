@@ -28,7 +28,6 @@
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QTimer>
-
 #include <algorithm>
 
 ScrollAnchor::ScrollAnchor(QScrollArea* scroll, QWidget* content)
@@ -38,19 +37,22 @@ ScrollAnchor::ScrollAnchor(QScrollArea* scroll, QWidget* content)
     content->installEventFilter(this);
 }
 
-// We only care about the event type, not the sender, so `watched` is unused.
 bool ScrollAnchor::eventFilter(QObject*, QEvent* event) {
     if (event->type() == QEvent::LayoutRequest && !_pending) {
         _savedValue = _scroll->verticalScrollBar()->value();
         _pending = true;
-        // A zero-delay timer runs after the current event loop iteration completes,
-        // at which point Qt has finished recalculating geometry. This lets us restore
-        // the scroll position after the layout pass rather than during it.
-        QTimer::singleShot(0, this, [this]() {
-            const int maxScroll = _scroll->verticalScrollBar()->maximum();
-            _scroll->verticalScrollBar()->setValue(std::min(_savedValue, maxScroll));
-            _pending = false;
-        });
+        // A zero-delay timer runs after the current event loop iteration completes, at
+        // which point Qt has finished recalculating geometry. This lets us restore the
+        // scroll position after the layout pass rather than during it
+        QTimer::singleShot(
+            0,
+            this,
+            [this]() {
+                const int maxScroll = _scroll->verticalScrollBar()->maximum();
+                _scroll->verticalScrollBar()->setValue(std::min(_savedValue, maxScroll));
+                _pending = false;
+            }
+        );
     }
     return false;
 }

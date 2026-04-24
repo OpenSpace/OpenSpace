@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___DOCUMENTATION___H__
-#define __OPENSPACE_ASSET_BUILDER___DOCUMENTATION___H__
+#ifndef __OPENSPACE_ASSETBUILDER___DOCUMENTATION___H__
+#define __OPENSPACE_ASSETBUILDER___DOCUMENTATION___H__
 
 #include <QString>
 
@@ -40,8 +40,8 @@ struct Documentation {
     bool isOptional = true;
     /// Short text underneath the title, e.g. "Value of type 'Double'"
     QString description;
-    /// Full descriptive text (can contain markdown)
+    /// Full descriptive text (can contain Markdown)
     QString documentation;
 };
 
-#endif // __OPENSPACE_ASSET_BUILDER___DOCUMENTATION___H__
+#endif // __OPENSPACE_ASSETBUILDER___DOCUMENTATION___H__
