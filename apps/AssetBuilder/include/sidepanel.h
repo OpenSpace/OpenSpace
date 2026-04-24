@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___SIDEPANEL___H__
-#define __OPENSPACE_ASSET_BUILDER___SIDEPANEL___H__
+#ifndef __OPENSPACE_ASSETBUILDER___SIDEPANEL___H__
+#define __OPENSPACE_ASSETBUILDER___SIDEPANEL___H__
 
 #include <QWidget>
 
@@ -79,4 +79,4 @@ private:
     MetadataWidget*     _metadata     = nullptr;
 };
 
-#endif // __OPENSPACE_ASSET_BUILDER___SIDEPANEL___H__
+#endif // __OPENSPACE_ASSETBUILDER___SIDEPANEL___H__

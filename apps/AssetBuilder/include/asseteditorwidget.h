@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___ASSETEDITORWIDGET___H__
-#define __OPENSPACE_ASSET_BUILDER___ASSETEDITORWIDGET___H__
+#ifndef __OPENSPACE_ASSETBUILDER___ASSETEDITORWIDGET___H__
+#define __OPENSPACE_ASSETBUILDER___ASSETEDITORWIDGET___H__
 
 #include <jasset.h>
 
@@ -118,4 +118,4 @@ private:
     IdentifierRegistry* _identifierRegistry = nullptr;
 };
 
-#endif // __OPENSPACE_ASSET_BUILDER___ASSETEDITORWIDGET___H__
+#endif // __OPENSPACE_ASSETBUILDER___ASSETEDITORWIDGET___H__

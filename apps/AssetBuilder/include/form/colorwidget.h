@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___FORM_COLORWIDGET___H__
-#define __OPENSPACE_ASSET_BUILDER___FORM_COLORWIDGET___H__
+#ifndef __OPENSPACE_ASSETBUILDER___FORM_COLORWIDGET___H__
+#define __OPENSPACE_ASSETBUILDER___FORM_COLORWIDGET___H__
 
 #include "form/matrixwidget.h"
 
@@ -61,4 +61,4 @@ private:
     QPushButton* _swatchButton = nullptr;
 };
 
-#endif // __OPENSPACE_ASSET_BUILDER___FORM_COLORWIDGET___H__
+#endif // __OPENSPACE_ASSETBUILDER___FORM_COLORWIDGET___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___MAINWINDOW___H__
-#define __OPENSPACE_ASSET_BUILDER___MAINWINDOW___H__
+#ifndef __OPENSPACE_ASSETBUILDER___MAINWINDOW___H__
+#define __OPENSPACE_ASSETBUILDER___MAINWINDOW___H__
 
 #include <QMainWindow>
 
@@ -115,4 +115,4 @@ private:
     QLabel* _pathLabel = nullptr;
 };
 
-#endif // __OPENSPACE_ASSET_BUILDER___MAINWINDOW___H__
+#endif // __OPENSPACE_ASSETBUILDER___MAINWINDOW___H__

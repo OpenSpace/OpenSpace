@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___DEPENDENCIESWIDGET___H__
-#define __OPENSPACE_ASSET_BUILDER___DEPENDENCIESWIDGET___H__
+#ifndef __OPENSPACE_ASSETBUILDER___DEPENDENCIESWIDGET___H__
+#define __OPENSPACE_ASSETBUILDER___DEPENDENCIESWIDGET___H__
 
 #include <jasset.h>
 #include <utils.h>
@@ -102,4 +102,4 @@ private:
     QListWidget* _dependenciesList = nullptr;
 };
 
-#endif // __OPENSPACE_ASSET_BUILDER___DEPENDENCIESWIDGET___H__
+#endif // __OPENSPACE_ASSETBUILDER___DEPENDENCIESWIDGET___H__

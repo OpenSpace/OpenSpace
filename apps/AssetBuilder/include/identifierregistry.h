@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___IDENTIFIERREGISTRY___H__
-#define __OPENSPACE_ASSET_BUILDER___IDENTIFIERREGISTRY___H__
+#ifndef __OPENSPACE_ASSETBUILDER___IDENTIFIERREGISTRY___H__
+#define __OPENSPACE_ASSETBUILDER___IDENTIFIERREGISTRY___H__
 
 #include <jasset.h>
 
@@ -85,4 +85,4 @@ private:
     QString _lastDuplicateWarning;
 };
 
-#endif // __OPENSPACE_ASSET_BUILDER___IDENTIFIERREGISTRY___H__
+#endif // __OPENSPACE_ASSETBUILDER___IDENTIFIERREGISTRY___H__

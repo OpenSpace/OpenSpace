@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___SCROLLANCHOR___H__
-#define __OPENSPACE_ASSET_BUILDER___SCROLLANCHOR___H__
+#ifndef __OPENSPACE_ASSETBUILDER___SCROLLANCHOR___H__
+#define __OPENSPACE_ASSETBUILDER___SCROLLANCHOR___H__
 
 #include <QObject>
 
@@ -61,4 +61,4 @@ private:
     bool _pending = false;
 };
 
-#endif // __OPENSPACE_ASSET_BUILDER___SCROLLANCHOR___H__
+#endif // __OPENSPACE_ASSETBUILDER___SCROLLANCHOR___H__

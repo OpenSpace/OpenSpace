@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___CONTENTSLISTWIDGET___H__
-#define __OPENSPACE_ASSET_BUILDER___CONTENTSLISTWIDGET___H__
+#ifndef __OPENSPACE_ASSETBUILDER___CONTENTSLISTWIDGET___H__
+#define __OPENSPACE_ASSETBUILDER___CONTENTSLISTWIDGET___H__
 
 #include <jasset.h>
 
@@ -81,4 +81,4 @@ private:
     QListWidget* _contentsList = nullptr;
 };
 
-#endif // __OPENSPACE_ASSET_BUILDER___CONTENTSLISTWIDGET___H__
+#endif // __OPENSPACE_ASSETBUILDER___CONTENTSLISTWIDGET___H__

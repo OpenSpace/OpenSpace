@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___EDITORPANEL___H__
-#define __OPENSPACE_ASSET_BUILDER___EDITORPANEL___H__
+#ifndef __OPENSPACE_ASSETBUILDER___EDITORPANEL___H__
+#define __OPENSPACE_ASSETBUILDER___EDITORPANEL___H__
 
 #include <documentation.h>
 #include <jasset.h>
@@ -95,4 +95,4 @@ private:
     size_t _currentIndex = NoSelection;
 };
 
-#endif // __OPENSPACE_ASSET_BUILDER___EDITORPANEL___H__
+#endif // __OPENSPACE_ASSETBUILDER___EDITORPANEL___H__

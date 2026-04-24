@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___FORM_MATRIXWIDGET___H__
-#define __OPENSPACE_ASSET_BUILDER___FORM_MATRIXWIDGET___H__
+#ifndef __OPENSPACE_ASSETBUILDER___FORM_MATRIXWIDGET___H__
+#define __OPENSPACE_ASSETBUILDER___FORM_MATRIXWIDGET___H__
 
 #include <jasset.h>
 
@@ -92,4 +92,4 @@ protected:
     bool _isInteger = false;
 };
 
-#endif // __OPENSPACE_ASSET_BUILDER___FORM_MATRIXWIDGET___H__
+#endif // __OPENSPACE_ASSETBUILDER___FORM_MATRIXWIDGET___H__
