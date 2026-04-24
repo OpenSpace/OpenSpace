@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___METADATAWIDGET___H__
-#define __OPENSPACE_ASSET_BUILDER___METADATAWIDGET___H__
+#ifndef __OPENSPACE_ASSETBUILDER___METADATAWIDGET___H__
+#define __OPENSPACE_ASSETBUILDER___METADATAWIDGET___H__
 
 #include <jasset.h>
 
@@ -68,4 +68,4 @@ private:
     QComboBox* _licenseCombo    = nullptr;
 };
 
-#endif // __OPENSPACE_ASSET_BUILDER___METADATAWIDGET___H__
+#endif // __OPENSPACE_ASSETBUILDER___METADATAWIDGET___H__

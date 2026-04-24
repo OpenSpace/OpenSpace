@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___FORM_SCHEMAFORMWIDGET___H__
-#define __OPENSPACE_ASSET_BUILDER___FORM_SCHEMAFORMWIDGET___H__
+#ifndef __OPENSPACE_ASSETBUILDER___FORM_SCHEMAFORMWIDGET___H__
+#define __OPENSPACE_ASSETBUILDER___FORM_SCHEMAFORMWIDGET___H__
 
 #include "documentation.h"
 #include "jasset.h"
@@ -320,4 +320,4 @@ private:
     IdentifierRegistry* _registry = nullptr;
 };
 
-#endif // __OPENSPACE_ASSET_BUILDER___FORM_SCHEMAFORMWIDGET___H__
+#endif // __OPENSPACE_ASSETBUILDER___FORM_SCHEMAFORMWIDGET___H__

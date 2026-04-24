@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___WELCOMEDIALOG___H__
-#define __OPENSPACE_ASSET_BUILDER___WELCOMEDIALOG___H__
+#ifndef __OPENSPACE_ASSETBUILDER___WELCOMEDIALOG___H__
+#define __OPENSPACE_ASSETBUILDER___WELCOMEDIALOG___H__
 
 #include <QDialog>
 
@@ -83,4 +83,4 @@ private:
     std::filesystem::path _selectedFile;
 };
 
-#endif // __OPENSPACE_ASSET_BUILDER___WELCOMEDIALOG___H__
+#endif // __OPENSPACE_ASSETBUILDER___WELCOMEDIALOG___H__

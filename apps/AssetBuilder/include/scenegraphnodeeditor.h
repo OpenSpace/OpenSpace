@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___SCENEGRAPHNODEEDITOR___H__
-#define __OPENSPACE_ASSET_BUILDER___SCENEGRAPHNODEEDITOR___H__
+#ifndef __OPENSPACE_ASSETBUILDER___SCENEGRAPHNODEEDITOR___H__
+#define __OPENSPACE_ASSETBUILDER___SCENEGRAPHNODEEDITOR___H__
 
 #include <documentation.h>
 #include <jasset.h>
@@ -112,4 +112,4 @@ private:
     size_t _index = 0;
 };
 
-#endif // __OPENSPACE_ASSET_BUILDER___SCENEGRAPHNODEEDITOR___H__
+#endif // __OPENSPACE_ASSETBUILDER___SCENEGRAPHNODEEDITOR___H__

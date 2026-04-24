@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___SCHEMA_ASSETSCHEMA___H__
-#define __OPENSPACE_ASSET_BUILDER___SCHEMA_ASSETSCHEMA___H__
+#ifndef __OPENSPACE_ASSETBUILDER___SCHEMA_ASSETSCHEMA___H__
+#define __OPENSPACE_ASSETBUILDER___SCHEMA_ASSETSCHEMA___H__
 
 #include <optional>
 #include <string>
@@ -169,4 +169,4 @@ private:
     bool _isLoaded = false;
 };
 
-#endif // __OPENSPACE_ASSET_BUILDER___SCHEMA_ASSETSCHEMA___H__
+#endif // __OPENSPACE_ASSETBUILDER___SCHEMA_ASSETSCHEMA___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___UTILS___H__
-#define __OPENSPACE_ASSET_BUILDER___UTILS___H__
+#ifndef __OPENSPACE_ASSETBUILDER___UTILS___H__
+#define __OPENSPACE_ASSETBUILDER___UTILS___H__
 
 #include <jasset.h>
 
@@ -139,4 +139,4 @@ std::vector<SchemaMember> collectMembers(
     const std::string& parentName,
     const std::vector<std::string>& names);
 
-#endif // __OPENSPACE_ASSET_BUILDER___UTILS___H__
+#endif // __OPENSPACE_ASSETBUILDER___UTILS___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___FORM_SEARCHDROPDOWN___H__
-#define __OPENSPACE_ASSET_BUILDER___FORM_SEARCHDROPDOWN___H__
+#ifndef __OPENSPACE_ASSETBUILDER___FORM_SEARCHDROPDOWN___H__
+#define __OPENSPACE_ASSETBUILDER___FORM_SEARCHDROPDOWN___H__
 
 #include <QFrame>
 #include <QVariant>
@@ -198,4 +198,4 @@ private:
     bool _isOpen = false;
 };
 
-#endif // __OPENSPACE_ASSET_BUILDER___FORM_SEARCHDROPDOWN___H__
+#endif // __OPENSPACE_ASSETBUILDER___FORM_SEARCHDROPDOWN___H__
