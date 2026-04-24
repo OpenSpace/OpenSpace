@@ -25,19 +25,17 @@
 #ifndef __OPENSPACE_ASSETBUILDER___EDITORPANEL___H__
 #define __OPENSPACE_ASSETBUILDER___EDITORPANEL___H__
 
-#include <documentation.h>
-#include <jasset.h>
-
 #include <QWidget>
+#include <documentation.h>
 
 class IdentifierRegistry;
+struct JAsset;
 class QStackedWidget;
 
 /**
- * Center panel containing the form editor for a single content item.
- * Manages a QStackedWidget with an empty-state page and a dynamically
- * rebuilt editor page. Delegates the actual form building to
- * SceneGraphNodeEditor.
+ * Center panel containing the form editor for a single content item. Manages a
+ * QStackedWidget with an empty-state page and a dynamically rebuilt editor page.
+ * Delegates the actual form building to SceneGraphNodeEditor.
  */
 class EditorPanel final : public QWidget {
 Q_OBJECT
@@ -45,8 +43,8 @@ public:
     explicit EditorPanel(QWidget* parent = nullptr);
 
     /**
-     * Sets the asset pointer used by showItemEditor.
-     * Must be called before showItemEditor. The pointer must remain valid.
+     * Sets the asset pointer used by showItemEditor. Must be called before
+     * showItemEditor. The pointer must remain valid.
      *
      * \param asset Non-owning pointer to the JAsset
      */
@@ -66,11 +64,15 @@ public:
      */
     void showItemEditor(size_t index);
 
-    /** Switches the stack to the empty-state page. */
+    /**
+     * Switches the stack to the empty-state page.
+     */
     void showEmptyCenter();
 
 signals:
-    /** Emitted whenever a field change makes the asset dirty. */
+    /**
+     * Emitted whenever a field change makes the asset dirty.
+     */
     void contentModified();
 
     /**
@@ -80,7 +82,9 @@ signals:
      */
     void documentationRequested(const Documentation& info);
 
-    /** Emitted when the user clicks a Browse .jasset button on an Identifier field. */
+    /**
+     * Emitted when the user clicks a Browse .jasset button on an Identifier field.
+     */
     void browseJassetRequested();
 
 private:
