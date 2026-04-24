@@ -43,9 +43,7 @@ void DocumentationPanel::showDocumentation(const Documentation& info) {
     // Meta line: "Type: X  Required/Optional"
     if (!info.type.isEmpty()) {
         const QString reqText = info.isOptional ? "Optional" : "Required";
-        _metaLabel->setText(
-            "Type: " + info.type + "    " + reqText
-        );
+        _metaLabel->setText("Type: " + info.type + "    " + reqText);
         _metaLabel->setVisible(true);
     }
     else {
@@ -62,15 +60,13 @@ void DocumentationPanel::showDocumentation(const Documentation& info) {
     }
 
     // Separator visible when either meta or description is shown
-    _separator->setVisible(
-        !info.type.isEmpty() || !info.description.isEmpty()
-    );
+    _separator->setVisible(!info.type.isEmpty() || !info.description.isEmpty());
 
-    // Full documentation — render markdown, then strip <a> tags so links
-    // appear as regular text
-    const QString text = info.documentation.isEmpty()
-        ? "*No documentation available.*"
-        : info.documentation;
+    // Full documentation — render markdown, then strip <a> tags so links appear as
+    // regular text
+    const QString text = info.documentation.isEmpty() ?
+        "*No documentation available.*" :
+        info.documentation;
     _textBrowser->setMarkdown(text);
     QString html = _textBrowser->toHtml();
     static const QRegularExpression linkOpen("<a[^>]*>");
@@ -91,7 +87,7 @@ void DocumentationPanel::buildUi() {
 
     // Inner widget and layout
     QWidget* docsInner = new QWidget();
-    QVBoxLayout* docsLayout = new QVBoxLayout(docsInner);
+    QBoxLayout* docsLayout = new QVBoxLayout(docsInner);
     docsLayout->setContentsMargins(12, 12, 12, 12);
     docsLayout->setSpacing(6);
 
@@ -134,9 +130,7 @@ void DocumentationPanel::buildUi() {
     // Remove the default sunken border to blend with the panel background
     _textBrowser->setFrameShape(QFrame::NoFrame);
     // Placeholder shown before any field is selected
-    _textBrowser->setMarkdown(
-        "*Select a setting to see its documentation here.*"
-    );
+    _textBrowser->setMarkdown("*Select a setting to see its documentation here.*");
 
     // Assemble layout
     docsLayout->addWidget(docsHeader);
@@ -148,7 +142,7 @@ void DocumentationPanel::buildUi() {
     docsScroll->setWidget(docsInner);
 
     // Outer layout
-    QVBoxLayout* layout = new QVBoxLayout(this);
+    QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(docsScroll);
 }
