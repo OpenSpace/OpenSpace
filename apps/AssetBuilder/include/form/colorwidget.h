@@ -40,7 +40,7 @@ Q_OBJECT
 public:
     /**
      * \param nComponents 3 for RGB, 4 for RGBA
-     * \param parent      Parent widget
+     * \param parent Parent widget
      */
     explicit ColorWidget(int nComponents, QWidget* parent = nullptr);
 
@@ -54,10 +54,12 @@ private:
      */
     QColor toQColor() const;
 
-    /** Updates the swatch button background to reflect the current field values. */
+    /**
+     * Updates the swatch button background to reflect the current field values.
+     */
     void updateSwatch();
 
-    /// Color preview button that opens a QColorDialog on click.
+    /// Color preview button that opens a QColorDialog on click
     QPushButton* _swatchButton = nullptr;
 };
 
