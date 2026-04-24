@@ -25,7 +25,6 @@
 #include "jasset.h"
 
 #include "utils.h"
-
 #include <QJsonArray>
 #include <QJsonObject>
 
@@ -34,16 +33,11 @@ JAsset jassetFromJson(const QJsonObject& root) {
 
     if (root.contains("metadata")) {
         const QJsonObject meta = root["metadata"].toObject();
-        asset.metadata.name =
-            meta["name"].toString("Untitled Asset").toStdString();
-        asset.metadata.version =
-            meta["asset_version"].toString("1.0.0").toStdString();
-        asset.metadata.author =
-            meta["author"].toString().toStdString();
-        asset.metadata.description =
-            meta["description"].toString().toStdString();
-        asset.metadata.license =
-            meta["license"].toString("None").toStdString();
+        asset.metadata.name = meta["name"].toString("Untitled Asset").toStdString();
+        asset.metadata.version = meta["asset_version"].toString("1.0.0").toStdString();
+        asset.metadata.author = meta["author"].toString().toStdString();
+        asset.metadata.description = meta["description"].toString().toStdString();
+        asset.metadata.license = meta["license"].toString("None").toStdString();
     }
 
     if (root.contains("dependencies")) {
@@ -62,10 +56,9 @@ JAsset jassetFromJson(const QJsonObject& root) {
             item.type = itemObj["type"].toString().toStdString();
             // Store all keys except "type" as properties — schema-agnostic,
             // so the parser doesn't need to know the type's members
-            for (auto it = itemObj.begin(); it != itemObj.end(); ++it) {
+            for (auto it = itemObj.begin(); it != itemObj.end(); it++) {
                 if (it.key() == "type") { continue; }
-                item.properties[it.key().toStdString()] =
-                    jsonValueToProperty(it.value());
+                item.properties[it.key().toStdString()] = jsonValueToProperty(it.value());
             }
             asset.contents.push_back(std::move(item));
         }
@@ -79,11 +72,11 @@ QJsonObject jassetToJson(const JAsset& asset) {
     root["jasset_version"] = "1.0";
 
     QJsonObject meta;
-    meta["name"]          = QString::fromStdString(asset.metadata.name);
+    meta["name"] = QString::fromStdString(asset.metadata.name);
     meta["asset_version"] = QString::fromStdString(asset.metadata.version);
-    meta["author"]        = QString::fromStdString(asset.metadata.author);
-    meta["description"]   = QString::fromStdString(asset.metadata.description);
-    meta["license"]       = QString::fromStdString(asset.metadata.license);
+    meta["author"] = QString::fromStdString(asset.metadata.author);
+    meta["description"] = QString::fromStdString(asset.metadata.description);
+    meta["license"] = QString::fromStdString(asset.metadata.license);
     root["metadata"] = meta;
 
     QJsonArray deps;

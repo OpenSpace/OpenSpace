@@ -30,8 +30,8 @@
 #include <filesystem>
 
 /**
- * Shown on application startup and when File -> New is triggered. Lets the user
- * create a new asset or open an existing one.
+ * Shown on application startup and when File -> New is triggered. Lets the user create a
+ * new asset or open an existing one.
  *
  * After exec() returns Accepted, read selectedAction() and selectedFile() to determine
  * what the user chose.
@@ -41,8 +41,8 @@ Q_OBJECT
 public:
     enum class Action {
         None,
-        CreateEmpty,    /// Create a new blank SceneGraphNode asset
-        OpenFile        /// Open an existing .jasset file (path in selectedFile())
+        CreateEmpty,    ///< Create a new blank SceneGraphNode asset
+        OpenFile        ///< Open an existing .jasset file (path in selectedFile())
     };
 
     explicit WelcomeDialog(QWidget* parent = nullptr);
@@ -62,10 +62,14 @@ public:
     std::filesystem::path selectedFile() const;
 
 private slots:
-    /** Accepts the dialog with Action::CreateEmpty. */
+    /**
+     * Accepts the dialog with Action::CreateEmpty.
+     */
     void createEmpty();
 
-    /** Opens a file picker and accepts with Action::OpenFile on success. */
+    /**
+     * Opens a file picker and accepts with Action::OpenFile on success.
+     */
     void browseForFile();
 
     /**
@@ -76,7 +80,9 @@ private slots:
     void openRecentFile(const std::filesystem::path& path);
 
 private:
-    /** Constructs and lays out all child widgets. */
+    /**
+     * Constructs and lays out all child widgets.
+     */
     void buildUi();
 
     Action _selectedAction = Action::None;
