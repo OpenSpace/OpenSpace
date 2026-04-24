@@ -30,34 +30,34 @@
 class QScrollArea;
 
 /**
- * Prevents the scroll area from jumping when child layout changes occur
- * (e.g. expanding/collapsing sections, toggling optional fields).
- * Saves the scroll position before each layout recalculation and restores
- * it once the geometry pass completes, keeping the viewport stable.
+ * Prevents the scroll area from jumping when child layout changes occur (e.g.
+ * expanding/collapsing sections, toggling optional fields). Saves the scroll position
+ * before each layout recalculation and restores it once the geometry pass completes,
+ * keeping the viewport stable.
  */
 class ScrollAnchor : public QObject {
 Q_OBJECT
 public:
     /**
      * Installs the scroll anchor on the given scroll area.
-     * Explicit even though two-argument constructors can't be called implicitly,
-     * as a defensive convention.
      *
-     * \param scroll  The scroll area to stabilize
+     * \param scroll The scroll area to stabilize
      * \param content The content widget inside the scroll area
      */
-    explicit ScrollAnchor(QScrollArea* scroll, QWidget* content);
+    ScrollAnchor(QScrollArea* scroll, QWidget* content);
 
 protected:
-    /** Intercepts LayoutRequest events to save and restore the scroll position. */
+    /**
+     * Intercepts LayoutRequest events to save and restore the scroll position.
+     */
     bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
-    /// The scroll area whose vertical position is stabilized.
+    /// The scroll area whose vertical position is stabilized
     QScrollArea* _scroll;
-    /// Scroll position captured before the layout pass.
+    /// Scroll position captured before the layout pass
     int _savedValue = 0;
-    /// True while a deferred restore is queued, prevents re-saving mid-pass.
+    /// `true` while a deferred restore is queued, prevents re-saving mid-pass
     bool _pending = false;
 };
 
