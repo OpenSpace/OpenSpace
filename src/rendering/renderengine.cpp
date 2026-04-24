@@ -55,6 +55,7 @@
 #include <ghoul/io/model/modelreader.h>
 #include <ghoul/io/model/modelreaderassimp.h>
 #include <ghoul/io/model/modelreaderbinary.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/loglevel.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
@@ -701,8 +702,7 @@ void RenderEngine::updateScreenSpaceRenderables() {
         }
         else {
             try {
-                _globalBlackout.imageTexture =
-                    ghoul::io::TextureReader::ref().loadTexture(path, 2);
+                _globalBlackout.imageTexture = ghoul::io::texture::loadTexture(path, 2);
             }
             catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
