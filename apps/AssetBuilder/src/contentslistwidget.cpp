@@ -30,7 +30,6 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
-
 #include <set>
 
 namespace {
@@ -70,7 +69,7 @@ namespace {
 
     // Returns baseId + suffix such that the result is not in existing
     std::string makeUniqueId(const std::string& baseId,
-        const std::set<std::string>& existing, int startSuffix)
+                             const std::set<std::string>& existing, int startSuffix)
     {
         std::string id = baseId + std::to_string(startSuffix);
         while (existing.count(id) > 0) {
@@ -109,11 +108,11 @@ void ContentsListWidget::refresh() {
         const QString dirtyDot = item.isDirty ? DirtyDot : "";
 
         _contentsList->addItem(
-            dirtyDot + label + "  (" + typeLabel + ")"
+            QString("%1%2  (%3)").arg(dirtyDot).arg(label).arg(typeLabel)
         );
     }
-    // Where selection should change is handled in the respective functions.
-    // Only set the refresh index if it is the same as before
+    // Where selection should change is handled in the respective functions. Only set the
+    // refresh index if it is the same as before
     if (selected >= 0 && selected < _contentsList->count()) {
         _contentsList->setCurrentRow(selected);
     }
@@ -125,12 +124,9 @@ void ContentsListWidget::addSceneGraphNode() {
         return;
     }
 
-    const std::set<std::string> existing =
-        collectIdentifiers(_asset->contents);
-    const int startSuffix =
-        static_cast<int>(_asset->contents.size()) + 1;
-    const std::string uniqueId =
-        makeUniqueId("Node", existing, startSuffix);
+    const std::set<std::string> existing = collectIdentifiers(_asset->contents);
+    const int startSuffix = static_cast<int>(_asset->contents.size()) + 1;
+    const std::string uniqueId = makeUniqueId("Node", existing, startSuffix);
 
     ContentItem item;
     item.type = "SceneGraphNode";
@@ -143,9 +139,7 @@ void ContentsListWidget::addSceneGraphNode() {
 }
 
 void ContentsListWidget::duplicateSceneGraphNode(int row) {
-    if (!_asset || row < 0 ||
-        row >= static_cast<int>(_asset->contents.size()))
-    {
+    if (!_asset || row < 0 || row >= static_cast<int>(_asset->contents.size())) {
         return;
     }
 
@@ -158,9 +152,7 @@ void ContentsListWidget::duplicateSceneGraphNode(int row) {
         PropertyMap& guiMap = guiIt->second.toMap();
         auto nameIt = guiMap.find("Name");
         if (nameIt != guiMap.end() && nameIt->second.isString()) {
-            nameIt->second = PropertyValue{
-                nameIt->second.toString() + " Copy"
-            };
+            nameIt->second = PropertyValue{ nameIt->second.toString() + " Copy" };
         }
     }
 
@@ -183,27 +175,26 @@ void ContentsListWidget::duplicateSceneGraphNode(int row) {
 
     // Insert after the source item
     const int insertPos = row + 1;
-    _asset->contents.insert(
-        _asset->contents.begin() + insertPos, std::move(copy)
-    );
+    _asset->contents.insert(_asset->contents.begin() + insertPos, std::move(copy));
     emit assetModified();
     _contentsList->setCurrentRow(insertPos);
 }
 
 void ContentsListWidget::removeSceneGraphNode(int row) {
-    if (!_asset || row < 0 ||
-        row >= static_cast<int>(_asset->contents.size()))
-    {
+    if (!_asset || row < 0 || row >= static_cast<int>(_asset->contents.size())) {
         return;
     }
     const QString name = displayName(_asset->contents[row]);
 
     const QMessageBox::StandardButton answer = QMessageBox::question(
-        this, "Remove Content",
+        this,
+        "Remove Content",
         "Remove \"" + name + "\"?",
         QMessageBox::Yes | QMessageBox::No, QMessageBox::No
     );
-    if (answer != QMessageBox::Yes) { return; }
+    if (answer != QMessageBox::Yes) {
+        return;
+    }
 
     _asset->contents.erase(_asset->contents.begin() + row);
     emit assetModified();
@@ -211,8 +202,8 @@ void ContentsListWidget::removeSceneGraphNode(int row) {
     // Select a neighbor or signal empty
     const int nItems = static_cast<int>(_asset->contents.size());
     if (nItems > 0) {
-        // Select the previous row if it wasn't the last row.
-        // If it was, select the new last row
+        // Select the previous row if it wasn't the last row. If it was, select the new
+        // last row
         const int next = (row < nItems) ? row : nItems - 1;
         _contentsList->setCurrentRow(next);
     }
@@ -223,11 +214,11 @@ void ContentsListWidget::removeSceneGraphNode(int row) {
 }
 
 void ContentsListWidget::buildUi() {
-    QVBoxLayout* layout = new QVBoxLayout(this);
+    QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
 
-    QHBoxLayout* headerLayout = new QHBoxLayout();
+    QBoxLayout* headerLayout = new QHBoxLayout();
     headerLayout->setContentsMargins(12, 8, 8, 4);
     headerLayout->setSpacing(4);
 
@@ -238,15 +229,19 @@ void ContentsListWidget::buildUi() {
     addButton->setObjectName("add-button");
     addButton->setFixedSize(20, 20);
     addButton->setToolTip("Add content");
-    connect(addButton, &QPushButton::clicked, this,
+    connect(
+        addButton,
+        &QPushButton::clicked,
+        this,
         [this, addButton]() {
             QMenu menu(this);
-            menu.addAction("Add Scene Graph Node", this,
-                &ContentsListWidget::addSceneGraphNode);
+            menu.addAction(
+                "Add Scene Graph Node",
+                this,
+                &ContentsListWidget::addSceneGraphNode
+            );
             // Align the menu to the bottom left edge of the button
-            menu.exec(addButton->mapToGlobal(
-                addButton->rect().bottomLeft()
-            ));
+            menu.exec(addButton->mapToGlobal(addButton->rect().bottomLeft()));
         }
     );
 
@@ -259,25 +254,34 @@ void ContentsListWidget::buildUi() {
     _contentsList->setContextMenuPolicy(Qt::CustomContextMenu);
 
     // Wire signals - emit selection changed whenever the QListWidget changes
-    connect(_contentsList, &QListWidget::currentRowChanged,
-        this, &ContentsListWidget::selectionChanged);
+    connect(
+        _contentsList, &QListWidget::currentRowChanged,
+        this, &ContentsListWidget::selectionChanged
+    );
 
     // Create the right click menu
-    connect(_contentsList,
-        &QListWidget::customContextMenuRequested, this,
+    connect(
+        _contentsList,
+        &QListWidget::customContextMenuRequested,
+        this,
         [this](const QPoint& pos) {
             QListWidgetItem* item = _contentsList->itemAt(pos);
-            if (!item) { return; }
+            if (!item) {
+                return;
+            }
 
             const int row = _contentsList->row(item);
 
             QMenu menu(this);
-            menu.addAction("Duplicate", this, [this, row]() {
-                duplicateSceneGraphNode(row);
-            });
-            menu.addAction("Remove", this, [this, row]() {
-                removeSceneGraphNode(row);
-            });
+            menu.addAction(
+                "Duplicate",
+                this,
+                [this, row]() { duplicateSceneGraphNode(row); }
+            );
+            menu.addAction(
+                "Remove",
+                this, [this, row]() { removeSceneGraphNode(row); }
+            );
             menu.exec(_contentsList->mapToGlobal(pos));
         }
     );
