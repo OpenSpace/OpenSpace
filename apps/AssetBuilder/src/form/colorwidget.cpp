@@ -29,10 +29,11 @@
 #include <QGridLayout>
 #include <QLineEdit>
 #include <QPushButton>
+#include <format>
 
 namespace {
-constexpr int SwatchSize = 24;
-constexpr int ColorDecimalPrecision = 4;
+    constexpr int SwatchSize = 24;
+    constexpr int ColorDecimalPrecision = 4;
 } // namespace
 
 ColorWidget::ColorWidget(int nComponents, QWidget* parent)
@@ -68,36 +69,41 @@ ColorWidget::ColorWidget(int nComponents, QWidget* parent)
 
     connect(this, &MatrixWidget::valueChanged, this, &ColorWidget::updateSwatch);
 
-    connect(_swatchButton, &QPushButton::clicked, this, [this]() {
-        const QColor initial = toQColor();
+    connect(
+        _swatchButton,
+        &QPushButton::clicked,
+        this,
+        [this]() {
+            const QColor initial = toQColor();
 
-        const QColorDialog::ColorDialogOptions opts = (_fields.size() > 3)
-            ? QColorDialog::ColorDialogOptions(QColorDialog::ShowAlphaChannel)
-            : QColorDialog::ColorDialogOptions();
+            const QColorDialog::ColorDialogOptions opts = (_fields.size() > 3)
+                ? QColorDialog::ColorDialogOptions(QColorDialog::ShowAlphaChannel)
+                : QColorDialog::ColorDialogOptions();
 
-        const QColor picked = QColorDialog::getColor(initial, this, "Pick Color", opts);
+            const QColor picked = QColorDialog::getColor(initial, this, "Pick Color", opts);
 
-        if (!picked.isValid()) {
-            return;
+            if (!picked.isValid()) {
+                return;
+            }
+
+            // Write back to fields
+            PropertyList newVals;
+            newVals.push_back(PropertyValue{ picked.redF() });
+            newVals.push_back(PropertyValue{ picked.greenF() });
+            newVals.push_back(PropertyValue{ picked.blueF() });
+            if (_fields.size() > 3) {
+                newVals.push_back(PropertyValue{ picked.alphaF() });
+            }
+            setValues(newVals);
         }
-
-        // Write back to fields
-        PropertyList newVals;
-        newVals.push_back(PropertyValue{ picked.redF() });
-        newVals.push_back(PropertyValue{ picked.greenF() });
-        newVals.push_back(PropertyValue{ picked.blueF() });
-        if (_fields.size() > 3) {
-            newVals.push_back(PropertyValue{ picked.alphaF() });
-        }
-        setValues(newVals);
-    });
+    );
 }
 
 void ColorWidget::setValues(const PropertyList& vals) {
     MatrixWidget::setValues(vals);
-    // Base emits valueChanged which is normally connected to updateSwatch,
-    // but callers may blockSignals during populate. Call directly to ensure
-    // the swatch always reflects the current values.
+    // Base emits valueChanged which is normally connected to updateSwatch, but callers
+    // may blockSignals during populate. Call directly to ensure the swatch always
+    // reflects the current values
     updateSwatch();
 }
 
@@ -116,8 +122,9 @@ QColor ColorWidget::toQColor() const {
 
 void ColorWidget::updateSwatch() {
     const QColor color = toQColor();
-    _swatchButton->setStyleSheet(
-        QString("background-color: rgb(%1, %2, %3);")
-            .arg(color.red()).arg(color.green()).arg(color.blue())
+    std::string style = std::format(
+        "background-color: rgb({}, {}, {});",
+        color.red(), color.green(), color.blue()
     );
+    _swatchButton->setStyleSheet(QString::fromStdString(style));
 }
