@@ -28,7 +28,6 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-
 #include <stdexcept>
 
 namespace {
@@ -46,20 +45,22 @@ namespace {
     constexpr const char* KeyFound = "found";
 
     SchemaMember parseMember(const QJsonObject& obj) {
-        SchemaMember member;
-        member.name = obj[KeyName].toString().toStdString();
-        member.type = obj[KeyType].toString().toStdString();
-        member.isOptional = obj[KeyOptional].toInt() != 0;
-        member.documentation = obj[KeyDocumentation].toString().toStdString();
-        member.description = obj[KeyDescription].toString().toStdString();
+        SchemaMember member = {
+            .name = obj[KeyName].toString().toStdString(),
+            .type = obj[KeyType].toString().toStdString(),
+            .isOptional = obj[KeyOptional].toInt() != 0,
+            .documentation = obj[KeyDocumentation].toString().toStdString(),
+            .description = obj[KeyDescription].toString().toStdString()
+        };
 
         if (obj.contains(KeyReference)) {
             const QJsonObject refObj = obj[KeyReference].toObject();
-            SchemaReference ref;
-            ref.identifier = refObj[KeyIdentifier].toString().toStdString();
-            ref.name = refObj[KeyName].toString().toStdString();
-            ref.isFound = refObj[KeyFound].toBool();
-            member.reference = ref;
+            SchemaReference ref = {
+                .identifier = refObj[KeyIdentifier].toString().toStdString(),
+                .name = refObj[KeyName].toString().toStdString(),
+                .isFound = refObj[KeyFound].toBool()
+            };
+            member.reference = std::move(ref);
         }
 
         if (obj.contains(KeyMembers)) {
@@ -73,10 +74,11 @@ namespace {
     }
 
     SchemaType parseType(const QJsonObject& obj) {
-        SchemaType type;
-        type.name = obj[KeyName].toString().toStdString();
-        type.identifier = obj[KeyIdentifier].toString().toStdString();
-        type.description = obj[KeyDescription].toString().toStdString();
+        SchemaType type = {
+            .name = obj[KeyName].toString().toStdString(),
+            .identifier = obj[KeyIdentifier].toString().toStdString(),
+            .description = obj[KeyDescription].toString().toStdString()
+        };
 
         const QJsonArray members = obj[KeyMembers].toArray();
         for (const QJsonValue& memberVal : members) {
@@ -113,8 +115,7 @@ void AssetSchema::loadFromResource() {
         throw std::runtime_error(
             std::format(
                 "Failed to parse {}: {}",
-                SchemaResourcePath,
-                parseError.errorString().toStdString()
+                SchemaResourcePath, parseError.errorString().toStdString()
             )
         );
     }
@@ -132,9 +133,10 @@ void AssetSchema::loadFromResource() {
     for (const QJsonValue& categoryVal : categoriesArray) {
         const QJsonObject categoryObj = categoryVal.toObject();
 
-        SchemaCategory category;
-        category.name = categoryObj[KeyName].toString().toStdString();
-        category.identifier = categoryObj[KeyIdentifier].toString().toStdString();
+        SchemaCategory category = {
+            .name = categoryObj[KeyName].toString().toStdString(),
+            .identifier = categoryObj[KeyIdentifier].toString().toStdString()
+        };
 
         const QJsonArray types = categoryObj[KeyClasses].toArray();
         category.types.reserve(types.size());
