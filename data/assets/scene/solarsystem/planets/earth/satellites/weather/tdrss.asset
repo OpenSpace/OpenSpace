@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Tracking and Data Relay Satellite System (TDRSS))",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_tdrss",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=tdrss&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=tdrss&FORMAT=csv",
   Filename = "tdrss.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -18,7 +18,7 @@ local TrackingDataRelaySatellites = {
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "tdrss.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
     TrailFade = 17,

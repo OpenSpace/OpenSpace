@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Active)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_active",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=active&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=active&FORMAT=csv",
   Filename = "active.txt",
   -- The active satellites are updated every 2 hours. We reduce this update rate to every
   -- 4 hours to ease the load on the servers a bit
@@ -20,7 +20,7 @@ local ActiveSatellites = {
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "active.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.45, 0.25, 0.45 },
     TrailFade = 5,

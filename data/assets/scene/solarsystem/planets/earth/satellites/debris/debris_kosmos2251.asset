@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Kosmos 2251 Debris)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_cosmos-2251-debris",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=cosmos-2251-debris&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=cosmos-2251-debris&FORMAT=csv",
   Filename = "cosmos-2251-debris.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -18,7 +18,7 @@ local DebrisCosmos = {
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "cosmos-2251-debris.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.66, 0.8, 0.5 },
     TrailFade = 1.5,

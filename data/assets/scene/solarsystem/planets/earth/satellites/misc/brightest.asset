@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (100 Brightest)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_visual",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=visual&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=visual&FORMAT=csv",
   Filename = "visual.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -18,7 +18,7 @@ local BrightestSatellites = {
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "visual.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.55, 0.25, 0.65 },
     TrailFade = 15,

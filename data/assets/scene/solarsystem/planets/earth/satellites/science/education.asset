@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Education)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_education",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=education&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=education&FORMAT=csv",
   Filename = "education.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -18,7 +18,7 @@ local EducationSatellites = {
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "education.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
     TrailFade = 20,
