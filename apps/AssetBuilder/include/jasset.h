@@ -22,17 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___JASSET___H__
-#define __OPENSPACE_ASSET_BUILDER___JASSET___H__
+#ifndef __OPENSPACE_ASSETBUILDER___JASSET___H__
+#define __OPENSPACE_ASSETBUILDER___JASSET___H__
 
 #include <map>
 #include <string>
 #include <variant>
 #include <vector>
 
-class QJsonObject;
-
 struct PropertyValue;
+class QJsonObject;
 
 /// A map of named property values, used for Table-typed members
 using PropertyMap = std::map<std::string, PropertyValue>;
@@ -138,4 +137,4 @@ JAsset jassetFromJson(const QJsonObject& root);
  */
 QJsonObject jassetToJson(const JAsset& asset);
 
-#endif // __OPENSPACE_ASSET_BUILDER___JASSET___H__
+#endif // __OPENSPACE_ASSETBUILDER___JASSET___H__

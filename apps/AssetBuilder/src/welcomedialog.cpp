@@ -90,7 +90,7 @@ void WelcomeDialog::openRecentFile(const std::filesystem::path& path) {
 }
 
 void WelcomeDialog::buildUi() {
-    QVBoxLayout* root = new QVBoxLayout(this);
+    QBoxLayout* root = new QVBoxLayout(this);
     root->setContentsMargins(32, 32, 32, 32);
     root->setSpacing(0);
 
@@ -109,7 +109,7 @@ void WelcomeDialog::buildUi() {
     root->addSpacing(32);
 
     // Action buttons
-    QHBoxLayout* buttons = new QHBoxLayout();
+    QBoxLayout* buttons = new QHBoxLayout();
     buttons->setSpacing(16);
 
     QPushButton* newButton = new QPushButton("New Asset", this);
@@ -151,17 +151,17 @@ void WelcomeDialog::buildUi() {
         root->addWidget(recentLabel);
 
         for (const std::filesystem::path& path : validRecents) {
-            const QString filename =
-                QString::fromStdWString(path.filename().wstring());
-            const QString dir =
-                QString::fromStdWString(path.parent_path().wstring());
+            const QString filename = QString::fromStdWString(path.filename().wstring());
+            const QString dir = QString::fromStdWString(path.parent_path().wstring());
 
             QPushButton* button = new QPushButton(this);
             button->setFlat(true);
             button->setText(filename + "  \u2014  " + dir);
             button->setToolTip(QString::fromStdWString(path.wstring()));
-            connect(button, &QPushButton::clicked, this,
-                [this, path]() { openRecentFile(path); });
+            connect(
+                button, &QPushButton::clicked,
+                this, [this, path]() { openRecentFile(path); }
+            );
             root->addWidget(button);
         }
     }

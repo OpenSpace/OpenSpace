@@ -22,12 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSET_BUILDER___DOCUMENTATIONPANEL___H__
-#define __OPENSPACE_ASSET_BUILDER___DOCUMENTATIONPANEL___H__
-
-#include <documentation.h>
+#ifndef __OPENSPACE_ASSETBUILDER___DOCUMENTATIONPANEL___H__
+#define __OPENSPACE_ASSETBUILDER___DOCUMENTATIONPANEL___H__
 
 #include <QWidget>
+
+#include <documentation.h>
 
 class QFrame;
 class QLabel;
@@ -62,8 +62,8 @@ private:
     QFrame* _separator = nullptr;
     /// Short one-line description of the field
     QLabel* _descriptionLabel = nullptr;
-    /// Full documentation text rendered from markdown
+    /// Full documentation text rendered from Markdown
     QTextBrowser* _textBrowser = nullptr;
 };
 
-#endif // __OPENSPACE_ASSET_BUILDER___DOCUMENTATIONPANEL___H__
+#endif // __OPENSPACE_ASSETBUILDER___DOCUMENTATIONPANEL___H__
