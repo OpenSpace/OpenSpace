@@ -748,16 +748,21 @@ std::vector<Parameters> readCsvFile(const std::filesystem::path& file) {
         {
             std::string_view meanMotion = entry[3];
             double mm = 0.0;
-            auto [_, ec] = std::from_chars(
+            auto [ptr, ec] = std::from_chars(
                 meanMotion.data(),
                 meanMotion.data() + meanMotion.size(),
                 mm
             );
-            if (ec != std::errc()) {
+            if (ptr != meanMotion.data() + meanMotion.size() || ec != std::errc()) {
                 throw ghoul::RuntimeError(std::format(
                     "Error parsing 'MeanMotion' of CSV file with error '{}'",
                     std::make_error_code(ec).message()
                 ));
+            }
+            if (mm == 0.0) {
+                throw ghoul::RuntimeError(
+                    "Error parsing 'MeanMotion' of CSV file. Mean motion of 0 not valid"
+                );
             }
 
             current.semiMajorAxis = calculateSemiMajorAxis(mm);
@@ -765,12 +770,12 @@ std::vector<Parameters> readCsvFile(const std::filesystem::path& file) {
         }
         {
             std::string_view eccentricity = entry[4];
-            auto [_, ec] = std::from_chars(
+            auto [ptr, ec] = std::from_chars(
                 eccentricity.data(),
                 eccentricity.data() + eccentricity.size(),
                 current.eccentricity
             );
-            if (ec != std::errc()) {
+            if (ptr != eccentricity.data() + eccentricity.size() || ec != std::errc()) {
                 throw ghoul::RuntimeError(std::format(
                     "Error parsing 'Eccentricity' of CSV file with error '{}'",
                     std::make_error_code(ec).message()
@@ -779,12 +784,12 @@ std::vector<Parameters> readCsvFile(const std::filesystem::path& file) {
         }
         {
             std::string_view inclination = entry[5];
-            auto [_, ec] = std::from_chars(
+            auto [ptr, ec] = std::from_chars(
                 inclination.data(),
                 inclination.data() + inclination.size(),
                 current.inclination
             );
-            if (ec != std::errc()) {
+            if (ptr != inclination.data() + inclination.size() || ec != std::errc()) {
                 throw ghoul::RuntimeError(std::format(
                     "Error parsing 'Inclination' of CSV file with error '{}'",
                     std::make_error_code(ec).message()
@@ -793,12 +798,12 @@ std::vector<Parameters> readCsvFile(const std::filesystem::path& file) {
         }
         {
             std::string_view ascendingNode = entry[6];
-            auto [_, ec] = std::from_chars(
+            auto [ptr, ec] = std::from_chars(
                 ascendingNode.data(),
                 ascendingNode.data() + ascendingNode.size(),
                 current.ascendingNode
             );
-            if (ec != std::errc()) {
+            if (ptr != ascendingNode.data() + ascendingNode.size() || ec != std::errc()) {
                 throw ghoul::RuntimeError(std::format(
                     "Error parsing 'AscendingNode' of CSV file with error '{}'",
                     std::make_error_code(ec).message()
@@ -807,12 +812,14 @@ std::vector<Parameters> readCsvFile(const std::filesystem::path& file) {
         }
         {
             std::string_view argumentOfPeriapsis = entry[7];
-            auto [_, ec] = std::from_chars(
+            auto [ptr, ec] = std::from_chars(
                 argumentOfPeriapsis.data(),
                 argumentOfPeriapsis.data() + argumentOfPeriapsis.size(),
                 current.argumentOfPeriapsis
             );
-            if (ec != std::errc()) {
+            if (ptr != argumentOfPeriapsis.data() + argumentOfPeriapsis.size() ||
+                ec != std::errc())
+            {
                 throw ghoul::RuntimeError(std::format(
                     "Error parsing 'ArgumentOfPeriapsis' of CSV file with error '{}'",
                     std::make_error_code(ec).message()
@@ -821,12 +828,12 @@ std::vector<Parameters> readCsvFile(const std::filesystem::path& file) {
         }
         {
             std::string_view meanAnomaly = entry[8];
-            auto [_, ec] = std::from_chars(
+            auto [ptr, ec] = std::from_chars(
                 meanAnomaly.data(),
                 meanAnomaly.data() + meanAnomaly.size(),
                 current.meanAnomaly
             );
-            if (ec != std::errc()) {
+            if (ptr != meanAnomaly.data() + meanAnomaly.size() || ec != std::errc()) {
                 throw ghoul::RuntimeError(std::format(
                     "Error parsing 'MeanAnomaly' of CSV file with error '{}'",
                     std::make_error_code(ec).message()
