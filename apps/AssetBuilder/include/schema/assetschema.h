@@ -30,8 +30,8 @@
 #include <vector>
 
 /**
- * Points to another SchemaType in a different SchemaCategory, used when a member's
- * type is "Table" and its contents are defined by a separate named class.
+ * Points to another SchemaType in a different SchemaCategory, used when a member's type
+ * is "Table" and its contents are defined by a separate named class.
  */
 struct SchemaReference {
     /// The identifier of the referenced SchemaType (e.g. "renderable")
@@ -94,8 +94,8 @@ struct SchemaType {
 };
 
 /**
- * A top-level category grouping related types (e.g. "Renderable" groups all 55
- * renderable types). Corresponds to one top-level entry in assetComponents.json.
+ * A top-level category grouping related types (e.g. "Renderable" groups all renderable
+ * types). Corresponds to one top-level entry in assetComponents.json.
  */
 struct SchemaCategory {
     /// Display name of this category (e.g. "Renderable", "Rotation")
@@ -110,8 +110,8 @@ struct SchemaCategory {
 
 /**
  * Singleton that loads and holds the full OpenSpace asset component schema from the
- * bundled Qt resource assetComponents.json. All schema data is read-only
- * after loading and shared across the entire application.
+ * bundled Qt resource assetComponents.json. All schema data is read-only after loading
+ * and shared across the entire application.
  */
 class AssetSchema {
 public:
@@ -132,7 +132,7 @@ public:
      * Returns the category with the given identifier, or `nullptr` if not found.
      *
      * \param identifier The category identifier (e.g. "categoryRenderable")
-     * \return Pointer to the matching SchemaCategory, or nullptr
+     * \return Pointer to the matching SchemaCategory, or `nullptr`
      */
     const SchemaCategory* findCategory(const std::string& identifier) const;
 
@@ -140,7 +140,7 @@ public:
      * Searches all categories for a type with the given identifier.
      *
      * \param identifier The type identifier (e.g. "core_scene_node")
-     * \return Pointer to the matching SchemaType, or nullptr
+     * \return Pointer to the matching SchemaType, or `nullptr`
      */
     const SchemaType* findType(const std::string& identifier) const;
 
@@ -149,7 +149,7 @@ public:
      * the category containing it, or `nullptr` if not found.
      *
      * \param typeId The type identifier (e.g. "renderable", "core_time_frame")
-     * \return Pointer to the SchemaCategory containing the type, or nullptr
+     * \return Pointer to the SchemaCategory containing the type, or `nullptr`
      */
     const SchemaCategory* findCategoryByTypeId(const std::string& typeId) const;
 
