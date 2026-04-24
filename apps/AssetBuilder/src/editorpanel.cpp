@@ -26,7 +26,7 @@
 
 #include "scenegraphnodeeditor.h"
 #include "scrollanchor.h"
-
+#include <jasset.h>
 #include <QFrame>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -36,7 +36,7 @@
 
 namespace {
     // Index into _centerStack
-    constexpr int CenterPageEmpty  = 0;
+    constexpr int CenterPageEmpty = 0;
     constexpr int CenterPageEditor = 1;
 } // namespace
 
@@ -60,7 +60,10 @@ QWidget* EditorPanel::createContentEditor(size_t index, QWidget* parent) {
     // Add more types here
     if (type == "SceneGraphNode") {
         SceneGraphNodeEditor* sgnEditor = new SceneGraphNodeEditor(
-            _asset, _registry, index, parent
+            _asset,
+            _registry,
+            index,
+            parent
         );
         connect(sgnEditor, &SceneGraphNodeEditor::contentModified,
             this, &EditorPanel::contentModified);
@@ -91,12 +94,12 @@ void EditorPanel::showItemEditor(size_t index) {
     scroll->setFrameShape(QFrame::NoFrame);
 
     QWidget* outerWrapper = new QWidget();
-    QVBoxLayout* outerLayout = new QVBoxLayout(outerWrapper);
+    QBoxLayout* outerLayout = new QVBoxLayout(outerWrapper);
     outerLayout->setContentsMargins(0, 32, 0, 32);
     outerLayout->setSpacing(0);
     outerLayout->setAlignment(Qt::AlignTop);
 
-    QHBoxLayout* cardRow = new QHBoxLayout();
+    QBoxLayout* cardRow = new QHBoxLayout();
     cardRow->setContentsMargins(0, 0, 0, 0);
     cardRow->setSpacing(0);
     cardRow->addStretch(1);
@@ -104,7 +107,7 @@ void EditorPanel::showItemEditor(size_t index) {
     QFrame* inner = new QFrame();
     inner->setObjectName("form-card");
     inner->setMaximumWidth(1100);
-    QVBoxLayout* cardLayout = new QVBoxLayout(inner);
+    QBoxLayout* cardLayout = new QVBoxLayout(inner);
     cardLayout->setContentsMargins(32, 32, 32, 32);
     cardLayout->setSpacing(0);
 
@@ -129,14 +132,14 @@ void EditorPanel::showEmptyCenter() {
 }
 
 void EditorPanel::buildUi() {
-    QVBoxLayout* root = new QVBoxLayout(this);
+    QBoxLayout* root = new QVBoxLayout(this);
     root->setContentsMargins(0, 0, 0, 0);
     root->setSpacing(0);
 
     _centerStack = new QStackedWidget(this);
 
     QWidget* emptyPage = new QWidget(_centerStack);
-    QVBoxLayout* emptyLayout = new QVBoxLayout(emptyPage);
+    QBoxLayout* emptyLayout = new QVBoxLayout(emptyPage);
     emptyLayout->setAlignment(Qt::AlignCenter);
 
     QLabel* emptyLabel = new QLabel("No node selected", emptyPage);
