@@ -521,6 +521,11 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
 
     std::string header;
     while (ghoul::getline(f, header)) {
+        if (header.starts_with("No GP data found")) {
+            LWARNING(std::format("TLE file '{}' did not contain any data", file));
+            return std::vector<Parameters>();
+        }
+
         Parameters p;
 
         // Header
@@ -639,6 +644,11 @@ std::vector<Parameters> readOmmFile(const std::filesystem::path& file) {
     std::optional<Parameters> current = std::nullopt;
     std::string line;
     while (ghoul::getline(f, line)) {
+        if (line.starts_with("No GP data found")) {
+            LWARNING(std::format("OMM file '{}' did not contain any data", file));
+            return std::vector<Parameters>();
+        }
+
         if (line.empty() || line == "\r") {
             continue;
         }
@@ -721,6 +731,18 @@ std::vector<Parameters> readOmmFile(const std::filesystem::path& file) {
 
 std::vector<Parameters> readCsvFile(const std::filesystem::path& file) {
     ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
+
+    {
+        // Tentatively load the CSV file to better detect if we got some other response
+        std::ifstream f = std::ifstream(file);
+        std::string line;
+        ghoul::getline(f, line);
+
+        if (line.starts_with("No GP data found")) {
+            LWARNING(std::format("OMM file '{}' did not contain any data", file));
+            return std::vector<Parameters>();
+        }
+    }
 
     const std::vector<std::string> columns = {
         "OBJECT_NAME",
