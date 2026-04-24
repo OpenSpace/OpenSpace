@@ -3,31 +3,31 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (NOAA)",
+  Name = "Satellite OMM Data (SatNOGS)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_noaa",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=noaa&FORMAT=csv",
-  Filename = "noaa.txt",
+  Identifier = "satellite_omm_data_satnogs",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=satnogs&FORMAT=csv",
+  Filename = "satnogs.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
-local NoaaSatellites = {
-  Identifier = "NoaaSatellites",
+local SatNOGSSatellites = {
+  Identifier = "SatNOGSSatellites",
   Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
-    Path = omm .. "noaa.txt",
+    Path = omm .. "satnogs.txt",
     Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
-    TrailFade = 17,
+    TrailFade = 5,
     PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
   GUI = {
-    Name = "NOAA",
+    Name = "SatNOGS",
     Path = "/Solar System/Planets/Earth/Satellites",
     Focusable = false
   }
@@ -35,20 +35,20 @@ local NoaaSatellites = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(NoaaSatellites)
+  openspace.addSceneGraphNode(SatNOGSSatellites)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(NoaaSatellites)
+  openspace.removeSceneGraphNode(SatNOGSSatellites)
 end)
 
-asset.export(NoaaSatellites)
+asset.export(SatNOGSSatellites)
 
 
 
 asset.meta = {
-  Name = "Satellites Weather - NOAA",
-  Description = "Satellites asset for Weather - NOAA. Data from Celestrak",
+  Name = "Satellites Communications - SatNOGS",
+  Description = "Satellites asset for Communications - SatNOGS. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"

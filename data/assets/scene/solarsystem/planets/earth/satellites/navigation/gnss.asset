@@ -3,52 +3,53 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Molniya)",
+  Name = "Satellite OMM Data (GNSS)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_molniya",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=molniya&FORMAT=csv",
-  Filename = "molniya.txt",
+  Identifier = "satellite_omm_data_gnss",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=gnss&FORMAT=csv",
+  Filename = "gnss.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
-local MolniyaSatellites = {
-  Identifier = "MolniyaSatellites",
+local GNSSSatellites = {
+  Identifier = "GNSSSatellites",
   Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
-    Path = omm .. "molniya.txt",
+    Path = omm .. "gnss.txt",
     Format = "CSV",
     SegmentQuality = 3,
-    Color = { 0.75, 0.75, 0.35 },
+    Color = { 0.9, 0.5, 0.0 },
     TrailFade = 15,
-    PointSizeExponent = 5.0,
+    PointSizeExponent = 5.5,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
   GUI = {
-    Name = "Molniya",
+    Name = "GNSS",
     Path = "/Solar System/Planets/Earth/Satellites",
-    Focusable = false
+    Focusable = false,
+    Description = [[The GPS satellites that give us our precise locations back on Earth.]]
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(MolniyaSatellites)
+  openspace.addSceneGraphNode(GNSSSatellites)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(MolniyaSatellites)
+  openspace.removeSceneGraphNode(GNSSSatellites)
 end)
 
-asset.export(MolniyaSatellites)
+asset.export(GNSSSatellites)
 
 
 
 asset.meta = {
-  Name = "Satellites Communications - Molniya",
-  Description = "Satellites asset for Communications - Molniya. Data from Celestrak",
+  Name = "Satellites Navigation GNSS",
+  Description = "Satellites asset for Navigation GNSS. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"

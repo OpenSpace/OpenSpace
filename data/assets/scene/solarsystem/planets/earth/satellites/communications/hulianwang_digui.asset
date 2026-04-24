@@ -1,0 +1,55 @@
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+
+
+
+local omm = asset.resource({
+  Name = "Satellite OMM Data (Hulianwang Digui)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_hulianwang",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=hulianwang&FORMAT=csv",
+  Filename = "hulianwang.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local HulianwangDiguiSatellites = {
+  Identifier = "HulianwangDiguiSatellites",
+  Parent = earthAsset.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "hulianwang.txt",
+    Format = "CSV",
+    SegmentQuality = 3,
+    Color = { 0.75, 0.75, 0.35 },
+    TrailFade = 5,
+    PointSizeExponent = 5.0,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Hulianwang Digui",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(HulianwangDiguiSatellites)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(HulianwangDiguiSatellites)
+end)
+
+asset.export(HulianwangDiguiSatellites)
+
+
+
+asset.meta = {
+  Name = "Satellites Communications - Hulianwang Digui",
+  Description = "Satellites asset for Communications - Hulianwang Digui. Data from Celestrak",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.org/NORAD/elements/",
+  License = "Celestrak"
+}

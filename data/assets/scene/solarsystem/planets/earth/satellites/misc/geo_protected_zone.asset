@@ -1,0 +1,57 @@
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+
+
+
+local omm = asset.resource({
+  Name = "Satellite OMM Data (GEO Protected Zone)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_geo-protected-zone",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?SPECIAL=gpz&FORMAT=csv",
+  Filename = "geo-protected-zone.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local GeoProtectedZoneSatellites = {
+  Identifier = "GeoProtectedZoneSatellites",
+  Parent = earthAsset.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "geo-protected-zone.txt",
+    Format = "CSV",
+    SegmentQuality = 3,
+    Color = { 0.45, 0.25, 0.45 },
+    TrailFade = 5,
+    PointSizeExponent = 5.0,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "GEO Protected Zone",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false,
+    Description = [[Objects inside the GEO Protected Zone (GEO altitude +/- 200 km).]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(GeoProtectedZoneSatellites)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(GeoProtectedZoneSatellites)
+end)
+
+asset.export(GeoProtectedZoneSatellites)
+
+
+
+asset.meta = {
+  Name = "Satellites GEO Protected Zone",
+  Description = [[Objects inside the GEO Protected Zone (GEO altitude +/- 200 km). Data
+    from Celestrak]],
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.org/NORAD/elements/",
+  License = "Celestrak"
+}

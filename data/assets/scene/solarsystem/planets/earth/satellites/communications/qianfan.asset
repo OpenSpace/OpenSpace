@@ -3,21 +3,21 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Raduga)",
+  Name = "Satellite OMM Data (Qianfan)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_raduga",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=raduga&FORMAT=csv",
-  Filename = "raduga.txt",
+  Identifier = "satellite_omm_data_qianfan",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=qianfan&FORMAT=csv",
+  Filename = "qianfan.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
-local RadugaSatellites = {
-  Identifier = "RadugaSatellites",
+local QianfanSatellites = {
+  Identifier = "QianfanSatellites",
   Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
-    Path = omm .. "raduga.txt",
+    Path = omm .. "qianfan.txt",
     Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
@@ -27,7 +27,7 @@ local RadugaSatellites = {
   },
   Tag = { "earth_satellites" },
   GUI = {
-    Name = "Raduga",
+    Name = "Qianfan",
     Path = "/Solar System/Planets/Earth/Satellites",
     Focusable = false
   }
@@ -35,20 +35,20 @@ local RadugaSatellites = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(RadugaSatellites)
+  openspace.addSceneGraphNode(QianfanSatellites)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(RadugaSatellites)
+  openspace.removeSceneGraphNode(QianfanSatellites)
 end)
 
-asset.export(RadugaSatellites)
+asset.export(QianfanSatellites)
 
 
 
 asset.meta = {
-  Name = "Satellites Communications - Raduga",
-  Description = "Satellites asset for Communications - Raduga. Data from Celestrak",
+  Name = "Satellites Communications - Qianfan",
+  Description = "Satellites asset for Communications - Qianfan. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"

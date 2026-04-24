@@ -3,21 +3,21 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Gorizont)",
+  Name = "Satellite OMM Data (OneWeb)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_gorizont",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=gorizont&FORMAT=csv",
-  Filename = "gorizont.txt",
+  Identifier = "satellite_omm_data_oneweb",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=oneweb&FORMAT=csv",
+  Filename = "oneweb.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
-local GorizontSatellites = {
-  Identifier = "GorizontSatellites",
+local OneWebSatellites = {
+  Identifier = "OneWebSatellites",
   Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
-    Path = omm .. "gorizont.txt",
+    Path = omm .. "oneweb.txt",
     Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
@@ -27,7 +27,7 @@ local GorizontSatellites = {
   },
   Tag = { "earth_satellites" },
   GUI = {
-    Name = "Gorizont",
+    Name = "OneWeb",
     Path = "/Solar System/Planets/Earth/Satellites",
     Focusable = false
   }
@@ -35,20 +35,20 @@ local GorizontSatellites = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(GorizontSatellites)
+  openspace.addSceneGraphNode(OneWebSatellites)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(GorizontSatellites)
+  openspace.removeSceneGraphNode(OneWebSatellites)
 end)
 
-asset.export(GorizontSatellites)
+asset.export(OneWebSatellites)
 
 
 
 asset.meta = {
-  Name = "Satellites Communications - Gorizont",
-  Description = "Satellites asset for Communications - Gorizont. Data from Celestrak",
+  Name = "Satellites Communications - OneWeb",
+  Description = "Satellites asset for Communications - OneWeb. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
