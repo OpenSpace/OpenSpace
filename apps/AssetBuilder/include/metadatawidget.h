@@ -25,10 +25,9 @@
 #ifndef __OPENSPACE_ASSETBUILDER___METADATAWIDGET___H__
 #define __OPENSPACE_ASSETBUILDER___METADATAWIDGET___H__
 
-#include <jasset.h>
-
 #include <QWidget>
 
+struct JAsset;
 class QComboBox;
 class QLineEdit;
 class QPlainTextEdit;
@@ -49,11 +48,15 @@ public:
      */
     void setAsset(JAsset* asset);
 
-    /** Re-reads the asset metadata into the form fields. */
+    /**
+     * Re-reads the asset metadata into the form fields.
+     */
     void refresh();
 
 signals:
-    /** Emitted whenever this widget mutates the asset. */
+    /**
+     * Emitted whenever this widget mutates the asset.
+     */
     void assetModified();
 
 private:
@@ -61,11 +64,11 @@ private:
 
     JAsset* _asset = nullptr;
 
-    QLineEdit* _nameEdit        = nullptr;
-    QLineEdit* _versionEdit     = nullptr;
-    QLineEdit* _authorEdit      = nullptr;
+    QLineEdit* _nameEdit = nullptr;
+    QLineEdit* _versionEdit = nullptr;
+    QLineEdit* _authorEdit = nullptr;
     QPlainTextEdit* _descriptionEdit = nullptr;
-    QComboBox* _licenseCombo    = nullptr;
+    QComboBox* _licenseCombo = nullptr;
 };
 
 #endif // __OPENSPACE_ASSETBUILDER___METADATAWIDGET___H__
