@@ -25,10 +25,9 @@
 #ifndef __OPENSPACE_ASSETBUILDER___FORM_MATRIXWIDGET___H__
 #define __OPENSPACE_ASSETBUILDER___FORM_MATRIXWIDGET___H__
 
-#include <jasset.h>
-
 #include <QWidget>
 
+#include <jasset.h>
 #include <vector>
 
 class QLineEdit;
@@ -45,17 +44,13 @@ class MatrixWidget : public QWidget {
 Q_OBJECT
 public:
     /**
-     * \param nComponents   Number of numeric components (2, 3, 4, 9, 16)
-     * \param nColumns      Number of columns for grid layout (use nComponents for row)
-     * \param isInteger     true = integer validation, false = double validation
-     * \param parent        Parent widget
+     * \param nComponents Number of numeric components (2, 3, 4, 9, 16)
+     * \param nColumns Number of columns for grid layout (use nComponents for row)
+     * \param isInteger `true` = integer validation, `false` = double validation
+     * \param parent Parent widget
      */
-    explicit MatrixWidget(
-        int nComponents,
-        int nColumns,
-        bool isInteger,
-        QWidget* parent = nullptr
-    );
+    MatrixWidget(int nComponents, int nColumns, bool isInteger,
+        QWidget* parent = nullptr);
 
     /**
      * Returns current values as a PropertyList of doubles.
@@ -78,17 +73,21 @@ public:
      */
     bool hasContent() const;
 
-    /** Clears all fields and emits valueChanged. */
+    /**
+     * Clears all fields and emits valueChanged.
+     */
     void clear();
 
 signals:
-    /** Emitted whenever a field value changes (user edit or programmatic). */
+    /**
+     * Emitted whenever a field value changes (user edit or programmatic).
+     */
     void valueChanged();
 
 protected:
-    /// One QLineEdit per numeric component, laid out in a grid.
+    /// One QLineEdit per numeric component, laid out in a grid
     std::vector<QLineEdit*> _fields;
-    /// true for integer validation and display, false for double.
+    /// `true` for integer validation and display, `false` for double
     bool _isInteger = false;
 };
 
