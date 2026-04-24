@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Radar Calibration)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_radar",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=radar&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=radar&FORMAT=csv",
   Filename = "radar.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -18,7 +18,7 @@ local RadarSatellites = {
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "radar.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
     TrailFade = 15,

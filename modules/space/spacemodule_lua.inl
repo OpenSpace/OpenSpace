@@ -90,6 +90,9 @@ std::vector<ghoul::Dictionary> readKeplerFile(std::filesystem::path p, std::stri
     else if (type == "OMM") {
         f = kepler::Format::OMM;
     }
+    else if (type == "CSV") {
+        f = kepler::Format::CSV;
+    }
     else if (type == "SBDB") {
         f = kepler::Format::SBDB;
     }

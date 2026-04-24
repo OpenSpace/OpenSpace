@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Iridium)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_iridium",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=iridium&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=iridium&FORMAT=csv",
   Filename = "iridium.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -18,7 +18,7 @@ local IridiumSatellites = {
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "iridium.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
     TrailFade = 15,

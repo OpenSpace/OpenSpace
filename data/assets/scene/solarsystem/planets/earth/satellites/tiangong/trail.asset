@@ -5,7 +5,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Tiangong)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_tiangong",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?CATNR=48274&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?CATNR=48274&FORMAT=csv",
   Filename = "Tiangong.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -20,7 +20,7 @@ local TiangongTrail = {
       Type = "GPTranslation",
       Observer = earthAsset.EarthInertial.Identifier,
       File = omm .. "Tiangong.txt",
-      Format = "OMM"
+      Format = "CSV"
     },
     RenderBinMode = "PostDeferredTransparent",
     Color = { 0.9, 0.28, 0.33 },
@@ -37,7 +37,7 @@ local TiangongTrail = {
 
 
 asset.onInitialize(function()
-  local i = openspace.space.readKeplerFile(omm .. "Tiangong.txt", "OMM")
+  local i = openspace.space.readKeplerFile(omm .. "Tiangong.txt", "CSV")
   TiangongTrail.Renderable.Period = i[1].Period / (60 * 60 * 24)
 
   openspace.addSceneGraphNode(TiangongTrail)

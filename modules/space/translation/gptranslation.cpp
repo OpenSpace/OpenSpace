@@ -50,6 +50,8 @@ namespace {
             TLE,
             // Orbit Mean-Elements Message in the KVN notation.
             OMM,
+            // CSV format that is provided by Celestrak
+            CSV,
             // JPL's Small Bodies Database.
             SBDB
         };

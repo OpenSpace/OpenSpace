@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Aqua)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_aqua",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?CATNR=27424&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?CATNR=27424&FORMAT=csv",
   Filename = "Aqua.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -21,7 +21,7 @@ local AquaTrail = {
       Type = "GPTranslation",
       Observer = earthAsset.EarthInertial.Identifier,
       File = omm .. "Aqua.txt",
-      Format = "OMM",
+      Format = "CSV",
       RenderBinMode = "PostDeferredTransparent"
     },
     Color = { 0.9, 0.6715, 0.0 },
@@ -38,7 +38,7 @@ local AquaTrail = {
 
 
 asset.onInitialize(function()
-  local a = openspace.space.readKeplerFile(omm .. "Aqua.txt", "OMM")
+  local a = openspace.space.readKeplerFile(omm .. "Aqua.txt", "CSV")
   AquaTrail.Renderable.Period = a[1].Period / (60 * 60 * 24)
 
   openspace.addSceneGraphNode(AquaTrail)

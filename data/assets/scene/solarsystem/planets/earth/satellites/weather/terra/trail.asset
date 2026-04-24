@@ -7,7 +7,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Terra)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_terra",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?CATNR=25994&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?CATNR=25994&FORMAT=csv",
   Filename = "Terra.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -22,7 +22,7 @@ local TerraTrail = {
       Type = "GPTranslation",
       Observer = earthAsset.EarthInertial.Identifier,
       File = omm .. "Terra.txt",
-      Format = "OMM",
+      Format = "CSV",
       RenderBinMode = "PostDeferredTransparent"
     },
     Color = { 0.9, 0.6715, 0.0 },
@@ -39,7 +39,7 @@ local TerraTrail = {
 
 
 asset.onInitialize(function()
-  local t = openspace.space.readKeplerFile(omm .. "Terra.txt", "OMM")
+  local t = openspace.space.readKeplerFile(omm .. "Terra.txt", "CSV")
   TerraTrail.Renderable.Period = t[1].Period / (60 * 60 * 24)
 
   openspace.addSceneGraphNode(TerraTrail)

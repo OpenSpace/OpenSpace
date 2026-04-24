@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Glosnass)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_glo-ops",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=glo-ops&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=glo-ops&FORMAT=csv",
   Filename = "glo-ops.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -18,7 +18,7 @@ local GlosnassSatellites = {
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "glo-ops.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
     TrailFade = 15,
