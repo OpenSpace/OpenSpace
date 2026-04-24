@@ -30,15 +30,10 @@
 #include <QLineEdit>
 
 namespace {
-constexpr int DecimalPrecision = 10;
+    constexpr int DecimalPrecision = 10;
 } // namespace
 
-MatrixWidget::MatrixWidget(
-    int nComponents,
-    int nColumns,
-    bool isInteger,
-    QWidget* parent
-)
+MatrixWidget::MatrixWidget(int nComponents, int nColumns, bool isInteger, QWidget* parent)
     : QWidget(parent)
     , _isInteger(isInteger)
 {
@@ -51,7 +46,7 @@ MatrixWidget::MatrixWidget(
 
     _fields.reserve(nComponents);
 
-    for (int i = 0; i < nComponents; ++i) {
+    for (int i = 0; i < nComponents; i++) {
         const int row = useGrid ? (i / nColumns) : 0;
         const int col = useGrid ? (i % nColumns) : i;
 
@@ -70,11 +65,11 @@ MatrixWidget::MatrixWidget(
         _fields.push_back(field);
     }
 
-    // Even stretch for value columns only — default stretch is 0 (content-based),
-    // so this ensures equal width. Also keeps any extra columns added by subclasses
-    // (e.g. ColorWidget's swatch button) at their minimum size
+    // Even stretch for value columns only — default stretch is 0 (content-based), so this
+    // ensures equal width. Also keeps any extra columns added by subclasses (e.g.
+    // ColorWidget's swatch button) at their minimum size
     const int nStretchCols = useGrid ? nColumns : nComponents;
-    for (int col = 0; col < nStretchCols; ++col) {
+    for (int col = 0; col < nStretchCols; col++) {
         grid->setColumnStretch(col, 1);
     }
 }
@@ -90,7 +85,7 @@ PropertyList MatrixWidget::values() const {
 
 void MatrixWidget::setValues(const PropertyList& vals) {
     Q_ASSERT(vals.size() == _fields.size());
-    for (size_t i = 0; i < _fields.size(); ++i) {
+    for (size_t i = 0; i < _fields.size(); i++) {
         // Suppress per-field textEdited so setText doesn't emit valueChanged
         // N times; we emit it once after the loop instead
         _fields[i]->blockSignals(true);
