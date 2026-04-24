@@ -24,8 +24,8 @@
 
 #include "identifierregistry.h"
 
+#include <jasset.h>
 #include <utils.h>
-
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -35,13 +35,12 @@ IdentifierRegistry::IdentifierRegistry(QObject* parent)
     : QObject(parent)
 {}
 
-void IdentifierRegistry::rebuildFromAsset(
-    const JAsset& asset,
-    const std::filesystem::path& assetPath)
+void IdentifierRegistry::rebuildFromAsset(const JAsset& asset,
+                                          const std::filesystem::path& assetPath)
 {
-    const std::filesystem::path assetDir = assetPath.empty()
-        ? std::filesystem::path{}
-        : assetPath.parent_path();
+    const std::filesystem::path assetDir = assetPath.empty() ?
+        std::filesystem::path() :
+        assetPath.parent_path();
 
     // Map each identifier to the list of sources where it was found
     QMap<QString, QStringList> sources;
@@ -58,8 +57,7 @@ void IdentifierRegistry::rebuildFromAsset(
 
     // Collect identifiers from dependency files
     for (const std::string& dep : asset.dependencies) {
-        const std::filesystem::path depPath =
-            resolvePath(dep, dataRoot(), assetDir);
+        const std::filesystem::path depPath = resolvePath(dep, dataRoot(), assetDir);
 
         QFile file(QString::fromStdWString(depPath.wstring()));
         if (!file.open(QFile::ReadOnly)) {
@@ -94,18 +92,18 @@ void IdentifierRegistry::rebuildFromAsset(
 
     // Report any identifiers that appear in more than one source
     QStringList warnings;
-    for (auto it = sources.constBegin(); it != sources.constEnd(); ++it) {
+    for (auto it = sources.constBegin(); it != sources.constEnd(); it++) {
         // If there are more than 1 of an identifier, add to the list
         if (it.value().size() > 1) {
             warnings.append(
-                "\"" + it.key() + "\" is defined in:\n  - " +
-                it.value().join("\n  - ")
+                QString("\"%1\" is defined in:\n  - %2")
+                    .arg(it.key()).arg(it.value().join("\n  - "))
             );
         }
     }
-    const QString message = warnings.isEmpty()
-        ? QString{}
-        : "Duplicate identifiers found:\n\n" + warnings.join("\n\n");
+    const QString message = warnings.isEmpty() ?
+        QString() :
+        "Duplicate identifiers found:\n\n" + warnings.join("\n\n");
     if (message != _lastDuplicateWarning) {
         _lastDuplicateWarning = message;
         if (!message.isEmpty()) {
