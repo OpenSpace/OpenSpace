@@ -25,17 +25,17 @@
 #ifndef __OPENSPACE_ASSETBUILDER___IDENTIFIERREGISTRY___H__
 #define __OPENSPACE_ASSETBUILDER___IDENTIFIERREGISTRY___H__
 
-#include <jasset.h>
-
 #include <QObject>
-#include <QStringList>
 
+#include <QStringList>
 #include <filesystem>
 
+struct JAsset;
+
 /**
- * Maintains a list of all known identifiers from the current asset's content items
- * and from parsed dependency files. Used to populate Identifier-type comboboxes
- * in the schema form.
+ * Maintains a list of all known identifiers from the current asset's content items and
+ * from parsed dependency files. Used to populate Identifier-type comboboxes in the schema
+ * form.
  */
 class IdentifierRegistry final : public QObject {
 Q_OBJECT
@@ -49,39 +49,39 @@ public:
     explicit IdentifierRegistry(QObject* parent = nullptr);
 
     /**
-     * Rebuilds the identifier list from the given asset. Collects identifiers from
-     * local content items and from each dependency file (resolved relative to
-     * the parent directory of assetPath). Emits registryChanged() only if
-     * the set actually changed.
+     * Rebuilds the identifier list from the given asset. Collects identifiers from local
+     * content items and from each dependency file (resolved relative to the parent
+     * directory of assetPath). Emits registryChanged() only if the set actually changed.
      *
-     * \param asset     The current in-memory asset
+     * \param asset The current in-memory asset
      * \param assetPath Path to the .jasset file (empty if untitled)
      */
-    void rebuildFromAsset(
-        const JAsset& asset,
-        const std::filesystem::path& assetPath
-    );
+    void rebuildFromAsset(const JAsset& asset, const std::filesystem::path& assetPath);
 
-    /** Returns the sorted, deduplicated list of all known identifiers. */
+    /**
+     * Returns the sorted, deduplicated list of all known identifiers.
+     */
     QStringList knownIdentifiers() const;
 
 signals:
-    /** Emitted when the identifier set changes after a rebuild. */
+    /**
+     * Emitted when the identifier set changes after a rebuild.
+     */
     void registryChanged();
 
     /**
-     * Emitted when duplicate identifiers are found across the asset's
-     * content items and dependency files.
+     * Emitted when duplicate identifiers are found across the asset's content items and
+     * dependency files.
      *
      * \param message Human-readable description of each duplicate and its sources
      */
     void duplicatesFound(const QString& message);
 
 private:
-    /// Sorted, deduplicated list of all known identifiers.
+    /// Sorted, deduplicated list of all known identifiers
     QStringList _identifiers;
 
-    /// Last emitted duplicate warning (to avoid repeated popups).
+    /// Last emitted duplicate warning (to avoid repeated popups)
     QString _lastDuplicateWarning;
 };
 
