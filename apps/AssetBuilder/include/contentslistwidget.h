@@ -25,15 +25,14 @@
 #ifndef __OPENSPACE_ASSETBUILDER___CONTENTSLISTWIDGET___H__
 #define __OPENSPACE_ASSETBUILDER___CONTENTSLISTWIDGET___H__
 
-#include <jasset.h>
-
 #include <QWidget>
 
+struct JAsset;
 class QListWidget;
 
 /**
- * Widget showing the contents list with add/duplicate/remove actions.
- * Owns the QListWidget and all content-item mutation logic.
+ * Widget showing the contents list with add/duplicate/remove actions. Owns the
+ * QListWidget and all content-item mutation logic.
  */
 class ContentsListWidget final : public QWidget {
 Q_OBJECT
@@ -47,20 +46,28 @@ public:
      */
     void setAsset(JAsset* asset);
 
-    /** Rebuilds the contents list from the current asset. */
+    /**
+     * Rebuilds the contents list from the current asset.
+     */
     void refresh();
 
 signals:
-    /** Emitted when the contents list selection changes. */
+    /**
+     * Emitted when the contents list selection changes.
+     */
     void selectionChanged(int row);
 
-    /** Emitted whenever this widget mutates the asset. */
+    /**
+     * Emitted whenever this widget mutates the asset.
+     */
     void assetModified();
 
 private:
     void buildUi();
 
-    /** Appends a new default SceneGraphNode and selects it. */
+    /**
+     * Appends a new default SceneGraphNode and selects it.
+     */
     void addSceneGraphNode();
 
     /**
