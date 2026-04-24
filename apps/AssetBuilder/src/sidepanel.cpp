@@ -27,7 +27,6 @@
 #include "contentslistwidget.h"
 #include "dependencieswidget.h"
 #include "metadatawidget.h"
-
 #include <QSplitter>
 #include <QVBoxLayout>
 
@@ -61,7 +60,7 @@ void SidePanel::buildUi() {
     setObjectName("side-panel");
     setMinimumWidth(0);
 
-    QVBoxLayout* root = new QVBoxLayout(this);
+    QBoxLayout* root = new QVBoxLayout(this);
     root->setContentsMargins(0, 0, 0, 0);
     root->setSpacing(0);
 
@@ -71,22 +70,29 @@ void SidePanel::buildUi() {
 
     _contentsList = new ContentsListWidget(splitter);
     _dependencies = new DependenciesWidget(splitter);
-    _metadata     = new MetadataWidget(splitter);
+    _metadata = new MetadataWidget(splitter);
 
     // Wire child signals to own signals
-    connect(_contentsList, &ContentsListWidget::selectionChanged,
-        this, [this](int row) {
-            emit selectionChanged(static_cast<size_t>(row));
-        });
-    connect(_contentsList, &ContentsListWidget::assetModified,
-        this, &SidePanel::assetModified);
-    connect(_dependencies, &DependenciesWidget::assetModified,
-        this, &SidePanel::assetModified);
-    connect(_metadata, &MetadataWidget::assetModified,
-        this, &SidePanel::assetModified);
+    connect(
+        _contentsList,
+        &ContentsListWidget::selectionChanged,
+        this,
+        [this](int row) { emit selectionChanged(static_cast<size_t>(row)); }
+    );
+    connect(
+        _contentsList, &ContentsListWidget::assetModified,
+        this, &SidePanel::assetModified
+    );
+    connect(
+        _dependencies, &DependenciesWidget::assetModified,
+        this, &SidePanel::assetModified
+    );
+    connect(
+        _metadata, &MetadataWidget::assetModified,
+        this, &SidePanel::assetModified
+    );
 
-    // Splitter sizing: contents gets most space, deps gets some,
-    // metadata its natural size
+    // Sizing: contents gets most space, deps gets some, metadata its natural size
     splitter->addWidget(_contentsList);
     splitter->addWidget(_dependencies);
     splitter->addWidget(_metadata);

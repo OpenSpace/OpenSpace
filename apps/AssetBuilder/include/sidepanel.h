@@ -31,12 +31,12 @@
 
 class ContentsListWidget;
 class DependenciesWidget;
-class MetadataWidget;
 struct JAsset;
+class MetadataWidget;
 
 /**
- * Thin container for the left-side panel. Owns a vertical QSplitter
- * containing the contents list, dependencies list, and metadata form.
+ * Thin container for the left-side panel. Owns a vertical QSplitter containing the
+ * contents list, dependencies list, and metadata form.
  */
 class SidePanel final : public QWidget {
 Q_OBJECT
@@ -57,18 +57,26 @@ public:
      */
     void setFilePath(const std::filesystem::path* path);
 
-    /** Refreshes all three child widgets. */
+    /**
+     * Refreshes all three child widgets.
+     */
     void refreshAll();
 
 public slots:
-    /** Opens a file dialog and adds the chosen file as a dependency. */
+    /**
+     * Opens a file dialog and adds the chosen file as a dependency.
+     */
     void addDependencyViaDialog();
 
 signals:
-    /** Emitted when the contents list selection changes. */
+    /**
+     * Emitted when the contents list selection changes.
+     */
     void selectionChanged(size_t row);
 
-    /** Emitted whenever a child widget mutates the asset. */
+    /**
+     * Emitted whenever a child widget mutates the asset.
+     */
     void assetModified();
 
 private:
@@ -76,7 +84,7 @@ private:
 
     ContentsListWidget* _contentsList = nullptr;
     DependenciesWidget* _dependencies = nullptr;
-    MetadataWidget*     _metadata     = nullptr;
+    MetadataWidget* _metadata = nullptr;
 };
 
 #endif // __OPENSPACE_ASSETBUILDER___SIDEPANEL___H__
