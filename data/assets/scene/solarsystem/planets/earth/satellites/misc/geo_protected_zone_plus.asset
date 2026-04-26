@@ -13,7 +13,7 @@ local omm = asset.resource({
 
 
 local GeoProtectedZonePlusSatellites = {
-  Identifier = "GeoProtectedZoneSatellitesPlus",
+  Identifier = "GeoProtectedZonePlusSatellites",
   Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
@@ -49,7 +49,7 @@ asset.export(GeoProtectedZonePlusSatellites)
 
 
 asset.meta = {
-  Name = "Satellites GEO Protected Zone",
+  Name = "Satellites GEO Protected Zone Plus",
   Description = [[Objects inside and passing through the GEO Protected Zone (GEO altitude
     +/- 200 km). Data from Celestrak]],
   Author = "OpenSpace Team",
