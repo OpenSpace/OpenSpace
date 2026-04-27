@@ -26,6 +26,7 @@
 #define __OPENSPACE_ASSETBUILDER___FORM_SEARCHDROPDOWN___H__
 
 #include <QFrame>
+
 #include <QVariant>
 #include <vector>
 
@@ -41,9 +42,9 @@ class QPushButton;
  *          [floating list popup (plain QFrame overlay, no Qt::Popup)]
  *
  * The popup uses Qt::WindowDoesNotAcceptFocus so keyboard focus always stays
- * in the search input.  Arrow keys and Enter navigate / confirm without a click.
+ * in the search input. Arrow keys and Enter navigate / confirm without a click.
  */
-class SearchDropdown : public QFrame {
+class SearchDropdown final : public QFrame {
 Q_OBJECT
 public:
     /**
@@ -51,16 +52,18 @@ public:
      */
     explicit SearchDropdown(QWidget* parent = nullptr);
 
-    /** Deletes the popup window which has no Qt parent. */
+    /**
+     * Deletes the popup window which has no Qt parent.
+     */
     ~SearchDropdown() override;
 
     /**
      * Appends an item to the dropdown list.
      *
      * \param displayText Text shown in the list and search input
-     * \param userData    Optional data attached to the item (e.g. schema type key)
+     * \param userData Optional data attached to the item (e.g. schema type key)
      */
-    void addItem(const QString& displayText, const QVariant& userData = QVariant());
+    void addItem(QString displayText, QVariant userData = QVariant());
 
     /**
      * Returns the total number of items in the dropdown.
@@ -120,33 +123,46 @@ public:
     bool isOpen() const;
 
 signals:
-    /** Emitted when the user confirms a selection. */
+    /**
+     * Emitted when the user confirms a selection.
+     */
     void activated(int index);
-    /** Emitted as the user hovers each item (for docs panel). */
+
+    /**
+     * Emitted as the user hovers each item (for docs panel).
+     */
     void highlighted(const QVariant& userData);
 
 protected:
     /**
-     * Intercepts key and mouse events on the search input to handle arrow
-     * navigation, Enter/Escape, and click-to-open.
+     * Intercepts key and mouse events on the search input to handle arrow navigation,
+     * Enter/Escape, and click-to-open.
      *
      * \param watched The object that received the event (expected to be _searchEdit)
-     * \param event   The event to filter
-     * \return true if the event was handled, false to pass it through
+     * \param event The event to filter
+     * \return `true` if the event was handled, `false` to pass it through
      */
     bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
-    /** Creates the search input, chevron button, popup frame, and list widget. */
+    /**
+     * Creates the search input, chevron button, popup frame, and list widget.
+     */
     void buildUi();
 
-    /** Shows the popup and populates it with the full item list. */
+    /**
+     * Shows the popup and populates it with the full item list.
+     */
     void openPopup();
 
-    /** Hides the popup and restores the display text. */
+    /**
+     * Hides the popup and restores the display text.
+     */
     void closePopup();
 
-    /** Moves and resizes the popup to align with the search input. */
+    /**
+     * Moves and resizes the popup to align with the search input.
+     */
     void repositionPopup();
 
     /**
@@ -170,10 +186,14 @@ private:
      */
     void navigateList(int delta);
 
-    /** Updates the search input text to show the current selection. */
+    /**
+     * Updates the search input text to show the current selection.
+     */
     void updateSearchText();
 
-    /// A single entry in the dropdown list.
+    /**
+     * A single entry in the dropdown list.
+     */
     struct Item {
         /// Text shown in the list and search input
         QString displayText;
