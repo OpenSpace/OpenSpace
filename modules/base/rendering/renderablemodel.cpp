@@ -521,8 +521,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
         if (!_hasFrustumSize) {
             const double bounds = _geometry->boundingRadius();
-            PropertyOwner* p = owner();
-            if (dynamic_cast<SceneGraphNode*>(p)) {
+            PropertyOwner* pOwner = owner();
+            if (dynamic_cast<SceneGraphNode*>(pOwner)) {
                 const double scale = _modelScale * glm::compMax(parent()->scale());
                 // The *2 is a fudge-factor to make the shadowing work for most cases
                 const float r = static_cast<float>(bounds * scale * 2.f);

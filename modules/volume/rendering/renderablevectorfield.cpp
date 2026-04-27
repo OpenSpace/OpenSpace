@@ -726,6 +726,10 @@ void RenderableVectorField::computeSparseFieldLines() {
     }
 
     const size_t totalInstances = (_sparse.data.size() + _stride - 1) / _stride;
+    if (totalInstances == 0) {
+        return;
+    }
+
     _instances.clear();
     _instances.resize(totalInstances);
 
