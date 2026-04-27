@@ -26,7 +26,6 @@
 
 #include "form/matrixwidget.h"
 #include "utils.h"
-
 #include <QCheckBox>
 #include <QComboBox>
 #include <QGridLayout>
@@ -35,286 +34,271 @@
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
-
 #include <algorithm>
 #include <optional>
 #include <string>
 #include <vector>
 
 namespace {
+    constexpr int LabelColumnMinWidth = 130;
+    constexpr int ColumnSpacing = 8;
+    constexpr int RowSpacing = 4;
+    constexpr int InfoButtonSize = 16;
 
-constexpr int LabelColumnMinWidth = 130;
-constexpr int ColumnSpacing = 8;
-constexpr int RowSpacing = 4;
-constexpr int InfoButtonSize = 16;
+    bool hasWidgetContent(QWidget* widget) {
+        if (auto* checkBox = qobject_cast<QCheckBox*>(widget);  checkBox) {
+            return checkBox->isChecked();
+        }
+        if (auto* matrix = qobject_cast<MatrixWidget*>(widget);  matrix) {
+            return matrix->hasContent();
+        }
+        if (auto* lineEdit = qobject_cast<QLineEdit*>(widget);  lineEdit) {
+            return !lineEdit->text().isEmpty();
+        }
+        if (widget->objectName() == FileContainerName) {
+            auto* lineEdit = widget->findChild<QLineEdit*>();
+            return lineEdit && !lineEdit->text().isEmpty();
+        }
+        if (auto* combo = widget->findChild<QComboBox*>();  combo) {
+            return !combo->currentText().isEmpty();
+        }
+        return false;
+    }
 
-bool hasWidgetContent(QWidget* widget) {
-    if (auto* checkBox = qobject_cast<QCheckBox*>(widget)) {
-        return checkBox->isChecked();
-    }
-    if (auto* matrix = qobject_cast<MatrixWidget*>(widget)) {
-        return matrix->hasContent();
-    }
-    if (auto* lineEdit = qobject_cast<QLineEdit*>(widget)) {
-        return !lineEdit->text().isEmpty();
-    }
-    if (widget->objectName() == FileContainerName) {
-        auto* lineEdit = widget->findChild<QLineEdit*>();
-        return lineEdit && !lineEdit->text().isEmpty();
-    }
-    if (auto* combo = widget->findChild<QComboBox*>()) {
-        return !combo->currentText().isEmpty();
-    }
-    return false;
-}
-
-void clearWidget(QWidget* widget) {
-    if (auto* checkBox = qobject_cast<QCheckBox*>(widget)) {
-        checkBox->blockSignals(true);
-        checkBox->setChecked(false);
-        checkBox->blockSignals(false);
-    }
-    else if (auto* matrix = qobject_cast<MatrixWidget*>(widget)) {
-        matrix->blockSignals(true);
-        matrix->clear();
-        matrix->blockSignals(false);
-    }
-    else if (auto* lineEdit = qobject_cast<QLineEdit*>(widget)) {
-        lineEdit->blockSignals(true);
-        lineEdit->clear();
-        lineEdit->blockSignals(false);
-    }
-    else if (widget->objectName() == FileContainerName) {
-        auto* lineEdit = widget->findChild<QLineEdit*>();
-        if (lineEdit) {
+    void clearWidget(QWidget* widget) {
+        if (auto* checkBox = qobject_cast<QCheckBox*>(widget);  checkBox) {
+            checkBox->blockSignals(true);
+            checkBox->setChecked(false);
+            checkBox->blockSignals(false);
+        }
+        else if (auto* matrix = qobject_cast<MatrixWidget*>(widget);  matrix) {
+            matrix->blockSignals(true);
+            matrix->clear();
+            matrix->blockSignals(false);
+        }
+        else if (auto* lineEdit = qobject_cast<QLineEdit*>(widget);  lineEdit) {
             lineEdit->blockSignals(true);
             lineEdit->clear();
             lineEdit->blockSignals(false);
         }
+        else if (widget->objectName() == FileContainerName) {
+            auto* lineEdit = widget->findChild<QLineEdit*>();
+            if (lineEdit) {
+                lineEdit->blockSignals(true);
+                lineEdit->clear();
+                lineEdit->blockSignals(false);
+            }
+        }
+        else if (auto* combo = widget->findChild<QComboBox*>();  combo) {
+            combo->blockSignals(true);
+            combo->setCurrentText("");
+            combo->blockSignals(false);
+        }
     }
-    else if (auto* combo = widget->findChild<QComboBox*>()) {
-        combo->blockSignals(true);
-        combo->setCurrentText("");
-        combo->blockSignals(false);
-    }
-}
 
-// Reads the current value from a field widget and returns it as a PropertyValue.
-// The member type is needed to distinguish numeric/date/string line edits.
-// Returns std::nullopt if the widget is empty or unrecognized.
-std::optional<PropertyValue> readWidgetValue(QWidget* widget, const std::string& type) {
-    if (auto* checkBox = qobject_cast<QCheckBox*>(widget)) {
-        return PropertyValue{ checkBox->isChecked() };
-    }
-    if (auto* matrix = qobject_cast<MatrixWidget*>(widget)) {
-        return PropertyValue{ matrix->values() };
-    }
-    if (auto* lineEdit = qobject_cast<QLineEdit*>(widget)) {
-        const QString text = lineEdit->text();
-        if (text.isEmpty()) {
-            return std::nullopt;
+    // Reads the current value from a field widget and returns it as a PropertyValue. The
+    // member type is needed to distinguish numeric/date/string line edits. Returns
+    // std::nullopt if the widget is empty or unrecognized
+    std::optional<PropertyValue> readWidgetValue(QWidget* widget, const std::string& type)
+    {
+        if (auto* checkBox = qobject_cast<QCheckBox*>(widget);  checkBox) {
+            return PropertyValue{ checkBox->isChecked() };
         }
-        if (type == "Integer" || type == "Double") {
-            bool ok = false;
-            // Internally integers are stored as double
-            const double value = text.toDouble(&ok);
-            return ok ? std::optional(PropertyValue{ value }) : std::nullopt;
+        if (auto* matrix = qobject_cast<MatrixWidget*>(widget);  matrix) {
+            return PropertyValue{ matrix->values() };
         }
-        if (type == "Date and time") {
-            const QDateTime dateTime =
-                QDateTime::fromString(text, DateDisplayFormat);
-            if (!dateTime.isValid()) {
+        if (auto* lineEdit = qobject_cast<QLineEdit*>(widget);  lineEdit) {
+            const QString text = lineEdit->text();
+            if (text.isEmpty()) {
                 return std::nullopt;
             }
-            return PropertyValue{
-                dateTime.toUTC().toString(Qt::ISODate).toStdString()
-            };
+            if (type == "Integer" || type == "Double") {
+                bool ok = false;
+                // Internally integers are stored as double
+                const double value = text.toDouble(&ok);
+                return ok ? std::optional(PropertyValue{ value }) : std::nullopt;
+            }
+            if (type == "Date and time") {
+                const QDateTime dateTime = QDateTime::fromString(text, DateDisplayFormat);
+                if (!dateTime.isValid()) {
+                    return std::nullopt;
+                }
+                return PropertyValue{
+                    dateTime.toUTC().toString(Qt::ISODate).toStdString()
+                };
+            }
+            return PropertyValue{ text.toStdString() };
         }
-        return PropertyValue{ text.toStdString() };
-    }
-    if (widget->objectName() == FileContainerName) {
-        auto* fileEdit = widget->findChild<QLineEdit*>();
-        if (fileEdit && !fileEdit->text().isEmpty()) {
-            return PropertyValue{ fileEdit->text().toStdString() };
+        if (widget->objectName() == FileContainerName) {
+            auto* fileEdit = widget->findChild<QLineEdit*>();
+            if (fileEdit && !fileEdit->text().isEmpty()) {
+                return PropertyValue{ fileEdit->text().toStdString() };
+            }
+            return std::nullopt;
+        }
+        if (auto* combo = widget->findChild<QComboBox*>();  combo) {
+            const QString text = combo->currentText();
+            if (!text.isEmpty()) {
+                return PropertyValue{ text.toStdString() };
+            }
         }
         return std::nullopt;
     }
-    if (auto* combo = widget->findChild<QComboBox*>()) {
-        const QString text = combo->currentText();
-        if (!text.isEmpty()) {
-            return PropertyValue{ text.toStdString() };
-        }
-    }
-    return std::nullopt;
-}
 
-void populateWidget(QWidget* widget, const PropertyValue& propertyValue) {
-    if (auto* checkBox = qobject_cast<QCheckBox*>(widget)) {
-        checkBox->blockSignals(true);
-        checkBox->setChecked(
-            propertyValue.isBool() ? propertyValue.toBool() : false
-        );
-        checkBox->blockSignals(false);
-    }
-    else if (auto* matrix = qobject_cast<MatrixWidget*>(widget)) {
-        matrix->blockSignals(true);
-        if (propertyValue.isList()) {
-            matrix->setValues(propertyValue.toList());
-        }
-        matrix->blockSignals(false);
-    }
-    else if (auto* lineEdit = qobject_cast<QLineEdit*>(widget)) {
-        lineEdit->blockSignals(true);
-        if (propertyValue.isDouble()) {
-            lineEdit->setText(
-                QString::number(propertyValue.toDouble(), 'g', 10)
+    void populateWidget(QWidget* widget, const PropertyValue& propertyValue) {
+        if (auto* checkBox = qobject_cast<QCheckBox*>(widget);  checkBox) {
+            checkBox->blockSignals(true);
+            checkBox->setChecked(
+                propertyValue.isBool() ? propertyValue.toBool() : false
             );
+            checkBox->blockSignals(false);
         }
-        else if (propertyValue.isString()) {
-            QString value =
-                QString::fromStdString(propertyValue.toString());
-            // Convert ISO date to display format for date fields only
-            // (avoid mangling plain strings)
-            if (lineEdit->objectName() == DateEditName) {
-                const QDateTime dateTime =
-                    QDateTime::fromString(value, Qt::ISODate);
-                if (dateTime.isValid()) {
-                    value = dateTime.toLocalTime()
-                        .toString(DateDisplayFormat);
-                }
+        else if (auto* matrix = qobject_cast<MatrixWidget*>(widget);  matrix) {
+            matrix->blockSignals(true);
+            if (propertyValue.isList()) {
+                matrix->setValues(propertyValue.toList());
             }
-            lineEdit->setText(value);
+            matrix->blockSignals(false);
         }
-        lineEdit->blockSignals(false);
-    }
-    else if (widget->objectName() == FileContainerName) {
-        auto* fileEdit = widget->findChild<QLineEdit*>();
-        if (fileEdit) {
-            fileEdit->blockSignals(true);
-            if (propertyValue.isString()) {
-                fileEdit->setText(
-                    QString::fromStdString(propertyValue.toString())
+        else if (auto* lineEdit = qobject_cast<QLineEdit*>(widget);  lineEdit) {
+            lineEdit->blockSignals(true);
+            if (propertyValue.isDouble()) {
+                lineEdit->setText(
+                    QString::number(propertyValue.toDouble(), 'g', 10)
                 );
             }
-            fileEdit->blockSignals(false);
+            else if (propertyValue.isString()) {
+                QString value = QString::fromStdString(propertyValue.toString());
+                // Convert ISO date to display format for date fields only (avoid mangling
+                // plain strings)
+                if (lineEdit->objectName() == DateEditName) {
+                    const QDateTime dateTime = QDateTime::fromString(value, Qt::ISODate);
+                    if (dateTime.isValid()) {
+                        value = dateTime.toLocalTime().toString(DateDisplayFormat);
+                    }
+                }
+                lineEdit->setText(value);
+            }
+            lineEdit->blockSignals(false);
+        }
+        else if (widget->objectName() == FileContainerName) {
+            if (auto* fileEdit = widget->findChild<QLineEdit*>();  fileEdit) {
+                if (propertyValue.isString()) {
+                    fileEdit->blockSignals(true);
+                    fileEdit->setText(QString::fromStdString(propertyValue.toString()));
+                    fileEdit->blockSignals(false);
+                }
+            }
+        }
+        else if (auto* combo = widget->findChild<QComboBox*>()) {
+            if (propertyValue.isString()) {
+                combo->blockSignals(true);
+                combo->setCurrentText(QString::fromStdString(propertyValue.toString()));
+                combo->blockSignals(false);
+            }
         }
     }
-    else if (auto* combo = widget->findChild<QComboBox*>()) {
-        combo->blockSignals(true);
-        if (propertyValue.isString()) {
-            combo->setCurrentText(
-                QString::fromStdString(propertyValue.toString())
-            );
-        }
-        combo->blockSignals(false);
-    }
-}
 
-// Resolves the editable QLineEdit from a member widget. The widget may be
-// a QLineEdit directly, or a QComboBox wrapping one (e.g. Identifier).
-QLineEdit* resolveLineEdit(QWidget* widget) {
-    if (!widget) {
+    // Resolves the editable QLineEdit from a member widget. The widget may be a QLineEdit
+    // directly, or a QComboBox wrapping one (e.g. Identifier)
+    QLineEdit* resolveLineEdit(QWidget* widget) {
+        if (!widget) {
+            return nullptr;
+        }
+
+        if (auto* lineEdit = qobject_cast<QLineEdit*>(widget);  lineEdit) {
+            return lineEdit;
+        }
+        if (auto* combo = widget->findChild<QComboBox*>();  combo) {
+            return combo->lineEdit();
+        }
         return nullptr;
     }
-    if (auto* lineEdit = qobject_cast<QLineEdit*>(widget)) {
-        return lineEdit;
-    }
-    if (auto* combo = widget->findChild<QComboBox*>()) {
-        return combo->lineEdit();
-    }
-    return nullptr;
-}
 
-// A union field stores only the raw property value (no type tag), so we need
-// to deduce which type it is by inspecting the value and matching it against
-// the entries in the union's type combo box.
-//
-// The combo entries correspond to schema types like "Double", "String",
-// "Vector3<double>", etc. We check the value's runtime type (isDouble,
-// isString, isList, isBool) and search the combo for a matching entry.
-// Some runtime types map to multiple possible schema types (e.g. a string
-// could be "String", "File", or "Date and time"), so we try candidates in
-// order and use the first one present in the combo.
-//
-// matchIndex tracks the result: the combo index to activate. If no match is
-// found (matchIndex stays < 0), we fall back to index 0 (the first entry).
-// Setting the combo index triggers the show/hide lambda from
-// createUnionWidget, which makes the correct field widget visible.
-void populateUnionWidget(QWidget* container, const PropertyValue& value) {
-    auto* typeCombo = container->findChild<QComboBox*>(UnionTypeComboName);
-    if (!typeCombo) {
-        return;
-    }
+    // A union field stores only the raw property value (no type tag), so we need to
+    // deduce which type it is by inspecting the value and matching it against the entries
+    // in the union's type combo box.
+    //
+    // The combo entries correspond to schema types like "Double", "String",
+    // "Vector3<double>", etc. We check the value's runtime type (isDouble, isString,
+    // isList, isBool) and search the combo for a matching entry. Some runtime types map
+    // to multiple possible schema types (e.g. a string could be "String", "File", or
+    // "Date and time"), so we try candidates in order and use the first one present in
+    // the combo.
+    //
+    // matchIndex tracks the result: the combo index to activate. If no match is found
+    // (matchIndex stays < 0), we fall back to index 0 (the first entry). Setting the
+    // combo index triggers the show/hide lambda from createUnionWidget, which makes the
+    // correct field widget visible
+    void populateUnionWidget(QWidget* container, const PropertyValue& value) {
+        auto* typeCombo = container->findChild<QComboBox*>(UnionTypeComboName);
+        if (!typeCombo) {
+            return;
+        }
 
-    int matchIndex = 0;
-    if (value.isDouble()) {
-        for (const char* name : { "Double", "Integer" }) {
-            matchIndex = typeCombo->findText(name);
-            if (matchIndex >= 0) {
-                break;
+        int matchIndex = 0;
+        if (value.isDouble()) {
+            for (const QString& name : { "Double", "Integer" }) {
+                matchIndex = typeCombo->findText(name);
+                if (matchIndex >= 0) {
+                    break;
+                }
             }
         }
-    }
-    else if (value.isBool()) {
-        matchIndex = typeCombo->findText("Boolean");
-    }
-    else if (value.isList()) {
-        for (int i = 0; i < typeCombo->count(); ++i) {
-            const QString text = typeCombo->itemText(i);
-            if (text.startsWith("Vector") || text.startsWith("Color") ||
-                text.startsWith("Matrix"))
+        else if (value.isBool()) {
+            matchIndex = typeCombo->findText("Boolean");
+        }
+        else if (value.isList()) {
+            for (int i = 0; i < typeCombo->count(); i++) {
+                const QString text = typeCombo->itemText(i);
+                if (text.startsWith("Vector") || text.startsWith("Color") ||
+                    text.startsWith("Matrix"))
+                {
+                    matchIndex = i;
+                    break;
+                }
+            }
+        }
+        else if (value.isString()) {
+            for (const QString& name : { "String", "Date and time", "File",
+                                         "Directory", "Identifier" })
             {
-                matchIndex = i;
+                matchIndex = typeCombo->findText(name);
+                if (matchIndex != -1) {
+                    break;
+                }
+            }
+        }
+        matchIndex = std::max(matchIndex, 0);
+
+        // setCurrentIndex triggers the show/hide lambda
+        typeCombo->setCurrentIndex(matchIndex);
+
+        // Populate the now-visible field widget
+        const auto children = container->findChildren<QWidget*>(
+            QString(),
+            Qt::FindDirectChildrenOnly
+        );
+        for (QWidget* fieldWidget : children) {
+            if (fieldWidget->isVisible() &&
+                fieldWidget->objectName() != UnionTypeComboName)
+            {
+                populateWidget(fieldWidget, value);
                 break;
             }
         }
     }
-    else if (value.isString()) {
-        for (const char* name : { "String", "Date and time", "File",
-                                   "Directory", "Identifier" })
-        {
-            matchIndex = typeCombo->findText(name);
-            if (matchIndex >= 0) {
-                break;
-            }
-        }
-    }
-    if (matchIndex < 0) {
-        matchIndex = 0;
-    }
-
-    // setCurrentIndex triggers the show/hide lambda
-    typeCombo->setCurrentIndex(matchIndex);
-
-    // Populate the now-visible field widget
-    const auto children = container->findChildren<QWidget*>(
-        QString(), Qt::FindDirectChildrenOnly
-    );
-    for (QWidget* fieldWidget : children) {
-        if (fieldWidget->isVisible() &&
-            fieldWidget->objectName() != UnionTypeComboName)
-        {
-            populateWidget(fieldWidget, value);
-            break;
-        }
-    }
-}
-
 } // namespace
 
-SchemaFormWidget::SchemaFormWidget(
-    const std::vector<SchemaMember>& members,
-    PropertyMap& properties,
-    QWidget* parent,
-    bool subSectionsExpanded,
-    bool sortMembers,
-    IdentifierRegistry* registry
-)
+SchemaFormWidget::SchemaFormWidget(std::vector<SchemaMember> members,
+                                   PropertyMap& properties, QWidget* parent,
+                                   bool subSectionsExpanded, bool sortMembers,
+                                   IdentifierRegistry* registry)
     : QWidget(parent)
-    , _members(members)
+    , _members(std::move(members))
     , _properties(properties)
-    , _subSectionsExpanded(subSectionsExpanded)
-    , _sortMembers(sortMembers)
+    , _areSubSectionsExpanded(subSectionsExpanded)
+    , _shouldSortMembers(sortMembers)
     , _registry(registry)
 {
     _fieldWidgets.resize(_members.size(), nullptr);
@@ -325,9 +309,8 @@ SchemaFormWidget::SchemaFormWidget(
     buildUi();
 }
 
-void SchemaFormWidget::addMemberToGrid(
-    QGridLayout* grid, int row, int memberIndex,
-    const SchemaMember& member)
+void SchemaFormWidget::addMemberToGrid(QGridLayout* grid, int row, int memberIndex,
+                                       const SchemaMember& member)
 {
     if (member.type == "Table") {
         QWidget* section = createTableSection(member);
@@ -339,19 +322,15 @@ void SchemaFormWidget::addMemberToGrid(
     // Label container: info button + name label + optional asterisk
     {
         QWidget* labelContainer = new QWidget(this);
-        labelContainer->setSizePolicy(
-            QSizePolicy::Preferred, QSizePolicy::Fixed
-        );
+        labelContainer->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
-        QHBoxLayout* labelLayout = new QHBoxLayout(labelContainer);
+        QBoxLayout* labelLayout = new QHBoxLayout(labelContainer);
         labelLayout->setContentsMargins(0, 0, 0, 0);
         labelLayout->setSpacing(4);
 
         labelLayout->addWidget(createInfoButton(member, labelContainer));
 
-        QLabel* nameLabel = new QLabel(
-            splitPascalCase(member.name), labelContainer
-        );
+        QLabel* nameLabel = new QLabel(splitPascalCase(member.name), labelContainer);
         nameLabel->setObjectName("field-label");
         labelLayout->addWidget(nameLabel);
 
@@ -361,10 +340,7 @@ void SchemaFormWidget::addMemberToGrid(
             labelLayout->addWidget(asterisk);
         }
         labelLayout->addStretch();
-        grid->addWidget(
-            labelContainer, row, 0,
-            Qt::AlignVCenter | Qt::AlignLeft
-        );
+        grid->addWidget(labelContainer, row, 0, Qt::AlignVCenter | Qt::AlignLeft);
     }
 
     QWidget* field = createFlatWidget(member);
@@ -378,22 +354,24 @@ void SchemaFormWidget::addMemberToGrid(
     }
 }
 
-QPushButton* SchemaFormWidget::createInfoButton(
-    const SchemaMember& member, QWidget* parent)
+QPushButton* SchemaFormWidget::createInfoButton(const SchemaMember& member,
+                                                QWidget* parent)
 {
-    Documentation info;
-    info.name = QString::fromStdString(member.name);
-    info.type = QString::fromStdString(member.type);
-    info.isOptional = member.isOptional;
-    info.description = QString::fromStdString(member.description);
-    info.documentation = QString::fromStdString(member.documentation);
+    const Documentation info = {
+        .name = QString::fromStdString(member.name),
+        .type = QString::fromStdString(member.type),
+        .isOptional = member.isOptional,
+        .description = QString::fromStdString(member.description),
+        .documentation = QString::fromStdString(member.documentation)
+    };
 
     QPushButton* button = new QPushButton("i", parent);
     button->setObjectName("field-info-button");
     button->setFixedSize(InfoButtonSize, InfoButtonSize);
 
-    connect(button, &QPushButton::clicked, this,
-        [this, info]() { emit documentationRequested(info); }
+    connect(
+        button, &QPushButton::clicked,
+        this, [this, info]() { emit documentationRequested(info); }
     );
     return button;
 }
@@ -406,7 +384,7 @@ QWidget* SchemaFormWidget::createOptionalWrapper(int memberIndex, QWidget* field
     // field is inactive) and the field + remove button (when active).
     // Both are created upfront and toggled via setOptionalFieldActive.
     QWidget* optionalContainer = new QWidget(this);
-    QVBoxLayout* containerLayout = new QVBoxLayout(optionalContainer);
+    QBoxLayout* containerLayout = new QVBoxLayout(optionalContainer);
     containerLayout->setContentsMargins(0, 0, 0, 0);
     containerLayout->setSpacing(0);
 
@@ -420,7 +398,7 @@ QWidget* SchemaFormWidget::createOptionalWrapper(int memberIndex, QWidget* field
     // Active row: the actual field widget + a remove button beside it.
     // Visible when the field is active, hidden otherwise.
     QWidget* activeRow = new QWidget(optionalContainer);
-    QHBoxLayout* activeRowLayout = new QHBoxLayout(activeRow);
+    QBoxLayout* activeRowLayout = new QHBoxLayout(activeRow);
     activeRowLayout->setContentsMargins(0, 0, 0, 0);
     activeRowLayout->setSpacing(4);
     activeRowLayout->addWidget(field, 1);
@@ -436,47 +414,57 @@ QWidget* SchemaFormWidget::createOptionalWrapper(int memberIndex, QWidget* field
     containerLayout->addWidget(activeRow);
 
     // Clicking "+" activates the field and focuses it
-    connect(addButton, &QPushButton::clicked, this,
-        [this, memberIndex]()
-    {
-        setOptionalFieldActive(memberIndex, true);
-        if (_fieldWidgets[memberIndex]) {
-            _fieldWidgets[memberIndex]->setFocus();
+    connect(
+        addButton,
+        &QPushButton::clicked,
+        this,
+        [this, memberIndex]() {
+            setOptionalFieldActive(memberIndex, true);
+            if (_fieldWidgets[memberIndex]) {
+                _fieldWidgets[memberIndex]->setFocus();
+            }
+            emit optionalFieldToggled(
+                QString::fromStdString(_members[memberIndex].name), true
+            );
+            emit fieldChanged();
         }
-        emit optionalFieldToggled(
-            QString::fromStdString(_members[memberIndex].name), true
-        );
-        emit fieldChanged();
-    });
+    );
 
     // Clicking the remove button deactivates the field after confirmation
-    connect(removeButton, &QPushButton::clicked, this,
-        [this, memberIndex]()
-    {
-        if (hasWidgetContent(_fieldWidgets[memberIndex])) {
-            const int result = QMessageBox::question(
-                this, "Remove Field",
-                QString("The field \"%1\" has content. Remove it?")
-                    .arg(splitPascalCase(_members[memberIndex].name)),
-                QMessageBox::Yes | QMessageBox::No
-            );
-            if (result != QMessageBox::Yes) {
-                return;
+    connect(
+        removeButton,
+        &QPushButton::clicked,
+        this,
+        [this, memberIndex]() {
+            if (hasWidgetContent(_fieldWidgets[memberIndex])) {
+                const int result = QMessageBox::question(
+                    this,
+                    "Remove Field",
+                    QString("The field \"%1\" has content. Remove it?")
+                        .arg(splitPascalCase(_members[memberIndex].name)),
+                    QMessageBox::Yes | QMessageBox::No
+                );
+                if (result != QMessageBox::Yes) {
+                    return;
+                }
             }
+            _properties.erase(_members[memberIndex].name);
+            setOptionalFieldActive(memberIndex, false);
+            emit optionalFieldToggled(
+                QString::fromStdString(_members[memberIndex].name),
+                false
+            );
+            emit fieldChanged();
         }
-        _properties.erase(_members[memberIndex].name);
-        setOptionalFieldActive(memberIndex, false);
-        emit optionalFieldToggled(
-            QString::fromStdString(_members[memberIndex].name), false
-        );
-        emit fieldChanged();
-    });
+    );
 
     return optionalContainer;
 }
 
 QWidget* SchemaFormWidget::widgetForMember(const std::string& name) const {
-    auto it = std::find_if(_members.begin(), _members.end(),
+    auto it = std::find_if(
+        _members.begin(),
+        _members.end(),
         [&](const SchemaMember& member) { return member.name == name; }
     );
     if (it == _members.end() || it->type == "Table") {
@@ -487,22 +475,21 @@ QWidget* SchemaFormWidget::widgetForMember(const std::string& name) const {
 }
 
 void SchemaFormWidget::applyToProperties() {
-    for (size_t i = 0; i < _members.size(); ++i) {
+    for (size_t i = 0; i < _members.size(); i++) {
         QWidget* widget = _fieldWidgets[i];
         if (!widget || !_optionalFieldActive[i]) {
             continue;
         }
         const SchemaMember& member = _members[i];
 
-        // Union pages maintain _properties via their own signal handlers;
-        // skip to avoid type-detection issues (member.type is the union
-        // string, not the active type)
+        // Union pages maintain _properties via their own signal handlers; skip to avoid
+        // type-detection issues (member.type is the union string, not the active type)
         if (widget->objectName() == UnionContainerName) {
             continue;
         }
 
         std::optional<PropertyValue> value = readWidgetValue(widget, member.type);
-        if (value) {
+        if (value.has_value()) {
             _properties[member.name] = std::move(*value);
         }
     }
@@ -521,7 +508,9 @@ void SchemaFormWidget::setOptionalFieldActive(int memberIndex, bool active) {
 }
 
 void SchemaFormWidget::setFieldActive(const std::string& memberName, bool active) {
-    auto it = std::find_if(_members.begin(), _members.end(),
+    auto it = std::find_if(
+        _members.begin(),
+        _members.end(),
         [&](const SchemaMember& member) { return member.name == memberName; }
     );
     if (it == _members.end()) {
@@ -535,7 +524,7 @@ void SchemaFormWidget::setFieldActive(const std::string& memberName, bool active
         return;
     }
 
-    // Already in the requested state — nothing to do
+    // Already in the requested state - nothing to do
     if (active == _optionalFieldActive[index]) {
         return;
     }
@@ -547,13 +536,13 @@ void SchemaFormWidget::setFieldActive(const std::string& memberName, bool active
     setOptionalFieldActive(index, active);
 }
 
-void SchemaFormWidget::syncFieldWith(
-    const std::string& memberName, SchemaFormWidget* other)
+void SchemaFormWidget::syncFieldWith(const std::string& memberName,
+                                     SchemaFormWidget* other)
 {
-    // Cross-connect text edits so typing in one form updates the other.
-    // setText() emits textChanged but NOT textEdited, so the cross-connections
-    // cannot loop. Signals are left unblocked so that other textChanged
-    // listeners (e.g. identifier auto-generation) still fire.
+    // Cross-connect text edits so typing in one form updates the other. setText() emits
+    // textChanged but NOT textEdited, so the cross-connections cannot loop. Signals are
+    // left unblocked so that other textChanged listeners (e.g. identifier
+    // auto-generation) still fire
     QLineEdit* thisEdit = resolveLineEdit(widgetForMember(memberName));
     QLineEdit* otherEdit = resolveLineEdit(other->widgetForMember(memberName));
 
@@ -562,35 +551,34 @@ void SchemaFormWidget::syncFieldWith(
         connect(otherEdit, &QLineEdit::textEdited, thisEdit, &QLineEdit::setText);
     }
 
-    // Cross-connect optional field toggle state so adding/removing the field
-    // in one form mirrors the change in the other
-    const QString targetName = QString::fromStdString(memberName);
-
-    auto syncToggle = [memberName, targetName](
-        SchemaFormWidget* sender, SchemaFormWidget* receiver)
-    {
-        connect(sender, &SchemaFormWidget::optionalFieldToggled, receiver,
-            [receiver, memberName, targetName](const QString& name, bool active)
-        {
-            if (name == targetName) {
-                receiver->setFieldActive(memberName, active);
+    // Cross-connect optional field toggle state so adding/removing the field in one form
+    // mirrors the change in the other
+    auto syncToggle = [memberName](SchemaFormWidget* sender, SchemaFormWidget* receiver) {
+        connect(
+            sender,
+            &SchemaFormWidget::optionalFieldToggled,
+            receiver,
+            [receiver, memberName](const QString& name, bool active) {
+                if (name == memberName) {
+                    receiver->setFieldActive(memberName, active);
+                }
             }
-        });
+        );
     };
     syncToggle(this, other);
     syncToggle(other, this);
 }
 
 void SchemaFormWidget::populateFromProperties() {
-    for (size_t i = 0; i < _members.size(); ++i) {
+    for (size_t i = 0; i < _members.size(); i++) {
         QWidget* widget = _fieldWidgets[i];
         if (!widget) {
             continue;
         }
         const SchemaMember& member = _members[i];
 
-        // For optional fields, show or hide the active row based on whether
-        // the property exists. Skip if the property is absent or null.
+        // For optional fields, show or hide the active row based on whether the property
+        // exists. Skip if the property is absent or null
         if (_fieldAddButtons[i]) {
             const bool exists =
                 _properties.count(member.name) > 0 &&
@@ -608,20 +596,20 @@ void SchemaFormWidget::populateFromProperties() {
         }
         const PropertyValue& value = it->second;
 
-        // Union widgets need special handling to detect the stored type
-        // and switch the combo to the matching page before populating
+        // Union widgets need special handling to detect the stored type and switch the
+        // combo to the matching page before populating
         if (widget->objectName() == UnionContainerName) {
             populateUnionWidget(widget, value);
             continue;
         }
 
-        // Regular flat widget — set the display value directly
+        // Regular flat widget - set the display value directly
         populateWidget(widget, value);
     }
 }
 
 void SchemaFormWidget::buildUi() {
-    QVBoxLayout* outer = new QVBoxLayout(this);
+    QBoxLayout* outer = new QVBoxLayout(this);
     outer->setContentsMargins(0, 0, 0, 0);
     outer->setSpacing(4);
 
@@ -640,33 +628,29 @@ void SchemaFormWidget::buildUi() {
         displayOrder[i] = i;
     }
 
-    if (_sortMembers) {
+    if (_shouldSortMembers) {
         // Order: 1) Flat before Table 2) required before optional 3) alphabetical
-        std::sort(displayOrder.begin(), displayOrder.end(),
+        std::sort(
+            displayOrder.begin(),
+            displayOrder.end(),
             [this](int a, int b) {
                 const bool aTable = (_members[a].type == "Table");
                 const bool bTable = (_members[b].type == "Table");
-
                 if (aTable != bTable) {
                     return !aTable;
                 }
-
                 const bool aOpt = _members[a].isOptional;
                 const bool bOpt = _members[b].isOptional;
-
                 if (aOpt != bOpt) {
                     return !aOpt;
                 }
-
                 return _members[a].name < _members[b].name;
             }
         );
     }
 
-    for (int row = 0; row < nMembers; ++row) {
-        addMemberToGrid(
-            grid, row, displayOrder[row], _members[displayOrder[row]]
-        );
+    for (int row = 0; row < nMembers; row++) {
+        addMemberToGrid(grid, row, displayOrder[row], _members[displayOrder[row]]);
     }
 
     outer->addWidget(gridWidget);
