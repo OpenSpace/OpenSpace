@@ -26,7 +26,6 @@
 #define __OPENSPACE_ASSETBUILDER___UTILS___H__
 
 #include <jasset.h>
-
 #include <filesystem>
 #include <string>
 
@@ -40,7 +39,9 @@ class QWidget;
 struct SchemaType;
 struct SchemaMember;
 
-/** Classification of dependency path strings. */
+/**
+ * Classification of dependency path strings.
+ */
 enum class PathType {
     /// Data-relative path (e.g. "textures/earth.png")
     Data,
@@ -59,20 +60,17 @@ enum class PathType {
 PathType detectPathType(const std::string& path);
 
 /**
- * Resolves a dependency string to an absolute filesystem path.
- * Data-relative paths resolve against \p dataRoot, jasset-relative paths resolve
- * against \p assetDir, and absolute paths are returned as-is (after canonicalization).
+ * Resolves a dependency string to an absolute filesystem path. Data-relative paths
+ * resolve against \p dataRoot, jasset-relative paths resolve against \p assetDir, and
+ * absolute paths are returned as-is (after canonicalization).
  *
  * \param dependency The dependency path string
  * \param dataRoot The OpenSpace data root directory
  * \param assetDirectory The parent directory of the current .jasset file
  * \return Canonicalized absolute path, or the raw resolved path on error
  */
-std::filesystem::path resolvePath(
-    const std::string& dependency,
-    const std::filesystem::path& dataRoot,
-    const std::filesystem::path& assetDirectory
-);
+std::filesystem::path resolvePath(const std::string& dependency,
+    const std::filesystem::path& dataRoot, const std::filesystem::path& assetDirectory);
 
 /**
  * Returns the persisted data root from QSettings.
@@ -82,8 +80,8 @@ std::filesystem::path resolvePath(
 std::filesystem::path dataRoot();
 
 /**
- * Opens a directory picker to choose the data root, persists it in QSettings,
- * and returns the chosen path.
+ * Opens a directory picker to choose the data root, persists it in QSettings, and returns
+ * the chosen path.
  *
  * \param parent Parent widget for the dialog
  * \return Chosen data root path, or an empty path if the user cancels
@@ -91,8 +89,8 @@ std::filesystem::path dataRoot();
 std::filesystem::path pickDataRootDialog(QWidget* parent);
 
 /**
- * Converts a display name to PascalCase suitable for use as an identifier.
- * Splits on spaces, hyphens and underscores; removes non-alphanumeric characters.
+ * Converts a display name to PascalCase suitable for use as an identifier. Splits on
+ * spaces, hyphens and underscores; removes non-alphanumeric characters.
  *
  * \param name The display name to convert
  * \return PascalCase string (e.g. "My Planet" -> "MyPlanet")
@@ -125,18 +123,16 @@ PropertyValue jsonValueToProperty(const QJsonValue& value);
 QJsonValue propertyToJsonValue(const PropertyValue& propertyValue);
 
 /**
- * Collects members from a SchemaType by name.
- * If \p parentName is empty, searches top-level members.
- * Otherwise, finds the parent member first, then searches its children.
+ * Collects members from a SchemaType by name. If \p parentName is empty, searches
+ * top-level members. Otherwise, finds the parent member first, then searches its
+ * children.
  *
- * \param schemaType  The schema type to search within
- * \param parentName  Parent member name, or empty for top-level lookup
- * \param names       Member names to collect, in desired order
+ * \param schemaType The schema type to search within
+ * \param parentName Parent member name, or empty for top-level lookup
+ * \param names Member names to collect, in desired order
  * \return Vector of matching members in the order of \p names, empty if parent not found
  */
-std::vector<SchemaMember> collectMembers(
-    const SchemaType& schemaType,
-    const std::string& parentName,
-    const std::vector<std::string>& names);
+std::vector<SchemaMember> collectMembers(const SchemaType& schemaType,
+    const std::string& parentName, const std::vector<std::string>& names);
 
 #endif // __OPENSPACE_ASSETBUILDER___UTILS___H__

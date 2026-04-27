@@ -25,18 +25,17 @@
 #ifndef __OPENSPACE_ASSETBUILDER___DEPENDENCIESWIDGET___H__
 #define __OPENSPACE_ASSETBUILDER___DEPENDENCIESWIDGET___H__
 
-#include <jasset.h>
-#include <utils.h>
-
 #include <QWidget>
 
+#include <utils.h>
 #include <filesystem>
 
+struct JAsset;
 class QListWidget;
 
 /**
- * Widget showing the dependencies list with add/remove and path-conversion
- * context menu actions.
+ * Widget showing the dependencies list with add/remove and path-conversion context menu
+ * actions.
  */
 class DependenciesWidget final : public QWidget {
 Q_OBJECT
@@ -57,7 +56,9 @@ public:
      */
     void setFilePath(const std::filesystem::path* path);
 
-    /** Rebuilds the dependencies list from the current asset. */
+    /**
+     * Rebuilds the dependencies list from the current asset.
+     */
     void refresh();
 
 public slots:
@@ -71,11 +72,12 @@ public slots:
     void addDependencyViaDialog();
 
 signals:
-    /** Emitted whenever this widget mutates the asset. */
+    /**
+     * Emitted whenever this widget mutates the asset.
+     */
     void assetModified();
 
 private:
-
     void buildUi();
     void showContextMenu(const QPoint& pos);
 
@@ -89,12 +91,14 @@ private:
     /**
      * Converts the dependency at the given row to a different path type.
      *
-     * \param row    Index into asset dependencies
+     * \param row Index into asset dependencies
      * \param target Target path type
      */
     void convertDependencyPath(size_t row, PathType target);
 
-    /** Returns the parent directory of the .jasset file, or empty. */
+    /**
+     * Returns the parent directory of the .jasset file, or empty.
+     */
     std::filesystem::path assetDir() const;
 
     JAsset* _asset = nullptr;

@@ -24,8 +24,8 @@
 
 #include "dependencieswidget.h"
 
+#include <jasset.h>
 #include <utils.h>
-
 #include <QDir>
 #include <QFileDialog>
 #include <QHBoxLayout>
@@ -49,8 +49,8 @@ namespace {
             case PathType::Data:     return "[data]";
             case PathType::Relative: return "[rel]";
             case PathType::Absolute: return "[abs]";
+            default: return "";
         }
-        return "";
     }
 
     // Normalize all backslashes to forward slashes in-place
@@ -93,7 +93,8 @@ void DependenciesWidget::refresh() {
 
     if (_asset->dependencies.empty()) {
         QListWidgetItem* placeholder = new QListWidgetItem(
-            "No dependencies", _dependenciesList
+            "No dependencies",
+            _dependenciesList
         );
         // Non-interactive; styled via QListWidget::item:disabled
         placeholder->setFlags(Qt::NoItemFlags);
@@ -121,12 +122,15 @@ void DependenciesWidget::addDependencyViaDialog() {
         return;
     }
     const std::filesystem::path assetDirectory = assetDir();
-    const QString startDir = assetDirectory.empty()
-        ? QDir::homePath()
-        : QString::fromStdWString(assetDirectory.wstring());
+    const QString startDir = assetDirectory.empty() ?
+        QDir::homePath() :
+        QString::fromStdWString(assetDirectory.wstring());
 
     const QString selected = QFileDialog::getOpenFileName(
-        this, "Add Dependency", startDir, FileFilter
+        this,
+        "Add Dependency",
+        startDir,
+        FileFilter
     );
     if (selected.isEmpty()) {
         return;
@@ -134,8 +138,8 @@ void DependenciesWidget::addDependencyViaDialog() {
 
     const std::filesystem::path selectedPath = selected.toStdWString();
 
-    // Store as data-relative if inside the data root, relative if the asset
-    // file is saved, or absolute as a last resort.
+    // Store as data-relative if inside the data root, relative if the asset file is
+    // saved, or absolute as a last resort
     std::string dependencyString;
     const std::filesystem::path root = dataRoot();
     if (!root.empty()) {
@@ -170,9 +174,11 @@ void DependenciesWidget::addDependencyViaDialog() {
     for (const std::string& existing : _asset->dependencies) {
         if (existing == dependencyString) {
             QMessageBox::information(
-                this, "Duplicate Dependency",
-                "This dependency is already added:\n" +
-                QString::fromStdString(dependencyString)
+                this,
+                "Duplicate Dependency",
+                QString::fromStdString(
+                    "This dependency is already added:\n" + dependencyString
+                )
             );
             return;
         }
@@ -189,17 +195,17 @@ void DependenciesWidget::removeDependency(size_t row) {
     const QString dependency = QString::fromStdString(_asset->dependencies[row]);
     const QMessageBox::StandardButton answer =
         QMessageBox::question(
-            this, "Remove Dependency",
+            this,
+            "Remove Dependency",
             "Remove \"" + dependency + "\"?",
-            QMessageBox::Yes | QMessageBox::No, QMessageBox::No
+            QMessageBox::Yes | QMessageBox::No,
+            QMessageBox::No
         );
     if (answer != QMessageBox::Yes) {
         return;
     }
 
-    _asset->dependencies.erase(
-        _asset->dependencies.begin() + row
-    );
+    _asset->dependencies.erase(_asset->dependencies.begin() + row);
     emit assetModified();
 }
 
@@ -223,7 +229,8 @@ void DependenciesWidget::convertDependencyPath(size_t row, PathType target) {
 
     if (needsAssetDir && assetDirectory.empty()) {
         QMessageBox::warning(
-            this, "Cannot Convert",
+            this,
+            "Cannot Convert",
             "Save the asset first to enable path conversion."
         );
         return;
@@ -249,8 +256,11 @@ void DependenciesWidget::convertDependencyPath(size_t row, PathType target) {
         std::filesystem::path rel =
             std::filesystem::relative(absolute, assetDirectory, error);
         if (error || rel.empty()) {
-            QMessageBox::warning(this, "Cannot Convert",
-                "Could not compute a relative path.");
+            QMessageBox::warning(
+                this,
+                "Cannot Convert",
+                "Could not compute a relative path."
+            );
             return;
         }
         converted = rel.string();
@@ -275,9 +285,12 @@ void DependenciesWidget::convertDependencyPath(size_t row, PathType target) {
             std::filesystem::relative(absolute, root, error);
 
         if (error || rel.empty() || rel.string().starts_with("..")) {
-            QMessageBox::warning(this, "Cannot Convert",
+            QMessageBox::warning(
+                this,
+                "Cannot Convert",
                 "The dependency does not reside inside the data directory:\n" +
-                QString::fromStdWString(root.wstring()));
+                QString::fromStdWString(root.wstring())
+            );
             return;
         }
         converted = rel.string();
@@ -299,19 +312,19 @@ void DependenciesWidget::showContextMenu(const QPoint& pos) {
     }
 
     QMenu menu(this);
-    menu.addAction("Remove", this, [this, row]() {
-        removeDependency(row);
-    });
+    menu.addAction(
+        "Remove",
+        this, [this, row]() { removeDependency(row); }
+    );
 
     menu.addSeparator();
     const PathType current = detectPathType(_asset->dependencies[row]);
 
     // Adds a conversion action; disabled + checked if already that type
     auto addConvertAction = [&](const QString& label, PathType target) {
-        QAction* action = menu.addAction(label, this,
-            [this, row, target]() {
-                convertDependencyPath(row, target);
-            }
+        QAction* action = menu.addAction(
+            label,
+            this, [this, row, target]() { convertDependencyPath(row, target); }
         );
         if (current == target) {
             action->setEnabled(false);
@@ -327,11 +340,11 @@ void DependenciesWidget::showContextMenu(const QPoint& pos) {
 }
 
 void DependenciesWidget::buildUi() {
-    QVBoxLayout* layout = new QVBoxLayout(this);
+    QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
 
-    QHBoxLayout* headerLayout = new QHBoxLayout();
+    QBoxLayout* headerLayout = new QHBoxLayout();
     headerLayout->setContentsMargins(12, 8, 8, 4);
     headerLayout->setSpacing(4);
 
@@ -342,8 +355,10 @@ void DependenciesWidget::buildUi() {
     addButton->setObjectName("add-button");
     addButton->setFixedSize(20, 20);
     addButton->setToolTip("Add dependency");
-    connect(addButton, &QPushButton::clicked, this,
-        &DependenciesWidget::addDependencyViaDialog);
+    connect(
+        addButton, &QPushButton::clicked,
+        this, &DependenciesWidget::addDependencyViaDialog
+    );
 
     headerLayout->addWidget(header);
     headerLayout->addStretch();
