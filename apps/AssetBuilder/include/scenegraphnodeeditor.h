@@ -25,19 +25,18 @@
 #ifndef __OPENSPACE_ASSETBUILDER___SCENEGRAPHNODEEDITOR___H__
 #define __OPENSPACE_ASSETBUILDER___SCENEGRAPHNODEEDITOR___H__
 
+#include <QWidget>
+
 #include <documentation.h>
 #include <jasset.h>
 #include <schema/assetschema.h>
-
-#include <QWidget>
 
 class IdentifierRegistry;
 class SchemaFormWidget;
 
 /**
- * Builds the entire form for one SceneGraphNode content item.
- * Created fresh each time a content item is selected; the old
- * instance is deleted by EditorPanel.
+ * Builds the entire form for one SceneGraphNode content item. Created fresh each time a
+ * content item is selected; the old instance is deleted by EditorPanel.
  */
 class SceneGraphNodeEditor final : public QWidget {
 Q_OBJECT
@@ -45,16 +44,18 @@ public:
     /**
      * Constructs the full SGN editor form for the content item at \p index.
      *
-     * \param asset    Non-owning pointer to the JAsset
+     * \param asset Non-owning pointer to the JAsset
      * \param registry Non-owning pointer to the IdentifierRegistry
-     * \param index    Index into asset->contents
-     * \param parent   Parent widget for ownership
+     * \param index Index into asset->contents
+     * \param parent Parent widget for ownership
      */
     SceneGraphNodeEditor(JAsset* asset, IdentifierRegistry* registry,
         size_t index, QWidget* parent = nullptr);
 
 signals:
-    /** Emitted whenever a field change makes the asset dirty. */
+    /**
+     * Emitted whenever a field change makes the asset dirty.
+     */
     void contentModified();
 
     /**
@@ -64,47 +65,52 @@ signals:
      */
     void documentationRequested(const Documentation& info);
 
-    /** Emitted when the user clicks a Browse .jasset button on an Identifier field. */
+    /**
+     * Emitted when the user clicks a Browse .jasset button on an Identifier field.
+     */
     void browseJassetRequested();
 
-    /** Emitted after a section paste so EditorPanel can rebuild the editor. */
+    /**
+     * Emitted after a section paste so EditorPanel can rebuild the editor.
+     */
     void rebuildRequested();
 
 private:
     void buildUi();
 
-    /** Creates a SchemaFormWidget, connects its signals, and populates it. */
-    SchemaFormWidget* createForm(
-        const std::vector<SchemaMember>& members,
-        PropertyMap& properties,
-        QWidget* parent,
-        bool expanded,
-        bool collapsible);
+    /**
+     * Creates a SchemaFormWidget, connects its signals, and populates it.
+     */
+    SchemaFormWidget* createForm(const std::vector<SchemaMember>& members,
+        PropertyMap& properties, QWidget* parent, bool expanded, bool collapsible);
 
-    /** Connects the GUI Name field to auto-generate the Identifier field. */
-    void wireIdentifierAutoGeneration(
-        SchemaFormWidget* additionalForm,
+    /**
+     * Connects the GUI Name field to auto-generate the Identifier field.
+     */
+    void wireIdentifierAutoGeneration(SchemaFormWidget* additionalForm,
         SchemaFormWidget* guiForm);
 
     // Section builders — create and return widgets without adding
     // to layout. buildUi handles layout order.
-    QWidget* buildQuickAccessFields(
-        const SchemaType& sgnType,
-        SchemaFormWidget* guiForm,
+    QWidget* buildQuickAccessFields(const SchemaType& sgnType, SchemaFormWidget* guiForm,
         QWidget* additionalSection);
-    SchemaFormWidget* buildMemberSection(
-        const SchemaType& sgnType,
+    SchemaFormWidget* buildMemberSection(const SchemaType& sgnType,
         const std::string& memberName, bool expanded);
-    QWidget* buildAdditionalSection(
-        const SchemaType& sgnType);
+    QWidget* buildAdditionalSection(const SchemaType& sgnType);
 
-    /** Copies the property data for the given key from the current content item. */
+    /**
+     * Copies the property data for the given key from the current content item.
+     */
     void onSectionCopy(const QString& key);
 
-    /** Pastes stored clipboard data into the given key of the current content item. */
+    /**
+     * Pastes stored clipboard data into the given key of the current content item.
+     */
     void onSectionPaste(const QString& key);
 
-    /** Sets paste button visibility on all CollapsibleSections in the editor. */
+    /**
+     * Sets paste button visibility on all CollapsibleSections in the editor.
+     */
     void updatePasteButtons();
 
     JAsset* _asset = nullptr;
