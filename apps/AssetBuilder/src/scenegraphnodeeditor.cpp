@@ -29,7 +29,6 @@
 #include "utils.h"
 
 #include <ghoul/misc/assert.h>
-
 #include <QLabel>
 #include <QLineEdit>
 #include <QVBoxLayout>
@@ -40,13 +39,12 @@
 namespace {
     constexpr const char* AdditionalSectionKey = "__additional__";
 
-    // All editor instances copy/paste into this shared clipboard.
-    // Each section key is stored independently, so copying Renderable
-    // from one item and TimeFrame from another keeps both available.
+    // All editor instances copy/paste into this shared clipboard. Each section key is
+    // stored independently, so copying Renderable from one item and TimeFrame from
+    // another keeps both available
     std::map<std::string, PropertyValue> sectionClipboard;
 
-    // SGN member names handled by explicit top-level sections
-    // (excluded from "Additional")
+    // SGN members handled by explicit top-level sections (excluded from "Additional")
     const std::vector<std::string> TopLevelSgnMembers = {
         "GUI", "Renderable", "Transform", "Tag", "TimeFrame"
     };
@@ -61,9 +59,8 @@ namespace {
     }
 } // namespace
 
-SceneGraphNodeEditor::SceneGraphNodeEditor(
-    JAsset* asset, IdentifierRegistry* registry,
-    size_t index, QWidget* parent)
+SceneGraphNodeEditor::SceneGraphNodeEditor(JAsset* asset, IdentifierRegistry* registry,
+                                           size_t index, QWidget* parent)
     : QWidget(parent)
     , _asset(asset)
     , _registry(registry)
@@ -73,36 +70,51 @@ SceneGraphNodeEditor::SceneGraphNodeEditor(
 }
 
 SchemaFormWidget* SceneGraphNodeEditor::createForm(
-    const std::vector<SchemaMember>& members,
-    PropertyMap& properties,
-    QWidget* parent,
-    bool expanded,
-    bool collapsible)
+                                                 const std::vector<SchemaMember>& members,
+                                                                  PropertyMap& properties,
+                                                                          QWidget* parent,
+                                                                            bool expanded,
+                                                                         bool collapsible)
 {
     SchemaFormWidget* form = new SchemaFormWidget(
-        members, properties, parent, expanded, collapsible, _registry
+        members,
+        properties,
+        parent,
+        expanded,
+        collapsible,
+        _registry
     );
-    connect(form, &SchemaFormWidget::fieldChanged, this,
+    connect(
+        form,
+        &SchemaFormWidget::fieldChanged,
+        this,
         [this]() {
             _asset->contents[_index].isDirty = true;
             emit contentModified();
-        });
+        }
+    );
 
-    connect(form, &SchemaFormWidget::documentationRequested,
-        this, &SceneGraphNodeEditor::documentationRequested);
-    connect(form, &SchemaFormWidget::sectionCopyRequested,
-        this, &SceneGraphNodeEditor::onSectionCopy);
-    connect(form, &SchemaFormWidget::sectionPasteRequested,
-        this, &SceneGraphNodeEditor::onSectionPaste);
-    connect(form, &SchemaFormWidget::browseJassetRequested,
-        this, &SceneGraphNodeEditor::browseJassetRequested);
+    connect(
+        form, &SchemaFormWidget::documentationRequested,
+        this, &SceneGraphNodeEditor::documentationRequested
+    );
+    connect(
+        form, &SchemaFormWidget::sectionCopyRequested,
+        this, &SceneGraphNodeEditor::onSectionCopy
+    );
+    connect(
+        form, &SchemaFormWidget::sectionPasteRequested,
+        this, &SceneGraphNodeEditor::onSectionPaste
+    );
+    connect(
+        form, &SchemaFormWidget::browseJassetRequested,
+        this, &SceneGraphNodeEditor::browseJassetRequested
+    );
 
     form->populateFromProperties();
 
     return form;
 }
-
-// Section copy/paste
 
 void SceneGraphNodeEditor::onSectionCopy(const QString& key) {
     PropertyMap& properties = _asset->contents[_index].properties;
@@ -137,9 +149,7 @@ void SceneGraphNodeEditor::onSectionPaste(const QString& key) {
         sectionClipboard.at(keyString).isMap())
     {
         // Spread the stored map back into root properties
-        for (const auto& [name, value] :
-            sectionClipboard.at(keyString).toMap())
-        {
+        for (const auto& [name, value] : sectionClipboard.at(keyString).toMap()) {
             properties[name] = value;
         }
     }
@@ -159,9 +169,7 @@ void SceneGraphNodeEditor::updatePasteButtons() {
         if (key.isEmpty()) {
             continue;
         }
-        section->setPasteAvailable(
-            sectionClipboard.count(key.toStdString()) > 0
-        );
+        section->setPasteAvailable(sectionClipboard.count(key.toStdString()) > 0);
     }
 }
 
@@ -182,8 +190,11 @@ void SceneGraphNodeEditor::wireIdentifierAutoGeneration(
     ghoul_assert(nameEdit, "Name widget must exist");
 
     // We only wire it to the Name field because it updates when quick access is updated
-    connect(nameEdit, &QLineEdit::textChanged,
-        this, [this, identifierEdit](const QString& text) {
+    connect(
+        nameEdit,
+        &QLineEdit::textChanged,
+        this,
+        [this, identifierEdit](const QString& text) {
             // If someone edited the identifier manually, don't override
             if (identifierEdit->isModified()) {
                 return;
@@ -192,15 +203,15 @@ void SceneGraphNodeEditor::wireIdentifierAutoGeneration(
             // Make sure we never empty the identifier
             if (!identifierText.isEmpty()) {
                 identifierEdit->setText(identifierText);
-                _asset->contents[_index]
-                    .properties["Identifier"] =
+                _asset->contents[_index].properties["Identifier"] =
                     PropertyValue{ identifierText.toStdString() };
                 emit contentModified();
             }
-        });
+        }
+    );
 
     // After a rebuild (e.g. paste), signals are blocked during populate so the
-    // auto-generation above doesn't fire. Seed the identifier if it is still empty.
+    // auto-generation above doesn't fire. Seed the identifier if it is still empty
     const QString currentName = nameEdit->text();
     if (!currentName.isEmpty() && identifierEdit->text().isEmpty()) {
         const QString identifierText = toPascalCase(currentName);
@@ -212,20 +223,16 @@ void SceneGraphNodeEditor::wireIdentifierAutoGeneration(
     }
 }
 
-// Section builders
-
-QWidget* SceneGraphNodeEditor::buildQuickAccessFields(
-    const SchemaType& sgnType,
-    SchemaFormWidget* guiForm,
-    QWidget* additionalSection)
+QWidget* SceneGraphNodeEditor::buildQuickAccessFields(const SchemaType& sgnType,
+                                                      SchemaFormWidget* guiForm,
+                                                      QWidget* additionalSection)
 {
-    SchemaFormWidget* additionalForm =
-        additionalSection->findChild<SchemaFormWidget*>();
+    SchemaFormWidget* additionalForm = additionalSection->findChild<SchemaFormWidget*>();
 
     PropertyMap& rootProperties = _asset->contents[_index].properties;
 
     QWidget* quickAccessWidget = new QWidget(this);
-    QVBoxLayout* quickAccessLayout = new QVBoxLayout(quickAccessWidget);
+    QBoxLayout* quickAccessLayout = new QVBoxLayout(quickAccessWidget);
     quickAccessLayout->setContentsMargins(0, 4, 0, 16);
     quickAccessLayout->setSpacing(4);
 
@@ -242,7 +249,9 @@ QWidget* SceneGraphNodeEditor::buildQuickAccessFields(
         }
         PropertyMap& guiProperties = rootProperties["GUI"].toMap();
         quickAccessGuiForm = createForm(
-            quickAccessGuiMembers, guiProperties, quickAccessWidget,
+            quickAccessGuiMembers,
+            guiProperties,
+            quickAccessWidget,
             false, false
         );
         quickAccessLayout->addWidget(quickAccessGuiForm);
@@ -250,13 +259,15 @@ QWidget* SceneGraphNodeEditor::buildQuickAccessFields(
 
     // Add "Parent" field to quick access
     SchemaFormWidget* quickAccessAdditionalForm = nullptr;
-    std::vector<SchemaMember> parentMembers =
-        collectMembers(sgnType, "", { "Parent" });
+    std::vector<SchemaMember> parentMembers = collectMembers(sgnType, "", { "Parent" });
 
     if (!parentMembers.empty()) {
         quickAccessAdditionalForm = createForm(
-            parentMembers, rootProperties, quickAccessWidget,
-            false, false
+            parentMembers,
+            rootProperties,
+            quickAccessWidget,
+            false,
+            false
         );
         quickAccessLayout->addWidget(quickAccessAdditionalForm);
     }
@@ -274,9 +285,9 @@ QWidget* SceneGraphNodeEditor::buildQuickAccessFields(
     return quickAccessWidget;
 }
 
-SchemaFormWidget* SceneGraphNodeEditor::buildMemberSection(
-    const SchemaType& sgnType,
-    const std::string& memberName, bool expanded)
+SchemaFormWidget* SceneGraphNodeEditor::buildMemberSection(const SchemaType& sgnType,
+                                                           const std::string& memberName,
+                                                           bool expanded)
 {
     std::vector<SchemaMember> members = collectMembers(sgnType, "", { memberName });
     if (members.empty()) {
@@ -293,15 +304,21 @@ QWidget* SceneGraphNodeEditor::buildAdditionalSection(const SchemaType& sgnType)
     section->setExpanded(false);
     section->setSectionKey(AdditionalSectionKey);
 
-    connect(section, &CollapsibleSection::documentationRequested,
-        this, &SceneGraphNodeEditor::documentationRequested);
-    connect(section, &CollapsibleSection::copyRequested,
-        this, &SceneGraphNodeEditor::onSectionCopy);
-    connect(section, &CollapsibleSection::pasteRequested,
-        this, &SceneGraphNodeEditor::onSectionPaste);
+    connect(
+        section, &CollapsibleSection::documentationRequested,
+        this, &SceneGraphNodeEditor::documentationRequested
+    );
+    connect(
+        section, &CollapsibleSection::copyRequested,
+        this, &SceneGraphNodeEditor::onSectionCopy
+    );
+    connect(
+        section, &CollapsibleSection::pasteRequested,
+        this, &SceneGraphNodeEditor::onSectionPaste
+    );
 
     QWidget* content = new QWidget();
-    QVBoxLayout* contentLayout = new QVBoxLayout(content);
+    QBoxLayout* contentLayout = new QVBoxLayout(content);
     contentLayout->setContentsMargins(0, 4, 0, 8);
     contentLayout->setSpacing(0);
 
@@ -316,7 +333,11 @@ QWidget* SceneGraphNodeEditor::buildAdditionalSection(const SchemaType& sgnType)
     // Add to Collapsible Section
     if (!additionalMembers.empty()) {
         SchemaFormWidget* form = createForm(
-            additionalMembers, rootProperties, content, false, true
+            additionalMembers,
+            rootProperties,
+            content,
+            false,
+            true
         );
         contentLayout->addWidget(form);
     }
@@ -325,14 +346,13 @@ QWidget* SceneGraphNodeEditor::buildAdditionalSection(const SchemaType& sgnType)
 }
 
 void SceneGraphNodeEditor::buildUi() {
-    const SchemaType* sgnTypePtr =
-        AssetSchema::instance().findType("core_scene_node");
+    const SchemaType* sgnTypePtr = AssetSchema::instance().findType("core_scene_node");
     if (!sgnTypePtr) {
         return;
     }
     const SchemaType& sgnType = *sgnTypePtr;
 
-    QVBoxLayout* layout = new QVBoxLayout(this);
+    QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(12);
 
@@ -341,60 +361,55 @@ void SceneGraphNodeEditor::buildUi() {
     titleLabel->setObjectName("node-title");
 
     SchemaFormWidget* renderable = buildMemberSection(sgnType, "Renderable", true);
-    SchemaFormWidget* transform =  buildMemberSection(sgnType, "Transform", true);
-    SchemaFormWidget* gui =        buildMemberSection(sgnType, "GUI", false);
-    SchemaFormWidget* timeFrame =  buildMemberSection(sgnType, "TimeFrame", false);
+    SchemaFormWidget* transform = buildMemberSection(sgnType, "Transform", true);
+    SchemaFormWidget* gui = buildMemberSection(sgnType, "GUI", false);
+    SchemaFormWidget* timeFrame = buildMemberSection(sgnType, "TimeFrame", false);
 
-    // Tag has schema type "String, or Table" (union) so buildMemberSection
-    // renders it as a flat field. Wrap it in a CollapsibleSection manually.
+    // Tag has schema type "String, or Table" (union) so buildMemberSection renders it as
+    // a flat field. Wrap it in a CollapsibleSection manually
     SchemaFormWidget* tagForm = buildMemberSection(sgnType, "Tag", false);
     CollapsibleSection* tags = nullptr;
     if (tagForm) {
         tags = new CollapsibleSection("Tag", this);
         tags->setExpanded(false);
         tags->setSectionKey("Tag");
-        connect(tags, &CollapsibleSection::documentationRequested,
-            this, &SceneGraphNodeEditor::documentationRequested);
-        connect(tags, &CollapsibleSection::copyRequested,
-            this, &SceneGraphNodeEditor::onSectionCopy);
-        connect(tags, &CollapsibleSection::pasteRequested,
-            this, &SceneGraphNodeEditor::onSectionPaste);
+        connect(
+            tags, &CollapsibleSection::documentationRequested,
+            this, &SceneGraphNodeEditor::documentationRequested
+        );
+        connect(
+            tags, &CollapsibleSection::copyRequested,
+            this, &SceneGraphNodeEditor::onSectionCopy
+        );
+        connect(
+            tags, &CollapsibleSection::pasteRequested,
+            this, &SceneGraphNodeEditor::onSectionPaste
+        );
         tags->setContentWidget(tagForm);
     }
 
     QWidget* additional = buildAdditionalSection(sgnType);
 
-    // buildMemberSection wraps Table members in a CollapsibleSection,
-    // so the actual form with Name/Description/Path is nested inside.
-    // Unwrap it for syncing and identifier auto-generation.
-    SchemaFormWidget* guiInnerForm = gui
-        ? gui->findChild<SchemaFormWidget*>() : nullptr;
+    // buildMemberSection wraps Table members in a CollapsibleSection, so the actual form
+    // with Name/Description/Path is nested inside. Unwrap it for syncing and identifier
+    // auto-generation
+    SchemaFormWidget* guiInnerForm = gui ? gui->findChild<SchemaFormWidget*>() : nullptr;
 
-    QWidget* quickAccess = buildQuickAccessFields(
-        sgnType, guiInnerForm, additional
-    );
+    QWidget* quickAccess = buildQuickAccessFields(sgnType, guiInnerForm, additional);
 
     // Automatically generate identifier
-    SchemaFormWidget* additionalForm =
-        additional->findChild<SchemaFormWidget*>();
+    SchemaFormWidget* additionalForm = additional->findChild<SchemaFormWidget*>();
     wireIdentifierAutoGeneration(additionalForm, guiInnerForm);
 
     // Layout
     layout->addWidget(titleLabel);
     layout->addWidget(quickAccess);
 
-    for (QWidget* section : {
-        static_cast<QWidget*>(renderable),
-        static_cast<QWidget*>(transform),
-        static_cast<QWidget*>(gui),
-        static_cast<QWidget*>(tags),
-        static_cast<QWidget*>(timeFrame)
-    })
-    {
-        if (section) {
-            layout->addWidget(section);
-        }
-    }
+    layout->addWidget(renderable);
+    layout->addWidget(transform);
+    layout->addWidget(gui);
+    layout->addWidget(tags);
+    layout->addWidget(timeFrame);
 
     layout->addWidget(additional);
     updatePasteButtons();
