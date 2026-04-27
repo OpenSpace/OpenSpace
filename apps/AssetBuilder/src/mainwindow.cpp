@@ -28,6 +28,7 @@
 #include <utils.h>
 #include <welcomedialog.h>
 
+#include <ghoul/misc/assert.h>
 #include <QCloseEvent>
 #include <QFileDialog>
 #include <QLabel>
@@ -36,8 +37,6 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QVBoxLayout>
-
-#include <ghoul/misc/assert.h>
 
 namespace {
     constexpr std::string_view AppName = "AssetBuilder";
@@ -61,17 +60,14 @@ MainWindow::MainWindow() {
 
 void MainWindow::showEmptyState() {
     QWidget* placeholder = new QWidget(this);
-    QVBoxLayout* layout = new QVBoxLayout(placeholder);
+    QBoxLayout* layout = new QVBoxLayout(placeholder);
     layout->setAlignment(Qt::AlignCenter);
 
     QLabel* label = new QLabel("No asset open", placeholder);
     label->setObjectName("empty-state");
     label->setAlignment(Qt::AlignCenter);
 
-    QLabel* sub = new QLabel(
-        "Use File > New or File > Open to get started",
-        placeholder
-    );
+    QLabel* sub = new QLabel("Use File > New or File > Open to get started", placeholder);
     sub->setObjectName("empty-state-sub");
     sub->setAlignment(Qt::AlignCenter);
 
@@ -133,12 +129,8 @@ void MainWindow::createMenus() {
 
     fileMenu->addSeparator();
 
-    QAction* dataRootAction =
-        fileMenu->addAction("Set Data Directory...");
-    connect(
-        dataRootAction, &QAction::triggered,
-        this, &MainWindow::setDataRootViaDialog
-    );
+    QAction* dataRootAction = fileMenu->addAction("Set Data Directory...");
+    connect(dataRootAction, &QAction::triggered, this, &MainWindow::setDataRootViaDialog);
 
     fileMenu->addSeparator();
 
@@ -170,9 +162,10 @@ void MainWindow::createEditor() {
         return;
     }
     _editor = new AssetEditorWidget(this);
-    connect(_editor, &AssetEditorWidget::assetModified, this, [this]() {
-        updateTitle();
-    });
+    connect(
+        _editor, &AssetEditorWidget::assetModified,
+        this, [this]() { updateTitle(); }
+    );
     setCentralWidget(_editor);
 }
 
@@ -247,7 +240,8 @@ bool MainWindow::saveAsset() {
     }
     if (!_editor->saveAsset(_editor->filePath())) {
         QMessageBox::critical(
-            this, "Save Failed",
+            this,
+            "Save Failed",
             "Could not save to:\n" +
                 QString::fromStdWString(_editor->filePath().wstring()) +
                 "\n\nCheck that the file is not read-only and the "
@@ -260,9 +254,9 @@ bool MainWindow::saveAsset() {
 }
 
 bool MainWindow::saveAssetAs() {
-    const QString suggestion = (_editor && _editor->hasFile())
-        ? QString::fromStdWString(_editor->filePath().wstring())
-        : QString();
+    const QString suggestion = (_editor && _editor->hasFile()) ?
+        QString::fromStdWString(_editor->filePath().wstring()) :
+        QString();
 
     const QString path = QFileDialog::getSaveFileName(
         this,
@@ -281,7 +275,8 @@ bool MainWindow::saveAssetAs() {
 
     if (!_editor->saveAsset(std::filesystem::path(path.toStdString()))) {
         QMessageBox::critical(
-            this, "Save Failed",
+            this,
+            "Save Failed",
             "Could not save to:\n" + path +
                 "\n\nCheck that the file is not read-only and the "
                 "directory exists."
@@ -345,9 +340,7 @@ void MainWindow::keyPressEvent(QKeyEvent* evt) {
 void MainWindow::resizeEvent(QResizeEvent* evt) {
     QMainWindow::resizeEvent(evt);
     if (_pathLabel) {
-        _pathLabel->setGeometry(
-            0, 0, menuBar()->width(), menuBar()->height()
-        );
+        _pathLabel->setGeometry(0, 0, menuBar()->width(), menuBar()->height());
     }
 }
 
