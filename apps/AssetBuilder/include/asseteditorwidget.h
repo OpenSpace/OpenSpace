@@ -25,10 +25,9 @@
 #ifndef __OPENSPACE_ASSETBUILDER___ASSETEDITORWIDGET___H__
 #define __OPENSPACE_ASSETBUILDER___ASSETEDITORWIDGET___H__
 
-#include <jasset.h>
-
 #include <QWidget>
 
+#include <jasset.h>
 #include <filesystem>
 
 class SidePanel;
@@ -47,14 +46,16 @@ Q_OBJECT
 public:
     explicit AssetEditorWidget(QWidget* parent = nullptr);
 
-    /** Resets the editor to an empty, untitled asset. */
+    /**
+     * Resets the editor to an empty, untitled asset.
+     */
     void newAsset();
 
     /**
      * Loads the given .jasset file into the editor.
      *
      * \param path Path to the .jasset file to load
-     * \return true on success, false if the file could not be read or parsed
+     * \return `true` on success, `false` if the file could not be read or parsed
      */
     bool loadAsset(const std::filesystem::path& path);
 
@@ -62,33 +63,49 @@ public:
      * Saves the current in-memory asset to disk.
      *
      * \param path Destination path for the .jasset file
-     * \return true on success, false if serialisation or writing failed
+     * \return `true` on success, `false` if serialisation or writing failed
      */
     bool saveAsset(const std::filesystem::path& path);
 
-    /** Read-only access to the in-memory asset. */
+    /**
+     * Read-only access to the in-memory asset.
+     */
     const JAsset& asset() const;
 
-    /** Returns true when the in-memory asset differs from the last saved state. */
+    /**
+     * Returns true when the in-memory asset differs from the last saved state.
+     */
     bool isDirty() const;
 
-    /** Returns the path of the currently open .jasset file (empty if untitled). */
+    /**
+     * Returns the path of the currently open .jasset file (empty if untitled).
+     */
     const std::filesystem::path& filePath() const;
 
-    /** Returns true when a file path is associated with this editor. */
+    /**
+     * Returns true when a file path is associated with this editor.
+     */
     bool hasFile() const;
 
-    /** Returns a short display name: "file.jasset" (+ " *" if dirty), or "Untitled". */
+    /**
+     * Returns a short display name: "file.jasset" (+ " *" if dirty), or "Untitled".
+     */
     QString displayName() const;
 
-    /** Returns the full native-separator path (+ " *" if dirty), or "Untitled". */
+    /**
+     * Returns the full native-separator path (+ " *" if dirty), or "Untitled".
+     */
     QString displayPath() const;
 
-    /** Syncs all panels and the identifier registry to the current state. */
+    /**
+     * Syncs all panels and the identifier registry to the current state.
+     */
     void refreshPanels();
 
 signals:
-    /** Emitted whenever a change is made to the in-memory asset. */
+    /**
+     * Emitted whenever a change is made to the in-memory asset.
+     */
     void assetModified();
 
 private slots:
@@ -99,11 +116,15 @@ private slots:
      */
     void onSelectionChanged(size_t row);
 
-    /** Called when either panel reports a change to the asset. */
+    /**
+     * Called when either panel reports a change to the asset.
+     */
     void onContentModified();
 
 private:
-    /** Constructs and lays out all child widgets and wires signals. */
+    /**
+     * Constructs and lays out all child widgets and wires signals.
+     */
     void buildUi();
 
     // Asset data and file path
