@@ -24,6 +24,7 @@
 
 #include "contentslistwidget.h"
 
+#include "jasset.h"
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QListWidget>
