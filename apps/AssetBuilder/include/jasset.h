@@ -54,21 +54,21 @@ struct PropertyValue {
         PropertyList
     > value;
 
-    bool isNull()   const { return std::holds_alternative<std::monostate>(value); }
-    bool isString() const { return std::holds_alternative<std::string>(value); }
-    bool isDouble() const { return std::holds_alternative<double>(value); }
-    bool isBool()   const { return std::holds_alternative<bool>(value); }
-    bool isMap()    const { return std::holds_alternative<PropertyMap>(value); }
-    bool isList()   const { return std::holds_alternative<PropertyList>(value); }
+    bool isNull() const;
+    bool isString() const;
+    bool isDouble() const;
+    bool isBool() const;
+    bool isMap() const;
+    bool isList() const;
 
-    const std::string& toString()  const { return std::get<std::string>(value); }
-    double             toDouble()  const { return std::get<double>(value); }
-    bool               toBool()    const { return std::get<bool>(value); }
-    const PropertyMap& toMap()     const { return std::get<PropertyMap>(value); }
-    const PropertyList& toList()   const { return std::get<PropertyList>(value); }
+    const std::string& toString() const;
+    double toDouble() const;
+    bool toBool() const;
+    const PropertyMap& toMap() const;
+    const PropertyList& toList() const;
 
-    PropertyMap&  toMap()  { return std::get<PropertyMap>(value); }
-    PropertyList& toList() { return std::get<PropertyList>(value); }
+    PropertyMap& toMap();
+    PropertyList& toList();
 };
 
 /**

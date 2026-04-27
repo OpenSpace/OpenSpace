@@ -28,6 +28,58 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
+bool PropertyValue::isNull() const {
+    return std::holds_alternative<std::monostate>(value);
+}
+
+bool PropertyValue::isString() const {
+    return std::holds_alternative<std::string>(value);
+}
+
+bool PropertyValue::isDouble() const {
+    return std::holds_alternative<double>(value);
+}
+
+bool PropertyValue::isBool() const {
+    return std::holds_alternative<bool>(value);
+}
+
+bool PropertyValue::isMap() const {
+    return std::holds_alternative<PropertyMap>(value);
+}
+
+bool PropertyValue::isList() const {
+    return std::holds_alternative<PropertyList>(value);
+}
+
+const std::string& PropertyValue::toString() const {
+    return std::get<std::string>(value);
+}
+
+double PropertyValue::toDouble() const {
+    return std::get<double>(value);
+}
+
+bool PropertyValue::toBool() const {
+    return std::get<bool>(value);
+}
+
+const PropertyMap& PropertyValue::toMap() const {
+    return std::get<PropertyMap>(value);
+}
+
+const PropertyList& PropertyValue::toList() const {
+    return std::get<PropertyList>(value);
+}
+
+PropertyMap& PropertyValue::toMap() {
+    return std::get<PropertyMap>(value);
+}
+
+PropertyList& PropertyValue::toList() {
+    return std::get<PropertyList>(value);
+}
+
 JAsset jassetFromJson(const QJsonObject& root) {
     JAsset asset;
 
