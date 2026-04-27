@@ -24,19 +24,19 @@
 
 #include "asseteditorwidget.h"
 
-#include "sidepanel.h"
 #include "documentationpanel.h"
 #include "editorpanel.h"
 #include "identifierregistry.h"
+#include "sidepanel.h"
 
 #include <QDir>
+#include <QFile>
 #include <QHBoxLayout>
 #include <QMessageBox>
-#include <QFile>
 #include <QSplitter>
 
 namespace {
-    constexpr int LeftPanelWidth  = 240;
+    constexpr int LeftPanelWidth = 240;
     constexpr int RightPanelWidth = 280;
 } // namespace
 
@@ -63,9 +63,9 @@ bool AssetEditorWidget::hasFile() const {
 }
 
 QString AssetEditorWidget::displayName() const {
-    QString name = _filePath.empty()
-        ? "Untitled"
-        : QString::fromStdWString(_filePath.filename().wstring());
+    QString name = _filePath.empty() ?
+        "Untitled" :
+        QString::fromStdWString(_filePath.filename().wstring());
     if (_isDirty) {
         name += " *";
     }
@@ -73,11 +73,9 @@ QString AssetEditorWidget::displayName() const {
 }
 
 QString AssetEditorWidget::displayPath() const {
-    QString path = _filePath.empty()
-        ? "Untitled"
-        : QDir::toNativeSeparators(
-            QString::fromStdWString(_filePath.wstring())
-        );
+    QString path = _filePath.empty() ?
+        "Untitled" :
+        QDir::toNativeSeparators(QString::fromStdWString(_filePath.wstring()));
     if (_isDirty) {
         path += " *";
     }
@@ -85,7 +83,7 @@ QString AssetEditorWidget::displayPath() const {
 }
 
 void AssetEditorWidget::newAsset() {
-    _asset = JAsset{};
+    _asset = JAsset();
     _isDirty = false;
     _filePath.clear();
     refreshPanels();
@@ -97,7 +95,8 @@ bool AssetEditorWidget::loadAsset(const std::filesystem::path& path) {
     QFile file(qPath);
     if (!file.open(QFile::ReadOnly)) {
         QMessageBox::critical(
-            this, "Load Failed",
+            this,
+            "Load Failed",
             "Could not open file:\n" + qPath + "\n\n" +
             file.errorString()
         );
@@ -107,11 +106,12 @@ bool AssetEditorWidget::loadAsset(const std::filesystem::path& path) {
     QJsonParseError err;
     const QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &err);
     if (doc.isNull() || !doc.isObject()) {
-        const QString detail = err.error != QJsonParseError::NoError
-            ? err.errorString()
-            : "File does not contain a JSON object.";
+        const QString detail = err.error != QJsonParseError::NoError ?
+            err.errorString() :
+            "File does not contain a JSON object.";
         QMessageBox::critical(
-            this, "Load Failed",
+            this,
+            "Load Failed",
             "Could not parse file:\n" + qPath + "\n\n" + detail
         );
         return false;
@@ -164,7 +164,7 @@ void AssetEditorWidget::refreshPanels() {
 }
 
 void AssetEditorWidget::buildUi() {
-    QHBoxLayout* root = new QHBoxLayout(this);
+    QBoxLayout* root = new QHBoxLayout(this);
     root->setContentsMargins(0, 0, 0, 0);
     root->setSpacing(0);
 
@@ -172,9 +172,9 @@ void AssetEditorWidget::buildUi() {
     splitter->setChildrenCollapsible(true);
     splitter->setHandleWidth(4);
 
-    _sidePanel   = new SidePanel(splitter);
+    _sidePanel = new SidePanel(splitter);
     _editorPanel = new EditorPanel(splitter);
-    _docsPanel   = new DocumentationPanel(splitter);
+    _docsPanel = new DocumentationPanel(splitter);
 
     _identifierRegistry = new IdentifierRegistry(this);
 
@@ -184,20 +184,33 @@ void AssetEditorWidget::buildUi() {
     _editorPanel->setIdentifierRegistry(_identifierRegistry);
 
     // Wire signals
-    connect(_sidePanel, &SidePanel::selectionChanged,
-        this, &AssetEditorWidget::onSelectionChanged);
-    connect(_sidePanel, &SidePanel::assetModified,
-        this, &AssetEditorWidget::onContentModified);
+    connect(
+        _sidePanel, &SidePanel::selectionChanged,
+        this, &AssetEditorWidget::onSelectionChanged
+    );
+    connect(
+        _sidePanel, &SidePanel::assetModified,
+        this, &AssetEditorWidget::onContentModified
+    );
 
-    connect(_editorPanel, &EditorPanel::contentModified,
-        this, &AssetEditorWidget::onContentModified);
-    connect(_editorPanel, &EditorPanel::documentationRequested,
-        _docsPanel, &DocumentationPanel::showDocumentation);
-    connect(_editorPanel, &EditorPanel::browseJassetRequested,
-        _sidePanel, &SidePanel::addDependencyViaDialog);
+    connect(
+        _editorPanel, &EditorPanel::contentModified,
+        this, &AssetEditorWidget::onContentModified
+    );
+    connect(
+        _editorPanel, &EditorPanel::documentationRequested,
+        _docsPanel, &DocumentationPanel::showDocumentation
+    );
+    connect(
+        _editorPanel, &EditorPanel::browseJassetRequested,
+        _sidePanel, &SidePanel::addDependencyViaDialog
+    );
 
-    connect(_identifierRegistry, &IdentifierRegistry::duplicatesFound,
-        this, [this](const QString& message) {
+    connect(
+        _identifierRegistry,
+        &IdentifierRegistry::duplicatesFound,
+        this,
+        [this](const QString& message) {
             QMessageBox::warning(this, "Duplicate Identifiers", message);
         }
     );
