@@ -49,16 +49,6 @@ struct MatrixTypeEntry {
     bool isColor;
 };
 
-// Shared constants used across the schemaformwidget .cpp files.
-constexpr const char* DateDisplayFormat = "yyyy-MM-dd HH:mm:ss";
-
-// Object names used as type tags for widget identification.
-// Set in schemaformwidget_flat.cpp, checked in schemaformwidget.cpp.
-constexpr const char* FileContainerName = "file-container";
-constexpr const char* UnionContainerName = "union-container";
-constexpr const char* UnionTypeComboName = "union-type-combo";
-constexpr const char* DateEditName = "date-edit";
-
 class CollapsibleSection;
 class IdentifierRegistry;
 class QBoxLayout;
