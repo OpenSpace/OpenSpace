@@ -478,7 +478,7 @@ namespace {
     }
 
     // Determines the table kind (ref array, ref, scalar array, inline array, or plain
-// table) based on the member's structure and references
+    // table) based on the member's structure and references
     TableClassification classifyTableMember(const SchemaMember& member) {
         // An array member has exactly one child named "*", which serves as the schema
         // template for each element in the array
@@ -1629,7 +1629,7 @@ void SchemaFormWidget::rebuildInlineArray(QBoxLayout* itemsLayout,
 }
 
 // ---------------------------------------------------------------------------
-// Public content builders
+// Table builders
 // ---------------------------------------------------------------------------
 void SchemaFormWidget::buildRefArrayContent(CollapsibleSection* section,
     const SchemaMember& member,
