@@ -227,7 +227,7 @@ void MainWindow::openAsset() {
     }
 
     createEditor();
-    if (!_editor->loadAsset(std::filesystem::path(path.toStdString()))) {
+    if (!_editor->loadAsset(std::filesystem::path(path.toStdWString()))) {
         return;
     }
     addToRecentFiles(_editor->filePath());
@@ -273,7 +273,7 @@ bool MainWindow::saveAssetAs() {
         return false;
     }
 
-    if (!_editor->saveAsset(std::filesystem::path(path.toStdString()))) {
+    if (!_editor->saveAsset(std::filesystem::path(path.toStdWString()))) {
         QMessageBox::critical(
             this,
             "Save Failed",
