@@ -30,7 +30,6 @@
 #include "documentation.h"
 #include "jasset.h"
 #include "schema/assetschema.h"
-#include <QStringList>
 #include <vector>
 
 /**
@@ -53,7 +52,6 @@ class CollapsibleSection;
 class IdentifierRegistry;
 class QBoxLayout;
 class QGridLayout;
-class QPushButton;
 
 /**
  * Generates a form from a list of SchemaMember descriptors bound to a PropertyMap.
@@ -163,11 +161,6 @@ private:
         const SchemaMember& member);
 
     /**
-     * Creates the small (i) documentation button for a member's label column.
-     */
-    QPushButton* createInfoButton(const SchemaMember& member, QWidget* parent);
-
-    /**
      * Wraps a field widget with Add (+) / Remove (x) buttons for optional members.
      */
     QWidget* createOptionalWrapper(int memberIndex, QWidget* field);
@@ -183,55 +176,9 @@ private:
     QWidget* createFlatWidget(const SchemaMember& member);
 
     /**
-     * Creates a QCheckBox for a Boolean member
-     */
-    QWidget* createBooleanWidget(const std::string& name);
-
-    /**
-     * Creates a validated QLineEdit for an Integer member.
-     */
-    QWidget* createIntegerWidget(const std::string& name, const std::string& description);
-
-    /**
-     * Creates a validated QLineEdit for a Double member.
-     */
-    QWidget* createDoubleWidget(const std::string& name, const std::string& description);
-
-    /**
-     * Creates a MatrixWidget (or ColorWidget) for vector/matrix/color members.
-     */
-    QWidget* createMatrixWidget(const std::string& name, const MatrixTypeEntry& entry);
-
-    /**
-     * Creates a QLineEdit + Browse button for File or Directory members.
-     */
-    QWidget* createFileWidget(const std::string& name, const std::string& description,
-        bool isDirectory);
-
-    /**
-     * Creates a validated QLineEdit for a "Date and time" member.
-     */
-    QWidget* createDateTimeWidget(const std::string& name);
-
-    /**
-     * Creates an editable QComboBox + Browse .jasset button for Identifier refs.
-     */
-    QWidget* createIdentifierComboWidget(const SchemaMember& member);
-
-    /**
-     * Creates a QComboBox for members whose description contains "In list {...}".
-     */
-    QWidget* createInListWidget(const std::string& name, const QStringList& listOptions);
-
-    /**
      * Creates a type-selector combo + stacked pages for union-typed members.
      */
     QWidget* createUnionWidget(const SchemaMember& member);
-
-    /**
-     * Creates a plain QLineEdit as a fallback for unrecognised types.
-     */
-    QWidget* createStringWidget(const SchemaMember& member);
 
     /**
      * Creates a CollapsibleSection for a Table member, dispatching by table kind.
