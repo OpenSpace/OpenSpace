@@ -46,6 +46,7 @@ local Vesta = {
   Renderable = {
     Type = "RenderableModelProjection",
     GeometryFile = models .. "VestaComet_5000.obj",
+    EnableFaceCulling = false,
     Projection = {
       Sequence = images,
       SequenceType = "image-sequence",

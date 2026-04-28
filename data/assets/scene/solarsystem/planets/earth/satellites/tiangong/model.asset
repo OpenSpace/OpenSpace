@@ -29,7 +29,8 @@ local TiangongModel = {
     LightSources = {
       sunAsset.LightSource
     },
-    PerformShading = true
+    PerformShading = true,
+    EnableFaceCulling = false
   },
   Tag = { "earth_satellites", "Tiangong", "space_stations" },
   GUI = {

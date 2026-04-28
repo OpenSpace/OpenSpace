@@ -54,7 +54,8 @@ local MessengerProbeBlack = {
     ModelTransform = RotationMatrix,
     LightSources = {
       sunAsset.LightSource
-    }
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "MessengerProbe Black",
@@ -73,7 +74,8 @@ local MessengerProbeFoil = {
     ModelTransform = RotationMatrix,
     LightSources = {
       sunAsset.LightSource
-    }
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "MessengerProbe foil",
@@ -92,7 +94,8 @@ local MessengerProbeHeatShield = {
     ModelTransform = RotationMatrix,
     LightSources = {
       sunAsset.LightSource
-    }
+    },
+    EnableFaceCulling = true
   },
   GUI = {
     Name = "MessengerProbe Heat Shield",
@@ -111,7 +114,8 @@ local MessengerProbeMetal = {
     ModelTransform = RotationMatrix,
     LightSources = {
       sunAsset.LightSource
-    }
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "MessengerProbe Metal",
@@ -130,7 +134,8 @@ local MessengerProbePanels = {
     ModelTransform = RotationMatrix,
     LightSources = {
       sunAsset.LightSource
-    }
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "MessengerProbe Panels",

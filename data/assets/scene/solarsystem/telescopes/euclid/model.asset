@@ -43,7 +43,8 @@ local Euclid = {
       sunAsset.LightSource
     },
     PerformShading = true,
-    AmbientIntensity = 0.075
+    AmbientIntensity = 0.075,
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Euclid",
