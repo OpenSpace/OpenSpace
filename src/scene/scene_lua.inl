@@ -386,7 +386,7 @@ namespace {
     void applyRegularExpression(lua_State* L, std::string_view regex,
                                 double interpolationDuration, std::string_view groupTag,
                                 ghoul::EasingFunction easingFunction,
-                                std::string postScript)
+                                std::string postScript, bool isBouncing)
     {
         //
         // 1. Retrieve all properties that match the regex
@@ -453,7 +453,8 @@ namespace {
                         prop,
                         static_cast<float>(interpolationDuration),
                         postScript,
-                        easingFunction
+                        easingFunction,
+                        isBouncing
                     );
                 }
             }
@@ -469,7 +470,7 @@ namespace {
 
     int setPropertyCallSingle(Property& prop, const std::string& uri, lua_State* L,
                               double duration, ghoul::EasingFunction easingFunction,
-                              std::string postScript)
+                              std::string postScript, bool isBouncing)
     {
         using ghoul::lua::errorLocation;
         using ghoul::lua::luaTypeToString;
@@ -504,7 +505,8 @@ namespace {
                     &prop,
                     static_cast<float>(duration),
                     std::move(postScript),
-                    easingFunction
+                    easingFunction,
+                    isBouncing
                 );
             }
         }
@@ -568,12 +570,14 @@ int propertySetValue(lua_State* L) {
     std::string easingMethodName;
     ghoul::EasingFunction easingMethod = ghoul::EasingFunction::Linear;
     std::string postScript;
+    bool isBouncing = false;
 
     // Extracting the parameters. These are the options that we have:
     // 1. <uri> <value>
     // 2. <uri> <value> <duration>
     // 3. <uri> <value> <duration> <easing>
     // 4. <uri> <value> <duration> <easing> <postscript>
+    // 5. <uri> <value> <duration> <easing> <postscript> <bouncing>
 
     if (nParameters >= 3) {
         // Later functions expect the value to be at the last position on the stack
@@ -604,7 +608,7 @@ int propertySetValue(lua_State* L) {
             return ghoul::lua::luaError(L, msg);
         }
     }
-    if (nParameters == 5) {
+    if (nParameters >= 5) {
         if (ghoul::lua::hasValue<std::string>(L, 5)) {
             postScript = ghoul::lua::value<std::string>(L, 5, ghoul::lua::PopValue::No);
         }
@@ -616,6 +620,19 @@ int propertySetValue(lua_State* L) {
             return ghoul::lua::luaError(L, msg);
         }
     }
+    if (nParameters >= 6) {
+        if (ghoul::lua::hasValue<bool>(L, 6)) {
+            isBouncing = ghoul::lua::value<bool>(L, 6, ghoul::lua::PopValue::No);
+        }
+        else {
+            std::string msg = std::format(
+                "Unexpected type '{}' in argument 6",
+                ghoul::lua::luaTypeToString(lua_type(L, 6))
+            );
+            return ghoul::lua::luaError(L, msg);
+        }
+
+    }
 
     if (!easingMethodName.empty()) {
         bool correctName = ghoul::isValidEasingFunctionName(easingMethodName);
@@ -626,6 +643,12 @@ int propertySetValue(lua_State* L) {
         }
 
         easingMethod = ghoul::easingFunctionFromName(easingMethodName);
+    }
+
+    if (isBouncing && interpolationDuration == 0.0) {
+        throw ghoul::lua::LuaError(
+            "When bouncing, a duration of 0 seconds is not allowed"
+        );
     }
 
     defer { lua_settop(L, 0); };
@@ -649,7 +672,8 @@ int propertySetValue(lua_State* L) {
             L,
             interpolationDuration,
             easingMethod,
-            std::move(postScript)
+            std::move(postScript),
+            isBouncing
         );
     }
     else {
@@ -665,7 +689,8 @@ int propertySetValue(lua_State* L) {
             interpolationDuration,
             tag,
             easingMethod,
-            std::move(postScript)
+            std::move(postScript),
+            isBouncing
         );
     }
     return 0;
@@ -693,6 +718,21 @@ int propertyGetValue(lua_State* L) {
 } // namespace openspace::luascriptfunctions
 
 namespace {
+
+/**
+ * Stops the bouncing interpolation on the provided property and interpolate the value to
+ * the original starting value over the original duration.
+ * 
+ *
+ * \param uri The URI of the property whose bouncing interpolation should be stopped
+ */
+[[codegen::luawrap]] void stopPropertyBouncing(std::string uri) {
+    Property* prop = property(uri);
+    if (!prop) {
+        throw ghoul::lua::LuaError(std::format("Error finding property '{}'", uri));
+    }
+    global::renderEngine->scene()->stopBouncing(prop);
+}
 
 /**
  * Returns whether a property with the given URI exists. The `uri` identifies the property
