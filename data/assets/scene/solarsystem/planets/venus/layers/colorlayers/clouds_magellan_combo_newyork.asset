@@ -18,7 +18,7 @@ local Layer = {
   Type = "TileProviderByLevel",
   LevelTileProviders = {
     {
-      MaxLevel = 4,
+      MaxLevel = 3,
       TileProvider = {
         Identifier = "Clouds",
         Name = "Clouds",
