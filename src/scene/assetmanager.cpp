@@ -29,6 +29,7 @@
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/scene/asset.h>
+#include <openspace/scene/jasset.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/resourcesynchronization.h>
@@ -386,7 +387,16 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
     }
 
     try {
-        ghoul::lua::runScriptFile(*_luaState, asset->path());
+        const bool isRegularAsset = asset->path().extension() == ".asset";
+        const bool isJasset = asset->path().extension() == ".jasset";
+        ghoul_assert(isRegularAsset || isJasset, "Must be regular asset or jasset");
+        if (isRegularAsset) {
+            ghoul::lua::runScriptFile(*_luaState, asset->path());
+        }
+        else if (isJasset) {
+            std::string jassetString = jassetToLua(asset->path());
+            ghoul::lua::runScript(*_luaState, jassetString);
+        }
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(std::format("Could not load asset '{}': {}", asset->path(), e.message));
@@ -1079,10 +1089,24 @@ std::filesystem::path AssetManager::generateAssetPath(
     // We treat the Absolute and the Tokenized paths the same here since they will
     // behave the same when passed into the `absPath` function
 
-    // Construct the full path including the .asset extension
-    std::filesystem::path fullAssetPath = std::format("{}{}", prefix, assetPath);
-    if (fullAssetPath.extension() != ".asset") {
-        fullAssetPath.replace_extension(".asset");
+    // Construct the full path including the .asset extension if there is no extension
+    std::string fullAssetPath = std::format("{}{}", prefix, assetPath);
+    std::filesystem::path path = absPath(fullAssetPath);
+    if (std::filesystem::exists(path)) {
+        return path;
+    }
+    else if (path.extension().empty()) {
+        std::filesystem::path pathAsset = path;
+        pathAsset.replace_extension(".asset");
+        if (std::filesystem::exists(pathAsset)) {
+            return pathAsset;
+        }
+
+        std::filesystem::path pathJasset = path;
+        pathJasset.replace_extension(".jasset");
+        if (std::filesystem::exists(pathJasset)) {
+            return pathJasset;
+        }
     }
 
     // We don't check whether the file exists here as the error will be more

@@ -36,7 +36,7 @@ local is_video_file = function(extension)
 end
 
 local is_asset_file = function(extension)
-  return extension == ".asset"
+  return extension == ".asset" or extension == ".jasset"
 end
 
 local is_recording_file = function(extension)
