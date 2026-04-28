@@ -39,10 +39,10 @@ MatrixWidget::MatrixWidget(int nComponents, int nColumns, bool isInteger, QWidge
 {
     const bool useGrid = (nComponents > nColumns);
 
-    QGridLayout* grid = new QGridLayout(this);
-    grid->setContentsMargins(0, 0, 0, 0);
-    grid->setHorizontalSpacing(4);
-    grid->setVerticalSpacing(2);
+    _grid = new QGridLayout(this);
+    _grid->setContentsMargins(0, 0, 0, 0);
+    _grid->setHorizontalSpacing(4);
+    _grid->setVerticalSpacing(2);
 
     _fields.reserve(nComponents);
 
@@ -61,7 +61,7 @@ MatrixWidget::MatrixWidget(int nComponents, int nColumns, bool isInteger, QWidge
         }
         connect(field, &QLineEdit::textEdited, this, [this]() { emit valueChanged(); });
 
-        grid->addWidget(field, row, col);
+        _grid->addWidget(field, row, col);
         _fields.push_back(field);
     }
 
@@ -70,7 +70,7 @@ MatrixWidget::MatrixWidget(int nComponents, int nColumns, bool isInteger, QWidge
     // ColorWidget's swatch button) at their minimum size
     const int nStretchCols = useGrid ? nColumns : nComponents;
     for (int col = 0; col < nStretchCols; col++) {
-        grid->setColumnStretch(col, 1);
+        _grid->setColumnStretch(col, 1);
     }
 }
 

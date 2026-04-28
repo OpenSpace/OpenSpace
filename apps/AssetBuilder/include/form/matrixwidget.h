@@ -30,6 +30,7 @@
 #include <jasset.h>
 #include <vector>
 
+class QGridLayout;
 class QLineEdit;
 
 /**
@@ -85,6 +86,8 @@ signals:
     void valueChanged();
 
 protected:
+    /// The grid layout holding all numeric fields
+    QGridLayout* _grid = nullptr;
     /// One QLineEdit per numeric component, laid out in a grid
     std::vector<QLineEdit*> _fields;
     /// `true` for integer validation and display, `false` for double

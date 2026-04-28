@@ -34,6 +34,15 @@
 namespace {
     constexpr int SwatchSize = 24;
     constexpr int ColorDecimalPrecision = 4;
+
+    QColor toQColor(const PropertyList& vals) {
+        return QColor::fromRgbF(
+            vals[0].toDouble(),
+            vals[1].toDouble(),
+            vals[2].toDouble(),
+            vals.size() > 3 ? vals[3].toDouble() : 1.0
+        );
+    }
 } // namespace
 
 ColorWidget::ColorWidget(int nComponents, QWidget* parent)
@@ -56,14 +65,8 @@ ColorWidget::ColorWidget(int nComponents, QWidget* parent)
     _swatchButton->setFixedSize(SwatchSize, SwatchSize);
     _swatchButton->setToolTip("Click to pick a color");
 
-    // Cast needed for grid-specific API (columnCount, addWidget with row/col).
-    // MatrixWidget always creates a QGridLayout
-    QGridLayout* grid = qobject_cast<QGridLayout*>(layout());
-    // Should never fail, but just to be safe
-    Q_ASSERT(grid);
-    const int swatchCol = grid->columnCount();
-    // Row 0, next available column
-    grid->addWidget(_swatchButton, 0, swatchCol);
+    const int swatchCol = _grid->columnCount();
+    _grid->addWidget(_swatchButton, 0, swatchCol);
 
     updateSwatch();
 
@@ -74,7 +77,7 @@ ColorWidget::ColorWidget(int nComponents, QWidget* parent)
         &QPushButton::clicked,
         this,
         [this]() {
-            const QColor initial = toQColor();
+            const QColor initial = toQColor(values());
 
             const QColorDialog::ColorDialogOptions opts = (_fields.size() > 3)
                 ? QColorDialog::ColorDialogOptions(QColorDialog::ShowAlphaChannel)
@@ -107,21 +110,8 @@ void ColorWidget::setValues(const PropertyList& vals) {
     updateSwatch();
 }
 
-QColor ColorWidget::toQColor() const {
-    const PropertyList vals = values();
-    for (const PropertyValue& v : vals) {
-        Q_ASSERT(v.toDouble() >= 0.0 && v.toDouble() <= 1.0);
-    }
-    return QColor::fromRgbF(
-        vals[0].toDouble(),
-        vals[1].toDouble(),
-        vals[2].toDouble(),
-        vals.size() > 3 ? vals[3].toDouble() : 1.0
-    );
-}
-
 void ColorWidget::updateSwatch() {
-    const QColor color = toQColor();
+    const QColor color = toQColor(values());
     std::string style = std::format(
         "background-color: rgb({}, {}, {});",
         color.red(), color.green(), color.blue()
