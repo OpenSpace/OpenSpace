@@ -51,11 +51,11 @@ public:
     void setAsset(JAsset* asset);
 
     /**
-     * Sets the file path pointer on the dependencies widget.
+     * Sets the file path on the dependencies widget.
      *
-     * \param path Non-owning pointer to the .jasset file path
+     * \param path The .jasset file path (empty if unsaved)
      */
-    void setFilePath(const std::filesystem::path* path);
+    void setFilePath(const std::filesystem::path& path);
 
     /**
      * Refreshes all three child widgets.

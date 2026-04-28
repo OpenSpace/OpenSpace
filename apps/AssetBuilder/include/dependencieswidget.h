@@ -50,11 +50,11 @@ public:
     void setAsset(JAsset* asset);
 
     /**
-     * Sets the pointer to the file path owned by AssetEditorWidget.
+     * Sets the file path of the current .jasset file.
      *
-     * \param path Non-owning pointer to the .jasset file path
+     * \param path The .jasset file path (empty if unsaved)
      */
-    void setFilePath(const std::filesystem::path* path);
+    void setFilePath(const std::filesystem::path& path);
 
     /**
      * Rebuilds the dependencies list from the current asset.
@@ -102,7 +102,7 @@ private:
     std::filesystem::path assetDir() const;
 
     JAsset* _asset = nullptr;
-    const std::filesystem::path* _filePath = nullptr;
+    std::filesystem::path _filePath;
     QListWidget* _dependenciesList = nullptr;
 };
 
