@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
     }
 
     try {
-        AssetSchema::instance().loadFromResource();
+        AssetSchema::instance();
     }
     catch (const std::exception& e) {
         QMessageBox::critical(

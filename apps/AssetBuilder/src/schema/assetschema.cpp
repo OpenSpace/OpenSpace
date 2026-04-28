@@ -28,6 +28,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <format>
 #include <stdexcept>
 
 namespace {
@@ -89,16 +90,12 @@ namespace {
     }
 } // namespace
 
-AssetSchema& AssetSchema::instance() {
+const AssetSchema& AssetSchema::instance() {
     static AssetSchema schema;
     return schema;
 }
 
-void AssetSchema::loadFromResource() {
-    if (_isLoaded) {
-        return;
-    }
-
+AssetSchema::AssetSchema() {
     QFile file(SchemaResourcePath);
 
     if (!file.open(QFile::ReadOnly)) {
@@ -146,8 +143,6 @@ void AssetSchema::loadFromResource() {
 
         _categories.push_back(std::move(category));
     }
-
-    _isLoaded = true;
 }
 
 const SchemaCategory* AssetSchema::findCategory(const std::string& identifier) const {

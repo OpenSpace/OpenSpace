@@ -116,17 +116,11 @@ struct SchemaCategory {
 class AssetSchema {
 public:
     /**
-     * Returns the singleton instance.
-     */
-    static AssetSchema& instance();
-
-    /**
-     * Parses the schema resource into the in-memory schema representation.
-     * Safe to call multiple times; subsequent calls return immediately.
+     * Returns the singleton instance. The schema is loaded on first call.
      *
      * \throw std::runtime_error if the resource cannot be opened or parsed
      */
-    void loadFromResource();
+    static const AssetSchema& instance();
 
     /**
      * Returns the category with the given identifier, or `nullptr` if not found.
@@ -156,17 +150,19 @@ public:
     /**
      * Returns all loaded schema categories.
      *
-     * \return Reference to the list of all SchemaCategories
+     * \return Reference to the vector of all SchemaCategories
      */
     const std::vector<SchemaCategory>& categories() const;
 
 private:
-    AssetSchema() = default;
+    AssetSchema();
     AssetSchema(const AssetSchema&) = delete;
     AssetSchema& operator=(const AssetSchema&) = delete;
 
+    // Immutable after construction; pointers into this vector (returned by
+    // findCategory / findType / findCategoryByTypeId) remain valid because
+    // instance() exposes only a const reference.
     std::vector<SchemaCategory> _categories;
-    bool _isLoaded = false;
 };
 
 #endif // __OPENSPACE_ASSETBUILDER___SCHEMA_ASSETSCHEMA___H__
