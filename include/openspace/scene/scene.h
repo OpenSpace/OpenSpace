@@ -176,8 +176,8 @@ public:
      * \param postScript A Lua script that will be executed when the interpolation
      *        finishes
      * \param easingFunction A function that determines who the interpolation occurs
-     * \param isBouncing If this value is set to `true`, the property will interpolate to
-     *        the provided new value, then back to the original value, until manually
+     * \param shouldBounce If this value is set to `true`, the property will interpolate
+     *        to the provided new value, then back to the original value, until manually
      *        stopped.
      *
      * \pre \p prop must not be `nullptr`
@@ -187,7 +187,7 @@ public:
     void addPropertyInterpolation(Property* prop, float durationSeconds,
         std::string postScript = "",
         ghoul::EasingFunction easingFunction = ghoul::EasingFunction::Linear,
-        bool isBouncing = false);
+        bool shouldBounce = false);
 
     /**
      * Removes the passed \p prop from the list of Property%s that are update each time
@@ -221,7 +221,7 @@ public:
      *
      * \param prop The property whose interpolation should be stopped
      */
-    void stopInterpolation(Property* prop);
+    void stopBouncing(Property* prop);
 
     /**
      * Returns the Lua library that contains all Lua functions available to change the

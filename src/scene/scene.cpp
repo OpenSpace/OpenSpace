@@ -642,7 +642,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
 void Scene::addPropertyInterpolation(Property* prop, float durationSeconds,
                                      std::string postScript,
                                      ghoul::EasingFunction easingFunction,
-                                     bool isBouncing)
+                                     bool shouldBounce)
 {
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
     ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
@@ -670,7 +670,7 @@ void Scene::addPropertyInterpolation(Property* prop, float durationSeconds,
             info.durationSeconds = durationSeconds;
             info.postScript = std::move(postScript);
             info.easingFunction = func;
-            info.isBouncing = isBouncing;
+            info.isBouncing = shouldBounce;
             info.bouncingShouldStop = false;
             info.bouncingShouldStopT = -1.f;
             info.bouncingAbortTime = std::chrono::time_point<std::chrono::steady_clock>();
@@ -686,7 +686,7 @@ void Scene::addPropertyInterpolation(Property* prop, float durationSeconds,
         .durationSeconds = durationSeconds,
         .postScript = std::move(postScript),
         .easingFunction = func,
-        .isBouncing = isBouncing
+        .isBouncing = shouldBounce
     };
     _propertyInterpolationInfos.push_back(std::move(i));
 }
@@ -800,7 +800,7 @@ void Scene::updateInterpolations() {
     );
 }
 
-void Scene::stopInterpolation(Property* prop) {
+void Scene::stopBouncing(Property* prop) {
     ghoul_assert(prop, "No property provided");
 
     auto it = std::find_if(

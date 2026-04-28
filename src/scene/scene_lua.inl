@@ -731,7 +731,7 @@ namespace {
     if (!prop) {
         throw ghoul::lua::LuaError(std::format("Error finding property '{}'", uri));
     }
-    global::renderEngine->scene()->stopInterpolation(prop);
+    global::renderEngine->scene()->stopBouncing(prop);
 }
 
 /**
