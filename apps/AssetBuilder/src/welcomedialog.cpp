@@ -79,7 +79,7 @@ void WelcomeDialog::browseForFile() {
     }
 
     _selectedAction = Action::OpenFile;
-    _selectedFile = std::filesystem::path(path.toStdString());
+    _selectedFile = std::filesystem::path(path.toStdWString());
     accept();
 }
 
