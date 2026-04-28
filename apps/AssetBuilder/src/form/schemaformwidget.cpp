@@ -635,6 +635,326 @@ namespace {
             Q_ASSERT(properties.at(key).isList());
         }
     }
+    QPushButton* createInfoButton(const SchemaMember& member, QWidget* parent,
+                                  const std::function<void(const Documentation&)>& onInfo)
+    {
+        const Documentation info = {
+            .name = QString::fromStdString(member.name),
+            .type = QString::fromStdString(member.type),
+            .isOptional = member.isOptional,
+            .description = QString::fromStdString(member.description),
+            .documentation = QString::fromStdString(member.documentation)
+        };
+
+        QPushButton* button = new QPushButton("i", parent);
+        button->setObjectName("field-info-button");
+        button->setFixedSize(InfoButtonSize, InfoButtonSize);
+
+        QObject::connect(
+            button, &QPushButton::clicked,
+            button, [info, onInfo]() { onInfo(info); }
+        );
+        return button;
+    }
+
+    QWidget* createBooleanWidget(const std::string& name, PropertyMap& properties,
+                                 const std::function<void()>& onChange)
+    {
+        PropertyMap* props = &properties;
+        QCheckBox* checkBox = new QCheckBox();
+
+        QObject::connect(
+            checkBox,
+            &QCheckBox::toggled,
+            checkBox,
+            [props, name, onChange](bool checked) {
+                (*props)[name] = PropertyValue{ checked };
+                onChange();
+            }
+        );
+        return checkBox;
+    }
+
+    QWidget* createIntegerWidget(const std::string& name, const std::string& description,
+                                 PropertyMap& properties,
+                                 const std::function<void()>& onChange)
+    {
+        PropertyMap* props = &properties;
+        QLineEdit* lineEdit = new QLineEdit();
+        const NumericRange range = parseRange(description);
+        // Cannot cast the NumericRange double defaults to int (overflow / UB), so fall
+        // back to int limits when no bound was parsed
+        const int lowerBound =
+            range.hasMin ? static_cast<int>(range.min) : std::numeric_limits<int>::min();
+        const int upperBound =
+            range.hasMax ? static_cast<int>(range.max) : std::numeric_limits<int>::max();
+        lineEdit->setValidator(new QIntValidator(lowerBound, upperBound, lineEdit));
+        lineEdit->setPlaceholderText(rangePlaceholder(range, true));
+
+        QObject::connect(
+            lineEdit,
+            &QLineEdit::textEdited,
+            lineEdit,
+            [props, name, onChange](const QString& text) {
+                bool ok = false;
+                const int value = text.toInt(&ok);
+                (*props)[name] = PropertyValue{
+                    static_cast<double>(ok ? value : 0)
+                };
+                onChange();
+            }
+        );
+        return lineEdit;
+    }
+
+    QWidget* createDoubleWidget(const std::string& name, const std::string& description,
+                                PropertyMap& properties,
+                                const std::function<void()>& onChange)
+    {
+        PropertyMap* props = &properties;
+        QLineEdit* lineEdit = new QLineEdit();
+        const NumericRange range = parseRange(description);
+        // QDoubleValidator misbehaves with extreme double values, so use +/- 1e15 as a
+        // practical fallback when no bound was parsed
+        const double lowerBound = range.hasMin ? range.min : -1e15;
+        const double upperBound = range.hasMax ? range.max : 1e15;
+        lineEdit->setValidator(
+            new QDoubleValidator(lowerBound, upperBound, -1, lineEdit)
+        );
+        lineEdit->setPlaceholderText(rangePlaceholder(range, false));
+        QObject::connect(
+            lineEdit,
+            &QLineEdit::textEdited,
+            lineEdit,
+            [props, name, onChange](const QString& text) {
+                bool ok = false;
+                const double value = text.toDouble(&ok);
+                (*props)[name] = PropertyValue{ ok ? value : 0.0 };
+                onChange();
+            }
+        );
+        return lineEdit;
+    }
+
+    QWidget* createMatrixWidget(const std::string& name, const MatrixTypeEntry& entry,
+                                PropertyMap& properties,
+                                const std::function<void()>& onChange)
+    {
+        PropertyMap* props = &properties;
+        MatrixWidget* matrixWidget = entry.isColor ?
+            static_cast<MatrixWidget*>(new ColorWidget(entry.nComponents)) :
+            new MatrixWidget(entry.nComponents, entry.nColumns, entry.isInteger);
+        QObject::connect(
+            matrixWidget,
+            &MatrixWidget::valueChanged,
+            matrixWidget,
+            [props, name, matrixWidget, onChange]() {
+                (*props)[name] = PropertyValue{ matrixWidget->values() };
+                onChange();
+            }
+        );
+        return matrixWidget;
+    }
+
+    QWidget* createFileWidget(const std::string& name, const std::string& description,
+                              bool isDirectory, PropertyMap& properties,
+                              const std::function<void()>& onChange)
+    {
+        PropertyMap* props = &properties;
+        QWidget* container = new QWidget();
+        container->setObjectName(FileContainerName);
+        QBoxLayout* horizontalLayout = new QHBoxLayout(container);
+        horizontalLayout->setContentsMargins(0, 0, 0, 0);
+        horizontalLayout->setSpacing(4);
+
+        QLineEdit* lineEdit = new QLineEdit(container);
+        if (!description.empty()) {
+            lineEdit->setPlaceholderText(QString::fromStdString(description));
+        }
+        else {
+            lineEdit->setPlaceholderText(
+                isDirectory ? "Path to directory..." : "Path to file..."
+            );
+        }
+        QObject::connect(
+            lineEdit,
+            &QLineEdit::textEdited,
+            lineEdit,
+            [props, name, onChange](const QString& text) {
+                (*props)[name] = PropertyValue{ text.toStdString() };
+                onChange();
+            }
+        );
+
+        QPushButton* browseButton = new QPushButton("Browse...", container);
+        browseButton->setObjectName("file-browse-button");
+        QObject::connect(
+            browseButton,
+            &QPushButton::clicked,
+            container,
+            [container, lineEdit, props, name, isDirectory, onChange]() {
+                const QString path = isDirectory ?
+                    QFileDialog::getExistingDirectory(container, "Select Directory") :
+                    QFileDialog::getOpenFileName(container, "Select File");
+                if (!path.isEmpty()) {
+                    lineEdit->setText(path);
+                    (*props)[name] = PropertyValue{ path.toStdString() };
+                    onChange();
+                }
+            }
+        );
+
+        horizontalLayout->addWidget(lineEdit, 1);
+        horizontalLayout->addWidget(browseButton);
+        return container;
+    }
+
+    QWidget* createDateTimeWidget(const std::string& name, PropertyMap& properties,
+                                  const std::function<void()>& onChange)
+    {
+        PropertyMap* props = &properties;
+        QLineEdit* lineEdit = new QLineEdit();
+        lineEdit->setObjectName(DateEditName);
+        // Human-readable hint; the actual Qt format string is DateDisplayFormat
+        lineEdit->setPlaceholderText("YYYY-MM-DD hh:mm:ss");
+        lineEdit->setValidator(new QRegularExpressionValidator(
+            QRegularExpression(R"(^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$)"),
+            lineEdit
+        ));
+        QObject::connect(
+            lineEdit,
+            &QLineEdit::textEdited,
+            lineEdit,
+            [props, name, onChange](const QString& text) {
+                const QDateTime dateTime = QDateTime::fromString(text, DateDisplayFormat);
+                if (dateTime.isValid()) {
+                    (*props)[name] = PropertyValue{
+                        dateTime.toUTC().toString(Qt::ISODate).toStdString()
+                    };
+                }
+                onChange();
+            }
+        );
+        return lineEdit;
+    }
+
+    QWidget* createIdentifierComboWidget(const SchemaMember& member,
+                                         IdentifierRegistry* registry,
+                                         PropertyMap& properties,
+                                         const std::function<void()>& onChange,
+                                         const std::function<void()>& onBrowse)
+    {
+        PropertyMap* props = &properties;
+        QWidget* container = new QWidget();
+        QBoxLayout* horizontalLayout = new QHBoxLayout(container);
+        horizontalLayout->setContentsMargins(0, 0, 0, 0);
+        horizontalLayout->setSpacing(4);
+
+        // Returns identifiers excluding this node's own
+        auto filteredIdentifiers = [registry, props]() {
+            QStringList identifiers = registry->knownIdentifiers();
+            const auto it = props->find("Identifier");
+            if (it != props->end() && it->second.isString()) {
+                identifiers.removeAll(QString::fromStdString(it->second.toString()));
+            }
+            return identifiers;
+            };
+
+        QComboBox* combo = new QComboBox(container);
+        combo->setEditable(true);
+        combo->addItems(filteredIdentifiers());
+        if (!member.description.empty()) {
+            combo->lineEdit()->setPlaceholderText(
+                QString::fromStdString(member.description)
+            );
+        }
+
+        QObject::connect(
+            registry,
+            &IdentifierRegistry::registryChanged,
+            combo,
+            [combo, filteredIdentifiers]() {
+                const QString current = combo->currentText();
+                combo->blockSignals(true);
+                combo->clear();
+                combo->addItems(filteredIdentifiers());
+                combo->setCurrentText(current);
+                combo->blockSignals(false);
+            }
+        );
+        QObject::connect(
+            combo,
+            &QComboBox::currentTextChanged,
+            combo,
+            [props, name = member.name, onChange](const QString& text) {
+                (*props)[name] = PropertyValue{ text.toStdString() };
+                onChange();
+            }
+        );
+
+        QPushButton* browseButton = new QPushButton("Browse .jasset", container);
+        browseButton->setObjectName("identifier-browse-button");
+        QObject::connect(
+            browseButton, &QPushButton::clicked,
+            browseButton, onBrowse
+        );
+
+        horizontalLayout->addWidget(combo, 1);
+        horizontalLayout->addWidget(browseButton);
+        return container;
+    }
+
+    QWidget* createInListWidget(const std::string& name, const QStringList& listOptions,
+                                PropertyMap& properties,
+                                const std::function<void()>& onChange)
+    {
+        PropertyMap* props = &properties;
+        QComboBox* combo = new QComboBox();
+        combo->addItem("Select...");
+        combo->addItems(listOptions);
+        combo->setCurrentIndex(0);
+        QObject::connect(
+            combo,
+            &QComboBox::currentIndexChanged,
+            combo,
+            [props, name, combo, onChange](int index) {
+                // Index 0 is the "Select..." placeholder - erase the property so the
+                // placeholder choice is not serialized into the asset
+                if (index <= 0) {
+                    props->erase(name);
+                }
+                else {
+                    (*props)[name] = PropertyValue{ combo->currentText().toStdString() };
+                }
+                onChange();
+            }
+        );
+        return combo;
+    }
+
+    QWidget* createStringWidget(const std::string& name, const std::string& description,
+                                PropertyMap& properties,
+                                const std::function<void()>& onChange)
+    {
+        PropertyMap* props = &properties;
+        QLineEdit* lineEdit = new QLineEdit();
+
+        if (!description.empty()) {
+            lineEdit->setPlaceholderText(QString::fromStdString(description));
+        }
+
+        QObject::connect(
+            lineEdit,
+            &QLineEdit::textEdited,
+            lineEdit,
+            [props, name, onChange](const QString& text) {
+                (*props)[name] = PropertyValue{ text.toStdString() };
+                onChange();
+            }
+        );
+
+        return lineEdit;
+    }
 } // namespace
 
 SchemaFormWidget::SchemaFormWidget(std::vector<SchemaMember> members,
@@ -675,7 +995,10 @@ void SchemaFormWidget::addMemberToGrid(QGridLayout* grid, int row, int memberInd
         labelLayout->setContentsMargins(0, 0, 0, 0);
         labelLayout->setSpacing(4);
 
-        labelLayout->addWidget(createInfoButton(member, labelContainer));
+        auto onInfo = [this](const Documentation& info) {
+            emit documentationRequested(info);
+        };
+        labelLayout->addWidget(createInfoButton(member, labelContainer, onInfo));
 
         QLabel* nameLabel = new QLabel(splitPascalCase(member.name), labelContainer);
         nameLabel->setObjectName("field-label");
@@ -699,28 +1022,6 @@ void SchemaFormWidget::addMemberToGrid(QGridLayout* grid, int row, int memberInd
     else {
         grid->addWidget(field, row, 1);
     }
-}
-
-QPushButton* SchemaFormWidget::createInfoButton(const SchemaMember& member,
-                                                QWidget* parent)
-{
-    const Documentation info = {
-        .name = QString::fromStdString(member.name),
-        .type = QString::fromStdString(member.type),
-        .isOptional = member.isOptional,
-        .description = QString::fromStdString(member.description),
-        .documentation = QString::fromStdString(member.documentation)
-    };
-
-    QPushButton* button = new QPushButton("i", parent);
-    button->setObjectName("field-info-button");
-    button->setFixedSize(InfoButtonSize, InfoButtonSize);
-
-    connect(
-        button, &QPushButton::clicked,
-        this, [this, info]() { emit documentationRequested(info); }
-    );
-    return button;
 }
 
 QWidget* SchemaFormWidget::createOptionalWrapper(int memberIndex, QWidget* field) {
@@ -1597,6 +1898,9 @@ void SchemaFormWidget::buildInlineTableContent(CollapsibleSection* section,
 
 QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
     const QString typeString = QString::fromStdString(member.type);
+    auto onChange = [this]() {
+        emit fieldChanged();
+    };
 
     // Union types (contain ", " or " or ")
     if (typeString.contains(", ") || typeString.contains(" or ")) {
@@ -1604,290 +1908,61 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
     }
 
     if (member.type == "Boolean") {
-        return createBooleanWidget(member.name);
+        return createBooleanWidget(member.name, _properties, onChange);
     }
     if (member.type == "Integer") {
-        return createIntegerWidget(member.name, member.description);
+        return createIntegerWidget(member.name, member.description, _properties, onChange);
     }
     if (member.type == "Double") {
-        return createDoubleWidget(member.name, member.description);
+        return createDoubleWidget(member.name, member.description, _properties, onChange);
     }
     for (const MatrixTypeEntry& entry : MatrixTypeLookup) {
         if (member.type == entry.typeName) {
-            return createMatrixWidget(member.name, entry);
+            return createMatrixWidget(member.name, entry, _properties, onChange);
         }
     }
     if (member.type == "File") {
-        return createFileWidget(member.name, member.description, false);
+        return createFileWidget(
+            member.name,
+            member.description,
+            false,
+            _properties,
+            onChange
+        );
     }
     if (member.type == "Directory") {
-        return createFileWidget(member.name, member.description, true);
+        return createFileWidget(
+            member.name,
+            member.description,
+            true,
+            _properties,
+            onChange
+        );
     }
     if (member.type == "Date and time") {
-        return createDateTimeWidget(member.name);
+        return createDateTimeWidget(member.name, _properties, onChange);
     }
     // Identifier fields that reference other nodes (not the node's own Identifier
     // definition) get a registry combo + browse button
     if (member.type == "Identifier" && member.name != "Identifier" && _registry) {
-        return createIdentifierComboWidget(member);
+        auto onBrowse = [this]() {
+            emit browseJassetRequested();
+        };
+        return createIdentifierComboWidget(
+            member,
+            _registry,
+            _properties,
+            onChange,
+            onBrowse
+        );
     }
     const QStringList options = parseInList(member.description);
     if (!options.isEmpty()) {
-        return createInListWidget(member.name, options);
+        return createInListWidget(member.name, options, _properties, onChange);
     }
 
     // Fallback to string
-    return createStringWidget(member);
-}
-
-QWidget* SchemaFormWidget::createBooleanWidget(const std::string& name) {
-    QCheckBox* checkBox = new QCheckBox(this);
-
-    connect(
-        checkBox,
-        &QCheckBox::toggled,
-        this,
-        [this, name](bool checked) {
-            _properties[name] = PropertyValue{ checked };
-            emit fieldChanged();
-        }
-    );
-    return checkBox;
-}
-
-QWidget* SchemaFormWidget::createIntegerWidget(const std::string& name,
-    const std::string& description)
-{
-    QLineEdit* lineEdit = new QLineEdit(this);
-    const NumericRange range = parseRange(description);
-    // Cannot cast the NumericRange double defaults to int (overflow / UB), so fall back
-    // to int limits when no bound was parsed
-    const int lowerBound =
-        range.hasMin ? static_cast<int>(range.min) : std::numeric_limits<int>::min();
-    const int upperBound =
-        range.hasMax ? static_cast<int>(range.max) : std::numeric_limits<int>::max();
-    lineEdit->setValidator(new QIntValidator(lowerBound, upperBound, lineEdit));
-    lineEdit->setPlaceholderText(rangePlaceholder(range, true));
-
-    connect(
-        lineEdit,
-        &QLineEdit::textEdited,
-        this,
-        [this, name](const QString& text) {
-            bool ok = false;
-            const int value = text.toInt(&ok);
-            _properties[name] = PropertyValue{
-                static_cast<double>(ok ? value : 0)
-            };
-            emit fieldChanged();
-        }
-    );
-    return lineEdit;
-}
-
-QWidget* SchemaFormWidget::createDoubleWidget(const std::string& name,
-    const std::string& description)
-{
-    QLineEdit* lineEdit = new QLineEdit(this);
-    const NumericRange range = parseRange(description);
-    // QDoubleValidator misbehaves with extreme double values, so use +/- 1e15 as a
-    // practical fallback when no bound was parsed
-    const double lowerBound = range.hasMin ? range.min : -1e15;
-    const double upperBound = range.hasMax ? range.max : 1e15;
-    lineEdit->setValidator(new QDoubleValidator(lowerBound, upperBound, -1, lineEdit));
-    lineEdit->setPlaceholderText(rangePlaceholder(range, false));
-    connect(
-        lineEdit,
-        &QLineEdit::textEdited,
-        this,
-        [this, name](const QString& text) {
-            bool ok = false;
-            const double value = text.toDouble(&ok);
-            _properties[name] = PropertyValue{ ok ? value : 0.0 };
-            emit fieldChanged();
-        }
-    );
-    return lineEdit;
-}
-
-QWidget* SchemaFormWidget::createMatrixWidget(const std::string& name,
-    const MatrixTypeEntry& entry)
-{
-    MatrixWidget* matrixWidget = entry.isColor ?
-        static_cast<MatrixWidget*>(new ColorWidget(entry.nComponents, this)) :
-        new MatrixWidget(entry.nComponents, entry.nColumns, entry.isInteger, this);
-    connect(
-        matrixWidget,
-        &MatrixWidget::valueChanged,
-        this,
-        [this, name, matrixWidget]() {
-            _properties[name] = PropertyValue{ matrixWidget->values() };
-            emit fieldChanged();
-        }
-    );
-    return matrixWidget;
-}
-
-QWidget* SchemaFormWidget::createFileWidget(const std::string& name,
-    const std::string& description,
-    bool isDirectory)
-{
-    QWidget* container = new QWidget(this);
-    container->setObjectName(FileContainerName);
-    QBoxLayout* horizontalLayout = new QHBoxLayout(container);
-    horizontalLayout->setContentsMargins(0, 0, 0, 0);
-    horizontalLayout->setSpacing(4);
-
-    QLineEdit* lineEdit = new QLineEdit(container);
-    if (!description.empty()) {
-        lineEdit->setPlaceholderText(QString::fromStdString(description));
-    }
-    else {
-        lineEdit->setPlaceholderText(
-            isDirectory ? "Path to directory..." : "Path to file..."
-        );
-    }
-    connect(
-        lineEdit,
-        &QLineEdit::textEdited,
-        this,
-        [this, name](const QString& text) {
-            _properties[name] = PropertyValue{ text.toStdString() };
-            emit fieldChanged();
-        }
-    );
-
-    QPushButton* browseButton = new QPushButton("Browse...", container);
-    browseButton->setObjectName("file-browse-button");
-    connect(
-        browseButton,
-        &QPushButton::clicked,
-        this,
-        [this, lineEdit, name, isDirectory]() {
-            const QString path = isDirectory ?
-                QFileDialog::getExistingDirectory(this, "Select Directory") :
-                QFileDialog::getOpenFileName(this, "Select File");
-            if (!path.isEmpty()) {
-                lineEdit->setText(path);
-                _properties[name] = PropertyValue{ path.toStdString() };
-                emit fieldChanged();
-            }
-        }
-    );
-
-    horizontalLayout->addWidget(lineEdit, 1);
-    horizontalLayout->addWidget(browseButton);
-    return container;
-}
-
-QWidget* SchemaFormWidget::createDateTimeWidget(const std::string& name) {
-    QLineEdit* lineEdit = new QLineEdit(this);
-    lineEdit->setObjectName(DateEditName);
-    // Human-readable hint; the actual Qt format string is DateDisplayFormat
-    lineEdit->setPlaceholderText("YYYY-MM-DD hh:mm:ss");
-    lineEdit->setValidator(new QRegularExpressionValidator(
-        QRegularExpression(R"(^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$)"),
-        lineEdit
-    ));
-    connect(
-        lineEdit,
-        &QLineEdit::textEdited,
-        this,
-        [this, name](const QString& text) {
-            const QDateTime dateTime = QDateTime::fromString(text, DateDisplayFormat);
-            if (dateTime.isValid()) {
-                _properties[name] = PropertyValue{
-                    dateTime.toUTC().toString(Qt::ISODate).toStdString()
-                };
-            }
-            emit fieldChanged();
-        }
-    );
-    return lineEdit;
-}
-
-QWidget* SchemaFormWidget::createIdentifierComboWidget(const SchemaMember& member) {
-    QWidget* container = new QWidget(this);
-    QBoxLayout* horizontalLayout = new QHBoxLayout(container);
-    horizontalLayout->setContentsMargins(0, 0, 0, 0);
-    horizontalLayout->setSpacing(4);
-
-    // Returns identifiers excluding this node's own
-    auto filteredIdentifiers = [this]() {
-        QStringList identifiers = _registry->knownIdentifiers();
-        const auto it = _properties.find("Identifier");
-        if (it != _properties.end() && it->second.isString()) {
-            identifiers.removeAll(QString::fromStdString(it->second.toString()));
-        }
-        return identifiers;
-        };
-
-    QComboBox* combo = new QComboBox(container);
-    combo->setEditable(true);
-    combo->addItems(filteredIdentifiers());
-    if (!member.description.empty()) {
-        combo->lineEdit()->setPlaceholderText(QString::fromStdString(member.description));
-    }
-
-    connect(
-        _registry,
-        &IdentifierRegistry::registryChanged,
-        combo,
-        [combo, filteredIdentifiers]() {
-            const QString current = combo->currentText();
-            combo->blockSignals(true);
-            combo->clear();
-            combo->addItems(filteredIdentifiers());
-            combo->setCurrentText(current);
-            combo->blockSignals(false);
-        }
-    );
-    connect(
-        combo,
-        &QComboBox::currentTextChanged,
-        this,
-        [this, name = member.name](const QString& text) {
-            _properties[name] = PropertyValue{ text.toStdString() };
-            emit fieldChanged();
-        }
-    );
-
-    QPushButton* browseButton = new QPushButton("Browse .jasset", container);
-    browseButton->setObjectName("identifier-browse-button");
-    connect(
-        browseButton, &QPushButton::clicked,
-        this, &SchemaFormWidget::browseJassetRequested
-    );
-
-    horizontalLayout->addWidget(combo, 1);
-    horizontalLayout->addWidget(browseButton);
-    return container;
-}
-
-QWidget* SchemaFormWidget::createInListWidget(const std::string& name,
-    const QStringList& listOptions)
-{
-    QComboBox* combo = new QComboBox(this);
-    combo->addItem("Select...");
-    combo->addItems(listOptions);
-    combo->setCurrentIndex(0);
-    connect(
-        combo,
-        &QComboBox::currentIndexChanged,
-        this,
-        [this, name, combo](int index) {
-            // Index 0 is the "Select..." placeholder - erase the property so the
-            // placeholder choice is not serialized into the asset
-            if (index <= 0) {
-                _properties.erase(name);
-            }
-            else {
-                _properties[name] = PropertyValue{ combo->currentText().toStdString() };
-            }
-            emit fieldChanged();
-        }
-    );
-    return combo;
+    return createStringWidget(member.name, member.description, _properties, onChange);
 }
 
 QWidget* SchemaFormWidget::createUnionWidget(const SchemaMember& member) {
@@ -1933,24 +2008,4 @@ QWidget* SchemaFormWidget::createUnionWidget(const SchemaMember& member) {
     );
 
     return container;
-}
-
-QWidget* SchemaFormWidget::createStringWidget(const SchemaMember& member) {
-    QLineEdit* lineEdit = new QLineEdit(this);
-
-    if (!member.description.empty()) {
-        lineEdit->setPlaceholderText(QString::fromStdString(member.description));
-    }
-
-    connect(
-        lineEdit,
-        &QLineEdit::textEdited,
-        this,
-        [this, name = member.name](const QString& text) {
-            _properties[name] = PropertyValue{ text.toStdString() };
-            emit fieldChanged();
-        }
-    );
-
-    return lineEdit;
 }
