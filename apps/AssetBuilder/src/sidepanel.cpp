@@ -42,7 +42,7 @@ void SidePanel::setAsset(JAsset* asset) {
     _metadata->setAsset(asset);
 }
 
-void SidePanel::setFilePath(const std::filesystem::path* path) {
+void SidePanel::setFilePath(const std::filesystem::path& path) {
     _dependencies->setFilePath(path);
 }
 

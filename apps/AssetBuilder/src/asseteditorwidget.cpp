@@ -160,6 +160,7 @@ void AssetEditorWidget::onContentModified() {
 
 void AssetEditorWidget::refreshPanels() {
     _identifierRegistry->rebuildFromAsset(_asset, _filePath);
+    _sidePanel->setFilePath(_filePath);
     _sidePanel->refreshAll();
 }
 
@@ -179,7 +180,7 @@ void AssetEditorWidget::buildUi() {
     _identifierRegistry = new IdentifierRegistry(this);
 
     _sidePanel->setAsset(&_asset);
-    _sidePanel->setFilePath(&_filePath);
+    _sidePanel->setFilePath(_filePath);
     _editorPanel->setAsset(&_asset);
     _editorPanel->setIdentifierRegistry(_identifierRegistry);
 

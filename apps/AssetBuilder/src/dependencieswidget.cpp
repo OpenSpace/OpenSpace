@@ -73,15 +73,15 @@ void DependenciesWidget::setAsset(JAsset* asset) {
     _asset = asset;
 }
 
-void DependenciesWidget::setFilePath(const std::filesystem::path* path) {
+void DependenciesWidget::setFilePath(const std::filesystem::path& path) {
     _filePath = path;
 }
 
 std::filesystem::path DependenciesWidget::assetDir() const {
-    if (!_filePath || _filePath->empty()) {
+    if (_filePath.empty()) {
         return {};
     }
-    return _filePath->parent_path();
+    return _filePath.parent_path();
 }
 
 void DependenciesWidget::refresh() {
