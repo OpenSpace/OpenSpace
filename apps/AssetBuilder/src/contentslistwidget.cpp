@@ -131,6 +131,7 @@ void ContentsListWidget::addSceneGraphNode() {
 
     ContentItem item;
     item.type = "SceneGraphNode";
+    item.isDirty = true;
     item.properties["Identifier"] = PropertyValue{ uniqueId };
     _asset->contents.push_back(std::move(item));
 

@@ -254,7 +254,10 @@ bool SearchDropdown::eventFilter(QObject* watched, QEvent* event) {
                 if (_isOpen) {
                     QListWidgetItem* currentItem = _listWidget->currentItem();
                     if (currentItem) {
-                        selectItem(currentItem->data(Qt::UserRole).toInt());
+                        const int index = currentItem->data(Qt::UserRole).toInt();
+                        if (index >= 0) {
+                            selectItem(index);
+                        }
                     }
                 }
                 return true;
