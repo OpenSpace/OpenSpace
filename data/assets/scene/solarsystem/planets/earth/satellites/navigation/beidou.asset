@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Beidou)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_beidou",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=beidou&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=beidou&FORMAT=csv",
   Filename = "beidou.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -18,7 +18,7 @@ local BeidouSatellites = {
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "beidou.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
     TrailFade = 15,

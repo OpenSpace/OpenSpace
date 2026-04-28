@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (SES)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_ses",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=ses&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=ses&FORMAT=csv",
   Filename = "ses.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -18,7 +18,7 @@ local SesSatellites = {
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "ses.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
     TrailFade = 10,

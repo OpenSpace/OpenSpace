@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Last 30 Days)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_tle-new",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=last-30-days&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=last-30-days&FORMAT=csv",
   Filename = "tle-new.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -18,7 +18,7 @@ local Last30DaysSatellites = {
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "tle-new.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.65, 0.25, 0.45 },
     TrailFade = 15,

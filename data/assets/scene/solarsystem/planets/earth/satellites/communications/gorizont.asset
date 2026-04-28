@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Gorizont)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_gorizont",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=gorizont&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=gorizont&FORMAT=csv",
   Filename = "gorizont.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -18,7 +18,7 @@ local GorizontSatellites = {
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "gorizont.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
     TrailFade = 5,

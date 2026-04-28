@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Breeze-M Breakup)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_2012-044",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?INTDES=2012-044&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?INTDES=2012-044&FORMAT=csv",
   Filename = "2012-044.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -18,7 +18,7 @@ local DebrisBreezem = {
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "2012-044.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.25, 0.35, 0.45 },
     TrailFade = 15,

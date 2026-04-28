@@ -582,7 +582,7 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
     }
 }
 
-RenderablePointCloud::Texture::Texture()
+RenderablePointCloud::TextureOwner::TextureOwner()
     : PropertyOwner({ "Texture", "Texture", "" })
     , enabled(TextureEnabledInfo, true)
     , allowCompression(AllowTextureCompressionInfo, true)
@@ -1742,8 +1742,8 @@ size_t TextureFormatHash::operator()(const TextureFormat& k) const {
     size_t seed = 0;
 
     // Standard hash-combine pattern (similar to boost::hash_combine)
-    auto hash_combine = [](size_t& seed, size_t value) {
-        seed ^= value + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    auto hash_combine = [](size_t& s, size_t value) {
+        s ^= value + 0x9e3779b9 + (s << 6) + (s >> 2);
     };
 
     hash_combine(seed, std::hash<uint32_t>{}(k.resolution.x));

@@ -561,7 +561,6 @@ int propertySetValue(lua_State* L) {
         { 2, 6 },
         "lua::property_setValue"
     );
-    defer { lua_settop(L, 0); };
 
     std::string uriOrRegex =
         ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No);
@@ -628,6 +627,8 @@ int propertySetValue(lua_State* L) {
 
         easingMethod = ghoul::easingFunctionFromName(easingMethodName);
     }
+
+    defer { lua_settop(L, 0); };
 
     if constexpr (optimization) {
         Property* prop = property(uriOrRegex);

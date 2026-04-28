@@ -210,8 +210,8 @@ protected:
     UIntProperty _nDataPoints;
     BoolProperty _hasOrientationData;
 
-    struct Texture : PropertyOwner {
-        Texture();
+    struct TextureOwner : PropertyOwner {
+        TextureOwner();
 
         BoolProperty enabled;
         BoolProperty allowCompression;
@@ -219,7 +219,7 @@ protected:
         StringProperty spriteTexturePath;
         StringProperty inputMode;
     };
-    Texture _texture;
+    TextureOwner _texture;
     TextureInputMode _textureMode = TextureInputMode::Single;
     std::filesystem::path _texturesDirectory;
 

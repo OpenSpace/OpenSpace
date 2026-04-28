@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (CubeSat)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_cubesat",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=cubesat&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=cubesat&FORMAT=csv",
   Filename = "cubesat.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -18,7 +18,7 @@ local Cubesats = {
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "cubesat.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
     TrailFade = 15,

@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (SNPP)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_snpp",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?CATNR=37849&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?CATNR=37849&FORMAT=csv",
   Filename = "SNPP.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -21,7 +21,7 @@ local SNPPTrail = {
       Type = "GPTranslation",
       Observer = earthAsset.EarthInertial.Identifier,
       File = omm .. "SNPP.txt",
-      Format = "OMM",
+      Format = "CSV",
       RenderBinMode = "PostDeferredTransparent"
     },
     Color = { 0.9, 0.6715, 0.0 },
@@ -38,7 +38,7 @@ local SNPPTrail = {
 
 
 asset.onInitialize(function()
-  local s = openspace.space.readKeplerFile(omm .. "SNPP.txt", "OMM")
+  local s = openspace.space.readKeplerFile(omm .. "SNPP.txt", "CSV")
   SNPPTrail.Renderable.Period = s[1].Period / (60 * 60 * 24)
 
   openspace.addSceneGraphNode(SNPPTrail)

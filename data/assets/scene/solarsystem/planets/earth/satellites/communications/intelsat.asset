@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Intelsat)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_intelsat",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=intelsat&FORMAT=kvn",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=intelsat&FORMAT=csv",
   Filename = "intelsat.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -18,7 +18,7 @@ local IntelsatSatellites = {
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "intelsat.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
     TrailFade = 5,

@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/list/intlistproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
@@ -173,7 +174,6 @@ private:
     void renderCameraInformation();
     void renderShutdownInformation(float timer, float fullTime);
     void renderDashboard() const;
-    float combinedBlackoutFactor() const;
 
     Camera* _camera = nullptr;
     Scene* _scene = nullptr;
@@ -197,8 +197,18 @@ private:
     BoolProperty _screenshotUseDateTime;
     BoolProperty _disableMasterRendering;
 
-    FloatProperty _globalBlackOutFactor;
-    BoolProperty _applyBlackoutToMaster;
+    struct Blackout {
+        PropertyOwner owner;
+        FloatProperty factor;
+        Vec4Property color;
+        FloatProperty imageFactor;
+        StringProperty imagePath;
+        BoolProperty applyToMaster;
+        bool imageIsDirty = false;
+        std::unique_ptr<ghoul::opengl::Texture> imageTexture;
+    };
+    Blackout _globalBlackout;
+
 
     BoolProperty _enableFXAA;
 

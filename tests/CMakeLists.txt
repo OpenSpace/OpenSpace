@@ -32,6 +32,7 @@ add_executable(
   test_horizons.cpp
   test_iswamanager.cpp
   test_jsonformatting.cpp
+  test_kepler.cpp
   test_latlonpatch.cpp
   test_lrucache.cpp
   test_lua_createsinglecolorimage.cpp
