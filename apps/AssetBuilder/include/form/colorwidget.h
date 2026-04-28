@@ -27,8 +27,6 @@
 
 #include "form/matrixwidget.h"
 
-#include <QColor>
-
 class QPushButton;
 
 /**
@@ -47,13 +45,6 @@ public:
     void setValues(const PropertyList& vals) override;
 
 private:
-    /**
-     * Converts current field values to a QColor for the swatch and color dialog.
-     *
-     * \return QColor with RGB or RGBA components from the field values
-     */
-    QColor toQColor() const;
-
     /**
      * Updates the swatch button background to reflect the current field values.
      */
