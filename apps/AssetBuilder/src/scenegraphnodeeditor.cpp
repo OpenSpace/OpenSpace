@@ -28,7 +28,6 @@
 #include "form/schemaformwidget.h"
 #include "utils.h"
 
-#include <ghoul/misc/assert.h>
 #include <QLabel>
 #include <QLineEdit>
 #include <QVBoxLayout>
@@ -177,8 +176,10 @@ void SceneGraphNodeEditor::wireIdentifierAutoGeneration(
     SchemaFormWidget* additionalForm,
     SchemaFormWidget* guiForm)
 {
-    ghoul_assert(additionalForm, "Additional form must exist");
-    ghoul_assert(guiForm, "GUI form must exist");
+    if (!additionalForm || !guiForm) {
+        qWarning("wireIdentifierAutoGeneration: form is null");
+        return;
+    }
 
     QLineEdit* identifierEdit = qobject_cast<QLineEdit*>(
         additionalForm->widgetForMember("Identifier")
@@ -186,8 +187,10 @@ void SceneGraphNodeEditor::wireIdentifierAutoGeneration(
     QLineEdit* nameEdit = qobject_cast<QLineEdit*>(
         guiForm->widgetForMember("Name")
     );
-    ghoul_assert(identifierEdit, "Identifier widget must exist");
-    ghoul_assert(nameEdit, "Name widget must exist");
+    if (!identifierEdit || !nameEdit) {
+        qWarning("wireIdentifierAutoGeneration: widget lookup failed");
+        return;
+    }
 
     // We only wire it to the Name field because it updates when quick access is updated
     connect(

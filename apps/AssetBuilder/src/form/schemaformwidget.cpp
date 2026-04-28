@@ -604,7 +604,13 @@ namespace {
 
     // Ensures the item at the given index is a map, replacing it if needed
     PropertyMap& ensureListItemMap(PropertyList& items, size_t index) {
-        Q_ASSERT(index < items.size());
+        if (index >= items.size()) {
+            qWarning("ensureListItemMap: index %llu out of range (size %llu)",
+                     index, items.size());
+            static PropertyMap empty;
+            empty = PropertyMap{};
+            return empty;
+        }
         if (!items[index].isMap()) {
             items[index] = PropertyValue{ PropertyMap{} };
         }
@@ -616,7 +622,11 @@ namespace {
         if (properties.count(key) == 0 || properties.at(key).isNull()) {
             properties[key] = PropertyValue{ PropertyMap{} };
         }
-        Q_ASSERT(properties[key].isMap());
+        if (!properties[key].isMap()) {
+            qWarning("ensurePropertyMap: key '%s' is not a map, replacing",
+                     key.c_str());
+            properties[key] = PropertyValue{ PropertyMap{} };
+        }
         return properties[key].toMap();
     }
 
@@ -636,7 +646,11 @@ namespace {
         }
         else {
             // Should already be a list if it exists and isn't null or a map
-            Q_ASSERT(properties.at(key).isList());
+            if (!properties.at(key).isList()) {
+                qWarning("ensurePropertyList: key '%s' is not a list, replacing",
+                         key.c_str());
+                properties[key] = PropertyValue{ PropertyList{} };
+            }
         }
     }
     QPushButton* createInfoButton(const SchemaMember& member, QWidget* parent,
@@ -1690,8 +1704,10 @@ void SchemaFormWidget::buildRefContent(CollapsibleSection* section,
         AssetSchema::instance().findType(reference.identifier);
 
     // Both lookups should succeed if the schema is well-formed
-    Q_ASSERT(targetType);
-    Q_ASSERT(category);
+    if (!targetType || !category) {
+        qWarning("buildRefContent: schema lookup failed for '%s'",
+                 reference.identifier.c_str());
+    }
 
     // Polymorphic when the target is the base type of its category
     // (e.g. "Renderable"), or as a fallback when lookup fails

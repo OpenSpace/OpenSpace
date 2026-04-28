@@ -84,7 +84,11 @@ PropertyList MatrixWidget::values() const {
 }
 
 void MatrixWidget::setValues(const PropertyList& vals) {
-    Q_ASSERT(vals.size() == _fields.size());
+    if (vals.size() != _fields.size()) {
+        qWarning("MatrixWidget::setValues: expected %llu values, got %llu",
+                 _fields.size(), vals.size());
+        return;
+    }
     for (size_t i = 0; i < _fields.size(); i++) {
         // Suppress per-field textEdited so setText doesn't emit valueChanged
         // N times; we emit it once after the loop instead
