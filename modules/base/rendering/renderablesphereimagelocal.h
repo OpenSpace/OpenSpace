@@ -51,6 +51,10 @@ private:
     StringProperty _texturePath;
 
     std::unique_ptr<TextureComponent> _texture;
+
+    bool _isLoadingLazily = false;
+    bool _shouldUnloadTexture = false;
+    bool _textureIsDirty = false;
 };
 
 } // namespace openspace

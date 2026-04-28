@@ -88,6 +88,10 @@ void TextureComponent::loadFromFile(const std::filesystem::path& path) {
     _fileIsDirty = false;
 }
 
+void TextureComponent::unloadTexture() {
+    _texture = nullptr;
+}
+
 void TextureComponent::update() {
     if (_fileIsDirty) {
         loadFromFile(_textureFile->path());

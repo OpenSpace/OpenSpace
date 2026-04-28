@@ -58,6 +58,11 @@ namespace {
 
         // [[codegen::verbatim(TexturePathInfo.description)]]
         std::optional<std::filesystem::path> texturePath;
+
+        // If this value is set to true, the image for this plane will not be loaded at
+        // startup but rather when plane is shown for the first time. Additionally, if the
+        // plane is hidden, the image will automatically be unloaded.
+        std::optional<bool> lazyLoading;
     };
 } // namespace
 #include "screenspaceimagelocal_codegen.cpp"
@@ -71,29 +76,48 @@ Documentation ScreenSpaceImageLocal::Documentation() {
 ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _texturePath(TexturePathInfo)
+    , _textureIsDirty(_enabled)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     std::string identifier = p.identifier.value_or("ScreenSpaceImageLocal");
     setIdentifier(makeUniqueIdentifier(std::move(identifier)));
 
-    _texturePath.onChange([this]() {
-        if (!std::filesystem::is_regular_file(absPath(_texturePath))) {
-            LERRORC(
-                "ScreenSpaceImageLocal",
-                std::format(
-                    "Image '{}' did not exist for '{}'", _texturePath.value(), _identifier
-                )
-            );
-        }
-        else {
-            _textureIsDirty = true;
-        }
-    });
-    addProperty(_texturePath);
-
     if (p.texturePath.has_value()) {
         _texturePath = p.texturePath->string();
+    }
+    _texturePath.onChange([this]() { _textureIsDirty = true; });
+    addProperty(_texturePath);
+
+
+    _isLoadingLazily = p.lazyLoading.value_or(_isLoadingLazily);
+    if (_isLoadingLazily) {
+        _enabled.onChange([this]() {
+            if (_enabled) {
+                _textureIsDirty = true;
+            }
+            else {
+                _shouldUnloadTexture = true;
+            }
+        });
+    }
+}
+
+void ScreenSpaceImageLocal::initializeGL() {
+    ScreenSpaceRenderable::initializeGL();
+
+    if (!_isLoadingLazily) {
+        _texture = ghoul::io::texture::loadTexture(
+            absPath(_texturePath),
+            2,
+            ghoul::opengl::Texture::SamplerInit{
+                // TODO: AnisotropicMipMap crashes on ATI cards ---abock
+                //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
+                .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+            }
+        );
+        _objectSize = _texture->dimensions();
+        _textureIsDirty = false;
     }
 }
 
@@ -104,6 +128,11 @@ void ScreenSpaceImageLocal::deinitializeGL() {
 }
 
 void ScreenSpaceImageLocal::update() {
+    if (_shouldUnloadTexture) [[unlikely]] {
+        _texture = nullptr;
+        _shouldUnloadTexture = false;
+    }
+
     if (_textureIsDirty && !_texturePath.value().empty()) [[unlikely]] {
         _texture = ghoul::io::texture::loadTexture(
             absPath(_texturePath),
