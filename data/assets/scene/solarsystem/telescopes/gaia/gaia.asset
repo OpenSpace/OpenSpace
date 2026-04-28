@@ -51,9 +51,13 @@ local Gaia = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = model .. "gaia.obj",
-    AmbientIntensity = 0.2,
     LightSources = {
-      sunAsset.LightSource
+      sunAsset.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.4
+      }
     },
     EnableFaceCulling = false
   },
