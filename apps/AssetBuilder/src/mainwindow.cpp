@@ -28,7 +28,6 @@
 #include <utils.h>
 #include <welcomedialog.h>
 
-#include <ghoul/misc/assert.h>
 #include <QCloseEvent>
 #include <QFileDialog>
 #include <QLabel>
@@ -178,7 +177,10 @@ void MainWindow::updateTitle() {
     }
     setWindowTitle(title);
 
-    ghoul_assert(_pathLabel, "Path label must exist");
+    if (!_pathLabel) {
+        qWarning("MainWindow::updateTitle: _pathLabel is null");
+        return;
+    }
     _pathLabel->setText(_editor ? _editor->displayPath() : "");
 }
 
