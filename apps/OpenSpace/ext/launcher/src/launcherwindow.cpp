@@ -375,8 +375,8 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
 
 
     _editWindowButton = new QPushButton("Edit", centralWidget);
-    _editWindowButton->setVisible(true);
     _editWindowButton->setObjectName("small");
+    _editWindowButton->setVisible(true);
     _editWindowButton->setGeometry(geometry::EditWindowButton);
     _editWindowButton->setCursor(Qt::PointingHandCursor);
     _editWindowButton->setAutoDefault(true);
