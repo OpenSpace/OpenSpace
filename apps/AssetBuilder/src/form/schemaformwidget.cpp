@@ -136,11 +136,11 @@ namespace {
             lineEdit->blockSignals(false);
         }
         else if (widget->objectName() == FileContainerName) {
-            auto* lineEdit = widget->findChild<QLineEdit*>();
-            if (lineEdit) {
-                lineEdit->blockSignals(true);
-                lineEdit->clear();
-                lineEdit->blockSignals(false);
+            auto* lineEditFile = widget->findChild<QLineEdit*>();
+            if (lineEditFile) {
+                lineEditFile->blockSignals(true);
+                lineEditFile->clear();
+                lineEditFile->blockSignals(false);
             }
         }
         else if (auto* combo = widget->findChild<QComboBox*>();  combo) {
