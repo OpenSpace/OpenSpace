@@ -65,8 +65,6 @@ set(SOURCE_FILES
   src/utils.cpp
   src/form/collapsiblesection.cpp
   src/form/schemaformwidget.cpp
-  src/form/schemaformwidget_flat.cpp
-  src/form/schemaformwidget_table.cpp
   src/form/searchdropdown.cpp
   src/form/matrixwidget.cpp
   src/form/colorwidget.cpp
