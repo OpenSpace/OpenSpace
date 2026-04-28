@@ -146,14 +146,6 @@ namespace {
 
 namespace openspace {
 
-void VideoPlayer::onMpvRenderUpdate(void* ctx) {
-    // The wakeup flag is set here to enable the mpv_render_context_render
-    // path in the main loop.
-    // The pattern here with a static function and a void pointer to the the class
-    // instance is a common pattern where C++ integrates a C library
-    static_cast<VideoPlayer*>(ctx)->_wakeup = 1;
-}
-
 void VideoPlayer::observePropertyMpv(MpvKey key) {
     mpv_observe_property(_mpvHandle, static_cast<uint64_t>(key), keys[key], formats[key]);
 }
@@ -436,11 +428,6 @@ void VideoPlayer::initializeMpv() {
         LINFO("Failed to initialize libmpv OpenGL context");
     }
 
-    // When there is a need to call mpv_render_context_update(), which can request a new
-    // frame to be rendered. (Separate from the normal event handling mechanism for the
-    // sake of users which run OpenGL on a different thread.)
-    mpv_render_context_set_update_callback(_mpvRenderContext, onMpvRenderUpdate, this);
-
     // Load file
     const std::string file = _videoFile.string();
     const char* cmd[] = { "loadfile", file.c_str(), nullptr };
@@ -524,13 +511,10 @@ void VideoPlayer::update() {
 void VideoPlayer::renderMpv() {
     handleMpvEvents();
 
-    // Renders a frame libmpv has been updated
-    if (_wakeup) {
-        const uint64_t result = mpv_render_context_update(_mpvRenderContext);
-        if ((result & MPV_RENDER_UPDATE_FRAME)) {
-            renderFrame();
-            _wakeup = 0;
-        }
+    // Renders a frame
+    const uint64_t result = mpv_render_context_update(_mpvRenderContext);
+    if ((result & MPV_RENDER_UPDATE_FRAME)) {
+        renderFrame();
     }
 }
 
@@ -806,7 +790,7 @@ void VideoPlayer::postSync(bool isMaster) {
     const bool isMappingTime = _playbackMode == PlaybackMode::MapToSimulationTime;
     if (!isMaster) {
         if ((_correctPlaybackTime - _currentVideoTime) > glm::epsilon<double>()) {
-            seekToTime(_correctPlaybackTime, PauseAfterSeek(isMappingTime));
+            //seekToTime(_correctPlaybackTime, PauseAfterSeek(isMappingTime));
         }
     }
 }

@@ -104,11 +104,6 @@ private:
     void resizeTexture(glm::ivec2 size);
 
     /**
-     * Has to be static because of C API.
-     */
-    static void onMpvRenderUpdate(void*);
-
-    /**
      * Called first time in update.
      */
     void initializeMpv();
@@ -176,8 +171,6 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _frameTexture;
     /// Our OpenGL framebuffer where mpv renders to
     GLuint _fbo = 0;
-    /// Signals when libmpv has a new frame ready
-    int _wakeup = 0;
     /// If libmpv has been inititalized
     bool _isInitialized = false;
     /// Prevent seeking while already seeking
