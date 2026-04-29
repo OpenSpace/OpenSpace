@@ -59,6 +59,10 @@ void IdentifierRegistry::rebuildFromAsset(const JAsset& asset,
     for (const std::string& dep : asset.dependencies) {
         const std::filesystem::path depPath = resolvePath(dep, dataRoot(), assetDir);
 
+        if (depPath.extension() != ".jasset") {
+            continue;
+        }
+
         QFile file(QString::fromStdWString(depPath.wstring()));
         if (!file.open(QFile::ReadOnly)) {
             continue;
