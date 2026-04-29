@@ -1876,13 +1876,35 @@ void SchemaFormWidget::buildPolymorphicRefContent(CollapsibleSection* section,
         clearButton,
         &QPushButton::clicked,
         this,
-        [this, propertiesPtr, memberName, dropdown, innerLayout, clearButton]() {
+        [this, propertiesPtr, memberName, dropdown, innerLayout, clearButton,
+         previousIndex]()
+        {
             PropertyMap& properties = *propertiesPtr;
+
+            // Check if the user has filled in any fields beyond the "Type" key
+            const auto it = properties.find(memberName);
+            bool hasEntry = it != properties.end() && it->second.isMap();
+            bool hasExistingData = hasEntry && it->second.toMap().size() > 1;
+
+            if (hasExistingData) {
+                const int result = QMessageBox::question(
+                    this,
+                    "Clear Type",
+                    QString("Clearing the type will discard all current settings."
+                            " Continue?"),
+                    QMessageBox::Yes | QMessageBox::No
+                );
+                if (result != QMessageBox::Yes) {
+                    return;
+                }
+            }
+
             dropdown->setCurrentIndex(-1);
             clearButton->setVisible(false);
             clearLayout(innerLayout);
             properties.erase(memberName);
             emit fieldChanged();
+            *previousIndex = -1;
         }
     );
 }
