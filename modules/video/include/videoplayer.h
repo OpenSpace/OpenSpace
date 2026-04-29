@@ -92,7 +92,7 @@ private:
 
     // State keys
     enum class PlaybackState : uint16_t {
-        Unitialized = 0,
+        Undefined = 0,
         Waiting,
         Playing,
         Paused
@@ -160,7 +160,7 @@ private:
     // Variables used when syncronizing play, pause and looping behavior
     const bool _isMaster;
     syncFlags _syncflags;
-    PlaybackState _playbackState = PlaybackState::Unitialized;
+    PlaybackState _playbackState = PlaybackState::Undefined;
     std::chrono::duration<long long, std::milli> _goTime;
 
     // Video properties. Try to read all these values from the video
