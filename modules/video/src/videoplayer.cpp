@@ -239,6 +239,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
     , _playAudio(AudioInfo, false)
     , _loopVideo(LoopVideoInfo, true)
     , _isMaster(global::windowDelegate->isMaster())
+    , _goTime(0)
 {
     ZoneScoped;
 
@@ -269,9 +270,6 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         addProperty(_pause);
         _goToStart.onChange([this]() { goToStart(); });
         addProperty(_goToStart);
-        _loopVideo.onChange([this]() {
-            setPropertyAsyncMpv(_loopVideo ? "no" : "no", MpvKey::Loop);
-        });
         addProperty(_loopVideo);
         // Audio only makes sense when the video is playing in real time
         _playAudio.onChange([this]() { toggleMute(); });
@@ -303,7 +301,6 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         { MpvKey::IsSeeking, "seeking" },
         { MpvKey::Mute, "mute" },
         { MpvKey::Seek, "seek" },
-        { MpvKey::Loop, "loop-file" },
         { MpvKey::EndOfFile, "eof-reached"}
     };
 
@@ -317,7 +314,6 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         { MpvKey::Fps, MPV_FORMAT_DOUBLE },
         { MpvKey::IsSeeking, MPV_FORMAT_FLAG },
         { MpvKey::Mute, MPV_FORMAT_STRING },
-        { MpvKey::Loop, MPV_FORMAT_STRING },
         { MpvKey::EndOfFile, MPV_FORMAT_FLAG }
     };
 }
@@ -356,12 +352,6 @@ void VideoPlayer::initializeMpv() {
     // Set libmpv flags before initializing
     // See order at https://github.com/mpv-player/mpv/blob/master/libmpv/client.h#L420
     // Avoiding async calls in uninitialized state
-
-    // Loop video
-    if (_loopVideo && _playbackMode == PlaybackMode::RealTimeLoop) {
-        // https://mpv.io/manual/master/#options-loop
-        setPropertyStringMpv("loop-file", "no");
-    }
 
     // Allow only OpenGL (requires OpenGL 2.1+ or GLES 2.0+)
     // https://mpv.io/manual/master/#options-gpu-api
@@ -762,17 +752,9 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             break;
         }
         case MpvKey::EndOfFile: {
-            if (_loopVideo && _playbackState == PlaybackState::Playing) {
-                seekToTime(0.0);
+            if (_isMaster && _loopVideo && _playbackState == PlaybackState::Playing) {
                 if(_isMaster) {
-                    const int delay = 2 * static_cast<int>(1000.0 / _fps);
-                    _playbackState = PlaybackState::Waiting;
-                    _goTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-                        std::chrono::ceil<std::chrono::seconds>(
-                            std::chrono::system_clock::now().time_since_epoch() +
-                            std::chrono::milliseconds(delay)
-                        )
-                    );
+                    _syncflags.goToStart = true;
                 }
             }
             break;
@@ -795,37 +777,59 @@ void VideoPlayer::destroy() {
 
 void VideoPlayer::preSync(bool isMaster) {
     _correctPlaybackTime = isMaster ? _currentVideoTime : -1.0;
+    if (isMaster && _playbackState == PlaybackState::Waiting) {
+        const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()
+        );
+        const long long dt = _goTime.count() - now.count();
+        if (dt <= 0.0) {
+            _syncflags.play = true;
+        }
+    }
 }
 
 void VideoPlayer::encode(SyncBuffer* syncBuffer) {
     syncBuffer->encode(_correctPlaybackTime);
-    syncBuffer->encode(_goTime);
     syncBuffer->encode(_playbackState);
+    syncBuffer->encode(_syncflags);
 }
 
 void VideoPlayer::decode(SyncBuffer* syncBuffer) {
     syncBuffer->decode(_correctPlaybackTime);
-    syncBuffer->decode(_goTime);
-    syncBuffer->encode(_playbackState);
+    syncBuffer->decode(_playbackState);
+    syncBuffer->decode(_syncflags);
 }
 
 void VideoPlayer::postSync(bool isMaster) {
     if (_correctPlaybackTime < 0.0) {
         return;
     }
-    // Ensure the nodes have the same time as the master node
-    const bool isMappingTime = _playbackMode == PlaybackMode::MapToSimulationTime;
-    if (!isMaster) {
-        if ((_correctPlaybackTime - _currentVideoTime) > glm::epsilon<double>()) {
-            //seekToTime(_correctPlaybackTime, PauseAfterSeek(isMappingTime));
+
+    // Ensure syncronized playback and states between Nodes and Master
+    if (_syncflags.goToStart) {
+        setPropertyAsyncMpv(0.0, MpvKey::Time);
+        if (isMaster) {
+            _playbackState = PlaybackState::Waiting;
+            _syncflags.goToStart = false;
+
+            // Set new timer 3 frames into the future when seek is (hopefully) done 
+            const long long delay = static_cast<long long>(3 * 1000.0 / _fps);
+            _goTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch() +
+                std::chrono::milliseconds(delay)
+            );
         }
     }
-
-    const auto delta = _goTime - std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()
-    );
-    if (_playbackState == PlaybackState::Waiting && delta.count() <= 0) {
+    if (_syncflags.play) {
         play();
+        if (isMaster) {
+            _syncflags.play = false;
+        }
+    }
+    if (_isPaused && !isMaster) {
+        if (std::abs(_correctPlaybackTime - _currentVideoTime) > glm::epsilon<double>()) {
+            seekToTime(_correctPlaybackTime);
+        }
     }
 }
 
