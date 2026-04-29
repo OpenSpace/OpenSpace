@@ -93,7 +93,7 @@ void EditorPanel::showItemEditor(size_t index) {
     scroll->setWidgetResizable(true);
     scroll->setFrameShape(QFrame::NoFrame);
 
-    QWidget* outerWrapper = new QWidget();
+    QWidget* outerWrapper = new QWidget(scroll);
     QBoxLayout* outerLayout = new QVBoxLayout(outerWrapper);
     outerLayout->setContentsMargins(0, 32, 0, 32);
     outerLayout->setSpacing(0);
@@ -104,7 +104,7 @@ void EditorPanel::showItemEditor(size_t index) {
     cardRow->setSpacing(0);
     cardRow->addStretch(1);
 
-    QFrame* inner = new QFrame();
+    QFrame* inner = new QFrame(outerWrapper);
     inner->setObjectName("form-card");
     inner->setMaximumWidth(1100);
     QBoxLayout* cardLayout = new QVBoxLayout(inner);
