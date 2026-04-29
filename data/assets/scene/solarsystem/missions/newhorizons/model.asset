@@ -22,7 +22,8 @@ local NewHorizons = {
     SpecularIntensity = 1.0,
     LightSources = {
       sunAsset.LightSource
-    }
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "New Horizons",

@@ -58,7 +58,8 @@ local Gaia = {
         Type = "CameraLightSource",
         Intensity = 0.4
       }
-    }
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Gaia",

@@ -31,7 +31,8 @@ local ArtemisModel = {
     LightSources = {
       sunAsset.LightSource
     },
-    AmbientIntensity = 0.05
+    AmbientIntensity = 0.05,
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Orion (Artemis-1) Model",

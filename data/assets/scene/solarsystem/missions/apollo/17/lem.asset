@@ -57,7 +57,8 @@ local Apollo17LemModel = {
         Type = "CameraLightSource",
         Intensity = 0.5
       }
-    }
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Apollo 17 Lem",

@@ -72,7 +72,8 @@ local Voyager2 = {
         Type = "CameraLightSource",
         Intensity = 0.5
       }
-    }
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Voyager 2",
