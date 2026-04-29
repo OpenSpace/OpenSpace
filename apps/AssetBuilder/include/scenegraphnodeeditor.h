@@ -116,6 +116,12 @@ private:
     JAsset* _asset = nullptr;
     IdentifierRegistry* _registry = nullptr;
     size_t _index = 0;
+    // Owned copy of the content item's properties. All child SchemaFormWidgets reference
+    // this copy rather than _asset->contents directly. This is because SchemaFormWidget
+    // uses a lot of captured references which can become dangling. Instead we keep a local
+    // copy to make sure that they exist in the life time of the children of this widget.
+    // Write explicitly back to the "ground truth", _asset
+    PropertyMap _localProperties;
 };
 
 #endif // __OPENSPACE_ASSETBUILDER___SCENEGRAPHNODEEDITOR___H__
