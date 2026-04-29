@@ -28,6 +28,9 @@
 #include <openspace/util/json_helper.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/stringhelper.h>
+#include <format>
+#include <fstream>
+#include <iterator>
 #include <ranges>
 
 namespace {
@@ -75,12 +78,13 @@ namespace {
         std::vector<std::string> lines;
 
         for (const std::string& dep : jasset.dependencies) {
-            lines.push_back(std::format("asset.require(\"{}\")", dep));
+            lines.push_back(std::format("asset.require([[{}]])", dep));
         }
 
         std::vector<std::string> sgns;
-        for (const ghoul::Dictionary& d : jasset.sceneGraphNodes) {
-            std::string variable = d.value<std::string>("Identifier");
+        for (size_t i = 0; i < jasset.sceneGraphNodes.size(); i++) {
+            const ghoul::Dictionary& d = jasset.sceneGraphNodes[i];
+            std::string variable = std::format("sgn{}", i);
             std::string sgn = ghoul::formatLua(d);
             lines.push_back(std::format("local {} = {}", variable, sgn));
             sgns.push_back(variable);
@@ -116,6 +120,12 @@ std::string jassetToLua(const std::filesystem::path& path) {
     ghoul_assert(std::filesystem::exists(path), "Path must exist");
 
     std::ifstream inFile = std::ifstream(path, std::ifstream::in);
+    if (!inFile.good()) {
+        throw ghoul::RuntimeError(std::format(
+            "Error opening file '{}' path for loading jasset file",
+            path
+        ));
+    }
     const std::string content = std::string(
         std::istreambuf_iterator<char>(inFile),
         std::istreambuf_iterator<char>()
