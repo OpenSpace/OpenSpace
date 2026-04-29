@@ -1813,14 +1813,39 @@ void SchemaFormWidget::buildPolymorphicRefContent(CollapsibleSection* section,
         rebuildItemForm(innerLayout, subProperties, storedTypeName, category);
     }
 
+    // Track the selected index so we can revert on cancelled type changes.
+    // It needs to be a pointer because we mutate it in the lambda
+    auto previousIndex = std::make_shared<int>(preSelectedIndex);
+
     // Type selected: reset the property map and rebuild the inner form
     connect(
         dropdown,
         &SearchDropdown::activated,
         this,
-        [this, propertiesPtr, memberName, innerLayout, dropdown, clearButton, category]()
+        [this, propertiesPtr, memberName, innerLayout, dropdown, clearButton, category,
+         previousIndex]()
         {
             PropertyMap& properties = *propertiesPtr;
+
+            // Check if the user has filled in any fields beyond the "Type" key
+            const auto it = properties.find(memberName);
+            bool hasEntry = it != properties.end() && it->second.isMap();
+            bool hasExistingData = hasEntry && it->second.toMap().size() > 1;
+
+            if (hasExistingData) {
+                const int result = QMessageBox::question(
+                    this,
+                    "Change Type",
+                    QString("Changing the type will discard all current settings."
+                            " Continue?"),
+                    QMessageBox::Yes | QMessageBox::No
+                );
+                if (result != QMessageBox::Yes) {
+                    dropdown->setCurrentIndex(*previousIndex);
+                    return;
+                }
+            }
+
             properties[memberName] = PropertyValue{ PropertyMap{} };
             PropertyMap& subProperties = properties[memberName].toMap();
 
@@ -1832,6 +1857,7 @@ void SchemaFormWidget::buildPolymorphicRefContent(CollapsibleSection* section,
             );
             emit fieldChanged();
             clearButton->setVisible(true);
+            *previousIndex = dropdown->currentIndex();
         }
     );
 
