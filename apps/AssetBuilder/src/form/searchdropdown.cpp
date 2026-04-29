@@ -25,6 +25,7 @@
 #include "form/searchdropdown.h"
 
 #include <QApplication>
+#include <QCursor>
 #include <QEvent>
 #include <QHBoxLayout>
 #include <QKeyEvent>
@@ -122,6 +123,7 @@ void SearchDropdown::openPopup() {
     _popup->show();
     _popup->raise();
 
+    qApp->installEventFilter(this);
     _chevronButton->setText(ChevronUp);
     _searchEdit->setFocus();
 }
@@ -131,6 +133,7 @@ void SearchDropdown::closePopup() {
         return;
     }
     _isOpen = false;
+    qApp->removeEventFilter(this);
     _popup->hide();
     _chevronButton->setText(ChevronDown);
     updateSearchText();
@@ -225,6 +228,16 @@ void SearchDropdown::updateSearchText() {
 }
 
 bool SearchDropdown::eventFilter(QObject* watched, QEvent* event) {
+    // Block scrolling outside the popup while it is open (matches QComboBox behavior).
+    // Check cursor position rather than widget parentage because the popup is a
+    // Qt::Tool window that does not accept focus, so Qt may route wheel events to the
+    // focused widget (_searchEdit) instead of the widget under the cursor
+    if (_isOpen && event->type() == QEvent::Wheel) {
+        if (!_popup->geometry().contains(QCursor::pos())) {
+            return true;
+        }
+    }
+
     // Only intercept events for the search input; delegate everything else to the base
     // class which returns false (event not consumed)
     if (watched != _searchEdit) {
