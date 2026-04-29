@@ -64,6 +64,7 @@ SceneGraphNodeEditor::SceneGraphNodeEditor(JAsset* asset, IdentifierRegistry* re
     , _asset(asset)
     , _registry(registry)
     , _index(index)
+    , _localProperties(asset->contents[index].properties)
 {
     buildUi();
 }
@@ -88,6 +89,7 @@ SchemaFormWidget* SceneGraphNodeEditor::createForm(
         &SchemaFormWidget::fieldChanged,
         this,
         [this]() {
+            _asset->contents[_index].properties = _localProperties;
             _asset->contents[_index].isDirty = true;
             emit contentModified();
         }
@@ -116,21 +118,20 @@ SchemaFormWidget* SceneGraphNodeEditor::createForm(
 }
 
 void SceneGraphNodeEditor::onSectionCopy(const QString& key) {
-    PropertyMap& properties = _asset->contents[_index].properties;
     const std::string keyString = key.toStdString();
 
     if (keyString == AdditionalSectionKey) {
         // Collect all non-top-level properties into a map
         PropertyMap extras;
-        for (const auto& [name, value] : properties) {
+        for (const auto& [name, value] : _localProperties) {
             if (!isTopLevelMember(name)) {
                 extras[name] = value;
             }
         }
         sectionClipboard[keyString] = PropertyValue{ std::move(extras) };
     }
-    else if (properties.count(keyString) > 0) {
-        sectionClipboard[keyString] = properties.at(keyString);
+    else if (_localProperties.count(keyString) > 0) {
+        sectionClipboard[keyString] = _localProperties.at(keyString);
     }
     updatePasteButtons();
 }
@@ -142,19 +143,18 @@ void SceneGraphNodeEditor::onSectionPaste(const QString& key) {
     if (sectionClipboard.count(keyString) == 0) {
         return;
     }
-    PropertyMap& properties = _asset->contents[_index].properties;
-
     if (keyString == AdditionalSectionKey &&
         sectionClipboard.at(keyString).isMap())
     {
         // Spread the stored map back into root properties
         for (const auto& [name, value] : sectionClipboard.at(keyString).toMap()) {
-            properties[name] = value;
+            _localProperties[name] = value;
         }
     }
     else {
-        properties[keyString] = sectionClipboard.at(keyString);
+        _localProperties[keyString] = sectionClipboard.at(keyString);
     }
+    _asset->contents[_index].properties = _localProperties;
     _asset->contents[_index].isDirty = true;
     emit contentModified();
     emit rebuildRequested();
@@ -206,8 +206,9 @@ void SceneGraphNodeEditor::wireIdentifierAutoGeneration(
             // Make sure we never empty the identifier
             if (!identifierText.isEmpty()) {
                 identifierEdit->setText(identifierText);
-                _asset->contents[_index].properties["Identifier"] =
+                _localProperties["Identifier"] =
                     PropertyValue{ identifierText.toStdString() };
+                _asset->contents[_index].properties = _localProperties;
                 emit contentModified();
             }
         }
@@ -220,8 +221,9 @@ void SceneGraphNodeEditor::wireIdentifierAutoGeneration(
         const QString identifierText = toPascalCase(currentName);
         if (!identifierText.isEmpty()) {
             identifierEdit->setText(identifierText);
-            _asset->contents[_index].properties["Identifier"] =
+            _localProperties["Identifier"] =
                 PropertyValue{ identifierText.toStdString() };
+            _asset->contents[_index].properties = _localProperties;
         }
     }
 }
@@ -231,8 +233,6 @@ QWidget* SceneGraphNodeEditor::buildQuickAccessFields(const SchemaType& sgnType,
                                                       QWidget* additionalSection)
 {
     SchemaFormWidget* additionalForm = additionalSection->findChild<SchemaFormWidget*>();
-
-    PropertyMap& rootProperties = _asset->contents[_index].properties;
 
     QWidget* quickAccessWidget = new QWidget(this);
     QBoxLayout* quickAccessLayout = new QVBoxLayout(quickAccessWidget);
@@ -247,10 +247,12 @@ QWidget* SceneGraphNodeEditor::buildQuickAccessFields(const SchemaType& sgnType,
     if (!quickAccessGuiMembers.empty()) {
         // Ensure the nested GUI map exists so we can reference it below.
         // This is not necessary at the root level but it is for nested members
-        if (rootProperties.count("GUI") == 0 || rootProperties.at("GUI").isNull()) {
-            rootProperties["GUI"] = PropertyValue{ PropertyMap{} };
+        if (_localProperties.count("GUI") == 0 ||
+            _localProperties.at("GUI").isNull())
+        {
+            _localProperties["GUI"] = PropertyValue{ PropertyMap{} };
         }
-        PropertyMap& guiProperties = rootProperties["GUI"].toMap();
+        PropertyMap& guiProperties = _localProperties["GUI"].toMap();
         quickAccessGuiForm = createForm(
             quickAccessGuiMembers,
             guiProperties,
@@ -267,7 +269,7 @@ QWidget* SceneGraphNodeEditor::buildQuickAccessFields(const SchemaType& sgnType,
     if (!parentMembers.empty()) {
         quickAccessAdditionalForm = createForm(
             parentMembers,
-            rootProperties,
+            _localProperties,
             quickAccessWidget,
             false,
             false
@@ -296,13 +298,10 @@ SchemaFormWidget* SceneGraphNodeEditor::buildMemberSection(const SchemaType& sgn
     if (members.empty()) {
         return nullptr;
     }
-    PropertyMap& rootProperties = _asset->contents[_index].properties;
-    return createForm(members, rootProperties, this, expanded, true);
+    return createForm(members, _localProperties, this, expanded, true);
 }
 
 QWidget* SceneGraphNodeEditor::buildAdditionalSection(const SchemaType& sgnType) {
-    PropertyMap& rootProperties = _asset->contents[_index].properties;
-
     CollapsibleSection* section = new CollapsibleSection("Additional Settings", this);
     section->setExpanded(false);
     section->setSectionKey(AdditionalSectionKey);
@@ -337,7 +336,7 @@ QWidget* SceneGraphNodeEditor::buildAdditionalSection(const SchemaType& sgnType)
     if (!additionalMembers.empty()) {
         SchemaFormWidget* form = createForm(
             additionalMembers,
-            rootProperties,
+            _localProperties,
             content,
             false,
             true
