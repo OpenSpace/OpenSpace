@@ -66,36 +66,65 @@ public:
     void resizeEvent(QResizeEvent* evt) override;
 
 private slots:
-    /** Creates a new empty asset, prompting to save if needed. */
+    /**
+     * Creates a new empty asset, prompting to save if needed.
+     */
     void newAsset();
-    /** Opens a .jasset file via file dialog, prompting to save if needed. */
+
+    /**
+     * Opens a .jasset file via file dialog, prompting to save if needed.
+     */
     void openAsset();
-    /** Saves the current asset to its file path, or prompts for one. */
+
+    /**
+     * Saves the current asset to its file path, or prompts for one.
+     */
     bool saveAsset();
-    /** Prompts for a file path and saves the current asset. */
+
+    /**
+     * Prompts for a file path and saves the current asset.
+     */
     bool saveAssetAs();
-    /** Closes the current asset, prompting to save if needed. */
+
+    /**
+     * Closes the current asset, prompting to save if needed.
+     */
     void closeAsset();
-    /** Shows the About dialog. */
+
+    /**
+     * Shows the About dialog.
+     */
     void showAbout();
 
-    /** Opens a directory picker to set the persistent data root. */
+    /**
+     * Opens a directory picker to set the persistent data root.
+     */
     void setDataRootViaDialog();
 
-    /** Shows the WelcomeDialog and acts on the user's choice. */
+    /**
+     * Shows the WelcomeDialog and acts on the user's choice.
+     */
     void showWelcomeDialog();
 
 private:
-    /** Creates the application menu bar and connects all actions. */
+    /**
+     * Creates the application menu bar and connects all actions.
+     */
     void createMenus();
 
-    /** Replaces the central widget with the empty-state placeholder. */
+    /**
+     * Replaces the central widget with the empty-state placeholder.
+     */
     void showEmptyState();
 
-    /** Updates the window title and path label to reflect current state. */
+    /**
+     * Updates the window title and path label to reflect current state.
+     */
     void updateTitle();
 
-    /** Creates the editor widget and sets it as the central widget. */
+    /**
+     * Creates the editor widget and sets it as the central widget.
+     */
     void createEditor();
 
     /**
