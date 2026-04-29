@@ -3,9 +3,9 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Hulianwang Digui)",
+  Name = "Satellite CSV Data (Hulianwang Digui)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_hulianwang",
+  Identifier = "satellite_csv_data_hulianwang",
   Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=hulianwang&FORMAT=csv",
   Filename = "hulianwang.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()

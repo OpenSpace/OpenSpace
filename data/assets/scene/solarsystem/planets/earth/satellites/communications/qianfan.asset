@@ -3,9 +3,9 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Qianfan)",
+  Name = "Satellite CSV Data (Qianfan)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_qianfan",
+  Identifier = "satellite_csv_data_qianfan",
   Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=qianfan&FORMAT=csv",
   Filename = "qianfan.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()

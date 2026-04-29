@@ -3,9 +3,9 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (GEO Protected Zone Plus)",
+  Name = "Satellite CSV Data (GEO Protected Zone Plus)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_geo-protected-zone-plus",
+  Identifier = "satellite_csv_data_geo-protected-zone-plus",
   Url = "https://liu-se.relay.openspaceproject.com/celestrak?SPECIAL=gpz-plus&FORMAT=csv",
   Filename = "geo-protected-zone-plus.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
