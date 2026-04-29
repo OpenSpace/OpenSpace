@@ -2011,9 +2011,10 @@ QWidget* SchemaFormWidget::createUnionWidget(const SchemaMember& member) {
             createTableSection(typeMember) :
             createFlatWidget(typeMember);
 
-        // Only the first type is visible; the combo switches between them
-        widget->setVisible(j == 0);
+        // Parent first, then set visibility — a parentless widget with
+        // setVisible(true) becomes a top-level window on Windows
         verticalLayout->addWidget(widget);
+        widget->setVisible(j == 0);
         typeWidgets.append(widget);
     }
 
