@@ -385,11 +385,16 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
         );
         return false;
     }
+    const bool isRegularAsset = asset->path().extension() == ".asset";
+    const bool isJasset = asset->path().extension() == ".jasset";
+    if (!(isRegularAsset || isJasset)) {
+        LERROR(std::format(
+            "Could not load asset '{}': Unknown extension", asset->path())
+        );
+        return false;
+    }
 
     try {
-        const bool isRegularAsset = asset->path().extension() == ".asset";
-        const bool isJasset = asset->path().extension() == ".jasset";
-        ghoul_assert(isRegularAsset || isJasset, "Must be regular asset or jasset");
         if (isRegularAsset) {
             ghoul::lua::runScriptFile(*_luaState, asset->path());
         }
