@@ -238,6 +238,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
     , _reload(ReloadInfo)
     , _playAudio(AudioInfo, false)
     , _loopVideo(LoopVideoInfo, true)
+    , _isMaster(global::windowDelegate->isMaster())
 {
     ZoneScoped;
 
@@ -269,7 +270,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         _goToStart.onChange([this]() { goToStart(); });
         addProperty(_goToStart);
         _loopVideo.onChange([this]() {
-            setPropertyAsyncMpv(_loopVideo ? "inf" : "no", MpvKey::Loop);
+            setPropertyAsyncMpv(_loopVideo ? "no" : "no", MpvKey::Loop);
         });
         addProperty(_loopVideo);
         // Audio only makes sense when the video is playing in real time
@@ -302,7 +303,8 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         { MpvKey::IsSeeking, "seeking" },
         { MpvKey::Mute, "mute" },
         { MpvKey::Seek, "seek" },
-        { MpvKey::Loop, "loop-file" }
+        { MpvKey::Loop, "loop-file" },
+        { MpvKey::EndOfFile, "eof-reached"}
     };
 
     formats = {
@@ -315,7 +317,8 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         { MpvKey::Fps, MPV_FORMAT_DOUBLE },
         { MpvKey::IsSeeking, MPV_FORMAT_FLAG },
         { MpvKey::Mute, MPV_FORMAT_STRING },
-        { MpvKey::Loop, MPV_FORMAT_STRING }
+        { MpvKey::Loop, MPV_FORMAT_STRING },
+        { MpvKey::EndOfFile, MPV_FORMAT_FLAG }
     };
 }
 
@@ -327,11 +330,13 @@ VideoPlayer::~VideoPlayer() {
 void VideoPlayer::pause() {
     constexpr int IsPaused = 1;
     setPropertyAsyncMpv(IsPaused, MpvKey::Pause);
+    _playbackState = PlaybackState::Paused;
 }
 
 void VideoPlayer::play() {
     constexpr int IsPaused = 0;
     setPropertyAsyncMpv(IsPaused, MpvKey::Pause);
+    _playbackState = PlaybackState::Playing;
 }
 
 void VideoPlayer::goToStart() {
@@ -355,7 +360,7 @@ void VideoPlayer::initializeMpv() {
     // Loop video
     if (_loopVideo && _playbackMode == PlaybackMode::RealTimeLoop) {
         // https://mpv.io/manual/master/#options-loop
-        setPropertyStringMpv("loop-file", "inf");
+        setPropertyStringMpv("loop-file", "no");
     }
 
     // Allow only OpenGL (requires OpenGL 2.1+ or GLES 2.0+)
@@ -450,11 +455,13 @@ void VideoPlayer::initializeMpv() {
     observePropertyMpv(MpvKey::Fps);
     observePropertyMpv(MpvKey::Time);
     observePropertyMpv(MpvKey::IsSeeking);
+    observePropertyMpv(MpvKey::EndOfFile);
 
     // Render the first frame so we can see the video
     renderFrame();
 
     _isInitialized = true;
+    _playbackState = PlaybackState::Paused;
 }
 
 void VideoPlayer::seekToTime(double time, PauseAfterSeek pauseAfter) {
@@ -754,6 +761,22 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             }
             break;
         }
+        case MpvKey::EndOfFile: {
+            if (_loopVideo && _playbackState == PlaybackState::Playing) {
+                seekToTime(0.0);
+                if(_isMaster) {
+                    const int delay = 2 * static_cast<int>(1000.0 / _fps);
+                    _playbackState = PlaybackState::Waiting;
+                    _goTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+                        std::chrono::ceil<std::chrono::seconds>(
+                            std::chrono::system_clock::now().time_since_epoch() +
+                            std::chrono::milliseconds(delay)
+                        )
+                    );
+                }
+            }
+            break;
+        }
         default:
             throw ghoul::MissingCaseException();
     }
@@ -776,10 +799,14 @@ void VideoPlayer::preSync(bool isMaster) {
 
 void VideoPlayer::encode(SyncBuffer* syncBuffer) {
     syncBuffer->encode(_correctPlaybackTime);
+    syncBuffer->encode(_goTime);
+    syncBuffer->encode(_playbackState);
 }
 
 void VideoPlayer::decode(SyncBuffer* syncBuffer) {
     syncBuffer->decode(_correctPlaybackTime);
+    syncBuffer->decode(_goTime);
+    syncBuffer->encode(_playbackState);
 }
 
 void VideoPlayer::postSync(bool isMaster) {
@@ -792,6 +819,13 @@ void VideoPlayer::postSync(bool isMaster) {
         if ((_correctPlaybackTime - _currentVideoTime) > glm::epsilon<double>()) {
             //seekToTime(_correctPlaybackTime, PauseAfterSeek(isMappingTime));
         }
+    }
+
+    const auto delta = _goTime - std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()
+    );
+    if (_playbackState == PlaybackState::Waiting && delta.count() <= 0) {
+        play();
     }
 }
 

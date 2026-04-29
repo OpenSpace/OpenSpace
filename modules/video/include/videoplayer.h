@@ -36,6 +36,7 @@
 #include <ghoul/opengl/texture.h>
 #include <client.h>
 #include <render.h>
+#include <chrono>
 #include <cstdint>
 #include <filesystem>
 #include <memory>
@@ -83,6 +84,14 @@ public:
     static openspace::Documentation Documentation();
 
 private:
+    // State keys
+    enum class PlaybackState : uint16_t {
+        Unitialized = 0,
+        Waiting,
+        Playing,
+        Paused
+    };
+
     // Libmpv keys
     enum class MpvKey : uint64_t {
         Duration = 1, // 0 is the default key in libmpv so avoid that
@@ -96,7 +105,8 @@ private:
         Mute,
         Command,
         Seek,
-        Loop
+        Loop,
+        EndOfFile
     };
 
     // Framebuffer
@@ -140,6 +150,14 @@ private:
     TriggerProperty _reload;
     BoolProperty _playAudio;
     BoolProperty _loopVideo;
+
+    // TESTING
+    PlaybackState _playbackState = PlaybackState::Unitialized;
+    const bool _isMaster;
+    std::chrono::duration<double, std::milli> _goTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()
+        );
 
     // Video properties. Try to read all these values from the video
     std::filesystem::path _videoFile;
