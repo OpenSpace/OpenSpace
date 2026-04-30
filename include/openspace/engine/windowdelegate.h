@@ -104,8 +104,6 @@ struct WindowDelegate {
 
     std::string (*nameForWindow)(size_t windowIdx) = [](size_t) { return std::string(); };
 
-    glm::ivec2 (*resolutionForWindow)(size_t windowIdx) = [](size_t) { return glm::ivec2(0, 0); };
-
     float (*horizFieldOfView)(size_t windowIdx) = [](size_t) { return 0.f; };
 
     void (*setHorizFieldOfView)(size_t windowIdx, float hFovDeg) = [](size_t, float) {};
