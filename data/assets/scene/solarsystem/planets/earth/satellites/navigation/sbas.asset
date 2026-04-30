@@ -3,9 +3,9 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Satellite Based Augmentation System)",
+  Name = "Satellite CSV Data (Satellite Based Augmentation System)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_sbas",
+  Identifier = "satellite_csv_data_sbas",
   Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=sbas&FORMAT=csv",
   Filename = "sbas.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()

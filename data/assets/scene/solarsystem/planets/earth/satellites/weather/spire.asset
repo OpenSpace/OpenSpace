@@ -3,9 +3,9 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Spire)",
+  Name = "Satellite CSV Data (Spire)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_spire",
+  Identifier = "satellite_csv_data_spire",
   Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=spire&FORMAT=csv",
   Filename = "spire.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()

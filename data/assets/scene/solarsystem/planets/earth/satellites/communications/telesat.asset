@@ -3,31 +3,31 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Iridium)",
+  Name = "Satellite CSV Data (Telesat)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_iridium",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=iridium&FORMAT=csv",
-  Filename = "iridium.txt",
+  Identifier = "satellite_csv_data_telesat",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=telesat&FORMAT=csv",
+  Filename = "telesat.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
-local IridiumSatellites = {
-  Identifier = "IridiumSatellites",
+local TelesatSatellites = {
+  Identifier = "TelesatSatellites",
   Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
-    Path = omm .. "iridium.txt",
+    Path = omm .. "telesat.txt",
     Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
-    TrailFade = 15,
+    TrailFade = 5,
     PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
   GUI = {
-    Name = "Iridium",
+    Name = "Telesat",
     Path = "/Solar System/Planets/Earth/Satellites",
     Focusable = false
   }
@@ -35,20 +35,20 @@ local IridiumSatellites = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(IridiumSatellites)
+  openspace.addSceneGraphNode(TelesatSatellites)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(IridiumSatellites)
+  openspace.removeSceneGraphNode(TelesatSatellites)
 end)
 
-asset.export(IridiumSatellites)
+asset.export(TelesatSatellites)
 
 
 
 asset.meta = {
-  Name = "Satellites Communications - Iridium",
-  Description = "Satellites asset for Communications - Iridium. Data from Celestrak",
+  Name = "Satellites Communications - Telesat",
+  Description = "Satellites asset for Communications - Telesat. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
