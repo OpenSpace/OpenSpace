@@ -376,7 +376,6 @@ DirectManipulation::DirectManipulation()
             if (it != _firstTouchPoints.end()) {
                 _firstTouchPoints.erase(it);
             }
-            return false;
         }
     );
 }
@@ -519,9 +518,6 @@ std::optional<glm::dvec3> DirectManipulation::computeSurfacePoint(
     // Normalized -1 to 1 coordinates on screen
     const double xCo = 2.0 * (touchPosition.x - 0.5);
     const double yCo = -2.0 * (touchPosition.y - 0.5);
-
-    glm::dvec2 co = 2.0 * glm::dvec2(touchPosition - 0.5);
-    co.y *= -1.0;
 
     const glm::dvec3 cursorInWorldSpace = camRotation *
         glm::dvec3(glm::inverse(camera->projectionMatrix()) *

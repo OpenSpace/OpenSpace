@@ -60,7 +60,7 @@ namespace {
     {
         double rollFactor = 0.0;
         for (const TouchInputHolder& touchPoint : touchPoints) {
-            // Find the last processed touch point corresponding to tihs one
+            // Find the last processed touch point corresponding to this one
             const auto it = std::find_if(
                 lastProcessed.begin(),
                 lastProcessed.end(),

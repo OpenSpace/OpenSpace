@@ -186,7 +186,7 @@ void TouchInputState::evaluateTap(const TouchInput& lastRemovedInput) {
 
         // @TODO (emmbr26, 2026-04-16) We should also check that the positions of the taps
         // match. Now you can quickly tap with both hand on multiple sides of the screen
-        // and it wil register as a multi-tap. But I don't consider this too much of an
+        // and it will register as a multi-tap. But I don't consider this too much of an
         // issue right now.
 
         if ((time - _lastDoubleTapTime).count() < _maxDoubleTapTimeInterval) {
