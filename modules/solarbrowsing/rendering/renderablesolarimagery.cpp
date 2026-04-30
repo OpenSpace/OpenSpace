@@ -202,11 +202,6 @@ namespace {
             DynamicDownloading
         };
 
-        enum class [[codegen::map(FaceMode)]] FaceMode {
-            FrontOnly [[codgen::key("Front Only")]],
-            SolidBack [[codegen::key("Solid Back")]],
-            DoubleSided [[codegen::key("Double Sided")]]
-        };
         // The root directory containing solar imagery organized by instrument. Each
         // subdirectory represents an instrument and contains its observation images.
         std::string imageDirectory;
@@ -222,7 +217,7 @@ namespace {
         std::optional<bool> enableFrustum;
 
         enum class [[codegen::map(FaceMode)]] FaceMode {
-            FrontOnly [[codgen::key("Front Only")]],
+            FrontOnly [[codegen::key("Front Only")]],
             SolidBack [[codegen::key("Solid Back")]],
             DoubleSided [[codegen::key("Double Sided")]]
         };
