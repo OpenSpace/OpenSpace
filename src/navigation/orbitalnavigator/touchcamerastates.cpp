@@ -279,12 +279,11 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
         constexpr float SameThreshold = 0.3f;
         constexpr float InterpretPanDistance = 0.2f;
 
-        float dot = glm::dot(glm::normalize(dir0), glm::normalize(dir1));
-
-        if (areBothFingersMoving && distanceDiff < InterpretPanDistance &&
-            std::abs(dot - 1.f) < SameThreshold)
-        {
-            return InteractionType::Pan;
+        if (areBothFingersMoving && distanceDiff < InterpretPanDistance) {
+            float dot = glm::dot(glm::normalize(dir0), glm::normalize(dir1));
+            if (std::abs(dot - 1.f) < SameThreshold) {
+                return InteractionType::Pan;
+            }
         }
     }
 
