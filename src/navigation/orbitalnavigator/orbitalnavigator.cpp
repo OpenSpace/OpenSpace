@@ -565,7 +565,7 @@ void OrbitalNavigator::resetVelocities() {
 }
 
 void OrbitalNavigator::updateCamera(double deltaTime) {
-    // Special touch gesture for reargetting focus node
+    // Special touch gesture for retargeting focus node
     if (global::interactionHandler->touchInputState().isTripleTap()) {
         startRetargetAnchor();
         return;
