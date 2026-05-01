@@ -167,10 +167,7 @@ math(EXPR all_module_names_count "${all_module_names_count} - 1")
 #
 set(enabled_module_names "")
 set(enabled_module_paths "")
-foreach(val RANGE ${all_module_names_count})
-  list(GET all_module_names ${val} name)
-  list(GET all_module_paths ${val} path)
-
+foreach (name path IN ZIP_LISTS all_module_names all_module_paths)
   get_module_attribute_supported(${path} is_module_supported)
   if (NOT ${is_module_supported})
     message(STATUS "Skipping module ${name} (${path}) as it is not supported on this machine")

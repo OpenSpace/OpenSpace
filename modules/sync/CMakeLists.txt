@@ -39,4 +39,8 @@ set(SOURCE_FILES
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
-create_new_module("Sync" sync_module ${HEADER_FILES} ${SOURCE_FILES})
+create_new_module(
+  "Sync"
+  sync_module
+  ${HEADER_FILES} ${SOURCE_FILES}
+)

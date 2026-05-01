@@ -25,7 +25,7 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/application_definition.cmake)
 
 create_new_application(DocsWriter
-    main.cpp
+  main.cpp
 )
 
 target_link_libraries(DocsWriter PRIVATE openspace-core openspace-module-collection)
@@ -34,16 +34,13 @@ target_link_libraries(DocsWriter PRIVATE openspace-core openspace-module-collect
 # Why not put these in the module's path? Because they do not have access to the
 # target as of July 2017, which is needed.
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
-  # wanted by CEF
-  set(CMAKE_BUILD_TYPE Debug CACHE STRING "CMAKE_BUILD_TYPE")
-
   if (WIN32)
     set(RESOURCE_FILE openspace.rc)
   endif ()
 
   # Add the CEF binary distribution's cmake/ directory to the module path and
   # find CEF to initialize it properly.
-  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
+  list(APPEND CMAKE_MODULE_PATH "${WEBBROWSER_MODULE_PATH}/cmake")
   include(webbrowser_helpers)
 
   set_cef_targets("${CEF_ROOT}" DocsWriter)

@@ -66,7 +66,7 @@ if (WIN32 OR UNIX)
   option(USE_SANDBOX OFF)
 endif ()
 # Add this project's cmake/ directory to the module path.
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(cef_support)
 
 # determine the current build platform
@@ -104,7 +104,7 @@ endif ()
 ##########################################################################################
 
 # Add the CEF binary distribution's cmake/ directory to the module path.
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CEF_ROOT}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CEF_ROOT}/cmake")
 
 # Load the CEF configuration (executes FindCEF.cmake).
 find_package(CEF REQUIRED)
@@ -291,7 +291,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 create_new_module(
   ${WEBBROWSER_MODULE_NAME}
   webbrowser_module
-  STATIC
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
