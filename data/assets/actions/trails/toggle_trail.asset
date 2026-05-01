@@ -3,7 +3,7 @@ local ToggleTrail = {
   Name = "Toggle trail",
   Command = [[
     local node
-    if is_declared("args")and is_declared("args.Node") then
+    if is_declared("args") then
       node = args.Node
     else
       node = openspace.navigation.getNavigationState().Anchor
@@ -20,7 +20,7 @@ local ToggleTrail = {
     end
 
     local visibility
-    if is_declared("args") and is_declared("args.Transition") then
+    if is_declared("args") then
       if args.Transition == "Approaching" then
         visibility = false
       elseif args.Transition == "Exiting" then
@@ -50,7 +50,7 @@ local HideTrail = {
   Name = "Hide trail",
   Command = [[
     local node
-    if is_declared("args") and is_declared("args.Node") then
+    if is_declared("args") then
       node = args.Node
     else
       node = openspace.navigation.getNavigationState().Anchor
@@ -74,7 +74,7 @@ local ShowTrail = {
   Name = "Show trail",
   Command = [[
     local node
-    if is_declared("args") and is_declared("args.Node") then
+    if is_declared("args") then
       node = args.Node
     else
       node = openspace.navigation.getNavigationState().Anchor

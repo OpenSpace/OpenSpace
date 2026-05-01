@@ -9,7 +9,7 @@ local PointJwst = {
     local ra
     local dec
     local duration
-    if is_declared("args") and is_declared("args.Ra") and is_declared("args.Dec") and is_declared("args.Duration") then
+    if is_declared("args") then
       ra = args.Ra
       dec = args.Dec
       duration = args.Duration
