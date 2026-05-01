@@ -67,7 +67,7 @@ namespace openspace {
         void deinitializeGL() override;
         void deinitialize() override;
 
-        bool isReady() const override;
+        bool isReady() const;
 
         void render(const RenderData& data, RendererTasks& rendererTask) override;
         void update(const UpdateData& data) override;
