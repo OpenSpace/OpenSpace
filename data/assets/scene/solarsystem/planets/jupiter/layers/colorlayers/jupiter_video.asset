@@ -14,6 +14,7 @@ local Layer = {
   Type = "VideoTileProvider",
   Identifier = "JupiterVideo",
   Name = "Jupiter Video",
+  Enabled = true,
   ZIndex = 10,
   Video = data .. "/jupiter_movie_3600.mp4"
 }
