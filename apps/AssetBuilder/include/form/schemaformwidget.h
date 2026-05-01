@@ -30,6 +30,7 @@
 #include "documentation.h"
 #include "jasset.h"
 #include "schema/assetschema.h"
+#include <memory>
 #include <vector>
 
 /**
@@ -72,9 +73,10 @@ public:
      *        Table, then alphabetical)
      * \param registry Optional identifier registry for Identifier-type combos
      */
-    SchemaFormWidget(std::vector<SchemaMember> members, PropertyMap& properties,
-        QWidget* parent = nullptr, bool subSectionsExpanded = false,
-        bool sortMembers = true, IdentifierRegistry* registry = nullptr);
+    SchemaFormWidget(std::vector<SchemaMember> members,
+        std::weak_ptr<PropertyMap> properties, QWidget* parent = nullptr,
+        bool subSectionsExpanded = false, bool sortMembers = true,
+        IdentifierRegistry* registry = nullptr);
 
     /**
      * Writes current widget values into the bound PropertyMap.
@@ -192,7 +194,7 @@ private:
      * Creates a nested SchemaFormWidget and wires its signals to this form.
      */
     SchemaFormWidget* createNestedForm(const std::vector<SchemaMember>& members,
-        PropertyMap& props);
+        PropertyMap& subMap);
 
     /**
      * Emits documentationRequested for a named type within a category.
@@ -205,28 +207,28 @@ private:
      * the property map, and creates a new nested form populated with any existing
      * property values.
      */
-    void rebuildItemForm(QBoxLayout* layout, PropertyMap& props, const QString& typeName,
-        const SchemaCategory* category);
+    void rebuildItemForm(QBoxLayout* layout, PropertyMap& properties,
+        const QString& typeName, const SchemaCategory* category);
 
     /**
      * Populates a CollapsibleSection with an array of ref-typed items.
      */
     void buildRefArrayContent(CollapsibleSection* section, const SchemaMember& member,
-        const std::string& referenceId, PropertyMap& properties);
+        const std::string& referenceId, std::weak_ptr<PropertyMap> properties);
 
     /**
      * Builds a single card (type dropdown + form) for one ref-array item.
      */
     void buildRefArrayCard(QBoxLayout* itemsLayout, const std::string& memberName,
         const SchemaCategory* category, const std::string& referenceId, size_t index,
-        PropertyMap& properties);
+        std::weak_ptr<PropertyMap> properties);
 
     /**
      * Clears and rebuilds all ref-array cards from the current property list.
      */
     void rebuildRefArray(QBoxLayout* itemsLayout, const std::string& memberName,
         const SchemaCategory* category, const std::string& referenceId,
-        PropertyMap& properties);
+        std::weak_ptr<PropertyMap> properties);
 
     /**
      * Populates a CollapsibleSection with a concrete or polymorphic ref.
@@ -239,26 +241,27 @@ private:
      */
     void buildPolymorphicRefContent(CollapsibleSection* section,
         const SchemaMember& member, const SchemaReference& reference,
-        const SchemaCategory* category, PropertyMap& properties);
+        const SchemaCategory* category, std::weak_ptr<PropertyMap> properties);
 
     /**
      * Populates a CollapsibleSection with an array of inline-member items.
      */
     void buildInlineArrayContent(CollapsibleSection* section, const SchemaMember& member,
-        PropertyMap& properties);
+        std::weak_ptr<PropertyMap> properties);
 
     /**
      * Builds a single card (nested form + remove button) for one inline array item.
      */
     void buildInlineArrayCard(QBoxLayout* itemsLayout, const std::string& memberName,
         const std::vector<SchemaMember>& itemMembers, size_t index,
-        PropertyMap& properties);
+        std::weak_ptr<PropertyMap> properties);
 
     /**
      * Clears and rebuilds all inline-array cards from the current property list.
      */
     void rebuildInlineArray(QBoxLayout* itemsLayout, const std::string& memberName,
-        const std::vector<SchemaMember>& itemMembers, PropertyMap& properties);
+        const std::vector<SchemaMember>& itemMembers,
+        std::weak_ptr<PropertyMap> properties);
 
     /**
      * Populates a CollapsibleSection with a nested form for a plain table member.
@@ -268,8 +271,8 @@ private:
 
     /// Schema member descriptors for this form
     std::vector<SchemaMember> _members;
-    /// Bound property map (owned by caller)
-    PropertyMap& _properties;
+    /// Weak reference to the bound property map (root or sub-map)
+    std::weak_ptr<PropertyMap> _properties;
 
     /// Per-member leaf widget (flat) or CollapsibleSection (Table)
     std::vector<QWidget*> _fieldWidgets;
