@@ -139,9 +139,12 @@ signals:
     void optionalFieldToggled(const QString& name, bool active);
 
     /**
-     * Emitted when the user clicks a Browse .jasset button on an Identifier field.
+     * Emitted when the user selects a .jasset file via the Browse button on an
+     * Identifier field. Carries the absolute file path to add as a dependency.
+     *
+     * \param filePath Absolute path to the selected .jasset file
      */
-    void browseJassetRequested();
+    void addDependency(const QString& filePath);
 
 private:
     /// Size of remove/clear buttons

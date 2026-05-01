@@ -69,8 +69,8 @@ QWidget* EditorPanel::createContentEditor(size_t index, QWidget* parent) {
             this, &EditorPanel::contentModified);
         connect(sgnEditor, &SceneGraphNodeEditor::documentationRequested,
             this, &EditorPanel::documentationRequested);
-        connect(sgnEditor, &SceneGraphNodeEditor::browseJassetRequested,
-            this, &EditorPanel::browseJassetRequested);
+        connect(sgnEditor, &SceneGraphNodeEditor::addDependency,
+            this, &EditorPanel::addDependency);
         connect(sgnEditor, &SceneGraphNodeEditor::rebuildRequested,
             this, [this]() { showItemEditor(_currentIndex); });
         return sgnEditor;

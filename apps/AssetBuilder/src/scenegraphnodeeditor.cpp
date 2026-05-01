@@ -108,8 +108,8 @@ SchemaFormWidget* SceneGraphNodeEditor::createForm(
         this, &SceneGraphNodeEditor::onSectionPaste
     );
     connect(
-        form, &SchemaFormWidget::browseJassetRequested,
-        this, &SceneGraphNodeEditor::browseJassetRequested
+        form, &SchemaFormWidget::addDependency,
+        this, &SceneGraphNodeEditor::addDependency
     );
 
     form->populateFromProperties();

@@ -64,12 +64,20 @@ public:
 public slots:
     /**
      * Opens a file dialog and adds the chosen file as a dependency.
-     * The path is stored in the first format that applies:
+     */
+    void addDependencyViaDialog();
+
+    /**
+     * Adds the file at \p filePath as a dependency. The path is stored in the first
+     * format that applies:
      *   1. Data-relative (if a data root is set and the file is inside it)
      *   2. Jasset-relative (if the asset file has been saved)
      *   3. Absolute (last resort)
+     * Checks for duplicates and emits assetModified on success.
+     *
+     * \param filePath Absolute path to the file to add
      */
-    void addDependencyViaDialog();
+    void addDependency(const QString& filePath);
 
 signals:
     /**

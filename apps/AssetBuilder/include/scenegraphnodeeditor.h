@@ -66,9 +66,12 @@ signals:
     void documentationRequested(const Documentation& info);
 
     /**
-     * Emitted when the user clicks a Browse .jasset button on an Identifier field.
+     * Emitted when the user selects a .jasset file via the Browse button on an
+     * Identifier field. Carries the absolute file path to add as a dependency.
+     *
+     * \param filePath Absolute path to the selected .jasset file
      */
-    void browseJassetRequested();
+    void addDependency(const QString& filePath);
 
     /**
      * Emitted after a section paste so EditorPanel can rebuild the editor.
