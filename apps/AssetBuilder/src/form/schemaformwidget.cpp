@@ -679,18 +679,22 @@ namespace {
         return button;
     }
 
-    QWidget* createBooleanWidget(const std::string& name, PropertyMap& properties,
+    QWidget* createBooleanWidget(const std::string& name,
+                                 std::weak_ptr<PropertyMap> properties,
                                  const std::function<void()>& onChange)
     {
-        PropertyMap* props = &properties;
         QCheckBox* checkBox = new QCheckBox();
 
         QObject::connect(
             checkBox,
             &QCheckBox::toggled,
             checkBox,
-            [props, name, onChange](bool checked) {
-                (*props)[name] = PropertyValue{ checked };
+            [properties, name, onChange](bool checked) {
+                auto lockedProperties = properties.lock();
+                if (!lockedProperties) {
+                    return;
+                }
+                (*lockedProperties)[name] = PropertyValue{ checked };
                 onChange();
             }
         );
@@ -698,10 +702,9 @@ namespace {
     }
 
     QWidget* createIntegerWidget(const std::string& name, const std::string& description,
-                                 PropertyMap& properties,
+                                 std::weak_ptr<PropertyMap> properties,
                                  const std::function<void()>& onChange)
     {
-        PropertyMap* props = &properties;
         QLineEdit* lineEdit = new QLineEdit();
         const NumericRange range = parseRange(description);
         // Cannot cast the NumericRange double defaults to int (overflow / UB), so fall
@@ -717,10 +720,14 @@ namespace {
             lineEdit,
             &QLineEdit::textEdited,
             lineEdit,
-            [props, name, onChange](const QString& text) {
+            [properties, name, onChange](const QString& text) {
+                auto lockedProperties = properties.lock();
+                if (!lockedProperties) {
+                    return;
+                }
                 bool ok = false;
                 const int value = text.toInt(&ok);
-                (*props)[name] = PropertyValue{
+                (*lockedProperties)[name] = PropertyValue{
                     static_cast<double>(ok ? value : 0)
                 };
                 onChange();
@@ -730,10 +737,9 @@ namespace {
     }
 
     QWidget* createDoubleWidget(const std::string& name, const std::string& description,
-                                PropertyMap& properties,
+                                std::weak_ptr<PropertyMap> properties,
                                 const std::function<void()>& onChange)
     {
-        PropertyMap* props = &properties;
         QLineEdit* lineEdit = new QLineEdit();
         const NumericRange range = parseRange(description);
         // QDoubleValidator misbehaves with extreme double values, so use +/- 1e15 as a
@@ -748,10 +754,14 @@ namespace {
             lineEdit,
             &QLineEdit::textEdited,
             lineEdit,
-            [props, name, onChange](const QString& text) {
+            [properties, name, onChange](const QString& text) {
+                auto lockedProperties = properties.lock();
+                if (!lockedProperties) {
+                    return;
+                }
                 bool ok = false;
                 const double value = text.toDouble(&ok);
-                (*props)[name] = PropertyValue{ ok ? value : 0.0 };
+                (*lockedProperties)[name] = PropertyValue{ ok ? value : 0.0 };
                 onChange();
             }
         );
@@ -759,10 +769,9 @@ namespace {
     }
 
     QWidget* createMatrixWidget(const std::string& name, const MatrixTypeEntry& entry,
-                                PropertyMap& properties,
+                                std::weak_ptr<PropertyMap> properties,
                                 const std::function<void()>& onChange)
     {
-        PropertyMap* props = &properties;
         MatrixWidget* matrixWidget = entry.isColor ?
             static_cast<MatrixWidget*>(new ColorWidget(entry.nComponents)) :
             new MatrixWidget(entry.nComponents, entry.nColumns, entry.isInteger);
@@ -770,8 +779,12 @@ namespace {
             matrixWidget,
             &MatrixWidget::valueChanged,
             matrixWidget,
-            [props, name, matrixWidget, onChange]() {
-                (*props)[name] = PropertyValue{ matrixWidget->values() };
+            [properties, name, matrixWidget, onChange]() {
+                auto lockedProperties = properties.lock();
+                if (!lockedProperties) {
+                    return;
+                }
+                (*lockedProperties)[name] = PropertyValue{ matrixWidget->values() };
                 onChange();
             }
         );
@@ -779,10 +792,9 @@ namespace {
     }
 
     QWidget* createFileWidget(const std::string& name, const std::string& description,
-                              bool isDirectory, PropertyMap& properties,
+                              bool isDirectory, std::weak_ptr<PropertyMap> properties,
                               const std::function<void()>& onChange)
     {
-        PropertyMap* props = &properties;
         QWidget* container = new QWidget();
         container->setObjectName(FileContainerName);
         QBoxLayout* horizontalLayout = new QHBoxLayout(container);
@@ -802,8 +814,12 @@ namespace {
             lineEdit,
             &QLineEdit::textEdited,
             lineEdit,
-            [props, name, onChange](const QString& text) {
-                (*props)[name] = PropertyValue{ text.toStdString() };
+            [properties, name, onChange](const QString& text) {
+                auto lockedProperties = properties.lock();
+                if (!lockedProperties) {
+                    return;
+                }
+                (*lockedProperties)[name] = PropertyValue{ text.toStdString() };
                 onChange();
             }
         );
@@ -814,13 +830,19 @@ namespace {
             browseButton,
             &QPushButton::clicked,
             container,
-            [container, lineEdit, props, name, isDirectory, onChange]() {
+            [container, lineEdit, properties, name, isDirectory, onChange]() {
                 const QString path = isDirectory ?
                     QFileDialog::getExistingDirectory(container, "Select Directory") :
                     QFileDialog::getOpenFileName(container, "Select File");
                 if (!path.isEmpty()) {
+                    auto lockedProperties = properties.lock();
+                    if (!lockedProperties) {
+                        return;
+                    }
                     lineEdit->setText(path);
-                    (*props)[name] = PropertyValue{ path.toStdString() };
+                    (*lockedProperties)[name] = PropertyValue{
+                        path.toStdString()
+                    };
                     onChange();
                 }
             }
@@ -831,10 +853,10 @@ namespace {
         return container;
     }
 
-    QWidget* createDateTimeWidget(const std::string& name, PropertyMap& properties,
+    QWidget* createDateTimeWidget(const std::string& name,
+                                  std::weak_ptr<PropertyMap> properties,
                                   const std::function<void()>& onChange)
     {
-        PropertyMap* props = &properties;
         QLineEdit* lineEdit = new QLineEdit();
         lineEdit->setObjectName(DateEditName);
         // Human-readable hint; the actual Qt format string is DateDisplayFormat
@@ -847,11 +869,18 @@ namespace {
             lineEdit,
             &QLineEdit::textEdited,
             lineEdit,
-            [props, name, onChange](const QString& text) {
-                const QDateTime dateTime = QDateTime::fromString(text, DateDisplayFormat);
+            [properties, name, onChange](const QString& text) {
+                auto lockedProperties = properties.lock();
+                if (!lockedProperties) {
+                    return;
+                }
+                const QDateTime dateTime = QDateTime::fromString(
+                    text,
+                    DateDisplayFormat
+                );
                 if (dateTime.isValid()) {
-                    (*props)[name] = PropertyValue{
                         dateTime.toUTC().toString(Qt::ISODate).toStdString()
+                    (*lockedProperties)[name] = PropertyValue{
                     };
                 }
                 onChange();
@@ -883,25 +912,28 @@ namespace {
 
     QWidget* createIdentifierComboWidget(const SchemaMember& member,
                                          IdentifierRegistry* registry,
-                                         PropertyMap& properties,
+                                         std::weak_ptr<PropertyMap> properties,
                                          const std::function<void()>& onChange,
                                     const std::function<void(const QString&)>& onSelect)
     {
-        PropertyMap* props = &properties;
         QWidget* container = new QWidget();
         QBoxLayout* horizontalLayout = new QHBoxLayout(container);
         horizontalLayout->setContentsMargins(0, 0, 0, 0);
         horizontalLayout->setSpacing(4);
 
         // Returns identifiers excluding this node's own
-        auto filteredIdentifiers = [registry, props]() {
+        auto filteredIdentifiers = [registry, properties]() {
             QStringList identifiers = registry->knownIdentifiers();
-            const auto it = props->find("Identifier");
-            if (it != props->end() && it->second.isString()) {
+            auto lockedProperties = properties.lock();
+            if (!lockedProperties) {
+                return identifiers;
+            }
+            const auto it = lockedProperties->find("Identifier");
+            if (it != lockedProperties->end() && it->second.isString()) {
                 identifiers.removeAll(QString::fromStdString(it->second.toString()));
             }
             return identifiers;
-            };
+        };
 
         QComboBox* combo = new QComboBox(container);
         combo->setEditable(true);
@@ -929,8 +961,12 @@ namespace {
             combo,
             &QComboBox::currentTextChanged,
             combo,
-            [props, name = member.name, onChange](const QString& text) {
-                (*props)[name] = PropertyValue{ text.toStdString() };
+            [properties, name = member.name, onChange](const QString& text) {
+                auto lockedProperties = properties.lock();
+                if (!lockedProperties) {
+                    return;
+                }
+                (*lockedProperties)[name] = PropertyValue{ text.toStdString() };
                 onChange();
             }
         );
@@ -979,11 +1015,11 @@ namespace {
         return container;
     }
 
-    QWidget* createInListWidget(const std::string& name, const QStringList& listOptions,
-                                PropertyMap& properties,
+    QWidget* createInListWidget(const std::string& name,
+                                const QStringList& listOptions,
+                                std::weak_ptr<PropertyMap> properties,
                                 const std::function<void()>& onChange)
     {
-        PropertyMap* props = &properties;
         QComboBox* combo = new QComboBox();
         combo->addItem("Select...");
         combo->addItems(listOptions);
@@ -992,14 +1028,20 @@ namespace {
             combo,
             &QComboBox::currentIndexChanged,
             combo,
-            [props, name, combo, onChange](int index) {
-                // Index 0 is the "Select..." placeholder - erase the property so the
-                // placeholder choice is not serialized into the asset
+            [properties, name, combo, onChange](int index) {
+                auto lockedProperties = properties.lock();
+                if (!lockedProperties) {
+                    return;
+                }
+                // Index 0 is the "Select..." placeholder - erase the
+                // property so the placeholder choice is not serialized
                 if (index <= 0) {
-                    props->erase(name);
+                    lockedProperties->erase(name);
                 }
                 else {
-                    (*props)[name] = PropertyValue{ combo->currentText().toStdString() };
+                    (*lockedProperties)[name] = PropertyValue{
+                        combo->currentText().toStdString()
+                    };
                 }
                 onChange();
             }
@@ -1007,11 +1049,11 @@ namespace {
         return combo;
     }
 
-    QWidget* createStringWidget(const std::string& name, const std::string& description,
-                                PropertyMap& properties,
+    QWidget* createStringWidget(const std::string& name,
+                                const std::string& description,
+                                std::weak_ptr<PropertyMap> properties,
                                 const std::function<void()>& onChange)
     {
-        PropertyMap* props = &properties;
         QLineEdit* lineEdit = new QLineEdit();
 
         if (!description.empty()) {
@@ -1022,8 +1064,14 @@ namespace {
             lineEdit,
             &QLineEdit::textEdited,
             lineEdit,
-            [props, name, onChange](const QString& text) {
-                (*props)[name] = PropertyValue{ text.toStdString() };
+            [properties, name, onChange](const QString& text) {
+                auto lockedProperties = properties.lock();
+                if (!lockedProperties) {
+                    return;
+                }
+                (*lockedProperties)[name] = PropertyValue{
+                    text.toStdString()
+                };
                 onChange();
             }
         );
@@ -1033,7 +1081,8 @@ namespace {
 } // namespace
 
 SchemaFormWidget::SchemaFormWidget(std::vector<SchemaMember> members,
-                                   PropertyMap& properties, QWidget* parent,
+                                   std::weak_ptr<PropertyMap> properties,
+                                   QWidget* parent,
                                    bool subSectionsExpanded, bool sortMembers,
                                    IdentifierRegistry* registry)
     : QWidget(parent)
@@ -1101,7 +1150,8 @@ void SchemaFormWidget::addMemberToGrid(QGridLayout* grid, int row, int memberInd
 
 QWidget* SchemaFormWidget::createOptionalWrapper(int memberIndex, QWidget* field) {
     const std::string& name = _members[memberIndex].name;
-    const bool alreadySet = _properties.count(name) > 0;
+    auto lockedProperties = _properties.lock();
+    const bool alreadySet = lockedProperties && lockedProperties->count(name) > 0;
 
     // Container holds two mutually-exclusive rows: a "+" button (when the
     // field is inactive) and the field + remove button (when active).
@@ -1171,7 +1221,10 @@ QWidget* SchemaFormWidget::createOptionalWrapper(int memberIndex, QWidget* field
                     return;
                 }
             }
-            _properties.erase(_members[memberIndex].name);
+            auto lockedProperties = _properties.lock();
+            if (lockedProperties) {
+                lockedProperties->erase(_members[memberIndex].name);
+            }
             setOptionalFieldActive(memberIndex, false);
             emit optionalFieldToggled(
                 QString::fromStdString(_members[memberIndex].name),
@@ -1198,6 +1251,10 @@ QWidget* SchemaFormWidget::widgetForMember(const std::string& name) const {
 }
 
 void SchemaFormWidget::applyToProperties() {
+    auto lockedProperties = _properties.lock();
+    if (!lockedProperties) {
+        return;
+    }
     for (size_t i = 0; i < _members.size(); i++) {
         QWidget* widget = _fieldWidgets[i];
         if (!widget || !_optionalFieldActive[i]) {
@@ -1213,7 +1270,7 @@ void SchemaFormWidget::applyToProperties() {
 
         std::optional<PropertyValue> value = readWidgetValue(widget, member.type);
         if (value.has_value()) {
-            _properties[member.name] = std::move(*value);
+            (*lockedProperties)[member.name] = std::move(*value);
         }
     }
 }
@@ -1254,7 +1311,10 @@ void SchemaFormWidget::setFieldActive(const std::string& memberName, bool active
 
     // When deactivating, remove the property so it won't be serialized
     if (!active) {
-        _properties.erase(memberName);
+        auto lockedProperties = _properties.lock();
+        if (lockedProperties) {
+            lockedProperties->erase(memberName);
+        }
     }
     setOptionalFieldActive(index, active);
 }
@@ -1293,6 +1353,10 @@ void SchemaFormWidget::syncFieldWith(const std::string& memberName,
 }
 
 void SchemaFormWidget::populateFromProperties() {
+    auto lockedProperties = _properties.lock();
+    if (!lockedProperties) {
+        return;
+    }
     for (size_t i = 0; i < _members.size(); i++) {
         QWidget* widget = _fieldWidgets[i];
         if (!widget) {
@@ -1304,8 +1368,8 @@ void SchemaFormWidget::populateFromProperties() {
         // exists. Skip if the property is absent or null
         if (_fieldAddButtons[i]) {
             const bool exists =
-                _properties.count(member.name) > 0 &&
-                !_properties.at(member.name).isNull();
+                lockedProperties->count(member.name) > 0 &&
+                !lockedProperties->at(member.name).isNull();
             setOptionalFieldActive(static_cast<int>(i), exists);
             if (!exists) {
                 continue;
@@ -1313,8 +1377,8 @@ void SchemaFormWidget::populateFromProperties() {
         }
 
         // Look up the stored value; skip if there is no property for this member
-        const auto it = _properties.find(member.name);
-        if (it == _properties.end()) {
+        const auto it = lockedProperties->find(member.name);
+        if (it == lockedProperties->end()) {
             continue;
         }
         const PropertyValue& value = it->second;
@@ -1422,9 +1486,15 @@ QWidget* SchemaFormWidget::createTableSection(const SchemaMember& member) {
             _properties
         );
         break;
-    case TableKind::Ref:
-        buildRefContent(section, member, *classification.reference, _properties);
+    case TableKind::Ref: {
+        auto lockedProperties = _properties.lock();
+        if (!lockedProperties) {
+            break;
+        }
+        buildRefContent(section, member, *classification.reference, *lockedProperties);
+
         break;
+    }
     case TableKind::ScalarArray: {
         // Scalar arrays are rendered as a single flat widget (e.g. a text field)
         // rather than a list with add/remove buttons. member.members[0] is the "*"
@@ -1439,9 +1509,14 @@ QWidget* SchemaFormWidget::createTableSection(const SchemaMember& member) {
     case TableKind::InlineArray:
         buildInlineArrayContent(section, member, _properties);
         break;
-    case TableKind::Table:
-        buildInlineTableContent(section, member, _properties);
+    case TableKind::Table: {
+        auto lockedProperties = _properties.lock();
+        if (!lockedProperties) {
+            break;
+        }
+        buildInlineTableContent(section, member, *lockedProperties);
         break;
+    }
     }
 
     return section;
@@ -1453,11 +1528,19 @@ QWidget* SchemaFormWidget::createTableSection(const SchemaMember& member) {
 
 SchemaFormWidget* SchemaFormWidget::createNestedForm(
     const std::vector<SchemaMember>& members,
-    PropertyMap& properties)
+    PropertyMap& subMap)
 {
+    auto root = _properties.lock();
+    if (!root) {
+        return nullptr;
+    }
+    // Aliasing constructor of shared_ptr: we can point to a submap in the shared_ptr in
+    // scenegraphnodeeditor. This is so we can create a nested form. Shares lifetime with
+    // root shared_ptr
+    auto aliased = std::shared_ptr<PropertyMap>(root, &subMap);
     SchemaFormWidget* inner = new SchemaFormWidget(
         members,
-        properties,
+        std::weak_ptr<PropertyMap>(aliased),
         nullptr,
         false,
         true,
@@ -1519,11 +1602,13 @@ void SchemaFormWidget::buildRefArrayCard(QBoxLayout* itemsLayout,
     const std::string& memberName,
     const SchemaCategory* category,
     const std::string& referenceId, size_t index,
-    PropertyMap& properties)
+    std::weak_ptr<PropertyMap> properties)
 {
-    // Pointer alias - lambdas cannot capture references
-    PropertyMap* propertiesPtr = &properties;
-    PropertyList& items = properties[memberName].toList();
+    auto lockedProperties = properties.lock();
+    if (!lockedProperties) {
+        return;
+    }
+    PropertyList& items = (*lockedProperties)[memberName].toList();
     PropertyMap& itemProperties = ensureListItemMap(items, index);
 
     // Card frame and header row
@@ -1586,9 +1671,12 @@ void SchemaFormWidget::buildRefArrayCard(QBoxLayout* itemsLayout,
         dropdown,
         &SearchDropdown::activated,
         this,
-        [this, propertiesPtr, memberName, index, innerLayout, category, dropdown]() {
-            PropertyMap& properties = *propertiesPtr;
-            PropertyList& list = properties[memberName].toList();
+        [this, properties, memberName, index, innerLayout, category, dropdown]() {
+            auto lockedProperties = properties.lock();
+            if (!lockedProperties) {
+                return;
+            }
+            PropertyList& list = (*lockedProperties)[memberName].toList();
             if (index >= list.size()) {
                 return;
             }
@@ -1615,9 +1703,12 @@ void SchemaFormWidget::buildRefArrayCard(QBoxLayout* itemsLayout,
         removeButton,
         &QPushButton::clicked,
         this,
-        [this, propertiesPtr, memberName, index, itemsLayout, category, referenceId]() {
-            PropertyMap& properties = *propertiesPtr;
-            PropertyList& list = properties[memberName].toList();
+        [this, properties, memberName, index, itemsLayout, category, referenceId]() {
+            auto lockedProperties = properties.lock();
+            if (!lockedProperties) {
+                return;
+            }
+            PropertyList& list = (*lockedProperties)[memberName].toList();
             if (index < list.size()) {
                 list.erase(list.begin() + static_cast<int>(index));
             }
@@ -1633,10 +1724,14 @@ void SchemaFormWidget::rebuildRefArray(QBoxLayout* itemsLayout,
     const std::string& memberName,
     const SchemaCategory* category,
     const std::string& referenceId,
-    PropertyMap& properties)
+    std::weak_ptr<PropertyMap> properties)
 {
     clearLayout(itemsLayout);
-    PropertyList& items = properties[memberName].toList();
+    auto lockedProperties = properties.lock();
+    if (!lockedProperties) {
+        return;
+    }
+    PropertyList& items = (*lockedProperties)[memberName].toList();
     for (size_t i = 0; i < items.size(); i++) {
         buildRefArrayCard(itemsLayout, memberName, category, referenceId, i, properties);
     }
@@ -1645,10 +1740,13 @@ void SchemaFormWidget::rebuildRefArray(QBoxLayout* itemsLayout,
 void SchemaFormWidget::buildInlineArrayCard(QBoxLayout* itemsLayout,
     const std::string& memberName,
     const std::vector<SchemaMember>& itemMembers,
-    size_t index, PropertyMap& properties)
+    size_t index, std::weak_ptr<PropertyMap> properties)
 {
-    PropertyMap* propertiesPtr = &properties;
-    PropertyList& items = properties[memberName].toList();
+    auto lockedProperties = properties.lock();
+    if (!lockedProperties) {
+        return;
+    }
+    PropertyList& items = (*lockedProperties)[memberName].toList();
     PropertyMap& itemProperties = ensureListItemMap(items, index);
 
     auto [card, cardLayout] = createCardFrame();
@@ -1677,9 +1775,12 @@ void SchemaFormWidget::buildInlineArrayCard(QBoxLayout* itemsLayout,
         removeButton,
         &QPushButton::clicked,
         this,
-        [this, propertiesPtr, memberName, index, itemsLayout, membersPtr]() {
-            PropertyMap& properties = *propertiesPtr;
-            PropertyList& list = properties[memberName].toList();
+        [this, properties, memberName, index, itemsLayout, membersPtr]() {
+            auto lockedProperties = properties.lock();
+            if (!lockedProperties) {
+                return;
+            }
+            PropertyList& list = (*lockedProperties)[memberName].toList();
             if (index < list.size()) {
                 list.erase(list.begin() + static_cast<int>(index));
             }
@@ -1694,10 +1795,14 @@ void SchemaFormWidget::buildInlineArrayCard(QBoxLayout* itemsLayout,
 void SchemaFormWidget::rebuildInlineArray(QBoxLayout* itemsLayout,
     const std::string& memberName,
     const std::vector<SchemaMember>& itemMembers,
-    PropertyMap& properties)
+    std::weak_ptr<PropertyMap> properties)
 {
     clearLayout(itemsLayout);
-    PropertyList& items = properties[memberName].toList();
+    auto lockedProperties = properties.lock();
+    if (!lockedProperties) {
+        return;
+    }
+    PropertyList& items = (*lockedProperties)[memberName].toList();
     for (size_t i = 0; i < items.size(); i++) {
         buildInlineArrayCard(itemsLayout, memberName, itemMembers, i, properties);
     }
@@ -1709,20 +1814,24 @@ void SchemaFormWidget::rebuildInlineArray(QBoxLayout* itemsLayout,
 void SchemaFormWidget::buildRefArrayContent(CollapsibleSection* section,
     const SchemaMember& member,
     const std::string& referenceId,
-    PropertyMap& properties)
+    std::weak_ptr<PropertyMap> properties)
 {
     // Look up the category for the reference
     const SchemaCategory* category =
         AssetSchema::instance().findCategoryByTypeId(referenceId);
     const std::string memberName = member.name;
-    PropertyMap* propertiesPtr = &properties;
 
     auto [itemsLayout, addButton] = createArrayScaffold(section);
 
-    ensurePropertyList(properties, memberName);
+    auto lockedProperties = properties.lock();
+    if (!lockedProperties) {
+        return;
+    }
+
+    ensurePropertyList(*lockedProperties, memberName);
 
     // Build a card for each existing item in the array
-    PropertyList& items = properties[memberName].toList();
+    PropertyList& items = (*lockedProperties)[memberName].toList();
     for (size_t i = 0; i < items.size(); i++) {
         buildRefArrayCard(itemsLayout, memberName, category, referenceId, i, properties);
     }
@@ -1732,10 +1841,15 @@ void SchemaFormWidget::buildRefArrayContent(CollapsibleSection* section,
         addButton,
         &QPushButton::clicked,
         this,
-        [this, propertiesPtr, memberName, itemsLayout, category, referenceId]() {
-            PropertyMap& properties = *propertiesPtr;
-            properties[memberName].toList().push_back(PropertyValue{ PropertyMap{} });
-            const size_t newIndex = properties[memberName].toList().size() - 1;
+        [this, properties, memberName, itemsLayout, category, referenceId]() {
+            auto lockedProperties = properties.lock();
+            if (!lockedProperties) {
+                return;
+            }
+            (*lockedProperties)[memberName].toList().push_back(
+                PropertyValue{ PropertyMap{} }
+            );
+            const size_t newIndex = (*lockedProperties)[memberName].toList().size() - 1;
             buildRefArrayCard(
                 itemsLayout,
                 memberName,
@@ -1772,7 +1886,7 @@ void SchemaFormWidget::buildRefContent(CollapsibleSection* section,
         targetType->name == category->name;
 
     if (isPolymorphic) {
-        buildPolymorphicRefContent(section, member, reference, category, properties);
+        buildPolymorphicRefContent(section, member, reference, category, _properties);
         return;
     }
 
@@ -1787,10 +1901,12 @@ void SchemaFormWidget::buildPolymorphicRefContent(CollapsibleSection* section,
     const SchemaMember& member,
     const SchemaReference& reference,
     const SchemaCategory* category,
-    PropertyMap& properties)
+    std::weak_ptr<PropertyMap> properties)
 {
-    // Pointer alias - lambdas cannot capture references
-    PropertyMap* propertiesPtr = &properties;
+    auto lockedProperties = properties.lock();
+    if (!lockedProperties) {
+        return;
+    }
 
     // Outer container for the type selector and inner form
     QWidget* container = new QWidget();
@@ -1800,10 +1916,10 @@ void SchemaFormWidget::buildPolymorphicRefContent(CollapsibleSection* section,
 
     // Check if the property map already has a saved type selection
     const bool hasStoredProperties =
-        properties.count(member.name) > 0
-        && properties.at(member.name).isMap();
+        lockedProperties->count(member.name) > 0
+        && lockedProperties->at(member.name).isMap();
     const QString storedTypeName = hasStoredProperties ?
-        storedTypeFromMap(properties.at(member.name).toMap()) :
+        storedTypeFromMap(lockedProperties->at(member.name).toMap()) :
         QString();
 
     // Type dropdown - populated with all concrete types in the category, skipping the
@@ -1866,27 +1982,30 @@ void SchemaFormWidget::buildPolymorphicRefContent(CollapsibleSection* section,
 
     // Restore the inner form for a previously saved type selection
     if (preSelectedIndex >= 0) {
-        PropertyMap& subProperties = ensurePropertyMap(properties, memberName);
+        PropertyMap& subProperties = ensurePropertyMap(*lockedProperties, memberName);
         rebuildItemForm(innerLayout, subProperties, storedTypeName, category);
     }
 
-    // Track the selected index so we can revert on cancelled type changes.
-    // It needs to be a pointer because we mutate it in the lambda
+    // Track the selected index so we can revert on cancelled type
+    // changes. Pointer because we mutate it in the lambda
     auto previousIndex = std::make_shared<int>(preSelectedIndex);
 
-    // Type selected: reset the property map and rebuild the inner form
+    // Type selected: reset the property map and rebuild inner form
     connect(
         dropdown,
         &SearchDropdown::activated,
         this,
-        [this, propertiesPtr, memberName, innerLayout, dropdown, clearButton, category,
+        [this, properties, memberName, innerLayout, dropdown, clearButton, category,
          previousIndex]()
         {
-            PropertyMap& properties = *propertiesPtr;
+            auto lockedProperties = properties.lock();
+            if (!lockedProperties) {
+                return;
+            }
 
             // Check if the user has filled in any fields beyond the "Type" key
-            const auto it = properties.find(memberName);
-            bool hasEntry = it != properties.end() && it->second.isMap();
+            const auto it = lockedProperties->find(memberName);
+            bool hasEntry = it != lockedProperties->end() && it->second.isMap();
             bool hasExistingData = hasEntry && it->second.toMap().size() > 1;
 
             if (hasExistingData) {
@@ -1903,8 +2022,8 @@ void SchemaFormWidget::buildPolymorphicRefContent(CollapsibleSection* section,
                 }
             }
 
-            properties[memberName] = PropertyValue{ PropertyMap{} };
-            PropertyMap& subProperties = properties[memberName].toMap();
+            (*lockedProperties)[memberName] = PropertyValue{ PropertyMap{} };
+            PropertyMap& subProperties = (*lockedProperties)[memberName].toMap();
 
             rebuildItemForm(
                 innerLayout,
@@ -1928,19 +2047,22 @@ void SchemaFormWidget::buildPolymorphicRefContent(CollapsibleSection* section,
         }
     );
 
-    // Clear button: remove the selection and erase the property
+    // Clear button: remove selection and erase the property
     connect(
         clearButton,
         &QPushButton::clicked,
         this,
-        [this, propertiesPtr, memberName, dropdown, innerLayout, clearButton,
+        [this, properties, memberName, dropdown, innerLayout, clearButton,
          previousIndex]()
         {
-            PropertyMap& properties = *propertiesPtr;
+            auto lockedProperties = properties.lock();
+            if (!lockedProperties) {
+                return;
+            }
 
             // Check if the user has filled in any fields beyond the "Type" key
-            const auto it = properties.find(memberName);
-            bool hasEntry = it != properties.end() && it->second.isMap();
+            const auto it = lockedProperties->find(memberName);
+            bool hasEntry = it != lockedProperties->end() && it->second.isMap();
             bool hasExistingData = hasEntry && it->second.toMap().size() > 1;
 
             if (hasExistingData) {
@@ -1959,7 +2081,7 @@ void SchemaFormWidget::buildPolymorphicRefContent(CollapsibleSection* section,
             dropdown->setCurrentIndex(-1);
             clearButton->setVisible(false);
             clearLayout(innerLayout);
-            properties.erase(memberName);
+            lockedProperties->erase(memberName);
             emit fieldChanged();
             *previousIndex = -1;
         }
@@ -1968,33 +2090,43 @@ void SchemaFormWidget::buildPolymorphicRefContent(CollapsibleSection* section,
 
 void SchemaFormWidget::buildInlineArrayContent(CollapsibleSection* section,
     const SchemaMember& member,
-    PropertyMap& properties)
+    std::weak_ptr<PropertyMap> properties)
 {
     // members[0] is the "*" array template child; its sub-members define the schema for
     // each element in the array
     const std::vector<SchemaMember>& itemMembers = member.members[0].members;
     const std::string memberName = member.name;
     const std::vector<SchemaMember>* membersPtr = &itemMembers;
-    PropertyMap* propertiesPtr = &properties;
 
     auto [itemsLayout, addButton] = createArrayScaffold(section);
 
-    ensurePropertyList(properties, memberName);
+    auto lockedProperties = properties.lock();
+    if (!lockedProperties) {
+        return;
+    }
 
-    PropertyList& items = properties[memberName].toList();
+    ensurePropertyList(*lockedProperties, memberName);
+
+    PropertyList& items = (*lockedProperties)[memberName].toList();
     for (size_t i = 0; i < items.size(); i++) {
         buildInlineArrayCard(itemsLayout, memberName, *membersPtr, i, properties);
     }
 
-    // "+ Add" button: appends a new item to the array and builds its card
+    // "+ Add" button: appends a new item and builds its card
     connect(
         addButton,
         &QPushButton::clicked,
         this,
-        [this, propertiesPtr, memberName, itemsLayout, membersPtr]() {
-            PropertyMap& properties = *propertiesPtr;
-            properties[memberName].toList().push_back(PropertyValue{ PropertyMap{} });
-            const size_t newIndex = properties[memberName].toList().size() - 1;
+        [this, properties, memberName, itemsLayout, membersPtr]() {
+            auto lockedProperties = properties.lock();
+            if (!lockedProperties) {
+                return;
+            }
+            (*lockedProperties)[memberName].toList().push_back(
+                PropertyValue{ PropertyMap{} }
+            );
+            const size_t newIndex = (*lockedProperties)[memberName].toList().size() - 1;
+
             buildInlineArrayCard(
                 itemsLayout,
                 memberName,
