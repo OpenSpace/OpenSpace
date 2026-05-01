@@ -879,8 +879,8 @@ namespace {
                     DateDisplayFormat
                 );
                 if (dateTime.isValid()) {
-                        dateTime.toUTC().toString(Qt::ISODate).toStdString()
                     (*lockedProperties)[name] = PropertyValue{
+                        dateTime.toUTC().toString(Qt::ISODate).toStdString()
                     };
                 }
                 onChange();
