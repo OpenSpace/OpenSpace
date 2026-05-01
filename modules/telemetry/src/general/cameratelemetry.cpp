@@ -79,8 +79,8 @@ namespace {
     constexpr Property::PropertyInfo RotationPrecisionInfo = {
         "RotationPrecision",
         "Rotation precision",
-        "The precision used to determin when to send updated camera rotational "
-        "data to the Open Sound Control receiver.",
+        "The precision used to determin when to send updated camera rotational data to "
+        "the Open Sound Control receiver.",
         Property::Visibility::User
     };
 
@@ -100,8 +100,11 @@ CameraTelemetry::CameraTelemetry(const std::string& ip, int port)
     , _cameraSpeedDistanceUnitOption(CameraSpeedDistanceUnitInfo)
     , _precisionProperties(CameraTelemetry::PrecisionProperties(PrecisionInfo))
 {
-    for (int i = 0; i < DistanceUnitNames.size(); i++) {
-        _cameraSpeedDistanceUnitOption.addOption(i, DistanceUnitNames[i].singular.data());
+    for (size_t i = 0; i < DistanceUnitNames.size(); i++) {
+        _cameraSpeedDistanceUnitOption.addOption(
+            static_cast<int>(i),
+            DistanceUnitNames[i].singular.data()
+        );
     }
 
     _cameraSpeedDistanceUnitOption.setValue(static_cast<int>(DistanceUnit::Kilometer));
@@ -127,12 +130,12 @@ CameraTelemetry::PrecisionProperties::PrecisionProperties(
 }
 
 bool CameraTelemetry::updateData(const Camera* camera) {
-    const glm::dvec3 cameraPosition = camera->positionVec3();
+    const glm::dvec3 cameraPosition = camera->position();
     const double distanceMoved = glm::length(_cameraPosition - cameraPosition);
 
     const glm::dquat cameraRotation = camera->rotationQuaternion();
-    // To check if the rotation has changed above the precision threshold, check the
-    // angle and axis of the quaternion seperatly
+    // To check if the rotation has changed above the precision threshold, check the angle
+    // and axis of the quaternion seperatly
     const double rotationAngleDifference = std::abs(_cameraRotation.w - cameraRotation.w);
     const double rotationAxisDifference = glm::length(
         glm::dvec3(_cameraRotation.x, _cameraRotation.y, _cameraRotation.z) -
@@ -179,7 +182,7 @@ bool CameraTelemetry::updateData(const Camera* camera) {
 }
 
 void CameraTelemetry::sendData() {
-    std::string label = "/Camera";
+    constexpr std::string_view Label = "/Camera";
     std::vector<OpenSoundControlDataType> data(NumDataItems);
 
     data[CameraPosXIndex] = _cameraPosition.x;
@@ -196,7 +199,7 @@ void CameraTelemetry::sendData() {
         _cameraSpeedDistanceUnitOption.value()
     );
 
-    _connection->send(label, data);
+    _connection->send(std::string(Label), data);
 }
 
 } // namespace openspace

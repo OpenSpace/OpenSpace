@@ -63,17 +63,16 @@ public:
      * Create the labels from an already loaded dataset. That dataset should have a
      * comment per point to be used for the labels.
      *
-     * This function should be called before the labels are initialized
+     * This function should be called before the labels are initialized.
      *
      * \param dataset The dataset to create the labelset from, including xyz position and
-     *        a string to be used for the text.
+     *        a string to be used for the text
      * \param unit The unit to use when interpreting the point information in the dataset
      */
     void loadLabelsFromDataset(const dataloader::Dataset& dataset, DistanceUnit unit);
 
     void loadLabels();
 
-    bool isReady() const;
     bool enabled() const;
 
     void render(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,

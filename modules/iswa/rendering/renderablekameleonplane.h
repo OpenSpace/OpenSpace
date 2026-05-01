@@ -58,7 +58,7 @@ private:
     bool updateTextureResource() override;
     void renderGeometry() const override;
     void setUniforms() override;
-    std::vector<float*> textureData() override;
+    std::vector<std::vector<float>> textureData() override;
 
     void setDimensions();
 

@@ -12,6 +12,6 @@ asset.meta = {
   Name = "Habitable Zone Textures",
   Description = "Default textures that can be used for the habitable zone rendering",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

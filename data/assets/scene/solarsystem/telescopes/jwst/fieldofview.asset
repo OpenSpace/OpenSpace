@@ -56,6 +56,6 @@ asset.meta = {
     The field of view for the James Webb Space Telescope at its current position.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

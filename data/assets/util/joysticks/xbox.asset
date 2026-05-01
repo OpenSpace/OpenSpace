@@ -212,6 +212,6 @@ asset.meta = {
   Name = "Joystick controller: Xbox (wired)",
   Description = "Joystick controller configuration for Xbox (wired)",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -1,6 +1,6 @@
 -- Most of the local bookmarks we are loading are relative to the Earth so we should
 -- ensure that it is loaded first
-asset.require("scene/solarsystem/planets/earth/earth")
+asset.require("scene/solarsystem/planets/earth/globe")
 
 
 

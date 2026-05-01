@@ -23,7 +23,13 @@ local Mission = {
       Name = "Version 5.4",
       Date = "2022 DEC 09 16:14:00",
       Description = [[For version 5.4 of WSA fieldline data and solar surfaces from end of
-        2022 until today.]]
+        2022 until end of 2025.]]
+    },
+    {
+      Name = "Version 6.2",
+      Date = "2025 SEP 10 16:14:00",
+      Description = [[For version 6.2 of WSA fieldline data and solar surfaces from end of
+        2025 until today.]]
     }
   }
 }
@@ -44,6 +50,6 @@ asset.meta = {
   Description = [[This mission file provides information about the simulation model
     WSA.]],
   Author = "CCMC",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

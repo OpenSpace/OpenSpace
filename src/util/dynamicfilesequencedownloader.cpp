@@ -56,7 +56,7 @@ namespace {
         std::ifstream inFile = std::ifstream(syncFilePath);
         std::string line;
 
-        // load existing entries
+        // Load existing entries
         while (ghoul::getline(inFile, line)) {
             if (!line.empty()) {
                 existingEntries.insert(std::filesystem::path(line).filename().string());
@@ -78,7 +78,7 @@ namespace {
     std::string buildDataHttpRequest(double minTime, double maxTime, int dataID,
                                      const std::string& baseUrl)
     {
-        // formulate a min and a max time from time
+        // Formulate a min and a max time from time
         // The thing is time might be "now" and no items
         // ISO8601 format: yyyy-mm-ddThh:mm:ssZ
 
@@ -86,14 +86,84 @@ namespace {
         // days in seconds      : 86400
         // 30 days in seconds   : 2592000
         // 1 year in seconds    : 31556926
-        std::string_view min = Time(minTime).ISO8601();
-        std::string_view max = Time(maxTime).ISO8601();
+        const std::string min = std::format("{}Z", Time(minTime).ISO8601());
+        const std::string max = std::format("{}Z", Time(maxTime).ISO8601());
 
         return std::format("{}{}&time.min={}&time.max={}", baseUrl, dataID, min, max);
     }
 } // namepace
 
 namespace openspace {
+
+std::pair<double, double> DynamicFileSequenceDownloader::parseDataInfoResponse(
+                                                       const nlohmann::json& json)
+{
+    if (!json.contains("datafeeds") || !json["datafeeds"].is_array()) {
+        throw ghoul::RuntimeError(
+            "ISWA metadata response missing array 'datafeeds'"
+        );
+    }
+
+    const nlohmann::json& datafeeds = json["datafeeds"];
+    if (datafeeds.empty() || !datafeeds[0].is_object()) {
+        throw ghoul::RuntimeError("ISWA metadata response missing object 'datafeeds[0]'");
+    }
+
+    const nlohmann::json& datafeed = datafeeds[0];
+    if (!datafeed.contains("availability") || !datafeed["availability"].is_object()) {
+        throw ghoul::RuntimeError(
+            "ISWA metadata response missing object 'datafeeds[0].availability'"
+        );
+    }
+
+    const nlohmann::json& availability = datafeed["availability"];
+
+    if (!availability.contains("startDate") || !availability["startDate"].is_string()) {
+        throw ghoul::RuntimeError(
+            "ISWA metadata response missing string 'datafeeds[0].availability.startDate'"
+        );
+    }
+    if (!availability.contains("stopDate") || !availability["stopDate"].is_string()) {
+        throw ghoul::RuntimeError(
+            "ISWA metadata response missing string 'datafeeds[0].availability.stopDate'"
+        );
+    }
+
+    return {
+        Time::convertTime(availability["startDate"].get<std::string>()),
+        Time::convertTime(availability["stopDate"].get<std::string>())
+    };
+}
+
+std::vector<std::pair<std::string, std::string>>
+DynamicFileSequenceDownloader::parseAvailableFilesResponse(const nlohmann::json& json)
+{
+    if (!json.contains("files") || !json["files"].is_array()) {
+        throw ghoul::RuntimeError("ISWA file response missing array 'files'");
+    }
+
+    std::vector<std::pair<std::string, std::string>> files;
+    files.reserve(json["files"].size());
+
+    for (const nlohmann::json& element : json["files"]) {
+        if (!element.is_object()) {
+            throw ghoul::RuntimeError("ISWA file response contains non-object file entry");
+        }
+        if (!element.contains("timestamp") || !element["timestamp"].is_string()) {
+            throw ghoul::RuntimeError("ISWA file entry missing string 'timestamp'");
+        }
+        if (!element.contains("url") || !element["url"].is_string()) {
+            throw ghoul::RuntimeError("ISWA file entry missing string 'url'");
+        }
+
+        files.emplace_back(
+            element["timestamp"].get<std::string>(),
+            element["url"].get<std::string>()
+        );
+    }
+
+    return files;
+}
 
 DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
                                                             const std::string& identifier,
@@ -133,9 +203,7 @@ DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
             continue;
         }
         std::string name = entry.path().filename().string();
-        if (name != _trackSynced.filename().string() &&
-            !keepFiles.contains(name))
-        {
+        if (name != _trackSynced.filename().string() && !keepFiles.contains(name)) {
             std::filesystem::remove(entry.path());
         }
     }
@@ -196,19 +264,17 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
     int attempt = 0;
     constexpr int MaxRetries = 1;
 
-    /********************
-    * Example response
-    *********************
-    * {
-    *    "availability": {
-    *        "startDate": "2017-07-01T00:42:02.0Z",
-    *        "stopDate" : "2017-09-30T22:43:18.0Z"
-    *    },
-    *    "description" : "WSA 4.4 field line trace from the SCS outer boundary to the
-    *                     source surface",
-    *    "id" : 1177
-    * }
-    */
+    // Example response
+    //
+    // {
+    //   "availability": {
+    //     "startDate": "2017-07-01T00:42:02.0Z",
+    //     "stopDate": "2017-09-30T22:43:18.0Z"
+    //   },
+    //   "description": "WSA 4.4 field line trace from the SCS outer boundary to the
+    //                   source surface",
+    //   "id": 1177
+    // }
     while (attempt <= MaxRetries && !success) {
         try {
             std::vector<char> responseText = response.downloadedData();
@@ -216,16 +282,16 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
                 throw ghoul::RuntimeError("Empty HTTP response");
             }
             nlohmann::json jsonResult = nlohmann::json::parse(responseText);
+            const std::pair<double, double> timeRange = parseDataInfoResponse(jsonResult);
             success = true;
-            _dataMinTime = Time::convertTime(
-                jsonResult["availability"]["startDate"].get<std::string>()
-            );
-            _dataMaxTime = Time::convertTime(
-                jsonResult["availability"]["stopDate"].get<std::string>()
-            );
+            _dataMinTime = timeRange.first;
+            _dataMaxTime = timeRange.second;
         }
         catch (const nlohmann::json::parse_error& e) {
             LWARNING(std::format("JSON parse error: {}", e.what()));
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LWARNING(std::format("ISWA metadata schema error: {}", e.what()));
         }
 
         if (!success) {
@@ -259,28 +325,26 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
     constexpr int MaxRetries = 1;
     nlohmann::json jsonResult;
 
-    /********************
-    * Example response
-    *********************
-    * {
-    *  "dataID": 1234,
-    *  "files": [
-    *   {
-    *    "timestamp": "2017-07-01 00:42:02.0",
-    *    "url": "https://iswa...fieldlines/trace_scs_outtoin/timestamp.osfls"
-    *   },
-    *   {
-    *    "timestamp": "2017-07-01 00:51:36.0",
-    *    "url": "https://iswa...fieldlines/trace_scs_outtoin/timestamp.osfls"
-    *   }
-    *  ],
-    *  "time.max": "2017-10-01 00:00:00.0",
-    *  "time.min": "2017-06-01 00:00:00.0"
-    * }
-    *
-    * Note that requested time can be month 10 but last entry in list is month 07,
-    * meaning there are no more available files between month 7-10.
-    * *****************/
+    // Example response
+    //
+    // {
+    //   "dataID": 1234,
+    //   "files": [
+    //     {
+    //       "timestamp": "2017-07-01 00:42:02.0",
+    //       "url": "https://iswa...fieldlines/trace_scs_outtoin/timestamp.osfls"
+    //     },
+    //     {
+    //       "timestamp": "2017-07-01 00:51:36.0",
+    //       "url": "https://iswa...fieldlines/trace_scs_outtoin/timestamp.osfls"
+    //     }
+    //   ],
+    //   "time.max": "2017-10-01 00:00:00.0",
+    //   "time.min": "2017-06-01 00:00:00.0"
+    // }
+    //
+    // Note that requested time can be month 10 but last entry in list is month 07,
+    // meaning there are no more available files between month 7-10
     while (attempt <= MaxRetries && !success) {
         try {
             std::vector<char> data = response.downloadedData();
@@ -289,10 +353,14 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
             }
 
             jsonResult = nlohmann::json::parse(data);
+            parseAvailableFilesResponse(jsonResult);
             success = true;
         }
         catch (const nlohmann::json::parse_error& ex) {
             LERROR(std::format("JSON parsing error: '{}'", ex.what()));
+        }
+        catch (const ghoul::RuntimeError& ex) {
+            LERROR(std::format("ISWA file schema error: '{}'", ex.what()));
         }
 
         if (!success) {
@@ -317,10 +385,13 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
         return;
     }
 
+    const std::vector<std::pair<std::string, std::string>> files =
+        parseAvailableFilesResponse(jsonResult);
+
     int index = 0;
-    for (const nlohmann::json& element : jsonResult["files"]) {
-        std::string timestamp = element["timestamp"].get<std::string>();
-        std::string url = element["url"].get<std::string>();
+    for (const std::pair<std::string, std::string>& fileInfo : files) {
+        const std::string& timestamp = fileInfo.first;
+        const std::string& url = fileInfo.second;
 
         // An example of how one element in the list from the JSON-result look like:
         // timestamp = "2022-11-13T16:14:00.000";
@@ -427,7 +498,7 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
                 file->state = File::State::Downloaded;
                 trackFinishedDownloads(_trackSynced, file->path);
                 currentIt = _filesCurrentlyDownloading.erase(currentIt);
-                // if one is removed, i is reduced, else we'd skip one in the list
+                // If one is removed, i is reduced, else we'd skip one in the list
                 --i;
             }
         }
@@ -542,8 +613,8 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
         }
         return;
     }
-    // More than 2hrs a second would generally be unfeasable
-    // for a regular internet connection to operate at
+    // More than 2hrs a second would generally be unfeasable for a regular internet
+    // connection to operate at
     constexpr int SpeedThreshold = 7200; // 2 hours in seconds
     if (std::abs(deltaTime) > SpeedThreshold) {
         // Too fast, do nothing
@@ -556,7 +627,7 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
         return;
     }
 
-    // if delta time direction got changed
+    // If delta time direction got changed
     if ((_isForwardDirection && deltaTime < 0) || (!_isForwardDirection && deltaTime > 0))
     {
         _isForwardDirection = !_isForwardDirection;
@@ -568,51 +639,48 @@ void DynamicFileSequenceDownloader::update(double time, double deltaTime) {
     }
 
     if (_isForwardDirection && _currentFile != _availableData.end()) {
-        // if files are there and time is between next file (+1) and +2 file
-        // (meaning the this file is active from now till next file)
-        // change this to be next
+        // If files are there and time is between next file (+1) and +2 file (meaning the
+        // this file is active from now till next file) change this to be next
         if (_currentFile + 1 != _availableData.end() &&
             _currentFile + 2 != _availableData.end() &&
-            (_currentFile + 1)->time < time &&
-            (_currentFile + 2)->time > time)
+            (_currentFile + 1)->time < time && (_currentFile + 2)->time > time)
         {
             _currentFile++;
         }
-        // if its beyond the +2 file, arguably that can mean delta time is to fast
-        // and files might be missed. But we also know we went past beyond the next so
-        // we no longer know where we are so we reinitialize
+        // If its beyond the +2 file, arguably that can mean delta time is to fast and
+        // files might be missed. But we also know we went past beyond the next so we no
+        // longer know where we are so we reinitialize
         else if (_currentFile + 1 != _availableData.end() &&
                  _currentFile + 2 != _availableData.end() &&
                  (_currentFile + 2)->time < time)
         {
             _currentFile = closestFileToNow(time);
         }
-        // We've jumped back without interpolating to a previous time step,
-        // past circa 2 files worth of time and without changing delta time
+        // We've jumped back without interpolating to a previous time step, past circa 2
+        // files worth of time and without changing delta time
         // >>>>>>>we jumped to here>>>>>>>>>now>>>>>>>
         else if (_currentFile->time - 2 * _currentFile->cadence > time) {
             _currentFile = closestFileToNow(time);
         }
     }
     else if (!_isForwardDirection && _currentFile != _availableData.begin()) {
-        // If file is there and time is between prev and this file
-        // then change this to be prev. Same goes here as if time is moving forward
-        // we will use forward 'usage', meaning file is active from now till next
-        if (_currentFile - 1 != _availableData.begin() &&
-            _currentFile->time < time &&
+        // If file is there and time is between prev and this file then change this to be
+        // prev. Same goes here as if time is moving forward we will use forward 'usage',
+        // meaning file is active from now till next
+        if (_currentFile - 1 != _availableData.begin() && _currentFile->time < time &&
             (_currentFile - 1)->time > time)
         {
             _currentFile--;
         }
-        // If we are beyond the prev file, again delta time might be to fast, but we
-        // no longer know where we are so we reinitialize
+        // If we are beyond the prev file, again delta time might be to fast, but we no
+        // longer know where we are so we reinitialize
         else if (_currentFile - 1 != _availableData.begin() &&
-                 (_currentFile - 1)->time > time)
+                (_currentFile - 1)->time > time)
         {
             _currentFile = closestFileToNow(time);
         }
-        // We've jumped forward without interpolating to a future time step,
-        // past circa 2 files worth of time and without changing delta time
+        // We've jumped forward without interpolating to a future time step, past circa 2
+        // files worth of time and without changing delta time
         // <<<<<<now<<<<<<<<<we jumped to here<<<<<<<
         else if (_currentFile->time - 2 * _currentFile->cadence < time) {
             _currentFile = closestFileToNow(time);

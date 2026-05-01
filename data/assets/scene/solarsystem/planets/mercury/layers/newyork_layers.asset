@@ -2,7 +2,7 @@ asset.require("./base_layers")
 asset.require("./colorlayers/messenger_mdis_newyork", false)
 asset.require("./colorlayers/messenger_mosaic_newyork", false)
 asset.require("./colorlayers/messenger_mosaic2_newyork", false)
-asset.require("./colorlayers/messenger_bdr_newyork", asset.enabled)
+asset.require("./colorlayers/messenger_bdr_newyork", true)
 asset.require("./colorlayers/messenger_hie_newyork", false)
 asset.require("./colorlayers/messenger_hiw_newyork", false)
 asset.require("./colorlayers/messenger_loi_newyork", false)
@@ -24,6 +24,6 @@ asset.meta = {
     Layers only loaded from the New York server
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

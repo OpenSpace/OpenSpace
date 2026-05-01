@@ -26,18 +26,18 @@
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/defer.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -105,8 +105,8 @@ namespace {
     constexpr Property::PropertyInfo ScaleByDistanceInfo = {
         "ScaleByDistance",
         "Scale by distance",
-        "Decides whether the plane should automatically adjust in size to based on "
-        "the distance to the camera. Otherwise it will remain in the given size.",
+        "Decides whether the plane should automatically adjust in size to based on the "
+        "distance to the camera. Otherwise it will remain in the given size.",
         Property::Visibility::AdvancedUser
     };
 
@@ -144,15 +144,14 @@ namespace {
     constexpr Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
         "Multiply color",
-        "An RGB color to multiply with the plane's texture. Useful for applying "
-        "a color to grayscale images.",
+        "An RGB color to multiply with the plane's texture. Useful for applying a color "
+        "to grayscale images.",
         Property::Visibility::User
     };
 
-    // A `RenderablePlane` is a renderable that will shows some form of contents projected
-    // on a two-dimensional plane, which in turn is placed in three-dimensional space as
-    // any other `Renderable`. It is possible to specify the `Size` of the plane, whether
-    // it should always face the camera (`Billboard`), and other parameters shown below.
+    // Displays some form of content (usually an image) on a plane. Settable parameters
+    // include the `Size` of the plane, whether it should always face the camera
+    // (`Billboard`), and others shown below.
     struct [[codegen::Dictionary(RenderablePlane)]] Parameters {
         enum class [[codegen::map(RenderOption)]] RenderOption {
             ViewDirection [[codegen::key("Camera View Direction")]],
@@ -197,7 +196,7 @@ namespace {
             std::optional<float> scaleByDistanceMinHeight [[codegen::greater(0.f)]];
         };
 
-        // Settings for scaling points based on camera distance
+        // Settings for scaling points based on camera distance.
         std::optional<DistanceScalingSettings> distanceScalingSettings;
 
         enum class [[codegen::map(BlendMode)]] BlendMode {
@@ -339,10 +338,6 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     setBoundingSphere(glm::compMax(_size.value()));
 }
 
-bool RenderablePlane::isReady() const {
-    return _shader != nullptr;
-}
-
 void RenderablePlane::initializeGL() {
     ZoneScoped;
 
@@ -408,16 +403,18 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     if (_distanceScalingSettings.scaleByDistance) {
         if (global::windowDelegate->isFisheyeRendering()) {
-            LWARNINGC("RenderablePlane",
-                "Distance scaling is disabled in Fisheye rendering mode.");
+            LWARNINGC(
+                "RenderablePlane",
+                "Distance scaling is disabled in Fisheye rendering mode"
+            );
             _distanceScalingSettings.scaleByDistance = false;
         }
         else {
-            const glm::dvec3 cameraPosition = data.camera.positionVec3();
+            const glm::dvec3 cameraPosition = data.camera.position();
             const glm::dvec3 modelPosition = data.modelTransform.translation;
 
-            const double fovDegrees = static_cast<double>(
-                                             global::windowDelegate->horizFieldOfView(0));
+            const double fovDegrees =
+                static_cast<double>(global::windowDelegate->horizFieldOfView(0));
             const double fovRadians = glm::radians(fovDegrees);
             const double halfFovTan = std::tan(fovRadians * 0.5);
 
@@ -428,19 +425,14 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
             projectedHeight = std::clamp(
                 projectedHeight,
-                static_cast<double>(
-                               _distanceScalingSettings.scaleByDistanceMinHeight.value()),
-                static_cast<double>(
-                                _distanceScalingSettings.scaleByDistanceMaxHeight.value())
+                static_cast<double>(_distanceScalingSettings.scaleByDistanceMinHeight),
+                static_cast<double>(_distanceScalingSettings.scaleByDistanceMaxHeight)
             );
 
-            const glm::vec2 currentSize = _size.value();
+            const glm::vec2 currentSize = _size;
             if (currentSize.y > 0.f) {
-                const double scaleFactor = projectedHeight / static_cast<double>(
-                                                                           currentSize.y);
-                const glm::vec2 scaledSize = currentSize * static_cast<float>(
-                                                                             scaleFactor);
-                _size.setValue(scaledSize);
+                const double scale = projectedHeight / static_cast<double>(currentSize.y);
+                _size = currentSize * static_cast<float>(scale);
             }
         }
     }
@@ -460,7 +452,6 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     defer { unbindTexture(); };
 
     _shader->setUniform(_uniformCache.colorTexture, unit);
-
     _shader->setUniform(_uniformCache.multiplyColor, _multiplyColor);
 
     const bool additiveBlending = (_blendMode == static_cast<int>(BlendMode::Additive));
@@ -512,7 +503,7 @@ void RenderablePlane::createPlane() {
         Vertex{ glm::vec4( sizeX,  sizeY, 0.f, 0.f), glm::vec2(1.f, 1.f) }
     };
 
-    glNamedBufferSubData(_vbo, 0, sizeof(vertexData), vertexData.data());
+    glNamedBufferSubData(_vbo, 0, vertexData.size() * sizeof(Vertex), vertexData.data());
 }
 
 glm::dmat4 RenderablePlane::rotationMatrix(const RenderData& data) const {
@@ -554,7 +545,7 @@ glm::dmat4 RenderablePlane::rotationMatrix(const RenderData& data) const {
             );
 
             const glm::dvec3 normal = glm::normalize(
-                data.camera.positionVec3() - objPosWorld
+                data.camera.position() - objPosWorld
             );
             const glm::dvec3 newRight = glm::normalize(
                 glm::cross(data.camera.lookUpVectorWorldSpace(), normal)

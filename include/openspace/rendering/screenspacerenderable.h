@@ -83,7 +83,6 @@ public:
     virtual void deinitializeGL();
 
     virtual void update();
-    virtual bool isReady() const;
     bool isEnabled() const;
     bool isUsingRaeCoords() const;
     bool isFacingCamera() const;
@@ -113,6 +112,9 @@ protected:
     glm::mat4 translationMatrix();
     glm::mat4 localRotationMatrix();
 
+    /**
+     * Radius, azimiuth, elevation to spherical coordinates.
+     */
     glm::vec3 raeToCartesian(const glm::vec3& rae) const;
     glm::vec3 cartesianToRae(const glm::vec3& cartesian) const;
 
@@ -122,6 +124,9 @@ protected:
     virtual void bindTexture(ghoul::opengl::TextureUnit& unit) = 0;
     virtual void unbindTexture();
 
+    /**
+     * Spherical coordinates to radius, azimuth and elevation.
+     */
     glm::vec3 sphericalToRae(const glm::vec3& spherical) const;
     glm::vec3 raeToSpherical(const glm::vec3& rae) const;
     glm::vec3 cartesianToSpherical(const glm::vec3& cartesian) const;
@@ -137,8 +142,7 @@ protected:
     // x, y, z
     Vec3Property _cartesianPosition;
 
-    // Radius, azimuth, elevation,
-    // where azimuth is relative to negative y axis and
+    // Radius, azimuth, elevation, where azimuth is relative to negative y axis and
     // elevation is angle from plane with normal z.
     Vec3Property _raePosition;
 

@@ -8,6 +8,7 @@ local Item = {
   DisplayString = "Rotational Friction is: {}"
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Item)
 end)

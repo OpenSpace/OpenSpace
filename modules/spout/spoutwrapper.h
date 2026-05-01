@@ -47,8 +47,8 @@ namespace openspace {
 
 struct Documentation;
 
-// @TODO(abock, 2022-03-02)  This class should probably be outsourced into a stand-alone
-//                           library that the SGCT version of this class then can also use
+// @TODO(abock, 2022-03-02) This class should probably be outsourced into a stand-alone
+// library that the SGCT version of this class then can also use
 class SpoutMain {
 public:
     SpoutMain();

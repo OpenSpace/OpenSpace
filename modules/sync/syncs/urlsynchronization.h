@@ -48,8 +48,8 @@ public:
      *
      * \param dictionary The parameter dictionary that contains all information that this
      *        UrlSynchronization needs to download the provided files
-     * \param synchronizationRoot The base location based off which the final placement
-     *        is calculated
+     * \param synchronizationRoot The base location based off which the final placement is
+     *        calculated
      */
     UrlSynchronization(const ghoul::Dictionary& dictionary,
         std::filesystem::path synchronizationRoot);
@@ -115,7 +115,7 @@ private:
     /// Contains a flag whether the current transfer should be cancelled
     std::atomic_bool _shouldCancel = false;
 
-    // The thread that will be doing the synchronization
+    /// The thread that will be doing the synchronization
     std::thread _syncThread;
 
     /// Determines how long the file is valid before it should be downloaded again

@@ -79,7 +79,7 @@ namespace {
 namespace openspace {
 
 Documentation ImageSequenceTileProvider::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_imagesequencetileprovider");
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_imagesequence");
 }
 
 ImageSequenceTileProvider::ImageSequenceTileProvider(const ghoul::Dictionary& dictionary)
@@ -126,7 +126,7 @@ TileDepthTransform ImageSequenceTileProvider::depthTransform() {
         return _currentTileProvider->depthTransform();
     }
     else {
-        return { 1.f, 0.f };
+        return { .scale = 1.f, .offset = 0.f };
     }
 }
 

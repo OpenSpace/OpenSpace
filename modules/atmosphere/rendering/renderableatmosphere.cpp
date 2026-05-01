@@ -46,7 +46,7 @@
 namespace {
     using namespace openspace;
 
-    constexpr float KM_TO_M = 1000.f;
+    constexpr float KilometerToMeter = 1000.f;
 
     constexpr Property::PropertyInfo AtmosphereHeightInfo = {
         "AtmosphereHeight",
@@ -122,13 +122,6 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MieScatteringExtinctionPropCoeffInfo = {
-        "MieScatteringExtinctionPropCoefficient",
-        "Mie scattering/extinction proportion coefficient (%)",
-        "Mie Scattering/Extinction Proportion Coefficient.",
-        Property::Visibility::AdvancedUser
-    };
-
     constexpr Property::PropertyInfo MieAsymmetricFactorGInfo = {
         "MieAsymmetricFactorG",
         "Mie asymmetric factor G",
@@ -182,8 +175,8 @@ namespace {
     constexpr Property::PropertyInfo LightSourceNodeInfo = {
         "LightSourceNode",
         "Light source",
-        "The name of a scene graph node to be used as the source of illumination "
-        "for the atmosphere. If not specified, the solar system's Sun is used.",
+        "The name of a scene graph node to be used as the source of illumination for the "
+        "atmosphere. If not specified, the solar system's Sun is used.",
         Property::Visibility::AdvancedUser
     };
 
@@ -224,9 +217,6 @@ namespace {
 
         // [[codegen::verbatim(SunIntensityInfo.description)]]
         std::optional<float> sunIntensity;
-
-        // [[codegen::verbatim(MieScatteringExtinctionPropCoeffInfo.description)]]
-        std::optional<float> mieScatteringExtinctionPropCoefficient;
 
         // [[codegen::verbatim(GroundRadianceEmissionInfo.description)]]
         float groundRadianceEmission;
@@ -296,22 +286,24 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _rayleighHeightScale(RayleighHeightScaleInfo, 0.f, 0.1f, 50.f)
     , _rayleighScatteringCoeff(
         RayleighScatteringCoeffInfo,
-        glm::vec3(0.f), glm::vec3(0.00001f), glm::vec3(0.1f)
+        glm::vec3(0.f),
+        glm::vec3(0.00001f),
+        glm::vec3(0.1f)
     )
     , _ozoneEnabled(OzoneLayerInfo, false)
     , _ozoneHeightScale(OzoneHeightScaleInfo, 0.f, 0.1f, 50.f)
     , _ozoneCoeff(
         OzoneLayerCoeffInfo,
-        glm::vec3(0.f), glm::vec3(0.00001f), glm::vec3(0.001f)
+        glm::vec3(0.f),
+        glm::vec3(0.00001f),
+        glm::vec3(0.001f)
     )
     , _mieHeightScale(MieHeightScaleInfo, 0.f, 0.1f, 50.f)
     , _mieScatteringCoeff(
         MieScatteringCoeffInfo,
-        glm::vec3(0.004f), glm::vec3(0.00001f), glm::vec3(1.f)
-    )
-    , _mieScatteringExtinctionPropCoeff(
-        MieScatteringExtinctionPropCoeffInfo,
-        0.9f, 0.01f, 1.f
+        glm::vec3(0.004f),
+        glm::vec3(0.00001f),
+        glm::vec3(1.f)
     )
     , _miePhaseConstant(MieAsymmetricFactorGInfo, 0.f, -1.f, 1.f)
     , _sunIntensity(SunIntensityInfo, 5.f, 0.1f, 1000.f)
@@ -322,7 +314,9 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _atmosphereDimmingHeight(AtmosphereDimmingHeightInfo, 0.7f, 0.f, 1.f)
     , _atmosphereDimmingSunsetAngle(
         SunsetAngleInfo,
-        glm::vec2(95.f, 100.f), glm::vec2(0.f), glm::vec2(180.f)
+        glm::vec2(95.f, 100.f),
+        glm::vec2(0.f),
+        glm::vec2(180.f)
     )
  {
     auto updateWithCalculation = [this]() {
@@ -335,14 +329,15 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
 
     _shadowEnabled = p.shadowGroup.has_value();
     if (_shadowEnabled) {
-        for (const Parameters::ShadowGroup::SourceElement& s : p.shadowGroup->sources) {
-            for (const Parameters::ShadowGroup::CasterElement& c :
-                 p.shadowGroup->casters)
-            {
-                ShadowConfiguration sc;
-                sc.source = std::pair(s.name, s.radius);
-                sc.caster = std::pair(c.name, c.radius);
-                _shadowConfArray.push_back(sc);
+        using SourceElement = Parameters::ShadowGroup::SourceElement;
+        using CasterElement = Parameters::ShadowGroup::CasterElement;
+        for (const SourceElement& s : p.shadowGroup->sources) {
+            for (const CasterElement& c : p.shadowGroup->casters) {
+                ShadowConfiguration sc = {
+                    .source = std::pair(s.name, s.radius),
+                    .caster = std::pair(c.name, c.radius)
+                };
+                _shadowConfArray.push_back(std::move(sc));
             }
         }
     }
@@ -360,9 +355,6 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     _sunIntensity = p.sunIntensity.value_or(_sunIntensity);
     _sunIntensity.onChange(updateWithoutCalculation);
     addProperty(_sunIntensity);
-
-    _mieScattExtPropCoefProp =
-        p.mieScatteringExtinctionPropCoefficient.value_or(_mieScattExtPropCoefProp);
 
     _rayleighScatteringCoeff = p.rayleigh.coefficients.scattering;
     _rayleighScatteringCoeff.onChange(updateWithCalculation);
@@ -399,13 +391,6 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     _miePhaseConstant = p.mie.phaseConstant;
     _miePhaseConstant.onChange(updateWithCalculation);
     addProperty(_miePhaseConstant);
-
-    _mieScatteringExtinctionPropCoeff =
-        _mieScattExtPropCoefProp != 1.f ? _mieScattExtPropCoefProp :
-        _mieScatteringCoeff.value().x / _mieExtinctionCoeff.x;
-
-    _mieScatteringExtinctionPropCoeff.onChange(updateWithCalculation);
-    addProperty(_mieScatteringExtinctionPropCoeff);
 
     if (p.debug.has_value()) {
         _textureScale = p.debug->preCalculatedTextureScale.value_or(_textureScale);
@@ -485,12 +470,8 @@ void RenderableAtmosphere::initializeGL() {
     global::deferredcasterManager->attachDeferredcaster(*_deferredcaster);
 }
 
-bool RenderableAtmosphere::isReady() const {
-    return true;
-}
-
 glm::dmat4 RenderableAtmosphere::computeModelTransformMatrix(const TransformData& data) {
-    // scale the planet to appropriate size since the planet is a unit sphere
+    // Scale the planet to appropriate size since the planet is a unit sphere
     return glm::translate(glm::dmat4(1.0), data.translation) *
         glm::dmat4(data.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.scale));
@@ -499,7 +480,10 @@ glm::dmat4 RenderableAtmosphere::computeModelTransformMatrix(const TransformData
 void RenderableAtmosphere::render(const RenderData& data, RendererTasks& rendererTask) {
     ZoneScoped;
 
-    DeferredcasterTask task = { _deferredcaster.get(), data };
+    DeferredcasterTask task = {
+        .deferredcaster = _deferredcaster.get(),
+        .renderData = data
+    };
     rendererTask.deferredcasterTasks.push_back(std::move(task));
 }
 
@@ -521,9 +505,6 @@ void RenderableAtmosphere::update(const UpdateData& data) {
 }
 
 void RenderableAtmosphere::updateAtmosphereParameters() {
-    _mieExtinctionCoeff =
-        _mieScatteringCoeff.value() / _mieScatteringExtinctionPropCoeff.value();
-
     _deferredcaster->setParameters(
         _planetRadius + _atmosphereHeight,
         _planetRadius,
@@ -546,10 +527,12 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
     _deferredcaster->setHardShadows(_hardShadowsEnabled);
 }
 
-// Calculate atmosphere dimming coefficient
+/**
+ * Calculate atmosphere dimming coefficient.
+ */
 void RenderableAtmosphere::setDimmingCoefficient(const glm::dmat4& modelTransform) {
     // Calculate if the camera is in the atmosphere and if it is in the sunny region
-    const glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
+    const glm::dvec3 cameraPos = global::navigationHandler->camera()->position();
     // TODO: change the assumption that the Sun is placed in the origin
     const glm::dvec3 planetPos =
         glm::dvec3(modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0));
@@ -565,7 +548,7 @@ void RenderableAtmosphere::setDimmingCoefficient(const glm::dmat4& modelTransfor
     // If cameraSunAngle is more than 90 degrees, we are in shaded part of globe
     const bool cameraIsInSun = cameraSunAngle <= sunsetEnd;
     // Atmosphere height is in KM
-    const float atmosphereEdge = KM_TO_M * (_planetRadius + _atmosphereHeight);
+    const float atmosphereEdge = KilometerToMeter * (_planetRadius + _atmosphereHeight);
     const bool cameraIsInAtmosphere = cameraDistance < atmosphereEdge;
 
     // Don't fade if camera is not in the sunny part of an atmosphere
@@ -575,7 +558,7 @@ void RenderableAtmosphere::setDimmingCoefficient(const glm::dmat4& modelTransfor
     // Else we need to fade the objects
     // Height of the atmosphere where the objects will be faded
     const float atmosphereFadingHeight =
-        KM_TO_M * _atmosphereDimmingHeight * _atmosphereHeight;
+        KilometerToMeter * _atmosphereDimmingHeight * _atmosphereHeight;
     const float atmosphereInnerEdge = atmosphereEdge - atmosphereFadingHeight;
     const bool cameraIsInFadingRegion = cameraDistance > atmosphereInnerEdge;
 
@@ -592,8 +575,7 @@ void RenderableAtmosphere::setDimmingCoefficient(const glm::dmat4& modelTransfor
 
     if (cameraIsInSunset) {
         // Fading - linear interpolation
-        atmosphereDimming = (cameraSunAngle - sunsetStart) /
-            (sunsetEnd - sunsetStart);
+        atmosphereDimming = (cameraSunAngle - sunsetStart) / (sunsetEnd - sunsetStart);
     }
     else if (cameraIsInFadingRegion && cameraIsInEclipse) {
         // Fade with regards to altitude & eclipse shadow
@@ -617,9 +599,7 @@ void RenderableAtmosphere::setDimmingCoefficient(const glm::dmat4& modelTransfor
     }
     // Calculate dimming coefficient for stars, labels etc that are dimmed in the
     // atmosphere
-    global::navigationHandler->camera()->setAtmosphereDimmingFactor(
-        atmosphereDimming
-    );
+    global::navigationHandler->camera()->setAtmosphereDimmingFactor(atmosphereDimming);
 }
 
 } // namespace openspace

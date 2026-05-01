@@ -74,7 +74,6 @@ void GuiGIBSComponent::render() {
         TemporalResolutionBuffer.size()
     );
 
-    //static std::array<char, 64> TemporalFormatBuffer;
     // @TODO Replace with dropdown menu
     constexpr std::array<const char*, 5> TemporalFormats = {
         // @FRAGILE: Synchronized with tileprovider.cpp `from_string` method

@@ -36,8 +36,8 @@
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
-#include <openspace/scripting/scriptengine.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
@@ -119,27 +119,23 @@ ImGUIModule::ImGUIModule()
     }
     _spaceTime.setEnabled(true);
 
-    {
-        auto showHelpTextFunc = [this]() {
-            for (GuiComponent* comp : _components) {
-                comp->setShowHelpTooltip(_showHelpText);
-            }
-        };
-        showHelpTextFunc();
-        _showHelpText.onChange(std::move(showHelpTextFunc));
-        addProperty(_showHelpText);
-    }
+    auto showHelpTextFunc = [this]() {
+        for (GuiComponent* comp : _components) {
+            comp->setShowHelpTooltip(_showHelpText);
+        }
+    };
+    showHelpTextFunc();
+    _showHelpText.onChange(std::move(showHelpTextFunc));
+    addProperty(_showHelpText);
 
-    {
-        auto helpTextDelayFunc = [this]() {
-            for (GuiComponent* comp : _components) {
-                comp->setShowHelpTooltipDelay(_helpTextDelay);
-            }
-        };
-        helpTextDelayFunc();
-        _helpTextDelay.onChange(std::move(helpTextDelayFunc));
-        addProperty(_helpTextDelay);
-    }
+    auto helpTextDelayFunc = [this]() {
+        for (GuiComponent* comp : _components) {
+            comp->setShowHelpTooltipDelay(_helpTextDelay);
+        }
+    };
+    helpTextDelayFunc();
+    _helpTextDelay.onChange(std::move(helpTextDelayFunc));
+    addProperty(_helpTextDelay);
 
     global::callback::draw2D->emplace_back([this]() {
         ZoneScopedN("ImGUI");
@@ -169,9 +165,7 @@ ImGUIModule::ImGUIModule()
     });
 
     global::callback::keyboard->emplace_back(
-        [this](Key key, KeyModifier mod, KeyAction action,
-               IsGuiWindow isGuiWindow) -> bool
-        {
+        [this](Key key, KeyModifier mod, KeyAction action, IsGuiWindow isGuiWindow) {
             ZoneScopedN("ImGUI");
 
             if (!isGuiWindow || !_isEnabled || !_hasContext) {
@@ -182,9 +176,7 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::character->emplace_back(
-        [this](unsigned int codepoint, KeyModifier modifier,
-               IsGuiWindow isGuiWindow) -> bool
-        {
+        [this](unsigned int codepoint, KeyModifier modifier, IsGuiWindow isGuiWindow) {
             ZoneScopedN("ImGUI");
 
             if (!isGuiWindow || !_isEnabled || !_hasContext) {
@@ -205,7 +197,7 @@ ImGUIModule::ImGUIModule()
 
     global::callback::mouseButton->emplace_back(
         [this](MouseButton button, MouseAction action, KeyModifier,
-               IsGuiWindow isGuiWindow) -> bool
+               IsGuiWindow isGuiWindow)
         {
             ZoneScopedN("ImGUI");
 
@@ -225,7 +217,7 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::mouseScrollWheel->emplace_back(
-        [this](double, double posY, IsGuiWindow isGuiWindow) -> bool {
+        [this](double, double posY, IsGuiWindow isGuiWindow) {
             ZoneScopedN("ImGUI");
 
             if (!isGuiWindow || !_isEnabled || !_hasContext) {
@@ -236,7 +228,7 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::touchDetected->emplace_back(
-        [this](TouchInput input) -> bool {
+        [this](TouchInput input) {
             if (!_isEnabled || !_hasContext) {
                 return false;
             }
@@ -245,7 +237,7 @@ ImGUIModule::ImGUIModule()
     );
 
     global::callback::touchUpdated->emplace_back(
-        [this](TouchInput input) -> bool {
+        [this](TouchInput input) {
             if (!_isEnabled || !_hasContext) {
                 return false;
             }
@@ -266,16 +258,14 @@ ImGUIModule::ImGUIModule()
 void ImGUIModule::internalInitialize(const ghoul::Dictionary&) {
     LDEBUGC("ImGUIModule", "Initializing GUI");
 
-    _sceneProperty.setPropertyOwnerFunction(
-        []() {
-            const Scene* scene = global::renderEngine->scene();
-            const std::vector<SceneGraphNode*>& nodes = scene ?
-                scene->allSceneGraphNodes() :
-                std::vector<SceneGraphNode*>();
+    _sceneProperty.setPropertyOwnerFunction([]() {
+        const Scene* scene = global::renderEngine->scene();
+        const std::vector<SceneGraphNode*>& nodes = scene ?
+            scene->allSceneGraphNodes() :
+            std::vector<SceneGraphNode*>();
 
-            return std::vector<PropertyOwner*>(nodes.begin(), nodes.end());
-        }
-    );
+        return std::vector<PropertyOwner*>(nodes.begin(), nodes.end());
+    });
 
     _property.setPropertyOwners({
         global::screenSpaceRootPropertyOwner,
@@ -310,9 +300,9 @@ void ImGUIModule::internalInitializeGL() {
 
 #ifdef WIN32
     strcpy_s(_iniFileBuffer.data(), file.string().size() + 1, file.string().c_str());
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
     strcpy(_iniFileBuffer.data(), file.c_str());
-#endif
+#endif // WIN32
 
     const size_t nWindows = global::windowDelegate->nWindows();
     _contexts.resize(nWindows);
@@ -427,13 +417,13 @@ void ImGUIModule::internalInitializeGL() {
         }
 
         _fontTexture = std::make_unique<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit{
+            ghoul::opengl::Texture::FormatInit {
                 .dimensions = glm::uvec3(texSize.x, texSize.y, 1),
                 .type = GL_TEXTURE_2D,
                 .format = ghoul::opengl::Texture::Format::RGBA,
                 .dataType = GL_UNSIGNED_BYTE
             },
-            ghoul::opengl::Texture::SamplerInit{},
+            ghoul::opengl::Texture::SamplerInit {},
             reinterpret_cast<std::byte*>(texData)
         );
         _fontTexture->setName("GUI Text");
@@ -501,8 +491,8 @@ void ImGUIModule::internalDeinitializeGL() {
 }
 
 void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
-                             const glm::vec2& dpiScaling, const glm::vec2& mousePos,
-                             uint32_t mouseButtonsPressed)
+                              const glm::vec2& dpiScaling, const glm::vec2& mousePos,
+                              uint32_t mouseButtonsPressed)
 {
     const int iWindow = global::windowDelegate->currentWindowId();
     ImGui::SetCurrentContext(_contexts[iWindow]);
@@ -524,38 +514,38 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }
 
-   //
-   // Render
-   ImGui::SetNextWindowCollapsed(_isCollapsed);
+    //
+    // Render
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
 
-   ImGui::Begin("OpenSpace GUI", nullptr);
+    ImGui::Begin("OpenSpace GUI", nullptr);
 
-   _isCollapsed = ImGui::IsWindowCollapsed();
+    _isCollapsed = ImGui::IsWindowCollapsed();
 
-   for (GuiComponent* comp : _components) {
-       bool enabled = comp->isEnabled();
-       ImGui::Checkbox(comp->guiName().c_str(), &enabled);
-       comp->setEnabled(enabled);
-   }
+    for (GuiComponent* comp : _components) {
+        bool enabled = comp->isEnabled();
+        ImGui::Checkbox(comp->guiName().c_str(), &enabled);
+        comp->setEnabled(enabled);
+    }
 
 #ifdef SHOW_IMGUI_HELPERS
-   ImGui::Checkbox("ImGUI Internals", &_showInternals);
-   if (_showInternals) {
-       ImGui::Begin("Style Editor");
-       ImGui::ShowStyleEditor();
-       ImGui::End();
+    ImGui::Checkbox("ImGUI Internals", &_showInternals);
+    if (_showInternals) {
+        ImGui::Begin("Style Editor");
+        ImGui::ShowStyleEditor();
+        ImGui::End();
 
-       ImGui::Begin("Test Window");
-       ImGui::ShowDemoWindow();
-       ImGui::End();
+        ImGui::Begin("Test Window");
+        ImGui::ShowDemoWindow();
+        ImGui::End();
 
-       ImGui::Begin("Metrics Window");
-       ImGui::ShowMetricsWindow();
-       ImGui::End();
-   }
-#endif
+        ImGui::Begin("Metrics Window");
+        ImGui::ShowMetricsWindow();
+        ImGui::End();
+    }
+#endif // SHOW_IMGUI_HELPERS
 
-   ImGui::End();
+    ImGui::End();
 
 
     for (GuiComponent* comp : _components) {
@@ -700,8 +690,8 @@ bool ImGUIModule::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
         io.KeyAlt = hasAlt;
     }
 
-    // Even if the event is not consumed,
-    // set keys and modifiers to false when they are released.
+    // Even if the event is not consumed, set keys and modifiers to false when they are
+    // released
     if (action == KeyAction::Release) {
         io.KeysDown[keyIndex] = false;
     }

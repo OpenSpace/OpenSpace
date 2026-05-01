@@ -49,8 +49,10 @@ struct ShadowInfo {
     glm::dmat4 viewProjectionMatrix = glm::dmat4(1.0);
 };
 
-// This drop-in class is representing that an object is capable of shadowing another
-// object
+/**
+ * This drop - in class is representing that an object is capable of shadowing another
+ * object.
+ */
 class Shadower {
 public:
     explicit Shadower(const ghoul::Dictionary& dictionary);
@@ -78,8 +80,10 @@ protected:
     bool _hasFrustumSize = false;
 };
 
-// This drop-in class is representing that an object can be shadowed by other another
-// object
+/**
+ * This drop - in class is representing that an object can be shadowed by other another
+ * object.
+ */
 class Shadowee {
 public:
     void addShadower(const Shadower* shadower);

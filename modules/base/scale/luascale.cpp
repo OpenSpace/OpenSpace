@@ -53,10 +53,10 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // This `Scale` type generates the scale values for the attached scene graph node by
-    // calling the provided Lua script. The script must return three scaling factors, one
-    // for each principal axis. The script parameter describes in greater detail how the
-    // Lua script file should be constructed.
+    // Generates the scale values for the attached scene graph node by calling the
+    // provided Lua script. The script must return three scaling factors, one for each
+    // principal axis. The script parameter describes in greater detail how the Lua
+    // script file should be constructed.
     struct [[codegen::Dictionary(LuaScale)]] Parameters {
         // [[codegen::verbatim(ScriptInfo.description)]]
         std::filesystem::path script;
@@ -67,7 +67,7 @@ namespace {
 namespace openspace {
 
 Documentation LuaScale::Documentation() {
-    return codegen::doc<Parameters>("base_transform_scale_lua");
+    return codegen::doc<Parameters>("base_scale_lua");
 }
 
 LuaScale::LuaScale(const ghoul::Dictionary& dictionary)

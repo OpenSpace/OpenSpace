@@ -7,6 +7,7 @@ local Item = {
   DataFile = asset.resource("data/dummydata.json"),
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Item)
 end)

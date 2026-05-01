@@ -74,6 +74,7 @@ local Node = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Sphere1)
   openspace.addSceneGraphNode(Sphere2)

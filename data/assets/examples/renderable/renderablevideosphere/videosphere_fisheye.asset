@@ -23,6 +23,9 @@ local Node = {
     -- Set orientation to also render the inside of the sphere (which is the correct view
     -- for a fisheye/fulldome video)
     Orientation = "Both",
+    -- Mirror the image as this RenderableVideoSphere is intended to be watched from the
+    -- inside
+    MirrorTexture = true,
     -- Increasing the number of segments makes the sphere smoother and reduces distortion
     -- at the edge of the video
     Segments = 64
@@ -32,6 +35,7 @@ local Node = {
     Path = "/Examples"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Node)

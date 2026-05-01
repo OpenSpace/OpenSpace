@@ -50,7 +50,6 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
     void render(const RenderData& renderData) override;
-    bool isReady() const override;
 
     void addRenderFunction(RenderFunction renderFunction);
     void removeAllRenderFunctions();
@@ -70,6 +69,7 @@ private:
     std::vector<std::function<void()>> _renderFunctions;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<ghoul::opengl::Texture> _depthTexture;
 };
 
 } // namespace openspace

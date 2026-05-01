@@ -236,7 +236,6 @@ void Asset::addIdentifier(std::string identifier) {
     if (!_metaInformation.has_value()) {
         _metaInformation = MetaInformation();
     }
-
     _metaInformation->identifiers.push_back(std::move(identifier));
 }
 
@@ -277,8 +276,8 @@ void Asset::unload() {
 
         child->_parentAssets.erase(parentIt);
 
-        // We only want to deinitialize the child if noone is keeping track of it,
-        // which is either a still initialized parent or that it is loaded as a root
+        // We only want to deinitialize the child if noone is keeping track of it, which
+        // is either a still initialized parent or that it is loaded as a root
         if (!child->hasInitializedParent() && !_manager.isRootAsset(child)) {
             child->deinitialize();
         }
@@ -338,6 +337,7 @@ void Asset::deinitialize() {
     if (!isInitialized()) {
         return;
     }
+
     LDEBUG(std::format("Deinitializing asset '{}'", _assetPath));
 
     // Perform inverse actions as in initialize, in reverse order (3 - 1)

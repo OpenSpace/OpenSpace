@@ -31,12 +31,10 @@
 #include <utility>
 
 namespace {
-    // This Scale type combines multiple individual scale operations that are applied one
-    // after the other.
+    // Combines multiple individual scale operations that are applied one after the other.
     struct [[codegen::Dictionary(MultiScale)]] Parameters {
-        // The list of scales that are applied one after the other
-        std::vector<ghoul::Dictionary> scales
-            [[codegen::reference("core_transform_scale")]];
+        // The list of scales that are applied one after the other.
+        std::vector<ghoul::Dictionary> scales [[codegen::reference("core_scale")]];
     };
 } // namespace
 #include "multiscale_codegen.cpp"
@@ -44,7 +42,7 @@ namespace {
 namespace openspace {
 
 Documentation MultiScale::Documentation() {
-    return codegen::doc<Parameters>("base_transform_scale_multi");
+    return codegen::doc<Parameters>("base_scale_multi");
 }
 
 MultiScale::MultiScale(const ghoul::Dictionary& dictionary)

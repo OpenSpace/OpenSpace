@@ -45,8 +45,8 @@ void LuaLibrary::merge(LuaLibrary rhs) {
             }
         );
         if (itf != functions.end()) {
-            // the function with the desired name is already present, but we don't
-            // want to overwrite it
+            // The function with the desired name is already present, but we don't want to
+            // overwrite it
             LERRORC(
                 "LuaLibrary",
                 std::format(

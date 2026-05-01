@@ -45,12 +45,12 @@ namespace {
     constexpr std::string_view _loggerCat = "ReadFitsTask";
 
     struct [[codegen::Dictionary(ReadFitsTask)]] Parameters {
-        // If SingleFileProcess is set to true then this specifies the path to a single
+        // If `SingleFileProcess` is set to true then this specifies the path to a single
         // FITS file that will be read. Otherwise it specifies the path to a folder with
         // multiple FITS files that are to be read.
         std::string inFileOrFolderPath;
 
-        // If SingleFileProcess is set to true then this specifies the name (including
+        // If `SingleFileProcess` is set to true then this specifies the name (including
         // entire path) to the output file. Otherwise it specifies the path to the output
         // folder which to export binary star data to.
         std::string outFileOrFolderPath;
@@ -82,7 +82,7 @@ namespace {
 namespace openspace {
 
 Documentation ReadFitsTask::Documentation() {
-    return codegen::doc<Parameters>("gaiamission_fitsfiletorawdata");
+    return codegen::doc<Parameters>("gaia_task_readfits");
 }
 
 ReadFitsTask::ReadFitsTask(const ghoul::Dictionary& dictionary) {
@@ -98,7 +98,7 @@ ReadFitsTask::ReadFitsTask(const ghoul::Dictionary& dictionary) {
     if (p.filterColumnNames.has_value()) {
         const ghoul::Dictionary d = *p.filterColumnNames;
 
-        // Ugly fix for ASCII sorting when there are more columns read than 10.
+        // Ugly fix for ASCII sorting when there are more columns read than 10
         std::set<int> intKeys;
         for (const std::string_view key : d.keys()) {
             intKeys.insert(std::stoi(std::string(key)));
@@ -133,9 +133,8 @@ void ReadFitsTask::perform(const Task::ProgressCallback& onProgress) {
 }
 
 void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCallback) {
-    int32_t nValuesPerStar = 0;
-
     FitsFileReader fileReader = FitsFileReader(false);
+    int32_t nValuesPerStar = 0;
     std::vector<float> fullData = fileReader.readFitsFile(
         _inFileOrFolderPath,
         nValuesPerStar,
@@ -146,31 +145,26 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
 
     progressCallback(0.8f);
 
-    std::ofstream outFileStream(_outFileOrFolderPath, std::ofstream::binary);
-    if (outFileStream.good()) {
-        int32_t nValues = static_cast<int32_t>(fullData.size());
-        LINFO(std::format(
-            "Writing {} values to file '{}'", nValues, _outFileOrFolderPath
-        ));
-        LINFO(std::format("Number of values per star: {}", nValuesPerStar));
-
-        if (nValues == 0) {
-            LERROR("Error writing file - No values were read from file");
-        }
-        outFileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
-        outFileStream.write(
-            reinterpret_cast<const char*>(&nValuesPerStar),
-            sizeof(int32_t)
-        );
-
-        const size_t nBytes = nValues * sizeof(fullData[0]);
-        outFileStream.write(reinterpret_cast<const char*>(fullData.data()), nBytes);
-    }
-    else {
+    std::ofstream outFile = std::ofstream(_outFileOrFolderPath, std::ofstream::binary);
+    if (!outFile.good()) {
         LERROR(std::format(
             "Error opening file '{}' as output data file", _outFileOrFolderPath
         ));
+        return;
     }
+
+    int32_t nValues = static_cast<int32_t>(fullData.size());
+    LINFO(std::format("Writing {} values to file '{}'", nValues, _outFileOrFolderPath));
+    LINFO(std::format("Number of values per star: {}", nValuesPerStar));
+
+    if (nValues == 0) {
+        LERROR("Error writing file - No values were read from file");
+    }
+    outFile.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
+    outFile.write(reinterpret_cast<const char*>(&nValuesPerStar), sizeof(int32_t));
+
+    const size_t nBytes = nValues * sizeof(float);
+    outFile.write(reinterpret_cast<const char*>(fullData.data()), nBytes);
 }
 
 void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
@@ -268,7 +262,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
 
     LINFO("All files added to queue");
 
-    // Check for finished jobs.
+    // Check for finished jobs
     while (finishedJobs < nInputFiles) {
         if (jobManager.numFinishedJobs() > 0) {
             std::vector<std::vector<float>> newOctant =
@@ -277,7 +271,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
             finishedJobs++;
 
             for (int i = 0; i < 8; i++) {
-                // Add read values to global octant and check if it's time to write!
+                // Add read values to global octant and check if it's time to write
                 octants[i].insert(
                     octants[i].end(),
                     newOctant[i].begin(),

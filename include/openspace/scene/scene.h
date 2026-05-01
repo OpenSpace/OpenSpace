@@ -176,6 +176,9 @@ public:
      * \param postScript A Lua script that will be executed when the interpolation
      *        finishes
      * \param easingFunction A function that determines who the interpolation occurs
+     * \param shouldBounce If this value is set to `true`, the property will interpolate
+     *        to the provided new value, then back to the original value, until manually
+     *        stopped.
      *
      * \pre \p prop must not be `nullptr`
      * \pre \p durationSeconds must be positive and not 0
@@ -183,7 +186,8 @@ public:
      */
     void addPropertyInterpolation(Property* prop, float durationSeconds,
         std::string postScript = "",
-        ghoul::EasingFunction easingFunction = ghoul::EasingFunction::Linear);
+        ghoul::EasingFunction easingFunction = ghoul::EasingFunction::Linear,
+        bool shouldBounce = false);
 
     /**
      * Removes the passed \p prop from the list of Property%s that are update each time
@@ -191,7 +195,7 @@ public:
      *
      * \param prop The Property that should not longer be updated
      *
-     * \pre \p prop must not be nullptr
+     * \pre \p prop must not be `nullptr`
      * \post No interpolation record exists for \p prop
      */
     void removePropertyInterpolation(Property* prop);
@@ -208,6 +212,18 @@ public:
     void updateInterpolations();
 
     /**
+     * Calling this function will cause the interpolation of the provided property to stop
+     * the next time it is at a defined state. For normal interpolation, calling this
+     * function is a noop, as the interpolation will be automatically stopped at the end
+     * of the interpolation. For bouncing interpolations, it will cause the bouncing
+     * interpolation of the property to be stopped when it reaches the original value the
+     * next time.
+     *
+     * \param prop The property whose interpolation should be stopped
+     */
+    void stopBouncing(Property* prop);
+
+    /**
      * Returns the Lua library that contains all Lua functions available to change the
      * scene graph.
      *
@@ -222,7 +238,7 @@ public:
      * string value (which must be converted because a Profile stores all values as
      * strings).
      *
-     * \param p The Profile to be read.
+     * \param p The Profile to be read
      */
     void setPropertiesFromProfile(const Profile& p);
 
@@ -239,7 +255,7 @@ public:
     /**
      * Returns a list of all unique tags that are used in the currently loaded scene.
      *
-     * \return A list of all unique tags that are used in the currently loaded scene.
+     * \return A list of all unique tags that are used in the currently loaded scene
      */
     std::vector<std::string> allTags() const;
 
@@ -248,7 +264,7 @@ public:
      *
      * \param guiPath The GUI path for which to set the order
      * \param list A list of names of scene graph nodes or subgroups in the GUI, in the
-     *             order of which they should appear in the tree.
+     *        order of which they should appear in the tree
      */
     void setGuiTreeOrder(const std::string& guiPath,
         const std::vector<std::string>& list);
@@ -304,13 +320,20 @@ private:
 
         ghoul::EasingFunc<float> easingFunction;
         bool isExpired = false;
+
+        bool isBouncing = false;
+        bool bouncingShouldStop = false;
+        float bouncingShouldStopT = -1.f;
+        std::chrono::time_point<std::chrono::steady_clock> bouncingAbortTime;
     };
     std::vector<PropertyInterpolationInfo> _propertyInterpolationInfos;
 
     std::unordered_map<std::string, std::vector<std::string>> _guiTreeOrderMap;
 };
 
-// Convert the input string to a format that is valid as an identifier
+/**
+ * Convert the input string to a format that is valid as an identifier.
+ */
 std::string makeIdentifier(std::string str);
 
 } // namespace openspace

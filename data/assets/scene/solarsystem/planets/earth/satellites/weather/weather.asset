@@ -1,12 +1,12 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Weather)",
+  Name = "Satellite CSV Data (Weather)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_weather",
-  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=weather&FORMAT=kvn",
+  Identifier = "satellite_csv_data_weather",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=weather&FORMAT=csv",
   Filename = "weather.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -14,11 +14,11 @@ local omm = asset.resource({
 
 local WeatherSatellites = {
   Identifier = "WeatherSatellites",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "weather.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
     TrailFade = 15,
@@ -50,6 +50,6 @@ asset.meta = {
   Name = "Satellites Weather - Weather",
   Description = "Satellites asset for Weather - Weather. Data from Celestrak",
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/NORAD/elements/",
+  URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
 }

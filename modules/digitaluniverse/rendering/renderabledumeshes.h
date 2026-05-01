@@ -53,8 +53,6 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
@@ -110,7 +108,7 @@ private:
     IVec2Property _textMinMaxSize;
     FloatProperty _lineWidth;
 
-    // DEBUG:
+    // Debug
     OptionProperty _renderOption;
 
     ghoul::opengl::ProgramObject* _program = nullptr;

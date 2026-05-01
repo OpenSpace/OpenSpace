@@ -36,7 +36,7 @@
 namespace {
     constexpr std::string_view _loggerCat = "VideoTileProvider";
 
-    // This `TileProvider` can be used to render a video on the globe.
+    // Renders a video on the globe.
     //
     // The video can either be played back based on a given simulation time
     // (`PlaybackMode` MapToSimulationTime) or through the user interface (for
@@ -52,12 +52,10 @@ namespace {
 namespace openspace {
 
 Documentation VideoTileProvider::Documentation() {
-    openspace::Documentation doc = codegen::doc<Parameters>("video_videotileprovider");
-
-    openspace::Documentation vp = VideoPlayer::Documentation();
-    doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
-
-    return doc;
+    return codegen::doc<Parameters>(
+        "video_tileprovider_video",
+        VideoPlayer::Documentation()
+    );
 }
 
 VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
@@ -79,7 +77,7 @@ Tile VideoTileProvider::tile(const TileIndex& tileIndex) {
         LINFO("Framebuffer is not complete");
     }
 
-    // For now, don't use the cache as we're trying to debug the problem w playback
+    // For now, don't use the cache as we're trying to debug the problem with playback
     const uint64_t hash = tileIndex.hashKey();
     auto foundTile = _tileCache.find(hash);
     const bool textureChanged = foundTile != _tileCache.end() &&

@@ -163,12 +163,7 @@ std::string OptionProperty::getDescriptionByValue(int value) {
         }
     );
 
-    if (it != _options.end()) {
-        return it->description;
-    }
-    else {
-        return "";
-    }
+    return it != _options.end() ? it->description : "";
 }
 
 void OptionProperty::getLuaValue(lua_State* state) const {

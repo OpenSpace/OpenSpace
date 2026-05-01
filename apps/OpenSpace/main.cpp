@@ -28,6 +28,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settings.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/util/progressbar.h>
 #include <openspace/util/task.h>
@@ -116,7 +117,7 @@ glm::ivec2 currentDrawResolution;
 
 #ifdef OPENVR_SUPPORT
 Window* FirstOpenVRWindow = nullptr;
-#endif
+#endif // OPENVR_SUPPORT
 
 // This value is specified from the commandline options and kept around to be run after
 // everything has been initialized. It's going to be std::nullopt unless a user wants to
@@ -128,10 +129,11 @@ std::optional<std::string> taskToRun;
 //
 
 #ifdef OPENSPACE_HAS_SPOUT
+
 /**
- * This struct stores all information about a single render window. Depending on the
- * frame setup, each window can be mono or stereo, the information of which is stored in
- * the `leftOrMain` and `right` members respectively.
+ * This struct stores all information about a single render window. Depending on the frame
+ * setup, each window can be mono or stereo, the information of which is stored in the
+ * `leftOrMain` and `right` members respectively.
  */
 struct SpoutWindow {
     /// The left framebuffer (or main, if there is no stereo rendering)
@@ -207,10 +209,11 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
         nullptr
     );
 
-    MINIDUMP_EXCEPTION_INFORMATION exceptionParameter;
-    exceptionParameter.ThreadId = GetCurrentThreadId();
-    exceptionParameter.ExceptionPointers = exceptionPointers;
-    exceptionParameter.ClientPointers = TRUE;
+    MINIDUMP_EXCEPTION_INFORMATION exceptionParameter = {
+        .ThreadId = GetCurrentThreadId(),
+        .ExceptionPointers = exceptionPointers,
+        .ClientPointers = TRUE
+    };
 
     BOOL success = MiniDumpWriteDump(
         GetCurrentProcess(),
@@ -239,60 +242,34 @@ void checkJoystickStatus() {
     for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; i++) {
         ZoneScopedN("Joystick state");
 
-        JoystickInputState& state = global::joystickInputStates->at(i);
+        JoystickInputState& joystick =
+            global::interactionHandler->joystickInputStates().at(i);
 
-        const int present = glfwJoystickPresent(i);
-        if (present == GLFW_FALSE) {
-            state.isConnected = false;
+        const int isPresent = glfwJoystickPresent(i);
+        if (isPresent == GLFW_FALSE) {
+            joystick.isConnected = false;
             continue;
         }
 
-        if (!state.isConnected) {
+        if (!joystick.isConnected) {
             // Joystick was added
-            state.isConnected = true;
-            state.name = glfwGetJoystickName(i);
+            joystick.isConnected = true;
+            joystick.name = glfwGetJoystickName(i);
 
             // Check axes and buttons
-            glfwGetJoystickAxes(i, &state.nAxes);
-            glfwGetJoystickButtons(i, &state.nButtons);
-            state.axes.resize(state.nAxes);
-            state.buttons.resize(state.nButtons);
+            glfwGetJoystickAxes(i, &joystick.nAxes);
+            glfwGetJoystickButtons(i, &joystick.nButtons);
 
-            std::fill(state.axes.begin(), state.axes.end(), 0.f);
-            std::fill(state.buttons.begin(), state.buttons.end(), JoystickAction::Idle);
+            joystick.initializeAxesAndButtons();
         }
 
-        const float* axes = glfwGetJoystickAxes(i, &state.nAxes);
-        std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
+        const float* axes = glfwGetJoystickAxes(i, &joystick.nAxes);
+        std::memcpy(joystick.axes.data(), axes, joystick.nAxes * sizeof(float));
 
-        const unsigned char* buttons = glfwGetJoystickButtons(i, &state.nButtons);
-        for (int j = 0; j < state.nButtons; j++) {
+        const unsigned char* buttons = glfwGetJoystickButtons(i, &joystick.nButtons);
+        for (int j = 0; j < joystick.nButtons; j++) {
             const bool currentlyPressed = buttons[j] == GLFW_PRESS;
-
-            if (currentlyPressed) {
-                switch (state.buttons[j]) {
-                    case JoystickAction::Idle:
-                    case JoystickAction::Release:
-                        state.buttons[j] = JoystickAction::Press;
-                        break;
-                    case JoystickAction::Press:
-                    case JoystickAction::Repeat:
-                        state.buttons[j] = JoystickAction::Repeat;
-                        break;
-                }
-            }
-            else {
-                switch (state.buttons[j]) {
-                    case JoystickAction::Idle:
-                    case JoystickAction::Release:
-                        state.buttons[j] = JoystickAction::Idle;
-                        break;
-                    case JoystickAction::Press:
-                    case JoystickAction::Repeat:
-                        state.buttons[j] = JoystickAction::Release;
-                        break;
-                }
-            }
+            joystick.updateButtonState(currentlyPressed, j);
         }
     }
 }
@@ -317,8 +294,8 @@ void mainInitFunc(GLFWwindow*) {
     //
     //  Screenshots
     //
-    // We save the startup value of the screenshots just in case we want to add a date
-    // to them later in the RenderEngine
+    // We save the startup value of the screenshots just in case we want to add a date to
+    // them later in the RenderEngine
     std::filesystem::path screenshotPath = absPath("${SCREENSHOTS}");
     sgct::Engine::instance().setCapturePath(screenshotPath);
     FileSys.registerPathToken("${STARTUP_SCREENSHOT}", std::move(screenshotPath));
@@ -335,10 +312,11 @@ void mainInitFunc(GLFWwindow*) {
         const std::string p = path.string();
         unsigned char* data = stbi_load(p.c_str(), &x, &y, &n, 0);
 
-        GLFWimage icon;
-        icon.pixels = data;
-        icon.width = x;
-        icon.height = y;
+        GLFWimage icon = {
+            .width = x,
+            .height = y,
+            .pixels = data
+        };
 
         for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
             glfwSetWindowIcon(window->windowHandle(), 1, &icon);
@@ -357,20 +335,20 @@ void mainInitFunc(GLFWwindow*) {
 
 
     // Find if we have at least one OpenVR window
-    // Save reference to first OpenVR window, which is the one we will copy to the HMD.
+    // Save reference to first OpenVR window, which is the one we will copy to the HMD
     for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
         if (window->hasTag(OpenVRTag)) {
 #ifdef OPENVR_SUPPORT
             FirstOpenVRWindow = window.get();
 
-            // If we have an OpenVRWindow, initialize OpenVR.
+            // If we have an OpenVRWindow, initialize OpenVR
             sgct::OpenVR::initialize(
                 Engine::instance().nearClippingPlane(),
                 Engine::instance().farClippingPlane()
             );
-#else
+#else // ^^^^ OPENVR_SUPPORT // !OPENVR_SUPPORT vvvv
             LWARNING("OpenVR was requested, but program was compiled without VR support");
-#endif
+#endif // OPENVR_SUPPORT
 
             break;
         }
@@ -411,7 +389,7 @@ void mainInitFunc(GLFWwindow*) {
         if (retValue) {
             SpoutWindows.push_back(std::move(w));
         }
-#else
+#else // ^^^^ OPENSPACE_HAS_SPOUT // !OPENSPACE_HAS_SPOUT vvvv
         LWARNING("Spout was requested, but program was compiled without Spout support");
 #endif // OPENSPACE_HAS_SPOUT
     }
@@ -531,7 +509,7 @@ void mainRenderFunc(const sgct::RenderData& data) {
             SgctEngine->getCurrentFrustumMode()
         );
     }
-#endif
+#endif // OPENVR_SUPPORT
 
     try {
         glm::mat4 modelMatrix;
@@ -795,10 +773,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.currentWindowSize = []() {
         ZoneScoped;
 
-        return glm::ivec2(
-            currentWindow->windowResolution().x,
-            currentWindow->windowResolution().y
-        );
+        return glm::ivec2(currentWindow->windowSize().x, currentWindow->windowSize().y);
     };
     sgctDelegate.currentSubwindowSize = []() {
         ZoneScoped;
@@ -807,19 +782,19 @@ void setSgctDelegateFunctions() {
             case Window::StereoMode::SideBySide:
             case Window::StereoMode::SideBySideInverted:
                 return glm::ivec2(
-                    currentWindow->windowResolution().x / 2,
-                    currentWindow->windowResolution().y
+                    currentWindow->windowSize().x / 2,
+                    currentWindow->windowSize().y
                 );
             case Window::StereoMode::TopBottom:
             case Window::StereoMode::TopBottomInverted:
                 return glm::ivec2(
-                    currentWindow->windowResolution().x,
-                    currentWindow->windowResolution().y / 2
+                    currentWindow->windowSize().x,
+                    currentWindow->windowSize().y / 2
                 );
             default:
                 return glm::ivec2(
-                    currentWindow->windowResolution().x * currentViewport->size().x,
-                    currentWindow->windowResolution().y * currentViewport->size().y
+                    currentWindow->windowSize().x * currentViewport->size().x,
+                    currentWindow->windowSize().y * currentViewport->size().y
                 );
         }
     };
@@ -854,7 +829,7 @@ void setSgctDelegateFunctions() {
         ZoneScoped;
 
         if (currentViewport) {
-            const ivec2 res = currentWindow->windowResolution();
+            const ivec2 res = currentWindow->windowSize();
             const vec2 size = currentViewport->size();
             return glm::ivec2(size.x * res.x, size.y * res.y);
         }
@@ -869,7 +844,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.firstWindowResolution = []() {
         ZoneScoped;
         sgct::Window* window = Engine::instance().windows().front().get();
-        return glm::ivec2(window->windowResolution().x, window->windowResolution().y);
+        return glm::ivec2(window->windowSize().x, window->windowSize().y);
     };
     sgctDelegate.guiWindowResolution = []() {
         ZoneScoped;
@@ -885,7 +860,7 @@ void setSgctDelegateFunctions() {
             guiWin = Engine::instance().windows().front().get();
         }
 
-        return glm::ivec2(guiWin->windowResolution().x, guiWin->windowResolution().y);
+        return glm::ivec2(guiWin->windowSize().x, guiWin->windowSize().y);
     };
     sgctDelegate.osDpiScaling = []() {
         ZoneScoped;
@@ -1063,7 +1038,7 @@ void setSgctDelegateFunctions() {
                 continue;
             }
 
-            const sgct::ivec2 res = window->windowResolution();
+            const sgct::ivec2 res = window->windowSize();
             for (const std::unique_ptr<Viewport>& viewport : window->viewports()) {
                 const sgct::vec2 pos = viewport->position();
                 const sgct::vec2 size = viewport->size();
@@ -1177,16 +1152,16 @@ int main(int argc, char* argv[]) {
 #endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
 
 #ifdef WIN32
-    // In order to be able to use PDB files to resolve stack traces on _user_ machines,
-    // we need to explicitly tell the operating system where to find the PDB files. We
-    // place them right next to the .exe file and this seems to be the only reliable way
-    // to do it.
+    // In order to be able to use PDB files to resolve stack traces on _user_ machines, we
+    // need to explicitly tell the operating system where to find the PDB files. We place
+    // them right next to the .exe file and this seems to be the only reliable way to do
+    // it.
     // Using SymInitialize and SymSetSearchPath from dbghelp.h didn't work
     // https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/symbol-path
 
     std::string exeFolder = std::filesystem::path(argv[0]).parent_path().string();
     _putenv_s("_NT_SYMBOL_PATH", exeFolder.c_str());
-#endif //WIN32
+#endif // WIN32
 
     std::setlocale(LC_ALL, "C");
 
@@ -1212,8 +1187,8 @@ int main(int argc, char* argv[]) {
     ghoul::initialize();
     global::create();
 
-    // Register the path of the executable,
-    // to make it possible to find other files in the same directory.
+    // Register the path of the executable, to make it possible to find other files in the
+    // same directory
     FileSys.registerPathToken(
         "${BIN}",
         std::filesystem::current_path() / std::filesystem::path(argv[0]).parent_path(),
@@ -1237,7 +1212,7 @@ int main(int argc, char* argv[]) {
         "-f",
         "Provides the path to the OpenSpace configuration file. Only the '${TEMPORARY}' "
         "path token is available and any other path has to be specified relative to the "
-        "current working directory"
+        "current working directory."
     ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
         commandlineArguments.windowConfig,
@@ -1254,6 +1229,15 @@ int main(int argc, char* argv[]) {
         "-p",
         "Specifies the profile that should be used to start OpenSpace and that overrides "
         "the profile specified in the `openspace.cfg` and the settings."
+    ));
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        commandlineArguments.profileAddons,
+        "--addons",
+        "-a",
+        "Specifies the addons of the profile that should be loaded. The provided addons "
+        "must exist on the profile. Multiple addons can be specified by separating them "
+        "with a \";\", for example \"--addons abc;def\" specifies the addons \"abc\" and "
+        "\"def\"."
     ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
         commandlineArguments.propertyVisibility,
@@ -1337,30 +1321,11 @@ int main(int argc, char* argv[]) {
         std::filesystem::path base = findConfiguration().parent_path();
         FileSys.registerPathToken("${BASE}", std::move(base));
 
-        // The previous incarnation of this was initializing GLFW to get the primary
-        // monitor's resolution, but that had some massive performance implications as
-        // there was some issue with the swap buffer handling inside of GLFW. My
-        // assumption is that GLFW doesn't like being initialized, destroyed, and then
-        // initialized again. Therefore we are using the platform specific functions now
-#ifdef WIN32
-        glm::ivec2 size = glm::ivec2(1920, 1080);
-        DEVMODEW dm = { 0 };
-        dm.dmSize = sizeof(DEVMODEW);
-        BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
-        if (success) {
-            size.x = dm.dmPelsWidth;
-            size.y = dm.dmPelsHeight;
-        }
-#else // ^^^^ WIN32 // !WIN32 vvvv
-        const glm::ivec2 size = glm::ivec2(1920, 1080);
-#endif // WIN32
-
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
         *global::configuration = loadConfigurationFromFile(
             configurationFilePath,
-            findSettings(),
-            size
+            findSettings()
         );
 
         // Override configuration with commandline arguments
@@ -1369,7 +1334,11 @@ int main(int argc, char* argv[]) {
                 *commandlineArguments.windowConfig;
         }
         if (commandlineArguments.profile.has_value()) {
-            global::configuration->profile = *commandlineArguments.profile;
+            global::configuration->profile.profile = *commandlineArguments.profile;
+        }
+        if (commandlineArguments.profileAddons.has_value()) {
+            global::configuration->profile.addons =
+                ghoul::tokenizeString(*commandlineArguments.profileAddons, ';');
         }
         if (commandlineArguments.propertyVisibility.has_value()) {
             if (commandlineArguments.propertyVisibility == "NoviceUser") {
@@ -1420,16 +1389,11 @@ int main(int argc, char* argv[]) {
     global::openSpaceEngine->registerPathTokens();
 
     // Call profile GUI
-    const std::string labelFromCfgFile = " (from .cfg)";
     std::string windowCfgPreset;
     if (commandlineArguments.windowConfig.has_value()) {
         windowCfgPreset = std::format(
             "{} (from CLI)", global::configuration->windowConfiguration
         );
-    }
-    else if (!global::configuration->sgctConfigNameInitialized.empty()) {
-        windowCfgPreset =
-            global::configuration->sgctConfigNameInitialized + labelFromCfgFile;
     }
     else {
         windowCfgPreset = global::configuration->windowConfiguration;
@@ -1456,7 +1420,8 @@ int main(int argc, char* argv[]) {
         }
 
         LauncherWindow launcher = LauncherWindow(
-            !commandlineArguments.profile.has_value(),
+            !commandlineArguments.profile.has_value() &&
+                !commandlineArguments.profileAddons.has_value(),
             *global::configuration,
             !commandlineArguments.windowConfig.has_value(),
             std::move(windowCfgPreset)
@@ -1485,49 +1450,19 @@ int main(int argc, char* argv[]) {
             configurationFilePath = findConfiguration();
         }
 
-        // The previous incarnation of this was initializing GLFW to get the primary
-        // monitor's resolution, but that had some massive performance implications as
-        // there was some issue with the swap buffer handling inside of GLFW. My
-        // assumption is that GLFW doesn't like being initialized, destroyed, and then
-        // initialized again. Therefore we are using the platform specific functions now
-#ifdef WIN32
-        glm::ivec2 size = glm::ivec2(1920, 1080);
-        DEVMODEW dm = { 0 };
-        dm.dmSize = sizeof(DEVMODEW);
-        BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
-        if (success) {
-            size.x = dm.dmPelsWidth;
-            size.y = dm.dmPelsHeight;
-        }
-#else // ^^^^ WIN32 // !WIN32 vvvv
-        const glm::ivec2 size = glm::ivec2(1920, 1080);
-#endif // WIN32
-
         *global::configuration = loadConfigurationFromFile(
             configurationFilePath,
-            findSettings(),
-            size
+            findSettings()
         );
 
-        global::configuration->profile = launcher.selectedProfile();
+        auto [profile, addons] = launcher.selectedProfile();
+        global::configuration->profile.profile = profile;
+        global::configuration->profile.addons = addons;
 
         std::string config = windowConfiguration;
         isGeneratedWindowConfig = false;
         if (!commandlineArguments.windowConfig.has_value()) {
-            config = launcher.selectedWindowConfig();
-            if (config.find(labelFromCfgFile) != std::string::npos) {
-                if (config.find("sgct.config") == std::string::npos) {
-                    config = config.substr(
-                        0,
-                        config.length() - labelFromCfgFile.length()
-                    );
-                }
-                else {
-                    config = windowConfiguration;
-                    isGeneratedWindowConfig = true;
-                }
-            }
-            global::configuration->windowConfiguration = config;
+            global::configuration->windowConfiguration = launcher.selectedWindowConfig();
         }
 #else // ^^^^ OPENSPACE_HAS_LAUNCHER // !OPENSPACE_HAS_LAUNCHER
         glfwInit();
@@ -1536,7 +1471,7 @@ int main(int argc, char* argv[]) {
     else {
         glfwInit();
     }
-    if (global::configuration->profile.empty()) {
+    if (global::configuration->profile.profile.empty()) {
         LFATAL("Cannot launch without a profile");
         exit(EXIT_FAILURE);
     }
@@ -1545,7 +1480,7 @@ int main(int argc, char* argv[]) {
     {
         Settings settings = loadSettings();
 
-        const std::filesystem::path profile = global::configuration->profile;
+        const std::filesystem::path profile = global::configuration->profile.profile;
 
         const bool isDefaultProfile = ghoul::filesystem::isSubdirectory(
             profile,
@@ -1579,8 +1514,10 @@ int main(int argc, char* argv[]) {
             );
         }
 
-        settings.configuration =
-            isGeneratedWindowConfig ? "" : global::configuration->windowConfiguration;
+        settings.profileAddons = global::configuration->profile.addons;
+        if (!isGeneratedWindowConfig) {
+            settings.configuration = global::configuration->windowConfiguration;
+        }
 
         saveSettings(settings, findSettings());
     }
@@ -1648,13 +1585,13 @@ int main(int argc, char* argv[]) {
         Engine::destroy();
         global::openSpaceEngine->deinitialize();
         ghoul::deinitialize();
-        throw;
+        exit(EXIT_FAILURE);
     }
     catch (...) {
         global::openSpaceEngine->deinitialize();
         ghoul::deinitialize();
         Engine::destroy();
-        throw;
+        exit(EXIT_FAILURE);
     }
 
     LINFO("Starting rendering loop");
@@ -1674,7 +1611,7 @@ int main(int argc, char* argv[]) {
 #ifdef OPENVR_SUPPORT
     // Clean up OpenVR
     sgct::SGCTOpenVR::shutdown();
-#endif
+#endif // OPENVR_SUPPORT
 
 #ifdef OPENSPACE_HAS_SPOUT
     for (SpoutWindow& w : SpoutWindows) {

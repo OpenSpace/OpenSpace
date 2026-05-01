@@ -64,7 +64,7 @@ public:
      *
      * \param row The row to parse, given as a string
      * \param columnNames The list of column names in the file, from the CSV header
-     * \param positionSourceFile A SPECK file to use for getting the position of the star
+     * \param positionSourceFile A SPECK file to use for getting the position of the star.
      *        This is used to make sure the position of the star matches those of other
      *        star datasets. If no file is provided, the position from the CSV data file
      *        is read and used instead
@@ -89,8 +89,8 @@ private:
     std::filesystem::path _teffToBvFilePath;
 
     /**
-     * Try to find the star position from an input speck file. If not found, the
-     * returned position will contain NaN values.
+     * Try to find the star position from an input speck file. If not found, the returned
+     * position will contain NaN values.
      *
      * \param starName The name of the star to look for in the file
      * \param sourceFile The name of the file in which to look
@@ -99,7 +99,9 @@ private:
     static glm::vec3 starPosition(const std::string& starName,
         const std::filesystem::path& sourceFile);
 
-    // Compute b-v color from teff value using a conversion file
+    /**
+     * Compute b - v color from teff value using a conversion file.
+     */
     static float bvFromTeff(float teff, const std::filesystem::path& conversionFile);
 };
 

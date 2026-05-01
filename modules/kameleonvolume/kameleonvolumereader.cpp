@@ -40,14 +40,14 @@
 #pragma warning (disable : 4800) // #pragma warning: there is no warning number '4800'
 #endif // WIN32
 
+#include <ccmc/Attribute.h>
+#include <ccmc/BATSRUS.h>
+#include <ccmc/CCMCTime.h>
+#include <ccmc/ENLIL.h>
+#include <ccmc/FileReader.h>
+#include <ccmc/Interpolator.h>
 #include <ccmc/Kameleon.h>
 #include <ccmc/Model.h>
-#include <ccmc/FileReader.h>
-#include <ccmc/BATSRUS.h>
-#include <ccmc/ENLIL.h>
-#include <ccmc/CCMCTime.h>
-#include <ccmc/Attribute.h>
-#include <ccmc/Interpolator.h>
 
 #ifdef WIN32
 #pragma warning (pop)
@@ -325,7 +325,7 @@ std::string KameleonVolumeReader::getVisUnit(const std::string& variable) const 
 std::string KameleonVolumeReader::time() const {
     double start =
         ccmc::Time(simulationStart()).getEpoch();
-    // Get elapsed time in seconds and convert to milliseconds.
+    // Get elapsed time in seconds and convert to milliseconds
     double elapsed = elapsedTime() * 1000;
     return ccmc::Time(start + elapsed).toString();
 }

@@ -33,16 +33,14 @@ namespace openspace {
 class PlaneGeometry {
 public:
     explicit PlaneGeometry(glm::vec2 size);
-    explicit PlaneGeometry(float size);
 
     ~PlaneGeometry() = default;
 
     void initialize();
-    void deinitialize();
+    void deinitialize() const;
     void render() const;
 
     void updateSize(const glm::vec2& size);
-    void updateSize(float size);
 
 private:
     void updateGeometry() const;

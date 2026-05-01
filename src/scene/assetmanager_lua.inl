@@ -57,7 +57,7 @@ namespace {
 }
 
 /**
- * Removes all assets that are currently loaded
+ * Removes all assets that are currently loaded.
  */
 [[codegen::luawrap]] void removeAll() {
     std::vector<const Asset*> as = global::openSpaceEngine->assetManager().rootAssets();
@@ -112,7 +112,7 @@ namespace {
 
 /**
  * Returns the path to all parents that are still interested in this Asset e.g., through
- * 'asset.require()'
+ * 'asset.require()'.
  */
 [[codegen::luawrap]] std::vector<std::filesystem::path> parents(std::string assetName) {
     std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();

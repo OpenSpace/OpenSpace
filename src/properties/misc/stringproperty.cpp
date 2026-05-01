@@ -29,7 +29,7 @@
 
 namespace openspace {
 
-StringProperty::StringProperty(Property::PropertyInfo info, std::string value)
+StringProperty::StringProperty(PropertyInfo info, std::string value)
     : TemplateProperty<std::string>(std::move(info), std::move(value))
 {}
 

@@ -68,7 +68,7 @@ void GuiActionComponent::render() {
         }
         ImGui::SameLine();
 
-        // Poor mans table layout
+        // Poor man's table layout
         ImGui::SetCursorPosX(125.f);
 
         const openspace::Action& a = global::actionManager->action(p.second);
@@ -96,7 +96,7 @@ void GuiActionComponent::render() {
         }
         ImGui::SameLine();
 
-        // Poor mans table layout
+        // Poor man's table layout
         ImGui::SetCursorPosX(350.f);
 
         ImGui::Text("%s", action.documentation.c_str());

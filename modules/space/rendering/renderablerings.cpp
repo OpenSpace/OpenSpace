@@ -155,10 +155,6 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     addProperty(_colorFilter);
 }
 
-bool RenderableRings::isReady() const {
-    return _shader && _texture;
-}
-
 void RenderableRings::initializeGL() {
     _shader = global::renderEngine->buildRenderProgram(
         "RingProgram",
@@ -250,7 +246,7 @@ void RenderableRings::update(const UpdateData& data) {
 void RenderableRings::loadTexture() {
     using namespace ghoul::io;
     using namespace ghoul::opengl;
-    _texture = TextureReader::ref().loadTexture(
+    _texture = texture::loadTexture(
         _texturePath.value(),
         1,
         { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
@@ -269,12 +265,12 @@ void RenderableRings::createPlane() {
     const GLfloat size = _size;
 
     const std::array<VertexData, 6> Data = {
-        VertexData{ -size, -size, 0.f, 0.f },
-        VertexData{  size,  size, 1.f, 1.f },
-        VertexData{ -size,  size, 0.f, 1.f },
-        VertexData{ -size, -size, 0.f, 0.f },
-        VertexData{  size, -size, 1.f, 0.f },
-        VertexData{  size,  size, 1.f, 1.f },
+        VertexData { -size, -size, 0.f, 0.f },
+        VertexData {  size,  size, 1.f, 1.f },
+        VertexData { -size,  size, 0.f, 1.f },
+        VertexData { -size, -size, 0.f, 0.f },
+        VertexData {  size, -size, 1.f, 0.f },
+        VertexData {  size,  size, 1.f, 1.f },
     };
 
     glNamedBufferData(_vbo, Data.size(), Data.data(), GL_STATIC_DRAW);

@@ -60,7 +60,7 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // A RenderableBoxGrid creates a 3D box that is rendered using grid lines.
+    // Creates a 3D box that is rendered using grid lines.
     //
     // Per default the box is given a uniform size of 1x1x1 meters. It can then be scaled
     // to the desired size. Alternatively, the size in each dimension can be specified.
@@ -103,10 +103,6 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     _size = p.size.value_or(_size);
     _size.onChange([this]() { _gridIsDirty = true; });
     addProperty(_size);
-}
-
-bool RenderableBoxGrid::isReady() const {
-    return _gridProgram != nullptr;
 }
 
 void RenderableBoxGrid::initializeGL() {
@@ -156,7 +152,6 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
-    // Change GL state:
     glLineWidth(_lineWidth);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
@@ -169,7 +164,6 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&) {
 
     _gridProgram->deactivate();
 
-    // Restore GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
     global::renderEngine->openglStateCache().resetDepthState();

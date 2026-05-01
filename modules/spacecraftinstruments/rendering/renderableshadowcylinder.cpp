@@ -53,8 +53,8 @@ namespace {
         "ShadowLength",
         "Shadow length",
         "A factor that controls the length of the shadow that is cast by the target "
-        "object. The total length of the shadow is equal to the distance from the "
-        "target to the light source multiplied with this value.",
+        "object. The total length of the shadow is equal to the distance from the target "
+        "to the light source multiplied with this value.",
         Property::Visibility::AdvancedUser
     };
 
@@ -111,12 +111,11 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // This Renderable displays the shadow cylinder behind a planetary body. Given the
-    // SPICE name of a planetary body and an observer, it will show a cylinder extending
-    // behind the body away from the observer to highlight the areas of space from which
-    // the observer is occluded by the body. A concrete example is using the Sun as the
-    // observer, in which case the shadow cylinder indicates the areas in which there is
-    // darkness.
+    // Displays a shadow cylinder behind a planetary body. Given the SPICE name of a
+    // planetary body and an observer, it will show a cylinder extending behind the body
+    // away from the observer to highlight the areas of space from which the observer is
+    // occluded by the body. A concrete example is using the Sun as the observer, in which
+    // case the shadow cylinder indicates the areas in which there is darkness.
     struct [[codegen::Dictionary(RenderableShadowCylinder)]] Parameters {
         // [[codegen::verbatim(NumberPointsInfo.description)]]
         std::optional<int> numberOfPoints;
@@ -155,7 +154,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableShadowCylinder::Documentation() {
-    return codegen::doc<Parameters>("spacecraftinstruments_renderableshadowcylinder");
+    return codegen::doc<Parameters>("spacecraftinstruments_renderable_shadowcylinder");
 }
 
 RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dictionary)
@@ -212,7 +211,7 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
         { static_cast<int>(T::ConvergedNewtonian), "Converged Newtonian" },
         { static_cast<int>(T::ConvergedNewtonianStellar), "Converged Newtonian Stellar" },
         { static_cast<int>(T::LightTime), "Light Time" },
-        { static_cast<int>(T::LightTimeStellar), "Light Time Stellar" },
+        { static_cast<int>(T::LightTimeStellar), "Light Time Stellar" }
     });
     const SpiceManager::AberrationCorrection abbcorr = SpiceManager::AberrationCorrection(
         p.aberration
@@ -260,10 +259,6 @@ void RenderableShadowCylinder::deinitializeGL() {
 
     glDeleteVertexArrays(1, &_vao);
     glDeleteBuffers(1, &_vbo);
-}
-
-bool RenderableShadowCylinder::isReady() const {
-    return _shader != nullptr;
 }
 
 void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {

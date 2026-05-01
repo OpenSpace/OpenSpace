@@ -72,13 +72,13 @@ namespace {
         "for vector types, there need to be as many {} as there are components in the "
         "vector, for example two {} for vec2 types, three for vec3 types, etc. For more "
         "information on how to structure the formatting string, see the documentation at "
-        "https://en.cppreference.com/w/cpp/utility/format/spec.",
+        "https://en.cppreference.com/w/cpp/utility/format/spec",
         Property::Visibility::User
     };
 
-    // This `DashboardItem` will show the value of the provided property. Depending on the
-    // type of the property, the `DisplayString` will have to be adapted. See the
-    // documentation for the `DisplayString` for more information.
+    // Shows the value of the provided property. Depending on the type of the property,
+    // the `DisplayString` will have to be adapted. See the documentation for the
+    // `DisplayString` for more information.
     struct [[codegen::Dictionary(DashboardItemPropertyValue)]] Parameters {
         // [[codegen::verbatim(PropertyUriInfo.description)]]
         std::optional<std::string> uri [[codegen::key("URI")]];

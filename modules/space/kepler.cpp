@@ -28,6 +28,7 @@
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/csvreader.h>
 #include <ghoul/misc/stringhelper.h>
 #include <scn/scan.h>
 #include <fstream>
@@ -143,7 +144,7 @@ namespace {
     }
 
     int daysIntoGivenYear(int year, int month, int dayOfMonth) {
-        // month and dayCount are zero-based.
+        // Month and dayCount are zero-based
         month -= 1;
         int dayCount = dayOfMonth - 1;
         constexpr int February = 1;
@@ -198,7 +199,7 @@ namespace {
         // 5. Adjust for the fact the epoch starts on 1st Januaray at 12:00:00, not
         // midnight
 
-        // According to https://celestrak.com/columns/v04n03/
+        // According to https://celestrak.org/columns/v04n03/
         // Apparently, US Space Command sees no need to change the two-line element set
         // format yet since no artificial earth satellites existed prior to 1957. By their
         // reasoning, two-digit years from 57-99 correspond to 1957-1999 and those from
@@ -206,7 +207,7 @@ namespace {
 
         // 1,2. Get the full year and days
         std::string e = epoch;
-        if (e.find('.') == std::string::npos) {
+        if (!e.contains('.')) {
             e += ".0";
         }
         if (e.size() <= 2) {
@@ -234,7 +235,7 @@ namespace {
         // 3
         using namespace std::chrono;
         const int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
-        //Need to subtract 1 from daysInYear since it is not a zero-based count
+        // Need to subtract 1 from daysInYear since it is not a zero-based count
         const double nSecondsSince2000 = (daysSince2000 + daysInYear - 1) * SecondsPerDay;
 
         // 4
@@ -258,7 +259,7 @@ namespace {
         // YYYYMMDD.ddddddd
         // YYYY-MM-DD.ddddddd
         // With YYYY as the year, MM the month (1 - 12), DD the day of month (1-31),
-        // and dddd the fraction of that day.
+        // and dddd the fraction of that day
 
         // The main overview of this function:
         // 1. Read the year value
@@ -266,10 +267,10 @@ namespace {
         // 3. Convert the number of days to a number of seconds
         // 4. Get the number of leap seconds since January 1st, 2000 and remove them
         // 5. Adjust for the fact the epoch starts on 1st January at 12:00:00, not
-        // midnight
+        //    midnight
 
         std::string e = epoch;
-        if (e.find('.') == std::string::npos) {
+        if (!e.contains('.')) {
             // No . was found so the epoch was provided as an integer number (see #2551)
             e += ".0";
         }
@@ -297,7 +298,7 @@ namespace {
         // 3
         using namespace std::chrono;
         const int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
-        //Need to subtract 1 from daysInYear since it is not a zero-based count
+        // Need to subtract 1 from daysInYear since it is not a zero-based count
         const double nSecondsSince2000 = (daysSince2000 + daysInYear - 1) * SecondsPerDay;
 
         // 4
@@ -329,7 +330,7 @@ namespace {
         // 4. Get the number of leap seconds since January 1st, 2000 and remove them
         // 5. Add the hh:mm:ss component
         // 6. Adjust for the fact the epoch starts on 1st January at 12:00:00, not
-        // midnight
+        //    midnight
 
         std::string e = epoch;
         if (e.back() == 'Z') {
@@ -365,7 +366,6 @@ namespace {
 
             auto res = scn::scan<int, int, int, int, double>(
                 epoch, "{:4}-{:3}T{:2}:{:2}:{}"
-                //date.year, date.nDays, date.hours, date.minutes, date.seconds
             );
             if (!res) {
                 throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
@@ -521,10 +521,17 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
 
     std::string header;
     while (ghoul::getline(f, header)) {
+        if (header.starts_with("No GP data found")) {
+            LWARNING(std::format("TLE file '{}' did not contain any data", file));
+            return std::vector<Parameters>();
+        }
+
         Parameters p;
 
         // Header
-        p.name = header;
+        std::string name = header;
+        ghoul::trimWhitespace(name);
+        p.name = std::move(name);
 
         // First line
         // Field Columns   Content
@@ -637,6 +644,11 @@ std::vector<Parameters> readOmmFile(const std::filesystem::path& file) {
     std::optional<Parameters> current = std::nullopt;
     std::string line;
     while (ghoul::getline(f, line)) {
+        if (line.starts_with("No GP data found")) {
+            LWARNING(std::format("OMM file '{}' did not contain any data", file));
+            return std::vector<Parameters>();
+        }
+
         if (line.empty() || line == "\r") {
             continue;
         }
@@ -717,6 +729,146 @@ std::vector<Parameters> readOmmFile(const std::filesystem::path& file) {
     return result;
 }
 
+std::vector<Parameters> readCsvFile(const std::filesystem::path& file) {
+    ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
+
+    {
+        // Tentatively load the CSV file to better detect if we got some other response
+        std::ifstream f = std::ifstream(file);
+        std::string line;
+        ghoul::getline(f, line);
+
+        if (line.starts_with("No GP data found")) {
+            LWARNING(std::format("OMM file '{}' did not contain any data", file));
+            return std::vector<Parameters>();
+        }
+    }
+
+    const std::vector<std::string> columns = {
+        "OBJECT_NAME",
+        "OBJECT_ID",
+        "EPOCH",
+        "MEAN_MOTION",
+        "ECCENTRICITY",
+        "INCLINATION",
+        "RA_OF_ASC_NODE",
+        "ARG_OF_PERICENTER",
+        "MEAN_ANOMALY"
+    };
+    std::vector<std::vector<std::string>> entries = ghoul::loadCSVFile(file, columns);
+
+    std::vector<Parameters> result;
+    result.reserve(entries.size());
+    for (const std::vector<std::string>& entry : entries) {
+        ghoul_assert(entry.size() == columns.size(), "Mismatched number of columns");
+
+        Parameters current = {
+            .name = entry[0],
+            .id = entry[1],
+            .epoch = epochFromOmmString(entry[2]) // CSV uses the same format as OMM
+        };
+        {
+            std::string_view meanMotion = entry[3];
+            double mm = 0.0;
+            auto [ptr, ec] = std::from_chars(
+                meanMotion.data(),
+                meanMotion.data() + meanMotion.size(),
+                mm
+            );
+            if (ptr != meanMotion.data() + meanMotion.size() || ec != std::errc()) {
+                throw ghoul::RuntimeError(std::format(
+                    "Error parsing 'MeanMotion' of CSV file with error '{}'",
+                    std::make_error_code(ec).message()
+                ));
+            }
+            if (mm == 0.0) {
+                throw ghoul::RuntimeError(
+                    "Error parsing 'MeanMotion' of CSV file. Mean motion of 0 not valid"
+                );
+            }
+
+            current.semiMajorAxis = calculateSemiMajorAxis(mm);
+            current.period = std::chrono::seconds(std::chrono::hours(24)).count() / mm;
+        }
+        {
+            std::string_view eccentricity = entry[4];
+            auto [ptr, ec] = std::from_chars(
+                eccentricity.data(),
+                eccentricity.data() + eccentricity.size(),
+                current.eccentricity
+            );
+            if (ptr != eccentricity.data() + eccentricity.size() || ec != std::errc()) {
+                throw ghoul::RuntimeError(std::format(
+                    "Error parsing 'Eccentricity' of CSV file with error '{}'",
+                    std::make_error_code(ec).message()
+                ));
+            }
+        }
+        {
+            std::string_view inclination = entry[5];
+            auto [ptr, ec] = std::from_chars(
+                inclination.data(),
+                inclination.data() + inclination.size(),
+                current.inclination
+            );
+            if (ptr != inclination.data() + inclination.size() || ec != std::errc()) {
+                throw ghoul::RuntimeError(std::format(
+                    "Error parsing 'Inclination' of CSV file with error '{}'",
+                    std::make_error_code(ec).message()
+                ));
+            }
+        }
+        {
+            std::string_view ascendingNode = entry[6];
+            auto [ptr, ec] = std::from_chars(
+                ascendingNode.data(),
+                ascendingNode.data() + ascendingNode.size(),
+                current.ascendingNode
+            );
+            if (ptr != ascendingNode.data() + ascendingNode.size() || ec != std::errc()) {
+                throw ghoul::RuntimeError(std::format(
+                    "Error parsing 'AscendingNode' of CSV file with error '{}'",
+                    std::make_error_code(ec).message()
+                ));
+            }
+        }
+        {
+            std::string_view argumentOfPeriapsis = entry[7];
+            auto [ptr, ec] = std::from_chars(
+                argumentOfPeriapsis.data(),
+                argumentOfPeriapsis.data() + argumentOfPeriapsis.size(),
+                current.argumentOfPeriapsis
+            );
+            if (ptr != argumentOfPeriapsis.data() + argumentOfPeriapsis.size() ||
+                ec != std::errc())
+            {
+                throw ghoul::RuntimeError(std::format(
+                    "Error parsing 'ArgumentOfPeriapsis' of CSV file with error '{}'",
+                    std::make_error_code(ec).message()
+                ));
+            }
+        }
+        {
+            std::string_view meanAnomaly = entry[8];
+            auto [ptr, ec] = std::from_chars(
+                meanAnomaly.data(),
+                meanAnomaly.data() + meanAnomaly.size(),
+                current.meanAnomaly
+            );
+            if (ptr != meanAnomaly.data() + meanAnomaly.size() || ec != std::errc()) {
+                throw ghoul::RuntimeError(std::format(
+                    "Error parsing 'MeanAnomaly' of CSV file with error '{}'",
+                    std::make_error_code(ec).message()
+                ));
+            }
+        }
+
+        result.push_back(current);
+    }
+
+    return result;
+}
+
 std::vector<Parameters> readSbdbFile(const std::filesystem::path& file) {
     constexpr int NDataFields = 9;
     constexpr std::string_view ExpectedHeader = "full_name,epoch_cal,e,a,i,om,w,ma,per";
@@ -744,17 +896,8 @@ std::vector<Parameters> readSbdbFile(const std::filesystem::path& file) {
                 "Malformed line {}, expected 8 data fields, got {}", line, parts.size()
             ));
         }
-        Parameters p;
 
         ghoul::trimWhitespace(parts[0]);
-        p.name = parts[0];
-
-        p.epoch = epochFromYMDdSubstring(parts[1]);
-        p.eccentricity = std::stod(parts[2]);
-        // AU -> km
-        p.semiMajorAxis =
-            std::stod(parts[3]) * distanceconstants::AstronomicalUnit / 1000.0;
-
         auto importAngleValue = [](const std::string& angle) {
             if (angle.empty()) {
                 return 0.0;
@@ -768,13 +911,19 @@ std::vector<Parameters> readSbdbFile(const std::filesystem::path& file) {
             return output;
         };
 
-        p.inclination = importAngleValue(parts[4]);
-        p.ascendingNode = importAngleValue(parts[5]);
-        p.argumentOfPeriapsis = importAngleValue(parts[6]);
-        p.meanAnomaly = importAngleValue(parts[7]);
-        p.period =
-            std::stod(parts[8]) * std::chrono::seconds(std::chrono::hours(24)).count();
-
+        Parameters p = {
+            .name = parts[0],
+            .inclination = importAngleValue(parts[4]),
+            .semiMajorAxis =
+                std::stod(parts[3]) * distanceconstants::AstronomicalUnit / 1000.0,
+            .ascendingNode = importAngleValue(parts[5]),
+            .eccentricity = std::stod(parts[2]),
+            .argumentOfPeriapsis = importAngleValue(parts[6]),
+            .meanAnomaly = importAngleValue(parts[7]),
+            .epoch = epochFromYMDdSubstring(parts[1]),
+            .period =
+                std::stod(parts[8]) * std::chrono::seconds(std::chrono::hours(24)).count()
+        };
         result.push_back(std::move(p));
     }
     return result;
@@ -785,13 +934,13 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
 
     std::ifstream f = std::ifstream(file);
 
-    // Automatically detecting the header in an MPC file is unfortuntely not trivially
-    // The data lines in the MPC file format must be at least 160 character in length and
-    // none of the header lines (with one exception) encountered thus far are less than
-    // these 160 characters long. The exception is a line exactly 160 characters long with
-    // all `-` characters as a delimiter between header and data. Furthermore, the MPC
-    // file format is a fixed-width format where columns are located at specific positions
-    // and with a fixed length. More information about the file format is available at
+    // Automatically detecting the header in an MPC file is unfortuntely not trivial. The
+    // data lines in the MPC file format must be at least 160 character in length and none
+    // of the header lines (with one exception) encountered thus far are less than these
+    // 160 characters long. The exception is a line exactly 160 characters long with all
+    // `-` characters as a delimiter between header and data. Furthermore, the MPC file
+    // format is a fixed-width format where columns are located at specific positions and
+    // with a fixed length. More information about the file format is available at
     // http://www.minorplanetcenter.org/iau/info/MPOrbitFormat.html
     std::vector<Parameters> result;
     std::string line;
@@ -928,7 +1077,7 @@ std::optional<std::vector<Parameters>> loadCache(const std::filesystem::path& fi
     return res;
 }
 
-std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
+std::vector<Parameters> readFile(const std::filesystem::path& file, Format format) {
     std::filesystem::path cachedFile = FileSys.cacheManager()->cachedFilename(file);
     if (std::filesystem::is_regular_file(cachedFile)) {
         LINFO(std::format(
@@ -951,6 +1100,9 @@ std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
         case Format::OMM:
             res = readOmmFile(file);
             break;
+        case Format::CSV:
+            res = readCsvFile(file);
+            break;
         case Format::SBDB:
             res = readSbdbFile(file);
             break;
@@ -959,9 +1111,23 @@ std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
             break;
     }
 
-    LINFO(std::format("Saving cache '{}' for Kepler file '{}'", cachedFile, file));
-    saveCache(res, cachedFile);
+    if (!res.empty()) {
+        LINFO(std::format("Saving cache '{}' for Kepler file '{}'", cachedFile, file));
+        saveCache(res, cachedFile);
+    }
     return res;
+}
+
+std::vector<Parameters> readFiles(const std::vector<std::filesystem::path>& files,
+                                  Format format)
+{
+    std::vector<Parameters> result;
+
+    for (const std::filesystem::path& file : files) {
+        std::vector<Parameters> r = readFile(file, format);
+        result.insert(result.end(), r.begin(), r.end());
+    }
+    return result;
 }
 
 } // namespace openspace::kepler

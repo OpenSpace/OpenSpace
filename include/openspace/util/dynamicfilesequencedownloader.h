@@ -26,8 +26,10 @@
 #define __OPENSPACE_CORE___DYNAMICFILESEQUENCEDOWNLOADER___H__
 
 #include <openspace/util/httprequest.h>
+#include <openspace/json.h>
 #include <filesystem>
 #include <memory>
+#include <utility>
 #include <string>
 #include <vector>
 
@@ -55,6 +57,10 @@ class DynamicFileSequenceDownloader {
 public:
     DynamicFileSequenceDownloader(int dataID, const std::string& identifier,
         std::string infoUrl, std::string dataUrl, size_t nFilesToQueue);
+
+    static std::pair<double, double> parseDataInfoResponse(const nlohmann::json& json);
+    static std::vector<std::pair<std::string, std::string>> parseAvailableFilesResponse(
+        const nlohmann::json& json);
 
     void deinitialize(bool cacheFiles) const;
     void requestDataInfo(std::string httpInfoRequest);

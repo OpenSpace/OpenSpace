@@ -38,8 +38,8 @@ namespace {
         Property::Visibility::User
     };
 
-    // This `Translation` provides a fixed translation to the attached scene graph node
-    // that does not change unless the `Position` property is changed.
+    // Provides a fixed translation to the attached scene graph node that does not change
+    // unless the `Position` property is changed.
     struct [[codegen::Dictionary(StaticTranslation)]] Parameters {
         // [[codegen::verbatim(PositionInfo.description)]]
         glm::dvec3 position;
@@ -50,7 +50,7 @@ namespace {
 namespace openspace {
 
 Documentation StaticTranslation::Documentation() {
-    return codegen::doc<Parameters>("base_transform_translation_static");
+    return codegen::doc<Parameters>("base_translation_static");
 }
 
 StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)

@@ -3,7 +3,7 @@ local AddSunTrail = {
   Name = "Add sun trail",
   Command = [[
     local date
-    if is_declared("args") then
+    if is_declared("args") and is_declared("args.Date") then
       if (args.Date == "NOW") then
         date = openspace.time.currentWallTime()
       elseif (args.Date == "UTC") then

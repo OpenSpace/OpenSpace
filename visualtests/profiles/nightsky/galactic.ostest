@@ -44,7 +44,7 @@
     {
       "type": "property",
       "value": {
-        "property": "Scene.GalacticLine.Renderable.Enabled",
+        "property": "Scene.GalacticEquator.Renderable.Enabled",
         "value": true
       }
     },

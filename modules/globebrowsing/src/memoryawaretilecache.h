@@ -65,16 +65,15 @@ struct ProviderTileHasher {
      * +-------+------------+-------+------------+
      *
      * Bits are then shifted depending on the tile provider used.
-    */
+     */
     unsigned long long operator()(const ProviderTileKey& t) const {
         unsigned long long key = 0;
         key |= static_cast<unsigned long long>(t.tileIndex.level);
         key |= static_cast<unsigned long long>(t.tileIndex.x) << 5ULL;
         key |= static_cast<unsigned long long>(t.tileIndex.y) << 35ULL;
-        // Now the key is unique for all tiles, however not for all tile providers.
-        // Add to the key depending on the tile provider to avoid some hash collisions.
-        // (All hash collisions can not be avoided due to the limit in 64 bit for the
-        // hash key)
+        // Now the key is unique for all tiles, however not for all tile providers. Add to
+        // the key depending on the tile provider to avoid some hash collisions. (All hash
+        // collisions can not be avoided due to the limit in 64 bit for the hash key)
         // Idea: make some offset in the place of the bits for the x value. Lesser chance
         // of having different x-value than having different tile provider ids.
         key += static_cast<unsigned long long>(t.providerID) << 25ULL;
@@ -107,8 +106,8 @@ private:
     class TextureContainer {
     public:
         /**
-         * \param initData is the description of the texture type
-         * \param numTextures is the number of textures to allocate
+         * \param initData The description of the texture type
+         * \param numTextures The number of textures to allocate
          */
         TextureContainer(TileTextureInitData initData, size_t numTextures);
 
@@ -120,14 +119,14 @@ private:
         /**
          * \return A pointer to a texture if there is one texture never used before. If
          *         there are no textures left, nullptr is returned. TextureContainer still
-         *         owns the texture so no delete should be called on the raw pointer.
+         *         owns the texture so no delete should be called on the raw pointer
          */
         ghoul::opengl::Texture* getTextureIfFree();
 
         const TileTextureInitData& tileTextureInitData() const;
 
         /**
-         * \return the number of textures in this TextureContainer
+         * \return The number of textures in this TextureContainer
          */
         size_t size() const;
 

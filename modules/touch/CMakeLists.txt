@@ -25,36 +25,21 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
-  ext/levmarq.h
-  include/directinputsolver.h
   include/tuioear.h
-  include/touchinteraction.h
-  include/touchmarker.h
   include/win32_touch.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ext/levmarq.cpp
-  src/directinputsolver.cpp
   src/tuioear.cpp
-  src/touchinteraction.cpp
-  src/touchmarker.cpp
   src/win32_touch.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
-set(SHADER_FILES
-  shaders/marker_fs.glsl
-  shaders/marker_vs.glsl
-)
-source_group("Shader Files" FILES ${SHADER_FILES})
-
 create_new_module(
   "Touch"
   touch_module
-  STATIC
-  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+  ${HEADER_FILES} ${SOURCE_FILES}
 )
 
 add_subdirectory(ext SYSTEM)

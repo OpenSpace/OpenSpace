@@ -63,9 +63,8 @@ namespace {
         "RenderDuringBlackout",
         "Render during blackout",
         "If true, this screen space renderable is going to ignore the global blackout "
-        "factor from the Render Engine and will always render at full opacity. If "
-        "false, it will adhere to the factor and fade out like the rest of the 3D "
-        "rendering.",
+        "factor from the Render Engine and will always render at full opacity. If false, "
+        "it will adhere to the factor and fade out like the rest of the 3D rendering.",
         Property::Visibility::User
     };
 
@@ -484,10 +483,6 @@ void ScreenSpaceRenderable::render(const RenderData& renderData) {
     draw(mat, renderData);
 }
 
-bool ScreenSpaceRenderable::isReady() const {
-    return _shader != nullptr;
-}
-
 void ScreenSpaceRenderable::update() {}
 
 bool ScreenSpaceRenderable::isEnabled() const {
@@ -547,7 +542,7 @@ void ScreenSpaceRenderable::createShaders(ghoul::Dictionary dict) {
 }
 
 glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
-    // to scale the plane
+    // To scale the plane
     const float textureRatio =
         static_cast<float>(_objectSize.y) / static_cast<float>(_objectSize.x);
 
@@ -583,8 +578,8 @@ bool ScreenSpaceRenderable::isIntersecting(const glm::vec2& coord) {
     const bool isRightToLeftBorder = coord.x > lowerLeftCornerScreenSpace().x;
     const bool isOverBottomBorder = coord.y > lowerLeftCornerScreenSpace().y;
 
-    return  isUnderTopBorder && isLeftToRightBorder &&
-            isRightToLeftBorder && isOverBottomBorder;
+    return isUnderTopBorder && isLeftToRightBorder &&
+           isRightToLeftBorder && isOverBottomBorder;
 }
 
 void ScreenSpaceRenderable::translate(glm::vec2 translation, glm::vec2 position) {
@@ -610,15 +605,15 @@ glm::vec3 ScreenSpaceRenderable::raePosition() const {
 
 glm::mat4 ScreenSpaceRenderable::globalRotationMatrix() {
     // We do not want the screen space planes to be affected by
-    // 1) The global rotation of the view applied in the render engine
-    // 2) sgct's scene matrix (also called model matrix by sgct)
+    // 1. The global rotation of the view applied in the render engine
+    // 2. sgct's scene matrix (also called model matrix by sgct)
 
     const glm::mat4 inverseRotation = glm::inverse(
         global::renderEngine->globalRotation() *
         global::windowDelegate->modelMatrix()
     );
 
-    // The rotation of all screen space renderables is adjustable in the render engine:
+    // The rotation of all screen space renderables is adjustable in the render engine
     return global::renderEngine->screenSpaceRotation() * inverseRotation;
 }
 
@@ -709,7 +704,7 @@ glm::vec3 ScreenSpaceRenderable::sanitizeSphericalCoordinates(glm::vec3 spherica
     const float r = spherical.x;
     float phi = spherical.z;
 
-    // Sanitize coordinates.
+    // Sanitize coordinates
     float theta = wrap(spherical.y, 0.f, glm::two_pi<float>());
     if (theta > glm::pi<float>()) {
         theta = glm::two_pi<float>() - theta;
@@ -723,7 +718,7 @@ glm::vec3 ScreenSpaceRenderable::sphericalToCartesian(glm::vec3 spherical) const
     // First convert to ISO convention spherical coordinates according to
     // https://en.wikipedia.org/wiki/Spherical_coordinate_system
     // (radius, theta, phi), where theta is the polar angle from the z axis,
-    // and phi is the azimuth.
+    // and phi is the azimuth
 
     const glm::vec3 sanitized = sanitizeSphericalCoordinates(std::move(spherical));
     const float x = sanitized[0] * std::sin(sanitized[1]) * std::cos(sanitized[2]);
@@ -731,12 +726,12 @@ glm::vec3 ScreenSpaceRenderable::sphericalToCartesian(glm::vec3 spherical) const
     const float z = sanitized[0] * std::cos(sanitized[1]);
 
     // Now, convert rotate the coordinate system, so that z maps to y,
-    // and y maps to -z. We want the pole to be in y instead of z.
+    // and y maps to -z. We want the pole to be in y instead of z
     return glm::vec3(x, -z, y);
 }
 
 glm::vec3 ScreenSpaceRenderable::cartesianToSpherical(const glm::vec3& cartesian) const {
-    // Rotate cartesian coordinates.
+    // Rotate cartesian coordinates
     const glm::vec3 rotated = glm::vec3(cartesian.x, cartesian.z, -cartesian.y);
 
     const float r = std::sqrt(
@@ -747,24 +742,20 @@ glm::vec3 ScreenSpaceRenderable::cartesianToSpherical(const glm::vec3& cartesian
     return sanitizeSphericalCoordinates(glm::vec3(r, theta, phi));
 }
 
-// Radius, azimiuth, elevation to spherical coordinates.
 glm::vec3 ScreenSpaceRenderable::raeToSpherical(const glm::vec3& rae) const {
-    //return rae;
     const float r = rae.x;
 
-    // Polar angle, theta, is elevation + pi/2.
+    // Polar angle, theta, is elevation + pi/2
     const float theta = rae.z + glm::half_pi<float>();
 
-    // Azimuth in ISO spherical coordiantes (phi) is angle from x,
-    // as opposed to from negative y on screen.
+    // Azimuth in ISO spherical coordiantes (phi) is angle from x, as opposed to from
+    // negative y on screen
     const float phi = rae.y - glm::half_pi<float>();
 
     return glm::vec3(r, theta, phi);
 }
 
-// Spherical coordinates to radius, azimuth and elevation.
 glm::vec3 ScreenSpaceRenderable::sphericalToRae(const glm::vec3& spherical) const {
-    //return spherical;
     const float r = spherical.x;
 
     // Azimuth on screen is angle from negative y, as opposed to from x.

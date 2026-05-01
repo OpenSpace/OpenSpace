@@ -1,0 +1,22 @@
+{
+  "version": { "major": 1, "minor": 0 },
+  "identifier": "dwarf_planets",
+  "name": "Dwarf Planets",
+  "description": "Includes the various dwarf planets such as Ceres, Gonggong, Sedna, Vesta, etc.",
+  "assets": [
+    "scene/solarsystem/dwarf_planets/ceres/ceres",
+    "scene/solarsystem/dwarf_planets/ceres/layers/default_layers",
+    "scene/solarsystem/dwarf_planets/eris/eris",
+    "scene/solarsystem/dwarf_planets/gonggong/gonggong",
+    "scene/solarsystem/dwarf_planets/haumea/haumea",
+    "scene/solarsystem/dwarf_planets/makemake/makemake",
+    "scene/solarsystem/dwarf_planets/orcus/orcus",
+    "scene/solarsystem/dwarf_planets/pluto/pluto",
+    "scene/solarsystem/dwarf_planets/pluto/layers/default_layers",
+    "scene/solarsystem/dwarf_planets/pluto/moons/charon/charon",
+    "scene/solarsystem/dwarf_planets/pluto/moons/charon/layers/default_layers",
+    "scene/solarsystem/dwarf_planets/quaoar/quaoar",
+    "scene/solarsystem/dwarf_planets/sedna/sedna",
+    "scene/solarsystem/dwarf_planets/vesta/vesta"
+  ]
+}

@@ -38,11 +38,11 @@ namespace {
         Property::Visibility::NoviceUser
     };
 
-    // This Scale type scales the scene graph node that it is attached to by a fixed
-    // amount that does not change over time. It is possible to change the fixed scale
-    // after starting the application, but it otherwise remains unchanged. The scaling is
-    // a simple multiplication so that a `Scale` value of 10 means that the object will be
-    // 10 times larger than its original size.
+    // Scales the scene graph node that it is attached to by a fixed amount that does not
+    // change over time. It is possible to change the fixed scale after starting the
+    // application, but it otherwise remains unchanged. The scaling is a simple
+    // multiplication so that a `Scale` value of 10 means that the object will be 10 times
+    // larger than its original size.
     struct [[codegen::Dictionary(StaticScale)]] Parameters {
         // [[codegen::verbatim(ScaleInfo.description)]]
         double scale;
@@ -53,7 +53,7 @@ namespace {
 namespace openspace {
 
 Documentation StaticScale::Documentation() {
-    return codegen::doc<Parameters>("base_transform_scale_static");
+    return codegen::doc<Parameters>("base_scale_static");
 }
 
 StaticScale::StaticScale(const ghoul::Dictionary& dictionary)

@@ -56,9 +56,9 @@ public:
     void bind(ghoul::opengl::ProgramObject& programObject, const LayerGroup& layerGroup);
 
     /**
-    * Deactivates any `TextureUnit`s assigned by this object. This method should be called
-    * after the OpenGL draw call.
-    */
+     * Deactivates any `TextureUnit`s assigned by this object. This method should be
+     * called after the OpenGL draw call.
+     */
     void deactivate();
 
 private:

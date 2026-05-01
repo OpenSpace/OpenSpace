@@ -27,9 +27,12 @@
 #include <modules/skybrowser/include/renderableskytarget.h>
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/targetbrowserpair.h>
+#include <modules/skybrowser/include/skybrowsertopic.h>
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/topic/server.h>
+#include <openspace/topic/connection.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/properties/property.h>
@@ -150,6 +153,11 @@ namespace {
 
         // [[codegen::verbatim(SpaceCraftTimeInfo.description)]]
         std::optional<std::string> wwtImageCollectionUrl;
+
+        // How often the SkyBrowser module should send updates to the UI.
+        // Set in milliseconds, so for example a value of 100 will result in
+        //  an update sent every 0.1 second (10 updates per second).
+        std::optional<int> updateInterval;
     };
 } // namespace
 #include "skybrowsermodule_codegen.cpp"
@@ -182,9 +190,9 @@ SkyBrowserModule::SkyBrowserModule()
     addProperty(_hideTargetsBrowsersWithGui);
     addProperty(_inverseZoomDirection);
     addProperty(_spaceCraftAnimationTime);
+    _wwtImageCollectionUrl.setReadOnly(true);
     addProperty(_wwtImageCollectionUrl);
     addProperty(_synchronizeAim);
-    _wwtImageCollectionUrl.setReadOnly(true);
 
     // Set callback functions
     global::callback::mouseButton->emplace(
@@ -202,7 +210,7 @@ SkyBrowserModule::SkyBrowserModule()
 
         // Disable browser and targets when camera is outside of solar system
         const bool camWasInSolarSystem = _isCameraInSolarSystem;
-        const glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
+        const glm::dvec3 cameraPos = global::navigationHandler->camera()->position();
         _isCameraInSolarSystem = glm::length(cameraPos) < SolarSystemRadius;
         const bool vizModeChanged = _isCameraInSolarSystem != camWasInSolarSystem;
 
@@ -216,8 +224,8 @@ SkyBrowserModule::SkyBrowserModule()
                     pair->startFading(0.f, FadeDuration);
                 }
 
-                // Also hide the hover circle
-                disableHoverCircle();
+                // Also hide the hover indicator
+                disableHoverIndicator();
             }
             else {
                 // Camera moved into the solar system => fade in
@@ -257,20 +265,21 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     _spaceCraftAnimationTime = p.spaceCraftAnimationTime.value_or(
         _spaceCraftAnimationTime
     );
+    _topicUpdateInterval = p.updateInterval.value_or(_topicUpdateInterval);
 
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
-
-    // Register ScreenSpaceSkyBrowser
     fScreenSpaceRenderable->registerClass<ScreenSpaceSkyBrowser>("ScreenSpaceSkyBrowser");
 
     ghoul::TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
-
-    // Register ScreenSpaceSkyTarget
     fRenderable->registerClass<RenderableSkyTarget>("RenderableSkyTarget");
+
+    ghoul::TemplateFactory<Topic>* fTopic = FactoryManager::ref().factory<Topic>();
+    ghoul_assert(fTopic, "Topic factory was not created");
+    fTopic->registerClass<SkyBrowserTopic>("skybrowser");
 }
 
 void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId,
@@ -316,26 +325,26 @@ void SkyBrowserModule::lookAtTarget(const std::string& id) {
     }
 }
 
-void SkyBrowserModule::setHoverCircle(SceneGraphNode* circle) {
-    ghoul_assert(circle, "No circle specified");
-    _hoverCircle = circle;
+void SkyBrowserModule::setHoverIndicator(SceneGraphNode* circle) {
+    ghoul_assert(circle, "No indicator specified");
+    _hoverIndicator = circle;
 
     // Always disable it per default. It should only be visible on interaction
-    disableHoverCircle();
+    disableHoverIndicator();
 }
 
-void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScript) {
+void SkyBrowserModule::moveHoverIndicator(const std::string& imageUrl, bool useScript) {
     std::optional<const ImageData> found = _dataHandler.image(imageUrl);
     if (!found.has_value()) {
         return;
     }
     const ImageData image = *found;
     // Only move and show circle if the image has coordinates
-    if (!(_hoverCircle && image.hasCelestialCoords && _isCameraInSolarSystem)) {
+    if (!(_hoverIndicator && image.hasCelestialCoords && _isCameraInSolarSystem)) {
         return;
     }
 
-    const std::string id = _hoverCircle->identifier();
+    const std::string id = _hoverIndicator->identifier();
 
     // Show the circle
     if (useScript) {
@@ -345,15 +354,14 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
         global::scriptEngine->queueScript(script);
     }
     else {
-        Renderable* renderable = _hoverCircle->renderable();
+        Renderable* renderable = _hoverIndicator->renderable();
         if (renderable) {
             renderable->setFade(1.f);
         }
     }
 
-    // Set the exact target position
-    // Move it slightly outside of the celestial sphere so it doesn't overlap with
-    // the target
+    // Set the exact target position. Move it slightly outside of the celestial sphere so
+    // it doesn't overlap with the target
     glm::dvec3 pos = equatorialToGalactic(image.equatorialCartesian);
     pos *= CelestialSphereRadius * 1.1;
 
@@ -365,21 +373,23 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
     global::scriptEngine->queueScript(script);
 }
 
-void SkyBrowserModule::disableHoverCircle(bool useScript) {
-    if (_hoverCircle && _hoverCircle->renderable()) {
-        if (useScript) {
-            const std::string script = std::format(
-                "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 0.0);",
-                _hoverCircle->identifier()
-            );
-            global::scriptEngine->queueScript(script);
-        }
-        else {
-            Property* prop = _hoverCircle->renderable()->property("Fade");
-            FloatProperty* floatProp = dynamic_cast<FloatProperty*>(prop);
-            ghoul_assert(floatProp, "Fade property is not a float property");
-            *floatProp = 0.f;
-        }
+void SkyBrowserModule::disableHoverIndicator(bool useScript) {
+    if (!_hoverIndicator || !_hoverIndicator->renderable()) {
+        return;
+    }
+
+    if (useScript) {
+        const std::string script = std::format(
+            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 0.0);",
+            _hoverIndicator->identifier()
+        );
+        global::scriptEngine->queueScript(script);
+    }
+    else {
+        Property* prop = _hoverIndicator->renderable()->property("Fade");
+        FloatProperty* floatProp = dynamic_cast<FloatProperty*>(prop);
+        ghoul_assert(floatProp, "Fade property is not a float property");
+        *floatProp = 0.f;
     }
 }
 
@@ -391,6 +401,10 @@ void SkyBrowserModule::loadImages(const std::string& root,
 
 int SkyBrowserModule::nLoadedImages() const {
     return _dataHandler.nLoadedImages();
+}
+
+int SkyBrowserModule::topicUpdateInterval() const {
+    return _topicUpdateInterval;
 }
 
 const WwtDataHandler& SkyBrowserModule::wwtDataHandler() const {
@@ -417,7 +431,7 @@ TargetBrowserPair* SkyBrowserModule::pair(std::string_view id) const {
         }
     );
     TargetBrowserPair* found = it != _targetsBrowsers.end() ? it->get() : nullptr;
-    if (found == nullptr) {
+    if (!found) {
         LINFO(std::format("Identifier '{}' not found", id));
     }
     return found;
@@ -464,8 +478,7 @@ std::string SkyBrowserModule::wwtImageCollectionUrl() const {
 }
 
 void SkyBrowserModule::setSelectedBrowser(std::string_view id) {
-    TargetBrowserPair* p = pair(id);
-    if (p) {
+    if (TargetBrowserPair* p = pair(id);  p) {
         _selectedBrowser = id;
     }
 }
@@ -512,9 +525,9 @@ LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::InitializeBrowser,
             codegen::lua::SendOutIdsToBrowsers,
             codegen::lua::ListOfImages,
-            codegen::lua::SetHoverCircle,
-            codegen::lua::MoveCircleToHoverImage,
-            codegen::lua::DisableHoverCircle,
+            codegen::lua::SetHoverIndicator,
+            codegen::lua::MoveIndicatorToHoverImage,
+            codegen::lua::DisableHoverIndicator,
             codegen::lua::LoadImagesToWWT,
             codegen::lua::SelectImage,
             codegen::lua::RemoveSelectedImageInBrowser,

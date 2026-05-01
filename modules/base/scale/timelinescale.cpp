@@ -43,15 +43,15 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // This `Scale` uses a timeline of other `Scale` classes to calculate the final
-    // scale factor for the attached scene graph node. The current in-game time is used to
-    // determine which specific keyframe to currently use. It is also possible to
-    // interpolate between two adjacent keyframes.
+    // Uses a timeline of other `Scale` classes to calculate the final scale factor for
+    // the attached scene graph node. The current in-game time is used to determine which
+    // specific keyframe to currently use. It is also possible to interpolate between two
+    // adjacent keyframes.
     struct [[codegen::Dictionary(TimelineScale)]] Parameters {
         // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
         // that are valid Scale objects.
         std::map<std::string, ghoul::Dictionary> keyframes
-            [[codegen::reference("core_transform_scale")]];
+            [[codegen::reference("core_scale")]];
 
         // [[codegen::verbatim(ShouldInterpolateInfo.description)]]
         std::optional<bool> shouldInterpolate;
@@ -62,7 +62,7 @@ namespace {
 namespace openspace {
 
 Documentation TimelineScale::Documentation() {
-    return codegen::doc<Parameters>("base_transform_scale_keyframe");
+    return codegen::doc<Parameters>("base_scale_keyframe");
 }
 
 TimelineScale::TimelineScale(const ghoul::Dictionary& dictionary)

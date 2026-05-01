@@ -28,7 +28,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
@@ -82,18 +82,18 @@ namespace {
     constexpr Property::PropertyInfo StartOffsetInfo = {
         "StartOffset",
         "Offset to start node",
-        "A distance from the start node at which the rendered line should begin. "
-        "By default it takes a value in meters, but if 'UseRelativeOffsets' is set "
-        "to true it is read as a multiplier times the bounding sphere of the node.",
+        "A distance from the start node at which the rendered line should begin. By "
+        "default it takes a value in meters, but if 'UseRelativeOffsets' is set to true "
+        "it is read as a multiplier times the bounding sphere of the node.",
         Property::Visibility::AdvancedUser
     };
 
     constexpr Property::PropertyInfo EndOffsetInfo = {
         "EndOffset",
         "Offset to end node",
-        "A distance to the end node at which the rendered line should end. "
-        "By default it takes a value in meters, but if 'UseRelativeOffsets' is set "
-        "to true it is read as a multiplier times the bounding sphere of the node.",
+        "A distance to the end node at which the rendered line should end. By default it "
+        "takes a value in meters, but if 'UseRelativeOffsets' is set to true it is read "
+        "as a multiplier times the bounding sphere of the node.",
         Property::Visibility::AdvancedUser
     };
 
@@ -106,8 +106,10 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // Returns a position that is relative to the current anchor node. This is a method to
-    // handle precision problems that occur when approaching a line end point
+    /**
+     * Returns a position that is relative to the current anchor node.This is a method to
+     * handle precision problems that occur when approaching a line end point.
+     */
     glm::dvec3 coordinatePosFromAnchorNode(const glm::dvec3& worldPos) {
         glm::dvec3 anchorNodePos(0.0);
 
@@ -120,8 +122,8 @@ namespace {
         return diffPos;
     }
 
-    // This `Renderable` connects two scene graph nodes by drawing a line between them.
-    // The line will update dynamically if the position of the nodes change.
+    // Connects two scene graph nodes by drawing a line between them. The line will update
+    // dynamically if the position of the nodes change.
     //
     // One use case for the `RenderableNodeLine` is to visualize the distance between two
     // objects. For this, a [RenderableDistanceLabel](#base_renderable_distancelabel) can
@@ -303,12 +305,6 @@ void RenderableNodeLine::deinitializeGL() {
         }
     );
     _program = nullptr;
-}
-
-bool RenderableNodeLine::isReady() const {
-    bool ready = true;
-    ready &= (_program != nullptr);
-    return ready;
 }
 
 void RenderableNodeLine::update(const UpdateData&) {

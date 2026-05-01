@@ -1,0 +1,45 @@
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
+
+
+
+local L3Position = {
+  Identifier = "L3Position",
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.Earth,
+      Observer = coreKernels.ID.SolarSystemBarycenter,
+      TimeOffset = openspace.time.secondsPerYear() / 2
+    }
+  },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l3" },
+  GUI = {
+    Name = "L3 Position",
+    Path = "/Solar System/Planets/Earth/Lagrange Points",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(L3Position)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(L3Position)
+end)
+
+asset.export(L3Position)
+
+
+
+asset.meta = {
+  Name = "Lagrange point L3 Position",
+  Description = [[The position of L3 as calculated based on Earth's position offset by half a year.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

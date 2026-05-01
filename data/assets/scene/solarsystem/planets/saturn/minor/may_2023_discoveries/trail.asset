@@ -1,0 +1,2039 @@
+local transforms = asset.require("scene/solarsystem/planets/saturn/transforms")
+local kernels454 = asset.require("scene/solarsystem/planets/saturn/kernels454")
+local coreKernels = asset.require("spice/core")
+
+
+
+local S2019S2Trail = {
+  Identifier = "S2019S2Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S2,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 795.67,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 2 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S2",
+    Focusable = false
+  }
+}
+
+local S2019S3Trail = {
+  Identifier = "S2019S3Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S3,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 833.19,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 3 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S3",
+    Focusable = false
+  }
+}
+
+local S2020S1Trail = {
+  Identifier = "S2020S1Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2020S1,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 450.77,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2020 S 1 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2020S1",
+    Focusable = false
+  }
+}
+
+local S2020S2Trail = {
+  Identifier = "S2020S2Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2020S2,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 891.86,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2020 S 2 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S2",
+    Focusable = false
+  }
+}
+
+local S2004S40Trail = {
+  Identifier = "S2004S40Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2004S40,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 761.0,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 40 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S40",
+    Focusable = false
+  }
+}
+
+local S2006S9Trail = {
+  Identifier = "S2006S9Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2006S9,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 645.58,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 9 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S9",
+    Focusable = false
+  }
+}
+
+local S2007S5Trail = {
+  Identifier = "S2007S5Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2007S5,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 744.01,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2007 S 5 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S5",
+    Focusable = false
+  }
+}
+
+local S2020S3Trail = {
+  Identifier = "S2020S3Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2020S3,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 905.84,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2020 S 3 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2020S3",
+    Focusable = false
+  }
+}
+
+local S2019S4Trail = {
+  Identifier = "S2019S4Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S4,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 898.09,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 4 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S4",
+    Focusable = false
+  }
+}
+
+local S2004S41Trail = {
+  Identifier = "S2004S41Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2004S41,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 908.89,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 41 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S41",
+    Focusable = false
+  }
+}
+
+local S2020S4Trail = {
+  Identifier = "S2020S4Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2020S4,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 919.52,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2020 S 4 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2020S4",
+    Focusable = false
+  }
+}
+
+local S2020S5Trail = {
+  Identifier = "S2020S5Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2020S5,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 931.19,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2020 S 5 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2020S5",
+    Focusable = false
+  }
+}
+
+local S2007S6Trail = {
+  Identifier = "S2007S6Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2007S6,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 942.98,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2007 S 6 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S6",
+    Focusable = false
+  }
+}
+
+local S2004S42Trail = {
+  Identifier = "S2004S42Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2004S42,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 919.88,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 42 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S42",
+    Focusable = false
+  }
+}
+
+local S2006S10Trail = {
+  Identifier = "S2006S10Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2006S10,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 976.34,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 10 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S10",
+    Focusable = false
+  }
+}
+
+local S2019S5Trail = {
+  Identifier = "S2019S5Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S5,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 984.87,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 5 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S5",
+    Focusable = false
+  }
+}
+
+local S2004S43Trail = {
+  Identifier = "S2004S43Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2004S43,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 972.85,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 43 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S43",
+    Focusable = false
+  }
+}
+
+local S2004S44Trail = {
+  Identifier = "S2004S44Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2004S44,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1017.91,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 44 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S44",
+    Focusable = false
+  }
+}
+
+local S2004S45Trail = {
+  Identifier = "S2004S45Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2004S45,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1031.86,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 45 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2004S45",
+    Focusable = false
+  }
+}
+
+local S2006S11Trail = {
+  Identifier = "S2006S11Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2006S11,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1033.35,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 11 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S11",
+    Focusable = false
+  }
+}
+
+local S2006S12Trail = {
+  Identifier = "S2006S12Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2006S12,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1022.29,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 12 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2006S12",
+    Focusable = false
+  }
+}
+
+local S2019S6Trail = {
+  Identifier = "S2019S6Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S6,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 917.11,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 6 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2019S6",
+    Focusable = false
+  }
+}
+
+local S2006S13Trail = {
+  Identifier = "S2006S13Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2006S13,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1052.32,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 13 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S13",
+    Focusable = false
+  }
+}
+
+local S2019S7Trail = {
+  Identifier = "S2019S7Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S7,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1070.8,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 7 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S7",
+    Focusable = false
+  }
+}
+
+local S2019S8Trail = {
+  Identifier = "S2019S8Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S8,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1078.86,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 8 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S8",
+    Focusable = false
+  }
+}
+
+local S2019S9Trail = {
+  Identifier = "S2019S9Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S9,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1084.62,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 9 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S9",
+    Focusable = false
+  }
+}
+
+local S2004S46Trail = {
+  Identifier = "S2004S46Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2004S46,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1096.99,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 46 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2004S46",
+    Focusable = false
+  }
+}
+
+local S2019S10Trail = {
+  Identifier = "S2019S10Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S10,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1111.99,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 10 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S10",
+    Focusable = false
+  }
+}
+
+local S2004S47Trail = {
+  Identifier = "S2004S47Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2004S47,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 759.22,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 47 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S47",
+    Focusable = false
+  }
+}
+
+local S2019S11Trail = {
+  Identifier = "S2019S11Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S11,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1109.11,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 11 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2019S11",
+    Focusable = false
+  }
+}
+
+local S2006S14Trail = {
+  Identifier = "S2006S14Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2006S14,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1141.27,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 14 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S14",
+    Focusable = false
+  }
+}
+
+local S2019S12Trail = {
+  Identifier = "S2019S12Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S12,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1127.6,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 12 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S12",
+    Focusable = false
+  }
+}
+
+local S2020S6Trail = {
+  Identifier = "S2020S6Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2020S6,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1156.81,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2020 S 6 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S6",
+    Focusable = false
+  }
+}
+
+local S2019S13Trail = {
+  Identifier = "S2019S13Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S13,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1133.27,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 13 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S13",
+    Focusable = false
+  }
+}
+
+local S2005S4Trail = {
+  Identifier = "S2005S4Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2005S4,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 449.93,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2005 S 4 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2005S4",
+    Focusable = false
+  }
+}
+
+local S2007S7Trail = {
+  Identifier = "S2007S7Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2007S7,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 750.8,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2007 S 7 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S7",
+    Focusable = false
+  }
+}
+
+local S2007S8Trail = {
+  Identifier = "S2007S8Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2007S8,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 831.21,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2007 S 8 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2007S8",
+    Focusable = false
+  }
+}
+
+local S2020S7Trail = {
+  Identifier = "S2020S7Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2020S7,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 856.53,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2020 S 7 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S7",
+    Focusable = false
+  }
+}
+
+local S2019S14Trail = {
+  Identifier = "S2019S14Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S14,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 890.59,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 14 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2019S14",
+    Focusable = false
+  }
+}
+
+local S2019S15Trail = {
+  Identifier = "S2019S15Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S15,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1151.66,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 15 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S15",
+    Focusable = false
+  }
+}
+
+local S2005S5Trail = {
+  Identifier = "S2005S5Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2005S5,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1165.96,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2005 S 5 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2005S5",
+    Focusable = false
+  }
+}
+
+local S2006S15Trail = {
+  Identifier = "S2006S15Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2006S15,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1201.69,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 15 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S15",
+    Focusable = false
+  }
+}
+
+local S2006S16Trail = {
+  Identifier = "S2006S16Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2006S16,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1195.13,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 16 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S16",
+    Focusable = false
+  }
+}
+
+local S2006S17Trail = {
+  Identifier = "S2006S17Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2006S17,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1250.46,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 17 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S17",
+    Focusable = false
+  }
+}
+
+local S2004S48Trail = {
+  Identifier = "S2004S48Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2004S48,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1229.86,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 48 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S48",
+    Focusable = false
+  }
+}
+
+local S2020S8Trail = {
+  Identifier = "S2020S8Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2020S8,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1215.61,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2020 S 8 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S8",
+    Focusable = false
+  }
+}
+
+local S2004S49Trail = {
+  Identifier = "S2004S49Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2004S49,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1251.68,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 49 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S49",
+    Focusable = false
+  }
+}
+
+local S2004S50Trail = {
+  Identifier = "S2004S50Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2004S50,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1247.19,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 50 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S50",
+    Focusable = false
+  }
+}
+
+local S2006S18Trail = {
+  Identifier = "S2006S18Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2006S18,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1282.09,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 18 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S18",
+    Focusable = false
+  }
+}
+
+local S2019S16Trail = {
+  Identifier = "S2019S16Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S16,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1324.95,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 16 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S16",
+    Focusable = false
+  }
+}
+
+local S2019S17Trail = {
+  Identifier = "S2019S17Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S17,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1278.96,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 17 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S17",
+    Focusable = false
+  }
+}
+
+local S2019S18Trail = {
+  Identifier = "S2019S18Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S18,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1314.27,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 18 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S18",
+    Focusable = false
+  }
+}
+
+local S2019S19Trail = {
+  Identifier = "S2019S19Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S19,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1306.16,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 19 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S19",
+    Focusable = false
+  }
+}
+
+local S2019S20Trail = {
+  Identifier = "S2019S20Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S20,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1360.47,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 20 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2019S20",
+    Focusable = false
+  }
+}
+
+local S2006S19Trail = {
+  Identifier = "S2006S19Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2006S19,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1371.02,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 19 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S19",
+    Focusable = false
+  }
+}
+
+local S2004S51Trail = {
+  Identifier = "S2004S51Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2004S51,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1494.41,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 51 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S51",
+    Focusable = false
+  }
+}
+
+local S2020S9Trail = {
+  Identifier = "S2020S9Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2020S9,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1512.38,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2020 S 9 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S9",
+    Focusable = false
+  }
+}
+
+local S2004S52Trail = {
+  Identifier = "S2004S52Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2004S52,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1605.89,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 52 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S52",
+    Focusable = false
+  }
+}
+
+local S2007S9Trail = {
+  Identifier = "S2007S9Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2007S9,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1069.81,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2007 S 9 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2007S9",
+    Focusable = false
+  }
+}
+
+local S2004S53Trail = {
+  Identifier = "S2004S53Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2004S53,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1326.18,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 53 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S53",
+    Focusable = false
+  }
+}
+
+local S2020S10Trail = {
+  Identifier = "S2020S10Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2020S10,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1503.97,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2020 S 10 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S10",
+    Focusable = false
+  }
+}
+
+local S2019S21Trail = {
+  Identifier = "S2019S21Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2019S21,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 1605.28,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 21 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S21",
+    Focusable = false
+  }
+}
+
+local S2006S20Trail = {
+  Identifier = "S2006S20Trail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.S2006S20,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 565.79,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_other",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 20 Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S20",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(S2019S2Trail)
+  openspace.addSceneGraphNode(S2019S3Trail)
+  openspace.addSceneGraphNode(S2020S1Trail)
+  openspace.addSceneGraphNode(S2020S2Trail)
+  openspace.addSceneGraphNode(S2004S40Trail)
+  openspace.addSceneGraphNode(S2006S9Trail)
+  openspace.addSceneGraphNode(S2007S5Trail)
+  openspace.addSceneGraphNode(S2020S3Trail)
+  openspace.addSceneGraphNode(S2019S4Trail)
+  openspace.addSceneGraphNode(S2004S41Trail)
+  openspace.addSceneGraphNode(S2020S4Trail)
+  openspace.addSceneGraphNode(S2020S5Trail)
+  openspace.addSceneGraphNode(S2007S6Trail)
+  openspace.addSceneGraphNode(S2004S42Trail)
+  openspace.addSceneGraphNode(S2006S10Trail)
+  openspace.addSceneGraphNode(S2019S5Trail)
+  openspace.addSceneGraphNode(S2004S43Trail)
+  openspace.addSceneGraphNode(S2004S44Trail)
+  openspace.addSceneGraphNode(S2004S45Trail)
+  openspace.addSceneGraphNode(S2006S11Trail)
+  openspace.addSceneGraphNode(S2006S12Trail)
+  openspace.addSceneGraphNode(S2019S6Trail)
+  openspace.addSceneGraphNode(S2006S13Trail)
+  openspace.addSceneGraphNode(S2019S7Trail)
+  openspace.addSceneGraphNode(S2019S8Trail)
+  openspace.addSceneGraphNode(S2019S9Trail)
+  openspace.addSceneGraphNode(S2004S46Trail)
+  openspace.addSceneGraphNode(S2019S10Trail)
+  openspace.addSceneGraphNode(S2004S47Trail)
+  openspace.addSceneGraphNode(S2019S11Trail)
+  openspace.addSceneGraphNode(S2006S14Trail)
+  openspace.addSceneGraphNode(S2019S12Trail)
+  openspace.addSceneGraphNode(S2020S6Trail)
+  openspace.addSceneGraphNode(S2019S13Trail)
+  openspace.addSceneGraphNode(S2005S4Trail)
+  openspace.addSceneGraphNode(S2007S7Trail)
+  openspace.addSceneGraphNode(S2007S8Trail)
+  openspace.addSceneGraphNode(S2020S7Trail)
+  openspace.addSceneGraphNode(S2019S14Trail)
+  openspace.addSceneGraphNode(S2019S15Trail)
+  openspace.addSceneGraphNode(S2005S5Trail)
+  openspace.addSceneGraphNode(S2006S15Trail)
+  openspace.addSceneGraphNode(S2006S16Trail)
+  openspace.addSceneGraphNode(S2006S17Trail)
+  openspace.addSceneGraphNode(S2004S48Trail)
+  openspace.addSceneGraphNode(S2020S8Trail)
+  openspace.addSceneGraphNode(S2004S49Trail)
+  openspace.addSceneGraphNode(S2004S50Trail)
+  openspace.addSceneGraphNode(S2006S18Trail)
+  openspace.addSceneGraphNode(S2019S16Trail)
+  openspace.addSceneGraphNode(S2019S17Trail)
+  openspace.addSceneGraphNode(S2019S18Trail)
+  openspace.addSceneGraphNode(S2019S19Trail)
+  openspace.addSceneGraphNode(S2019S20Trail)
+  openspace.addSceneGraphNode(S2006S19Trail)
+  openspace.addSceneGraphNode(S2004S51Trail)
+  openspace.addSceneGraphNode(S2020S9Trail)
+  openspace.addSceneGraphNode(S2004S52Trail)
+  openspace.addSceneGraphNode(S2007S9Trail)
+  openspace.addSceneGraphNode(S2004S53Trail)
+  openspace.addSceneGraphNode(S2020S10Trail)
+  openspace.addSceneGraphNode(S2019S21Trail)
+  openspace.addSceneGraphNode(S2006S20Trail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2006S20Trail)
+  openspace.removeSceneGraphNode(S2019S21Trail)
+  openspace.removeSceneGraphNode(S2020S10Trail)
+  openspace.removeSceneGraphNode(S2004S53Trail)
+  openspace.removeSceneGraphNode(S2007S9Trail)
+  openspace.removeSceneGraphNode(S2004S52Trail)
+  openspace.removeSceneGraphNode(S2020S9Trail)
+  openspace.removeSceneGraphNode(S2004S51Trail)
+  openspace.removeSceneGraphNode(S2006S19Trail)
+  openspace.removeSceneGraphNode(S2019S20Trail)
+  openspace.removeSceneGraphNode(S2019S19Trail)
+  openspace.removeSceneGraphNode(S2019S18Trail)
+  openspace.removeSceneGraphNode(S2019S17Trail)
+  openspace.removeSceneGraphNode(S2019S16Trail)
+  openspace.removeSceneGraphNode(S2006S18Trail)
+  openspace.removeSceneGraphNode(S2004S50Trail)
+  openspace.removeSceneGraphNode(S2004S49Trail)
+  openspace.removeSceneGraphNode(S2020S8Trail)
+  openspace.removeSceneGraphNode(S2004S48Trail)
+  openspace.removeSceneGraphNode(S2006S17Trail)
+  openspace.removeSceneGraphNode(S2006S16Trail)
+  openspace.removeSceneGraphNode(S2006S15Trail)
+  openspace.removeSceneGraphNode(S2005S5Trail)
+  openspace.removeSceneGraphNode(S2019S15Trail)
+  openspace.removeSceneGraphNode(S2019S14Trail)
+  openspace.removeSceneGraphNode(S2020S7Trail)
+  openspace.removeSceneGraphNode(S2007S8Trail)
+  openspace.removeSceneGraphNode(S2007S7Trail)
+  openspace.removeSceneGraphNode(S2005S4Trail)
+  openspace.removeSceneGraphNode(S2019S13Trail)
+  openspace.removeSceneGraphNode(S2020S6Trail)
+  openspace.removeSceneGraphNode(S2019S12Trail)
+  openspace.removeSceneGraphNode(S2006S14Trail)
+  openspace.removeSceneGraphNode(S2019S11Trail)
+  openspace.removeSceneGraphNode(S2004S47Trail)
+  openspace.removeSceneGraphNode(S2019S10Trail)
+  openspace.removeSceneGraphNode(S2004S46Trail)
+  openspace.removeSceneGraphNode(S2019S9Trail)
+  openspace.removeSceneGraphNode(S2019S8Trail)
+  openspace.removeSceneGraphNode(S2019S7Trail)
+  openspace.removeSceneGraphNode(S2006S13Trail)
+  openspace.removeSceneGraphNode(S2019S6Trail)
+  openspace.removeSceneGraphNode(S2006S12Trail)
+  openspace.removeSceneGraphNode(S2006S11Trail)
+  openspace.removeSceneGraphNode(S2004S45Trail)
+  openspace.removeSceneGraphNode(S2004S44Trail)
+  openspace.removeSceneGraphNode(S2004S43Trail)
+  openspace.removeSceneGraphNode(S2019S5Trail)
+  openspace.removeSceneGraphNode(S2006S10Trail)
+  openspace.removeSceneGraphNode(S2004S42Trail)
+  openspace.removeSceneGraphNode(S2007S6Trail)
+  openspace.removeSceneGraphNode(S2020S5Trail)
+  openspace.removeSceneGraphNode(S2020S4Trail)
+  openspace.removeSceneGraphNode(S2004S41Trail)
+  openspace.removeSceneGraphNode(S2019S4Trail)
+  openspace.removeSceneGraphNode(S2020S3Trail)
+  openspace.removeSceneGraphNode(S2007S5Trail)
+  openspace.removeSceneGraphNode(S2006S9Trail)
+  openspace.removeSceneGraphNode(S2004S40Trail)
+  openspace.removeSceneGraphNode(S2020S2Trail)
+  openspace.removeSceneGraphNode(S2020S1Trail)
+  openspace.removeSceneGraphNode(S2019S3Trail)
+  openspace.removeSceneGraphNode(S2019S2Trail)
+end)
+
+asset.export(S2019S2Trail)
+asset.export(S2019S3Trail)
+asset.export(S2020S1Trail)
+asset.export(S2020S2Trail)
+asset.export(S2004S40Trail)
+asset.export(S2006S9Trail)
+asset.export(S2007S5Trail)
+asset.export(S2020S3Trail)
+asset.export(S2019S4Trail)
+asset.export(S2004S41Trail)
+asset.export(S2020S4Trail)
+asset.export(S2020S5Trail)
+asset.export(S2007S6Trail)
+asset.export(S2004S42Trail)
+asset.export(S2006S10Trail)
+asset.export(S2019S5Trail)
+asset.export(S2004S43Trail)
+asset.export(S2004S44Trail)
+asset.export(S2004S45Trail)
+asset.export(S2006S11Trail)
+asset.export(S2006S12Trail)
+asset.export(S2019S6Trail)
+asset.export(S2006S13Trail)
+asset.export(S2019S7Trail)
+asset.export(S2019S8Trail)
+asset.export(S2019S9Trail)
+asset.export(S2004S46Trail)
+asset.export(S2019S10Trail)
+asset.export(S2004S47Trail)
+asset.export(S2019S11Trail)
+asset.export(S2006S14Trail)
+asset.export(S2019S12Trail)
+asset.export(S2020S6Trail)
+asset.export(S2019S13Trail)
+asset.export(S2005S4Trail)
+asset.export(S2007S7Trail)
+asset.export(S2007S8Trail)
+asset.export(S2020S7Trail)
+asset.export(S2019S14Trail)
+asset.export(S2019S15Trail)
+asset.export(S2005S5Trail)
+asset.export(S2006S15Trail)
+asset.export(S2006S16Trail)
+asset.export(S2006S17Trail)
+asset.export(S2004S48Trail)
+asset.export(S2020S8Trail)
+asset.export(S2004S49Trail)
+asset.export(S2004S50Trail)
+asset.export(S2006S18Trail)
+asset.export(S2019S16Trail)
+asset.export(S2019S17Trail)
+asset.export(S2019S18Trail)
+asset.export(S2019S19Trail)
+asset.export(S2019S20Trail)
+asset.export(S2006S19Trail)
+asset.export(S2004S51Trail)
+asset.export(S2020S9Trail)
+asset.export(S2004S52Trail)
+asset.export(S2007S9Trail)
+asset.export(S2004S53Trail)
+asset.export(S2020S10Trail)
+asset.export(S2019S21Trail)
+asset.export(S2006S20Trail)
+
+
+
+asset.meta = {
+  Name = "Saturn Moons Trails -- May 2023 Discoveries",
+  Description = [[Asset containing trails for the Saturn's moons discovered in May 2023.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,12 +1,12 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Experimental)",
+  Name = "Satellite CSV Data (Experimental)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_x-comm",
-  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=x-comm&FORMAT=kvn",
+  Identifier = "satellite_csv_data_x-comm",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=x-comm&FORMAT=csv",
   Filename = "x-comm.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -14,11 +14,11 @@ local omm = asset.resource({
 
 local ExperimentalSatellites = {
   Identifier = "ExperimentalSatellites",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "x-comm.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
     TrailFade = 15,
@@ -50,6 +50,6 @@ asset.meta = {
   Name = "Satellites Communications - Experimental",
   Description = "Satellites asset for Communications - Experimental. Data from Celestrak",
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/NORAD/elements/",
+  URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
 }

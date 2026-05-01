@@ -29,8 +29,8 @@
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <openspace/documentation/documentation.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringconversion.h>
 #include <algorithm>
 #include <optional>
@@ -107,8 +107,8 @@ namespace {
     constexpr Property::PropertyInfo GuiDescriptionInfo = {
         "GuiDescription",
         "Gui description",
-        "This is the description for the scene graph node to be shown in the gui "
-        "example: Earth is a special place.",
+        "This is the description for the scene graph node to be shown in the GUI. "
+        "Example: Earth is a special place.",
         Property::Visibility::Hidden
     };
 
@@ -117,18 +117,18 @@ namespace {
         std::string identifier [[codegen::identifier()]];
 
         // A human-readable name for the user interface. If this is omitted, the
-        // identifier is used instead
+        // identifier is used instead.
         std::optional<std::string> name;
 
         // A human-readable description of the layer to be used in informational texts
-        // presented to the user
+        // presented to the user.
         std::optional<std::string> description;
 
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
 
         // Specifies the type of layer that is to be added. If this value is not
-        // specified, the layer is a DefaultTileProvider
+        // specified, the layer is a DefaultTileProvider.
         std::optional<std::string> type [[codegen::inlist("DefaultTileProvider",
             "SingleImageProvider", "ImageSequenceTileProvider",
             "SizeReferenceTileProvider", "TemporalTileProvider", "TileIndexTileProvider",
@@ -136,29 +136,29 @@ namespace {
             "SolidColor", "SpoutImageProvider", "VideoTileProvider")]];
 
         // Determine whether the layer is enabled or not. If this value is not specified,
-        // the layer is disabled
+        // the layer is disabled.
         std::optional<bool> enabled;
 
         // [[codegen::verbatim(ZIndexInfo.description)]]
         std::optional<int> zIndex [[codegen::greater(0)]];
 
-        // The opacity value of the layer
+        // The opacity value of the layer.
         std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
 
         struct Settings {
-            // The gamma value that is applied to each pixel of the layer
+            // The gamma value that is applied to each pixel of the layer.
             std::optional<float> gamma;
 
-            // The multiplicative factor that is applied to each pixel of the layer
+            // The multiplicative factor that is applied to each pixel of the layer.
             std::optional<float> multiplier;
 
-            // An additive offset that is applied to each pixel of the layer
+            // An additive offset that is applied to each pixel of the layer.
             std::optional<float> offset;
         };
-        // Specifies the render settings that should be applied to this layer
+        // Specifies the render settings that should be applied to this layer.
         std::optional<Settings> settings;
 
-        // Parameters that set individual adjustment parameters for this layer
+        // Parameters that set individual adjustment parameters for this layer.
         std::optional<ghoul::Dictionary> adjustment
             [[codegen::reference("globebrowsing_layeradjustment")]];
 
@@ -171,7 +171,7 @@ namespace {
             Color
         };
         // Sets the blend mode of this layer to determine how it interacts with other
-        // layers on top of this
+        // layers on top of this.
         std::optional<BlendMode> blendMode;
     };
 } // namespace
@@ -407,7 +407,10 @@ ChunkTilePile Layer::chunkTilePile(const TileIndex& tileIndex, int pileSize) con
         std::fill(chunkTilePile.begin(), chunkTilePile.end(), std::nullopt);
         for (int i = 0; i < pileSize; i++) {
             ChunkTile tile;
-            tile.uvTransform = TileUvTransform{ { 0, 0 }, { 1, 1 } };
+            tile.uvTransform = TileUvTransform {
+                .uvOffset = glm::vec2(0.f),
+                .uvScale = glm::vec2(1.f)
+            };
             chunkTilePile[i] = tile;
         }
         return chunkTilePile;
@@ -415,9 +418,7 @@ ChunkTilePile Layer::chunkTilePile(const TileIndex& tileIndex, int pileSize) con
 }
 
 Tile::Status Layer::tileStatus(const TileIndex& index) const {
-    return _tileProvider ?
-        _tileProvider->tileStatus(index) :
-        Tile::Status::Unavailable;
+    return _tileProvider ? _tileProvider->tileStatus(index) : Tile::Status::Unavailable;
 }
 
 layers::Layer::ID Layer::type() const {
@@ -507,8 +508,8 @@ void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDi
         case layers::Layer::ID::TileProviderByIndex:
         case layers::Layer::ID::TileProviderByLevel:
         case layers::Layer::ID::VideoTileProvider:
-            // We add the id to the dictionary since it needs to be known by
-            // the tile provider
+            // We add the id to the dictionary since it needs to be known by the tile
+            // provider
             initDict.setValue(
                 std::string(KeyLayerGroupID),
                 static_cast<int>(_layerGroupId)

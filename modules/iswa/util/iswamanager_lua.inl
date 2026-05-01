@@ -35,14 +35,18 @@ using namespace openspace;
 
 namespace {
 
-// Adds a IswaCygnet.
+/**
+ * Adds a IswaCygnet.
+ */
 [[codegen::luawrap]] void addCygnet(int id = -1, std::string type = "Texture",
                                     std::string group = "")
 {
     IswaManager::ref().addIswaCygnet(id, type, group);
 }
 
-// Adds a Screen Space Cygnets.
+/**
+ * Adds a Screen Space Cygnets.
+ */
 [[codegen::luawrap]] void addScreenSpaceCygnet(ghoul::Dictionary d) {
     int id = static_cast<int>(d.value<double>("CygnetId"));
     std::map<int, std::shared_ptr<CygnetInfo>> cygnetInformation =
@@ -75,14 +79,18 @@ namespace {
     }
 }
 
-// Remove a Cygnets.
+/**
+ * Remove a Cygnets.
+ */
 [[codegen::luawrap]] void removeCygnet(std::string name) {
     global::scriptEngine->queueScript(
         "openspace.removeSceneGraphNode('" + name + "')"
     );
 }
 
-// Remove a Screen Space Cygnets.
+/**
+ * Remove a Screen Space Cygnets.
+ */
 [[codegen::luawrap]] void removeScreenSpaceCygnet(int id) {
     std::map<int, std::shared_ptr<CygnetInfo>> cygnetInformation =
         IswaManager::ref().cygnetInformation();
@@ -101,7 +109,9 @@ namespace {
     global::scriptEngine->queueScript(script);
 }
 
-// Remove a group of Cygnets.
+/**
+ * Remove a group of Cygnets.
+ */
 [[codegen::luawrap]] void removeGroup(std::string name) {
     std::map<std::string, std::shared_ptr<IswaBaseGroup>> groups =
         IswaManager::ref().groups();
@@ -110,17 +120,23 @@ namespace {
     }
 }
 
-// Adds a cdf files to choose from.
+/**
+ * Adds a cdf files to choose from.
+ */
 [[codegen::luawrap]] void addCdfFiles(std::string path) {
     IswaManager::ref().addCdfFiles(path);
 }
 
-// Adds KameleonPlanes from cdf file.
+/**
+ * Adds KameleonPlanes from cdf file.
+ */
 [[codegen::luawrap]] void addKameleonPlanes(std::string group, int pos) {
     IswaManager::ref().addKameleonCdf(group, pos);
 }
 
-// Sets the base url.
+/**
+ * Sets the base URL.
+ */
 [[codegen::luawrap]] void setBaseUrl(std::string url) {
     IswaManager::ref().setBaseUrl(url);
 }

@@ -47,20 +47,14 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
 private:
     using Line = std::vector<LinePoint>;
 
-    void initializeDefaultPropertyValues();
-    void loadSeedPoints();
     void loadSeedPointsFromFile();
-    void loadSeedPointsFromTable();
 
-    std::vector<Line> generateFieldlines();
     std::vector<Line> generateFieldlinesVolumeKameleon();
 
     FloatProperty _stepSize;
@@ -71,9 +65,9 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
-    ghoul::Dictionary _vectorFieldInfo;
-    ghoul::Dictionary _fieldlineInfo;
-    ghoul::Dictionary _seedPointsInfo;
+    std::filesystem::path _file;
+    std::vector<std::string> _variables;
+    std::optional<std::vector<glm::vec3>> _seedPointsTable;
 
     bool _seedPointsAreDirty = true;
     bool _fieldLinesAreDirty = true;

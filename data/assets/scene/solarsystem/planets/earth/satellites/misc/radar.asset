@@ -1,12 +1,12 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Radar Calibration)",
+  Name = "Satellite CSV Data (Radar Calibration)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_radar",
-  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=radar&FORMAT=kvn",
+  Identifier = "satellite_csv_data_radar",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=radar&FORMAT=csv",
   Filename = "radar.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -14,11 +14,11 @@ local omm = asset.resource({
 
 local RadarSatellites = {
   Identifier = "RadarSatellites",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "radar.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
     TrailFade = 15,
@@ -50,6 +50,6 @@ asset.meta = {
   Name = "Satellites Radar Calibration",
   Description = "Satellites asset for Radar Calibration. Data from Celestrak",
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/NORAD/elements/",
+  URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
 }

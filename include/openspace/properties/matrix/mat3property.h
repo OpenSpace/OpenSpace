@@ -34,8 +34,7 @@ namespace openspace {
 
 class Mat3Property : public NumericalProperty<glm::mat3x3> {
 public:
-    explicit Mat3Property(Property::PropertyInfo info,
-        glm::mat3x3 value = glm::mat3x3(0.f),
+    explicit Mat3Property(PropertyInfo info, glm::mat3x3 value = glm::mat3x3(0.f),
         glm::mat3x3 minValue =
             ghoul::createFillMat3x3<float>(std::numeric_limits<float>::lowest()),
         glm::mat3x3 maxValue =

@@ -54,11 +54,10 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // This `Rotation` type generates the rotation for the attached scene graph node by
-    // calling the provided Lua script to create the full matrix used to orient the scene
-    // graph node. The returned matrix must be a valid rotation matrix. The script
-    // parameter describes in greater detail how the Lua script file should be
-    // constructed.
+    // Generates the rotation for the attached scene graph node by calling the provided
+    // Lua script to create the full matrix used to orient the scene graph node. The
+    // returned matrix must be a valid rotation matrix. The script parameter describes in
+    // greater detail how the Lua script file should be constructed.
     struct [[codegen::Dictionary(LuaRotation)]] Parameters {
         // [[codegen::verbatim(ScriptInfo.description)]]
         std::filesystem::path script;
@@ -69,7 +68,7 @@ namespace {
 namespace openspace {
 
 Documentation LuaRotation::Documentation() {
-    return codegen::doc<Parameters>("base_transform_rotation_lua");
+    return codegen::doc<Parameters>("base_rotation_lua");
 }
 
 LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary)

@@ -28,8 +28,8 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/space/kepler.h>
+#include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
-#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
@@ -46,7 +46,6 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
@@ -104,14 +103,18 @@ private:
     std::vector<GLint> _segmentSizeTrails;
     std::vector<kepler::Parameters> _parameters;
 
-    /// Extra data for more efficient updating of vectors
+    /**
+     * Extra data for more efficient updating of vectors.
+     */
     struct UpdateInfo {
         double timestamp = std::numeric_limits<double>::min();
         double timePerStep = 0.0;
     };
     std::vector<UpdateInfo> _updateHelper;
 
-    /// The layout of the VBOs
+    /**
+     * The layout of the VBOs.
+     */
     struct TrailVBOLayout {
         float x = 0.f;
         float y = 0.f;
@@ -128,7 +131,7 @@ private:
     UIntProperty _segmentQuality;
     UIntProperty _startRenderIdx;
     UIntProperty _sizeRender;
-    StringProperty _path;
+    StringListProperty _path;
     BoolProperty _contiguousMode;
     kepler::Format _format;
     RenderableOrbitalKepler::Appearance _appearance;
@@ -136,11 +139,11 @@ private:
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;
 
-    // Line cache
+    /// Line cache
     UniformCache(modelViewTransform, projectionTransform, trailFadeExponent,
         colorFadeCutoffValue, inGameTime, color, opacity) _uniformTrailCache;
 
-    // Point cache
+    /// Point cache
     UniformCache(modelTransform, viewTransform, projectionTransform, renderOption,
         cameraViewDirectionUp, cameraViewDirectionRight, cameraPositionWorld,
         cameraUpWorld, inGameTime, color, pointSizeExponent, enableMaxSize, maxSize,

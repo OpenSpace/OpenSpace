@@ -1,0 +1,24 @@
+{
+  "version": { "major": 1, "minor": 0 },
+  "identifier": "asteroids",
+  "name": "Asteroids",
+  "description": "Includes asteroids from the JPL Horizons Small-Body Database and using their categories.",
+  "assets": [
+    "scene/solarsystem/sssb/amor_asteroid",
+    "scene/solarsystem/sssb/apollo_asteroid",
+    "scene/solarsystem/sssb/aten_asteroid",
+    "scene/solarsystem/sssb/atira_asteroid",
+    "scene/solarsystem/sssb/centaur_asteroid",
+    "scene/solarsystem/sssb/chiron-type_comet",
+    "scene/solarsystem/sssb/encke-type_comet",
+    "scene/solarsystem/sssb/halley-type_comet",
+    "scene/solarsystem/sssb/inner_main_belt_asteroid",
+    "scene/solarsystem/sssb/jupiter-family_comet",
+    "scene/solarsystem/sssb/jupiter_trojan_asteroid",
+    "scene/solarsystem/sssb/main_belt_asteroid",
+    "scene/solarsystem/sssb/mars-crossing_asteroid",
+    "scene/solarsystem/sssb/outer_main_belt_asteroid",
+    "scene/solarsystem/sssb/pha",
+    "scene/solarsystem/sssb/transneptunian_object_asteroid"
+  ]
+}

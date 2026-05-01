@@ -56,6 +56,7 @@ public:
          * not be found.
          *
          * \param t The type `T` for the `TemplateFactory<T>` that could not be found
+         *
          * \pre \p t must not be empty
          */
         explicit FactoryNotFoundError(std::string t);

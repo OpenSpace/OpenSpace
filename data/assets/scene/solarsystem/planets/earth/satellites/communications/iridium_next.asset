@@ -1,12 +1,12 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Iridium NEXT)",
+  Name = "Satellite CSV Data (Iridium NEXT)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_iridium-NEXT",
-  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=iridium-NEXT&FORMAT=kvn",
+  Identifier = "satellite_csv_data_iridium-NEXT",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=iridium-NEXT&FORMAT=csv",
   Filename = "iridium-NEXT.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -14,11 +14,11 @@ local omm = asset.resource({
 
 local IridiumNextSatellites = {
   Identifier = "IridiumNextSatellites",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "iridium-NEXT.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
     TrailFade = 15,
@@ -50,6 +50,6 @@ asset.meta = {
   Name = "Satellites Communications - Iridium NEXT",
   Description = "Satellites asset for Communications - Iridium NEXT. Data from Celestrak",
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/NORAD/elements/",
+  URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
 }

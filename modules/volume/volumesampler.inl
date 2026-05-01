@@ -44,9 +44,10 @@ typename VolumeType::VoxelType VolumeSampler<VolumeType>::sample(
     const glm::ivec3 flooredPos = static_cast<glm::ivec3>(glm::floor(position));
     const glm::vec3 t = glm::fract(position);
 
-    // t is now in interval [0, 1[ (never 1)
-    const glm::ivec3 minCoords = flooredPos - _filterSize / 2; // min coord to sample from
-    // max coords to sample from, including interpolation.
+    // `t` is now in interval [0, 1[ (never 1)
+    // Min coord to sample from
+    const glm::ivec3 minCoords = flooredPos - _filterSize / 2;
+    // Max coords to sample from, including interpolation
     const glm::ivec3 maxCoords = minCoords + _filterSize;
     const glm::ivec3 clampCeiling = _volume->dimensions() - glm::ivec3(1);
 

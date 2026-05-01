@@ -1,0 +1,213 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Kiviuq = {
+  Identifier = "Kiviuq",
+  Parent = transforms.KiviuqPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 16000, 16000, 16000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_inuit",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Kiviuq",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq"
+  }
+}
+
+local Ijiraq = {
+  Identifier = "Ijiraq",
+  Parent = transforms.IjiraqPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 12000, 12000, 12000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_inuit",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Ijiraq",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Ijiraq"
+  }
+}
+
+local Paaliaq = {
+  Identifier = "Paaliaq",
+  Parent = transforms.PaaliaqPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 22000, 22000, 22000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_inuit",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Paaliaq",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Paaliaq"
+  }
+}
+
+local Siarnaq = {
+  Identifier = "Siarnaq",
+  Parent = transforms.SiarnaqPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 40000, 40000, 40000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_inuit",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Siarnaq",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq"
+  }
+}
+
+local Tarqeq = {
+  Identifier = "Tarqeq",
+  Parent = transforms.TarqeqPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 7000, 7000, 7000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_inuit",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Tarqeq",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Tarqeq"
+  }
+}
+
+local S2004S29 = {
+  Identifier = "S2004S29",
+  Parent = transforms.S2004S29Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_inuit",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 29",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S29"
+  }
+}
+
+local S2004S31 = {
+  Identifier = "S2004S31",
+  Parent = transforms.S2004S31Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_inuit",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 31",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S31"
+  }
+}
+
+local S2019S01 = {
+  Identifier = "S2019S01",
+  Parent = transforms.S2019S01Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 5000, 5000, 5000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_inuit",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2019 S 01",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2019S01"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Kiviuq)
+  openspace.addSceneGraphNode(Ijiraq)
+  openspace.addSceneGraphNode(Paaliaq)
+  openspace.addSceneGraphNode(Siarnaq)
+  openspace.addSceneGraphNode(Tarqeq)
+  openspace.addSceneGraphNode(S2004S29)
+  openspace.addSceneGraphNode(S2004S31)
+  openspace.addSceneGraphNode(S2019S01)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2019S01)
+  openspace.removeSceneGraphNode(S2004S31)
+  openspace.removeSceneGraphNode(S2004S29)
+  openspace.removeSceneGraphNode(Tarqeq)
+  openspace.removeSceneGraphNode(Siarnaq)
+  openspace.removeSceneGraphNode(Paaliaq)
+  openspace.removeSceneGraphNode(Ijiraq)
+  openspace.removeSceneGraphNode(Kiviuq)
+end)
+
+asset.export(Kiviuq)
+asset.export(Ijiraq)
+asset.export(Paaliaq)
+asset.export(Siarnaq)
+asset.export(Tarqeq)
+asset.export(S2004S29)
+asset.export(S2004S31)
+asset.export(S2019S01)
+
+
+
+asset.meta = {
+  Name = "Saturn Inuit Group Moons",
+  Description = [[Asset containing globes for  Saturn's Inuit Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

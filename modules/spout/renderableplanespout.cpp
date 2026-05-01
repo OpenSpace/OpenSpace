@@ -33,11 +33,11 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    // This `Renderable` type can be used to render a plane with a texture that is
-    // provided by another application on the same computer using the SPOUT library.
-    // Note: The Spout library is only available on Windows.
-    struct [[codegen::Dictionary(RenderablePlaneSpout)]] Parameters {
-    };
+    // Renders a plane with a texture that is provided by another application on the same
+    // computer using the SPOUT library.
+    //
+    // Note: The SPOUT library is only available on Windows.
+    struct [[codegen::Dictionary(RenderablePlaneSpout)]] Parameters {};
 } // namespace
 #include "renderableplanespout_codegen.cpp"
 
@@ -45,7 +45,7 @@ namespace openspace {
 
 Documentation RenderablePlaneSpout::Documentation() {
     return codegen::doc<Parameters>(
-        "spout_renderableplanespout",
+        "spout_renderable_planespout",
         SpoutReceiverPropertyProxy::Documentation()
     );
 }

@@ -1,0 +1,50 @@
+local transforms = asset.require("./transforms")
+
+
+
+local SaturnLabel = {
+  Identifier = "SaturnLabel",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Saturn",
+    FontSize = 70.0,
+    Size = 8.9,
+    MinMaxSize = { 1, 60 },
+    BlendMode = "Additive",
+    OrientationOption = "Camera View Direction",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 2.5, 80.0 },
+    FadeWidths = { 1.0, 100.0 }
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "Saturn Label",
+    Path = "/Solar System/Planets/Saturn",
+    Focusable = false,
+    Description = "Main planet label for Saturn"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SaturnLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SaturnLabel)
+end)
+
+asset.export(SaturnLabel)
+
+
+
+asset.meta = {
+  Name = "Saturn Label",
+  Description = "Label for Saturn",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,83 +1,14 @@
+asset.require("./globe")
 asset.require("./trail")
-local transforms = asset.require("./transforms")
-local coreKernels = asset.require("spice/core")
-local neptuneKernels = asset.require("./kernels095")
-
-
-
-local Neptune = {
-  Identifier = "Neptune",
-  Parent = transforms.NeptuneBarycenter.Identifier,
-  Transform = {
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = neptuneKernels.ID.Neptune,
-      Observer = coreKernels.ID.NeptuneBarycenter
-    },
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = coreKernels.Frame.Neptune,
-      DestinationFrame = coreKernels.Frame.Galactic
-    }
-  },
-  Renderable = {
-    Type = "RenderableGlobe",
-    Radii = { 24764000.0, 24764000.0, 24314000.0 }
-  },
-  Tag = { "planet_solarSystem", "planet_giants" },
-  GUI = {
-    Name = "Neptune",
-    Path = "/Solar System/Planets/Neptune",
-    Description = "Neptune globe"
-  }
-}
-
-local NeptuneLabel = {
-  Identifier = "NeptuneLabel",
-  Parent = Neptune.Identifier,
-  Renderable = {
-    Type = "RenderableLabel",
-    Enabled = false,
-    Text = "Neptune",
-    FontSize = 70.0,
-    Size = 9.0,
-    MinMaxSize = { 1, 80 },
-    OrientationOption = "Camera View Direction",
-    BlendMode = "Additive",
-    EnableFading = true,
-    FadeUnit = "au",
-    FadeDistances = { 6.0, 120.0 },
-    FadeWidths = { 2.0, 150.0 }
-  },
-  Tag = { "solarsystem_labels" },
-  GUI = {
-    Name = "Neptune Label",
-    Path = "/Solar System/Planets/Neptune",
-    Focusable = false,
-    Description = "Main planet label for Neptune"
-  }
-}
-
-
-asset.onInitialize(function()
-  openspace.addSceneGraphNode(Neptune)
-  openspace.addSceneGraphNode(NeptuneLabel)
-end)
-
-asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(NeptuneLabel)
-  openspace.removeSceneGraphNode(Neptune)
-end)
-
-asset.export(Neptune)
-asset.export(NeptuneLabel)
+asset.require("./major_moons")
+asset.require("./label", false)
 
 
 
 asset.meta = {
   Name = "Neptune",
-  Description = "Neptune globe, and main planet label",
+  Description = "Neptune globe, trail, and label",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

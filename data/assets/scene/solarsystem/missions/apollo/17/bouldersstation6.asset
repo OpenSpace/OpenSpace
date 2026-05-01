@@ -1,5 +1,5 @@
-local sun = asset.require("scene/solarsystem/sun/transforms")
-local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/globe")
 
 
 
@@ -11,13 +11,13 @@ local models = asset.resource({
 })
 
 
-local Station6Frag1Model = {
-  Identifier = "Station6Frag1Model",
-  Parent = moon.Moon.Identifier,
+local Station6Frag1 = {
+  Identifier = "Apollo17Station6Frag1",
+  Parent = moonAsset.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon.Moon.Identifier,
+      Globe = moonAsset.Moon.Identifier,
       Longitude = 30.8007,
       Latitude = 20.2903,
       Altitude = 0.4,
@@ -25,7 +25,7 @@ local Station6Frag1Model = {
     },
     Rotation = {
       Type = "GlobeRotation",
-      Globe = moon.Moon.Identifier,
+      Globe = moonAsset.Moon.Identifier,
       Longitude = 30.8007,
       Latitude = 20.2903,
       Altitude = 0,
@@ -37,7 +37,7 @@ local Station6Frag1Model = {
     GeometryFile = models .. "A17-S6-frag1.obj",
     RotationVector = { 270.0, 60.0, 0.0 },
     LightSources = {
-      sun.LightSource,
+      sunAsset.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
@@ -52,18 +52,18 @@ local Station6Frag1Model = {
     ModelScale = 0.1
   },
   GUI = {
-    Name = "Station 6 Fragment 1 Model",
+    Name = "Station 6 Fragment 1",
     Path = "/Solar System/Missions/Apollo/17/Station 6"
   }
 }
 
-local Station6Frag2Model = {
-  Identifier = "A17S6F5",
-  Parent = moon.Moon.Identifier,
+local Station6Frag2 = {
+  Identifier = "Apollo17Station6Fragment2",
+  Parent = moonAsset.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon.Moon.Identifier,
+      Globe = moonAsset.Moon.Identifier,
       Longitude = 30.80055,
       Latitude = 20.289808,
       Altitude = 0.5,
@@ -71,7 +71,7 @@ local Station6Frag2Model = {
     },
     Rotation = {
       Type = "GlobeRotation",
-      Globe = moon.Moon.Identifier,
+      Globe = moonAsset.Moon.Identifier,
       Longitude = 30.80055,
       Latitude = 20.289808,
       Altitude = 0,
@@ -83,7 +83,7 @@ local Station6Frag2Model = {
     GeometryFile = models .. "station6_boulder_frag2.obj",
     RotationVector = { 0.0, 132.0, 0.0 },
     LightSources = {
-      sun.LightSource,
+      sunAsset.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
@@ -98,18 +98,18 @@ local Station6Frag2Model = {
     ModelScale = 0.15
   },
   GUI = {
-    Name = "Station 6 Fragment 2 Model",
+    Name = "Station 6 Fragment 2",
     Path = "/Solar System/Missions/Apollo/17/Station 6"
   }
 }
 
-local Station6Frag3Model = {
-  Identifier = "A17S6F3",
-  Parent = moon.Moon.Identifier,
+local Station6Frag3 = {
+  Identifier = "Apollo17Station6Fragment3",
+  Parent = moonAsset.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon.Moon.Identifier,
+      Globe = moonAsset.Moon.Identifier,
       Longitude = 30.80053,
       Latitude = 20.29030,
       Altitude = -1,
@@ -117,7 +117,7 @@ local Station6Frag3Model = {
     },
     Rotation = {
       Type = "GlobeRotation",
-      Globe = moon.Moon.Identifier,
+      Globe = moonAsset.Moon.Identifier,
       Longitude = 30.80053,
       Latitude = 20.29030,
       Altitude = 0,
@@ -129,7 +129,7 @@ local Station6Frag3Model = {
     GeometryFile = models .. "station6_boulder_frag3.obj",
     RotationVector = { 0.0, 170.0, 0.0 },
     LightSources = {
-      sun.LightSource,
+      sunAsset.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
@@ -144,27 +144,27 @@ local Station6Frag3Model = {
     ModelScale = 0.14
   },
   GUI = {
-    Name = "Station 6 Fragment 3 Model",
+    Name = "Station 6 Fragment 3",
     Path = "/Solar System/Missions/Apollo/17/Station 6"
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Station6Frag1Model)
-  openspace.addSceneGraphNode(Station6Frag2Model)
-  openspace.addSceneGraphNode(Station6Frag3Model)
+  openspace.addSceneGraphNode(Station6Frag1)
+  openspace.addSceneGraphNode(Station6Frag2)
+  openspace.addSceneGraphNode(Station6Frag3)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Station6Frag3Model)
-  openspace.removeSceneGraphNode(Station6Frag2Model)
-  openspace.removeSceneGraphNode(Station6Frag1Model)
+  openspace.removeSceneGraphNode(Station6Frag3)
+  openspace.removeSceneGraphNode(Station6Frag2)
+  openspace.removeSceneGraphNode(Station6Frag1)
 end)
 
-asset.export(Station6Frag1Model)
-asset.export(Station6Frag2Model)
-asset.export(Station6Frag3Model)
+asset.export(Station6Frag1)
+asset.export(Station6Frag2)
+asset.export(Station6Frag3)
 
 
 
@@ -173,6 +173,6 @@ asset.meta = {
   Description = [[This asset shows 3D models of the fragments at station 6, which have
     been reconstructed from the imagery taken of the Apollo 17 crew.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

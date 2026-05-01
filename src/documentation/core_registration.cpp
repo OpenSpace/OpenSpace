@@ -38,7 +38,7 @@
 #include <openspace/mission/missionmanager.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
-#include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/navigation/path.h>
 #include <openspace/navigation/pathnavigator.h>
 #include <openspace/network/parallelpeer.h>
@@ -52,9 +52,9 @@
 #include <openspace/scene/lightsource.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scene/rotation.h>
+#include <openspace/scene/scale.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scale.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scene/timeframe.h>
 #include <openspace/scripting/scriptengine.h>
@@ -64,6 +64,8 @@
 #include <openspace/util/task.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timerange.h>
+#include <openspace/topic/server.h>
+#include <openspace/topic/serverinterface.h>
 
 namespace openspace {
 
@@ -90,6 +92,8 @@ void registerCoreClasses(DocumentationEngine& engine) {
 
     engine.addDocumentation(NavigationState::Documentation());
     engine.addDocumentation(Path::Documentation());
+    engine.addDocumentation(ServerInterface::Documentation());
+    engine.addDocumentation(Server::Documentation());
 }
 
 // NOTE: should this be in the documentation/core_reg.cpp file? Seems to be here just

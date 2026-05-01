@@ -26,6 +26,7 @@
 
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/joystickinputstate.h>
 
 namespace {
@@ -48,8 +49,12 @@ void GuiJoystickComponent::render() {
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    for (size_t i = 0; i < global::joystickInputStates->size(); i++) {
-        const JoystickInputState& state = global::joystickInputStates->at(i);
+    JoystickInputStates joystickStates =
+        global::interactionHandler->joystickInputStates();
+
+    for (size_t i = 0; i < joystickStates.size(); i++) {
+        const JoystickInputState& state = joystickStates.at(i);
+
         if (!state.isConnected) {
             continue;
         }
@@ -59,12 +64,7 @@ void GuiJoystickComponent::render() {
         for (int j = 0; j < state.nAxes; j++) {
             float f = state.axes[j];
             const std::string id = std::to_string(j) + "##" + state.name + "Axis";
-            ImGui::SliderFloat(
-                id.c_str(),
-                &f,
-                -1.f,
-                1.f
-            );
+            ImGui::SliderFloat(id.c_str(), &f, -1.f, 1.f);
         }
         ImGui::Text("%s", "Buttons");
         for (int j = 0; j < state.nButtons; j++) {
@@ -84,23 +84,18 @@ void GuiJoystickComponent::render() {
 
     ImGui::Text("%s", "Summed contributions");
     ImGui::Text("%s", "Axes");
-    for (int i = 0; i < global::joystickInputStates->numAxes(); i++) {
-        float f = global::joystickInputStates->axis("", i);
+    for (int i = 0; i < joystickStates.numAxes(); i++) {
+        float f = joystickStates.axis("", i);
         const std::string id = std::to_string(i) + "##" + "TotalAxis";
-        ImGui::SliderFloat(
-            id.c_str(),
-            &f,
-            -1.f,
-            1.f
-        );
+        ImGui::SliderFloat(id.c_str(), &f, -1.f, 1.f);
     }
     ImGui::Text("%s", "Buttons");
-    for (int i = 0; i < global::joystickInputStates->numButtons(); i++) {
+    for (int i = 0; i < joystickStates.numButtons(); i++) {
         const std::string id = std::to_string(i) + "##" + "TotalButton";
         ImGui::RadioButton(
             id.c_str(),
-            global::joystickInputStates->button("", i, JoystickAction::Press) ||
-                global::joystickInputStates->button("", i, JoystickAction::Repeat)
+            joystickStates.button("", i, JoystickAction::Press) ||
+            joystickStates.button("", i, JoystickAction::Repeat)
         );
     }
 

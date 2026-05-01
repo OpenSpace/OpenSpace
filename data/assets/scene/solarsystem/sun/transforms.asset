@@ -119,6 +119,6 @@ asset.meta = {
   Name = "Sun Transforms",
   Description = "Sun transforms: Solar System Barycenter, SUN IAU and SUN J2000",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

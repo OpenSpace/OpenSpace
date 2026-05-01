@@ -77,9 +77,7 @@ Time Time::now() {
     const double secondsSince2000 = static_cast<double>(
         secondsSince1970 - 30 * secondsInAYear
     );
-    Time now;
-    now.setTime(secondsSince2000);
-    return now;
+    return Time(secondsSince2000);
 }
 
 void Time::setTime(double j2000Seconds) {
@@ -179,9 +177,7 @@ std::string Time::advancedTime(const std::string& base, std::string change) {
         else if (uName == "d") { unit = TimeUnit::Day; }
         else if (uName == "M") { unit = TimeUnit::Month; }
         else if (uName == "y") { unit = TimeUnit::Year; }
-        else {
-            throw ghoul::RuntimeError(std::format("Unknown unit '{}'", uName));
-        }
+        else {       throw ghoul::RuntimeError(std::format("Unknown unit '{}'", uName)); }
 
         dt = openspace::convertTime(value, unit, TimeUnit::Second);
         if (isNegative) {

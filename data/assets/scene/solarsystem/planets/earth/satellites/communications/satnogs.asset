@@ -1,0 +1,55 @@
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+
+
+
+local omm = asset.resource({
+  Name = "Satellite CSV Data (SatNOGS)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_csv_data_satnogs",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=satnogs&FORMAT=csv",
+  Filename = "satnogs.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local SatNOGSSatellites = {
+  Identifier = "SatNOGSSatellites",
+  Parent = earthAsset.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "satnogs.txt",
+    Format = "CSV",
+    SegmentQuality = 3,
+    Color = { 0.75, 0.75, 0.35 },
+    TrailFade = 5,
+    PointSizeExponent = 5.0,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "SatNOGS",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SatNOGSSatellites)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SatNOGSSatellites)
+end)
+
+asset.export(SatNOGSSatellites)
+
+
+
+asset.meta = {
+  Name = "Satellites Communications - SatNOGS",
+  Description = "Satellites asset for Communications - SatNOGS. Data from Celestrak",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.org/NORAD/elements/",
+  License = "Celestrak"
+}

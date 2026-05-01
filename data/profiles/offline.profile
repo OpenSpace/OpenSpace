@@ -22,7 +22,7 @@
     "scene/solarsystem/planets/saturn/layers/colorlayers/saturn_texture",
     "scene/solarsystem/planets/uranus/layers/colorlayers/uranus_texture",
     "scene/solarsystem/planets/venus/layers/colorlayers/venus_texture",
-    "scene/solarsystem/sun/default_layers",
+    "scene/solarsystem/sun/layers/default_layers",
     "scene/solarsystem/sun/glare",
     "scene/solarsystem/sun/habitablezone"
   ],
@@ -77,6 +77,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 4
+    "minor": 5
   }
 }

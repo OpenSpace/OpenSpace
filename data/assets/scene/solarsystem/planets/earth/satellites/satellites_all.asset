@@ -13,6 +13,6 @@ asset.meta = {
   Name = "Satellites All",
   Description = "Meta asset for all satellites of Earth. Containing other meta assets",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -1,5 +1,5 @@
-local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -13,7 +13,7 @@ local trail = asset.resource({
 
 local GaiaTrail = {
   Identifier = "GaiaTrail",
-  Parent = earthTransforms.EarthCenter.Identifier,
+  Parent = earthAsset.EarthCenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
@@ -30,8 +30,10 @@ local GaiaTrail = {
     },
     Color = { 0.0, 0.8, 0.7 },
     PointSize = 5,
+    StartTime = "2013 Dec 19 09:55:27",
+    EndTime = "2026 Sep 14 00:00:00",
     Period = 365, -- 1 year orbit time
-    Resolution = 24244 -- Sameple rate of 40 minutes
+    Resolution = 13140 -- Sameple rate of 40 minutes
   },
   GUI = {
     Name = "Gaia Trail",
@@ -42,7 +44,7 @@ local GaiaTrail = {
 
 local GaiaTrailEclip = {
   Identifier = "GaiaTrail_Eclip",
-  Parent = sunTransforms.SunCenter.Identifier,
+  Parent = sunAsset.SunCenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
     Enabled = false,
@@ -57,6 +59,8 @@ local GaiaTrailEclip = {
     },
     Color = { 1.0, 0.0, 0.0 },
     PointSize = 5,
+    StartTime = "2013 Dec 20 00:00:00",
+    EndTime = "2026 Sep 14 00:00:00",
     Period = 365, -- 1 year orbit time
     Resolution = 365 -- Sameple rate of 1 day
   },

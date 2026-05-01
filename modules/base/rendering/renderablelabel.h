@@ -46,9 +46,6 @@ public:
 
     void initialize() override;
     void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
@@ -65,8 +62,8 @@ protected:
 
     std::string_view toString(int unit) const;
 
-    // Data may require some type of transformation prior the spice transformation being
-    // applied
+    /// Data may require some type of transformation prior the spice transformation being
+    /// applied
     glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 
 private:

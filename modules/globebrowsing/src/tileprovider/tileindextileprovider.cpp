@@ -52,7 +52,7 @@ namespace {
 namespace openspace {
 
 Documentation TileIndexTileProvider::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_tileindextileprovider");
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_tileindex");
 }
 
 TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary& dictionary)
@@ -115,7 +115,7 @@ Tile::Status TileIndexTileProvider::tileStatus(const TileIndex&) {
 }
 
 TileDepthTransform TileIndexTileProvider::depthTransform() {
-    return { 0.f, 1.f };
+    return { .scale = 0.f, .offset = 1.f };
 }
 
 void TileIndexTileProvider::update() {}

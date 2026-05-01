@@ -1,16 +1,15 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
 
 
 
 local L2SunLine = {
   Identifier = "L2SunLine",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableNodeLine",
     Enabled = asset.enabled,
-    StartNode = sun.Sun.Identifier,
+    StartNode = sunAsset.SunCenter.Identifier,
     EndNode = transforms.L2Position.Identifier,
     Color = { 0.5, 0.5, 0.5 },
     LineWidth = 2
@@ -40,6 +39,6 @@ asset.meta = {
   Name = "Lagrange Point L2 to Sun Line",
   Description = [[Lagrange point L2 to Sun line]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

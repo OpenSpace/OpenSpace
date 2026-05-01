@@ -41,12 +41,12 @@ public:
     MissionManager();
 
     /**
-    * Loads the provided mission. If this is the first mission to be loaded, the mission
-    * will also be set as the current active mission.
-    *
-    * \param mission The file that contains the mission that is to be loaded
-    * \return The name of the mission that was loaded
-    */
+     * Loads the provided mission. If this is the first mission to be loaded, the mission
+     * will also be set as the current active mission.
+     *
+     * \param mission The file that contains the mission that is to be loaded
+     * \return The name of the mission that was loaded
+     */
     std::string loadMission(Mission mission);
 
     /**
@@ -68,11 +68,11 @@ public:
     bool hasMission(const std::string& missionName);
 
     /**
-    * Sets the mission with the name \p missionName as the current mission. The current
-    * mission is what is return by `currentMission()`.
-    *
-    * \pre \p missionName must not be empty
-    */
+     * Sets the mission with the name \p missionName as the current mission. The current
+     * mission is what is return by `currentMission()`.
+     *
+     * \pre \p missionName must not be empty
+     */
     void setCurrentMission(const std::string& missionName);
 
     /**

@@ -31,13 +31,17 @@ using namespace openspace;
 
 namespace {
 
-// Load mission phases from file.
+/**
+ * Load mission phases from file.
+ */
 [[codegen::luawrap]] void loadMission(ghoul::Dictionary mission) {
     // TODO: Check if mission table is valid
     global::missionManager->loadMission(Mission(mission));
 }
 
-// Unloads a previously loaded mission.
+/**
+ * Unloads a previously loaded mission
+ */
 [[codegen::luawrap]] void unloadMission(
                          std::variant<std::string, ghoul::Dictionary> identifierOrMission)
 {
@@ -66,7 +70,9 @@ namespace {
     global::missionManager->unloadMission(identifier);
 }
 
-// Returns whether a mission with the provided name has been loaded.
+/**
+ * Returns whether a mission with the provided name has been loaded.
+ */
 [[codegen::luawrap]] bool hasMission(std::string identifier) {
     if (identifier.empty()) {
         throw ghoul::lua::LuaError("Mission identifier is empty");
@@ -76,7 +82,9 @@ namespace {
     return hasMission;
 }
 
-// Set the currnet mission.
+/**
+ * Set the current mission.
+ */
 [[codegen::luawrap]] void setCurrentMission(std::string identifier) {
     if (identifier.empty()) {
         throw ghoul::lua::LuaError("Mission identifier is empty");

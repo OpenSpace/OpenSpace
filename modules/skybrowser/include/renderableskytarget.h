@@ -67,7 +67,7 @@ private:
 
     bool _isInitialized = false;
     double _borderRadius = 0.0;
-    glm::ivec3 _borderColor = glm::ivec3(230);
+    glm::ivec3 _borderColor = glm::ivec3(220);
     float _ratio = 1.f;
     glm::dvec3 _rightVector;
     glm::dvec3 _upVector;

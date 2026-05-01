@@ -39,7 +39,7 @@
 #define NOMINMAX
 #endif // NOMINMAX
 #include <modules/spout/spoutwrapper.h>
-#endif
+#endif // OPENSPACE_HAS_SPOUT
 
 namespace {
     struct [[codegen::Dictionary(SpoutImageProvider)]] Parameters {
@@ -51,7 +51,7 @@ namespace {
 namespace openspace {
 
 Documentation SpoutImageProvider::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_spoutimageprovider");
+    return codegen::doc<Parameters>("globebrowsing_tileprovider_spoutimage");
 }
 
 SpoutImageProvider::SpoutImageProvider(
@@ -68,23 +68,26 @@ SpoutImageProvider::SpoutImageProvider(
                 glCreateFramebuffers(1, &fbo[i]);
             }
             tileTexture[i] = std::make_unique<ghoul::opengl::Texture>(
-                ghoul::opengl::Texture::FormatInit{
+                ghoul::opengl::Texture::FormatInit {
                     .dimensions = glm::uvec3(width / 2, height, 1),
                     .type = GL_TEXTURE_2D,
                     .format = ghoul::opengl::Texture::Format::RGBA,
                     .dataType = GL_UNSIGNED_BYTE
                 },
-                ghoul::opengl::Texture::SamplerInit{}
+                ghoul::opengl::Texture::SamplerInit {}
             );
 
             if (!tileTexture[i]) {
                 return false;
             }
-            tiles[i] = Tile{ tileTexture[i].get(), std::nullopt, Tile::Status::OK };
+            tiles[i] = Tile{
+                .texture = tileTexture[i].get(),
+                .metaData = std::nullopt,
+                .status = Tile::Status::OK
+            };
         }
         return true;
     });
-
 
     spoutReceiver->onReleaseTexture([this]() {
         for (int i = 0; i < 2; i++) {
@@ -134,7 +137,7 @@ SpoutImageProvider::SpoutImageProvider(
         );
         return true;
     });
-#endif
+#endif // OPENSPACE_HAS_SPOUT
 
     reset();
 }
@@ -165,7 +168,7 @@ Tile::Status SpoutImageProvider::tileStatus(const TileIndex&) {
 }
 
 TileDepthTransform SpoutImageProvider::depthTransform() {
-    return { 0.f, 1.f };
+    return { .scale = 0.f, .offset = 1.f };
 }
 
 void SpoutImageProvider::update() {

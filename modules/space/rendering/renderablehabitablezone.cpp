@@ -74,6 +74,25 @@ namespace {
         Property::Visibility::User
     };
 
+    // Represents a star's habitable zone, with boundaries computed from its effective
+    // temperature and luminosity.
+    //
+    // The inner and outer boundaries of the habitable zone are computed using formulas
+    // from Kopparapu et al. (2013) for an Earth-like rocky planet. The model defines both
+    // optimistic and conservative boundaries: the optimistic range includes regions where
+    // liquid water could exist (assuming Venus and Mars once had it), while the
+    // conservative range is more restrictive, indicating where stable surface liquid
+    // water is most likely under Earth-like conditions.
+    //
+    // These formulas are valid for stars with effective temperatures between 2600–7200 K.
+    // Outside this range, a simpler method by Tom E. Harris is used, based only on
+    // stellar luminosity and without optimistic boundaries. For flexibility, the
+    // temperature interval for using Kopparapu's formulas can be configured.
+    //
+    // The habitable zone regions are visualized using the provided 1D `Texture`, divided
+    // into three equal parts: the center represents the conservative zone, the first part
+    // the optimistic inner zone, and the last part the optimistic outer zone (furthest
+    // from the star).
     struct [[codegen::Dictionary(RenderableHabitableZone)]] Parameters {
         // [[codegen::verbatim(EffectiveTemperatureInfo.description)]]
         float effectiveTemperature;
@@ -94,7 +113,7 @@ namespace openspace {
 
 Documentation RenderableHabitableZone::Documentation() {
     return codegen::doc<Parameters>(
-        "space_renderablehabitablezone",
+        "space_renderable_habitablezone",
         RenderableDisc::Documentation()
     );
 }
@@ -159,7 +178,6 @@ void RenderableHabitableZone::render(const RenderData& data, RendererTasks&) {
 
     _shader->deactivate();
 
-    // Restores GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();
@@ -204,8 +222,8 @@ glm::dvec4 RenderableHabitableZone::computeKopparapuZoneBoundaries(float teff,
 {
     // Kopparapu's formula only considers stars with teff in range [2600, 7200] K.
     // However, we want to use the formula for more stars, so add some flexibility to
-    // the teff boundaries (see constructor).
-    // OBS! This also prevents problems with too large teff values in the computation
+    // the teff boundaries (see constructor). OBS! This also prevents problems with too
+    // large teff values in the computation
     const glm::vec2 teffBounds = _kopparapuTeffInterval;
     if (teff > teffBounds.y || teff < teffBounds.x) {
         // For the other stars, use a method by Tom E. Morris:

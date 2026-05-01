@@ -40,6 +40,7 @@ uniform sampler1D colorTexture;
 uniform float luminosityMultiplier;
 uniform int renderOption;
 uniform float viewScaling;
+uniform float opacity;
 
 // Keep in sync with gaiaoptions.h:RenderOption enum
 const int RenderOptionStatic = 0;
@@ -85,5 +86,5 @@ void main() {
   // Multiply our color with the luminosity as well as a user-controlled property
   color *= luminosity * pow(luminosityMultiplier, 3.0);
 
-  out_color = vec4(color, 1.0);
+  out_color = vec4(color * opacity, opacity);
 }

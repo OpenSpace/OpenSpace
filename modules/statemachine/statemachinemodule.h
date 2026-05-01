@@ -47,7 +47,9 @@ public:
 
     bool hasStateMachine() const;
 
-    // initializeStateMachine must have been called before
+    /**
+     * #initializeStateMachine must have been called before.
+     */
     void setInitialState(const std::string& initialState);
     std::string currentState() const;
     std::vector<std::string> possibleTransitions() const;

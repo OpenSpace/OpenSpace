@@ -13,6 +13,7 @@ local Item = {
   RegularFormat = "{:.1f} {:s} / second{:s}"
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Item)
 end)

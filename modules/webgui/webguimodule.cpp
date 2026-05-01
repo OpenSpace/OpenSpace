@@ -24,11 +24,10 @@
 
 #include <modules/webgui/webguimodule.h>
 
-#include <modules/server/include/serverinterface.h>
-#include <modules/server/servermodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/topic/server.h>
 #include <openspace/util/json_helper.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
@@ -211,7 +210,7 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
         }
         for (const std::pair<const std::string, std::string>& e : _endpoints) {
             if (newEndpoints.find(e.first) == newEndpoints.end()) {
-                // This endpoint existed before but does not exist anymore.
+                // This endpoint existed before but does not exist anymore
                 notifyEndpointListeners(e.first, false);
             }
         }
@@ -219,8 +218,8 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
             if (_endpoints.find(e.first) == _endpoints.end() ||
                 newEndpoints[e.first] != e.second)
             {
-                // This endpoint exists now but did not exist before,
-                // or the directory has changed.
+                // This endpoint exists now but did not exist before, or the directory has
+                // changed
                 notifyEndpointListeners(e.first, true);
             }
         }
@@ -243,10 +242,8 @@ void WebGuiModule::startProcess() {
 
     _endpoints.clear();
 
-    ServerModule* serverModule = global::moduleEngine->module<ServerModule>();
-    const ServerInterface* serverInterface = serverModule->serverInterfaceByIdentifier(
-        _webSocketInterface
-    );
+    const ServerInterface* serverInterface =
+        global::server->serverInterfaceByIdentifier(_webSocketInterface);
     if (!serverInterface) {
         LERROR("Missing server interface. Server process could not start");
         return;

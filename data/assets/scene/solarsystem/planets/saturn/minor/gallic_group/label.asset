@@ -1,0 +1,157 @@
+local transforms = asset.require("./transforms")
+
+
+
+local AlbiorixLabel = {
+  Identifier = "AlbiorixLabel",
+  Parent = transforms.AlbiorixPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Albiorix",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_gallic"
+  },
+  GUI = {
+    Name = "Albiorix Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Albiorix",
+    Focusable = false
+  }
+}
+
+local BebhionnLabel = {
+  Identifier = "BebhionnLabel",
+  Parent = transforms.BebhionnPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Bebhionn",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_gallic"
+  },
+  GUI = {
+    Name = "Bebhionn Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Bebhionn",
+    Focusable = false
+  }
+}
+
+local ErriapusLabel = {
+  Identifier = "ErriapusLabel",
+  Parent = transforms.ErriapusPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Erriapus",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_gallic"
+  },
+  GUI = {
+    Name = "Erriapus Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Erriapus",
+    Focusable = false
+  }
+}
+
+local TarvosLabel = {
+  Identifier = "TarvosLabel",
+  Parent = transforms.TarvosPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Tarvos",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_gallic"
+  },
+  GUI = {
+    Name = "Tarvos Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Tarvos",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(AlbiorixLabel)
+  openspace.addSceneGraphNode(BebhionnLabel)
+  openspace.addSceneGraphNode(ErriapusLabel)
+  openspace.addSceneGraphNode(TarvosLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TarvosLabel)
+  openspace.removeSceneGraphNode(ErriapusLabel)
+  openspace.removeSceneGraphNode(BebhionnLabel)
+  openspace.removeSceneGraphNode(AlbiorixLabel)
+end)
+
+asset.export(AlbiorixLabel)
+asset.export(BebhionnLabel)
+asset.export(ErriapusLabel)
+asset.export(TarvosLabel)
+
+
+
+asset.meta = {
+  Name = "Saturn Gallic Group Moons Labels",
+  Description = [[Asset containing labels for Saturn's Gallic Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

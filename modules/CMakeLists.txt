@@ -53,19 +53,6 @@ function (get_unique_include_paths module_paths internal_module_path result)
 endfunction ()
 
 
-# Returns whether the module located at 'path' is a default module or not
-function (get_module_attribute_default path result)
-  set(${result} OFF PARENT_SCOPE)
-  if (EXISTS "${path}/include.cmake")
-    unset(DEFAULT_MODULE)
-    include(${path}/include.cmake)
-    if (DEFINED DEFAULT_MODULE)
-      set(${result} ${DEFAULT_MODULE} PARENT_SCOPE)
-    endif ()
-  endif ()
-endfunction()
-
-
 # Returns the list of dependencies of the module located at 'path'
 function (get_module_attribute_dependencies path result)
   set(${result} "" PARENT_SCOPE)
@@ -162,7 +149,6 @@ endfunction ()
 
 
 
-option(OPENSPACE_ENABLE_ALL_MODULES "If this is ON, all modules will be enabled by default")
 set(internal_module_path "${PROJECT_SOURCE_DIR}/modules")
 set(all_enabled_modules "")
 
@@ -181,23 +167,15 @@ math(EXPR all_module_names_count "${all_module_names_count} - 1")
 #
 set(enabled_module_names "")
 set(enabled_module_paths "")
-foreach(val RANGE ${all_module_names_count})
-  list(GET all_module_names ${val} name)
-  list(GET all_module_paths ${val} path)
-
+foreach (name path IN ZIP_LISTS all_module_names all_module_paths)
   get_module_attribute_supported(${path} is_module_supported)
   if (NOT ${is_module_supported})
     message(STATUS "Skipping module ${name} (${path}) as it is not supported on this machine")
     continue()
   endif ()
 
-  get_module_attribute_default(${path} is_default_module)
   create_option_name(${name} optionName)
-  if (${OPENSPACE_ENABLE_ALL_MODULES})
-    option(${optionName} "Build ${path} Module" ON)
-  else ()
-    option(${optionName} "Build ${path} Module" ${is_default_module})
-  endif ()
+  option(${optionName} "Build ${path} Module" ON)
 
   if (${optionName})
     list(APPEND enabled_module_names ${name})

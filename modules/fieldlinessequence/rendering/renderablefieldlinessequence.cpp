@@ -55,7 +55,7 @@ namespace {
     constexpr std::string_view _loggerCat = "RenderableFieldlinesSequence";
 
     double extractTriggerTimeFromFilename(const std::filesystem::path& filePath) {
-        // number of characters in filename (excluding '.osfls')
+        // Number of characters in filename (excluding '.osfls')
         std::string fileName = filePath.stem().string(); // excludes extention
 
         // Ensure the separators are correct
@@ -231,28 +231,27 @@ namespace {
     constexpr Property::PropertyInfo SaveDownloadsOnShutdown = {
         "SaveDownloadsOnShutdown",
         "Save downloads on shutdown",
-        "This is an option for if dynamically downloaded should be saved between runs "
-        "or not.",
+        "This is an option for if dynamically downloaded should be saved between runs or "
+        "not.",
         Property::Visibility::User
     };
 
-    // This `Renderable` visualizes field lines, mainly a sequence of time steps but works
-    // with only one time step, too. A sequence is a data source consisting of multiple
-    // data files that each correspond to a specific time and is therefore time varying
-    // like the name of the renderable suggests.
+    // Visualizes field lines, typically across a sequence of time steps, but also
+    // supports a single step. A sequence is a data source consisting of multiple data
+    // files that each correspond to a specific time.
     //
     // `LoadingType` can be specified in two ways;
     //
     // 1. `StaticLoading`: In this case all data is loaded when starting OpenSpace. A
-    // `SourceFolder` is then required. The data format is also required to be set with
-    // `InputFileType`.
+    //    `SourceFolder` is then required. The data format is also required to be set with
+    //    `InputFileType`.
     //
     // 2. `DynamicDownloading`: This case downloads the data during runtime. For this, a
-    // few parameters are required: `InfoURL` together with `DataID` will construct a URL
-    // that is used for a HTTP request that returns meta data. `DataURL` and `DataID`,
-    // together with this meta data, will be used in constructing another HTTP request
-    // that returns the list with data files. The `DataID` specify which data source to
-    // use.
+    //    few parameters are required: `InfoURL` together with `DataID` will construct a
+    //    URL that is used for a HTTP request that returns meta data. `DataURL` and
+    //    `DataID`, together with this meta data, will be used in constructing another
+    //    HTTP request that returns the list with data files. The `DataID` specify which
+    //    data source to use.
     //
     // When using CDF data `SeedPointDirectory` is required. Some prior knowledge of the
     // data is needed to use it in this way. `TracingVariable` needs to be set and
@@ -279,8 +278,8 @@ namespace {
         // used for colorizing the fieldlines according to different parameters.
         std::optional<std::vector<std::filesystem::path>> colorTablePaths;
 
-        // Ranges for which their corresponding parameters values will be
-        // colorized by. Should be entered as min value, max value.
+        // Ranges for which their corresponding parameters values will be colorized by.
+        // Should be entered as min value, max value.
         std::optional<std::vector<glm::vec2>> colorTableRanges;
 
         // [[codegen::verbatim(ColorMinMaxInfo.description)]]
@@ -310,12 +309,12 @@ namespace {
         // [[codegen::verbatim(MaskingQuantityInfo.description)]]
         std::optional<int> maskingQuantity;
 
-        // Ranges for which their corresponding quantity parameter value will be
-        // masked by. Should be entered as a list of min value, max value pairs.
+        // Ranges for which their corresponding quantity parameter value will be masked
+        // by. Should be entered as a list of min value, max value pairs.
         std::optional<std::vector<glm::vec2>> maskingRanges;
 
-        // Ranges for which their corresponding parameters values will be
-        // masked by. Should be entered as a min value, max value pair.
+        // Ranges for which their corresponding parameters values will be masked by.
+        // Should be entered as a min value, max value pair.
         std::optional<glm::vec2> maskingMinMaxRange;
 
         // [[codegen::verbatim(DomainEnabledInfo.description)]]
@@ -333,8 +332,8 @@ namespace {
         std::optional<bool> showAtAllTimes;
 
         // If data sets parameter start_time differ from start of run,
-        // elapsed_time_in_seconds might be in relation to start of run.
-        // ManuelTimeOffset will be added to trigger time.
+        // elapsed_time_in_seconds might be in relation to start of run. ManualTimeOffset
+        // will be added to trigger time.
         std::optional<float> manualTimeOffset;
 
         enum class [[codegen::map(openspace::Model)]] Model {
@@ -347,22 +346,21 @@ namespace {
         // (scaleToMeters) will be 1.0 assuming meter as input.
         std::optional<Model> simulationModel;
 
-        // Convert the models distance unit, ex. AU to meters for Enlil.
-        // 1.0 is default, assuming meters as input.
-        // Does not need to be specified if simulationModel is specified.
-        // When using a different model, use this value to scale your vertex positions to
-        // meters.
+        // Convert the models distance unit, ex. AU to meters for Enlil. 1.0 is default,
+        // assuming meters as input. Does not need to be specified if simulationModel is
+        // specified. When using a different model, use this value to scale your vertex
+        // positions to meters.
         std::optional<float> scaleToMeters;
 
         enum class [[codegen::map(openspace::RenderableFieldlinesSequence::LoadingType)]]
         LoadingType {
+            // Download and load files on startup.
             StaticLoading,
+            // Download and load files during run time.
             DynamicDownloading
         };
 
-        // Choose type of loading:
-        // `StaticLoading`: Download and load files on startup.
-        // `DynamicDownloading`: Download and load files during run time.
+        // Choose type of loading.
         std::optional<LoadingType> loadingType;
 
         // A maximum number to limit the number of files being downloaded simultaneously.
@@ -417,7 +415,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableFieldlinesSequence::Documentation() {
-    return codegen::doc<Parameters>("fieldlinessequence_renderablefieldlinessequence");
+    return codegen::doc<Parameters>("fieldlinessequence_renderable_fieldlinessequence");
 }
 
 RenderableFieldlinesSequence::RenderableFieldlinesSequence(
@@ -507,7 +505,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     setModelDependentConstants();
 
     // Setting the scaling factor after model to support the case with unknown models
-    // (model = invalid), but scaling factor being specified.
+    // (model = invalid), but scaling factor being specified
     _scalingFactor = p.scaleToMeters.value_or(_scalingFactor);
 
     if (_loadingType == LoadingType::DynamicDownloading) {
@@ -652,7 +650,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _shouldUpdateColorBuffer = true;
         // Note that we do not need to set _selectedColorRange in the constructor, due to
         // this onChange being declared before firstupdate() function that sets
-        // _colorQuantity.
+        // _colorQuantity
         if (_colorQuantity < static_cast<int>(_colorTableRanges.size())) {
             _selectedColorRange = _colorTableRanges[_colorQuantity];
         }
@@ -785,7 +783,6 @@ void RenderableFieldlinesSequence::initializeGL() {
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
     );
 
-
     glCreateVertexArrays(1, &_vao);
 
     glEnableVertexArrayAttrib(_vao, 0);
@@ -846,7 +843,7 @@ void RenderableFieldlinesSequence::setupProperties() {
 }
 
 void RenderableFieldlinesSequence::setModelDependentConstants() {
-    float limit = 100.f; // Just used as a default value.
+    float limit = 100.f; // Just used as a default value
     switch (_model) {
         case Model::Batsrus:
             _scalingFactor = ReToMeter;
@@ -910,7 +907,7 @@ void RenderableFieldlinesSequence::computeSequenceEndTime() {
         _sequenceEndTime = _files[0].timestamp + 7200.f;
         if (_loadingType == LoadingType::StaticLoading && !_renderForever) {
             // TODO (2025-06-10, Elon) Alternativly check at construction and throw
-            // exeption.
+            // exception
             LWARNING(
                 "Only one file in data set, but ShowAtAllTimes set to false. Using a 2h "
                 "window after the files time stamp to visualize the data"
@@ -977,9 +974,9 @@ int RenderableFieldlinesSequence::updateActiveIndex(double currentTime) {
     if (_files.empty()) {
         return -1;
     }
-    // Sets index to 0 if time is at the first file time stamp and also,
-    // if size == 1 then we can expect to not have a sequence and wants to show
-    // the one file of fieldlines at all points in time
+    // Sets index to 0 if time is at the first file time stamp and also, if size == 1 then
+    // we can expect to not have a sequence and wants to show the one file of fieldlines
+    // at all points in time
     if (_files.begin()->timestamp == currentTime || _files.size() == 1) {
         return 0;
     }
@@ -1002,10 +999,6 @@ int RenderableFieldlinesSequence::updateActiveIndex(double currentTime) {
     else {
         return static_cast<int>(_files.size()) - 1;
     }
-}
-
-bool RenderableFieldlinesSequence::isReady() const {
-    return _shaderProgram != nullptr;
 }
 
 void RenderableFieldlinesSequence::updateDynamicDownloading(double currentTime,
@@ -1032,8 +1025,8 @@ void RenderableFieldlinesSequence::updateDynamicDownloading(double currentTime,
         trackOldest(*it);
     }
 
-    // If all files are moved into _sourceFiles then we can
-    // empty the DynamicFileSequenceDownloader's downloaded files list
+    // If all files are moved into _sourceFiles then we can empty the
+    // DynamicFileSequenceDownloader's downloaded files list
     _dynamicFileDownloader->clearDownloaded();
 }
 
@@ -1118,15 +1111,15 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     // For the sake of this if statement, it is easiest to think of activeIndex as the
     // previous index and nextIndex as the current
     const int nextIndex = _activeIndex + 1;
-    // if _activeIndex is -1 but we are in interval, it means we were before the start
-    //     of the sequence in the previous frame
+    // If _activeIndex is -1 but we are in interval, it means we were before the start of
+    // the sequence in the previous frame
     if (_activeIndex == -1 ||
-        // if currentTime < active timestamp, it means that we stepped back to a
-        // time represented by another state
+        // If currentTime < active timestamp, it means that we stepped back to a time
+        // represented by another state
         // _activeIndex has already been checked if it is <0 in the line above
         currentTime < _files[_activeIndex].timestamp ||
-        // if currentTime >= next timestamp, it means that we stepped forward to a
-        // time represented by another state
+        // If currentTime >= next timestamp, it means that we stepped forward to a time
+        // represented by another state
         (nextIndex < static_cast<int>(_files.size()) &&
         currentTime >= _files[nextIndex].timestamp) ||
         // The case when we jumped passed last file. where nextIndex is not < file.size()
@@ -1134,14 +1127,14 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     {
         int previousIndex = _activeIndex;
         _activeIndex = updateActiveIndex(currentTime);
-        // check index again after updating
+        // Check index again after updating
         if (_activeIndex == -1) {
             return;
         }
         File& file = _files[_activeIndex];
         if (file.status == File::FileStatus::Downloaded) {
-            // if LoadingType is StaticLoading all files will be Loaded
-            // would be optimal if loading of next file would happen in the background
+            // If LoadingType is StaticLoading all files will be Loaded would be optimal
+            // if loading of next file would happen in the background
             loadFile(file);
             _isLoadingStateFromDisk = false;
             file.status = File::FileStatus::Loaded;
@@ -1323,7 +1316,6 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
     _shaderProgram->deactivate();
 
     if (additiveBlending) {
-        // Restores OpenGL Rendering State
         global::renderEngine->openglStateCache().resetBlendState();
         global::renderEngine->openglStateCache().resetDepthState();
     }

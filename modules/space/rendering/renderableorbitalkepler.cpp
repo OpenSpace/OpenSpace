@@ -24,26 +24,26 @@
 
 #include <modules/space/rendering/renderableorbitalkepler.h>
 
+#include <modules/space/kepler.h>
 #include <modules/space/translation/keplertranslation.h>
 #include <modules/space/spacemodule.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/properties/property.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/programobject.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <openspace/properties/property.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/rendering/fadeable.h>
-#include <openspace/rendering/renderable.h>
-#include <modules/space/kepler.h>
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -91,8 +91,8 @@ namespace {
     constexpr Property::PropertyInfo SegmentQualityInfo = {
         "SegmentQuality",
         "Segment quality",
-        "A segment quality value for the orbital trail. A value from 1 (lowest) to "
-        "10 (highest) that controls the number of line segments in the rendering of the "
+        "A segment quality value for the orbital trail. A value from 1 (lowest) to 10 "
+        "(highest) that controls the number of line segments in the rendering of the "
         "orbital trail. This does not control the direct number of segments because "
         "these automatically increase according to the eccentricity of the orbit.",
         Property::Visibility::User
@@ -136,9 +136,9 @@ namespace {
     constexpr Property::PropertyInfo RenderingModeInfo = {
         "Rendering",
         "Rendering mode",
-        "Determines how the trail should be rendered. If 'Trail' is selected, "
-        "only the line part is visible, if 'Point' is selected, only the "
-        "current satellite/debris point is visible.",
+        "Determines how the trail should be rendered. If 'Trail' is selected, only the "
+        "line part is visible, if 'Point' is selected, only the current satellite/debris "
+        "point is visible.",
         Property::Visibility::AdvancedUser
     };
 
@@ -198,22 +198,25 @@ namespace {
     constexpr Property::PropertyInfo ContiguousModeInfo = {
         "ContiguousMode",
         "Contiguous mode",
-        "If enabled, the contiguous set of objects starting from StartRenderIdx "
-        "of size RenderSize will be rendered. If disabled, the number of objects "
-        "defined by UpperLimit will rendered from an evenly dispersed sample of the "
-        "full length of the data file.",
+        "If enabled, the contiguous set of objects starting from StartRenderIdx of size "
+        "RenderSize will be rendered. If disabled, the number of objects defined by "
+        "UpperLimit will rendered from an evenly dispersed sample of the full length of "
+        "the data file.",
         Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableOrbitalKepler)]] Parameters {
-        // [[codegen::verbatim(PathInfo.description)]]
-        std::filesystem::path path;
+        // The file path or paths to the data file to read. If multiple paths are provided
+        // the contents are concatenated.
+        std::variant<std::filesystem::path, std::vector<std::filesystem::path>> path;
 
         enum class [[codegen::map(openspace::kepler::Format)]] Format {
             // A NORAD-style Two-Line element.
             TLE,
             // Orbit Mean-Elements Message in the KVN notation.
             OMM,
+            // CSV format that is provided by Celestrak
+            CSV,
             // JPL's Small Bodies Database.
             SBDB,
             // Minor Planet Center.
@@ -282,7 +285,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableOrbitalKepler::Documentation() {
-    return codegen::doc<Parameters>("space_renderableorbitalkepler");
+    return codegen::doc<Parameters>("space_renderable_orbitalkepler");
 }
 
 RenderableOrbitalKepler::Appearance::Appearance()
@@ -306,7 +309,7 @@ RenderableOrbitalKepler::Appearance::Appearance()
     renderingModes.addOptions({
         { static_cast<int>(RenderMode::RenderingModeTrail), "Trails" },
         { static_cast<int>(RenderMode::RenderingModePoint), "Points"},
-        { static_cast<int>(RenderMode::RenderingModePointTrail) , "Points and Trails" }
+        { static_cast<int>(RenderMode::RenderingModePointTrail), "Points and Trails" }
     });
     renderingModes.onChange([this]() { isRenderTypeDirty = true; });
     addProperty(renderingModes);
@@ -414,10 +417,8 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
 
     _sizeRender = p.renderSize.value_or(0u);
     _sizeRender.onChange([this]() {
-        if (_contiguousMode) {
-            if (_sizeRender > (_nOrbits - _startRenderIdx)) {
-                _startRenderIdx = static_cast<unsigned int>(_nOrbits - _sizeRender);
-            }
+        if (_contiguousMode && _sizeRender > (_nOrbits - _startRenderIdx)) {
+            _startRenderIdx = static_cast<unsigned int>(_nOrbits - _sizeRender);
         }
         _updateDataBuffersAtNextRender = true;
     });
@@ -427,7 +428,18 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _contiguousMode.onChange([this]() { _updateDataBuffersAtNextRender = true; });
     addProperty(_contiguousMode);
 
-    _path = p.path.string();
+    if (std::holds_alternative<std::filesystem::path>(p.path)) {
+        _path = { std::get<std::filesystem::path>(p.path).string()};
+    }
+    else {
+        std::vector<std::filesystem::path> paths =
+            std::get<std::vector<std::filesystem::path>>(p.path);
+        std::vector<std::string> ps;
+        for (const std::filesystem::path& path : paths) {
+            ps.push_back(path.string());
+        }
+        _path = std::move(ps);
+    }
     _path.onChange([this]() { _updateDataBuffersAtNextRender = true; });
     addProperty(_path);
 }
@@ -454,13 +466,13 @@ void RenderableOrbitalKepler::initializeGL() {
     // Program for line rendering
     _trailProgram = SpaceModule::ProgramObjectManager.request(
         "OrbitalKeplerTrails",
-       []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
            return global::renderEngine->buildRenderProgram(
                "OrbitalKeplerTrails",
                absPath("${MODULE_SPACE}/shaders/keplertrails_vs.glsl"),
                absPath("${MODULE_SPACE}/shaders/keplertrails_fs.glsl")
            );
-       }
+        }
    );
 
     // Program for point rendering
@@ -502,10 +514,6 @@ void RenderableOrbitalKepler::deinitializeGL() {
 
     _pointProgram = nullptr;
     _trailProgram = nullptr;
-}
-
-bool RenderableOrbitalKepler::isReady() const {
-    return _pointProgram != nullptr && _trailProgram != nullptr;
 }
 
 void RenderableOrbitalKepler::update(const UpdateData& data) {
@@ -578,17 +586,14 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
             _uniformPointCache.renderOption,
             _appearance.pointRenderOption
         );
-        _pointProgram->setUniform(
-            _uniformPointCache.cameraViewDirectionUp,
-            orthoUp
-        );
+        _pointProgram->setUniform(_uniformPointCache.cameraViewDirectionUp, orthoUp);
         _pointProgram->setUniform(
             _uniformPointCache.cameraViewDirectionRight,
             orthoRight
         );
         _pointProgram->setUniform(
             _uniformPointCache.cameraPositionWorld,
-            data.camera.positionVec3()
+            data.camera.position()
         );
         _pointProgram->setUniform(
             _uniformPointCache.cameraUpWorld,
@@ -657,11 +662,10 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
         );
         _trailProgram->setUniform(_uniformTrailCache.trailFadeExponent, fade);
 
-        // 0.05 is the "alpha value" for which the trail should no longer be rendered.
-        // The value that's compared to 0.05 is calculated in the shader and depends
-        // on the distance from the head of the trail to the part that's being rendered.
-        // Value is passed as uniform due to it being used in both geometry and fragment
-        // shader.
+        // 0.05 is the "alpha value" for which the trail should no longer be rendered. The
+        // value that's compared to 0.05 is calculated in the shader and depends on the
+        // distance from the head of the trail to the part that's being rendered. Value is
+        // passed as uniform due to it being used in both geometry and fragment shader
         _trailProgram->setUniform(_uniformTrailCache.colorFadeCutoffValue, 0.05f);
 
         glLineWidth(_appearance.trailWidth);
@@ -680,7 +684,13 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableOrbitalKepler::updateBuffers() {
-    _parameters = kepler::readFile(_path.value(), _format);
+    std::vector<std::string> ps = _path;
+    std::vector<std::filesystem::path> paths;
+    for (const std::string& p : ps) {
+        paths.push_back(p);
+    }
+
+    _parameters = kepler::readFiles(paths, _format);
     _nOrbits = static_cast<unsigned int>(_parameters.size());
 
     if (_startRenderIdx >= _nOrbits) {
@@ -713,7 +723,7 @@ void RenderableOrbitalKepler::updateBuffers() {
             ));
         }
 
-        // Extract subset that starts at _startRenderIdx and contains _sizeRender obejcts
+        // Extract subset that starts at _startRenderIdx and contains _sizeRender objects
         _parameters = std::vector<kepler::Parameters>(
             _parameters.begin() + _startRenderIdx,
             _parameters.begin() + _startRenderIdx + _sizeRender
@@ -818,7 +828,7 @@ void RenderableOrbitalKepler::updateBuffers() {
         }
     );
 
-    // Calculate how many orbits we calculate per thread
+    // Calculate how many orbits we calculate per thread.
     // 1000 per thread (arbitrary) to not create threads that do little to no work
     unsigned int orbitsPerThread = std::max(
         1000,
@@ -853,14 +863,12 @@ void RenderableOrbitalKepler::threadedSegmentCalculations(int threadId,
     ZoneScoped;
 
     const int selection = _appearance.renderingModes;
-    _renderPoints = (
+    _renderPoints =
         selection == static_cast<int>(RenderMode::RenderingModePoint) ||
-        selection == static_cast<int>(RenderMode::RenderingModePointTrail)
-    );
-    _renderTrails = (
+        selection == static_cast<int>(RenderMode::RenderingModePointTrail);
+    _renderTrails =
         selection == static_cast<int>(RenderMode::RenderingModeTrail) ||
-        selection == static_cast<int>(RenderMode::RenderingModePointTrail)
-    );
+        selection == static_cast<int>(RenderMode::RenderingModePointTrail);
 
     const float fade = std::pow(
         _appearance.trailFade.maxValue() - _appearance.trailFade,
@@ -897,15 +905,15 @@ void RenderableOrbitalKepler::threadedSegmentCalculations(int threadId,
             // We can always do this since it has no cost
             _startIndexPoints[i] = startVertexIndex + pointHead;
 
-            // There is a lot of what seems to be "magic numbers" in this section.
-            // They will most likely disappear when we change our method of determining
-            // the trail fade amount is changed.
+            // There is a lot of what seems to be "magic numbers" in this section. They
+            // will most likely disappear when we change our method of determining the
+            // trail fade amount is changed
             if (_renderTrails) {
-                // When rendering a trail we don't know if the trail will pass over
-                // the starting point of the orbit or not. If the trail passes over the
+                // When rendering a trail we don't know if the trail will pass over the
+                // starting point of the orbit or not. If the trail passes over the
                 // starting point of the orbit, then we can't draw the entire trail as
                 // line strip. Instead we need to divide the line strip into two parts,
-                // where p0 and p1 denotes the respctive line strips (parts).
+                // where p0 and p1 denotes the respctive line strips (parts)
                 int p0Start = -1;
                 int p0Length = -1;
                 int p1Start = -1;
@@ -941,7 +949,7 @@ void RenderableOrbitalKepler::threadedSegmentCalculations(int threadId,
 
                         // Special check to make sure we don't end up with segment
                         // sections 1 vertex length. A segment must contain at least 2
-                        // vertices or more.
+                        // vertices or more
                         if (lastVertexIndex - correctVertexIndex == 1) {
                             p1Length = 0;
                             p0Length = correctTrailLength - 1;

@@ -1,4 +1,4 @@
-local globe = asset.require("../../jupiter")
+local jupiterAsset = asset.require("scene/solarsystem/planets/jupiter/globe")
 
 
 
@@ -20,11 +20,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Jupiter.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(jupiterAsset.Jupiter.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Jupiter.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(jupiterAsset.Jupiter.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export("layer", Layer)
@@ -35,6 +35,6 @@ asset.meta = {
   Name = "Jupiter Texutre",
   Description = "Default texture for Jupiter",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

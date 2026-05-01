@@ -146,15 +146,15 @@ LuaLibrary StateMachineModule::luaLibrary() const {
     return {
         "statemachine",
         {
-        codegen::lua::CreateStateMachine,
-        codegen::lua::DestroyStateMachine,
-        codegen::lua::GoToState,
-        codegen::lua::SetInitialState,
-        codegen::lua::CurrentState,
-        codegen::lua::PossibleTransitions,
-        codegen::lua::CanGoToState,
-        codegen::lua::PrintCurrentStateInfo,
-        codegen::lua::SaveToDotFile
+            codegen::lua::CreateStateMachine,
+            codegen::lua::DestroyStateMachine,
+            codegen::lua::GoToState,
+            codegen::lua::SetInitialState,
+            codegen::lua::CurrentState,
+            codegen::lua::PossibleTransitions,
+            codegen::lua::CanGoToState,
+            codegen::lua::PrintCurrentStateInfo,
+            codegen::lua::SaveToDotFile
         }
     };
 }

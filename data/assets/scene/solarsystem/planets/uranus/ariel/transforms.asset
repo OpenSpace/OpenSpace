@@ -1,0 +1,44 @@
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local ArielPosition = {
+  Identifier = "ArielPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Ariel,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Ariel Position",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Ariel",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(ArielPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(ArielPosition)
+end)
+
+asset.export(ArielPosition)
+
+
+
+asset.meta = {
+  Name = "Miranda Position",
+  Description = [[Miranda Position]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

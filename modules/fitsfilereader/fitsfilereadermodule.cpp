@@ -33,7 +33,9 @@
 
 namespace openspace {
 
-FitsFileReaderModule::FitsFileReaderModule() : OpenSpaceModule(Name) {}
+FitsFileReaderModule::FitsFileReaderModule()
+    : OpenSpaceModule(Name)
+{}
 
 void FitsFileReaderModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul::TemplateFactory<Renderable>* fRenderable =

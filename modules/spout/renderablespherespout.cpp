@@ -33,11 +33,11 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    // This `Renderable` type can be used to render a sphere with a texture that is
-    // provided by another application on the same computer using the SPOUT library.
-    // Note: The Spout library is only available on Windows.
-    struct [[codegen::Dictionary(RenderableSphereSpout)]] Parameters {
-    };
+    // Renders a sphere with a texture that is provided by another application on the
+    // same computer using the SPOUT library.
+    //
+    // Note: The SPOUT library is only available on Windows.
+    struct [[codegen::Dictionary(RenderableSphereSpout)]] Parameters {};
 } // namespace
 #include "renderablespherespout_codegen.cpp"
 
@@ -45,7 +45,7 @@ namespace openspace {
 
 Documentation RenderableSphereSpout::Documentation() {
     return codegen::doc<Parameters>(
-        "spout_renderablespherespout",
+        "spout_renderable_spherespout",
         SpoutReceiverPropertyProxy::Documentation()
     );
 }

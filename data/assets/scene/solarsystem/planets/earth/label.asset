@@ -1,0 +1,50 @@
+local transforms = asset.require("./transforms")
+
+
+
+local EarthLabel = {
+  Identifier = "EarthLabel",
+  Parent = transforms.EarthBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Earth",
+    FontSize = 70.0,
+    Size = 8.50,
+    MinMaxSize = { 1, 50 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 1.5, 30.0 },
+    FadeWidths = { 1.0, 40.0 }
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "Earth Label",
+    Path = "/Solar System/Planets/Earth",
+    Description = "Main label for Earth",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(EarthLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(EarthLabel)
+end)
+
+asset.export(EarthLabel)
+
+
+
+asset.meta = {
+  Name = "Earth Label",
+  Description = "The textual label for Earth",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

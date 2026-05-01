@@ -131,6 +131,31 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
+    // Computes an object's position from classical Keplerian orbital elements. It is
+    // intended for bodies whose motion can be described analytically as an ellipse around
+    // a central body, using a compact orbital parameter set rather than sampled
+    // trajectory data. The class evaluates orbital motion from the standard elements that
+    // define orbit shape, orientation, and phase. From these values, it reconstructs the
+    // orbital plane, advances the object along the orbit as time progresses, and returns
+    // the corresponding 3D position in space. This makes it a foundational translation
+    // type for planets, moons, spacecraft, and other orbiting objects when an idealized
+    // two-body style orbit is sufficient.
+    //
+    // A key responsibility of KeplerTranslation is converting time into orbital phase. It
+    // uses the configured epoch and orbital period to determine the current mean anomaly,
+    // solves for the eccentric anomaly, and then computes the position within the orbital
+    // plane before rotating that position into the final world-space orientation of the
+    // orbit.
+    //
+    // The implementation is designed for elliptical or circular orbits and explicitly
+    // excludes hyperbolic Keplerian trajectories. It also supports epoch input in either
+    // absolute time form (ISO 8601, for example 2025-04-01 18:00:00) or J2000 seconds,
+    // making it flexible for authored assets and external data sources.
+    //
+    // Because the orbital plane and orbital position are handled separately, the class
+    // can efficiently respond to changes in either the orbit's geometry or the object's
+    // phase along that orbit. This makes it suitable both for static asset definitions
+    // and for interactive or programmatic updates to orbital parameters.
     struct [[codegen::Dictionary(KeplerTranslation)]] Parameters {
         // [[codegen::verbatim(EccentricityInfo.description)]]
         double eccentricity [[codegen::inrange(0.0, 1.0)]];
@@ -309,7 +334,7 @@ glm::dmat3 KeplerTranslation::computeOrbitPlane(double ascendingNode, double inc
     // Perform three rotations:
     // 1. Around the z axis to place the location of the ascending node
     // 2. Around the x axis (now aligned with the ascending node) to get the correct
-    // inclination
+    //    inclination
     // 3. Around the new z axis to place the closest approach to the correct location
 
     const glm::dvec3 ascendingNodeAxisRot = glm::dvec3(0.f, 0.f, 1.f);
@@ -352,41 +377,31 @@ void KeplerTranslation::setKeplerElements(double eccentricity, double semiMajorA
     auto isInRange = [](double val, double min, double max) -> bool {
         return val >= min && val <= max;
     };
-    if (isInRange(eccentricity, 0.0, 1.0)) {
-        _eccentricity = eccentricity;
-    }
-    else {
+    if (!isInRange(eccentricity, 0.0, 1.0)) {
         throw RangeError("Eccentricity");
     }
-
+    _eccentricity = eccentricity;
     _semiMajorAxis = semiMajorAxis;
 
-    if (isInRange(inclination, 0.0, 360.0)) {
-        _inclination = inclination;
-    }
-    else {
+    if (!isInRange(inclination, 0.0, 360.0)) {
         throw RangeError("Inclination");
     }
+    _inclination = inclination;
 
-    if (isInRange(_ascendingNode, 0.0, 360.0)) {
-        _ascendingNode = ascendingNode;
-    }
-    else {
+    if (!isInRange(_ascendingNode, 0.0, 360.0)) {
         throw RangeError("Ascending Node");
     }
-    if (isInRange(_argumentOfPeriapsis, 0.0, 360.0)) {
-        _argumentOfPeriapsis = argumentOfPeriapsis;
-    }
-    else {
+    _ascendingNode = ascendingNode;
+
+    if (!isInRange(_argumentOfPeriapsis, 0.0, 360.0)) {
         throw RangeError("Argument of Periapsis");
     }
+    _argumentOfPeriapsis = argumentOfPeriapsis;
 
-    if (isInRange(_meanAnomalyAtEpoch, 0.0, 360.0)) {
-        _meanAnomalyAtEpoch = meanAnomalyAtEpoch;
-    }
-    else {
+    if (!isInRange(_meanAnomalyAtEpoch, 0.0, 360.0)) {
         throw RangeError("Mean anomaly at epoch");
     }
+    _meanAnomalyAtEpoch = meanAnomalyAtEpoch;
 
     _period = orbitalPeriod;
     _epoch = epoch;

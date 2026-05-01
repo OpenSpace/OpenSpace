@@ -1,5 +1,4 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
-local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 local coreKernels = asset.require("spice/core")
 local jupiterKernels = asset.require("./kernels")
 
@@ -7,7 +6,7 @@ local jupiterKernels = asset.require("./kernels")
 
 local JupiterTrailEarth = {
   Identifier = "JupiterTrailEarth",
-  Parent = earthTransforms.EarthBarycenter.Identifier,
+  Parent = earthAsset.EarthBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
     Enabled = false,
@@ -45,6 +44,6 @@ asset.meta = {
   Name = "Jupiter Trail from Earth",
   Description = "Trail of Jupiter as observed by the Earth",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

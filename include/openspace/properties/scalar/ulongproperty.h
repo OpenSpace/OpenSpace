@@ -32,12 +32,12 @@
 namespace openspace {
 
 /**
- * This class is a concrete implementation of TemplateProperty with
- * the type `unsigned long`.
+ * This class is a concrete implementation of TemplateProperty with the type
+ * `unsigned long`.
  */
 class ULongProperty : public NumericalProperty<unsigned long> {
 public:
-    explicit ULongProperty(Property::PropertyInfo info, unsigned long value = 0ul,
+    explicit ULongProperty(PropertyInfo info, unsigned long value = 0ul,
         unsigned long minValue = std::numeric_limits<unsigned long>::lowest(),
         unsigned long maxValue = std::numeric_limits<unsigned long>::max(),
         unsigned long stepValue = 1ul);

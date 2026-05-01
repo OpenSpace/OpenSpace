@@ -1,4 +1,4 @@
-local sun = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
 
 
@@ -21,7 +21,7 @@ local ArtemisModel = {
       Attached = "ArtemisModel",
       XAxis = { 1.0, 0.0, 0.0 },
       XAxisOrthogonal = true,
-      YAxis = sun.SunCenter.Identifier,
+      YAxis = sunAsset.SunCenter.Identifier,
       YAxisInvert = true
     }
   },
@@ -29,9 +29,10 @@ local ArtemisModel = {
     Type = "RenderableModel",
     GeometryFile = models .. "artemis.glb",
     LightSources = {
-      sun.LightSource
+      sunAsset.LightSource
     },
-    AmbientIntensity = 0.05
+    AmbientIntensity = 0.05,
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Orion (Artemis-1) Model",
@@ -57,6 +58,6 @@ asset.meta = {
   Name = "Artemis-1 Model",
   Description = "Orion capsule model for the Artemis-1 mission",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

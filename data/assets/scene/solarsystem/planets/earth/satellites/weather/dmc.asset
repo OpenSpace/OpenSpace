@@ -1,12 +1,12 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Disaster Monitoring)",
+  Name = "Satellite CSV Data (Disaster Monitoring)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_dmc",
-  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=dmc&FORMAT=kvn",
+  Identifier = "satellite_csv_data_dmc",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=dmc&FORMAT=csv",
   Filename = "dmc.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -14,11 +14,11 @@ local omm = asset.resource({
 
 local DisasterMonitoringConstellation = {
   Identifier = "DisasterMonitoringConstellation",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "dmc.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
     TrailFade = 17,
@@ -50,6 +50,6 @@ asset.meta = {
   Name = "Satellites Weather - Disaster Monitoring",
   Description = "Satellites asset for Weather - Disaster Monitoring. Data from Celestrak",
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/NORAD/elements/",
+  URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
 }

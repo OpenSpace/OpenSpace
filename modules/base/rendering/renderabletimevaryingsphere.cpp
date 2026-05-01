@@ -73,7 +73,7 @@ namespace openspace {
 
 Documentation RenderableTimeVaryingSphere::Documentation() {
     return codegen::doc<Parameters>(
-        "base_renderable_time_varying_sphere",
+        "base_renderable_timevaryingsphere",
         RenderableSphere::Documentation()
     );
 }
@@ -91,10 +91,6 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     loadTexture();
 }
 
-bool RenderableTimeVaryingSphere::isReady() const {
-    return RenderableSphere::isReady() && _texture;
-}
-
 void RenderableTimeVaryingSphere::deinitializeGL() {
     _texture = nullptr;
     _files.clear();
@@ -103,8 +99,8 @@ void RenderableTimeVaryingSphere::deinitializeGL() {
 }
 
 void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
-    // Ensure that the source folder exists and then extract
-    // the files with the same extension as <inputFileTypeString>
+    // Ensure that the source folder exists and then extract the files with the same
+    // extension as <inputFileTypeString>
     namespace fs = std::filesystem;
     const fs::path sourceFolder = absPath(_textureSourcePath);
     if (!std::filesystem::is_directory(sourceFolder)) {
@@ -122,7 +118,7 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
         std::filesystem::path filePath = e.path();
         const double time = extractTriggerTimeFromFileName(filePath);
         std::unique_ptr<ghoul::opengl::Texture> t =
-            ghoul::io::TextureReader::ref().loadTexture(filePath, 2);
+            ghoul::io::texture::loadTexture(filePath, 2);
         _files.push_back({ std::move(filePath), time, std::move(t) });
     }
 
@@ -162,10 +158,10 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
         {
             updateActiveTriggerTimeIndex(currentTime);
             _textureIsDirty = true;
-        } // else {we're still in same state as previous frame (no changes needed)}
+        } // Else {we're still in same state as previous frame (no changes needed)}
     }
     else {
-        // not in interval => set everything to false
+        // Not in interval => set everything to false
         _activeTriggerTimeIndex = 0;
     }
 

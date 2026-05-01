@@ -116,24 +116,8 @@ int main(int argc, char** argv) {
     constexpr std::string_view BasePathToken = "${BASE}";
     FileSys.registerPathToken(BasePathToken.data(), base);
 
-    // Using same configuration for size as in apps/OpenSpace/main.cpp
-    glm::ivec2 size = glm::ivec2(1920, 1080);
-#ifdef WIN32
-    DEVMODEW dm = { 0 };
-    dm.dmSize = sizeof(DEVMODEW);
-    BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
-    if (success) {
-        size.x = dm.dmPelsWidth;
-        size.y = dm.dmPelsHeight;
-    }
-#endif // WIN32
-
     std::filesystem::path settings = findSettings();
-    *global::configuration = loadConfigurationFromFile(
-        configFile.string(),
-        settings,
-        size
-    );
+    *global::configuration = loadConfigurationFromFile(configFile.string(), settings);
     openspace::global::openSpaceEngine->registerPathTokens();
     global::openSpaceEngine->initialize();
 
@@ -154,8 +138,6 @@ int main(int argc, char** argv) {
 
     commandlineParser.setCommandLine({ argv, argv + argc });
     commandlineParser.execute();
-
-    //FileSys.setCurrentDirectory(launchDirectory);
 
     if (tasksPath.has_value()) {
         performTasks(*tasksPath);

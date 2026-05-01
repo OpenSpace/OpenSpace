@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
@@ -11,7 +11,7 @@ local EclipticRotationMatrix = {
 
 local eclipticGrid = {
   Identifier = "EarthEclipticRadialGrid",
-  Parent = transforms.EarthCenter.Identifier,
+  Parent = earthAsset.EarthCenter.Identifier,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
@@ -53,6 +53,6 @@ asset.meta = {
   Name = "Earth Ecliptic Grid",
   Description = "A grid that shows the ecliptic of the Earth a radial grid",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

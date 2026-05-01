@@ -1,0 +1,11 @@
+asset.require("./colorlayers/mimas_texture", true)
+
+
+
+asset.meta = {
+  Name = "Default Mimas Layers",
+  Description = "Default Mimas layers are: Mimas Texture",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

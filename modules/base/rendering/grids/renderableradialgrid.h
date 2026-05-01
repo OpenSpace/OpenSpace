@@ -48,8 +48,6 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
@@ -72,7 +70,7 @@ protected:
         GLenum mode = GL_LINE_STRIP;
     };
 
-    ghoul::opengl::ProgramObject* _gridProgram;
+    ghoul::opengl::ProgramObject* _gridProgram = nullptr;
 
     Vec3Property _color;
     IVec2Property _gridSegments;

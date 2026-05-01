@@ -75,7 +75,8 @@ namespace {
 
     // Parsing and downloading of wtml files
     bool downloadFile(const std::string& url, const std::filesystem::path& destination) {
-        HttpFileDownload wtmlRoot(url, destination, HttpFileDownload::Overwrite::Yes);
+        HttpFileDownload wtmlRoot =
+            HttpFileDownload(url, destination, HttpFileDownload::Overwrite::Yes);
         wtmlRoot.start(std::chrono::milliseconds(10000));
         return wtmlRoot.wait();
     }
@@ -112,25 +113,25 @@ namespace {
     std::string childNodeContentFromImageSet(const tinyxml2::XMLElement* imageSet,
                                              std::string_view elementName)
     {
-        // Find the thumbnail image url
-        // The thumbnail is the last node so traverse backwards for speed
+        // Find the thumbnail image URL. The thumbnail is the last node so traverse
+        // backwards for speed
         const std::string n = std::string(elementName);
         const tinyxml2::XMLElement* child = imageSet->FirstChildElement(n.c_str());
         return child && child->GetText() ? child->GetText() : std::string(Undefined);
     }
 
     std::string urlFromPlace(const tinyxml2::XMLElement* place) {
-        // If the place has a thumbnail url, return it
+        // If the place has a thumbnail URL, return it
         if (hasAttribute(place, Thumbnail)) {
             return attribute(place, Thumbnail);
         }
 
-        // If the place doesn't have a thumbnail url data attribute,
-        // Load the image set it stores instead
+        // If the place doesn't have a thumbnail URL data attribute. Load the image set it
+        // stores instead
         const tinyxml2::XMLElement* imageSet = childNode(place, ImageSet);
 
-        // If there is an imageSet, collect thumbnail url, if it doesn't contain an
-        // ImageSet, it doesn't have an url
+        // If there is an imageSet, collect thumbnail URL, if it doesn't contain an
+        // ImageSet, it doesn't have an URL
         return imageSet ?
             childNodeContentFromImageSet(imageSet, ThumbnailUrl) :
             std::string(Undefined);
@@ -139,7 +140,7 @@ namespace {
     bool downloadWtmlFiles(const std::filesystem::path& directory, const std::string& url,
                            const std::string& fileName)
     {
-        // Download file from url
+        // Download file from URL
         const std::filesystem::path file = std::format("{}{}.aspx", directory, fileName);
         const bool success = downloadFile(url, file);
         if (!success) {
@@ -154,14 +155,14 @@ namespace {
         const std::string f = file.string();
         document->LoadFile(f.c_str());
 
-        // Search XML file for folders with urls
+        // Search XML file for folders with URLs
         const tinyxml2::XMLElement* root = document->RootElement();
         const tinyxml2::XMLElement* element = root->FirstChildElement(Folder.data());
         const bool folderExists = element != nullptr;
         const bool folderContainNoUrls = folderExists && !hasAttribute(element, Url);
 
-        // If the file contains no folders, or there are folders but without urls,
-        // stop recursion
+        // If the file contains no folders, or there are folders but without URLs, stop
+        // recursion
         if (!folderExists || folderContainNoUrls) {
             LINFO(std::format("Saving '{}'", url));
             return true;
@@ -169,7 +170,7 @@ namespace {
 
         // Iterate through all the folders in the XML file
         while (element && std::string(element->Value()) == Folder) {
-            // If folder contains urls, download and parse those urls
+            // If folder contains urls, download and parse those URLs
             if (hasAttribute(element, Url) && hasAttribute(element, Name)) {
                 const std::string urlAttr = attribute(element, Url);
                 const std::string fileNameAttr = attribute(element, Name);
@@ -208,10 +209,10 @@ namespace {
             return std::nullopt;
         }
 
-        // Collect name, image url and credits
+        // Collect name, image URL and credits
         std::string name = attribute(node, Name);
         if (std::islower(name[0])) {
-            // convert first character in string to upper case
+            // Convert first character in string to upper case
             name[0] = static_cast<char>(std::toupper(name[0]));
         }
 
@@ -225,8 +226,8 @@ namespace {
         glm::dvec3 equatorialCartesian = glm::dvec3(0.0);
 
         if (hasCelestialCoords) {
-            // The RA from WWT is in the unit hours:
-            // to convert to degrees, multiply with 360 (deg) /24 (h) = 15
+            // The RA from WWT is in the unit hours. To convert to degrees, multiply with
+            // 360 (deg) /24 (h) = 15
             const double ra = 15.0 * std::stod(attribute(node, RA));
             const double dec = std::stod(attribute(node, Dec));
             equatorialSpherical = glm::dvec2(ra, dec);
@@ -282,8 +283,8 @@ void WwtDataHandler::loadImages(const std::string& root,
             root.find_last_of('/')
         ) + "/hash.md5";
         const bool success = downloadFile(remoteHashFile, directory / "hash.tmp");
-        // The hash download might fail if the provided 'root' does not have a hash
-        // in which case we assume that the underlying data has not changed
+        // The hash download might fail if the provided 'root' does not have a hash in
+        // which case we assume that the underlying data has not changed
         if (success) {
             std::ifstream(directory / "hash.tmp") >> remoteHash;
             std::filesystem::remove(directory / "hash.tmp");
@@ -372,8 +373,8 @@ void WwtDataHandler::saveImagesFromXml(const tinyxml2::XMLElement* root,
     // Get direct child of node called Place
     const tinyxml2::XMLElement* node = root->FirstChildElement();
 
-    // Iterate through all siblings of node. If sibling is folder, open recursively.
-    // If sibling is image, save it.
+    // Iterate through all siblings of node. If sibling is folder, open recursively. If
+    // sibling is image, save it
     while (node) {
         const std::string name = node->Name();
         // If node is an image or place, load it

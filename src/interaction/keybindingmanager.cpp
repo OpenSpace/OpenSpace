@@ -39,7 +39,7 @@ namespace openspace {
 void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
 {
     if (action == KeyAction::Press || action == KeyAction::Repeat) {
-        // iterate over key bindings
+        // Iterate over key bindings
         auto ret = _keyLua.equal_range({ key, modifier });
         for (auto it = ret.first; it != ret.second; it++) {
             ghoul_assert(!it->second.empty(), "Action must not be empty");

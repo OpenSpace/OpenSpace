@@ -104,7 +104,7 @@ public:
      * Describe if this Tile is good for usage (OK) or otherwise the reason why it is not.
      */
     enum class Status {
-        /// E.g when texture data is not currently in memory.
+        /// For example when texture data is not currently in memory.
         /// `texture` and `tileMetaData` are both `nullptr`
         Unavailable,
 
@@ -113,7 +113,7 @@ public:
         /// `texture` and `metaData` are both `nullptr`
         OutOfRange,
 
-        /// An IO Error happend
+        /// An IO Error happened.
         /// `texture` and `metaData` are both `nullptr`
         IOError,
 

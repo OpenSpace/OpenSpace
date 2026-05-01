@@ -27,18 +27,20 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/json.h>
 #include <openspace/properties/propertyowner.h>
+#include <openspace/topic/server.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
 
 namespace openspace {
 
-const char* Property::ViewOptions::Color = "Color";
-const char* Property::ViewOptions::MinMaxRange = "MinMaxRange";
+std::string Property::ViewOptions::Color = "Color";
+std::string Property::ViewOptions::MinMaxRange = "MinMaxRange";
 
 #ifdef _DEBUG
 uint64_t Property::Identifier = 0;
-#endif
+#endif // _DEBUG
 
 Property::Property(PropertyInfo info)
     : _identifier(info.identifier)
@@ -46,7 +48,7 @@ Property::Property(PropertyInfo info)
     , _description(info.description)
 #ifdef _DEBUG
     , _id(Identifier++)
-#endif
+#endif // _DEBUG
 {
     ghoul_assert(!_identifier.empty(), "Identifier must not be empty");
     ghoul_assert(!_guiName.empty(), "guiName must not be empty");
@@ -103,9 +105,9 @@ void Property::setVisibility(Visibility visibility) {
     _metaData.visibility = visibility;
     notifyMetaDataChangeListeners();
 
-    // We only subscribe to meta data changes for visible properties, so if the
-    // visibility changes during runtime, we need to notify the property owner
-    // about the change for it to affect properties that are currently hidden
+    // We only subscribe to meta data changes for visible properties, so if the visibility
+    // changes during runtime, we need to notify the property owner about the change for
+    // it to affect properties that are currently hidden
     if (_owner) {
         global::eventEngine->publishEvent<EventPropertyTreeUpdated>(_owner->uri());
     }
@@ -250,6 +252,16 @@ void Property::notifyChangeListeners() {
     for (const std::pair<OnChangeHandle, std::function<void()>>& p : _onChangeCallbacks) {
         p.second();
     }
+    if (uri().empty()) {
+        return;
+    }
+    nlohmann::json payload;
+    payload["event"] = "property_changed";
+    payload["payload"] = {
+        { "property", uri() },
+        { "value", nlohmann::json::parse(jsonValue()) }
+    };
+    global::server->passDataToTopic("propertyTree", payload);
 }
 
 void Property::notifyMetaDataChangeListeners() {
@@ -257,6 +269,18 @@ void Property::notifyMetaDataChangeListeners() {
     for (Callback& p : _onMetaDataChangeCallbacks) {
         p.second();
     }
+    if (uri().empty()) {
+        // Property has no owner yet (still being constructed), so there is nothing to
+        // notify
+        return;
+    }
+    nlohmann::json payload;
+    payload["event"] = "property_changed";
+    payload["payload"] = {
+        { "property", uri() },
+        { "metaData", generateJsonDescription() }
+    };
+    global::server->passDataToTopic("propertyTree", payload);
 }
 
 bool Property::hasChanged() const {
@@ -297,7 +321,7 @@ nlohmann::json Property::generateJsonDescription() const {
         { "visibility", vis }
     };
 
-    if (_metaData.viewOptions.size() > 0) {
+    if (!_metaData.viewOptions.empty()) {
         nlohmann::json viewOptions = nlohmann::json::object();
         for (const std::pair<const std::string, bool>& p : _metaData.viewOptions) {
             viewOptions[p.first] = p.second;

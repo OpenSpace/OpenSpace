@@ -45,7 +45,7 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
   shaders/billboard_fs.glsl
-  shaders/billboard_ge.glsl
+  shaders/billboard_gs.glsl
   shaders/billboard_vs.glsl
   shaders/galaxyraycast.glsl
   shaders/points_fs.glsl
@@ -59,6 +59,5 @@ source_group("Shader Files" FILES ${SHADER_FILES})
 create_new_module(
   "Galaxy"
   galaxy
-  STATIC
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )

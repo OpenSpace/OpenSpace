@@ -56,7 +56,7 @@ namespace {
         std::string sourceFolder;
 
         // If set to `true` the images are only loaded when it is about to be shown
-        // instead of preloading them
+        // instead of preloading them.
         std::optional<bool> lazyLoading;
     };
 } // namespace
@@ -66,7 +66,7 @@ namespace openspace {
 
 Documentation RenderablePlaneTimeVaryingImage::Documentation() {
     return codegen::doc<Parameters>(
-        "base_renderable_plane_time_varying_image",
+        "base_renderable_planetimevaryingimage",
         RenderablePlane::Documentation()
     );
 }
@@ -81,8 +81,7 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
     _sourceFolder = p.sourceFolder;
     if (!std::filesystem::is_directory(absPath(_sourceFolder))) {
         LERROR(std::format(
-            "Time varying image, '{}' is not a valid directory",
-            _sourceFolder.value()
+            "Time varying image, '{}' is not a valid directory", _sourceFolder.value()
         ));
     }
 
@@ -118,7 +117,7 @@ void RenderablePlaneTimeVaryingImage::initializeGL() {
 
     _textureFiles.resize(_sourceFiles.size());
     for (size_t i = 0; i < _sourceFiles.size(); i++) {
-        _textureFiles[i] = ghoul::io::TextureReader::ref().loadTexture(
+        _textureFiles[i] = ghoul::io::texture::loadTexture(
             absPath(_sourceFiles[i]),
             2
         );
@@ -129,8 +128,8 @@ void RenderablePlaneTimeVaryingImage::initializeGL() {
 }
 
 bool RenderablePlaneTimeVaryingImage::extractMandatoryInfoFromDictionary() {
-    // Ensure that the source folder exists and then extract
-    // the files with the same extension as <inputFileTypeString>
+    // Ensure that the source folder exists and then extract the files with the same
+    // extension as <inputFileTypeString>
     namespace fs = std::filesystem;
     const fs::path sourceFolder = absPath(_sourceFolder);
     // Extract all file paths from the provided folder
@@ -193,7 +192,7 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
         } // else we're still in same state as previous frame (no changes needed)
     }
     else {
-        // not in interval => set everything to false
+        // Not in interval => set everything to false
         _activeTriggerTimeIndex = -1;
         needsUpdate = false;
     }

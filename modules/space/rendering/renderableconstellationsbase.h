@@ -46,8 +46,6 @@ public:
     void initializeGL() override = 0;
     void deinitializeGL() override = 0;
 
-    bool isReady() const override;
-
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
     static openspace::Documentation Documentation();
@@ -77,6 +75,7 @@ protected:
 
     /// Labels
     bool _hasLabels = false;
+
     /// Everything related to the labels is handled by LabelsComponent
     std::unique_ptr<LabelsComponent> _labels;
 

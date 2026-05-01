@@ -33,11 +33,10 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    // This `DashboardItem` displays information about the status of the parallel
-    // connection, which is whether OpenSpace is directly connected to other OpenSpace
-    // instances and can either control those instances or be controlled by the master of
-    // the session. If OpenSpace is not connected, this `DashboardItem` will not display
-    // anything.
+    // Displays information about the status of the parallel connection, which is whether
+    // OpenSpace is directly connected to other OpenSpace instances and can either control
+    // those instances or be controlled by the master of the session. If OpenSpace is not
+    // connected, this `DashboardItem` will not display anything.
     //
     // The information presented contains how many clients are connected to the same
     // session and whether this machine is currently the host of the session.
@@ -79,7 +78,7 @@ void DashboardItemParallelConnection::update() {
     }
     else if (status == ParallelConnection::Status::ClientWithHost) {
         nClients--;
-        _buffer = "Session hosted by '" + hostName + "'";
+        _buffer = std::format("Session hosted by '{}'", hostName);
     }
     else if (status == ParallelConnection::Status::ClientWithoutHost) {
         _buffer = "Host is disconnected";

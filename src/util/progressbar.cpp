@@ -47,7 +47,8 @@ void ProgressBar::print(int current) {
     if (iprogress != _previous) {
         const int pos = std::clamp(static_cast<int>(_width * progress), 0, _width - 1);
 
-        _stream << std::format("[{}>{}] {:3>}% \r",
+        _stream << std::format(
+            "[{}>{}] {:3>}% \r",
             std::string(pos, '='),
             std::string(_width - pos - 1, ' '),
             iprogress
@@ -57,10 +58,10 @@ void ProgressBar::print(int current) {
 }
 
 void ProgressBar::finish() {
-    if (!isFinished) {
+    if (!_isFinished) {
         print(_end);
         _stream << '\n';
-        isFinished = true;
+        _isFinished = true;
     }
 }
 

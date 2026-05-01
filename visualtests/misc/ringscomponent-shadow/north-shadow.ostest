@@ -7,7 +7,7 @@
     },
     {
       "type": "asset",
-      "value": "scene/solarsystem/planets/saturn/default_layers.asset"
+      "value": "scene/solarsystem/planets/saturn/layers/default_layers.asset"
     },
     {
       "type": "navigationstate",

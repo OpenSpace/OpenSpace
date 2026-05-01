@@ -1,12 +1,12 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Glosnass)",
+  Name = "Satellite CSV Data (Glosnass)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_glo-ops",
-  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=glo-ops&FORMAT=kvn",
+  Identifier = "satellite_csv_data_glo-ops",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=glo-ops&FORMAT=csv",
   Filename = "glo-ops.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -14,11 +14,11 @@ local omm = asset.resource({
 
 local GlosnassSatellites = {
   Identifier = "GlosnassSatellites",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "glo-ops.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
     TrailFade = 15,
@@ -50,6 +50,6 @@ asset.meta = {
   Name = "Satellites Navigation Glosnass",
   Description = "Satellites asset for Navigation Glosnass. Data from Celestrak",
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/NORAD/elements/",
+  URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
 }

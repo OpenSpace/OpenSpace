@@ -1,0 +1,28 @@
+{
+  "version": { "major": 1, "minor": 0 },
+  "identifier": "minor_moons",
+  "name": "Minor Moons",
+  "description": "Includes the minor moons of the outer solar system planets Jupiter, Saturn, Uranus, and Neptune.",
+  "assets": [
+    "scene/solarsystem/planets/jupiter/minor/ananke_group/trail",
+    "scene/solarsystem/planets/jupiter/minor/carme_group/trail",
+    "scene/solarsystem/planets/jupiter/minor/carpo_group/trail",
+    "scene/solarsystem/planets/jupiter/minor/himalia_group/trail",
+    "scene/solarsystem/planets/jupiter/minor/inner_group/trail",
+    "scene/solarsystem/planets/jupiter/minor/other_groups/trail",
+    "scene/solarsystem/planets/jupiter/minor/pasiphae_group/trail",
+    "scene/solarsystem/planets/jupiter/minor/themisto_group/trail",
+    "scene/solarsystem/planets/saturn/minor/gallic_group/trail",
+    "scene/solarsystem/planets/saturn/minor/inuit_group/trail",
+    "scene/solarsystem/planets/saturn/minor/march_2025_discoveries/trail",
+    "scene/solarsystem/planets/saturn/minor/may_2023_discoveries/trail",
+    "scene/solarsystem/planets/saturn/minor/norse_group/trail",
+    "scene/solarsystem/planets/saturn/minor/other_group/trail",
+    "scene/solarsystem/planets/saturn/minor/shepherd_group/trail",
+    "scene/solarsystem/planets/uranus/minor/inner_moons/trail",
+    "scene/solarsystem/planets/uranus/minor/irregular_prograde_moons/trail",
+    "scene/solarsystem/planets/uranus/minor/irregular_retrograde_moons/trail",
+    "scene/solarsystem/planets/neptune/minor/inner_moons/trail",
+    "scene/solarsystem/planets/neptune/minor/irregular_moons/trail"
+  ]
+}

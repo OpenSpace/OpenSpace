@@ -32,18 +32,13 @@ namespace {
 
     size_t numberOfRasters(ghoul::opengl::Texture::Format format) {
         switch (format) {
-            case ghoul::opengl::Texture::Format::Red:
-                return 1;
-            case ghoul::opengl::Texture::Format::RG:
-                return 2;
-            case ghoul::opengl::Texture::Format::RGB:
-            case ghoul::opengl::Texture::Format::BGR:
-                return 3;
-            case ghoul::opengl::Texture::Format::RGBA:
-            case ghoul::opengl::Texture::Format::BGRA:
-                return 4;
-            default:
-                throw ghoul::MissingCaseException();
+            case ghoul::opengl::Texture::Format::Red:  return 1;
+            case ghoul::opengl::Texture::Format::RG:   return 2;
+            case ghoul::opengl::Texture::Format::RGB:  return 3;
+            case ghoul::opengl::Texture::Format::BGR:  return 3;
+            case ghoul::opengl::Texture::Format::RGBA: return 4;
+            case ghoul::opengl::Texture::Format::BGRA: return 4;
+            default:                                  throw ghoul::MissingCaseException();
         }
     }
 
@@ -58,8 +53,7 @@ namespace {
             case GL_HALF_FLOAT:     return sizeof(GLhalf);
             case GL_FLOAT:          return sizeof(GLfloat);
             case GL_DOUBLE:         return sizeof(GLdouble);
-            default:
-                throw ghoul::MissingCaseException();
+            default:                throw ghoul::MissingCaseException();
         }
     }
 

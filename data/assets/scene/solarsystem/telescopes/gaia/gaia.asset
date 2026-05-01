@@ -1,6 +1,5 @@
-local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local sunTransform = asset.require("scene/solarsystem/sun/transforms")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -21,7 +20,7 @@ local trail = asset.resource({
 
 local Gaia = {
   Identifier = "Gaia",
-  Parent = earthTransforms.EarthCenter.Identifier,
+  Parent = earthAsset.EarthCenter.Identifier,
   Transform = {
     Translation = {
       Type = "HorizonsTranslation",
@@ -40,7 +39,7 @@ local Gaia = {
       Attached = "Gaia",
       XAxis = { 1.0, 0.0, 0.0 },
       XAxisOrthogonal = true,
-      YAxis = sun.Sun.Identifier,
+      YAxis = sunAsset.SunCenter.Identifier,
       YAxisInvert = true
     },
     Scale = {
@@ -53,13 +52,14 @@ local Gaia = {
     Type = "RenderableModel",
     GeometryFile = model .. "gaia.obj",
     LightSources = {
-      sunTransform.LightSource,
+      sunAsset.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
         Intensity = 0.4
       }
-    }
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Gaia",

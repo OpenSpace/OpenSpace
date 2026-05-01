@@ -60,9 +60,7 @@ bool WebsocketInputStates::button(int button, WebsocketAction action) const {
         end(),
         [button, action](const std::pair<const size_t, const WebsocketInputState *> state)
         {
-            return state.second->isConnected ?
-                (state.second->buttons[button] == action)
-                : false;
+            return state.second->isConnected && (state.second->buttons[button] == action);
         }
     );
     return res;

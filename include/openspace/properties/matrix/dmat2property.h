@@ -34,8 +34,7 @@ namespace openspace {
 
 class DMat2Property : public NumericalProperty<glm::dmat2x2> {
 public:
-    explicit DMat2Property(Property::PropertyInfo info,
-        glm::dmat2x2 value = glm::dmat2x2(0.0),
+    explicit DMat2Property(PropertyInfo info, glm::dmat2x2 value = glm::dmat2x2(0.0),
         glm::dmat2x2 minValue =
             ghoul::createFillMat2x2<double>(std::numeric_limits<double>::lowest()),
         glm::dmat2x2 maxValue =

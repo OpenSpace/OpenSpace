@@ -57,6 +57,7 @@ local Node_Invert = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Node)
   openspace.addSceneGraphNode(Node_Invert)

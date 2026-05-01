@@ -36,13 +36,13 @@ namespace {
     struct [[codegen::Dictionary(Scale)]] Parameters {
         // The type of the scaling that is described in this element. The available types
         // of scaling depend on the configuration of the application and can be written to
-        // disk on application startup into the FactoryDocumentation
+        // disk on application startup into the FactoryDocumentation.
         std::string type [[codegen::annotation("Must name a valid Scale type")]];
 
         // The time frame in which this `Scale` is applied. If the in-game time is outside
         // this range, no scaling will be applied.
         std::optional<ghoul::Dictionary> timeFrame
-            [[codegen::reference("core_time_frame")]];
+            [[codegen::reference("core_timeframe")]];
     };
 } // namespace
 #include "scale_codegen.cpp"
@@ -50,7 +50,7 @@ namespace {
 namespace openspace {
 
 Documentation Scale::Documentation() {
-    return codegen::doc<Parameters>("core_transform_scale");
+    return codegen::doc<Parameters>("core_scale");
 }
 
 ghoul::mm_unique_ptr<Scale> Scale::createFromDictionary(

@@ -92,6 +92,9 @@ namespace {
         Property::Visibility::User
     };
 
+    // Renders a prism shape defined by two polygonal shapes (base and top) connected by
+    // lines. The number of polygon segments is determined by the `Segments`
+    // property, with the same number being used for both the base and the top.
     struct [[codegen::Dictionary(RenderablePrism)]] Parameters {
         // [[codegen::verbatim(SegmentsInfo.description)]]
         int segments;
@@ -167,10 +170,6 @@ RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)
     addProperty(_length);
 
     addProperty(Fadeable::_opacity);
-}
-
-bool RenderablePrism::isReady() const {
-    return _shader != nullptr;
 }
 
 void RenderablePrism::initializeGL() {
@@ -315,14 +314,12 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4 modelViewProjectionTransform =
         calcModelViewProjectionTransform(data);
 
-    // Uniforms
     _shader->setUniform(
         _uniformCache.modelViewProjectionTransform,
         glm::mat4(modelViewProjectionTransform)
     );
     _shader->setUniform(_uniformCache.color, glm::vec4(_lineColor.value(), opacity()));
 
-    // Render
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(255);
     glLineWidth(_lineWidth);

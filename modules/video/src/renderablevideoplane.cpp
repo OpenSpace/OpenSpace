@@ -32,7 +32,7 @@
 #include <limits>
 
 namespace {
-    // This `Renderable` creates a textured 3D plane where the texture is a video.
+    // Creates a textured 3D plane where the texture is a video.
     //
     // The video can either be played back based on a given simulation time
     // (`PlaybackMode` MapToSimulationTime) or through the user interface (for
@@ -49,7 +49,7 @@ namespace openspace {
 
 Documentation RenderableVideoPlane::Documentation() {
     openspace::Documentation doc = codegen::doc<Parameters>(
-        "video_renderablevideoplane",
+        "video_renderable_videoplane",
         RenderablePlane::Documentation()
     );
 
@@ -74,10 +74,6 @@ void RenderableVideoPlane::initializeGL() {
 void RenderableVideoPlane::deinitializeGL() {
     _videoPlayer.destroy();
     RenderablePlane::deinitializeGL();
-}
-
-bool RenderableVideoPlane::isReady() const {
-    return RenderablePlane::isReady() && _videoPlayer.isInitialized();
 }
 
 void RenderableVideoPlane::render(const RenderData& data, RendererTasks& rendererTask) {

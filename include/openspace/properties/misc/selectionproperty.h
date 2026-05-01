@@ -123,7 +123,7 @@ private:
 private:
     std::set<std::string> toValue(lua_State* state) const override final;
 
-    // A list of all available options that can be selected
+    /// A list of all available options that can be selected
     std::vector<std::string> _options;
 };
 

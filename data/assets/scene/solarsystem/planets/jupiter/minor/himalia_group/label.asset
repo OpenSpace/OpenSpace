@@ -1,0 +1,336 @@
+local transforms = asset.require("./transforms")
+
+
+
+local LedaLabel = {
+  Identifier = "LedaLabel",
+  Parent = transforms.LedaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Leda",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.0, 120.0 },
+    FadeWidths = { 1.0, 120.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_himalia"
+  },
+  GUI = {
+    Name = "Leda Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Leda",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Leda (Himalia group)"
+  }
+}
+
+local HimaliaLabel = {
+  Identifier = "HimaliaLabel",
+  Parent = transforms.HimaliaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Himalia",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.0, 120.0 },
+    FadeWidths = { 1.0, 120.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_himalia"
+  },
+  GUI = {
+    Name = "Himalia Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Himalia",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Himalia (Himalia group)"
+  }
+}
+
+local LysitheaLabel = {
+  Identifier = "LysitheaLabel",
+  Parent = transforms.LysitheaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Lysithea",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.0, 120.0 },
+    FadeWidths = { 1.0, 120.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_himalia"
+  },
+  GUI = {
+    Name = "Lysithea Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Lysithea",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Lysithea (Himalia group)"
+  }
+}
+
+local ElaraLabel = {
+  Identifier = "ElaraLabel",
+  Parent = transforms.ElaraPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Elara",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.0, 120.0 },
+    FadeWidths = { 1.0, 120.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_himalia"
+  },
+  GUI = {
+    Name = "Elara Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Elara",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Elara (Himalia group)"
+  }
+}
+
+local DiaLabel = {
+  Identifier = "DiaLabel",
+  Parent = transforms.DiaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Dia",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.0, 120.0 },
+    FadeWidths = { 1.0, 120.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_himalia"
+  },
+  GUI = {
+    Name = "Dia Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Dia",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Dia (Himalia group)"
+  }
+}
+
+local S2011J3Label = {
+  Identifier = "S2011J3Label",
+  Parent = transforms.S2011J3Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2011 J 3",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.0, 120.0 },
+    FadeWidths = { 1.0, 120.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_himalia"
+  },
+  GUI = {
+    Name = "S/2011 J 3 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/S2011J3",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S2011J3 (Himalia group)"
+  }
+}
+
+local S2018J2Label = {
+  Identifier = "S2018J2Label",
+  Parent = transforms.S2018J2Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2018 J 2",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.0, 120.0 },
+    FadeWidths = { 1.0, 120.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_himalia"
+  },
+  GUI = {
+    Name = "S/2018 J 2 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/S2018J2",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S2018J2 (Himalia group)"
+  }
+}
+
+local PandiaLabel = {
+  Identifier = "PandiaLabel",
+  Parent = transforms.PandiaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Pandia",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.0, 120.0 },
+    FadeWidths = { 1.0, 120.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_himalia"
+  },
+  GUI = {
+    Name = "Pandia Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Pandia",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Pandia (Himalia group)"
+  }
+}
+
+local ErsaLabel = {
+  Identifier = "ErsaLabel",
+  Parent = transforms.ErsaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Ersa",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.0, 120.0 },
+    FadeWidths = { 1.0, 120.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_himalia"
+  },
+  GUI = {
+    Name = "Ersa Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Ersa",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Ersa (Himalia group)"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(LedaLabel)
+  openspace.addSceneGraphNode(HimaliaLabel)
+  openspace.addSceneGraphNode(LysitheaLabel)
+  openspace.addSceneGraphNode(ElaraLabel)
+  openspace.addSceneGraphNode(DiaLabel)
+  openspace.addSceneGraphNode(S2011J3Label)
+  openspace.addSceneGraphNode(S2018J2Label)
+  openspace.addSceneGraphNode(PandiaLabel)
+  openspace.addSceneGraphNode(ErsaLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(ErsaLabel)
+  openspace.removeSceneGraphNode(PandiaLabel)
+  openspace.removeSceneGraphNode(S2018J2Label)
+  openspace.removeSceneGraphNode(S2011J3Label)
+  openspace.removeSceneGraphNode(DiaLabel)
+  openspace.removeSceneGraphNode(ElaraLabel)
+  openspace.removeSceneGraphNode(LysitheaLabel)
+  openspace.removeSceneGraphNode(HimaliaLabel)
+  openspace.removeSceneGraphNode(LedaLabel)
+end)
+
+asset.export(LedaLabel)
+asset.export(HimaliaLabel)
+asset.export(LysitheaLabel)
+asset.export(ElaraLabel)
+asset.export(DiaLabel)
+asset.export(S2011J3Label)
+asset.export(S2018J2Label)
+asset.export(PandiaLabel)
+asset.export(ErsaLabel)
+
+
+
+asset.meta = {
+  Name = "Jupiter Himalia Group Moons Labels",
+  Description = [[Asset containing labels for Jupiter's Himalia Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

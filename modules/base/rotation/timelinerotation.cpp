@@ -43,15 +43,15 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // This `Rotation` uses a timeline of other `Rotation` classes to calculate the
-    // final rotation for the attached scene graph node. The current in-game time is
-    // used to determine which specific keyframe to currently use. It is also possible to
-    // interpolate between two adjacent keyframes.
+    // Uses a timeline of other `Rotation` classes to calculate the final rotation for the
+    // attached scene graph node. The current in-game time is used to determine which
+    // specific keyframe to currently use. It is also possible to interpolate between two
+    // adjacent keyframes.
     struct [[codegen::Dictionary(TimelineRotation)]] Parameters {
         // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
-        // that are valid Rotation objects
+        // that are valid Rotation objects.
         std::map<std::string, ghoul::Dictionary> keyframes
-            [[codegen::reference("core_transform_rotation")]];
+            [[codegen::reference("core_rotation")]];
 
         // [[codegen::verbatim(ShouldInterpolateInfo.description)]]
         std::optional<bool> shouldInterpolate;
@@ -62,7 +62,7 @@ namespace {
 namespace openspace {
 
 Documentation TimelineRotation::Documentation() {
-    return codegen::doc<Parameters>("base_transform_rotation_keyframe");
+    return codegen::doc<Parameters>("base_rotation_keyframe");
 }
 
 TimelineRotation::TimelineRotation(const ghoul::Dictionary& dictionary)

@@ -9,6 +9,7 @@ local Item = {
   FilePath = asset.resource("data/example.json")
 }
 
+
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(Item)
 end)

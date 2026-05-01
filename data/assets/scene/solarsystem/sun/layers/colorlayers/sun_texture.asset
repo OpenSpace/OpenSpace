@@ -1,4 +1,4 @@
-local globe = asset.require("../../sun")
+local globe = asset.require("scene/solarsystem/sun/globe")
 
 
 
@@ -34,6 +34,6 @@ asset.meta = {
   Name = "Sun Texture",
   Description = "Default Sun texture for renderable globe",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

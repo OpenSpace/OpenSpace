@@ -1,12 +1,12 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (100 Brightest)",
+  Name = "Satellite CSV Data (100 Brightest)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_visual",
-  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=visual&FORMAT=kvn",
+  Identifier = "satellite_csv_data_visual",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=visual&FORMAT=csv",
   Filename = "visual.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -14,11 +14,11 @@ local omm = asset.resource({
 
 local BrightestSatellites = {
   Identifier = "BrightestSatellites",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "visual.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.55, 0.25, 0.65 },
     TrailFade = 15,
@@ -52,6 +52,6 @@ asset.meta = {
   Name = "Satellites 100 Brightest",
   Description = "Satellites asset for 100 Brightest. Data from Celestrak",
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/NORAD/elements/",
+  URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
 }

@@ -110,11 +110,11 @@ namespace {
 
         // If true (default), the loaded labels file will be cached so that it can be
         // loaded faster at a later time. Note that this also means that changes in the
-        // file will not be registered until the cached file is deleted. Set to false
-        // to disable chaching and always do a fresh load of the label file
+        // file will not be registered until the cached file is deleted. Set to false to
+        // disable chaching and always do a fresh load of the label file.
         std::optional<bool> useCaching;
 
-        // The opacity of the labels
+        // The opacity of the labels.
         std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
 
         // [[codegen::verbatim(ColorInfo.description)]]
@@ -152,7 +152,7 @@ namespace {
 namespace openspace {
 
 Documentation LabelsComponent::Documentation() {
-    return codegen::doc<Parameters>("labelscomponent");
+    return codegen::doc<Parameters>("core_labelscomponent");
 }
 
 LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
@@ -174,12 +174,7 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
     _labelFile = p.file.has_value() ? absPath(*p.file) : "";
     _useCache = p.useCaching.value_or(true);
 
-    if (p.unit.has_value()) {
-        _unit = codegen::map<DistanceUnit>(*p.unit);
-    }
-    else {
-        _unit = DistanceUnit::Meter;
-    }
+    _unit = codegen::map<DistanceUnit>(p.unit.value_or(Parameters::Unit::Meter));
 
     _enabled = p.enabled.value_or(_enabled);
     addProperty(_enabled);
@@ -281,10 +276,6 @@ void LabelsComponent::loadLabels() {
     }
 }
 
-bool LabelsComponent::isReady() const {
-    return !(_labelset.entries.empty());
-}
-
 bool LabelsComponent::enabled() const {
     return _enabled;
 }
@@ -302,18 +293,19 @@ void LabelsComponent::render(const RenderData& data,
     const int renderOption =
         _faceCamera ? RenderOptionFaceCamera : RenderOptionPositionNormal;
 
-    ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
-    labelInfo.orthoRight = orthoRight;
-    labelInfo.orthoUp = orthoUp;
-    labelInfo.minSize = _minMaxSize.value().x;
-    labelInfo.maxSize = _minMaxSize.value().y;
-    labelInfo.cameraPos = data.camera.positionVec3();
-    labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
-    labelInfo.renderType = renderOption;
-    labelInfo.mvpMatrix = modelViewProjectionMatrix;
-    labelInfo.scale = std::pow(10.f, _size);
-    labelInfo.enableDepth = true;
-    labelInfo.enableFalseDepth = false;
+    const ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo = {
+        .enableDepth = true,
+        .enableFalseDepth = false,
+        .scale = std::pow(10.f, _size),
+        .renderType = renderOption,
+        .minSize = _minMaxSize.value().x,
+        .maxSize = _minMaxSize.value().y,
+        .mvpMatrix = modelViewProjectionMatrix,
+        .orthoRight = orthoRight,
+        .orthoUp = orthoUp,
+        .cameraPos = data.camera.position(),
+        .cameraLookUp = data.camera.lookUpVectorWorldSpace()
+    };
 
     const glm::vec4 textColor = glm::vec4(glm::vec3(_color), opacity() * fadeInVariable);
 

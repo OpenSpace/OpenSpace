@@ -1,5 +1,5 @@
-asset.require("./inner_moons")
-asset.require("./irregular_moons")
+asset.require("./minor/inner_moons/inner_moons")
+asset.require("./minor/irregular_moons/irregular_moons")
 
 
 
@@ -84,6 +84,6 @@ asset.meta = {
   Description = [[Meta asset containing two moon groups: inner_moons and
     irregular_moons]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

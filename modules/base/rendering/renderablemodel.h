@@ -55,8 +55,6 @@ public:
     void createDepthMapResources();
     void releaseDepthMapResources();
 
-    bool isReady() const override;
-
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
@@ -131,7 +129,7 @@ private:
     GLuint _vbo = 0;
     bool _shouldRenderTwice = false;
 
-    // Opacity program
+    /// Opacity program
     ghoul::opengl::ProgramObject* _quadProgram = nullptr;
     UniformCache(opacity, colorTexture, depthTexture, viewport,
         resolution) _uniformOpacityCache;

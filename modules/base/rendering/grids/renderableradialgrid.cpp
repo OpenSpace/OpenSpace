@@ -85,8 +85,8 @@ namespace {
         "The labels for the grid."
     };
 
-    // This `Renderable` creates a planar circular grid with a given size. Optionally, it
-    // may have a hole in the center.
+    // Creates a planar circular grid with a given size. Optionally, it may have a hole in
+    // the center.
     //
     // The size is determined by two radii values: The first (inner) radius defines the
     // hole in the center. The second (outer) radius defines the full grid size. To create
@@ -109,7 +109,7 @@ namespace {
 
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("labelscomponent")]];
+            [[codegen::reference("core_labelscomponent")]];
     };
 } // namespace
 #include "renderableradialgrid_codegen.cpp"
@@ -162,13 +162,9 @@ RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
         _labels = std::make_unique<LabelsComponent>(*p.labels);
         _hasLabels = true;
         addPropertySubOwner(_labels.get());
-        // Fading of the labels should also depend on the fading of the renderable
+        // Fading of the labels should also depend on the fading of the Renderable
         _labels->setParentFadeable(this);
     }
-}
-
-bool RenderableRadialGrid::isReady() const {
-    return _gridProgram && (_hasLabels ? _labels->isReady() : true);
 }
 
 void RenderableRadialGrid::initialize() {
@@ -211,7 +207,6 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
-    // Change GL state:
     glLineWidth(_lineWidth);
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -226,7 +221,6 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
 
     _gridProgram->deactivate();
 
-    // Restore GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
     global::renderEngine->openglStateCache().resetDepthState();
@@ -277,15 +271,14 @@ void RenderableRadialGrid::update(const UpdateData&) {
     _circles.reserve(nCircles);
 
     auto addRing = [this](int nSegments, float radius) {
-        std::vector<rendering::Vertex> vertices =
-            rendering::createRing(nSegments, radius);
+        std::vector<rendering::Vertex> verts = rendering::createRing(nSegments, radius);
 
         _circles.emplace_back(GL_LINE_STRIP);
-        std::vector<rendering::VertexXYZ> data = rendering::convert(std::move(vertices));
+        std::vector<rendering::VertexXYZ> data = rendering::convert(std::move(verts));
         _circles.back().update(data);
     };
 
-    // add an extra inmost circle
+    // Add an extra inmost circle
     if (hasInnerRadius) {
         addRing(_circleSegments, innerRadius);
     }
@@ -296,13 +289,11 @@ void RenderableRadialGrid::update(const UpdateData&) {
     }
 
     // Lines
-    const int nLines = _gridSegments.value()[1];
-    const int nVertices = 2 * nLines;
+    if (const int nLines = _gridSegments.value()[1];  nLines > 1) {
+        std::vector<rendering::VertexXYZ> data;
+        const int nVertices = 2 * nLines;
+        data.reserve(nVertices);
 
-    std::vector<rendering::VertexXYZ> data;
-    data.reserve(nVertices);
-
-    if (nLines > 1) {
         std::vector<rendering::Vertex> outerVertices =
             rendering::createRing(nLines, outerRadius);
 
@@ -310,17 +301,14 @@ void RenderableRadialGrid::update(const UpdateData&) {
             rendering::createRing(nLines, innerRadius);
 
         for (int i = 0; i < nLines; i++) {
-            const rendering::VertexXYZ vOut =
-                rendering::convertToXYZ(outerVertices[i]);
-
-            const rendering::VertexXYZ vIn =
-                rendering::convertToXYZ(innerVertices[i]);
-
+            const rendering::VertexXYZ vOut = rendering::convertToXYZ(outerVertices[i]);
             data.push_back(vOut);
+
+            const rendering::VertexXYZ vIn = rendering::convertToXYZ(innerVertices[i]);
             data.push_back(vIn);
         }
+        _lines.update(data);
     }
-    _lines.update(data);
 
     setBoundingSphere(static_cast<double>(outerRadius));
 

@@ -46,7 +46,9 @@ public:
 
     static openspace::Documentation Documentation();
 
-    // Get the distance between the start and end node
+    /**
+     * Get the distance between the start and end node.
+     */
     double distance() const;
 
     std::string start() const;
@@ -56,7 +58,6 @@ private:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 

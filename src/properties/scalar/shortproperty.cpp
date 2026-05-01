@@ -28,7 +28,7 @@
 
 namespace openspace {
 
-ShortProperty::ShortProperty(Property::PropertyInfo info, short value, short minValue,
+ShortProperty::ShortProperty(PropertyInfo info, short value, short minValue,
                              short maxValue, short stepValue)
     : NumericalProperty<short>(std::move(info), value, minValue, maxValue, stepValue)
 {}

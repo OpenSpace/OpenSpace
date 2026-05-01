@@ -69,7 +69,7 @@ namespace {
 namespace openspace {
 
 Documentation DashboardItem::Documentation() {
-    return codegen::doc<Parameters>("dashboarditem");
+    return codegen::doc<Parameters>("core_dashboarditem");
 }
 
 std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(

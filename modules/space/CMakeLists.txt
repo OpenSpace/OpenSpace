@@ -88,7 +88,7 @@ set(SHADER_FILES
   shaders/rings_vs.glsl
   shaders/rings_fs.glsl
   shaders/star_fs.glsl
-  shaders/star_ge.glsl
+  shaders/star_gs.glsl
   shaders/star_vs.glsl
   shaders/travelspeed_fs.glsl
   shaders/travelspeed_vs.glsl
@@ -98,7 +98,6 @@ source_group("Shader Files" FILES ${SHADER_FILES})
 create_new_module(
   "Space"
   space_module
-  STATIC
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 target_precompile_headers(${space_module} PRIVATE

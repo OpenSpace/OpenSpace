@@ -91,8 +91,6 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     /**
      * The render method will set up the shader information and then render first the
      * information contained in the the `_primaryRenderInformation`, then the optional
@@ -117,18 +115,20 @@ protected:
 
     static openspace::Documentation Documentation();
 
-    /// The layout of the VBOs (use float if sending as positions to shader)
+    /**
+     * The layout of the VBOs (use float if sending as positions to shader).
+     */
     template <typename T>
     struct TrailVBOLayout {
         T x, y, z;
     };
 
     /// The backend storage for the vertex buffer object containing all points for this
-    /// trail.
+    /// trail
     std::vector<TrailVBOLayout<float>> _vertexArray;
 
     /// The index array that is potentially used in the draw call. If this is empty, no
-    /// element draw call is used.
+    /// element draw call is used
     std::vector<unsigned int> _indexArray;
 
     /// The Translation object that provides the position of the individual trail points

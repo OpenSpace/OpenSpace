@@ -75,13 +75,14 @@ void TargetBrowserPair::setImageOrder(const std::string& imageUrl, int order) {
 }
 
 void TargetBrowserPair::startFinetuningTarget() {
-
     _startTargetPosition = _targetNode->worldPosition();
 }
 
-// The fine tune of the target is a way to "drag and drop" the target with click
-// drag on the sky browser window. This is to be able to drag the target around when it
-// has a very small field of view
+/**
+ * The fine tune of the target is a way to "drag and drop" the target with click drag on
+ * the sky browser window. This is to be able to drag the target around when it has a very
+ * small field of view.
+ */
 void TargetBrowserPair::fineTuneTarget(const glm::vec2& translation) {
     const glm::dvec2 percentage = glm::dvec2(translation);
     const glm::dvec3 right = _targetRenderable->rightVector() * percentage.x;
@@ -188,7 +189,6 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     res.setValue("dec", spherical.y);
     res.setValue("cartesianDirection", cartesian);
     res.setValue("selectedImages", selectedImagesIndices);
-
     return res;
 }
 
@@ -227,6 +227,7 @@ void TargetBrowserPair::hideChromeInterface() {
 void TargetBrowserPair::sendIdToBrowser() const {
     _browser->setIdInBrowser();
 }
+
 std::vector<std::pair<std::string, glm::dvec3>> TargetBrowserPair::displayCopies() const {
     return _browser->displayCopies();
 }
@@ -322,7 +323,6 @@ void TargetBrowserPair::startFading(float goal, float fadeTime) {
         "openspace.setPropertyValueSingle('ScreenSpace.{1}.Fade', {2}, {3});",
         _targetNode->identifier(), _browser->identifier(), goal, fadeTime
     );
-
     global::scriptEngine->queueScript(script);
 }
 
@@ -358,11 +358,10 @@ void TargetBrowserPair::centerTargetOnScreen() {
 }
 
 double TargetBrowserPair::targetRoll() const {
-    // To remove the lag effect when moving the camera while having a locked
-    // target, send the locked coordinates to wwt
+    // To remove the lag effect when moving the camera while having a locked target, send
+    // the locked coordinates to wwt
     const glm::dvec3 normal = glm::normalize(
-        _targetNode->worldPosition() -
-        global::navigationHandler->camera()->positionVec3()
+        _targetNode->worldPosition() - global::navigationHandler->camera()->position()
     );
     const glm::dvec3 right = _targetRenderable->rightVector();
     const glm::dvec3 up = glm::normalize(glm::cross(right, normal));

@@ -3,7 +3,7 @@ local ToggleTrail = {
   Name = "Toggle Artemis trails (auto)",
   Command = [[
     local node
-    if is_declared("args") then
+    if is_declared("args") and is_declared("args.Node") then
       node = args.Node
     else
       node = openspace.navigation.getNavigationState().Anchor

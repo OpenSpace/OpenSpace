@@ -47,8 +47,6 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
@@ -98,7 +96,7 @@ private:
     float _interpolationTime = 0.f;
 
     struct RenderInformation {
-        // Differentiating different vertex types
+        /// Differentiating different vertex types
         using VertexColorType = int32_t;
         // This needs to be synced with the fov_vs.glsl shader
         static constexpr VertexColorType VertexColorTypeDefaultStart = 0;

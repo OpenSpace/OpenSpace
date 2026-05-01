@@ -37,6 +37,7 @@ class ScreenSpaceImageLocal : public ScreenSpaceRenderable {
 public:
     explicit ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary);
 
+    void initializeGL() override;
     void deinitializeGL() override;
 
     void update() override;
@@ -49,6 +50,8 @@ private:
     StringProperty _texturePath;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
+    bool _isLoadingLazily = false;
+    bool _shouldUnloadTexture = false;
     bool _textureIsDirty = false;
 };
 

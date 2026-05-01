@@ -26,9 +26,9 @@
 
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/globals.h>
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/action.h>
@@ -48,11 +48,11 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringhelper.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/misc/templatefactory.h>
 #include <algorithm>
 #include <fstream>
@@ -189,8 +189,8 @@ namespace {
                 // Since this is a table we need to recurse this function to extract data
                 nlohmann::json tableDocs = documentationToJson(doc);
 
-                // Set the members entry to the members of the table
-                // to remove unnecessary nestling
+                // Set the members entry to the members of the table to remove unnecessary
+                // nestling
                 entry[MembersKey] = tableDocs[MembersKey];
             }
             else {
@@ -538,7 +538,7 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
         // Add documentation about derived classes
         const std::vector<std::string>& registeredClasses = f->registeredClasses();
         for (const std::string& c : registeredClasses) {
-            if (c == "") {
+            if (c.empty()) {
                 LERROR("Factory documentation, derived class, without identifier");
                 continue;
             }
@@ -563,14 +563,14 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
         sortJson(factory[ClassesKey], NameKey);
         json.push_back(factory);
     }
+
     // Add all leftover docs
     nlohmann::json leftovers;
     leftovers[NameKey] = OtherName;
     leftovers[IdentifierKey] = OtherIdentifierName;
 
     for (const Documentation& doc : docs) {
-        if (doc.id == "") {
-            LERROR("Documentation without identifier");
+        if (doc.id.empty()) {
             continue;
         }
         leftovers[ClassesKey].push_back(documentationToJson(doc));
@@ -632,7 +632,7 @@ void DocumentationEngine::writeJavascriptDocumentation() const {
 
     // Write documentation to json files if config file supplies path for doc files
     if (global::configuration->documentation.path.empty()) {
-        // if path was empty, that means that no documentation is requested
+        // If path was empty, that means that no documentation is requested
         return;
     }
 
@@ -666,27 +666,25 @@ void DocumentationEngine::writeJavascriptDocumentation() const {
     nlohmann::json result;
     result[DocumentationKey] = documentation;
 
-    // Make into a javascript variable so that it is possible to open with static html
+    // Make into a JavaScript variable so that it is possible to open with static HTML
     std::ofstream out = std::ofstream(absPath("${DOCUMENTATION}/documentationData.js"));
     out << "var data = " << result.dump();
 }
 
 void DocumentationEngine::writeJsonDocumentation() const {
-    nlohmann::json factory = generateFactoryManagerJson();
-    nlohmann::json scripting = generateScriptEngineJson();
+    // Write two json files for the static docs page - asset components and scripting API
 
-    // Write two json files for the static docs page - asset components and scripting api
-    std::ofstream out = std::ofstream(absPath("${DOCUMENTATION}/assetComponents.json"));
-    if (out) {
-        out << factory.dump();
+    std::ofstream outFactory(absPath("${DOCUMENTATION}/assetComponents.json"));
+    if (outFactory.good()) {
+        nlohmann::json factory = generateFactoryManagerJson();
+        outFactory << factory.dump();
     }
-    out.close();
 
-    out.open(absPath("${DOCUMENTATION}/scriptingApi.json"));
-    if (out) {
-        out << scripting.dump();
+    std::ofstream outScription(absPath("${DOCUMENTATION}/scriptingApi.json"));
+    if (outScription.good()) {
+        nlohmann::json scripting = generateScriptEngineJson();
+        outScription << scripting.dump();
     }
-    out.close();
 }
 
 nlohmann::json DocumentationEngine::generateActionJson() const {
@@ -697,7 +695,7 @@ nlohmann::json DocumentationEngine::generateActionJson() const {
 
     for (const Action& action : actions) {
         nlohmann::json d;
-        // Use identifier as name to make it more similar to scripting api
+        // Use identifier as name to make it more similar to the scripting API
         d[NameKey] = action.identifier;
         d[GuiNameKey] = action.name;
         d[DocumentationKey] = action.documentation;

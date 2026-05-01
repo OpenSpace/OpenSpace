@@ -1,5 +1,5 @@
-local earth = asset.require("scene/solarsystem/planets/earth/earth")
-local sun = asset.require("scene/solarsystem/sun/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -23,18 +23,18 @@ local ExamplePolygon = {
     PerformShading = true
   },
   LightSources = {
-    sun.LightSource
+    sunAsset.LightSource
   },
   Name = "Extruded and Shaded Polygon (lit by Sun)"
 }
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExamplePolygon)
+  openspace.globebrowsing.addGeoJson(earthAsset.Earth.Identifier, ExamplePolygon)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, ExamplePolygon)
+  openspace.globebrowsing.deleteGeoJson(earthAsset.Earth.Identifier, ExamplePolygon)
 end)
 
 asset.export(ExamplePolygon)
@@ -46,6 +46,6 @@ asset.meta = {
   Description = [[GeoJson example asset demonstrating how to apply shading from light
     sources on polygons]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

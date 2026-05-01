@@ -67,9 +67,10 @@ std::string SyncBuffer::decode() {
         _dataStream.data() + _decodeOffset,
         sizeof(int32_t)
     );
+    length = std::max(length, 0);
     std::vector<char> tmp(length + 1);
     _decodeOffset += sizeof(int32_t);
-    memcpy(tmp.data(), _dataStream.data() + _decodeOffset, length);
+    memcpy(tmp.data(), _dataStream.data() + _decodeOffset, static_cast<size_t>(length));
     _decodeOffset += length;
     tmp[length] = '\0';
     std::string ret(tmp.data());

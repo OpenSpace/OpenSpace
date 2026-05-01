@@ -47,6 +47,7 @@
 #include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <cstring>
 #include <iterator>
 #include <limits>
@@ -102,16 +103,10 @@ namespace {
     }
 
     using ProfilePropertyLua = std::variant<bool, float, std::string, ghoul::lua::nil_t>;
-    PropertyValueType propertyValueType(const std::string& value);
-    void handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::string& value,
-        bool& isTableValue, std::string_view propertyName);
-    ProfilePropertyLua propertyProcessValue(ghoul::lua::LuaState& L,
-        const std::string& value, bool& valueIsTable, std::string_view propertyName);
     template <typename T>
     void processPropertyValueTableEntries(ghoul::lua::LuaState& L,
         const std::string& value, std::vector<T>& table, bool& valueIsTable,
         std::string_view propertyName);
-
 
     /**
      * Accepts string version of a property value from a profile, and returns the
@@ -211,7 +206,6 @@ namespace {
         }
     }
 
-
     /**
      * Accepts string version of a property value from a profile, and processes it
      * according to the data type of the value.
@@ -260,7 +254,7 @@ namespace {
 
     /**
      * Accepts string version of a property value from a profile, and adds it to a vector
-     * which will later be used to push as a Lua table containing values of type T
+     * which will later be used to push as a Lua table containing values of type T.
      *
      * \param L The Lua state to (eventually) push to
      * \param value String representation of the value with which to set property
@@ -426,10 +420,9 @@ void Scene::sortTopologically() {
 
     std::unordered_map<SceneGraphNode*, size_t> inDegrees;
     for (SceneGraphNode* node : _topologicallySortedNodes) {
-        size_t inDegree = node->dependencies().size();
         if (node->parent()) {
-            inDegree++;
-            inDegrees[node] = inDegree;
+            const size_t inDegree = node->dependencies().size();
+            inDegrees[node] = inDegree + 1;
         }
     }
 
@@ -648,7 +641,8 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
 
 void Scene::addPropertyInterpolation(Property* prop, float durationSeconds,
                                      std::string postScript,
-                                     ghoul::EasingFunction easingFunction)
+                                     ghoul::EasingFunction easingFunction,
+                                     bool shouldBounce)
 {
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
     ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
@@ -676,6 +670,10 @@ void Scene::addPropertyInterpolation(Property* prop, float durationSeconds,
             info.durationSeconds = durationSeconds;
             info.postScript = std::move(postScript);
             info.easingFunction = func;
+            info.isBouncing = shouldBounce;
+            info.bouncingShouldStop = false;
+            info.bouncingShouldStopT = -1.f;
+            info.bouncingAbortTime = std::chrono::time_point<std::chrono::steady_clock>();
             // If we found it, we can break since we make sure that each property is only
             // represented once in this
             return;
@@ -687,7 +685,8 @@ void Scene::addPropertyInterpolation(Property* prop, float durationSeconds,
         .beginTime = now,
         .durationSeconds = durationSeconds,
         .postScript = std::move(postScript),
-        .easingFunction = func
+        .easingFunction = func,
+        .isBouncing = shouldBounce
     };
     _propertyInterpolationInfos.push_back(std::move(i));
 }
@@ -726,22 +725,52 @@ void Scene::updateInterpolations() {
         const long long us =
             duration_cast<std::chrono::microseconds>(now - i.beginTime).count();
 
-        const float t = glm::clamp(
-            static_cast<float>(
-                static_cast<double>(us) /
-                static_cast<double>(i.durationSeconds * 1000000)
-            ),
-            0.f,
-            1.f
+        const float t = static_cast<float>(
+            static_cast<double>(us) /
+            static_cast<double>(i.durationSeconds * 1000000)
         );
+        const float tClamped = std::clamp(t, 0.f, 1.f);
+        const float tBounce = [t]() {
+            const float tMod = std::fmod(t, 2.f);
+            if (tMod <= 1.f) {
+                return tMod;
+            }
+            else {
+                return 2.f - tMod;
+            }
+        }();
+
+        if (i.isBouncing && i.bouncingShouldStop && i.bouncingShouldStopT == -1.f) {
+            i.bouncingShouldStopT = tBounce;
+            i.bouncingAbortTime = now;
+        }
+
+        const long long bouncingAbortUs =
+            duration_cast<std::chrono::microseconds>(now - i.bouncingAbortTime).count();
+        const float bouncingAbortT = static_cast<float>(
+            static_cast<double>(bouncingAbortUs) /
+            static_cast<double>(i.durationSeconds * 1000000)
+        );
+        const float bounceAbortT = glm::mix(i.bouncingShouldStopT, 0.f, bouncingAbortT);
+
+        const float finalT =
+            i.isBouncing ?
+            i.bouncingShouldStop ? bounceAbortT : tBounce :
+            tClamped;
+
 
         // This method might crash if someone deleted the property underneath us. We take
         // care of removing entire PropertyOwners, but we assume that Propertys live as
         // long as their SceneGraphNodes. This is true in general, but if Propertys are
-        // created and destroyed often by the SceneGraphNode, this might become a problem.
-        i.prop->interpolateValue(t, i.easingFunction);
+        // created and destroyed often by the SceneGraphNode, this might become a problem
+        i.prop->interpolateValue(finalT, i.easingFunction);
 
-        i.isExpired = (t == 1.f);
+        if (i.isBouncing) {
+            i.isExpired = i.bouncingShouldStop && (finalT < 0.f || finalT > 1.f);
+        }
+        else {
+            i.isExpired = (t >= 1.f);
+        }
 
         if (i.isExpired) {
             if (!i.postScript.empty()) {
@@ -765,10 +794,28 @@ void Scene::updateInterpolations() {
         std::remove_if(
             _propertyInterpolationInfos.begin(),
             _propertyInterpolationInfos.end(),
-            [](const PropertyInterpolationInfo& i) { return i.isExpired; }
+            std::mem_fn(&PropertyInterpolationInfo::isExpired)
         ),
         _propertyInterpolationInfos.end()
     );
+}
+
+void Scene::stopBouncing(Property* prop) {
+    ghoul_assert(prop, "No property provided");
+
+    auto it = std::find_if(
+        _propertyInterpolationInfos.begin(),
+        _propertyInterpolationInfos.end(),
+        [prop](const PropertyInterpolationInfo& info) { return info.prop == prop; }
+    );
+
+    if (it == _propertyInterpolationInfos.end()) {
+        throw ghoul::RuntimeError(std::format(
+            "The provided property '{}' is not interpolating", prop->uri()
+        ));
+    }
+
+    it->bouncingShouldStop = true;
 }
 
 void Scene::setPropertiesFromProfile(const Profile& p) {
@@ -800,7 +847,8 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
             0.0,
             groupName,
             ghoul::EasingFunction::Linear,
-            ""
+            "",
+            false
         );
         // Clear lua state stack
         lua_settop(L, 0);
@@ -808,7 +856,7 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
 }
 
 void Scene::propertyPushProfileValueToLua(ghoul::lua::LuaState& L,
-                                                                 const std::string& value)
+                                          const std::string& value)
 {
     _valueIsTable = false;
     ProfilePropertyLua elem = propertyProcessValue(
@@ -818,20 +866,10 @@ void Scene::propertyPushProfileValueToLua(ghoul::lua::LuaState& L,
         _profilePropertyName
     );
     if (!_valueIsTable) {
-        std::visit(overloaded {
-            [&L](bool v) {
-                ghoul::lua::push(L, v);
-            },
-            [&L](float v) {
-                ghoul::lua::push(L, v);
-            },
-            [&L](const std::string& v) {
-                ghoul::lua::push(L, v);
-            },
-            [&L](ghoul::lua::nil_t v) {
-                ghoul::lua::push(L, v);
-            }
-        }, elem);
+        std::visit(
+            overloaded { [&L](auto v) { ghoul::lua::push(L, v); } },
+            elem
+        );
     }
 }
 
@@ -876,7 +914,8 @@ LuaLibrary Scene::luaLibrary() {
                     { "value", "Nil | String | Number | Boolean | Table" },
                     { "duration", "Number?", "0.0" },
                     { "easing", "EasingFunction?", "Linear" },
-                    { "postscript", "String?", "" }
+                    { "postscript", "String?", "" },
+                    { "isBouncing", "Boolean?", "false" }
                 },
                 "",
                 R"(Sets the property or properties identified by the URI to the specified
@@ -911,7 +950,7 @@ that identifies a property owner
 should be changed to. The type of this parameter must agree with the type of the selected
 property
 \\param duration The number of seconds over which the change will occur. If not provided
-or the provided value is 0, the change is instantaneously.
+or the provided value is 0, the change is instantaneously
 \\param easing If a duration larger than 0 is provided, this parameter controls the manner
 in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEaseIn",
 "QuadraticEaseOut", "QuadraticEaseInOut", "CubicEaseIn", "CubicEaseOut", "CubicEaseInOut",
@@ -922,7 +961,9 @@ in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEas
 "BounceEaseIn", "BounceEaseOut", "BounceEaseInOut"
 \\param postscript A Lua script that will be executed once the change of property value
 is completed. If a duration larger than 0 was provided, it is at the end of the
-interpolation. If 0 was provided, the script runs immediately.
+interpolation. If 0 was provided, the script runs immediately
+\\param isBouncing If this value is set to `true`, the property will interpolate to the
+provided new value, then back to the original value, until manually stopped.
 )",
                 {
                     std::source_location::current().file_name(),
@@ -937,7 +978,8 @@ interpolation. If 0 was provided, the script runs immediately.
                     { "value", "Nil | String | Number | Boolean | Table" },
                     { "duration", "Number?", "0.0" },
                     { "easing", "EasingFunction?", "Linear" },
-                    { "postscript", "String?", "" }
+                    { "postscript", "String?", "" },
+                    { "isBouncing", "Boolean?", "" }
                 },
                 "",
                 R"(Sets the single property identified by the URI to the specified value.
@@ -954,7 +996,7 @@ efficiently for individual property values.
 \\param value The new value to which the property identified by the `uri` should be
 changed to. The type of this parameter must agree with the type of the selected property
 \\param duration The number of seconds over which the change will occur. If not provided
-or the provided value is 0, the change is instantaneously.
+or the provided value is 0, the change is instantaneously
 \\param easing If a duration larger than 0 is provided, this parameter controls the manner
 in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEaseIn",
 "QuadraticEaseOut", "QuadraticEaseInOut", "CubicEaseIn", "CubicEaseOut", "CubicEaseInOut",
@@ -965,7 +1007,9 @@ in which the parameter is interpolated. Has to be one of "Linear", "QuadraticEas
 "BounceEaseIn", "BounceEaseOut", "BounceEaseInOut"
 \\param postscript This parameter specifies a Lua script that will be executed once the
 change of property value is completed. If a duration larger than 0 was provided, it is
-at the end of the interpolation. If 0 was provided, the script runs immediately.
+at the end of the interpolation. If 0 was provided, the script runs immediately
+\\param isBouncing If this value is set to `true`, the property will interpolate to the
+provided new value, then back to the original value, until manually stopped.
 )",
                 {
                     std::source_location::current().file_name(),
@@ -987,6 +1031,7 @@ at the end of the interpolation. If 0 was provided, the script runs immediately.
                     std::source_location::current().line()
                 }
             },
+            codegen::lua::StopPropertyBouncing,
             codegen::lua::HasProperty,
             codegen::lua::Property,
             codegen::lua::PropertyOwner,

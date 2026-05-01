@@ -41,24 +41,24 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // A RenderableSwitch can be used to render one of two renderables depending on the
-    // distance between the camera and the object's position.
+    // Can be used to render one of two renderables depending on the distance between the
+    // camera and the object's position.
     //
     // The two renderables are specified separately: `RenderableNear` and `RenderableFar`.
     // These can be any renderable types.
     //
-    // The `DistanceThreshold` property determines which renderable will be shown.
-    // If the camera is closer to the object than the threshold, `RenderableNear` is used,
+    // The `DistanceThreshold` property determines which renderable will be shown. If the
+    // camera is closer to the object than the threshold, `RenderableNear` is used,
     // otherwise, `RenderableFar` is rendered.
     struct [[codegen::Dictionary(RenderableSwitch)]] Parameters {
         // The renderable to show when the camera is closer to the object than the
         // threshold.
         std::optional<ghoul::Dictionary>
-            renderableNear [[codegen::reference("renderable")]];
+            renderableNear [[codegen::reference("core_renderable")]];
 
         // The renderable to show when the camera is further away than the threshold.
         std::optional<ghoul::Dictionary>
-            renderableFar [[codegen::reference("renderable")]];
+            renderableFar [[codegen::reference("core_renderable")]];
 
         // [[codegen::verbatim(DistanceThresholdInfo.description)]]
         std::optional<double> distanceThreshold [[codegen::greater(0.f)]];
@@ -69,9 +69,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableSwitch::Documentation() {
-    return codegen::doc<Parameters>(
-        "base_renderable_switch"
-    );
+    return codegen::doc<Parameters>("base_renderable_switch");
 }
 
 RenderableSwitch::RenderableSwitch(const ghoul::Dictionary& dictionary)
@@ -153,12 +151,6 @@ void RenderableSwitch::deinitializeGL() {
     }
 }
 
-bool RenderableSwitch::isReady() const {
-    const bool near = _renderableNear ? _renderableNear->isReady() : true;
-    const bool far = _renderableFar ? _renderableFar->isReady() : true;
-    return near && far;
-}
-
 void RenderableSwitch::update(const UpdateData& data) {
     ghoul_assert(_renderableNear || _renderableFar, "No renderable");
 
@@ -172,7 +164,7 @@ void RenderableSwitch::update(const UpdateData& data) {
 }
 
 void RenderableSwitch::render(const RenderData& data, RendererTasks& tasks) {
-    glm::dvec3 cameraPosition = data.camera.positionVec3();
+    glm::dvec3 cameraPosition = data.camera.position();
     glm::dvec3 modelPosition = data.modelTransform.translation;
 
     if (glm::distance(cameraPosition, modelPosition) < _distanceThreshold) {

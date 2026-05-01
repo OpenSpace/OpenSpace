@@ -64,6 +64,7 @@ public:
      *        relative to the base directory (the path starting with . or ..), an absolute
      *        path (that path starting with *:/ or /) or relative to the global asset root
      *        (if the path starts any other way)
+     *
      * \pre \p path must not be the empty string
      */
     void add(const std::string& path);
@@ -76,6 +77,7 @@ public:
      *        relative to the base directory (the path starting with . or ..), an absolute
      *        path (that path starting with *:/ or /) or relative to the global asset root
      *        (if the path starts any other way)
+     *
      * \pre \p path must not be the empty string
      */
     void remove(const std::string& path);
@@ -89,6 +91,7 @@ public:
      *        relative to the base directory (the path starting with . or ..), an absolute
      *        path (that path starting with *:/ or /) or relative to the global asset root
      *        (if the path starts any other way)
+     *
      * \pre \p path must not be the empty string
      */
     void reload(const std::string& path);
@@ -138,7 +141,7 @@ public:
      * \param parent The parent of the loaded asset file or `nullptr` if the asset is a
      *        root asset
      *
-     * \pre \p asset must not be a nullptr
+     * \pre \p asset must not be a `nullptr`
      */
     bool loadAsset(Asset* asset, Asset* parent);
 
@@ -149,7 +152,7 @@ public:
      *
      * \param asset The asset that should get unloaded
      *
-     * \pre \p asset must not be a nullptr
+     * \pre \p asset must not be a `nullptr`
      */
     void unloadAsset(Asset* asset);
 
@@ -226,7 +229,9 @@ private:
     // ResourceSynchronizations
     //
 
-    /// Collection that stores the assets that have requested each ResourceSynchronization
+    /**
+     * Collection that stores the assets that have requested each ResourceSynchronization.
+     */
     struct SyncItem {
         std::unique_ptr<ResourceSynchronization> synchronization;
         std::vector<Asset*> assets;

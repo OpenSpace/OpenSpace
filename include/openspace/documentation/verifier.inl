@@ -34,22 +34,6 @@
 
 namespace openspace {
 
-// Workaround for macOS libc++ std::format with std::vector<bool>
-namespace detail {
-    template <typename T>
-    decltype(auto) format_value(T&& value) {
-        using Type = std::remove_cvref_t<T>;
-        if constexpr (std::is_same_v<Type, std::vector<bool>::reference> ||
-                        std::is_same_v<Type, std::vector<bool>::const_reference>)
-        {
-            return static_cast<bool>(std::forward<T>(value));
-        }
-        else {
-            return std::forward<T>(value);
-        }
-    }
-} // detail
-
 template <>
 TestResult TemplateVerifier<glm::ivec2>::operator()(const ghoul::Dictionary& dict,
     const std::string& key) const;
@@ -74,16 +58,18 @@ TestResult TemplateVerifier<T>::operator()(const ghoul::Dictionary& dict,
         res.success = false;
 
         if (dict.hasKey(key)) {
-            TestResult::Offense o;
-            o.offender = key;
-            o.reason = TestResult::Offense::Reason::WrongType;
-            res.offenses.push_back(o);
+            TestResult::Offense o = {
+                .offender = key,
+                .reason = TestResult::Offense::Reason::WrongType
+            };
+            res.offenses.push_back(std::move(o));
         }
         else {
-            TestResult::Offense o;
-            o.offender = key;
-            o.reason = TestResult::Offense::Reason::MissingKey;
-            res.offenses.push_back(o);
+            TestResult::Offense o = {
+                .offender = key,
+                .reason = TestResult::Offense::Reason::MissingKey
+            };
+            res.offenses.push_back(std::move(o));
         }
     }
     return res;
@@ -260,53 +246,54 @@ TestResult OperatorVerifier<T, Operator>::operator()(const ghoul::Dictionary& di
                                                      const std::string& key) const
 {
     TestResult res = T::operator()(dict, key);
-    if (res.success) {
-        typename T::Type val;
-        if constexpr (std::is_same_v<typename T::Type, glm::ivec2>) {
-            val = dict.value<glm::dvec2>(key);
-        }
-        else if constexpr (std::is_same_v<typename T::Type, glm::ivec3>) {
-            val = dict.value<glm::dvec3>(key);
-        }
-        else if constexpr (std::is_same_v<typename T::Type, glm::ivec4>) {
-            val = dict.value<glm::dvec4>(key);
-        }
-        else if constexpr (std::is_same_v<typename T::Type, int>) {
-            const double d = dict.value<double>(key);
-            double intPart;
-            bool isInt = std::modf(d, &intPart) == 0.0;
-            if (isInt) {
-                val = static_cast<int>(d);
-            }
-            else {
-                TestResult r;
-                r.success = false;
-                TestResult::Offense o;
-                o.offender = key;
-                o.reason = TestResult::Offense::Reason::WrongType;
-                r.offenses.push_back(o);
-                return r;
-            }
-        }
-        else {
-            val = dict.value<typename T::Type>(key);
-        }
+    if (!res.success) {
+        return res;
+    }
 
-        if (Operator()(val, value)) {
-            return { true, {}, {} };
+    typename T::Type val;
+    if constexpr (std::is_same_v<typename T::Type, glm::ivec2>) {
+        val = dict.value<glm::dvec2>(key);
+    }
+    else if constexpr (std::is_same_v<typename T::Type, glm::ivec3>) {
+        val = dict.value<glm::dvec3>(key);
+    }
+    else if constexpr (std::is_same_v<typename T::Type, glm::ivec4>) {
+        val = dict.value<glm::dvec4>(key);
+    }
+    else if constexpr (std::is_same_v<typename T::Type, int>) {
+        const double d = dict.value<double>(key);
+        double intPart;
+        bool isInt = std::modf(d, &intPart) == 0.0;
+        if (isInt) {
+            val = static_cast<int>(d);
         }
         else {
             TestResult r;
             r.success = false;
-            TestResult::Offense o;
-            o.offender = key;
-            o.reason = TestResult::Offense::Reason::Verification;
-            r.offenses.push_back(o);
+            TestResult::Offense o = {
+                .offender = key,
+                .reason = TestResult::Offense::Reason::WrongType
+            };
+            r.offenses.push_back(std::move(o));
             return r;
         }
     }
     else {
-        return res;
+        val = dict.value<typename T::Type>(key);
+    }
+
+    if (Operator()(val, value)) {
+        return { true, {}, {} };
+    }
+    else {
+        TestResult r;
+        r.success = false;
+        TestResult::Offense o = {
+            .offender = key,
+            .reason = TestResult::Offense::Reason::Verification
+        };
+        r.offenses.push_back(std::move(o));
+        return r;
     }
 }
 
@@ -350,67 +337,67 @@ TestResult InListVerifier<T>::operator()(const ghoul::Dictionary& dict,
                                          const std::string& key) const
 {
     TestResult res = T::operator()(dict, key);
-    if (res.success) {
-        typename T::Type val;
-        if constexpr (std::is_same_v<typename T::Type, glm::ivec2>) {
-            val = dict.value<glm::dvec2>(key);
-        }
-        else if constexpr (std::is_same_v<typename T::Type, glm::ivec3>) {
-            val = dict.value<glm::dvec3>(key);
-        }
-        else if constexpr (std::is_same_v<typename T::Type, glm::ivec4>) {
-            val = dict.value<glm::dvec4>(key);
-        }
-        else if constexpr (std::is_same_v<typename T::Type, int>) {
-            const double d = dict.value<double>(key);
-            double intPart;
-            bool isInt = modf(d, &intPart) == 0.0;
-            if (isInt) {
-                val = static_cast<int>(d);
-            }
-            else {
-                TestResult r;
-                r.success = false;
-                TestResult::Offense o;
-                o.offender = key;
-                o.reason = TestResult::Offense::Reason::WrongType;
-                r.offenses.push_back(o);
-                return r;
-            }
-        }
-        else {
-            val = dict.value<typename T::Type>(key);
-        }
+    if (!res.success) {
+        return res;
+    }
 
-        auto it = std::find(values.begin(), values.end(), val);
-        if (it != values.end()) {
-            return { true, {}, {} };
+    typename T::Type val;
+    if constexpr (std::is_same_v<typename T::Type, glm::ivec2>) {
+        val = dict.value<glm::dvec2>(key);
+    }
+    else if constexpr (std::is_same_v<typename T::Type, glm::ivec3>) {
+        val = dict.value<glm::dvec3>(key);
+    }
+    else if constexpr (std::is_same_v<typename T::Type, glm::ivec4>) {
+        val = dict.value<glm::dvec4>(key);
+    }
+    else if constexpr (std::is_same_v<typename T::Type, int>) {
+        const double d = dict.value<double>(key);
+        double intPart;
+        bool isInt = modf(d, &intPart) == 0.0;
+        if (isInt) {
+            val = static_cast<int>(d);
         }
         else {
             TestResult r;
             r.success = false;
-            TestResult::Offense o;
-            o.offender = key;
-            o.reason = TestResult::Offense::Reason::Verification;
-
-            std::string list = std::accumulate(
-                values.begin() + 1,
-                values.end(),
-                std::format("{}", detail::format_value(values.front())),
-                [](std::string lhs, typename T::Type rhs) {
-                    return std::format("{}, {}", lhs, rhs);
-                }
-            );
-            o.explanation = std::format(
-                "'{}' not in list of accepted values '{}'",
-                key, list
-            );
-            r.offenses.push_back(o);
+            TestResult::Offense o = {
+                .offender = key,
+                .reason = TestResult::Offense::Reason::WrongType
+            };
+            r.offenses.push_back(std::move(o));
             return r;
         }
     }
     else {
-        return res;
+        val = dict.value<typename T::Type>(key);
+    }
+
+    auto it = std::find(values.begin(), values.end(), val);
+    if (it != values.end()) {
+        return { true, {}, {} };
+    }
+    else {
+        TestResult r;
+        r.success = false;
+        std::string list = std::accumulate(
+            values.begin() + 1,
+            values.end(),
+            std::format("{}", values.front()),
+            [](std::string lhs, typename T::Type rhs) {
+                return std::format("{}, {}", lhs, rhs);
+            }
+        );
+        TestResult::Offense o = {
+            .offender = key,
+            .reason = TestResult::Offense::Reason::Verification,
+            .explanation = std::format(
+                "'{}' not in list of accepted values '{}'",
+                key, list
+            )
+        };
+        r.offenses.push_back(std::move(o));
+        return r;
     }
 }
 
@@ -443,54 +430,57 @@ TestResult NotInListVerifier<T>::operator()(const ghoul::Dictionary& dict,
                                             const std::string& key) const
 {
     TestResult res = T::operator()(dict, key);
-    if (res.success) {
-        typename T::Type val;
-        if constexpr (std::is_same_v<typename T::Type, glm::ivec2>) {
-            val = dict.value<glm::dvec2>(key);
-        }
-        else if constexpr (std::is_same_v<typename T::Type, glm::ivec3>) {
-            val = dict.value<glm::dvec3>(key);
-        }
-        else if constexpr (std::is_same_v<typename T::Type, glm::ivec4>) {
-            val = dict.value<glm::dvec4>(key);
-        }
-        else if constexpr (std::is_same_v<typename T::Type, int>) {
-            const double d = dict.value<double>(key);
-            double intPart;
-            bool isInt = modf(d, &intPart) == 0.0;
-            if (isInt) {
-                val = static_cast<int>(d);
-            }
-            else {
-                TestResult r;
-                r.success = false;
-                TestResult::Offense o;
-                o.offender = key;
-                o.reason = TestResult::Offense::Reason::WrongType;
-                r.offenses.push_back(o);
-                return r;
-            }
-        }
-        else {
-            val = dict.value<typename T::Type>(key);
-        }
+    if (!res.success) {
+        return res;
+    }
 
-        auto it = std::find(values.begin(), values.end(), val);
-        if (it == values.end()) {
-            return { true, {}, {} };
+    typename T::Type val;
+    if constexpr (std::is_same_v<typename T::Type, glm::ivec2>) {
+        val = dict.value<glm::dvec2>(key);
+    }
+    else if constexpr (std::is_same_v<typename T::Type, glm::ivec3>) {
+        val = dict.value<glm::dvec3>(key);
+    }
+    else if constexpr (std::is_same_v<typename T::Type, glm::ivec4>) {
+        val = dict.value<glm::dvec4>(key);
+    }
+    else if constexpr (std::is_same_v<typename T::Type, int>) {
+        const double d = dict.value<double>(key);
+        double intPart;
+        bool isInt = modf(d, &intPart) == 0.0;
+        if (isInt) {
+            val = static_cast<int>(d);
         }
         else {
-            TestResult r;
-            r.success = false;
-            TestResult::Offense o;
-            o.offender = key;
-            o.reason = TestResult::Offense::Reason::Verification;
-            r.offenses.push_back(o);
+            TestResult r = {
+                .success = false
+            };
+            TestResult::Offense o = {
+                .offender = key,
+                .reason = TestResult::Offense::Reason::WrongType
+            };
+            r.offenses.push_back(std::move(o));
             return r;
         }
     }
     else {
-        return res;
+        val = dict.value<typename T::Type>(key);
+    }
+
+    auto it = std::find(values.begin(), values.end(), val);
+    if (it == values.end()) {
+        return { true, {}, {} };
+    }
+    else {
+        TestResult r = {
+            .success = false
+        };
+        TestResult::Offense o = {
+            .offender = key,
+            .reason = TestResult::Offense::Reason::Verification
+        };
+        r.offenses.push_back(std::move(o));
+        return r;
     }
 }
 
@@ -549,55 +539,57 @@ TestResult InRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
                                           const std::string& key) const
 {
     TestResult res = T::operator()(dict, key);
-    if (res.success) {
-        typename T::Type val;
-        if constexpr (std::is_same_v<typename T::Type, glm::ivec2>) {
-            val = dict.value<glm::dvec2>(key);
-        }
-        else if constexpr (std::is_same_v<typename T::Type, glm::ivec3>) {
-            val = dict.value<glm::dvec3>(key);
-        }
-        else if constexpr (std::is_same_v<typename T::Type, glm::ivec4>) {
-            val = dict.value<glm::dvec4>(key);
-        }
-        else if constexpr (std::is_same_v<typename T::Type, int>) {
-            const double d = dict.value<double>(key);
-            double intPart;
-            const bool isInt = std::modf(d, &intPart) == 0.0;
-            if (isInt) {
-                val = static_cast<int>(d);
-            }
-            else {
-                TestResult r;
-                r.success = false;
-                TestResult::Offense o;
-                o.offender = key;
-                o.reason = TestResult::Offense::Reason::WrongType;
-                r.offenses.push_back(o);
-                return r;
-            }
-        }
-        else {
-            val = dict.value<typename T::Type>(key);
-        }
+    if (!res.success) {
+        return res;
+    }
 
-        if (std::greater_equal<typename T::Type>()(val, lower) &&
-            std::less_equal<typename T::Type>()(val, upper))
-        {
-            return { true, {}, {} };
+    typename T::Type val;
+    if constexpr (std::is_same_v<typename T::Type, glm::ivec2>) {
+        val = dict.value<glm::dvec2>(key);
+    }
+    else if constexpr (std::is_same_v<typename T::Type, glm::ivec3>) {
+        val = dict.value<glm::dvec3>(key);
+    }
+    else if constexpr (std::is_same_v<typename T::Type, glm::ivec4>) {
+        val = dict.value<glm::dvec4>(key);
+    }
+    else if constexpr (std::is_same_v<typename T::Type, int>) {
+        const double d = dict.value<double>(key);
+        double intPart;
+        const bool isInt = std::modf(d, &intPart) == 0.0;
+        if (isInt) {
+            val = static_cast<int>(d);
         }
         else {
             TestResult r;
             r.success = false;
-            TestResult::Offense o;
-            o.offender = key;
-            o.reason = TestResult::Offense::Reason::Verification;
-            r.offenses.push_back(o);
+            TestResult::Offense o = {
+                .offender = key,
+                .reason = TestResult::Offense::Reason::WrongType
+            };
+            r.offenses.push_back(std::move(o));
             return r;
         }
     }
     else {
-        return res;
+        val = dict.value<typename T::Type>(key);
+    }
+
+    if (std::greater_equal<typename T::Type>()(val, lower) &&
+        std::less_equal<typename T::Type>()(val, upper))
+    {
+        return { true, {}, {} };
+    }
+    else {
+        TestResult r = {
+            .success = false
+        };
+        TestResult::Offense o = {
+            .offender = key,
+            .reason = TestResult::Offense::Reason::Verification
+        };
+        r.offenses.push_back(std::move(o));
+        return r;
     }
 }
 
@@ -643,62 +635,66 @@ template <typename T>
 TestResult NotInRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
                                              const std::string& key) const {
     TestResult res = T::operator()(dict, key);
-    if (res.success) {
-        typename T::Type val;
-        if constexpr (std::is_same_v<typename T::Type, glm::ivec2>) {
-            val = dict.value<glm::dvec2>(key);
-        }
-        else if constexpr (std::is_same_v<typename T::Type, glm::ivec3>) {
-            val = dict.value<glm::dvec3>(key);
-        }
-        else if constexpr (std::is_same_v<typename T::Type, glm::ivec4>) {
-            val = dict.value<glm::dvec4>(key);
-        }
-        else if constexpr (std::is_same_v<typename T::Type, int>) {
-            const double d = dict.value<double>(key);
-            double intPart;
-            const bool isInt = std::modf(d, &intPart) == 0.0;
-            if (isInt) {
-                val = static_cast<int>(d);
-            }
-            else {
-                TestResult r;
-                r.success = false;
-                TestResult::Offense o;
-                o.offender = key;
-                o.reason = TestResult::Offense::Reason::WrongType;
-                r.offenses.push_back(o);
-                return r;
-            }
-        }
-        else {
-            val = dict.value<typename T::Type>(key);
-        }
+    if (!res.success) {
+        return res;
+    }
 
-        if (std::less<typename T::Type>()(val, lower) ||
-            std::greater<typename T::Type>()(val, upper))
-        {
-            return { true, {}, {} };
+    typename T::Type val;
+    if constexpr (std::is_same_v<typename T::Type, glm::ivec2>) {
+        val = dict.value<glm::dvec2>(key);
+    }
+    else if constexpr (std::is_same_v<typename T::Type, glm::ivec3>) {
+        val = dict.value<glm::dvec3>(key);
+    }
+    else if constexpr (std::is_same_v<typename T::Type, glm::ivec4>) {
+        val = dict.value<glm::dvec4>(key);
+    }
+    else if constexpr (std::is_same_v<typename T::Type, int>) {
+        const double d = dict.value<double>(key);
+        double intPart;
+        const bool isInt = std::modf(d, &intPart) == 0.0;
+        if (isInt) {
+            val = static_cast<int>(d);
         }
         else {
-            TestResult r;
-            r.success = false;
-            TestResult::Offense o;
-            o.offender = key;
-            o.reason = TestResult::Offense::Reason::Verification;
-            r.offenses.push_back(o);
+            TestResult r = {
+                .success = false
+            };
+            TestResult::Offense o = {
+                .offender = key,
+                .reason = TestResult::Offense::Reason::WrongType
+            };
+            r.offenses.push_back(std::move(o));
             return r;
         }
     }
     else {
-        return res;
+        val = dict.value<typename T::Type>(key);
+    }
+
+    if (std::less<typename T::Type>()(val, lower) ||
+        std::greater<typename T::Type>()(val, upper))
+    {
+        return { true, {}, {} };
+    }
+    else {
+        TestResult r = {
+            .success = false
+        };
+        TestResult::Offense o = {
+            .offender = key,
+            .reason = TestResult::Offense::Reason::Verification
+        };
+        r.offenses.push_back(std::move(o));
+        return r;
     }
 }
 
 template <typename T>
 std::string NotInRangeVerifier<T>::documentation() const {
-    return "Not in range: ( " + ghoul::to_string(lower) + "," +
-           ghoul::to_string(upper) + " )";
+    return std::format(
+        "Not in range: ( {}, {} )", ghoul::to_string(lower), ghoul::to_string(upper)
+    );
 }
 
 template <typename T>

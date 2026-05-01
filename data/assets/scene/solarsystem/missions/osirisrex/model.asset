@@ -1,7 +1,4 @@
-local transforms = asset.require("./transforms")
-local sun = asset.require("scene/solarsystem/sun/transforms")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -19,7 +16,7 @@ local BennuBodyId = "2101955"
 
 local OsirisRex = {
   Identifier = "OsirisRex",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
@@ -36,13 +33,14 @@ local OsirisRex = {
     Type = "RenderableModel",
     GeometryFile = models .. "orx_base_resized_12_sep_2016.obj",
     LightSources = {
-      sun.LightSource,
+      sunAsset.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
         Intensity = 0.5
       }
-    }
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "OSIRIS REx",
@@ -68,7 +66,7 @@ local PolyCam = {
     Type = "RenderableModel",
     GeometryFile = models .. "orx_polycam_resized_12_sep_2016.obj",
     LightSources = {
-      sun.LightSource,
+      sunAsset.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
@@ -101,7 +99,7 @@ local Rexis = {
     Type = "RenderableModel",
     GeometryFile = models .. "orx_rexis_resized_12_sep_2016.obj",
     LightSources = {
-      sun.LightSource,
+      sunAsset.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
@@ -145,6 +143,7 @@ local PolyCamFov = {
 --   Parent = Rexis.Identifier,
 --   Renderable = {
 --     Type = "RenderableFov",
+--     Enabled = asset.enabled,
 --     Body = kernels.Frame.OsirisRex,
 --     Frame = kernels.Frame.Rexis,
 --     RGB = { 0.8, 0.7, 0.7 },

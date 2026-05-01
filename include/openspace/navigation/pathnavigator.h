@@ -48,7 +48,6 @@ public:
     PathNavigator();
     ~PathNavigator() override;
 
-    // Accessors
     Camera* camera() const;
     const SceneGraphNode* anchor() const;
     const Path* currentPath() const;
@@ -84,7 +83,7 @@ public:
      * Find a node close to the given node. Closeness is determined by a factor times
      * the bounding sphere of the object.
      *
-     * \return Pointer to the SGN if one was found, nullptr otherwise
+     * \return Pointer to the SGN if one was found, `nullptr` otherwise
      */
     static SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node);
 
@@ -113,7 +112,7 @@ private:
     OptionProperty _defaultPathType;
     BoolProperty _includeRoll;
     FloatProperty _speedScale;
-    BoolProperty _applyIdleBehaviorOnFinish;
+    BoolProperty _applyIdleMotionOnFinish;
     DoubleProperty _arrivalDistanceFactor;
     FloatProperty _linearRotationSpeedFactor;
     DoubleProperty _minValidBoundingSphere;

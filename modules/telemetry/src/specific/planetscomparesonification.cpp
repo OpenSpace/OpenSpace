@@ -46,7 +46,7 @@ namespace {
     constexpr int SecondPlanetIndex = 1;
     constexpr int SettingsIndex = 2;
 
-    // Indicies for the gui settings
+    // Indicies for the GUI settings
     constexpr int NumSettings = 6;
     constexpr int SizeDayIndex = 0;
     constexpr int GravityIndex = 1;

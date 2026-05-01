@@ -1,7 +1,7 @@
 local coreKernels = asset.require("spice/core")
 local kernels = asset.require("./kernels")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local earthTransform = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
@@ -12,6 +12,7 @@ local models = asset.resource({
   Version = 1
 })
 
+
 local MissionBegin = "2010 FEB 11 05:02:58"
 local MissionEnd = "2026 JUN 12 07:11:59"
 
@@ -21,7 +22,7 @@ local MissionEnd = "2026 JUN 12 07:11:59"
 -- will still be off and wobble as time progress
 local SdoPosition = {
   Identifier = "SDO_Position",
-  Parent = earthTransform.EarthBarycenter.Identifier,
+  Parent = earthAsset.EarthBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
@@ -50,7 +51,7 @@ local Sdo = {
     Rotation = {
       Type = "FixedRotation",
       Attached = "SDO_Model",
-      YAxis = sunTransforms.SunCenter.Identifier,
+      YAxis = sunAsset.SunCenter.Identifier,
       ZAxis = { 0.0, 0.0, 1.0 },
       ZAxisOrthogonal = true
     }
@@ -59,9 +60,10 @@ local Sdo = {
     Type = "RenderableModel",
     GeometryFile = models .. "sdo.glb",
     RotationVector = { 90.0, 0.0, 0.0 },
-    LightSources = { sunTransforms.LightSource },
+    LightSources = { sunAsset.LightSource },
     AmbientIntensity = 0.2,
-    SpecularIntensity = 0.0
+    SpecularIntensity = 0.0,
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "SDO",
@@ -72,7 +74,7 @@ local Sdo = {
 
 local SdoTrail = {
   Identifier = "SDO_Trail",
-  Parent = earthTransform.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = MissionBegin,
@@ -84,7 +86,7 @@ local SdoTrail = {
       Type = "SpiceTranslation",
       Target = kernels.ID.SDO,
       Observer = coreKernels.ID.Earth,
-      Frame = coreKernels.Frame.J2000,
+      Frame = coreKernels.Frame.J2000
     },
     Color = { 0.51, 0.78, 0.12 },
     Period = 0.997319,
@@ -92,9 +94,9 @@ local SdoTrail = {
     EnableFade = true
   },
   GUI = {
-      Name = "SDO Trail",
-      Path = "/Solar System/Missions/SDO",
-      Description = "The trajectory of the SDO spacecraft."
+    Name = "SDO Trail",
+    Path = "/Solar System/Missions/SDO",
+    Description = "The trajectory of the SDO spacecraft."
   }
 }
 
@@ -121,11 +123,11 @@ asset.export("MissionEnd", MissionEnd)
 
 asset.meta = {
   Name = "SDO",
-  Description = [[This asset adds the SDO (Solar Dynamics Observatory) Model,
+  Description = [[This asset adds the SDO (Solar Dynamics Observatory) model,
     including the trajectory for the entire duration of the SDO mission.
     Model credits: https://sketchfab.com/3d-models/solar-dynamics-observatory-8a40c426c12f48ff9fef4897283ef1d2
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

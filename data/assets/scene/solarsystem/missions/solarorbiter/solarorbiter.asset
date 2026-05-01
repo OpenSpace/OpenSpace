@@ -1,10 +1,10 @@
 local coreKernels = asset.require("spice/core")
 local kernels = asset.require("./kernels")
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
 
---model from https://scifleet.esa.int/model/solar_orbiter/
+-- Model from https://scifleet.esa.int/model/solar_orbiter/
 local models = asset.resource({
   Name = "Solar Orbiter Models",
   Type = "HttpSynchronization",
@@ -12,17 +12,18 @@ local models = asset.resource({
   Version = 1
 })
 
+
 local MissionBegin = "2020 FEB 10 04:56:58"
 local MissionEnd = "2030 NOV 20 04:05:16"
 
 local SolarOrbiterPosition = {
   Identifier = "Solar_Orbiter_Position",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
       Target = kernels.ID.SolarOrbiter,
-      Observer = coreKernels.ID.SolarSystemBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   GUI = {
@@ -54,7 +55,7 @@ local SolarOrbiter = {
     Body = "Solar_Orbiter_Model",
     GeometryFile = models .. "solar_orbiter.fbx",
     RotationVector = { 90.0, 0.0, 0.0 },
-    LightSources = { sunTransforms.LightSource },
+    LightSources = { sunAsset.LightSource },
     AmbientIntensity = 0.2,
     SpecularIntensity = 0.0
   },
@@ -67,7 +68,7 @@ local SolarOrbiter = {
 
 local SolarOrbiterTrail = {
   Identifier = "Solar_Orbiter_Trail",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = MissionBegin,
@@ -118,6 +119,6 @@ asset.meta = {
   Description = [[This asset adds the Solar Orbiter model, including the trajectory for
     the entire duration of the Solar Orbiter mission.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

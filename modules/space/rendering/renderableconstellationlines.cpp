@@ -89,9 +89,7 @@ namespace {
     // @TODO (2025-01-07, emmbr) Also need to update description of names file and labels
     // as part of the labels rewrite
 
-    // This renderable can be used to draw constellations using lines. Each constellation
-    // corresponds to a group of lines between 3D positions that represent the star
-    // positions.
+    // Draws constellations as lines between 3D star positions grouped per constellation.
     //
     // Each constellation is given an abbreviation that acts as the identifier of the
     // constellation. These abbreviations can be mapped to full names in the
@@ -203,16 +201,6 @@ void RenderableConstellationLines::selectionPropertyHasChanged() {
     }
 }
 
-bool RenderableConstellationLines::isReady() const {
-    const bool isReady = _program && !_renderingConstellationsMap.empty();
-
-    // If we have labels, they also need to be loaded
-    if (_hasLabels) {
-        return isReady && RenderableConstellationsBase::isReady();
-    }
-    return isReady;
-}
-
 void RenderableConstellationLines::initialize() {
     RenderableConstellationsBase::initialize();
 
@@ -312,7 +300,6 @@ void RenderableConstellationLines::renderConstellations(const RenderData&,
     glBindVertexArray(0);
     _program->deactivate();
 
-    // Restores GL State
     global::renderEngine->openglStateCache().resetDepthState();
     global::renderEngine->openglStateCache().resetBlendState();
 }
@@ -365,8 +352,8 @@ void RenderableConstellationLines::loadData() {
             break;
         }
 
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
+        // Guard against wrong line endings (copying files between operating systems)
+        // causes lines to have a final \r
         if (!line.empty() && line.back() == '\r') {
             line = line.substr(0, line.length() - 1);
         }
@@ -375,7 +362,7 @@ void RenderableConstellationLines::loadData() {
             continue;
         }
 
-        if (const size_t found = line.find("mesh");  found == std::string::npos) {
+        if (!line.contains("mesh")) {
             continue;
         }
 
@@ -393,7 +380,7 @@ void RenderableConstellationLines::loadData() {
         str >> dummy; // color index command
         do {
             if (dummy == "-c") {
-                str >> constellationLine.colorIndex; // color index
+                str >> constellationLine.colorIndex;
             }
             else {
                 LWARNING(std::format(
@@ -414,7 +401,7 @@ void RenderableConstellationLines::loadData() {
 
         id >> dummy; // id command
         dummy.clear();
-        ghoul::getline(id, identifier); // identifier
+        ghoul::getline(id, identifier);
         ghoul::trimWhitespace(identifier);
         constellationLine.name = constellationFullName(identifier);
 

@@ -41,8 +41,6 @@ public:
     BooleanType(Inclusive);
 
     struct CameraPose {
-        CameraPose() = default;
-        CameraPose(datamessagestructures::CameraKeyframe&& kf);
         bool operator==(const CameraPose&) const noexcept = default;
 
         glm::dvec3 position = glm::dvec3(0.0);

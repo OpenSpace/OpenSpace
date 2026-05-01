@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "masteraddress": "localhost",
+  "settings": {
+    "display": {
+      "swapinterval": 1
+    }
+  },
+  "nodes": [
+    {
+      "address": "localhost",
+      "port": 20401,
+      "windows": [
+        {
+          "name": "OpenSpace",
+          "stereo": "none",
+          "pos": { "x": 50, "y": 50 },
+          "viewports": [
+            {
+              "tracked": true,
+              "pos": { "x": 0.0, "y": 0.0 },
+              "size": { "x": 1.0, "y": 1.0 },
+              "projection": {
+                "type": "PlanarProjection",
+                "fov": {
+                  "hfov": 80.0,
+                  "vfov": 50.534015846724
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "eyeseparation": 0.065,
+      "pos": { "x": 0.0, "y": 0.0, "z": 0.0 }
+    }
+  ],
+  "meta": {
+    "author": "OpenSpace Team",
+    "description": "The default display configuration that will create a window 2/3 the size of the primary monitor",
+    "license": "MIT License",
+    "name": "Single",
+    "version": "1.0"
+  }
+}

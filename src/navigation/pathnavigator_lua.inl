@@ -59,9 +59,8 @@ namespace {
 /**
  * Create a camera path as described by the instruction in the input argument.
  *
- * \param pathInstruction A table representing a
- *                        [PathInstruction](#core_path_instruction) that describes a
- *                        camera path to be created
+ * \param pathInstruction A table representing a [PathInstruction](#core_path_instruction)
+ *        that describes a camera path to be created
  */
 [[codegen::luawrap]] void createPath(ghoul::Dictionary pathInstruction) {
     global::navigationHandler->pathNavigator().createPath(pathInstruction);

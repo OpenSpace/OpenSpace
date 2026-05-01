@@ -60,12 +60,11 @@ namespace {
         Property::Visibility::User
     };
 
-    // This dashboard item shows information about the status of individual instruments
-    // onboard a spacecraft with regards to upcoming image capture. An image sequence has
-    // to be registered in order to be able to show the necessary information. The
-    // dashboard item shows a visual representation on how much time has passed since the
-    // previous image capture and how much time remains until the instrument captures the
-    // next image.
+    // Shows information about the status of individual instruments onboard a spacecraft
+    // with regards to upcoming image capture. An image sequence has to be registered in
+    // order to be able to show the necessary information. The dashboard item shows a
+    // visual representation on how much time has passed since the previous image capture
+    // and how much time remains until the instrument captures the next image.
     struct [[codegen::Dictionary(DashboardItemInstruments)]] Parameters {
         // [[codegen::verbatim(ActiveColorInfo.description)]]
         std::optional<glm::vec3> activeColor [[codegen::color()]];
@@ -123,7 +122,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
 
     penPosition.y -= _font->height();
 
-    constexpr glm::vec4 targetColor(0.f, 0.75f, 1.f, 1.f);
+    constexpr glm::vec4 targetColor = glm::vec4(0.f, 0.75f, 1.f, 1.f);
 
     const double previous = sequencer.prevCaptureTime(currentTime);
     const double next = sequencer.nextCaptureTime(currentTime);

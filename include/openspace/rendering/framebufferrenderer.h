@@ -60,9 +60,6 @@ class FramebufferRenderer final : public RaycasterListener, public Deferredcaste
 public:
     virtual ~FramebufferRenderer() override = default;
 
-    //============================//
-    //=====  Reuse textures  =====//
-    //============================//
     /**
      * Gives access to the currently NOT used pingPongTexture. This texture is available
      * for all RenderBins. However, it cannot be used at the same time as the Deferred
@@ -103,10 +100,6 @@ public:
      */
     GLuint additionalDepthTexture() const;
 
-    //=============================//
-    //=====  Access G-buffer  =====//
-    //=============================//
-    // Functions to access the G-buffer textures
     /**
      * Gives access to the color texture of the G-buffer. NOTE: This texture is used for
      * the majority of rendering the scene and might be already in use. Use CAUTION when
@@ -167,10 +160,12 @@ public:
         const glm::ivec4& viewport);
     void performDeferredTasks(const std::vector<DeferredcasterTask>& tasks,
         const glm::ivec4& viewport);
-    void render(Scene* scene, Camera* camera, float blackoutFactor);
+    void render(Scene* scene, Camera* camera, float blackoutFactor,
+        const glm::vec4& blackoutColor, float blackoutTextureFactor,
+        ghoul::opengl::Texture* blackoutTexture);
 
     /**
-     * Update render data. Responsible for calling renderEngine::setRenderData
+     * Update render data. Responsible for calling RenderEngine::setRenderData.
      */
     virtual void updateRendererData();
 
@@ -196,7 +191,9 @@ private:
         std::unique_ptr<ghoul::opengl::ProgramObject>
     >;
 
-    void applyTMO(float blackoutFactor, const glm::ivec4& viewport);
+    void applyTMO(float blackoutFactor, const glm::vec4& blackoutColor,
+        float blackoutTextureFactor, ghoul::opengl::Texture* blackoutTexture,
+        const glm::ivec4& viewport);
     void applyFXAA(const glm::ivec4& viewport);
     void updateDownscaleTextures() const;
     void writeDownscaledVolume(const glm::ivec4& viewport);
@@ -215,8 +212,9 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _fxaaProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _downscaledVolumeProgram;
 
-    UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
-        hue, saturation, value, viewport, resolution) _hdrUniformCache;
+    UniformCache(hdrFeedingTexture, blackoutFactor, blackoutColor, hasBlackoutTexture,
+        blackoutTexture, blackoutTextureFactor, hdrExposure, gamma, hue, saturation,
+        value, viewport, resolution) _hdrUniformCache;
     UniformCache(renderedTexture, inverseScreenSize, viewport,
         resolution) _fxaaUniformCache;
     UniformCache(downscaledRenderedVolume, downscaledRenderedVolumeDepth, viewport,

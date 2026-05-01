@@ -96,7 +96,7 @@ HorizonsDialog::HorizonsDialog(QWidget* parent)
 std::filesystem::path HorizonsDialog::file() const {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
     return _horizonsFile.file();
-#else // OPENSPACE_MODULE_SPACE_ENABLED
+#else // ^^^^ OPENSPACE_MODULE_SPACE_ENABLED // !OPENSPACE_MODULE_SPACE_ENABLED vvvv
     return std::filesystem::path();
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
 }
@@ -111,7 +111,7 @@ void HorizonsDialog::openSaveAs() {
 #ifdef __linux__
         // Linux in Qt5 and Qt6 crashes when trying to access the native dialog here
         , QFileDialog::DontUseNativeDialog
-#endif
+#endif // __linux__
     );
     _fileEdit->setText(filename);
 }

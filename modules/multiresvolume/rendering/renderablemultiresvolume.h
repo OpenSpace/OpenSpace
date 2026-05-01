@@ -66,15 +66,13 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& tasks) override;
 
 private:
     BoolProperty _useGlobalTime;
     BoolProperty _loop;
-    // used to vary time, if not using global time nor looping
+    /// Used to vary time, if not using global time nor looping
     IntProperty _currentTime;
     IntProperty _memoryBudget;
     IntProperty _streamingBudget;

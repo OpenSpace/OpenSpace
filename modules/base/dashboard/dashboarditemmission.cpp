@@ -54,9 +54,9 @@ namespace {
         return progress;
     }
 
-    // This `DashboardItem` shows information about the currently active mission. This
-    // includes information about the currently active mission phase, the next phase, and
-    // all subphases of the currently active phase.
+    // Shows information about the currently active mission. This includes information
+    // about the currently active mission phase, the next phase, and all subphases of the
+    // currently active phase.
     struct [[codegen::Dictionary(DashboardItemMission)]] Parameters {};
 } // namespace
 #include "dashboarditemmission_codegen.cpp"
@@ -177,9 +177,8 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
         penPosition.x -= depth * PixelIndentation;
 
         if (isCurrentPhase || ShowAllPhases) {
-            // phases are sorted increasingly by start time, and will be
-            // popped last-in-first-out from the stack, so add them in
-            // reversed order.
+            // Phases are sorted increasingly by start time, and will be popped
+            // last-in-first-out from the stack, so add them in reversed order
             const int indexLastPhase = static_cast<int>(phase->phases().size()) - 1;
             for (int i = indexLastPhase; 0 <= i; --i) {
                 S.emplace(&phase->phases()[i], depth + 1);

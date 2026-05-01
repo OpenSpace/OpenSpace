@@ -139,7 +139,7 @@ public:
         int role = Qt::EditRole) final;
 
     /**
-      * Returns a vector of all #Asset%s selected in the tree view.
+      * Returns a vector of all Asset%s selected in the tree view.
       *
       * \param outputPaths The vector of paths that were selected
       * \param outputItems The vector of AssetTreeItem that were selected

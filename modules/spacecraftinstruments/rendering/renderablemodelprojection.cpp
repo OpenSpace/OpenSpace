@@ -57,14 +57,13 @@ namespace {
         Property::Visibility::NoviceUser
     };
 
-    // Similarly to the
-    // [RenderablePlaneProjection](spacecraftinstruments_renderableplaneprojection) and
-    // [RenderablePlanetProjection](spacecraftinstruments_renderableplanetprojection),
-    // this Renderable type servers as a potential target for image projections from a
-    // spacecraft's instrument. This renderable will determine whenever an image in a
-    // currently loaded image sequence is projected whether that instrument's field of
-    // view intersects this model and will correctly project the captured image onto the
-    // model.
+    // A 3D model that acts as a projection target for spacecraft instrument images,
+    // similarly to
+    // [RenderablePlaneProjection](spacecraftinstruments_renderable_planeprojection) and
+    // [RenderablePlanetProjection](spacecraftinstruments_renderable_planetprojection).
+    //
+    // Images from a loaded image sequence will be projected onto the model if the
+    // instrument’s field-of-view intersects it.
     struct [[codegen::Dictionary(RenderableModelProjection)]] Parameters {
         // The file or files that should be loaded, that specifies the model to load. The
         // file can contain filesystem tokens or can be specified relative to the
@@ -110,7 +109,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableModelProjection::Documentation() {
-    return codegen::doc<Parameters>("spacecraftinstruments_renderablemodelprojection");
+    return codegen::doc<Parameters>("spacecraftinstruments_renderable_modelprojection");
 }
 
 RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& dictionary)
@@ -155,10 +154,6 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 }
 
 RenderableModelProjection::~RenderableModelProjection() {}
-
-bool RenderableModelProjection::isReady() const {
-    return (_programObject != nullptr) && _projectionComponent.isReady();
-}
 
 void RenderableModelProjection::initializeGL() {
     _programObject = global::renderEngine->buildRenderProgram(
@@ -320,7 +315,7 @@ void RenderableModelProjection::update(const UpdateData& data) {
     const double time = data.time.j2000Seconds();
     const double integrateFromTime = data.previousFrameTime.j2000Seconds();
 
-    // Only project new images if time changed since last update.
+    // Only project new images if time changed since last update
     if (time > integrateFromTime && ImageSequencer::ref().isReady() &&
         _projectionComponent.doesPerformProjection())
     {

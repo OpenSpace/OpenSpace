@@ -30,10 +30,10 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    // This `Renderable` creates a textured 3D sphere where the texture is a video. Per
-    // default, the sphere uses an equirectangular projection for the image mapping
-    // and hence expects a video in equirectangular format. However, it can also be used
-    // to play fisheye videos by changing the `TextureProjection`.
+    // Creates a textured 3D sphere where the texture is a video. Per default, the sphere
+    // uses an equirectangular projection for the image mapping and hence expects a video
+    // in equirectangular format. However, it can also be used to play fisheye videos by
+    // changing the `TextureProjection`.
     //
     // The video can either be played back based on a given simulation time
     // (`PlaybackMode` MapToSimulationTime) or through the user interface (for
@@ -50,7 +50,7 @@ namespace openspace {
 
 Documentation RenderableVideoSphere::Documentation() {
     openspace::Documentation doc = codegen::doc<Parameters>(
-        "video_renderablevideosphere",
+        "video_renderable_videosphere",
         RenderableSphere::Documentation()
     );
 
@@ -65,10 +65,6 @@ RenderableVideoSphere::RenderableVideoSphere(const ghoul::Dictionary& dictionary
     , _videoPlayer(dictionary)
 {
     addPropertySubOwner(_videoPlayer);
-}
-
-bool RenderableVideoSphere::isReady() const {
-    return RenderableSphere::isReady() && _videoPlayer.isInitialized();
 }
 
 void RenderableVideoSphere::initializeGL() {

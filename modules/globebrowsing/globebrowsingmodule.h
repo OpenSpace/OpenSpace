@@ -61,13 +61,17 @@ public:
     };
     using Capabilities = std::vector<Layer>;
 
-    // Stores the mapping between globe to names
+    /**
+     * Stores the mapping between globe to names.
+     */
     struct UrlInfo {
         std::string name;
         std::string url;
     };
 
-    // Registers then user-usable name
+    /**
+     * Registers then user - usable name.
+     */
     void loadWMSCapabilities(std::string name, std::string globe, std::string url);
     Capabilities capabilities(const std::string& name);
 

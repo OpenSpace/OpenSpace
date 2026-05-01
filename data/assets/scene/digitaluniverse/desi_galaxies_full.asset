@@ -1,0 +1,80 @@
+-- This file is auto-generated in the make_RenderablePointCloud_asset() function inside asset_creation.py
+
+-- Set some parameters for OpenSpace settings
+local data_folder = asset.resource({
+  Name = "DESI Galaxies Data Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_desi_galaxies_full_data",
+  Version = 1
+})
+local texture_folder = asset.resource({
+  Name = "Point Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_point_textures",
+  Version = 1
+})
+local cmap_folder = asset.resource({ -- often the same as the data_folder but not always
+  Name = "DESI Galaxies Colormap",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_desi_galaxies_full_data",
+  Version = 1
+})
+local data_file = data_folder .. "desi_galaxies_full.csv"
+local texture = texture_folder .. "point3A.png"
+local cmap = cmap_folder .. "desi_galaxies_full.cmap"
+
+local Object = {
+  Identifier = "desi_galaxies_full",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = data_file,
+    Unit = "Mpc",
+    Enabled = false,
+    Coloring = {
+      FixedColor = {0.85, 0.35, 0.18},
+      ColorMapping = {
+        File = cmap,
+        Enabled = true,
+        ParameterOptions = {
+          { Key = "num_nearby_galaxies", Range = {0.1, 20} }
+        }
+      }
+    },
+    Opacity = 0.95,
+    Texture = {
+      File = texture },
+    SizeSettings = {
+      ScaleExponent = 22.5,
+      MaxSize = 0.3,
+      EnableMaxSizeControl = true
+     },
+    Fading = {
+      FadeInDistances = {300.0, 500.0}
+    },
+  },
+  GUI = {
+    Name = "DESI Galaxies (Full)",
+    Path = "/Universe/Deep Sky Surveys",
+    Description = [[The full version of the DESI (Dark Energy Spectroscopic Instrument) galaxy survey. Census: 14,633,224 galaxies.]]
+  }
+}
+
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(Object)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+asset.meta = {
+  Name = "DESI Galaxies (Full)",
+  Description = Object.GUI.Description,
+  Author = "Cade Mohrhardt, Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}

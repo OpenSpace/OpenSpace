@@ -81,8 +81,8 @@ private:
     BoolProperty _renderFullTrail;
     /// Determines whether accurate trail points are being calculated or not
     BoolProperty _useAccurateTrail;
-    /// Determines how many vertices around the object that will be
-    /// replaced during full trail rendering
+    /// Determines how many vertices around the object that will be replaced during full
+    /// trail rendering
     IntProperty _nReplacementPoints;
 
     /// Dirty flag that determines whether the full vertex buffer needs to be resampled
@@ -93,8 +93,8 @@ private:
     /// The conversion of the _endTime into the internal time format
     double _end = 0.0;
 
-    /// How many points do we need to compute given the distance between the
-    /// start and end date and the desired sample interval
+    /// How many points do we need to compute given the distance between the start and end
+    /// date and the desired sample interval
     unsigned int _nVertices = 0;
 
     double _totalSampleInterval = 0.0;

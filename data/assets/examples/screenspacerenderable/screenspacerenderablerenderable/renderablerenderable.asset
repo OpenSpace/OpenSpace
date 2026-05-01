@@ -1,6 +1,6 @@
 -- Basic
 -- Creates a screenspace image that shows a spherical grid as an example for any
--- [Renderable](#renderable) that can be displayed.
+-- [Renderable](#core_renderable) that can be displayed.
 
 local Item = {
   Type = "ScreenSpaceRenderableRenderable",
@@ -12,6 +12,7 @@ local Item = {
     LineWidth = 2.0
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(Item)

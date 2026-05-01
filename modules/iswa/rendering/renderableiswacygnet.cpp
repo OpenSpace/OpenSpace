@@ -29,8 +29,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/transferfunction.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/rendering/transferfunction.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
@@ -38,8 +38,8 @@
 #include <ghoul/designpattern/event.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/programobject.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/programobject.h>
 #include <cmath>
 #include <cstdlib>
 
@@ -106,12 +106,7 @@ RenderableIswaCygnet::RenderableIswaCygnet(const ghoul::Dictionary& dictionary)
 
     double xOffset = p.xOffset.value_or(0.0);
 
-    glm::vec3 scale = glm::vec3(
-        _data.gridMax.x - _data.gridMin.x,
-        _data.gridMax.y - _data.gridMin.y,
-        _data.gridMax.z - _data.gridMin.z
-    );
-    _data.scale = scale;
+    _data.scale = _data.gridMax - _data.gridMin;
 
     glm::vec3 offset = glm::vec3(
         (_data.gridMin.x +
@@ -163,10 +158,6 @@ void RenderableIswaCygnet::deinitializeGL() {
     }
 }
 
-bool RenderableIswaCygnet::isReady() const {
-    return !_shader;
-}
-
 void RenderableIswaCygnet::render(const RenderData& data, RendererTasks&) {
     if (!readyToRender()) {
         return;
@@ -180,16 +171,12 @@ void RenderableIswaCygnet::render(const RenderData& data, RendererTasks&) {
     }
     transform = transform * _rotation;
 
-    glm::vec4 pposition =
+    const glm::vec4 pposition =
         static_cast<glm::vec4>(glm::dvec4(data.modelTransform.translation, 0.0)) +
-        transform * glm::vec4(
-            _data.spatialScale.x * _data.offset,
-            _data.spatialScale.w
-        );
-    glm::vec3 position =
-        glm::vec3(pposition) * static_cast<float>(pow(10.f, pposition.w));
+        transform * glm::vec4(_data.spatialScale.x * _data.offset, _data.spatialScale.w);
+    const glm::vec3 position =
+        glm::vec3(pposition) * static_cast<float>(std::pow(10.f, pposition.w));
 
-    // Activate shader
     _shader->activate();
     glEnable(GL_ALPHA_TEST);
     glDisable(GL_CULL_FACE);
@@ -197,7 +184,7 @@ void RenderableIswaCygnet::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform("viewProjection", data.camera.viewProjectionMatrix());
     _shader->setUniform("modelTransform", transform);
 
-    _shader->setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
+    _shader->setUniform("campos", glm::vec4(data.camera.position(), 1.f));
     _shader->setUniform("objpos", glm::vec4(position, 0.f));
     _shader->setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
     _shader->setUniform("scaling", glm::vec2(1.f, 0.f));
@@ -215,8 +202,8 @@ void RenderableIswaCygnet::update(const UpdateData&) {
         return;
     }
 
-    // the texture resource is downloaded ahead of time, so we need to
-    // now if we are going backwards or forwards
+    // The texture resource is downloaded ahead of time, so we need to now if we are going
+    // backwards or forwards
     _openSpaceTime = global::timeManager->time().j2000Seconds();
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()
@@ -228,7 +215,7 @@ void RenderableIswaCygnet::update(const UpdateData&) {
     );
 
     const bool timeToUpdate =
-        (fabs(_openSpaceTime - _lastUpdateOpenSpaceTime) >= _data.updateTime &&
+        (std::abs(_openSpaceTime - _lastUpdateOpenSpaceTime) >= _data.updateTime &&
         (_realTime.count() - _lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
 
     if (_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
@@ -238,20 +225,18 @@ void RenderableIswaCygnet::update(const UpdateData&) {
         }
     }
 
-    if (_textureDirty && _data.updateTime != 0 && timeToUpdate) {
+    if (_textureDirty && (_data.updateTime != 0) && timeToUpdate) {
         updateTexture();
         _textureDirty = false;
 
-        double clockwiseSign = (global::timeManager->deltaTime() > 0) ? 1.0 : -1.0;
-        downloadTextureResource(_openSpaceTime + clockwiseSign * _data.updateTime);
+        const double clockwiseSgn = (global::timeManager->deltaTime() > 0.0) ? 1.0 : -1.0;
+        downloadTextureResource(_openSpaceTime + clockwiseSgn * _data.updateTime);
         _lastUpdateRealTime = _realTime;
         _lastUpdateOpenSpaceTime = _openSpaceTime;
     }
 
-    if (!_transferFunctions.empty()) {
-        for (TransferFunction& tf : _transferFunctions) {
-            tf.update();
-        }
+    for (TransferFunction& tf : _transferFunctions) {
+        tf.update();
     }
 }
 
@@ -278,7 +263,7 @@ void RenderableIswaCygnet::initializeTime() {
 void RenderableIswaCygnet::initializeGroup() {
     _group = IswaManager::ref().iswaGroup(_data.groupName);
 
-    //Subscribe to enable and delete property
+    // Subscribe to enable and delete property
     ghoul::Event<ghoul::Dictionary>& groupEvent = _group->groupEvent();
 
     groupEvent.subscribe(

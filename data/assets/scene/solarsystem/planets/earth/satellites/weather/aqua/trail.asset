@@ -1,0 +1,62 @@
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+
+
+
+local omm = asset.resource({
+  Name = "Satellite CSV Data (Aqua)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_csv_data_aqua",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?CATNR=27424&FORMAT=csv",
+  Filename = "Aqua.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local AquaTrail = {
+  Identifier = "Aqua_trail",
+  Parent = earthAsset.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "GPTranslation",
+      Observer = earthAsset.EarthInertial.Identifier,
+      File = omm .. "Aqua.txt",
+      Format = "CSV",
+      RenderBinMode = "PostDeferredTransparent"
+    },
+    Color = { 0.9, 0.6715, 0.0 },
+    Fade = 1.5,
+    Resolution = 320
+  },
+  Tag = { "earth_satellites", "Aqua" },
+  GUI = {
+    Name = "Aqua Trail",
+    Path = "/Solar System/Planets/Earth/Satellites/Aqua",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  local a = openspace.space.readKeplerFile(omm .. "Aqua.txt", "CSV")
+  AquaTrail.Renderable.Period = a[1].Period / (60 * 60 * 24)
+
+  openspace.addSceneGraphNode(AquaTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(AquaTrail)
+end)
+
+asset.export(AquaTrail)
+
+
+
+asset.meta = {
+  Name = "Aqua Trail",
+  Description = [[Trail for Aqua. Trail data from Celestrak. Can be used in conjuntion
+    with Aqua Modis (Temporal) layer for Earth]],
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.org/",
+  License = "NASA"
+}

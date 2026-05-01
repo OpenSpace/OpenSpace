@@ -50,7 +50,7 @@ namespace {
         Property::Visibility::User
     };
 
-    struct [[codegen::Dictionary(DashboardTextItem)]] Parameters {
+    struct [[codegen::Dictionary(ScreenSpaceRenderableText)]] Parameters {
         // [[codegen::verbatim(FontNameInfo.description)]]
         std::optional<std::string> fontName;
 
@@ -63,7 +63,7 @@ namespace {
 namespace openspace {
 
 Documentation ScreenSpaceRenderableText::Documentation() {
-    return codegen::doc<Parameters>("screenspace_text");
+    return codegen::doc<Parameters>("core_screenspacetext");
 }
 
 ScreenSpaceRenderableText::ScreenSpaceRenderableText(const ghoul::Dictionary& dictionary)
@@ -105,10 +105,6 @@ void ScreenSpaceRenderableText::deinitializeGL() {
     ScreenSpaceRenderable::deinitializeGL();
 }
 
-bool ScreenSpaceRenderableText::isReady() const {
-    return _shader && _font && _texture;
-}
-
 void ScreenSpaceRenderableText::update() {
     updateFramebuffer();
 }
@@ -130,7 +126,7 @@ void ScreenSpaceRenderableText::render(const RenderData& renderData) {
 
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glm::vec2 pos = glm::vec2(0.f, size.y / 4);
+    glm::vec2 pos = glm::vec2(0.f, size.y / 4.f);
     _fontRenderer->render(*_font, pos, _buffer);
     ghoul::opengl::FramebufferObject::deactivate();
 
@@ -160,13 +156,13 @@ void ScreenSpaceRenderableText::updateFramebuffer() {
     _framebuffer->activate();
     // Create a texture that has 2 times the size to create a buffer
     _texture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(bbox.x, bbox.y, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGB,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit{}
+        ghoul::opengl::Texture::SamplerInit {}
     );
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
     ghoul::opengl::FramebufferObject::deactivate();

@@ -1,12 +1,12 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Kuiper)",
+  Name = "Satellite CSV Data (Kuiper)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_kuiper",
-  Url = "https://celestrak.org/NORAD/elements/supplemental/sup-gp.php?FILE=kuiper&FORMAT=kvn",
+  Identifier = "satellite_csv_data_kuiper",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=kuiper&FORMAT=csv",
   Filename = "kuiper.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -14,11 +14,11 @@ local omm = asset.resource({
 
 local KuiperSatellites = {
   Identifier = "KuiperSatellites",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "kuiper.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.95, 0.82, 0.25 },
     TrailFade = 5,
@@ -52,6 +52,6 @@ asset.meta = {
   Name = "Satellites Communications - Kuiper",
   Description = "Satellites asset for Communications - Kuipter. Data from Celestrak",
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/NORAD/elements/",
+  URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
 }

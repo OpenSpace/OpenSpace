@@ -318,6 +318,78 @@ TEST_CASE("SetPropertyValueSingle: PostScript 0 duration", "[setpropertyvalue]")
     }
 }
 
+TEST_CASE("SetPropertyValueSingle: Bouncing", "[setpropertyvalue]") {
+#ifdef NDEBUG
+    // Disabling this test in Debug mode as it is very sensitive to performance-based
+    // timers
+
+    std::unique_ptr<Scene> scene = std::make_unique<Scene>(
+        std::make_unique<SceneInitializer>()
+    );
+    global::renderEngine->setScene(scene.get());
+    defer { global::renderEngine->setScene(nullptr); };
+
+    PropertyOwner owner = PropertyOwner({ "base" });
+    global::rootPropertyOwner->addPropertySubOwner(owner);
+    defer { global::rootPropertyOwner->removePropertySubOwner(owner); };
+    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner.addProperty(p1);
+    FloatProperty p2 = FloatProperty(Property::PropertyInfo("p2", "a", "b"), 1.f);
+    owner.addProperty(p2);
+
+    {
+        LogMgr.resetMessageCounters();
+        defer { LogMgr.resetMessageCounters(); };
+
+        global::scriptEngine->queueScript(R"(
+            openspace.setPropertyValueSingle(
+                'base.p1',
+                2.0,
+                0.1,
+                'Linear',
+                [[openspace.setPropertyValueSingle('base.p2', 0.75)]],
+                true
+            )
+        )");
+        defer { scene->removePropertyInterpolation(&p1); };
+
+        CHECK(p1 == 1.f);
+        CHECK(p2 == 1.f);
+        triggerScriptRun();
+        updateInterpolations(std::chrono::milliseconds(50));
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.5, 0.05));
+        CHECK(p2 == 1.f);
+
+        updateInterpolations(std::chrono::milliseconds(50));
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(2.0, 0.05));
+        CHECK(p2 == 1.f);
+
+        updateInterpolations(std::chrono::milliseconds(50));
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.5, 0.05));
+        CHECK(p2 == 1.f);
+
+        updateInterpolations(std::chrono::milliseconds(50));
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.0, 0.05));
+        CHECK(p2 == 1.f);
+
+        updateInterpolations(std::chrono::milliseconds(50));
+        CHECK_THAT(p1, Catch::Matchers::WithinAbs(1.5, 0.05));
+        CHECK(p2 == 1.f);
+
+
+        global::scriptEngine->queueScript(R"(
+            openspace.stopPropertyInterpolation('base.p1',)
+        )");
+
+        triggerScriptRun();
+        updateInterpolations(std::chrono::milliseconds(100));
+        triggerScriptRun();
+        CHECK(p1 == 1.f);
+        CHECK(p2 == 2.f);
+    }
+#endif // !(defined(NDEBUG) || defined(DEBUG))
+}
+
 TEST_CASE("SetPropertyValue: Basic", "[setpropertyvalue]") {
     PropertyOwner owner = PropertyOwner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);

@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -11,7 +11,7 @@ local EquatorialRotationMatrix = {
 
 local EquatorialLine = {
   Identifier = "EquatorialLine",
-  Parent = transforms.SolarSystemBarycenter.Name,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
@@ -24,13 +24,13 @@ local EquatorialLine = {
   },
   Renderable = {
     Type = "RenderableRadialGrid",
+    Enabled = asset.enabled,
     Opacity = 0.8,
     Color = { 0.6, 0.6, 0.2 },
     LineWidth = 4.0,
-    GridSegments = {1, 1},
-    Enabled = asset.enabled
+    GridSegments = { 1, 1 }
   },
-  Tag = { "nightsky_marking" },
+  Tag = { "nightsky_marking", "equatorial_marking" },
   GUI = {
     Name = "Celestial Equator",
     Description = "A line representation of the Equatorial plane.",
@@ -96,6 +96,6 @@ asset.meta = {
   Description = [[A line representation of the Equatorial plane, including actions
     to toggle, hide and show it.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

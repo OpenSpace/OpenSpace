@@ -33,8 +33,8 @@ bool VolumeRaycaster::isCameraInside(const RenderData&, glm::vec3&) {
     return false;
 }
 
-void VolumeRaycaster::setMaxSteps(int nsteps) {
-    _rayCastMaxSteps = nsteps;
+void VolumeRaycaster::setMaxSteps(int nSteps) {
+    _rayCastMaxSteps = nSteps;
 }
 
 int VolumeRaycaster::maxSteps() const {
