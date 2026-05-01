@@ -143,6 +143,44 @@ AssetSchema::AssetSchema() {
 
         _categories.push_back(std::move(category));
     }
+
+    // Copy base-class members into concrete types. The type whose name matches the
+    // category name is the base (e.g. "Renderable" in the Renderable category)
+    for (SchemaCategory& category : _categories) {
+        const SchemaType* baseType = nullptr;
+        for (const SchemaType& type : category.types) {
+            if (type.name == category.name) {
+                baseType = &type;
+                break;
+            }
+        }
+        // For example, "Other" doesn't have a base type
+        if (!baseType) {
+            continue;
+        }
+
+        // Collect inheritable members (skip "Type" — handled by the selector) 
+        std::vector<SchemaMember> baseMembers;
+        for (const SchemaMember& member : baseType->members) {
+            if (member.name != "Type") {
+                baseMembers.push_back(member);
+            }
+        }
+        if (baseMembers.empty()) {
+            continue;
+        }
+
+        for (SchemaType& type : category.types) {
+            if (&type == baseType) {
+                continue;
+            }
+            type.members.insert(
+                type.members.end(),
+                baseMembers.begin(),
+                baseMembers.end()
+            );
+        }
+    }
 }
 
 const SchemaCategory* AssetSchema::findCategory(const std::string& identifier) const {
