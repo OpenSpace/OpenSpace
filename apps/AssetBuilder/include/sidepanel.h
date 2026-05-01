@@ -68,6 +68,13 @@ public slots:
      */
     void addDependencyViaDialog();
 
+    /**
+     * Adds the file at \p filePath as a dependency.
+     *
+     * \param filePath Absolute path to the file to add
+     */
+    void addDependency(const QString& filePath);
+
 signals:
     /**
      * Emitted when the contents list selection changes.

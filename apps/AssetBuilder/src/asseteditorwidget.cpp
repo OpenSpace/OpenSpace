@@ -203,8 +203,8 @@ void AssetEditorWidget::buildUi() {
         _docsPanel, &DocumentationPanel::showDocumentation
     );
     connect(
-        _editorPanel, &EditorPanel::browseJassetRequested,
-        _sidePanel, &SidePanel::addDependencyViaDialog
+        _editorPanel, &EditorPanel::addDependency,
+        _sidePanel, &SidePanel::addDependency
     );
 
     connect(

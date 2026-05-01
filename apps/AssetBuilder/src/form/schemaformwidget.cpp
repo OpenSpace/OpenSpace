@@ -36,11 +36,15 @@
 #include <QComboBox>
 #include <QDateTime>
 #include <QDoubleValidator>
+#include <QFile>
 #include <QFileDialog>
 #include <QFrame>
 #include <QGridLayout>
 #include <QHBoxLayout>
+#include <QInputDialog>
 #include <QIntValidator>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
@@ -856,11 +860,32 @@ namespace {
         return lineEdit;
     }
 
+    QStringList extractJassetIdentifiers(const QString& filePath) {
+        QFile file(filePath);
+        if (!file.open(QFile::ReadOnly)) {
+            return {};
+        }
+        QJsonParseError err;
+        const QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &err);
+        if (doc.isNull() || !doc.isObject()) {
+            return {};
+        }
+        const JAsset asset = jassetFromJson(doc.object());
+        QStringList ids;
+        for (const ContentItem& item : asset.contents) {
+            const auto it = item.properties.find("Identifier");
+            if (it != item.properties.end() && it->second.isString()) {
+                ids.append(QString::fromStdString(it->second.toString()));
+            }
+        }
+        return ids;
+    }
+
     QWidget* createIdentifierComboWidget(const SchemaMember& member,
                                          IdentifierRegistry* registry,
                                          PropertyMap& properties,
                                          const std::function<void()>& onChange,
-                                         const std::function<void()>& onBrowse)
+                                    const std::function<void(const QString&)>& onSelect)
     {
         PropertyMap* props = &properties;
         QWidget* container = new QWidget();
@@ -914,7 +939,39 @@ namespace {
         browseButton->setObjectName("identifier-browse-button");
         QObject::connect(
             browseButton, &QPushButton::clicked,
-            browseButton, onBrowse
+            container,
+            [combo, container, onSelect]() {
+                const QString selected = QFileDialog::getOpenFileName(
+                    container, "Browse .jasset", QDir::homePath(),
+                    "Asset files (*.jasset);"
+                );
+                if (selected.isEmpty()) {
+                    return;
+                }
+
+                QStringList identifiers = extractJassetIdentifiers(selected);
+
+                if (identifiers.isEmpty()) {
+                    QMessageBox::information(
+                        container, "No Identifiers",
+                        "No identifiers were found in the selected file."
+                    );
+                    return;
+                }
+
+                bool ok = false;
+                const QString picked = QInputDialog::getItem(
+                    container, "Select Identifier",
+                    "Select an identifier from the file:",
+                    identifiers, 0, false, &ok
+                );
+                if (!ok) {
+                    return;
+                }
+
+                combo->setCurrentText(picked);
+                onSelect(selected);
+            }
         );
 
         horizontalLayout->addWidget(combo, 1);
@@ -1415,8 +1472,8 @@ SchemaFormWidget* SchemaFormWidget::createNestedForm(
         this, &SchemaFormWidget::documentationRequested
     );
     connect(
-        inner, &SchemaFormWidget::browseJassetRequested,
-        this, &SchemaFormWidget::browseJassetRequested
+        inner, &SchemaFormWidget::addDependency,
+        this, &SchemaFormWidget::addDependency
     );
     return inner;
 }
@@ -2013,15 +2070,15 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
     // Identifier fields that reference other nodes (not the node's own Identifier
     // definition) get a registry combo + browse button
     if (member.type == "Identifier" && member.name != "Identifier" && _registry) {
-        auto onBrowse = [this]() {
-            emit browseJassetRequested();
+        auto onSelect = [this](const QString& filePath) {
+            emit addDependency(filePath);
         };
         return createIdentifierComboWidget(
             member,
             _registry,
             _properties,
             onChange,
-            onBrowse
+            onSelect
         );
     }
     const QStringList options = parseInList(member.description);

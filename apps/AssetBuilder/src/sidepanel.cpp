@@ -56,6 +56,10 @@ void SidePanel::addDependencyViaDialog() {
     _dependencies->addDependencyViaDialog();
 }
 
+void SidePanel::addDependency(const QString& filePath) {
+    _dependencies->addDependency(filePath);
+}
+
 void SidePanel::buildUi() {
     setObjectName("side-panel");
     setMinimumWidth(0);

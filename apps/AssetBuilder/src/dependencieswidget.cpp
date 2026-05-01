@@ -136,7 +136,16 @@ void DependenciesWidget::addDependencyViaDialog() {
         return;
     }
 
-    const std::filesystem::path selectedPath = selected.toStdWString();
+    addDependency(selected);
+}
+
+void DependenciesWidget::addDependency(const QString& filePath) {
+    if (!_asset) {
+        return;
+    }
+
+    const std::filesystem::path selectedPath = filePath.toStdWString();
+    const std::filesystem::path assetDirectory = assetDir();
 
     // Store as data-relative if inside the data root, relative if the asset file is
     // saved, or absolute as a last resort
