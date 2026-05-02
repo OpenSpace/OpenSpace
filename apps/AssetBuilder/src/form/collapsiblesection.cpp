@@ -70,12 +70,6 @@ CollapsibleSection::CollapsibleSection(QWidget* parent, const QString& title,
     headerLayout->setContentsMargins(12, 8, 12, 8);
     headerLayout->setSpacing(8);
 
-    // Title: transparent to mouse events so clicks reach the parent frame
-    QLabel* titleLabel = new QLabel(title, _headerFrame);
-    titleLabel->setObjectName("accordion-title");
-    titleLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
-    titleLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-
     // Info button: always visible; default shows "No documentation available"
     _infoButton = new QPushButton("i", _headerFrame);
     _infoButton->setObjectName("section-info-button");
@@ -85,22 +79,28 @@ CollapsibleSection::CollapsibleSection(QWidget* parent, const QString& title,
         _infoButton, &QPushButton::clicked,
         this, [this]() { emit documentationRequested(_documentation); }
     );
+    headerLayout->addWidget(_infoButton);
+
+    // Title: transparent to mouse events so clicks reach the parent frame
+    QLabel* titleLabel = new QLabel(title, _headerFrame);
+    titleLabel->setObjectName("accordion-title");
+    titleLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    titleLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    headerLayout->addWidget(titleLabel);
+
+    _mandatoryLabel = new QLabel("*", _headerFrame);
+    _mandatoryLabel->setObjectName("section-required-asterisk");
+    _mandatoryLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    _mandatoryLabel->setVisible(isMandatory);
+    headerLayout->addWidget(_mandatoryLabel);
+
+    headerLayout->addStretch(1);
 
     // Chevron: transparent to mouse events so clicks reach the parent frame
     _chevronLabel = new QLabel(ChevronDown, _headerFrame);
     _chevronLabel->setObjectName("accordion-chevron");
     _chevronLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
     _chevronLabel->setText(_isExpanded ? ChevronUp : ChevronDown);
-
-    _mandatoryLabel = new QLabel("*", _headerFrame);
-    _mandatoryLabel->setObjectName("section-required-asterisk");
-    _mandatoryLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
-    _mandatoryLabel->setVisible(isMandatory);
-
-    headerLayout->addWidget(_infoButton);
-    headerLayout->addWidget(titleLabel);
-    headerLayout->addWidget(_mandatoryLabel);
-    headerLayout->addStretch(1);
     headerLayout->addWidget(_chevronLabel);
 
     // Content area
@@ -126,7 +126,9 @@ bool CollapsibleSection::eventFilter(QObject* object, QEvent* event) {
         if (_infoButton->isVisible() && _infoButton->geometry().contains(position)) {
             return false;
         }
-        toggleExpanded();
+        _isExpanded = !_isExpanded;
+        _contentFrame->setVisible(_isExpanded && !_frameLayout->isEmpty());
+        _chevronLabel->setText(_isExpanded ? ChevronUp : ChevronDown);
         return true;
     }
     if (mouseEvent->button() == Qt::RightButton && !_sectionKey.isEmpty()) {
@@ -156,20 +158,8 @@ void CollapsibleSection::setContentWidget(QWidget* widget) {
         delete item;
     }
 
-    if (widget) {
-        widget->setParent(_contentFrame);
-        _frameLayout->addWidget(widget);
-    }
-
+    _frameLayout->addWidget(widget);
     _contentFrame->setVisible(_isExpanded && (widget != nullptr));
-}
-
-QWidget* CollapsibleSection::contentWidget() const {
-    return _frameLayout->isEmpty() ? nullptr : _frameLayout->itemAt(0)->widget();
-}
-
-bool CollapsibleSection::isExpanded() const {
-    return _isExpanded;
 }
 
 QString CollapsibleSection::sectionKey() const {
@@ -178,10 +168,4 @@ QString CollapsibleSection::sectionKey() const {
 
 void CollapsibleSection::setPasteAvailable(bool isAvailable) {
     _canPaste = isAvailable;
-}
-
-void CollapsibleSection::toggleExpanded() {
-    _isExpanded = !_isExpanded;
-    _contentFrame->setVisible(_isExpanded && (contentWidget() != nullptr));
-    _chevronLabel->setText(_isExpanded ? ChevronUp : ChevronDown);
 }

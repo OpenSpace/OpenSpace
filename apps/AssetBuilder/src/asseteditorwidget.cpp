@@ -28,7 +28,6 @@
 #include "editorpanel.h"
 #include "identifierregistry.h"
 #include "sidepanel.h"
-
 #include <QDir>
 #include <QFile>
 #include <QHBoxLayout>
@@ -37,34 +36,13 @@
 
 namespace {
     constexpr int LeftPanelWidth = 240;
-    constexpr int RightPanelWidth = 280;
+    constexpr int Stretch = 9999;
+    constexpr int RightPanelWidth = 350;
 } // namespace
 
 AssetEditorWidget::AssetEditorWidget(QWidget* parent)
     : QWidget(parent)
 {
-    QBoxLayout* root = new QHBoxLayout(this);
-    root->setContentsMargins(0, 0, 0, 0);
-    root->setSpacing(0);
-
-    QSplitter* splitter = new QSplitter(Qt::Horizontal, this);
-    splitter->setChildrenCollapsible(true);
-    splitter->setHandleWidth(4);
-    root->addWidget(splitter);
-
-    _sidePanel = new SidePanel(splitter);
-    _sidePanel->setAsset(&_asset);
-    _sidePanel->setFilePath(_filePath);
-    connect(
-        _sidePanel, &SidePanel::selectionChanged,
-        this, &AssetEditorWidget::onSelectionChanged
-    );
-    connect(
-        _sidePanel, &SidePanel::assetModified,
-        this, &AssetEditorWidget::onContentModified
-    );
-    splitter->addWidget(_sidePanel);
-
     _identifierRegistry = new IdentifierRegistry(this);
     connect(
         _identifierRegistry,
@@ -74,6 +52,35 @@ AssetEditorWidget::AssetEditorWidget(QWidget* parent)
             QMessageBox::warning(this, "Duplicate Identifiers", message);
         }
     );
+
+    QBoxLayout* root = new QHBoxLayout(this);
+    root->setContentsMargins(0, 0, 0, 0);
+    root->setSpacing(0);
+
+    QSplitter* splitter = new QSplitter(Qt::Horizontal, this);
+    splitter->setChildrenCollapsible(true);
+    splitter->setHandleWidth(4);
+    root->addWidget(splitter);
+
+
+    //
+    // Sidepanel
+    //
+    _sidePanel = new SidePanel(splitter, _asset);
+    _sidePanel->setFilePath(_filePath);
+    connect(
+        _sidePanel, &SidePanel::selectionChanged,
+        this, &AssetEditorWidget::onSelectionChanged
+    );
+    connect(
+        _sidePanel, &SidePanel::assetModified,
+        this, &AssetEditorWidget::onContentModified
+    );
+
+
+    //
+    // Editor
+    //
     _editorPanel = new EditorPanel(splitter, &_asset, _identifierRegistry);
     connect(
         _editorPanel, &EditorPanel::contentModified,
@@ -83,24 +90,22 @@ AssetEditorWidget::AssetEditorWidget(QWidget* parent)
         _editorPanel, &EditorPanel::addDependency,
         _sidePanel, &SidePanel::addDependency
     );
-    splitter->addWidget(_editorPanel);
 
+
+    //
+    // Documentation
+    //
     _docsPanel = new DocumentationPanel(splitter);
     connect(
         _editorPanel, &EditorPanel::documentationRequested,
         _docsPanel, &DocumentationPanel::showDocumentation
     );
-    splitter->addWidget(_docsPanel);
 
-    constexpr int Stretch = 9999;
+
     splitter->setSizes({ LeftPanelWidth, Stretch, RightPanelWidth });
     splitter->setStretchFactor(0, 0);
     splitter->setStretchFactor(1, 1);
     splitter->setStretchFactor(2, 0);
-}
-
-const JAsset& AssetEditorWidget::asset() const {
-    return _asset;
 }
 
 bool AssetEditorWidget::isDirty() const {
@@ -109,10 +114,6 @@ bool AssetEditorWidget::isDirty() const {
 
 const std::filesystem::path& AssetEditorWidget::filePath() const {
     return _filePath;
-}
-
-bool AssetEditorWidget::hasFile() const {
-    return !_filePath.empty();
 }
 
 QString AssetEditorWidget::displayName() const {
@@ -145,7 +146,7 @@ void AssetEditorWidget::newAsset() {
 
 bool AssetEditorWidget::loadAsset(const std::filesystem::path& path) {
     const QString qPath = QString::fromStdWString(path.wstring());
-    QFile file(qPath);
+    QFile file = QFile(qPath);
     if (!file.open(QFile::ReadOnly)) {
         QMessageBox::critical(
             this,

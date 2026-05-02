@@ -80,29 +80,28 @@ MatrixWidget::MatrixWidget(int nComponents, int nColumns, bool isInteger, QWidge
     }
 }
 
-PropertyList MatrixWidget::values() const {
-    PropertyList result;
+std::vector<double> MatrixWidget::values() const {
+    std::vector<double> result;
     result.reserve(_fields.size());
     for (const QLineEdit* field : _fields) {
-        result.push_back(PropertyValue{ field->text().toDouble() });
+        result.push_back(field->text().toDouble());
     }
     return result;
 }
 
-void MatrixWidget::setValues(const PropertyList& vals) {
+void MatrixWidget::setValues(const std::vector<double>& vals) {
     ghoul_assert(vals.size() == _fields.size(), "Wrong number of values");
     for (size_t i = 0; i < _fields.size(); i++) {
         // Suppress per-field textEdited so setText doesn't emit valueChanged
         // N times; we emit it once after the loop instead
         _fields[i]->blockSignals(true);
-        const double val = vals[i].toDouble();
 
         if (_isInteger) {
-            _fields[i]->setText(QString::number(static_cast<int>(val)));
+            _fields[i]->setText(QString::number(static_cast<int>(vals[i])));
         }
         else {
             // 'g' = shortest of fixed/scientific notation, trims trailing zeros
-            _fields[i]->setText(QString::number(val, 'g', DecimalPrecision));
+            _fields[i]->setText(QString::number(vals[i], 'g', DecimalPrecision));
         }
         _fields[i]->blockSignals(false);
     }

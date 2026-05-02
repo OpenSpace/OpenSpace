@@ -46,7 +46,7 @@ public:
      *
      * \param parent Optional parent QObject for lifetime management
      */
-    explicit IdentifierRegistry(QObject* parent = nullptr);
+    explicit IdentifierRegistry(QObject* parent);
 
     /**
      * Rebuilds the identifier list from the given asset. Collects identifiers from local

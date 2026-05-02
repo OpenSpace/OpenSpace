@@ -45,7 +45,7 @@ public:
         OpenFile ///< Open an existing .jasset file (path in selectedFile())
     };
 
-    explicit WelcomeDialog(QWidget* parent = nullptr);
+    explicit WelcomeDialog(QWidget* parent);
 
     /**
      * Returns the action the user chose before the dialog closed.

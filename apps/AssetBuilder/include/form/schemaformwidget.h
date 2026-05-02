@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSETBUILDER___FORM_SCHEMAFORMWIDGET___H__
-#define __OPENSPACE_ASSETBUILDER___FORM_SCHEMAFORMWIDGET___H__
+#ifndef __OPENSPACE_ASSETBUILDER___SCHEMAFORMWIDGET___H__
+#define __OPENSPACE_ASSETBUILDER___SCHEMAFORMWIDGET___H__
 
 #include <QWidget>
 
@@ -58,7 +58,7 @@ public:
      * \param registry Optional identifier registry for Identifier-type combos
      */
     SchemaFormWidget(std::vector<SchemaMember> members,
-        std::weak_ptr<PropertyMap> properties, QWidget* parent = nullptr,
+        std::weak_ptr<PropertyMap> properties, QWidget* parent,
         bool subSectionsExpanded = false, bool sortMembers = true,
         const IdentifierRegistry* registry = nullptr);
 
@@ -266,4 +266,4 @@ private:
     const IdentifierRegistry* _registry = nullptr;
 };
 
-#endif // __OPENSPACE_ASSETBUILDER___FORM_SCHEMAFORMWIDGET___H__
+#endif // __OPENSPACE_ASSETBUILDER___SCHEMAFORMWIDGET___H__

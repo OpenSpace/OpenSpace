@@ -30,21 +30,21 @@
 #include <jasset.h>
 #include <filesystem>
 
-class SidePanel;
 class DocumentationPanel;
 class EditorPanel;
 class IdentifierRegistry;
+class SidePanel;
 
 /**
- * Coordinator widget for the three-panel .jasset editor. Owns the asset data
- * and wires signals between SidePanel, EditorPanel, and DocumentationPanel.
+ * Coordinator widget for the three-panel .jasset editor. Owns the asset data and wires
+ ( signals between SidePanel, EditorPanel, and DocumentationPanel.
  *
  * Layout: left drawer (contents + deps) | center form | right drawer (docs)
  */
 class AssetEditorWidget final : public QWidget {
 Q_OBJECT
 public:
-    explicit AssetEditorWidget(QWidget* parent = nullptr);
+    explicit AssetEditorWidget(QWidget* parent);
 
     /**
      * Resets the editor to an empty, untitled asset.
@@ -68,11 +68,6 @@ public:
     bool saveAsset(const std::filesystem::path& path);
 
     /**
-     * Read-only access to the in-memory asset.
-     */
-    const JAsset& asset() const;
-
-    /**
      * Returns true when the in-memory asset differs from the last saved state.
      */
     bool isDirty() const;
@@ -81,11 +76,6 @@ public:
      * Returns the path of the currently open .jasset file (empty if untitled).
      */
     const std::filesystem::path& filePath() const;
-
-    /**
-     * Returns true when a file path is associated with this editor.
-     */
-    bool hasFile() const;
 
     /**
      * Returns a short display name: "file.jasset" (+ " *" if having unsaved changes), or

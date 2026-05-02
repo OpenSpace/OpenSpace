@@ -25,6 +25,7 @@
 #include "contentslistwidget.h"
 
 #include "jasset.h"
+#include <ghoul/misc/assert.h>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QListWidget>
@@ -81,8 +82,9 @@ namespace {
     }
 } // namespace
 
-ContentsListWidget::ContentsListWidget(QWidget* parent)
+ContentsListWidget::ContentsListWidget(QWidget* parent, JAsset& asset)
     : QWidget(parent)
+    , _asset(asset)
 {
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -91,9 +93,13 @@ ContentsListWidget::ContentsListWidget(QWidget* parent)
     QBoxLayout* headerLayout = new QHBoxLayout;
     headerLayout->setContentsMargins(12, 8, 8, 4);
     headerLayout->setSpacing(4);
+    layout->addLayout(headerLayout);
 
     QLabel* header = new QLabel("CONTENTS", this);
     header->setObjectName("section-header");
+    headerLayout->addWidget(header);
+
+    headerLayout->addStretch();
 
     QPushButton* addButton = new QPushButton("+", this);
     addButton->setObjectName("add-button");
@@ -114,17 +120,13 @@ ContentsListWidget::ContentsListWidget(QWidget* parent)
             menu.exec(addButton->mapToGlobal(addButton->rect().bottomLeft()));
         }
     );
-
-    headerLayout->addWidget(header);
-    headerLayout->addStretch();
     headerLayout->addWidget(addButton);
-    layout->addLayout(headerLayout);
+
 
     _contentsList = new QListWidget(this);
     // We want a custom right-click menu on the items
     _contentsList->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    // Wire signals: emit selection changed whenever the QListWidget changes
     connect(
         _contentsList, &QListWidget::currentRowChanged,
         this, &ContentsListWidget::selectionChanged
@@ -159,15 +161,7 @@ ContentsListWidget::ContentsListWidget(QWidget* parent)
     layout->addWidget(_contentsList);
 }
 
-void ContentsListWidget::setAsset(JAsset* asset) {
-    _asset = asset;
-}
-
 void ContentsListWidget::refresh() {
-    if (!_asset) {
-        return;
-    }
-
     const int selected = _contentsList->currentRow();
 
     // Block signals so the rebuild doesn't fire selectionChanged
@@ -175,7 +169,7 @@ void ContentsListWidget::refresh() {
     _contentsList->clear();
 
     // Add all items again
-    for (const ContentItem& item : _asset->contents) {
+    for (const ContentItem& item : _asset.contents) {
         const QString label = displayName(item);
         const QString typeLabel = QString::fromStdString(item.type);
         const QString dirtyDot = item.isDirty ? DirtyDot : "";
@@ -193,12 +187,8 @@ void ContentsListWidget::refresh() {
 }
 
 void ContentsListWidget::addSceneGraphNode() {
-    if (!_asset) {
-        return;
-    }
-
-    const std::set<std::string> existing = collectIdentifiers(_asset->contents);
-    const int startSuffix = static_cast<int>(_asset->contents.size()) + 1;
+    const std::set<std::string> existing = collectIdentifiers(_asset.contents);
+    const int startSuffix = static_cast<int>(_asset.contents.size()) + 1;
     const std::string uniqueId = makeUniqueId("Node", existing, startSuffix);
 
     ContentItem item = {
@@ -206,7 +196,7 @@ void ContentsListWidget::addSceneGraphNode() {
         .properties = PropertyMap{ { "Identifier", PropertyValue{ uniqueId } } },
         .isDirty = true
     };
-    _asset->contents.push_back(std::move(item));
+    _asset.contents.push_back(std::move(item));
 
     emit assetModified();
 
@@ -214,11 +204,12 @@ void ContentsListWidget::addSceneGraphNode() {
 }
 
 void ContentsListWidget::duplicateSceneGraphNode(int row) {
-    if (!_asset || row < 0 || row >= static_cast<int>(_asset->contents.size())) {
-        return;
-    }
+    ghoul_assert(
+        row >= 0 && row < static_cast<int>(_asset.contents.size()),
+        "Invalid index"
+    );
 
-    ContentItem copy = _asset->contents[row];
+    ContentItem copy = _asset.contents[row];
     copy.isDirty = true;
 
     // Append " Copy" to GUI.Name if present
@@ -237,7 +228,7 @@ void ContentsListWidget::duplicateSceneGraphNode(int row) {
         idIt != copy.properties.end() && idIt->second.isString() ?
         idIt->second.toString() + "Copy" :
         "NodeCopy";
-    const std::set<std::string> existing = collectIdentifiers(_asset->contents);
+    const std::set<std::string> existing = collectIdentifiers(_asset.contents);
     std::string uniqueId = baseId;
     if (existing.count(uniqueId) > 0) {
         // Assume the first item that was copied is "1", so go with "2"
@@ -247,16 +238,17 @@ void ContentsListWidget::duplicateSceneGraphNode(int row) {
 
     // Insert after the source item
     const int insertPos = row + 1;
-    _asset->contents.insert(_asset->contents.begin() + insertPos, std::move(copy));
+    _asset.contents.insert(_asset.contents.begin() + insertPos, std::move(copy));
     emit assetModified();
     _contentsList->setCurrentRow(insertPos);
 }
 
 void ContentsListWidget::removeSceneGraphNode(int row) {
-    if (!_asset || row < 0 || row >= static_cast<int>(_asset->contents.size())) {
-        return;
-    }
-    const QString name = displayName(_asset->contents[row]);
+    ghoul_assert(
+        row >= 0 && row < static_cast<int>(_asset.contents.size()),
+        "Invalid index"
+    );
+    const QString name = displayName(_asset.contents[row]);
 
     const QMessageBox::StandardButton answer = QMessageBox::question(
         this,
@@ -269,11 +261,11 @@ void ContentsListWidget::removeSceneGraphNode(int row) {
         return;
     }
 
-    _asset->contents.erase(_asset->contents.begin() + row);
+    _asset.contents.erase(_asset.contents.begin() + row);
     emit assetModified();
 
     // Select a neighbor or signal empty
-    const int nItems = static_cast<int>(_asset->contents.size());
+    const int nItems = static_cast<int>(_asset.contents.size());
     if (nItems > 0) {
         // Select the previous row if it wasn't the last row. If it was, select the new
         // last row

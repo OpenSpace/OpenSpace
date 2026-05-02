@@ -27,6 +27,7 @@
 #include <asseteditorwidget.h>
 #include <utils.h>
 #include <welcomedialog.h>
+#include <ghoul/misc/assert.h>
 #include <QCloseEvent>
 #include <QFileDialog>
 #include <QLabel>
@@ -169,10 +170,7 @@ void MainWindow::updateTitle() {
     }
     setWindowTitle(title);
 
-    if (!_pathLabel) {
-        qWarning("MainWindow::updateTitle: _pathLabel is null");
-        return;
-    }
+    ghoul_assert(_pathLabel, "_pathLabel is null");
     _pathLabel->setText(_editor ? _editor->displayPath() : "");
 }
 
@@ -229,7 +227,7 @@ void MainWindow::openAsset() {
 }
 
 bool MainWindow::saveAsset() {
-    if (!_editor || !_editor->hasFile()) {
+    if (!_editor || _editor->filePath().empty()) {
         return saveAssetAs();
     }
     if (!_editor->saveAsset(_editor->filePath())) {
@@ -248,7 +246,7 @@ bool MainWindow::saveAsset() {
 }
 
 bool MainWindow::saveAssetAs() {
-    const QString suggestion = (_editor && _editor->hasFile()) ?
+    const QString suggestion = (_editor && !_editor->filePath().empty()) ?
         QString::fromStdWString(_editor->filePath().wstring()) :
         QString();
 

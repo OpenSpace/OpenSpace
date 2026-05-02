@@ -36,24 +36,19 @@ namespace {
     constexpr int SwatchSize = 24;
     constexpr int ColorDecimalPrecision = 4;
 
-    QColor toQColor(const PropertyList& vals) {
+    QColor toQColor(const std::vector<double>& vals) {
         ghoul_assert(vals.size() == 3 || vals.size() == 4, "Invalid size");
         return QColor::fromRgbF(
-            vals[0].toDouble(),
-            vals[1].toDouble(),
-            vals[2].toDouble(),
-            vals.size() > 3 ? vals[3].toDouble() : 1.0
+            vals[0],
+            vals[1],
+            vals[2],
+            vals.size() > 3 ? vals[3] : 1.0
         );
     }
 } // namespace
 
 ColorWidget::ColorWidget(int nComponents, QWidget* parent)
-    : MatrixWidget(
-          nComponents,
-          nComponents, // nColumns = nComponents (single row)
-          false, // double mode
-          parent
-      )
+    : MatrixWidget(nComponents, nComponents, false, parent)
 {
     // Override validators to enforce [0, 1] range
     for (QLineEdit* field : _fields) {
@@ -93,19 +88,20 @@ ColorWidget::ColorWidget(int nComponents, QWidget* parent)
             }
 
             // Write back to fields
-            PropertyList newVals;
-            newVals.push_back(PropertyValue{ picked.redF() });
-            newVals.push_back(PropertyValue{ picked.greenF() });
-            newVals.push_back(PropertyValue{ picked.blueF() });
+            std::vector<double> newVals = {
+                picked.redF(),
+                picked.greenF(),
+                picked.blueF()
+            };
             if (_fields.size() > 3) {
-                newVals.push_back(PropertyValue{ picked.alphaF() });
+                newVals.push_back(picked.alphaF());
             }
             setValues(newVals);
         }
     );
 }
 
-void ColorWidget::setValues(const PropertyList& vals) {
+void ColorWidget::setValues(const std::vector<double>& vals) {
     MatrixWidget::setValues(vals);
     // Base emits valueChanged which is normally connected to updateSwatch, but callers
     // may blockSignals during populate. Call directly to ensure the swatch always

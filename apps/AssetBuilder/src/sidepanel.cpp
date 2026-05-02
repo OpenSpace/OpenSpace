@@ -30,7 +30,7 @@
 #include <QSplitter>
 #include <QVBoxLayout>
 
-SidePanel::SidePanel(QWidget* parent)
+SidePanel::SidePanel(QWidget* parent, JAsset& asset)
     : QWidget(parent)
 {
     setObjectName("side-panel");
@@ -45,7 +45,7 @@ SidePanel::SidePanel(QWidget* parent)
     splitter->setHandleWidth(4);
     root->addWidget(splitter);
 
-    _contentsList = new ContentsListWidget(splitter);
+    _contentsList = new ContentsListWidget(splitter, asset);
     splitter->addWidget(_contentsList);
     splitter->setStretchFactor(0, 2);
 
@@ -76,12 +76,6 @@ SidePanel::SidePanel(QWidget* parent)
         _metadata, &MetadataWidget::assetModified,
         this, &SidePanel::assetModified
     );
-}
-
-void SidePanel::setAsset(JAsset* asset) {
-    _contentsList->setAsset(asset);
-    _dependencies->setAsset(asset);
-    _metadata->setAsset(asset);
 }
 
 void SidePanel::setFilePath(std::filesystem::path path) {

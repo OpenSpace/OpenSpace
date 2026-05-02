@@ -41,14 +41,7 @@ class MetadataWidget;
 class SidePanel final : public QWidget {
 Q_OBJECT
 public:
-    explicit SidePanel(QWidget* parent = nullptr);
-
-    /**
-     * Sets the asset pointer on all child widgets.
-     *
-     * \param asset Non-owning pointer to the JAsset
-     */
-    void setAsset(JAsset* asset);
+    SidePanel(QWidget* parent, JAsset& asset);
 
     /**
      * Sets the file path on the dependencies widget.
