@@ -38,7 +38,7 @@ class QPlainTextEdit;
 class MetadataWidget final : public QWidget {
 Q_OBJECT
 public:
-    explicit MetadataWidget(QWidget* parent = nullptr);
+    explicit MetadataWidget(QWidget* parent);
 
     /**
      * Sets the asset pointer used for editing.

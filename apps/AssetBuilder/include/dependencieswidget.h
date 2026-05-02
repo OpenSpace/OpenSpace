@@ -40,7 +40,7 @@ class QListWidget;
 class DependenciesWidget final : public QWidget {
 Q_OBJECT
 public:
-    explicit DependenciesWidget(QWidget* parent = nullptr);
+    explicit DependenciesWidget(QWidget* parent);
 
     /**
      * Sets the asset pointer used for editing.

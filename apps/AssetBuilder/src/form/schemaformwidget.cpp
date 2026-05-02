@@ -184,7 +184,12 @@ namespace {
             return PropertyValue{ checkBox->isChecked() };
         }
         if (auto* matrix = qobject_cast<MatrixWidget*>(widget);  matrix) {
-            return PropertyValue{ matrix->values() };
+            std::vector<double> values = matrix->values();
+            PropertyList res;
+            for (double v : values) {
+                res.push_back(PropertyValue{ v });
+            }
+            return PropertyValue{ res };
         }
         if (auto* lineEdit = qobject_cast<QLineEdit*>(widget);  lineEdit) {
             const QString text = lineEdit->text();
@@ -237,7 +242,12 @@ namespace {
         else if (auto* matrix = qobject_cast<MatrixWidget*>(widget);  matrix) {
             matrix->blockSignals(true);
             if (propertyValue.isList()) {
-                matrix->setValues(propertyValue.toList());
+                PropertyList list = propertyValue.toList();
+                std::vector<double> param;
+                for (const PropertyValue& value : list) {
+                    param.push_back(value.toDouble());
+                }
+                matrix->setValues(param);
             }
             matrix->blockSignals(false);
         }
@@ -1935,8 +1945,12 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
                     if (!lockedProperties) {
                         return;
                     }
-                    (*lockedProperties)[member.name] =
-                        PropertyValue{ matrixWidget->values() };
+                    std::vector<double> values = matrixWidget->values();
+                    PropertyList p;
+                    for (double v : values) {
+                        p.push_back(PropertyValue{ v });
+                    }
+                    (*lockedProperties)[member.name] = PropertyValue{ p };
                     onChange();
                 }
             );

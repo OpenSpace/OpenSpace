@@ -41,7 +41,7 @@ class QTextBrowser;
 class DocumentationPanel final : public QWidget {
 Q_OBJECT
 public:
-    explicit DocumentationPanel(QWidget* parent = nullptr);
+    explicit DocumentationPanel(QWidget* parent);
 
 public slots:
     /**

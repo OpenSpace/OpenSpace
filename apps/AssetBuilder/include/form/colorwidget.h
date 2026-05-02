@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSETBUILDER___FORM_COLORWIDGET___H__
-#define __OPENSPACE_ASSETBUILDER___FORM_COLORWIDGET___H__
+#ifndef __OPENSPACE_ASSETBUILDER___COLORWIDGET___H__
+#define __OPENSPACE_ASSETBUILDER___COLORWIDGET___H__
 
 #include "form/matrixwidget.h"
 
@@ -42,7 +42,7 @@ public:
      */
     explicit ColorWidget(int nComponents, QWidget* parent = nullptr);
 
-    void setValues(const PropertyList& vals) override;
+    void setValues(const std::vector<double>& vals) override;
 
 private:
     /**
@@ -54,4 +54,4 @@ private:
     QPushButton* _swatchButton = nullptr;
 };
 
-#endif // __OPENSPACE_ASSETBUILDER___FORM_COLORWIDGET___H__
+#endif // __OPENSPACE_ASSETBUILDER___COLORWIDGET___H__

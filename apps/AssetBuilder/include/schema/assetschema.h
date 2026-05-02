@@ -22,11 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSETBUILDER___SCHEMA_ASSETSCHEMA___H__
-#define __OPENSPACE_ASSETBUILDER___SCHEMA_ASSETSCHEMA___H__
+#ifndef __OPENSPACE_ASSETBUILDER___ASSETSCHEMA___H__
+#define __OPENSPACE_ASSETBUILDER___ASSETSCHEMA___H__
 
 #include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 /**
@@ -128,7 +129,7 @@ public:
      * \param identifier The category identifier (e.g. "categoryRenderable")
      * \return Pointer to the matching SchemaCategory, or `nullptr`
      */
-    const SchemaCategory* findCategory(const std::string& identifier) const;
+    const SchemaCategory* findCategory(std::string_view identifier) const;
 
     /**
      * Searches all categories for a type with the given identifier.
@@ -136,7 +137,7 @@ public:
      * \param identifier The type identifier (e.g. "core_scene_node")
      * \return Pointer to the matching SchemaType, or `nullptr`
      */
-    const SchemaType* findType(const std::string& identifier) const;
+    const SchemaType* findType(std::string_view identifier) const;
 
     /**
      * Searches all categories for a type with the given identifier and returns
@@ -145,14 +146,7 @@ public:
      * \param typeId The type identifier (e.g. "renderable", "core_time_frame")
      * \return Pointer to the SchemaCategory containing the type, or `nullptr`
      */
-    const SchemaCategory* findCategoryByTypeId(const std::string& typeId) const;
-
-    /**
-     * Returns all loaded schema categories.
-     *
-     * \return Reference to the vector of all SchemaCategories
-     */
-    const std::vector<SchemaCategory>& categories() const;
+    const SchemaCategory* findCategoryByTypeId(std::string_view typeId) const;
 
 private:
     AssetSchema();
@@ -164,4 +158,4 @@ private:
     const std::vector<SchemaCategory> _categories;
 };
 
-#endif // __OPENSPACE_ASSETBUILDER___SCHEMA_ASSETSCHEMA___H__
+#endif // __OPENSPACE_ASSETBUILDER___ASSETSCHEMA___H__

@@ -22,12 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSETBUILDER___FORM_MATRIXWIDGET___H__
-#define __OPENSPACE_ASSETBUILDER___FORM_MATRIXWIDGET___H__
+#ifndef __OPENSPACE_ASSETBUILDER___MATRIXWIDGET___H__
+#define __OPENSPACE_ASSETBUILDER___MATRIXWIDGET___H__
 
 #include <QWidget>
 
-#include <jasset.h>
 #include <vector>
 
 class QGridLayout;
@@ -58,14 +57,14 @@ public:
      *
      * \return One PropertyValue per component, each holding the field's double value
      */
-    PropertyList values() const;
+    std::vector<double> values() const;
 
     /**
      * Sets field values from a PropertyList of doubles.
      *
      * \param vals List of values to write; must have exactly nComponents entries
      */
-    virtual void setValues(const PropertyList& vals);
+    virtual void setValues(const std::vector<double>& vals);
 
     /**
      * Returns `true` if any field is non-empty.
@@ -94,4 +93,4 @@ protected:
     const bool _isInteger = false;
 };
 
-#endif // __OPENSPACE_ASSETBUILDER___FORM_MATRIXWIDGET___H__
+#endif // __OPENSPACE_ASSETBUILDER___MATRIXWIDGET___H__

@@ -51,7 +51,7 @@ public:
      * \param parent Parent widget for ownership
      */
     SceneGraphNodeEditor(JAsset* asset, const IdentifierRegistry* registry,
-        size_t index, QWidget* parent = nullptr);
+        size_t index, QWidget* parent);
 
 signals:
     /**

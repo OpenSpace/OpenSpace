@@ -37,14 +37,7 @@ class QListWidget;
 class ContentsListWidget final : public QWidget {
 Q_OBJECT
 public:
-    explicit ContentsListWidget(QWidget* parent = nullptr);
-
-    /**
-     * Sets the asset pointer used for editing.
-     *
-     * \param asset Non-owning pointer to the JAsset
-     */
-    void setAsset(JAsset* asset);
+    ContentsListWidget(QWidget* parent, JAsset& asset);
 
     /**
      * Rebuilds the contents list from the current asset.
@@ -82,7 +75,7 @@ private:
      */
     void removeSceneGraphNode(int row);
 
-    JAsset* _asset = nullptr;
+    JAsset& _asset;
     QListWidget* _contentsList = nullptr;
 };
 

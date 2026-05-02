@@ -91,7 +91,7 @@ namespace {
 
     std::vector<SchemaCategory> loadCategories() {
         std::vector<SchemaCategory> result;
-        QFile file(SchemaResourcePath);
+        QFile file = QFile(SchemaResourcePath);
         if (!file.open(QFile::ReadOnly)) {
             throw std::runtime_error(std::format(
                 "Could not open schema resource {}", SchemaResourcePath
@@ -140,7 +140,7 @@ AssetSchema::AssetSchema()
     : _categories(loadCategories())
 {}
 
-const SchemaCategory* AssetSchema::findCategory(const std::string& identifier) const {
+const SchemaCategory* AssetSchema::findCategory(std::string_view identifier) const {
     for (const SchemaCategory& category : _categories) {
         if (category.identifier == identifier) {
             return &category;
@@ -149,7 +149,7 @@ const SchemaCategory* AssetSchema::findCategory(const std::string& identifier) c
     return nullptr;
 }
 
-const SchemaType* AssetSchema::findType(const std::string& identifier) const {
+const SchemaType* AssetSchema::findType(std::string_view identifier) const {
     for (const SchemaCategory& category : _categories) {
         for (const SchemaType& type : category.types) {
             if (type.identifier == identifier) {
@@ -160,7 +160,7 @@ const SchemaType* AssetSchema::findType(const std::string& identifier) const {
     return nullptr;
 }
 
-const SchemaCategory* AssetSchema::findCategoryByTypeId(const std::string& id) const {
+const SchemaCategory* AssetSchema::findCategoryByTypeId(std::string_view id) const {
     for (const SchemaCategory& category : _categories) {
         for (const SchemaType& type : category.types) {
             if (type.identifier == id) {
@@ -169,8 +169,4 @@ const SchemaCategory* AssetSchema::findCategoryByTypeId(const std::string& id) c
         }
     }
     return nullptr;
-}
-
-const std::vector<SchemaCategory>& AssetSchema::categories() const {
-    return _categories;
 }

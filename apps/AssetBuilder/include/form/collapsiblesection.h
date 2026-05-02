@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSETBUILDER___FORM_COLLAPSIBLESECTION___H__
-#define __OPENSPACE_ASSETBUILDER___FORM_COLLAPSIBLESECTION___H__
+#ifndef __OPENSPACE_ASSETBUILDER___COLLAPSIBLESECTION___H__
+#define __OPENSPACE_ASSETBUILDER___COLLAPSIBLESECTION___H__
 
 #include <QFrame>
 
@@ -67,20 +67,6 @@ public:
     void setContentWidget(QWidget* widget);
 
     /**
-     * Returns the current content widget, or nullptr if none is set.
-     *
-     * \return The body content widget
-     */
-    QWidget* contentWidget() const;
-
-    /**
-     * Returns true when the body area is visible.
-     *
-     * \return true if the section is expanded
-     */
-    bool isExpanded() const;
-
-    /**
      * Returns the property key set by setSectionKey, or empty.
      *
      * \return The section's schema member key
@@ -121,12 +107,6 @@ protected:
      */
     bool eventFilter(QObject* object, QEvent* event) override;
 
-private slots:
-    /**
-     * Toggles the expanded/collapsed state of the section.
-     */
-    void toggleExpanded();
-
 private:
     /// Clickable header row
     QFrame* _headerFrame = nullptr;
@@ -152,4 +132,4 @@ private:
     bool _isExpanded = true;
 };
 
-#endif // __OPENSPACE_ASSETBUILDER___FORM_COLLAPSIBLESECTION___H__
+#endif // __OPENSPACE_ASSETBUILDER___COLLAPSIBLESECTION___H__
