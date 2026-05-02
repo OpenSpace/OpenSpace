@@ -42,7 +42,111 @@ namespace {
 SearchDropdown::SearchDropdown(QWidget* parent)
     : QFrame(parent)
 {
-    buildUi();
+    setObjectName("search-dropdown");
+    setFrameShape(QFrame::NoFrame);
+
+    QBoxLayout* layout = new QHBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+
+    _searchEdit = new QLineEdit(this);
+    _searchEdit->setObjectName("search-dropdown-input");
+    _searchEdit->installEventFilter(this);
+    layout->addWidget(_searchEdit, 1);
+
+    _chevronButton = new QPushButton(ChevronDown, this);
+    _chevronButton->setObjectName("search-dropdown-chevron");
+    _chevronButton->setFixedWidth(22);
+    layout->addWidget(_chevronButton);
+
+    // Popup: top-level frameless window that never steals keyboard focus. Parented to
+    // nullptr so it can float above the scroll area
+    _popup = new QFrame(
+        nullptr,
+        Qt::Tool | Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus
+    );
+    _popup->setObjectName("search-dropdown-popup");
+
+    QBoxLayout* popupLayout = new QVBoxLayout(_popup);
+    popupLayout->setContentsMargins(0, 0, 0, 0);
+    popupLayout->setSpacing(0);
+
+    _listWidget = new QListWidget(_popup);
+    _listWidget->setObjectName("search-dropdown-list");
+    _listWidget->setFrameShape(QFrame::NoFrame);
+    _listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _listWidget->setFocusPolicy(Qt::NoFocus);
+    _listWidget->setMouseTracking(true);
+    popupLayout->addWidget(_listWidget);
+
+    // Chevron toggles the popup
+    connect(
+        _chevronButton,
+        &QPushButton::clicked,
+        this,
+        [this]() {
+            if (_isOpen) {
+                closePopup();
+            }
+            else {
+                openPopup();
+            }
+        }
+    );
+
+    // Typing filters items
+    connect(
+        _searchEdit, &QLineEdit::textChanged,
+        this, [this](const QString& query) { filterItems(query); }
+    );
+
+    // Click on a list item: select (guard against placeholder with index == -1)
+    connect(
+        _listWidget,
+        &QListWidget::itemClicked,
+        this,
+        [this](QListWidgetItem* item) {
+            const int index = item->data(Qt::UserRole).toInt();
+            if (index >= 0) {
+                selectItem(index);
+            }
+        }
+    );
+
+    // Hover over list item: emit highlighted for docs panel
+    connect(
+        _listWidget,
+        &QListWidget::itemEntered,
+        this,
+        [this](QListWidgetItem* item) {
+            const int index = item->data(Qt::UserRole).toInt();
+            if (index >= 0 && index < static_cast<int>(_items.size())) {
+                emit highlighted(_items[index].userData);
+            }
+        }
+    );
+
+    // Close popup when focus moves somewhere unrelated
+    connect(qApp, &QApplication::focusChanged, this,
+        [this](QWidget*, QWidget* now) {
+            if (!_isOpen || !now) {
+                return;
+            }
+            // Walk up the parent chain of the newly focused widget. If this
+            // SearchDropdown is an ancestor, the user clicked within our own UI (e.g.
+            // search input, chevron) so keep the popup open. Otherwise focus left
+            // entirely, so close it. This check is needed because the popup is a
+            // top-level window with no Qt parent
+            QWidget* widget = now;
+            while (widget) {
+                if (widget == this) {
+                    return;
+                }
+                widget = widget->parentWidget();
+            }
+            closePopup();
+        }
+    );
 }
 
 SearchDropdown::~SearchDropdown() {
@@ -106,7 +210,7 @@ void SearchDropdown::openPopup() {
     _searchEdit->blockSignals(true);
     _searchEdit->clear();
     _searchEdit->blockSignals(false);
-    filterItems({});
+    filterItems(QString());
 
     // Scroll to current selection if there is one
     if (_currentIndex >= 0) {
@@ -146,7 +250,7 @@ void SearchDropdown::repositionPopup() {
     // Height: at least 1 row, at most 8 rows. Use sizeHintForRow after the list is
     // populated (always >= 1 item)
     const int itemHeight = _listWidget->sizeHintForRow(0);
-    const int nRows = qMax(1, qMin(_listWidget->count(), 8));
+    const int nRows = std::clamp(_listWidget->count(), 1, 8);
     // Fall back to 24px per row if sizeHintForRow returns 0 (no items rendered yet)
     const int listHeight = itemHeight > 0 ? itemHeight * nRows : 24 * nRows;
     _listWidget->setFixedHeight(listHeight);
@@ -227,7 +331,7 @@ void SearchDropdown::updateSearchText() {
     _searchEdit->blockSignals(false);
 }
 
-bool SearchDropdown::eventFilter(QObject* watched, QEvent* event) {
+bool SearchDropdown::eventFilter(QObject* object, QEvent* event) {
     // Block scrolling outside the popup while it is open (matches QComboBox behavior).
     // Check cursor position rather than widget parentage because the popup is a
     // Qt::Tool window that does not accept focus, so Qt may route wheel events to the
@@ -240,8 +344,8 @@ bool SearchDropdown::eventFilter(QObject* watched, QEvent* event) {
 
     // Only intercept events for the search input; delegate everything else to the base
     // class which returns false (event not consumed)
-    if (watched != _searchEdit) {
-        return QFrame::eventFilter(watched, event);
+    if (object != _searchEdit) {
+        return QFrame::eventFilter(object, event);
     }
 
     // Click on the search input while closed: open the popup but return false so the
@@ -251,150 +355,43 @@ bool SearchDropdown::eventFilter(QObject* watched, QEvent* event) {
         return false;
     }
 
-    if (event->type() == QEvent::KeyPress) {
-        switch (QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);  keyEvent->key()) {
-            case Qt::Key_Down:
-                if (!_isOpen) {
-                    openPopup();
-                }
-                navigateList(+1);
-                return true;
-            case Qt::Key_Up:
-                navigateList(-1);
-                return true;
-            case Qt::Key_Return:
-            case Qt::Key_Enter:
-                if (_isOpen) {
-                    QListWidgetItem* currentItem = _listWidget->currentItem();
-                    if (currentItem) {
-                        const int index = currentItem->data(Qt::UserRole).toInt();
-                        if (index >= 0) {
-                            selectItem(index);
-                        }
-                    }
-                }
-                return true;
-            case Qt::Key_Escape:
-                if (_isOpen) {
-                    closePopup();
-                }
-                return true;
-            default:
-                // Any printable character: open popup if not already open
-                if (!_isOpen && !keyEvent->text().isEmpty()) {
-                    openPopup();
-                }
-                break;
-        }
+    if (event->type() != QEvent::KeyPress) {
+        return QFrame::eventFilter(object, event);
     }
 
-    return QFrame::eventFilter(watched, event);
-}
-
-void SearchDropdown::buildUi() {
-    setObjectName("search-dropdown");
-    setFrameShape(QFrame::NoFrame);
-
-    QBoxLayout* layout = new QHBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
-
-    _searchEdit = new QLineEdit(this);
-    _searchEdit->setObjectName("search-dropdown-input");
-    _searchEdit->installEventFilter(this);
-    layout->addWidget(_searchEdit, 1);
-
-    _chevronButton = new QPushButton(ChevronDown, this);
-    _chevronButton->setObjectName("search-dropdown-chevron");
-    _chevronButton->setFixedWidth(22);
-    layout->addWidget(_chevronButton);
-
-    // Popup: top-level frameless window that never steals keyboard focus. Parented to
-    // nullptr so it can float above the scroll area
-    _popup = new QFrame(
-        nullptr,
-        Qt::Tool | Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus
-    );
-    _popup->setObjectName("search-dropdown-popup");
-
-    QBoxLayout* popupLayout = new QVBoxLayout(_popup);
-    popupLayout->setContentsMargins(0, 0, 0, 0);
-    popupLayout->setSpacing(0);
-
-    _listWidget = new QListWidget(_popup);
-    _listWidget->setObjectName("search-dropdown-list");
-    _listWidget->setFrameShape(QFrame::NoFrame);
-    _listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    _listWidget->setFocusPolicy(Qt::NoFocus);
-    _listWidget->setMouseTracking(true);
-    popupLayout->addWidget(_listWidget);
-
-    // Chevron toggles the popup
-    connect(
-        _chevronButton,
-        &QPushButton::clicked,
-        this,
-        [this]() {
+    switch (QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);  keyEvent->key()) {
+        case Qt::Key_Down:
+            if (!_isOpen) {
+                openPopup();
+            }
+            navigateList(+1);
+            return true;
+        case Qt::Key_Up:
+            navigateList(-1);
+            return true;
+        case Qt::Key_Return:
+        case Qt::Key_Enter:
+            if (_isOpen) {
+                QListWidgetItem* currentItem = _listWidget->currentItem();
+                if (currentItem) {
+                    const int index = currentItem->data(Qt::UserRole).toInt();
+                    if (index >= 0) {
+                        selectItem(index);
+                    }
+                }
+            }
+            return true;
+        case Qt::Key_Escape:
             if (_isOpen) {
                 closePopup();
             }
-            else {
+            return true;
+        default:
+            // Any printable character: open popup if not already open
+            if (!_isOpen && !keyEvent->text().isEmpty()) {
                 openPopup();
             }
-        }
-    );
-
-    // Typing filters items
-    connect(
-        _searchEdit, &QLineEdit::textChanged,
-        this, [this](const QString& query) { filterItems(query); }
-    );
-
-    // Click on a list item - select (guard against placeholder with index == -1)
-    connect(
-        _listWidget,
-        &QListWidget::itemClicked,
-        this,
-        [this](QListWidgetItem* item) {
-            const int index = item->data(Qt::UserRole).toInt();
-            if (index >= 0) {
-                selectItem(index);
-            }
-        }
-    );
-
-    // Hover over list item - emit highlighted for docs panel
-    connect(
-        _listWidget,
-        &QListWidget::itemEntered,
-        this,
-        [this](QListWidgetItem* item) {
-            const int index = item->data(Qt::UserRole).toInt();
-            if (index >= 0 && index < static_cast<int>(_items.size())) {
-                emit highlighted(_items[index].userData);
-            }
-        }
-    );
-
-    // Close popup when focus moves somewhere unrelated
-    connect(qApp, &QApplication::focusChanged, this,
-        [this](QWidget*, QWidget* now) {
-            if (!_isOpen || !now) {
-                return;
-            }
-            // Walk up the parent chain of the newly focused widget. If this
-            // SearchDropdown is an ancestor, the user clicked within our own UI (e.g.
-            // search input, chevron) so keep the popup open. Otherwise focus left
-            // entirely, so close it. This check is needed because the popup is a
-            // top-level window with no Qt parent
-            QWidget* widget = now;
-            while (widget) {
-                if (widget == this) {
-                    return;
-                }
-                widget = widget->parentWidget();
-            }
-            closePopup();
-        }
-    );
+            break;
+    }
+    return QFrame::eventFilter(object, event);
 }

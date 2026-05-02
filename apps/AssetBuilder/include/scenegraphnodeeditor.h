@@ -50,7 +50,7 @@ public:
      * \param index Index into asset->contents
      * \param parent Parent widget for ownership
      */
-    SceneGraphNodeEditor(JAsset* asset, IdentifierRegistry* registry,
+    SceneGraphNodeEditor(JAsset* asset, const IdentifierRegistry* registry,
         size_t index, QWidget* parent = nullptr);
 
 signals:
@@ -80,8 +80,6 @@ signals:
     void rebuildRequested();
 
 private:
-    void buildUi();
-
     /**
      * Creates a SchemaFormWidget, connects its signals, and populates it.
      */
@@ -89,18 +87,12 @@ private:
         std::weak_ptr<PropertyMap> properties, QWidget* parent, bool expanded,
         bool collapsible);
 
-    /**
-     * Connects the GUI Name field to auto-generate the Identifier field.
-     */
-    void wireIdentifierAutoGeneration(SchemaFormWidget* additionalForm,
-        SchemaFormWidget* guiForm);
-
     // Section builders — create and return widgets without adding
     // to layout. buildUi handles layout order.
     QWidget* buildQuickAccessFields(const SchemaType& sgnType, SchemaFormWidget* guiForm,
         QWidget* additionalSection);
     SchemaFormWidget* buildMemberSection(const SchemaType& sgnType,
-        const std::string& memberName, bool expanded);
+        const std::string& memberName, bool isExpanded);
     QWidget* buildAdditionalSection(const SchemaType& sgnType);
 
     /**
@@ -119,8 +111,9 @@ private:
     void updatePasteButtons();
 
     JAsset* _asset = nullptr;
-    IdentifierRegistry* _registry = nullptr;
+    const IdentifierRegistry* _registry = nullptr;
     size_t _index = 0;
+
     // Owned copy of the content item's properties, dynamically allocated so that child
     // SchemaFormWidgets can hold weak_ptr to it (or to nested items in it - submaps).
     // All child forms reference this copy rather than _asset->contents directly because

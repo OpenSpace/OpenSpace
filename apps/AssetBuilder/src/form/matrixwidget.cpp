@@ -24,6 +24,7 @@
 
 #include "form/matrixwidget.h"
 
+#include <ghoul/misc/assert.h>
 #include <QDoubleValidator>
 #include <QGridLayout>
 #include <QIntValidator>
@@ -37,6 +38,11 @@ MatrixWidget::MatrixWidget(int nComponents, int nColumns, bool isInteger, QWidge
     : QWidget(parent)
     , _isInteger(isInteger)
 {
+    ghoul_assert(
+        nComponents == 2 || nComponents == 3 || nComponents == 4 || nComponents == 9 ||
+        nComponents == 16,
+        "Invalid number of components"
+    );
     const bool useGrid = (nComponents > nColumns);
 
     _grid = new QGridLayout(this);
@@ -59,7 +65,7 @@ MatrixWidget::MatrixWidget(int nComponents, int nColumns, bool isInteger, QWidge
             field->setValidator(new QDoubleValidator(field));
             field->setPlaceholderText("0.0");
         }
-        connect(field, &QLineEdit::textEdited, this, [this]() { emit valueChanged(); });
+        connect(field, &QLineEdit::textEdited, this, &MatrixWidget::valueChanged);
 
         _grid->addWidget(field, row, col);
         _fields.push_back(field);
@@ -84,11 +90,7 @@ PropertyList MatrixWidget::values() const {
 }
 
 void MatrixWidget::setValues(const PropertyList& vals) {
-    if (vals.size() != _fields.size()) {
-        qWarning("MatrixWidget::setValues: expected %llu values, got %llu",
-                 _fields.size(), vals.size());
-        return;
-    }
+    ghoul_assert(vals.size() == _fields.size(), "Wrong number of values");
     for (size_t i = 0; i < _fields.size(); i++) {
         // Suppress per-field textEdited so setText doesn't emit valueChanged
         // N times; we emit it once after the loop instead
@@ -108,12 +110,11 @@ void MatrixWidget::setValues(const PropertyList& vals) {
 }
 
 bool MatrixWidget::hasContent() const {
-    for (const QLineEdit* field : _fields) {
-        if (!field->text().isEmpty()) {
-            return true;
-        }
-    }
-    return false;
+    return std::any_of(
+        _fields.begin(),
+        _fields.end(),
+        [](const QLineEdit* field) { return !field->text().isEmpty(); }
+    );
 }
 
 void MatrixWidget::clear() {

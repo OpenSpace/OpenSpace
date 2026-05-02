@@ -54,7 +54,7 @@ public:
      *
      * \param path The .jasset file path (empty if unsaved)
      */
-    void setFilePath(const std::filesystem::path& path);
+    void setFilePath(std::filesystem::path path);
 
     /**
      * Rebuilds the dependencies list from the current asset.
@@ -86,7 +86,6 @@ signals:
     void assetModified();
 
 private:
-    void buildUi();
     void showContextMenu(const QPoint& pos);
 
     /**

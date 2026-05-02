@@ -40,42 +40,36 @@ namespace {
     constexpr int CenterPageEditor = 1;
 } // namespace
 
-EditorPanel::EditorPanel(QWidget* parent)
+EditorPanel::EditorPanel(QWidget* parent, JAsset* asset, IdentifierRegistry* registry)
     : QWidget(parent)
+    , _asset(asset)
+    , _registry(registry)
 {
-    buildUi();
-}
+    QBoxLayout* root = new QVBoxLayout(this);
+    root->setContentsMargins(0, 0, 0, 0);
+    root->setSpacing(0);
 
-void EditorPanel::setAsset(JAsset* asset) {
-    _asset = asset;
-}
+    _centerStack = new QStackedWidget(this);
+    root->addWidget(_centerStack);
 
-void EditorPanel::setIdentifierRegistry(IdentifierRegistry* registry) {
-    _registry = registry;
-}
+    QWidget* emptyPage = new QWidget(_centerStack);
+    QBoxLayout* emptyLayout = new QVBoxLayout(emptyPage);
+    emptyLayout->setAlignment(Qt::AlignCenter);
+    _centerStack->addWidget(emptyPage);  // index 0
 
-QWidget* EditorPanel::createContentEditor(size_t index, QWidget* parent) {
-    const std::string& type = _asset->contents[index].type;
+    QLabel* emptyLabel = new QLabel("No node selected", emptyPage);
+    emptyLabel->setObjectName("empty-state");
+    emptyLabel->setAlignment(Qt::AlignCenter);
+    emptyLayout->addWidget(emptyLabel);
 
-    // Add more types here
-    if (type == "SceneGraphNode") {
-        SceneGraphNodeEditor* sgnEditor = new SceneGraphNodeEditor(
-            _asset,
-            _registry,
-            index,
-            parent
-        );
-        connect(sgnEditor, &SceneGraphNodeEditor::contentModified,
-            this, &EditorPanel::contentModified);
-        connect(sgnEditor, &SceneGraphNodeEditor::documentationRequested,
-            this, &EditorPanel::documentationRequested);
-        connect(sgnEditor, &SceneGraphNodeEditor::addDependency,
-            this, &EditorPanel::addDependency);
-        connect(sgnEditor, &SceneGraphNodeEditor::rebuildRequested,
-            this, [this]() { showItemEditor(_currentIndex); });
-        return sgnEditor;
-    }
-    return nullptr;
+    QLabel* emptySubLabel = new QLabel(
+        "Add a Scene Graph Node or select one from the Contents panel",
+        emptyPage
+    );
+    emptySubLabel->setObjectName("empty-state-sub");
+    emptySubLabel->setAlignment(Qt::AlignCenter);
+    emptySubLabel->setWordWrap(true);
+    emptyLayout->addWidget(emptySubLabel);
 }
 
 void EditorPanel::showItemEditor(size_t index) {
@@ -99,7 +93,7 @@ void EditorPanel::showItemEditor(size_t index) {
     outerLayout->setSpacing(0);
     outerLayout->setAlignment(Qt::AlignTop);
 
-    QBoxLayout* cardRow = new QHBoxLayout();
+    QBoxLayout* cardRow = new QHBoxLayout;
     cardRow->setContentsMargins(0, 0, 0, 0);
     cardRow->setSpacing(0);
     cardRow->addStretch(1);
@@ -111,9 +105,33 @@ void EditorPanel::showItemEditor(size_t index) {
     cardLayout->setContentsMargins(32, 32, 32, 32);
     cardLayout->setSpacing(0);
 
-    QWidget* editor = createContentEditor(index, inner);
-    if (editor) {
-        cardLayout->addWidget(editor);
+    const std::string& type = _asset->contents[index].type;
+
+    // Add more types here
+    if (type == "SceneGraphNode") {
+        SceneGraphNodeEditor* sgnEditor = new SceneGraphNodeEditor(
+            _asset,
+            _registry,
+            index,
+            parentWidget()
+        );
+        connect(
+            sgnEditor, &SceneGraphNodeEditor::contentModified,
+            this, &EditorPanel::contentModified
+        );
+        connect(
+            sgnEditor, &SceneGraphNodeEditor::documentationRequested,
+            this, &EditorPanel::documentationRequested
+        );
+        connect(
+            sgnEditor, &SceneGraphNodeEditor::addDependency,
+            this, &EditorPanel::addDependency
+        );
+        connect(
+            sgnEditor, &SceneGraphNodeEditor::rebuildRequested,
+            this, [this]() { showItemEditor(_currentIndex); }
+        );
+        cardLayout->addWidget(sgnEditor);
     }
 
     cardRow->addWidget(inner, 8);
@@ -129,34 +147,4 @@ void EditorPanel::showItemEditor(size_t index) {
 void EditorPanel::showEmptyCenter() {
     _currentIndex = NoSelection;
     _centerStack->setCurrentIndex(CenterPageEmpty);
-}
-
-void EditorPanel::buildUi() {
-    QBoxLayout* root = new QVBoxLayout(this);
-    root->setContentsMargins(0, 0, 0, 0);
-    root->setSpacing(0);
-
-    _centerStack = new QStackedWidget(this);
-
-    QWidget* emptyPage = new QWidget(_centerStack);
-    QBoxLayout* emptyLayout = new QVBoxLayout(emptyPage);
-    emptyLayout->setAlignment(Qt::AlignCenter);
-
-    QLabel* emptyLabel = new QLabel("No node selected", emptyPage);
-    emptyLabel->setObjectName("empty-state");
-    emptyLabel->setAlignment(Qt::AlignCenter);
-
-    QLabel* emptySubLabel = new QLabel(
-        "Add a Scene Graph Node or select one from the Contents panel",
-        emptyPage
-    );
-    emptySubLabel->setObjectName("empty-state-sub");
-    emptySubLabel->setAlignment(Qt::AlignCenter);
-    emptySubLabel->setWordWrap(true);
-
-    emptyLayout->addWidget(emptyLabel);
-    emptyLayout->addWidget(emptySubLabel);
-    _centerStack->addWidget(emptyPage);  // index 0
-
-    root->addWidget(_centerStack);
 }

@@ -43,7 +43,60 @@ namespace {
 AssetEditorWidget::AssetEditorWidget(QWidget* parent)
     : QWidget(parent)
 {
-    buildUi();
+    QBoxLayout* root = new QHBoxLayout(this);
+    root->setContentsMargins(0, 0, 0, 0);
+    root->setSpacing(0);
+
+    QSplitter* splitter = new QSplitter(Qt::Horizontal, this);
+    splitter->setChildrenCollapsible(true);
+    splitter->setHandleWidth(4);
+    root->addWidget(splitter);
+
+    _sidePanel = new SidePanel(splitter);
+    _sidePanel->setAsset(&_asset);
+    _sidePanel->setFilePath(_filePath);
+    connect(
+        _sidePanel, &SidePanel::selectionChanged,
+        this, &AssetEditorWidget::onSelectionChanged
+    );
+    connect(
+        _sidePanel, &SidePanel::assetModified,
+        this, &AssetEditorWidget::onContentModified
+    );
+    splitter->addWidget(_sidePanel);
+
+    _identifierRegistry = new IdentifierRegistry(this);
+    connect(
+        _identifierRegistry,
+        &IdentifierRegistry::duplicatesFound,
+        this,
+        [this](const QString& message) {
+            QMessageBox::warning(this, "Duplicate Identifiers", message);
+        }
+    );
+    _editorPanel = new EditorPanel(splitter, &_asset, _identifierRegistry);
+    connect(
+        _editorPanel, &EditorPanel::contentModified,
+        this, &AssetEditorWidget::onContentModified
+    );
+    connect(
+        _editorPanel, &EditorPanel::addDependency,
+        _sidePanel, &SidePanel::addDependency
+    );
+    splitter->addWidget(_editorPanel);
+
+    _docsPanel = new DocumentationPanel(splitter);
+    connect(
+        _editorPanel, &EditorPanel::documentationRequested,
+        _docsPanel, &DocumentationPanel::showDocumentation
+    );
+    splitter->addWidget(_docsPanel);
+
+    constexpr int Stretch = 9999;
+    splitter->setSizes({ LeftPanelWidth, Stretch, RightPanelWidth });
+    splitter->setStretchFactor(0, 0);
+    splitter->setStretchFactor(1, 1);
+    splitter->setStretchFactor(2, 0);
 }
 
 const JAsset& AssetEditorWidget::asset() const {
@@ -162,68 +215,4 @@ void AssetEditorWidget::refreshPanels() {
     _identifierRegistry->rebuildFromAsset(_asset, _filePath);
     _sidePanel->setFilePath(_filePath);
     _sidePanel->refreshAll();
-}
-
-void AssetEditorWidget::buildUi() {
-    QBoxLayout* root = new QHBoxLayout(this);
-    root->setContentsMargins(0, 0, 0, 0);
-    root->setSpacing(0);
-
-    QSplitter* splitter = new QSplitter(Qt::Horizontal, this);
-    splitter->setChildrenCollapsible(true);
-    splitter->setHandleWidth(4);
-
-    _sidePanel = new SidePanel(splitter);
-    _editorPanel = new EditorPanel(splitter);
-    _docsPanel = new DocumentationPanel(splitter);
-
-    _identifierRegistry = new IdentifierRegistry(this);
-
-    _sidePanel->setAsset(&_asset);
-    _sidePanel->setFilePath(_filePath);
-    _editorPanel->setAsset(&_asset);
-    _editorPanel->setIdentifierRegistry(_identifierRegistry);
-
-    // Wire signals
-    connect(
-        _sidePanel, &SidePanel::selectionChanged,
-        this, &AssetEditorWidget::onSelectionChanged
-    );
-    connect(
-        _sidePanel, &SidePanel::assetModified,
-        this, &AssetEditorWidget::onContentModified
-    );
-
-    connect(
-        _editorPanel, &EditorPanel::contentModified,
-        this, &AssetEditorWidget::onContentModified
-    );
-    connect(
-        _editorPanel, &EditorPanel::documentationRequested,
-        _docsPanel, &DocumentationPanel::showDocumentation
-    );
-    connect(
-        _editorPanel, &EditorPanel::addDependency,
-        _sidePanel, &SidePanel::addDependency
-    );
-
-    connect(
-        _identifierRegistry,
-        &IdentifierRegistry::duplicatesFound,
-        this,
-        [this](const QString& message) {
-            QMessageBox::warning(this, "Duplicate Identifiers", message);
-        }
-    );
-
-    // Splitter sizing
-    splitter->addWidget(_sidePanel);
-    splitter->addWidget(_editorPanel);
-    splitter->addWidget(_docsPanel);
-    splitter->setSizes({ LeftPanelWidth, 9999, RightPanelWidth });
-    splitter->setStretchFactor(0, 0);
-    splitter->setStretchFactor(1, 1);
-    splitter->setStretchFactor(2, 0);
-
-    root->addWidget(splitter);
 }

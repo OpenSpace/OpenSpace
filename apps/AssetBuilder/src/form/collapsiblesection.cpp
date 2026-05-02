@@ -33,48 +33,114 @@
 #include <QVBoxLayout>
 
 namespace {
-constexpr const char* ChevronDown = "\xe2\x96\xbe";  // v
-constexpr const char* ChevronUp   = "\xe2\x96\xb4";  // ^
+    constexpr const char* ChevronDown = "\xe2\x96\xbe";  // v
+    constexpr const char* ChevronUp = "\xe2\x96\xb4";  // ^
 } // namespace
 
-CollapsibleSection::CollapsibleSection(const QString& title, QWidget* parent)
+CollapsibleSection::CollapsibleSection(QWidget* parent, const QString& title,
+                                       bool isExpanded, bool isMandatory,
+                                 std::optional<std::pair<QString, QString>> documentation,
+                                                                       QString sectionKey)
     : QFrame(parent)
-    , _title(title)
-{
-    buildUi(title);
-}
-
-bool CollapsibleSection::eventFilter(QObject* watched, QEvent* event) {
-    if (watched == _headerFrame && event->type() == QEvent::MouseButtonRelease) {
-        const auto* mouseEvent = static_cast<const QMouseEvent*>(event);
-        if (mouseEvent->button() == Qt::LeftButton) {
-            const QPoint position = mouseEvent->position().toPoint();
-            if (_infoButton->isVisible() && _infoButton->geometry().contains(position)) {
-                return false;
-            }
-            toggleExpanded();
-            return true;
-        }
-        if (mouseEvent->button() == Qt::RightButton && !_sectionKey.isEmpty()) {
-            QMenu menu(this);
-            menu.addAction(
-                "Copy",
-                this, [this]() { emit copyRequested(_sectionKey); }
-            );
-            QAction* pasteAction = menu.addAction(
-                "Paste",
-                this, [this]() { emit pasteRequested(_sectionKey); }
-            );
-            pasteAction->setEnabled(_canPaste);
-            menu.exec(_headerFrame->mapToGlobal(mouseEvent->position().toPoint()));
-            return true;
-        }
+    , _documentation{
+        .name = documentation.value_or(std::pair<QString, QString>(title, "")).first,
+        .documentation =
+            documentation.value_or(std::pair<QString, QString>(title, title)).second
     }
-    return QFrame::eventFilter(watched, event);
+    , _sectionKey(std::move(sectionKey))
+    , _isExpanded(isExpanded)
+{
+    setObjectName("accordion-item");
+    setFrameShape(QFrame::NoFrame);
+
+    QBoxLayout* root = new QVBoxLayout(this);
+    root->setContentsMargins(0, 0, 0, 0);
+    root->setSpacing(0);
+
+    // Header (full row is clickable)
+    _headerFrame = new QFrame(this);
+    _headerFrame->setObjectName("accordion-header");
+    _headerFrame->setFrameShape(QFrame::NoFrame);
+    _headerFrame->setAttribute(Qt::WA_Hover, true);
+    _headerFrame->setCursor(Qt::PointingHandCursor);
+    _headerFrame->installEventFilter(this);
+    root->addWidget(_headerFrame);
+
+    QBoxLayout* headerLayout = new QHBoxLayout(_headerFrame);
+    headerLayout->setContentsMargins(12, 8, 12, 8);
+    headerLayout->setSpacing(8);
+
+    // Title: transparent to mouse events so clicks reach the parent frame
+    QLabel* titleLabel = new QLabel(title, _headerFrame);
+    titleLabel->setObjectName("accordion-title");
+    titleLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    titleLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+
+    // Info button: always visible; default shows "No documentation available"
+    _infoButton = new QPushButton("i", _headerFrame);
+    _infoButton->setObjectName("section-info-button");
+    _infoButton->setFixedSize(18, 18);
+    _infoButton->setVisible(true);
+    connect(
+        _infoButton, &QPushButton::clicked,
+        this, [this]() { emit documentationRequested(_documentation); }
+    );
+
+    // Chevron: transparent to mouse events so clicks reach the parent frame
+    _chevronLabel = new QLabel(ChevronDown, _headerFrame);
+    _chevronLabel->setObjectName("accordion-chevron");
+    _chevronLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    _chevronLabel->setText(_isExpanded ? ChevronUp : ChevronDown);
+
+    _mandatoryLabel = new QLabel("*", _headerFrame);
+    _mandatoryLabel->setObjectName("section-required-asterisk");
+    _mandatoryLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    _mandatoryLabel->setVisible(isMandatory);
+
+    headerLayout->addWidget(_infoButton);
+    headerLayout->addWidget(titleLabel);
+    headerLayout->addWidget(_mandatoryLabel);
+    headerLayout->addStretch(1);
+    headerLayout->addWidget(_chevronLabel);
+
+    // Content area
+    _contentFrame = new QFrame(this);
+    _contentFrame->setObjectName("accordion-content");
+    _contentFrame->setFrameShape(QFrame::NoFrame);
+    _contentFrame->setVisible(_isExpanded);
+    root->addWidget(_contentFrame);
+
+    _frameLayout = new QVBoxLayout(_contentFrame);
+    _frameLayout->setContentsMargins(16, 8, 16, 12);
+    _frameLayout->setSpacing(0);
 }
 
-void CollapsibleSection::updateChevron() {
-    _chevronLabel->setText(_isExpanded ? ChevronUp : ChevronDown);
+bool CollapsibleSection::eventFilter(QObject* object, QEvent* event) {
+    if (object != _headerFrame || event->type() != QEvent::MouseButtonRelease) {
+        return QFrame::eventFilter(object, event);
+    }
+
+    const QMouseEvent* mouseEvent = static_cast<const QMouseEvent*>(event);
+    if (mouseEvent->button() == Qt::LeftButton) {
+        const QPoint position = mouseEvent->position().toPoint();
+        if (_infoButton->isVisible() && _infoButton->geometry().contains(position)) {
+            return false;
+        }
+        toggleExpanded();
+        return true;
+    }
+    if (mouseEvent->button() == Qt::RightButton && !_sectionKey.isEmpty()) {
+        QMenu menu(this);
+        menu.addAction("Copy", this, [this]() { emit copyRequested(_sectionKey); });
+        QAction* pasteAction = menu.addAction(
+            "Paste",
+            this, [this]() { emit pasteRequested(_sectionKey); }
+        );
+        pasteAction->setEnabled(_canPaste);
+        menu.exec(_headerFrame->mapToGlobal(mouseEvent->position().toPoint()));
+        return true;
+    }
+    return QFrame::eventFilter(object, event);
 }
 
 void CollapsibleSection::setContentWidget(QWidget* widget) {
@@ -106,20 +172,6 @@ bool CollapsibleSection::isExpanded() const {
     return _isExpanded;
 }
 
-void CollapsibleSection::setExpanded(bool isExpanded) {
-    _isExpanded = isExpanded;
-    _contentFrame->setVisible(_isExpanded && (contentWidget() != nullptr));
-    updateChevron();
-}
-
-void CollapsibleSection::setMandatory(bool isMandatory) {
-    _mandatoryLabel->setVisible(isMandatory);
-}
-
-void CollapsibleSection::setSectionKey(QString key) {
-    _sectionKey = std::move(key);
-}
-
 QString CollapsibleSection::sectionKey() const {
     return _sectionKey;
 }
@@ -128,84 +180,8 @@ void CollapsibleSection::setPasteAvailable(bool isAvailable) {
     _canPaste = isAvailable;
 }
 
-void CollapsibleSection::setDocumentation(QString name, QString doc) {
-    _documentation.name = std::move(name);
-    _documentation.documentation = std::move(doc);
-}
-
-void CollapsibleSection::setDocumentation(Documentation info) {
-    _documentation = std::move(info);
-}
-
 void CollapsibleSection::toggleExpanded() {
-    setExpanded(!_isExpanded);
-}
-
-void CollapsibleSection::buildUi(const QString& title) {
-    setObjectName("accordion-item");
-    setFrameShape(QFrame::NoFrame);  // border comes from QSS
-
-    QBoxLayout* root = new QVBoxLayout(this);
-    root->setContentsMargins(0, 0, 0, 0);
-    root->setSpacing(0);
-
-    // Header (full row is clickable)
-    _headerFrame = new QFrame(this);
-    _headerFrame->setObjectName("accordion-header");
-    _headerFrame->setFrameShape(QFrame::NoFrame);
-    _headerFrame->setAttribute(Qt::WA_Hover, true);
-    _headerFrame->setCursor(Qt::PointingHandCursor);
-    _headerFrame->installEventFilter(this);
-
-    QBoxLayout* headerLayout = new QHBoxLayout(_headerFrame);
-    headerLayout->setContentsMargins(12, 8, 12, 8);
-    headerLayout->setSpacing(8);
-
-    // Title: transparent to mouse events so clicks reach the parent frame
-    _titleLabel = new QLabel(title, _headerFrame);
-    _titleLabel->setObjectName("accordion-title");
-    _titleLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
-    _titleLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-
-    // Info button -- always visible; default shows "No documentation available"
-    _documentation.name = title;
-    _infoButton = new QPushButton("i", _headerFrame);
-    _infoButton->setObjectName("section-info-button");
-    _infoButton->setFixedSize(18, 18);
-    _infoButton->setVisible(true);
-    connect(
-        _infoButton, &QPushButton::clicked,
-        this, [this]() { emit documentationRequested(_documentation); }
-    );
-
-    // Chevron: transparent to mouse events so clicks reach the parent frame
-    _chevronLabel = new QLabel(ChevronDown, _headerFrame);
-    _chevronLabel->setObjectName("accordion-chevron");
-    _chevronLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
-
-    _mandatoryLabel = new QLabel("*", _headerFrame);
-    _mandatoryLabel->setObjectName("section-required-asterisk");
-    _mandatoryLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
-    _mandatoryLabel->setVisible(false);
-
-    headerLayout->addWidget(_infoButton);
-    headerLayout->addWidget(_titleLabel);
-    headerLayout->addWidget(_mandatoryLabel);
-    headerLayout->addStretch(1);
-    headerLayout->addWidget(_chevronLabel);
-
-    // Content area
-    _contentFrame = new QFrame(this);
-    _contentFrame->setObjectName("accordion-content");
-    _contentFrame->setFrameShape(QFrame::NoFrame);
-    _contentFrame->setVisible(_isExpanded);
-
-    _frameLayout = new QVBoxLayout(_contentFrame);
-    _frameLayout->setContentsMargins(16, 8, 16, 12);
-    _frameLayout->setSpacing(0);
-
-    root->addWidget(_headerFrame);
-    root->addWidget(_contentFrame);
-
-    updateChevron();
+    _isExpanded = !_isExpanded;
+    _contentFrame->setVisible(_isExpanded && (contentWidget() != nullptr));
+    _chevronLabel->setText(_isExpanded ? ChevronUp : ChevronDown);
 }

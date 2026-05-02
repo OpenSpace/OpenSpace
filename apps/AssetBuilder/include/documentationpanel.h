@@ -35,8 +35,8 @@ class QTextBrowser;
 
 /**
  * Right-side documentation panel. Shows a field name, type, required/optional status,
- * short description, and full documentation text when the user clicks a field info
- * button in the editor.
+ * short description, and full documentation text when the user clicks a field info button
+ * in the editor.
  */
 class DocumentationPanel final : public QWidget {
 Q_OBJECT
@@ -52,8 +52,6 @@ public slots:
     void showDocumentation(const Documentation& info);
 
 private:
-    void buildUi();
-
     /// Display name of the documented field or type
     QLabel* _nameLabel = nullptr;
     /// "Type: X  Required/Optional" metadata line

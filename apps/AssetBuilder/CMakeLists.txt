@@ -25,49 +25,49 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/application_definition.cmake)
 
 set(HEADER_FILES
-  include/mainwindow.h
-  include/welcomedialog.h
   include/asseteditorwidget.h
-  include/sidepanel.h
   include/contentslistwidget.h
   include/dependencieswidget.h
-  include/metadatawidget.h
+  include/documentation.h
   include/documentationpanel.h
   include/editorpanel.h
-  include/scenegraphnodeeditor.h
   include/identifierregistry.h
+  include/jasset.h
+  include/mainwindow.h
+  include/metadatawidget.h
+  include/scenegraphnodeeditor.h
   include/scrollanchor.h
+  include/sidepanel.h
   include/utils.h
+  include/welcomedialog.h
   include/form/collapsiblesection.h
+  include/form/colorwidget.h
+  include/form/matrixwidget.h
   include/form/schemaformwidget.h
   include/form/searchdropdown.h
-  include/form/matrixwidget.h
-  include/form/colorwidget.h
-  include/documentation.h
   include/schema/assetschema.h
-  include/jasset.h
 )
 
 set(SOURCE_FILES
-  src/mainwindow.cpp
-  src/welcomedialog.cpp
-  src/jasset.cpp
   src/asseteditorwidget.cpp
-  src/sidepanel.cpp
   src/contentslistwidget.cpp
   src/dependencieswidget.cpp
-  src/metadatawidget.cpp
   src/documentationpanel.cpp
   src/editorpanel.cpp
-  src/scenegraphnodeeditor.cpp
   src/identifierregistry.cpp
+  src/jasset.cpp
+  src/mainwindow.cpp
+  src/metadatawidget.cpp
+  src/scenegraphnodeeditor.cpp
   src/scrollanchor.cpp
+  src/sidepanel.cpp
   src/utils.cpp
+  src/welcomedialog.cpp
   src/form/collapsiblesection.cpp
+  src/form/colorwidget.cpp
+  src/form/matrixwidget.cpp
   src/form/schemaformwidget.cpp
   src/form/searchdropdown.cpp
-  src/form/matrixwidget.cpp
-  src/form/colorwidget.cpp
   src/schema/assetschema.cpp
 )
 

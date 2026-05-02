@@ -41,7 +41,85 @@ WelcomeDialog::WelcomeDialog(QWidget* parent)
 {
     setWindowTitle("AssetBuilder");
     setFixedSize(DialogWidth, DialogHeight);
-    buildUi();
+
+    QBoxLayout* root = new QVBoxLayout(this);
+    root->setContentsMargins(32, 32, 32, 32);
+    root->setSpacing(0);
+
+    // Title
+    QLabel* title = new QLabel("AssetBuilder", this);
+    title->setObjectName("welcome-title");
+    title->setAlignment(Qt::AlignCenter);
+    root->addWidget(title);
+
+    // Subtitle
+    QLabel* sub = new QLabel("Visual editor for OpenSpace .jasset files", this);
+    sub->setObjectName("welcome-subtitle");
+    sub->setAlignment(Qt::AlignCenter);
+    root->addWidget(sub);
+
+    root->addSpacing(32);
+
+    // Action buttons
+    QBoxLayout* buttons = new QHBoxLayout;
+    buttons->setSpacing(16);
+    root->addLayout(buttons);
+
+    QPushButton* newButton = new QPushButton("New Asset", this);
+    newButton->setObjectName("primary");
+    newButton->setFixedHeight(40);
+    newButton->setToolTip("Create a new blank Scene Graph Node asset");
+    connect(newButton, &QPushButton::clicked, this, &WelcomeDialog::createEmpty);
+    buttons->addWidget(newButton);
+
+    QPushButton* openButton = new QPushButton("Open Asset\u2026", this);
+    openButton->setObjectName("secondary");
+    openButton->setFixedHeight(40);
+    openButton->setToolTip("Open an existing .jasset file");
+    connect(openButton, &QPushButton::clicked, this, &WelcomeDialog::browseForFile);
+    buttons->addWidget(openButton);
+
+
+    // Recent files
+    QSettings settings;
+    const QStringList recents = settings.value("recentFiles").toStringList();
+
+    // Filter to files that still exist
+    std::vector<std::filesystem::path> validRecents;
+    for (const QString& r : recents) {
+        std::filesystem::path p(r.toStdWString());
+        if (std::filesystem::exists(p)) {
+            validRecents.push_back(p);
+        }
+    }
+
+    // Create the recent file buttons
+    // They have the structure: <filename> <folder filepath>
+    if (!validRecents.empty()) {
+        root->addSpacing(20);
+
+        QLabel* recentLabel = new QLabel("Recent", this);
+        recentLabel->setObjectName("section-header");
+        root->addWidget(recentLabel);
+
+        for (const std::filesystem::path& path : validRecents) {
+            const QString filename = QString::fromStdWString(path.filename().wstring());
+            const QString dir = QString::fromStdWString(path.parent_path().wstring());
+
+            QPushButton* button = new QPushButton(this);
+            button->setFlat(true);
+            button->setText(filename + "  \u2014  " + dir);
+            button->setToolTip(QString::fromStdWString(path.wstring()));
+            connect(
+                button, &QPushButton::clicked,
+                this, [this, path]() { openRecentFile(path); }
+            );
+            root->addWidget(button);
+        }
+    }
+
+    root->addStretch();
+
 
     // Center on parent
     if (parent) {
@@ -87,84 +165,4 @@ void WelcomeDialog::openRecentFile(const std::filesystem::path& path) {
     _selectedAction = Action::OpenFile;
     _selectedFile = path;
     accept();
-}
-
-void WelcomeDialog::buildUi() {
-    QBoxLayout* root = new QVBoxLayout(this);
-    root->setContentsMargins(32, 32, 32, 32);
-    root->setSpacing(0);
-
-    // Title
-    QLabel* title = new QLabel("AssetBuilder", this);
-    title->setObjectName("welcome-title");
-    title->setAlignment(Qt::AlignCenter);
-    root->addWidget(title);
-
-    // Subtitle
-    QLabel* sub = new QLabel("Visual editor for OpenSpace .jasset files", this);
-    sub->setObjectName("welcome-subtitle");
-    sub->setAlignment(Qt::AlignCenter);
-    root->addWidget(sub);
-
-    root->addSpacing(32);
-
-    // Action buttons
-    QBoxLayout* buttons = new QHBoxLayout();
-    buttons->setSpacing(16);
-
-    QPushButton* newButton = new QPushButton("New Asset", this);
-    newButton->setObjectName("primary");
-    newButton->setFixedHeight(40);
-    newButton->setToolTip("Create a new blank Scene Graph Node asset");
-    connect(newButton, &QPushButton::clicked, this, &WelcomeDialog::createEmpty);
-
-    QPushButton* openButton = new QPushButton("Open Asset\u2026", this);
-    openButton->setObjectName("secondary");
-    openButton->setFixedHeight(40);
-    openButton->setToolTip("Open an existing .jasset file");
-    connect(openButton, &QPushButton::clicked, this, &WelcomeDialog::browseForFile);
-
-    buttons->addWidget(newButton);
-    buttons->addWidget(openButton);
-    root->addLayout(buttons);
-
-    // Recent files
-    QSettings settings;
-    const QStringList recents = settings.value("recentFiles").toStringList();
-
-    // Filter to files that still exist
-    std::vector<std::filesystem::path> validRecents;
-    for (const QString& r : recents) {
-        std::filesystem::path p(r.toStdWString());
-        if (std::filesystem::exists(p)) {
-            validRecents.push_back(p);
-        }
-    }
-
-    // Create the recent file buttons
-    // They have the structure: <filename> <folder filepath>
-    if (!validRecents.empty()) {
-        root->addSpacing(20);
-
-        QLabel* recentLabel = new QLabel("Recent", this);
-        recentLabel->setObjectName("section-header");
-        root->addWidget(recentLabel);
-
-        for (const std::filesystem::path& path : validRecents) {
-            const QString filename = QString::fromStdWString(path.filename().wstring());
-            const QString dir = QString::fromStdWString(path.parent_path().wstring());
-
-            QPushButton* button = new QPushButton(this);
-            button->setFlat(true);
-            button->setText(filename + "  \u2014  " + dir);
-            button->setToolTip(QString::fromStdWString(path.wstring()));
-            connect(
-                button, &QPushButton::clicked,
-                this, [this, path]() { openRecentFile(path); }
-            );
-            root->addWidget(button);
-        }
-    }
-
-    root->addStretch();
 }

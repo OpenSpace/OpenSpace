@@ -41,8 +41,8 @@ Q_OBJECT
 public:
     enum class Action {
         None,
-        CreateEmpty,    ///< Create a new blank SceneGraphNode asset
-        OpenFile        ///< Open an existing .jasset file (path in selectedFile())
+        CreateEmpty, ///< Create a new blank SceneGraphNode asset
+        OpenFile ///< Open an existing .jasset file (path in selectedFile())
     };
 
     explicit WelcomeDialog(QWidget* parent = nullptr);
@@ -80,11 +80,6 @@ private slots:
     void openRecentFile(const std::filesystem::path& path);
 
 private:
-    /**
-     * Constructs and lays out all child widgets.
-     */
-    void buildUi();
-
     Action _selectedAction = Action::None;
     std::filesystem::path _selectedFile;
 };

@@ -38,9 +38,9 @@ ScrollAnchor::ScrollAnchor(QScrollArea* scroll, QWidget* content)
 }
 
 bool ScrollAnchor::eventFilter(QObject*, QEvent* event) {
-    if (event->type() == QEvent::LayoutRequest && !_pending) {
+    if (event->type() == QEvent::LayoutRequest && !_isDeferredRestorePending) {
         _savedValue = _scroll->verticalScrollBar()->value();
-        _pending = true;
+        _isDeferredRestorePending = true;
         // A zero-delay timer runs after the current event loop iteration completes, at
         // which point Qt has finished recalculating geometry. This lets us restore the
         // scroll position after the layout pass rather than during it
@@ -50,7 +50,7 @@ bool ScrollAnchor::eventFilter(QObject*, QEvent* event) {
             [this]() {
                 const int maxScroll = _scroll->verticalScrollBar()->maximum();
                 _scroll->verticalScrollBar()->setValue(std::min(_savedValue, maxScroll));
-                _pending = false;
+                _isDeferredRestorePending = false;
             }
         );
     }

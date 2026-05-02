@@ -63,8 +63,6 @@ signals:
     void assetModified();
 
 private:
-    void buildUi();
-
     /**
      * Appends a new default SceneGraphNode and selects it.
      */

@@ -55,7 +55,7 @@ public:
      *
      * \param path The .jasset file path (empty if unsaved)
      */
-    void setFilePath(const std::filesystem::path& path);
+    void setFilePath(std::filesystem::path path);
 
     /**
      * Refreshes all three child widgets.
@@ -87,8 +87,6 @@ signals:
     void assetModified();
 
 private:
-    void buildUi();
-
     ContentsListWidget* _contentsList = nullptr;
     DependenciesWidget* _dependencies = nullptr;
     MetadataWidget* _metadata = nullptr;

@@ -24,6 +24,7 @@
 
 #include "form/colorwidget.h"
 
+#include <ghoul/misc/assert.h>
 #include <QColorDialog>
 #include <QDoubleValidator>
 #include <QGridLayout>
@@ -36,6 +37,7 @@ namespace {
     constexpr int ColorDecimalPrecision = 4;
 
     QColor toQColor(const PropertyList& vals) {
+        ghoul_assert(vals.size() == 3 || vals.size() == 4, "Invalid size");
         return QColor::fromRgbF(
             vals[0].toDouble(),
             vals[1].toDouble(),
@@ -49,7 +51,7 @@ ColorWidget::ColorWidget(int nComponents, QWidget* parent)
     : MatrixWidget(
           nComponents,
           nComponents, // nColumns = nComponents (single row)
-          false,       // double mode
+          false, // double mode
           parent
       )
 {
@@ -79,11 +81,12 @@ ColorWidget::ColorWidget(int nComponents, QWidget* parent)
         [this]() {
             const QColor initial = toQColor(values());
 
-            const QColorDialog::ColorDialogOptions opts = (_fields.size() > 3)
-                ? QColorDialog::ColorDialogOptions(QColorDialog::ShowAlphaChannel)
-                : QColorDialog::ColorDialogOptions();
+            const QColorDialog::ColorDialogOptions opts = (_fields.size() > 3) ?
+                QColorDialog::ColorDialogOptions(QColorDialog::ShowAlphaChannel) :
+                QColorDialog::ColorDialogOptions();
 
-            const QColor picked = QColorDialog::getColor(initial, this, "Pick Color", opts);
+            const QColor picked =
+                QColorDialog::getColor(initial, this, "Pick Color", opts);
 
             if (!picked.isValid()) {
                 return;

@@ -159,10 +159,9 @@ private:
     AssetSchema(const AssetSchema&) = delete;
     AssetSchema& operator=(const AssetSchema&) = delete;
 
-    // Immutable after construction; pointers into this vector (returned by
-    // findCategory / findType / findCategoryByTypeId) remain valid because
-    // instance() exposes only a const reference.
-    std::vector<SchemaCategory> _categories;
+    // This vector needs to be immutable as we are returning pointers into the vector in
+    // the `findCategory` / `findType` / `findCategoryByTypeId` functions
+    const std::vector<SchemaCategory> _categories;
 };
 
 #endif // __OPENSPACE_ASSETBUILDER___SCHEMA_ASSETSCHEMA___H__

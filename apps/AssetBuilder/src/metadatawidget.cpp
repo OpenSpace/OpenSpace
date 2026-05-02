@@ -25,7 +25,6 @@
 #include "metadatawidget.h"
 
 #include <jasset.h>
-
 #include <QComboBox>
 #include <QGridLayout>
 #include <QLabel>
@@ -40,7 +39,141 @@ namespace {
 MetadataWidget::MetadataWidget(QWidget* parent)
     : QWidget(parent)
 {
-    buildUi();
+    QBoxLayout* layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+
+    QLabel* header = new QLabel("METADATA", this);
+    header->setObjectName("section-header");
+    header->setContentsMargins(12, 8, 8, 4);
+    layout->addWidget(header);
+
+    QWidget* content = new QWidget(this);
+    layout->addWidget(content);
+    QGridLayout* grid = new QGridLayout(content);
+    grid->setContentsMargins(12, 0, 8, 8);
+    grid->setColumnMinimumWidth(0, LabelColumnMinWidth);
+    grid->setColumnStretch(1, 1);
+    grid->setHorizontalSpacing(8);
+    grid->setVerticalSpacing(4);
+
+    // Helper: add a label + QLineEdit row to the grid
+    auto addField = [content, grid](int row, const QString& label,
+                                    const QString& placeholder)
+    {
+        // Left side label
+        QLabel* fieldLabel = new QLabel(label, content);
+        fieldLabel->setObjectName("field-label");
+        grid->addWidget(fieldLabel, row, 0, Qt::AlignVCenter | Qt::AlignLeft);
+
+        // Right side edit field
+        QLineEdit* edit = new QLineEdit(content);
+        edit->setPlaceholderText(placeholder);
+        grid->addWidget(edit, row, 1);
+        return edit;
+    };
+
+    _nameEdit = addField(0, "Name", "Asset name");
+    connect(
+        _nameEdit,
+        &QLineEdit::textEdited,
+        this,
+        [this](const QString& text) {
+            if (!_asset) {
+                return;
+            }
+            _asset->metadata.name = text.toStdString();
+            emit assetModified();
+        }
+    );
+
+    _versionEdit = addField(1, "Version", "1.0.0");
+    connect(
+        _versionEdit,
+        &QLineEdit::textEdited,
+        this,
+        [this](const QString& text) {
+            if (!_asset) {
+                return;
+            }
+            _asset->metadata.version = text.toStdString();
+            emit assetModified();
+        }
+    );
+
+    _authorEdit = addField(2, "Author",  "Author name");
+    connect(
+        _authorEdit,
+        &QLineEdit::textEdited,
+        this,
+        [this](const QString& text) {
+            if (!_asset) {
+                return;
+            }
+            _asset->metadata.author = text.toStdString();
+            emit assetModified();
+        }
+    );
+
+    // Description: multi-line plain text
+    {
+        // Left side label
+        QLabel* label = new QLabel("Description", content);
+        label->setObjectName("field-label");
+        grid->addWidget(label, 3, 0, Qt::AlignTop | Qt::AlignLeft);
+
+        // Right side edit field
+        _descriptionEdit = new QPlainTextEdit(content);
+        _descriptionEdit->setPlaceholderText("Short summary");
+        _descriptionEdit->setMinimumHeight(48);
+        _descriptionEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        connect(
+            _descriptionEdit,
+            &QPlainTextEdit::textChanged,
+            this,
+            [this]() {
+                if (!_asset) {
+                    return;
+                }
+                _asset->metadata.description =
+                    _descriptionEdit->toPlainText().toStdString();
+                emit assetModified();
+            }
+        );
+        grid->addWidget(_descriptionEdit, 3, 1);
+    }
+
+    // License: editable combo with preset items
+    {
+        // Left side label
+        QLabel* label = new QLabel("License", content);
+        label->setObjectName("field-label");
+        grid->addWidget(label, 4, 0, Qt::AlignVCenter | Qt::AlignLeft);
+
+        // Right side combobox
+        _licenseCombo = new QComboBox(content);
+        _licenseCombo->setEditable(true);
+        _licenseCombo->lineEdit()->setPlaceholderText("e.g. MIT");
+        _licenseCombo->addItems({
+            "", "MIT", "Apache 2.0", "GPL 3.0", "CC BY 4.0", "Proprietary"
+        });
+        _licenseCombo->setCurrentIndex(0);
+        connect(
+            _licenseCombo,
+            &QComboBox::currentTextChanged,
+            this,
+            [this](const QString& text) {
+                if (!_asset) {
+                    return;
+                }
+                _asset->metadata.license = text.toStdString();
+                emit assetModified();
+            }
+        );
+        grid->addWidget(_licenseCombo, 4, 1);
+    }
+
+    layout->addStretch();
 }
 
 void MetadataWidget::setAsset(JAsset* asset) {
@@ -79,139 +212,4 @@ void MetadataWidget::refresh() {
         _licenseCombo->setCurrentText(license);
     }
     _licenseCombo->blockSignals(false);
-}
-
-void MetadataWidget::buildUi() {
-    QBoxLayout* layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
-
-    QLabel* header = new QLabel("METADATA", this);
-    header->setObjectName("section-header");
-    header->setContentsMargins(12, 8, 8, 4);
-
-    QWidget* content = new QWidget(this);
-    QGridLayout* grid = new QGridLayout(content);
-    grid->setContentsMargins(12, 0, 8, 8);
-    grid->setColumnMinimumWidth(0, LabelColumnMinWidth);
-    grid->setColumnStretch(1, 1);
-    grid->setHorizontalSpacing(8);
-    grid->setVerticalSpacing(4);
-
-    // Helper: add a label + QLineEdit row to the grid
-    auto addField = [&](int row, const QString& label, const QString& placeholder) {
-        // Left side label
-        QLabel* fieldLabel = new QLabel(label, content);
-        fieldLabel->setObjectName("field-label");
-        grid->addWidget(fieldLabel, row, 0, Qt::AlignVCenter | Qt::AlignLeft);
-
-        // Right side edit field
-        QLineEdit* edit = new QLineEdit(content);
-        edit->setPlaceholderText(placeholder);
-        grid->addWidget(edit, row, 1);
-        return edit;
-    };
-
-    _nameEdit = addField(0, "Name", "Asset name");
-    _versionEdit = addField(1, "Version", "1.0.0");
-    _authorEdit = addField(2, "Author",  "Author name");
-
-    // Description: multi-line plain text
-    {
-        // Left side label
-        QLabel* label = new QLabel("Description", content);
-        label->setObjectName("field-label");
-        grid->addWidget(label, 3, 0, Qt::AlignTop | Qt::AlignLeft);
-
-        // Right side edit field
-        _descriptionEdit = new QPlainTextEdit(content);
-        _descriptionEdit->setPlaceholderText("Short summary");
-        _descriptionEdit->setMinimumHeight(48);
-        _descriptionEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-        grid->addWidget(_descriptionEdit, 3, 1);
-    }
-
-    // License: editable combo with preset items
-    {
-        // Left side label
-        QLabel* label = new QLabel("License", content);
-        label->setObjectName("field-label");
-        grid->addWidget(label, 4, 0, Qt::AlignVCenter | Qt::AlignLeft);
-
-        // Right side combobox
-        _licenseCombo = new QComboBox(content);
-        _licenseCombo->setEditable(true);
-        _licenseCombo->lineEdit()->setPlaceholderText("e.g. MIT");
-        _licenseCombo->addItems({
-            "", "MIT", "Apache 2.0", "GPL 3.0", "CC BY 4.0", "Proprietary"
-        });
-        _licenseCombo->setCurrentIndex(0);
-        grid->addWidget(_licenseCombo, 4, 1);
-    }
-
-    // Connections
-    connect(
-        _nameEdit,
-        &QLineEdit::textEdited,
-        this,
-        [this](const QString& text) {
-            if (!_asset) {
-                return;
-            }
-            _asset->metadata.name = text.toStdString();
-            emit assetModified();
-        }
-    );
-    connect(
-        _versionEdit,
-        &QLineEdit::textEdited,
-        this,
-        [this](const QString& text) {
-            if (!_asset) {
-                return;
-            }
-            _asset->metadata.version = text.toStdString();
-            emit assetModified();
-        }
-    );
-    connect(
-        _authorEdit,
-        &QLineEdit::textEdited,
-        this,
-        [this](const QString& text) {
-            if (!_asset) {
-                return;
-            }
-            _asset->metadata.author = text.toStdString();
-            emit assetModified();
-        }
-    );
-    connect(
-        _descriptionEdit,
-        &QPlainTextEdit::textChanged,
-        this,
-        [this]() {
-            if (!_asset) {
-                return;
-            }
-            _asset->metadata.description = _descriptionEdit->toPlainText().toStdString();
-            emit assetModified();
-        }
-    );
-    connect(
-        _licenseCombo,
-        &QComboBox::currentTextChanged,
-        this,
-        [this](const QString& text) {
-            if (!_asset) {
-                return;
-            }
-            _asset->metadata.license = text.toStdString();
-            emit assetModified();
-        }
-    );
-
-    layout->addWidget(header);
-    layout->addWidget(content);
-    layout->addStretch();
 }

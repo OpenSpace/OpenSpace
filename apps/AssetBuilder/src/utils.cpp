@@ -25,7 +25,6 @@
 #include "utils.h"
 
 #include <schema/assetschema.h>
-
 #include <QDir>
 #include <QFileDialog>
 #include <QJsonArray>
@@ -46,10 +45,9 @@ PathType detectPathType(const std::string& path) {
     return PathType::Data;
 }
 
-std::filesystem::path resolvePath(
-    const std::string& dependency,
-    const std::filesystem::path& dataRoot,
-    const std::filesystem::path& assetDirectory)
+std::filesystem::path resolvePath(const std::string& dependency,
+                                  const std::filesystem::path& dataRoot,
+                                  const std::filesystem::path& assetDirectory)
 {
     const PathType type = detectPathType(dependency);
     std::filesystem::path resolved(dependency);
@@ -64,29 +62,30 @@ std::filesystem::path resolvePath(
 
     // Normalize the path (resolve .. and . segments)
     std::error_code error;
-    std::filesystem::path canonical =
-        std::filesystem::weakly_canonical(resolved, error);
+    std::filesystem::path canonical = std::filesystem::weakly_canonical(resolved, error);
     return error ? resolved : canonical;
 }
 
 std::filesystem::path dataRoot() {
     const QString value = QSettings().value(SettingsKeyDataRoot).toString();
-    return value.isEmpty()
-        ? std::filesystem::path{}
-        : std::filesystem::path(value.toStdWString());
+    return value.isEmpty() ?
+        std::filesystem::path() :
+        std::filesystem::path(value.toStdWString());
 }
 
 std::filesystem::path pickDataRootDialog(QWidget* parent) {
     const std::filesystem::path current = dataRoot();
-    const QString startDirectory = current.empty()
-        ? QDir::homePath()
-        : QString::fromStdWString(current.wstring());
+    const QString startDirectory = current.empty() ?
+        QDir::homePath() :
+        QString::fromStdWString(current.wstring());
 
     const QString selected = QFileDialog::getExistingDirectory(
-        parent, "Set Data Directory", startDirectory
+        parent,
+        "Set Data Directory",
+        startDirectory
     );
     if (selected.isEmpty()) {
-        return {};
+        return std::filesystem::path();
     }
 
     QSettings().setValue(SettingsKeyDataRoot, selected);
@@ -96,7 +95,7 @@ std::filesystem::path pickDataRootDialog(QWidget* parent) {
 QString splitPascalCase(const std::string& name) {
     const QString text = QString::fromStdString(name);
     QString result;
-    for (int i = 0; i < text.size(); ++i) {
+    for (int i = 0; i < text.size(); i++) {
         const QChar character = text[i];
         // Insert a space before an uppercase letter when it marks a word boundary:
         if (i > 0 && character.isUpper()) {
@@ -106,9 +105,9 @@ QString splitPascalCase(const std::string& name) {
             // Current character is upper; previous character is lower.
             // This is a camelCase space (e.g. "Time|Frame" -> "Time Frame")
             const bool camelCaseBoundary = previousLower;
-            // previousUpper && nextLower: end of acronym run, split before the
-            //   new word (e.g. "GUI|Name" -> "GUI Name"), but keep consecutive
-            //   uppercase together (e.g. "GUI" stays as "GUI")
+            // previousUpper && nextLower: end of acronym run, split before the new word
+            // (e.g. "GUI|Name" -> "GUI Name"), but keep consecutive uppercase together
+            // (e.g. "GUI" stays as "GUI")
             const bool endOfAcronym = previousUpper && nextLower;
             if (camelCaseBoundary|| endOfAcronym) {
                 result += ' ';
@@ -147,9 +146,8 @@ PropertyValue jsonValueToProperty(const QJsonValue& value) {
     if (value.isObject()) {
         PropertyMap map;
         const QJsonObject object = value.toObject();
-        for (auto it = object.begin(); it != object.end(); ++it) {
-            map[it.key().toStdString()] =
-                jsonValueToProperty(it.value());
+        for (auto it = object.begin(); it != object.end(); it++) {
+            map[it.key().toStdString()] = jsonValueToProperty(it.value());
         }
         return PropertyValue{ std::move(map) };
     }
@@ -165,19 +163,22 @@ PropertyValue jsonValueToProperty(const QJsonValue& value) {
 }
 
 QJsonValue propertyToJsonValue(const PropertyValue& propertyValue) {
-    if (propertyValue.isNull())   { return QJsonValue::Null; }
-    if (propertyValue.isBool())   { return QJsonValue(propertyValue.toBool()); }
-    if (propertyValue.isDouble()) { return QJsonValue(propertyValue.toDouble()); }
+    if (propertyValue.isNull()) {
+        return QJsonValue::Null;
+    }
+    if (propertyValue.isBool()) {
+        return QJsonValue(propertyValue.toBool());
+    }
+    if (propertyValue.isDouble()) {
+        return QJsonValue(propertyValue.toDouble());
+    }
     if (propertyValue.isString()) {
-        return QJsonValue(
-            QString::fromStdString(propertyValue.toString())
-        );
+        return QJsonValue(QString::fromStdString(propertyValue.toString()));
     }
     if (propertyValue.isMap()) {
         QJsonObject object;
         for (const auto& [key, value] : propertyValue.toMap()) {
-            object[QString::fromStdString(key)] =
-                propertyToJsonValue(value);
+            object[QString::fromStdString(key)] = propertyToJsonValue(value);
         }
         return object;
     }
@@ -191,10 +192,9 @@ QJsonValue propertyToJsonValue(const PropertyValue& propertyValue) {
     return QJsonValue::Null;
 }
 
-std::vector<SchemaMember> collectMembers(
-    const SchemaType& schemaType,
-    const std::string& parentName,
-    const std::vector<std::string>& names)
+std::vector<SchemaMember> collectMembers(const SchemaType& schemaType,
+                                         const std::string& parentName,
+                                         const std::vector<std::string>& names)
 {
     const std::vector<SchemaMember>* source = &schemaType.members;
     if (!parentName.empty()) {
@@ -207,7 +207,7 @@ std::vector<SchemaMember> collectMembers(
         }
         // No top level member found; return empty
         if (!source) {
-            return {};
+            return std::vector<SchemaMember>();
         }
     }
 

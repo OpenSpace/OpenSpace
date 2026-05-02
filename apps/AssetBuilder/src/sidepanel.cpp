@@ -33,34 +33,6 @@
 SidePanel::SidePanel(QWidget* parent)
     : QWidget(parent)
 {
-    buildUi();
-}
-
-void SidePanel::setAsset(JAsset* asset) {
-    _contentsList->setAsset(asset);
-    _dependencies->setAsset(asset);
-    _metadata->setAsset(asset);
-}
-
-void SidePanel::setFilePath(const std::filesystem::path& path) {
-    _dependencies->setFilePath(path);
-}
-
-void SidePanel::refreshAll() {
-    _contentsList->refresh();
-    _dependencies->refresh();
-    _metadata->refresh();
-}
-
-void SidePanel::addDependencyViaDialog() {
-    _dependencies->addDependencyViaDialog();
-}
-
-void SidePanel::addDependency(const QString& filePath) {
-    _dependencies->addDependency(filePath);
-}
-
-void SidePanel::buildUi() {
     setObjectName("side-panel");
     setMinimumWidth(0);
 
@@ -71,10 +43,19 @@ void SidePanel::buildUi() {
     QSplitter* splitter = new QSplitter(Qt::Vertical, this);
     splitter->setChildrenCollapsible(false);
     splitter->setHandleWidth(4);
+    root->addWidget(splitter);
 
     _contentsList = new ContentsListWidget(splitter);
+    splitter->addWidget(_contentsList);
+    splitter->setStretchFactor(0, 2);
+
     _dependencies = new DependenciesWidget(splitter);
+    splitter->addWidget(_dependencies);
+    splitter->setStretchFactor(1, 1);
+
     _metadata = new MetadataWidget(splitter);
+    splitter->addWidget(_metadata);
+    splitter->setStretchFactor(2, 0);
 
     // Wire child signals to own signals
     connect(
@@ -95,14 +76,28 @@ void SidePanel::buildUi() {
         _metadata, &MetadataWidget::assetModified,
         this, &SidePanel::assetModified
     );
+}
 
-    // Sizing: contents gets most space, deps gets some, metadata its natural size
-    splitter->addWidget(_contentsList);
-    splitter->addWidget(_dependencies);
-    splitter->addWidget(_metadata);
-    splitter->setStretchFactor(0, 2);
-    splitter->setStretchFactor(1, 1);
-    splitter->setStretchFactor(2, 0);
+void SidePanel::setAsset(JAsset* asset) {
+    _contentsList->setAsset(asset);
+    _dependencies->setAsset(asset);
+    _metadata->setAsset(asset);
+}
 
-    root->addWidget(splitter);
+void SidePanel::setFilePath(std::filesystem::path path) {
+    _dependencies->setFilePath(std::move(path));
+}
+
+void SidePanel::refreshAll() {
+    _contentsList->refresh();
+    _dependencies->refresh();
+    _metadata->refresh();
+}
+
+void SidePanel::addDependencyViaDialog() {
+    _dependencies->addDependencyViaDialog();
+}
+
+void SidePanel::addDependency(const QString& filePath) {
+    _dependencies->addDependency(filePath);
 }

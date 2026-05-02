@@ -33,31 +33,15 @@
 #include <memory>
 #include <vector>
 
-/**
- * Describes a matrix/vector/color type for widget creation.
- */
-struct MatrixTypeEntry {
-    /// Schema type name (e.g. "Vector3<double>", "Color4").
-    const char* typeName;
-    /// Total number of numeric fields.
-    int nComponents;
-    /// Columns in the grid layout.
-    int nColumns;
-    /// `true` for integer validation, `false` for double.
-    bool isInteger;
-    /// `true` to use ColorWidget instead of plain MatrixWidget.
-    bool isColor;
-};
-
 class CollapsibleSection;
 class IdentifierRegistry;
 class QBoxLayout;
 class QGridLayout;
 
 /**
- * Generates a form from a list of SchemaMember descriptors bound to a PropertyMap.
- * Flat members (string, number, boolean, etc.) are rendered as labeled fields in a grid.
- * Table members become nested CollapsibleSection widgets with type-appropriate content.
+ * Generates a form from a list of SchemaMember descriptors bound to a PropertyMap. Flat
+ * members (string, number, boolean, etc.) are rendered as labeled fields in a grid. Table
+ * members become nested CollapsibleSection widgets with type-appropriate content.
  */
 class SchemaFormWidget final : public QWidget {
 Q_OBJECT
@@ -76,7 +60,7 @@ public:
     SchemaFormWidget(std::vector<SchemaMember> members,
         std::weak_ptr<PropertyMap> properties, QWidget* parent = nullptr,
         bool subSectionsExpanded = false, bool sortMembers = true,
-        IdentifierRegistry* registry = nullptr);
+        const IdentifierRegistry* registry = nullptr);
 
     /**
      * Writes current widget values into the bound PropertyMap.
@@ -91,6 +75,8 @@ public:
     /**
      * Returns the leaf field widget (e.g. QLineEdit, QCheckBox) for the member with the
      * given name, or nullptr if the name is unknown or the member is a Table type.
+     *
+     * \param name The member for which the widget should be returned
      */
     QWidget* widgetForMember(const std::string& name) const;
 
@@ -149,16 +135,6 @@ signals:
     void addDependency(const QString& filePath);
 
 private:
-    /// Size of remove/clear buttons
-    static constexpr int RemoveButtonSize = 22;
-    /// UTF-8 multiply sign (x) used as remove/clear glyph
-    static constexpr const char* RemoveGlyph = "\xc3\x97";
-
-    /**
-     * Creates the grid layout and populates it with member rows.
-     */
-    void buildUi();
-
     /**
      * Adds a single member's label and widget to the grid at \p row.
      */
@@ -179,11 +155,6 @@ private:
      * Dispatches to a type-specific creator based on the member's schema type.
      */
     QWidget* createFlatWidget(const SchemaMember& member);
-
-    /**
-     * Creates a type-selector combo + stacked pages for union-typed members.
-     */
-    QWidget* createUnionWidget(const SchemaMember& member);
 
     /**
      * Creates a CollapsibleSection for a Table member, dispatching by table kind.
@@ -269,26 +240,30 @@ private:
     void buildInlineTableContent(CollapsibleSection* section, const SchemaMember& member,
         PropertyMap& properties);
 
-    /// Schema member descriptors for this form
-    std::vector<SchemaMember> _members;
     /// Weak reference to the bound property map (root or sub-map)
     std::weak_ptr<PropertyMap> _properties;
 
-    /// Per-member leaf widget (flat) or CollapsibleSection (Table)
-    std::vector<QWidget*> _fieldWidgets;
-    /// Per-member "+" button; nullptr for required and Table members
-    std::vector<QWidget*> _fieldAddButtons;
-    /// Per-member active row container; nullptr for required and Table members
-    std::vector<QWidget*> _fieldActiveRows;
-    /// Whether each optional field is currently active. Always `true` for required/Table
-    std::vector<bool> _optionalFieldActive;
+    struct MemberInfo {
+        /// Schema member descriptors for this form
+        SchemaMember member;
+        /// Per-member leaf widget (flat) or CollapsibleSection (Table)
+        QWidget* fieldWidget = nullptr;
+        /// Per-member "+" button; nullptr for required and Table members
+        QWidget* addButton = nullptr;
+        /// Per-member active row container; nullptr for required and Table members
+        QWidget* activeRows = nullptr;
+        /// Whether each optional field is currently active. Always `true` for
+        /// required/Table
+        bool optionalActive = true;
+    };
+    std::vector<MemberInfo> _members;
 
     /// Whether new sub-sections start expanded
-    bool _areSubSectionsExpanded = false;
+    const bool _areSubSectionsExpanded = false;
     /// Whether members are sorted in the grid
-    bool _shouldSortMembers = true;
+    const bool _shouldSortMembers = true;
     /// Registry for Identifier-type combo boxes; `nullptr` if unavailable
-    IdentifierRegistry* _registry = nullptr;
+    const IdentifierRegistry* _registry = nullptr;
 };
 
 #endif // __OPENSPACE_ASSETBUILDER___FORM_SCHEMAFORMWIDGET___H__

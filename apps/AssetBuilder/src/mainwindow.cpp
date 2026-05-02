@@ -27,7 +27,6 @@
 #include <asseteditorwidget.h>
 #include <utils.h>
 #include <welcomedialog.h>
-
 #include <QCloseEvent>
 #include <QFileDialog>
 #include <QLabel>
@@ -45,66 +44,7 @@ namespace {
 
 MainWindow::MainWindow() {
     setMinimumSize(900, 600);
-    createMenus();
-    showEmptyState();
-    updateTitle();
 
-    // Show the welcome dialog immediately so the user can create or open an asset
-    QMetaObject::invokeMethod(
-        this,
-        &MainWindow::showWelcomeDialog,
-        Qt::QueuedConnection // needs to be queued so the main window gets created first
-    );
-}
-
-void MainWindow::showEmptyState() {
-    QWidget* placeholder = new QWidget(this);
-    QBoxLayout* layout = new QVBoxLayout(placeholder);
-    layout->setAlignment(Qt::AlignCenter);
-
-    QLabel* label = new QLabel("No asset open", placeholder);
-    label->setObjectName("empty-state");
-    label->setAlignment(Qt::AlignCenter);
-
-    QLabel* sub = new QLabel("Use File > New or File > Open to get started", placeholder);
-    sub->setObjectName("empty-state-sub");
-    sub->setAlignment(Qt::AlignCenter);
-
-    layout->addWidget(label);
-    layout->addWidget(sub);
-
-    setCentralWidget(placeholder);
-}
-
-void MainWindow::showWelcomeDialog() {
-    WelcomeDialog dialog(this);
-    const int dialogResult = dialog.exec();
-
-    if (dialogResult != QDialog::Accepted) {
-        return;
-    }
-
-    createEditor();
-
-    switch (dialog.selectedAction()) {
-        case WelcomeDialog::Action::CreateEmpty:
-            _editor->newAsset();
-            break;
-        case WelcomeDialog::Action::OpenFile: {
-            const std::filesystem::path file = dialog.selectedFile();
-            if (_editor->loadAsset(file)) {
-                addToRecentFiles(file);
-            }
-            break;
-        }
-        case WelcomeDialog::Action::None:
-            break;
-    }
-
-    updateTitle();
-}
-
-void MainWindow::createMenus() {
     // File menu
     QMenu* fileMenu = menuBar()->addMenu("File");
 
@@ -154,6 +94,62 @@ void MainWindow::createMenus() {
     _pathLabel->setObjectName("file-path-bar");
     _pathLabel->setAlignment(Qt::AlignCenter);
     _pathLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
+
+    showEmptyState();
+    updateTitle();
+
+    // Show the welcome dialog immediately so the user can create or open an asset
+    QMetaObject::invokeMethod(
+        this,
+        &MainWindow::showWelcomeDialog,
+        Qt::QueuedConnection // needs to be queued so the main window gets created first
+    );
+}
+
+void MainWindow::showEmptyState() {
+    QWidget* placeholder = new QWidget(this);
+    setCentralWidget(placeholder);
+    QBoxLayout* layout = new QVBoxLayout(placeholder);
+    layout->setAlignment(Qt::AlignCenter);
+
+    QLabel* label = new QLabel("No asset open", placeholder);
+    label->setObjectName("empty-state");
+    label->setAlignment(Qt::AlignCenter);
+    layout->addWidget(label);
+
+    QLabel* sub = new QLabel("Use File > New or File > Open to get started", placeholder);
+    sub->setObjectName("empty-state-sub");
+    sub->setAlignment(Qt::AlignCenter);
+    layout->addWidget(sub);
+
+}
+
+void MainWindow::showWelcomeDialog() {
+    WelcomeDialog dialog(this);
+    const int dialogResult = dialog.exec();
+
+    if (dialogResult != QDialog::Accepted) {
+        return;
+    }
+
+    createEditor();
+
+    switch (dialog.selectedAction()) {
+        case WelcomeDialog::Action::CreateEmpty:
+            _editor->newAsset();
+            break;
+        case WelcomeDialog::Action::OpenFile: {
+            const std::filesystem::path file = dialog.selectedFile();
+            if (_editor->loadAsset(file)) {
+                addToRecentFiles(file);
+            }
+            break;
+        }
+        case WelcomeDialog::Action::None:
+            break;
+    }
+
+    updateTitle();
 }
 
 void MainWindow::createEditor() {
@@ -161,10 +157,7 @@ void MainWindow::createEditor() {
         return;
     }
     _editor = new AssetEditorWidget(this);
-    connect(
-        _editor, &AssetEditorWidget::assetModified,
-        this, [this]() { updateTitle(); }
-    );
+    connect(_editor, &AssetEditorWidget::assetModified, this, &MainWindow::updateTitle);
     setCentralWidget(_editor);
 }
 
@@ -172,8 +165,7 @@ void MainWindow::updateTitle() {
     QString title = QString::fromStdString(std::string(AppName));
     if (_editor) {
         // Add an emdash and then the file name (with asterisk if dirty)
-        title += QString::fromStdString(" \u2014 ") +
-            _editor->displayName();
+        title += QString::fromStdString(" \u2014 ") + _editor->displayName();
     }
     setWindowTitle(title);
 
