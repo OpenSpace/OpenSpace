@@ -74,7 +74,7 @@ namespace {
     {
         std::string id = baseId + std::to_string(startSuffix);
         while (existing.count(id) > 0) {
-            ++startSuffix;
+            startSuffix++;
             id = baseId + std::to_string(startSuffix);
         }
         return id;
@@ -84,7 +84,79 @@ namespace {
 ContentsListWidget::ContentsListWidget(QWidget* parent)
     : QWidget(parent)
 {
-    buildUi();
+    QBoxLayout* layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+
+    QBoxLayout* headerLayout = new QHBoxLayout;
+    headerLayout->setContentsMargins(12, 8, 8, 4);
+    headerLayout->setSpacing(4);
+
+    QLabel* header = new QLabel("CONTENTS", this);
+    header->setObjectName("section-header");
+
+    QPushButton* addButton = new QPushButton("+", this);
+    addButton->setObjectName("add-button");
+    addButton->setFixedSize(20, 20);
+    addButton->setToolTip("Add content");
+    connect(
+        addButton,
+        &QPushButton::clicked,
+        this,
+        [this, addButton]() {
+            QMenu menu(this);
+            menu.addAction(
+                "Add Scene Graph Node",
+                this,
+                &ContentsListWidget::addSceneGraphNode
+            );
+            // Align the menu to the bottom left edge of the button
+            menu.exec(addButton->mapToGlobal(addButton->rect().bottomLeft()));
+        }
+    );
+
+    headerLayout->addWidget(header);
+    headerLayout->addStretch();
+    headerLayout->addWidget(addButton);
+    layout->addLayout(headerLayout);
+
+    _contentsList = new QListWidget(this);
+    // We want a custom right-click menu on the items
+    _contentsList->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    // Wire signals: emit selection changed whenever the QListWidget changes
+    connect(
+        _contentsList, &QListWidget::currentRowChanged,
+        this, &ContentsListWidget::selectionChanged
+    );
+
+    // Create the right click menu
+    connect(
+        _contentsList,
+        &QListWidget::customContextMenuRequested,
+        this,
+        [this](const QPoint& pos) {
+            QListWidgetItem* item = _contentsList->itemAt(pos);
+            if (!item) {
+                return;
+            }
+
+            const int row = _contentsList->row(item);
+
+            QMenu menu(this);
+            menu.addAction(
+                "Duplicate",
+                this,
+                [this, row]() { duplicateSceneGraphNode(row); }
+            );
+            menu.addAction(
+                "Remove",
+                this, [this, row]() { removeSceneGraphNode(row); }
+            );
+            menu.exec(_contentsList->mapToGlobal(pos));
+        }
+    );
+    layout->addWidget(_contentsList);
 }
 
 void ContentsListWidget::setAsset(JAsset* asset) {
@@ -129,10 +201,11 @@ void ContentsListWidget::addSceneGraphNode() {
     const int startSuffix = static_cast<int>(_asset->contents.size()) + 1;
     const std::string uniqueId = makeUniqueId("Node", existing, startSuffix);
 
-    ContentItem item;
-    item.type = "SceneGraphNode";
-    item.isDirty = true;
-    item.properties["Identifier"] = PropertyValue{ uniqueId };
+    ContentItem item = {
+        .type = "SceneGraphNode",
+        .properties = PropertyMap{ { "Identifier", PropertyValue{ uniqueId } } },
+        .isDirty = true
+    };
     _asset->contents.push_back(std::move(item));
 
     emit assetModified();
@@ -160,13 +233,10 @@ void ContentsListWidget::duplicateSceneGraphNode(int row) {
 
     // Generate a unique Identifier
     auto idIt = copy.properties.find("Identifier");
-    std::string baseId;
-    if (idIt != copy.properties.end() && idIt->second.isString()) {
-        baseId = idIt->second.toString() + "Copy";
-    }
-    else {
-        baseId = "NodeCopy";
-    }
+    const std::string baseId =
+        idIt != copy.properties.end() && idIt->second.isString() ?
+        idIt->second.toString() + "Copy" :
+        "NodeCopy";
     const std::set<std::string> existing = collectIdentifiers(_asset->contents);
     std::string uniqueId = baseId;
     if (existing.count(uniqueId) > 0) {
@@ -192,7 +262,8 @@ void ContentsListWidget::removeSceneGraphNode(int row) {
         this,
         "Remove Content",
         "Remove \"" + name + "\"?",
-        QMessageBox::Yes | QMessageBox::No, QMessageBox::No
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::No
     );
     if (answer != QMessageBox::Yes) {
         return;
@@ -210,84 +281,7 @@ void ContentsListWidget::removeSceneGraphNode(int row) {
         _contentsList->setCurrentRow(next);
     }
     else {
-        // Empty - no selection
+        // Empty: no selection
         emit selectionChanged(-1);
     }
-}
-
-void ContentsListWidget::buildUi() {
-    QBoxLayout* layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
-
-    QBoxLayout* headerLayout = new QHBoxLayout();
-    headerLayout->setContentsMargins(12, 8, 8, 4);
-    headerLayout->setSpacing(4);
-
-    QLabel* header = new QLabel("CONTENTS", this);
-    header->setObjectName("section-header");
-
-    QPushButton* addButton = new QPushButton("+", this);
-    addButton->setObjectName("add-button");
-    addButton->setFixedSize(20, 20);
-    addButton->setToolTip("Add content");
-    connect(
-        addButton,
-        &QPushButton::clicked,
-        this,
-        [this, addButton]() {
-            QMenu menu(this);
-            menu.addAction(
-                "Add Scene Graph Node",
-                this,
-                &ContentsListWidget::addSceneGraphNode
-            );
-            // Align the menu to the bottom left edge of the button
-            menu.exec(addButton->mapToGlobal(addButton->rect().bottomLeft()));
-        }
-    );
-
-    headerLayout->addWidget(header);
-    headerLayout->addStretch();
-    headerLayout->addWidget(addButton);
-
-    _contentsList = new QListWidget(this);
-    // We want a custom right-click menu on the items
-    _contentsList->setContextMenuPolicy(Qt::CustomContextMenu);
-
-    // Wire signals - emit selection changed whenever the QListWidget changes
-    connect(
-        _contentsList, &QListWidget::currentRowChanged,
-        this, &ContentsListWidget::selectionChanged
-    );
-
-    // Create the right click menu
-    connect(
-        _contentsList,
-        &QListWidget::customContextMenuRequested,
-        this,
-        [this](const QPoint& pos) {
-            QListWidgetItem* item = _contentsList->itemAt(pos);
-            if (!item) {
-                return;
-            }
-
-            const int row = _contentsList->row(item);
-
-            QMenu menu(this);
-            menu.addAction(
-                "Duplicate",
-                this,
-                [this, row]() { duplicateSceneGraphNode(row); }
-            );
-            menu.addAction(
-                "Remove",
-                this, [this, row]() { removeSceneGraphNode(row); }
-            );
-            menu.exec(_contentsList->mapToGlobal(pos));
-        }
-    );
-
-    layout->addLayout(headerLayout);
-    layout->addWidget(_contentsList);
 }

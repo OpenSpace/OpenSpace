@@ -32,12 +32,11 @@
 /// QSettings key for the persistent OpenSpace data root directory
 constexpr const char* SettingsKeyDataRoot = "dataRoot";
 
+struct SchemaType;
+struct SchemaMember;
 class QJsonValue;
 class QString;
 class QWidget;
-
-struct SchemaType;
-struct SchemaMember;
 
 /**
  * Classification of dependency path strings.

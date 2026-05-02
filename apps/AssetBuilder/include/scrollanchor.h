@@ -50,7 +50,7 @@ protected:
     /**
      * Intercepts LayoutRequest events to save and restore the scroll position.
      */
-    bool eventFilter(QObject* watched, QEvent* event) override;
+    bool eventFilter(QObject* object, QEvent* event) override;
 
 private:
     /// The scroll area whose vertical position is stabilized
@@ -58,7 +58,7 @@ private:
     /// Scroll position captured before the layout pass
     int _savedValue = 0;
     /// `true` while a deferred restore is queued, prevents re-saving mid-pass
-    bool _pending = false;
+    bool _isDeferredRestorePending = false;
 };
 
 #endif // __OPENSPACE_ASSETBUILDER___SCROLLANCHOR___H__

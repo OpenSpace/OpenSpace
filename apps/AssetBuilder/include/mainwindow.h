@@ -108,11 +108,6 @@ private slots:
 
 private:
     /**
-     * Creates the application menu bar and connects all actions.
-     */
-    void createMenus();
-
-    /**
      * Replaces the central widget with the empty-state placeholder.
      */
     void showEmptyState();

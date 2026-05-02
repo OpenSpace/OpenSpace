@@ -38,9 +38,7 @@ IdentifierRegistry::IdentifierRegistry(QObject* parent)
 void IdentifierRegistry::rebuildFromAsset(const JAsset& asset,
                                           const std::filesystem::path& assetPath)
 {
-    const std::filesystem::path assetDir = assetPath.empty() ?
-        std::filesystem::path() :
-        assetPath.parent_path();
+    const std::filesystem::path assetDir = assetPath.parent_path();
 
     // Map each identifier to the list of sources where it was found
     QMap<QString, QStringList> sources;
@@ -63,7 +61,7 @@ void IdentifierRegistry::rebuildFromAsset(const JAsset& asset,
             continue;
         }
 
-        QFile file(QString::fromStdWString(depPath.wstring()));
+        QFile file = QFile(QString::fromStdWString(depPath.wstring()));
         if (!file.open(QFile::ReadOnly)) {
             continue;
         }

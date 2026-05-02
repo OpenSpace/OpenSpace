@@ -88,6 +88,47 @@ namespace {
 
         return type;
     }
+
+    std::vector<SchemaCategory> loadCategories() {
+        std::vector<SchemaCategory> result;
+        QFile file(SchemaResourcePath);
+        if (!file.open(QFile::ReadOnly)) {
+            throw std::runtime_error(std::format(
+                "Could not open schema resource {}", SchemaResourcePath
+            ));
+        }
+        const QByteArray data = file.readAll();
+        QJsonParseError parseError;
+        const QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
+        if (doc.isNull()) {
+            throw std::runtime_error(std::format(
+                "Failed to parse {}: {}",
+                SchemaResourcePath, parseError.errorString().toStdString()
+            ));
+        }
+        if (!doc.isArray()) {
+            throw std::runtime_error(std::format(
+                "{} must be a JSON array at the top level", SchemaResourcePath
+            ));
+        }
+        const QJsonArray categoriesArray = doc.array();
+        result.reserve(categoriesArray.size());
+        // Read the JSON into the structs
+        for (const QJsonValue& categoryVal : categoriesArray) {
+            const QJsonObject categoryObj = categoryVal.toObject();
+            SchemaCategory category = {
+                .name = categoryObj[KeyName].toString().toStdString(),
+                .identifier = categoryObj[KeyIdentifier].toString().toStdString()
+            };
+            const QJsonArray types = categoryObj[KeyClasses].toArray();
+            category.types.reserve(types.size());
+            for (const QJsonValue& typeVal : types) {
+                category.types.push_back(parseType(typeVal.toObject()));
+            }
+            result.push_back(std::move(category));
+        }
+        return result;
+    }
 } // namespace
 
 const AssetSchema& AssetSchema::instance() {
@@ -95,93 +136,9 @@ const AssetSchema& AssetSchema::instance() {
     return schema;
 }
 
-AssetSchema::AssetSchema() {
-    QFile file(SchemaResourcePath);
-
-    if (!file.open(QFile::ReadOnly)) {
-        throw std::runtime_error(
-            std::format("Could not open schema resource {}", SchemaResourcePath)
-        );
-    }
-
-    const QByteArray data = file.readAll();
-    QJsonParseError parseError;
-    const QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
-
-    if (doc.isNull()) {
-        throw std::runtime_error(
-            std::format(
-                "Failed to parse {}: {}",
-                SchemaResourcePath, parseError.errorString().toStdString()
-            )
-        );
-    }
-
-    if (!doc.isArray()) {
-        throw std::runtime_error(
-            std::format("{} must be a JSON array at the top level", SchemaResourcePath)
-        );
-    }
-
-    const QJsonArray categoriesArray = doc.array();
-    _categories.reserve(categoriesArray.size());
-
-    // Read the JSON into the structs
-    for (const QJsonValue& categoryVal : categoriesArray) {
-        const QJsonObject categoryObj = categoryVal.toObject();
-
-        SchemaCategory category = {
-            .name = categoryObj[KeyName].toString().toStdString(),
-            .identifier = categoryObj[KeyIdentifier].toString().toStdString()
-        };
-
-        const QJsonArray types = categoryObj[KeyClasses].toArray();
-        category.types.reserve(types.size());
-        for (const QJsonValue& typeVal : types) {
-            category.types.push_back(parseType(typeVal.toObject()));
-        }
-
-        _categories.push_back(std::move(category));
-    }
-
-    // Copy base-class members into concrete types. The type whose name matches the
-    // category name is the base (e.g. "Renderable" in the Renderable category)
-    for (SchemaCategory& category : _categories) {
-        const SchemaType* baseType = nullptr;
-        for (const SchemaType& type : category.types) {
-            if (type.name == category.name) {
-                baseType = &type;
-                break;
-            }
-        }
-        // For example, "Other" doesn't have a base type
-        if (!baseType) {
-            continue;
-        }
-
-        // Collect inheritable members (skip "Type" — handled by the selector) 
-        std::vector<SchemaMember> baseMembers;
-        for (const SchemaMember& member : baseType->members) {
-            if (member.name != "Type") {
-                baseMembers.push_back(member);
-            }
-        }
-        if (baseMembers.empty()) {
-            continue;
-        }
-
-        for (SchemaType& type : category.types) {
-            if (&type == baseType) {
-                continue;
-            }
-            type.members.insert(
-                type.members.end(),
-                baseMembers.begin(),
-                baseMembers.end()
-            );
-        }
-    }
-}
+AssetSchema::AssetSchema()
+    : _categories(loadCategories())
+{}
 
 const SchemaCategory* AssetSchema::findCategory(const std::string& identifier) const {
     for (const SchemaCategory& category : _categories) {

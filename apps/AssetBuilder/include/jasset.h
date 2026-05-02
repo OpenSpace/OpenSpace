@@ -72,9 +72,8 @@ struct PropertyValue {
 };
 
 /**
- * A single item within an asset's contents list. In v1 the type is always
- * "SceneGraphNode". Properties mirror the schema member names exactly, so that
- * serialisation to .jasset JSON requires no key translation.
+ * A single item within an asset's contents list. Properties mirror the schema member
+ * names exactly, so that serialisation to .jasset JSON requires no key translation.
  */
 struct ContentItem {
     /// Schema type name (e.g. "SceneGraphNode")
@@ -92,7 +91,7 @@ struct ContentItem {
  */
 struct AssetMetadata {
     /// Human-readable asset name
-    std::string name    = "Untitled Asset";
+    std::string name = "Untitled Asset";
     /// Semantic version string (e.g. "1.0.0")
     std::string version = "1.0.0";
     /// Asset author name
@@ -127,6 +126,7 @@ struct JAsset {
  * \param root Top-level JSON object from a .jasset file
  * \return Populated JAsset with metadata, dependencies, and contents
  */
+ // @TODO (2026-04-29, abock): Merge this function with openspace\scene\jasset.h
 JAsset jassetFromJson(const QJsonObject& root);
 
 /**

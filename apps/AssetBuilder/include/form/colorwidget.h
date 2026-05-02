@@ -30,8 +30,8 @@
 class QPushButton;
 
 /**
- * MatrixWidget subclass for Color3/Color4 fields. Adds a 24x24 color swatch button
- * that shows the current color and opens a QColorDialog on click.
+ * MatrixWidget subclass for Color3/Color4 fields. Adds a 24x24 color swatch button that
+ * shows the current color and opens a QColorDialog on click.
  */
 class ColorWidget final : public MatrixWidget {
 Q_OBJECT

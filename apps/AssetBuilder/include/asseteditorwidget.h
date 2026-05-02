@@ -88,12 +88,14 @@ public:
     bool hasFile() const;
 
     /**
-     * Returns a short display name: "file.jasset" (+ " *" if dirty), or "Untitled".
+     * Returns a short display name: "file.jasset" (+ " *" if having unsaved changes), or
+     * "Untitled".
      */
     QString displayName() const;
 
     /**
-     * Returns the full native-separator path (+ " *" if dirty), or "Untitled".
+     * Returns the full native-separator path (+ " *" if having unsaved changes), or
+     * "Untitled".
      */
     QString displayPath() const;
 
@@ -122,20 +124,15 @@ private slots:
     void onContentModified();
 
 private:
-    /**
-     * Constructs and lays out all child widgets and wires signals.
-     */
-    void buildUi();
-
     // Asset data and file path
     JAsset _asset;
     std::filesystem::path _filePath;
 
     bool _isDirty = false;
 
-    SidePanel*          _sidePanel          = nullptr;
-    EditorPanel*        _editorPanel        = nullptr;
-    DocumentationPanel* _docsPanel          = nullptr;
+    SidePanel* _sidePanel = nullptr;
+    EditorPanel* _editorPanel = nullptr;
+    DocumentationPanel* _docsPanel = nullptr;
     IdentifierRegistry* _identifierRegistry = nullptr;
 };
 

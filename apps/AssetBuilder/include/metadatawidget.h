@@ -33,8 +33,7 @@ class QLineEdit;
 class QPlainTextEdit;
 
 /**
- * Widget showing the asset metadata form (name, version, author, description,
- * license).
+ * Widget showing the asset metadata form (name, version, author, description, license).
  */
 class MetadataWidget final : public QWidget {
 Q_OBJECT
@@ -60,8 +59,6 @@ signals:
     void assetModified();
 
 private:
-    void buildUi();
-
     JAsset* _asset = nullptr;
 
     QLineEdit* _nameEdit = nullptr;

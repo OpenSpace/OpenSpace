@@ -45,10 +45,16 @@ class CollapsibleSection final : public QFrame {
 Q_OBJECT
 public:
     /**
-     * \param title Section header text
      * \param parent Parent widget
+     * \param title Section header text
+     * \param documentation Display name and Markdown documentation text for the
+              documentation panel
+     * \param sectionKey Schema member name used as the copy/paste identifier
      */
-    explicit CollapsibleSection(const QString& title, QWidget* parent = nullptr);
+    explicit CollapsibleSection(QWidget* parent, const QString& title, bool isExpanded,
+        bool isMandatory = false,
+        std::optional<std::pair<QString, QString>> documentation = std::nullopt,
+        QString sectionKey = "");
 
     /**
      * Replaces the body content widget. Any existing content is deleted. Pass `nullptr`
@@ -73,46 +79,6 @@ public:
      * \return true if the section is expanded
      */
     bool isExpanded() const;
-
-    /**
-     * Shows or hides the body area.
-     *
-     * \param isExpanded true to show the body, false to hide it
-     */
-    void setExpanded(bool isExpanded);
-
-    /**
-     * Convenience overload for section-level documentation (e.g. "Renderable", "GUI")
-     * where only a name and markdown text are available from the schema. The type,
-     * description, and isOptional fields are left at their defaults since they only
-     * apply to individual member documentation.
-     *
-     * \param name Display name for the documentation panel
-     * \param doc Markdown documentation text
-     */
-    void setDocumentation(QString name, QString doc);
-
-    /**
-     * Stores a full Documentation for the info button to emit on click.
-     *
-     * \param info Complete documentation bundle
-     */
-    void setDocumentation(Documentation info);
-
-    /**
-     * Shows a blue `*` in the header to indicate this field is required.
-     *
-     * \param isMandatory `true` to show the asterisk, `false` to hide it
-     */
-    void setMandatory(bool isMandatory);
-
-    /**
-     * Sets the property key for section copy/paste context menu. The key should be the
-     * schema member name (e.g. "Renderable", "GUI").
-     *
-     * \param key Schema member name used as the copy/paste identifier
-     */
-    void setSectionKey(QString key);
 
     /**
      * Returns the property key set by setSectionKey, or empty.
@@ -149,11 +115,11 @@ protected:
      * Handles mouse clicks on the header frame: left-click toggles expand/collapse,
      * right-click shows the copy/paste context menu.
      *
-     * \param watched The object that received the event (expected to be _headerFrame)
+     * \param object The object that received the event (expected to be _headerFrame)
      * \param event The event to filter
      * \return `true` if the event was handled, `false` to pass it through
      */
-    bool eventFilter(QObject* watched, QEvent* event) override;
+    bool eventFilter(QObject* object, QEvent* event) override;
 
 private slots:
     /**
@@ -162,22 +128,8 @@ private slots:
     void toggleExpanded();
 
 private:
-    /**
-     * Creates the header and content frame layout.
-     */
-    void buildUi(const QString& title);
-
-    /**
-     * Updates the chevron label to match the current expanded state.
-     */
-    void updateChevron();
-
-    /// Section title text
-    QString _title;
     /// Clickable header row
     QFrame* _headerFrame = nullptr;
-    /// Section title label (left side)
-    QLabel* _titleLabel = nullptr;
     /// Info button, always visible
     QPushButton* _infoButton = nullptr;
     /// Blue * shown for required sections
@@ -190,9 +142,9 @@ private:
     QBoxLayout* _frameLayout = nullptr;
 
     /// Documentation bundle emitted when the info button is clicked
-    Documentation _documentation;
+    const Documentation _documentation;
     /// Schema member key for copy/paste context menu
-    QString _sectionKey;
+    const QString _sectionKey;
     /// Whether the Paste action is enabled in the context menu
     bool _canPaste = false;
 

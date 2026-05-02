@@ -138,18 +138,13 @@ protected:
      * Intercepts key and mouse events on the search input to handle arrow navigation,
      * Enter/Escape, and click-to-open.
      *
-     * \param watched The object that received the event (expected to be _searchEdit)
+     * \param object The object that received the event (expected to be _searchEdit)
      * \param event The event to filter
      * \return `true` if the event was handled, `false` to pass it through
      */
-    bool eventFilter(QObject* watched, QEvent* event) override;
+    bool eventFilter(QObject* object, QEvent* event) override;
 
 private:
-    /**
-     * Creates the search input, chevron button, popup frame, and list widget.
-     */
-    void buildUi();
-
     /**
      * Shows the popup and populates it with the full item list.
      */

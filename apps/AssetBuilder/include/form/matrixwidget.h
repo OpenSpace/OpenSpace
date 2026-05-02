@@ -37,9 +37,9 @@ class QLineEdit;
  * Reusable widget showing N numeric fields in a row (vectors) or grid (matrices).
  * Supports both integer and double modes.
  *
- * Internally all values are stored as doubles since JSON uses the same number type
- * for both integers and floats. The isInteger flag only controls what the user can
- * type and how values are displayed (e.g. "5" vs "5.0").
+ * Internally all values are stored as doubles since JSON uses the same number type for
+ * both integers and floats. The isInteger flag only controls what the user can type and
+ * how values are displayed (e.g. "5" vs "5.0").
  */
 class MatrixWidget : public QWidget {
 Q_OBJECT
@@ -68,9 +68,9 @@ public:
     virtual void setValues(const PropertyList& vals);
 
     /**
-     * Returns true if any field is non-empty.
+     * Returns `true` if any field is non-empty.
      *
-     * \return true if at least one field contains text
+     * \return `true` if at least one field contains text
      */
     bool hasContent() const;
 
@@ -91,7 +91,7 @@ protected:
     /// One QLineEdit per numeric component, laid out in a grid
     std::vector<QLineEdit*> _fields;
     /// `true` for integer validation and display, `false` for double
-    bool _isInteger = false;
+    const bool _isInteger = false;
 };
 
 #endif // __OPENSPACE_ASSETBUILDER___FORM_MATRIXWIDGET___H__

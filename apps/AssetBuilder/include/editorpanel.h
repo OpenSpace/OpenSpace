@@ -40,22 +40,11 @@ class QStackedWidget;
 class EditorPanel final : public QWidget {
 Q_OBJECT
 public:
-    explicit EditorPanel(QWidget* parent = nullptr);
-
     /**
-     * Sets the asset pointer used by showItemEditor. Must be called before
-     * showItemEditor. The pointer must remain valid.
-     *
      * \param asset Non-owning pointer to the JAsset
-     */
-    void setAsset(JAsset* asset);
-
-    /**
-     * Sets the identifier registry used for populating Identifier-type comboboxes.
-     *
      * \param registry Non-owning pointer to the IdentifierRegistry
      */
-    void setIdentifierRegistry(IdentifierRegistry* registry);
+    EditorPanel(QWidget* parent, JAsset* asset, IdentifierRegistry* registry);
 
     /**
      * Replaces the editor page with a form for the given content item.
@@ -91,13 +80,10 @@ signals:
     void addDependency(const QString& filePath);
 
 private:
-    void buildUi();
-    QWidget* createContentEditor(size_t index, QWidget* parent);
-
     static constexpr size_t NoSelection = static_cast<size_t>(-1);
 
     JAsset* _asset = nullptr;
-    IdentifierRegistry* _registry = nullptr;
+    const IdentifierRegistry* _registry = nullptr;
     QStackedWidget* _centerStack = nullptr;
     size_t _currentIndex = NoSelection;
 };

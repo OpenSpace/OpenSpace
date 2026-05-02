@@ -25,7 +25,6 @@
 #include "dependencieswidget.h"
 
 #include <jasset.h>
-#include <utils.h>
 #include <QDir>
 #include <QFileDialog>
 #include <QHBoxLayout>
@@ -49,16 +48,7 @@ namespace {
             case PathType::Data:     return "[data]";
             case PathType::Relative: return "[rel]";
             case PathType::Absolute: return "[abs]";
-            default: return "";
-        }
-    }
-
-    // Normalize all backslashes to forward slashes in-place
-    void normalizeSlashes(std::string& path) {
-        for (char& c : path) {
-            if (c == '\\') {
-                c = '/';
-            }
+            default:                 return "";
         }
     }
 } // namespace
@@ -66,21 +56,49 @@ namespace {
 DependenciesWidget::DependenciesWidget(QWidget* parent)
     : QWidget(parent)
 {
-    buildUi();
+    QBoxLayout* layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+
+    QBoxLayout* headerLayout = new QHBoxLayout;
+    headerLayout->setContentsMargins(12, 8, 8, 4);
+    headerLayout->setSpacing(4);
+    layout->addLayout(headerLayout);
+
+    QLabel* header = new QLabel("DEPENDENCIES", this);
+    header->setObjectName("section-header");
+    headerLayout->addWidget(header);
+
+    headerLayout->addStretch();
+
+    QPushButton* addButton = new QPushButton("+", this);
+    addButton->setObjectName("add-button");
+    addButton->setFixedSize(20, 20);
+    addButton->setToolTip("Add dependency");
+    connect(
+        addButton, &QPushButton::clicked,
+        this, &DependenciesWidget::addDependencyViaDialog
+    );
+    headerLayout->addWidget(addButton);
+
+    _dependenciesList = new QListWidget(this);
+    _dependenciesList->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(
+        _dependenciesList, &QListWidget::customContextMenuRequested,
+        this, [this](const QPoint& pos) { showContextMenu(pos); }
+    );
+    layout->addWidget(_dependenciesList);
 }
 
 void DependenciesWidget::setAsset(JAsset* asset) {
     _asset = asset;
 }
 
-void DependenciesWidget::setFilePath(const std::filesystem::path& path) {
-    _filePath = path;
+void DependenciesWidget::setFilePath(std::filesystem::path path) {
+    _filePath = std::move(path);
 }
 
 std::filesystem::path DependenciesWidget::assetDir() const {
-    if (_filePath.empty()) {
-        return {};
-    }
     return _filePath.parent_path();
 }
 
@@ -109,7 +127,7 @@ void DependenciesWidget::refresh() {
         const bool exists = std::filesystem::exists(depPath);
 
         const QString badge = pathTypeBadge(detectPathType(dep));
-        const QString icon  = exists ? IconExists : IconMissing;
+        const QString icon = exists ? IconExists : IconMissing;
         const QString display = badge + " " + icon + "  " + QString::fromStdString(dep);
 
         QListWidgetItem* item = new QListWidgetItem(display, _dependenciesList);
@@ -177,7 +195,7 @@ void DependenciesWidget::addDependency(const QString& filePath) {
     if (dependencyString.empty()) {
         dependencyString = selectedPath.string();
     }
-    normalizeSlashes(dependencyString);
+    std::replace(dependencyString.begin(), dependencyString.end(), '\\', '/');
 
     // Avoid duplicates
     for (const std::string& existing : _asset->dependencies) {
@@ -202,20 +220,18 @@ void DependenciesWidget::removeDependency(size_t row) {
         return;
     }
     const QString dependency = QString::fromStdString(_asset->dependencies[row]);
-    const QMessageBox::StandardButton answer =
-        QMessageBox::question(
-            this,
-            "Remove Dependency",
-            "Remove \"" + dependency + "\"?",
-            QMessageBox::Yes | QMessageBox::No,
-            QMessageBox::No
-        );
-    if (answer != QMessageBox::Yes) {
-        return;
-    }
+    const QMessageBox::StandardButton answer = QMessageBox::question(
+        this,
+        "Remove Dependency",
+        "Remove \"" + dependency + "\"?",
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::No
+    );
 
-    _asset->dependencies.erase(_asset->dependencies.begin() + row);
-    emit assetModified();
+    if (answer == QMessageBox::Yes) {
+        _asset->dependencies.erase(_asset->dependencies.begin() + row);
+        emit assetModified();
+    }
 }
 
 void DependenciesWidget::convertDependencyPath(size_t row, PathType target) {
@@ -281,7 +297,7 @@ void DependenciesWidget::convertDependencyPath(size_t row, PathType target) {
         }
     }
     else {
-        // Data-relative — make path relative to data root
+        // Data-relative: make path relative to data root
         if (root.empty()) {
             root = pickDataRootDialog(this);
             if (root.empty()) {
@@ -290,8 +306,7 @@ void DependenciesWidget::convertDependencyPath(size_t row, PathType target) {
         }
 
         std::error_code error;
-        std::filesystem::path rel =
-            std::filesystem::relative(absolute, root, error);
+        std::filesystem::path rel = std::filesystem::relative(absolute, root, error);
 
         if (error || rel.empty() || rel.string().starts_with("..")) {
             QMessageBox::warning(
@@ -305,7 +320,7 @@ void DependenciesWidget::convertDependencyPath(size_t row, PathType target) {
         converted = rel.string();
     }
 
-    normalizeSlashes(converted);
+    std::replace(converted.begin(), converted.end(), '\\', '/');
     _asset->dependencies[row] = converted;
     emit assetModified();
 }
@@ -321,10 +336,7 @@ void DependenciesWidget::showContextMenu(const QPoint& pos) {
     }
 
     QMenu menu(this);
-    menu.addAction(
-        "Remove",
-        this, [this, row]() { removeDependency(row); }
-    );
+    menu.addAction("Remove", this, [this, row]() { removeDependency(row); });
 
     menu.addSeparator();
     const PathType current = detectPathType(_asset->dependencies[row]);
@@ -346,40 +358,4 @@ void DependenciesWidget::showContextMenu(const QPoint& pos) {
     addConvertAction("Convert to absolute", PathType::Absolute);
 
     menu.exec(_dependenciesList->mapToGlobal(pos));
-}
-
-void DependenciesWidget::buildUi() {
-    QBoxLayout* layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
-
-    QBoxLayout* headerLayout = new QHBoxLayout();
-    headerLayout->setContentsMargins(12, 8, 8, 4);
-    headerLayout->setSpacing(4);
-
-    QLabel* header = new QLabel("DEPENDENCIES", this);
-    header->setObjectName("section-header");
-
-    QPushButton* addButton = new QPushButton("+", this);
-    addButton->setObjectName("add-button");
-    addButton->setFixedSize(20, 20);
-    addButton->setToolTip("Add dependency");
-    connect(
-        addButton, &QPushButton::clicked,
-        this, &DependenciesWidget::addDependencyViaDialog
-    );
-
-    headerLayout->addWidget(header);
-    headerLayout->addStretch();
-    headerLayout->addWidget(addButton);
-
-    _dependenciesList = new QListWidget(this);
-    _dependenciesList->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(_dependenciesList,
-        &QListWidget::customContextMenuRequested, this,
-        [this](const QPoint& pos) { showContextMenu(pos); }
-    );
-
-    layout->addLayout(headerLayout);
-    layout->addWidget(_dependenciesList);
 }
