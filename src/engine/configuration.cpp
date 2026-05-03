@@ -725,7 +725,13 @@ Documentation Configuration::Documentation() {
     openspace::Documentation doc = codegen::doc<Parameters>("core_configuration");
 
     auto moduleConfiguration = std::make_shared<TableVerifier>();
-    for (OpenSpaceModule* mod : global::moduleEngine->modules()) {
+
+    const std::vector<OpenSpaceModule*> modules =
+        global::moduleEngine ?
+        global::moduleEngine->modules() :
+        std::vector<OpenSpaceModule*>();
+
+    for (OpenSpaceModule* mod : modules) {
         std::string name = mod->identifier();
         std::string id = mod->Documentation().id;
 
