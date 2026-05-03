@@ -35,9 +35,9 @@ set(HEADER_FILES
   include/jasset.h
   include/mainwindow.h
   include/metadatawidget.h
+  include/path.h
   include/scenegraphnodeeditor.h
   include/sidepanel.h
-  include/utils.h
   include/welcomedialog.h
   include/form/collapsiblesection.h
   include/form/colorwidget.h
@@ -57,9 +57,9 @@ set(SOURCE_FILES
   src/jasset.cpp
   src/mainwindow.cpp
   src/metadatawidget.cpp
+  src/path.cpp
   src/scenegraphnodeeditor.cpp
   src/sidepanel.cpp
-  src/utils.cpp
   src/welcomedialog.cpp
   src/form/collapsiblesection.cpp
   src/form/colorwidget.cpp

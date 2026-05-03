@@ -24,9 +24,9 @@
 
 #include "mainwindow.h"
 
-#include <asseteditorwidget.h>
-#include <utils.h>
-#include <welcomedialog.h>
+#include "asseteditorwidget.h"
+#include "path.h"
+#include "welcomedialog.h"
 #include <ghoul/misc/assert.h>
 #include <QCloseEvent>
 #include <QFileDialog>

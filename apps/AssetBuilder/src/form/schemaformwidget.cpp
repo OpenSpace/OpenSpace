@@ -31,7 +31,7 @@
 #include "form/searchdropdown.h"
 #include "identifierregistry.h"
 #include "schema/assetschema.h"
-#include "utils.h"
+#include "path.h"
 #include <ghoul/misc/assert.h>
 #include <QCheckBox>
 #include <QComboBox>

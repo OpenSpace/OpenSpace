@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "utils.h"
+#include "path.h"
 
 PathType detectPathType(const std::string& path) {
     // Jasset-relative: ./foo, ../foo
