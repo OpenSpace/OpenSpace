@@ -151,10 +151,7 @@ ContentsListWidget::ContentsListWidget(QWidget* parent, JAsset& asset)
                 this,
                 [this, row]() { duplicateSceneGraphNode(row); }
             );
-            menu.addAction(
-                "Remove",
-                this, [this, row]() { removeSceneGraphNode(row); }
-            );
+            menu.addAction("Remove", this, [this, row]() { removeSceneGraphNode(row); });
             menu.exec(_contentsList->mapToGlobal(pos));
         }
     );

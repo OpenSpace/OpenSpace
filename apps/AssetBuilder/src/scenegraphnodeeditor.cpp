@@ -43,28 +43,83 @@ namespace {
     std::map<std::string, PropertyValue> sectionClipboard;
 
     // SGN members handled by explicit top-level sections (excluded from "Additional")
-    const std::vector<std::string> TopLevelSgnMembers = {
+    constexpr std::array<std::string_view, 5> TopLevelMembers = {
         "GUI", "Renderable", "Transform", "Tag", "TimeFrame"
     };
 
-    bool isTopLevelMember(const std::string& name) {
-        for (const std::string& topLevelName : TopLevelSgnMembers) {
-            if (name == topLevelName) {
-                return true;
+    /**
+     * Converts a display name to PascalCase suitable for use as an identifier. Splits on
+     * spaces, hyphens and underscores; removes non-alphanumeric characters.
+     *
+     * \param name The display name to convert
+     * \return PascalCase string (e.g. "My Planet" -> "MyPlanet")
+     */
+    QString toPascalCase(const QString& name) {
+        QString result;
+        bool capitalizeNext = true;
+        for (const QChar character : name) {
+            if (character == ' ' || character == '-' || character == '_') {
+                capitalizeNext = true;
+            }
+            else if (character.isLetterOrNumber()) {
+                result += capitalizeNext ? character.toUpper() : character;
+                capitalizeNext = false;
             }
         }
-        return false;
+        return result;
+    }
+
+    /**
+     * Collects members from a SchemaType by name. If \p parentName is empty, searches
+     * top-level members. Otherwise, finds the parent member first, then searches its
+     * children.
+     *
+     * \param schemaType The schema type to search within
+     * \param parentName Parent member name, or empty for top-level lookup
+     * \param names Member names to collect, in desired order
+     * \return Vector of matching members in the order of \p names, empty if parent not
+     *         found
+     */
+    std::vector<SchemaMember> collectMembers(const SchemaType& schemaType,
+                                             const std::string& parentName,
+                                             const std::vector<std::string>& names)
+    {
+        const std::vector<SchemaMember>* source = &schemaType.members;
+        if (!parentName.empty()) {
+            source = nullptr;
+            for (const SchemaMember& member : schemaType.members) {
+                if (member.name == parentName) {
+                    source = &member.members;
+                    break;
+                }
+            }
+            // No top level member found; return empty
+            if (!source) {
+                return std::vector<SchemaMember>();
+            }
+        }
+
+        std::vector<SchemaMember> result;
+        for (const std::string& name : names) {
+            for (const SchemaMember& member : *source) {
+                if (member.name == name) {
+                    result.push_back(member);
+                    break;
+                }
+            }
+        }
+        return result;
     }
 } // namespace
 
-SceneGraphNodeEditor::SceneGraphNodeEditor(JAsset* asset,
+SceneGraphNodeEditor::SceneGraphNodeEditor(JAsset& asset,
                                            const IdentifierRegistry* registry,
                                            size_t index, QWidget* parent)
     : QWidget(parent)
     , _asset(asset)
     , _registry(registry)
     , _index(index)
-    , _localProperties(std::make_shared<PropertyMap>(asset->contents[index].properties))
+    , _localProperties(std::make_shared<PropertyMap>(asset.contents[index].properties))
 {
     const SchemaType* sgnTypePtr = AssetSchema::instance().findType("core_scene_node");
     if (!sgnTypePtr) {
@@ -76,18 +131,41 @@ SceneGraphNodeEditor::SceneGraphNodeEditor(JAsset* asset,
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(12);
 
-    // Build
     QLabel* titleLabel = new QLabel("Scene Graph Node", this);
     titleLabel->setObjectName("node-title");
+    layout->addWidget(titleLabel);
 
-    SchemaFormWidget* renderable = buildMemberSection(sgnType, "Renderable", true);
-    SchemaFormWidget* transform = buildMemberSection(sgnType, "Transform", true);
-    SchemaFormWidget* gui = buildMemberSection(sgnType, "GUI", false);
-    SchemaFormWidget* timeFrame = buildMemberSection(sgnType, "TimeFrame", false);
+    SchemaFormWidget* renderable = nullptr;
+    {
+        std::vector<SchemaMember> members = collectMembers(sgnType, "", { "Renderable" });
+        renderable = createForm(members, _localProperties, this, true, true);
+    }
+
+    SchemaFormWidget* transform = nullptr;
+    {
+        std::vector<SchemaMember> members = collectMembers(sgnType, "", { "Transform" });
+        transform = createForm(members, _localProperties, this, true, true);
+    }
+
+    SchemaFormWidget* gui = nullptr;
+    {
+        std::vector<SchemaMember> members = collectMembers(sgnType, "", { "GUI" });
+        gui = createForm(members, _localProperties, this, false, true);
+    }
+
+    SchemaFormWidget* timeFrame = nullptr;
+    {
+        std::vector<SchemaMember> members = collectMembers(sgnType, "", { "TimeFrame" });
+        timeFrame = createForm(members, _localProperties, this, false, true);
+    }
 
     // Tag has schema type "String, or Table" (union) so buildMemberSection renders it as
     // a flat field. Wrap it in a CollapsibleSection manually
-    SchemaFormWidget* tagForm = buildMemberSection(sgnType, "Tag", false);
+    SchemaFormWidget* tagForm = nullptr;
+    {
+        std::vector<SchemaMember> members = collectMembers(sgnType, "", { "Tag" });
+        tagForm = createForm(members, _localProperties, this, false, true);
+    }
     CollapsibleSection* tags = nullptr;
     if (tagForm) {
         tags = new CollapsibleSection(this, "Tag", false, false, std::nullopt, "Tag");
@@ -108,23 +186,15 @@ SceneGraphNodeEditor::SceneGraphNodeEditor(JAsset* asset,
 
     QWidget* additional = buildAdditionalSection(sgnType);
 
-    // buildMemberSection wraps Table members in a CollapsibleSection, so the actual form
-    // with Name/Description/Path is nested inside. Unwrap it for syncing and identifier
-    // auto-generation
-    SchemaFormWidget* guiInnerForm = gui ? gui->findChild<SchemaFormWidget*>() : nullptr;
-
+    SchemaFormWidget* guiInnerForm = gui->findChild<SchemaFormWidget*>();
     QWidget* quickAccess = buildQuickAccessFields(sgnType, guiInnerForm, additional);
 
     // Automatically generate identifier
     SchemaFormWidget* additionalForm = additional->findChild<SchemaFormWidget*>();
-    ghoul_assert(additionalForm && guiInnerForm, "Form is null");
-
     QLineEdit* identifierEdit = qobject_cast<QLineEdit*>(
         additionalForm->widgetForMember("Identifier")
     );
     QLineEdit* nameEdit = qobject_cast<QLineEdit*>(guiInnerForm->widgetForMember("Name"));
-    ghoul_assert(identifierEdit && nameEdit, "Widget lookup failed");
-
 
     // We only wire it to the Name field because it updates when quick access is updated
     connect(
@@ -142,7 +212,7 @@ SceneGraphNodeEditor::SceneGraphNodeEditor(JAsset* asset,
                 identifierEdit->setText(identifierText);
                 (*_localProperties)["Identifier"] =
                     PropertyValue{ identifierText.toStdString() };
-                _asset->contents[_index].properties = *_localProperties;
+                _asset.contents[_index].properties = *_localProperties;
                 emit contentModified();
             }
         }
@@ -157,12 +227,11 @@ SceneGraphNodeEditor::SceneGraphNodeEditor(JAsset* asset,
             identifierEdit->setText(identifierText);
             (*_localProperties)["Identifier"] =
                 PropertyValue{ identifierText.toStdString() };
-            _asset->contents[_index].properties = *_localProperties;
+            _asset.contents[_index].properties = *_localProperties;
         }
     }
 
     // Layout
-    layout->addWidget(titleLabel);
     layout->addWidget(quickAccess);
 
     layout->addWidget(renderable);
@@ -182,6 +251,10 @@ SchemaFormWidget* SceneGraphNodeEditor::createForm(
                                                                             bool expanded,
                                                                          bool collapsible)
 {
+    if (members.empty()) {
+        return nullptr;
+    }
+
     SchemaFormWidget* form = new SchemaFormWidget(
         members,
         properties,
@@ -195,8 +268,8 @@ SchemaFormWidget* SceneGraphNodeEditor::createForm(
         &SchemaFormWidget::fieldChanged,
         this,
         [this]() {
-            _asset->contents[_index].properties = *_localProperties;
-            _asset->contents[_index].isDirty = true;
+            _asset.contents[_index].properties = *_localProperties;
+            _asset.contents[_index].isDirty = true;
             emit contentModified();
         }
     );
@@ -230,7 +303,8 @@ void SceneGraphNodeEditor::onSectionCopy(const QString& key) {
         // Collect all non-top-level properties into a map
         PropertyMap extras;
         for (const auto& [name, value] : *_localProperties) {
-            if (!isTopLevelMember(name)) {
+            auto it = std::find(TopLevelMembers.begin(), TopLevelMembers.end(), name);
+            if (it == TopLevelMembers.end()) {
                 extras[name] = value;
             }
         }
@@ -258,8 +332,8 @@ void SceneGraphNodeEditor::onSectionPaste(const QString& key) {
     else {
         (*_localProperties)[keyString] = sectionClipboard.at(keyString);
     }
-    _asset->contents[_index].properties = *_localProperties;
-    _asset->contents[_index].isDirty = true;
+    _asset.contents[_index].properties = *_localProperties;
+    _asset.contents[_index].isDirty = true;
     emit contentModified();
     emit rebuildRequested();
 }
@@ -289,48 +363,39 @@ QWidget* SceneGraphNodeEditor::buildQuickAccessFields(const SchemaType& sgnType,
     quickAccessLayout->setSpacing(4);
 
     // Add "Name" "Description" and "Path" from GUI to quick access
-    SchemaFormWidget* quickAccessGuiForm = nullptr;
     std::vector<SchemaMember> quickAccessGuiMembers =
         collectMembers(sgnType, "GUI", { "Name", "Description", "Path" });
 
-    if (!quickAccessGuiMembers.empty()) {
-        // Ensure the nested GUI map exists so we can reference it below.
-        // This is not necessary at the root level but it is for nested members
-        if (_localProperties->count("GUI") == 0 ||
-            _localProperties->at("GUI").isNull())
-        {
-            (*_localProperties)["GUI"] = PropertyValue{ PropertyMap{} };
-        }
-        PropertyMap& guiProperties = (*_localProperties)["GUI"].toMap();
-        // Using the aliasing constructor for shared_ptr: points to the GUI sub-map while
-        // sharing ownership with the root, so the weak_ptr stays valid. This is
-        // necessary because createForm needs the pointer to the root of the submap
-        auto guiAlias = std::shared_ptr<PropertyMap>(_localProperties, &guiProperties);
-
-        quickAccessGuiForm = createForm(
-            quickAccessGuiMembers,
-            guiAlias,
-            quickAccessWidget,
-            false,
-            false
-        );
-        quickAccessLayout->addWidget(quickAccessGuiForm);
+    // Ensure the nested GUI map exists so we can reference it below. This is not
+    // necessary at the root level but it is for nested members
+    if (!_localProperties->contains("GUI") || _localProperties->at("GUI").isNull()) {
+        (*_localProperties)["GUI"] = PropertyValue{ PropertyMap{} };
     }
+    PropertyMap& guiProperties = (*_localProperties)["GUI"].toMap();
+    // Using the aliasing constructor for shared_ptr: points to the GUI sub-map while
+    // sharing ownership with the root, so the weak_ptr stays valid. This is necessary
+    // because createForm needs the pointer to the root of the submap
+    auto guiAlias = std::shared_ptr<PropertyMap>(_localProperties, &guiProperties);
+
+    SchemaFormWidget* quickAccessGuiForm = createForm(
+        quickAccessGuiMembers,
+        guiAlias,
+        quickAccessWidget,
+        false,
+        false
+    );
+    quickAccessLayout->addWidget(quickAccessGuiForm);
 
     // Add "Parent" field to quick access
-    SchemaFormWidget* quickAccessAdditionalForm = nullptr;
     std::vector<SchemaMember> parentMembers = collectMembers(sgnType, "", { "Parent" });
-
-    if (!parentMembers.empty()) {
-        quickAccessAdditionalForm = createForm(
-            parentMembers,
-            std::weak_ptr<PropertyMap>(_localProperties),
-            quickAccessWidget,
-            false,
-            false
-        );
-        quickAccessLayout->addWidget(quickAccessAdditionalForm);
-    }
+    SchemaFormWidget* quickAccessAdditionalForm = createForm(
+        parentMembers,
+        _localProperties,
+        quickAccessWidget,
+        false,
+        false
+    );
+    quickAccessLayout->addWidget(quickAccessAdditionalForm);
 
     // Wire bidirectional sync between quick-access and full sections
     if (quickAccessGuiForm && guiForm) {
@@ -343,18 +408,6 @@ QWidget* SceneGraphNodeEditor::buildQuickAccessFields(const SchemaType& sgnType,
     }
 
     return quickAccessWidget;
-}
-
-SchemaFormWidget* SceneGraphNodeEditor::buildMemberSection(const SchemaType& sgnType,
-                                                           const std::string& memberName,
-                                                           bool isExpanded)
-{
-    std::vector<SchemaMember> members = collectMembers(sgnType, "", { memberName });
-    if (members.empty()) {
-        return nullptr;
-    }
-    auto pointer = std::weak_ptr<PropertyMap>(_localProperties);
-    return createForm(members, pointer, this, isExpanded, true);
 }
 
 QWidget* SceneGraphNodeEditor::buildAdditionalSection(const SchemaType& sgnType) {
@@ -388,22 +441,21 @@ QWidget* SceneGraphNodeEditor::buildAdditionalSection(const SchemaType& sgnType)
     // Get all members that are direct children on SceneGraphNode
     std::vector<SchemaMember> additionalMembers;
     for (const SchemaMember& member : sgnType.members) {
-        if (!isTopLevelMember(member.name)) {
+        auto it = std::find(TopLevelMembers.begin(), TopLevelMembers.end(), member.name);
+        if (it == TopLevelMembers.end()) {
             additionalMembers.push_back(member);
         }
     }
 
     // Add to Collapsible Section
-    if (!additionalMembers.empty()) {
-        SchemaFormWidget* form = createForm(
-            additionalMembers,
-            std::weak_ptr<PropertyMap>(_localProperties),
-            content,
-            false,
-            true
-        );
-        contentLayout->addWidget(form);
-    }
+    SchemaFormWidget* form = createForm(
+        additionalMembers,
+        _localProperties,
+        content,
+        false,
+        true
+    );
+    contentLayout->addWidget(form);
     section->setContentWidget(content);
     return section;
 }

@@ -25,6 +25,7 @@
 #include "dependencieswidget.h"
 
 #include <jasset.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <QDir>
 #include <QFileDialog>
 #include <QHBoxLayout>
@@ -53,8 +54,11 @@ namespace {
     }
 } // namespace
 
-DependenciesWidget::DependenciesWidget(QWidget* parent)
+DependenciesWidget::DependenciesWidget(QWidget* parent, JAsset& asset,
+                                       std::filesystem::path& path)
     : QWidget(parent)
+    , _asset(asset)
+    , _filePath(path)
 {
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -90,26 +94,14 @@ DependenciesWidget::DependenciesWidget(QWidget* parent)
     layout->addWidget(_dependenciesList);
 }
 
-void DependenciesWidget::setAsset(JAsset* asset) {
-    _asset = asset;
-}
-
-void DependenciesWidget::setFilePath(std::filesystem::path path) {
-    _filePath = std::move(path);
-}
-
-std::filesystem::path DependenciesWidget::assetDir() const {
-    return _filePath.parent_path();
-}
-
 void DependenciesWidget::refresh() {
-    if (!_dependenciesList || !_asset) {
+    if (!_dependenciesList) {
         return;
     }
 
     _dependenciesList->clear();
 
-    if (_asset->dependencies.empty()) {
+    if (_asset.dependencies.empty()) {
         QListWidgetItem* placeholder = new QListWidgetItem(
             "No dependencies",
             _dependenciesList
@@ -119,10 +111,10 @@ void DependenciesWidget::refresh() {
         return;
     }
 
-    const std::filesystem::path root = dataRoot();
-    const std::filesystem::path assetDirectory = assetDir();
+    const std::filesystem::path root = absPath("${USER_ASSETS}");
+    const std::filesystem::path assetDirectory = _filePath.parent_path();
 
-    for (const std::string& dep : _asset->dependencies) {
+    for (const std::string& dep : _asset.dependencies) {
         const std::filesystem::path depPath = resolvePath(dep, root, assetDirectory);
         const bool exists = std::filesystem::exists(depPath);
 
@@ -136,10 +128,7 @@ void DependenciesWidget::refresh() {
 }
 
 void DependenciesWidget::addDependencyViaDialog() {
-    if (!_asset) {
-        return;
-    }
-    const std::filesystem::path assetDirectory = assetDir();
+    const std::filesystem::path assetDirectory = _filePath.parent_path();
     const QString startDir = assetDirectory.empty() ?
         QDir::homePath() :
         QString::fromStdWString(assetDirectory.wstring());
@@ -158,17 +147,13 @@ void DependenciesWidget::addDependencyViaDialog() {
 }
 
 void DependenciesWidget::addDependency(const QString& filePath) {
-    if (!_asset) {
-        return;
-    }
-
     const std::filesystem::path selectedPath = filePath.toStdWString();
-    const std::filesystem::path assetDirectory = assetDir();
+    const std::filesystem::path assetDirectory = _filePath.parent_path();
 
     // Store as data-relative if inside the data root, relative if the asset file is
     // saved, or absolute as a last resort
     std::string dependencyString;
-    const std::filesystem::path root = dataRoot();
+    const std::filesystem::path root = absPath("${USER_ASSETS}");
     if (!root.empty()) {
         std::error_code error;
         const std::filesystem::path relative =
@@ -198,7 +183,7 @@ void DependenciesWidget::addDependency(const QString& filePath) {
     std::replace(dependencyString.begin(), dependencyString.end(), '\\', '/');
 
     // Avoid duplicates
-    for (const std::string& existing : _asset->dependencies) {
+    for (const std::string& existing : _asset.dependencies) {
         if (existing == dependencyString) {
             QMessageBox::information(
                 this,
@@ -211,15 +196,16 @@ void DependenciesWidget::addDependency(const QString& filePath) {
         }
     }
 
-    _asset->dependencies.push_back(dependencyString);
+    _asset.dependencies.push_back(dependencyString);
     emit assetModified();
 }
 
 void DependenciesWidget::removeDependency(size_t row) {
-    if (!_asset || row >= _asset->dependencies.size()) {
+    if (row >= _asset.dependencies.size()) {
         return;
     }
-    const QString dependency = QString::fromStdString(_asset->dependencies[row]);
+
+    const QString dependency = QString::fromStdString(_asset.dependencies[row]);
     const QMessageBox::StandardButton answer = QMessageBox::question(
         this,
         "Remove Dependency",
@@ -229,24 +215,24 @@ void DependenciesWidget::removeDependency(size_t row) {
     );
 
     if (answer == QMessageBox::Yes) {
-        _asset->dependencies.erase(_asset->dependencies.begin() + row);
+        _asset.dependencies.erase(_asset.dependencies.begin() + row);
         emit assetModified();
     }
 }
 
 void DependenciesWidget::convertDependencyPath(size_t row, PathType target) {
-    if (!_asset || row >= _asset->dependencies.size()) {
+    if (row >= _asset.dependencies.size()) {
         return;
     }
 
-    const std::string current = _asset->dependencies[row];
+    const std::string current = _asset.dependencies[row];
     const PathType currentType = detectPathType(current);
 
     if (currentType == target) {
         return;
     }
 
-    const std::filesystem::path assetDirectory = assetDir();
+    const std::filesystem::path assetDirectory = _filePath.parent_path();
 
     // Any conversion involving a relative path requires a saved file
     const bool needsAssetDir =
@@ -262,13 +248,7 @@ void DependenciesWidget::convertDependencyPath(size_t row, PathType target) {
     }
 
     // Step 1: Resolve current path to absolute
-    std::filesystem::path root = dataRoot();
-    if (currentType == PathType::Data && root.empty()) {
-        root = pickDataRootDialog(this);
-        if (root.empty()) {
-            return;
-        }
-    }
+    std::filesystem::path root = absPath("${USER_ASSETS}");
     const std::filesystem::path absolute = resolvePath(current, root, assetDirectory);
 
     // Step 2: Convert from absolute to target
@@ -298,13 +278,6 @@ void DependenciesWidget::convertDependencyPath(size_t row, PathType target) {
     }
     else {
         // Data-relative: make path relative to data root
-        if (root.empty()) {
-            root = pickDataRootDialog(this);
-            if (root.empty()) {
-                return;
-            }
-        }
-
         std::error_code error;
         std::filesystem::path rel = std::filesystem::relative(absolute, root, error);
 
@@ -321,7 +294,7 @@ void DependenciesWidget::convertDependencyPath(size_t row, PathType target) {
     }
 
     std::replace(converted.begin(), converted.end(), '\\', '/');
-    _asset->dependencies[row] = converted;
+    _asset.dependencies[row] = converted;
     emit assetModified();
 }
 
@@ -331,7 +304,7 @@ void DependenciesWidget::showContextMenu(const QPoint& pos) {
         return;
     }
     const size_t row = static_cast<size_t>(_dependenciesList->row(clicked));
-    if (!_asset || row >= _asset->dependencies.size()) {
+    if (row >= _asset.dependencies.size()) {
         return;
     }
 
@@ -339,23 +312,25 @@ void DependenciesWidget::showContextMenu(const QPoint& pos) {
     menu.addAction("Remove", this, [this, row]() { removeDependency(row); });
 
     menu.addSeparator();
-    const PathType current = detectPathType(_asset->dependencies[row]);
+
 
     // Adds a conversion action; disabled + checked if already that type
-    auto addConvertAction = [&](const QString& label, PathType target) {
+    auto addConvertAction = [&](const QString& label, PathType target, const PathType cur)
+    {
         QAction* action = menu.addAction(
             label,
             this, [this, row, target]() { convertDependencyPath(row, target); }
         );
-        if (current == target) {
+        if (cur == target) {
             action->setEnabled(false);
             action->setCheckable(true);
             action->setChecked(true);
         }
     };
-    addConvertAction("Convert to relative", PathType::Relative);
-    addConvertAction("Convert to data-relative", PathType::Data);
-    addConvertAction("Convert to absolute", PathType::Absolute);
+    const PathType current = detectPathType(_asset.dependencies[row]);
+    addConvertAction("Convert to relative", PathType::Relative, current);
+    addConvertAction("Convert to data-relative", PathType::Data, current);
+    addConvertAction("Convert to absolute", PathType::Absolute, current);
 
     menu.exec(_dependenciesList->mapToGlobal(pos));
 }

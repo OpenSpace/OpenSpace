@@ -38,14 +38,7 @@ class QPlainTextEdit;
 class MetadataWidget final : public QWidget {
 Q_OBJECT
 public:
-    explicit MetadataWidget(QWidget* parent);
-
-    /**
-     * Sets the asset pointer used for editing.
-     *
-     * \param asset Non-owning pointer to the JAsset
-     */
-    void setAsset(JAsset* asset);
+    MetadataWidget(QWidget* parent, JAsset& asset);
 
     /**
      * Re-reads the asset metadata into the form fields.
@@ -59,7 +52,7 @@ signals:
     void assetModified();
 
 private:
-    JAsset* _asset = nullptr;
+    JAsset& _asset;
 
     QLineEdit* _nameEdit = nullptr;
     QLineEdit* _versionEdit = nullptr;

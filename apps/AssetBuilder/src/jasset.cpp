@@ -28,6 +28,67 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
+namespace {
+    PropertyValue jsonValueToProperty(const QJsonValue& value) {
+        if (value.isBool()) {
+            return PropertyValue{ value.toBool() };
+        }
+        if (value.isDouble()) {
+            return PropertyValue{ value.toDouble() };
+        }
+        if (value.isString()) {
+            return PropertyValue{ value.toString().toStdString() };
+        }
+        if (value.isObject()) {
+            PropertyMap map;
+            const QJsonObject object = value.toObject();
+            for (auto it = object.begin(); it != object.end(); it++) {
+                map[it.key().toStdString()] = jsonValueToProperty(it.value());
+            }
+            return PropertyValue{ std::move(map) };
+        }
+        if (value.isArray()) {
+            PropertyList list;
+            const QJsonArray array = value.toArray();
+            for (const QJsonValue& item : array) {
+                list.push_back(jsonValueToProperty(item));
+            }
+            return PropertyValue{ std::move(list) };
+        }
+        return PropertyValue{};
+    }
+
+    QJsonValue propertyToJsonValue(const PropertyValue& propertyValue) {
+        if (propertyValue.isNull()) {
+            return QJsonValue::Null;
+        }
+        if (propertyValue.isBool()) {
+            return QJsonValue(propertyValue.toBool());
+        }
+        if (propertyValue.isDouble()) {
+            return QJsonValue(propertyValue.toDouble());
+        }
+        if (propertyValue.isString()) {
+            return QJsonValue(QString::fromStdString(propertyValue.toString()));
+        }
+        if (propertyValue.isMap()) {
+            QJsonObject object;
+            for (const auto& [key, value] : propertyValue.toMap()) {
+                object[QString::fromStdString(key)] = propertyToJsonValue(value);
+            }
+            return object;
+        }
+        if (propertyValue.isList()) {
+            QJsonArray array;
+            for (const PropertyValue& item : propertyValue.toList()) {
+                array.append(propertyToJsonValue(item));
+            }
+            return array;
+        }
+        return QJsonValue::Null;
+    }
+} // namespace
+
 bool PropertyValue::isNull() const {
     return std::holds_alternative<std::monostate>(value);
 }

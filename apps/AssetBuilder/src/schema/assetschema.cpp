@@ -24,6 +24,7 @@
 
 #include "schema/assetschema.h"
 
+#include <ghoul/misc/assert.h>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -74,43 +75,17 @@ namespace {
         return member;
     }
 
-    SchemaType parseType(const QJsonObject& obj) {
-        SchemaType type = {
-            .name = obj[KeyName].toString().toStdString(),
-            .identifier = obj[KeyIdentifier].toString().toStdString(),
-            .description = obj[KeyDescription].toString().toStdString()
-        };
-
-        const QJsonArray members = obj[KeyMembers].toArray();
-        for (const QJsonValue& memberVal : members) {
-            type.members.push_back(parseMember(memberVal.toObject()));
-        }
-
-        return type;
-    }
-
     std::vector<SchemaCategory> loadCategories() {
         std::vector<SchemaCategory> result;
         QFile file = QFile(SchemaResourcePath);
-        if (!file.open(QFile::ReadOnly)) {
-            throw std::runtime_error(std::format(
-                "Could not open schema resource {}", SchemaResourcePath
-            ));
-        }
+        ghoul_assert(file.open(QFile::ReadOnly), "Could not open schema resource");
+
         const QByteArray data = file.readAll();
         QJsonParseError parseError;
         const QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
-        if (doc.isNull()) {
-            throw std::runtime_error(std::format(
-                "Failed to parse {}: {}",
-                SchemaResourcePath, parseError.errorString().toStdString()
-            ));
-        }
-        if (!doc.isArray()) {
-            throw std::runtime_error(std::format(
-                "{} must be a JSON array at the top level", SchemaResourcePath
-            ));
-        }
+        ghoul_assert(!doc.isNull(), "Failed to parse schema");
+        ghoul_assert(doc.isArray(), "Schema must be an array at the top level");
+
         const QJsonArray categoriesArray = doc.array();
         result.reserve(categoriesArray.size());
         // Read the JSON into the structs
@@ -123,7 +98,18 @@ namespace {
             const QJsonArray types = categoryObj[KeyClasses].toArray();
             category.types.reserve(types.size());
             for (const QJsonValue& typeVal : types) {
-                category.types.push_back(parseType(typeVal.toObject()));
+                const QJsonObject& obj = typeVal.toObject();
+                SchemaType type = {
+                    .name = obj[KeyName].toString().toStdString(),
+                    .identifier = obj[KeyIdentifier].toString().toStdString(),
+                    .description = obj[KeyDescription].toString().toStdString()
+                };
+                const QJsonArray members = obj[KeyMembers].toArray();
+                for (const QJsonValue& memberVal : members) {
+                    type.members.push_back(parseMember(memberVal.toObject()));
+                }
+
+                category.types.push_back(type);
             }
             result.push_back(std::move(category));
         }

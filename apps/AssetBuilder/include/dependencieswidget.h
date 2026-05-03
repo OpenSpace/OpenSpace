@@ -40,21 +40,7 @@ class QListWidget;
 class DependenciesWidget final : public QWidget {
 Q_OBJECT
 public:
-    explicit DependenciesWidget(QWidget* parent);
-
-    /**
-     * Sets the asset pointer used for editing.
-     *
-     * \param asset Non-owning pointer to the JAsset
-     */
-    void setAsset(JAsset* asset);
-
-    /**
-     * Sets the file path of the current .jasset file.
-     *
-     * \param path The .jasset file path (empty if unsaved)
-     */
-    void setFilePath(std::filesystem::path path);
+    DependenciesWidget(QWidget* parent, JAsset& asset, std::filesystem::path& path);
 
     /**
      * Rebuilds the dependencies list from the current asset.
@@ -103,13 +89,8 @@ private:
      */
     void convertDependencyPath(size_t row, PathType target);
 
-    /**
-     * Returns the parent directory of the .jasset file, or empty.
-     */
-    std::filesystem::path assetDir() const;
-
-    JAsset* _asset = nullptr;
-    std::filesystem::path _filePath;
+    JAsset& _asset;
+    std::filesystem::path& _filePath;
     QListWidget* _dependenciesList = nullptr;
 };
 

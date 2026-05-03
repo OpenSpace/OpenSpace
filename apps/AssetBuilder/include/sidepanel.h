@@ -41,14 +41,7 @@ class MetadataWidget;
 class SidePanel final : public QWidget {
 Q_OBJECT
 public:
-    SidePanel(QWidget* parent, JAsset& asset);
-
-    /**
-     * Sets the file path on the dependencies widget.
-     *
-     * \param path The .jasset file path (empty if unsaved)
-     */
-    void setFilePath(std::filesystem::path path);
+    SidePanel(QWidget* parent, JAsset& asset, std::filesystem::path& path);
 
     /**
      * Refreshes all three child widgets.
@@ -56,11 +49,6 @@ public:
     void refreshAll();
 
 public slots:
-    /**
-     * Opens a file dialog and adds the chosen file as a dependency.
-     */
-    void addDependencyViaDialog();
-
     /**
      * Adds the file at \p filePath as a dependency.
      *

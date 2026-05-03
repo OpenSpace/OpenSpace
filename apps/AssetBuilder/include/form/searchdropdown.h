@@ -41,8 +41,8 @@ class QPushButton;
  *                    | (on open)
  *          [floating list popup (plain QFrame overlay, no Qt::Popup)]
  *
- * The popup uses Qt::WindowDoesNotAcceptFocus so keyboard focus always stays
- * in the search input. Arrow keys and Enter navigate / confirm without a click.
+ * The popup uses Qt::WindowDoesNotAcceptFocus so keyboard focus always stays in the
+ * search input. Arrow keys and Enter navigate / confirm without a click.
  */
 class SearchDropdown final : public QFrame {
 Q_OBJECT
@@ -53,24 +53,12 @@ public:
     explicit SearchDropdown(QWidget* parent);
 
     /**
-     * Deletes the popup window which has no Qt parent.
-     */
-    ~SearchDropdown() override;
-
-    /**
      * Appends an item to the dropdown list.
      *
      * \param displayText Text shown in the list and search input
      * \param userData Optional data attached to the item (e.g. schema type key)
      */
     void addItem(QString displayText, QVariant userData = QVariant());
-
-    /**
-     * Returns the total number of items in the dropdown.
-     *
-     * \return Item count
-     */
-    int count() const;
 
     /**
      * Returns the index of the currently selected item, or -1 if nothing is selected.
@@ -80,26 +68,11 @@ public:
     int currentIndex() const;
 
     /**
-     * Returns the display text of the currently selected item.
-     *
-     * \return Display text, or empty string if nothing is selected
-     */
-    QString currentText() const;
-
-    /**
      * Returns the user data of the currently selected item.
      *
      * \return User data, or invalid QVariant if nothing is selected
      */
     QVariant currentData() const;
-
-    /**
-     * Returns the user data for the item at the given index.
-     *
-     * \param index Item index
-     * \return User data, or invalid QVariant if index is out of range
-     */
-    QVariant itemData(int index) const;
 
     /**
      * Sets the currently selected item by index. Pass -1 to deselect.
@@ -114,13 +87,6 @@ public:
      * \param text Placeholder text
      */
     void setPlaceholderText(const QString& text);
-
-    /**
-     * Returns whether the popup is currently visible.
-     *
-     * \return true if the popup is open
-     */
-    bool isOpen() const;
 
 signals:
     /**
@@ -201,7 +167,7 @@ private:
     /// Toggle button for opening/closing the popup
     QPushButton* _chevronButton = nullptr;
     /// Top-level frameless popup window (no Qt parent, manually deleted)
-    QFrame* _popup = nullptr;
+    std::unique_ptr<QFrame> _popup = nullptr;
     /// Filterable item list inside the popup
     QListWidget* _listWidget = nullptr;
 
