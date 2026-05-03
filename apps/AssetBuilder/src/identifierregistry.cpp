@@ -24,8 +24,8 @@
 
 #include "identifierregistry.h"
 
-#include <jasset.h>
-#include <utils.h>
+#include "jasset.h"
+#include "path.h"
 #include <ghoul/filesystem/filesystem.h>
 #include <QFile>
 #include <QJsonDocument>

@@ -24,7 +24,7 @@
 
 #include "jasset.h"
 
-#include "utils.h"
+#include "path.h"
 #include <QJsonArray>
 #include <QJsonObject>
 

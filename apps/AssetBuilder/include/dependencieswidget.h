@@ -27,7 +27,7 @@
 
 #include <QWidget>
 
-#include <utils.h>
+#include "path.h"
 #include <filesystem>
 
 struct JAsset;
