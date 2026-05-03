@@ -32,6 +32,7 @@
 #include <openspace/util/openspacemodule.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/assert.h>
@@ -803,6 +804,36 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
     }
 
     return result;
+}
+
+void registerPathTokens(const Configuration& configuration) {
+    // Registering Path tokens. If the BASE path is set, it is the only one that will
+    // overwrite the default path of the cfg directory
+    using T = std::string;
+    for (const std::pair<const T, T>& path : configuration.pathTokens) {
+        std::string fullKey = std::format("${{{}}}", path.first);
+        LDEBUGC(
+            "Configuration",
+            std::format("Registering path '{}': {}", fullKey, path.second)
+        );
+
+        const bool overrideBase = (fullKey == "${BASE}");
+        if (overrideBase) {
+            LINFOC(
+                "Configuration",
+                std::format("Overriding base path with '{}'", path.second)
+            );
+        }
+
+        const bool overrideTemporary = (fullKey == "${TEMPORARY}");
+
+        using Override = ghoul::filesystem::FileSystem::Override;
+        FileSys.registerPathToken(
+            std::move(fullKey),
+            path.second,
+            Override(overrideBase || overrideTemporary)
+        );
+    }
 }
 
 Configuration::LayerServer stringToLayerServer(std::string_view server) {

@@ -274,33 +274,6 @@ OpenSpaceEngine::OpenSpaceEngine()
 
 OpenSpaceEngine::~OpenSpaceEngine() {}
 
-void OpenSpaceEngine::registerPathTokens() {
-    LTRACE("OpenSpaceEngine::initialize(begin)");
-
-    // Registering Path tokens. If the BASE path is set, it is the only one that will
-    // overwrite the default path of the cfg directory
-    using T = std::string;
-    for (const std::pair<const T, T>& path : global::configuration->pathTokens) {
-        std::string fullKey = std::format("${{{}}}", path.first);
-        LDEBUG(std::format("Registering path '{}': {}", fullKey, path.second));
-
-        const bool overrideBase = (fullKey == "${BASE}");
-        if (overrideBase) {
-            LINFO(std::format("Overriding base path with '{}'", path.second));
-        }
-
-        const bool overrideTemporary = (fullKey == "${TEMPORARY}");
-
-        using Override = ghoul::filesystem::FileSystem::Override;
-        FileSys.registerPathToken(
-            std::move(fullKey),
-            path.second,
-            Override(overrideBase || overrideTemporary)
-        );
-    }
-    LTRACE("OpenSpaceEngine::initialize(end)");
-}
-
 void OpenSpaceEngine::initialize() {
     ZoneScoped;
 
