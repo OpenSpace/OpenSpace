@@ -36,8 +36,8 @@ class QLabel;
  * Thin window shell for the AssetBuilder standalone application. Hosts the
  * AssetEditorWidget, owns the menu bar and window-level actions.
  *
- * All per-asset state lives inside AssetEditorWidget so that future multi-tab
- * support only requires wrapping multiple editors in a QTabWidget here.
+ * All per-asset state lives inside AssetEditorWidget so that future multi-tab support
+ * only requires wrapping multiple editors in a QTabWidget here.
  */
 class MainWindow final : public QMainWindow {
 Q_OBJECT
@@ -97,11 +97,6 @@ private slots:
     void showAbout();
 
     /**
-     * Opens a directory picker to set the persistent data root.
-     */
-    void setDataRootViaDialog();
-
-    /**
      * Shows the WelcomeDialog and acts on the user's choice.
      */
     void showWelcomeDialog();
@@ -125,14 +120,16 @@ private:
     /**
      * Prompts the user to save if there are unsaved changes.
      *
-     * \return True if it is safe to proceed (no changes, or user confirmed)
+     * \return `true` if it is safe to proceed (no changes, or user confirmed)
      */
     bool maybeSave();
 
-    /** Adds the given path to the QSettings-backed recent files list. */
+    /**
+     * Adds the given path to the QSettings-backed recent files list.
+     */
     void addToRecentFiles(const std::filesystem::path& path);
 
-    /// The editor widget, null when no asset is open
+    /// The editor widget, `nullptr` when no asset is open
     AssetEditorWidget* _editor = nullptr;
 
     /// File path label shown in the menu bar

@@ -24,14 +24,17 @@
 
 #include "editorpanel.h"
 
+#include "documentation.h"
 #include "scenegraphnodeeditor.h"
-#include "scrollanchor.h"
 #include <jasset.h>
+#include <QEvent>
 #include <QFrame>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QScrollArea>
+#include <QScrollBar>
 #include <QStackedWidget>
+#include <QTimer>
 #include <QVBoxLayout>
 
 namespace {
@@ -40,7 +43,8 @@ namespace {
     constexpr int CenterPageEditor = 1;
 } // namespace
 
-EditorPanel::EditorPanel(QWidget* parent, JAsset* asset, IdentifierRegistry* registry)
+EditorPanel::EditorPanel(QWidget* parent, JAsset& asset,
+                         const IdentifierRegistry* registry)
     : QWidget(parent)
     , _asset(asset)
     , _registry(registry)
@@ -83,15 +87,18 @@ void EditorPanel::showItemEditor(size_t index) {
     }
 
     // Scroll area + card scaffold
-    QScrollArea* scroll = new QScrollArea(this);
-    scroll->setWidgetResizable(true);
-    scroll->setFrameShape(QFrame::NoFrame);
+    _scroll = new QScrollArea(this);
+    _scroll->setWidgetResizable(true);
+    _scroll->setFrameShape(QFrame::NoFrame);
 
-    QWidget* outerWrapper = new QWidget(scroll);
+    QWidget* outerWrapper = new QWidget(_scroll);
+    // Install ourselves as an event filter to enable a stable scroll anchor
+    outerWrapper->installEventFilter(this);
     QBoxLayout* outerLayout = new QVBoxLayout(outerWrapper);
     outerLayout->setContentsMargins(0, 32, 0, 32);
     outerLayout->setSpacing(0);
     outerLayout->setAlignment(Qt::AlignTop);
+    _scroll->setWidget(outerWrapper);
 
     QBoxLayout* cardRow = new QHBoxLayout;
     cardRow->setContentsMargins(0, 0, 0, 0);
@@ -105,7 +112,7 @@ void EditorPanel::showItemEditor(size_t index) {
     cardLayout->setContentsMargins(32, 32, 32, 32);
     cardLayout->setSpacing(0);
 
-    const std::string& type = _asset->contents[index].type;
+    const std::string& type = _asset.contents[index].type;
 
     // Add more types here
     if (type == "SceneGraphNode") {
@@ -138,13 +145,33 @@ void EditorPanel::showItemEditor(size_t index) {
     cardRow->addStretch(1);
     outerLayout->addLayout(cardRow);
 
-    scroll->setWidget(outerWrapper);
-    new ScrollAnchor(scroll, outerWrapper);
-    _centerStack->insertWidget(CenterPageEditor, scroll);
+    _centerStack->insertWidget(CenterPageEditor, _scroll);
     _centerStack->setCurrentIndex(CenterPageEditor);
 }
 
 void EditorPanel::showEmptyCenter() {
     _currentIndex = NoSelection;
     _centerStack->setCurrentIndex(CenterPageEmpty);
+}
+
+bool EditorPanel::eventFilter(QObject*, QEvent* event) {
+    if (event->type() != QEvent::LayoutRequest || _isDeferredRestorePending) {
+        return false;
+    }
+
+    _savedValue = _scroll->verticalScrollBar()->value();
+    _isDeferredRestorePending = true;
+    // A zero-delay timer runs after the current event loop iteration completes, at which
+    // point Qt has finished recalculating geometry. This lets us restore the scroll
+    // position after the layout pass rather than during it
+    QTimer::singleShot(
+        0,
+        this,
+        [this]() {
+            const int maxScroll = _scroll->verticalScrollBar()->maximum();
+            _scroll->verticalScrollBar()->setValue(std::min(_savedValue, maxScroll));
+            _isDeferredRestorePending = false;
+        }
+    );
+    return false;
 }

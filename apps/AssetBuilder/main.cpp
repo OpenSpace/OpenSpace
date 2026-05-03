@@ -22,38 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <mainwindow.h>
-#include <schema/assetschema.h>
+#include "mainwindow.h"
+#include "schema/assetschema.h"
+#include <openspace/engine/configuration.h>
+#include <openspace/engine/settings.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <QApplication>
 #include <QFile>
 #include <QMessageBox>
 
+using namespace openspace;
+
 int main(int argc, char* argv[]) {
-    QApplication app(argc, argv);
+    ghoul::logging::LogManager::initialize(
+        ghoul::logging::LogLevel::Debug,
+        ghoul::logging::LogManager::ImmediateFlush::Yes
+    );
+
+    ghoul::filesystem::FileSystem::initialize();
+
+    // Register the path of the executable, to make it possible to find other files in the
+    // same directory
+    FileSys.registerPathToken(
+        "${BIN}",
+        std::filesystem::current_path() / std::filesystem::path(argv[0]).parent_path(),
+        ghoul::filesystem::FileSystem::Override::Yes
+    );
+
+    std::filesystem::path cfgPath = findConfiguration();
+    Configuration configuration = loadConfigurationFromFile(cfgPath, findSettings());
+    registerPathTokens(configuration);
+
+
+    QApplication app = QApplication(argc, argv);
 
     QApplication::setApplicationName("AssetBuilder");
     QApplication::setApplicationVersion("1.0.0");
     QApplication::setOrganizationName("OpenSpace");
 
-    QFile styleFile(":/qss/assetbuilder.qss");
-    if (styleFile.open(QFile::ReadOnly)) {
-        app.setStyleSheet(QLatin1String(styleFile.readAll()));
+    if (QFile style = QFile(":/qss/assetbuilder.qss");  style.open(QFile::ReadOnly)) {
+        app.setStyleSheet(QLatin1String(style.readAll()));
     }
 
-    try {
-        AssetSchema::instance();
-    }
-    catch (const std::exception& e) {
-        QMessageBox::critical(
-            nullptr,
-            "Schema Error",
-            QString("Failed to load asset schema:\n\n") + e.what()
-        );
-        return 1;
-    }
+    AssetSchema::instance();
 
     MainWindow window;
     window.showMaximized();
-
     return app.exec();
 }

@@ -66,8 +66,7 @@ AssetEditorWidget::AssetEditorWidget(QWidget* parent)
     //
     // Sidepanel
     //
-    _sidePanel = new SidePanel(splitter, _asset);
-    _sidePanel->setFilePath(_filePath);
+    _sidePanel = new SidePanel(splitter, _asset, _filePath);
     connect(
         _sidePanel, &SidePanel::selectionChanged,
         this, &AssetEditorWidget::onSelectionChanged
@@ -81,7 +80,7 @@ AssetEditorWidget::AssetEditorWidget(QWidget* parent)
     //
     // Editor
     //
-    _editorPanel = new EditorPanel(splitter, &_asset, _identifierRegistry);
+    _editorPanel = new EditorPanel(splitter, _asset, _identifierRegistry);
     connect(
         _editorPanel, &EditorPanel::contentModified,
         this, &AssetEditorWidget::onContentModified
@@ -182,7 +181,7 @@ bool AssetEditorWidget::loadAsset(const std::filesystem::path& path) {
 bool AssetEditorWidget::saveAsset(const std::filesystem::path& path) {
     const QJsonObject root = jassetToJson(_asset);
 
-    QFile file(QString::fromStdWString(path.wstring()));
+    QFile file = QFile(QString::fromStdWString(path.wstring()));
     // Truncate to avoid stale trailing bytes when new content is shorter
     if (!file.open(QFile::WriteOnly | QFile::Truncate)) {
         return false;
@@ -214,6 +213,5 @@ void AssetEditorWidget::onContentModified() {
 
 void AssetEditorWidget::refreshPanels() {
     _identifierRegistry->rebuildFromAsset(_asset, _filePath);
-    _sidePanel->setFilePath(_filePath);
     _sidePanel->refreshAll();
 }

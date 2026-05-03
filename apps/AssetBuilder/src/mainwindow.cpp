@@ -69,11 +69,6 @@ MainWindow::MainWindow() {
 
     fileMenu->addSeparator();
 
-    QAction* dataRootAction = fileMenu->addAction("Set Data Directory...");
-    connect(dataRootAction, &QAction::triggered, this, &MainWindow::setDataRootViaDialog);
-
-    fileMenu->addSeparator();
-
     QAction* closeAction = fileMenu->addAction("Close");
     closeAction->setShortcut(QKeySequence::Close);
     connect(closeAction, &QAction::triggered, this, &MainWindow::closeAsset);
@@ -122,11 +117,10 @@ void MainWindow::showEmptyState() {
     sub->setObjectName("empty-state-sub");
     sub->setAlignment(Qt::AlignCenter);
     layout->addWidget(sub);
-
 }
 
 void MainWindow::showWelcomeDialog() {
-    WelcomeDialog dialog(this);
+    WelcomeDialog dialog = WelcomeDialog(this);
     const int dialogResult = dialog.exec();
 
     if (dialogResult != QDialog::Accepted) {
@@ -170,7 +164,6 @@ void MainWindow::updateTitle() {
     }
     setWindowTitle(title);
 
-    ghoul_assert(_pathLabel, "_pathLabel is null");
     _pathLabel->setText(_editor ? _editor->displayPath() : "");
 }
 
@@ -219,7 +212,8 @@ void MainWindow::openAsset() {
     }
 
     createEditor();
-    if (!_editor->loadAsset(std::filesystem::path(path.toStdWString()))) {
+    const bool success = _editor->loadAsset(std::filesystem::path(path.toStdWString()));
+    if (!success) {
         return;
     }
     addToRecentFiles(_editor->filePath());
@@ -230,14 +224,14 @@ bool MainWindow::saveAsset() {
     if (!_editor || _editor->filePath().empty()) {
         return saveAssetAs();
     }
-    if (!_editor->saveAsset(_editor->filePath())) {
+    const bool success = _editor->saveAsset(_editor->filePath());
+    if (!success) {
         QMessageBox::critical(
             this,
             "Save Failed",
             "Could not save to:\n" +
                 QString::fromStdWString(_editor->filePath().wstring()) +
-                "\n\nCheck that the file is not read-only and the "
-                "directory exists."
+                "\n\nCheck that the file is not read-only and the directory exists."
         );
         return false;
     }
@@ -246,6 +240,10 @@ bool MainWindow::saveAsset() {
 }
 
 bool MainWindow::saveAssetAs() {
+    if (!_editor) {
+        return false;
+    }
+
     const QString suggestion = (_editor && !_editor->filePath().empty()) ?
         QString::fromStdWString(_editor->filePath().wstring()) :
         QString();
@@ -256,22 +254,17 @@ bool MainWindow::saveAssetAs() {
         suggestion,
         QString::fromStdString(std::string(FileFilter))
     );
-
     if (path.isEmpty()) {
         return false;
     }
 
-    if (!_editor) {
-        return false;
-    }
-
-    if (!_editor->saveAsset(std::filesystem::path(path.toStdWString()))) {
+    const bool success = _editor->saveAsset(std::filesystem::path(path.toStdWString()));
+    if (!success) {
         QMessageBox::critical(
             this,
             "Save Failed",
             "Could not save to:\n" + path +
-                "\n\nCheck that the file is not read-only and the "
-                "directory exists."
+                "\n\nCheck that the file is not read-only and the directory exists."
         );
         return false;
     }
@@ -293,16 +286,9 @@ void MainWindow::showAbout() {
     QMessageBox::about(
         this,
         "About AssetBuilder",
-        "AssetBuilder\n\nA visual editor for OpenSpace .jasset files.\n\n"
-        "Part of the OpenSpace project -- openspaceproject.com"
+        "AssetBuilder\n\nA visual editor for OpenSpace .jasset files.\n\nPart of the "
+        "OpenSpace project -- openspaceproject.com"
     );
-}
-
-void MainWindow::setDataRootViaDialog() {
-    const std::filesystem::path root = pickDataRootDialog(this);
-    if (!root.empty() && _editor) {
-        _editor->refreshPanels();
-    }
 }
 
 void MainWindow::addToRecentFiles(const std::filesystem::path& path) {
@@ -330,10 +316,9 @@ void MainWindow::keyPressEvent(QKeyEvent* evt) {
 }
 
 void MainWindow::resizeEvent(QResizeEvent* evt) {
+    _pathLabel->setGeometry(0, 0, menuBar()->width(), menuBar()->height());
+
     QMainWindow::resizeEvent(evt);
-    if (_pathLabel) {
-        _pathLabel->setGeometry(0, 0, menuBar()->width(), menuBar()->height());
-    }
 }
 
 void MainWindow::closeEvent(QCloseEvent* evt) {

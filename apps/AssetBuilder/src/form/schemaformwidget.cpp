@@ -124,6 +124,39 @@ namespace {
         bool hasMax = false;
     };
 
+    /**
+     * Inserts spaces before uppercase letters to turn PascalCase into readable text.
+     * "TimeFrame" -> "Time Frame",  "IsOptional" -> "Is Optional",  "GUI" -> "GUI".
+     *
+     * \param name The PascalCase identifier to split
+     * \return Human-readable string with spaces inserted
+     */
+    QString splitPascalCase(const std::string& name) {
+        const QString text = QString::fromStdString(name);
+        QString result;
+        for (int i = 0; i < text.size(); i++) {
+            const QChar character = text[i];
+            // Insert a space before an uppercase letter when it marks a word boundary:
+            if (i > 0 && character.isUpper()) {
+                const bool previousLower = text[i - 1].isLower();
+                const bool previousUpper = text[i - 1].isUpper();
+                const bool nextLower = (i + 1 < text.size()) && text[i + 1].isLower();
+                // Current character is upper; previous character is lower.
+                // This is a camelCase space (e.g. "Time|Frame" -> "Time Frame")
+                const bool camelCaseBoundary = previousLower;
+                // previousUpper && nextLower: end of acronym run, split before the new word
+                // (e.g. "GUI|Name" -> "GUI Name"), but keep consecutive uppercase together
+                // (e.g. "GUI" stays as "GUI")
+                const bool endOfAcronym = previousUpper && nextLower;
+                if (camelCaseBoundary|| endOfAcronym) {
+                    result += ' ';
+                }
+            }
+            result += character;
+        }
+        return result;
+    }
+
     bool hasWidgetContent(QWidget* widget) {
         if (auto* checkBox = qobject_cast<QCheckBox*>(widget);  checkBox) {
             return checkBox->isChecked();

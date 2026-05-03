@@ -36,7 +36,6 @@ set(HEADER_FILES
   include/mainwindow.h
   include/metadatawidget.h
   include/scenegraphnodeeditor.h
-  include/scrollanchor.h
   include/sidepanel.h
   include/utils.h
   include/welcomedialog.h
@@ -59,7 +58,6 @@ set(SOURCE_FILES
   src/mainwindow.cpp
   src/metadatawidget.cpp
   src/scenegraphnodeeditor.cpp
-  src/scrollanchor.cpp
   src/sidepanel.cpp
   src/utils.cpp
   src/welcomedialog.cpp

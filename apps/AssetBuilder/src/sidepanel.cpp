@@ -30,7 +30,7 @@
 #include <QSplitter>
 #include <QVBoxLayout>
 
-SidePanel::SidePanel(QWidget* parent, JAsset& asset)
+SidePanel::SidePanel(QWidget* parent, JAsset& asset, std::filesystem::path& path)
     : QWidget(parent)
 {
     setObjectName("side-panel");
@@ -49,11 +49,11 @@ SidePanel::SidePanel(QWidget* parent, JAsset& asset)
     splitter->addWidget(_contentsList);
     splitter->setStretchFactor(0, 2);
 
-    _dependencies = new DependenciesWidget(splitter);
+    _dependencies = new DependenciesWidget(splitter, asset, path);
     splitter->addWidget(_dependencies);
     splitter->setStretchFactor(1, 1);
 
-    _metadata = new MetadataWidget(splitter);
+    _metadata = new MetadataWidget(splitter, asset);
     splitter->addWidget(_metadata);
     splitter->setStretchFactor(2, 0);
 
@@ -72,24 +72,13 @@ SidePanel::SidePanel(QWidget* parent, JAsset& asset)
         _dependencies, &DependenciesWidget::assetModified,
         this, &SidePanel::assetModified
     );
-    connect(
-        _metadata, &MetadataWidget::assetModified,
-        this, &SidePanel::assetModified
-    );
-}
-
-void SidePanel::setFilePath(std::filesystem::path path) {
-    _dependencies->setFilePath(std::move(path));
+    connect(_metadata, &MetadataWidget::assetModified, this, &SidePanel::assetModified);
 }
 
 void SidePanel::refreshAll() {
     _contentsList->refresh();
     _dependencies->refresh();
     _metadata->refresh();
-}
-
-void SidePanel::addDependencyViaDialog() {
-    _dependencies->addDependencyViaDialog();
 }
 
 void SidePanel::addDependency(const QString& filePath) {

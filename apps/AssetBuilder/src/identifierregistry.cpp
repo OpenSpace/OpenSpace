@@ -26,6 +26,7 @@
 
 #include <jasset.h>
 #include <utils.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -55,7 +56,11 @@ void IdentifierRegistry::rebuildFromAsset(const JAsset& asset,
 
     // Collect identifiers from dependency files
     for (const std::string& dep : asset.dependencies) {
-        const std::filesystem::path depPath = resolvePath(dep, dataRoot(), assetDir);
+        const std::filesystem::path depPath = resolvePath(
+            dep,
+            absPath("${USER_ASSETS}"),
+            assetDir
+        );
 
         if (depPath.extension() != ".jasset") {
             continue;

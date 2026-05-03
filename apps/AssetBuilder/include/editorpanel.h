@@ -26,10 +26,11 @@
 #define __OPENSPACE_ASSETBUILDER___EDITORPANEL___H__
 
 #include <QWidget>
-#include <documentation.h>
 
+struct Documentation;
 class IdentifierRegistry;
 struct JAsset;
+class QScrollArea;
 class QStackedWidget;
 
 /**
@@ -44,7 +45,7 @@ public:
      * \param asset Non-owning pointer to the JAsset
      * \param registry Non-owning pointer to the IdentifierRegistry
      */
-    EditorPanel(QWidget* parent, JAsset* asset, IdentifierRegistry* registry);
+    EditorPanel(QWidget* parent, JAsset& asset, const IdentifierRegistry* registry);
 
     /**
      * Replaces the editor page with a form for the given content item.
@@ -82,10 +83,22 @@ signals:
 private:
     static constexpr size_t NoSelection = static_cast<size_t>(-1);
 
-    JAsset* _asset = nullptr;
+    /**
+     * Intercepts LayoutRequest events to save and restore the scroll position.
+     */
+    bool eventFilter(QObject* object, QEvent* event) override;
+
+    JAsset& _asset;
     const IdentifierRegistry* _registry = nullptr;
     QStackedWidget* _centerStack = nullptr;
     size_t _currentIndex = NoSelection;
+
+    /// The scroll area whose vertical position is stabilized
+    QScrollArea* _scroll;
+    /// Scroll position captured before the layout pass
+    int _savedValue = 0;
+    /// `true` while a deferred restore is queued, prevents re-saving mid-pass
+    bool _isDeferredRestorePending = false;
 };
 
 #endif // __OPENSPACE_ASSETBUILDER___EDITORPANEL___H__

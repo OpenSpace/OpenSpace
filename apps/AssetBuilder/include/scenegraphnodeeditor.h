@@ -27,9 +27,9 @@
 
 #include <QWidget>
 
-#include <documentation.h>
-#include <jasset.h>
-#include <schema/assetschema.h>
+#include "documentation.h"
+#include "jasset.h"
+#include "schema/assetschema.h"
 #include <memory>
 
 class IdentifierRegistry;
@@ -50,8 +50,8 @@ public:
      * \param index Index into asset->contents
      * \param parent Parent widget for ownership
      */
-    SceneGraphNodeEditor(JAsset* asset, const IdentifierRegistry* registry,
-        size_t index, QWidget* parent);
+    SceneGraphNodeEditor(JAsset& asset, const IdentifierRegistry* registry, size_t index,
+        QWidget* parent);
 
 signals:
     /**
@@ -87,12 +87,9 @@ private:
         std::weak_ptr<PropertyMap> properties, QWidget* parent, bool expanded,
         bool collapsible);
 
-    // Section builders — create and return widgets without adding
-    // to layout. buildUi handles layout order.
     QWidget* buildQuickAccessFields(const SchemaType& sgnType, SchemaFormWidget* guiForm,
         QWidget* additionalSection);
-    SchemaFormWidget* buildMemberSection(const SchemaType& sgnType,
-        const std::string& memberName, bool isExpanded);
+
     QWidget* buildAdditionalSection(const SchemaType& sgnType);
 
     /**
@@ -110,7 +107,7 @@ private:
      */
     void updatePasteButtons();
 
-    JAsset* _asset = nullptr;
+    JAsset& _asset;
     const IdentifierRegistry* _registry = nullptr;
     size_t _index = 0;
 

@@ -36,8 +36,9 @@ namespace {
     constexpr int LabelColumnMinWidth = 80;
 } // namespace
 
-MetadataWidget::MetadataWidget(QWidget* parent)
+MetadataWidget::MetadataWidget(QWidget* parent, JAsset& asset)
     : QWidget(parent)
+    , _asset(asset)
 {
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -57,66 +58,72 @@ MetadataWidget::MetadataWidget(QWidget* parent)
     grid->setHorizontalSpacing(8);
     grid->setVerticalSpacing(4);
 
-    // Helper: add a label + QLineEdit row to the grid
-    auto addField = [content, grid](int row, const QString& label,
-                                    const QString& placeholder)
     {
         // Left side label
-        QLabel* fieldLabel = new QLabel(label, content);
+        QLabel* fieldLabel = new QLabel("Name", content);
         fieldLabel->setObjectName("field-label");
-        grid->addWidget(fieldLabel, row, 0, Qt::AlignVCenter | Qt::AlignLeft);
+        grid->addWidget(fieldLabel, 0, 0, Qt::AlignVCenter | Qt::AlignLeft);
 
         // Right side edit field
-        QLineEdit* edit = new QLineEdit(content);
-        edit->setPlaceholderText(placeholder);
-        grid->addWidget(edit, row, 1);
-        return edit;
-    };
-
-    _nameEdit = addField(0, "Name", "Asset name");
-    connect(
-        _nameEdit,
-        &QLineEdit::textEdited,
-        this,
-        [this](const QString& text) {
-            if (!_asset) {
-                return;
+        _nameEdit = new QLineEdit(content);
+        _nameEdit->setPlaceholderText("Asset name");
+        connect(
+            _nameEdit,
+            &QLineEdit::textEdited,
+            this,
+            [this](const QString& text) {
+                _asset.metadata.name = text.toStdString();
+                emit assetModified();
             }
-            _asset->metadata.name = text.toStdString();
-            emit assetModified();
-        }
-    );
+        );
+        grid->addWidget(_nameEdit, 0, 1);
+    }
 
-    _versionEdit = addField(1, "Version", "1.0.0");
-    connect(
-        _versionEdit,
-        &QLineEdit::textEdited,
-        this,
-        [this](const QString& text) {
-            if (!_asset) {
-                return;
-            }
-            _asset->metadata.version = text.toStdString();
-            emit assetModified();
-        }
-    );
-
-    _authorEdit = addField(2, "Author",  "Author name");
-    connect(
-        _authorEdit,
-        &QLineEdit::textEdited,
-        this,
-        [this](const QString& text) {
-            if (!_asset) {
-                return;
-            }
-            _asset->metadata.author = text.toStdString();
-            emit assetModified();
-        }
-    );
-
-    // Description: multi-line plain text
     {
+        // Left side label
+        QLabel* fieldLabel = new QLabel("Version", content);
+        fieldLabel->setObjectName("field-label");
+        grid->addWidget(fieldLabel, 1, 0, Qt::AlignVCenter | Qt::AlignLeft);
+
+        // Right side edit field
+        _versionEdit = new QLineEdit(content);
+        _versionEdit->setPlaceholderText("1.0.0");
+        connect(
+            _versionEdit,
+            &QLineEdit::textEdited,
+            this,
+            [this](const QString& text) {
+                _asset.metadata.version = text.toStdString();
+                emit assetModified();
+            }
+        );
+        grid->addWidget(_versionEdit, 1, 1);
+    }
+
+    {
+        // Left side label
+        QLabel* fieldLabel = new QLabel("Author", content);
+        fieldLabel->setObjectName("field-label");
+        grid->addWidget(fieldLabel, 2, 0, Qt::AlignVCenter | Qt::AlignLeft);
+
+        // Right side edit field
+        _authorEdit = new QLineEdit(content);
+        _authorEdit->setPlaceholderText("Author name");
+        connect(
+            _authorEdit,
+            &QLineEdit::textEdited,
+            this,
+            [this](const QString& text) {
+                _asset.metadata.author = text.toStdString();
+                emit assetModified();
+            }
+        );
+        grid->addWidget(_authorEdit, 2, 1);
+    }
+
+    {
+        // Description: multi-line plain text
+
         // Left side label
         QLabel* label = new QLabel("Description", content);
         label->setObjectName("field-label");
@@ -132,10 +139,7 @@ MetadataWidget::MetadataWidget(QWidget* parent)
             &QPlainTextEdit::textChanged,
             this,
             [this]() {
-                if (!_asset) {
-                    return;
-                }
-                _asset->metadata.description =
+                _asset.metadata.description =
                     _descriptionEdit->toPlainText().toStdString();
                 emit assetModified();
             }
@@ -143,8 +147,9 @@ MetadataWidget::MetadataWidget(QWidget* parent)
         grid->addWidget(_descriptionEdit, 3, 1);
     }
 
-    // License: editable combo with preset items
     {
+        // License: editable combo with preset items
+
         // Left side label
         QLabel* label = new QLabel("License", content);
         label->setObjectName("field-label");
@@ -163,10 +168,7 @@ MetadataWidget::MetadataWidget(QWidget* parent)
             &QComboBox::currentTextChanged,
             this,
             [this](const QString& text) {
-                if (!_asset) {
-                    return;
-                }
-                _asset->metadata.license = text.toStdString();
+                _asset.metadata.license = text.toStdString();
                 emit assetModified();
             }
         );
@@ -176,27 +178,11 @@ MetadataWidget::MetadataWidget(QWidget* parent)
     layout->addStretch();
 }
 
-void MetadataWidget::setAsset(JAsset* asset) {
-    _asset = asset;
-}
-
 void MetadataWidget::refresh() {
-    if (!_asset) {
-        return;
-    }
-    const AssetMetadata& metadata = _asset->metadata;
-
-    _nameEdit->blockSignals(true);
+    const AssetMetadata& metadata = _asset.metadata;
     _nameEdit->setText(QString::fromStdString(metadata.name));
-    _nameEdit->blockSignals(false);
-
-    _versionEdit->blockSignals(true);
     _versionEdit->setText(QString::fromStdString(metadata.version));
-    _versionEdit->blockSignals(false);
-
-    _authorEdit->blockSignals(true);
     _authorEdit->setText(QString::fromStdString(metadata.author));
-    _authorEdit->blockSignals(false);
 
     _descriptionEdit->blockSignals(true);
     _descriptionEdit->setPlainText(QString::fromStdString(metadata.description));
