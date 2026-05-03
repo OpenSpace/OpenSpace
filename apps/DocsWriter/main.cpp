@@ -58,7 +58,7 @@ int main(int, char** argv) {
     FileSys.registerPathToken("${BASE}", base);
 
     *global::configuration = loadConfigurationFromFile(configFile.string(), "");
-    openspace::global::openSpaceEngine->registerPathTokens();
+    registerPathTokens(*global::configuration);
 
     // Now that we have the tokens we can initialize the engine
     global::openSpaceEngine->initialize();
