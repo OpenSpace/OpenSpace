@@ -116,6 +116,7 @@
 #include <openspace/topic/topics/profiletopic.h>
 #include <openspace/topic/topics/sessionrecordingtopic.h>
 #include <openspace/topic/topics/setpropertytopic.h>
+#include <openspace/topic/topics/subscriptiontopic.h>
 #include <openspace/topic/topics/timetopic.h>
 #include <openspace/topic/topics/triggerpropertytopic.h>
 #include <openspace/topic/topics/versiontopic.h>
@@ -166,6 +167,7 @@ void registerCoreSchemas(DocumentationEngine& engine) {
     engine.addSchema(ProfileTopic::Schema());
     engine.addSchema(SessionRecordingTopic::Schema());
     engine.addSchema(SetPropertyTopic::Schema());
+    engine.addSchema(SubscriptionTopic::Schema());
     engine.addSchema(TimeTopic::Schema());
     engine.addSchema(TriggerPropertyTopic::Schema());
     engine.addSchema(VersionTopic::Schema());

@@ -521,6 +521,7 @@ void DocumentationEngine::writeJsonSchema() {
 
     nlohmann::json defs;
     nlohmann::json anyProperty = nlohmann::json::array();
+    nlohmann::json anyPropertyMetaData = nlohmann::json::array();
 
     for (const nlohmann::json& propertySchema : _propertySchemas) {
         // Add any global $defs
@@ -530,15 +531,27 @@ void DocumentationEngine::writeJsonSchema() {
 
         // Add property typedef
         if (propertySchema.contains("typedefs")) {
-            mergeDefs(defs, propertySchema["typedefs"]);
-
             // @TODO (anden88 2026-05-04): Should we guard for duplicate typeNames?
-            for (const auto& [typeName, _] : propertySchema["typedefs"].items()) {
+            for (const auto& [typeName, typeDef] : propertySchema["typedefs"].items()) {
+                defs[typeName] = typeDef;
                 anyProperty.push_back({ {"$ref", std::format("#/$defs/{}", typeName)} });
+
+                // We also store the union of all properties final metadata shapes under
+                // AnyPropertyMetaData this enables validation of the SubscriptionTopic,
+                // otherwise the metaData shape would be defined as a plain Json object {}
+
+                // Add a named metaData def for this type so AnyPropertyMetaData generates
+                // readable names like DoubleListPropertyMetaData
+                const std::string metaDataName = std::format("{}MetaData", typeName);
+                defs[metaDataName] = typeDef["properties"]["metaData"];
+                anyPropertyMetaData.push_back({
+                    { "$ref", std::format("#/$defs/{}", metaDataName) }
+                });
             }
         }
     }
 
+    defs["AnyPropertyMetaData"] = { { "anyOf", anyPropertyMetaData} };
     defs["AnyProperty"] = { { "anyOf", anyProperty } };
     defs["PropertyOwner"] = nlohmann::json::parse(R"(
         {
@@ -570,6 +583,24 @@ void DocumentationEngine::writeJsonSchema() {
             "subowners",
             "tag",
             "uri"
+          ]
+        }
+    )");
+    defs["JsonValue"] = nlohmann::json::parse(R"(
+        {
+          "anyOf": [
+            { "type": "string" },
+            { "type": "number" },
+            { "type": "boolean" },
+            {
+              "type": "array",
+              "items": { "$ref": "#/$defs/JsonValue" }
+            },
+            {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/JsonValue" }
+            },
+            { "type": "null" }
           ]
         }
     )");
