@@ -148,22 +148,22 @@ Schema FlightControllerTopic::Schema() {
             "FlightControllerDisconnectCommand": {
               "type": "object",
               "properties": {
-                "type": { "const": "disconnect" }
+                "event": { "const": "disconnect" }
               },
               "additionalProperties": false,
-              "required": ["type"]
+              "required": ["event"]
             },
             "FlightControllerInputStateCommand": {
               "type": "object",
               "properties": {
-                "type": { "const": "inputState" },
+                "event": { "const": "inputState" },
                 "inputState": { "$ref": "#/$defs/AxisValues" }
               },
               "additionalProperties": false,
-              "required": ["type", "inputState"]
+              "required": ["event", "inputState"]
             },
             "FlightControllerCommand": {
-              "oneOf": [
+              "anyOf": [
                 { "$ref": "#/$defs/FlightControllerDisconnectCommand" },
                 { "$ref": "#/$defs/FlightControllerInputStateCommand" }
               ]
@@ -174,7 +174,7 @@ Schema FlightControllerTopic::Schema() {
           "properties": {
             "topicId": { "const": "flightcontroller" },
             "topicPayload": { "$ref": "#/$defs/FlightControllerCommand" },
-            "data": false
+            "data": null
           },
           "additionalProperties": false,
           "required": ["topicId", "topicPayload", "data"]

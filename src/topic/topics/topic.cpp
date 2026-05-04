@@ -48,7 +48,6 @@ std::string Topic::type() const {
 nlohmann::json Topic::wrappedPayload(const nlohmann::json& payload) const {
     ZoneScoped;
 
-    // TODO: add message time
     nlohmann::json j = {
         { "topic", _topicId },
         { "payload", payload }

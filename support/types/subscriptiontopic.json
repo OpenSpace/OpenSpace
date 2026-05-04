@@ -72,14 +72,14 @@
             "event": {
               "const": "start_subscription"
             },
-            "property": {
+            "uri": {
               "description": "The URI of the property to subscribe to",
               "type": "string"
             }
           },
           "required": [
             "event",
-            "property"
+            "uri"
           ],
           "type": "object"
         },
