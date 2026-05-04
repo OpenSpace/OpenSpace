@@ -178,22 +178,11 @@ namespace {
         GLuint t = 0;
         glCreateTextures(GL_TEXTURE_2D, 1, &t);
         glObjectLabel(GL_TEXTURE, t, static_cast<GLsizei>(name.size()), name.data());
+        glTextureStorage2D(t, 1, GL_RGB32F, size.x, size.y);
         glTextureParameteri(t, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTextureParameteri(t, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTextureParameteri(t, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTextureParameteri(t, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glBindTexture(GL_TEXTURE_2D, t);
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_RGB32F,
-            size.x,
-            size.y,
-            0,
-            GL_RGB,
-            GL_FLOAT,
-            nullptr
-        );
         return t;
     }
 
@@ -203,24 +192,13 @@ namespace {
         GLuint t = 0;
         glCreateTextures(GL_TEXTURE_3D, 1, &t);
         glObjectLabel(GL_TEXTURE, t, static_cast<GLsizei>(name.size()), name.data());
+        GLenum frmt = (components == 3) ? GL_RGB32F : GL_RGBA32F;
+        glTextureStorage3D(t, 1, frmt, size.x, size.y, size.z);
         glTextureParameteri(t, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTextureParameteri(t, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTextureParameteri(t, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTextureParameteri(t, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTextureParameteri(t, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        glBindTexture(GL_TEXTURE_3D, t);
-        glTexImage3D(
-            GL_TEXTURE_3D,
-            0,
-            (components == 3) ? GL_RGB32F : GL_RGBA32F,
-            size.x,
-            size.y,
-            size.z,
-            0,
-            GL_RGB,
-            GL_FLOAT,
-            nullptr
-        );
         return t;
     }
 } // namespace
@@ -401,7 +379,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
     const glm::dvec3 sunPosObj =
         _sunFollowingCameraEnabled ?
         camPosObjCoords :
-        invModelMatrix * glm::dvec4(sunPosWorld, 1.0);;
+        invModelMatrix * glm::dvec4(sunPosWorld, 1.0);
 
     // Sun Position in Object Space
     program.setUniform(_uniformCache.sunDirectionObj, glm::normalize(sunPosObj));
@@ -657,8 +635,8 @@ GLuint AtmosphereDeferredcaster::calculateDeltaE() {
     program->setUniform("rPlanet", _atmospherePlanetRadius);
     program->setUniform("rAtmosphere", _atmosphereRadius);
     program->setUniform("deltaESize", _deltaETableSize);
-    glClear(GL_COLOR_BUFFER_BIT);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glClear(GL_COLOR_BUFFER_BIT);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     if (_saveCalculationTextures) {
         saveTextureFile("deltaE_table_texture.ppm", _deltaETableSize);
@@ -709,7 +687,8 @@ std::pair<GLuint, GLuint> AtmosphereDeferredcaster::calculateDeltaS() {
     program->setUniform("ozoneHeightScale", _ozoneHeightScale);
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glClear(GL_COLOR_BUFFER_BIT);
+    constexpr glm::vec4 Black = glm::vec4(0.f, 0.f, 0.f, 0.f);
+    glClearNamedFramebufferfv(fbo, GL_COLOR, 0, glm::value_ptr(Black));
     for (int layer = 0; layer < _rSamples; layer++) {
         program->setUniform("layer", layer);
         step3DTexture(*program, layer);
@@ -793,7 +772,8 @@ void AtmosphereDeferredcaster::calculateInscattering(GLuint deltaSRayleigh,
     program->setUniform("rSamples", _rSamples);
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glClear(GL_COLOR_BUFFER_BIT);
+    constexpr glm::vec4 Black = glm::vec4(0.f, 0.f, 0.f, 0.f);
+    glClearNamedFramebufferfv(fbo, GL_COLOR, 0, glm::value_ptr(Black));
     for (int layer = 0; layer < _rSamples; layer++) {
         program->setUniform("layer", layer);
         glDrawArrays(GL_TRIANGLES, 0, 6);

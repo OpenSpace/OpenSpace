@@ -9,6 +9,7 @@ local Item = {
   LowestTimeUnit = "Day"
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Item)
 end)

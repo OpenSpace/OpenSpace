@@ -91,10 +91,6 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     loadTexture();
 }
 
-bool RenderableTimeVaryingSphere::isReady() const {
-    return RenderableSphere::isReady() && _texture;
-}
-
 void RenderableTimeVaryingSphere::deinitializeGL() {
     _texture = nullptr;
     _files.clear();
@@ -122,7 +118,7 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
         std::filesystem::path filePath = e.path();
         const double time = extractTriggerTimeFromFileName(filePath);
         std::unique_ptr<ghoul::opengl::Texture> t =
-            ghoul::io::TextureReader::ref().loadTexture(filePath, 2);
+            ghoul::io::texture::loadTexture(filePath, 2);
         _files.push_back({ std::move(filePath), time, std::move(t) });
     }
 

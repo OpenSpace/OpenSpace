@@ -1594,6 +1594,6 @@ asset.meta = {
   Description = [[This asset provides orientation information about Apollo 11 as it is in
     the final stages of the descent onto the Moon.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

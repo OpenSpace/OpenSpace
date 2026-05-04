@@ -426,7 +426,7 @@ void RenderableGalaxy::initializeGL() {
     );
 
     if (!_pointSpreadFunctionTexturePath.empty()) {
-        _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
+        _pointSpreadFunctionTexture = ghoul::io::texture::loadTexture(
             absPath(_pointSpreadFunctionTexturePath),
             2,
             { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
@@ -489,10 +489,6 @@ void RenderableGalaxy::deinitializeGL() {
     glDeleteVertexArrays(1, &_pointsVao);
     glDeleteBuffers(1, &_positionVbo);
     glDeleteBuffers(1, &_colorVbo);
-}
-
-bool RenderableGalaxy::isReady() const {
-    return true;
 }
 
 void RenderableGalaxy::update(const UpdateData& data) {

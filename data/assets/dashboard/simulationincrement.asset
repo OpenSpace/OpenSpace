@@ -22,6 +22,6 @@ asset.meta = {
   Description = [[This asset provides a dashboard item that shows the simulation
     increment, meaning how fast the in-game time progresses relative to the wall-clock]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

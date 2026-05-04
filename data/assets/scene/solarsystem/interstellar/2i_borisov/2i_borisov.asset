@@ -1,0 +1,12 @@
+asset.require("./trail")
+asset.require("./label", false)
+
+
+
+asset.meta = {
+  Name = "2I/Borisov meta asset",
+  Description = [[Trail and Label of 2I/Borisov.]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

@@ -1,0 +1,48 @@
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local MimasPosition = {
+  Identifier = "MimasPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Mimas,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Mimas,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "Mimas Position",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Mimas",
+    Description = "That's no moon..."
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MimasPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MimasPosition)
+end)
+
+asset.export(MimasPosition)
+
+
+
+asset.meta = {
+  Name = "Mimas Position",
+  Description = "Mimas position",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

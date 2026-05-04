@@ -25,18 +25,17 @@
 #include <modules/volume/rendering/renderablevectorfield.h>
 
 #include <modules/volume/rawvolumereader.h>
+#include <openspace/data/colormaploader.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <algorithm>
-#include <array>
 #include <execution>
 #include <numeric>
 
@@ -124,9 +123,8 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // A RenderableVectorField can be used to render vectors from a given 3D volumetric
-    // dataset or a sparse point-like dataset, optionally including color mapping and
-    // custom filtering via Lua script.
+    // Renders vectors from a given 3D volumetric dataset or a sparse point-like dataset,
+    // optionally including color mapping and custom filtering via Lua script.
     //
     // If `mode` is set to `Volume`, the vector field is defined on a regular 3D grid
     // specified by `Dimensions`, and occupies the spatial domain defined by `MinDomain`
@@ -493,10 +491,6 @@ void RenderableVectorField::deinitializeGL() {
     }
 }
 
-bool RenderableVectorField::isReady() const {
-    return _program != nullptr;
-}
-
 void RenderableVectorField::render(const RenderData& data, RendererTasks&) {
     if (_instances.empty()) {
         return;
@@ -561,9 +555,8 @@ void RenderableVectorField::update(const UpdateData&) {
         _colorTexture = nullptr;
 
         if (!_colorSettings.colorMap.value().empty()) {
-            _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
+            _colorTexture = dataloader::colormap::loadColorMapTexture(
                 absPath(_colorSettings.colorMap),
-                1,
                 ghoul::opengl::Texture::SamplerInit {
                     .filter = ghoul::opengl::Texture::FilterMode::Nearest,
                     .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
@@ -733,6 +726,10 @@ void RenderableVectorField::computeSparseFieldLines() {
     }
 
     const size_t totalInstances = (_sparse.data.size() + _stride - 1) / _stride;
+    if (totalInstances == 0) {
+        return;
+    }
+
     _instances.clear();
     _instances.resize(totalInstances);
 

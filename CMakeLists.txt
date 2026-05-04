@@ -22,10 +22,9 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-cmake_minimum_required(VERSION 3.25 FATAL_ERROR)
-cmake_policy(VERSION 3.25)
+cmake_minimum_required(VERSION 4.0)
 
-project(OpenSpace)
+project(OpenSpace LANGUAGES C CXX)
 
 # CMake 4.0 will no longer allow minimum required version below 3.5 and some of our
 # dependencies have not been updated to reflect this. To make things work, we blanked
@@ -78,7 +77,7 @@ mark_as_advanced(CMAKE_BACKWARDS_COMPATIBILITY CMAKE_BUILD_TYPE CMAKE_DEBUG_POST
 )
 
 # Set build output directories
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/support/cmake)
+list (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/support/cmake")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 if (MSVC)
@@ -96,6 +95,7 @@ execute_process(
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   OUTPUT_VARIABLE OPENSPACE_GIT_BRANCH
   OUTPUT_STRIP_TRAILING_WHITESPACE
+  COMMAND_ERROR_IS_FATAL ANY
 )
 
 # Get the latest abbreviated commit hash of the working branch
@@ -104,6 +104,7 @@ execute_process(
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   OUTPUT_VARIABLE OPENSPACE_GIT_COMMIT
   OUTPUT_STRIP_TRAILING_WHITESPACE
+  COMMAND_ERROR_IS_FATAL ANY
 )
 
 option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
@@ -113,26 +114,10 @@ if (MSVC)
 endif ()
 
 if (UNIX AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  if (NOT CMAKE_BUILD_TYPE)
-    # Can set to "RelWithDebInfo" or "Debug" also, but problems occur if this is blank by default
-    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Default build type" FORCE)
+  if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
   endif ()
-  if (NOT DEFINED CMAKE_CXX_FLAGS OR CMAKE_CXX_FLAGS MATCHES "")
-    set(CMAKE_CXX_FLAGS " ")
-  endif ()
-  STRING(FIND ${CMAKE_CXX_FLAGS} "GLM_ENABLE_EXPERIMENTAL" GLM_FLAG_POS)
-  if (${GLM_FLAG_POS} EQUAL -1)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGLM_ENABLE_EXPERIMENTAL" CACHE STRING "" FORCE)
-  endif ()
-  set(OpenGL_GL_PREFERENCE "GLVND" CACHE STRING "OpenGL Preference setting necessary for linux" FORCE)
-  # Fix for GCC tolerating space in target name
-  if (NOT DEFINED CMAKE_C_FLAGS OR CMAKE_C_FLAGS MATCHES "")
-    set(CMAKE_C_FLAGS " ")
-  endif ()
-  STRING(FIND ${CMAKE_C_FLAGS} "_GNU_SOURCE" GNUSOURCE_FLAG_POS)
-  if (${GNUSOURCE_FLAG_POS} EQUAL -1)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_GNU_SOURCE" CACHE STRING "" FORCE)
-  endif ()
+  add_compile_definitions(D_GNU_SOURCE)
 endif ()
 
 add_subdirectory(ext)
@@ -181,25 +166,20 @@ if (OPENSPACE_HAVE_TESTS)
   begin_header("Generating OpenSpace unit test")
   add_subdirectory(tests)
   end_header()
-endif (OPENSPACE_HAVE_TESTS)
+endif ()
 
 
 # Web Browser and Web gui
 # Why not put these in the module's path? Because they do not have access to the
 # target as of July 2017, which is needed.
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
-  # wanted by CEF
-  set(CMAKE_BUILD_TYPE Debug CACHE STRING "CMAKE_BUILD_TYPE")
-
-  set(PROJECT_ARCH "x86_64")
-
   if (WIN32)
     set(RESOURCE_FILE openspace.rc)
   endif ()
 
   # Add the CEF binary distribution's cmake/ directory to the module path and
   # find CEF to initialize it properly.
-  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
+  list(APPEND CMAKE_MODULE_PATH "${WEBBROWSER_MODULE_PATH}/cmake")
   include(webbrowser_helpers)
 else ()
   message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again")

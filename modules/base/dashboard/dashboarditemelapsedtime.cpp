@@ -72,9 +72,9 @@ namespace {
         Property::Visibility::User
     };
 
-    // This `DashboardItem` displays the remaining time until a provided `ReferenceTime`
-    // or the elapsed time since the `ReferenceTime`. The output can be configured through
-    // the `FormatString` and the unit that is used to display the configurable as well.
+    // Displays the remaining time until a provided `ReferenceTime` or the elapsed time
+    // since the `ReferenceTime`. The output can be configured through the `FormatString`
+    // and the unit that is used to display the configurable as well.
     struct [[codegen::Dictionary(DashboardItemElapsedTime)]] Parameters {
         // [[codegen::verbatim(FormatStringInfo.description)]]
         std::optional<std::string> formatString;

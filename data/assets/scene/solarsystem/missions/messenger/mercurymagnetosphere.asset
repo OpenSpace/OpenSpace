@@ -1,4 +1,4 @@
-local mercuryTransforms = asset.require("scene/solarsystem/planets/mercury/transforms")
+local mercuryAsset = asset.require("scene/solarsystem/planets/mercury/transforms")
 local coreKernels = asset.require("spice/core")
 
 
@@ -16,7 +16,7 @@ local MercuryRadius = 2439700
 local Magnetosphere = {
   Name = "Mercury Magnetosphere",
   Identifier = "MercuryMagnetosphere",
-  Parent = mercuryTransforms.MercuryBarycenter.Identifier,
+  Parent = mercuryAsset.MercuryBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",

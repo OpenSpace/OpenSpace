@@ -268,10 +268,6 @@ void RenderableTrail::deinitializeGL() {
     _programObject = nullptr;
 }
 
-bool RenderableTrail::isReady() const {
-    return _programObject != nullptr;
-}
-
 glm::dvec3 RenderableTrail::translationPosition(Time time) const {
     // Use empty modelTransform (local coordinates) and time 0; previous frame time
     // doesn't matter

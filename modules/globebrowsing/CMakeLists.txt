@@ -150,7 +150,6 @@ source_group("Shader Files" FILES ${SHADER_FILES})
 create_new_module(
   "GlobeBrowsing"
   globebrowsing_module
-  STATIC
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 target_precompile_headers(${globebrowsing_module} PRIVATE

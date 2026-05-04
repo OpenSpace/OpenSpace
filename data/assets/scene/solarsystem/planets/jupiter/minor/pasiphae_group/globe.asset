@@ -1,0 +1,573 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Euporie = {
+  Identifier = "Euporie",
+  Parent = transforms.EuporiePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Euporie",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Euporie"
+  }
+}
+
+local S2003J18 = {
+  Identifier = "S2003J18",
+  Parent = transforms.S2003J18Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 18",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J18"
+  }
+}
+
+local Helike = {
+  Identifier = "Helike",
+  Parent = transforms.HelikePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Helike",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Helike"
+  }
+}
+
+local Orthosie = {
+  Identifier = "Orthosie",
+  Parent = transforms.OrthosiePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Orthosie",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Orthosie"
+  }
+}
+
+local S2016J1 = {
+  Identifier = "S2016J1",
+  Parent = transforms.S2016J1Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2016 J 1",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J1"
+  }
+}
+
+local S2003J15 = {
+  Identifier = "S2003J15",
+  Parent = transforms.S2003J15Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 15",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J15"
+  }
+}
+
+local Aoede = {
+  Identifier = "Aoede",
+  Parent = transforms.AoedePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Aoede",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Aoede"
+  }
+}
+
+local Callirrhoe = {
+  Identifier = "Callirrhoe",
+  Parent = transforms.CallirrhoePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 9000, 9000, 9000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Callirrhoe",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Callirrhoe"
+  }
+}
+
+local Eurydome = {
+  Identifier = "Eurydome",
+  Parent = transforms.EurydomePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Eurydome",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Eurydome"
+  }
+}
+
+local Kore = {
+  Identifier = "Kore",
+  Parent = transforms.KorePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Kore",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Kore"
+  }
+}
+
+local Cyllene = {
+  Identifier = "Cyllene",
+  Parent = transforms.CyllenePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Cyllene",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Cyllene"
+  }
+}
+
+local S2011J2 = {
+  Identifier = "S2011J2",
+  Parent = transforms.S2011J2Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2011 J 2",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2011J2"
+  }
+}
+
+local S2017J1 = {
+  Identifier = "S2017J1",
+  Parent = transforms.S2017J1Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 1",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J1"
+  }
+}
+
+local S2003J4 = {
+  Identifier = "S2003J4",
+  Parent = transforms.S2003J4Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 4",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J4"
+  }
+}
+
+local Pasiphae = {
+  Identifier = "Pasiphae",
+  Parent = transforms.PasiphaePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 60000, 60000, 60000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Pasiphae",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Pasiphae"
+  }
+}
+
+local Hegemone = {
+  Identifier = "Hegemone",
+  Parent = transforms.HegemonePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Hegemone",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Hegemone"
+  }
+}
+
+local Sinope = {
+  Identifier = "Sinope",
+  Parent = transforms.SinopePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 38000, 38000, 38000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Sinope",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sinope"
+  }
+}
+
+local Sponde = {
+  Identifier = "Sponde",
+  Parent = transforms.SpondePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Sponde",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sponde"
+  }
+}
+
+local Autonoe = {
+  Identifier = "Autonoe",
+  Parent = transforms.AutonoePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Autonoe",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Autonoe"
+  }
+}
+
+local Megaclite = {
+  Identifier = "Megaclite",
+  Parent = transforms.MegaclitePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 5000, 5000, 5000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Megaclite",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Megaclite"
+  }
+}
+
+local S2016J4 = {
+  Identifier = "S2016J4",
+  Parent = transforms.S2016J4Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2016 J 4",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J4"
+  }
+}
+
+local S2017J6 = {
+  Identifier = "S2017J6",
+  Parent = transforms.S2017J6Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 6",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J6"
+  }
+}
+
+local S2003J23 = {
+  Identifier = "S2003J23",
+  Parent = transforms.S2003J23Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_pasiphae",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 23",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J23"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Euporie)
+  openspace.addSceneGraphNode(S2003J18)
+  openspace.addSceneGraphNode(Helike)
+  openspace.addSceneGraphNode(Orthosie)
+  openspace.addSceneGraphNode(S2016J1)
+  openspace.addSceneGraphNode(S2003J15)
+  openspace.addSceneGraphNode(Aoede)
+  openspace.addSceneGraphNode(Callirrhoe)
+  openspace.addSceneGraphNode(Eurydome)
+  openspace.addSceneGraphNode(Kore)
+  openspace.addSceneGraphNode(Cyllene)
+  openspace.addSceneGraphNode(S2011J2)
+  openspace.addSceneGraphNode(S2017J1)
+  openspace.addSceneGraphNode(S2003J4)
+  openspace.addSceneGraphNode(Pasiphae)
+  openspace.addSceneGraphNode(Hegemone)
+  openspace.addSceneGraphNode(Sinope)
+  openspace.addSceneGraphNode(Sponde)
+  openspace.addSceneGraphNode(Autonoe)
+  openspace.addSceneGraphNode(Megaclite)
+  openspace.addSceneGraphNode(S2016J4)
+  openspace.addSceneGraphNode(S2017J6)
+  openspace.addSceneGraphNode(S2003J23)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2003J23)
+  openspace.removeSceneGraphNode(S2017J6)
+  openspace.removeSceneGraphNode(S2016J4)
+  openspace.removeSceneGraphNode(Megaclite)
+  openspace.removeSceneGraphNode(Autonoe)
+  openspace.removeSceneGraphNode(Sponde)
+  openspace.removeSceneGraphNode(Sinope)
+  openspace.removeSceneGraphNode(Hegemone)
+  openspace.removeSceneGraphNode(Pasiphae)
+  openspace.removeSceneGraphNode(S2003J4)
+  openspace.removeSceneGraphNode(S2017J1)
+  openspace.removeSceneGraphNode(S2011J2)
+  openspace.removeSceneGraphNode(Cyllene)
+  openspace.removeSceneGraphNode(Kore)
+  openspace.removeSceneGraphNode(Eurydome)
+  openspace.removeSceneGraphNode(Callirrhoe)
+  openspace.removeSceneGraphNode(Aoede)
+  openspace.removeSceneGraphNode(S2003J15)
+  openspace.removeSceneGraphNode(S2016J1)
+  openspace.removeSceneGraphNode(Orthosie)
+  openspace.removeSceneGraphNode(Helike)
+  openspace.removeSceneGraphNode(S2003J18)
+  openspace.removeSceneGraphNode(Euporie)
+end)
+
+asset.export(Euporie)
+asset.export(S2003J18)
+asset.export(Helike)
+asset.export(Orthosie)
+asset.export(S2016J1)
+asset.export(S2003J15)
+asset.export(Aoede)
+asset.export(Callirrhoe)
+asset.export(Eurydome)
+asset.export(Kore)
+asset.export(Cyllene)
+asset.export(S2011J2)
+asset.export(S2017J1)
+asset.export(S2003J4)
+asset.export(Pasiphae)
+asset.export(Hegemone)
+asset.export(Sinope)
+asset.export(Sponde)
+asset.export(Autonoe)
+asset.export(Megaclite)
+asset.export(S2016J4)
+asset.export(S2017J6)
+asset.export(S2003J23)
+
+
+
+asset.meta = {
+  Name = "Jupiter Pasiphae Group Moons Globes",
+  Description = [[Asset containing globes for Jupiter's Pasiphae Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

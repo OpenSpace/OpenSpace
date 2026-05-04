@@ -8,6 +8,7 @@ local Item = {
   FrametimeType = "Deltatime"
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Item)
 end)

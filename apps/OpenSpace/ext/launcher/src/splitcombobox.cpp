@@ -50,13 +50,13 @@ SplitComboBox::SplitComboBox(QWidget* parent, std::filesystem::path userPath,
         this,
         QOverload<int>::of(&QComboBox::currentIndexChanged),
         [this](int index) {
-            if (!_specialFirst.empty() && index == 0) {
+            std::string path = itemData(index).toString().toStdString();
+            if (!_specialFirst.empty() && index == 0 && path.empty()) {
                 // We have a special entry which is at the top of the list and that entry
                 // was selected
                 emit selectionChanged(std::nullopt);
             }
             else {
-                std::string path = itemData(index).toString().toStdString();
                 emit selectionChanged(std::move(path));
             }
         }
@@ -110,7 +110,7 @@ void SplitComboBox::populateList(const std::string& preset) {
         // Display the relative path, but store the full path in the user data segment
         addItem(
             icon,
-            QString::fromStdString(relPath.string()),
+            QString::fromStdString(relPath.generic_string()),
             QString::fromStdString(p.string())
         );
 
@@ -139,7 +139,7 @@ void SplitComboBox::populateList(const std::string& preset) {
 
         // Display the relative path, but store the full path in the user data segment
         addItem(
-            QString::fromStdString(relPath.string()),
+            QString::fromStdString(relPath.generic_string()),
             QString::fromStdString(p.string())
         );
 
@@ -158,18 +158,39 @@ void SplitComboBox::populateList(const std::string& preset) {
     blockSignals(false);
 
 
+    // The user might have provided the name of the profile with an extension, so we need
+    // to check both
+    std::filesystem::path presetPath = std::filesystem::path(preset);
+    const std::string presetOption1 = presetPath.string();
+    const std::string presetOption2 = presetPath.replace_extension("").string();
+
     //
     // Find the provided preset and set it as the current one
-    const int idx = findText(QString::fromStdString(preset));
-    if (idx != -1) {
+    const int idx1 = findText(QString::fromStdString(presetOption1));
+    const int idx2 = findText(QString::fromStdString(presetOption2));
+    if (idx1 != -1) {
         // Found the preset, set it as the current index
-        setCurrentIndex(idx);
+        setCurrentIndex(idx1);
+    }
+    else if (idx2 != -1) {
+        // Found the preset, set it as the current index
+        setCurrentIndex(idx2);
     }
     else {
-        // The preset wasn't found, so we add it to the top
-        std::string text = std::format("'{}' not found", preset);
-        insertItem(0, QString::fromStdString(text));
-        setCurrentIndex(0);
+        // If we get here the user has either: 1. set a full absolute path to a profile or
+        // 2. asked for a profile that does not exist. Either way, we just take the preset
+        // as provided and don't need to do anything with the extension anymore
+        if (std::filesystem::exists(preset)) {
+            // The user specified the full path to a profile, so we add it at the top
+            insertItem(0, QString::fromStdString(preset), QString::fromStdString(preset));
+            setCurrentIndex(0);
+        }
+        else {
+            // The preset wasn't found, so we add it to the top
+            std::string text = std::format("'{}' not found", preset);
+            insertItem(0, QString::fromStdString(text), "");
+            setCurrentIndex(0);
+        }
     }
 }
 

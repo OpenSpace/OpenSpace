@@ -83,7 +83,6 @@ public:
     virtual void deinitializeGL();
 
     virtual void update();
-    virtual bool isReady() const;
     bool isEnabled() const;
     bool isUsingRaeCoords() const;
     bool isFacingCamera() const;

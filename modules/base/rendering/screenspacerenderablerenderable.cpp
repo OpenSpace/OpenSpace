@@ -82,10 +82,9 @@ namespace {
         "Renderable."
     };
 
-    // This [ScreenSpaceRenderable](#core_screenspacerenderable) object can render any
-    // [Renderable](#core_renderable) type into an image that is shown in screen space.
-    // This can be used to display a rendered object as an overlay in front of the regular
-    // 3D rendering of the scene.
+    // Renders any [Renderable](#core_renderable) type into an image that is shown in
+    // screen space. This can be used to display a rendered object as an overlay in front
+    // of the regular 3D rendering of the scene.
     //
     // Note that to use this `ScreenSpaceRenderable`, it might be necessary to specify the
     // `size` parameter, which determines the resolution of the inset window into which

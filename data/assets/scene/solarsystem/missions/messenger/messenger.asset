@@ -1,6 +1,5 @@
-local sun = asset.require("scene/solarsystem/sun/transforms")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local mercuryTransforms = asset.require("scene/solarsystem/planets/mercury/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+local mercuryAsset = asset.require("scene/solarsystem/planets/mercury/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -23,7 +22,7 @@ local RotationMatrix = {
 
 local Messenger = {
   Identifier = "Messenger",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "2011-03-01",
@@ -54,8 +53,9 @@ local MessengerProbeBlack = {
     GeometryFile = models .. "MessengerProbe_black.obj",
     ModelTransform = RotationMatrix,
     LightSources = {
-      sun.LightSource
-    }
+      sunAsset.LightSource
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "MessengerProbe Black",
@@ -73,8 +73,9 @@ local MessengerProbeFoil = {
     GeometryFile = models .. "MessengerProbe_foil.obj",
     ModelTransform = RotationMatrix,
     LightSources = {
-      sun.LightSource
-    }
+      sunAsset.LightSource
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "MessengerProbe foil",
@@ -92,8 +93,9 @@ local MessengerProbeHeatShield = {
     GeometryFile = models .. "MessengerProbe_heatShield.obj",
     ModelTransform = RotationMatrix,
     LightSources = {
-      sun.LightSource
-    }
+      sunAsset.LightSource
+    },
+    EnableFaceCulling = true
   },
   GUI = {
     Name = "MessengerProbe Heat Shield",
@@ -111,8 +113,9 @@ local MessengerProbeMetal = {
     GeometryFile = models .. "MessengerProbe_metal.obj",
     ModelTransform = RotationMatrix,
     LightSources = {
-      sun.LightSource
-    }
+      sunAsset.LightSource
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "MessengerProbe Metal",
@@ -130,8 +133,9 @@ local MessengerProbePanels = {
     GeometryFile = models .. "MessengerProbe_panels.obj",
     ModelTransform = RotationMatrix,
     LightSources = {
-      sun.LightSource
-    }
+      sunAsset.LightSource
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "MessengerProbe Panels",
@@ -143,7 +147,7 @@ local MessengerProbePanels = {
 
 local MessengerTrail = {
   Identifier = "MessengerTrail",
-  Parent = mercuryTransforms.MercuryBarycenter.Identifier,
+  Parent = mercuryAsset.MercuryBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {

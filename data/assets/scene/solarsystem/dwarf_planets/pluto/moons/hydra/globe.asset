@@ -1,0 +1,37 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Hydra = {
+  Identifier = "Hydra",
+  Parent = transforms.HydraPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 53000, 53000, 53000 }
+  },
+  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor", "moon_minor_pluto" },
+  GUI = {
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Hydra"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Hydra)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Hydra)
+end)
+
+asset.export(Hydra)
+
+
+
+asset.meta = {
+  Name = "Hydra Globe",
+  Description = "Globe for Pluto's moon Hydra",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

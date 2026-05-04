@@ -1,12 +1,12 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Space & Earth Science)",
+  Name = "Satellite CSV Data (Space & Earth Science)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_science",
-  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=science&FORMAT=kvn",
+  Identifier = "satellite_csv_data_science",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=science&FORMAT=csv",
   Filename = "science.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -14,11 +14,11 @@ local omm = asset.resource({
 
 local ScienceSatellites = {
   Identifier = "ScienceSatellites",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "science.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
     TrailFade = 17,
@@ -50,6 +50,6 @@ asset.meta = {
   Name = "Satellites Science Space & Earth Science",
   Description = "Satellites asset for Science Space & Earth Science. Data from Celestrak",
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/NORAD/elements/",
+  URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
 }

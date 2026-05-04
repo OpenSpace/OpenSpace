@@ -1,5 +1,5 @@
-local sun = asset.require("scene/solarsystem/sun/transforms")
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
@@ -25,7 +25,7 @@ local GenericAction = {
 
 local Model = {
   Identifier = "ExampleEventModel",
-  Parent = transforms.EarthCenter.Identifier,
+  Parent = earthAsset.EarthCenter.Identifier,
   Transform = {
     Translation = {
       Type = "StaticTranslation",
@@ -37,7 +37,7 @@ local Model = {
     GeometryFile = model .. "BoxAnimated.glb",
     ModelScale = 1000,
     LightSources = {
-      sun.LightSource
+      sunAsset.LightSource
     }
   },
   InteractionSphere = 900,

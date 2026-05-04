@@ -1,0 +1,59 @@
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+
+
+local omm = asset.resource({
+  Name = "Satellite CSV Data (Tiangong)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_csv_data_tiangong",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?CATNR=48274&FORMAT=csv",
+  Filename = "Tiangong.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local TiangongTrail = {
+  Identifier = "Tiangong_trail",
+  Parent = earthAsset.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "GPTranslation",
+      Observer = earthAsset.EarthInertial.Identifier,
+      File = omm .. "Tiangong.txt",
+      Format = "CSV"
+    },
+    RenderBinMode = "PostDeferredTransparent",
+    Color = { 0.9, 0.28, 0.33 },
+    Fade = 1.5,
+    Resolution = 320
+  },
+  Tag = { "earth_satellites", "Tiangong", "space_stations", "trails" },
+  GUI = {
+    Name = "Tiangong Trail",
+    Path = "/Solar System/Planets/Earth/Satellites/Tiangong",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  local i = openspace.space.readKeplerFile(omm .. "Tiangong.txt", "CSV")
+  TiangongTrail.Renderable.Period = i[1].Period / (60 * 60 * 24)
+
+  openspace.addSceneGraphNode(TiangongTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TiangongTrail)
+end)
+
+asset.export(TiangongTrail)
+
+
+
+asset.meta = {
+  Name = "Tiangong Trail",
+  Description = [[Trail for Tiangong. Trail data from Celestrak.]],
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.org/"
+}

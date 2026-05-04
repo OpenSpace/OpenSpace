@@ -42,7 +42,7 @@ namespace openspace {
 class TouchMarker : public PropertyOwner {
 public:
     TouchMarker();
-    virtual ~TouchMarker();
+    ~TouchMarker() override;
 
     void initializeGL();
     void deinitializeGL();

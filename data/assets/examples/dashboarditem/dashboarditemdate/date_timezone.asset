@@ -8,6 +8,7 @@ local Item = {
   TimeFormat = "YYYY MON DD HR:MN:SC.### PDT ::UTC-7"
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Item)
 end)

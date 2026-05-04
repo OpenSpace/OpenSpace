@@ -46,6 +46,6 @@ asset.meta = {
   Name = "Moon Trail",
   Description = "Moon Trail - This asset contains the trail of the Moon",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

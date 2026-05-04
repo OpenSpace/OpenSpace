@@ -24,6 +24,7 @@
 
 #include <openspace/data/dataloader.h>
 
+#include <openspace/data/colormaploader.h>
 #include <openspace/data/csvloader.h>
 #include <openspace/data/speckloader.h>
 #include <ghoul/filesystem/cachemanager.h>
@@ -589,7 +590,7 @@ namespace color {
 
         ColorMap res;
         if (extension == ".cmap") {
-            res = speck::loadCmapFile(path);
+            res = colormap::loadCmapFile(path);
         }
         else {
             LERRORC("DataLoader", std::format(

@@ -28,8 +28,8 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/space/kepler.h>
+#include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
-#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
@@ -46,7 +46,6 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
@@ -132,7 +131,7 @@ private:
     UIntProperty _segmentQuality;
     UIntProperty _startRenderIdx;
     UIntProperty _sizeRender;
-    StringProperty _path;
+    StringListProperty _path;
     BoolProperty _contiguousMode;
     kepler::Format _format;
     RenderableOrbitalKepler::Appearance _appearance;

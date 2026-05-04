@@ -1,0 +1,28 @@
+asset.require("./base_layers")
+
+local server = openspace.layerServer();
+if (server == "All") then
+  asset.require("./newyork_layers")
+  asset.require("./utah_layers")
+elseif (server == "NewYork") then
+  asset.require("./newyork_layers")
+elseif (server == "Sweden") then
+  -- Using the New York server as a fallback
+  asset.require("./newyork_layers")
+elseif (server == "Utah") then
+  asset.require("./utah_layers")
+end
+
+
+
+asset.meta = {
+  Name = "Default Venus Layers",
+  Description = [[Default Venus layers are: Venus Texture, Magellan Mosaic,
+    Clouds Magellan Combo, and Magellan Elevation (3D).
+
+    Layers loaded from all available servers
+  ]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

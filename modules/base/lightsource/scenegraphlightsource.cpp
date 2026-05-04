@@ -50,9 +50,9 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // This `LightSource` type represents a light source placed at the position of a scene
-    // graph node. That is, the direction of the light will follow the position of an
-    // existing object in the scene. It will also update dynamically as the object moves.
+    // Represents a light source placed at the position of a scene graph node. That is,
+    // the direction of the light will follow the position of an existing object in the
+    // scene. It will also update dynamically as the object moves.
     //
     // Note that the brightness of the light from the light source does not depend on the
     // distance between the two scene graph nodes. Only the `Intensity` value has an

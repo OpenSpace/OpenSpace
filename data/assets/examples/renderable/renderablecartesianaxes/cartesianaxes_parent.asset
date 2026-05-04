@@ -2,11 +2,11 @@
 -- This example creates a scene graph node that displays coordinate axes of the given
 -- parent node, in this case Earth.
 
-local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 
 local Node = {
   Identifier = "RenderableCartesianAxes_Example_Parent",
-  Parent = earth.Earth.Identifier,
+  Parent = earthAsset.Earth.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -21,6 +21,7 @@ local Node = {
     Path = "/Examples"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Node)

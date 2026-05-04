@@ -49,10 +49,6 @@
 namespace {
     using namespace openspace;
 
-    // We can't use ${SCRIPTS} here as that hasn't been defined by this point
-    constexpr std::string_view InitialConfigHelper =
-        "${BASE}/scripts/configuration_helper.lua";
-
     struct [[codegen::Dictionary(Configuration)]] Parameters {
         // The SGCT configuration file that determines the window and view frustum
         // settings that are being used when OpenSpace is started.
@@ -217,7 +213,7 @@ namespace {
         // concrete OpenSpace instance was started. This value is enabled by default, but
         // it is advised to disable this value if rendering sessions of individual frames
         // pass beyond local midnight.
-        std::optional<bool> screenshotUseDate;
+        std::optional<bool> screenshotUseDateTime;
 
         // Toggles whether the Lua states used inside OpenSpace are sandboxed which
         // prevents potentially unsafe malicious code to run on the system. Only turn this
@@ -441,7 +437,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("IsPrintingEvents", isPrintingEvents);
     res.setValue("ConsoleKey", ghoul::to_string(consoleKey));
     res.setValue("ShutdownCountdown", static_cast<double>(shutdownCountdown));
-    res.setValue("shouldUseScreenshotDate", shouldUseScreenshotDate);
+    res.setValue("shouldUseScreenshotDateTime", shouldUseScreenshotDateTime);
     res.setValue("sandboxedLua", sandboxedLua);
     res.setValue("OnScreenTextScaling", onScreenTextScaling);
     res.setValue("UsePerProfileCache", usePerProfileCache);
@@ -519,8 +515,6 @@ ghoul::Dictionary Configuration::createDictionary() {
         res.setValue("HttpProxy", httpProxyDict);
     }
 
-    res.setValue("SgctConfigNameInitialized", sgctConfigNameInitialized);
-
     return res;
 }
 
@@ -530,15 +524,6 @@ void parseLuaState(Configuration& configuration) {
     // Shorten the rest of this function
     Configuration& c = configuration;
     const LuaState& s = c.state;
-
-    // The sgctConfigNameInitialized is a bit special
-    lua_getglobal(s, "sgctconfiginitializeString");
-    c.sgctConfigNameInitialized = ghoul::lua::value<std::string>(
-        s,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-
 
     // The configuration file sets all values as global variables, so we need to pull them
     // into a table first so that we can pass that table to the dictionary constructor
@@ -606,7 +591,8 @@ void parseLuaState(Configuration& configuration) {
     }
 
     c.shutdownCountdown = p.shutdownCountdown.value_or(c.shutdownCountdown);
-    c.shouldUseScreenshotDate = p.screenshotUseDate.value_or(c.shouldUseScreenshotDate);
+    c.shouldUseScreenshotDateTime =
+        p.screenshotUseDateTime.value_or(c.shouldUseScreenshotDateTime);
     c.sandboxedLua = p.sandboxedLua.value_or(c.sandboxedLua);
     c.onScreenTextScaling = p.onScreenTextScaling.value_or(c.onScreenTextScaling);
     c.usePerProfileCache = p.perProfileCache.value_or(c.usePerProfileCache);
@@ -698,7 +684,6 @@ void patchConfiguration(Configuration& configuration, const Settings& settings) 
         settings.configuration.has_value())
     {
         configuration.windowConfiguration = *settings.configuration;
-        configuration.sgctConfigNameInitialized.clear();
     }
     if (settings.rememberLastProfile.value_or(false)) {
         if (settings.profile.has_value()) {
@@ -791,8 +776,7 @@ std::filesystem::path findConfiguration(const std::string& filename) {
 }
 
 Configuration loadConfigurationFromFile(const std::filesystem::path& configurationFile,
-                                        const std::filesystem::path& settingsFile,
-                                        const glm::ivec2& primaryMonitorResolution)
+                                        const std::filesystem::path& settingsFile)
 {
     ghoul_assert(std::filesystem::is_regular_file(configurationFile), "File must exist");
 
@@ -800,31 +784,6 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
     // Having the configuration not sandboxed is safe as there is no way for a third-party
     // file to have any input this early in the loading phase
     result.state = ghoul::lua::LuaState(ghoul::lua::LuaState::Sandboxed::No);
-
-    // Injecting the resolution of the primary screen into the Lua state
-    const std::string script = std::format(
-        "ScreenResolution = {{ x = {}, y = {} }}",
-        primaryMonitorResolution.x, primaryMonitorResolution.y
-    );
-    ghoul::lua::runScript(result.state, script);
-
-    // Local function to convert a dictionary to its JSON object's string representation
-    constexpr auto TableToJson = [](lua_State* state) {
-        if (!ghoul::lua::hasValue<ghoul::Dictionary>(state)) {
-            throw ghoul::lua::LuaError("TableToJson must receive a table object");
-        }
-        ghoul::Dictionary dict = ghoul::lua::value<ghoul::Dictionary>(state);
-        std::string stringRepresentation = formatJson(dict);
-        ghoul::lua::push(state, std::move(stringRepresentation));
-        return 1;
-    };
-    lua_pushcfunction(result.state, TableToJson);
-    lua_setglobal(result.state, "TableToJson");
-
-    // If there is an initial config helper file, load it into the state
-    if (std::filesystem::is_regular_file(absPath(InitialConfigHelper))) {
-        ghoul::lua::runScriptFile(result.state, absPath(InitialConfigHelper));
-    }
 
     // Load the configuration file into the state
     ghoul::lua::runScriptFile(result.state, configurationFile);
@@ -847,23 +806,21 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
 }
 
 Configuration::LayerServer stringToLayerServer(std::string_view server) {
-    using Server = Configuration::LayerServer;
-    if (server == "All") { return Server::All; }
-    else if (server == "NewYork") { return Server::NewYork; }
-    else if (server == "Sweden") { return Server::Sweden; }
-    else if (server == "Utah") { return Server::Utah; }
-    else if (server == "None") { return Server::None; }
+    if (server == "All") { return Configuration::LayerServer::All; }
+    else if (server == "NewYork") { return Configuration::LayerServer::NewYork; }
+    else if (server == "Sweden") { return Configuration::LayerServer::Sweden; }
+    else if (server == "Utah") { return Configuration::LayerServer::Utah; }
+    else if (server == "None") { return Configuration::LayerServer::None; }
     else { throw ghoul::MissingCaseException(); }
 }
 
 std::string layerServerToString(Configuration::LayerServer server) {
-    using Server = Configuration::LayerServer;
     switch (server) {
-        case Server::All: return "All";
-        case Server::NewYork: return "NewYork";
-        case Server::Sweden: return "Sweden";
-        case Server::Utah: return "Utah";
-        case Server::None: return "None";
+        case Configuration::LayerServer::All: return "All";
+        case Configuration::LayerServer::NewYork: return "NewYork";
+        case Configuration::LayerServer::Sweden: return "Sweden";
+        case Configuration::LayerServer::Utah: return "Utah";
+        case Configuration::LayerServer::None: return "None";
         default: throw ghoul::MissingCaseException();
     }
 }

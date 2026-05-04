@@ -57,11 +57,7 @@ int main(int, char** argv) {
     std::filesystem::path base = configFile.parent_path();
     FileSys.registerPathToken("${BASE}", base);
 
-    *global::configuration = loadConfigurationFromFile(
-        configFile.string(),
-        "",
-        glm::ivec2(0)
-    );
+    *global::configuration = loadConfigurationFromFile(configFile.string(), "");
     openspace::global::openSpaceEngine->registerPathTokens();
 
     // Now that we have the tokens we can initialize the engine

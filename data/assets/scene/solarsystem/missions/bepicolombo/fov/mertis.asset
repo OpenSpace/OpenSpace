@@ -1,11 +1,11 @@
-local transforms = asset.require("../model")
+local model = asset.require("../model")
 local kernels = asset.require("../kernels")
 
 
 
 local MertisTis = {
   Identifier = "BepiColomboMPO_MertisTis",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -28,7 +28,7 @@ local MertisTis = {
 
 local MertisTisPlanet = {
   Identifier = "BepiColomboMPO_MertisTisPlanet",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -51,7 +51,7 @@ local MertisTisPlanet = {
 
 local MertisTisSpace = {
   Identifier = "BepiColomboMPO_MertisTisSpace",
-  Parent = transforms.BepiColombo.Identifier,
+  Parent = model.BepiColombo.Identifier,
   Renderable = {
     Type = "RenderableFov",
     Body = kernels.ID.MPO,
@@ -98,6 +98,6 @@ asset.meta = {
     better than 500 m for approximately 5-10 percent of the surface.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -64,9 +64,9 @@ namespace {
         );
     }
 
-    // This `Renderable` shows a sphere with an image provided by an online URL. The image
-    // will be downloaded when the `Renderable` is added to a scene graph node. To show a
-    // sphere with an image from a local file, see
+    // Shows a sphere with an image provided by an online URL. The image will be
+    // downloaded when the `Renderable` is added to a scene graph node. To show a sphere
+    // with an image from a local file, see
     // [RenderableSphereImageLocal](#base_screenspace_imagelocal).
     //
     // Per default, the sphere uses an equirectangular projection for the image mapping
@@ -134,7 +134,7 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
         }
 
         try {
-            _texture = ghoul::io::TextureReader::ref().loadTexture(
+            _texture = ghoul::io::texture::loadTexture(
                 reinterpret_cast<void*>(imageFile.buffer),
                 imageFile.size,
                 2,
@@ -144,7 +144,7 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
 
             _textureIsDirty = false;
         }
-        catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
+        catch (const ghoul::io::texture::InvalidLoadException& e) {
             _textureIsDirty = false;
             LERRORC(e.component, e.message);
         }

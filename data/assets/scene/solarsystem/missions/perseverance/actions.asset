@@ -40,6 +40,6 @@ asset.meta = {
   Name = "Perseverance Actions",
   Description = "Actions related to the Perseverance mission",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

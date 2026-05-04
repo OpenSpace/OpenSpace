@@ -1,0 +1,55 @@
+local transforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
+local kernels347 = asset.require("scene/solarsystem/planets/jupiter/kernels347")
+local coreKernels = asset.require("spice/core")
+
+
+
+local ThemistoTrail = {
+  Identifier = "ThemistoTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Themisto,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 129.87,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_themisto",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Themisto Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Themisto Group/Themisto",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(ThemistoTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(ThemistoTrail)
+end)
+
+asset.export(ThemistoTrail)
+
+
+
+asset.meta = {
+  Name = "Jupiter Themisto Group Moons Trails",
+  Description = [[Asset containing trails for Jupiter's Themisto Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

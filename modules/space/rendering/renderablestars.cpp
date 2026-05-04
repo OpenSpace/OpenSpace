@@ -24,6 +24,7 @@
 
 #include <modules/space/rendering/renderablestars.h>
 
+#include <openspace/data/colormaploader.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
@@ -314,12 +315,11 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // RenderableStars renders large star catalogs as a point-based star field using data
-    // loaded from a SPECK file or a CSV file (see
-    // [here](/building-content/point-data/data-formats) for more information on the
-    // available data formats). It is intended for astronomical datasets where each entry
-    // represents a star with position and optional physical metadata such as color index,
-    // luminosity, magnitude, and motion.
+    // Renders large star catalogs as a point-based star field using data loaded from a
+    // SPECK file or a CSV file (see [here](/building-content/point-data/data-formats)
+    // for more information on the available data formats). It is intended for
+    // astronomical datasets where each entry represents a star with position and optional
+    // physical metadata such as color index, luminosity, magnitude, and motion.
     //
     // Visually, each star is drawn as a billboarded light source made up of one or two
     // textured components: a central core and a surrounding glare.
@@ -775,10 +775,6 @@ void RenderableStars::deinitializeGL() {
     }
 }
 
-bool RenderableStars::isReady() const {
-    return _program && _glare.texture;
-}
-
 void RenderableStars::loadPSFTexture() {
     auto markPsfTextureAsDirty = [this]() { _pointSpreadFunctionTextureIsDirty = true; };
     auto loadTexture = [markPsfTextureAsDirty](TextureComponent& component) {
@@ -790,7 +786,7 @@ void RenderableStars::loadPSFTexture() {
             return;
         }
 
-        component.texture = ghoul::io::TextureReader::ref().loadTexture(
+        component.texture = ghoul::io::texture::loadTexture(
             absPath(path),
             2,
             {
@@ -947,9 +943,8 @@ void RenderableStars::update(const UpdateData&) {
         LDEBUG("Reloading Color Texture");
         _colorTexture = nullptr;
         if (!_colorTexturePath.value().empty()) {
-            _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_colorTexturePath),
-                1
+            _colorTexture = dataloader::colormap::loadColorMapTexture(
+                absPath(_colorTexturePath)
             );
 
             LDEBUG(std::format("Loaded texture '{}'", _colorTexturePath.value()));
@@ -962,12 +957,11 @@ void RenderableStars::update(const UpdateData&) {
     }
 
     if (_otherDataColorMapIsDirty) [[unlikely]] {
-        LDEBUG("Reloading Color Texture");
+        LDEBUG("Reloading Other Data Color Texture");
         _otherDataColorMapTexture = nullptr;
         if (!_otherDataColorMapPath.value().empty()) {
-            _otherDataColorMapTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_otherDataColorMapPath),
-                1
+            _otherDataColorMapTexture = dataloader::colormap::loadColorMapTexture(
+                absPath(_otherDataColorMapPath)
             );
             LDEBUG(std::format(
                 "Loaded texture '{}'", _otherDataColorMapPath.value()
@@ -1000,9 +994,12 @@ void RenderableStars::loadData() {
     }
     _otherDataOption.addOptions(variableNames);
 
-    const bool success = _dataset.normalizeVariable("lum");
+    const bool success = _dataset.normalizeVariable(_dataMapping.luminance);
     if (!success) {
-        throw ghoul::RuntimeError("Could not find required variable 'luminosity'");
+        throw ghoul::RuntimeError(std::format(
+            "Could not find required variable '{}'",
+            _dataMapping.luminance.value()
+        ));
     }
 }
 

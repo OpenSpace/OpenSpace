@@ -32,6 +32,7 @@ local Item = {
   DestinationNodeIdentifier = Node2.Identifier
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Node1)
   openspace.addSceneGraphNode(Node2)

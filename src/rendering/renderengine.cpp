@@ -56,10 +56,6 @@
 #include <ghoul/io/model/modelreaderassimp.h>
 #include <ghoul/io/model/modelreaderbinary.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/io/texture/texturereadercmap.h>
-#include <ghoul/io/texture/texturereaderstb.h>
-#include <ghoul/io/texture/texturewriter.h>
-#include <ghoul/io/texture/texturewriterstb.h>
 #include <ghoul/logging/loglevel.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
@@ -150,9 +146,18 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ScreenshotUseDateInfo = {
-        "ScreenshotUseDate",
-        "Screenshot folder uses date",
+    constexpr Property::PropertyInfo UseNewScreenshotFolderInfo = {
+        "UseNewScreenshotFolder",
+        "Use New Screenshot Folder",
+        "If this property is triggered, a new screenshot folder is created and the "
+        "numbering for screenshots is reset to start at 0. Note, this property only does "
+        "something if `ScreenshotUseDateTime` is set to `true`.",
+        Property::Visibility::AdvancedUser
+    };
+
+    constexpr Property::PropertyInfo ScreenshotUseDateTimeInfo = {
+        "ScreenshotUseDateTime",
+        "Screenshot folder uses datetime",
         "If this value is set to 'true', screenshots will be saved to a folder that "
         "contains the time at which this value was enabled.",
         Property::Visibility::AdvancedUser
@@ -258,16 +263,43 @@ namespace {
     };
 
     constexpr Property::PropertyInfo GlobalBlackoutFactorInfo = {
-        "BlackoutFactor",
-        "Blackout factor",
+        "Factor",
+        "Factor",
         "The blackout factor of the rendering. This can be used for fading in or out the "
         "rendering window.",
         Property::Visibility::User
     };
 
+    constexpr Property::PropertyInfo GlobalBlackoutColorInfo = {
+        "Color",
+        "Color",
+        "The color used for the blackout of the rendering. This can be used for fading "
+        "in or out the rendering window.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo GlobalBlackoutImageFactorInfo = {
+        "ImageFactor",
+        "Image factor",
+        "Determines the visibility of the image provided by the `Blackout.Image`, if no "
+        "such image has been loaded, this value does nothing.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo GlobalBlackoutImageInfo = {
+        "ImagePath",
+        "Image Path",
+        "The path to an image that is used when the blackout rendering is enabled. "
+        "Whether the image is shown or not is controlled by the alpha component of the "
+        "`Blackout.Color` property. It also determines the color shown if the selected "
+        "image has transparency or does not have the same aspect ratio as the render "
+        "window.",
+        Property::Visibility::User
+    };
+
     constexpr Property::PropertyInfo ApplyBlackoutToMasterInfo = {
-        "ApplyBlackoutToMaster",
-        "Apply blackout to master",
+        "ApplyMaster",
+        "Apply to master",
         "If this value is 'true', the blackout factor is applied to the master node. "
         "Regardless of this value, the clients will always adhere to the factor.",
         Property::Visibility::AdvancedUser
@@ -326,10 +358,24 @@ RenderEngine::RenderEngine()
     , _showCameraInfo(ShowCameraInfo, true)
     , _screenshotWindowIds(ScreenshotWindowIdsInfo)
     , _applyWarping(ApplyWarpingInfo, false)
-    , _screenshotUseDate(ScreenshotUseDateInfo, false)
+    , _useNewScreenfolder(UseNewScreenshotFolderInfo)
+    , _screenshotUseDateTime(ScreenshotUseDateTimeInfo, false)
     , _disableMasterRendering(DisableMasterInfo, false)
-    , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
-    , _applyBlackoutToMaster(ApplyBlackoutToMasterInfo, true)
+    , _globalBlackout {
+        .owner = PropertyOwner(
+            { "GlobalBlackout", "Global Blackout", "Blackout settings" }
+        ),
+        .factor = FloatProperty(GlobalBlackoutFactorInfo, 0.f, 0.f, 1.f),
+        .color = Vec4Property(
+            GlobalBlackoutColorInfo,
+            glm::vec4(0.f, 0.f, 0.f, 1.f),
+            glm::vec4(0.f),
+            glm::vec4(1.f)
+        ),
+        .imageFactor = FloatProperty(GlobalBlackoutImageFactorInfo, 1.f, 0.f, 1.f),
+        .imagePath = StringProperty(GlobalBlackoutImageInfo),
+        .applyToMaster = BoolProperty(ApplyBlackoutToMasterInfo, true)
+    }
     , _enableFXAA(FXAAInfo, true)
     , _disableHDRPipeline(DisableHDRPipelineInfo, false)
     , _hdrExposure(HDRExposureInfo, 3.7f, 0.01f, 10.f)
@@ -402,25 +448,59 @@ RenderEngine::RenderEngine()
     _value.onChange(setHueValueSaturation);
     addProperty(_value);
 
-    addProperty(_globalBlackOutFactor);
-    addProperty(_applyBlackoutToMaster);
+    _globalBlackout.owner.addProperty(_globalBlackout.factor);
+    _globalBlackout.color.setViewOption(Property::ViewOptions::Color);
+    _globalBlackout.owner.addProperty(_globalBlackout.color);
+    _globalBlackout.owner.addProperty(_globalBlackout.imageFactor);
+    _globalBlackout.imagePath.onChange([this]() { _globalBlackout.imageIsDirty = true; });
+    _globalBlackout.owner.addProperty(_globalBlackout.imagePath);
+    _globalBlackout.owner.addProperty(_globalBlackout.applyToMaster);
+    addPropertySubOwner(_globalBlackout.owner);
+
     addProperty(_screenshotWindowIds);
     addProperty(_applyWarping);
 
-    _screenshotUseDate.onChange([this]() {
+    _useNewScreenfolder.onChange([this]() {
+        // If there is no screenshot folder or if we are not using the date, we don't need
+        // to do anything
+        if (!FileSys.hasRegisteredToken("${STARTUP_SCREENSHOT}") ||
+            !_screenshotUseDateTime)
+        {
+            return;
+        }
+
+        const std::time_t now = std::time(nullptr);
+        std::tm* nowTime = std::localtime(&now);
+        std::array<char, 128> date;
+        strftime(date.data(), sizeof(date), "%Y-%m-%d-%H-%M-%S", nowTime);
+
+        const std::filesystem::path newFolder = absPath(
+            "${STARTUP_SCREENSHOT}/" + std::string(date.data())
+        );
+
+        FileSys.registerPathToken(
+            "${SCREENSHOTS}",
+            newFolder,
+            ghoul::filesystem::FileSystem::Override::Yes
+        );
+        global::windowDelegate->setScreenshotFolder(absPath("${SCREENSHOTS}"));
+    });
+    addProperty(_useNewScreenfolder);
+
+    _screenshotUseDateTime.onChange([this]() {
         // If there is no screenshot folder, don't bother with handling the change
         if (!FileSys.hasRegisteredToken("${STARTUP_SCREENSHOT}")) {
             return;
         }
 
-        if (_screenshotUseDate) {
+        if (_screenshotUseDateTime) {
             // Going from 'false' -> 'true'
             // We might need to create the folder first
 
             const std::time_t now = std::time(nullptr);
             std::tm* nowTime = std::localtime(&now);
             std::array<char, 128> date;
-            strftime(date.data(), sizeof(date), "%Y-%m-%d-%H-%M", nowTime);
+            strftime(date.data(), sizeof(date), "%Y-%m-%d-%H-%M-%S", nowTime);
 
             const std::filesystem::path newFolder = absPath(
                 "${STARTUP_SCREENSHOT}/" + std::string(date.data())
@@ -443,7 +523,7 @@ RenderEngine::RenderEngine()
         }
         global::windowDelegate->setScreenshotFolder(absPath("${SCREENSHOTS}"));
     });
-    addProperty(_screenshotUseDate);
+    addProperty(_screenshotUseDateTime);
 
     addPropertySubOwner(_windowing);
     // Adding the actual window owners later in the initialize, as we don't know yet how
@@ -477,12 +557,9 @@ void RenderEngine::initialize() {
     _screenSpaceRotation = global::configuration->screenSpaceRotation;
     _masterRotation = global::configuration->masterRotation;
     _disableMasterRendering = global::configuration->isRenderingOnMasterDisabled;
-    _screenshotUseDate = global::configuration->shouldUseScreenshotDate;
+    _screenshotUseDateTime = global::configuration->shouldUseScreenshotDateTime;
 
     using namespace ghoul::io;
-    TextureReader::ref().addReader(std::make_unique<TextureReaderSTB>());
-    TextureReader::ref().addReader(std::make_unique<TextureReaderCMAP>());
-    TextureWriter::ref().addWriter(std::make_unique<TextureWriterSTB>());
     ModelReader::ref().addReader(std::make_unique<ModelReaderAssimp>());
     ModelReader::ref().addReader(std::make_unique<ModelReaderBinary>());
 }
@@ -616,6 +693,24 @@ void RenderEngine::updateRenderer() {
 
 void RenderEngine::updateScreenSpaceRenderables() {
     ZoneScoped;
+
+    // Not really part of the screenspace renderables but it's pretty close
+    if (_globalBlackout.imageIsDirty) [[unlikely]] {
+        std::string path = _globalBlackout.imagePath;
+        if (path.empty()) {
+            _globalBlackout.imageTexture = nullptr;
+        }
+        else {
+            try {
+                _globalBlackout.imageTexture = ghoul::io::texture::loadTexture(path, 2);
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERRORC(e.component, e.message);
+            }
+        }
+
+        _globalBlackout.imageIsDirty = false;
+    }
 
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : *global::screenSpaceRenderables) {
 #ifdef TRACY_ENABLE
@@ -755,8 +850,20 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     }
 
     const bool renderingEnabled = delegate.isMaster() ? !_disableMasterRendering : true;
-    if (renderingEnabled && combinedBlackoutFactor() > 0.f) {
-        _renderer.render(_scene, _camera, combinedBlackoutFactor());
+    const float trueBlackoutFactor =
+        global::windowDelegate->isMaster() ?
+        _globalBlackout.applyToMaster ? _globalBlackout.factor : 1.f :
+        _globalBlackout.factor;
+
+    if (renderingEnabled) {
+        _renderer.render(
+            _scene,
+            _camera,
+            1.f - trueBlackoutFactor,
+            _globalBlackout.color.value(),
+            _globalBlackout.imageFactor,
+            _globalBlackout.imageTexture.get()
+        );
     }
 
     // The CEF webbrowser fix has to be called at least once per frame and we are doing
@@ -778,7 +885,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         for (const std::unique_ptr<ScreenSpaceRenderable>& ssr :
             *global::screenSpaceRenderables)
         {
-            if (ssr->isEnabled() && ssr->isReady()) {
+            if (ssr->isEnabled()) {
                 ssrs.push_back(ssr.get());
             }
         }
@@ -797,7 +904,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         ScreenSpaceRenderable::RenderData data = {
-            .blackoutFactor = combinedBlackoutFactor(),
+            .blackoutFactor = 1.f - trueBlackoutFactor,
             .hue = _hue / 360.f,
             .value = _value,
             .saturation = _saturation,
@@ -938,15 +1045,6 @@ void RenderEngine::renderDashboard() const {
     );
 
     global::dashboard->render(penPosition);
-}
-
-float RenderEngine::combinedBlackoutFactor() const {
-    if (global::windowDelegate->isMaster()) {
-        return _applyBlackoutToMaster ? _globalBlackOutFactor : 1.f;
-    }
-    else {
-        return _globalBlackOutFactor;
-    }
 }
 
 void RenderEngine::postDraw() {

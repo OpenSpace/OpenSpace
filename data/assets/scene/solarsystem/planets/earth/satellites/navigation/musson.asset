@@ -1,12 +1,12 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Russian LEO Navigation)",
+  Name = "Satellite CSV Data (Russian LEO Navigation)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_musson",
-  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=musson&FORMAT=kvn",
+  Identifier = "satellite_csv_data_musson",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=musson&FORMAT=csv",
   Filename = "musson.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -14,11 +14,11 @@ local omm = asset.resource({
 
 local MussonSatellites = {
   Identifier = "MussonSatellites",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "musson.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
     TrailFade = 15,
@@ -51,6 +51,6 @@ asset.meta = {
   Description = [[Satellites asset for Navigation Russian LEO Navigation. Data from
     Celestrak]],
   Author = "OpenSpace Team",
-  URL = "https://celestrak.com/NORAD/elements/",
+  URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"
 }

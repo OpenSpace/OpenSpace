@@ -26,6 +26,7 @@
 
 #include <modules/globebrowsing/src/tileindex.h>
 #include <openspace/documentation/documentation.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
@@ -33,14 +34,15 @@
 #include <utility>
 
 namespace {
-    // This tile provider will switch between different tile providers specified within
-    // based on the level of detail that is requested by the Globe. All other things being
-    // equal, this corresponds to the distance of the camera to the planet, with a closer
-    // distance resulting in a higher lever. Due to technical reasons, the available
-    // levels are in the range [2, 22] and each increase in levels corresponds to a
-    // doubling in the effective resolution. For a given requested level, the tile
-    // provider that has the largest `MaxLevel` that is not greater than the requested
-    // level will be used.
+    // Switches between different specified tile providers based on the level of detail
+    // that is requested by the Globe. All other things being equal, this corresponds to
+    // the distance of the camera to the planet, with a closer distance resulting in a
+    // higher level.
+    //
+    // Due to technical reasons, the available levels are in the range [2, 22] and each
+    // increase in levels corresponds to a doubling in the effective resolution. For a
+    // given requested level, the tile provider that has the largest `MaxLevel` that is
+    // not greater than the requested level will be used.
     struct [[codegen::Dictionary(TileProviderByLevel)]] Parameters {
         // Each collection describes a distinct layer which can be toggled at a specified
         // max level at which it is requested.
@@ -75,9 +77,18 @@ Documentation TileProviderByLevel::Documentation() {
 TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
     ZoneScoped;
 
-    const Parameters p = codegen::bake<Parameters>(dictionary);
+    Parameters p = codegen::bake<Parameters>(dictionary);
 
-    for (Parameters::Provider provider : p.levelTileProviders) {
+    std::sort(
+        p.levelTileProviders.begin(),
+        p.levelTileProviders.end(),
+        [](const Parameters::Provider& lhs, const Parameters::Provider& rhs) {
+            return lhs.maxLevel < rhs.maxLevel;
+        }
+    );
+
+    for (size_t i = 0; i < p.levelTileProviders.size(); i++) {
+        Parameters::Provider provider = p.levelTileProviders[i];
         ghoul::Dictionary& tileProviderDict = provider.tileProvider;
         tileProviderDict.setValue("LayerGroupID", p.layerGroupID);
 
@@ -90,6 +101,26 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
         }
 
         std::unique_ptr<TileProvider> tp = createFromDictionary(tileProviderDict);
+        const int maxLevel = tp->maxLevel();
+
+        const bool isLastEntry = i == p.levelTileProviders.size() - 1;
+        if (provider.maxLevel > maxLevel && maxLevel != 0 && !isLastEntry) {
+            // We won't print a warning if the *last* tile provider has a higher number
+            // since there is no other tile provider to shadow. So no harm, no foul
+            // Some TileProviders return a max level of 0 when they are not
+            // initialized. We'll miss any potential warning opportunities, but its better
+            // than having false positives instead
+            LWARNINGC(
+                "TileProviderByLevel",
+                std::format(
+                    "Specified maximum level {} for provider '{}' but provider only "
+                    "provides a maximum level of {}. This will prevent other higher "
+                    "resolution tile providers from functioning",
+                    provider.maxLevel, tileProviderDict.value<std::string>("Identifier"),
+                    maxLevel
+                )
+            );
+        }
 
         const std::string provId = tileProviderDict.value<std::string>("Identifier");
         tp->setIdentifier(provId);

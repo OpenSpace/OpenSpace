@@ -4,7 +4,7 @@ local guiCustomization = asset.require("customization/gui")
 
 
 -- Select which commit hashes to use for the UI frontend
-local frontendHash = "0e1020b6029cd26d7ce80da9b1b2eaa476c128ed"
+local frontendHash = "8a61a097b2631c34bf927b96fc5e60ac620d30e1"
 
 -- The name of the file to download from the server
 local frontendFile = "frontend.zip"
@@ -131,6 +131,6 @@ end)
 asset.meta = {
   Name = "WebGUI",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

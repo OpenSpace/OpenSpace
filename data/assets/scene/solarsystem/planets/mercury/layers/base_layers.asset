@@ -4,7 +4,7 @@ asset.require("./colorlayers/fesimap_02122015", false)
 asset.require("./colorlayers/mgsimap_02122015", false)
 asset.require("./colorlayers/ssimap_02122015", false)
 
--- Only the Utah server have this map, use it for now
+-- Only the Utah server has this map, use it for now
 asset.require("./heightlayers/messenger_dem_utah", asset.enabled)
 
 
@@ -15,6 +15,6 @@ asset.meta = {
     Iron Abundance, Magnesium Abundance, Silicon Abundance, and Messenger DEM (3D).
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

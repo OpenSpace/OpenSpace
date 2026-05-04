@@ -60,9 +60,9 @@ namespace {
         return res;
     }
 
-    // A StaticRotation is using a fixed and constant rotation factor that does not change
-    // over time. The rotation value is provided as a property that can be changed at
-    // runtime, but it will not change automatically over time.
+    // Creates a fixed and constant rotation that does not change over time. The rotation
+    // value is provided as a property that can be changed at runtime, but it will not
+    // change automatically over time.
     struct [[codegen::Dictionary(StaticRotation)]] Parameters {
         // Stores the static rotation as a vector containing Euler angles, a quaternion
         // representation, or a rotation matrix.

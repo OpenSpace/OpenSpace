@@ -1,0 +1,56 @@
+local kernels = asset.resource({
+  Name = "ISS Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "iss_kernels",
+  Version = 1
+})
+
+local tle = asset.resource({
+  Name = "Satellite TLE Data (ISS)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_tle_data_iss",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?CATNR=25544&FORMAT=tle",
+  Filename = "ISS.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local ID = {
+  ISS = "ISS"
+}
+
+local Frame = {
+  ISS = "ISS"
+}
+
+local kernelFile
+asset.onInitialize(function()
+  -- In order to get the orientation of the ISS correctly, we need to have its position
+  -- available as a SPICE object. We don't want to just convert the TLE file once as we
+  -- want it to update with every startup.
+  -- For this reason we convert the TLE file into a type 10 SPICE kernel and since we are
+  -- already doing that, we can also get a more accurate position for free, too
+  local translation, kernel = openspace.space.tleToSpiceTranslation(tle .. "ISS.txt")
+  kernelFile = kernel -- Store the path for the deinitialize function
+
+  openspace.spice.loadKernel(kernelFile)
+  openspace.spice.loadKernel(kernels .. "iss.tf")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels .. "iss.tf")
+  openspace.spice.unloadKernel(kernelFile)
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)
+
+
+
+asset.meta = {
+  Name = "International Space Station Kernels",
+  Description = "Kernels for the International Space Station",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.org/NORAD/elements/",
+  License = "CC-BY"
+}

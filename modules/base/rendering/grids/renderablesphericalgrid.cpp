@@ -53,9 +53,7 @@ namespace {
         "Number of longitudinal segments",
         "The number of longitudinal segments the sphere is split into. Determines the "
         "resolution of the rendered sphere in a left/right direction when looking "
-        "straight at the equator. Should be an even value (if an odd value is provided, "
-        "the value will be set to the new value minus one). If the `Segments` value is "
-        "provided as well, it will have precedence over this value.",
+        "straight at the equator.",
         Property::Visibility::User
     };
 
@@ -64,9 +62,7 @@ namespace {
         "Number of latitudinal segments",
         "The number of latitudinal segments the sphere is split into. Determines the "
         "resolution of the rendered sphere in a up/down direction when looking "
-        "straight at the equator. Should be an even value (if an odd value is provided, "
-        "the value will be set to the new value minus one). If the `Segments` value is "
-        "provided as well, it will have precedence over this value.",
+        "straight at the equator.",
         Property::Visibility::User
     };
 
@@ -83,9 +79,11 @@ namespace {
         "The labels for the grid."
     };
 
-    // This `Renderable` creates a grid in the shape of a sphere. Note that the sphere
-    // will always be given a radius of one meter. To change its size, use a `Scale`
-    // transform, such as the [StaticScale](#base_scale_static).
+    // Creates a grid with a spherical shape, given a number of segments in the latitude
+    // and longitude direction.
+    //
+    // Note that the sphere will always be given a radius of one meter. To change its
+    // size, use a `Scale` transform, such as the [StaticScale](#base_scale_static).
     //
     // The grid may be split up into equal segments in both directions using the
     // `Segments` parameter, or different number of segments in the latitudal and
@@ -129,7 +127,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     , _gridProgram(nullptr)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _longSegments(LongSegmentsInfo, 36, 4, 200)
-    , _latSegments(LatSegmentsInfo, 19, 4, 200)
+    , _latSegments(LatSegmentsInfo, 18, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -149,6 +147,10 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     _longSegments.onChange(gridDirty);
     addProperty(_longSegments);
 
+    // In all use-cases of this variable, we are actually +1 this value. This is a
+    // side-effect of how the individual vertices are being generated. The goal is to make
+    // the user-facing value intuitive. With the +1 the number the user choose is actually
+    // the number of segments and behaves the same way as the longitudinal segments
     _latSegments = p.segments.value_or(p.latSegments.value_or(_latSegments));
     _latSegments.onChange(gridDirty);
     addProperty(_latSegments);
@@ -166,10 +168,6 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
         // Fading of the labels should also depend on the fading of the Renderable
         _labels->setParentFadeable(this);
     }
-}
-
-bool RenderableSphericalGrid::isReady() const {
-    return _gridProgram && (_hasLabels ? _labels->isReady() : true);
 }
 
 void RenderableSphericalGrid::initialize() {
@@ -232,7 +230,7 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&) {
         GL_LINE_LOOP,
         _latitudeRenderInfo.first.data(),
         _latitudeRenderInfo.count.data(),
-        _latSegments
+        (_latSegments + 1)
     );
 
     // Render longitude segments
@@ -293,14 +291,14 @@ void RenderableSphericalGrid::update(const UpdateData&) {
     // arc after another
 
     // * 2 since we store all vertices twice
-    const unsigned int vertSize = _longSegments * _latSegments * 2;
+    const unsigned int vertSize = _longSegments * (_latSegments + 1) * 2;
     std::vector<Vertex> vert;
     vert.reserve(vertSize);
-    for (int lat = 0; lat < _latSegments; lat++) {
+    for (int lat = 0; lat < (_latSegments + 1); lat++) {
         for (int lng = 0; lng < _longSegments; lng++) {
             // Inclination angle (north to south)
             const float theta =
-                static_cast<float>(lat) / static_cast<float>(_latSegments - 1) *
+                static_cast<float>(lat) / static_cast<float>(_latSegments) *
                 glm::pi<float>(); // 0 -> PI
 
             // Azimuth angle (east to west)
@@ -320,7 +318,7 @@ void RenderableSphericalGrid::update(const UpdateData&) {
     // glMultiDrawArrays in the render function
     _latitudeRenderInfo.first.clear();
     _latitudeRenderInfo.count.clear();
-    for (int i = 0; i < _latSegments; i++) {
+    for (int i = 0; i < (_latSegments + 1); i++) {
         _latitudeRenderInfo.first.push_back(i * _longSegments);
         _latitudeRenderInfo.count.push_back(_longSegments);
     }
@@ -329,7 +327,7 @@ void RenderableSphericalGrid::update(const UpdateData&) {
     // take every vertex in a longitude segment and connect it to the same index along all
     // latitude arcs
     for (int lng = 0; lng < _longSegments; lng++) {
-        for (int lat = 0; lat < _latSegments; lat++) {
+        for (int lat = 0; lat < (_latSegments + 1); lat++) {
             Vertex v = vert[lat * _longSegments + lng];
             vert.push_back(v);
         }
@@ -340,10 +338,10 @@ void RenderableSphericalGrid::update(const UpdateData&) {
     // render call use the vertices that are in the second "block" of the VBO
     _longitudeRenderInfo.first.clear();
     _longitudeRenderInfo.count.clear();
-    const int base = _longSegments * _latSegments;
+    const int base = _longSegments * (_latSegments + 1);
     for (int i = 0; i < _longSegments; i++) {
-        _longitudeRenderInfo.first.push_back(i * _latSegments + base);
-        _longitudeRenderInfo.count.push_back(_latSegments);
+        _longitudeRenderInfo.first.push_back(i * (_latSegments + 1) + base);
+        _longitudeRenderInfo.count.push_back(_latSegments + 1);
     }
 
     glDeleteBuffers(1, &_vbo);

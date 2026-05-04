@@ -1,0 +1,73 @@
+local transforms = asset.require("./transforms")
+
+
+
+local labelsPath = asset.resource({
+  Name = "Earth Labels",
+  Type = "HttpSynchronization",
+  Identifier = "earth_labels",
+  Version = 1
+})
+
+
+-- local EarthEllipsoid = { 6378137.0, 6378137.0, 6356752.314245 }
+local EarthEllipsoid = { 6378137.0, 6378137.0, 6378137.0 }
+
+local Earth = {
+  Identifier = "Earth",
+  Parent = transforms.EarthIAU.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = EarthEllipsoid,
+    PerformShading = false,
+    ShadowGroup = {
+      Sources = {
+        { Name = "Sun", Radius = 696300000 },
+      },
+      Casters = {
+        { Name = "Moon", Radius = 1737000 },
+      }
+    },
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "Earth.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 5.0,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 10000.0, 300000.0 },
+      DistanceEPS = 1500000.0,
+      Color = { 1.0, 0.0, 0.0 }
+    }
+  },
+  Tag = { "planet_solarSystem", "planet_terrestrial" },
+  GUI = {
+    Name = "Earth",
+    Path = "/Solar System/Planets/Earth",
+    Description = "Third rock from the Sun"
+  }
+}
+
+
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Earth)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Earth)
+end)
+
+asset.export(Earth)
+
+
+
+asset.meta = {
+  Name = "Earth",
+  Description = "Earth is a special planet with special needs",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

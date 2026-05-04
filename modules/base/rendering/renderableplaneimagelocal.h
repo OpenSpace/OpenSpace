@@ -55,6 +55,7 @@ private:
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
 
     bool _isLoadingLazily = false;
+    bool _shouldUnloadTexture = false;
     bool _textureIsDirty = false;
 };
 

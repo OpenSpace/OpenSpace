@@ -41,7 +41,7 @@ namespace {
 
     constexpr double Epsilon = 1E-7;
 
-    // A NavigationState is an object describing an exact camera position and rotation,
+    // A `NavigationState` is an object describing an exact camera position and rotation,
     // in a certain reference frame (per default, the one of the specified Anchor node).
     // It can be used to set the same camera position at a later point in time, or
     // navigating to a specific camera position using the pathnavigation system.
@@ -53,10 +53,10 @@ namespace {
     // To get the current navigation state of the camera, use the
     // `openspace.navigation.navigationState()` function in the Scripting API.
     //
-    // Note that when loading a NavigationState, the visuals may be different depending
+    // Note that when loading a `NavigationState`, the visuals may be different depending
     // on what the simulation timestamp is, as the relative positions of objects in the
-    // scene may have changed. The get the exact same visuals as when the NavigationState
-    // was saved you need to also set the simulation time to correpsond to the timestamp.
+    // scene may have changed. To get the exact same visuals as when the `NavigationState`
+    // was saved you need to also set the simulation time to correspond to the timestamp.
     struct [[codegen::Dictionary(NavigationState)]] Parameters {
         // The identifier of the anchor node.
         std::string anchor;
@@ -115,13 +115,28 @@ NavigationState::NavigationState(const ghoul::Dictionary& dictionary) {
 }
 
 NavigationState::NavigationState(const nlohmann::json& json) {
-    position.x = json["position"]["x"].get<double>();
-    position.y = json["position"]["y"].get<double>();
-    position.z = json["position"]["z"].get<double>();
+    if (auto it = json.find("position"); it->is_array()) {
+        std::vector<double> values = it->get<std::vector<double>>();
+        if (values.size() != 3) {
+            throw ghoul::RuntimeError(std::format(
+                "Expected {} values, got {}", 3, values.size()
+            ));
+        }
+        position = glm::dvec3(values[0], values[1], values[2]);
+    }
+    else {
+        ghoul_assert(it->is_object(), "Not an object");
+        position.x = (*it)["x"].get<double>();
+        position.y = (*it)["y"].get<double>();
+        position.z = (*it)["z"].get<double>();
+    }
 
     anchor = json["anchor"].get<std::string>();
 
     if (auto it = json.find("referenceframe");  it != json.end()) {
+        referenceFrame = it->get<std::string>();
+    }
+    else if (auto it = json.find("referenceFrame");  it != json.end()) {
         referenceFrame = it->get<std::string>();
     }
     else {
@@ -133,10 +148,22 @@ NavigationState::NavigationState(const nlohmann::json& json) {
     }
 
     if (auto it = json.find("up");  it != json.end()) {
-        up = glm::dvec3();
-        up->x = it->at("x").get<double>();
-        up->y = it->at("y").get<double>();
-        up->z = it->at("z").get<double>();
+        if (it->is_array()) {
+            std::vector<double> values = it->get<std::vector<double>>();
+            if (values.size() != 3) {
+                throw ghoul::RuntimeError(std::format(
+                    "Expected {} values, got {}", 3, values.size()
+                ));
+            }
+            up = glm::dvec3(values[0], values[1], values[2]);
+        }
+        else {
+            ghoul_assert(it->is_object(), "Not an object");
+            up = glm::dvec3();
+            up->x = (*it)["x"].get<double>();
+            up->y = (*it)["y"].get<double>();
+            up->z = (*it)["z"].get<double>();
+        }
     }
 
     if (auto it = json.find("yaw");  it != json.end()) {

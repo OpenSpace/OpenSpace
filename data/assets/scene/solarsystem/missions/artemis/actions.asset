@@ -24,6 +24,6 @@ asset.meta = {
   Name = "Actions - Artemis",
   Description = "Actions related to the Artemis mission",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

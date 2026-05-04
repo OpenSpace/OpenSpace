@@ -54,8 +54,6 @@ public:
     bool initializeGL();
     void deinitialize();
 
-    bool isReady() const;
-
     ghoul::opengl::Texture& depthTexture() const;
     void imageProjectBegin();
     void imageProjectEnd();

@@ -25,8 +25,6 @@
 #include <openspace/data/speckloader.h>
 
 #include <openspace/data/dataloader.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
@@ -499,89 +497,6 @@ Labelset loadLabelFile(std::filesystem::path path) {
         if (!rest.empty()) {
             res.entries.push_back(std::move(entry));
         }
-    }
-
-    return res;
-}
-
-ColorMap loadCmapFile(std::filesystem::path path) {
-    ghoul_assert(std::filesystem::exists(path), "File must exist");
-
-    std::ifstream file = std::ifstream(path);
-    if (!file.good()) {
-        throw ghoul::RuntimeError(std::format(
-            "Failed to open color map file '{}'", path
-        ));
-    }
-
-    ColorMap res;
-    int nColorLines = -1;
-
-    std::string line;
-    while (ghoul::getline(file, line)) {
-        // Ignore empty line or commented-out lines
-        if (line.empty() || line[0] == '#') {
-            continue;
-        }
-
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
-        if (line.back() == '\r') {
-            line = line.substr(0, line.length() - 1);
-        }
-
-        strip(line);
-
-        if (nColorLines == -1) {
-            // This is the first time we get this far, it will have to be the first number
-            // meaning that it is the number of color values
-
-            std::stringstream str(line);
-            str >> nColorLines;
-            res.entries.reserve(nColorLines);
-        }
-        else {
-            // We have already read the number of color lines, so we are in the process of
-            // reading the individual value lines
-
-            glm::vec4 color;
-            std::string dummy;
-            // Note that startwith converts the input string to all lowercase
-            if (startsWith(line, "belowrange")) {
-                std::stringstream str(line);
-                str >> dummy >> color.x >> color.y >> color.z >> color.w;
-                res.belowRangeColor = color;
-            }
-            else if (startsWith(line, "aboverange")) {
-                std::stringstream str(line);
-                str >> dummy >> color.x >> color.y >> color.z >> color.w;
-                res.aboveRangeColor = color;
-            }
-            else if (startsWith(line, "nan")) {
-                std::stringstream str(line);
-                str >> dummy >> color.x >> color.y >> color.z >> color.w;
-                res.nanColor = color;
-            }
-            else {
-                // TODO: Catch when this is not a color!
-                std::stringstream str(line);
-                str >> color.x >> color.y >> color.z >> color.w;
-                res.entries.push_back(std::move(color));
-            }
-        }
-    }
-
-    res.entries.shrink_to_fit();
-
-    if (nColorLines != static_cast<int>(res.entries.size())) {
-        LWARNINGC(
-            "SpeckLoader",
-            std::format(
-                "While loading color map '{}', the expected number of color values '{}' "
-                "was different from the actual number of color values '{}'",
-                path, nColorLines, res.entries.size()
-            )
-        );
     }
 
     return res;

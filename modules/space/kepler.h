@@ -73,6 +73,20 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file);
 std::vector<Parameters> readOmmFile(const std::filesystem::path& file);
 
 /**
+ * Reads the object information from the provided \p file and returns them as individual
+ * values. Currently, only the file format used by Celestrak is supported; see
+ * https://celestrak.org/satcat/satcat-format.php for a documentation of the values that
+ * are used.
+ *
+ * \param file The file to the CSV file. This file must be a valid file
+ * \return Information about all of the contained objects in the \p file
+ *
+ * \throw ghoul::RuntimeError If the provided \p file is not a valid CSV file
+ * \pre \p file must be a file and must exist
+ */
+std::vector<Parameters> readCsvFile(const std::filesystem::path& file);
+
+/**
  * Reads the object information from a CSV file following JPL's Small Body Database
  * format, which provides the Epoch, eccentricity, semi-major axis (in AU), inclination,
  * ascending node, argument of periapsis, mean anomaly, and period in that order.
@@ -103,6 +117,7 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file);
 enum class Format {
     TLE,  ///< Two-line elements
     OMM,  ///< Orbit Mean-Elements Message
+    CSV, ///< Celestrak CSV format
     SBDB, ///< Small-Body Database
     MPC   ///< Minor Planet Center
 };
@@ -117,7 +132,21 @@ enum class Format {
  * \throw ghoul::RuntimeError If the provided \p is not in the provided file
  * \pre \p file must be a file and must exist
  */
-std::vector<Parameters> readFile(std::filesystem::path file, Format format);
+std::vector<Parameters> readFile(const std::filesystem::path& file, Format format);
+
+/**
+ * Reads the object information from the provided files. Each file is loaded independently
+ * and then the results are concatenated.
+ *
+ * \param files The files containing the information about the objects
+ * \param format The format of the provided \p file
+ * \return Information about all of the contained objects in the \p files
+ *
+ * \throw ghoul::RuntimeError If the provided \p is not in the provided files
+ * \pre Each entry in \p files must be a file and must exist
+ */
+std::vector<Parameters> readFiles(const std::vector<std::filesystem::path>& files,
+    Format format);
 
 } // namespace openspace::kepler
 

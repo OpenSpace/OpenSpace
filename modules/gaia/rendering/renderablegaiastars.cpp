@@ -26,6 +26,7 @@
 
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 #include <modules/gaia/rendering/gaiaoptions.h>
+#include <openspace/data/colormaploader.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
@@ -544,10 +545,6 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     addProperty(_gpuStreamBudgetProperty);
 }
 
-bool RenderableGaiaStars::isReady() const {
-    return _program && _programTM;
-}
-
 void RenderableGaiaStars::initializeGL() {
     _program = ghoul::opengl::ProgramObject::Build(
         "GaiaStar",
@@ -953,9 +950,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
         LDEBUG("Reloading Color Texture");
         _colorTexture = nullptr;
         if (!_colorTexturePath.value().empty()) {
-            _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_colorTexturePath),
-                1
+            _colorTexture = dataloader::colormap::loadColorMapTexture(
+                absPath(_colorTexturePath)
             );
             LDEBUG(std::format("Loaded texture from '{}'", _colorTexturePath.value()));
 

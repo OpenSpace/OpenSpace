@@ -1,6 +1,6 @@
 -- Apollo mission insignias on their locations on the Lunar surface.
 
-local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/globe")
 
 
 
@@ -14,11 +14,11 @@ local insigniasPath = asset.resource({
 
 local Apollo11 = {
   Identifier = "Apollo11Insignia",
-  Parent = moon.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon.Moon.Identifier,
+      Globe = moonAsset.Moon.Identifier,
       Latitude = 0.67409,
       Longitude = 23.47298,
       Altitude = 110000,
@@ -41,11 +41,11 @@ local Apollo11 = {
 
 local Apollo12 = {
   Identifier = "Apollo12Insignia",
-  Parent = moon.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon.Moon.Identifier,
+      Globe = moonAsset.Moon.Identifier,
       Latitude = -3.01381,
       Longitude = -23.41930,
       Altitude = 110000,
@@ -68,11 +68,11 @@ local Apollo12 = {
 
 local Apollo14 = {
   Identifier = "Apollo14Insignia",
-  Parent = moon.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon.Moon.Identifier,
+      Globe = moonAsset.Moon.Identifier,
       Latitude = -3.64544,
       Longitude = -17.47139,
       Altitude = 110000,
@@ -95,11 +95,11 @@ local Apollo14 = {
 
 local Apollo15 = {
   Identifier = "Apollo15Insignia",
-  Parent = moon.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon.Moon.Identifier,
+      Globe = moonAsset.Moon.Identifier,
       Latitude = 26.13224,
       Longitude = 3.63400,
       Altitude = 110000,
@@ -122,11 +122,11 @@ local Apollo15 = {
 
 local Apollo16 = {
   Identifier = "Apollo16Insignia",
-  Parent = moon.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon.Moon.Identifier,
+      Globe = moonAsset.Moon.Identifier,
       Latitude = -8.97341,
       Longitude = 15.49859,
       Altitude = 110000,
@@ -149,11 +149,11 @@ local Apollo16 = {
 
 local Apollo17 = {
   Identifier = "Apollo17Insignia",
-  Parent = moon.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon.Moon.Identifier,
+      Globe = moonAsset.Moon.Identifier,
       Latitude = 20.18809,
       Longitude = 30.77475,
       Altitude = 110000,
@@ -230,6 +230,6 @@ asset.meta = {
   Description = [[This asset shows the location of the different landing sites of the
     Apollo missions on the Moon by placing the missions' insignias.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

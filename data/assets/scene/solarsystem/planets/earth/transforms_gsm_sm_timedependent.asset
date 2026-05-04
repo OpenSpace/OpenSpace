@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 local coreKernels = asset.require("spice/core")
 
 
@@ -31,7 +31,7 @@ local Frame = {
 
 local GeocentricSolarMagnetosphericTimeDependent = {
   Identifier = "GeocentricSolarMagnetosphericTimeDependent",
-  Parent = transforms.EarthCenter.Identifier,
+  Parent = earthAsset.EarthCenter.Identifier,
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
@@ -58,7 +58,7 @@ local GeocentricSolarMagnetosphericTimeDependent = {
 -- 20251231, 20301231 etc...
 local SolarMagneticTimeDependent = {
   Identifier = "SolarMagneticTimeDependent",
-  Parent = transforms.EarthCenter.Identifier,
+  Parent = earthAsset.EarthCenter.Identifier,
   Transform = {
     Rotation ={
       Type = "SpiceRotation",
@@ -117,6 +117,6 @@ asset.meta = {
   Version = "1.0",
   Description = "Earth transforms: Earth's time dependent magnetic northpole GSM, Geocentric Solar Magnetospheric and SM, Solar Magnetic transforms",
   Author = "CCMC",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

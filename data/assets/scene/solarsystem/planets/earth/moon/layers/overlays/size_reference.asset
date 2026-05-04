@@ -1,4 +1,4 @@
-local globe = asset.require("../../moon")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/globe")
 
 
 
@@ -7,16 +7,16 @@ local Layer = {
   Name = "Size Reference",
   Enabled = asset.enabled,
   Type = "SizeReferenceTileProvider",
-  Radii = globe.Moon.Renderable.Radii
+  Radii = moonAsset.Moon.Renderable.Radii
 }
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Moon.Identifier, "Overlays", Layer)
+  openspace.globebrowsing.addLayer(moonAsset.Moon.Identifier, "Overlays", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Moon.Identifier, "Overlays", Layer)
+  openspace.globebrowsing.deleteLayer(moonAsset.Moon.Identifier, "Overlays", Layer)
 end)
 
 asset.export("layer", Layer)
@@ -27,6 +27,6 @@ asset.meta = {
   Name = "Moon Size Reference",
   Description = "Size reference layer for Moon globe",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

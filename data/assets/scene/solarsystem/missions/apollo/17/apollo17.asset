@@ -9,6 +9,6 @@ asset.meta = {
   Description = [[A meta asset that will include all of the other assets to show the
     Apollo 17 launch, orbit, and landing sequence.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

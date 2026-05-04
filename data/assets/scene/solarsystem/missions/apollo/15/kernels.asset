@@ -2,7 +2,7 @@ local data = asset.resource({
   Name = "Apollo Kernels",
   Type = "HttpSynchronization",
   Identifier = "apollo_spice",
-  Version = 1
+  Version = 2
 })
 
 
@@ -12,7 +12,8 @@ local kernels = {
   data .. "apollo15MetricAddendum002.ti",
   data .. "apollo15_metric.0002.ti",
   data .. "apollo15-1.bsp",
-  data .. "AS15-M_v01.bc"
+  data .. "AS15-M_v01.bc",
+  data .. "A15.tf"
 }
 
 local ID = {
@@ -21,7 +22,8 @@ local ID = {
 
 local Frame = {
   Apollo15Nadir = -915240,
-  Apollo15Metric = "A15_METRIC"
+  Apollo15Metric = "A15_METRIC",
+  Apollo15Mapping = "A15_MAPPING"
 }
 
 
@@ -43,6 +45,6 @@ asset.meta = {
   Description = [[This asset provides the SPICE kernels for the Apollo 15 module that
     provide position and orientation information for the mission.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

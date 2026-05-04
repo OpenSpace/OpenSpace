@@ -48,8 +48,8 @@ namespace {
         Property::Visibility::User
     };
 
-    // A `RenderablePlaneImageOnline` creates a textured 3D plane, where the texture image
-    // is loaded from the internet though a web URL.
+    // Creates a textured 3D plane, where the texture image is loaded from the internet
+    // through a web URL.
     struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];
@@ -142,11 +142,11 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
         }
 
         try {
-            _texture = ghoul::io::TextureReader::ref().loadTexture(
+            _texture = ghoul::io::texture::loadTexture(
                 reinterpret_cast<void*>(imageFile.buffer),
                 imageFile.size,
                 2,
-                {
+                ghoul::opengl::Texture::SamplerInit{
                     .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
                 },
                 imageFile.format
@@ -176,7 +176,7 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
                 _textureDimensions = textureDim;
             }
         }
-        catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
+        catch (const ghoul::io::texture::InvalidLoadException& e) {
             _textureIsDirty = false;
             LERRORC(e.component, e.message);
         }

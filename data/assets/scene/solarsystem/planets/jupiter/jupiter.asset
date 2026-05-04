@@ -1,91 +1,14 @@
+asset.require("./globe")
 asset.require("./trail")
-local transforms = asset.require("./transforms")
-local coreKernels = asset.require("spice/core")
-local jupiterKernels = asset.require("./kernels")
-
-
-
-local Jupiter = {
-  Identifier = "Jupiter",
-  Parent = transforms.JupiterBarycenter.Identifier,
-  Transform = {
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = jupiterKernels.ID.Jupiter,
-      Observer = coreKernels.ID.JupiterBarycenter
-    },
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = coreKernels.Frame.Jupiter,
-      DestinationFrame = coreKernels.Frame.Galactic
-    }
-  },
-  Renderable = {
-    Type = "RenderableGlobe",
-    Radii = { 71492000.0, 71492000.0, 66854000.0 },
-    ShadowGroup = {
-      Sources = {
-        { Name = "Sun", Radius = 696300000 },
-      },
-      Casters = {
-        { Name = "Ganymede", Radius = 2631000 },
-        { Name = "Io", Radius = 1821600 },
-        { Name = "Europa", Radius = 1560800 },
-        { Name = "Callisto", Radius = 2410000 }
-      }
-    }
-  },
-  Tag = { "planet_solarSystem", "planet_giants" },
-  GUI = {
-    Path = "/Solar System/Planets/Jupiter"
-  }
-}
-
-local JupiterLabel = {
-  Identifier = "JupiterLabel",
-  Parent = Jupiter.Identifier,
-  Renderable = {
-    Type = "RenderableLabel",
-    Enabled = false,
-    Text = "Jupiter",
-    FontSize = 70.0,
-    Size = 8.75,
-    MinMaxSize = { 1, 50 },
-    OrientationOption = "Camera View Direction",
-    BlendMode = "Additive",
-    EnableFading = true,
-    FadeUnit = "au",
-    FadeDistances = { 3.0, 40.0 },
-    FadeWidths = { 1.0, 60.0 }
-  },
-  Tag = { "solarsystem_labels" },
-  GUI = {
-    Name = "Jupiter Label",
-    Path = "/Solar System/Planets/Jupiter",
-    Focusable = false
-  }
-}
-
-
-asset.onInitialize(function()
-  openspace.addSceneGraphNode(Jupiter)
-  openspace.addSceneGraphNode(JupiterLabel)
-end)
-
-asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(JupiterLabel)
-  openspace.removeSceneGraphNode(Jupiter)
-end)
-
-asset.export(Jupiter)
-asset.export(JupiterLabel)
+asset.require("./major_moons")
+asset.require("./label", false)
 
 
 
 asset.meta = {
   Name = "Jupiter",
-  Description = "Jupiter globe, and main planet label",
+  Description = [[Trail, Model, Label, and Moons of Jupiter.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
-  License = "MIT license"
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
 }

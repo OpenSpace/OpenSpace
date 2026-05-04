@@ -1,7 +1,7 @@
 local trail = asset.require("./trail")
-local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
+local marsAsset = asset.require("scene/solarsystem/planets/mars/transforms")
 local marsKernels = asset.require("scene/solarsystem/planets/mars/kernels")
-local sun = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -59,7 +59,7 @@ local TranslationKeyframes = {
 
 local PerseveranceNode = {
   Identifier = "PerseveranceNode",
-  Parent = marsTransforms.MarsBarycenter.Identifier,
+  Parent = marsAsset.MarsBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
@@ -116,14 +116,15 @@ local Body = {
     Type = "RenderableModel",
     GeometryFile = models .. "Perseverance.obj",
     LightSources = {
-      sun.LightSource,
+      sunAsset.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
         Intensity = 0.5
       }
     },
-    RotationVector = { 19.19, 0.0, 348.08 }
+    RotationVector = { 19.19, 0.0, 348.08 },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Perseverance Model Body",

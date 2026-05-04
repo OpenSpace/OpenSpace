@@ -25,6 +25,13 @@
       }
     },
     {
+      "type": "property",
+      "value": {
+        "property": "Scene.RenderableGrid_Example_Segments.Renderable.LineWidth",
+        "value": 5.0
+      }
+    },
+    {
       "type": "screenshot"
     }
   ]

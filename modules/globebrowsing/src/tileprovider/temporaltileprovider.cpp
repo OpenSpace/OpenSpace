@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <modules/globebrowsing/src/tileindex.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
+#include <openspace/data/colormaploader.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
@@ -38,7 +39,6 @@
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
@@ -319,9 +319,8 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     if (_isInterpolating) {
         _interpolateTileProvider = std::make_unique<InterpolateTileProvider>(dictionary);
         _interpolateTileProvider->initialize();
-        _interpolateTileProvider->colormap = ghoul::io::TextureReader::ref().loadTexture(
+        _interpolateTileProvider->colormap = dataloader::colormap::loadColorMapTexture(
             _colormap,
-            1,
             { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
         );
     }

@@ -43,18 +43,15 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 create_new_module(
   "FitsFileReader"
   fitsfilereader
-  ${HEADER_FILES}
-  ${SOURCE_FILES}
+  ${HEADER_FILES} ${SOURCE_FILES}
 )
 
 # CCfits is dependent on cfitsio, let it handle the internal linking
 add_subdirectory(ext/cfitsio SYSTEM)
 set_target_properties(cfitsio PROPERTIES FOLDER "External")
-set(cfitsio_BUILD_SHARED_LIBS OFF)
 
 add_subdirectory(ext/CCfits SYSTEM)
 set_target_properties(CCfits PROPERTIES FOLDER "External")
-set(CCfits_BUILD_SHARED_LIBS OFF)
 
 if (MSVC)
   target_compile_options(cfitsio PRIVATE "/W0")

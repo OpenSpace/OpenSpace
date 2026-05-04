@@ -1,4 +1,4 @@
-local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
@@ -92,6 +92,6 @@ asset.meta = {
   Description = [[A 1:1 scale model of a US school bus, with actions to move
     it to a position under the camera, or back to its start position.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -32,7 +32,7 @@
 #include <limits>
 
 namespace {
-    // This `Renderable` creates a textured 3D plane where the texture is a video.
+    // Creates a textured 3D plane where the texture is a video.
     //
     // The video can either be played back based on a given simulation time
     // (`PlaybackMode` MapToSimulationTime) or through the user interface (for
@@ -74,10 +74,6 @@ void RenderableVideoPlane::initializeGL() {
 void RenderableVideoPlane::deinitializeGL() {
     _videoPlayer.destroy();
     RenderablePlane::deinitializeGL();
-}
-
-bool RenderableVideoPlane::isReady() const {
-    return RenderablePlane::isReady() && _videoPlayer.isInitialized();
 }
 
 void RenderableVideoPlane::render(const RenderData& data, RendererTasks& rendererTask) {

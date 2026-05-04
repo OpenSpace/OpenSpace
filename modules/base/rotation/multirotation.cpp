@@ -31,9 +31,9 @@
 #include <utility>
 
 namespace {
-    // This Rotation type combines multiple individual rotations that are applied one
-    // after the other. The rotations are applied in the order in which they are specified
-    // in the `Rotations` key.
+    // Combines multiple individual rotations that are applied one after the other. The
+    // rotations are applied in the order in which they are specified in the `Rotations`
+    // key.
     struct [[codegen::Dictionary(MultiRotation)]] Parameters {
         // The list of rotations that are applied one after the other.
         std::vector<ghoul::Dictionary> rotations [[codegen::reference("core_rotation")]];

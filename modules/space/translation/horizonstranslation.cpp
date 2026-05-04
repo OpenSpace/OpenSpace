@@ -59,10 +59,9 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // HorizonsTranslation is a file-driven translation component that computes an
-    // object's position from ephemeris data exported from JPL Horizons. It is intended
-    // for bodies whose motion is best represented by sampled positional data over time
-    // rather than by an analytic orbit model.
+    // Computes an object's position from ephemeris data files exported from JPL Horizons.
+    // It is intended for bodies whose motion is best represented by sampled positional
+    // data over time rather than by an analytic orbit model.
     //
     // The class reads one or more Horizons text files and converts their contents into a
     // time-ordered position timeline. At runtime, it evaluates the object's position by

@@ -1,0 +1,523 @@
+local transforms = asset.require("./transforms")
+
+
+
+local S2010J2 = {
+  Identifier = "S2010J2",
+  Parent = transforms.S2010J2Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2010 J 2",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2010J2"
+  }
+}
+
+local Thelxinoe = {
+  Identifier = "Thelxinoe",
+  Parent = transforms.ThelxinoePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Thelxinoe",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thelxinoe"
+  }
+}
+
+local Euanthe = {
+  Identifier = "Euanthe",
+  Parent = transforms.EuanthePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Euanthe",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Euanthe"
+  }
+}
+
+local Iocaste = {
+  Identifier = "Iocaste",
+  Parent = transforms.IocastePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 5000, 5000, 5000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Iocaste",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Iocaste"
+  }
+}
+
+local S2003J16 = {
+  Identifier = "S2003J16",
+  Parent = transforms.S2003J16Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 16",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J16"
+  }
+}
+
+local Praxidike = {
+  Identifier = "Praxidike",
+  Parent = transforms.PraxidikePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 7000, 7000, 7000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Praxidike",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Praxidike"
+  }
+}
+
+local Harpalyke = {
+  Identifier = "Harpalyke",
+  Parent = transforms.HarpalykePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Harpalyke",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Harpalyke"
+  }
+}
+
+local Mneme = {
+  Identifier = "Mneme",
+  Parent = transforms.MnemePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Mneme",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Mneme"
+  }
+}
+
+local Hermippe = {
+  Identifier = "Hermippe",
+  Parent = transforms.HermippePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Hermippe",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Hermippe"
+  }
+}
+
+local Thyone = {
+  Identifier = "Thyone",
+  Parent = transforms.ThyonePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Thyone",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thyone"
+  }
+}
+
+local Ananke = {
+  Identifier = "Ananke",
+  Parent = transforms.AnankePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 28000, 28000, 28000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Ananke",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Ananke"
+  }
+}
+
+local S2021J1 = {
+  Identifier = "S2021J1",
+  Parent = transforms.S2021J1Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2021 J 1",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J1"
+  }
+}
+
+local S2021J2 = {
+  Identifier = "S2021J2",
+  Parent = transforms.S2021J2Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2021 J 2",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J2"
+  }
+}
+
+local S2021J3 = {
+  Identifier = "S2021J3",
+  Parent = transforms.S2021J3Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2021 J 3",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J3"
+  }
+}
+
+local S2022J3 = {
+  Identifier = "S2022J3",
+  Parent = transforms.S2022J3Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2022 J 3",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2022J3"
+  }
+}
+
+local S2017J3 = {
+  Identifier = "S2017J3",
+  Parent = transforms.S2017J3Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 3",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J3"
+  }
+}
+
+local S2017J7 = {
+  Identifier = "S2017J7",
+  Parent = transforms.S2017J7Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 7",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J7"
+  }
+}
+
+local S2017J9 = {
+  Identifier = "S2017J9",
+  Parent = transforms.S2017J9Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 9",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J9"
+  }
+}
+
+local S2003J2 = {
+  Identifier = "S2003J2",
+  Parent = transforms.S2003J2Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 2",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J2"
+  }
+}
+
+local S2003J12 = {
+  Identifier = "S2003J12",
+  Parent = transforms.S2003J12Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 12",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J12"
+  }
+}
+
+local S2017J10 = {
+  Identifier = "S2017J10",
+  Parent = transforms.S2017J10Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 10",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J10"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(S2010J2)
+  openspace.addSceneGraphNode(Thelxinoe)
+  openspace.addSceneGraphNode(Euanthe)
+  openspace.addSceneGraphNode(Iocaste)
+  openspace.addSceneGraphNode(S2003J16)
+  openspace.addSceneGraphNode(Praxidike)
+  openspace.addSceneGraphNode(Harpalyke)
+  openspace.addSceneGraphNode(Mneme)
+  openspace.addSceneGraphNode(Hermippe)
+  openspace.addSceneGraphNode(Thyone)
+  openspace.addSceneGraphNode(Ananke)
+  openspace.addSceneGraphNode(S2021J1)
+  openspace.addSceneGraphNode(S2021J2)
+  openspace.addSceneGraphNode(S2021J3)
+  openspace.addSceneGraphNode(S2022J3)
+  openspace.addSceneGraphNode(S2017J3)
+  openspace.addSceneGraphNode(S2017J7)
+  openspace.addSceneGraphNode(S2017J9)
+  openspace.addSceneGraphNode(S2003J2)
+  openspace.addSceneGraphNode(S2003J12)
+  openspace.addSceneGraphNode(S2017J10)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2017J10)
+  openspace.removeSceneGraphNode(S2003J12)
+  openspace.removeSceneGraphNode(S2003J2)
+  openspace.removeSceneGraphNode(S2017J9)
+  openspace.removeSceneGraphNode(S2017J7)
+  openspace.removeSceneGraphNode(S2017J3)
+  openspace.removeSceneGraphNode(S2022J3)
+  openspace.removeSceneGraphNode(S2021J3)
+  openspace.removeSceneGraphNode(S2021J2)
+  openspace.removeSceneGraphNode(S2021J1)
+  openspace.removeSceneGraphNode(Ananke)
+  openspace.removeSceneGraphNode(Thyone)
+  openspace.removeSceneGraphNode(Hermippe)
+  openspace.removeSceneGraphNode(Mneme)
+  openspace.removeSceneGraphNode(Harpalyke)
+  openspace.removeSceneGraphNode(Praxidike)
+  openspace.removeSceneGraphNode(S2003J16)
+  openspace.removeSceneGraphNode(Iocaste)
+  openspace.removeSceneGraphNode(Euanthe)
+  openspace.removeSceneGraphNode(Thelxinoe)
+  openspace.removeSceneGraphNode(S2010J2)
+end)
+
+asset.export(S2010J2)
+asset.export(Thelxinoe)
+asset.export(Euanthe)
+asset.export(Iocaste)
+asset.export(S2003J16)
+asset.export(Praxidike)
+asset.export(Harpalyke)
+asset.export(Mneme)
+asset.export(Hermippe)
+asset.export(Thyone)
+asset.export(Ananke)
+asset.export(S2021J1)
+asset.export(S2021J2)
+asset.export(S2021J3)
+asset.export(S2022J3)
+asset.export(S2017J3)
+asset.export(S2017J7)
+asset.export(S2017J9)
+asset.export(S2017J10)
+asset.export(S2003J2)
+asset.export(S2003J12)
+
+asset.meta = {
+  Name = "Jupiter Ananke Group Moons Globes",
+  Description = [[Asset containing globes for Jupiter's Ananke Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

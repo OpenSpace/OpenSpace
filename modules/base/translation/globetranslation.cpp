@@ -100,12 +100,13 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // This `Translation` places the scene graph node at a specific location relative to
-    // another scene graph node. The position is identified via the longitude, latitude,
-    // and altitude parameters. If the provided scene graph node is a globe, the positions
-    // correspond to the native coordinate frame of that object. If it is a node without a
-    // renderable or a non-globe renderable, the latitude/longitude grid used is the
-    // node's interaction sphere.
+    // Places the scene graph node at a specific location relative to another scene graph
+    // node. The position is identified via the longitude, latitude, and altitude
+    // parameters. If the provided scene graph node is a globe, the positions correspond
+    // to the native coordinate frame of that object. If it is a node without a renderable
+    // or a non-globe renderable, the latitude/longitude grid used is the node's
+    // interaction sphere.
+    //
     // This class is useful in conjunction with the
     // [GlobeRotation](#base_rotation_globe) rotation to orient a scene graph node away
     // from the center of the body.

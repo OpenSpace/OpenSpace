@@ -37,8 +37,8 @@ class OrbitalCameraStates {
 public:
     /**
      * \param sensitivity Interaction sensitivity
-     * \param velocityScale Can be set to 60 to remove the inertia of the interaction.
-     *        Lower value will make it harder to move the camera
+     * \param velocityScaleFactor Can be set to 60 to remove the inertia of the
+     *        interaction. Lower value will make it harder to move the camera
      */
     OrbitalCameraStates(double sensitivity, double velocityScaleFactor);
     virtual ~OrbitalCameraStates() = default;

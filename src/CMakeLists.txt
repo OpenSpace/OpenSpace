@@ -28,6 +28,7 @@ set(OPENSPACE_SOURCE
   openspace.cpp
   camera/camera.cpp
   camera/camerapose.cpp
+  data/colormaploader.cpp
   data/csvloader.cpp
   data/dataloader.cpp
   data/datamapping.cpp
@@ -252,6 +253,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/json.h
   ${PROJECT_SOURCE_DIR}/include/openspace/camera/camera.h
   ${PROJECT_SOURCE_DIR}/include/openspace/camera/camerapose.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/data/colormaploader.h
   ${PROJECT_SOURCE_DIR}/include/openspace/data/csvloader.h
   ${PROJECT_SOURCE_DIR}/include/openspace/data/dataloader.h
   ${PROJECT_SOURCE_DIR}/include/openspace/data/datamapping.h
@@ -626,9 +628,3 @@ endif ()
 
 set_openspace_compile_settings(openspace-core)
 target_link_libraries(openspace-core PUBLIC Ghoul spice external-curl)
-
-# Just in case, create the bin directory
-add_custom_command(
-  TARGET openspace-core
-  PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-)

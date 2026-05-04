@@ -174,6 +174,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     }
 
     QWidget* centralWidget = new QWidget;
+    setCentralWidget(centralWidget);
 
     {
         // Yes, this looks weird to create an object but not keeping the pointer around,
@@ -374,8 +375,8 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
 
 
     _editWindowButton = new QPushButton("Edit", centralWidget);
-    _editWindowButton->setVisible(true);
     _editWindowButton->setObjectName("small");
+    _editWindowButton->setVisible(true);
     _editWindowButton->setGeometry(geometry::EditWindowButton);
     _editWindowButton->setCursor(Qt::PointingHandCursor);
     _editWindowButton->setAutoDefault(true);
@@ -447,8 +448,6 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
             this, &LauncherWindow::openSettings
         );
     }
-
-    setCentralWidget(centralWidget);
 }
 
 void LauncherWindow::editProfile() {
@@ -777,15 +776,14 @@ void LauncherWindow::updateAddonsBox(const std::string& profile) {
     const std::filesystem::path coreCandidate = _profilePath / profile;
     const std::filesystem::path userCandidate = _userProfilePath / profile;
 
-    ghoul_assert(
-        std::filesystem::exists(coreCandidate) || std::filesystem::exists(userCandidate),
-        "One of the two options must exist"
-    );
-
-    Profile p = Profile(
-        // User path has precedence
-        std::filesystem::exists(userCandidate) ? userCandidate : coreCandidate
-    );
+    std::optional<Profile> p;
+    // User path has precedence
+    if (std::filesystem::exists(userCandidate)) {
+        p = Profile(userCandidate);
+    }
+    else if (std::filesystem::exists(coreCandidate)) {
+        p = Profile(coreCandidate);
+    }
 
     QIcon icon = userIcon();
 
@@ -805,7 +803,8 @@ void LauncherWindow::updateAddonsBox(const std::string& profile) {
     };
 
     const bool hasProfileAddons =
-        !p.addons.custom.empty() || !p.addons.recommended.empty();
+        p.has_value() &&
+        (!p->addons.custom.empty() || !p->addons.recommended.empty());
     const bool hasGlobalAddons = !addonsCore.empty() || !addonsUser.empty();
 
     // Stores the list of the adds explicitly mentioned by the profile so that we can
@@ -819,7 +818,8 @@ void LauncherWindow::updateAddonsBox(const std::string& profile) {
         _addonBox.model->appendRow(header);
 
         // First the custom
-        for (const Addon& addon : p.addons.custom) {
+        ghoul_assert(p.has_value(), "Profile must exist");
+        for (const Addon& addon : p->addons.custom) {
             profileAddons.insert(addon.identifier);
 
             constexpr bool IsUserFolder = false;
@@ -827,7 +827,7 @@ void LauncherWindow::updateAddonsBox(const std::string& profile) {
             _addonBox.model->appendRow(i);
         }
         // Then the recommended
-        for (const Addon& addon : p.addons.recommended) {
+        for (const Addon& addon : p->addons.recommended) {
             profileAddons.insert(addon.identifier);
 
             constexpr bool IsUserFolder = false;

@@ -1,4 +1,4 @@
-local globe = asset.require("../../tethys")
+local tethysAsset = asset.require("scene/solarsystem/planets/saturn/tethys/globe")
 
 
 
@@ -19,11 +19,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Tethys.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(tethysAsset.Tethys.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Tethys.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(tethysAsset.Tethys.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export("layer", Layer)
@@ -34,6 +34,6 @@ asset.meta = {
   Name = "Tethys Texutre",
   Description = "Default jpg texture for Tethys",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -40,8 +40,6 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     void update(const UpdateData& data) override;
 
     static openspace::Documentation Documentation();
@@ -53,6 +51,10 @@ private:
     StringProperty _texturePath;
 
     std::unique_ptr<TextureComponent> _texture;
+
+    bool _isLoadingLazily = false;
+    bool _shouldUnloadTexture = false;
+    bool _textureIsDirty = false;
 };
 
 } // namespace openspace

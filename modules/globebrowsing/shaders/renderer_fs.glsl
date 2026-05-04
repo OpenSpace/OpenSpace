@@ -347,7 +347,7 @@ Fragment getFragment() {
   float accum = 1.0;
   for (int idx = 0; idx < nDepthMaps; idx++) {
     vec2 ssz = 1.0 / textureSize(lightDepthMaps[idx], 0);
-    vec4 pls = in_data.positions_lightspace[idx];
+    vec4 pls = in_data.positionsLightspace[idx];
     vec3 coords = 0.5 + 0.5 * pls.xyz / pls.w;
     for (int x = -Size; x <= Size; x++) {
       for (int y = -Size; y <= Size; y++) {

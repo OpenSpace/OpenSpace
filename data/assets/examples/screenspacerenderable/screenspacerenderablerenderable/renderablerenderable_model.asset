@@ -38,6 +38,7 @@ local Item = {
   CameraCenter = { 0.0, 0.5, 0.0 }
 }
 
+
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(Item)
 end)

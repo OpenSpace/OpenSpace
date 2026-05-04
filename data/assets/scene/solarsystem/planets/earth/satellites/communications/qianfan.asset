@@ -1,0 +1,55 @@
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+
+
+
+local omm = asset.resource({
+  Name = "Satellite CSV Data (Qianfan)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_csv_data_qianfan",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=qianfan&FORMAT=csv",
+  Filename = "qianfan.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local QianfanSatellites = {
+  Identifier = "QianfanSatellites",
+  Parent = earthAsset.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "qianfan.txt",
+    Format = "CSV",
+    SegmentQuality = 3,
+    Color = { 0.75, 0.75, 0.35 },
+    TrailFade = 5,
+    PointSizeExponent = 5.0,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "Qianfan",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(QianfanSatellites)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(QianfanSatellites)
+end)
+
+asset.export(QianfanSatellites)
+
+
+
+asset.meta = {
+  Name = "Satellites Communications - Qianfan",
+  Description = "Satellites asset for Communications - Qianfan. Data from Celestrak",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.org/NORAD/elements/",
+  License = "Celestrak"
+}

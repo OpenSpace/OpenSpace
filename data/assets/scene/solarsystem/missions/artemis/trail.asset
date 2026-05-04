@@ -1,5 +1,5 @@
-local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/globe")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -7,7 +7,7 @@ local coreKernels = asset.require("spice/core")
 
 local ArtemisEarthTrail = {
   Identifier = "ArtemisEarthTrail",
-  Parent = earthTransforms.EarthCenter.Identifier,
+  Parent = earthAsset.EarthCenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
@@ -32,7 +32,7 @@ local ArtemisEarthTrail = {
 
 local ArtemisMoonTrail = {
   Identifier = "ArtemisMoonTrail",
-  Parent = moon.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
@@ -75,6 +75,6 @@ asset.meta = {
   Name = "Artemis-1 Trails",
   Description = "Trail of Artemis-1 in respect to Earth and the Moon",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

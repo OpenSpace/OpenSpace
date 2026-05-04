@@ -1,0 +1,12 @@
+asset.require("./trail")
+asset.require("./label", false)
+
+
+
+asset.meta = {
+  Name = "3I/ATLAS meta asset",
+  Description = [[Trail and Label of 3I/ATLAS.]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

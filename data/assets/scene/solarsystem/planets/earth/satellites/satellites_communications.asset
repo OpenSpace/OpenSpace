@@ -1,26 +1,27 @@
-asset.require("./communications/geostationary")
-asset.require("./communications/intelsat")
-asset.require("./communications/ses")
-asset.require("./communications/iridium")
-asset.require("./communications/iridium_next")
-asset.require("./communications/orbcomm")
-asset.require("./communications/globalstar")
 asset.require("./communications/amateur")
+asset.require("./communications/eutelsat")
 asset.require("./communications/experimental")
+asset.require("./communications/geostationary")
+asset.require("./communications/globalstar")
+asset.require("./communications/hulianwang_digui")
+asset.require("./communications/intelsat")
+asset.require("./communications/iridium_next")
+asset.require("./communications/kuiper")
+asset.require("./communications/oneweb")
+asset.require("./communications/orbcomm")
 asset.require("./communications/other_comm")
-asset.require("./communications/gorizont")
-asset.require("./communications/raduga")
-asset.require("./communications/molniya")
+asset.require("./communications/qianfan")
+asset.require("./communications/satnogs")
+asset.require("./communications/ses")
 asset.require("./communications/starlink")
+asset.require("./communications/telesat")
 
 
 
 asset.meta = {
   Name = "Satellites Communications",
-  Description = [[Meta asset for communications satellites of Earth. Containing groups:
-    geostationary, intelsat, ses, iridium, iridium_next, orbcomm, globalstar, amateur,
-    experimental, other_comm, gorizont, raduga and molniya]],
+  Description = [[Meta asset for communications satellites of Earth.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

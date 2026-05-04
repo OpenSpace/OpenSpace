@@ -583,7 +583,7 @@ void RingsComponent::loadTexture() {
     using namespace ghoul::opengl;
 
     if (!_texturePath.value().empty()) {
-        _texture = TextureReader::ref().loadTexture(
+        _texture = texture::loadTexture(
             absPath(_texturePath),
             1,
             { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
@@ -596,7 +596,7 @@ void RingsComponent::loadTexture() {
     }
 
     if (!_textureFwrdPath.value().empty()) {
-        _textureForwards = TextureReader::ref().loadTexture(
+        _textureForwards = texture::loadTexture(
             absPath(_textureFwrdPath),
             1,
             { .filter = Texture::FilterMode::AnisotropicMipMap }
@@ -614,7 +614,7 @@ void RingsComponent::loadTexture() {
     }
 
     if (!_textureBckwrdPath.value().empty()) {
-        _textureBackwards = TextureReader::ref().loadTexture(
+        _textureBackwards = texture::loadTexture(
             absPath(_textureBckwrdPath),
             1,
             { .filter = Texture::FilterMode::AnisotropicMipMap }
@@ -631,7 +631,7 @@ void RingsComponent::loadTexture() {
     }
 
     if (!_textureUnlitPath.value().empty()) {
-        _textureUnlit = TextureReader::ref().loadTexture(
+        _textureUnlit = texture::loadTexture(
             absPath(_textureUnlitPath),
             1,
             { . filter = Texture::FilterMode::AnisotropicMipMap }
@@ -646,7 +646,7 @@ void RingsComponent::loadTexture() {
     }
 
     if (!_textureColorPath.value().empty()) {
-        _textureColor = TextureReader::ref().loadTexture(
+        _textureColor = texture::loadTexture(
             absPath(_textureColorPath),
             1,
             { .filter = Texture::FilterMode::AnisotropicMipMap }
@@ -661,7 +661,7 @@ void RingsComponent::loadTexture() {
     }
 
     if (!_textureTransparencyPath.value().empty()) {
-        _textureTransparency = TextureReader::ref().loadTexture(
+        _textureTransparency = texture::loadTexture(
             absPath(_textureTransparencyPath),
             1,
             { .filter = Texture::FilterMode::AnisotropicMipMap }

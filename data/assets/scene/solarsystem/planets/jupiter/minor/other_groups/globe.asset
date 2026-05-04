@@ -1,0 +1,93 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Eupheme = {
+  Identifier = "Eupheme",
+  Parent = transforms.EuphemePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Eupheme",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Group/Eupheme"
+  }
+}
+
+local S2003J19 = {
+  Identifier = "S2003J19",
+  Parent = transforms.S2003J19Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 19",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Group/S2003J19"
+  }
+}
+
+local Valetudo = {
+  Identifier = "Valetudo",
+  Parent = transforms.ValetudoPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_other",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Valetudo",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Group/Valetudo"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Eupheme)
+  openspace.addSceneGraphNode(S2003J19)
+  openspace.addSceneGraphNode(Valetudo)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Valetudo)
+  openspace.removeSceneGraphNode(S2003J19)
+  openspace.removeSceneGraphNode(Eupheme)
+end)
+
+asset.export(Eupheme)
+asset.export(S2003J19)
+asset.export(Valetudo)
+
+
+
+asset.meta = {
+  Name = "Jupiter Pasiphae Other Moons Globes",
+  Description = [[Asset containing globes for Jupiter's Other Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

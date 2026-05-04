@@ -1,0 +1,66 @@
+-- This file is auto-generated in the make_RenderablePointCloud_asset() function inside asset_creation.py
+
+-- Set some parameters for OpenSpace settings
+local data_folder = asset.resource({
+  Name = "DESI Quasars Data Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_desi_quasars_data",
+  Version = 1
+})
+local texture_folder = asset.resource({
+  Name = "Point Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_point_textures",
+  Version = 1
+})
+local data_file = data_folder .. "desi_quasars.csv"
+local texture = texture_folder .. "point3A.png"
+
+local Object = {
+  Identifier = "desi_quasars",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = data_file,
+    Unit = "Mpc",
+    Enabled = true,
+    Coloring = {
+      FixedColor = {0.85, 0.35, 0.18}
+    },
+    Opacity = 0.95,
+    Texture = {
+      File = texture },
+    SizeSettings = {
+      ScaleExponent = 23.5,
+      MaxSize = 0.3,
+      EnableMaxSizeControl = true
+     },
+    Fading = {
+      FadeInDistances = {1000.0, 10000.0}
+    },
+  },
+  GUI = {
+    Name = "DESI Quasars",
+    Path = "/Universe/Deep Sky Surveys",
+    Description = [[The DESI (Dark Energy Spectroscopic Instrument) catalog of quasars. Census: 2,182,309 quasars.]]
+  }
+}
+
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(Object)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+asset.meta = {
+  Name = "DESI Quasars",
+  Description = Object.GUI.Description,
+  Author = "Cade Mohrhardt, Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}

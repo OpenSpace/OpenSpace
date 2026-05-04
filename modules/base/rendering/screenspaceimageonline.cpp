@@ -48,7 +48,7 @@ namespace {
         Property::Visibility::User
     };
 
-    // This `ScreenSpaceRenderable` can be used to display an image from a web URL.
+    // Displays an image from a web URL on a plane in screen space.
     //
     // To load an image from a local file on disk, see
     // [`ScreenSpaceImageLocal`](#base_screenspace_imagelocal).
@@ -115,28 +115,22 @@ void ScreenSpaceImageOnline::update() {
         }
 
         try {
-            // @TODO (2026-02-18, abock): This code was settings the swizzle mask only if
-            // the returned image was having a single Red channel. This can't currently be
-            // expressed unfortunately
-            ghoul::opengl::Texture::SamplerInit samplerInit = {
-                // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-                //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
-                .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
-                //.swizzleMask = std::array<GLenum, 4>{ GL_RED, GL_RED, GL_RED, GL_ONE }
-            };
-
-            _texture = ghoul::io::TextureReader::ref().loadTexture(
+            _texture = ghoul::io::texture::loadTexture(
                 reinterpret_cast<void*>(imageFile.buffer),
                 imageFile.size,
                 2,
-                samplerInit,
+                ghoul::opengl::Texture::SamplerInit{
+                    // TODO: AnisotropicMipMap crashes on ATI cards ---abock
+                    //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
+                    .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                },
                 imageFile.format
             );
 
             _objectSize = _texture->dimensions();
             _textureIsDirty = false;
         }
-        catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
+        catch (const ghoul::io::texture::InvalidLoadException& e) {
             _textureIsDirty = false;
             LERRORC(e.component, e.message);
         }

@@ -59,13 +59,11 @@ namespace {
         float t;
     };
 
-    // This specialized Renderable type is used as a target for projections from a
-    // spacecraft instrument. Similarly to the
-    // [RenderablePlanetProject](spacecraftinstruments_renderable_planetprojection) it
-    // uses the spacecraft's position and orientation and information about an instruments
-    // field-of-view and set of images to project a captured image. In the case of this
-    // renderable the target geometry is a two-dimensional plane that the image is
-    // projected on.
+    // A 2D plane that acts as a target for projections from a spacecraft instrument.
+    // Similarly to
+    // [RenderablePlanetProjection](spacecraftinstruments_renderable_planetprojection), it
+    // uses the spacecraft's position and orientation and information about an
+    // instrument's field-of-view to project a captured image from a set of images.
     struct [[codegen::Dictionary(RenderablePlaneProjection)]] Parameters {
         // The SPICE name of the spacecraft from which the projection is performed.
         std::string spacecraft;
@@ -103,10 +101,6 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
         _texturePath = absPath(*p.texture);
         _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
     }
-}
-
-bool RenderablePlaneProjection::isReady() const {
-    return _shader && _texture;
 }
 
 void RenderablePlaneProjection::initializeGL() {
@@ -216,16 +210,15 @@ void RenderablePlaneProjection::loadTexture() {
         return;
     }
 
-    // @TODO (2026-02-18, abock): This code was settings the swizzle mask only if the
-    // returned image was having a single Red channel. This can't currently be expressed
-    // unfortunately
-    ghoul::opengl::Texture::SamplerInit samplerInit = {
-        // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-        //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
-        .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
-        //.swizzleMask = std::array<GLenum, 4>{ GL_RED, GL_RED, GL_RED, GL_ONE }
-    };
-    _texture = ghoul::io::TextureReader::ref().loadTexture(_texturePath, 2, samplerInit);
+    _texture = ghoul::io::texture::loadTexture(
+        _texturePath,
+        2,
+        ghoul::opengl::Texture::SamplerInit{
+            // TODO: AnisotropicMipMap crashes on ATI cards ---abock
+            //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
+            .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+        }
+    );
 
     _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
     _textureFile->setCallback([this]() { _textureIsDirty = true; });

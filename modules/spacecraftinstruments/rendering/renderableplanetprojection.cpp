@@ -144,12 +144,12 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // This Renderable serves as a potential target for images projected from a
-    // spacecraft's instrument. Images have to be loaded into an image sequence first and
-    // when it is then time to project an image into the world from the point of view of
-    // the instrument, the field-of-view will be checked against the extent of this
-    // planetary body. If the field-of-view intersects, the image gets correctly projected
-    // onto the surface.
+    // Serves as a potential target for images projected from a spacecraft's instrument,
+    // when the observed object is a planetary body. The images first have to be loaded
+    // into an image sequence and when it is then time to project an image onto the world
+    // from the point of view of the instrument, the field-of-view will be checked against
+    // the extent of this planetary body. If the field-of-view intersects, the image gets
+    // correctly projected onto the surface.
     struct [[codegen::Dictionary(RenderablePlanetProjection)]] Parameters {
         // Contains information about projecting onto this planet.
         ghoul::Dictionary projection
@@ -389,10 +389,6 @@ void RenderablePlanetProjection::deinitializeGL() {
 
     SpacecraftInstrumentsModule::ProgramObjectManager.release("FBOPassProgram");
     _fboProgramObject = nullptr;
-}
-
-bool RenderablePlanetProjection::isReady() const {
-    return _programObject && _projectionComponent.isReady();
 }
 
 void RenderablePlanetProjection::imageProjectGPU(
@@ -640,7 +636,7 @@ void RenderablePlanetProjection::loadColorTexture() {
             Texture::WrappingMode::MirroredRepeat
         };
 
-        _baseTexture = ghoul::io::TextureReader::ref().loadTexture(
+        _baseTexture = ghoul::io::texture::loadTexture(
             absPath(selectedPath),
             2,
             ghoul::opengl::Texture::SamplerInit {
@@ -660,7 +656,7 @@ void RenderablePlanetProjection::loadHeightTexture() {
     // run out in the case of two large textures
     _heightMapTexture = nullptr;
     if (selectedPath != NoImageText) {
-        _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(
+        _heightMapTexture = ghoul::io::texture::loadTexture(
             absPath(selectedPath),
             2,
             {

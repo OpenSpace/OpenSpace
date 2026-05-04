@@ -24,9 +24,9 @@
 
 #include <openspace/rendering/transferfunction.h>
 
+#include <openspace/data/colormaploader.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
@@ -212,9 +212,8 @@ void TransferFunction::setTextureFromTxt() {
 }
 
 void TransferFunction::setTextureFromImage() {
-    _texture = ghoul::io::TextureReader::ref().loadTexture(
+    _texture = dataloader::colormap::loadColorMapTexture(
         _filepath,
-        1,
         { .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge }
     );
 }

@@ -1,0 +1,128 @@
+local coreKernels = asset.require("spice/core")
+local kernels = asset.require("./kernels")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+-- Model from https://scifleet.esa.int/model/soho/
+local models = asset.resource({
+  Name = "SOHO Models",
+  Type = "HttpSynchronization",
+  Identifier = "soho_models",
+  Version = 1
+})
+
+
+local MissionBegin = "1995 DEC 02 00:01:02"
+local MissionEnd = "2026 MAY 13 23:51:09"
+
+local SohoPosition = {
+  Identifier = "SOHO_Position",
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.SOHO,
+      Observer = coreKernels.ID.SolarSystemBarycenter
+    }
+  },
+  GUI = {
+    Name = "SOHO Position",
+    Path = "/Solar System/Missions/SOHO",
+    Description = "The position of the SOHO spacecraft.",
+    Hidden = true,
+    Focusable = false
+  }
+}
+
+local Soho = {
+  Identifier = "SOHO_Model",
+  Parent = SohoPosition.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = MissionBegin,
+    End = MissionEnd
+  },
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "SOHO_Model",
+      YAxis = sunAsset.SunCenter.Identifier,
+      -- The z = 1.0 seems to helps additional stabalization since we don't have CK
+      -- kernels
+      ZAxis = { 0.0, 1.0, 1.0 },
+      ZAxisOrthogonal = true
+    },
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "soho.fbx",
+    RotationVector = { 0.0, 270.0, 0.0 },
+    LightSources = { sunAsset.LightSource },
+    AmbientIntensity = 0.2,
+    SpecularIntensity = 0.0,
+    EnableFaceCulling = false
+  },
+  GUI = {
+    Name = "SOHO",
+    Path = "/Solar System/Missions/SOHO",
+    Description = "The SOHO (Solar and Heliospheric Observatory) spacecraft."
+  }
+}
+
+local SohoTrail = {
+  Identifier = "SOHO_Trail",
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = MissionBegin,
+    End = MissionEnd
+  },
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.SOHO,
+      Observer = coreKernels.ID.SolarSystemBarycenter
+    },
+    Color = { 0.1, 0.35, 0.52 },
+    Period = 365.0,
+    Resolution = 7000,
+    EnableFade = true
+  },
+  GUI = {
+    Name = "SOHO Trail",
+    Path = "/Solar System/Missions/SOHO",
+    Description = "The trajectory of the SOHO spacecraft."
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SohoPosition)
+  openspace.addSceneGraphNode(Soho)
+  openspace.addSceneGraphNode(SohoTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SohoTrail)
+  openspace.removeSceneGraphNode(Soho)
+  openspace.removeSceneGraphNode(SohoPosition)
+end)
+
+asset.export("Position", SohoPosition)
+asset.export("Soho", Soho)
+asset.export("Trail", Soho)
+asset.export("MissionBegin", MissionBegin)
+asset.export("MissionEnd", MissionEnd)
+
+
+
+asset.meta = {
+  Name = "SOHO",
+  Description = [[This asset adds the SOHO (Solar and Heliospheric Observatory) model,
+    including the trajectory for the entire duration of the SOHO mission.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

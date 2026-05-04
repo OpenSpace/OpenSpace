@@ -69,9 +69,8 @@ namespace {
         Property::Visibility::NoviceUser
     };
 
-    // This `Renderable` type can be used to draw bounding shapes on the night sky, where
-    // each shape encapsulates a group of night sky objects, such as the stars of a
-    // constellation.
+    // Can be used to draw bounding shapes on the night sky, where each shape encapsulates
+    // a group of night sky objects, such as the stars of a constellation.
     //
     // The shapes are defined in a file where each line specifies a vertex location in RA
     // Dec coordinates on the celestial sphere. Each coordinate must also be marked with
@@ -204,16 +203,6 @@ void RenderableConstellationBounds::deinitializeGL() {
         global::renderEngine->removeRenderProgram(_program.get());
         _program = nullptr;
     }
-}
-
-bool RenderableConstellationBounds::isReady() const {
-    bool isReady = _program && _vao != 0 && _vbo != 0;
-
-    // If we have labels, they also need to be loaded
-    if (_hasLabels) {
-        isReady = isReady && RenderableConstellationsBase::isReady();
-    }
-    return isReady;
 }
 
 void RenderableConstellationBounds::render(const RenderData& data, RendererTasks& tasks) {

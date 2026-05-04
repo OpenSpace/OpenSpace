@@ -215,6 +215,6 @@ asset.meta = {
     OpenSpace Team & Winston
     https://openspacesupport.slack.com/archives/CLMQXJJDQ/p1710388096683769
   ]],
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

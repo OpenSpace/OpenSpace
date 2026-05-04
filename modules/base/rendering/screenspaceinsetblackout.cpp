@@ -207,11 +207,10 @@ namespace {
         Property::Visibility::Developer
     };
 
-    // A ScreenSpaceInsetBlackout can be used to render a screen-space shape used to black
-    // out part of the rendering. This can be useful in a dome environment where you have
-    // a secondary presentation projector that can project on the dome surface. The
-    // blackout is used to avoid overlapping rendering between the dome projectors and the
-    // presentation projector.
+    // Renders a screen-space shape used to black out part of the rendering. This can be
+    // useful in a dome environment where you have a secondary presentation projector that
+    // can project on the dome surface. The blackout is used to avoid overlapping
+    // rendering between the dome projectors and the presentation projector.
     struct [[codegen::Dictionary(ScreenSpaceInsetBlackout)]] Parameters {
         struct BlackoutShape {
             // List of corner positions for the blackout shape. The order of corner points
@@ -247,6 +246,9 @@ namespace {
             // File path for the texture that should be used when displaying the
             // calibration grid.
             std::optional<std::filesystem::path> calibrationTexturePath;
+
+            // [[codegen::verbatim(CalibrationPatternInfo.description)]]
+            std::optional<bool> enableCalibrationPattern;
         };
         BlackoutShape blackoutshape;
     };
@@ -412,6 +414,8 @@ ScreenSpaceInsetBlackout::BlackoutShape::BlackoutShape(
     addPropertySubOwner(*leftSpline);
 
     // Add additional controls to GUI
+    enableCalibrationPattern =
+        params.blackoutshape.enableCalibrationPattern.value_or(enableCalibrationPattern);
     enableCalibrationPattern.onChange([this]() { textureTypeHasChanged = true; });
     addProperty(enableCalibrationPattern);
 
@@ -513,7 +517,7 @@ ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dict
                 //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
                 .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
             };
-            _calibrationTexture = ghoul::io::TextureReader::ref().loadTexture(
+            _calibrationTexture = ghoul::io::texture::loadTexture(
                 *optTexturePath,
                 2,
                 samplerInit

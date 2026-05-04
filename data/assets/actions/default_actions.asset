@@ -112,10 +112,10 @@ local FadeToBlack = {
   Identifier = "os.FadeToBlack",
   Name = "Fade to/from black",
   Command = [[
-    if openspace.propertyValue("RenderEngine.BlackoutFactor") > 0.5 then
-      openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 0.0, 3)
+    if openspace.propertyValue("RenderEngine.GlobalBlackout.Factor") > 0.5 then
+      openspace.setPropertyValueSingle("RenderEngine.GlobalBlackout.Factor", 0.0, 3)
     else
-      openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 1.0, 3)
+      openspace.setPropertyValueSingle("RenderEngine.GlobalBlackout.Factor", 1.0, 3)
     end
   ]],
   Documentation = [[Toggles the fade to black within 3 seconds or shows the rendering
@@ -326,6 +326,6 @@ asset.meta = {
   Name = "Actions - Default",
   Description = "Asset providing default actions that are useful in every profile",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -1,0 +1,49 @@
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local RheaPosition = {
+  Identifier = "RheaPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Rhea,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Rhea,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "Rhea Position",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Rhea",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(RheaPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(RheaPosition)
+end)
+
+asset.export(RheaPosition)
+
+
+
+asset.meta = {
+  Name = "Rhea Position",
+  Description = "Rhea position",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

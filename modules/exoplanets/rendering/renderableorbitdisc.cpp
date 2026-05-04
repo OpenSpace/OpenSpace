@@ -66,7 +66,7 @@ namespace {
         "Offset",
         "Offset",
         "The width of the disc, given as two values that specify the lower and upper "
-        "deviation from the semi major axis, respectively. The values are relative to "
+        "deviation from the semi-major axis, respectively. The values are relative to "
         "the size of the semi-major axis. That is, 0 means no deviation from the "
         "semi-major axis and 1 is a whole semi-major axis's worth of deviation.",
         Property::Visibility::AdvancedUser
@@ -80,6 +80,9 @@ namespace {
         Property::Visibility::NoviceUser
     };
 
+    // Renders a disc around a planetary orbit to visualize properties such as positional
+    // uncertainty along the orbit. The disc width is defined as a deviation from the
+    // semi-major axis, with separate values for the inner and outer offsets.
     struct [[codegen::Dictionary(RenderableOrbitDisc)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::filesystem::path texture;
@@ -138,10 +141,6 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     addProperty(_eccentricity);
 
     addProperty(Fadeable::_opacity);
-}
-
-bool RenderableOrbitDisc::isReady() const {
-    return _shader && _texture && _plane;
 }
 
 void RenderableOrbitDisc::initialize() {
