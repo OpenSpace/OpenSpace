@@ -49,6 +49,8 @@ public:
     std::string stringValue() const override final;
     using TemplateProperty<long>::operator=;
 
+    static nlohmann::json Schema();
+
 private:
     long toValue(lua_State* state) const override final;
 };

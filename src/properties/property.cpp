@@ -338,4 +338,59 @@ nlohmann::json Property::generateAdditionalJsonDescription() const {
 void Property::setLuaInterpolationTarget(lua_State*) {}
 void Property::interpolateValue(float, ghoul::EasingFunc<float>) {}
 
+nlohmann::json Property::MetaDataSchema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "$defs": {
+            "PropertyVisibility": {
+              "type": "string",
+              "enum": ["Always", "NoviceUser", "User", "AdvancedUser", "Developer", "Hidden"]
+            }
+          },
+          "type": "object",
+          "properties": {
+            "identifier": { "type": "string" },
+            "description": { "type": "string" },
+            "guiName": { "type": "string" },
+            "group": { "type": "string" },
+            "isReadOnly": { "type": "boolean" },
+            "needsConfirmation": { "type": "boolean" },
+            "visibility": { "$ref": "#/$defs/PropertyVisibility" }
+          },
+          "additionalProperties": false,
+          "required": [
+            "identifier",
+            "description",
+            "guiName",
+            "group",
+            "isReadOnly",
+            "needsConfirmation",
+            "visibility"
+          ]
+        }
+    )");
+
+    return schema;
+}
+
+nlohmann::json Property::ViewOptionsSchema() {
+    return nlohmann::json::parse(R"(
+        {
+          "type": "object",
+          "properties": {
+            "Color": { "type": "boolean" },
+            "MinMaxRange": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        }
+    )");
+}
+
+nlohmann::json Property::extractDefs(nlohmann::json& metaData) {
+    nlohmann::json defs = metaData.value("$defs", nlohmann::json::object());
+    metaData.erase("$defs");
+    return defs;
+}
+
+
 } // namespace openspace

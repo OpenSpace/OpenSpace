@@ -519,6 +519,7 @@ public:
      */
     void updateUriCache();
 
+    static nlohmann::json MetaDataSchema();
 protected:
     /**
      * This method must be called by all subclasses whenever the encapsulated value has
@@ -531,6 +532,10 @@ protected:
      * potential listeners need to be informed.
      */
     void notifyMetaDataChangeListeners();
+
+    static nlohmann::json ViewOptionsSchema();
+
+    static nlohmann::json extractDefs(nlohmann::json& metaData);
 
     /// The PropertyOwner this Property belongs to, or `nullptr`
     PropertyOwner* _owner = nullptr;

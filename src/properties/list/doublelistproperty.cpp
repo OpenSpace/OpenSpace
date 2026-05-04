@@ -54,4 +54,32 @@ std::string DoubleListProperty::stringValue() const {
     return json.dump();
 }
 
+nlohmann::json DoubleListProperty::Schema() {
+    nlohmann::json metaData = TemplateProperty<std::vector<double>>::MetaDataSchema();
+    metaData["properties"]["type"] = { { "const", "DoubleListProperty" } };
+    metaData["required"].push_back("type");
+
+    nlohmann::json typeDef = nlohmann::json::parse(R"(
+        {
+          "type": "object",
+          "properties": {
+            "uri": { "type": "string" },
+            "value": {
+              "type": "array",
+              "items": { "type": "number" }
+            }
+          },
+          "additionalProperties": false,
+          "required": ["metaData", "uri", "value"]
+        }
+    )");
+    nlohmann::json sharedDefs = extractDefs(metaData);
+    typeDef["properties"]["metaData"] = metaData;
+
+    nlohmann::json schema;
+    schema["$defs"] = sharedDefs;
+    schema["typedefs"]["DoubleListProperty"] = typeDef;
+    return schema;
+}
+
 } // namespace openspace

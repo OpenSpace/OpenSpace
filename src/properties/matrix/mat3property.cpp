@@ -59,4 +59,34 @@ std::string Mat3Property::stringValue() const {
     return formatJson(_value);
 }
 
+nlohmann::json Mat3Property::Schema() {
+    nlohmann::json metaData = NumericalProperty<glm::mat3x3>::MetaDataSchema();
+    metaData["properties"]["type"] = { { "const", "Mat3Property" } };
+    metaData["required"].push_back("type");
+
+    nlohmann::json typeDef = nlohmann::json::parse(R"(
+        {
+          "type": "object",
+          "properties": {
+            "uri": { "type": "string" },
+            "value": {
+              "type": "array",
+              "items": { "type": "number" },
+              "minItems": 9,
+              "maxItems": 9
+            }
+          },
+          "additionalProperties": false,
+          "required": ["metaData", "uri", "value"]
+        }
+    )");
+    nlohmann::json sharedDefs = extractDefs(metaData);
+    typeDef["properties"]["metaData"] = metaData;
+
+    nlohmann::json schema;
+    schema["$defs"] = sharedDefs;
+    schema["typedefs"]["Mat3Property"] = typeDef;
+    return schema;
+}
+
 } // namespace openspace

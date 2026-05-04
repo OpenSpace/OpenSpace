@@ -59,4 +59,36 @@ std::string UVec4Property::stringValue() const {
     return formatJson(_value);
 }
 
+nlohmann::json UVec4Property::Schema() {
+    nlohmann::json metaData = NumericalProperty<glm::uvec4>::MetaDataSchema();
+    metaData["$defs"]["ViewOptions"] = ViewOptionsSchema();
+    metaData["properties"]["type"] = { { "const", "UVec4Property" } };
+    metaData["properties"]["viewOptions"] = { { "$ref", "#/$defs/ViewOptions" } };
+    metaData["required"].push_back("type");
+
+    nlohmann::json typeDef = nlohmann::json::parse(R"(
+        {
+          "type": "object",
+          "properties": {
+            "uri": { "type": "string" },
+            "value": {
+              "type": "array",
+              "items": { "type": "number" },
+              "minItems": 4,
+              "maxItems": 4
+            }
+          },
+          "additionalProperties": false,
+          "required": ["metaData", "uri", "value"]
+        }
+    )");
+    nlohmann::json sharedDefs = extractDefs(metaData);
+    typeDef["properties"]["metaData"] = metaData;
+
+    nlohmann::json schema;
+    schema["$defs"] = sharedDefs;
+    schema["typedefs"]["UVec4Property"] = typeDef;
+    return schema;
+}
+
 } // namespace openspace

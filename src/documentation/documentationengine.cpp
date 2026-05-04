@@ -500,6 +500,96 @@ nlohmann::json DocumentationEngine::generateEventJson() const {
 }
 
 void DocumentationEngine::writeJsonSchema() {
+    // Properties schema
+    auto mergeDefs = [](nlohmann::json& target, const nlohmann::json& source) {
+        for (const auto& [key, value] : source.items()) {
+            if (target.contains(key)) {
+                ghoul_assert(
+                    target[key] == value,
+                    std::format(
+                        "Conflicting $def '{}': existing definition '{}' differs from "
+                        "incomming definition '{}'. Each $def name must be unique and/or "
+                        "identical across all property schemas.", key, target[key], value
+                    )
+                );
+                // identical, skip
+                continue;
+            }
+            target[key] = value;
+        }
+    };
+
+    nlohmann::json defs;
+    nlohmann::json anyProperty = nlohmann::json::array();
+
+    for (const nlohmann::json& propertySchema : _propertySchemas) {
+        // Add any global $defs
+        if (propertySchema.contains("$defs")) {
+            mergeDefs(defs, propertySchema["$defs"]);
+        }
+
+        // Add property typedef
+        if (propertySchema.contains("typedefs")) {
+            mergeDefs(defs, propertySchema["typedefs"]);
+
+            // @TODO (anden88 2026-05-04): Should we guard for duplicate typeNames?
+            for (const auto& [typeName, _] : propertySchema["typedefs"].items()) {
+                anyProperty.push_back({ {"$ref", std::format("#/$defs/{}", typeName)} });
+            }
+        }
+    }
+
+    defs["AnyProperty"] = { { "anyOf", anyProperty } };
+    defs["PropertyOwner"] = nlohmann::json::parse(R"(
+        {
+          "type": "object",
+          "properties": {
+            "identifier": { "type": "string" },
+            "guiName": { "type": "string" },
+            "description": { "type": "string" },
+            "properties": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/AnyProperty" }
+            },
+            "subowners": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/PropertyOwner" }
+            },
+            "tag": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "uri": { "type": "string" }
+          },
+          "additionalProperties": false,
+          "required": [
+            "identifier",
+            "guiName",
+            "description",
+            "properties",
+            "subowners",
+            "tag",
+            "uri"
+          ]
+        }
+    )");
+
+    nlohmann::json propertiesJson;
+    propertiesJson["$schema"] = "https://json-schema.org/draft/2020-12/schema";
+    propertiesJson["$defs"] = defs;
+    const std::filesystem::path propertiesPath =
+        absPath("${BASE}/support/types/properties.json");
+    std::ofstream propertiesFile = std::ofstream(propertiesPath);
+
+    if (propertiesFile) {
+        propertiesFile << propertiesJson.dump(2);
+    }
+    else {
+        throw ghoul::RuntimeError(std::format(
+            "Could not open properties file: '{}'", propertiesPath
+        ));
+    }
+
     for (Schema& schema : _schemas) {
         std::ofstream out = std::ofstream(absPath(std::format(
             "{}/support/types/{}.json", "${BASE}", schema.id
@@ -772,6 +862,10 @@ void DocumentationEngine::addSchema(Schema schema) {
             _schemas.push_back(std::move(schema));
         }
     }
+}
+
+void DocumentationEngine::addPropertySchema(const nlohmann::json& schema) {
+    _propertySchemas.push_back(schema);
 }
 
 std::vector<Documentation> DocumentationEngine::documentations() const {

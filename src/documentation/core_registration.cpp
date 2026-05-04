@@ -42,6 +42,40 @@
 #include <openspace/navigation/path.h>
 #include <openspace/navigation/pathnavigator.h>
 #include <openspace/network/parallelpeer.h>
+#include <openspace/properties/list/doublelistproperty.h>
+#include <openspace/properties/list/intlistproperty.h>
+#include <openspace/properties/list/stringlistproperty.h>
+#include <openspace/properties/matrix/dmat2property.h>
+#include <openspace/properties/matrix/dmat3property.h>
+#include <openspace/properties/matrix/dmat4property.h>
+#include <openspace/properties/matrix/mat2property.h>
+#include <openspace/properties/matrix/mat3property.h>
+#include <openspace/properties/matrix/mat4property.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/selectionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/longproperty.h>
+#include <openspace/properties/scalar/shortproperty.h>
+#include <openspace/properties/scalar/uintproperty.h>
+#include <openspace/properties/scalar/ulongproperty.h>
+#include <openspace/properties/scalar/ushortproperty.h>
+#include <openspace/properties/vector/dvec2property.h>
+#include <openspace/properties/vector/dvec3property.h>
+#include <openspace/properties/vector/dvec4property.h>
+#include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/vector/ivec3property.h>
+#include <openspace/properties/vector/ivec4property.h>
+#include <openspace/properties/vector/uvec2property.h>
+#include <openspace/properties/vector/uvec3property.h>
+#include <openspace/properties/vector/uvec4property.h>
+#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/colormappingcomponent.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/dashboarditem.h>
@@ -131,6 +165,47 @@ void registerCoreSchemas(DocumentationEngine& engine) {
     engine.addSchema(TimeTopic::Schema());
     engine.addSchema(TriggerPropertyTopic::Schema());
     engine.addSchema(VersionTopic::Schema());
+
+    // Properties
+    // List
+    engine.addPropertySchema(DoubleListProperty::Schema());
+    engine.addPropertySchema(IntListProperty::Schema());
+    engine.addPropertySchema(StringListProperty::Schema());
+    // Matrix
+    engine.addPropertySchema(DMat2Property::Schema());
+    engine.addPropertySchema(DMat3Property::Schema());
+    engine.addPropertySchema(DMat4Property::Schema());
+    engine.addPropertySchema(Mat2Property::Schema());
+    engine.addPropertySchema(Mat3Property::Schema());
+    engine.addPropertySchema(Mat4Property::Schema());
+    // Misc
+    engine.addPropertySchema(OptionProperty::Schema());
+    engine.addPropertySchema(SelectionProperty::Schema());
+    engine.addPropertySchema(StringProperty::Schema());
+    engine.addPropertySchema(TriggerProperty::Schema());
+    // Scalar
+    engine.addPropertySchema(BoolProperty::Schema());
+    engine.addPropertySchema(DoubleProperty::Schema());
+    engine.addPropertySchema(FloatProperty::Schema());
+    engine.addPropertySchema(IntProperty::Schema());
+    engine.addPropertySchema(LongProperty::Schema());
+    engine.addPropertySchema(ShortProperty::Schema());
+    engine.addPropertySchema(UIntProperty::Schema());
+    engine.addPropertySchema(ULongProperty::Schema());
+    engine.addPropertySchema(UShortProperty::Schema());
+    // Vector
+    engine.addPropertySchema(DVec2Property::Schema());
+    engine.addPropertySchema(DVec3Property::Schema());
+    engine.addPropertySchema(DVec4Property::Schema());
+    engine.addPropertySchema(IVec2Property::Schema());
+    engine.addPropertySchema(IVec3Property::Schema());
+    engine.addPropertySchema(IVec4Property::Schema());
+    engine.addPropertySchema(UVec2Property::Schema());
+    engine.addPropertySchema(UVec3Property::Schema());
+    engine.addPropertySchema(UVec4Property::Schema());
+    engine.addPropertySchema(Vec2Property::Schema());
+    engine.addPropertySchema(Vec3Property::Schema());
+    engine.addPropertySchema(Vec4Property::Schema());
 }
 
 // NOTE: should this be in the documentation/core_reg.cpp file? Seems to be here just

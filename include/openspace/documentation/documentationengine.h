@@ -65,6 +65,15 @@ public:
     void addSchema(Schema schema);
 
     /**
+     * Adds the \p schema to the list of PropertySchema%s that are written to the
+     * properties json file with the writeJsonschema method.
+     *
+     * \param schema The property schema json object that is to be stored for later use
+     */
+
+    void addPropertySchema(const nlohmann::json& schema);
+
+    /**
      * Returns a list of all registered Documentation%s.
      *
      * \return A list of all registered Documentation%s
@@ -100,6 +109,8 @@ private:
     std::vector<Documentation> _documentations;
     /// The list of all Schema%s that are stored by the DocumentationEngine
     std::vector<Schema> _schemas;
+    // The list of all property Schema%s that are stored by the DocumentationEngine
+    std::vector<nlohmann::json> _propertySchemas;
 
     static DocumentationEngine* _instance;
 };
