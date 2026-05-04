@@ -30,6 +30,7 @@
 namespace openspace {
 
 class Property;
+struct Schema;
 
 class SubscriptionTopic : public Topic {
 public:
@@ -38,6 +39,8 @@ public:
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
+
+    static openspace::Schema Schema();
 
 private:
     void resetCallbacks();

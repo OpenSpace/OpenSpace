@@ -24,6 +24,7 @@
 
 #include <openspace/topic/topics/subscriptiontopic.h>
 
+#include <openspace/documentation/schema.h>
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>
 #include <openspace/topic/connection.h>
@@ -36,9 +37,6 @@ using nlohmann::json;
 
 namespace {
     constexpr std::string_view _loggerCat = "SubscriptionTopic";
-
-    constexpr std::string_view StartSubscription = "start_subscription";
-    constexpr std::string_view StopSubscription = "stop_subscription";
 } // namespace
 
 namespace openspace {
@@ -50,7 +48,7 @@ SubscriptionTopic::~SubscriptionTopic() {
 void SubscriptionTopic::handleJson(const nlohmann::json& json) {
     const std::string& event = json.at("event").get<std::string>();
 
-    if (event == StartSubscription) {
+    if (event == "start_subscription") {
         std::string uri = json.at("property").get<std::string>();
 
         _prop = property(uri);
@@ -81,15 +79,15 @@ void SubscriptionTopic::handleJson(const nlohmann::json& json) {
                 _isSubscribedTo = false;
             });
 
-            // Immediately send the value and meta data
-            onChange();
+            // Immediately send the meta data and value
             onMetaDataChange();
+            onChange();
         }
         else {
             LWARNING(std::format("Could not subscribe. Property '{}' not found", uri));
         }
     }
-    if (event == StopSubscription) {
+    if (event == "stop_subscription") {
         _isSubscribedTo = false;
         resetCallbacks();
     }
@@ -97,6 +95,86 @@ void SubscriptionTopic::handleJson(const nlohmann::json& json) {
 
 bool SubscriptionTopic::isDone() const {
     return !_requestedResourceIsSubscribable || !_isSubscribedTo;
+}
+
+Schema SubscriptionTopic::Schema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "$defs": {
+            "JsonValue": {
+              "anyOf": [
+                { "type": "string" },
+                { "type": "number" },
+                { "type": "boolean" },
+                {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/JsonValue" }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": { "$ref": "#/$defs/JsonValue" }
+                },
+                { "type": "null" }
+              ]
+            }
+          },
+          "title": "SubscriptionTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "subscribe" },
+            "topicPayload": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "event": { "const": "start_subscription" },
+                    "property": {
+                      "type": "string",
+                      "description": "The URI of the property to subscribe to"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": ["event", "property"]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "event": { "const": "stop_subscription" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["event"]
+                }
+              ]
+            },
+            "data": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": { "$ref": "#/$defs/JsonValue" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["value"]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "metaData": { "$ref": "properties.json#/$defs/AnyPropertyMetaData" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["metaData"]
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+    )");
+
+    return { "subscriptiontopic", schema };
 }
 
 void SubscriptionTopic::resetCallbacks() {

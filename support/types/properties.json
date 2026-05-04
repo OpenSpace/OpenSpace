@@ -163,6 +163,112 @@
         }
       ]
     },
+    "AnyPropertyMetaData": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DoubleListPropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/IntListPropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/StringListPropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/DMat2PropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/DMat3PropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/DMat4PropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/Mat2PropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/Mat3PropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/Mat4PropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/OptionPropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/SelectionPropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/StringPropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/TriggerPropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/BoolPropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/DoublePropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/FloatPropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/IntPropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/LongPropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/ShortPropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/UIntPropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/ULongPropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/UShortPropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/DVec2PropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/DVec3PropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/DVec4PropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/IVec2PropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/IVec3PropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/IVec4PropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/UVec2PropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/UVec3PropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/UVec4PropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/Vec2PropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/Vec3PropertyMetaData"
+        },
+        {
+          "$ref": "#/$defs/Vec4PropertyMetaData"
+        }
+      ]
+    },
     "BoolProperty": {
       "additionalProperties": false,
       "properties": {
@@ -217,6 +323,46 @@
         "metaData",
         "uri",
         "value"
+      ],
+      "type": "object"
+    },
+    "BoolPropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "BoolProperty"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "type"
       ],
       "type": "object"
     },
@@ -286,6 +432,50 @@
       ],
       "type": "object"
     },
+    "DMat2PropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataVectorMatrix"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "DMat2Property"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
+      ],
+      "type": "object"
+    },
     "DMat3Property": {
       "additionalProperties": false,
       "properties": {
@@ -352,6 +542,50 @@
       ],
       "type": "object"
     },
+    "DMat3PropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataVectorMatrix"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "DMat3Property"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
+      ],
+      "type": "object"
+    },
     "DMat4Property": {
       "additionalProperties": false,
       "properties": {
@@ -415,6 +649,50 @@
         "metaData",
         "uri",
         "value"
+      ],
+      "type": "object"
+    },
+    "DMat4PropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataVectorMatrix"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "DMat4Property"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
       ],
       "type": "object"
     },
@@ -487,6 +765,53 @@
       ],
       "type": "object"
     },
+    "DVec2PropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataVectorMatrix"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "DVec2Property"
+        },
+        "viewOptions": {
+          "$ref": "#/$defs/ViewOptions"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
+      ],
+      "type": "object"
+    },
     "DVec3Property": {
       "additionalProperties": false,
       "properties": {
@@ -553,6 +878,53 @@
         "metaData",
         "uri",
         "value"
+      ],
+      "type": "object"
+    },
+    "DVec3PropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataVectorMatrix"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "DVec3Property"
+        },
+        "viewOptions": {
+          "$ref": "#/$defs/ViewOptions"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
       ],
       "type": "object"
     },
@@ -625,6 +997,53 @@
       ],
       "type": "object"
     },
+    "DVec4PropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataVectorMatrix"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "DVec4Property"
+        },
+        "viewOptions": {
+          "$ref": "#/$defs/ViewOptions"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
+      ],
+      "type": "object"
+    },
     "DoubleListProperty": {
       "additionalProperties": false,
       "properties": {
@@ -682,6 +1101,46 @@
         "metaData",
         "uri",
         "value"
+      ],
+      "type": "object"
+    },
+    "DoubleListPropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "DoubleListProperty"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "type"
       ],
       "type": "object"
     },
@@ -746,6 +1205,50 @@
       ],
       "type": "object"
     },
+    "DoublePropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataNumber"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "DoubleProperty"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
+      ],
+      "type": "object"
+    },
     "FloatProperty": {
       "additionalProperties": false,
       "properties": {
@@ -804,6 +1307,50 @@
         "metaData",
         "uri",
         "value"
+      ],
+      "type": "object"
+    },
+    "FloatPropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataNumber"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "FloatProperty"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
       ],
       "type": "object"
     },
@@ -876,6 +1423,53 @@
       ],
       "type": "object"
     },
+    "IVec2PropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataVectorMatrix"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "IVec2Property"
+        },
+        "viewOptions": {
+          "$ref": "#/$defs/ViewOptions"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
+      ],
+      "type": "object"
+    },
     "IVec3Property": {
       "additionalProperties": false,
       "properties": {
@@ -942,6 +1536,53 @@
         "metaData",
         "uri",
         "value"
+      ],
+      "type": "object"
+    },
+    "IVec3PropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataVectorMatrix"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "IVec3Property"
+        },
+        "viewOptions": {
+          "$ref": "#/$defs/ViewOptions"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
       ],
       "type": "object"
     },
@@ -1014,6 +1655,53 @@
       ],
       "type": "object"
     },
+    "IVec4PropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataVectorMatrix"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "IVec4Property"
+        },
+        "viewOptions": {
+          "$ref": "#/$defs/ViewOptions"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
+      ],
+      "type": "object"
+    },
     "IntListProperty": {
       "additionalProperties": false,
       "properties": {
@@ -1071,6 +1759,46 @@
         "metaData",
         "uri",
         "value"
+      ],
+      "type": "object"
+    },
+    "IntListPropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "IntListProperty"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "type"
       ],
       "type": "object"
     },
@@ -1135,6 +1863,78 @@
       ],
       "type": "object"
     },
+    "IntPropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataNumber"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "IntProperty"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
+      ],
+      "type": "object"
+    },
+    "JsonValue": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "type": "array"
+        },
+        {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "LongProperty": {
       "additionalProperties": false,
       "properties": {
@@ -1193,6 +1993,50 @@
         "metaData",
         "uri",
         "value"
+      ],
+      "type": "object"
+    },
+    "LongPropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataNumber"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "LongProperty"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
       ],
       "type": "object"
     },
@@ -1262,6 +2106,50 @@
       ],
       "type": "object"
     },
+    "Mat2PropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataVectorMatrix"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "Mat2Property"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
+      ],
+      "type": "object"
+    },
     "Mat3Property": {
       "additionalProperties": false,
       "properties": {
@@ -1328,6 +2216,50 @@
       ],
       "type": "object"
     },
+    "Mat3PropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataVectorMatrix"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "Mat3Property"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
+      ],
+      "type": "object"
+    },
     "Mat4Property": {
       "additionalProperties": false,
       "properties": {
@@ -1391,6 +2323,50 @@
         "metaData",
         "uri",
         "value"
+      ],
+      "type": "object"
+    },
+    "Mat4PropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataVectorMatrix"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "Mat4Property"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
       ],
       "type": "object"
     },
@@ -1464,6 +2440,62 @@
         "metaData",
         "uri",
         "value"
+      ],
+      "type": "object"
+    },
+    "OptionPropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "additionalProperties": false,
+          "properties": {
+            "options": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "options"
+          ],
+          "type": "object"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "OptionProperty"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "type",
+        "additionalData"
       ],
       "type": "object"
     },
@@ -1599,6 +2631,62 @@
       ],
       "type": "object"
     },
+    "SelectionPropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "additionalProperties": false,
+          "properties": {
+            "options": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "options"
+          ],
+          "type": "object"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "SelectionProperty"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "type",
+        "additionalData"
+      ],
+      "type": "object"
+    },
     "ShortProperty": {
       "additionalProperties": false,
       "properties": {
@@ -1657,6 +2745,50 @@
         "metaData",
         "uri",
         "value"
+      ],
+      "type": "object"
+    },
+    "ShortPropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataNumber"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "ShortProperty"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
       ],
       "type": "object"
     },
@@ -1720,6 +2852,46 @@
       ],
       "type": "object"
     },
+    "StringListPropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "StringListProperty"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "type"
+      ],
+      "type": "object"
+    },
     "StringProperty": {
       "additionalProperties": false,
       "properties": {
@@ -1777,6 +2949,46 @@
       ],
       "type": "object"
     },
+    "StringPropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "StringProperty"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "type"
+      ],
+      "type": "object"
+    },
     "TriggerProperty": {
       "additionalProperties": false,
       "properties": {
@@ -1831,6 +3043,46 @@
         "metaData",
         "uri",
         "value"
+      ],
+      "type": "object"
+    },
+    "TriggerPropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "TriggerProperty"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "type"
       ],
       "type": "object"
     },
@@ -1895,6 +3147,50 @@
       ],
       "type": "object"
     },
+    "UIntPropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataNumber"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "UIntProperty"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
+      ],
+      "type": "object"
+    },
     "ULongProperty": {
       "additionalProperties": false,
       "properties": {
@@ -1956,6 +3252,50 @@
       ],
       "type": "object"
     },
+    "ULongPropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataNumber"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "ULongProperty"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
+      ],
+      "type": "object"
+    },
     "UShortProperty": {
       "additionalProperties": false,
       "properties": {
@@ -2014,6 +3354,50 @@
         "metaData",
         "uri",
         "value"
+      ],
+      "type": "object"
+    },
+    "UShortPropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataNumber"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "UShortProperty"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
       ],
       "type": "object"
     },
@@ -2086,6 +3470,53 @@
       ],
       "type": "object"
     },
+    "UVec2PropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataVectorMatrix"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "UVec2Property"
+        },
+        "viewOptions": {
+          "$ref": "#/$defs/ViewOptions"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
+      ],
+      "type": "object"
+    },
     "UVec3Property": {
       "additionalProperties": false,
       "properties": {
@@ -2152,6 +3583,53 @@
         "metaData",
         "uri",
         "value"
+      ],
+      "type": "object"
+    },
+    "UVec3PropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataVectorMatrix"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "UVec3Property"
+        },
+        "viewOptions": {
+          "$ref": "#/$defs/ViewOptions"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
       ],
       "type": "object"
     },
@@ -2224,6 +3702,53 @@
       ],
       "type": "object"
     },
+    "UVec4PropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataVectorMatrix"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "UVec4Property"
+        },
+        "viewOptions": {
+          "$ref": "#/$defs/ViewOptions"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
+      ],
+      "type": "object"
+    },
     "Vec2Property": {
       "additionalProperties": false,
       "properties": {
@@ -2290,6 +3815,53 @@
         "metaData",
         "uri",
         "value"
+      ],
+      "type": "object"
+    },
+    "Vec2PropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataVectorMatrix"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "Vec2Property"
+        },
+        "viewOptions": {
+          "$ref": "#/$defs/ViewOptions"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
       ],
       "type": "object"
     },
@@ -2362,6 +3934,53 @@
       ],
       "type": "object"
     },
+    "Vec3PropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataVectorMatrix"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "Vec3Property"
+        },
+        "viewOptions": {
+          "$ref": "#/$defs/ViewOptions"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
+      ],
+      "type": "object"
+    },
     "Vec4Property": {
       "additionalProperties": false,
       "properties": {
@@ -2428,6 +4047,53 @@
         "metaData",
         "uri",
         "value"
+      ],
+      "type": "object"
+    },
+    "Vec4PropertyMetaData": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalData": {
+          "$ref": "#/$defs/AdditionalDataVectorMatrix"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "guiName": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "needsConfirmation": {
+          "type": "boolean"
+        },
+        "type": {
+          "const": "Vec4Property"
+        },
+        "viewOptions": {
+          "$ref": "#/$defs/ViewOptions"
+        },
+        "visibility": {
+          "$ref": "#/$defs/PropertyVisibility"
+        }
+      },
+      "required": [
+        "identifier",
+        "description",
+        "guiName",
+        "group",
+        "isReadOnly",
+        "needsConfirmation",
+        "visibility",
+        "additionalData",
+        "type"
       ],
       "type": "object"
     },
