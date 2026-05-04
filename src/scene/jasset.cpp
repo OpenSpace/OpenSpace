@@ -59,15 +59,12 @@ namespace {
     }
 
     void from_json(const nlohmann::json& j, JAsset& jasset) {
-        std::vector<nlohmann::json> contents =
-            j["contents"].get<std::vector<nlohmann::json>>();
-        for (const nlohmann::json& json : contents) {
-            std::string type = json["type"].get<std::string>();
-            if (type == "SceneGraphNode") {
-                ghoul::Dictionary d = jsonToDictionary(json);
-                d.removeValue("type");
-                jasset.sceneGraphNodes.push_back(d);
-            }
+        std::vector<nlohmann::json> sceneGraphNodes =
+            j["scenegraphnodes"].get<std::vector<nlohmann::json>>();
+        for (const nlohmann::json& json : sceneGraphNodes) {
+            ghoul::Dictionary d = jsonToDictionary(json);
+            d.removeValue("type");
+            jasset.sceneGraphNodes.push_back(d);
         }
 
         j["dependencies"].get_to(jasset.dependencies);
