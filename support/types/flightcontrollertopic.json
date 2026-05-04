@@ -37,7 +37,7 @@
       "type": "object"
     },
     "FlightControllerCommand": {
-      "oneOf": [
+      "anyOf": [
         {
           "$ref": "#/$defs/FlightControllerDisconnectCommand"
         },
@@ -49,27 +49,27 @@
     "FlightControllerDisconnectCommand": {
       "additionalProperties": false,
       "properties": {
-        "type": {
+        "event": {
           "const": "disconnect"
         }
       },
       "required": [
-        "type"
+        "event"
       ],
       "type": "object"
     },
     "FlightControllerInputStateCommand": {
       "additionalProperties": false,
       "properties": {
+        "event": {
+          "const": "inputState"
+        },
         "inputState": {
           "$ref": "#/$defs/AxisValues"
-        },
-        "type": {
-          "const": "inputState"
         }
       },
       "required": [
-        "type",
+        "event",
         "inputState"
       ],
       "type": "object"
@@ -78,7 +78,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
-    "data": false,
+    "data": null,
     "topicId": {
       "const": "flightcontroller"
     },

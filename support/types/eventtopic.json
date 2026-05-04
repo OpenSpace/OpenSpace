@@ -593,12 +593,7 @@
   "additionalProperties": false,
   "properties": {
     "data": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/EventData"
-        }
-      ],
-      "type": "object"
+      "$ref": "#/$defs/EventData"
     },
     "topicId": {
       "const": "event"

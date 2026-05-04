@@ -481,10 +481,7 @@ Schema EventTopic::Schema() {
                 }
               ]
             },
-            "data": {
-              "type": "object",
-              "anyOf": [{ "$ref": "#/$defs/EventData" }]
-            }
+            "data": { "$ref": "#/$defs/EventData" }
           },
           "additionalProperties": false,
           "required": ["topicId", "topicPayload", "data"]

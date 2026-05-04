@@ -49,7 +49,7 @@ void SubscriptionTopic::handleJson(const nlohmann::json& json) {
     const std::string& event = json.at("event").get<std::string>();
 
     if (event == "start_subscription") {
-        std::string uri = json.at("property").get<std::string>();
+        std::string uri = json.at("uri").get<std::string>();
 
         _prop = property(uri);
         resetCallbacks();
@@ -58,14 +58,13 @@ void SubscriptionTopic::handleJson(const nlohmann::json& json) {
             _requestedResourceIsSubscribable = true;
             _isSubscribedTo = true;
             auto onChange = [this, k = uri]() {
-                nlohmann::json payload = {
-                    { "value", json::parse(_prop->jsonValue()) }
-                };
+                nlohmann::json payload;
+                payload["value"] = json::parse(_prop->jsonValue());
                 sendData(payload);
             };
 
             auto onMetaDataChange = [this, k = uri]() {
-                nlohmann::json payload = {};
+                nlohmann::json payload;
                 payload["metaData"] = _prop->generateJsonDescription();
                 sendData(payload);
             };
@@ -129,13 +128,13 @@ Schema SubscriptionTopic::Schema() {
                   "type": "object",
                   "properties": {
                     "event": { "const": "start_subscription" },
-                    "property": {
+                    "uri": {
                       "type": "string",
                       "description": "The URI of the property to subscribe to"
                     }
                   },
                   "additionalProperties": false,
-                  "required": ["event", "property"]
+                  "required": ["event", "uri"]
                 },
                 {
                   "type": "object",

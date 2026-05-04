@@ -568,7 +568,7 @@ void DocumentationEngine::writeJsonSchema() {
               "type": "array",
               "items": { "$ref": "#/$defs/PropertyOwner" }
             },
-            "tag": {
+            "tags": {
               "type": "array",
               "items": { "type": "string" }
             },
@@ -581,7 +581,7 @@ void DocumentationEngine::writeJsonSchema() {
             "description",
             "properties",
             "subowners",
-            "tag",
+            "tags",
             "uri"
           ]
         }
@@ -608,6 +608,11 @@ void DocumentationEngine::writeJsonSchema() {
     nlohmann::json propertiesJson;
     propertiesJson["$schema"] = "https://json-schema.org/draft/2020-12/schema";
     propertiesJson["$defs"] = defs;
+    // Generating a TypeScript .ts file will always create a default interface. We use a
+    // dummy interface since all other properties and types are defined in $defs and does
+    // not show up in the generated output ts file
+    propertiesJson["title"] = "DummyInterface";
+    propertiesJson["additionalProperties"] = false;
     const std::filesystem::path propertiesPath =
         absPath("${BASE}/support/types/properties.json");
     std::ofstream propertiesFile = std::ofstream(propertiesPath);

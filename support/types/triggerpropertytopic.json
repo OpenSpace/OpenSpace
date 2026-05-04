@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
-    "data": false,
+    "data": null,
     "topicId": {
       "const": "trigger"
     },
@@ -14,11 +14,17 @@
           "type": "string"
         }
       },
-      "required": ["property"],
+      "required": [
+        "property"
+      ],
       "type": "object"
     }
   },
-  "required": ["topicId", "topicPayload", "data"],
+  "required": [
+    "topicId",
+    "topicPayload",
+    "data"
+  ],
   "title": "TriggerPropertyTopic",
   "type": "object"
 }
