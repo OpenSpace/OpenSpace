@@ -28,6 +28,7 @@
 #include <openspace/camera/camerapose.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -564,6 +565,12 @@ void OrbitalNavigator::resetVelocities() {
 }
 
 void OrbitalNavigator::updateCamera(double deltaTime) {
+    // Special touch gesture for retargeting focus node
+    if (global::interactionHandler->touchInputState().isTripleTap()) {
+        startRetargetAnchor();
+        return;
+    }
+
     _inputHandler.updateStatesFromInput(deltaTime);
 
     const bool interactionHappened = _inputHandler.hasNonZeroVelocity();
