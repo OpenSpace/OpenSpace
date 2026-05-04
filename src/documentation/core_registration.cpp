@@ -114,6 +114,7 @@
 #include <openspace/topic/topics/luascripttopic.h>
 #include <openspace/topic/topics/missiontopic.h>
 #include <openspace/topic/topics/profiletopic.h>
+#include <openspace/topic/topics/propertytreetopic.h>
 #include <openspace/topic/topics/sessionrecordingtopic.h>
 #include <openspace/topic/topics/setpropertytopic.h>
 #include <openspace/topic/topics/subscriptiontopic.h>
@@ -165,6 +166,7 @@ void registerCoreSchemas(DocumentationEngine& engine) {
     engine.addSchema(LuaScriptTopic::Schema());
     engine.addSchema(MissionTopic::Schema());
     engine.addSchema(ProfileTopic::Schema());
+    engine.addSchema(PropertyTreeTopic::Schema());
     engine.addSchema(SessionRecordingTopic::Schema());
     engine.addSchema(SetPropertyTopic::Schema());
     engine.addSchema(SubscriptionTopic::Schema());
