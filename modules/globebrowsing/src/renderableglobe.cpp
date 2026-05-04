@@ -638,7 +638,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         .levelByProjectedAreaElseDistance = BoolProperty(LevelProjectedAreaInfo, true),
         .resetTileProviders = TriggerProperty(ResetTileProviderInfo),
         .performFrustumCulling = BoolProperty(PerformFrustumCullingInfo, true),
-        .performHorizonCulling = BoolProperty(PerformHorizonCullingInfo, true),
+        .performHorizonCulling = BoolProperty(PerformHorizonCullingInfo, false),
         .modelSpaceRenderingCutoffLevel = IntProperty(ModelSpaceRenderingInfo, 14, 1, 22),
         .dynamicLodIterationCount = IntProperty(DynamicLodIterationCountInfo, 16, 4, 128)
     })
