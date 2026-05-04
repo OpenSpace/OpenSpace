@@ -36,7 +36,6 @@ set(OPENSPACE_SOURCE
   documentation/core_registration.cpp
   documentation/documentation.cpp
   documentation/documentationengine.cpp
-  documentation/schema.cpp
   documentation/verifier.cpp
   engine/configuration.cpp
   engine/downloadmanager.cpp

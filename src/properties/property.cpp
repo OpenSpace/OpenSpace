@@ -392,5 +392,4 @@ nlohmann::json Property::extractDefs(nlohmann::json& metaData) {
     return defs;
 }
 
-
 } // namespace openspace
