@@ -24,7 +24,7 @@
 
 cmake_minimum_required(VERSION 4.0)
 
-project(OpenSpace LANGUAGES CXX)
+project(OpenSpace LANGUAGES C CXX)
 
 # CMake 4.0 will no longer allow minimum required version below 3.5 and some of our
 # dependencies have not been updated to reflect this. To make things work, we blanked
