@@ -63,6 +63,8 @@ struct WindowDelegate {
 
     glm::ivec2 (*currentDrawBufferResolution)() = []() { return glm::ivec2(0); };
 
+    glm::ivec2 (*maxDrawBufferResolution)() = []() { return glm::ivec2(0); };
+
     glm::ivec2 (*currentViewportSize)() = []() { return glm::ivec2(0); };
 
     glm::ivec2(*currentViewportResolution)() = []() { return glm::ivec2(0); };
