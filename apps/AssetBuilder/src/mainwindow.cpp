@@ -27,6 +27,7 @@
 #include "asseteditorwidget.h"
 #include "path.h"
 #include "welcomedialog.h"
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <QCloseEvent>
 #include <QFileDialog>
@@ -203,7 +204,7 @@ void MainWindow::openAsset() {
     const QString path = QFileDialog::getOpenFileName(
         this,
         "Open Asset",
-        QString(),
+        QString::fromStdString(absPath("${USER_ASSETS}").string()),
         QString::fromStdString(std::string(FileFilter))
     );
 

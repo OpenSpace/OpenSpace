@@ -37,6 +37,7 @@ class CollapsibleSection;
 class IdentifierRegistry;
 class QBoxLayout;
 class QGridLayout;
+class QPushButton;
 
 /**
  * Generates a form from a list of SchemaMember descriptors bound to a PropertyMap. Flat
@@ -63,32 +64,12 @@ public:
         const IdentifierRegistry* registry = nullptr);
 
     /**
-     * Writes current widget values into the bound PropertyMap.
-     */
-    void applyToProperties();
-
-    /**
-     * Reads the bound PropertyMap and updates field widgets to match.
-     */
-    void populateFromProperties();
-
-    /**
      * Returns the leaf field widget (e.g. QLineEdit, QCheckBox) for the member with the
      * given name, or nullptr if the name is unknown or the member is a Table type.
      *
      * \param name The member for which the widget should be returned
      */
     QWidget* widgetForMember(const std::string& name) const;
-
-    /**
-     * Programmatically activates or deactivates an optional field by name. When
-     * deactivating, the property is erased and the widget is cleared. Does NOT emit
-     * optionalFieldToggled (to prevent infinite signal loops).
-     *
-     * \param memberName The schema member name (e.g. "Parent", "Name")
-     * \param active `true` to show the field, `false` to hide and clear it
-     */
-    void setFieldActive(const std::string& memberName, bool active);
 
     /**
      * Cross-connects the field identified by \p memberName between this form and \p other
@@ -135,21 +116,45 @@ signals:
     void addDependency(const QString& filePath);
 
 private:
+    struct MemberInfo {
+        /// Schema member descriptors for this form
+        SchemaMember member;
+        /// Per-member leaf widget (flat) or CollapsibleSection (Table)
+        QWidget* fieldWidget = nullptr;
+        /// Per-member "+" button; nullptr for required and Table members
+        QPushButton* addButton = nullptr;
+        /// Per-member active row container; nullptr for required and Table members
+        QWidget* activeRows = nullptr;
+        /// Whether each optional field is currently active. Always `true` for
+        /// required/Table
+        bool optionalActive = true;
+    };
+
     /**
      * Adds a single member's label and widget to the grid at \p row.
      */
     void addMemberToGrid(QGridLayout* grid, int row, int memberIndex,
-        const SchemaMember& member);
+        SchemaMember& member);
 
     /**
      * Wraps a field widget with Add (+) / Remove (x) buttons for optional members.
      */
-    QWidget* createOptionalWrapper(int memberIndex, QWidget* field);
+    QWidget* createOptionalWrapper(MemberInfo& member, QWidget* field);
 
     /**
      * Shows or hides the active row for an optional field by vector index.
      */
-    void setOptionalFieldActive(int memberIndex, bool active);
+    void setOptionalFieldActive(MemberInfo& member, bool active);
+
+    /**
+     * Programmatically activates or deactivates an optional field by name. When
+     * deactivating, the property is erased and the widget is cleared. Does NOT emit
+     * optionalFieldToggled (to prevent infinite signal loops).
+     *
+     * \param memberName The schema member name (e.g. "Parent", "Name")
+     * \param active `true` to show the field, `false` to hide and clear it
+     */
+    void setFieldActive(const std::string& memberName, bool active);
 
     /**
      * Dispatches to a type-specific creator based on the member's schema type.
@@ -243,19 +248,7 @@ private:
     /// Weak reference to the bound property map (root or sub-map)
     std::weak_ptr<PropertyMap> _properties;
 
-    struct MemberInfo {
-        /// Schema member descriptors for this form
-        SchemaMember member;
-        /// Per-member leaf widget (flat) or CollapsibleSection (Table)
-        QWidget* fieldWidget = nullptr;
-        /// Per-member "+" button; nullptr for required and Table members
-        QWidget* addButton = nullptr;
-        /// Per-member active row container; nullptr for required and Table members
-        QWidget* activeRows = nullptr;
-        /// Whether each optional field is currently active. Always `true` for
-        /// required/Table
-        bool optionalActive = true;
-    };
+
     std::vector<MemberInfo> _members;
 
     /// Whether new sub-sections start expanded
