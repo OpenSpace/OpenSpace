@@ -159,14 +159,15 @@ JAsset jassetFromJson(const QJsonObject& root) {
         }
     }
 
-    if (root.contains("contents")) {
-        for (const QJsonValue& itemVal : root["contents"].toArray()) {
+    if (root.contains("scenegraphnodes")) {
+        for (const QJsonValue& itemVal : root["scenegraphnodes"].toArray()) {
             if (!itemVal.isObject()) {
                 continue;
             }
             const QJsonObject itemObj = itemVal.toObject();
-            ContentItem item;
-            item.type = itemObj["type"].toString().toStdString();
+            ContentItem item = {
+                .type = "SceneGraphNode"
+            };
             // Store all keys except "type" as properties — schema-agnostic,
             // so the parser doesn't need to know the type's members
             for (auto it = itemObj.begin(); it != itemObj.end(); it++) {
@@ -182,7 +183,7 @@ JAsset jassetFromJson(const QJsonObject& root) {
 
 QJsonObject jassetToJson(const JAsset& asset) {
     QJsonObject root;
-    root["jasset_version"] = "1.0";
+    root["version"] = "1.0";
 
     QJsonObject meta;
     meta["name"] = QString::fromStdString(asset.metadata.name);
@@ -198,17 +199,17 @@ QJsonObject jassetToJson(const JAsset& asset) {
     }
     root["dependencies"] = deps;
 
-    QJsonArray contents;
+    QJsonArray scenegraphnodes;
     for (const ContentItem& item : asset.contents) {
         QJsonObject itemObj;
-        itemObj["type"] = QString::fromStdString(item.type);
         for (const auto& [key, value] : item.properties) {
-            itemObj[QString::fromStdString(key)] =
-                propertyToJsonValue(value);
+            itemObj[QString::fromStdString(key)] = propertyToJsonValue(value);
         }
-        contents.append(itemObj);
+        if (item.type == "SceneGraphNode") {
+            scenegraphnodes.append(itemObj);
+        }
     }
-    root["contents"] = contents;
+    root["scenegraphnodes"] = scenegraphnodes;
 
     return root;
 }
