@@ -24,6 +24,7 @@
 
 #include <openspace/topic/topics/getpropertytopic.h>
 
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -41,11 +42,6 @@ using nlohmann::json;
 
 namespace {
     constexpr std::string_view _loggerCat = "GetPropertyTopic";
-    constexpr std::string_view AllPropertiesValue = "__allProperties";
-    constexpr std::string_view AllNodesValue = "__allNodes";
-    constexpr std::string_view AllScreenSpaceRenderablesValue =
-        "__screenSpaceRenderables";
-    constexpr std::string_view RootPropertyOwner = "__rootOwner";
 } // namespace
 
 namespace openspace {
@@ -57,19 +53,8 @@ void GetPropertyTopic::handleJson(const nlohmann::json& json) {
     ZoneText(requestedKey.c_str(), requestedKey.size());
     LDEBUG(std::format("Getting property '{}'...", requestedKey));
     nlohmann::json response;
-    if (requestedKey == AllPropertiesValue) {
-        response = allProperties();
-    }
-    else if (requestedKey == AllNodesValue) {
-        const std::vector<SceneGraphNode*>& nodes = sceneGraph()->allSceneGraphNodes();
-        response = nodes;
-    }
-    else if (requestedKey == AllScreenSpaceRenderablesValue) {
-        response = {
-            { "value", global::renderEngine->screenSpaceRenderables() }
-        };
-    }
-    else if (requestedKey == RootPropertyOwner) {
+
+    if (requestedKey == "__rootOwner") {
         response = global::rootPropertyOwner;
     }
     else {
@@ -82,19 +67,52 @@ bool GetPropertyTopic::isDone() const {
     return true;
 }
 
-json GetPropertyTopic::allProperties() {
-    const json payload {
+Schema GetPropertyTopic::Schema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
         {
-            "value",
-            {
-                global::renderEngine,
-                global::luaConsole,
-                global::parallelPeer,
-                global::navigationHandler
+          "title": "GetPropertyTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "get" },
+            "topicPayload": {
+              "type": "object",
+              "properties": {
+                "property": {
+                  "anyOf": [{ "const": "__rootOwner" }, { "type": "string" }]
+                }
+              },
+              "additionalProperties": false,
+              "required": ["property"]
+            },
+            "data": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "propertyOwner": {
+                      "$ref": "properties.json#/$defs/PropertyOwner"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": ["propertyOwner"]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "property": { "$ref": "properties.json#/$defs/AnyProperty" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["property"]
+                }
+              ]
             }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
         }
-    };
-    return payload;
+    )");
+
+    return { "getpropertytopic", schema };
 }
 
 json GetPropertyTopic::propertyFromKey(const std::string& key) {

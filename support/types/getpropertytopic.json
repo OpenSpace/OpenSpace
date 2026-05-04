@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "data": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "propertyOwner": {
+              "$ref": "properties.json#/$defs/PropertyOwner"
+            }
+          },
+          "required": [
+            "propertyOwner"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "property": {
+              "$ref": "properties.json#/$defs/AnyProperty"
+            }
+          },
+          "required": [
+            "property"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "topicId": {
+      "const": "get"
+    },
+    "topicPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "property": {
+          "anyOf": [
+            {
+              "const": "__rootOwner"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "property"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "topicId",
+    "topicPayload",
+    "data"
+  ],
+  "title": "GetPropertyTopic",
+  "type": "object"
+}
