@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
 
     std::filesystem::path settings = findSettings();
     *global::configuration = loadConfigurationFromFile(configFile.string(), settings);
-    openspace::global::openSpaceEngine->registerPathTokens();
+    registerPathTokens(*global::configuration);
     global::openSpaceEngine->initialize();
 
     ghoul::cmdparser::CommandlineParser commandlineParser(

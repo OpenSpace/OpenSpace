@@ -22,52 +22,76 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/documentation/documentationengine.h>
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/settings.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/logging/logmanager.h>
+#ifndef __OPENSPACE_ASSETBUILDER___DEPENDENCIESWIDGET___H__
+#define __OPENSPACE_ASSETBUILDER___DEPENDENCIESWIDGET___H__
 
-int main(int, char** argv) {
-    using namespace openspace;
+#include <QWidget>
 
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Debug,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
-    );
+#include "path.h"
+#include <filesystem>
 
-    ghoul::initialize();
-    global::create();
+struct JAsset;
+class QListWidget;
 
-    // In order to initialize the engine, we need to specify the tokens
-    // We start by registering the path of the executable,
-    // to make it possible to find other files in the same directory
-    FileSys.registerPathToken(
-        "${BIN}",
-        std::filesystem::path(argv[0]).parent_path(),
-        ghoul::filesystem::FileSystem::Override::Yes
-    );
+/**
+ * Widget showing the dependencies list with add/remove and path-conversion context menu
+ * actions.
+ */
+class DependenciesWidget final : public QWidget {
+Q_OBJECT
+public:
+    DependenciesWidget(QWidget* parent, JAsset& asset, std::filesystem::path& path);
 
-    std::filesystem::path configFile = findConfiguration();
+    /**
+     * Rebuilds the dependencies list from the current asset.
+     */
+    void refresh();
 
-    // Register the base path as the directory where the configuration file lives
-    std::filesystem::path base = configFile.parent_path();
-    FileSys.registerPathToken("${BASE}", base);
+public slots:
+    /**
+     * Opens a file dialog and adds the chosen file as a dependency.
+     */
+    void addDependencyViaDialog();
 
-    *global::configuration = loadConfigurationFromFile(configFile.string(), "");
-    registerPathTokens(*global::configuration);
+    /**
+     * Adds the file at \p filePath as a dependency. The path is stored in the first
+     * format that applies:
+     *   1. Data-relative (if a data root is set and the file is inside it)
+     *   2. Jasset-relative (if the asset file has been saved)
+     *   3. Absolute (last resort)
+     * Checks for duplicates and emits assetModified on success.
+     *
+     * \param filePath Absolute path to the file to add
+     */
+    void addDependency(const QString& filePath);
 
-    // Now that we have the tokens we can initialize the engine
-    global::openSpaceEngine->initialize();
+signals:
+    /**
+     * Emitted whenever this widget mutates the asset.
+     */
+    void assetModified();
 
-    // Print out the documentation to the documentation folder
-    // @TODO (ylvse, 2024-05-02) change this directory when integrating with jenkins?
-    DocEng.writeJsonDocumentation();
+private:
+    void showContextMenu(const QPoint& pos);
 
-    global::openSpaceEngine->deinitialize();
+    /**
+     * Removes the dependency at the given row index.
+     *
+     * \param row Index into asset dependencies
+     */
+    void removeDependency(size_t row);
 
-    return 0;
+    /**
+     * Converts the dependency at the given row to a different path type.
+     *
+     * \param row Index into asset dependencies
+     * \param target Target path type
+     */
+    void convertDependencyPath(size_t row, PathType target);
+
+    JAsset& _asset;
+    std::filesystem::path& _filePath;
+    QListWidget* _dependenciesList = nullptr;
 };
+
+#endif // __OPENSPACE_ASSETBUILDER___DEPENDENCIESWIDGET___H__

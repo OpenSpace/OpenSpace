@@ -1,0 +1,2092 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2026                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#include "form/schemaformwidget.h"
+
+#include "documentation.h"
+#include "form/collapsiblesection.h"
+#include "form/colorwidget.h"
+#include "form/matrixwidget.h"
+#include "form/searchdropdown.h"
+#include "identifierregistry.h"
+#include "schema/assetschema.h"
+#include "path.h"
+#include <ghoul/misc/assert.h>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDateTime>
+#include <QDoubleValidator>
+#include <QFile>
+#include <QFileDialog>
+#include <QFrame>
+#include <QGridLayout>
+#include <QHBoxLayout>
+#include <QInputDialog>
+#include <QIntValidator>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
+#include <QVBoxLayout>
+#include <algorithm>
+#include <functional>
+#include <limits>
+#include <optional>
+#include <string>
+#include <vector>
+
+namespace {
+    constexpr int LabelColumnMinWidth = 130;
+    constexpr int ColumnSpacing = 8;
+    constexpr int RowSpacing = 4;
+    constexpr int InfoButtonSize = 16;
+    constexpr int CardMarginHorizontal = 8;
+    constexpr int CardMarginVertical = 6;
+    constexpr const char* DateDisplayFormat = "yyyy-MM-dd HH:mm:ss";
+
+    /// Size of remove/clear buttons
+    constexpr int RemoveButtonSize = 22;
+    /// UTF-8 multiply sign (x) used as remove/clear glyph
+    constexpr const char* RemoveGlyph = "\xc3\x97";
+
+    // Object names used as type tags for widget identification
+    constexpr const char* FileContainerName = "file-container";
+    constexpr const char* UnionContainerName = "union-container";
+    constexpr const char* UnionTypeComboName = "union-type-combo";
+    constexpr const char* DateEditName = "date-edit";
+
+    enum class TableKind {
+        RefArray,     // e.g. Layers = [{ Type: "...", ... }, ...]
+        Ref,          // e.g. Renderable = { Type: "...", ... }
+        ScalarArray,  // e.g. Tags = ["tag1", "tag2"]
+        InlineArray,  // e.g. Instruments = [{ Name: "...", ... }, ...]
+        Table         // e.g. GUI = { Name: "...", Path: "..." }
+    };
+
+    /**
+     * Describes a matrix/vector/color type for widget creation.
+     */
+    struct MatrixTypeEntry {
+        /// Schema type name (e.g. "Vector3<double>", "Color4").
+        const char* typeName;
+        /// Total number of numeric fields.
+        int nComponents;
+        /// Columns in the grid layout.
+        int nColumns;
+        /// `true` for integer validation, `false` for double.
+        bool isInteger;
+        /// `true` to use ColorWidget instead of plain MatrixWidget.
+        bool isColor;
+    };
+
+    constexpr MatrixTypeEntry MatrixTypeLookup[] = {
+        { "Vector2<double>",    2,  2, false, false },
+        { "Vector2<int>",       2,  2, true,  false },
+        { "Vector3<double>",    3,  3, false, false },
+        { "Vector3<int>",       3,  3, true,  false },
+        { "Vector4<double>",    4,  4, false, false },
+        { "Vector4<int>",       4,  4, true,  false },
+        { "Color3",             3,  3, false, true  },
+        { "Color4",             4,  4, false, true  },
+        { "Matrix3x3<double>",  9,  3, false, false },
+        { "Matrix4x4<double>", 16,  4, false, false }
+    };
+
+    struct NumericRange {
+        double min = -std::numeric_limits<double>::max();
+        double max = std::numeric_limits<double>::max();
+        bool hasMin = false;
+        bool hasMax = false;
+    };
+
+    /**
+     * Inserts spaces before uppercase letters to turn PascalCase into readable text.
+     * "TimeFrame" -> "Time Frame",  "IsOptional" -> "Is Optional",  "GUI" -> "GUI".
+     *
+     * \param name The PascalCase identifier to split
+     * \return Human-readable string with spaces inserted
+     */
+    QString splitPascalCase(const std::string& name) {
+        const QString text = QString::fromStdString(name);
+        QString result;
+        for (int i = 0; i < text.size(); i++) {
+            const QChar character = text[i];
+            // Insert a space before an uppercase letter when it marks a word boundary:
+            if (i > 0 && character.isUpper()) {
+                const bool previousLower = text[i - 1].isLower();
+                const bool previousUpper = text[i - 1].isUpper();
+                const bool nextLower = (i + 1 < text.size()) && text[i + 1].isLower();
+                // Current character is upper; previous character is lower.
+                // This is a camelCase space (e.g. "Time|Frame" -> "Time Frame")
+                const bool camelCaseBoundary = previousLower;
+                // previousUpper && nextLower: end of acronym run, split before the new word
+                // (e.g. "GUI|Name" -> "GUI Name"), but keep consecutive uppercase together
+                // (e.g. "GUI" stays as "GUI")
+                const bool endOfAcronym = previousUpper && nextLower;
+                if (camelCaseBoundary|| endOfAcronym) {
+                    result += ' ';
+                }
+            }
+            result += character;
+        }
+        return result;
+    }
+
+    bool hasWidgetContent(QWidget* widget) {
+        if (auto* checkBox = qobject_cast<QCheckBox*>(widget);  checkBox) {
+            return checkBox->isChecked();
+        }
+        if (auto* matrix = qobject_cast<MatrixWidget*>(widget);  matrix) {
+            return matrix->hasContent();
+        }
+        if (auto* lineEdit = qobject_cast<QLineEdit*>(widget);  lineEdit) {
+            return !lineEdit->text().isEmpty();
+        }
+        if (widget->objectName() == FileContainerName) {
+            auto* lineEdit = widget->findChild<QLineEdit*>();
+            return lineEdit && !lineEdit->text().isEmpty();
+        }
+        if (auto* combo = widget->findChild<QComboBox*>();  combo) {
+            return !combo->currentText().isEmpty();
+        }
+        return false;
+    }
+
+    void clearWidget(QWidget* widget) {
+        if (auto* checkBox = qobject_cast<QCheckBox*>(widget);  checkBox) {
+            checkBox->blockSignals(true);
+            checkBox->setChecked(false);
+            checkBox->blockSignals(false);
+        }
+        else if (auto* matrix = qobject_cast<MatrixWidget*>(widget);  matrix) {
+            matrix->blockSignals(true);
+            matrix->clear();
+            matrix->blockSignals(false);
+        }
+        else if (auto* lineEdit = qobject_cast<QLineEdit*>(widget);  lineEdit) {
+            lineEdit->blockSignals(true);
+            lineEdit->clear();
+            lineEdit->blockSignals(false);
+        }
+        else if (widget->objectName() == FileContainerName) {
+            auto* lineEditFile = widget->findChild<QLineEdit*>();
+            if (lineEditFile) {
+                lineEditFile->blockSignals(true);
+                lineEditFile->clear();
+                lineEditFile->blockSignals(false);
+            }
+        }
+        else if (auto* combo = widget->findChild<QComboBox*>();  combo) {
+            combo->blockSignals(true);
+            combo->setCurrentText("");
+            combo->blockSignals(false);
+        }
+    }
+
+    void populateWidget(QWidget* widget, const PropertyValue& propertyValue) {
+        if (auto* checkBox = qobject_cast<QCheckBox*>(widget);  checkBox) {
+            checkBox->blockSignals(true);
+            checkBox->setChecked(propertyValue.isBool() ? propertyValue.toBool() : false);
+            checkBox->blockSignals(false);
+        }
+        else if (auto* matrix = qobject_cast<MatrixWidget*>(widget);  matrix) {
+            matrix->blockSignals(true);
+            if (propertyValue.isList()) {
+                PropertyList list = propertyValue.toList();
+                std::vector<double> param;
+                for (const PropertyValue& value : list) {
+                    param.push_back(value.toDouble());
+                }
+                matrix->setValues(param);
+            }
+            matrix->blockSignals(false);
+        }
+        else if (auto* lineEdit = qobject_cast<QLineEdit*>(widget);  lineEdit) {
+            lineEdit->blockSignals(true);
+            if (propertyValue.isDouble()) {
+                lineEdit->setText(QString::number(propertyValue.toDouble(), 'g', 10));
+            }
+            else if (propertyValue.isString()) {
+                QString value = QString::fromStdString(propertyValue.toString());
+                // Convert ISO date to display format for date fields only (avoid mangling
+                // plain strings)
+                if (lineEdit->objectName() == DateEditName) {
+                    const QDateTime dateTime = QDateTime::fromString(value, Qt::ISODate);
+                    if (dateTime.isValid()) {
+                        value = dateTime.toLocalTime().toString(DateDisplayFormat);
+                    }
+                }
+                lineEdit->setText(value);
+            }
+            lineEdit->blockSignals(false);
+        }
+        else if (widget->objectName() == FileContainerName) {
+            if (auto* fileEdit = widget->findChild<QLineEdit*>();  fileEdit) {
+                if (propertyValue.isString()) {
+                    fileEdit->blockSignals(true);
+                    fileEdit->setText(QString::fromStdString(propertyValue.toString()));
+                    fileEdit->blockSignals(false);
+                }
+            }
+        }
+        else if (auto* combo = widget->findChild<QComboBox*>()) {
+            if (propertyValue.isString()) {
+                combo->blockSignals(true);
+                combo->setCurrentText(QString::fromStdString(propertyValue.toString()));
+                combo->blockSignals(false);
+            }
+        }
+    }
+
+    // Resolves the editable QLineEdit from a member widget. The widget may be a QLineEdit
+    // directly, or a QComboBox wrapping one (e.g. Identifier)
+    QLineEdit* resolveLineEdit(QWidget* widget) {
+        if (!widget) {
+            return nullptr;
+        }
+
+        if (auto* lineEdit = qobject_cast<QLineEdit*>(widget);  lineEdit) {
+            return lineEdit;
+        }
+        if (auto* combo = widget->findChild<QComboBox*>();  combo) {
+            return combo->lineEdit();
+        }
+        return nullptr;
+    }
+
+    // A union field stores only the raw property value (no type tag), so we need to
+    // deduce which type it is by inspecting the value and matching it against the entries
+    // in the union's type combo box.
+    //
+    // The combo entries correspond to schema types like "Double", "String",
+    // "Vector3<double>", etc. We check the value's runtime type (isDouble, isString,
+    // isList, isBool) and search the combo for a matching entry. Some runtime types map
+    // to multiple possible schema types (e.g. a string could be "String", "File", or
+    // "Date and time"), so we try candidates in order and use the first one present in
+    // the combo.
+    //
+    // matchIndex tracks the result: the combo index to activate. If no match is found
+    // (matchIndex stays < 0), we fall back to index 0 (the first entry). Setting the
+    // combo index triggers the show/hide lambda from createUnionWidget, which makes the
+    // correct field widget visible
+    void populateUnionWidget(QWidget* container, const PropertyValue& value) {
+        auto* typeCombo = container->findChild<QComboBox*>(UnionTypeComboName);
+        if (!typeCombo) {
+            return;
+        }
+
+        int matchIndex = 0;
+        if (value.isDouble()) {
+            for (const QString& name : { "Double", "Integer" }) {
+                matchIndex = typeCombo->findText(name);
+                if (matchIndex >= 0) {
+                    break;
+                }
+            }
+        }
+        else if (value.isBool()) {
+            matchIndex = typeCombo->findText("Boolean");
+        }
+        else if (value.isList()) {
+            for (int i = 0; i < typeCombo->count(); i++) {
+                const QString text = typeCombo->itemText(i);
+                if (text.startsWith("Vector") || text.startsWith("Color") ||
+                    text.startsWith("Matrix"))
+                {
+                    matchIndex = i;
+                    break;
+                }
+            }
+        }
+        else if (value.isString()) {
+            for (const QString& name : { "String", "Date and time", "File",
+                                         "Directory", "Identifier" })
+            {
+                matchIndex = typeCombo->findText(name);
+                if (matchIndex != -1) {
+                    break;
+                }
+            }
+        }
+        matchIndex = std::max(matchIndex, 0);
+
+        // setCurrentIndex triggers the show/hide lambda
+        typeCombo->setCurrentIndex(matchIndex);
+
+        // Populate the now-visible field widget
+        const auto children = container->findChildren<QWidget*>(
+            QString(),
+            Qt::FindDirectChildrenOnly
+        );
+        for (QWidget* fieldWidget : children) {
+            if (fieldWidget->isVisible() &&
+                fieldWidget->objectName() != UnionTypeComboName)
+            {
+                populateWidget(fieldWidget, value);
+                break;
+            }
+        }
+    }
+
+    // Extracts numeric bounds from a schema description string. Supports "In range",
+    // "Greater or equal to", "Greater than", "Less or equal to", and "Less than" patterns
+    NumericRange parseRange(const std::string& description) {
+        NumericRange range;
+        const QString descriptionText = QString::fromStdString(description);
+
+        // "In range: ( min, max )"
+        static const QRegularExpression rangeRegex = QRegularExpression(
+            R"(In range:\s*\(\s*([^,]+),\s*([^)]+)\))"
+        );
+        QRegularExpressionMatch match = rangeRegex.match(descriptionText);
+        if (match.hasMatch()) {
+            bool okMin = false;
+            bool okMax = false;
+            const double lower = match.captured(1).trimmed().toDouble(&okMin);
+            const double upper = match.captured(2).trimmed().toDouble(&okMax);
+            if (okMin) {
+                range.min = lower;
+                range.hasMin = true;
+            }
+            if (okMax) {
+                range.max = upper;
+                range.hasMax = true;
+            }
+            return range;
+        }
+
+        // "Greater or equal to: N"
+        static const QRegularExpression reGe(R"(Greater or equal to:\s*([-\d.eE+]+))");
+        match = reGe.match(descriptionText);
+        if (match.hasMatch()) {
+            bool ok = false;
+            const double value = match.captured(1).toDouble(&ok);
+            if (ok) {
+                range.min = value;
+                range.hasMin = true;
+            }
+        }
+
+        // "Greater than: N"
+        static const QRegularExpression reGt(R"(Greater than:\s*([-\d.eE+]+))");
+        match = reGt.match(descriptionText);
+        if (match.hasMatch()) {
+            bool ok = false;
+            const double value = match.captured(1).toDouble(&ok);
+            if (ok) {
+                range.min = value;
+                range.hasMin = true;
+            }
+        }
+
+        // "Less or equal to: N"
+        static const QRegularExpression reLe(R"(Less or equal to:\s*([-\d.eE+]+))");
+        match = reLe.match(descriptionText);
+        if (match.hasMatch()) {
+            bool ok = false;
+            const double value = match.captured(1).toDouble(&ok);
+            if (ok) {
+                range.max = value;
+                range.hasMax = true;
+            }
+        }
+
+        // "Less than: N"
+        static const QRegularExpression reLt(R"(Less than:\s*([-\d.eE+]+))");
+        match = reLt.match(descriptionText);
+        if (match.hasMatch()) {
+            bool ok = false;
+            const double value = match.captured(1).toDouble(&ok);
+            if (ok) {
+                range.max = value;
+                range.hasMax = true;
+            }
+        }
+
+        return range;
+    }
+
+    // Builds a placeholder string describing the valid range for a numeric field. Returns
+    // e.g. "1 to 10", ">= 0", "<= 100", or a default "0"/"0.0"
+    QString rangePlaceholder(const NumericRange& range, bool isInteger) {
+        auto format = [isInteger](double value) {
+            if (isInteger) {
+                return QString::number(static_cast<int>(value));
+            }
+            QString formatted = QString::number(value, 'g', 10);
+            if (!formatted.contains('.')) {
+                formatted += ".0";
+            }
+            return formatted;
+        };
+
+        if (range.hasMin && range.hasMax) {
+            return format(range.min) + " to " + format(range.max);
+        }
+        if (range.hasMin) {
+            return ">= " + format(range.min);
+        }
+        if (range.hasMax) {
+            return "<= " + format(range.max);
+        }
+        return isInteger ? "0" : "0.0";
+    }
+
+    // Extracts the allowed values from an "In list { ... }" description pattern. Returns
+    // the values as a trimmed string list, or empty if no match
+    QStringList parseInList(const std::string& description) {
+        const QString descriptionText = QString::fromStdString(description);
+        static const QRegularExpression re(R"(In list \{\s*(.+?)\s*\})");
+        QRegularExpressionMatch match = re.match(descriptionText);
+        if (!match.hasMatch()) {
+            return QStringList();
+        }
+        QStringList items = match.captured(1).split(",");
+        for (QString& item : items) {
+            item = item.trimmed();
+        }
+        items.removeAll("");
+        return items;
+    }
+
+    // Splits a union type string like "Integer, or Double" into individual types. Handles
+    // both ", or " and " or " separators
+    QStringList splitUnionTypes(QString type) {
+        type.replace(", or ", ", ");
+        type.replace(" or ", ", ");
+        QStringList parts = type.split(", ", Qt::SkipEmptyParts);
+        for (QString& part : parts) {
+            part = part.trimmed();
+        }
+        return parts;
+    }
+
+    // Determines the table kind (ref array, ref, scalar array, inline array, or plain
+    // table) based on the member's structure and references
+    std::pair<TableKind, const SchemaReference*> classifyTableMember(
+                                                               const SchemaMember& member)
+    {
+        // An array member has exactly one child named "*", which serves as the schema
+        // template for each element in the array
+        const bool isArray = !member.reference.has_value() &&
+            member.members.size() == 1 && member.members[0].name == "*";
+        const std::optional<SchemaReference>& optionalReference =
+            isArray ? member.members[0].reference : member.reference;
+
+        if (optionalReference.has_value() && optionalReference->isFound) {
+            return {
+                isArray ? TableKind::RefArray : TableKind::Ref,
+                &optionalReference.value()
+            };
+        }
+        if (isArray) {
+            return {
+                member.members[0].members.empty() ?
+                    TableKind::ScalarArray :
+                    TableKind::InlineArray,
+                nullptr
+            };
+        }
+        return { TableKind::Table, nullptr };
+    }
+
+    // Removes and deletes all widgets and layout items from a layout
+    void clearLayout(QLayout* layout) {
+        while (layout->count() > 0) {
+            QLayoutItem* layoutItem = layout->takeAt(0);
+            if (layoutItem->widget()) {
+                delete layoutItem->widget();
+            }
+            delete layoutItem;
+        }
+    }
+
+    // Looks up a schema type by display name within a category
+    const SchemaType* findTypeByName(const SchemaCategory* category,
+                                     const QString& typeName)
+    {
+        if (!category) {
+            return nullptr;
+        }
+        for (const SchemaType& schemaType : category->types) {
+            if (QString::fromStdString(schemaType.name) == typeName) {
+                return &schemaType;
+            }
+        }
+        return nullptr;
+    }
+
+    // Extracts the "Type" value from a property map, or empty if absent
+    QString storedTypeFromMap(const PropertyMap& properties) {
+        const auto it = properties.find("Type");
+        if (it != properties.end() && it->second.isString()) {
+            return QString::fromStdString(it->second.toString());
+        }
+        return {};
+    }
+
+    // Creates the shared container layout with an items area and "+ Add" button for
+    // array sections
+    std::pair<QBoxLayout*, QPushButton*> createArrayScaffold(CollapsibleSection* section)
+    {
+        // Outer container for the whole array section
+        QWidget* container = new QWidget;
+        QBoxLayout* containerLayout = new QVBoxLayout(container);
+        containerLayout->setContentsMargins(0, 4, 0, 4);
+        containerLayout->setSpacing(4);
+        section->setContentWidget(container);
+
+        // Inner container where individual item cards are added
+        QWidget* itemsContainer = new QWidget;
+        QVBoxLayout* itemsLayout = new QVBoxLayout(itemsContainer);
+        itemsLayout->setContentsMargins(0, 0, 0, 0);
+        itemsLayout->setSpacing(4);
+        containerLayout->addWidget(itemsContainer);
+
+        // Button to append a new item to the array
+        QPushButton* addButton = new QPushButton("+ Add");
+        addButton->setObjectName("array-add-button");
+        containerLayout->addWidget(addButton);
+
+        return { itemsLayout, addButton };
+    }
+
+    // Creates a styled card frame with vertical layout for an array item
+    std::pair<QFrame*, QBoxLayout*> createCardFrame() {
+        QFrame* card = new QFrame;
+        card->setObjectName("array-item-frame");
+        card->setFrameShape(QFrame::StyledPanel);
+
+        QBoxLayout* cardLayout = new QVBoxLayout(card);
+
+        cardLayout->setContentsMargins(
+            CardMarginHorizontal,
+            CardMarginVertical,
+            CardMarginHorizontal,
+            CardMarginVertical
+        );
+        cardLayout->setSpacing(4);
+        return { card, cardLayout };
+    }
+
+    // The ensure* functions guarantee that a PropertyMap or PropertyList exists at the
+    // given key before a nested form or array binds to it. Without them, accessing an
+    // unset key would produce a null PropertyValue, and calling toMap()/toList() on it
+    // would fail
+
+    // Ensures the item at the given index is a map, replacing it if needed
+    PropertyMap& ensureListItemMap(PropertyList& items, size_t index) {
+        ghoul_assert(index < items.size(), "Index out of range");
+        if (!items[index].isMap()) {
+            items[index] = PropertyMap();
+        }
+        return items[index].toMap();
+    }
+
+    // Ensures a property map exists at the given key, creating one if absent
+    PropertyMap& ensurePropertyMap(PropertyMap& properties, const std::string& key) {
+        if (properties.count(key) == 0 || properties.at(key).isNull()) {
+            properties[key] = PropertyMap();
+        }
+        ghoul_assert(properties[key].isMap(), "Key is not a map");
+        return properties[key].toMap();
+    }
+
+    // Ensures a property list exists at the given key. Creates one if absent, or wraps a
+    // single map value in a one-element list for uniformity
+    void ensurePropertyList(PropertyMap& properties, const std::string& key) {
+        if (properties.count(key) == 0 || properties.at(key).isNull()) {
+            properties[key] = PropertyList();
+        }
+        else if (properties.at(key).isMap()) {
+            // A single object was stored instead of a list - wrap it in a one-element
+            // list so downstream code can treat it uniformly as an array
+            PropertyMap existing = std::move(properties[key].toMap());
+            PropertyList wrapped;
+            wrapped.push_back(std::move(existing));
+            properties[key] = std::move(wrapped);
+        }
+        else {
+            // Should already be a list if it exists and isn't null or a map
+            ghoul_assert(properties.at(key).isList(), "Key is not a list");
+        }
+    }
+
+    QWidget* createFileWidget(const std::string& name, const std::string& description,
+                              bool isDirectory, std::weak_ptr<PropertyMap> properties,
+                              const std::function<void()>& onChange)
+    {
+        QWidget* container = new QWidget;
+        container->setObjectName(FileContainerName);
+        QBoxLayout* horizontalLayout = new QHBoxLayout(container);
+        horizontalLayout->setContentsMargins(0, 0, 0, 0);
+        horizontalLayout->setSpacing(4);
+
+        QLineEdit* lineEdit = new QLineEdit(container);
+        if (!description.empty()) {
+            lineEdit->setPlaceholderText(QString::fromStdString(description));
+        }
+        else {
+            lineEdit->setPlaceholderText(
+                isDirectory ? "Path to directory..." : "Path to file..."
+            );
+        }
+        QObject::connect(
+            lineEdit,
+            &QLineEdit::textEdited,
+            lineEdit,
+            [properties, name, onChange](const QString& text) {
+                std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
+                if (!lockedProperties) {
+                    return;
+                }
+                (*lockedProperties)[name] = text.toStdString();
+                onChange();
+            }
+        );
+
+        QPushButton* browseButton = new QPushButton("Browse...", container);
+        browseButton->setObjectName("file-browse-button");
+        QObject::connect(
+            browseButton,
+            &QPushButton::clicked,
+            container,
+            [container, lineEdit, properties, name, isDirectory, onChange]() {
+                const QString path = isDirectory ?
+                    QFileDialog::getExistingDirectory(container, "Select Directory") :
+                    QFileDialog::getOpenFileName(container, "Select File");
+                if (!path.isEmpty()) {
+                    std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
+                    if (!lockedProperties) {
+                        return;
+                    }
+                    lineEdit->setText(path);
+                    (*lockedProperties)[name] = path.toStdString();
+                    onChange();
+                }
+            }
+        );
+
+        horizontalLayout->addWidget(lineEdit, 1);
+        horizontalLayout->addWidget(browseButton);
+        return container;
+    }
+
+    QStringList extractJassetIdentifiers(const QString& filePath) {
+        QFile file(filePath);
+        if (!file.open(QFile::ReadOnly)) {
+            return {};
+        }
+        QJsonParseError err;
+        const QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &err);
+        if (doc.isNull() || !doc.isObject()) {
+            return {};
+        }
+        const JAsset asset = jassetFromJson(doc.object());
+        QStringList ids;
+        for (const ContentItem& item : asset.contents) {
+            const auto it = item.properties.find("Identifier");
+            if (it != item.properties.end() && it->second.isString()) {
+                ids.append(QString::fromStdString(it->second.toString()));
+            }
+        }
+        return ids;
+    }
+} // namespace
+
+SchemaFormWidget::SchemaFormWidget(std::vector<SchemaMember> members,
+                                   std::weak_ptr<PropertyMap> properties, QWidget* parent,
+                                   bool subSectionsExpanded, bool sortMembers,
+                                   const IdentifierRegistry* registry)
+    : QWidget(parent)
+    , _properties(properties)
+    , _areSubSectionsExpanded(subSectionsExpanded)
+    , _shouldSortMembers(sortMembers)
+    , _registry(registry)
+{
+    _members.reserve(members.size());;
+    for (SchemaMember member : members) {
+        _members.emplace_back(std::move(member));
+    }
+
+    QBoxLayout* outer = new QVBoxLayout(this);
+    outer->setContentsMargins(0, 0, 0, 0);
+    outer->setSpacing(4);
+
+    QWidget* gridWidget = new QWidget(this);
+    QGridLayout* grid = new QGridLayout(gridWidget);
+    grid->setContentsMargins(0, 0, 0, 0);
+    grid->setColumnMinimumWidth(0, LabelColumnMinWidth);
+    grid->setColumnStretch(1, 1);
+    grid->setHorizontalSpacing(ColumnSpacing);
+    grid->setVerticalSpacing(RowSpacing);
+
+    // Build display order: sorted or original insertion order
+    const int nMembers = static_cast<int>(_members.size());
+    std::vector<int> displayOrder(nMembers);
+    for (int i = 0; i < nMembers; ++i) {
+        displayOrder[i] = i;
+    }
+
+    if (_shouldSortMembers) {
+        // Order: 1) Flat before Table 2) required before optional 3) alphabetical
+        std::sort(
+            displayOrder.begin(),
+            displayOrder.end(),
+            [this](int a, int b) {
+                const bool aTable = (_members[a].member.type == "Table");
+                const bool bTable = (_members[b].member.type == "Table");
+                if (aTable != bTable) {
+                    return !aTable;
+                }
+                const bool aOpt = _members[a].member.isOptional;
+                const bool bOpt = _members[b].member.isOptional;
+                if (aOpt != bOpt) {
+                    return !aOpt;
+                }
+                return _members[a].member.name < _members[b].member.name;
+            }
+        );
+    }
+
+    for (int row = 0; row < nMembers; row++) {
+        addMemberToGrid(grid, row, displayOrder[row], _members[displayOrder[row]].member);
+    }
+
+    outer->addWidget(gridWidget);
+
+
+    std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
+    if (!lockedProperties) {
+        return;
+    }
+    for (size_t i = 0; i < _members.size(); i++) {
+        QWidget* widget = _members[i].fieldWidget;
+        if (!widget) {
+            continue;
+        }
+        const SchemaMember& member = _members[i].member;
+
+        // For optional fields, show or hide the active row based on whether the property
+        // exists. Skip if the property is absent or null
+        if (_members[i].addButton) {
+            const bool exists =
+                lockedProperties->count(member.name) > 0 &&
+                !lockedProperties->at(member.name).isNull();
+            setOptionalFieldActive(_members[i], exists);
+            if (!exists) {
+                continue;
+            }
+        }
+
+        // Look up the stored value; skip if there is no property for this member
+        const auto it = lockedProperties->find(member.name);
+        if (it == lockedProperties->end()) {
+            continue;
+        }
+        const PropertyValue& value = it->second;
+
+        // Union widgets need special handling to detect the stored type and switch the
+        // combo to the matching page before populating
+        if (widget->objectName() == UnionContainerName) {
+            populateUnionWidget(widget, value);
+            continue;
+        }
+
+        // Regular flat widget - set the display value directly
+        populateWidget(widget, value);
+    }
+}
+
+void SchemaFormWidget::addMemberToGrid(QGridLayout* grid, int row, int memberIndex,
+                                       SchemaMember& member)
+{
+    if (member.type == "Table") {
+        QWidget* section = createTableSection(member);
+        _members[memberIndex].fieldWidget = section;
+        grid->addWidget(section, row, 0, 1, 2);
+        return;
+    }
+
+    // Label container: info button + name label + optional asterisk
+    {
+        QWidget* labelContainer = new QWidget(this);
+        labelContainer->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+
+        QBoxLayout* labelLayout = new QHBoxLayout(labelContainer);
+        labelLayout->setContentsMargins(0, 0, 0, 0);
+        labelLayout->setSpacing(4);
+
+        {
+            const Documentation info = {
+                .name = QString::fromStdString(member.name),
+                .type = QString::fromStdString(member.type),
+                .isOptional = member.isOptional,
+                .description = QString::fromStdString(member.description),
+                .documentation = QString::fromStdString(member.documentation)
+            };
+            QPushButton* button = new QPushButton("i", labelContainer);
+            button->setObjectName("field-info-button");
+            button->setFixedSize(InfoButtonSize, InfoButtonSize);
+            connect(
+                button, &QPushButton::clicked,
+                this, [this, info]() { emit documentationRequested(info); }
+            );
+            labelLayout->addWidget(button);
+        }
+
+        QLabel* nameLabel = new QLabel(splitPascalCase(member.name), labelContainer);
+        nameLabel->setObjectName("field-label");
+        labelLayout->addWidget(nameLabel);
+
+        if (!member.isOptional) {
+            QLabel* asterisk = new QLabel("*", labelContainer);
+            asterisk->setObjectName("field-required-asterisk");
+            labelLayout->addWidget(asterisk);
+        }
+        labelLayout->addStretch();
+        grid->addWidget(labelContainer, row, 0, Qt::AlignVCenter | Qt::AlignLeft);
+    }
+
+    QWidget* field = createFlatWidget(member);
+    _members[memberIndex].fieldWidget = field;
+
+    if (member.isOptional) {
+        grid->addWidget(createOptionalWrapper(_members[memberIndex], field), row, 1);
+    }
+    else {
+        grid->addWidget(field, row, 1);
+    }
+}
+
+QWidget* SchemaFormWidget::createOptionalWrapper(MemberInfo& member, QWidget* field) {
+    const std::string& name = member.member.name;
+    std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
+    member.optionalActive = lockedProperties && lockedProperties->count(name) > 0;
+
+    // Container holds two mutually-exclusive rows: a "+" button (when the field is
+    // inactive) and the field + remove button (when active). Both are created upfront and
+    // toggled via setOptionalFieldActive
+    QWidget* optionalContainer = new QWidget(this);
+    QBoxLayout* containerLayout = new QVBoxLayout(optionalContainer);
+    containerLayout->setContentsMargins(0, 0, 0, 0);
+    containerLayout->setSpacing(0);
+
+    // "+" button shown when the optional field is not yet added
+    member.addButton = new QPushButton("+", optionalContainer);
+    member.addButton->setObjectName("field-add-button");
+    member.addButton->setVisible(!member.optionalActive);
+    containerLayout->addWidget(member.addButton);
+
+    // Active row: the actual field widget + a remove button beside it. Visible when the
+    // field is active, hidden otherwise
+    member.activeRows = new QWidget(optionalContainer);
+    QBoxLayout* activeRowLayout = new QHBoxLayout(member.activeRows);
+    activeRowLayout->setContentsMargins(0, 0, 0, 0);
+    activeRowLayout->setSpacing(4);
+    activeRowLayout->addWidget(field, 1);
+
+    QPushButton* removeButton = new QPushButton(RemoveGlyph, member.activeRows);
+    removeButton->setObjectName("field-remove-button");
+    removeButton->setFixedSize(RemoveButtonSize, RemoveButtonSize);
+    activeRowLayout->addWidget(removeButton);
+
+    member.activeRows->setVisible(member.optionalActive);
+    containerLayout->addWidget(member.activeRows);
+
+    // Clicking "+" activates the field and focuses it
+    connect(
+        member.addButton,
+        &QPushButton::clicked,
+        this,
+        [this, &member]() {
+            setOptionalFieldActive(member, true);
+            if (member.fieldWidget) {
+                member.fieldWidget->setFocus();
+            }
+            emit optionalFieldToggled(QString::fromStdString(member.member.name), true);
+            emit fieldChanged();
+        }
+    );
+
+    // Clicking the remove button deactivates the field after confirmation
+    connect(
+        removeButton,
+        &QPushButton::clicked,
+        this,
+        [this, &member]() {
+            if (hasWidgetContent(member.fieldWidget)) {
+                const int result = QMessageBox::question(
+                    this,
+                    "Remove Field",
+                    QString("The field \"%1\" has content. Remove it?")
+                        .arg(splitPascalCase(member.member.name)),
+                    QMessageBox::Yes | QMessageBox::No
+                );
+                if (result != QMessageBox::Yes) {
+                    return;
+                }
+            }
+            std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
+            if (lockedProperties) {
+                lockedProperties->erase(member.member.name);
+            }
+            setOptionalFieldActive(member, false);
+            emit optionalFieldToggled(
+                QString::fromStdString(member.member.name),
+                false
+            );
+            emit fieldChanged();
+        }
+    );
+
+    return optionalContainer;
+}
+
+QWidget* SchemaFormWidget::widgetForMember(const std::string& name) const {
+    auto it = std::find_if(
+        _members.begin(),
+        _members.end(),
+        [name](const MemberInfo& member) { return member.member.name == name; }
+    );
+    if (it == _members.end() || it->member.type == "Table") {
+        return nullptr;
+    }
+    const int index = static_cast<int>(std::distance(_members.begin(), it));
+    return _members[index].fieldWidget;
+}
+
+void SchemaFormWidget::setOptionalFieldActive(MemberInfo& member, bool active) {
+    if (!member.addButton) {
+        return;
+    }
+    member.optionalActive = active;
+    member.addButton->setVisible(!active);
+    member.activeRows->setVisible(active);
+    if (!active) {
+        clearWidget(member.fieldWidget);
+    }
+}
+
+void SchemaFormWidget::setFieldActive(const std::string& memberName, bool active) {
+    auto it = std::find_if(
+        _members.begin(),
+        _members.end(),
+        [&](const MemberInfo& member) { return member.member.name == memberName; }
+    );
+    if (it == _members.end()) {
+        return;
+    }
+
+    // Only optional fields have add/remove buttons
+    if (!it->addButton) {
+        return;
+    }
+
+    // Already in the requested state - nothing to do
+    if (active == it->optionalActive) {
+        return;
+    }
+
+    // When deactivating, remove the property so it won't be serialized
+    if (!active) {
+        std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
+        if (lockedProperties) {
+            lockedProperties->erase(memberName);
+        }
+    }
+    setOptionalFieldActive(*it, active);
+}
+
+void SchemaFormWidget::syncFieldWith(const std::string& memberName,
+                                     SchemaFormWidget* other)
+{
+    // Cross-connect text edits so typing in one form updates the other. setText() emits
+    // textChanged but NOT textEdited, so the cross-connections cannot loop. Signals are
+    // left unblocked so that other textChanged listeners (e.g. identifier
+    // auto-generation) still fire
+    QLineEdit* thisEdit = resolveLineEdit(widgetForMember(memberName));
+    QLineEdit* otherEdit = resolveLineEdit(other->widgetForMember(memberName));
+
+    if (thisEdit && otherEdit) {
+        connect(thisEdit, &QLineEdit::textEdited, otherEdit, &QLineEdit::setText);
+        connect(otherEdit, &QLineEdit::textEdited, thisEdit, &QLineEdit::setText);
+    }
+
+    // Cross-connect optional field toggle state so adding/removing the field in one form
+    // mirrors the change in the other
+    auto syncToggle = [memberName](SchemaFormWidget* sender, SchemaFormWidget* receiver) {
+        connect(
+            sender,
+            &SchemaFormWidget::optionalFieldToggled,
+            receiver,
+            [receiver, memberName](const QString& name, bool active) {
+                if (name == memberName) {
+                    receiver->setFieldActive(memberName, active);
+                }
+            }
+        );
+    };
+    syncToggle(this, other);
+    syncToggle(other, this);
+}
+
+QWidget* SchemaFormWidget::createTableSection(const SchemaMember& member) {
+    // Create the collapsible section header
+    CollapsibleSection* section = new CollapsibleSection(
+        this,
+        splitPascalCase(member.name),
+        _areSubSectionsExpanded,
+        !member.isOptional,
+        std::pair(
+            QString::fromStdString(member.name),
+            QString::fromStdString(member.documentation)
+        ),
+        QString::fromStdString(member.name)
+    );
+
+    // Forward section signals to the parent form
+    connect(
+        section, &CollapsibleSection::documentationRequested,
+        this, &SchemaFormWidget::documentationRequested
+    );
+    connect(
+        section, &CollapsibleSection::copyRequested,
+        this, &SchemaFormWidget::sectionCopyRequested
+    );
+    connect(
+        section, &CollapsibleSection::pasteRequested,
+        this, &SchemaFormWidget::sectionPasteRequested
+    );
+
+    // Populate the section content based on the table kind
+    const auto [kind, reference] = classifyTableMember(member);
+    switch (kind) {
+        case TableKind::RefArray:
+            buildRefArrayContent(section, member, reference->identifier, _properties);
+            break;
+        case TableKind::Ref: {
+            std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
+            if (!lockedProperties) {
+                break;
+            }
+            buildRefContent(section, member, *reference, *lockedProperties);
+            break;
+        }
+        case TableKind::ScalarArray: {
+            // Scalar arrays are rendered as a single flat widget (e.g. a text field)
+            // rather than a list with add/remove buttons. member.members[0] is the "*"
+            // array template child — it has the right type but a placeholder name. Copy
+            // it and replace the name with the parent's so the flat widget displays and
+            // stores the value under the correct key (e.g. "Tags")
+            SchemaMember scalar = member.members[0];
+            scalar.name = member.name;
+            QWidget* widget = createFlatWidget(scalar);
+            section->setContentWidget(widget);
+            break;
+        }
+        case TableKind::InlineArray:
+            buildInlineArrayContent(section, member, _properties);
+            break;
+        case TableKind::Table: {
+            std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
+            if (!lockedProperties) {
+                break;
+            }
+            buildInlineTableContent(section, member, *lockedProperties);
+            break;
+        }
+    }
+
+    return section;
+}
+
+SchemaFormWidget* SchemaFormWidget::createNestedForm(
+                                                 const std::vector<SchemaMember>& members,
+                                                                      PropertyMap& subMap)
+{
+    std::shared_ptr<PropertyMap> root = _properties.lock();
+    if (!root) {
+        return nullptr;
+    }
+    // Aliasing constructor of shared_ptr: we can point to a submap in the shared_ptr in
+    // scenegraphnodeeditor. This is so we can create a nested form. Shares lifetime with
+    // root shared_ptr
+    std::shared_ptr<PropertyMap> aliased = std::shared_ptr<PropertyMap>(root, &subMap);
+    SchemaFormWidget* inner = new SchemaFormWidget(
+        members,
+        std::weak_ptr<PropertyMap>(aliased),
+        nullptr,
+        false,
+        true,
+        _registry
+    );
+    connect(
+        inner, &SchemaFormWidget::fieldChanged,
+        this, &SchemaFormWidget::fieldChanged
+    );
+    connect(
+        inner, &SchemaFormWidget::documentationRequested,
+        this, &SchemaFormWidget::documentationRequested
+    );
+    connect(
+        inner, &SchemaFormWidget::addDependency,
+        this, &SchemaFormWidget::addDependency
+    );
+    return inner;
+}
+
+void SchemaFormWidget::emitTypeDocumentation(const SchemaCategory* category,
+                                             const QString& typeName)
+{
+    const SchemaType* schemaType = findTypeByName(category, typeName);
+    if (!schemaType) {
+        return;
+    }
+    const Documentation info = {
+        .name = splitPascalCase(schemaType->name),
+        .type = "Table",
+        .isOptional = false,
+        .documentation = QString::fromStdString(schemaType->description)
+    };
+    emit documentationRequested(info);
+}
+
+void SchemaFormWidget::rebuildItemForm(QBoxLayout* layout, PropertyMap& properties,
+                                       const QString& typeName,
+                                       const SchemaCategory* category)
+{
+    clearLayout(layout);
+    const SchemaType* type = findTypeByName(category, typeName);
+    if (!type) {
+        return;
+    }
+
+    properties["Type"] = typeName.toStdString();
+    SchemaFormWidget* inner = createNestedForm(type->members, properties);
+    layout->addWidget(inner);
+}
+
+void SchemaFormWidget::buildRefArrayCard(QBoxLayout* itemsLayout,
+                                         const std::string& memberName,
+                                         const SchemaCategory* category,
+                                         const std::string& referenceId, size_t index,
+                                         std::weak_ptr<PropertyMap> properties)
+{
+    std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
+    if (!lockedProperties) {
+        return;
+    }
+    PropertyList& items = (*lockedProperties)[memberName].toList();
+    PropertyMap& itemProperties = ensureListItemMap(items, index);
+
+    // Card frame and header row
+    auto [card, cardLayout] = createCardFrame();
+
+    QWidget* headerRow = new QWidget;
+    QBoxLayout* headerLayout = new QHBoxLayout(headerRow);
+    headerLayout->setContentsMargins(0, 0, 0, 0);
+    headerLayout->setSpacing(4);
+    cardLayout->addWidget(headerRow);
+
+    // Type dropdown: populated with concrete types, skipping the base type
+    SearchDropdown* dropdown = new SearchDropdown(card);
+    dropdown->setPlaceholderText("Select type...");
+    headerLayout->addWidget(dropdown, 1);
+
+    const QString storedType = storedTypeFromMap(itemProperties);
+
+    int preSelectedIndex = -1;
+    int dropdownIndex = 0;
+    if (category) {
+        for (const SchemaType& schemaType : category->types) {
+            // Skip the abstract base type of the category
+            if (schemaType.identifier == referenceId) {
+                continue;
+            }
+            const QString typeName = QString::fromStdString(schemaType.name);
+            dropdown->addItem(splitPascalCase(schemaType.name), typeName);
+            if (!storedType.isEmpty() && typeName == storedType) {
+                preSelectedIndex = dropdownIndex;
+            }
+            dropdownIndex++;
+        }
+    }
+    dropdown->setCurrentIndex(preSelectedIndex);
+
+    // Remove button for this array item
+    QPushButton* removeButton = new QPushButton(RemoveGlyph, card);
+    removeButton->setObjectName("combo-clear-button");
+    removeButton->setFixedSize(RemoveButtonSize, RemoveButtonSize);
+    removeButton->setToolTip("Remove item");
+    headerLayout->addWidget(removeButton);
+
+    // Inner form holder: populated when a type is selected
+    QWidget* innerHolder = new QWidget(card);
+    QBoxLayout* innerLayout = new QVBoxLayout(innerHolder);
+    innerLayout->setContentsMargins(0, 0, 0, 0);
+    innerLayout->setSpacing(0);
+    cardLayout->addWidget(innerHolder);
+
+    // Restore the inner form for a previously saved type selection
+    if (preSelectedIndex >= 0) {
+        rebuildItemForm(innerLayout, itemProperties, storedType, category);
+    }
+
+    // Type selected: reset the item's property map and rebuild the form
+    connect(
+        dropdown,
+        &SearchDropdown::activated,
+        this,
+        [this, properties, memberName, index, innerLayout, category, dropdown]() {
+            std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
+            if (!lockedProperties) {
+                return;
+            }
+            PropertyList& list = (*lockedProperties)[memberName].toList();
+            if (index >= list.size()) {
+                return;
+            }
+            list[index] = PropertyMap();
+            PropertyMap& itemProperties = list[index].toMap();
+            const QString typeName = dropdown->currentData().toString();
+            rebuildItemForm(innerLayout, itemProperties, typeName, category);
+            emit fieldChanged();
+        }
+    );
+
+    // Hover: show documentation for the highlighted type
+    connect(
+        dropdown,
+        &SearchDropdown::highlighted,
+        this,
+        [this, category](const QVariant& itemData) {
+            emitTypeDocumentation(category, itemData.toString());
+        }
+    );
+
+    // Remove button: erase this item and rebuild the entire array
+    connect(
+        removeButton,
+        &QPushButton::clicked,
+        this,
+        [this, properties, memberName, index, itemsLayout, category, referenceId]() {
+            std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
+            if (!lockedProperties) {
+                return;
+            }
+            PropertyList& list = (*lockedProperties)[memberName].toList();
+            if (index < list.size()) {
+                list.erase(list.begin() + static_cast<int>(index));
+            }
+            rebuildRefArray(itemsLayout, memberName, category, referenceId, properties);
+            emit fieldChanged();
+        }
+    );
+
+    itemsLayout->addWidget(card);
+}
+
+void SchemaFormWidget::rebuildRefArray(QBoxLayout* itemsLayout,
+                                       const std::string& memberName,
+                                       const SchemaCategory* category,
+                                       const std::string& referenceId,
+                                       std::weak_ptr<PropertyMap> properties)
+{
+    clearLayout(itemsLayout);
+    std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
+    if (!lockedProperties) {
+        return;
+    }
+    PropertyList& items = (*lockedProperties)[memberName].toList();
+    for (size_t i = 0; i < items.size(); i++) {
+        buildRefArrayCard(itemsLayout, memberName, category, referenceId, i, properties);
+    }
+}
+
+void SchemaFormWidget::buildInlineArrayCard(QBoxLayout* itemsLayout,
+                                            const std::string& memberName,
+                                            const std::vector<SchemaMember>& itemMembers,
+                                            size_t index,
+                                            std::weak_ptr<PropertyMap> properties)
+{
+    std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
+    if (!lockedProperties) {
+        return;
+    }
+    PropertyList& items = (*lockedProperties)[memberName].toList();
+    PropertyMap& itemProperties = ensureListItemMap(items, index);
+
+    auto [card, cardLayout] = createCardFrame();
+
+    QWidget* headerRow = new QWidget;
+    QBoxLayout* headerLayout = new QHBoxLayout(headerRow);
+    headerLayout->setContentsMargins(0, 0, 0, 0);
+    headerLayout->setSpacing(4);
+    headerLayout->addStretch();
+
+    QPushButton* removeButton = new QPushButton(RemoveGlyph, card);
+    removeButton->setObjectName("combo-clear-button");
+    removeButton->setFixedSize(RemoveButtonSize, RemoveButtonSize);
+    removeButton->setToolTip("Remove item");
+    headerLayout->addWidget(removeButton);
+    cardLayout->addWidget(headerRow);
+
+    SchemaFormWidget* inner = createNestedForm(itemMembers, itemProperties);
+    cardLayout->addWidget(inner);
+
+    // Capture pointer: underlying vector lives in _members
+    const std::vector<SchemaMember>* membersPtr = &itemMembers;
+    // Remove button: erase this item and rebuild the array
+    connect(
+        removeButton,
+        &QPushButton::clicked,
+        this,
+        [this, properties, memberName, index, itemsLayout, membersPtr]() {
+            std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
+            if (!lockedProperties) {
+                return;
+            }
+            PropertyList& list = (*lockedProperties)[memberName].toList();
+            if (index < list.size()) {
+                list.erase(list.begin() + static_cast<int>(index));
+            }
+            rebuildInlineArray(itemsLayout, memberName, *membersPtr, properties);
+            emit fieldChanged();
+        }
+    );
+
+    itemsLayout->addWidget(card);
+}
+
+void SchemaFormWidget::rebuildInlineArray(QBoxLayout* itemsLayout,
+                                          const std::string& memberName,
+                                          const std::vector<SchemaMember>& itemMembers,
+                                          std::weak_ptr<PropertyMap> properties)
+{
+    clearLayout(itemsLayout);
+    std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
+    if (!lockedProperties) {
+        return;
+    }
+    PropertyList& items = (*lockedProperties)[memberName].toList();
+    for (size_t i = 0; i < items.size(); i++) {
+        buildInlineArrayCard(itemsLayout, memberName, itemMembers, i, properties);
+    }
+}
+
+void SchemaFormWidget::buildRefArrayContent(CollapsibleSection* section,
+                                            const SchemaMember& member,
+                                            const std::string& referenceId,
+                                            std::weak_ptr<PropertyMap> properties)
+{
+    // Look up the category for the reference
+    const SchemaCategory* category =
+        AssetSchema::instance().findCategoryByTypeId(referenceId);
+    const std::string memberName = member.name;
+
+    auto [itemsLayout, addButton] = createArrayScaffold(section);
+
+    std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
+    if (!lockedProperties) {
+        return;
+    }
+
+    ensurePropertyList(*lockedProperties, memberName);
+
+    // Build a card for each existing item in the array
+    PropertyList& items = (*lockedProperties)[memberName].toList();
+    for (size_t i = 0; i < items.size(); i++) {
+        buildRefArrayCard(itemsLayout, memberName, category, referenceId, i, properties);
+    }
+
+    // "+ Add" button: appends a new item and builds its card
+    connect(
+        addButton,
+        &QPushButton::clicked,
+        this,
+        [this, properties, memberName, itemsLayout, category, referenceId]() {
+            std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
+            if (!lockedProperties) {
+                return;
+            }
+            (*lockedProperties)[memberName].toList().push_back(PropertyMap());
+            const size_t newIndex = (*lockedProperties)[memberName].toList().size() - 1;
+            buildRefArrayCard(
+                itemsLayout,
+                memberName,
+                category,
+                referenceId,
+                newIndex,
+                properties
+            );
+            emit fieldChanged();
+        }
+    );
+}
+
+void SchemaFormWidget::buildRefContent(CollapsibleSection* section,
+                                       const SchemaMember& member,
+                                       const SchemaReference& reference,
+                                       PropertyMap& properties)
+{
+    // Look up the category and concrete type for the reference
+    const SchemaCategory* category =
+        AssetSchema::instance().findCategoryByTypeId(reference.identifier);
+    const SchemaType* targetType =
+        AssetSchema::instance().findType(reference.identifier);
+
+    // Both lookups should succeed if the schema is well-formed
+    ghoul_assert(targetType && category, "buildRefContent: schema lookup failed");
+
+    // Polymorphic when the target is the base type of its category (e.g. "Renderable"),
+    // or as a fallback when lookup fails
+    const bool isPolymorphic = !targetType || !category ||
+        targetType->name == category->name;
+
+    if (isPolymorphic) {
+        buildPolymorphicRefContent(section, member, reference, category, _properties);
+        return;
+    }
+
+    PropertyMap& subProperties = ensurePropertyMap(properties, member.name);
+    SchemaFormWidget* nested = createNestedForm(targetType->members, subProperties);
+
+    section->setContentWidget(nested);
+}
+
+void SchemaFormWidget::buildPolymorphicRefContent(CollapsibleSection* section,
+                                                  const SchemaMember& member,
+                                                  const SchemaReference& reference,
+                                                  const SchemaCategory* category,
+                                                  std::weak_ptr<PropertyMap> properties)
+{
+    std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
+    if (!lockedProperties) {
+        return;
+    }
+
+    // Outer container for the type selector and inner form
+    QWidget* container = new QWidget;
+    QBoxLayout* containerLayout = new QVBoxLayout(container);
+    containerLayout->setContentsMargins(0, 4, 0, 4);
+    containerLayout->setSpacing(4);
+
+    // Check if the property map already has a saved type selection
+    const bool hasStoredProperties =
+        lockedProperties->count(member.name) > 0
+        && lockedProperties->at(member.name).isMap();
+    const QString storedTypeName = hasStoredProperties ?
+        storedTypeFromMap(lockedProperties->at(member.name).toMap()) :
+        QString();
+
+    // Type dropdown - populated with all concrete types in the category, skipping the
+    // abstract base type and the member's own name
+    SearchDropdown* dropdown = new SearchDropdown(container);
+    dropdown->setPlaceholderText(
+        QString("No %1 selected").arg(splitPascalCase(member.name).toLower())
+    );
+    int preSelectedIndex = -1;
+    int dropdownIndex = 0;
+
+    // Add each concrete subtype to the dropdown
+    if (category) {
+        for (const SchemaType& schemaType : category->types) {
+            if (schemaType.name == member.name ||
+                schemaType.identifier == reference.identifier)
+            {
+                // Skip self-referential entry (e.g. "Renderable" member) or the abstract
+                // base type of the category
+                continue;
+            }
+
+            const QString typeName = QString::fromStdString(schemaType.name);
+            dropdown->addItem(splitPascalCase(schemaType.name), typeName);
+
+            if (!storedTypeName.isEmpty() && typeName == storedTypeName) {
+                preSelectedIndex = dropdownIndex;
+            }
+            ++dropdownIndex;
+        }
+    }
+    dropdown->setCurrentIndex(preSelectedIndex);
+
+    // Selector row: dropdown & clear button
+    QWidget* selectorRow = new QWidget;
+    QBoxLayout* selectorLayout = new QHBoxLayout(selectorRow);
+    selectorLayout->setContentsMargins(0, 0, 0, 0);
+    selectorLayout->setSpacing(4);
+    selectorLayout->addWidget(dropdown, 1);
+    containerLayout->addWidget(selectorRow);
+
+    QPushButton* clearButton = new QPushButton(RemoveGlyph);
+    clearButton->setObjectName("combo-clear-button");
+    clearButton->setFixedSize(RemoveButtonSize, RemoveButtonSize);
+    clearButton->setToolTip("Clear selection");
+    selectorLayout->addWidget(clearButton);
+    clearButton->setVisible(preSelectedIndex >= 0);
+    section->setContentWidget(container);
+
+    // Inner form holder: populated when a type is selected
+    QWidget* innerHolder = new QWidget;
+    QBoxLayout* innerLayout = new QVBoxLayout(innerHolder);
+    innerLayout->setContentsMargins(0, 0, 0, 0);
+    innerLayout->setSpacing(0);
+    containerLayout->addWidget(innerHolder);
+
+    const std::string memberName = member.name;
+
+    // Restore the inner form for a previously saved type selection
+    if (preSelectedIndex >= 0) {
+        PropertyMap& subProperties = ensurePropertyMap(*lockedProperties, memberName);
+        rebuildItemForm(innerLayout, subProperties, storedTypeName, category);
+    }
+
+    // Track the selected index so we can revert on cancelled type
+    // changes. Pointer because we mutate it in the lambda
+    auto previousIndex = std::make_shared<int>(preSelectedIndex);
+
+    // Type selected: reset the property map and rebuild inner form
+    connect(
+        dropdown,
+        &SearchDropdown::activated,
+        this,
+        [this, properties, memberName, innerLayout, dropdown, clearButton, category,
+         previousIndex]()
+        {
+            std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
+            if (!lockedProperties) {
+                return;
+            }
+
+            // Check if the user has filled in any fields beyond the "Type" key
+            const auto it = lockedProperties->find(memberName);
+            bool hasEntry = it != lockedProperties->end() && it->second.isMap();
+            bool hasExistingData = hasEntry && it->second.toMap().size() > 1;
+
+            if (hasExistingData) {
+                const int result = QMessageBox::question(
+                    this,
+                    "Change Type",
+                    QString("Changing the type will discard all current settings."
+                            " Continue?"),
+                    QMessageBox::Yes | QMessageBox::No
+                );
+                if (result != QMessageBox::Yes) {
+                    dropdown->setCurrentIndex(*previousIndex);
+                    return;
+                }
+            }
+
+            (*lockedProperties)[memberName] = PropertyMap();
+            PropertyMap& subProperties = (*lockedProperties)[memberName].toMap();
+
+            rebuildItemForm(
+                innerLayout,
+                subProperties,
+                dropdown->currentData().toString(),
+                category
+            );
+            emit fieldChanged();
+            clearButton->setVisible(true);
+            *previousIndex = dropdown->currentIndex();
+        }
+    );
+
+    // Hover: show documentation for the highlighted type
+    connect(
+        dropdown,
+        &SearchDropdown::highlighted,
+        this,
+        [this, category](const QVariant& itemData) {
+            emitTypeDocumentation(category, itemData.toString());
+        }
+    );
+
+    // Clear button: remove selection and erase the property
+    connect(
+        clearButton,
+        &QPushButton::clicked,
+        this,
+        [this, properties, memberName, dropdown, innerLayout, clearButton,
+         previousIndex]()
+        {
+            std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
+            if (!lockedProperties) {
+                return;
+            }
+
+            // Check if the user has filled in any fields beyond the "Type" key
+            const auto it = lockedProperties->find(memberName);
+            bool hasEntry = it != lockedProperties->end() && it->second.isMap();
+            bool hasExistingData = hasEntry && it->second.toMap().size() > 1;
+
+            if (hasExistingData) {
+                const int result = QMessageBox::question(
+                    this,
+                    "Clear Type",
+                    QString("Clearing the type will discard all current settings."
+                            " Continue?"),
+                    QMessageBox::Yes | QMessageBox::No
+                );
+                if (result != QMessageBox::Yes) {
+                    return;
+                }
+            }
+
+            dropdown->setCurrentIndex(-1);
+            clearButton->setVisible(false);
+            clearLayout(innerLayout);
+            lockedProperties->erase(memberName);
+            emit fieldChanged();
+            *previousIndex = -1;
+        }
+    );
+}
+
+void SchemaFormWidget::buildInlineArrayContent(CollapsibleSection* section,
+                                               const SchemaMember& member,
+                                               std::weak_ptr<PropertyMap> properties)
+{
+    // members[0] is the "*" array template child; its sub-members define the schema for
+    // each element in the array
+    const std::vector<SchemaMember>& itemMembers = member.members[0].members;
+    const std::string memberName = member.name;
+    const std::vector<SchemaMember>* membersPtr = &itemMembers;
+
+    auto [itemsLayout, addButton] = createArrayScaffold(section);
+
+    std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
+    if (!lockedProperties) {
+        return;
+    }
+
+    ensurePropertyList(*lockedProperties, memberName);
+
+    PropertyList& items = (*lockedProperties)[memberName].toList();
+    for (size_t i = 0; i < items.size(); i++) {
+        buildInlineArrayCard(itemsLayout, memberName, *membersPtr, i, properties);
+    }
+
+    // "+ Add" button: appends a new item and builds its card
+    connect(
+        addButton,
+        &QPushButton::clicked,
+        this,
+        [this, properties, memberName, itemsLayout, membersPtr]() {
+            std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
+            if (!lockedProperties) {
+                return;
+            }
+            (*lockedProperties)[memberName].toList().push_back(PropertyMap());
+            const size_t newIndex = (*lockedProperties)[memberName].toList().size() - 1;
+
+            buildInlineArrayCard(
+                itemsLayout,
+                memberName,
+                *membersPtr,
+                newIndex,
+                properties
+            );
+            emit fieldChanged();
+        }
+    );
+}
+
+void SchemaFormWidget::buildInlineTableContent(CollapsibleSection* section,
+                                               const SchemaMember& member,
+                                               PropertyMap& properties)
+{
+    if (member.members.empty()) {
+        return;
+    }
+
+    PropertyMap& subProperties = ensurePropertyMap(properties, member.name);
+    SchemaFormWidget* nested = createNestedForm(member.members, subProperties);
+    section->setContentWidget(nested);
+}
+
+QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
+    const QString typeString = QString::fromStdString(member.type);
+    auto onChange = [this]() {
+        emit fieldChanged();
+    };
+
+    // Union types (contain ", " or " or ")
+    if (typeString.contains(", ") || typeString.contains(" or ")) {
+        QStringList types = splitUnionTypes(typeString);
+
+        // Combo selector + show/hide pages. Hidden widgets take zero layout space, so the
+        // container fits the active page
+        QWidget* container = new QWidget(this);
+        container->setObjectName(UnionContainerName);
+        QBoxLayout* verticalLayout = new QVBoxLayout(container);
+        verticalLayout->setContentsMargins(0, 0, 0, 0);
+        verticalLayout->setSpacing(4);
+
+        QComboBox* typeCombo = new QComboBox(container);
+        typeCombo->setObjectName(UnionTypeComboName);
+        verticalLayout->addWidget(typeCombo);
+
+        QList<QWidget*> typeWidgets;
+        for (int j = 0; j < types.size(); j++) {
+            typeCombo->addItem(types[j]);
+            // Empty description — the union description applies to the union as a whole,
+            // not the individual type
+            SchemaMember typeMember = { member.name, types[j].toStdString(), {} };
+            QWidget* widget = (types[j] == "Table") ?
+                createTableSection(typeMember) :
+                createFlatWidget(typeMember);
+
+            // Parent first, then set visibility — a parentless widget with
+            // setVisible(true) becomes a top-level window on Windows
+            verticalLayout->addWidget(widget);
+            widget->setVisible(j == 0);
+            typeWidgets.append(widget);
+        }
+
+        connect(
+            typeCombo,
+            &QComboBox::currentIndexChanged,
+            this,
+            [typeWidgets](int index) {
+                for (int i = 0; i < typeWidgets.size(); i++) {
+                    typeWidgets[i]->setVisible(i == index);
+                }
+            }
+        );
+
+        return container;
+    }
+
+    if (member.type == "Boolean") {
+        QCheckBox* checkBox = new QCheckBox;
+
+        connect(
+            checkBox,
+            &QCheckBox::toggled,
+            checkBox,
+            [this, member, onChange](bool checked) {
+                std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
+                if (!lockedProperties) {
+                    return;
+                }
+                (*lockedProperties)[member.name] = checked;
+                onChange();
+            }
+        );
+    }
+    if (member.type == "Integer") {
+        QLineEdit* lineEdit = new QLineEdit;
+        const NumericRange range = parseRange(member.description);
+        // Cannot cast the NumericRange double defaults to int (overflow / UB), so fall
+        // back to int limits when no bound was parsed
+        const int lowerBound =
+            range.hasMin ? static_cast<int>(range.min) : std::numeric_limits<int>::min();
+        const int upperBound =
+            range.hasMax ? static_cast<int>(range.max) : std::numeric_limits<int>::max();
+        lineEdit->setValidator(new QIntValidator(lowerBound, upperBound, lineEdit));
+        lineEdit->setPlaceholderText(rangePlaceholder(range, true));
+
+        connect(
+            lineEdit,
+            &QLineEdit::textEdited,
+            lineEdit,
+            [this, member, onChange](const QString& text) {
+                std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
+                if (!lockedProperties) {
+                    return;
+                }
+                bool ok = false;
+                const int value = text.toInt(&ok);
+                (*lockedProperties)[member.name] = static_cast<double>(ok ? value : 0);
+                onChange();
+            }
+        );
+        return lineEdit;
+    }
+    if (member.type == "Double") {
+        QLineEdit* lineEdit = new QLineEdit;
+        const NumericRange range = parseRange(member.description);
+        // QDoubleValidator misbehaves with extreme double values, so use +/- 1e15 as a
+        // practical fallback when no bound was parsed
+        const double lowerBound = range.hasMin ? range.min : -1e15;
+        const double upperBound = range.hasMax ? range.max : 1e15;
+        lineEdit->setValidator(
+            new QDoubleValidator(lowerBound, upperBound, -1, lineEdit)
+        );
+        lineEdit->setPlaceholderText(rangePlaceholder(range, false));
+        connect(
+            lineEdit,
+            &QLineEdit::textEdited,
+            lineEdit,
+            [this, member, onChange](const QString& text) {
+                std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
+                if (!lockedProperties) {
+                    return;
+                }
+                bool ok = false;
+                const double value = text.toDouble(&ok);
+                (*lockedProperties)[member.name] = ok ? value : 0.0;
+                onChange();
+            }
+        );
+        return lineEdit;
+    }
+    for (const MatrixTypeEntry& entry : MatrixTypeLookup) {
+        if (member.type == entry.typeName) {
+            MatrixWidget* matrixWidget = entry.isColor ?
+                new ColorWidget(entry.nComponents) :
+                new MatrixWidget(entry.nComponents, entry.nColumns, entry.isInteger);
+            connect(
+                matrixWidget,
+                &MatrixWidget::valueChanged,
+                matrixWidget,
+                [this, member, matrixWidget, onChange]() {
+                    std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
+                    if (!lockedProperties) {
+                        return;
+                    }
+                    std::vector<double> values = matrixWidget->values();
+                    PropertyList p;
+                    for (double v : values) {
+                        p.push_back(v);
+                    }
+                    (*lockedProperties)[member.name] = p;
+                    onChange();
+                }
+            );
+            return matrixWidget;
+        }
+    }
+    if (member.type == "File") {
+        return createFileWidget(
+            member.name,
+            member.description,
+            false,
+            _properties,
+            onChange
+        );
+    }
+    if (member.type == "Directory") {
+        return createFileWidget(
+            member.name,
+            member.description,
+            true,
+            _properties,
+            onChange
+        );
+    }
+    if (member.type == "Date and time") {
+        QLineEdit* lineEdit = new QLineEdit;
+        lineEdit->setObjectName(DateEditName);
+        // Human-readable hint; the actual Qt format string is DateDisplayFormat
+        lineEdit->setPlaceholderText("YYYY-MM-DD hh:mm:ss");
+        lineEdit->setValidator(new QRegularExpressionValidator(
+            QRegularExpression(R"(^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$)"),
+            lineEdit
+        ));
+        connect(
+            lineEdit,
+            &QLineEdit::textEdited,
+            lineEdit,
+            [this, member, onChange](const QString& text) {
+                std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
+                if (!lockedProperties) {
+                    return;
+                }
+                const QDateTime dateTime = QDateTime::fromString(
+                    text,
+                    DateDisplayFormat
+                );
+                if (dateTime.isValid()) {
+                    (*lockedProperties)[member.name] =
+                        dateTime.toUTC().toString(Qt::ISODate).toStdString();
+                }
+                onChange();
+            }
+        );
+        return lineEdit;
+    }
+    // Identifier fields that reference other nodes (not the node's own Identifier
+    // definition) get a registry combo + browse button
+    if (member.type == "Identifier" && member.name != "Identifier" && _registry) {
+        auto onSelect = [this](const QString& filePath) {
+            emit addDependency(filePath);
+        };
+
+        QWidget* container = new QWidget;
+        QBoxLayout* horizontalLayout = new QHBoxLayout(container);
+        horizontalLayout->setContentsMargins(0, 0, 0, 0);
+        horizontalLayout->setSpacing(4);
+
+        // Returns identifiers excluding this node's own
+        QStringList filteredIdentifiers = [this]() {
+            QStringList identifiers = _registry->knownIdentifiers();
+            std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
+            if (!lockedProperties) {
+                return identifiers;
+            }
+            const auto it = lockedProperties->find("Identifier");
+            if (it != lockedProperties->end() && it->second.isString()) {
+                identifiers.removeAll(QString::fromStdString(it->second.toString()));
+            }
+            return identifiers;
+        }();
+
+        QComboBox* combo = new QComboBox(container);
+        combo->setEditable(true);
+        combo->addItems(filteredIdentifiers);
+        if (!member.description.empty()) {
+            combo->lineEdit()->setPlaceholderText(
+                QString::fromStdString(member.description)
+            );
+        }
+
+        connect(
+            _registry,
+            &IdentifierRegistry::registryChanged,
+            combo,
+            [combo, filteredIdentifiers]() {
+                const QString current = combo->currentText();
+                combo->blockSignals(true);
+                combo->clear();
+                combo->addItems(filteredIdentifiers);
+                combo->setCurrentText(current);
+                combo->blockSignals(false);
+            }
+        );
+        connect(
+            combo,
+            &QComboBox::currentTextChanged,
+            combo,
+            [this, name = member.name, onChange](const QString& text) {
+                std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
+                if (!lockedProperties) {
+                    return;
+                }
+                (*lockedProperties)[name] = text.toStdString();
+                onChange();
+            }
+        );
+
+        QPushButton* browseButton = new QPushButton("Browse .jasset", container);
+        browseButton->setObjectName("identifier-browse-button");
+        connect(
+            browseButton, &QPushButton::clicked,
+            container,
+            [combo, container, onSelect]() {
+                const QString selected = QFileDialog::getOpenFileName(
+                    container, "Browse .jasset", QDir::homePath(),
+                    "Asset files (*.jasset);"
+                );
+                if (selected.isEmpty()) {
+                    return;
+                }
+
+                QStringList identifiers = extractJassetIdentifiers(selected);
+
+                if (identifiers.isEmpty()) {
+                    QMessageBox::information(
+                        container, "No Identifiers",
+                        "No identifiers were found in the selected file."
+                    );
+                    return;
+                }
+
+                bool ok = false;
+                const QString picked = QInputDialog::getItem(
+                    container, "Select Identifier",
+                    "Select an identifier from the file:",
+                    identifiers, 0, false, &ok
+                );
+                if (!ok) {
+                    return;
+                }
+
+                combo->setCurrentText(picked);
+                onSelect(selected);
+            }
+        );
+
+        horizontalLayout->addWidget(combo, 1);
+        horizontalLayout->addWidget(browseButton);
+        return container;
+    }
+    const QStringList options = parseInList(member.description);
+    if (!options.isEmpty()) {
+        QComboBox* combo = new QComboBox;
+        combo->addItem("Select...");
+        combo->addItems(options);
+        combo->setCurrentIndex(0);
+        connect(
+            combo,
+            &QComboBox::currentIndexChanged,
+            combo,
+            [this, member, combo, onChange](int index) {
+                std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
+                if (!lockedProperties) {
+                    return;
+                }
+                // Index 0 is the "Select..." placeholder - erase the
+                // property so the placeholder choice is not serialized
+                if (index <= 0) {
+                    lockedProperties->erase(member.name);
+                }
+                else {
+                    (*lockedProperties)[member.name] = combo->currentText().toStdString();
+                }
+                onChange();
+            }
+        );
+        return combo;
+    }
+
+    // Fallback to string
+    QLineEdit* lineEdit = new QLineEdit;
+
+    if (!member.description.empty()) {
+        lineEdit->setPlaceholderText(QString::fromStdString(member.description));
+    }
+
+    connect(
+        lineEdit,
+        &QLineEdit::textEdited,
+        lineEdit,
+        [this, member, onChange](const QString& text) {
+            std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
+            if (!lockedProperties) {
+                return;
+            }
+            (*lockedProperties)[member.name] = text.toStdString();
+            onChange();
+        }
+    );
+
+    return lineEdit;
+}

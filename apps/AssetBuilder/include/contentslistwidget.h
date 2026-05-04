@@ -22,52 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/documentation/documentationengine.h>
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/settings.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/logging/logmanager.h>
+#ifndef __OPENSPACE_ASSETBUILDER___CONTENTSLISTWIDGET___H__
+#define __OPENSPACE_ASSETBUILDER___CONTENTSLISTWIDGET___H__
 
-int main(int, char** argv) {
-    using namespace openspace;
+#include <QWidget>
 
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Debug,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
-    );
+struct JAsset;
+class QListWidget;
 
-    ghoul::initialize();
-    global::create();
+/**
+ * Widget showing the contents list with add/duplicate/remove actions. Owns the
+ * QListWidget and all content-item mutation logic.
+ */
+class ContentsListWidget final : public QWidget {
+Q_OBJECT
+public:
+    ContentsListWidget(QWidget* parent, JAsset& asset);
 
-    // In order to initialize the engine, we need to specify the tokens
-    // We start by registering the path of the executable,
-    // to make it possible to find other files in the same directory
-    FileSys.registerPathToken(
-        "${BIN}",
-        std::filesystem::path(argv[0]).parent_path(),
-        ghoul::filesystem::FileSystem::Override::Yes
-    );
+    /**
+     * Rebuilds the contents list from the current asset.
+     */
+    void refresh();
 
-    std::filesystem::path configFile = findConfiguration();
+signals:
+    /**
+     * Emitted when the contents list selection changes.
+     */
+    void selectionChanged(int row);
 
-    // Register the base path as the directory where the configuration file lives
-    std::filesystem::path base = configFile.parent_path();
-    FileSys.registerPathToken("${BASE}", base);
+    /**
+     * Emitted whenever this widget mutates the asset.
+     */
+    void assetModified();
 
-    *global::configuration = loadConfigurationFromFile(configFile.string(), "");
-    registerPathTokens(*global::configuration);
+private:
+    /**
+     * Appends a new default SceneGraphNode and selects it.
+     */
+    void addSceneGraphNode();
 
-    // Now that we have the tokens we can initialize the engine
-    global::openSpaceEngine->initialize();
+    /**
+     * Duplicates the content item at the given row index.
+     *
+     * \param row Index into asset contents
+     */
+    void duplicateSceneGraphNode(int row);
 
-    // Print out the documentation to the documentation folder
-    // @TODO (ylvse, 2024-05-02) change this directory when integrating with jenkins?
-    DocEng.writeJsonDocumentation();
+    /**
+     * Removes the content item at the given row index after confirmation.
+     *
+     * \param row Index into asset contents
+     */
+    void removeSceneGraphNode(int row);
 
-    global::openSpaceEngine->deinitialize();
-
-    return 0;
+    JAsset& _asset;
+    QListWidget* _contentsList = nullptr;
 };
+
+#endif // __OPENSPACE_ASSETBUILDER___CONTENTSLISTWIDGET___H__

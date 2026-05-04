@@ -22,52 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/documentation/documentationengine.h>
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/settings.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/logging/logmanager.h>
+#include "path.h"
 
-int main(int, char** argv) {
-    using namespace openspace;
+PathType detectPathType(const std::string& path) {
+    // Jasset-relative: ./foo, ../foo
+    if (path.starts_with("./") || path.starts_with("../")) {
+        return PathType::Relative;
+    }
+    // Absolute: C:/ on Windows, / on Unix
+    if (std::filesystem::path(path).is_absolute()) {
+        return PathType::Absolute;
+    }
+    return PathType::Data;
+}
 
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Debug,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
-    );
+std::filesystem::path resolvePath(const std::string& dependency,
+                                  const std::filesystem::path& dataRoot,
+                                  const std::filesystem::path& assetDirectory)
+{
+    const PathType type = detectPathType(dependency);
+    std::filesystem::path resolved(dependency);
 
-    ghoul::initialize();
-    global::create();
+    // Resolve relative paths against the appropriate root directory
+    if (type == PathType::Data && !dataRoot.empty()) {
+        resolved = dataRoot / resolved;
+    }
+    else if (type == PathType::Relative && !assetDirectory.empty()) {
+        resolved = assetDirectory / resolved;
+    }
 
-    // In order to initialize the engine, we need to specify the tokens
-    // We start by registering the path of the executable,
-    // to make it possible to find other files in the same directory
-    FileSys.registerPathToken(
-        "${BIN}",
-        std::filesystem::path(argv[0]).parent_path(),
-        ghoul::filesystem::FileSystem::Override::Yes
-    );
-
-    std::filesystem::path configFile = findConfiguration();
-
-    // Register the base path as the directory where the configuration file lives
-    std::filesystem::path base = configFile.parent_path();
-    FileSys.registerPathToken("${BASE}", base);
-
-    *global::configuration = loadConfigurationFromFile(configFile.string(), "");
-    registerPathTokens(*global::configuration);
-
-    // Now that we have the tokens we can initialize the engine
-    global::openSpaceEngine->initialize();
-
-    // Print out the documentation to the documentation folder
-    // @TODO (ylvse, 2024-05-02) change this directory when integrating with jenkins?
-    DocEng.writeJsonDocumentation();
-
-    global::openSpaceEngine->deinitialize();
-
-    return 0;
-};
+    // Normalize the path (resolve .. and . segments)
+    std::error_code error;
+    std::filesystem::path canonical = std::filesystem::weakly_canonical(resolved, error);
+    return error ? resolved : canonical;
+}

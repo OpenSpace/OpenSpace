@@ -22,52 +22,43 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/documentation/documentationengine.h>
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/settings.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/logging/logmanager.h>
+#ifndef __OPENSPACE_ASSETBUILDER___UTILS___H__
+#define __OPENSPACE_ASSETBUILDER___UTILS___H__
 
-int main(int, char** argv) {
-    using namespace openspace;
+#include <filesystem>
+#include <string>
 
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Debug,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
-    );
-
-    ghoul::initialize();
-    global::create();
-
-    // In order to initialize the engine, we need to specify the tokens
-    // We start by registering the path of the executable,
-    // to make it possible to find other files in the same directory
-    FileSys.registerPathToken(
-        "${BIN}",
-        std::filesystem::path(argv[0]).parent_path(),
-        ghoul::filesystem::FileSystem::Override::Yes
-    );
-
-    std::filesystem::path configFile = findConfiguration();
-
-    // Register the base path as the directory where the configuration file lives
-    std::filesystem::path base = configFile.parent_path();
-    FileSys.registerPathToken("${BASE}", base);
-
-    *global::configuration = loadConfigurationFromFile(configFile.string(), "");
-    registerPathTokens(*global::configuration);
-
-    // Now that we have the tokens we can initialize the engine
-    global::openSpaceEngine->initialize();
-
-    // Print out the documentation to the documentation folder
-    // @TODO (ylvse, 2024-05-02) change this directory when integrating with jenkins?
-    DocEng.writeJsonDocumentation();
-
-    global::openSpaceEngine->deinitialize();
-
-    return 0;
+/**
+ * Classification of dependency path strings.
+ */
+enum class PathType {
+    /// Data-relative path (e.g. "textures/earth.png")
+    Data,
+    /// Jasset-relative path (starts with ./ or ../)
+    Relative,
+    /// Absolute filesystem path (e.g. "C:/full/path.jasset")
+    Absolute
 };
+
+/**
+ * Detects whether a dependency string is data-relative, jasset-relative, or absolute.
+ *
+ * \param path The dependency path string
+ * \return Classified PathType for the given string
+ */
+PathType detectPathType(const std::string& path);
+
+/**
+ * Resolves a dependency string to an absolute filesystem path. Data-relative paths
+ * resolve against \p dataRoot, jasset-relative paths resolve against \p assetDir, and
+ * absolute paths are returned as-is (after canonicalization).
+ *
+ * \param dependency The dependency path string
+ * \param dataRoot The OpenSpace data root directory
+ * \param assetDirectory The parent directory of the current .jasset file
+ * \return Canonicalized absolute path, or the raw resolved path on error
+ */
+std::filesystem::path resolvePath(const std::string& dependency,
+    const std::filesystem::path& dataRoot, const std::filesystem::path& assetDirectory);
+
+#endif // __OPENSPACE_ASSETBUILDER___UTILS___H__

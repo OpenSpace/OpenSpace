@@ -1,0 +1,215 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2026                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#include "jasset.h"
+
+#include "path.h"
+#include <QJsonArray>
+#include <QJsonObject>
+
+namespace {
+    PropertyValue jsonValueToProperty(const QJsonValue& value) {
+        if (value.isBool()) {
+            return value.toBool();
+        }
+        if (value.isDouble()) {
+            return value.toDouble();
+        }
+        if (value.isString()) {
+            return value.toString().toStdString();
+        }
+        if (value.isObject()) {
+            PropertyMap map;
+            const QJsonObject object = value.toObject();
+            for (auto it = object.begin(); it != object.end(); it++) {
+                map[it.key().toStdString()] = jsonValueToProperty(it.value());
+            }
+            return std::move(map);
+        }
+        if (value.isArray()) {
+            PropertyList list;
+            const QJsonArray array = value.toArray();
+            for (const QJsonValue& item : array) {
+                list.push_back(jsonValueToProperty(item));
+            }
+            return std::move(list);
+        }
+        return PropertyValue();
+    }
+
+    QJsonValue propertyToJsonValue(const PropertyValue& propertyValue) {
+        if (propertyValue.isNull()) {
+            return QJsonValue::Null;
+        }
+        if (propertyValue.isBool()) {
+            return QJsonValue(propertyValue.toBool());
+        }
+        if (propertyValue.isDouble()) {
+            return QJsonValue(propertyValue.toDouble());
+        }
+        if (propertyValue.isString()) {
+            return QJsonValue(QString::fromStdString(propertyValue.toString()));
+        }
+        if (propertyValue.isMap()) {
+            QJsonObject object;
+            for (const auto& [key, value] : propertyValue.toMap()) {
+                object[QString::fromStdString(key)] = propertyToJsonValue(value);
+            }
+            return object;
+        }
+        if (propertyValue.isList()) {
+            QJsonArray array;
+            for (const PropertyValue& item : propertyValue.toList()) {
+                array.append(propertyToJsonValue(item));
+            }
+            return array;
+        }
+        return QJsonValue::Null;
+    }
+} // namespace
+
+bool PropertyValue::isNull() const {
+    return std::holds_alternative<std::monostate>(*this);
+}
+
+bool PropertyValue::isString() const {
+    return std::holds_alternative<std::string>(*this);
+}
+
+bool PropertyValue::isDouble() const {
+    return std::holds_alternative<double>(*this);
+}
+
+bool PropertyValue::isBool() const {
+    return std::holds_alternative<bool>(*this);
+}
+
+bool PropertyValue::isMap() const {
+    return std::holds_alternative<PropertyMap>(*this);
+}
+
+bool PropertyValue::isList() const {
+    return std::holds_alternative<PropertyList>(*this);
+}
+
+const std::string& PropertyValue::toString() const {
+    return std::get<std::string>(*this);
+}
+
+double PropertyValue::toDouble() const {
+    return std::get<double>(*this);
+}
+
+bool PropertyValue::toBool() const {
+    return std::get<bool>(*this);
+}
+
+const PropertyMap& PropertyValue::toMap() const {
+    return std::get<PropertyMap>(*this);
+}
+
+const PropertyList& PropertyValue::toList() const {
+    return std::get<PropertyList>(*this);
+}
+
+PropertyMap& PropertyValue::toMap() {
+    return std::get<PropertyMap>(*this);
+}
+
+PropertyList& PropertyValue::toList() {
+    return std::get<PropertyList>(*this);
+}
+
+JAsset jassetFromJson(const QJsonObject& root) {
+    JAsset asset;
+
+    if (root.contains("metadata")) {
+        const QJsonObject meta = root["metadata"].toObject();
+        asset.metadata.name = meta["name"].toString("Untitled Asset").toStdString();
+        asset.metadata.version = meta["asset_version"].toString("1.0.0").toStdString();
+        asset.metadata.author = meta["author"].toString().toStdString();
+        asset.metadata.description = meta["description"].toString().toStdString();
+        asset.metadata.license = meta["license"].toString("None").toStdString();
+    }
+
+    if (root.contains("dependencies")) {
+        for (const QJsonValue& dep : root["dependencies"].toArray()) {
+            asset.dependencies.push_back(dep.toString().toStdString());
+        }
+    }
+
+    if (root.contains("scenegraphnodes")) {
+        for (const QJsonValue& itemVal : root["scenegraphnodes"].toArray()) {
+            if (!itemVal.isObject()) {
+                continue;
+            }
+            const QJsonObject itemObj = itemVal.toObject();
+            ContentItem item = {
+                .type = "SceneGraphNode"
+            };
+            // Store all keys except "type" as properties — schema-agnostic,
+            // so the parser doesn't need to know the type's members
+            for (auto it = itemObj.begin(); it != itemObj.end(); it++) {
+                if (it.key() == "type") { continue; }
+                item.properties[it.key().toStdString()] = jsonValueToProperty(it.value());
+            }
+            asset.contents.push_back(std::move(item));
+        }
+    }
+
+    return asset;
+}
+
+QJsonObject jassetToJson(const JAsset& asset) {
+    QJsonObject root;
+    root["version"] = "1.0";
+
+    QJsonObject meta;
+    meta["name"] = QString::fromStdString(asset.metadata.name);
+    meta["asset_version"] = QString::fromStdString(asset.metadata.version);
+    meta["author"] = QString::fromStdString(asset.metadata.author);
+    meta["description"] = QString::fromStdString(asset.metadata.description);
+    meta["license"] = QString::fromStdString(asset.metadata.license);
+    root["metadata"] = meta;
+
+    QJsonArray deps;
+    for (const std::string& dep : asset.dependencies) {
+        deps.append(QString::fromStdString(dep));
+    }
+    root["dependencies"] = deps;
+
+    QJsonArray scenegraphnodes;
+    for (const ContentItem& item : asset.contents) {
+        QJsonObject itemObj;
+        for (const auto& [key, value] : item.properties) {
+            itemObj[QString::fromStdString(key)] = propertyToJsonValue(value);
+        }
+        if (item.type == "SceneGraphNode") {
+            scenegraphnodes.append(itemObj);
+        }
+    }
+    root["scenegraphnodes"] = scenegraphnodes;
+
+    return root;
+}

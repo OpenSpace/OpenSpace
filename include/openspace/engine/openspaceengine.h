@@ -95,7 +95,6 @@ public:
     OpenSpaceEngine();
     ~OpenSpaceEngine() override;
 
-    void registerPathTokens();
     void initialize();
     void initializeGL();
     void deinitialize();
