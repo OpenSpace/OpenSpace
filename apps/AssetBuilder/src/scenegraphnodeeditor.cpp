@@ -210,8 +210,7 @@ SceneGraphNodeEditor::SceneGraphNodeEditor(JAsset& asset,
             // Make sure we never empty the identifier
             if (!identifierText.isEmpty()) {
                 identifierEdit->setText(identifierText);
-                (*_localProperties)["Identifier"] =
-                    PropertyValue{ identifierText.toStdString() };
+                (*_localProperties)["Identifier"] = identifierText.toStdString();
                 _asset.contents[_index].properties = *_localProperties;
                 emit contentModified();
             }
@@ -225,8 +224,7 @@ SceneGraphNodeEditor::SceneGraphNodeEditor(JAsset& asset,
         const QString identifierText = toPascalCase(currentName);
         if (!identifierText.isEmpty()) {
             identifierEdit->setText(identifierText);
-            (*_localProperties)["Identifier"] =
-                PropertyValue{ identifierText.toStdString() };
+            (*_localProperties)["Identifier"] = identifierText.toStdString();
             _asset.contents[_index].properties = *_localProperties;
         }
     }
@@ -367,7 +365,7 @@ QWidget* SceneGraphNodeEditor::buildQuickAccessFields(const SchemaType& sgnType,
     // Ensure the nested GUI map exists so we can reference it below. This is not
     // necessary at the root level but it is for nested members
     if (!_localProperties->contains("GUI") || _localProperties->at("GUI").isNull()) {
-        (*_localProperties)["GUI"] = PropertyValue{ PropertyMap{} };
+        (*_localProperties)["GUI"] = PropertyMap();
     }
     PropertyMap& guiProperties = (*_localProperties)["GUI"].toMap();
     // Using the aliasing constructor for shared_ptr: points to the GUI sub-map while

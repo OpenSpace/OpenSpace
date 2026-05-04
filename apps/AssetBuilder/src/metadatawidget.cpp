@@ -179,7 +179,7 @@ MetadataWidget::MetadataWidget(QWidget* parent, JAsset& asset)
 }
 
 void MetadataWidget::refresh() {
-    const AssetMetadata& metadata = _asset.metadata;
+    const JAsset::Metadata& metadata = _asset.metadata;
     _nameEdit->setText(QString::fromStdString(metadata.name));
     _versionEdit->setText(QString::fromStdString(metadata.version));
     _authorEdit->setText(QString::fromStdString(metadata.author));

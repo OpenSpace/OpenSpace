@@ -31,13 +31,13 @@
 namespace {
     PropertyValue jsonValueToProperty(const QJsonValue& value) {
         if (value.isBool()) {
-            return PropertyValue{ value.toBool() };
+            return value.toBool();
         }
         if (value.isDouble()) {
-            return PropertyValue{ value.toDouble() };
+            return value.toDouble();
         }
         if (value.isString()) {
-            return PropertyValue{ value.toString().toStdString() };
+            return value.toString().toStdString();
         }
         if (value.isObject()) {
             PropertyMap map;
@@ -45,7 +45,7 @@ namespace {
             for (auto it = object.begin(); it != object.end(); it++) {
                 map[it.key().toStdString()] = jsonValueToProperty(it.value());
             }
-            return PropertyValue{ std::move(map) };
+            return std::move(map);
         }
         if (value.isArray()) {
             PropertyList list;
@@ -53,9 +53,9 @@ namespace {
             for (const QJsonValue& item : array) {
                 list.push_back(jsonValueToProperty(item));
             }
-            return PropertyValue{ std::move(list) };
+            return std::move(list);
         }
-        return PropertyValue{};
+        return PropertyValue();
     }
 
     QJsonValue propertyToJsonValue(const PropertyValue& propertyValue) {
@@ -90,55 +90,55 @@ namespace {
 } // namespace
 
 bool PropertyValue::isNull() const {
-    return std::holds_alternative<std::monostate>(value);
+    return std::holds_alternative<std::monostate>(*this);
 }
 
 bool PropertyValue::isString() const {
-    return std::holds_alternative<std::string>(value);
+    return std::holds_alternative<std::string>(*this);
 }
 
 bool PropertyValue::isDouble() const {
-    return std::holds_alternative<double>(value);
+    return std::holds_alternative<double>(*this);
 }
 
 bool PropertyValue::isBool() const {
-    return std::holds_alternative<bool>(value);
+    return std::holds_alternative<bool>(*this);
 }
 
 bool PropertyValue::isMap() const {
-    return std::holds_alternative<PropertyMap>(value);
+    return std::holds_alternative<PropertyMap>(*this);
 }
 
 bool PropertyValue::isList() const {
-    return std::holds_alternative<PropertyList>(value);
+    return std::holds_alternative<PropertyList>(*this);
 }
 
 const std::string& PropertyValue::toString() const {
-    return std::get<std::string>(value);
+    return std::get<std::string>(*this);
 }
 
 double PropertyValue::toDouble() const {
-    return std::get<double>(value);
+    return std::get<double>(*this);
 }
 
 bool PropertyValue::toBool() const {
-    return std::get<bool>(value);
+    return std::get<bool>(*this);
 }
 
 const PropertyMap& PropertyValue::toMap() const {
-    return std::get<PropertyMap>(value);
+    return std::get<PropertyMap>(*this);
 }
 
 const PropertyList& PropertyValue::toList() const {
-    return std::get<PropertyList>(value);
+    return std::get<PropertyList>(*this);
 }
 
 PropertyMap& PropertyValue::toMap() {
-    return std::get<PropertyMap>(value);
+    return std::get<PropertyMap>(*this);
 }
 
 PropertyList& PropertyValue::toList() {
-    return std::get<PropertyList>(value);
+    return std::get<PropertyList>(*this);
 }
 
 JAsset jassetFromJson(const QJsonObject& root) {
