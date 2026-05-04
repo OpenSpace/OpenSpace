@@ -291,8 +291,6 @@ SchemaFormWidget* SceneGraphNodeEditor::createForm(
         this, &SceneGraphNodeEditor::addDependency
     );
 
-    form->populateFromProperties();
-
     return form;
 }
 

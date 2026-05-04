@@ -208,64 +208,6 @@ namespace {
         }
     }
 
-    // Reads the current value from a field widget and returns it as a PropertyValue. The
-    // member type is needed to distinguish numeric/date/string line edits. Returns
-    // std::nullopt if the widget is empty or unrecognized
-    std::optional<PropertyValue> readWidgetValue(QWidget* widget, const std::string& type)
-    {
-        if (auto* checkBox = qobject_cast<QCheckBox*>(widget);  checkBox) {
-            return PropertyValue{ checkBox->isChecked() };
-        }
-        if (auto* matrix = qobject_cast<MatrixWidget*>(widget);  matrix) {
-            std::vector<double> values = matrix->values();
-            PropertyList res;
-            for (double v : values) {
-                res.push_back(PropertyValue{ v });
-            }
-            return PropertyValue{ res };
-        }
-        if (auto* lineEdit = qobject_cast<QLineEdit*>(widget);  lineEdit) {
-            const QString text = lineEdit->text();
-            if (text.isEmpty()) {
-                return std::nullopt;
-            }
-            if (type == "Integer" || type == "Double") {
-                bool ok = false;
-                // Internally integers are stored as double
-                const double value = text.toDouble(&ok);
-                return ok ? std::optional(PropertyValue{ value }) : std::nullopt;
-            }
-            if (type == "Date and time") {
-                const QDateTime dateTime = QDateTime::fromString(text, DateDisplayFormat);
-                if (dateTime.isValid()) {
-                    return PropertyValue{
-                        dateTime.toUTC().toString(Qt::ISODate).toStdString()
-                    };
-                }
-                else {
-                    return std::nullopt;
-                }
-            }
-            return PropertyValue{ text.toStdString() };
-        }
-        if (widget->objectName() == FileContainerName) {
-            auto* fileEdit = widget->findChild<QLineEdit*>();
-            if (fileEdit && !fileEdit->text().isEmpty()) {
-                return PropertyValue{ fileEdit->text().toStdString() };
-            }
-            else {
-                return std::nullopt;
-            }
-        }
-        if (auto* combo = widget->findChild<QComboBox*>();  combo) {
-            const QString text = combo->currentText();
-            if (!text.isEmpty()) {
-                return PropertyValue{ text.toStdString() };
-            }
-        }
-        return std::nullopt;
-    }
-
     void populateWidget(QWidget* widget, const PropertyValue& propertyValue) {
         if (auto* checkBox = qobject_cast<QCheckBox*>(widget);  checkBox) {
             checkBox->blockSignals(true);
@@ -534,11 +476,10 @@ namespace {
 
     // Splits a union type string like "Integer, or Double" into individual types. Handles
     // both ", or " and " or " separators
-    QStringList splitUnionTypes(const QString& type) {
-        QString cleaned = type;
-        cleaned.replace(", or ", ", ");
-        cleaned.replace(" or ", ", ");
-        QStringList parts = cleaned.split(", ", Qt::SkipEmptyParts);
+    QStringList splitUnionTypes(QString type) {
+        type.replace(", or ", ", ");
+        type.replace(" or ", ", ");
+        QStringList parts = type.split(", ", Qt::SkipEmptyParts);
         for (QString& part : parts) {
             part = part.trimmed();
         }
@@ -618,21 +559,19 @@ namespace {
         QBoxLayout* containerLayout = new QVBoxLayout(container);
         containerLayout->setContentsMargins(0, 4, 0, 4);
         containerLayout->setSpacing(4);
+        section->setContentWidget(container);
 
         // Inner container where individual item cards are added
         QWidget* itemsContainer = new QWidget;
         QVBoxLayout* itemsLayout = new QVBoxLayout(itemsContainer);
         itemsLayout->setContentsMargins(0, 0, 0, 0);
         itemsLayout->setSpacing(4);
+        containerLayout->addWidget(itemsContainer);
 
         // Button to append a new item to the array
         QPushButton* addButton = new QPushButton("+ Add");
         addButton->setObjectName("array-add-button");
-
-        // Assemble and set as the section content
-        containerLayout->addWidget(itemsContainer);
         containerLayout->addWidget(addButton);
-        section->setContentWidget(container);
 
         return { itemsLayout, addButton };
     }
@@ -842,10 +781,52 @@ SchemaFormWidget::SchemaFormWidget(std::vector<SchemaMember> members,
     }
 
     outer->addWidget(gridWidget);
+
+
+    std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
+    if (!lockedProperties) {
+        return;
+    }
+    for (size_t i = 0; i < _members.size(); i++) {
+        QWidget* widget = _members[i].fieldWidget;
+        if (!widget) {
+            continue;
+        }
+        const SchemaMember& member = _members[i].member;
+
+        // For optional fields, show or hide the active row based on whether the property
+        // exists. Skip if the property is absent or null
+        if (_members[i].addButton) {
+            const bool exists =
+                lockedProperties->count(member.name) > 0 &&
+                !lockedProperties->at(member.name).isNull();
+            setOptionalFieldActive(_members[i], exists);
+            if (!exists) {
+                continue;
+            }
+        }
+
+        // Look up the stored value; skip if there is no property for this member
+        const auto it = lockedProperties->find(member.name);
+        if (it == lockedProperties->end()) {
+            continue;
+        }
+        const PropertyValue& value = it->second;
+
+        // Union widgets need special handling to detect the stored type and switch the
+        // combo to the matching page before populating
+        if (widget->objectName() == UnionContainerName) {
+            populateUnionWidget(widget, value);
+            continue;
+        }
+
+        // Regular flat widget - set the display value directly
+        populateWidget(widget, value);
+    }
 }
 
 void SchemaFormWidget::addMemberToGrid(QGridLayout* grid, int row, int memberIndex,
-                                       const SchemaMember& member)
+                                       SchemaMember& member)
 {
     if (member.type == "Table") {
         QWidget* section = createTableSection(member);
@@ -874,7 +855,7 @@ void SchemaFormWidget::addMemberToGrid(QGridLayout* grid, int row, int memberInd
             QPushButton* button = new QPushButton("i", labelContainer);
             button->setObjectName("field-info-button");
             button->setFixedSize(InfoButtonSize, InfoButtonSize);
-            QObject::connect(
+            connect(
                 button, &QPushButton::clicked,
                 this, [this, info]() { emit documentationRequested(info); }
             );
@@ -898,17 +879,17 @@ void SchemaFormWidget::addMemberToGrid(QGridLayout* grid, int row, int memberInd
     _members[memberIndex].fieldWidget = field;
 
     if (member.isOptional) {
-        grid->addWidget(createOptionalWrapper(memberIndex, field), row, 1);
+        grid->addWidget(createOptionalWrapper(_members[memberIndex], field), row, 1);
     }
     else {
         grid->addWidget(field, row, 1);
     }
 }
 
-QWidget* SchemaFormWidget::createOptionalWrapper(int memberIndex, QWidget* field) {
-    const std::string& name = _members[memberIndex].member.name;
+QWidget* SchemaFormWidget::createOptionalWrapper(MemberInfo& member, QWidget* field) {
+    const std::string& name = member.member.name;
     std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
-    const bool alreadySet = lockedProperties && lockedProperties->count(name) > 0;
+    member.optionalActive = lockedProperties && lockedProperties->count(name) > 0;
 
     // Container holds two mutually-exclusive rows: a "+" button (when the field is
     // inactive) and the field + remove button (when active). Both are created upfront and
@@ -919,44 +900,38 @@ QWidget* SchemaFormWidget::createOptionalWrapper(int memberIndex, QWidget* field
     containerLayout->setSpacing(0);
 
     // "+" button shown when the optional field is not yet added
-    QPushButton* addButton = new QPushButton("+", optionalContainer);
-    addButton->setObjectName("field-add-button");
-    addButton->setVisible(!alreadySet);
-    _members[memberIndex].addButton = addButton;
-    containerLayout->addWidget(addButton);
+    member.addButton = new QPushButton("+", optionalContainer);
+    member.addButton->setObjectName("field-add-button");
+    member.addButton->setVisible(!member.optionalActive);
+    containerLayout->addWidget(member.addButton);
 
     // Active row: the actual field widget + a remove button beside it. Visible when the
     // field is active, hidden otherwise
-    QWidget* activeRow = new QWidget(optionalContainer);
-    QBoxLayout* activeRowLayout = new QHBoxLayout(activeRow);
+    member.activeRows = new QWidget(optionalContainer);
+    QBoxLayout* activeRowLayout = new QHBoxLayout(member.activeRows);
     activeRowLayout->setContentsMargins(0, 0, 0, 0);
     activeRowLayout->setSpacing(4);
     activeRowLayout->addWidget(field, 1);
 
-    QPushButton* removeButton = new QPushButton(RemoveGlyph, activeRow);
+    QPushButton* removeButton = new QPushButton(RemoveGlyph, member.activeRows);
     removeButton->setObjectName("field-remove-button");
     removeButton->setFixedSize(RemoveButtonSize, RemoveButtonSize);
     activeRowLayout->addWidget(removeButton);
 
-    activeRow->setVisible(alreadySet);
-    _members[memberIndex].activeRows = activeRow;
-    _members[memberIndex].optionalActive = alreadySet;
-    containerLayout->addWidget(activeRow);
+    member.activeRows->setVisible(member.optionalActive);
+    containerLayout->addWidget(member.activeRows);
 
     // Clicking "+" activates the field and focuses it
     connect(
-        addButton,
+        member.addButton,
         &QPushButton::clicked,
         this,
-        [this, memberIndex]() {
-            setOptionalFieldActive(memberIndex, true);
-            if (_members[memberIndex].fieldWidget) {
-                _members[memberIndex].fieldWidget->setFocus();
+        [this, &member]() {
+            setOptionalFieldActive(member, true);
+            if (member.fieldWidget) {
+                member.fieldWidget->setFocus();
             }
-            emit optionalFieldToggled(
-                QString::fromStdString(_members[memberIndex].member.name),
-                true
-            );
+            emit optionalFieldToggled(QString::fromStdString(member.member.name), true);
             emit fieldChanged();
         }
     );
@@ -966,13 +941,13 @@ QWidget* SchemaFormWidget::createOptionalWrapper(int memberIndex, QWidget* field
         removeButton,
         &QPushButton::clicked,
         this,
-        [this, memberIndex]() {
-            if (hasWidgetContent(_members[memberIndex].fieldWidget)) {
+        [this, &member]() {
+            if (hasWidgetContent(member.fieldWidget)) {
                 const int result = QMessageBox::question(
                     this,
                     "Remove Field",
                     QString("The field \"%1\" has content. Remove it?")
-                        .arg(splitPascalCase(_members[memberIndex].member.name)),
+                        .arg(splitPascalCase(member.member.name)),
                     QMessageBox::Yes | QMessageBox::No
                 );
                 if (result != QMessageBox::Yes) {
@@ -981,11 +956,11 @@ QWidget* SchemaFormWidget::createOptionalWrapper(int memberIndex, QWidget* field
             }
             std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
             if (lockedProperties) {
-                lockedProperties->erase(_members[memberIndex].member.name);
+                lockedProperties->erase(member.member.name);
             }
-            setOptionalFieldActive(memberIndex, false);
+            setOptionalFieldActive(member, false);
             emit optionalFieldToggled(
-                QString::fromStdString(_members[memberIndex].member.name),
+                QString::fromStdString(member.member.name),
                 false
             );
             emit fieldChanged();
@@ -1008,40 +983,15 @@ QWidget* SchemaFormWidget::widgetForMember(const std::string& name) const {
     return _members[index].fieldWidget;
 }
 
-void SchemaFormWidget::applyToProperties() {
-    std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
-    if (!lockedProperties) {
+void SchemaFormWidget::setOptionalFieldActive(MemberInfo& member, bool active) {
+    if (!member.addButton) {
         return;
     }
-    for (size_t i = 0; i < _members.size(); i++) {
-        QWidget* widget = _members[i].fieldWidget;
-        if (!widget || !_members[i].optionalActive) {
-            continue;
-        }
-        const SchemaMember& member = _members[i].member;
-
-        // Union pages maintain _properties via their own signal handlers; skip to avoid
-        // type-detection issues (member.type is the union string, not the active type)
-        if (widget->objectName() == UnionContainerName) {
-            continue;
-        }
-
-        std::optional<PropertyValue> value = readWidgetValue(widget, member.type);
-        if (value.has_value()) {
-            (*lockedProperties)[member.name] = std::move(*value);
-        }
-    }
-}
-
-void SchemaFormWidget::setOptionalFieldActive(int memberIndex, bool active) {
-    if (!_members[memberIndex].addButton) {
-        return;
-    }
-    _members[memberIndex].optionalActive = active;
-    _members[memberIndex].addButton->setVisible(!active);
-    _members[memberIndex].activeRows->setVisible(active);
+    member.optionalActive = active;
+    member.addButton->setVisible(!active);
+    member.activeRows->setVisible(active);
     if (!active) {
-        clearWidget(_members[memberIndex].fieldWidget);
+        clearWidget(member.fieldWidget);
     }
 }
 
@@ -1055,15 +1005,13 @@ void SchemaFormWidget::setFieldActive(const std::string& memberName, bool active
         return;
     }
 
-    const int index = static_cast<int>(std::distance(_members.begin(), it));
-
     // Only optional fields have add/remove buttons
-    if (!_members[index].addButton) {
+    if (!it->addButton) {
         return;
     }
 
     // Already in the requested state - nothing to do
-    if (active == _members[index].optionalActive) {
+    if (active == it->optionalActive) {
         return;
     }
 
@@ -1074,7 +1022,7 @@ void SchemaFormWidget::setFieldActive(const std::string& memberName, bool active
             lockedProperties->erase(memberName);
         }
     }
-    setOptionalFieldActive(index, active);
+    setOptionalFieldActive(*it, active);
 }
 
 void SchemaFormWidget::syncFieldWith(const std::string& memberName,
@@ -1108,49 +1056,6 @@ void SchemaFormWidget::syncFieldWith(const std::string& memberName,
     };
     syncToggle(this, other);
     syncToggle(other, this);
-}
-
-void SchemaFormWidget::populateFromProperties() {
-    std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
-    if (!lockedProperties) {
-        return;
-    }
-    for (size_t i = 0; i < _members.size(); i++) {
-        QWidget* widget = _members[i].fieldWidget;
-        if (!widget) {
-            continue;
-        }
-        const SchemaMember& member = _members[i].member;
-
-        // For optional fields, show or hide the active row based on whether the property
-        // exists. Skip if the property is absent or null
-        if (_members[i].addButton) {
-            const bool exists =
-                lockedProperties->count(member.name) > 0 &&
-                !lockedProperties->at(member.name).isNull();
-            setOptionalFieldActive(static_cast<int>(i), exists);
-            if (!exists) {
-                continue;
-            }
-        }
-
-        // Look up the stored value; skip if there is no property for this member
-        const auto it = lockedProperties->find(member.name);
-        if (it == lockedProperties->end()) {
-            continue;
-        }
-        const PropertyValue& value = it->second;
-
-        // Union widgets need special handling to detect the stored type and switch the
-        // combo to the matching page before populating
-        if (widget->objectName() == UnionContainerName) {
-            populateUnionWidget(widget, value);
-            continue;
-        }
-
-        // Regular flat widget - set the display value directly
-        populateWidget(widget, value);
-    }
 }
 
 QWidget* SchemaFormWidget::createTableSection(const SchemaMember& member) {
@@ -1203,7 +1108,8 @@ QWidget* SchemaFormWidget::createTableSection(const SchemaMember& member) {
             // stores the value under the correct key (e.g. "Tags")
             SchemaMember scalar = member.members[0];
             scalar.name = member.name;
-            section->setContentWidget(createFlatWidget(scalar));
+            QWidget* widget = createFlatWidget(scalar);
+            section->setContentWidget(widget);
             break;
         }
         case TableKind::InlineArray:
@@ -1286,7 +1192,6 @@ void SchemaFormWidget::rebuildItemForm(QBoxLayout* layout, PropertyMap& properti
     properties["Type"] = PropertyValue{ typeName.toStdString() };
     SchemaFormWidget* inner = createNestedForm(type->members, properties);
     layout->addWidget(inner);
-    inner->populateFromProperties();
 }
 
 void SchemaFormWidget::buildRefArrayCard(QBoxLayout* itemsLayout,
@@ -1456,7 +1361,6 @@ void SchemaFormWidget::buildInlineArrayCard(QBoxLayout* itemsLayout,
 
     SchemaFormWidget* inner = createNestedForm(itemMembers, itemProperties);
     cardLayout->addWidget(inner);
-    inner->populateFromProperties();
 
     // Capture pointer: underlying vector lives in _members
     const std::vector<SchemaMember>* membersPtr = &itemMembers;
@@ -1578,7 +1482,6 @@ void SchemaFormWidget::buildRefContent(CollapsibleSection* section,
     SchemaFormWidget* nested = createNestedForm(targetType->members, subProperties);
 
     section->setContentWidget(nested);
-    nested->populateFromProperties();
 }
 
 void SchemaFormWidget::buildPolymorphicRefContent(CollapsibleSection* section,
@@ -1593,7 +1496,7 @@ void SchemaFormWidget::buildPolymorphicRefContent(CollapsibleSection* section,
     }
 
     // Outer container for the type selector and inner form
-    QWidget* container = new QWidget();
+    QWidget* container = new QWidget;
     QBoxLayout* containerLayout = new QVBoxLayout(container);
     containerLayout->setContentsMargins(0, 4, 0, 4);
     containerLayout->setSpacing(4);
@@ -1637,13 +1540,6 @@ void SchemaFormWidget::buildPolymorphicRefContent(CollapsibleSection* section,
     }
     dropdown->setCurrentIndex(preSelectedIndex);
 
-    // Inner form holder: populated when a type is selected
-    QWidget* innerHolder = new QWidget;
-    QBoxLayout* innerLayout = new QVBoxLayout(innerHolder);
-    innerLayout->setContentsMargins(0, 0, 0, 0);
-    innerLayout->setSpacing(0);
-    containerLayout->addWidget(innerHolder);
-
     // Selector row: dropdown & clear button
     QWidget* selectorRow = new QWidget;
     QBoxLayout* selectorLayout = new QHBoxLayout(selectorRow);
@@ -1659,6 +1555,13 @@ void SchemaFormWidget::buildPolymorphicRefContent(CollapsibleSection* section,
     selectorLayout->addWidget(clearButton);
     clearButton->setVisible(preSelectedIndex >= 0);
     section->setContentWidget(container);
+
+    // Inner form holder: populated when a type is selected
+    QWidget* innerHolder = new QWidget;
+    QBoxLayout* innerLayout = new QVBoxLayout(innerHolder);
+    innerLayout->setContentsMargins(0, 0, 0, 0);
+    innerLayout->setSpacing(0);
+    containerLayout->addWidget(innerHolder);
 
     const std::string memberName = member.name;
 
@@ -1832,7 +1735,6 @@ void SchemaFormWidget::buildInlineTableContent(CollapsibleSection* section,
     PropertyMap& subProperties = ensurePropertyMap(properties, member.name);
     SchemaFormWidget* nested = createNestedForm(member.members, subProperties);
     section->setContentWidget(nested);
-    nested->populateFromProperties();
 }
 
 QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
@@ -1879,7 +1781,7 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
             &QComboBox::currentIndexChanged,
             this,
             [typeWidgets](int index) {
-                for (int i = 0; i < typeWidgets.size(); ++i) {
+                for (int i = 0; i < typeWidgets.size(); i++) {
                     typeWidgets[i]->setVisible(i == index);
                 }
             }
@@ -1891,7 +1793,7 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
     if (member.type == "Boolean") {
         QCheckBox* checkBox = new QCheckBox;
 
-        QObject::connect(
+        connect(
             checkBox,
             &QCheckBox::toggled,
             checkBox,
@@ -1917,7 +1819,7 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
         lineEdit->setValidator(new QIntValidator(lowerBound, upperBound, lineEdit));
         lineEdit->setPlaceholderText(rangePlaceholder(range, true));
 
-        QObject::connect(
+        connect(
             lineEdit,
             &QLineEdit::textEdited,
             lineEdit,
@@ -1947,7 +1849,7 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
             new QDoubleValidator(lowerBound, upperBound, -1, lineEdit)
         );
         lineEdit->setPlaceholderText(rangePlaceholder(range, false));
-        QObject::connect(
+        connect(
             lineEdit,
             &QLineEdit::textEdited,
             lineEdit,
@@ -1969,7 +1871,7 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
             MatrixWidget* matrixWidget = entry.isColor ?
                 new ColorWidget(entry.nComponents) :
                 new MatrixWidget(entry.nComponents, entry.nColumns, entry.isInteger);
-            QObject::connect(
+            connect(
                 matrixWidget,
                 &MatrixWidget::valueChanged,
                 matrixWidget,
@@ -2017,7 +1919,7 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
             QRegularExpression(R"(^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$)"),
             lineEdit
         ));
-        QObject::connect(
+        connect(
             lineEdit,
             &QLineEdit::textEdited,
             lineEdit,
@@ -2075,7 +1977,7 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
             );
         }
 
-        QObject::connect(
+        connect(
             _registry,
             &IdentifierRegistry::registryChanged,
             combo,
@@ -2088,7 +1990,7 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
                 combo->blockSignals(false);
             }
         );
-        QObject::connect(
+        connect(
             combo,
             &QComboBox::currentTextChanged,
             combo,
@@ -2104,7 +2006,7 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
 
         QPushButton* browseButton = new QPushButton("Browse .jasset", container);
         browseButton->setObjectName("identifier-browse-button");
-        QObject::connect(
+        connect(
             browseButton, &QPushButton::clicked,
             container,
             [combo, container, onSelect]() {
@@ -2151,7 +2053,7 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
         combo->addItem("Select...");
         combo->addItems(options);
         combo->setCurrentIndex(0);
-        QObject::connect(
+        connect(
             combo,
             &QComboBox::currentIndexChanged,
             combo,
@@ -2183,7 +2085,7 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
         lineEdit->setPlaceholderText(QString::fromStdString(member.description));
     }
 
-    QObject::connect(
+    connect(
         lineEdit,
         &QLineEdit::textEdited,
         lineEdit,
