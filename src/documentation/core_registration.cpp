@@ -110,6 +110,7 @@
 #include <openspace/topic/topics/errorlogtopic.h>
 #include <openspace/topic/topics/eventtopic.h>
 #include <openspace/topic/topics/flightcontrollertopic.h>
+#include <openspace/topic/topics/getpropertytopic.h>
 #include <openspace/topic/topics/luascripttopic.h>
 #include <openspace/topic/topics/missiontopic.h>
 #include <openspace/topic/topics/profiletopic.h>
@@ -159,6 +160,7 @@ void registerCoreSchemas(DocumentationEngine& engine) {
     engine.addSchema(ErrorLogTopic::Schema());
     engine.addSchema(EventTopic::Schema());
     engine.addSchema(FlightControllerTopic::Schema());
+    engine.addSchema(GetPropertyTopic::Schema());
     engine.addSchema(LuaScriptTopic::Schema());
     engine.addSchema(MissionTopic::Schema());
     engine.addSchema(ProfileTopic::Schema());
