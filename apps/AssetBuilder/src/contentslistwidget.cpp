@@ -190,7 +190,7 @@ void ContentsListWidget::addSceneGraphNode() {
 
     ContentItem item = {
         .type = "SceneGraphNode",
-        .properties = PropertyMap{ { "Identifier", PropertyValue{ uniqueId } } },
+        .properties = PropertyMap{ { "Identifier", uniqueId } },
         .isDirty = true
     };
     _asset.contents.push_back(std::move(item));
@@ -215,7 +215,7 @@ void ContentsListWidget::duplicateSceneGraphNode(int row) {
         PropertyMap& guiMap = guiIt->second.toMap();
         auto nameIt = guiMap.find("Name");
         if (nameIt != guiMap.end() && nameIt->second.isString()) {
-            nameIt->second = PropertyValue{ nameIt->second.toString() + " Copy" };
+            nameIt->second = nameIt->second.toString() + " Copy";
         }
     }
 
@@ -231,7 +231,7 @@ void ContentsListWidget::duplicateSceneGraphNode(int row) {
         // Assume the first item that was copied is "1", so go with "2"
         uniqueId = makeUniqueId(baseId, existing, 2);
     }
-    copy.properties["Identifier"] = PropertyValue{ uniqueId };
+    copy.properties["Identifier"] = uniqueId;
 
     // Insert after the source item
     const int insertPos = row + 1;

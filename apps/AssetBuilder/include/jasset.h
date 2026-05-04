@@ -43,16 +43,32 @@ using PropertyList = std::vector<PropertyValue>;
  * A recursive property value that can hold any type representable in the schema.
  * Corresponds directly to values that will be serialised into the .jasset JSON format.
  */
-struct PropertyValue {
-    /// The held value; monostate represents null / unset
-    std::variant<
+struct PropertyValue : public std::variant<
+    std::monostate,
+    std::string,
+    double,
+    bool,
+    PropertyMap,
+    PropertyList
+> {
+    using std::variant<
         std::monostate,
         std::string,
         double,
         bool,
         PropertyMap,
         PropertyList
-    > value;
+    >::variant;
+
+
+    using std::variant<
+        std::monostate,
+        std::string,
+        double,
+        bool,
+        PropertyMap,
+        PropertyList
+    >::operator=;
 
     bool isNull() const;
     bool isString() const;
@@ -87,28 +103,25 @@ struct ContentItem {
 };
 
 /**
- * Top-level metadata stored in the .jasset file's "metadata" block.
- */
-struct AssetMetadata {
-    /// Human-readable asset name
-    std::string name = "Untitled Asset";
-    /// Semantic version string (e.g. "1.0.0")
-    std::string version = "1.0.0";
-    /// Asset author name
-    std::string author;
-    /// Short description of the asset
-    std::string description;
-    /// License identifier (e.g. "MIT", "None")
-    std::string license = "None";
-};
-
-/**
  * The full in-memory representation of an open .jasset file. Owned by AssetEditorWidget
  * so that each editor tab (future implementation) has its own independent state.
  */
 struct JAsset {
+    struct Metadata {
+        /// Human-readable asset name
+        std::string name = "Untitled Asset";
+        /// Semantic version string (e.g. "1.0.0")
+        std::string version = "1.0.0";
+        /// Asset author name
+        std::string author;
+        /// Short description of the asset
+        std::string description;
+        /// License identifier (e.g. "MIT", "None")
+        std::string license = "None";
+    };
+
     /// Top-level metadata block (name, version, author, etc.)
-    AssetMetadata metadata;
+    Metadata metadata;
 
     /// Paths to dependency .jasset files. The path type is encoded in the string:
     /// data-relative (e.g. "textures/earth.png"),

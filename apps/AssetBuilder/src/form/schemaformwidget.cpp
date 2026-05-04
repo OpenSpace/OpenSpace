@@ -603,7 +603,7 @@ namespace {
     PropertyMap& ensureListItemMap(PropertyList& items, size_t index) {
         ghoul_assert(index < items.size(), "Index out of range");
         if (!items[index].isMap()) {
-            items[index] = PropertyValue{ PropertyMap{} };
+            items[index] = PropertyMap();
         }
         return items[index].toMap();
     }
@@ -611,7 +611,7 @@ namespace {
     // Ensures a property map exists at the given key, creating one if absent
     PropertyMap& ensurePropertyMap(PropertyMap& properties, const std::string& key) {
         if (properties.count(key) == 0 || properties.at(key).isNull()) {
-            properties[key] = PropertyValue{ PropertyMap{} };
+            properties[key] = PropertyMap();
         }
         ghoul_assert(properties[key].isMap(), "Key is not a map");
         return properties[key].toMap();
@@ -621,15 +621,15 @@ namespace {
     // single map value in a one-element list for uniformity
     void ensurePropertyList(PropertyMap& properties, const std::string& key) {
         if (properties.count(key) == 0 || properties.at(key).isNull()) {
-            properties[key] = PropertyValue{ PropertyList{} };
+            properties[key] = PropertyList();
         }
         else if (properties.at(key).isMap()) {
             // A single object was stored instead of a list - wrap it in a one-element
             // list so downstream code can treat it uniformly as an array
             PropertyMap existing = std::move(properties[key].toMap());
             PropertyList wrapped;
-            wrapped.push_back(PropertyValue{ std::move(existing) });
-            properties[key] = PropertyValue{ std::move(wrapped) };
+            wrapped.push_back(std::move(existing));
+            properties[key] = std::move(wrapped);
         }
         else {
             // Should already be a list if it exists and isn't null or a map
@@ -665,7 +665,7 @@ namespace {
                 if (!lockedProperties) {
                     return;
                 }
-                (*lockedProperties)[name] = PropertyValue{ text.toStdString() };
+                (*lockedProperties)[name] = text.toStdString();
                 onChange();
             }
         );
@@ -686,9 +686,7 @@ namespace {
                         return;
                     }
                     lineEdit->setText(path);
-                    (*lockedProperties)[name] = PropertyValue{
-                        path.toStdString()
-                    };
+                    (*lockedProperties)[name] = path.toStdString();
                     onChange();
                 }
             }
@@ -1189,7 +1187,7 @@ void SchemaFormWidget::rebuildItemForm(QBoxLayout* layout, PropertyMap& properti
         return;
     }
 
-    properties["Type"] = PropertyValue{ typeName.toStdString() };
+    properties["Type"] = typeName.toStdString();
     SchemaFormWidget* inner = createNestedForm(type->members, properties);
     layout->addWidget(inner);
 }
@@ -1274,7 +1272,7 @@ void SchemaFormWidget::buildRefArrayCard(QBoxLayout* itemsLayout,
             if (index >= list.size()) {
                 return;
             }
-            list[index] = PropertyValue{ PropertyMap{} };
+            list[index] = PropertyMap();
             PropertyMap& itemProperties = list[index].toMap();
             const QString typeName = dropdown->currentData().toString();
             rebuildItemForm(innerLayout, itemProperties, typeName, category);
@@ -1437,9 +1435,7 @@ void SchemaFormWidget::buildRefArrayContent(CollapsibleSection* section,
             if (!lockedProperties) {
                 return;
             }
-            (*lockedProperties)[memberName].toList().push_back(
-                PropertyValue{ PropertyMap{} }
-            );
+            (*lockedProperties)[memberName].toList().push_back(PropertyMap());
             const size_t newIndex = (*lockedProperties)[memberName].toList().size() - 1;
             buildRefArrayCard(
                 itemsLayout,
@@ -1607,7 +1603,7 @@ void SchemaFormWidget::buildPolymorphicRefContent(CollapsibleSection* section,
                 }
             }
 
-            (*lockedProperties)[memberName] = PropertyValue{ PropertyMap{} };
+            (*lockedProperties)[memberName] = PropertyMap();
             PropertyMap& subProperties = (*lockedProperties)[memberName].toMap();
 
             rebuildItemForm(
@@ -1707,9 +1703,7 @@ void SchemaFormWidget::buildInlineArrayContent(CollapsibleSection* section,
             if (!lockedProperties) {
                 return;
             }
-            (*lockedProperties)[memberName].toList().push_back(
-                PropertyValue{ PropertyMap{} }
-            );
+            (*lockedProperties)[memberName].toList().push_back(PropertyMap());
             const size_t newIndex = (*lockedProperties)[memberName].toList().size() - 1;
 
             buildInlineArrayCard(
@@ -1802,7 +1796,7 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
                 if (!lockedProperties) {
                     return;
                 }
-                (*lockedProperties)[member.name] = PropertyValue{ checked };
+                (*lockedProperties)[member.name] = checked;
                 onChange();
             }
         );
@@ -1830,9 +1824,7 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
                 }
                 bool ok = false;
                 const int value = text.toInt(&ok);
-                (*lockedProperties)[member.name] = PropertyValue{
-                    static_cast<double>(ok ? value : 0)
-                };
+                (*lockedProperties)[member.name] = static_cast<double>(ok ? value : 0);
                 onChange();
             }
         );
@@ -1860,7 +1852,7 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
                 }
                 bool ok = false;
                 const double value = text.toDouble(&ok);
-                (*lockedProperties)[member.name] = PropertyValue{ ok ? value : 0.0 };
+                (*lockedProperties)[member.name] = ok ? value : 0.0;
                 onChange();
             }
         );
@@ -1883,9 +1875,9 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
                     std::vector<double> values = matrixWidget->values();
                     PropertyList p;
                     for (double v : values) {
-                        p.push_back(PropertyValue{ v });
+                        p.push_back(v);
                     }
-                    (*lockedProperties)[member.name] = PropertyValue{ p };
+                    (*lockedProperties)[member.name] = p;
                     onChange();
                 }
             );
@@ -1933,9 +1925,8 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
                     DateDisplayFormat
                 );
                 if (dateTime.isValid()) {
-                    (*lockedProperties)[member.name] = PropertyValue{
-                        dateTime.toUTC().toString(Qt::ISODate).toStdString()
-                    };
+                    (*lockedProperties)[member.name] =
+                        dateTime.toUTC().toString(Qt::ISODate).toStdString();
                 }
                 onChange();
             }
@@ -1999,7 +1990,7 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
                 if (!lockedProperties) {
                     return;
                 }
-                (*lockedProperties)[name] = PropertyValue{ text.toStdString() };
+                (*lockedProperties)[name] = text.toStdString();
                 onChange();
             }
         );
@@ -2068,9 +2059,7 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
                     lockedProperties->erase(member.name);
                 }
                 else {
-                    (*lockedProperties)[member.name] = PropertyValue{
-                        combo->currentText().toStdString()
-                    };
+                    (*lockedProperties)[member.name] = combo->currentText().toStdString();
                 }
                 onChange();
             }
@@ -2094,9 +2083,7 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
             if (!lockedProperties) {
                 return;
             }
-            (*lockedProperties)[member.name] = PropertyValue{
-                text.toStdString()
-            };
+            (*lockedProperties)[member.name] = text.toStdString();
             onChange();
         }
     );
