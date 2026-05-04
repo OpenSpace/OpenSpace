@@ -4,7 +4,7 @@ Schemas should preferably be written directly as JSON files to ensure correct sy
 
 LLMs can be useful for generating an initial draft, but the result must always be reviewed and aligned with existing conventions. When using an LLM, provide:
 
-  - One or two examples of existing schemas
+  - One or two examples of existing schemas, `errorlogtopic.json` and `eventtopic.json` are two good candidates since they demonstrate most patterns used.
   - Relevant engine source code for the topic
 
 ## Validating Your Schema
@@ -77,8 +77,9 @@ for await (const _data_ of authorizeTopic.iterator()) {
 ## Validation Rules
 
   - `additionalProperties`
-    - Must be set to `false` unless there is a strong, well-justified reason not to
-    - Applies to all objects unless explicitly required otherwise
+    - Must be set to `false` on all objects unless keys are truly dynamic (e.g., scene node names, mission identifiers)
+    - When keys are runtime strings, use `additionalProperties: { "$ref": "#/$defs/SomeType" }`
+    - When applicable, this applies to all objects in the schema
   - Enums vs Union (`anyOf`)
     - Use `enum` for simple sets of constant values (e.g., strings or numbers)
     - Avoid `anyOf` when `enum` is sufficient
@@ -86,7 +87,10 @@ for await (const _data_ of authorizeTopic.iterator()) {
     - Prefer `anyOf` over `oneOf` for performance and predictability
     - Only use `oneOf` when strict mutual exclusivity is required
     - See [documentation](https://json-schema.org/blog/posts/applicability-json-schema-fundamentals-part-1#putting-everything-together-avoiding-oneof-pitfalls)
-  - Use `anyOf` with discriminated variants when a `type` or `event` const field distinguishes the payload shapes, for example:
+  - **Discriminated Union Pattern**
+    - Use `anyOf` (NOT `oneOf`) for multi-variant payloads where a `type` or `event` const field distinguishes the variants
+    - Each variant must define its own const value for the discriminator field
+    - This pattern produces clean TypeScript unions, for example:
 
 ```json
 {
@@ -269,7 +273,7 @@ Each helper file lives alongside the topic schemas in `OpenSpace/support/types/`
 
 Current helper files and their intended contents:
 
-@TODO (anden88: 2026-04-14): Create helper schema files.
+Helper schema files should be created as needed when types are shared across multiple topics. Reference them using relative paths in `$ref`.
 
 | File | Contents |
 | --- | --- |
@@ -341,10 +345,11 @@ When a type in a topic schema is identified as a candidate for extraction, add a
 The C++ source is always the source of truth for the schema. When reviewing or writing a schema:
 
   - Verify field names match exactly - including casing (e.g. `camelCase` vs `snake_case`)
-  - Check for `constexpr` string literals that flow into JSON keys or values and use `const` accordingly
+  - Trace `constexpr std::string_view` literals and similar constants that flow directly into JSON keys or values - these must be typed as `const` rather than `string`
+  - Copy field names and values verbatim from the C++ source to the schema
   - Flag any inconsistencies between the schema and the source as bugs to be fixed in the C++, not worked around in the schema
   - Check optional fields - only fields guarded by `has_value()`, `find()`, or `value_or` with a meaningful fallback should be omitted from `required`
-  - Watch for misspellings in identifiers, string literals, and comments in the C++ source and report them
+  - Watch for and report misspellings in C++ identifiers, string literals, and comments - these indicate bugs to fix, not schema workarounds
 
 ## Example Base JSON Schema
 
