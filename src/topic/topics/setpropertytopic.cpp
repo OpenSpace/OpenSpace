@@ -24,6 +24,7 @@
 
 #include <openspace/topic/topics/setpropertytopic.h>
 
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
@@ -36,7 +37,6 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "SetPropertyTopic";
-    constexpr std::string_view SpecialKeyTime = "__time";
 
     std::string escapedLuaString(const std::string& str) {
         std::string luaString;
@@ -114,20 +114,13 @@ void SetPropertyTopic::handleJson(const nlohmann::json& json) {
     try {
         const std::string& propertyKey = json.at("property").get<std::string>();
 
-        if (propertyKey == SpecialKeyTime) {
-            Time newTime;
-            newTime.setTime(json.at("value").get<std::string>());
-            global::timeManager->setTimeNextFrame(newTime);
-        }
-        else {
-            const nlohmann::json value = json.at("value");
-            std::string literal = luaLiteralFromJson(value);
+        const nlohmann::json value = json.at("value");
+        std::string literal = luaLiteralFromJson(value);
 
-            const std::string script = std::format(
-                "openspace.setPropertyValueSingle(\"{}\", {})", propertyKey, literal
-            );
-            global::scriptEngine->queueScript(script);
-        }
+        const std::string script = std::format(
+            "openspace.setPropertyValueSingle(\"{}\", {})", propertyKey, literal
+        );
+        global::scriptEngine->queueScript(script);
     }
     catch (const std::out_of_range& e) {
         LERROR("Could not set property -- key or value is missing in payload");
@@ -144,6 +137,50 @@ void SetPropertyTopic::handleJson(const nlohmann::json& json) {
 
 bool SetPropertyTopic::isDone() const {
     return true;
+}
+
+Schema SetPropertyTopic::Schema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "$defs": {
+            "JsonValue": {
+              "anyOf": [
+                { "type": "string" },
+                { "type": "number" },
+                { "type": "boolean" },
+                {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/JsonValue" }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": { "$ref": "#/$defs/JsonValue" }
+                },
+                { "type": "null" }
+              ]
+            }
+          },
+          "title": "SetPropertyTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "set" },
+            "topicPayload": {
+              "type": "object",
+              "properties": {
+                "property": { "type": "string" },
+                "value": { "$ref": "#/$defs/JsonValue" }
+              },
+              "additionalProperties": false,
+              "required": ["property", "value"]
+            },
+            "data": null
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+    )");
+
+    return { "setpropertytopic", schema };
 }
 
 } // namespace openspace
