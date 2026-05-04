@@ -327,12 +327,14 @@ void VideoPlayer::pause() {
     constexpr int IsPaused = 1;
     setPropertyAsyncMpv(IsPaused, MpvKey::Pause);
     _playbackState = PlaybackState::Paused;
+    _isPaused = true;
 }
 
 void VideoPlayer::play() {
     constexpr int IsPaused = 0;
     setPropertyAsyncMpv(IsPaused, MpvKey::Pause);
     _playbackState = PlaybackState::Playing;
+    _isPaused = false;
 }
 
 void VideoPlayer::goToStart() {
@@ -455,10 +457,12 @@ void VideoPlayer::initializeMpv() {
 }
 
 void VideoPlayer::seekToTime(double time, PauseAfterSeek pauseAfter) {
-    if (_isSeeking || std::abs(_currentVideoTime - time) < glm::epsilon<double>()) {
+    if (_isSeeking || checkFrameReached(time)) {
         return;
     }
-    pause();
+    if (!_isPaused) {
+        pause();
+    }
     setPropertyAsyncMpv(time, MpvKey::Time);
     if (!pauseAfter) {
         play();
@@ -497,9 +501,6 @@ void VideoPlayer::update() {
         return;
     }
 
-    if (_playbackMode == PlaybackMode::MapToSimulationTime) {
-        seekToTime(correctVideoPlaybackTime());
-    }
     if (_mpvRenderContext && _mpvHandle) {
         renderMpv();
     }
@@ -776,16 +777,24 @@ void VideoPlayer::destroy() {
 }
 
 void VideoPlayer::preSync(bool isMaster) {
-    _correctPlaybackTime = isMaster ? _currentVideoTime : -1.0;
-    if (isMaster && _playbackState == PlaybackState::Waiting) {
-        const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()
-        );
-        const long long dt = _goTime.count() - now.count();
-        if (dt <= 0.0) {
-            _syncflags.play = true;
+    if (isMaster) {
+        _correctPlaybackTime = _currentVideoTime;
+        if (_playbackMode == PlaybackMode::RealTimeLoop &&
+            _playbackState == PlaybackState::Waiting)
+        {
+            const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()
+            );
+            const long long dt = _goTime.count() - now.count();
+            if (dt <= 0.0) {
+                _syncflags.play = true;
+            }
         }
-    }
+        else if (_playbackMode == PlaybackMode::MapToSimulationTime) {
+            // MapToSimulationTime
+            _correctPlaybackTime = correctVideoPlaybackTime();
+        }
+    }    
 }
 
 void VideoPlayer::encode(SyncBuffer* syncBuffer) {
@@ -801,35 +810,37 @@ void VideoPlayer::decode(SyncBuffer* syncBuffer) {
 }
 
 void VideoPlayer::postSync(bool isMaster) {
-    if (_correctPlaybackTime < 0.0) {
-        return;
-    }
+    if (_playbackMode == PlaybackMode::RealTimeLoop) {
+        // Ensure syncronized playback and states between Nodes and Master
+        if (_syncflags.goToStart) {
+            setPropertyAsyncMpv(0.0, MpvKey::Time);
+            if (isMaster) {
+                _playbackState = PlaybackState::Waiting;
+                _syncflags.goToStart = false;
 
-    // Ensure syncronized playback and states between Nodes and Master
-    if (_syncflags.goToStart) {
-        setPropertyAsyncMpv(0.0, MpvKey::Time);
-        if (isMaster) {
-            _playbackState = PlaybackState::Waiting;
-            _syncflags.goToStart = false;
-
-            // Set new timer 3 frames into the future when seek is (hopefully) done 
-            const long long delay = static_cast<long long>(3 * 1000.0 / _fps);
-            _goTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::system_clock::now().time_since_epoch() +
-                std::chrono::milliseconds(delay)
-            );
+                // Set new timer 3 frames into the future when seek is (hopefully) done 
+                const long long delay = static_cast<long long>(3 * 1000.0 / _fps);
+                _goTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::system_clock::now().time_since_epoch() +
+                    std::chrono::milliseconds(delay)
+                );
+            }
+        }
+        if (_syncflags.play) {
+            play();
+            if (isMaster) {
+                _syncflags.play = false;
+            }
+        }
+        if (_isPaused && !isMaster) {
+            if (std::abs(_correctPlaybackTime - _currentVideoTime) > glm::epsilon<double>()) {
+                seekToTime(_correctPlaybackTime);
+            }
         }
     }
-    if (_syncflags.play) {
-        play();
-        if (isMaster) {
-            _syncflags.play = false;
-        }
-    }
-    if (_isPaused && !isMaster) {
-        if (std::abs(_correctPlaybackTime - _currentVideoTime) > glm::epsilon<double>()) {
-            seekToTime(_correctPlaybackTime);
-        }
+    else {
+        // MapToSimulationTime
+        seekToTime(_correctPlaybackTime);
     }
 }
 
@@ -850,11 +861,6 @@ bool VideoPlayer::isInitialized() const {
     return _isInitialized;
 }
 
-bool VideoPlayer::isWithingStartEndTime() const {
-    const double now = global::timeManager->time().j2000Seconds();
-    return now <= _endJ200Time && now >= _startJ200Time;
-}
-
 void VideoPlayer::updateFrameDuration() {
     const double openspaceVideoLength = (_endJ200Time - _startJ200Time) / _videoDuration;
     _frameDuration = (1.0 / _fps) * openspaceVideoLength;
@@ -873,6 +879,22 @@ double VideoPlayer::correctVideoPlaybackTime() const {
         percentage = (now - _startJ200Time) / (_endJ200Time - _startJ200Time);
     }
     return percentage * _videoDuration;
+}
+
+bool VideoPlayer::checkFrameReached(double correctTime) const {
+    const int numberOfFrames = std::max(
+        0,
+        static_cast<int>(std::floor(_videoDuration * _fps) - 1)
+    );
+    const int currentFrame = std::min(
+        numberOfFrames,
+        static_cast<int>(std::floor(_currentVideoTime * _fps))
+    );
+    const int correctFrame = std::min(
+        numberOfFrames,
+        static_cast<int>(std::floor(correctTime * _fps))
+    );
+    return currentFrame == correctFrame;
 }
 
 void VideoPlayer::createTexture(glm::ivec2 size) {

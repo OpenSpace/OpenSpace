@@ -146,7 +146,7 @@ private:
 
     // Map to simulation time functions
     double correctVideoPlaybackTime() const;
-    bool isWithingStartEndTime() const;
+    bool checkFrameReached(double correctTime) const;
     void updateFrameDuration();
 
     // Properties for user interaction
