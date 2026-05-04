@@ -30,6 +30,7 @@
 namespace openspace {
 
 class Property;
+struct Schema;
 
 class PropertyTreeTopic : public Topic {
 public:
@@ -39,6 +40,8 @@ public:
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
     std::string type() const override;
+
+    static openspace::Schema Schema();
 
 private:
     bool _isSubscribedTo = false;

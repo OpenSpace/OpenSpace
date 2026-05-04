@@ -24,6 +24,7 @@
 
 #include <openspace/topic/topics/propertytreetopic.h>
 
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>
@@ -60,6 +61,90 @@ void PropertyTreeTopic::handleJson(const nlohmann::json& json) {
     if (event == "stop_subscription") {
         _isSubscribedTo = false;
     }
+}
+
+Schema PropertyTreeTopic::Schema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "$defs": {
+            "JsonValue": {
+              "anyOf": [
+                { "type": "string" },
+                { "type": "number" },
+                { "type": "boolean" },
+                {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/JsonValue" }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": { "$ref": "#/$defs/JsonValue" }
+                },
+                { "type": "null" }
+              ]
+            }
+          },
+          "title": "PropertyTreeTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "propertyTree" },
+            "topicPayload": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "event": { "const": "start_subscription" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["event"]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "event": { "const": "stop_subscription" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["event"]
+                }
+              ]
+            },
+            "data": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": { "$ref": "#/$defs/JsonValue" },
+                    "uri": {
+                      "type": "string",
+                      "description": "The URI of the property that this value corresponds to"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": ["value", "uri"]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "metaData": { "$ref": "properties.json#/$defs/AnyPropertyMetaData" },
+                    "uri": {
+                      "type": "string",
+                      "description": "The URI of the property that this value corresponds to"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": ["metaData", "uri"]
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+    )");
+
+    return { "propertytreetopic", schema };
 }
 
 } // namespace openspace

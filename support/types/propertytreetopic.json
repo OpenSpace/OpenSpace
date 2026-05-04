@@ -1,0 +1,114 @@
+{
+  "$defs": {
+    "JsonValue": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "type": "array"
+        },
+        {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "data": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "uri": {
+              "description": "The URI of the property that this value corresponds to",
+              "type": "string"
+            },
+            "value": {
+              "$ref": "#/$defs/JsonValue"
+            }
+          },
+          "required": [
+            "value",
+            "uri"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "metaData": {
+              "$ref": "properties.json#/$defs/AnyPropertyMetaData"
+            },
+            "uri": {
+              "description": "The URI of the property that this value corresponds to",
+              "type": "string"
+            }
+          },
+          "required": [
+            "metaData",
+            "uri"
+          ],
+          "type": "object"
+        }
+      ],
+      "type": "object"
+    },
+    "topicId": {
+      "const": "propertyTree"
+    },
+    "topicPayload": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "event": {
+              "const": "start_subscription"
+            }
+          },
+          "required": [
+            "event"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "event": {
+              "const": "stop_subscription"
+            }
+          },
+          "required": [
+            "event"
+          ],
+          "type": "object"
+        }
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "topicId",
+    "topicPayload",
+    "data"
+  ],
+  "title": "PropertyTreeTopic",
+  "type": "object"
+}
