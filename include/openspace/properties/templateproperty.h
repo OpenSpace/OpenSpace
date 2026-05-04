@@ -122,6 +122,7 @@ public:
 
     void setLuaValue(lua_State* state) override;
 
+    static nlohmann::json MetaDataSchema();
 protected:
     virtual T toValue(lua_State* state) const = 0;
 

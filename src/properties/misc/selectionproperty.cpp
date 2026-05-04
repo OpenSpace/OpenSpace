@@ -143,6 +143,48 @@ std::string SelectionProperty::stringValue() const {
     return json.dump();
 }
 
+nlohmann::json SelectionProperty::Schema() {
+    nlohmann::json metaData = TemplateProperty<std::set<std::string>>::MetaDataSchema();
+    metaData["properties"]["type"] = { { "const", "SelectionProperty" } };
+    metaData["properties"]["additionalData"] = nlohmann::json::parse(R"(
+        {
+          "type": "object",
+          "properties": {
+            "options": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": false,
+          "required": ["options"]
+        }
+    )");
+    metaData["required"].push_back("type");
+    metaData["required"].push_back("additionalData");
+
+    nlohmann::json typeDef = nlohmann::json::parse(R"(
+        {
+          "type": "object",
+          "properties": {
+            "uri": { "type": "string" },
+            "value": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": false,
+          "required": ["metaData", "uri", "value"]
+        }
+    )");
+    nlohmann::json sharedDefs = extractDefs(metaData);
+    typeDef["properties"]["metaData"] = metaData;
+
+    nlohmann::json schema;
+    schema["$defs"] = sharedDefs;
+    schema["typedefs"]["SelectionProperty"] = typeDef;
+    return schema;
+}
+
 void SelectionProperty::sortOptions() {
     std::sort(_options.begin(), _options.end());
 }

@@ -71,4 +71,9 @@ const std::type_info& TemplateProperty<T>::type() const {
     return typeid(T);
 }
 
+template <typename T>
+nlohmann::json TemplateProperty<T>::MetaDataSchema() {
+    return Property::MetaDataSchema();
+}
+
 } // namespace openspace

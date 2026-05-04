@@ -54,4 +54,32 @@ std::string IntListProperty::stringValue() const {
     return json.dump();
 }
 
+nlohmann::json IntListProperty::Schema() {
+    nlohmann::json metaData = TemplateProperty<std::vector<int>>::MetaDataSchema();
+    metaData["properties"]["type"] = { { "const", "IntListProperty" } };
+    metaData["required"].push_back("type");
+
+    nlohmann::json typeDef = nlohmann::json::parse(R"(
+        {
+          "type": "object",
+          "properties": {
+            "uri": { "type": "string" },
+            "value": {
+              "type": "array",
+              "items": { "type": "number" }
+            }
+          },
+          "additionalProperties": false,
+          "required": ["metaData", "uri", "value"]
+        }
+    )");
+    nlohmann::json sharedDefs = extractDefs(metaData);
+    typeDef["properties"]["metaData"] = metaData;
+
+    nlohmann::json schema;
+    schema["$defs"] = sharedDefs;
+    schema["typedefs"]["IntListProperty"] = typeDef;
+    return schema;
+}
+
 } // namespace openspace

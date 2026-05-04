@@ -56,6 +56,8 @@ public:
     void interpolateValue(float t,
         ghoul::EasingFunc<float> easingFunc = nullptr) override;
 
+    static nlohmann::json MetaDataSchema();
+
 protected:
     nlohmann::json generateAdditionalJsonDescription() const override;
     using TemplateProperty<T>::toValue;

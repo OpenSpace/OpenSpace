@@ -205,6 +205,46 @@ std::string OptionProperty::stringValue() const {
     return formatJson(_value);
 }
 
+nlohmann::json OptionProperty::Schema() {
+    // Skip Numericalproperty's schema since OptionProperty has different metadata schema
+    nlohmann::json metaData = TemplateProperty<int>::MetaDataSchema();
+    metaData["properties"]["type"] = { { "const", "OptionProperty" } };
+    metaData["properties"]["additionalData"] = nlohmann::json::parse(R"(
+        {
+          "type": "object",
+          "properties": {
+            "options": {
+              "type": "object",
+              "additionalProperties": { "type": "string" }
+            }
+          },
+          "additionalProperties": false,
+          "required": ["options"]
+        }
+    )");
+    metaData["required"].push_back("type");
+    metaData["required"].push_back("additionalData");
+
+    nlohmann::json typeDef = nlohmann::json::parse(R"(
+        {
+          "type": "object",
+          "properties": {
+            "uri": { "type": "string" },
+            "value": { "type": "number" }
+          },
+          "additionalProperties": false,
+          "required": ["metaData", "uri", "value"]
+        }
+    )");
+    nlohmann::json sharedDefs = extractDefs(metaData);
+    typeDef["properties"]["metaData"] = metaData;
+
+    nlohmann::json schema;
+    schema["$defs"] = sharedDefs;
+    schema["typedefs"]["OptionProperty"] = typeDef;
+    return schema;
+}
+
 
 nlohmann::json OptionProperty::generateAdditionalJsonDescription() const {
     nlohmann::json data;

@@ -49,6 +49,8 @@ public:
     std::string stringValue() const override final;
     using TemplateProperty<glm::dmat2x2>::operator=;
 
+    static nlohmann::json Schema();
+
 private:
     glm::dmat2x2 toValue(lua_State* state) const override final;
 };

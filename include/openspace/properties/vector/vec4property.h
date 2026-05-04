@@ -48,6 +48,8 @@ public:
 
     using TemplateProperty<glm::vec4>::operator=;
 
+    static nlohmann::json Schema();
+
 private:
     glm::vec4 toValue(lua_State* state) const override final;
 };
