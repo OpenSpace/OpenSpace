@@ -783,7 +783,7 @@ void VideoPlayer::preSync(bool isMaster) {
             _playbackState == PlaybackState::Waiting)
         {
             const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::system_clock::now().time_since_epoch()
+                std::chrono::high_resolution_clock::now().time_since_epoch()
             );
             const long long dt = _goTime.count() - now.count();
             if (dt <= 0.0) {
@@ -821,7 +821,7 @@ void VideoPlayer::postSync(bool isMaster) {
                 // Set new timer 5 frames into the future when seek is (hopefully) done 
                 const long long delay = static_cast<long long>(5 * 1000.0 / _fps);
                 _goTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-                    std::chrono::system_clock::now().time_since_epoch() +
+                    std::chrono::high_resolution_clock::now().time_since_epoch() +
                     std::chrono::milliseconds(delay)
                 );
             }
