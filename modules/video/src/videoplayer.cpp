@@ -818,8 +818,8 @@ void VideoPlayer::postSync(bool isMaster) {
                 _playbackState = PlaybackState::Waiting;
                 _syncflags.goToStart = false;
 
-                // Set new timer 3 frames into the future when seek is (hopefully) done 
-                const long long delay = static_cast<long long>(3 * 1000.0 / _fps);
+                // Set new timer 5 frames into the future when seek is (hopefully) done 
+                const long long delay = static_cast<long long>(5 * 1000.0 / _fps);
                 _goTime = std::chrono::duration_cast<std::chrono::milliseconds>(
                     std::chrono::system_clock::now().time_since_epoch() +
                     std::chrono::milliseconds(delay)
@@ -833,9 +833,7 @@ void VideoPlayer::postSync(bool isMaster) {
             }
         }
         if (_isPaused && !isMaster) {
-            if (std::abs(_correctPlaybackTime - _currentVideoTime) > glm::epsilon<double>()) {
-                seekToTime(_correctPlaybackTime);
-            }
+            seekToTime(_correctPlaybackTime);
         }
     }
     else {
