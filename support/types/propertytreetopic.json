@@ -37,6 +37,9 @@
         {
           "additionalProperties": false,
           "properties": {
+            "type": {
+              "const": "value"
+            },
             "uri": {
               "description": "The URI of the property that this value corresponds to",
               "type": "string"
@@ -47,7 +50,8 @@
           },
           "required": [
             "value",
-            "uri"
+            "uri",
+            "type"
           ],
           "type": "object"
         },
@@ -57,6 +61,9 @@
             "metaData": {
               "$ref": "properties.json#/$defs/AnyPropertyMetaData"
             },
+            "type": {
+              "const": "metaData"
+            },
             "uri": {
               "description": "The URI of the property that this value corresponds to",
               "type": "string"
@@ -64,7 +71,8 @@
           },
           "required": [
             "metaData",
-            "uri"
+            "uri",
+            "type"
           ],
           "type": "object"
         }

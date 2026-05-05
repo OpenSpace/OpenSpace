@@ -119,10 +119,11 @@ Schema PropertyTreeTopic::Schema() {
                     "uri": {
                       "type": "string",
                       "description": "The URI of the property that this value corresponds to"
-                    }
+                    },
+                    "type": { "const": "value" }
                   },
                   "additionalProperties": false,
-                  "required": ["value", "uri"]
+                  "required": ["value", "uri", "type"]
                 },
                 {
                   "type": "object",
@@ -131,10 +132,11 @@ Schema PropertyTreeTopic::Schema() {
                     "uri": {
                       "type": "string",
                       "description": "The URI of the property that this value corresponds to"
-                    }
+                    },
+                    "type": { "const": "metaData" }
                   },
                   "additionalProperties": false,
-                  "required": ["metaData", "uri"]
+                  "required": ["metaData", "uri", "type"]
                 }
               ]
             }

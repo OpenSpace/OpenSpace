@@ -60,12 +60,14 @@ void SubscriptionTopic::handleJson(const nlohmann::json& json) {
             auto onChange = [this, k = uri]() {
                 nlohmann::json payload;
                 payload["value"] = json::parse(_prop->jsonValue());
+                payload["type"] = "value";
                 sendData(payload);
             };
 
             auto onMetaDataChange = [this, k = uri]() {
                 nlohmann::json payload;
                 payload["metaData"] = _prop->generateJsonDescription();
+                payload["type"] = "metaData";
                 sendData(payload);
             };
 
@@ -152,18 +154,20 @@ Schema SubscriptionTopic::Schema() {
                 {
                   "type": "object",
                   "properties": {
-                    "value": { "$ref": "#/$defs/JsonValue" }
+                    "value": { "$ref": "#/$defs/JsonValue" },
+                    "type": { "const": "value" }
                   },
                   "additionalProperties": false,
-                  "required": ["value"]
+                  "required": ["value", "type"]
                 },
                 {
                   "type": "object",
                   "properties": {
-                    "metaData": { "$ref": "properties.json#/$defs/AnyPropertyMetaData" }
+                    "metaData": { "$ref": "properties.json#/$defs/AnyPropertyMetaData" },
+                    "type": { "const": "metaData" }
                   },
                   "additionalProperties": false,
-                  "required": ["metaData"]
+                  "required": ["metaData", "type"]
                 }
               ]
             }

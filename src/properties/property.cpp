@@ -258,6 +258,7 @@ void Property::notifyChangeListeners() {
     nlohmann::json payload;
     payload["uri"] = uri();
     payload["value"] = nlohmann::json::parse(jsonValue());
+    payload["type"] = "value";
     global::server->passDataToTopic("propertyTree", payload);
 }
 
@@ -274,6 +275,7 @@ void Property::notifyMetaDataChangeListeners() {
     nlohmann::json payload;
     payload["uri"] = uri();
     payload["metaData"] = generateJsonDescription();
+    payload["type"] = "metaData";
     global::server->passDataToTopic("propertyTree", payload);
 }
 

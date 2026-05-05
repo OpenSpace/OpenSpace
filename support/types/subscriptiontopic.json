@@ -37,12 +37,16 @@
         {
           "additionalProperties": false,
           "properties": {
+            "type": {
+              "const": "value"
+            },
             "value": {
               "$ref": "#/$defs/JsonValue"
             }
           },
           "required": [
-            "value"
+            "value",
+            "type"
           ],
           "type": "object"
         },
@@ -51,10 +55,14 @@
           "properties": {
             "metaData": {
               "$ref": "properties.json#/$defs/AnyPropertyMetaData"
+            },
+            "type": {
+              "const": "metaData"
             }
           },
           "required": [
-            "metaData"
+            "metaData",
+            "type"
           ],
           "type": "object"
         }
