@@ -44,11 +44,12 @@ namespace {
     using namespace openspace;
 
     constexpr Property::PropertyInfo TextureInfo = {
-        "URL",
-        "Image URL",
-        "Sets the URL of the texture that is displayed on this screen space plane. If "
-        "this value is changed, the image at the new path will automatically be loaded "
-        "and displayed.",
+        "Texture",
+        "Texture",
+        "Sets the path of the texture that is displayed on this plane. The path can "
+        "either be specified as a filepath to a local image on disc, or a web URL to an "
+        "online image. If this value is changed, the image at the new path will "
+        "automatically be loaded and displayed.",
         Property::Visibility::User
     };
 
@@ -56,9 +57,9 @@ namespace {
     // through a web URL.
     struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
-        std::string url [[codegen::key("URL")]];
+        std::string texture;
 
-        // TODO
+        // Whether the provided path should be interpreted as a URL or a local file path.
         std::optional<bool> isUrl;
     };
 } // namespace
@@ -83,19 +84,17 @@ RenderablePlaneImageOnline::RenderablePlaneImageOnline(
     _isUrl = p.isUrl.value_or(_isUrl);
 
     if (_isUrl) {
-        _texturePath.onChange([this]() { _textureIsDirty = true; });
-        _texturePath = p.url;
-        addProperty(_texturePath);
+        _texturePath = p.texture;
     }
     else {
-        _textureIsDirty = true;
-        _texturePath = absPath(p.url).string();
+        _texturePath = absPath(p.texture).string();
         _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
         _textureFile->setCallback([this]() { _textureIsDirty = true; });
-
-        _texturePath.onChange([this]() { loadTexture(); });
-        addProperty(_texturePath);
     }
+
+    _textureIsDirty = true;
+    _texturePath.onChange([this]() { _textureIsDirty = true; });
+    addProperty(_texturePath);
 
     _autoScale.onChange([this]() {
         if (!_autoScale) {
@@ -142,11 +141,33 @@ void RenderablePlaneImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
 void RenderablePlaneImageOnline::update(const UpdateData& data) {
     RenderablePlane::update(data);
 
-    if (_isUrl) {
-        if (!_textureIsDirty) [[unlikely]] {
-            return;
-        }
+    if (_textureIsDirty) {
+        loadTexture();
+    }
+}
 
+std::future<DownloadManager::MemoryFile>
+RenderablePlaneImageOnline::downloadImageToMemory(const std::string& url)
+{
+    return global::downloadManager->fetchFile(
+        url,
+        [](const DownloadManager::MemoryFile&) {
+            LDEBUGC(
+                "RenderablePlaneImage",
+                "Download to memory finished"
+            );
+        },
+        [](const std::string& err) {
+            LDEBUGC(
+                "RenderablePlaneImage",
+                "Download to memory failed: " + err
+            );
+        }
+    );
+}
+
+void RenderablePlaneImageOnline::loadTexture() {
+    if (_isUrl) {
         if (!_imageFuture.valid()) {
             std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(
                 _texturePath
@@ -161,7 +182,7 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
 
             if (imageFile.corrupted) {
                 LERRORC(
-                    "ScreenSpaceImageOnline",
+                    "RenderablePlaneImage",
                     std::format("Error loading image from URL '{}'", _texturePath.value())
                 );
                 return;
@@ -187,10 +208,36 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
         }
     }
     else {
-        if (_textureIsDirty) [[unlikely]] {
-            loadTexture();
-            _textureIsDirty = false;
+        if (_texturePath.value().empty()) {
+            return;
         }
+
+        const unsigned int hash = ghoul::hashCRC32File(_texturePath);
+
+        ghoul::opengl::Texture* texture = BaseModule::TextureManager.request(
+            std::to_string(hash),
+            [path = _texturePath.value()]() -> std::unique_ptr<ghoul::opengl::Texture> {
+                std::unique_ptr<ghoul::opengl::Texture> texture =
+                    ghoul::io::texture::loadTexture(
+                        absPath(path),
+                        2,
+                        ghoul::opengl::Texture::SamplerInit{
+                            .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                        }
+                    );
+
+                LDEBUGC(
+                    "RenderablePlaneImage",
+                    std::format("Loaded texture from '{}'", absPath(path))
+                );
+                return texture;
+            }
+        );
+        _texture = std::make_unique<ghoul::opengl::Texture>(*texture);
+        _textureIsDirty = false;
+
+        _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
+        _textureFile->setCallback([this]() { _textureIsDirty = true; });
     }
 
     if (!_autoScale) {
@@ -214,59 +261,6 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
 
         _textureDimensions = textureDim;
     }
-    
-}
-
-std::future<DownloadManager::MemoryFile>
-RenderablePlaneImageOnline::downloadImageToMemory(const std::string& url)
-{
-    return global::downloadManager->fetchFile(
-        url,
-        [](const DownloadManager::MemoryFile&) {
-            LDEBUGC(
-                "ScreenSpaceImageOnline",
-                "Download to memory finished for screen space image"
-            );
-        },
-        [](const std::string& err) {
-            LDEBUGC(
-                "ScreenSpaceImageOnline",
-                "Download to memory failer for screen space image: " + err
-            );
-        }
-    );
-}
-
-void RenderablePlaneImageOnline::loadTexture() {
-    if (_texturePath.value().empty()) {
-        return;
-    }
-
-    const unsigned int hash = ghoul::hashCRC32File(_texturePath);
-
-    ghoul::opengl::Texture* texture = BaseModule::TextureManager.request(
-        std::to_string(hash),
-        [path = _texturePath.value()]() -> std::unique_ptr<ghoul::opengl::Texture> {
-            std::unique_ptr<ghoul::opengl::Texture> texture =
-                ghoul::io::texture::loadTexture(
-                    absPath(path),
-                    2,
-                    ghoul::opengl::Texture::SamplerInit{
-                        .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
-                    }
-                );
-
-            LDEBUGC(
-                "RenderablePlaneImageLocal",
-                std::format("Loaded texture from '{}'", absPath(path))
-            );
-            return texture;
-        }
-    );
-    _texture = std::make_unique<ghoul::opengl::Texture>(*texture);
-
-    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
-    _textureFile->setCallback([this]() { _textureIsDirty = true; });
 }
 
 } // namespace openspace
