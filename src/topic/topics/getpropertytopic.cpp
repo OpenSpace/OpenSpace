@@ -55,7 +55,8 @@ void GetPropertyTopic::handleJson(const nlohmann::json& json) {
     nlohmann::json response;
 
     if (requestedKey == "__rootOwner") {
-        response = global::rootPropertyOwner;
+        response["value"] = global::rootPropertyOwner;
+        response["type"] = "propertyOwner";
     }
     else {
         response = propertyFromKey(requestedKey);
@@ -89,20 +90,20 @@ Schema GetPropertyTopic::Schema() {
                 {
                   "type": "object",
                   "properties": {
-                    "propertyOwner": {
-                      "$ref": "properties.json#/$defs/PropertyOwner"
-                    }
+                    "value": { "$ref": "properties.json#/$defs/PropertyOwner" },
+                    "type": { "const": "propertyOwner" }
                   },
                   "additionalProperties": false,
-                  "required": ["propertyOwner"]
+                  "required": ["value", "type"]
                 },
                 {
                   "type": "object",
                   "properties": {
-                    "property": { "$ref": "properties.json#/$defs/AnyProperty" }
+                    "value": { "$ref": "properties.json#/$defs/AnyProperty" },
+                    "type": { "const": "property" }
                   },
                   "additionalProperties": false,
-                  "required": ["property"]
+                  "required": ["value", "type"]
                 }
               ]
             }
@@ -116,13 +117,20 @@ Schema GetPropertyTopic::Schema() {
 }
 
 json GetPropertyTopic::propertyFromKey(const std::string& key) {
+
     Property* prop = property(key);
     if (prop) {
-        return prop;
+        nlohmann::json response;
+        response["value"] = prop;
+        response["type"] = "property";
+        return response;
     }
     PropertyOwner* node = propertyOwner(key);
     if (node) {
-        return node;
+        nlohmann::json response;
+        response["value"] = node;
+        response["type"] = "propertyOwner";
+        return response;
     }
 
     throw ghoul::RuntimeError(std::format("Property '{}' not found", key));

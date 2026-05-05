@@ -7,24 +7,32 @@
         {
           "additionalProperties": false,
           "properties": {
-            "propertyOwner": {
+            "type": {
+              "const": "propertyOwner"
+            },
+            "value": {
               "$ref": "properties.json#/$defs/PropertyOwner"
             }
           },
           "required": [
-            "propertyOwner"
+            "value",
+            "type"
           ],
           "type": "object"
         },
         {
           "additionalProperties": false,
           "properties": {
-            "property": {
+            "type": {
+              "const": "property"
+            },
+            "value": {
               "$ref": "properties.json#/$defs/AnyProperty"
             }
           },
           "required": [
-            "property"
+            "value",
+            "type"
           ],
           "type": "object"
         }
