@@ -24,11 +24,15 @@
 
 #include <modules/base/rendering/renderableplaneimageonline.h>
 
+#include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/crc32.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -53,6 +57,9 @@ namespace {
     struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];
+
+        // TODO
+        std::optional<bool> isUrl;
     };
 } // namespace
 #include "renderableplaneimageonline_codegen.cpp"
@@ -73,9 +80,22 @@ RenderablePlaneImageOnline::RenderablePlaneImageOnline(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _texturePath.onChange([this]() { _textureIsDirty = true; });
-    _texturePath = p.url;
-    addProperty(_texturePath);
+    _isUrl = p.isUrl.value_or(_isUrl);
+
+    if (_isUrl) {
+        _texturePath.onChange([this]() { _textureIsDirty = true; });
+        _texturePath = p.url;
+        addProperty(_texturePath);
+    }
+    else {
+        _textureIsDirty = true;
+        _texturePath = absPath(p.url).string();
+        _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
+        _textureFile->setCallback([this]() { _textureIsDirty = true; });
+
+        _texturePath.onChange([this]() { loadTexture(); });
+        addProperty(_texturePath);
+    }
 
     _autoScale.onChange([this]() {
         if (!_autoScale) {
@@ -102,8 +122,13 @@ RenderablePlaneImageOnline::RenderablePlaneImageOnline(
     });
 }
 
+void RenderablePlaneImageOnline::initializeGL() {
+    RenderablePlane::initializeGL();
+}
+
 void RenderablePlaneImageOnline::deinitializeGL() {
     _texture = nullptr;
+    _textureFile = nullptr;
 
     RenderablePlane::deinitializeGL();
 }
@@ -117,70 +142,79 @@ void RenderablePlaneImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
 void RenderablePlaneImageOnline::update(const UpdateData& data) {
     RenderablePlane::update(data);
 
-    if (!_textureIsDirty) [[unlikely]] {
-        return;
-    }
-
-    if (!_imageFuture.valid()) {
-        std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(
-            _texturePath
-        );
-        if (future.valid()) {
-            _imageFuture = std::move(future);
-        }
-    }
-
-    if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-        const DownloadManager::MemoryFile imageFile = _imageFuture.get();
-
-        if (imageFile.corrupted) {
-            LERRORC(
-                "ScreenSpaceImageOnline",
-                std::format("Error loading image from URL '{}'", _texturePath.value())
-            );
+    if (_isUrl) {
+        if (!_textureIsDirty) [[unlikely]] {
             return;
         }
 
-        try {
-            _texture = ghoul::io::texture::loadTexture(
-                reinterpret_cast<void*>(imageFile.buffer),
-                imageFile.size,
-                2,
-                ghoul::opengl::Texture::SamplerInit{
-                    .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
-                },
-                imageFile.format
+        if (!_imageFuture.valid()) {
+            std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(
+                _texturePath
             );
+            if (future.valid()) {
+                _imageFuture = std::move(future);
+            }
+        }
 
-            _textureIsDirty = false;
+        if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
+            const DownloadManager::MemoryFile imageFile = _imageFuture.get();
 
-            if (!_autoScale) {
+            if (imageFile.corrupted) {
+                LERRORC(
+                    "ScreenSpaceImageOnline",
+                    std::format("Error loading image from URL '{}'", _texturePath.value())
+                );
                 return;
             }
 
-            // Shape the plane based on the aspect ration of the image
-            const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
-            if (_textureDimensions != textureDim) {
-                const float aspectRatio = textureDim.x / textureDim.y;
-                const float planeAspectRatio = _size.value().x / _size.value().y;
+            try {
+                _texture = ghoul::io::texture::loadTexture(
+                    reinterpret_cast<void*>(imageFile.buffer),
+                    imageFile.size,
+                    2,
+                    ghoul::opengl::Texture::SamplerInit{
+                        .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                    },
+                    imageFile.format
+                );
 
-                if (std::abs(planeAspectRatio - aspectRatio) >
-                    std::numeric_limits<float>::epsilon())
-                {
-                    _size =
-                        aspectRatio > 0.f ?
-                        glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
-                        glm::vec2(_size.value().x, _size.value().y * aspectRatio);
-                }
-
-                _textureDimensions = textureDim;
+                _textureIsDirty = false;
+            }
+            catch (const ghoul::io::texture::InvalidLoadException& e) {
+                _textureIsDirty = false;
+                LERRORC(e.component, e.message);
             }
         }
-        catch (const ghoul::io::texture::InvalidLoadException& e) {
+    }
+    else {
+        if (_textureIsDirty) [[unlikely]] {
+            loadTexture();
             _textureIsDirty = false;
-            LERRORC(e.component, e.message);
         }
     }
+
+    if (!_autoScale) {
+        return;
+    }
+
+    // Shape the plane based on the aspect ration of the image
+    const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+    if (_textureDimensions != textureDim) {
+        const float aspectRatio = textureDim.x / textureDim.y;
+        const float planeAspectRatio = _size.value().x / _size.value().y;
+
+        if (std::abs(planeAspectRatio - aspectRatio) >
+            std::numeric_limits<float>::epsilon())
+        {
+            _size =
+                aspectRatio > 0.f ?
+                glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
+                glm::vec2(_size.value().x, _size.value().y * aspectRatio);
+        }
+
+        _textureDimensions = textureDim;
+    }
+    
 }
 
 std::future<DownloadManager::MemoryFile>
@@ -201,6 +235,38 @@ RenderablePlaneImageOnline::downloadImageToMemory(const std::string& url)
             );
         }
     );
+}
+
+void RenderablePlaneImageOnline::loadTexture() {
+    if (_texturePath.value().empty()) {
+        return;
+    }
+
+    const unsigned int hash = ghoul::hashCRC32File(_texturePath);
+
+    ghoul::opengl::Texture* texture = BaseModule::TextureManager.request(
+        std::to_string(hash),
+        [path = _texturePath.value()]() -> std::unique_ptr<ghoul::opengl::Texture> {
+            std::unique_ptr<ghoul::opengl::Texture> texture =
+                ghoul::io::texture::loadTexture(
+                    absPath(path),
+                    2,
+                    ghoul::opengl::Texture::SamplerInit{
+                        .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                    }
+                );
+
+            LDEBUGC(
+                "RenderablePlaneImageLocal",
+                std::format("Loaded texture from '{}'", absPath(path))
+            );
+            return texture;
+        }
+    );
+    _texture = std::make_unique<ghoul::opengl::Texture>(*texture);
+
+    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
+    _textureFile->setCallback([this]() { _textureIsDirty = true; });
 }
 
 } // namespace openspace

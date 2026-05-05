@@ -38,6 +38,7 @@ class RenderablePlaneImageOnline : public RenderablePlane {
 public:
     explicit RenderablePlaneImageOnline(const ghoul::Dictionary& dictionary);
 
+    void initializeGL() override;
     void deinitializeGL() override;
 
     void update(const UpdateData& data) override;
@@ -51,11 +52,17 @@ private:
     std::future<DownloadManager::MemoryFile> downloadImageToMemory(
         const std::string& url);
 
+    void loadTexture();
+
     StringProperty _texturePath;
 
     std::future<DownloadManager::MemoryFile> _imageFuture;
+    std::unique_ptr<ghoul::filesystem::File> _textureFile;
+
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     glm::vec2 _textureDimensions = glm::vec2(0.f);
+
+    bool _isUrl = false;
     bool _textureIsDirty = false;
 };
 
