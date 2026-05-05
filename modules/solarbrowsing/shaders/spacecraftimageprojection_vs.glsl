@@ -33,7 +33,7 @@ layout(location = 1) in vec2 in_st;
 
 out Data {
   vec4 positionScreenSpace;
-  vec3 vUv[MaxSpacecraftObservatories];
+  vec3 texCoords[MaxSpacecraftObservatories];
 } out_data;
 
 uniform mat4 modelViewProjectionTransform;
@@ -47,11 +47,11 @@ void main() {
 
   // Transform the positions to the reference frame of the spacecraft to get tex coords
   for (int i = 0; i < numSpacecraftCameraPlanes; i++) {
-    out_data.vUv[i] = vec3(0.0);
+    out_data.texCoords[i] = vec3(0.0);
     if (isCoronaGraph[i] || !isEnabled[i])  {
       continue;
     };
-    out_data.vUv[i] = vec3(sunToSpacecraftReferenceFrame[i] * dvec4(position)).xyz;
+    out_data.texCoords[i] = vec3(sunToSpacecraftReferenceFrame[i] * dvec4(position)).xyz;
   }
 
   vec4 positionClipSpace = modelViewProjectionTransform * position;

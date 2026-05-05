@@ -33,11 +33,10 @@
 
 namespace openspace {
 
-// Assume everything in arcsec to minimize metadata
 struct ImageMetadata {
     std::filesystem::path filePath;
     int fullResolution = 0;
-    float scale = 0;;
+    float scale = 0.f;
     glm::vec2 centerPixel;
     bool isCoronaGraph = false;
 };

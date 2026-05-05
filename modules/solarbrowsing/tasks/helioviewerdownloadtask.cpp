@@ -45,7 +45,7 @@ namespace {
     //
     // All available images within the given interval are retrieved at the requested
     // temporal cadence and stored locally as JP2 files. The filenames are formatted
-    // according to the OpenSpace solar browsing convention,encoding timestamp, spacecraft
+    // according to the OpenSpace SolarBrowsing convention,encoding timestamp, spacecraft
     // name, and instrument identifier. The instrument string must match the local
     // colormap naming convention (hyphen-separated, e.g., "AIA-193") so that the correct
     // colormap can be resolved at runtime. Existing files are not re-downloaded.
@@ -67,14 +67,14 @@ namespace {
         std::string instrument;
 
         // The path to the colormap that will be used for this spacecraft and instrument.
-        // Note, the colormap is copied into the output folder.
+        // Note that the colormap is copied into the output folder.
         std::filesystem::path colorMap;
 
         // The beginning of the time interval to extract data from. Format:
         // YYYY-MM-DDTHH:MM:SS
         std::string startTime [[codegen::datetime()]];
 
-        // The end of the time interval to extract data from. Format YYYY-MM-DDTHH:MM:SS
+        // The end of the time interval to extract data from. Format: YYYY-MM-DDTHH:MM:SS
         std::string endTime [[codegen::datetime()]];
 
         // Desired temporal sampling interval in seconds.
@@ -117,10 +117,7 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
     const std::string jpxRequest = std::format(
         "http://api.helioviewer.org/v2/getJPX/?startTime={}&endTime={}"
         "&sourceId={}&verbose=true&cadence=true&cadence={}",
-        _startTime,
-        _endTime,
-        _sourceId,
-        _timeStep
+        _startTime, _endTime, _sourceId, _timeStep
     );
 
     // @TODO (anden88 2026-03-05): Due to how the progress bar uses the '\r' carriage
@@ -145,7 +142,6 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
     try {
         nlohmann::json json = nlohmann::json::parse(listingString.c_str());
         frames = json["frames"].get<std::vector<double>>();
-
         if (frames.empty()) {
             LERROR(std::format("Failed to acquire frames"));
         }
@@ -211,16 +207,8 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
 
             const std::string outFilename = std::format(
                 "{}/{:04}_{:02}_{:02}__{:02}_{:02}_{:02}_{:03}__{}_{}.jp2",
-                _outputFolder,
-                year,
-                month,
-                day,
-                hour,
-                minute,
-                second,
-                millisecond,
-                _name,
-                _instrument
+                _outputFolder, year, month, day, hour, minute,
+                second, millisecond, _name, _instrument
             );
 
             // Skip existing files

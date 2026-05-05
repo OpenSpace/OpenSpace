@@ -30,7 +30,7 @@ layout(location = 0) in vec2 in_position;
 layout(location = 1) in vec2 in_texCoords;
 
 out Data {
-  vec2 textCoords;
+  vec2 texCoords;
   float depth;
 } out_data;
 
@@ -39,7 +39,7 @@ uniform float scale;
 uniform vec2 centerPixel;
 
 void main() {
-  out_data.textCoords = in_texCoords;
+  out_data.texCoords = in_texCoords;
 
   vec2 position = in_position;
   position.x += centerPixel.x;

@@ -132,7 +132,7 @@ namespace {
         "VerboseMode",
         "Verbose mode",
         "Output information about image decoding.",
-        Property::Visibility::AdvancedUser
+        Property::Visibility::Developer
     };
 
     constexpr Property::PropertyInfo PredictFramesAfterInfo = {
@@ -345,1116 +345,1116 @@ namespace {
 
 namespace openspace {
 
-    openspace::Documentation RenderableSolarImagery::Documentation() {
-        return codegen::doc<Parameters>("solarbrowsing_renderable_solarimegary");
+openspace::Documentation RenderableSolarImagery::Documentation() {
+    return codegen::doc<Parameters>("solarbrowsing_renderable_solarimegary");
+}
+
+RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictionary)
+    : Renderable(dictionary)
+    , _activeInstruments(ActiveInstrumentInfo)
+    , _runtimeStatus(RuntimeStatusInfo, "Idle")
+    , _dataAvailabilityState(DataAvailabilityStateInfo, "NoData")
+    , _displayedImageTime(DisplayedImageTimeInfo, "")
+    , _currentSourceIdStatus(CurrentSourceIdInfo, "-1")
+    , _blackTransparencyThreshold(BlackTransparencyThresholdInfo, 0.01f, 0.0f, 0.1f)
+    , _contrastValue(ContrastValueInfo, 0.f, -15.f, 15.f)
+    , _enableBorder(EnableBorderInfo, false)
+    , _enableFrustum(EnableFrustumInfo, false)
+    , _faceMode(FaceModeInfo)
+    , _gammaValue(GammaValueInfo, 0.9f, 0.1f, 10.f)
+    , _moveFactor(MoveFactorInfo, 1.0, 0.0, 1.0)
+    , _downsamplingLevel(DownsamplingLevelInfo, 2, 0, 5)
+    , _verboseMode(VerboseModeInfo, false)
+    , _predictFramesAfter(PredictFramesAfterInfo, 10, 0, 20)
+    , _predictFramesBefore(PredictFramesBeforeInfo, 2, 0, 20)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    addProperty(Fadeable::_opacity);
+    _runtimeStatus.setReadOnly(true);
+    _dataAvailabilityState.setReadOnly(true);
+    _displayedImageTime.setReadOnly(true);
+    _currentSourceIdStatus.setReadOnly(true);
+    addProperty(_runtimeStatus);
+    addProperty(_dataAvailabilityState);
+    addProperty(_displayedImageTime);
+    addProperty(_currentSourceIdStatus);
+
+    _imageDirectory = std::filesystem::path(p.imageDirectory);
+    if (p.transferFunctions.has_value()) {
+        for (std::string_view key : p.transferFunctions->keys()) {
+            if (!p.transferFunctions->hasValue<std::string>(key)) {
+                LWARNING(std::format(
+                    "Ignoring transfer function entry '{}' with non-string value",
+                    key
+                ));
+                continue;
+            }
+
+            _configuredTransferFunctions[std::string(key)] = std::filesystem::path(
+                p.transferFunctions->value<std::string>(key)
+            );
+        }
     }
 
-    RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictionary)
-        : Renderable(dictionary)
-        , _activeInstruments(ActiveInstrumentInfo)
-        , _runtimeStatus(RuntimeStatusInfo, "Idle")
-        , _dataAvailabilityState(DataAvailabilityStateInfo, "NoData")
-        , _displayedImageTime(DisplayedImageTimeInfo, "")
-        , _currentSourceIdStatus(CurrentSourceIdInfo, "-1")
-        , _blackTransparencyThreshold(BlackTransparencyThresholdInfo, 0.01f, 0.0f, 0.1f)
-        , _contrastValue(ContrastValueInfo, 0.f, -15.f, 15.f)
-        , _enableBorder(EnableBorderInfo, false)
-        , _enableFrustum(EnableFrustumInfo, false)
-        , _faceMode(FaceModeInfo)
-        , _gammaValue(GammaValueInfo, 0.9f, 0.1f, 10.f)
-        , _moveFactor(MoveFactorInfo, 1.0, 0.0, 1.0)
-        , _downsamplingLevel(DownsamplingLevelInfo, 2, 0, 5)
-        , _verboseMode(VerboseModeInfo, false)
-        , _predictFramesAfter(PredictFramesAfterInfo, 10, 0, 20)
-        , _predictFramesBefore(PredictFramesBeforeInfo, 2, 0, 20)
-    {
-        const Parameters p = codegen::bake<Parameters>(dictionary);
-
-        addProperty(Fadeable::_opacity);
-        _runtimeStatus.setReadOnly(true);
-        _dataAvailabilityState.setReadOnly(true);
-        _displayedImageTime.setReadOnly(true);
-        _currentSourceIdStatus.setReadOnly(true);
-        addProperty(_runtimeStatus);
-        addProperty(_dataAvailabilityState);
-        addProperty(_displayedImageTime);
-        addProperty(_currentSourceIdStatus);
-
-        _imageDirectory = std::filesystem::path(p.imageDirectory);
-        if (p.transferFunctions.has_value()) {
-            for (std::string_view key : p.transferFunctions->keys()) {
-                if (!p.transferFunctions->hasValue<std::string>(key)) {
-                    LWARNING(std::format(
-                        "Ignoring transfer function entry '{}' with non-string value",
-                        key
-                    ));
-                    continue;
-                }
-
-                _configuredTransferFunctions[std::string(key)] = std::filesystem::path(
-                    p.transferFunctions->value<std::string>(key)
-                );
-            }
+    if (p.dynamicDownload.has_value()) {
+        const ghoul::Dictionary& dynamicDownload = *p.dynamicDownload;
+        if (dynamicDownload.hasValue<bool>("Enable")) {
+            _enableDynamicDownload = dynamicDownload.value<bool>("Enable");
         }
-
-        if (p.dynamicDownload.has_value()) {
-            const ghoul::Dictionary& dynamicDownload = *p.dynamicDownload;
-            if (dynamicDownload.hasValue<bool>("Enable")) {
-                _enableDynamicDownload = dynamicDownload.value<bool>("Enable");
-            }
-            _dynamicSourceId = intValueFromDictionary(
-                dynamicDownload,
-                "SourceId",
-                _dynamicSourceId
+        _dynamicSourceId = intValueFromDictionary(
+            dynamicDownload,
+            "SourceId",
+            _dynamicSourceId
+        );
+        if (dynamicDownload.hasValue<std::string>("SpacecraftName")) {
+            _dynamicSpacecraftName = dynamicDownload.value<std::string>(
+                "SpacecraftName"
             );
-            if (dynamicDownload.hasValue<std::string>("SpacecraftName")) {
-                _dynamicSpacecraftName = dynamicDownload.value<std::string>(
-                    "SpacecraftName"
-                );
-            }
-            if (dynamicDownload.hasValue<std::string>("Instrument")) {
-                _dynamicInstrument = dynamicDownload.value<std::string>("Instrument");
-            }
-            if (dynamicDownload.hasValue<double>("CadenceSeconds")) {
-                _dynamicCadenceSeconds = dynamicDownload.value<double>("CadenceSeconds");
-            }
-            if (dynamicDownload.hasValue<std::string>("DownloadDirectory")) {
-                _downloadDirectory = std::filesystem::path(
-                    dynamicDownload.value<std::string>("DownloadDirectory")
-                );
-            }
-            _dynamicPrefetchBefore = intValueFromDictionary(
-                dynamicDownload,
-                "PrefetchFramesBefore",
-                _dynamicPrefetchBefore
+        }
+        if (dynamicDownload.hasValue<std::string>("Instrument")) {
+            _dynamicInstrument = dynamicDownload.value<std::string>("Instrument");
+        }
+        if (dynamicDownload.hasValue<double>("CadenceSeconds")) {
+            _dynamicCadenceSeconds = dynamicDownload.value<double>("CadenceSeconds");
+        }
+        if (dynamicDownload.hasValue<std::string>("DownloadDirectory")) {
+            _downloadDirectory = std::filesystem::path(
+                dynamicDownload.value<std::string>("DownloadDirectory")
             );
-            _dynamicPrefetchAfter = intValueFromDictionary(
-                dynamicDownload,
-                "PrefetchFramesAfter",
-                _dynamicPrefetchAfter
+        }
+        _dynamicPrefetchBefore = intValueFromDictionary(
+            dynamicDownload,
+            "PrefetchFramesBefore",
+            _dynamicPrefetchBefore
+        );
+        _dynamicPrefetchAfter = intValueFromDictionary(
+            dynamicDownload,
+            "PrefetchFramesAfter",
+            _dynamicPrefetchAfter
+        );
+        _dynamicMaxConcurrentDownloads = intValueFromDictionary(
+            dynamicDownload,
+            "MaxConcurrentDownloads",
+            _dynamicMaxConcurrentDownloads
+        );
+        if (dynamicDownload.hasValue<bool>("SaveDownloadsOnShutdown")) {
+            _saveDownloadsOnShutdown = dynamicDownload.value<bool>(
+                "SaveDownloadsOnShutdown"
             );
-            _dynamicMaxConcurrentDownloads = intValueFromDictionary(
-                dynamicDownload,
-                "MaxConcurrentDownloads",
-                _dynamicMaxConcurrentDownloads
+        }
+        if (dynamicDownload.hasValue<double>("RetryBackoffSeconds")) {
+            _dynamicRetryBackoffSeconds = dynamicDownload.value<double>(
+                "RetryBackoffSeconds"
             );
-            if (dynamicDownload.hasValue<bool>("SaveDownloadsOnShutdown")) {
-                _saveDownloadsOnShutdown = dynamicDownload.value<bool>(
-                    "SaveDownloadsOnShutdown"
-                );
+        }
+        _dynamicMaxRetries = intValueFromDictionary(
+            dynamicDownload,
+            "MaxRetries",
+            _dynamicMaxRetries
+        );
+
+        const std::optional<std::vector<std::string>> instrumentNames =
+            stringVectorFromDictionary(dynamicDownload, "InstrumentNames");
+        const std::optional<std::vector<int>> instrumentSourceIds =
+            intVectorFromDictionary(dynamicDownload, "InstrumentSourceIds");
+
+        if (instrumentNames.has_value() && instrumentSourceIds.has_value())
+        {
+            const std::vector<std::string>& names = *instrumentNames;
+            const std::vector<int>& sourceIds = *instrumentSourceIds;
+
+            if (names.size() != sourceIds.size()) {
+                LWARNING(std::format(
+                    "Ignoring dynamic instrument list: {} names but {} source ids",
+                    names.size(),
+                    sourceIds.size()
+                ));
             }
-            if (dynamicDownload.hasValue<double>("RetryBackoffSeconds")) {
-                _dynamicRetryBackoffSeconds = dynamicDownload.value<double>(
-                    "RetryBackoffSeconds"
-                );
-            }
-            _dynamicMaxRetries = intValueFromDictionary(
-                dynamicDownload,
-                "MaxRetries",
-                _dynamicMaxRetries
-            );
-
-            const std::optional<std::vector<std::string>> instrumentNames =
-                stringVectorFromDictionary(dynamicDownload, "InstrumentNames");
-            const std::optional<std::vector<int>> instrumentSourceIds =
-                intVectorFromDictionary(dynamicDownload, "InstrumentSourceIds");
-
-            if (instrumentNames.has_value() && instrumentSourceIds.has_value())
-            {
-                const std::vector<std::string>& names = *instrumentNames;
-                const std::vector<int>& sourceIds = *instrumentSourceIds;
-
-                if (names.size() != sourceIds.size()) {
-                    LWARNING(std::format(
-                        "Ignoring dynamic instrument list: {} names but {} source ids",
-                        names.size(),
-                        sourceIds.size()
-                    ));
-                }
-                else {
-                    for (size_t i = 0; i < names.size(); ++i) {
-                        if (sourceIds[i] < 0) {
-                            LWARNING(std::format(
-                                "Ignoring dynamic instrument '{}' without a valid SourceId",
-                                names[i]
-                            ));
-                            continue;
-                        }
-
-                        _dynamicSourceIds[names[i]] = sourceIds[i];
+            else {
+                for (size_t i = 0; i < names.size(); ++i) {
+                    if (sourceIds[i] < 0) {
+                        LWARNING(std::format(
+                            "Ignoring dynamic instrument '{}' without a valid SourceId",
+                            names[i]
+                        ));
+                        continue;
                     }
+
+                    _dynamicSourceIds[names[i]] = sourceIds[i];
                 }
             }
-            else if (instrumentNames.has_value() || instrumentSourceIds.has_value()) {
-                LWARNING(
-                    "DynamicDownload instrument predeclaration requires both "
-                    "InstrumentNames and InstrumentSourceIds"
-                );
+        }
+        else if (instrumentNames.has_value() || instrumentSourceIds.has_value()) {
+            LWARNING(
+                "DynamicDownload instrument predeclaration requires both "
+                "InstrumentNames and InstrumentSourceIds"
+            );
+        }
+    }
+
+    if (_enableDynamicDownload && !std::filesystem::exists(_imageDirectory)) {
+        std::filesystem::create_directories(_imageDirectory);
+    }
+
+    _imageMetadataMap = loadImageMetadata(_imageDirectory);
+    _tfMap = loadTransferFunctions(
+        _imageDirectory,
+        _imageMetadataMap,
+        _configuredTransferFunctions
+    );
+    const bool hasData = std::any_of(
+        _imageMetadataMap.begin(),
+        _imageMetadataMap.end(),
+        [](const std::pair<const InstrumentName, Timeline<ImageMetadata>>& p) {
+            return p.second.nKeyframes() > 0;
+        }
+    );
+
+    if (!hasData) {
+        LWARNING(std::format(
+            "Could not find any image data in '{}'. Image data can be downloaded using "
+            "the HelioviewerDownloadTask. See the solar browsing documentation for more "
+            "information", p.imageDirectory
+        ));
+    }
+
+    _enableBorder = p.enableBorder.value_or(_enableBorder);
+    addProperty(_enableBorder);
+
+    _enableFrustum = p.enableFrustum.value_or(_enableFrustum);
+    _enableFrustum.onChange([this]() {
+        _enableBorder = _enableFrustum.value();
+        });
+    addProperty(_enableFrustum);
+
+    _faceMode.addOption(FaceMode::FrontOnly, "Front Only");
+    _faceMode.addOption(FaceMode::SolidBack, "Solid Back");
+    _faceMode.addOption(FaceMode::DoubleSided, "Double Sided");
+    _faceMode = FaceMode::SolidBack;
+
+    if (p.faceMode.has_value()) {
+        _faceMode = codegen::map<FaceMode>(*p.faceMode);
+    }
+    addProperty(_faceMode);
+
+    for (const auto& [instrument, _] : _imageMetadataMap) {
+        addInstrumentOption(instrument);
+    }
+    for (const auto& [instrument, _] : _dynamicSourceIds) {
+        addInstrumentOption(instrument);
+    }
+
+    if (p.startInstrument.has_value()) {
+        _currentActiveInstrument = p.startInstrument.value();
+        const std::optional<int> option = instrumentOptionValue(_currentActiveInstrument);
+        if (option.has_value()) {
+            _activeInstruments = *option;
+        }
+    }
+    else {
+        if (_activeInstruments.hasOption()) {
+            _currentActiveInstrument = _activeInstruments.getDescriptionByValue(
+                _activeInstruments
+            );
+        }
+    }
+
+    _activeInstruments.onChange([this]() {
+        _currentActiveInstrument = _activeInstruments.getDescriptionByValue(
+            _activeInstruments
+        );
+        _currentKeyframe = NoActiveKeyframe;
+        _predictionIsDirty = true;
+        if (_enableDynamicDownload && !_dynamicInstrument.has_value()) {
+            _dynamicDownloaderInstrument.clear();
+            if (_dynamicDownloader) {
+                _dynamicDownloader->deinitialize(_saveDownloadsOnShutdown);
             }
+            _dynamicDownloader = nullptr;
         }
+        });
+    addProperty(_activeInstruments);
 
-        if (_enableDynamicDownload && !std::filesystem::exists(_imageDirectory)) {
-            std::filesystem::create_directories(_imageDirectory);
+    _downsamplingLevel = p.downsamplingLevel.value_or(_downsamplingLevel);
+    _downsamplingLevel.onChange([this]() {
+        _currentKeyframe = NoActiveKeyframe;
+        _predictionIsDirty = true;
+        });
+    addProperty(_downsamplingLevel);
+
+    _moveFactor = p.moveFactor.value_or(_moveFactor);
+    _moveFactor.onChange([this]() { createPlaneAndFrustum(_moveFactor); });
+    addProperty(_moveFactor);
+
+    _blackTransparencyThreshold = p.blackTransparencyThreshold.value_or(
+        _blackTransparencyThreshold
+    );
+    addProperty(_blackTransparencyThreshold);
+
+    _gammaValue = p.gamma.value_or(_gammaValue);
+    addProperty(_gammaValue);
+
+    _contrastValue = p.contrast.value_or(_contrastValue);
+    addProperty(_contrastValue);
+
+    _predictFramesAfter = p.predictFramesAfter.value_or(_predictFramesAfter);
+    _predictFramesAfter.onChange([this]() { _predictionIsDirty = true; });
+    addProperty(_predictFramesAfter);
+
+    _predictFramesBefore = p.predictFramesBefore.value_or(_predictFramesBefore);
+    _predictFramesBefore.onChange([this]() { _predictionIsDirty = true; });
+    addProperty(_predictFramesBefore);
+
+    _verboseMode = p.verboseMode.value_or(_verboseMode);
+    _verboseMode.onChange([this]() {
+        if (_asyncDecoder) {
+            _asyncDecoder->setVerboseFlag(_verboseMode);
         }
+        });
+    addProperty(_verboseMode);
 
-        _imageMetadataMap = loadImageMetadata(_imageDirectory);
+    _asyncDecoder = std::make_unique<AsyncImageDecoder>(
+        std::thread::hardware_concurrency() / 2,
+        _verboseMode
+    );
+}
+
+void RenderableSolarImagery::initializeGL() {
+    _planeShader = BaseModule::ProgramObjectManager.request(
+        "SpacecraftImagePlaneProgram",
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return global::renderEngine->buildRenderProgram(
+                "SpacecraftImagePlaneProgram",
+                absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_vs.glsl"),
+                absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_fs.glsl")
+            );
+        }
+    );
+
+    _frustumShader = BaseModule::ProgramObjectManager.request(
+        "SpacecraftFrustumProgram",
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return global::renderEngine->buildRenderProgram(
+                "SpacecraftFrustumProgram",
+                absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_vs.glsl"),
+                absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_fs.glsl")
+            );
+        }
+    );
+
+    // Initialize plane buffer
+    glCreateVertexArrays(1, &_quadVao);
+    glCreateBuffers(1, &_vertexPositionBuffer);
+    glVertexArrayVertexBuffer(_quadVao, 0, _vertexPositionBuffer, 0, sizeof(PlaneVertex));
+
+    glEnableVertexArrayAttrib(_quadVao, 0);
+    glVertexArrayAttribFormat(_quadVao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_quadVao, 0, 0);
+    // ST coordinates
+    glEnableVertexArrayAttrib(_quadVao, 1);
+    glVertexArrayAttribFormat(
+        _quadVao,
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        offsetof(PlaneVertex, texCoords)
+    );
+    glVertexArrayAttribBinding(_quadVao, 1, 0);
+
+    // Initialize frustum buffer
+    glCreateVertexArrays(1, &_frustumVao);
+    glCreateBuffers(1, &_frustumPositionBuffer);
+    glVertexArrayVertexBuffer(
+        _frustumVao,
+        0,
+        _frustumPositionBuffer,
+        0,
+        sizeof(FrustumVertex)
+    );
+
+    // Position
+    glEnableVertexArrayAttrib(_frustumVao, 0);
+    glVertexArrayAttribFormat(_frustumVao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_frustumVao, 0, 0);
+
+    ghoul::opengl::updateUniformLocations(*_planeShader, _uniformCachePlane);
+    ghoul::opengl::updateUniformLocations(*_frustumShader, _uniformCacheFrustum);
+    createPlaneAndFrustum(_moveFactor);
+
+    _imageryTexture = std::make_unique<ghoul::opengl::Texture>(
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(DefaultTextureSize, DefaultTextureSize, 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::Red,
+            .dataType = GL_UNSIGNED_BYTE,
+        },
+        ghoul::opengl::Texture::SamplerInit{
+            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge,
+        }
+        );
+
+    updateImageryTexture();
+}
+
+void RenderableSolarImagery::deinitializeGL() {
+    glDeleteVertexArrays(1, &_quadVao);
+    glDeleteVertexArrays(1, &_frustumVao);
+    _imageryTexture = nullptr;
+
+    BaseModule::ProgramObjectManager.release(
+        "SpacecraftImagePlaneProgram",
+        [](ghoul::opengl::ProgramObject* p) {
+            global::renderEngine->removeRenderProgram(p);
+        }
+    );
+    _planeShader = nullptr;
+
+    BaseModule::ProgramObjectManager.release(
+        "SpacecraftFrustumProgram",
+        [](ghoul::opengl::ProgramObject* p) {
+            global::renderEngine->removeRenderProgram(p);
+        }
+    );
+    _frustumShader = nullptr;
+}
+
+void RenderableSolarImagery::deinitialize() {
+    if (_dynamicDownloader) {
+        _dynamicDownloader->deinitialize(_saveDownloadsOnShutdown);
+        _dynamicDownloader = nullptr;
+    }
+
+    Renderable::deinitialize();
+}
+
+bool RenderableSolarImagery::isReady() const {
+    return _planeShader && _frustumShader;
+}
+
+void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
+    updateImageryTexture();
+    const glm::dvec3& sunPositionWorld = sceneGraphNode("Sun")->worldPosition();
+
+    switch (_faceMode) {
+    case FaceMode::FrontOnly:
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        break;
+    case FaceMode::SolidBack:
+    case FaceMode::DoubleSided:
+        glDisable(GL_CULL_FACE);
+        break;
+    default:
+        throw ghoul::MissingCaseException();
+    }
+
+    // Perform necessary transforms
+    const glm::dmat4& viewMatrix = data.camera.combinedViewMatrix();
+    const glm::mat4& projectionMatrix = data.camera.projectionMatrix();
+
+    const glm::dvec3& spacecraftPosWorld = data.modelTransform.translation;
+    const glm::dmat3 spacecraftRotWorld = data.modelTransform.rotation;
+
+    const glm::dvec3 sunDir = sunPositionWorld - spacecraftPosWorld;
+    const glm::dvec3 offset = sunDir * _gaussianMoveFactor;
+
+    _position = spacecraftPosWorld + offset;
+    // Normal should point from plane toward spacecraft (i.e. plane faces spacecraft)
+    _normal = glm::normalize(spacecraftPosWorld - sunPositionWorld);
+
+    // (anden88 2025-12-10): An attempt was made to use the glm::lookAt to "simplify"
+    // the rotation matrix without having to build the basis vectors ourselves. However,
+    // the plane rotation would be rotating in all different kinds of orientations.
+        //_rotation = glm::lookAt(
+        //    spacecraftPosWorld,
+        //    glm::dvec3(sunPositionWorld),
+        //    glm::normalize(up)
+        //);
+    // _rotation[3] = glm::dvec4(0.0, 0.0, 0.0, 1.0);
+
+    // Pick a world up. Prefer the spacecraft local +Z transformed to world, but fall back
+    // to a global up if nearly collinear with the normal
+    glm::vec3 worldUp = spacecraftRotWorld * glm::dvec3(0.0, 0.0, 1.0);
+    if (std::abs(glm::dot(worldUp, _normal)) > 0.9999) {
+        // Nearly parallel: pick another stable up (e.g. world Y)
+        worldUp = glm::dvec3(0.0, 1.0, 0.0);
+    }
+
+    // Build tangent basis for the plane: right, upOnPlane, normal
+    glm::vec3 right = glm::normalize(glm::cross(worldUp, _normal));
+    // Already normalized if right and N are normalized
+    glm::vec3 upOnPlane = glm::cross(_normal, right);
+
+    // Build a rotation matrix that transforms local axes -> world axes.
+    // Local axes: +X = right, +Y = upOnPlane, +Z = _normal
+    glm::dmat4 rot = glm::dmat4(1.0);
+    rot[0] = glm::dvec4(right, 0.0);      // first column = world X for local +X
+    rot[1] = glm::dvec4(upOnPlane, 0.0);  // second column = world Y for local +Y
+    rot[2] = glm::dvec4(_normal, 0.0);    // third column = world Z for local +Z
+
+    _rotation = std::move(rot);
+
+    const glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), _position) *
+        _rotation *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+    const glm::dmat4 modelViewTransform = viewMatrix * modelTransform;
+
+    // For frustum
+    const glm::dmat4 spacecraftModelTransform =
+        glm::translate(glm::dmat4(1.0), spacecraftPosWorld) *
+        _rotation *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+
+    _planeShader->activate();
+    ghoul::opengl::TextureUnit imageUnit;
+    imageUnit.bind(*_imageryTexture);
+
+    _planeShader->setUniform(_uniformCachePlane.isCoronaGraph, _isCoronaGraph);
+    _planeShader->setUniform(_uniformCachePlane.scale, _currentScale);
+    _planeShader->setUniform(_uniformCachePlane.centerPixel, _currentCenterPixel);
+    _planeShader->setUniform(_uniformCachePlane.imageryTexture, imageUnit);
+    _planeShader->setUniform(_uniformCachePlane.planeOpacity, opacity());
+    _planeShader->setUniform(
+        _uniformCachePlane.blackTransparencyThreshold,
+        _blackTransparencyThreshold
+    );
+    _planeShader->setUniform(_uniformCachePlane.gammaValue, _gammaValue);
+    _planeShader->setUniform(_uniformCachePlane.contrastValue, _contrastValue);
+    _planeShader->setUniform(
+        _uniformCachePlane.modelViewProjectionTransform,
+        projectionMatrix * glm::mat4(modelViewTransform)
+    );
+
+    ghoul::opengl::TextureUnit tfUnit;
+    TransferFunction* lut = transferFunction();
+    if (lut) {
+        tfUnit.bind(lut->texture());
+        _planeShader->setUniform(_uniformCachePlane.hasLut, true);
+    }
+    else {
+        _planeShader->setUniform(_uniformCachePlane.hasLut, false);
+    }
+    // Must bind all sampler2D, otherwise undefined behaviour
+    _planeShader->setUniform(_uniformCachePlane.lut, tfUnit);
+    _planeShader->setUniform(_uniformCachePlane.faceMode, _faceMode);
+
+    glBindVertexArray(_quadVao);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    _planeShader->deactivate();
+    _frustumShader->activate();
+
+    _frustumShader->setUniform(_uniformCacheFrustum.scale, _currentScale);
+    _frustumShader->setUniform(_uniformCacheFrustum.centerPixel, _currentCenterPixel);
+    _frustumShader->setUniform(_uniformCacheFrustum.planeOpacity, opacity());
+    _frustumShader->setUniform(
+        _uniformCacheFrustum.modelViewProjectionTransform,
+        projectionMatrix * glm::mat4(viewMatrix * spacecraftModelTransform)
+    );
+    _frustumShader->setUniform(
+        _uniformCacheFrustum.modelViewProjectionTransformPlane,
+        projectionMatrix * glm::mat4(modelViewTransform)
+    );
+
+    glBindVertexArray(_frustumVao);
+
+    if (_enableBorder && _enableFrustum) {
+        glDrawArrays(GL_LINES, 0, 16);
+    }
+    else if (!_enableBorder && _enableFrustum) {
+        glDrawArrays(GL_LINES, 0, 8);
+    }
+    else if (!_enableFrustum && _enableBorder) {
+        glDrawArrays(GL_LINES, 8, 16);
+    }
+    _frustumShader->deactivate();
+
+    glDisable(GL_CULL_FACE);
+}
+
+void RenderableSolarImagery::update(const UpdateData& data) {
+    TransferFunction* tf = transferFunction();
+    if (tf) {
+        tf->update();
+    }
+
+    if (_enableDynamicDownload) {
+        ensureDynamicDownloader();
+        if (_dynamicDownloader) {
+            _dynamicDownloader->update(
+                data.time.j2000Seconds(),
+                data.time.j2000Seconds() - data.previousFrameTime.j2000Seconds()
+            );
+            ingestDownloadedFiles();
+        }
+    }
+
+    const Keyframe<ImageMetadata>* keyframe =
+        _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(
+            global::timeManager->time().j2000Seconds(),
+            true
+        );
+
+    updateRuntimeStatus(keyframe);
+
+    requestPredictiveFrames(keyframe, data);
+
+    if (_planeShader->isDirty()) {
+        _planeShader->rebuildFromFile();
+    }
+
+    if (_frustumShader->isDirty()) {
+        _frustumShader->rebuildFromFile();
+    }
+}
+
+void RenderableSolarImagery::updateRuntimeStatus(
+    const Keyframe<ImageMetadata>* displayedKeyframe)
+{
+    if (_dynamicDownloader) {
+        _runtimeImageryStatus = _dynamicDownloader->status();
+    }
+    else {
+        _runtimeImageryStatus.activeInstrument = _currentActiveInstrument;
+        _runtimeImageryStatus.sourceId = -1;
+        _runtimeImageryStatus.requestedSimTimeJ2000 = global::timeManager->time().j2000Seconds();
+        _runtimeImageryStatus.availabilityState = displayedKeyframe ?
+            ImageryAvailabilityState::ShowingImage : ImageryAvailabilityState::NoData;
+    }
+
+    DecodeRequest request = {
+        .metadata = displayedKeyframe ? displayedKeyframe->data : ImageMetadata{},
+        .downsamplingLevel = _downsamplingLevel
+    };
+
+    if (displayedKeyframe) {
+        SolarBrowsingModule* module = global::moduleEngine->module<SolarBrowsingModule>();
+        const int imageSize = displayedKeyframe->data.fullResolution /
+            static_cast<int>(std::pow(2, _downsamplingLevel.value()));
+        std::filesystem::path path = displayedKeyframe->data.filePath;
+        std::filesystem::path cacheFile = module->cacheManager()->cachedFilename(
+            path.replace_extension(".bin"),
+            std::format("{}x{}", imageSize, imageSize)
+        );
+
+        if (_currentKeyframe == displayedKeyframe->id) {
+            _runtimeImageryStatus.availabilityState = ImageryAvailabilityState::ShowingImage;
+            _runtimeImageryStatus.displayedFrameTimeJ2000 = displayedKeyframe->timestamp;
+        }
+        else if (!std::filesystem::exists(cacheFile) &&
+                    _asyncDecoder->isQueuedOrActive(request))
+        {
+            _runtimeImageryStatus.availabilityState = ImageryAvailabilityState::DecodePending;
+            _runtimeImageryStatus.displayedFrameTimeJ2000 = std::nullopt;
+        }
+        else if (!std::filesystem::exists(cacheFile)) {
+            _runtimeImageryStatus.availabilityState = ImageryAvailabilityState::WaitingForDownload;
+            _runtimeImageryStatus.displayedFrameTimeJ2000 = std::nullopt;
+        }
+        else {
+            _runtimeImageryStatus.displayedFrameTimeJ2000 = displayedKeyframe->timestamp;
+        }
+    }
+    else {
+        _runtimeImageryStatus.displayedFrameTimeJ2000 = std::nullopt;
+    }
+
+    _runtimeImageryStatus.decodeQueueSize = _asyncDecoder ? _asyncDecoder->queuedRequestCount() : 0;
+
+    const std::string newState = std::string(toString(_runtimeImageryStatus.availabilityState));
+    const std::string newDisplayedTime = _runtimeImageryStatus.displayedFrameTimeJ2000.has_value() ?
+        std::string(Time(*_runtimeImageryStatus.displayedFrameTimeJ2000).ISO8601()) : "";
+    const std::string newSourceId = std::to_string(_runtimeImageryStatus.sourceId);
+    const std::string newRuntimeStatus = std::format(
+        "{} | instrument={} | sourceId={} | displayed={} | queued={} | active={} | decodeQueue={}",
+        newState,
+        _runtimeImageryStatus.activeInstrument,
+        _runtimeImageryStatus.sourceId,
+        newDisplayedTime.empty() ? "none" : newDisplayedTime,
+        _runtimeImageryStatus.queuedDownloads,
+        _runtimeImageryStatus.activeDownloads,
+        _runtimeImageryStatus.decodeQueueSize
+    );
+
+    if (_dataAvailabilityState.value() != newState) {
+        _dataAvailabilityState = newState;
+    }
+    if (_displayedImageTime.value() != newDisplayedTime) {
+        _displayedImageTime = newDisplayedTime;
+    }
+    if (_currentSourceIdStatus.value() != newSourceId) {
+        _currentSourceIdStatus = newSourceId;
+    }
+    if (_runtimeStatus.value() != newRuntimeStatus) {
+        _runtimeStatus = newRuntimeStatus;
+    }
+}
+
+int RenderableSolarImagery::addInstrumentOption(std::string instrument) {
+    const std::optional<int> existing = instrumentOptionValue(instrument);
+    if (existing.has_value()) {
+        return *existing;
+    }
+
+    const int optionValue = static_cast<int>(_activeInstruments.options().size());
+    _activeInstruments.addOption(optionValue, std::move(instrument));
+    return optionValue;
+}
+
+std::optional<int> RenderableSolarImagery::instrumentOptionValue(
+    std::string_view instrument) const
+{
+    const std::vector<OptionProperty::Option>& options = _activeInstruments.options();
+    auto it = std::find_if(
+        options.begin(),
+        options.end(),
+        [instrument](const OptionProperty::Option& option) {
+            return option.description == instrument;
+        }
+    );
+
+    if (it == options.end()) {
+        return std::nullopt;
+    }
+
+    return it->value;
+}
+
+void RenderableSolarImagery::ensureDynamicDownloader() {
+    if (!_enableDynamicDownload || _dynamicSpacecraftName.empty()) {
+        return;
+    }
+
+    const std::string instrument = _dynamicInstrument.value_or(_currentActiveInstrument);
+    if (instrument.empty()) {
+        return;
+    }
+
+    const int sourceId = [&]() {
+        auto it = _dynamicSourceIds.find(instrument);
+        return (it != _dynamicSourceIds.end()) ? it->second : _dynamicSourceId;
+    }();
+    if (sourceId < 0) {
+        return;
+    }
+
+    if (_dynamicDownloader && instrument == _dynamicDownloaderInstrument) {
+        return;
+    }
+
+    if (_dynamicDownloader) {
+        _dynamicDownloader->deinitialize(_saveDownloadsOnShutdown);
+    }
+
+    std::filesystem::path outputDirectory = _downloadDirectory.value_or(
+        _imageDirectory / instrument
+    );
+
+    _dynamicDownloader = std::make_unique<DynamicHelioviewerImageDownloader>(
+        outputDirectory,
+        _dynamicSpacecraftName,
+        sourceId,
+        instrument,
+        _dynamicCadenceSeconds,
+        _dynamicPrefetchBefore,
+        _dynamicPrefetchAfter,
+        _dynamicMaxConcurrentDownloads,
+        _dynamicRetryBackoffSeconds,
+        _dynamicMaxRetries
+    );
+    _dynamicDownloaderInstrument = instrument;
+}
+
+void RenderableSolarImagery::ingestDownloadedFiles() {
+    if (!_dynamicDownloader) {
+        return;
+    }
+
+    const double now = global::timeManager->time().j2000Seconds();
+    const Keyframe<ImageMetadata>* previousCurrentKeyframe =
+        _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(now, true);
+
+    bool activeInstrumentChanged = false;
+    bool transferFunctionsMayNeedRefresh = false;
+
+    for (const std::filesystem::path& filePath : _dynamicDownloader->downloadedFiles()) {
+        ingestFile(filePath, activeInstrumentChanged, transferFunctionsMayNeedRefresh);
+    }
+
+    if (transferFunctionsMayNeedRefresh) {
         _tfMap = loadTransferFunctions(
             _imageDirectory,
             _imageMetadataMap,
             _configuredTransferFunctions
         );
-        const bool hasData = std::any_of(
-            _imageMetadataMap.begin(),
-            _imageMetadataMap.end(),
-            [](const std::pair<const InstrumentName, Timeline<ImageMetadata>>& p) {
-                return p.second.nKeyframes() > 0;
-            }
-        );
+    }
 
-        if (!hasData) {
-            LWARNING(std::format(
-                "Could not find any image data in '{}'. Image data can be downloaded using "
-                "the HelioviewerDownloadTask. See the solar browsing documentation for more "
-                "information", p.imageDirectory
-            ));
-        }
+    const Keyframe<ImageMetadata>* newCurrentKeyframe =
+        _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(now, true);
+    const bool visibleKeyframeChanged =
+        (previousCurrentKeyframe == nullptr) != (newCurrentKeyframe == nullptr) ||
+        (previousCurrentKeyframe != nullptr && newCurrentKeyframe != nullptr &&
+            previousCurrentKeyframe->id != newCurrentKeyframe->id);
 
-        _enableBorder = p.enableBorder.value_or(_enableBorder);
-        addProperty(_enableBorder);
-
-        _enableFrustum = p.enableFrustum.value_or(_enableFrustum);
-        _enableFrustum.onChange([this]() {
-            _enableBorder = _enableFrustum.value();
-            });
-        addProperty(_enableFrustum);
-
-        _faceMode.addOption(FaceMode::FrontOnly, "Front Only");
-        _faceMode.addOption(FaceMode::SolidBack, "Solid Back");
-        _faceMode.addOption(FaceMode::DoubleSided, "Double Sided");
-        _faceMode = FaceMode::SolidBack;
-
-        if (p.faceMode.has_value()) {
-            _faceMode = codegen::map<FaceMode>(*p.faceMode);
-        }
-        addProperty(_faceMode);
-
-        for (const auto& [instrument, _] : _imageMetadataMap) {
-            addInstrumentOption(instrument);
-        }
-        for (const auto& [instrument, _] : _dynamicSourceIds) {
-            addInstrumentOption(instrument);
-        }
-
-        if (p.startInstrument.has_value()) {
-            _currentActiveInstrument = p.startInstrument.value();
-            const std::optional<int> option = instrumentOptionValue(_currentActiveInstrument);
-            if (option.has_value()) {
-                _activeInstruments = *option;
-            }
-        }
-        else {
-            if (_activeInstruments.hasOption()) {
-                _currentActiveInstrument = _activeInstruments.getDescriptionByValue(
-                    _activeInstruments
-                );
-            }
-        }
-
-        _activeInstruments.onChange([this]() {
-            _currentActiveInstrument = _activeInstruments.getDescriptionByValue(
-                _activeInstruments
-            );
+    if (activeInstrumentChanged) {
+        _predictionIsDirty = true;
+        if (visibleKeyframeChanged) {
             _currentKeyframe = NoActiveKeyframe;
-            _predictionIsDirty = true;
-            if (_enableDynamicDownload && !_dynamicInstrument.has_value()) {
-                _dynamicDownloaderInstrument.clear();
-                if (_dynamicDownloader) {
-                    _dynamicDownloader->deinitialize(_saveDownloadsOnShutdown);
-                }
-                _dynamicDownloader = nullptr;
-            }
-            });
-        addProperty(_activeInstruments);
-
-        _downsamplingLevel = p.downsamplingLevel.value_or(_downsamplingLevel);
-        _downsamplingLevel.onChange([this]() {
-            _currentKeyframe = NoActiveKeyframe;
-            _predictionIsDirty = true;
-            });
-        addProperty(_downsamplingLevel);
-
-        _moveFactor = p.moveFactor.value_or(_moveFactor);
-        _moveFactor.onChange([this]() { createPlaneAndFrustum(_moveFactor); });
-        addProperty(_moveFactor);
-
-        _blackTransparencyThreshold = p.blackTransparencyThreshold.value_or(
-            _blackTransparencyThreshold
-        );
-        addProperty(_blackTransparencyThreshold);
-
-        _gammaValue = p.gamma.value_or(_gammaValue);
-        addProperty(_gammaValue);
-
-        _contrastValue = p.contrast.value_or(_contrastValue);
-        addProperty(_contrastValue);
-
-        _predictFramesAfter = p.predictFramesAfter.value_or(_predictFramesAfter);
-        _predictFramesAfter.onChange([this]() { _predictionIsDirty = true; });
-        addProperty(_predictFramesAfter);
-
-        _predictFramesBefore = p.predictFramesBefore.value_or(_predictFramesBefore);
-        _predictFramesBefore.onChange([this]() { _predictionIsDirty = true; });
-        addProperty(_predictFramesBefore);
-
-        _verboseMode = p.verboseMode.value_or(_verboseMode);
-        _verboseMode.onChange([this]() {
-            if (_asyncDecoder) {
-                _asyncDecoder->setVerboseFlag(_verboseMode);
-            }
-            });
-        addProperty(_verboseMode);
-
-        _asyncDecoder = std::make_unique<AsyncImageDecoder>(
-            std::thread::hardware_concurrency() / 2,
-            _verboseMode
-        );
-    }
-
-    void RenderableSolarImagery::initializeGL() {
-        _planeShader = BaseModule::ProgramObjectManager.request(
-            "SpacecraftImagePlaneProgram",
-            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return global::renderEngine->buildRenderProgram(
-                    "SpacecraftImagePlaneProgram",
-                    absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_vs.glsl"),
-                    absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_fs.glsl")
-                );
-            }
-        );
-
-        _frustumShader = BaseModule::ProgramObjectManager.request(
-            "SpacecraftFrustumProgram",
-            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return global::renderEngine->buildRenderProgram(
-                    "SpacecraftFrustumProgram",
-                    absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_vs.glsl"),
-                    absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_fs.glsl")
-                );
-            }
-        );
-
-        // Initialize plane buffer
-        glCreateVertexArrays(1, &_quadVao);
-        glCreateBuffers(1, &_vertexPositionBuffer);
-        glVertexArrayVertexBuffer(_quadVao, 0, _vertexPositionBuffer, 0, sizeof(PlaneVertex));
-
-        glEnableVertexArrayAttrib(_quadVao, 0);
-        glVertexArrayAttribFormat(_quadVao, 0, 2, GL_FLOAT, GL_FALSE, 0);
-        glVertexArrayAttribBinding(_quadVao, 0, 0);
-        // ST coordinates
-        glEnableVertexArrayAttrib(_quadVao, 1);
-        glVertexArrayAttribFormat(
-            _quadVao,
-            1,
-            2,
-            GL_FLOAT,
-            GL_FALSE,
-            offsetof(PlaneVertex, texCoords)
-        );
-        glVertexArrayAttribBinding(_quadVao, 1, 0);
-
-        // Initialize frustum buffer
-        glCreateVertexArrays(1, &_frustumVao);
-        glCreateBuffers(1, &_frustumPositionBuffer);
-        glVertexArrayVertexBuffer(
-            _frustumVao,
-            0,
-            _frustumPositionBuffer,
-            0,
-            sizeof(FrustumVertex)
-        );
-
-        // Position
-        glEnableVertexArrayAttrib(_frustumVao, 0);
-        glVertexArrayAttribFormat(_frustumVao, 0, 4, GL_FLOAT, GL_FALSE, 0);
-        glVertexArrayAttribBinding(_frustumVao, 0, 0);
-
-        ghoul::opengl::updateUniformLocations(*_planeShader, _uniformCachePlane);
-        ghoul::opengl::updateUniformLocations(*_frustumShader, _uniformCacheFrustum);
-        createPlaneAndFrustum(_moveFactor);
-
-        _imageryTexture = std::make_unique<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit{
-                .dimensions = glm::uvec3(DefaultTextureSize, DefaultTextureSize, 1),
-                .type = GL_TEXTURE_2D,
-                .format = ghoul::opengl::Texture::Format::Red,
-                .dataType = GL_UNSIGNED_BYTE,
-            },
-            ghoul::opengl::Texture::SamplerInit{
-                .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge,
-            }
-            );
-
-        updateImageryTexture();
-    }
-
-    void RenderableSolarImagery::deinitializeGL() {
-        glDeleteVertexArrays(1, &_quadVao);
-        glDeleteVertexArrays(1, &_frustumVao);
-        _imageryTexture = nullptr;
-
-        BaseModule::ProgramObjectManager.release(
-            "SpacecraftImagePlaneProgram",
-            [](ghoul::opengl::ProgramObject* p) {
-                global::renderEngine->removeRenderProgram(p);
-            }
-        );
-        _planeShader = nullptr;
-
-        BaseModule::ProgramObjectManager.release(
-            "SpacecraftFrustumProgram",
-            [](ghoul::opengl::ProgramObject* p) {
-                global::renderEngine->removeRenderProgram(p);
-            }
-        );
-        _frustumShader = nullptr;
-    }
-
-    void RenderableSolarImagery::deinitialize() {
-        if (_dynamicDownloader) {
-            _dynamicDownloader->deinitialize(_saveDownloadsOnShutdown);
-            _dynamicDownloader = nullptr;
-        }
-
-        Renderable::deinitialize();
-    }
-
-    bool RenderableSolarImagery::isReady() const {
-        return _planeShader && _frustumShader;
-    }
-
-    void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
-        updateImageryTexture();
-        const glm::dvec3& sunPositionWorld = sceneGraphNode("Sun")->worldPosition();
-
-        switch (_faceMode) {
-        case FaceMode::FrontOnly:
-            glEnable(GL_CULL_FACE);
-            glCullFace(GL_BACK);
-            break;
-        case FaceMode::SolidBack:
-        case FaceMode::DoubleSided:
-            glDisable(GL_CULL_FACE);
-            break;
-        default:
-            throw ghoul::MissingCaseException();
-        }
-
-        // Perform necessary transforms
-        const glm::dmat4& viewMatrix = data.camera.combinedViewMatrix();
-        const glm::mat4& projectionMatrix = data.camera.projectionMatrix();
-
-        const glm::dvec3& spacecraftPosWorld = data.modelTransform.translation;
-        const glm::dmat3 spacecraftRotWorld = data.modelTransform.rotation;
-
-        const glm::dvec3 sunDir = sunPositionWorld - spacecraftPosWorld;
-        const glm::dvec3 offset = sunDir * _gaussianMoveFactor;
-
-        _position = spacecraftPosWorld + offset;
-        // Normal should point from plane toward spacecraft (i.e. plane faces spacecraft)
-        _normal = glm::normalize(spacecraftPosWorld - sunPositionWorld);
-
-        // (anden88 2025-12-10): An attempt was made to use the glm::lookAt to "simplify"
-        // the rotation matrix without having to build the basis vectors ourselves. However,
-        // the plane rotation would be rotating in all different kinds of orientations.
-         //_rotation = glm::lookAt(
-         //    spacecraftPosWorld,
-         //    glm::dvec3(sunPositionWorld),
-         //    glm::normalize(up)
-         //);
-        // _rotation[3] = glm::dvec4(0.0, 0.0, 0.0, 1.0);
-
-        // Pick a world up. Prefer the spacecraft local +Z transformed to world, but fall back
-        // to a global up if nearly collinear with the normal
-        glm::vec3 worldUp = spacecraftRotWorld * glm::dvec3(0.0, 0.0, 1.0);
-        if (std::abs(glm::dot(worldUp, _normal)) > 0.9999) {
-            // Nearly parallel: pick another stable up (e.g. world Y)
-            worldUp = glm::dvec3(0.0, 1.0, 0.0);
-        }
-
-        // Build tangent basis for the plane: right, upOnPlane, normal
-        glm::vec3 right = glm::normalize(glm::cross(worldUp, _normal));
-        // Already normalized if right and N are normalized
-        glm::vec3 upOnPlane = glm::cross(_normal, right);
-
-        // Build a rotation matrix that transforms local axes -> world axes.
-        // Local axes: +X = right, +Y = upOnPlane, +Z = _normal
-        glm::dmat4 rot = glm::dmat4(1.0);
-        rot[0] = glm::dvec4(right, 0.0);      // first column = world X for local +X
-        rot[1] = glm::dvec4(upOnPlane, 0.0);  // second column = world Y for local +Y
-        rot[2] = glm::dvec4(_normal, 0.0);    // third column = world Z for local +Z
-
-        _rotation = std::move(rot);
-
-        const glm::dmat4 modelTransform =
-            glm::translate(glm::dmat4(1.0), _position) *
-            _rotation *
-            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-        const glm::dmat4 modelViewTransform = viewMatrix * modelTransform;
-
-        // For frustum
-        const glm::dmat4 spacecraftModelTransform =
-            glm::translate(glm::dmat4(1.0), spacecraftPosWorld) *
-            _rotation *
-            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-        _planeShader->activate();
-        ghoul::opengl::TextureUnit imageUnit;
-        imageUnit.bind(*_imageryTexture);
-
-        _planeShader->setUniform(_uniformCachePlane.isCoronaGraph, _isCoronaGraph);
-        _planeShader->setUniform(_uniformCachePlane.scale, _currentScale);
-        _planeShader->setUniform(_uniformCachePlane.centerPixel, _currentCenterPixel);
-        _planeShader->setUniform(_uniformCachePlane.imageryTexture, imageUnit);
-        _planeShader->setUniform(_uniformCachePlane.planeOpacity, opacity());
-        _planeShader->setUniform(
-            _uniformCachePlane.blackTransparencyThreshold,
-            _blackTransparencyThreshold
-        );
-        _planeShader->setUniform(_uniformCachePlane.gammaValue, _gammaValue);
-        _planeShader->setUniform(_uniformCachePlane.contrastValue, _contrastValue);
-        _planeShader->setUniform(
-            _uniformCachePlane.modelViewProjectionTransform,
-            projectionMatrix * glm::mat4(modelViewTransform)
-        );
-
-        ghoul::opengl::TextureUnit tfUnit;
-        TransferFunction* lut = transferFunction();
-        if (lut) {
-            tfUnit.bind(lut->texture());
-            _planeShader->setUniform(_uniformCachePlane.hasLut, true);
-        }
-        else {
-            _planeShader->setUniform(_uniformCachePlane.hasLut, false);
-        }
-        // Must bind all sampler2D, otherwise undefined behaviour
-        _planeShader->setUniform(_uniformCachePlane.lut, tfUnit);
-        _planeShader->setUniform(_uniformCachePlane.faceMode, _faceMode);
-
-        glBindVertexArray(_quadVao);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        _planeShader->deactivate();
-        _frustumShader->activate();
-
-        _frustumShader->setUniform(_uniformCacheFrustum.scale, _currentScale);
-        _frustumShader->setUniform(_uniformCacheFrustum.centerPixel, _currentCenterPixel);
-        _frustumShader->setUniform(_uniformCacheFrustum.planeOpacity, opacity());
-        _frustumShader->setUniform(
-            _uniformCacheFrustum.modelViewProjectionTransform,
-            projectionMatrix * glm::mat4(viewMatrix * spacecraftModelTransform)
-        );
-        _frustumShader->setUniform(
-            _uniformCacheFrustum.modelViewProjectionTransformPlane,
-            projectionMatrix * glm::mat4(modelViewTransform)
-        );
-
-        glBindVertexArray(_frustumVao);
-
-        if (_enableBorder && _enableFrustum) {
-            glDrawArrays(GL_LINES, 0, 16);
-        }
-        else if (!_enableBorder && _enableFrustum) {
-            glDrawArrays(GL_LINES, 0, 8);
-        }
-        else if (!_enableFrustum && _enableBorder) {
-            glDrawArrays(GL_LINES, 8, 16);
-        }
-        _frustumShader->deactivate();
-
-        glDisable(GL_CULL_FACE);
-    }
-
-    void RenderableSolarImagery::update(const UpdateData& data) {
-        TransferFunction* tf = transferFunction();
-        if (tf) {
-            tf->update();
-        }
-
-        if (_enableDynamicDownload) {
-            ensureDynamicDownloader();
-            if (_dynamicDownloader) {
-                _dynamicDownloader->update(
-                    data.time.j2000Seconds(),
-                    data.time.j2000Seconds() - data.previousFrameTime.j2000Seconds()
-                );
-                ingestDownloadedFiles();
-            }
-        }
-
-        const Keyframe<ImageMetadata>* keyframe =
-            _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(
-                global::timeManager->time().j2000Seconds(),
-                true
-            );
-
-        updateRuntimeStatus(keyframe);
-
-        requestPredictiveFrames(keyframe, data);
-
-        if (_planeShader->isDirty()) {
-            _planeShader->rebuildFromFile();
-        }
-
-        if (_frustumShader->isDirty()) {
-            _frustumShader->rebuildFromFile();
         }
     }
 
-    void RenderableSolarImagery::updateRuntimeStatus(
-        const Keyframe<ImageMetadata>* displayedKeyframe)
-    {
-        if (_dynamicDownloader) {
-            _runtimeImageryStatus = _dynamicDownloader->status();
-        }
-        else {
-            _runtimeImageryStatus.activeInstrument = _currentActiveInstrument;
-            _runtimeImageryStatus.sourceId = -1;
-            _runtimeImageryStatus.requestedSimTimeJ2000 = global::timeManager->time().j2000Seconds();
-            _runtimeImageryStatus.availabilityState = displayedKeyframe ?
-                ImageryAvailabilityState::ShowingImage : ImageryAvailabilityState::NoData;
-        }
+    _dynamicDownloader->clearDownloaded();
+}
 
-        DecodeRequest request = {
-            .metadata = displayedKeyframe ? displayedKeyframe->data : ImageMetadata{},
-            .downsamplingLevel = _downsamplingLevel
-        };
-
-        if (displayedKeyframe) {
-            SolarBrowsingModule* module = global::moduleEngine->module<SolarBrowsingModule>();
-            const int imageSize = displayedKeyframe->data.fullResolution /
-                static_cast<int>(std::pow(2, _downsamplingLevel.value()));
-            std::filesystem::path path = displayedKeyframe->data.filePath;
-            std::filesystem::path cacheFile = module->cacheManager()->cachedFilename(
-                path.replace_extension(".bin"),
-                std::format("{}x{}", imageSize, imageSize)
-            );
-
-            if (_currentKeyframe == displayedKeyframe->id) {
-                _runtimeImageryStatus.availabilityState = ImageryAvailabilityState::ShowingImage;
-                _runtimeImageryStatus.displayedFrameTimeJ2000 = displayedKeyframe->timestamp;
-            }
-            else if (!std::filesystem::exists(cacheFile) &&
-                     _asyncDecoder->isQueuedOrActive(request))
-            {
-                _runtimeImageryStatus.availabilityState = ImageryAvailabilityState::DecodePending;
-                _runtimeImageryStatus.displayedFrameTimeJ2000 = std::nullopt;
-            }
-            else if (!std::filesystem::exists(cacheFile)) {
-                _runtimeImageryStatus.availabilityState = ImageryAvailabilityState::WaitingForDownload;
-                _runtimeImageryStatus.displayedFrameTimeJ2000 = std::nullopt;
-            }
-            else {
-                _runtimeImageryStatus.displayedFrameTimeJ2000 = displayedKeyframe->timestamp;
-            }
-        }
-        else {
-            _runtimeImageryStatus.displayedFrameTimeJ2000 = std::nullopt;
-        }
-
-        _runtimeImageryStatus.decodeQueueSize = _asyncDecoder ? _asyncDecoder->queuedRequestCount() : 0;
-
-        const std::string newState = std::string(toString(_runtimeImageryStatus.availabilityState));
-        const std::string newDisplayedTime = _runtimeImageryStatus.displayedFrameTimeJ2000.has_value() ?
-            std::string(Time(*_runtimeImageryStatus.displayedFrameTimeJ2000).ISO8601()) : "";
-        const std::string newSourceId = std::to_string(_runtimeImageryStatus.sourceId);
-        const std::string newRuntimeStatus = std::format(
-            "{} | instrument={} | sourceId={} | displayed={} | queued={} | active={} | decodeQueue={}",
-            newState,
-            _runtimeImageryStatus.activeInstrument,
-            _runtimeImageryStatus.sourceId,
-            newDisplayedTime.empty() ? "none" : newDisplayedTime,
-            _runtimeImageryStatus.queuedDownloads,
-            _runtimeImageryStatus.activeDownloads,
-            _runtimeImageryStatus.decodeQueueSize
-        );
-
-        if (_dataAvailabilityState.value() != newState) {
-            _dataAvailabilityState = newState;
-        }
-        if (_displayedImageTime.value() != newDisplayedTime) {
-            _displayedImageTime = newDisplayedTime;
-        }
-        if (_currentSourceIdStatus.value() != newSourceId) {
-            _currentSourceIdStatus = newSourceId;
-        }
-        if (_runtimeStatus.value() != newRuntimeStatus) {
-            _runtimeStatus = newRuntimeStatus;
-        }
+void RenderableSolarImagery::ingestFile(
+    const std::filesystem::path& filePath,
+    bool& activeInstrumentChanged,
+    bool& transferFunctionsMayNeedRefresh)
+{
+    const std::optional<ImageMetadata> metadata = parseJ2kMetadata(filePath);
+    if (!metadata.has_value()) {
+        LERROR(std::format(
+            "Failed to parse metadata for streamed Helioviewer image '{}'",
+            filePath
+        ));
+        return;
     }
 
-    int RenderableSolarImagery::addInstrumentOption(std::string instrument) {
-        const std::optional<int> existing = instrumentOptionValue(instrument);
-        if (existing.has_value()) {
-            return *existing;
-        }
-
-        const int optionValue = static_cast<int>(_activeInstruments.options().size());
-        _activeInstruments.addOption(optionValue, std::move(instrument));
-        return optionValue;
+    const std::optional<double> timestamp = j2000FromHelioviewerFilename(filePath);
+    if (!timestamp.has_value()) {
+        LERROR(std::format(
+            "Failed to derive timestamp from streamed Helioviewer image '{}'",
+            filePath
+        ));
+        return;
     }
 
-    std::optional<int> RenderableSolarImagery::instrumentOptionValue(
-        std::string_view instrument) const
-    {
-        const std::vector<OptionProperty::Option>& options = _activeInstruments.options();
-        auto it = std::find_if(
-            options.begin(),
-            options.end(),
-            [instrument](const OptionProperty::Option& option) {
-                return option.description == instrument;
-            }
-        );
+    const std::string instrument = instrumentFromHelioviewerFilename(filePath).value_or(
+        _dynamicDownloaderInstrument
+    );
+    const bool hadInstrument = _imageMetadataMap.contains(instrument);
+    _imageMetadataMap[instrument].addKeyframe(*timestamp, *metadata);
 
-        if (it == options.end()) {
-            return std::nullopt;
-        }
+    if (!hadInstrument) {
+        const int optionValue = addInstrumentOption(instrument);
+        transferFunctionsMayNeedRefresh = true;
 
-        return it->value;
-    }
-
-    void RenderableSolarImagery::ensureDynamicDownloader() {
-        if (!_enableDynamicDownload || _dynamicSpacecraftName.empty()) {
-            return;
-        }
-
-        const std::string instrument = _dynamicInstrument.value_or(_currentActiveInstrument);
-        if (instrument.empty()) {
-            return;
-        }
-
-        const int sourceId = [&]() {
-            auto it = _dynamicSourceIds.find(instrument);
-            return (it != _dynamicSourceIds.end()) ? it->second : _dynamicSourceId;
-        }();
-        if (sourceId < 0) {
-            return;
-        }
-
-        if (_dynamicDownloader && instrument == _dynamicDownloaderInstrument) {
-            return;
-        }
-
-        if (_dynamicDownloader) {
-            _dynamicDownloader->deinitialize(_saveDownloadsOnShutdown);
-        }
-
-        std::filesystem::path outputDirectory = _downloadDirectory.value_or(
-            _imageDirectory / instrument
-        );
-
-        _dynamicDownloader = std::make_unique<DynamicHelioviewerImageDownloader>(
-            outputDirectory,
-            _dynamicSpacecraftName,
-            sourceId,
-            instrument,
-            _dynamicCadenceSeconds,
-            _dynamicPrefetchBefore,
-            _dynamicPrefetchAfter,
-            _dynamicMaxConcurrentDownloads,
-            _dynamicRetryBackoffSeconds,
-            _dynamicMaxRetries
-        );
-        _dynamicDownloaderInstrument = instrument;
-    }
-
-    void RenderableSolarImagery::ingestDownloadedFiles() {
-        if (!_dynamicDownloader) {
-            return;
-        }
-
-        const double now = global::timeManager->time().j2000Seconds();
-        const Keyframe<ImageMetadata>* previousCurrentKeyframe =
-            _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(now, true);
-
-        bool activeInstrumentChanged = false;
-        bool transferFunctionsMayNeedRefresh = false;
-
-        for (const std::filesystem::path& filePath : _dynamicDownloader->downloadedFiles()) {
-            ingestFile(filePath, activeInstrumentChanged, transferFunctionsMayNeedRefresh);
-        }
-
-        if (transferFunctionsMayNeedRefresh) {
-            _tfMap = loadTransferFunctions(
-                _imageDirectory,
-                _imageMetadataMap,
-                _configuredTransferFunctions
-            );
-        }
-
-        const Keyframe<ImageMetadata>* newCurrentKeyframe =
-            _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(now, true);
-        const bool visibleKeyframeChanged =
-            (previousCurrentKeyframe == nullptr) != (newCurrentKeyframe == nullptr) ||
-            (previousCurrentKeyframe != nullptr && newCurrentKeyframe != nullptr &&
-             previousCurrentKeyframe->id != newCurrentKeyframe->id);
-
-        if (activeInstrumentChanged) {
-            _predictionIsDirty = true;
-            if (visibleKeyframeChanged) {
-                _currentKeyframe = NoActiveKeyframe;
-            }
-        }
-
-        _dynamicDownloader->clearDownloaded();
-    }
-
-    void RenderableSolarImagery::ingestFile(
-        const std::filesystem::path& filePath,
-        bool& activeInstrumentChanged,
-        bool& transferFunctionsMayNeedRefresh)
-    {
-        const std::optional<ImageMetadata> metadata = parseJ2kMetadata(filePath);
-        if (!metadata.has_value()) {
-            LERROR(std::format(
-                "Failed to parse metadata for streamed Helioviewer image '{}'",
-                filePath
-            ));
-            return;
-        }
-
-        const std::optional<double> timestamp = j2000FromHelioviewerFilename(filePath);
-        if (!timestamp.has_value()) {
-            LERROR(std::format(
-                "Failed to derive timestamp from streamed Helioviewer image '{}'",
-                filePath
-            ));
-            return;
-        }
-
-        const std::string instrument = instrumentFromHelioviewerFilename(filePath).value_or(
-            _dynamicDownloaderInstrument
-        );
-        const bool hadInstrument = _imageMetadataMap.contains(instrument);
-        _imageMetadataMap[instrument].addKeyframe(*timestamp, *metadata);
-
-        if (!hadInstrument) {
-            const int optionValue = addInstrumentOption(instrument);
-            transferFunctionsMayNeedRefresh = true;
-
-            if (_activeInstruments.options().size() == 1) {
-                _activeInstruments = optionValue;
-                _currentActiveInstrument = instrument;
-                activeInstrumentChanged = true;
-            }
-        }
-
-        if (instrument == _currentActiveInstrument) {
+        if (_activeInstruments.options().size() == 1) {
+            _activeInstruments = optionValue;
+            _currentActiveInstrument = instrument;
             activeInstrumentChanged = true;
         }
     }
 
-    TransferFunction* RenderableSolarImagery::transferFunction() {
-        return _tfMap[_currentActiveInstrument].get();
+    if (instrument == _currentActiveInstrument) {
+        activeInstrumentChanged = true;
     }
+}
 
-    const RuntimeImageryStatus& RenderableSolarImagery::runtimeStatus() const {
-        return _runtimeImageryStatus;
-    }
+TransferFunction* RenderableSolarImagery::transferFunction() {
+    return _tfMap[_currentActiveInstrument].get();
+}
 
-    const std::unique_ptr<ghoul::opengl::Texture>&
-        RenderableSolarImagery::imageryTexture() const
-    {
-        return _imageryTexture;
-    }
+const RuntimeImageryStatus& RenderableSolarImagery::runtimeStatus() const {
+    return _runtimeImageryStatus;
+}
 
-    float RenderableSolarImagery::contrastValue() const {
-        return _contrastValue;
-    }
+const std::unique_ptr<ghoul::opengl::Texture>&
+    RenderableSolarImagery::imageryTexture() const
+{
+    return _imageryTexture;
+}
 
-    float RenderableSolarImagery::blackTransparencyThreshold() const {
-        return _blackTransparencyThreshold;
-    }
+float RenderableSolarImagery::contrastValue() const {
+    return _contrastValue;
+}
 
-    float RenderableSolarImagery::gammaValue() const {
-        return _gammaValue;
-    }
+float RenderableSolarImagery::blackTransparencyThreshold() const {
+    return _blackTransparencyThreshold;
+}
 
-    float RenderableSolarImagery::scale() const {
-        return _currentScale;
-    }
+float RenderableSolarImagery::gammaValue() const {
+    return _gammaValue;
+}
 
-    bool RenderableSolarImagery::isCoronaGraph() const {
-        return _isCoronaGraph;
-    }
+float RenderableSolarImagery::scale() const {
+    return _currentScale;
+}
 
-    glm::vec2 RenderableSolarImagery::centerPixel() const {
-        return _currentCenterPixel;
-    }
+bool RenderableSolarImagery::isCoronaGraph() const {
+    return _isCoronaGraph;
+}
 
-    void RenderableSolarImagery::updateImageryTexture() {
-        const Keyframe<ImageMetadata>* keyframe =
-            _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(
-                global::timeManager->time().j2000Seconds(),
-                true
+glm::vec2 RenderableSolarImagery::centerPixel() const {
+    return _currentCenterPixel;
+}
+
+void RenderableSolarImagery::updateImageryTexture() {
+    const Keyframe<ImageMetadata>* keyframe =
+        _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(
+            global::timeManager->time().j2000Seconds(),
+            true
+        );
+
+    if (!keyframe) {
+        // No keyframe avaialble so we clear the texture
+        if (_currentKeyframe != NoActiveKeyframe) {
+            // No need to re-upload an empty image
+            _isCoronaGraph = false;
+            _currentScale = 0;
+            _currentCenterPixel = glm::vec2(2.f);
+            _currentKeyframe = NoActiveKeyframe;
+
+            // Create some dummy data that will be uploaded to the GPU to avoid UB
+            std::vector<unsigned char> buffer;
+            buffer.resize(
+                DefaultTextureSize * DefaultTextureSize *
+                sizeof(ImagePrecision)
+            );
+            _imageryTexture->resize(
+                glm::uvec3(DefaultTextureSize, DefaultTextureSize, 1)
+            );
+            _imageryTexture->setPixelData(
+                reinterpret_cast<std::byte*>(buffer.data())
             );
 
-        if (!keyframe) {
-            // No keyframe avaialble so we clear the texture
-            if (_currentKeyframe != NoActiveKeyframe) {
-                // No need to re-upload an empty image
-                _isCoronaGraph = false;
-                _currentScale = 0;
-                _currentCenterPixel = glm::vec2(2.f);
-                _currentKeyframe = NoActiveKeyframe;
-
-                // Create some dummy data that will be uploaded to the GPU to avoid UB
-                std::vector<unsigned char> buffer;
-                buffer.resize(
-                    DefaultTextureSize * DefaultTextureSize *
-                    sizeof(ImagePrecision)
-                );
-                _imageryTexture->resize(
-                    glm::uvec3(DefaultTextureSize, DefaultTextureSize, 1)
-                );
-                _imageryTexture->setPixelData(
-                    reinterpret_cast<std::byte*>(buffer.data())
-                );
-
-                LDEBUG(std::format(
-                    "Cleared solar image for instrument '{}' at simulation time {}",
-                    _currentActiveInstrument,
-                    global::timeManager->time().ISO8601()
-                ));
-            }
-            return;
+            LDEBUG(std::format(
+                "Cleared solar image for instrument '{}' at simulation time {}",
+                _currentActiveInstrument,
+                global::timeManager->time().ISO8601()
+            ));
         }
+        return;
+    }
 
-        if (_currentKeyframe == keyframe->id) {
-            // This keyframe is already uploaded to the GPU
-            return;
-        }
+    if (_currentKeyframe == keyframe->id) {
+        // This keyframe is already uploaded to the GPU
+        return;
+    }
 
-        const float fullRes = static_cast<float>(keyframe->data.fullResolution);
-        const unsigned int imageSize = static_cast<unsigned int>(
-            fullRes / std::pow(2.f, static_cast<float>(_downsamplingLevel))
-            );
+    const float fullRes = static_cast<float>(keyframe->data.fullResolution);
+    const unsigned int imageSize = static_cast<unsigned int>(
+        fullRes / std::pow(2.f, static_cast<float>(_downsamplingLevel))
+        );
+
+    SolarBrowsingModule* module = global::moduleEngine->module<SolarBrowsingModule>();
+
+    std::filesystem::path path = keyframe->data.filePath;
+    std::filesystem::path cached = module->cacheManager()->cachedFilename(
+        path.replace_extension(".bin"),
+        std::format("{}x{}", imageSize, imageSize)
+    );
+
+    // If the current keyframe image has not yet been decoded and cached we'll just wait
+    // until it is available. The previous image will be shown until the new one is ready
+    if (std::filesystem::exists(cached)) {
+        // Load data from cache
+        DecodedImageData data = loadDecodedDataFromCache(
+            cached,
+            keyframe->data,
+            imageSize
+        );
+
+        _isCoronaGraph = data.metadata.isCoronaGraph;
+        _currentScale = data.metadata.scale;
+        _currentCenterPixel = data.metadata.centerPixel;
+        _currentKeyframe = keyframe->id;
+
+        _imageryTexture->resize(glm::uvec3(data.imageSize, data.imageSize, 1));
+        _imageryTexture->setPixelData(
+            reinterpret_cast<std::byte*>(data.buffer.data())
+        );
+
+        LDEBUG(std::format(
+            "Showing solar image '{}' for instrument '{}' at image time {} "
+            "(simulation time {})",
+            keyframe->data.filePath.filename(),
+            _currentActiveInstrument,
+            Time(keyframe->timestamp).ISO8601(),
+            global::timeManager->time().ISO8601()
+        ));
+    }
+}
+
+void RenderableSolarImagery::requestPredictiveFrames(
+    const Keyframe<ImageMetadata>* keyframe,
+    const UpdateData& data)
+{
+    if (!keyframe) {
+        return;
+    }
+
+    // Only update prediction if we've moved to a different keyframe
+    if (!_predictionIsDirty && _lastPredictedKeyframe == keyframe->id) {
+        // Already predicted this keyframe
+        return;
+    }
+
+    // Detect playback direction
+    const double now = data.time.j2000Seconds();
+    const double prevTime = data.previousFrameTime.j2000Seconds();
+    const double dt = now - prevTime;
+
+    const bool isPlayingForward = dt >= 0;
+    const bool isPaused = now == prevTime;
+
+    // Find keyframes within prediction window
+    int framesBefore = 0;
+    int framesAfter = 0;
+
+    if (isPaused) {
+        framesBefore = _predictFramesAfter / 2;
+        framesAfter = _predictFramesAfter / 2;
+    }
+    else if (isPlayingForward) {
+        framesBefore = _predictFramesBefore;
+        framesAfter = _predictFramesAfter;
+    }
+    else {
+        // Swap for backwards playtime
+        framesBefore = _predictFramesAfter;
+        framesAfter = _predictFramesBefore;
+    }
+
+    // Get the corresponding keyframes within the prediction window
+    const Timeline<ImageMetadata>& timeline = _imageMetadataMap[_currentActiveInstrument];
+    const std::deque<Keyframe<ImageMetadata>>& keyframes = timeline.keyframes();
+
+    // Find the current keyframe iterator
+    auto currentIt = std::find_if(
+        keyframes.begin(),
+        keyframes.end(),
+        [keyframe](const Keyframe<ImageMetadata>& kf) { return &kf == keyframe; }
+    );
+
+    if (currentIt == keyframes.end()) {
+        return;
+    }
+
+    auto requestFrameIfNeeded = [this](const Keyframe<ImageMetadata>& kf) {
+        // Check if the keyframe has already been decoded and exists in cache
+        const int imageSize = kf.data.fullResolution /
+            static_cast<int>(std::pow(2, _downsamplingLevel.value())
+                );
 
         SolarBrowsingModule* module = global::moduleEngine->module<SolarBrowsingModule>();
 
-        std::filesystem::path path = keyframe->data.filePath;
-        std::filesystem::path cached = module->cacheManager()->cachedFilename(
+        std::filesystem::path path = kf.data.filePath;
+        std::filesystem::path cacheFile = module->cacheManager()->cachedFilename(
             path.replace_extension(".bin"),
             std::format("{}x{}", imageSize, imageSize)
         );
 
-        // If the current keyframe image has not yet been decoded and cached we'll just wait
-        // until it is available. The previous image will be shown until the new one is ready
-        if (std::filesystem::exists(cached)) {
-            // Load data from cache
-            DecodedImageData data = loadDecodedDataFromCache(
-                cached,
-                keyframe->data,
-                imageSize
-            );
-
-            _isCoronaGraph = data.metadata.isCoronaGraph;
-            _currentScale = data.metadata.scale;
-            _currentCenterPixel = data.metadata.centerPixel;
-            _currentKeyframe = keyframe->id;
-
-            _imageryTexture->resize(glm::uvec3(data.imageSize, data.imageSize, 1));
-            _imageryTexture->setPixelData(
-                reinterpret_cast<std::byte*>(data.buffer.data())
-            );
-
-            LDEBUG(std::format(
-                "Showing solar image '{}' for instrument '{}' at image time {} "
-                "(simulation time {})",
-                keyframe->data.filePath.filename(),
-                _currentActiveInstrument,
-                Time(keyframe->timestamp).ISO8601(),
-                global::timeManager->time().ISO8601()
-            ));
-        }
-    }
-
-    void RenderableSolarImagery::requestPredictiveFrames(
-        const Keyframe<ImageMetadata>* keyframe,
-        const UpdateData& data)
-    {
-        if (!keyframe) {
+        // Skip if file is already cached
+        if (std::filesystem::exists(cacheFile)) {
             return;
         }
 
-        // Only update prediction if we've moved to a different keyframe
-        if (!_predictionIsDirty && _lastPredictedKeyframe == keyframe->id) {
-            // Already predicted this keyframe
-            return;
-        }
-
-        // Detect playback direction
-        const double now = data.time.j2000Seconds();
-        const double prevTime = data.previousFrameTime.j2000Seconds();
-        const double dt = now - prevTime;
-
-        const bool isPlayingForward = dt >= 0;
-        const bool isPaused = now == prevTime;
-
-        // Find keyframes within prediction window
-        int framesBefore = 0;
-        int framesAfter = 0;
-
-        if (isPaused) {
-            framesBefore = _predictFramesAfter / 2;
-            framesAfter = _predictFramesAfter / 2;
-        }
-        else if (isPlayingForward) {
-            framesBefore = _predictFramesBefore;
-            framesAfter = _predictFramesAfter;
-        }
-        else {
-            // Swap for backwards playtime
-            framesBefore = _predictFramesAfter;
-            framesAfter = _predictFramesBefore;
-        }
-
-        // Get the corresponding keyframes within the prediction window
-        const Timeline<ImageMetadata>& timeline = _imageMetadataMap[_currentActiveInstrument];
-        const std::deque<Keyframe<ImageMetadata>>& keyframes = timeline.keyframes();
-
-        // Find the current keyframe iterator
-        auto currentIt = std::find_if(
-            keyframes.begin(),
-            keyframes.end(),
-            [keyframe](const Keyframe<ImageMetadata>& kf) { return &kf == keyframe; }
+        // Request new images to decode
+        DecodeRequest request(
+            kf.data,
+            _downsamplingLevel,
+            [this, cacheFile](DecodedImageData&& decodedData) {
+                saveDecodedDataToCache(cacheFile, decodedData, _verboseMode);
+            }
         );
-
-        if (currentIt == keyframes.end()) {
-            return;
-        }
-
-        auto requestFrameIfNeeded = [this](const Keyframe<ImageMetadata>& kf) {
-            // Check if the keyframe has already been decoded and exists in cache
-            const int imageSize = kf.data.fullResolution /
-                static_cast<int>(std::pow(2, _downsamplingLevel.value())
-                    );
-
-            SolarBrowsingModule* module = global::moduleEngine->module<SolarBrowsingModule>();
-
-            std::filesystem::path path = kf.data.filePath;
-            std::filesystem::path cacheFile = module->cacheManager()->cachedFilename(
-                path.replace_extension(".bin"),
-                std::format("{}x{}", imageSize, imageSize)
-            );
-
-            // Skip if file is already cached
-            if (std::filesystem::exists(cacheFile)) {
-                return;
-            }
-
-            // Request new images to decode
-            DecodeRequest request(
-                kf.data,
-                _downsamplingLevel,
-                [this, cacheFile](DecodedImageData&& decodedData) {
-                    saveDecodedDataToCache(cacheFile, decodedData, _verboseMode);
-                }
-            );
-            _asyncDecoder->requestDecode(std::move(request));
-            };
-
-        // Request frames before and after the current keyframe
-        for (int i = 0; i <= framesAfter; i++) {
-            auto afterIt = std::next(currentIt, i);
-            if (afterIt == keyframes.end()) {
-                break;
-            }
-            requestFrameIfNeeded(*afterIt);
-        }
-
-        std::deque<Keyframe<ImageMetadata>>::const_iterator beforeIt = currentIt;
-        for (int i = 0; i < framesBefore && beforeIt != keyframes.begin(); i++) {
-            beforeIt--;
-            requestFrameIfNeeded(*beforeIt);
-        }
-
-        _lastPredictedKeyframe = keyframe->id;
-        _predictionIsDirty = false;
-    }
-
-    void RenderableSolarImagery::createPlaneAndFrustum(double moveDistance) {
-        // Computing the image plane position using linear scale is not sufficient for fine
-        // tuning movement near the Sun. A Gaussian function* (3.1) is used to address this
-        // issue: *https://www.diva-portal.org/smash/get/diva2:1147161/FULLTEXT01.pdf
-        _gaussianMoveFactor = exp(-(pow((moveDistance - 1), 2.0)) / (2.0));
-        _size = static_cast<float>(_gaussianMoveFactor * distanceconstants::SolarRadius);
-        createPlane();
-        createFrustum();
-    }
-
-    void RenderableSolarImagery::createPlane() const {
-        const std::array<PlaneVertex, 6> vertexData = {
-            PlaneVertex{ glm::vec2(-_size, -_size), glm::vec2(0.f, 0.f) },
-            PlaneVertex{ glm::vec2(_size,  _size), glm::vec2(1.f, 1.f) },
-            PlaneVertex{ glm::vec2(-_size,  _size), glm::vec2(0.f, 1.f) },
-            PlaneVertex{ glm::vec2(-_size, -_size), glm::vec2(0.f, 0.f) },
-            PlaneVertex{ glm::vec2(_size, -_size), glm::vec2(1.f, 0.f) },
-            PlaneVertex{ glm::vec2(_size,  _size), glm::vec2(1.f, 1.f) },
+        _asyncDecoder->requestDecode(std::move(request));
         };
 
-        glNamedBufferData(
-            _vertexPositionBuffer,
-            sizeof(vertexData),
-            vertexData.data(),
-            GL_STATIC_DRAW
-        );
+    // Request frames before and after the current keyframe
+    for (int i = 0; i <= framesAfter; i++) {
+        auto afterIt = std::next(currentIt, i);
+        if (afterIt == keyframes.end()) {
+            break;
+        }
+        requestFrameIfNeeded(*afterIt);
     }
 
-    void RenderableSolarImagery::createFrustum() const {
-        // Vertex orders x, y, z, w
-        // Where w indicates if vertex should be drawn in spacecraft or planes coordinate
-        // system
-        const std::array<FrustumVertex, 16> vertexData = {
-            FrustumVertex{ glm::vec4(0.f,    0.f,   0.f, 0.f) },
-            FrustumVertex{ glm::vec4(_size,  _size, 0.f, 1.f) },
-            FrustumVertex{ glm::vec4(0.f,    0.f,   0.f, 0.f) },
-            FrustumVertex{ glm::vec4(-_size, -_size, 0.f, 1.f) },
-            FrustumVertex{ glm::vec4(0.f,    0.f,   0.f, 0.f) },
-            FrustumVertex{ glm::vec4(_size, -_size, 0.f, 1.f) },
-            FrustumVertex{ glm::vec4(0.f,    0.f,   0.f, 0.f) },
-            FrustumVertex{ glm::vec4(-_size,  _size, 0.f, 1.f) },
-            // Borders
-            // Left
-            FrustumVertex{ glm::vec4(-_size, -_size, 0.f, 1.f) },
-            FrustumVertex{ glm::vec4(-_size,  _size, 0.f, 1.f) },
-            // Top
-            FrustumVertex{ glm::vec4(-_size,  _size, 0.f, 1.f) },
-            FrustumVertex{ glm::vec4(_size,  _size, 0.f, 1.f) },
-            // Right
-            FrustumVertex{ glm::vec4(_size,  _size, 0.f, 1.f) },
-            FrustumVertex{ glm::vec4(_size, -_size, 0.f, 1.f) },
-            // Bottom
-            FrustumVertex{ glm::vec4(_size, -_size, 0.f, 1.f) },
-            FrustumVertex{ glm::vec4(-_size, -_size, 0.f, 1.f) },
-        };
-
-        glNamedBufferData(
-            _frustumPositionBuffer,
-            sizeof(vertexData),
-            vertexData.data(),
-            GL_STATIC_DRAW
-        );
+    std::deque<Keyframe<ImageMetadata>>::const_iterator beforeIt = currentIt;
+    for (int i = 0; i < framesBefore && beforeIt != keyframes.begin(); i++) {
+        beforeIt--;
+        requestFrameIfNeeded(*beforeIt);
     }
 
-    const glm::vec3& RenderableSolarImagery::planeNormal() const {
-        return _normal;
-    }
-    const glm::dvec3& RenderableSolarImagery::planeWorldPosition() const {
-        return _position;
-    }
-    const glm::dmat4& RenderableSolarImagery::planeWorldRotation() const {
-        return _rotation;
-    }
+    _lastPredictedKeyframe = keyframe->id;
+    _predictionIsDirty = false;
+}
+
+void RenderableSolarImagery::createPlaneAndFrustum(double moveDistance) {
+    // Computing the image plane position using linear scale is not sufficient for fine
+    // tuning movement near the Sun. A Gaussian function* (3.1) is used to address this
+    // issue: *https://www.diva-portal.org/smash/get/diva2:1147161/FULLTEXT01.pdf
+    _gaussianMoveFactor = exp(-(pow((moveDistance - 1), 2.0)) / (2.0));
+    _size = static_cast<float>(_gaussianMoveFactor * distanceconstants::SolarRadius);
+    createPlane();
+    createFrustum();
+}
+
+void RenderableSolarImagery::createPlane() const {
+    const std::array<PlaneVertex, 6> vertexData = {
+        PlaneVertex{ glm::vec2(-_size, -_size), glm::vec2(0.f, 0.f) },
+        PlaneVertex{ glm::vec2(_size,  _size), glm::vec2(1.f, 1.f) },
+        PlaneVertex{ glm::vec2(-_size,  _size), glm::vec2(0.f, 1.f) },
+        PlaneVertex{ glm::vec2(-_size, -_size), glm::vec2(0.f, 0.f) },
+        PlaneVertex{ glm::vec2(_size, -_size), glm::vec2(1.f, 0.f) },
+        PlaneVertex{ glm::vec2(_size,  _size), glm::vec2(1.f, 1.f) },
+    };
+
+    glNamedBufferData(
+        _vertexPositionBuffer,
+        sizeof(vertexData),
+        vertexData.data(),
+        GL_STATIC_DRAW
+    );
+}
+
+void RenderableSolarImagery::createFrustum() const {
+    // Vertex orders x, y, z, w
+    // Where w indicates if vertex should be drawn in spacecraft or planes coordinate
+    // system
+    const std::array<FrustumVertex, 16> vertexData = {
+        FrustumVertex{ glm::vec4(0.f,    0.f,   0.f, 0.f) },
+        FrustumVertex{ glm::vec4(_size,  _size, 0.f, 1.f) },
+        FrustumVertex{ glm::vec4(0.f,    0.f,   0.f, 0.f) },
+        FrustumVertex{ glm::vec4(-_size, -_size, 0.f, 1.f) },
+        FrustumVertex{ glm::vec4(0.f,    0.f,   0.f, 0.f) },
+        FrustumVertex{ glm::vec4(_size, -_size, 0.f, 1.f) },
+        FrustumVertex{ glm::vec4(0.f,    0.f,   0.f, 0.f) },
+        FrustumVertex{ glm::vec4(-_size,  _size, 0.f, 1.f) },
+        // Borders
+        // Left
+        FrustumVertex{ glm::vec4(-_size, -_size, 0.f, 1.f) },
+        FrustumVertex{ glm::vec4(-_size,  _size, 0.f, 1.f) },
+        // Top
+        FrustumVertex{ glm::vec4(-_size,  _size, 0.f, 1.f) },
+        FrustumVertex{ glm::vec4(_size,  _size, 0.f, 1.f) },
+        // Right
+        FrustumVertex{ glm::vec4(_size,  _size, 0.f, 1.f) },
+        FrustumVertex{ glm::vec4(_size, -_size, 0.f, 1.f) },
+        // Bottom
+        FrustumVertex{ glm::vec4(_size, -_size, 0.f, 1.f) },
+        FrustumVertex{ glm::vec4(-_size, -_size, 0.f, 1.f) },
+    };
+
+    glNamedBufferData(
+        _frustumPositionBuffer,
+        sizeof(vertexData),
+        vertexData.data(),
+        GL_STATIC_DRAW
+    );
+}
+
+const glm::vec3& RenderableSolarImagery::planeNormal() const {
+    return _normal;
+}
+const glm::dvec3& RenderableSolarImagery::planeWorldPosition() const {
+    return _position;
+}
+const glm::dmat4& RenderableSolarImagery::planeWorldRotation() const {
+    return _rotation;
+}
 
 } // namespace openspace

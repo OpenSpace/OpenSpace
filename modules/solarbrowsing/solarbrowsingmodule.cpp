@@ -37,7 +37,9 @@
 
 namespace openspace {
 
-SolarBrowsingModule::SolarBrowsingModule() : OpenSpaceModule(Name) {}
+SolarBrowsingModule::SolarBrowsingModule()
+    : OpenSpaceModule(Name)
+{}
 
 void SolarBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul::TemplateFactory<Renderable>* fRenderable =
@@ -54,21 +56,21 @@ void SolarBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
 
     fTask->registerClass<HelioviewerDownloadTask>("HelioviewerDownloadTask");
 
-    const std::filesystem::path CacheDirectory = absPath(
+    const std::filesystem::path cacheDirectory = absPath(
         "${SYNC_DYNAMIC}/solarbrowsing/cache"
     );
 
-    if (!std::filesystem::is_directory(CacheDirectory)) {
-        std::filesystem::create_directories(CacheDirectory);
+    if (!std::filesystem::is_directory(cacheDirectory)) {
+        std::filesystem::create_directories(cacheDirectory);
     }
 
     ghoul_assert(
-        std::filesystem::is_directory(CacheDirectory),
+        std::filesystem::is_directory(cacheDirectory),
         "Cache directory did not exist"
     );
     ghoul_assert(!_cacheManager, "CacheManager was already created");
 
-    _cacheManager = std::make_unique<ghoul::filesystem::CacheManager>(CacheDirectory);
+    _cacheManager = std::make_unique<ghoul::filesystem::CacheManager>(cacheDirectory);
     ghoul_assert(_cacheManager, "CacheManager creation failed");
 }
 

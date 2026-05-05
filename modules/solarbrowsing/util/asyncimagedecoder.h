@@ -68,15 +68,14 @@ public:
     /**
      * Stops all worker threads and waits for them to finish.
      *
-     * Pending requests in the queue may not be processed after destruction
-     * begins.
+     * Pending requests in the queue may not be processed after destruction begins.
      */
     ~AsyncImageDecoder();
 
     /**
      * Submits a decode request to be processed asynchronously. If an equivalent request
-     * (same image file and downsampling level) is already being processed, the request
-     * is ignored.
+     * (same image file and downsampling level) is already being processed, the request is
+     * ignored.
      *
      * The provided callback will be invoked once decoding has completed.
      *
@@ -91,8 +90,8 @@ private:
     /**
      * Entry point for each worker thread.
      *
-     * Continuously waits for queued decode requests and processes them until
-     * the decoder is stopped.
+     * Continuously waits for queued decode requests and processes them until the decoder
+     * is stopped.
      */
     void workerThread();
 
@@ -106,7 +105,7 @@ private:
      */
     void decodeRequest(const DecodeRequest& request);
 
-    bool _verbose = false;
+    bool _isVerbose = false;
     std::atomic<size_t> _queuedRequestCount = 0;
 
     // Thread management
@@ -120,6 +119,6 @@ private:
     std::unordered_map<std::string, bool> _activeRequests;
 };
 
-} //namespace openspace
+} // namespace openspace
 
-#endif // !__OPENSPACE_MODULE_SOLARBROWSING___ASYNCIMAGEDECODER___H__
+#endif // __OPENSPACE_MODULE_SOLARBROWSING___ASYNCIMAGEDECODER___H__

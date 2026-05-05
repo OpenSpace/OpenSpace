@@ -25,7 +25,7 @@
 #include "fragment.glsl"
 
 in Data {
-  vec2 textCoords;
+  vec2 texCoords;
   float depth;
 } in_data;
 
@@ -54,7 +54,7 @@ float contrast(float intensity) {
 Fragment getFragment() {
   float intensityOrg = texture(
     imageryTexture,
-    vec2(in_data.textCoords.s, 1.0 - in_data.textCoords.t)
+    vec2(in_data.texCoords.s, 1.0 - in_data.texCoords.t)
   ).r;
 
   // Remove black background completely
@@ -87,8 +87,8 @@ Fragment getFragment() {
     discard;
   }
 
-  float absx = abs(0.5 - in_data.textCoords.s);
-  float absy = abs(0.5 - in_data.textCoords.t);
+  float absx = abs(0.5 - in_data.texCoords.s);
+  float absy = abs(0.5 - in_data.texCoords.t);
 
   if (isCoronaGraph && length(outColor.xyz) < 0.10 &&
      ((absy * absy + absx * absx) > 0.25))

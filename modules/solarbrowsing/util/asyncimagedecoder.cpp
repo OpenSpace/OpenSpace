@@ -37,7 +37,7 @@ namespace {
 namespace openspace {
 
 AsyncImageDecoder::AsyncImageDecoder(size_t numThreads, bool verbose)
-    : _verbose(verbose)
+    : _isVerbose(verbose)
 {
     _workers.reserve(numThreads);
     for (size_t i = 0; i < numThreads; i++) {
@@ -80,13 +80,16 @@ void AsyncImageDecoder::workerThread() {
     while (!_stopRequest) {
         DecodeRequest request;
         {
-            // Aquire lock
+            // Acquire lock
             std::unique_lock<std::mutex> lock(_queueMutex);
 
             // Wait for work or stop signal
-            _queueCV.wait(lock, [this]() {
-                return _stopRequest || !_requestQueue.empty();
-            });
+            _queueCV.wait(
+                lock,
+                [this]() {
+                    return _stopRequest || !_requestQueue.empty();
+                }
+            );
 
             // Exit working if the async decoder is stopped
             if (_stopRequest) {
@@ -118,7 +121,7 @@ void AsyncImageDecoder::decodeRequest(const DecodeRequest& request) {
     decodedData.buffer.resize(imageSize * imageSize * sizeof(ImagePrecision));
     decodedData.metadata = request.metadata;
 
-    J2kCodec j2c(_verbose);
+    J2kCodec j2c(_isVerbose);
     j2c.decodeIntoBuffer(
         request.metadata.filePath,
         decodedData.buffer.data(),
@@ -139,7 +142,7 @@ void AsyncImageDecoder::decodeRequest(const DecodeRequest& request) {
 }
 
 void AsyncImageDecoder::setVerboseFlag(bool verbose) {
-    _verbose = verbose;
+    _isVerbose = verbose;
 }
 
 bool AsyncImageDecoder::isQueuedOrActive(const DecodeRequest& request) const {

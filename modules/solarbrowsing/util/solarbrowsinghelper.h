@@ -28,6 +28,7 @@
 #include <modules/solarbrowsing/util/structs.h>
 
 namespace openspace {
+
 class TransferFunction;
 
 /**
@@ -39,7 +40,6 @@ class TransferFunction;
  * \param rootDir The directory containing transfer function definitions
  * \param imageMetadataMap The metadata map whose instruments determine
  *        which transfer functions are requested
- *
  * \return A map from instrument name to loaded TransferFunction instances
  */
 std::unordered_map<std::string, std::shared_ptr<TransferFunction>> loadTransferFunctions(
@@ -82,4 +82,4 @@ void saveDecodedDataToCache(const std::filesystem::path& path,
 
 } // namespace openspace
 
-#endif // !__OPENSPACE_MODULE_SOLARBROWSING___SOLARBROWSINGHELPER___H__
+#endif // __OPENSPACE_MODULE_SOLARBROWSING___SOLARBROWSINGHELPER___H__

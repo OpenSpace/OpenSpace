@@ -30,12 +30,9 @@ in Data {
 
 uniform float planeOpacity;
 
+
 Fragment getFragment() {
   vec4 diffuse = vec4(1.0, 1.0, 1.0, max(0.25, planeOpacity));
-
-  if (diffuse.a == 0.0) {
-    discard;
-  }
 
   Fragment frag;
   frag.color = diffuse;
