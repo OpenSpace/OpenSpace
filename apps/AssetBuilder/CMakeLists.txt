@@ -79,6 +79,7 @@ create_new_application(AssetBuilder
   ${SOURCE_FILES}
   ${MOC_FILES}
   ${RESOURCE_FILES}
+  ${CMAKE_CURRENT_SOURCE_DIR}/openspace.rc
 )
 
 target_include_directories(AssetBuilder PRIVATE
