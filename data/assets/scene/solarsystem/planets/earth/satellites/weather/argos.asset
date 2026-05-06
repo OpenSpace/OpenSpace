@@ -3,9 +3,9 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (ARGOS)",
+  Name = "Satellite CSV Data (ARGOS)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_argos",
+  Identifier = "satellite_csv_data_argos",
   Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=argos&FORMAT=csv",
   Filename = "argos.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()

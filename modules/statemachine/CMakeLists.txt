@@ -25,24 +25,23 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/state.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/transition.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/statemachine.h
+  include/state.h
+  include/transition.h
+  include/statemachine.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/statemachinemodule_lua.inl
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/state.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/transition.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/statemachine.cpp
+  statemachinemodule_lua.inl
+  src/state.cpp
+  src/transition.cpp
+  src/statemachine.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module(
   "StateMachine"
   statemachine_module
-  STATIC
   ${HEADER_FILES} ${SOURCE_FILES}
 )
 target_precompile_headers(${statemachine_module} PRIVATE

@@ -2,9 +2,9 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Tiangong)",
+  Name = "Satellite CSV Data (Tiangong)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_tiangong",
+  Identifier = "satellite_csv_data_tiangong",
   Url = "https://liu-se.relay.openspaceproject.com/celestrak?CATNR=48274&FORMAT=csv",
   Filename = "Tiangong.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()

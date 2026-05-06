@@ -3,31 +3,31 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Other)",
+  Name = "Satellite CSV Data (Eutelsat)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_other",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=other&FORMAT=csv",
-  Filename = "other.txt",
+  Identifier = "satellite_csv_data_eutelsat",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=eutelsat&FORMAT=csv",
+  Filename = "eutelsat.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
-local OtherSatellites = {
-  Identifier = "OtherSatellites",
+local EutelsatSatellites = {
+  Identifier = "EutelsatSatellites",
   Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
-    Path = omm .. "other.txt",
+    Path = omm .. "eutelsat.txt",
     Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
-    TrailFade = 15,
+    TrailFade = 5,
     PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
   GUI = {
-    Name = "Other",
+    Name = "Eutelsat",
     Path = "/Solar System/Planets/Earth/Satellites",
     Focusable = false
   }
@@ -35,20 +35,20 @@ local OtherSatellites = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(OtherSatellites)
+  openspace.addSceneGraphNode(EutelsatSatellites)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(OtherSatellites)
+  openspace.removeSceneGraphNode(EutelsatSatellites)
 end)
 
-asset.export(OtherSatellites)
+asset.export(EutelsatSatellites)
 
 
 
 asset.meta = {
-  Name = "Satellites Other",
-  Description = "Satellites asset for Other. Data from Celestrak",
+  Name = "Satellites Communications - Eutelsat",
+  Description = "Satellites asset for Communications - Eutelsat. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"

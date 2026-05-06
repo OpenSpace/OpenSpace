@@ -3,9 +3,9 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Iridium NEXT)",
+  Name = "Satellite CSV Data (Iridium NEXT)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_iridium-NEXT",
+  Identifier = "satellite_csv_data_iridium-NEXT",
   Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=iridium-NEXT&FORMAT=csv",
   Filename = "iridium-NEXT.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()

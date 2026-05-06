@@ -3,9 +3,9 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Active)",
+  Name = "Satellite CSV Data (Active)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_active",
+  Identifier = "satellite_csv_data_active",
   Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=active&FORMAT=csv",
   Filename = "active.txt",
   -- The active satellites are updated every 2 hours. We reduce this update rate to every

@@ -46,7 +46,8 @@ local Apollo15 = {
     LightSources = {
       sunAsset.LightSource
     },
-    PerformShading = true
+    PerformShading = true,
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Apollo 15",

@@ -46,7 +46,6 @@ set(SGCT_SPOUT_SUPPORT ON CACHE BOOL "" FORCE)
 create_new_module(
   "Spout"
   spout_module
-  STATIC
   ${HEADER_FILES} ${SOURCE_FILES}
 )
 

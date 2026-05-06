@@ -171,15 +171,15 @@ void TileProviderByDate::reset() {
 }
 
 int TileProviderByDate::minLevel() {
-    return _currentTileProvider ? _currentTileProvider->minLevel() : 1;
+    return _currentTileProvider ? _currentTileProvider->minLevel() : 0;
 }
 
 int TileProviderByDate::maxLevel() {
-    return _currentTileProvider ? _currentTileProvider->maxLevel() : 1;
+    return _currentTileProvider ? _currentTileProvider->maxLevel() : 0;
 }
 
 float TileProviderByDate::noDataValueAsFloat() {
-    return _currentTileProvider ? _currentTileProvider->noDataValueAsFloat() : 1;
+    return _currentTileProvider ? _currentTileProvider->noDataValueAsFloat() : 0;
 }
 
 } // namespace openspace

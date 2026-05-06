@@ -28,7 +28,8 @@ local VestaModel = {
     AmbientIntensity = 0.0,
     LightSources = {
       sunAsset.LightSource
-    }
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Vesta",

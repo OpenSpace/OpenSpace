@@ -42,7 +42,8 @@ local JuiceModel = {
         Intensity = 0.4,
         Enabled = false
       }
-    }
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Juice Model",

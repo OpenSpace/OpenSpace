@@ -59,7 +59,8 @@ local StereoA = {
     RotationVector = { 0.0, 260.0, 0.0 },
     LightSources = { sunAsset.LightSource },
     AmbientIntensity = 0.2,
-    SpecularIntensity = 0.0
+    SpecularIntensity = 0.0,
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "STEREO A",

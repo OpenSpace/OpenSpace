@@ -255,7 +255,7 @@ local ModelMoon = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ModelMarsSmall)
-  openspace.registerShadowcaster(sunAsset.SunCenter.Identifier, ModelMarsSmall.Identifier, marmarsAssets.Mars.Identifier, "mars")
+  openspace.registerShadowcaster(sunAsset.SunCenter.Identifier, ModelMarsSmall.Identifier, marsAsset.Mars.Identifier, "mars")
 
   openspace.addSceneGraphNode(ModelMarsLarge)
   openspace.registerShadowcaster(sunAsset.SunCenter.Identifier, ModelMarsLarge.Identifier, marsAsset.Mars.Identifier, "mars")

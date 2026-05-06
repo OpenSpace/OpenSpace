@@ -62,7 +62,8 @@ local Sdo = {
     RotationVector = { 90.0, 0.0, 0.0 },
     LightSources = { sunAsset.LightSource },
     AmbientIntensity = 0.2,
-    SpecularIntensity = 0.0
+    SpecularIntensity = 0.0,
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "SDO",

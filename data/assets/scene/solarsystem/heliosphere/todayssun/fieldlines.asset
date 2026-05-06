@@ -19,13 +19,12 @@ local dataURL = "https://iswa.ccmc.gsfc.nasa.gov/api/between?dataID="
 
 local sunRadius = 695700000.0
 
-local fieldlinesSCS = {
-  Identifier = "WSA_54_Fieldlines_SCS_OI",
+local WSA_62_fieldlinesSCS = {
+  Identifier = "WSA_62_Fieldlines_SCS_OI",
   Parent = transforms.WSAOffset60.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2022 DEC 14 16:14:00",
-    End = "2025 DEC 16 10:14:00"
+    Start = "2025 SEP 10 16:14:00"
   },
   Transform = {
     Scale = {
@@ -39,7 +38,7 @@ local fieldlinesSCS = {
     LoadingType = "DynamicDownloading",
     InfoURL = infoURL,
     DataURL = dataURL,
-    DataID = 2286,
+    DataID = 2979,
     ShowAtAllTimes = false,
     ColorMethod = "By Quantity",
     ColorQuantity = 0, -- Polarity & solar wind speed
@@ -54,21 +53,20 @@ local fieldlinesSCS = {
   },
   GUI = {
     Name = "Fieldlines: Corona SCS (Out-In Tracing)",
-    Path = "/Solar System/Heliosphere/WSA 5.4 Coronal Model",
-    Description = [[WSA 5.4 real-time output of the fieldline trace from the Schatten
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[WSA 6.2 real-time output of the fieldline trace from the Schatten
       Current Sheet model (SCS) outer boundary at 21.5 Rs to the source surface at 2.5 Rs
       using GONGZ as input.]],
     Focusable = false
   }
 }
 
-local fieldlinesOI = {
-  Identifier = "WSA_54_Fieldlines_PFSS_OI",
+local WSA_62_fieldlinesOI = {
+  Identifier = "WSA_62_Fieldlines_PFSS_OI",
   Parent = transforms.WSAOffset60.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2022 DEC 14 16:14:00",
-    End = "2025 DEC 16 10:14:00"
+    Start = "2025 SEP 10 16:14:00"
   },
   Transform = {
     Scale = {
@@ -82,7 +80,7 @@ local fieldlinesOI = {
     LoadingType = "DynamicDownloading",
     InfoURL = infoURL,
     DataURL = dataURL,
-    DataID = 2285,
+    DataID = 2978,
     ShowAtAllTimes = false,
     ColorMethod = "By Quantity",
     ColorQuantity = 0, -- Polarity & solar wind speed
@@ -97,21 +95,20 @@ local fieldlinesOI = {
   },
   GUI = {
     Name = "Fieldlines: Corona PFSS (Out-In Tracing)",
-    Path = "/Solar System/Heliosphere/WSA 5.4 Coronal Model",
-    Description = [[WSA 5.4 real-time output of the fieldline trace from the source
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[WSA 6.2 real-time output of the fieldline trace from the source
       surface to the solar surface using GONGZ as input. PFSS is the Potential Field
       Source Surface model, a part of WSA.]],
     Focusable = false
   }
 }
 
-local fieldlinesIO = {
-  Identifier = "WSA_54_Fieldlines_PFSS_IO",
+local WSA_62_fieldlinesIO = {
+  Identifier = "WSA_62_Fieldlines_PFSS_IO",
   Parent = transforms.WSAOffset60.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2022 DEC 14 16:14:00",
-    End = "2025 DEC 16 10:14:00"
+    Start = "2025 SEP 10 16:14:00"
   },
   Transform = {
     Scale = {
@@ -125,7 +122,7 @@ local fieldlinesIO = {
     LoadingType = "DynamicDownloading",
     InfoURL = infoURL,
     DataURL = dataURL,
-    DataID = 2284,
+    DataID = 2977,
     ShowAtAllTimes = false,
     ColorMethod = "By Quantity",
     ColorQuantity = 0, -- Open/closed lines
@@ -138,21 +135,20 @@ local fieldlinesIO = {
   },
   GUI = {
     Name = "Fieldlines: Corona PFSS (In-Out Tracing)",
-    Path = "/Solar System/Heliosphere/WSA 5.4 Coronal Model",
-    Description = [[WSA 5.4 real-time output of the fieldline trace from the solar surface
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[WSA 6.2 real-time output of the fieldline trace from the solar surface
       outwards using GONGZ as input. PFSS is the Potential Field Source Surface model, a
       part of WSA.]],
     Focusable = false
   }
 }
 
-local fieldlinesEarth = {
-  Identifier = "WSA_54_Fieldlines_Earth",
+local WSA_62_fieldlinesEarth = {
+  Identifier = "WSA_62_Fieldlines_Earth",
   Parent = transforms.WSAOffset60.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2022 DEC 14 16:14:00",
-    End = "2025 DEC 16 10:14:00"
+    Start = "2025 SEP 10 16:14:00"
   },
   Transform = {
     Scale = {
@@ -166,7 +162,7 @@ local fieldlinesEarth = {
     LoadingType = "DynamicDownloading",
     InfoURL = infoURL,
     DataURL = dataURL,
-    DataID = 2287,
+    DataID = 2980,
     ShowAtAllTimes = false,
     ColorMethod = "By Quantity",
     ColorQuantity = 0, -- Polarity
@@ -181,8 +177,8 @@ local fieldlinesEarth = {
   },
   GUI = {
     Name = "Fieldlines: Tracing from Earth",
-    Path = "/Solar System/Heliosphere/WSA 5.4 Coronal Model",
-    Description = [[WSA 5.4 real-time output of the field line trace from Earth using GONGZ
+    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Description = [[WSA 6.2 real-time output of the field line trace from Earth using GONGZ
       as input.]],
     Focusable = false
   }
@@ -190,30 +186,30 @@ local fieldlinesEarth = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(fieldlinesSCS)
-  openspace.addSceneGraphNode(fieldlinesOI)
-  openspace.addSceneGraphNode(fieldlinesIO)
-  openspace.addSceneGraphNode(fieldlinesEarth)
+  openspace.addSceneGraphNode(WSA_62_fieldlinesSCS)
+  openspace.addSceneGraphNode(WSA_62_fieldlinesOI)
+  openspace.addSceneGraphNode(WSA_62_fieldlinesIO)
+  openspace.addSceneGraphNode(WSA_62_fieldlinesEarth)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(fieldlinesEarth)
-  openspace.removeSceneGraphNode(fieldlinesIO)
-  openspace.removeSceneGraphNode(fieldlinesOI)
-  openspace.removeSceneGraphNode(fieldlinesSCS)
+  openspace.removeSceneGraphNode(WSA_62_fieldlinesEarth)
+  openspace.removeSceneGraphNode(WSA_62_fieldlinesIO)
+  openspace.removeSceneGraphNode(WSA_62_fieldlinesOI)
+  openspace.removeSceneGraphNode(WSA_62_fieldlinesSCS)
 end)
 
-asset.export(fieldlinesSCS)
-asset.export(fieldlinesOI)
-asset.export(fieldlinesIO)
-asset.export(fieldlinesEarth)
+asset.export(WSA_62_fieldlinesSCS)
+asset.export(WSA_62_fieldlinesOI)
+asset.export(WSA_62_fieldlinesIO)
+asset.export(WSA_62_fieldlinesEarth)
 
 
 
 asset.meta = {
-  Name = "WSA 5.4. Streaming Field Line Data Dynamically",
+  Name = "Streaming Field Line Data Dynamically",
   Version = "1.0",
-  Description = [[Downloading data from the WSA 5.4 simulation model, showing the dynamic
+  Description = [[Downloading data from the WSA 6.2 simulation model, showing the dynamic
     Sun at any point. It includes .osfls files (OpenSpace FieldLine Sequence) for field
     lines.]],
   Author = "CCMC",

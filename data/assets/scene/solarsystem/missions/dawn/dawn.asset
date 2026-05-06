@@ -64,7 +64,8 @@ local Dawn = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = models .. "Dawn_19.glb",
-    LightSources = LightSources
+    LightSources = LightSources,
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Dawn",

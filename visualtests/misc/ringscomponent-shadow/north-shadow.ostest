@@ -3,7 +3,7 @@
   "commands": [
     {
       "type": "asset",
-      "value": "scene/solarsystem/planets/saturn/saturn.asset"
+      "value": "scene/solarsystem/planets/saturn/globe.asset"
     },
     {
       "type": "asset",
@@ -30,7 +30,7 @@
     },
     {
       "type": "wait",
-      "value": 10.0
+      "value": 5.0
     },
     {
       "type": "screenshot"

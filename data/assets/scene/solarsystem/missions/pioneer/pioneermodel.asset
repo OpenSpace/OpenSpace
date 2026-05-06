@@ -20,7 +20,8 @@ local ModelRenderable = {
       Type = "CameraLightSource",
       Intensity = 0.5
     }
-  }
+  },
+  EnableFaceCulling = false
 }
 
 asset.export("PioneerModel", ModelRenderable)

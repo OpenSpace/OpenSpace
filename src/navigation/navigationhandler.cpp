@@ -189,12 +189,12 @@ void NavigationHandler::triggerFadeToTransition(std::string transitionScript,
         const std::string onArrivalScript = std::format(
             "{} "
             "openspace.setPropertyValueSingle("
-            "'RenderEngine.BlackoutFactor', 1, {}, 'QuadraticEaseIn'"
+            "'RenderEngine.GlobalBlackout.Factor', 0, {}, 'QuadraticEaseIn'"
             ")", transitionScript, duration
         );
         script = std::format(
             "openspace.setPropertyValueSingle("
-            "'RenderEngine.BlackoutFactor', 0, {}, 'QuadraticEaseOut', [[{}]]"
+            "'RenderEngine.GlobalBlackout.Factor', 1, {}, 'QuadraticEaseOut', [[{}]]"
             ")", duration, onArrivalScript
         );
     }

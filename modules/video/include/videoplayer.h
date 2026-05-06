@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/util/syncable.h>
 
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/glm.h>
@@ -156,6 +157,11 @@ private:
     TriggerProperty _reload;
     BoolProperty _playAudio;
     BoolProperty _loopVideo;
+
+    // Read-only properties for showing video information
+    BoolProperty _isPlaying;
+    StringProperty _startTime;
+    StringProperty _endTime;
 
     // Variables used when syncronizing play, pause and looping behavior
     SyncFlags _syncFlags;

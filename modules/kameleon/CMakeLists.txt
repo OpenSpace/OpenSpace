@@ -39,17 +39,10 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 create_new_module(
   "Kameleon"
   kameleon_module
-  STATIC
   ${HEADER_FILES} ${SOURCE_FILES}
 )
 
 option(KAMELEON_LIBRARY_ONLY "Build with Kameleon as library only" ON)
-if (WIN32)
-  option(BUILD_SHARED_LIBS "Build Shared Libraries" OFF)
-else ()
-  option(BUILD_SHARED_LIBS "Build Shared Libraries" ON)
-endif ()
-mark_as_advanced(BUILD_SHARED_LIBS) # Change to set instead of option
 option(KAMELEON_USE_HDF5 "Kameleon use HDF5" OFF)
 set(KAMELEON_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ext/kameleon)
 set(KAMELEON_INCLUDES ${KAMELEON_ROOT_DIR}/src)

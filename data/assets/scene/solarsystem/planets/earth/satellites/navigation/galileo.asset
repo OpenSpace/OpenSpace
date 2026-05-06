@@ -3,9 +3,9 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Galileo)",
+  Name = "Satellite CSV Data (Galileo)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_galileo",
+  Identifier = "satellite_csv_data_galileo",
   Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=galileo&FORMAT=csv",
   Filename = "galileo.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()

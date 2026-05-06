@@ -3,31 +3,31 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local omm = asset.resource({
-  Name = "Satellite CSV Data (Fengyun Debris)",
+  Name = "Satellite CSV Data (Qianfan)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_csv_data_1999-025",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?INTDES=1999-025&FORMAT=csv",
-  Filename = "1999-025.txt",
+  Identifier = "satellite_csv_data_qianfan",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=qianfan&FORMAT=csv",
+  Filename = "qianfan.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
-local DebrisFengyun = {
-  Identifier = "DebrisFengyun-1999-025",
+local QianfanSatellites = {
+  Identifier = "QianfanSatellites",
   Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
-    Path = omm .. "1999-025.txt",
+    Path = omm .. "qianfan.txt",
     Format = "CSV",
     SegmentQuality = 3,
-    Color = { 0.784, 1.0, 0.737 },
-    TrailFade = 1.5,
+    Color = { 0.75, 0.75, 0.35 },
+    TrailFade = 5,
     PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
   GUI = {
-    Name = "Fengyun Debris",
+    Name = "Qianfan",
     Path = "/Solar System/Planets/Earth/Satellites",
     Focusable = false
   }
@@ -35,20 +35,20 @@ local DebrisFengyun = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(DebrisFengyun)
+  openspace.addSceneGraphNode(QianfanSatellites)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(DebrisFengyun)
+  openspace.removeSceneGraphNode(QianfanSatellites)
 end)
 
-asset.export(DebrisFengyun)
+asset.export(QianfanSatellites)
 
 
 
 asset.meta = {
-  Name = "Satellites Debris - Fengyun Debris",
-  Description = "Satellites asset for Debris - Fengyun Debris. Data from Celestrak",
+  Name = "Satellites Communications - Qianfan",
+  Description = "Satellites asset for Communications - Qianfan. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"

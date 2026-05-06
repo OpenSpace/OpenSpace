@@ -3,31 +3,31 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (NOAA)",
+  Name = "Satellite CSV Data (Hulianwang Digui)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_noaa",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=noaa&FORMAT=csv",
-  Filename = "noaa.txt",
+  Identifier = "satellite_csv_data_hulianwang",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=hulianwang&FORMAT=csv",
+  Filename = "hulianwang.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
-local NoaaSatellites = {
-  Identifier = "NoaaSatellites",
+local HulianwangDiguiSatellites = {
+  Identifier = "HulianwangDiguiSatellites",
   Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
-    Path = omm .. "noaa.txt",
+    Path = omm .. "hulianwang.txt",
     Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
-    TrailFade = 17,
+    TrailFade = 5,
     PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
   GUI = {
-    Name = "NOAA",
+    Name = "Hulianwang Digui",
     Path = "/Solar System/Planets/Earth/Satellites",
     Focusable = false
   }
@@ -35,20 +35,20 @@ local NoaaSatellites = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(NoaaSatellites)
+  openspace.addSceneGraphNode(HulianwangDiguiSatellites)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(NoaaSatellites)
+  openspace.removeSceneGraphNode(HulianwangDiguiSatellites)
 end)
 
-asset.export(NoaaSatellites)
+asset.export(HulianwangDiguiSatellites)
 
 
 
 asset.meta = {
-  Name = "Satellites Weather - NOAA",
-  Description = "Satellites asset for Weather - NOAA. Data from Celestrak",
+  Name = "Satellites Communications - Hulianwang Digui",
+  Description = "Satellites asset for Communications - Hulianwang Digui. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.org/NORAD/elements/",
   License = "Celestrak"

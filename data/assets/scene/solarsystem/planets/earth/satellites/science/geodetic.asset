@@ -3,9 +3,9 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Geodetic)",
+  Name = "Satellite CSV Data (Geodetic)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_geodetic",
+  Identifier = "satellite_csv_data_geodetic",
   Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=geodetic&FORMAT=csv",
   Filename = "geodetic.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()

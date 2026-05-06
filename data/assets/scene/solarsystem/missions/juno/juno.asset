@@ -52,7 +52,8 @@ local Juno = {
         Type = "CameraLightSource",
         Intensity = 0.5
       }
-    }
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Path = "/Solar System/Missions/Juno"

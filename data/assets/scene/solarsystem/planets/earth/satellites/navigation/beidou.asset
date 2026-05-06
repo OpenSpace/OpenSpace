@@ -3,9 +3,9 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Beidou)",
+  Name = "Satellite CSV Data (Beidou)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_beidou",
+  Identifier = "satellite_csv_data_beidou",
   Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=beidou&FORMAT=csv",
   Filename = "beidou.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()

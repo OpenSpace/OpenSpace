@@ -194,7 +194,8 @@ local Apollo11LemDescentModel = {
         Type = "CameraLightSource",
         Intensity = 0.5
       }
-    }
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Apollo 11 Descent Lem",
@@ -227,7 +228,8 @@ local Apollo11LemLandedModel = {
         Type = "CameraLightSource",
         Intensity = 0.5
       }
-    }
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Apollo 11 Landed Lem",

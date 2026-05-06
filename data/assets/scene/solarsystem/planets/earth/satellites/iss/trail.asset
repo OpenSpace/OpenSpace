@@ -4,9 +4,9 @@ local coreKernels = asset.require("spice/core")
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (ISS)",
+  Name = "Satellite CSV Data (ISS)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_iss",
+  Identifier = "satellite_csv_data_iss",
   Url = "https://liu-se.relay.openspaceproject.com/celestrak?CATNR=25544&FORMAT=csv",
   Filename = "ISS.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()

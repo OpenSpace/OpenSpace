@@ -30,6 +30,13 @@
       }
     },
     {
+      "type": "property",
+      "value": {
+        "property": "Scene.RenderableRadialGrid_Example_Radii.Renderable.LineWidth",
+        "value": 5.0
+      }
+    },
+    {
       "type": "screenshot"
     }
   ]

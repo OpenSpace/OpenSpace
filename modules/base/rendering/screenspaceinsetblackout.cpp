@@ -246,6 +246,9 @@ namespace {
             // File path for the texture that should be used when displaying the
             // calibration grid.
             std::optional<std::filesystem::path> calibrationTexturePath;
+
+            // [[codegen::verbatim(CalibrationPatternInfo.description)]]
+            std::optional<bool> enableCalibrationPattern;
         };
         BlackoutShape blackoutshape;
     };
@@ -411,6 +414,8 @@ ScreenSpaceInsetBlackout::BlackoutShape::BlackoutShape(
     addPropertySubOwner(*leftSpline);
 
     // Add additional controls to GUI
+    enableCalibrationPattern =
+        params.blackoutshape.enableCalibrationPattern.value_or(enableCalibrationPattern);
     enableCalibrationPattern.onChange([this]() { textureTypeHasChanged = true; });
     addProperty(enableCalibrationPattern);
 

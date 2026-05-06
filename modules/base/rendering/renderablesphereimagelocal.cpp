@@ -51,6 +51,11 @@ namespace {
     struct [[codegen::Dictionary(RenderableSphereImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::filesystem::path texture;
+
+        // If this value is set to true, the image for this sphere will not be loaded at
+        // startup but rather when sphere is shown for the first time. Additionally, if
+        // the sphere is hidden, the image will automatically be unloaded.
+        std::optional<bool> lazyLoading;
     };
 } // namespace
 #include "renderablesphereimagelocal_codegen.cpp"
@@ -68,12 +73,25 @@ RenderableSphereImageLocal::RenderableSphereImageLocal(
                                                       const ghoul::Dictionary& dictionary)
     : RenderableSphere(dictionary)
     , _texturePath(TextureInfo)
+    , _textureIsDirty(_enabled)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _texturePath = p.texture.string();
     _texturePath.onChange([this]() { _texture->loadFromFile(_texturePath.value()); });
     addProperty(_texturePath);
+
+    _isLoadingLazily = p.lazyLoading.value_or(_isLoadingLazily);
+    if (_isLoadingLazily) {
+        _enabled.onChange([this]() {
+            if (_enabled) {
+                _textureIsDirty = true;
+            }
+            else {
+                _shouldUnloadTexture = true;
+            }
+        });
+    }
 }
 
 void RenderableSphereImageLocal::initialize() {
@@ -84,7 +102,11 @@ void RenderableSphereImageLocal::initialize() {
 
 void RenderableSphereImageLocal::initializeGL() {
     RenderableSphere::initializeGL();
-    _texture->loadFromFile(_texturePath.value());
+
+    if (!_isLoadingLazily) {
+        _texture->loadFromFile(_texturePath.value());
+        _textureIsDirty = false;
+    }
 }
 
 void RenderableSphereImageLocal::deinitializeGL() {
@@ -95,6 +117,17 @@ void RenderableSphereImageLocal::deinitializeGL() {
 
 void RenderableSphereImageLocal::update(const UpdateData& data) {
     RenderableSphere::update(data);
+
+    if (_shouldUnloadTexture) [[unlikely]] {
+        _texture->unloadTexture();
+        _shouldUnloadTexture = false;
+    }
+
+    if (_textureIsDirty) [[unlikely]] {
+        _texture->loadFromFile(_texturePath.value());
+        _textureIsDirty = false;
+    }
+
     _texture->update();
 }
 

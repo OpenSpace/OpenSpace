@@ -18,13 +18,13 @@
           0.8853866401416752,
           0.4557564741429799
         ],
-        "timestamp": "2025 JUN 30 10:48:38"
+        "timestamp": "2026 APR 15 12:00:00"
       }
     },
     {
       "type": "property",
       "value": {
-        "property": "Scene.WSA_54_Fieldlines_PFSS_OI.Renderable.Enabled",
+        "property": "Scene.WSA_62_Fieldlines_PFSS_OI.Renderable.Enabled",
         "value": false
       }
     },

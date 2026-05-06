@@ -115,13 +115,28 @@ NavigationState::NavigationState(const ghoul::Dictionary& dictionary) {
 }
 
 NavigationState::NavigationState(const nlohmann::json& json) {
-    position.x = json["position"]["x"].get<double>();
-    position.y = json["position"]["y"].get<double>();
-    position.z = json["position"]["z"].get<double>();
+    if (auto it = json.find("position"); it->is_array()) {
+        std::vector<double> values = it->get<std::vector<double>>();
+        if (values.size() != 3) {
+            throw ghoul::RuntimeError(std::format(
+                "Expected {} values, got {}", 3, values.size()
+            ));
+        }
+        position = glm::dvec3(values[0], values[1], values[2]);
+    }
+    else {
+        ghoul_assert(it->is_object(), "Not an object");
+        position.x = (*it)["x"].get<double>();
+        position.y = (*it)["y"].get<double>();
+        position.z = (*it)["z"].get<double>();
+    }
 
     anchor = json["anchor"].get<std::string>();
 
     if (auto it = json.find("referenceframe");  it != json.end()) {
+        referenceFrame = it->get<std::string>();
+    }
+    else if (auto it = json.find("referenceFrame");  it != json.end()) {
         referenceFrame = it->get<std::string>();
     }
     else {
@@ -133,10 +148,22 @@ NavigationState::NavigationState(const nlohmann::json& json) {
     }
 
     if (auto it = json.find("up");  it != json.end()) {
-        up = glm::dvec3();
-        up->x = it->at("x").get<double>();
-        up->y = it->at("y").get<double>();
-        up->z = it->at("z").get<double>();
+        if (it->is_array()) {
+            std::vector<double> values = it->get<std::vector<double>>();
+            if (values.size() != 3) {
+                throw ghoul::RuntimeError(std::format(
+                    "Expected {} values, got {}", 3, values.size()
+                ));
+            }
+            up = glm::dvec3(values[0], values[1], values[2]);
+        }
+        else {
+            ghoul_assert(it->is_object(), "Not an object");
+            up = glm::dvec3();
+            up->x = (*it)["x"].get<double>();
+            up->y = (*it)["y"].get<double>();
+            up->z = (*it)["z"].get<double>();
+        }
     }
 
     if (auto it = json.find("yaw");  it != json.end()) {
