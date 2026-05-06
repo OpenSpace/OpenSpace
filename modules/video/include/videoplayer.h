@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/util/syncable.h>
 
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/glm.h>
@@ -145,6 +146,11 @@ private:
     TriggerProperty _reload;
     BoolProperty _playAudio;
     BoolProperty _loopVideo;
+
+    // Read-only properties for showing video information
+    BoolProperty _isPlaying;
+    StringProperty _startTime;
+    StringProperty _endTime;
 
     // Video properties. Try to read all these values from the video
     std::filesystem::path _videoFile;

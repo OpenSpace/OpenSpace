@@ -107,6 +107,13 @@ namespace {
         "end of the video."
     };
 
+    constexpr Property::PropertyInfo IsPlayingInfo = {
+        "IsPlaying",
+        "Is Playing",
+        "Indicates whether the video is currently playing.",
+        Property::Visibility::Developer
+    };
+
     bool checkMpvError(int status) {
         if (status < 0) {
             LERROR(std::format("Libmpv API error: {}", mpv_error_string(status)));
@@ -246,6 +253,9 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
     , _reload(ReloadInfo)
     , _playAudio(AudioInfo, false)
     , _loopVideo(LoopVideoInfo, true)
+    , _isPlaying(IsPlayingInfo, false)
+    , _startTime(StartTimeInfo, "")
+    , _endTime(EndTimeInfo, "")
 {
     ZoneScoped;
 
@@ -253,9 +263,6 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
 
     _videoFile = p.video;
     _loopVideo = p.loopVideo.value_or(_loopVideo);
-
-    _reload.onChange([this]() { reload(); });
-    addProperty(_reload);
 
     if (p.playbackMode.has_value()) {
         switch (*p.playbackMode) {
@@ -283,19 +290,37 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         // Audio only makes sense when the video is playing in real time
         _playAudio.onChange([this]() { toggleMute(); });
         addProperty(_playAudio);
+
+        _isPlaying.setReadOnly(true);
+        addProperty(_isPlaying);
     }
 
     if (_playbackMode == PlaybackMode::MapToSimulationTime) {
         if (!p.startTime.has_value() || !p.endTime.has_value()) {
-            LERROR("Video tile layer tried to map to simulation time but lacked start or"
-                " end time"
+            LERROR(
+                "Video tile layer tried to map to simulation time but lacked start or "
+                "end time"
             );
             return;
         }
         _startJ200Time = Time::convertTime(*p.startTime);
         _endJ200Time = Time::convertTime(*p.endTime);
         ghoul_assert(_endJ200Time > _startJ200Time, "Invalid times for video");
+
+        // @TODO (2026-05-05, emmbr) Adding these properties as read-only so we can show
+        // them in the UI. In the future, we should also allow editing them, but that
+        // requires some more work to make sure the video playback works correctly
+        _startTime = p.startTime.value_or(_startTime);
+        _startTime.setReadOnly(true);
+        addProperty(_startTime);
+
+        _endTime = p.endTime.value_or(_endTime);
+        _endTime.setReadOnly(true);
+        addProperty(_endTime);
     }
+
+    _reload.onChange([this]() { reload(); });
+    addProperty(_reload);
 
     global::syncEngine->addSyncable(this);
 
@@ -335,11 +360,13 @@ VideoPlayer::~VideoPlayer() {
 void VideoPlayer::pause() {
     constexpr int IsPaused = 1;
     setPropertyAsyncMpv(IsPaused, MpvKey::Pause);
+    _isPlaying = false;
 }
 
 void VideoPlayer::play() {
     constexpr int IsPaused = 0;
     setPropertyAsyncMpv(IsPaused, MpvKey::Pause);
+    _isPlaying = true;
 }
 
 void VideoPlayer::goToStart() {
