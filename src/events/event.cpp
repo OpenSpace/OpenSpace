@@ -314,199 +314,199 @@ ghoul::Dictionary toParameter(const Event& e) {
     switch (e.type) {
         case Event::Type::ActionAdded:
             d.setValue(
-                "Uri",
+                "uri",
                 std::string(static_cast<const EventActionAdded&>(e).uri)
             );
             break;
         case Event::Type::ActionRemoved:
             d.setValue(
-                "Uri",
+                "uri",
                 std::string(static_cast<const EventActionRemoved&>(e).uri)
             );
             break;
         case Event::Type::ApplicationShutdown:
             switch (static_cast<const EventApplicationShutdown&>(e).state) {
                 case EventApplicationShutdown::State::Started:
-                    d.setValue("State", "Started"s);
+                    d.setValue("state", "Started"s);
                     break;
                 case EventApplicationShutdown::State::Aborted:
-                    d.setValue("State", "Aborted"s);
+                    d.setValue("state", "Aborted"s);
                     break;
                 case EventApplicationShutdown::State::Finished:
-                    d.setValue("State", "Finished"s);
+                    d.setValue("state", "Finished"s);
                     break;
             }
             break;
         case Event::Type::AssetLoading:
             d.setValue(
-                "AssetPath",
+                "assetPath",
                 static_cast<const EventAssetLoading&>(e).assetPath
             );
             switch (static_cast<const EventAssetLoading&>(e).state) {
                 case EventAssetLoading::State::Loaded:
-                    d.setValue("State", "Loaded"s);
+                    d.setValue("state", "Loaded"s);
                     break;
                 case EventAssetLoading::State::Loading:
-                    d.setValue("State", "Loading"s);
+                    d.setValue("state", "Loading"s);
                     break;
                 case EventAssetLoading::State::Unloaded:
-                    d.setValue("State", "Unloaded"s);
+                    d.setValue("state", "Unloaded"s);
                     break;
                 case EventAssetLoading::State::Error:
-                    d.setValue("State", "Error"s);
+                    d.setValue("state", "Error"s);
                     break;
             }
             break;
         case Event::Type::CameraFocusTransition:
             d.setValue(
-                "Node",
+                "node",
                 std::string(static_cast<const EventCameraFocusTransition&>(e).node)
             );
             switch (static_cast<const EventCameraFocusTransition&>(e).transition) {
                 case EventCameraFocusTransition::Transition::Approaching:
-                    d.setValue("Transition", "Approaching"s);
+                    d.setValue("transition", "Approaching"s);
                     break;
                 case EventCameraFocusTransition::Transition::Reaching:
-                    d.setValue("Transition", "Reaching"s);
+                    d.setValue("transition", "Reaching"s);
                     break;
                 case EventCameraFocusTransition::Transition::Receding:
-                    d.setValue("Transition", "Receding"s);
+                    d.setValue("transition", "Receding"s);
                     break;
                 case EventCameraFocusTransition::Transition::Exiting:
-                    d.setValue("Transition", "Exiting"s);
+                    d.setValue("transition", "Exiting"s);
                     break;
             }
             break;
         case Event::Type::CameraPathFinished:
             d.setValue(
-                "Origin",
+                "origin",
                 std::string(static_cast<const EventCameraPathFinished&>(e).origin)
             );
             d.setValue(
-                "Destination",
+                "destination",
                 std::string(static_cast<const EventCameraPathFinished&>(e).destination)
             );
             break;
         case Event::Type::CameraPathStarted:
             d.setValue(
-                "Origin",
+                "origin",
                 std::string(static_cast<const EventCameraPathStarted&>(e).origin)
             );
             d.setValue(
-                "Destination",
+                "destination",
                 std::string(static_cast<const EventCameraPathStarted&>(e).destination)
             );
             break;
         case Event::Type::Custom:
             d.setValue(
-                "Subtype", std::string(static_cast<const CustomEvent&>(e).subtype)
+                "subtype", std::string(static_cast<const CustomEvent&>(e).subtype)
             );
             d.setValue(
-                "Payload", std::string(static_cast<const CustomEvent&>(e).payload)
+                "payload", std::string(static_cast<const CustomEvent&>(e).payload)
             );
             break;
         case Event::Type::FocusNodeChanged:
             d.setValue(
-                "OldNode",
+                "oldNode",
                 std::string(static_cast<const EventFocusNodeChanged&>(e).oldNode)
             );
             d.setValue(
-                "NewNode",
+                "newNode",
                 std::string(static_cast<const EventFocusNodeChanged&>(e).newNode)
             );
             break;
         case Event::Type::InterpolationFinished:
             d.setValue(
-                "Property",
+                "property",
                 std::string(static_cast<const EventInterpolationFinished&>(e).property)
             );
             break;
         case Event::Type::MissionAdded:
             d.setValue(
-                "Identifier",
+                "identifier",
                 std::string(static_cast<const EventMissionAdded&>(e).identifier)
             );
             break;
         case Event::Type::MissionRemoved:
             d.setValue(
-                "Identifier",
+                "identifier",
                 std::string(static_cast<const EventMissionRemoved&>(e).identifier)
             );
             break;
         case Event::Type::ParallelConnection:
             switch (static_cast<const EventParallelConnection&>(e).state) {
                 case EventParallelConnection::State::Established:
-                    d.setValue("State", "Established"s);
+                    d.setValue("state", "Established"s);
                     break;
                 case EventParallelConnection::State::Lost:
-                    d.setValue("State", "Lost"s);
+                    d.setValue("state", "Lost"s);
                     break;
                 case EventParallelConnection::State::HostshipGained:
-                    d.setValue("State", "HostshipGained"s);
+                    d.setValue("state", "HostshipGained"s);
                     break;
                 case EventParallelConnection::State::HostshipLost:
-                    d.setValue("State", "HostshipLost"s);
+                    d.setValue("state", "HostshipLost"s);
                     break;
             }
             break;
         case Event::Type::PlanetEclipsed:
             d.setValue(
-                "Eclipsee",
+                "eclipsee",
                 std::string(static_cast<const EventPlanetEclipsed&>(e).eclipsee)
             );
             d.setValue(
-                "Eclipser",
+                "eclipser",
                 std::string(static_cast<const EventPlanetEclipsed&>(e).eclipser)
             );
             break;
         case Event::Type::PointSpacecraft:
-            d.setValue("Ra", static_cast<const EventPointSpacecraft&>(e).ra);
-            d.setValue("Dec", static_cast<const EventPointSpacecraft&>(e).dec);
-            d.setValue("Duration", static_cast<const EventPointSpacecraft&>(e).duration);
+            d.setValue("ra", static_cast<const EventPointSpacecraft&>(e).ra);
+            d.setValue("dec", static_cast<const EventPointSpacecraft&>(e).dec);
+            d.setValue("duration", static_cast<const EventPointSpacecraft&>(e).duration);
             break;
         case Event::Type::PropertyTreePruned:
             d.setValue(
-                "Uri",
+                "uri",
                 std::string(static_cast<const EventPropertyTreePruned&>(e).uri)
             );
             break;
         case Event::Type::PropertyTreeUpdated:
             d.setValue(
-                "Uri",
+                "uri",
                 std::string(static_cast<const EventPropertyTreeUpdated&>(e).uri)
             );
             break;
         case Event::Type::RenderableDisabled:
             d.setValue(
-                "Node",
+                "node",
                 std::string(static_cast<const EventRenderableDisabled&>(e).node)
             );
             break;
         case Event::Type::RenderableEnabled:
             d.setValue(
-                "Node",
+                "node",
                 std::string(static_cast<const EventRenderableEnabled&>(e).node)
             );
             break;
         case Event::Type::ScheduledScriptExecuted:
             d.setValue(
-                "Script",
+                "script",
                 std::string(static_cast<const EventScheduledScriptExecuted&>(e).script)
             );
             break;
         case Event::Type::SessionRecordingPlayback:
             switch (static_cast<const EventSessionRecordingPlayback&>(e).state) {
                 case EventSessionRecordingPlayback::State::Started:
-                    d.setValue("State", "Started"s);
+                    d.setValue("state", "Started"s);
                     break;
                 case EventSessionRecordingPlayback::State::Paused:
-                    d.setValue("State", "Paused"s);
+                    d.setValue("state", "Paused"s);
                     break;
                 case EventSessionRecordingPlayback::State::Resumed:
-                    d.setValue("State", "Resumed"s);
+                    d.setValue("state", "Resumed"s);
                     break;
                 case EventSessionRecordingPlayback::State::Finished:
-                    d.setValue("State", "Finished"s);
+                    d.setValue("state", "Finished"s);
                     break;
             }
             break;
