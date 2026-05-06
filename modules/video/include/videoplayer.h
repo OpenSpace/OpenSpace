@@ -84,10 +84,10 @@ public:
     static openspace::Documentation Documentation();
 
 private:
-    // Flags used to syncronize playback
-    struct syncFlags {
-        bool goToStart = false;
-        bool play = false;
+    // Flags used to synchronize playback
+    struct SyncFlags {
+        bool shouldGoToStart = false;
+        bool shouldPlay = false;
     };
 
     // State keys
@@ -158,10 +158,10 @@ private:
     BoolProperty _loopVideo;
 
     // Variables used when syncronizing play, pause and looping behavior
-    const bool _isMaster;
-    syncFlags _syncflags;
+    SyncFlags _syncFlags;
     PlaybackState _playbackState = PlaybackState::Undefined;
-    std::chrono::duration<long long, std::milli> _goTime;
+    std::chrono::duration<long long, std::milli> _goTime =
+        std::chrono::duration<long long, std::milli>::zero();
 
     // Video properties. Try to read all these values from the video
     std::filesystem::path _videoFile;

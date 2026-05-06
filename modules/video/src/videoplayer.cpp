@@ -238,8 +238,6 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
     , _reload(ReloadInfo)
     , _playAudio(AudioInfo, false)
     , _loopVideo(LoopVideoInfo, true)
-    , _isMaster(global::windowDelegate->isMaster())
-    , _goTime(0)
 {
     ZoneScoped;
 
@@ -301,7 +299,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         { MpvKey::IsSeeking, "seeking" },
         { MpvKey::Mute, "mute" },
         { MpvKey::Seek, "seek" },
-        { MpvKey::EndOfFile, "eof-reached"}
+        { MpvKey::EndOfFile, "eof-reached" }
     };
 
     formats = {
@@ -753,10 +751,10 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             break;
         }
         case MpvKey::EndOfFile: {
-            if (_isMaster && _loopVideo && _playbackState == PlaybackState::Playing) {
-                if(_isMaster) {
-                    _syncflags.goToStart = true;
-                }
+            if (global::windowDelegate->isMaster() && _loopVideo &&
+                _playbackState == PlaybackState::Playing)
+            {
+                _syncFlags.shouldGoToStart = true;
             }
             break;
         }
@@ -777,46 +775,47 @@ void VideoPlayer::destroy() {
 }
 
 void VideoPlayer::preSync(bool isMaster) {
-    if (isMaster) {
-        _correctPlaybackTime = _currentVideoTime;
-        if (_playbackMode == PlaybackMode::RealTimeLoop &&
-            _playbackState == PlaybackState::Waiting)
-        {
-            const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::high_resolution_clock::now().time_since_epoch()
-            );
-            const long long dt = _goTime.count() - now.count();
-            if (dt <= 0.0) {
-                _syncflags.play = true;
-            }
+    if (!isMaster) {
+        return;
+    }
+
+    _correctPlaybackTime = _currentVideoTime;
+    if (_playbackMode == PlaybackMode::RealTimeLoop &&
+        _playbackState == PlaybackState::Waiting)
+    {
+        const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::high_resolution_clock::now().time_since_epoch()
+        );
+        const long long dt = _goTime.count() - now.count();
+        if (dt <= 0.0) {
+            _syncFlags.shouldPlay = true;
         }
-        else if (_playbackMode == PlaybackMode::MapToSimulationTime) {
-            // MapToSimulationTime
-            _correctPlaybackTime = correctVideoPlaybackTime();
-        }
-    }    
+    }
+    else if (_playbackMode == PlaybackMode::MapToSimulationTime) {
+        _correctPlaybackTime = correctVideoPlaybackTime();
+    }
 }
 
 void VideoPlayer::encode(SyncBuffer* syncBuffer) {
     syncBuffer->encode(_correctPlaybackTime);
     syncBuffer->encode(_playbackState);
-    syncBuffer->encode(_syncflags);
+    syncBuffer->encode(_syncFlags);
 }
 
 void VideoPlayer::decode(SyncBuffer* syncBuffer) {
     syncBuffer->decode(_correctPlaybackTime);
     syncBuffer->decode(_playbackState);
-    syncBuffer->decode(_syncflags);
+    syncBuffer->decode(_syncFlags);
 }
 
 void VideoPlayer::postSync(bool isMaster) {
     if (_playbackMode == PlaybackMode::RealTimeLoop) {
-        // Ensure syncronized playback and states between Nodes and Master
-        if (_syncflags.goToStart) {
+        // Ensure synchronized playback and states between Nodes and Master
+        if (_syncFlags.shouldGoToStart) {
             setPropertyAsyncMpv(0.0, MpvKey::Time);
             if (isMaster) {
                 _playbackState = PlaybackState::Waiting;
-                _syncflags.goToStart = false;
+                _syncFlags.shouldGoToStart = false;
 
                 // Set new timer 5 frames into the future when seek is (hopefully) done 
                 const long long delay = static_cast<long long>(5 * 1000.0 / _fps);
@@ -826,10 +825,10 @@ void VideoPlayer::postSync(bool isMaster) {
                 );
             }
         }
-        if (_syncflags.play) {
+        if (_syncFlags.shouldPlay) {
             play();
             if (isMaster) {
-                _syncflags.play = false;
+                _syncFlags.shouldPlay = false;
             }
         }
         if (_isPaused && !isMaster) {
