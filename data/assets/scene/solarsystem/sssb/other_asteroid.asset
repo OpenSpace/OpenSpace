@@ -3,31 +3,30 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 local sssb = asset.resource({
-  Name = "Small SolarSystem Body Data (Inner Main Belt Asteroid)",
+  Name = "Small SolarSystem Body Data (Other Asteroid)",
   Type = "HttpSynchronization",
-  Identifier = "sssb_data_inner_main_belt_asteroid",
-  Version = 5
+  Identifier = "sssb_data_other_asteroid",
+  Version = 1
 })
 
 
 local Object = {
-  Identifier = "sssb_inner_main_belt_asteroid",
+  Identifier = "sssb_other_asteroid",
   Parent = transforms.SunEclipJ2000.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
-    Path = sssb .. "sssb_data_inner_main_belt_asteroid.csv",
+    Path = sssb .. "sssb_data_other_asteroid.csv",
     Format = "SBDB",
-    SegmentQuality = 1,
-    Color = { 1.0, 1.0, 0.0 },
-    TrailFade = 0.5,
+    SegmentQuality = 4,
+    Color = { 1.0, 1.0, 1.0 },
+    TrailFade = 11,
     PointSizeExponent = 9.2
   },
   GUI = {
-    Name = "Inner Main Asteroid Belt",
+    Name = "Other Asteroids",
     Path = "/Solar System/Small Bodies",
     Focusable = false,
-    Description = [[Asteroids with a semi-major axis less than 2.0 AU and a perihelion
-      distance greater than 1.666 AU.]]
+    Description = [[Asteroids that do not belong into any other group.]]
   }
 }
 
@@ -45,9 +44,9 @@ asset.export(Object)
 
 
 asset.meta = {
-  Name = "Inner Main Asteroid Belt",
+  Name = "Other Asteroids",
   Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
-    the Inner Main Asteroid Belt group]],
+    the Other asteorid group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",
   URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
   License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
