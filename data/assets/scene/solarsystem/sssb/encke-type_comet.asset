@@ -11,7 +11,7 @@ local sssb = asset.resource({
 
 
 local Object = {
-  Identifier = "sssb_encke-type_comet",
+  Identifier = "SSSB_Encke_Comet",
   Parent = transforms.SunEclipJ2000.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",

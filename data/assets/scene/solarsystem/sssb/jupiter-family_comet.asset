@@ -11,7 +11,7 @@ local sssb = asset.resource({
 
 
 local Object = {
-  Identifier = "sssb_jupiter-family_comet",
+  Identifier = "SSSB_Jupiter_Family_Comet",
   Parent = transforms.SunEclipJ2000.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
