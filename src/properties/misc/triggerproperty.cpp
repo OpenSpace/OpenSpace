@@ -52,4 +52,8 @@ std::string TriggerProperty::jsonValue() const {
     return "true";
 }
 
+std::string TriggerProperty::stringValue() const {
+    return "nil";
+}
+
 } // namespace openspace
