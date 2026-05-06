@@ -283,9 +283,7 @@ namespace {
  * \param useEyePosition If true, use the view direction of the camera instead of the
  *        camera position
  */
-[[codegen::luawrap]] std::tuple<double, double, double> geoPositionForCamera(
-                                                              bool useEyePosition = false)
-{
+[[codegen::luawrap]] glm::dvec3 geoPositionForCamera(bool useEyePosition = false) {
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
     // focus vs anchor
     const RenderableGlobe* globe = module->castFocusNodeRenderableToGlobe();
@@ -331,7 +329,7 @@ namespace {
         target - posHandle.centerToReferenceSurface
     );
 
-    return { glm::degrees(geo2.lat), glm::degrees(geo2.lon), altitude };
+    return glm::dvec3(glm::degrees(geo2.lat), glm::degrees(geo2.lon), altitude);
 }
 
 /**
