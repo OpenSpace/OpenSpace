@@ -24,6 +24,7 @@
 
 #include "welcomedialog.h"
 
+#include <ghoul/filesystem/filesystem.h>
 #include <QFileDialog>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -148,7 +149,7 @@ void WelcomeDialog::browseForFile() {
     const QString path = QFileDialog::getOpenFileName(
         this,
         "Open Asset",
-        QString(),
+        QString::fromStdString(absPath("${USER_ASSETS}").string()),
         QString::fromStdString(std::string(FileFilter))
     );
 
