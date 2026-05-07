@@ -350,16 +350,26 @@ void VideoPlayer::pause() {
     constexpr int IsPaused = 1;
     setPropertyAsyncMpv(IsPaused, MpvKey::Pause);
     _isPlaying = false;
-    _playbackState = PlaybackState::Paused;
-    _isPaused = true;
+    if (global::windowDelegate->isMaster()) {
+        _playbackState = PlaybackState::Paused;
+    }
 }
 
 void VideoPlayer::play() {
+    if (_playbackState == PlaybackState::EndOfFile) {
+        if (global::windowDelegate->isMaster()) {
+            _syncFlags.shouldGoToStart = true;
+            _isPlaying = true;
+        }
+        return;
+    }
+
     constexpr int IsPaused = 0;
     setPropertyAsyncMpv(IsPaused, MpvKey::Pause);
     _isPlaying = true;
-    _playbackState = PlaybackState::Playing;
-    _isPaused = false;
+    if (global::windowDelegate->isMaster()) {
+        _playbackState = PlaybackState::Playing;
+    }
 }
 
 void VideoPlayer::goToStart() {
@@ -485,7 +495,7 @@ void VideoPlayer::seekToTime(double time, PauseAfterSeek pauseAfter) {
     if (_isSeeking || checkFrameReached(time)) {
         return;
     }
-    if (!_isPaused) {
+    if (_isPlaying) {
         pause();
     }
     setPropertyAsyncMpv(time, MpvKey::Time);
@@ -760,7 +770,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
                 break;
             }
             int* videoIsPaused = reinterpret_cast<int*>(prop->data);
-            _isPaused = (* videoIsPaused == 1);
+            _isPlaying = (* videoIsPaused == 0);
             break;
         }
         case MpvKey::Meta: {
@@ -778,10 +788,19 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             break;
         }
         case MpvKey::EndOfFile: {
-            if (global::windowDelegate->isMaster() && _loopVideo &&
-                _playbackState == PlaybackState::Playing)
-            {
-                _syncFlags.shouldGoToStart = true;
+            if (!prop) {
+                break;
+            }
+
+            int* isEndOfFile = reinterpret_cast<int*>(prop->data);
+            if (global::windowDelegate->isMaster() && (* isEndOfFile == 1)) {
+                if (_loopVideo) {
+                    _syncFlags.shouldGoToStart = true;
+                    _isPlaying = true;
+                }
+                else {
+                    _playbackState = PlaybackState::EndOfFile;
+                }
             }
             break;
         }
@@ -858,7 +877,7 @@ void VideoPlayer::postSync(bool isMaster) {
                 _syncFlags.shouldPlay = false;
             }
         }
-        if (_isPaused && !isMaster) {
+        if (!_isPlaying && !isMaster) {
             seekToTime(_correctPlaybackTime);
         }
     }

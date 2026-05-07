@@ -96,7 +96,8 @@ private:
         Undefined = 0,
         Waiting,
         Playing,
-        Paused
+        Paused,
+        EndOfFile
     };
 
     // Libmpv keys
@@ -164,6 +165,7 @@ private:
     StringProperty _endTime;
 
     // Variables used when syncronizing play, pause and looping behavior
+    // (should only be modified by Master)
     SyncFlags _syncFlags;
     PlaybackState _playbackState = PlaybackState::Undefined;
     std::chrono::duration<long long, std::milli> _goTime =
@@ -177,7 +179,6 @@ private:
     double _videoDuration = 0.0;
     /// Used for the fbos
     glm::ivec2 _videoResolution = glm::ivec2(2048, 1024);
-    bool _isPaused = false;
     /// Default is to loop
     PlaybackMode _playbackMode = PlaybackMode::RealTimeLoop;
 
@@ -185,7 +186,7 @@ private:
     std::map<MpvKey, const char*> keys;
     std::map<MpvKey, mpv_format> formats;
 
-    // Syncing with multiple nodes
+    // Syncing with multiple nodes (should only be modified by Master)
     double _correctPlaybackTime = 0.0;
 
     // Video stretching: map to simulation time animation mode
