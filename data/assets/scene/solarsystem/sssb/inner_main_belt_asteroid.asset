@@ -11,7 +11,7 @@ local sssb = asset.resource({
 
 
 local Object = {
-  Identifier = "SSSB_Inner_MainBelt_Asteroid",
+  Identifier = "SSSB_Inner_Main_Belt_Asteroid",
   Parent = transforms.SunEclipJ2000.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
