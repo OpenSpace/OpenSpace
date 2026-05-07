@@ -129,7 +129,6 @@ struct Configuration {
         All = 0,
         NewYork,
         Sweden,
-        Utah,
         None
     };
     LayerServer layerServer = LayerServer::All;

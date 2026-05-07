@@ -8,9 +8,6 @@ elseif (server == "NewYork") then
   asset.require("./newyork_layers")
 elseif (server == "Sweden") then
   asset.require("./sweden_layers")
-elseif (server == "Utah") then
-  -- Using the New York server as a fallback
-  asset.require("./newyork_layers")
 end
 
 
