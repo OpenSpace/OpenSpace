@@ -85,7 +85,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableDisc::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_disc");
+    return codegen::doc<Parameters>(
+        "base_renderable_disc",
+        Renderable::Documentation()
+    );
 }
 
 RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)

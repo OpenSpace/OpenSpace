@@ -55,7 +55,10 @@ void KameleonVolumeModule::internalInitialize(const ghoul::Dictionary&) {
 }
 
 std::vector<Documentation> KameleonVolumeModule::documentations() const {
-    return { KameleonMetadataToJsonTask::documentation() };
+    return {
+        KameleonMetadataToJsonTask::documentation(),
+        RenderableKameleonVolume::Documentation()
+    };
 }
 
 } // namespace openspace

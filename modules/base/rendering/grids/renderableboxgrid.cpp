@@ -80,7 +80,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableBoxGrid::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_boxgrid");
+    return codegen::doc<Parameters>(
+        "base_renderable_boxgrid",
+        Renderable::Documentation()
+    );
 }
 
 RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)

@@ -318,7 +318,11 @@ namespace {
 namespace openspace {
 
 Documentation RenderableModel::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_model", Shadower::Documentation());
+    return codegen::doc<Parameters>(
+        "base_renderable_model",
+        Renderable::Documentation(),
+        Shadower::Documentation()
+    );
 }
 
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)

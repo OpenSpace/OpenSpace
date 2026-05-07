@@ -51,7 +51,10 @@ namespace {
 namespace openspace {
 
 Documentation ReadSpeckTask::Documentation() {
-    return codegen::doc<Parameters>("gaia_task_readspeck");
+    return codegen::doc<Parameters>(
+        "gaia_task_readspeck",
+        Task::documentation()
+    );
 }
 
 ReadSpeckTask::ReadSpeckTask(const ghoul::Dictionary& dictionary) {

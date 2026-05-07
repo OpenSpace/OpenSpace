@@ -78,7 +78,10 @@ namespace {
 namespace openspace {
 
 Documentation KameleonVolumeToRawTask::documentation() {
-    return codegen::doc<Parameters>("kameleon_task_kameleonvolumetoraw");
+    return codegen::doc<Parameters>(
+        "kameleon_task_kameleonvolumetoraw",
+        Task::documentation()
+    );
 }
 
 KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictionary) {

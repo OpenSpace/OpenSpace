@@ -141,7 +141,10 @@ namespace {
 namespace openspace {
 
 Documentation GlobeTranslation::Documentation() {
-    return codegen::doc<Parameters>("base_translation_globe");
+    return codegen::doc<Parameters>(
+        "base_translation_globe",
+        Translation::Documentation()
+    );
 }
 
 GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)

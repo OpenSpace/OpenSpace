@@ -90,7 +90,10 @@ namespace {
 namespace openspace {
 
 Documentation ExoplanetsDataPreparationTask::documentation() {
-    return codegen::doc<Parameters>("exoplanets_task_datapreparation");
+    return codegen::doc<Parameters>(
+        "exoplanets_task_datapreparation",
+        Task::documentation()
+    );
 }
 
 ExoplanetsDataPreparationTask::ExoplanetsDataPreparationTask(

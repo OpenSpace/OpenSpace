@@ -69,7 +69,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableSwitch::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_switch");
+    return codegen::doc<Parameters>(
+        "base_renderable_switch",
+        Renderable::Documentation()
+    );
 }
 
 RenderableSwitch::RenderableSwitch(const ghoul::Dictionary& dictionary)

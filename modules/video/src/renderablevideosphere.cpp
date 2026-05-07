@@ -49,15 +49,11 @@ namespace {
 namespace openspace {
 
 Documentation RenderableVideoSphere::Documentation() {
-    openspace::Documentation doc = codegen::doc<Parameters>(
+    return codegen::doc<Parameters>(
         "video_renderable_videosphere",
-        RenderableSphere::Documentation()
+        RenderableSphere::Documentation(),
+        VideoPlayer::Documentation()
     );
-
-    openspace::Documentation vp = VideoPlayer::Documentation();
-    doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
-
-    return doc;
 }
 
 RenderableVideoSphere::RenderableVideoSphere(const ghoul::Dictionary& dictionary)

@@ -82,7 +82,10 @@ namespace {
 namespace openspace {
 
 Documentation ReadFitsTask::Documentation() {
-    return codegen::doc<Parameters>("gaia_task_readfits");
+    return codegen::doc<Parameters>(
+        "gaia_task_readfits",
+        Task::documentation()
+    );
 }
 
 ReadFitsTask::ReadFitsTask(const ghoul::Dictionary& dictionary) {

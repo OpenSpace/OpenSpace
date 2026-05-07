@@ -101,7 +101,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableDistanceLabel::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_distancelabel");
+    return codegen::doc<Parameters>(
+        "base_renderable_distancelabel",
+        RenderableLabel::Documentation()
+    );
 }
 
 RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictionary)

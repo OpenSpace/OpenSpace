@@ -74,7 +74,10 @@ namespace {
 namespace openspace {
 
 openspace::Documentation RenderableSolarImageryProjection::Documentation() {
-    return codegen::doc<Parameters>("solarbrowsing_renderable_solarimageryprojection");
+    return codegen::doc<Parameters>(
+        "solarbrowsing_renderable_solarimageryprojection",
+        Renderable::Documentation()
+    );
 }
 
 RenderableSolarImageryProjection::RenderableSolarImageryProjection(

@@ -493,7 +493,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderablePointCloud::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_pointcloud");
+    return codegen::doc<Parameters>(
+        "base_renderable_pointcloud",
+        Renderable::Documentation()
+    );
 }
 
 RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictionary)

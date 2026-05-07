@@ -224,7 +224,10 @@ namespace {
 namespace openspace {
 
 openspace::Documentation RenderableSolarImagery::Documentation() {
-    return codegen::doc<Parameters>("solarbrowsing_renderable_solarimagery");
+    return codegen::doc<Parameters>(
+        "solarbrowsing_renderable_solarimagery",
+        Renderable::Documentation()
+    );
 }
 
 RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictionary)

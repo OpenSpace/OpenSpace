@@ -258,7 +258,10 @@ namespace {
 namespace openspace {
 
 Documentation ScreenSpaceInsetBlackout::Documentation() {
-    return codegen::doc<Parameters>("base_screenspace_insetblackout");
+    return codegen::doc<Parameters>(
+        "base_screenspace_insetblackout",
+        ScreenSpaceRenderable::Documentation()
+    );
 }
 
 ScreenSpaceInsetBlackout::BlackoutShape::Point::Point(glm::vec2& inData,

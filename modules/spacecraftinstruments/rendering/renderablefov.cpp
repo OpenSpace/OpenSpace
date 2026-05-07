@@ -206,7 +206,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableFov::Documentation() {
-    return codegen::doc<Parameters>("spacecraftinstruments_renderable_fieldofview");
+    return codegen::doc<Parameters>(
+        "spacecraftinstruments_renderable_fieldofview",
+        Renderable::Documentation()
+    );
 }
 
 RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)

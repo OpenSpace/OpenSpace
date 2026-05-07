@@ -61,7 +61,10 @@ namespace {
 namespace openspace {
 
 Documentation KameleonDocumentationTask::documentation() {
-    return codegen::doc<Parameters>("kameleon_task_documentation");
+    return codegen::doc<Parameters>(
+        "kameleon_task_documentation",
+        Task::documentation()
+    );
 }
 
 KameleonDocumentationTask::KameleonDocumentationTask(const ghoul::Dictionary& dictionary)
