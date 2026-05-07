@@ -40,9 +40,6 @@ struct SchemaReference {
 
     /// The human-readable name of the referenced class (e.g. "Renderable")
     std::string name;
-
-    /// Whether the referenced class was actually found in the schema
-    bool isFound = false;
 };
 
 /**
@@ -102,9 +99,6 @@ struct SchemaCategory {
     /// Display name of this category (e.g. "Renderable", "Rotation")
     std::string name;
 
-    /// Identifier used for lookup (e.g. "categoryRenderable", "categoryRotation")
-    std::string identifier;
-
     /// All types within this category
     std::vector<SchemaType> types;
 };
@@ -122,14 +116,6 @@ public:
      * \throw std::runtime_error if the resource cannot be opened or parsed
      */
     static const AssetSchema& instance();
-
-    /**
-     * Returns the category with the given identifier, or `nullptr` if not found.
-     *
-     * \param identifier The category identifier (e.g. "categoryRenderable")
-     * \return Pointer to the matching SchemaCategory, or `nullptr`
-     */
-    const SchemaCategory* findCategory(std::string_view identifier) const;
 
     /**
      * Searches all categories for a type with the given identifier.
@@ -153,8 +139,8 @@ private:
     AssetSchema(const AssetSchema&) = delete;
     AssetSchema& operator=(const AssetSchema&) = delete;
 
-    // This vector needs to be immutable as we are returning pointers into the vector in
-    // the `findCategory` / `findType` / `findCategoryByTypeId` functions
+    // This needs to be immutable as we are returning pointers into the datastructure
+    //std::map<std::string, std::vector<SchemaType>> _categories;
     const std::vector<SchemaCategory> _categories;
 };
 

@@ -121,11 +121,11 @@ SceneGraphNodeEditor::SceneGraphNodeEditor(JAsset& asset,
     , _index(index)
     , _localProperties(std::make_shared<PropertyMap>(asset.contents[index].properties))
 {
-    const SchemaType* sgnTypePtr = AssetSchema::instance().findType("core_scene_node");
-    if (!sgnTypePtr) {
+    const SchemaType* sgnType = AssetSchema::instance().findType("core_scenegraphnode");
+    if (!sgnType) {
         return;
     }
-    const SchemaType& sgnType = *sgnTypePtr;
+    const SchemaType& sgn = *sgnType;
 
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -137,25 +137,25 @@ SceneGraphNodeEditor::SceneGraphNodeEditor(JAsset& asset,
 
     SchemaFormWidget* renderable = nullptr;
     {
-        std::vector<SchemaMember> members = collectMembers(sgnType, "", { "Renderable" });
+        std::vector<SchemaMember> members = collectMembers(sgn, "", { "Renderable" });
         renderable = createForm(members, _localProperties, this, true, true);
     }
 
     SchemaFormWidget* transform = nullptr;
     {
-        std::vector<SchemaMember> members = collectMembers(sgnType, "", { "Transform" });
+        std::vector<SchemaMember> members = collectMembers(sgn, "", { "Transform" });
         transform = createForm(members, _localProperties, this, true, true);
     }
 
     SchemaFormWidget* gui = nullptr;
     {
-        std::vector<SchemaMember> members = collectMembers(sgnType, "", { "GUI" });
+        std::vector<SchemaMember> members = collectMembers(sgn, "", { "GUI" });
         gui = createForm(members, _localProperties, this, false, true);
     }
 
     SchemaFormWidget* timeFrame = nullptr;
     {
-        std::vector<SchemaMember> members = collectMembers(sgnType, "", { "TimeFrame" });
+        std::vector<SchemaMember> members = collectMembers(sgn, "", { "TimeFrame" });
         timeFrame = createForm(members, _localProperties, this, false, true);
     }
 
@@ -163,7 +163,7 @@ SceneGraphNodeEditor::SceneGraphNodeEditor(JAsset& asset,
     // a flat field. Wrap it in a CollapsibleSection manually
     SchemaFormWidget* tagForm = nullptr;
     {
-        std::vector<SchemaMember> members = collectMembers(sgnType, "", { "Tag" });
+        std::vector<SchemaMember> members = collectMembers(sgn, "", { "Tag" });
         tagForm = createForm(members, _localProperties, this, false, true);
     }
     CollapsibleSection* tags = nullptr;
@@ -184,10 +184,10 @@ SceneGraphNodeEditor::SceneGraphNodeEditor(JAsset& asset,
         tags->setContentWidget(tagForm);
     }
 
-    QWidget* additional = buildAdditionalSection(sgnType);
+    QWidget* additional = buildAdditionalSection(sgn);
 
     SchemaFormWidget* guiInnerForm = gui->findChild<SchemaFormWidget*>();
-    QWidget* quickAccess = buildQuickAccessFields(sgnType, guiInnerForm, additional);
+    QWidget* quickAccess = buildQuickAccessFields(sgn, guiInnerForm, additional);
 
     // Automatically generate identifier
     SchemaFormWidget* additionalForm = additional->findChild<SchemaFormWidget*>();

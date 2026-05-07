@@ -25,7 +25,10 @@
 #include "mainwindow.h"
 #include "schema/assetschema.h"
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settings.h>
+#include <ghoul/ghoul.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <QApplication>
@@ -40,7 +43,8 @@ int main(int argc, char* argv[]) {
         ghoul::logging::LogManager::ImmediateFlush::Yes
     );
 
-    ghoul::filesystem::FileSystem::initialize();
+    ghoul::initialize();
+    global::create();
 
     // Register the path of the executable, to make it possible to find other files in the
     // same directory
@@ -51,9 +55,15 @@ int main(int argc, char* argv[]) {
     );
 
     std::filesystem::path cfgPath = findConfiguration();
-    Configuration configuration = loadConfigurationFromFile(cfgPath, findSettings());
-    registerPathTokens(configuration);
 
+    // Register the base path as the directory where the configuration file lives
+    std::filesystem::path base = cfgPath.parent_path();
+    FileSys.registerPathToken("${BASE}", base);
+
+    *global::configuration = loadConfigurationFromFile(cfgPath, findSettings());
+    registerPathTokens(*global::configuration);
+
+    global::openSpaceEngine->initialize();
 
     QApplication app = QApplication(argc, argv);
 
@@ -69,5 +79,8 @@ int main(int argc, char* argv[]) {
 
     MainWindow window;
     window.showMaximized();
-    return app.exec();
+    int res = app.exec();
+
+    global::openSpaceEngine->deinitialize();
+    return res;
 }

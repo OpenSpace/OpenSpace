@@ -498,7 +498,7 @@ namespace {
         const std::optional<SchemaReference>& optionalReference =
             isArray ? member.members[0].reference : member.reference;
 
-        if (optionalReference.has_value() && optionalReference->isFound) {
+        if (optionalReference.has_value()) {
             return {
                 isArray ? TableKind::RefArray : TableKind::Ref,
                 &optionalReference.value()

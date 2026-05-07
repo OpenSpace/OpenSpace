@@ -24,95 +24,131 @@
 
 #include "schema/assetschema.h"
 
-#include <ghoul/misc/assert.h>
-#include <QFile>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <format>
-#include <stdexcept>
+#include <openspace/documentation/documentationengine.h>
+#include <openspace/util/factorymanager.h>
+
+using namespace openspace;
 
 namespace {
-    constexpr const char* SchemaResourcePath = ":/schema/assetComponents.json";
-
-    constexpr const char* KeyName = "name";
-    constexpr const char* KeyIdentifier = "identifier";
-    constexpr const char* KeyDescription = "description";
-    constexpr const char* KeyDocumentation = "documentation";
-    constexpr const char* KeyMembers = "members";
-    constexpr const char* KeyClasses = "classes";
-    constexpr const char* KeyType = "type";
-    constexpr const char* KeyOptional = "optional";
-    constexpr const char* KeyReference = "reference";
-    constexpr const char* KeyFound = "found";
-
-    SchemaMember parseMember(const QJsonObject& obj) {
-        SchemaMember member = {
-            .name = obj[KeyName].toString().toStdString(),
-            .type = obj[KeyType].toString().toStdString(),
-            .isOptional = obj[KeyOptional].toInt() != 0,
-            .documentation = obj[KeyDocumentation].toString().toStdString(),
-            .description = obj[KeyDescription].toString().toStdString()
+    SchemaType parseDocumentation(const Documentation& documentation) {
+        SchemaType type = {
+            .name = documentation.name,
+            .identifier = documentation.id,
+            .description = documentation.description
         };
 
-        if (obj.contains(KeyReference)) {
-            const QJsonObject refObj = obj[KeyReference].toObject();
-            SchemaReference ref = {
-                .identifier = refObj[KeyIdentifier].toString().toStdString(),
-                .name = refObj[KeyName].toString().toStdString(),
-                .isFound = refObj[KeyFound].toBool()
+        for (const DocumentationEntry& p : documentation.entries) {
+            SchemaMember entry = {
+                .name = p.key,
+                .type = p.verifier->type(),
+                .isOptional = p.optional,
+                .documentation = p.documentation
             };
-            member.reference = std::move(ref);
-        }
 
-        if (obj.contains(KeyMembers)) {
-            const QJsonArray membersArray = obj[KeyMembers].toArray();
-            for (const QJsonValue& memberVal : membersArray) {
-                member.members.push_back(parseMember(memberVal.toObject()));
+            auto* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
+            auto* rv = dynamic_cast<ReferencingVerifier*>(p.verifier.get());
+
+            if (rv) {
+                const std::vector<Documentation>& doc = DocEng.documentations();
+                auto it = std::find_if(
+                    doc.begin(),
+                    doc.end(),
+                    [rv](const Documentation& d) { return d.id == rv->identifier; }
+                );
+
+                ghoul_assert(it != doc.end(), "Did not find reference");
+                SchemaReference ref = {
+                    .identifier = rv->identifier,
+                    .name = it->name
+                };
+                entry.reference = std::move(ref);
             }
+            else if (tv) {
+                Documentation doc = { .entries = tv->documentations };
+
+                // Since this is a table we need to recurse this function to extract data
+                SchemaType tableDocs = parseDocumentation(doc);
+
+                entry.members = tableDocs.members;
+            }
+            else {
+                entry.description = p.verifier->documentation();
+            }
+            type.members.push_back(entry);
         }
 
-        return member;
+        return type;
     }
 
     std::vector<SchemaCategory> loadCategories() {
+        std::vector<Documentation> docs = DocEng.documentations();
+        const std::vector<FactoryManager::FactoryInfo>& factories =
+            FactoryManager::ref().factories();
+
         std::vector<SchemaCategory> result;
-        QFile file = QFile(SchemaResourcePath);
-        ghoul_assert(file.open(QFile::ReadOnly), "Could not open schema resource");
-
-        const QByteArray data = file.readAll();
-        QJsonParseError parseError;
-        const QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
-        ghoul_assert(!doc.isNull(), "Failed to parse schema");
-        ghoul_assert(doc.isArray(), "Schema must be an array at the top level");
-
-        const QJsonArray categoriesArray = doc.array();
-        result.reserve(categoriesArray.size());
-        // Read the JSON into the structs
-        for (const QJsonValue& categoryVal : categoriesArray) {
-            const QJsonObject categoryObj = categoryVal.toObject();
+        for (const FactoryManager::FactoryInfo& factoryInfo : factories) {
             SchemaCategory category = {
-                .name = categoryObj[KeyName].toString().toStdString(),
-                .identifier = categoryObj[KeyIdentifier].toString().toStdString()
+                .name = factoryInfo.name
             };
-            const QJsonArray types = categoryObj[KeyClasses].toArray();
-            category.types.reserve(types.size());
-            for (const QJsonValue& typeVal : types) {
-                const QJsonObject& obj = typeVal.toObject();
-                SchemaType type = {
-                    .name = obj[KeyName].toString().toStdString(),
-                    .identifier = obj[KeyIdentifier].toString().toStdString(),
-                    .description = obj[KeyDescription].toString().toStdString()
-                };
-                const QJsonArray members = obj[KeyMembers].toArray();
-                for (const QJsonValue& memberVal : members) {
-                    type.members.push_back(parseMember(memberVal.toObject()));
-                }
 
+            ghoul::TemplateFactoryBase* f = factoryInfo.factory.get();
+            // Add documentation about base class
+            auto factoryDoc = std::find_if(
+                docs.begin(),
+                docs.end(),
+                [&factoryInfo](const Documentation& d) {
+                    return d.name == factoryInfo.name;
+                }
+            );
+            if (factoryDoc != docs.end()) {
+                SchemaType type = parseDocumentation(*factoryDoc);
+                category.types.push_back(type);
+                // Remove documentation from list check at the end if all docs got put in
+                docs.erase(factoryDoc);
+            }
+            else {
+                SchemaType type = {
+                    .name = factoryInfo.name,
+                    .identifier = factoryInfo.name
+                };
                 category.types.push_back(type);
             }
-            result.push_back(std::move(category));
+
+            const std::vector<std::string>& registeredClasses = f->registeredClasses();
+            for (const std::string& c : registeredClasses) {
+                auto it = std::find_if(
+                    docs.begin(),
+                    docs.end(),
+                    [&c](const Documentation& d) { return d.name == c; }
+                );
+                if (it != docs.end()) {
+                    SchemaType type = parseDocumentation(*it);
+                    category.types.push_back(type);
+                    docs.erase(it);
+                }
+                else {
+                    SchemaType type = {
+                        .name = c,
+                        .identifier = c
+                    };
+                    category.types.push_back(type);
+                }
+            }
+            result.push_back(category);
         }
+
+
+        SchemaCategory other = {
+            .name = "Other"
+        };
+        for (const Documentation& doc : docs) {
+            if (doc.id.empty()) {
+                continue;
+            }
+            SchemaType type = parseDocumentation(doc);
+            other.types.push_back(type);
+        }
+        result.push_back(other);
         return result;
     }
 } // namespace
@@ -125,15 +161,6 @@ const AssetSchema& AssetSchema::instance() {
 AssetSchema::AssetSchema()
     : _categories(loadCategories())
 {}
-
-const SchemaCategory* AssetSchema::findCategory(std::string_view identifier) const {
-    for (const SchemaCategory& category : _categories) {
-        if (category.identifier == identifier) {
-            return &category;
-        }
-    }
-    return nullptr;
-}
 
 const SchemaType* AssetSchema::findType(std::string_view identifier) const {
     for (const SchemaCategory& category : _categories) {
