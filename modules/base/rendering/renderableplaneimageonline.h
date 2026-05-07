@@ -54,6 +54,8 @@ private:
 
     void loadTexture();
 
+    void scaleToAspectRatio();
+
     StringProperty _texturePath;
     StringProperty _rightTexturePath;
 
@@ -62,8 +64,8 @@ private:
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
     std::unique_ptr<ghoul::filesystem::File> _rightTextureFile;
 
-    ghoul::opengl::Texture* _texture;
-    ghoul::opengl::Texture* _rightTexture;
+    ghoul::opengl::Texture* _texture = nullptr;
+    ghoul::opengl::Texture* _rightTexture = nullptr;
     glm::vec2 _textureDimensions = glm::vec2(0.f);
 
     bool _isUrl = false;
