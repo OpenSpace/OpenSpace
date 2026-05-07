@@ -55,15 +55,20 @@ private:
     void loadTexture();
 
     StringProperty _texturePath;
+    StringProperty _rightTexturePath;
 
     std::future<DownloadManager::MemoryFile> _imageFuture;
+    std::future<DownloadManager::MemoryFile> _rightImageFuture;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
+    std::unique_ptr<ghoul::filesystem::File> _rightTextureFile;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<ghoul::opengl::Texture> _rightTexture;
     glm::vec2 _textureDimensions = glm::vec2(0.f);
 
     bool _isUrl = false;
     bool _textureIsDirty = false;
+    bool _useStereo = false;
 };
 
 } // namespace openspace

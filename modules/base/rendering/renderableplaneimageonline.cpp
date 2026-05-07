@@ -27,6 +27,7 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
@@ -49,7 +50,18 @@ namespace {
         "Sets the path of the texture that is displayed on this plane. The path can "
         "either be specified as a filepath to a local image on disc, or a web URL to an "
         "online image. If this value is changed, the image at the new path will "
-        "automatically be loaded and displayed.",
+        "automatically be loaded and displayed. During stereo rendering, this texture is "
+        "considered the left eye.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo RightTextureInfo = {
+        "RightTexture",
+        "Right Eye Texture",
+        "Sets the path of the texture that is displayed on this plane for the right eye "
+        "during stereo rendering. The path can either be specified as a filepath to a "
+        "local image on disc, or a web URL to an online image. If this value is changed, "
+        "the image at the new path will automatically be loaded and displayed.",
         Property::Visibility::User
     };
 
@@ -58,6 +70,9 @@ namespace {
     struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
+
+        // [[codegen::verbatim(RightTextureInfo.description)]]
+        std::optional<std::string> rightTexture;
 
         // Whether the provided path should be interpreted as a URL or a local file path.
         std::optional<bool> isUrl;
@@ -78,6 +93,7 @@ RenderablePlaneImageOnline::RenderablePlaneImageOnline(
                                                       const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _texturePath(TextureInfo)
+    , _rightTexturePath(RightTextureInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -95,6 +111,22 @@ RenderablePlaneImageOnline::RenderablePlaneImageOnline(
     _textureIsDirty = true;
     _texturePath.onChange([this]() { _textureIsDirty = true; });
     addProperty(_texturePath);
+
+    if (p.rightTexture.has_value()) {
+        _useStereo = true;
+
+        if (_isUrl) {
+            _rightTexturePath = *p.rightTexture;
+        }
+        else {
+            _rightTexturePath = absPath(*p.rightTexture).string();
+            _rightTextureFile = std::make_unique<ghoul::filesystem::File>(_rightTexturePath.value());
+            _rightTextureFile->setCallback([this]() { _textureIsDirty = true; });
+        }
+
+        _rightTexturePath.onChange([this]() { _textureIsDirty = true; });
+        addProperty(_rightTexturePath);
+    }
 
     _autoScale.onChange([this]() {
         if (!_autoScale) {
@@ -127,14 +159,26 @@ void RenderablePlaneImageOnline::initializeGL() {
 
 void RenderablePlaneImageOnline::deinitializeGL() {
     _texture = nullptr;
+    _rightTexture = nullptr;
     _textureFile = nullptr;
+    _rightTextureFile = nullptr;
 
     RenderablePlane::deinitializeGL();
 }
 
 void RenderablePlaneImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_texture) {
-        unit.bind(*_texture);
+        switch (global::windowDelegate->frustumMode()) {
+        case WindowDelegate::Frustum::Mono:
+        case WindowDelegate::Frustum::LeftEye:
+            unit.bind(*_texture);
+            break;
+        case WindowDelegate::Frustum::RightEye:
+            if (_useStereo && _rightTexture) {
+                unit.bind(*_rightTexture);
+            }
+            break;
+        }
     }
 }
 
@@ -168,7 +212,7 @@ RenderablePlaneImageOnline::downloadImageToMemory(const std::string& url)
 
 void RenderablePlaneImageOnline::loadTexture() {
     if (_isUrl) {
-        if (!_imageFuture.valid()) {
+        if (!_texture && !_imageFuture.valid()) {
             std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(
                 _texturePath
             );
@@ -177,7 +221,7 @@ void RenderablePlaneImageOnline::loadTexture() {
             }
         }
 
-        if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
+        if (!_texture && _imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
             const DownloadManager::MemoryFile imageFile = _imageFuture.get();
 
             if (imageFile.corrupted) {
@@ -198,12 +242,49 @@ void RenderablePlaneImageOnline::loadTexture() {
                     },
                     imageFile.format
                 );
-
-                _textureIsDirty = false;
             }
             catch (const ghoul::io::texture::InvalidLoadException& e) {
                 _textureIsDirty = false;
                 LERRORC(e.component, e.message);
+            }
+        }
+
+        if (_useStereo) {
+            if (!_rightTexture &&  !_rightImageFuture.valid()) {
+                std::future<DownloadManager::MemoryFile> rightFuture = downloadImageToMemory(
+                    _rightTexturePath
+                );
+                if (rightFuture.valid()) {
+                    _rightImageFuture = std::move(rightFuture);
+                }
+            }
+
+            if (!_rightTexture && _rightImageFuture.valid() && DownloadManager::futureReady(_rightImageFuture)) {
+                const DownloadManager::MemoryFile imageFile = _rightImageFuture.get();
+
+                if (imageFile.corrupted) {
+                    LERRORC(
+                        "RenderablePlaneImage",
+                        std::format("Error loading right image from URL '{}'", _rightTexturePath.value())
+                    );
+                    return;
+                }
+
+                try {
+                    _rightTexture = ghoul::io::texture::loadTexture(
+                        reinterpret_cast<void*>(imageFile.buffer),
+                        imageFile.size,
+                        2,
+                        ghoul::opengl::Texture::SamplerInit{
+                            .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                        },
+                        imageFile.format
+                    );
+                }
+                catch (const ghoul::io::texture::InvalidLoadException& e) {
+                    _textureIsDirty = false;
+                    LERRORC(e.component, e.message);
+                }
             }
         }
     }
@@ -211,6 +292,10 @@ void RenderablePlaneImageOnline::loadTexture() {
         if (_texturePath.value().empty()) {
             return;
         }
+
+        if (_useStereo && _rightTexturePath.value().empty()) {
+            return;
+        }   
 
         const unsigned int hash = ghoul::hashCRC32File(_texturePath);
 
@@ -234,10 +319,48 @@ void RenderablePlaneImageOnline::loadTexture() {
             }
         );
         _texture = std::make_unique<ghoul::opengl::Texture>(*texture);
-        _textureIsDirty = false;
 
         _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
         _textureFile->setCallback([this]() { _textureIsDirty = true; });
+
+        if (_useStereo) {
+            const unsigned int hash = ghoul::hashCRC32File(_rightTexturePath);
+
+            ghoul::opengl::Texture* texture = BaseModule::TextureManager.request(
+                std::to_string(hash),
+                [path = _rightTexturePath.value()]() -> std::unique_ptr<ghoul::opengl::Texture> {
+                    std::unique_ptr<ghoul::opengl::Texture> texture =
+                        ghoul::io::texture::loadTexture(
+                            absPath(path),
+                            2,
+                            ghoul::opengl::Texture::SamplerInit{
+                                .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                            }
+                        );
+
+                    LDEBUGC(
+                        "RenderablePlaneImage",
+                        std::format("Loaded right texture from '{}'", absPath(path))
+                    );
+                    return texture;
+                }
+            );
+            _rightTexture = std::make_unique<ghoul::opengl::Texture>(*texture);
+
+            _rightTextureFile = std::make_unique<ghoul::filesystem::File>(_rightTexturePath.value());
+            _rightTextureFile->setCallback([this]() { _textureIsDirty = true; });
+        }
+    }
+
+    if (_useStereo) {
+        if (_texture && _rightTexture) {
+            _textureIsDirty = false;
+        }
+    }
+    else {
+        if (_texture) {
+            _textureIsDirty = false;
+        }
     }
 
     if (!_autoScale) {
