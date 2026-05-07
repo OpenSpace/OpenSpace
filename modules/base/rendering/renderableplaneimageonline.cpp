@@ -35,6 +35,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/crc32.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <cstdlib>
@@ -158,10 +159,23 @@ void RenderablePlaneImageOnline::initializeGL() {
 }
 
 void RenderablePlaneImageOnline::deinitializeGL() {
+    if (_isUrl) {
+        delete _texture;
+    }
+    else {
+        BaseModule::TextureManager.release(_texture);
+    }
     _texture = nullptr;
-    _rightTexture = nullptr;
-    _textureFile = nullptr;
-    _rightTextureFile = nullptr;
+
+    if (_useStereo) {
+        if (_isUrl) {
+            delete _rightTexture;
+        }
+        else {
+            BaseModule::TextureManager.release(_rightTexture);
+        }
+        _rightTexture = nullptr;
+    }
 
     RenderablePlane::deinitializeGL();
 }
@@ -183,6 +197,8 @@ void RenderablePlaneImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
 }
 
 void RenderablePlaneImageOnline::update(const UpdateData& data) {
+    ZoneScoped;
+
     RenderablePlane::update(data);
 
     if (_textureIsDirty) {
@@ -211,6 +227,8 @@ RenderablePlaneImageOnline::downloadImageToMemory(const std::string& url)
 }
 
 void RenderablePlaneImageOnline::loadTexture() {
+    ZoneScoped;
+
     if (_isUrl) {
         if (!_texture && !_imageFuture.valid()) {
             std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(
@@ -241,7 +259,7 @@ void RenderablePlaneImageOnline::loadTexture() {
                         .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
                     },
                     imageFile.format
-                );
+                ).release();
             }
             catch (const ghoul::io::texture::InvalidLoadException& e) {
                 _textureIsDirty = false;
@@ -279,7 +297,7 @@ void RenderablePlaneImageOnline::loadTexture() {
                             .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
                         },
                         imageFile.format
-                    );
+                    ).release();
                 }
                 catch (const ghoul::io::texture::InvalidLoadException& e) {
                     _textureIsDirty = false;
@@ -299,7 +317,7 @@ void RenderablePlaneImageOnline::loadTexture() {
 
         const unsigned int hash = ghoul::hashCRC32File(_texturePath);
 
-        ghoul::opengl::Texture* texture = BaseModule::TextureManager.request(
+        _texture = BaseModule::TextureManager.request(
             std::to_string(hash),
             [path = _texturePath.value()]() -> std::unique_ptr<ghoul::opengl::Texture> {
                 std::unique_ptr<ghoul::opengl::Texture> texture =
@@ -318,7 +336,6 @@ void RenderablePlaneImageOnline::loadTexture() {
                 return texture;
             }
         );
-        _texture = std::make_unique<ghoul::opengl::Texture>(*texture);
 
         _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
         _textureFile->setCallback([this]() { _textureIsDirty = true; });
@@ -326,7 +343,7 @@ void RenderablePlaneImageOnline::loadTexture() {
         if (_useStereo) {
             const unsigned int hash = ghoul::hashCRC32File(_rightTexturePath);
 
-            ghoul::opengl::Texture* texture = BaseModule::TextureManager.request(
+            _rightTexture = BaseModule::TextureManager.request(
                 std::to_string(hash),
                 [path = _rightTexturePath.value()]() -> std::unique_ptr<ghoul::opengl::Texture> {
                     std::unique_ptr<ghoul::opengl::Texture> texture =
@@ -345,7 +362,6 @@ void RenderablePlaneImageOnline::loadTexture() {
                     return texture;
                 }
             );
-            _rightTexture = std::make_unique<ghoul::opengl::Texture>(*texture);
 
             _rightTextureFile = std::make_unique<ghoul::filesystem::File>(_rightTexturePath.value());
             _rightTextureFile->setCallback([this]() { _textureIsDirty = true; });

@@ -62,8 +62,8 @@ private:
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
     std::unique_ptr<ghoul::filesystem::File> _rightTextureFile;
 
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    std::unique_ptr<ghoul::opengl::Texture> _rightTexture;
+    ghoul::opengl::Texture* _texture;
+    ghoul::opengl::Texture* _rightTexture;
     glm::vec2 _textureDimensions = glm::vec2(0.f);
 
     bool _isUrl = false;
