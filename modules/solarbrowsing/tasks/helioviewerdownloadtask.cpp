@@ -89,10 +89,10 @@ namespace {
 
 namespace openspace {
 
-openspace::Documentation HelioviewerDownloadTask::documentation() {
+openspace::Documentation HelioviewerDownloadTask::Documentation() {
     return codegen::doc<Parameters>(
         "solarbrowsing_task_helioviewerdownload",
-        Task::documentation()
+        Task::Documentation()
     );
 }
 

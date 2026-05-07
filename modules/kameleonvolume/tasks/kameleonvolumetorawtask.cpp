@@ -77,10 +77,10 @@ namespace {
 
 namespace openspace {
 
-Documentation KameleonVolumeToRawTask::documentation() {
+Documentation KameleonVolumeToRawTask::Documentation() {
     return codegen::doc<Parameters>(
         "kameleon_task_kameleonvolumetoraw",
-        Task::documentation()
+        Task::Documentation()
     );
 }
 

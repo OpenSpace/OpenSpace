@@ -60,10 +60,10 @@ namespace {
 
 namespace openspace {
 
-Documentation KameleonDocumentationTask::documentation() {
+Documentation KameleonDocumentationTask::Documentation() {
     return codegen::doc<Parameters>(
         "kameleon_task_documentation",
-        Task::documentation()
+        Task::Documentation()
     );
 }
 

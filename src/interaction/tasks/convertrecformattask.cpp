@@ -48,10 +48,10 @@ namespace {
 
 namespace openspace {
 
-Documentation ConvertRecFormatTask::documentation() {
+Documentation ConvertRecFormatTask::Documentation() {
     return codegen::doc<Parameters>(
         "core_task_convertrecformat",
-        Task::documentation()
+        Task::Documentation()
     );
 }
 

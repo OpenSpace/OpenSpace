@@ -78,7 +78,7 @@ namespace openspace {
 Documentation KameleonVolumeToFieldlinesTask::Documentation() {
     return codegen::doc<Parameters>(
         "fieldlinessequence_task_kameleonvolumetofieldlines",
-        Task::documentation()
+        Task::Documentation()
     );
 }
 

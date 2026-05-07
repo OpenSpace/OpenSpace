@@ -56,7 +56,7 @@ void KameleonVolumeModule::internalInitialize(const ghoul::Dictionary&) {
 
 std::vector<Documentation> KameleonVolumeModule::documentations() const {
     return {
-        KameleonMetadataToJsonTask::documentation(),
+        KameleonMetadataToJsonTask::Documentation(),
         RenderableKameleonVolume::Documentation()
     };
 }

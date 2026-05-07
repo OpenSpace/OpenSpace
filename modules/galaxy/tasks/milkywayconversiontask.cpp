@@ -48,7 +48,7 @@ namespace openspace {
 Documentation MilkywayConversionTask::Documentation() {
     return codegen::doc<Parameters>(
         "galaxy_task_milkywayconversion",
-        Task::documentation()
+        Task::Documentation()
     );
 }
 

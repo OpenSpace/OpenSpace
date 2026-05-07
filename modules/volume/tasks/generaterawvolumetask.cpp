@@ -76,7 +76,7 @@ namespace openspace {
 Documentation GenerateRawVolumeTask::Documentation() {
     return codegen::doc<Parameters>(
         "volume_task_generaterawvolume",
-        Task::documentation()
+        Task::Documentation()
     );
 }
 

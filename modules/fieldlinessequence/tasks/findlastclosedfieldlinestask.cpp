@@ -64,7 +64,7 @@ namespace openspace {
 Documentation FindLastClosedFieldlinesTask::Documentation() {
     return codegen::doc<Parameters>(
         "fieldlinessequence_task_findlastclosedfieldlines",
-        Task::documentation()
+        Task::Documentation()
     );
 }
 

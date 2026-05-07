@@ -50,7 +50,7 @@ namespace {
 
 namespace openspace {
 
-Documentation Task::documentation() {
+Documentation Task::Documentation() {
     return codegen::doc<Parameters>("core_task");
 }
 

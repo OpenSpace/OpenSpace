@@ -53,10 +53,7 @@ namespace {
 namespace openspace {
 
 Documentation ConvertModelTask::Documentation() {
-    return codegen::doc<Parameters>(
-        "base_task_convertmodel",
-        Task::documentation()
-    );
+    return codegen::doc<Parameters>("base_task_convertmodel", Task::Documentation());
 }
 
 ConvertModelTask::ConvertModelTask(const ghoul::Dictionary& dictionary) {
