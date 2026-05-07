@@ -43,14 +43,9 @@ using PropertyList = std::vector<PropertyValue>;
  * A recursive property value that can hold any type representable in the schema.
  * Corresponds directly to values that will be serialised into the .jasset JSON format.
  */
-struct PropertyValue : public std::variant<
-    std::monostate,
-    std::string,
-    double,
-    bool,
-    PropertyMap,
-    PropertyList
-> {
+struct PropertyValue : public std::variant<std::monostate, std::string, double, bool,
+                                           PropertyMap, PropertyList>
+{
     using std::variant<
         std::monostate,
         std::string,

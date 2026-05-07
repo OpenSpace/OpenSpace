@@ -38,6 +38,26 @@
 #include <QSettings>
 #include <QVBoxLayout>
 
+// This is the overall organization of the widgets invloved in this application
+// MainWindow(QMainWindow)
+// └── AssetEditorWidget(QWidget)
+//     ├── SidePanel(QWidget)
+//     │   ├── ContentsListWidget(QWidget)
+//     │   ├── DependenciesWidget(QWidget)
+//     │   └── MetadataWidget(QWidget)
+//     ├── EditorPanel(QWidget)
+//     │   └── SceneGraphNodeEditor(QWidget)
+//     │       └── SchemaFormWidget(QWidget)
+//     │           ├── CollapsibleSection(QFrame)
+//     │           ├── MatrixWidget(QWidget)
+//     │           │   └── ColorWidget(MatrixWidget)
+//     │           └── SearchDropdown(QFrame)
+//     └── DocumentationPanel(QWidget)
+//
+// WelcomeDialog(QDialog) — shown modally at startup
+
+
+
 namespace {
     constexpr std::string_view AppName = "AssetBuilder";
     constexpr std::string_view FileFilter = "Asset files (*.jasset)";
