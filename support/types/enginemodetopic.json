@@ -1,4 +1,19 @@
 {
+  "$defs": {
+    "EngineMode": {
+      "enum": [
+        "user_control",
+        "session_recording_playback",
+        "camera_path"
+      ],
+      "tsEnumNames": [
+        "UserControl",
+        "SessionRecordingPlayback",
+        "CameraPath"
+      ],
+      "type": "string"
+    }
+  },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
@@ -6,12 +21,7 @@
       "additionalProperties": false,
       "properties": {
         "mode": {
-          "enum": [
-            "user_control",
-            "session_recording_playback",
-            "camera_path"
-          ],
-          "type": "string"
+          "$ref": "#/$defs/EngineMode"
         }
       },
       "required": [

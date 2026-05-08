@@ -23,6 +23,30 @@
       ],
       "type": "string"
     },
+    "LogMessage": {
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "type": "string"
+        },
+        "dateStamp": {
+          "type": "string"
+        },
+        "level": {
+          "$ref": "#/$defs/LogLevel"
+        },
+        "message": {
+          "type": "string"
+        },
+        "timeStamp": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "message"
+      ],
+      "type": "object"
+    },
     "Settings": {
       "additionalProperties": false,
       "properties": {
@@ -49,28 +73,7 @@
   "additionalProperties": false,
   "properties": {
     "data": {
-      "additionalProperties": false,
-      "properties": {
-        "category": {
-          "type": "string"
-        },
-        "dateStamp": {
-          "type": "string"
-        },
-        "level": {
-          "$ref": "#/$defs/LogLevel"
-        },
-        "message": {
-          "type": "string"
-        },
-        "timeStamp": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "message"
-      ],
-      "type": "object"
+      "$ref": "#/$defs/LogMessage"
     },
     "topicId": {
       "const": "errorLog"

@@ -3036,7 +3036,7 @@
           "type": "string"
         },
         "value": {
-          "type": "boolean"
+          "type": "null"
         }
       },
       "required": [

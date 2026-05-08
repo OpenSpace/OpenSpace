@@ -43,8 +43,23 @@
         },
         {
           "$ref": "#/$defs/FlightControllerInputStateCommand"
+        },
+        {
+          "$ref": "#/$defs/FlightControllerConnectCommand"
         }
       ]
+    },
+    "FlightControllerConnectCommand": {
+      "additionalProperties": false,
+      "properties": {
+        "event": {
+          "const": "connect"
+        }
+      },
+      "required": [
+        "event"
+      ],
+      "type": "object"
     },
     "FlightControllerDisconnectCommand": {
       "additionalProperties": false,

@@ -60,15 +60,17 @@ void CameraTopic::handleJson(const nlohmann::json& json) {
         return;
     }
 
-    _dataCallbackHandle = global::server->addPreSyncCallback(
-        [this]() {
-            const auto now = std::chrono::system_clock::now();
-            if (now - _lastUpdateTime > _cameraPositionUpdateTime) {
-                sendCameraData();
-                _lastUpdateTime = std::chrono::system_clock::now();
+    if (event == "start_subscription" && _dataCallbackHandle == UnsetOnChangeHandle) {
+        _dataCallbackHandle = global::server->addPreSyncCallback(
+            [this]() {
+                const auto now = std::chrono::system_clock::now();
+                if (now - _lastUpdateTime > _cameraPositionUpdateTime) {
+                    sendCameraData();
+                    _lastUpdateTime = std::chrono::system_clock::now();
+                }
             }
-        }
-    );
+        );
+    }
 }
 
 void CameraTopic::sendCameraData() {
@@ -110,7 +112,10 @@ Schema CameraTopic::Schema() {
             "topicPayload": {
               "type": "object",
               "properties": {
-                "event": { "const": "start_subscription" }
+                "event": {
+                  "type": "string",
+                  "enum": ["start_subscription", "stop_subscription"]
+                }
               },
               "additionalProperties": false,
               "required": ["event"]

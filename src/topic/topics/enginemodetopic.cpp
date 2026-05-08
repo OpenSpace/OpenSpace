@@ -86,6 +86,13 @@ bool EngineModeTopic::isDone() const {
 Schema EngineModeTopic::Schema() {
     nlohmann::json schema = nlohmann::json::parse(R"(
         {
+          "$defs": {
+            "EngineMode": {
+              "type": "string",
+              "enum": ["user_control", "session_recording_playback", "camera_path"],
+              "tsEnumNames": ["UserControl", "SessionRecordingPlayback", "CameraPath"]
+            }
+          },
           "title": "EngineModeTopic",
           "type": "object",
           "properties": {
@@ -104,10 +111,7 @@ Schema EngineModeTopic::Schema() {
             "data": {
               "type": "object",
               "properties": {
-                "mode": {
-                  "type": "string",
-                  "enum": ["user_control", "session_recording_playback", "camera_path"]
-                }
+                "mode": { "$ref": "#/$defs/EngineMode" }
               },
               "additionalProperties": false,
               "required": ["mode"]

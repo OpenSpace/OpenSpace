@@ -109,6 +109,12 @@ bool FlightControllerTopic::isDone() const {
 void FlightControllerTopic::handleJson(const nlohmann::json& json) {
     const std::string& event = json.at("event").get<std::string>();
 
+    if (event == "connect") {
+        // @TODO (anden88 2026-05-06): The API currently need to pass some kind of data to
+        // a topic, we'll just pass a connect event that does nothing
+        return;
+    }
+
     if (event == "disconnect") {
         disconnect();
     }
@@ -145,6 +151,14 @@ Schema FlightControllerTopic::Schema() {
               },
               "additionalProperties": false
             },
+            "FlightControllerConnectCommand": {
+              "type": "object",
+              "properties": {
+                "event": { "const": "connect" }
+              },
+              "additionalProperties": false,
+              "required": ["event"]
+            },
             "FlightControllerDisconnectCommand": {
               "type": "object",
               "properties": {
@@ -165,7 +179,8 @@ Schema FlightControllerTopic::Schema() {
             "FlightControllerCommand": {
               "anyOf": [
                 { "$ref": "#/$defs/FlightControllerDisconnectCommand" },
-                { "$ref": "#/$defs/FlightControllerInputStateCommand" }
+                { "$ref": "#/$defs/FlightControllerInputStateCommand" },
+                { "$ref": "#/$defs/FlightControllerConnectCommand" }
               ]
             }
           },

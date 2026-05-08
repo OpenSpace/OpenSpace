@@ -150,16 +150,7 @@ Schema ErrorLogTopic::Schema() {
           "$defs": {
             "LogLevel": {
               "type": "string",
-              "enum": [
-                "All",
-                "Trace",
-                "Debug",
-                "Info",
-                "Warning",
-                "Error",
-                "Fatal",
-                "None"
-              ],
+              "enum": ["All", "Trace", "Debug", "Info", "Warning", "Error", "Fatal", "None"],
               "tsEnumNames": [
                 "All",
                 "Trace",
@@ -181,6 +172,18 @@ Schema ErrorLogTopic::Schema() {
                 "logLevelStamping": { "type": "boolean" }
               },
               "additionalProperties": false
+            },
+            "LogMessage": {
+              "type": "object",
+              "properties": {
+                "message": { "type": "string" },
+                "timeStamp": { "type": "string" },
+                "dateStamp": { "type": "string" },
+                "category": { "type": "string" },
+                "level": { "$ref": "#/$defs/LogLevel" }
+              },
+              "additionalProperties": false,
+              "required": ["message"]
             }
           },
           "title": "ErrorLogTopic",
@@ -218,18 +221,7 @@ Schema ErrorLogTopic::Schema() {
                 }
               ]
             },
-            "data": {
-              "type": "object",
-              "properties": {
-                "message": { "type": "string" },
-                "timeStamp": { "type": "string" },
-                "dateStamp": { "type": "string" },
-                "category": { "type": "string" },
-                "level": { "$ref": "#/$defs/LogLevel" }
-              },
-              "additionalProperties": false,
-              "required": ["message"]
-            }
+            "data": { "$ref": "#/$defs/LogMessage" }
           },
           "additionalProperties": false,
           "required": ["topicId", "topicPayload", "data"]

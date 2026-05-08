@@ -49,7 +49,7 @@ void TriggerProperty::trigger() {
 }
 
 std::string TriggerProperty::jsonValue() const {
-    return "true";
+    return "null";
 }
 
 std::string TriggerProperty::stringValue() const {
@@ -66,7 +66,7 @@ nlohmann::json TriggerProperty::Schema() {
           "type": "object",
           "properties": {
             "uri": { "type": "string" },
-            "value": { "type": "boolean" }
+            "value": { "type": "null" }
           },
           "additionalProperties": false,
           "required": ["metaData", "uri", "value"]

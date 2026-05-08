@@ -1,6 +1,6 @@
 {
   "$defs": {
-    "SessionState": {
+    "SessionRecordingState": {
       "enum": [
         "idle",
         "recording",
@@ -29,7 +29,7 @@
           "type": "array"
         },
         "state": {
-          "$ref": "#/$defs/SessionState"
+          "$ref": "#/$defs/SessionRecordingState"
         }
       },
       "type": "object"

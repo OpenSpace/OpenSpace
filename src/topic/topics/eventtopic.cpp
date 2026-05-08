@@ -48,8 +48,8 @@ namespace openspace {
 void EventTopic::handleJson(const nlohmann::json& json) {
     std::vector<std::string> events;
 
-    auto eventJson = json.find("event");
-    auto statusJson = json.find("status");
+    auto eventJson = json.find("eventType");
+    auto statusJson = json.find("event");
 
     if (eventJson == json.end()) {
         LERROR("Payload does not contain 'event' key");
@@ -61,11 +61,11 @@ void EventTopic::handleJson(const nlohmann::json& json) {
         return;
     }
 
-    if (json.at("event").is_array()) {
-        events = json.at("event").get<std::vector<std::string>>();
+    if (json.at("eventType").is_array()) {
+        events = json.at("eventType").get<std::vector<std::string>>();
     }
     else {
-        const std::string& event = json.at("event").get<std::string>();
+        const std::string& event = json.at("eventType").get<std::string>();
         if (event == "*" || event == "all") {
             // Iterate over all event types and add them to list
             const uint8_t lastEvent = static_cast<uint8_t>(Event::Type::Last);
@@ -80,7 +80,7 @@ void EventTopic::handleJson(const nlohmann::json& json) {
         }
     }
 
-    const std::string& status = json.at("status").get<std::string>();
+    const std::string& status = json.at("event").get<std::string>();
 
     for (const std::string& event : events) {
         if (status == "start_subscription") {

@@ -126,7 +126,14 @@ Schema ActionKeybindTopic::Schema() {
               "type": "object",
               "anyOf": [
                 {
-                  "$ref": "#/$defs/Action"
+                  "type": "object",
+                  "description": "Response to get_action",
+                  "properties": {
+                    "action": { "$ref": "#/$defs/Action" },
+                    "type": "action"
+                  },
+                  "additionalProperties": false,
+                  "required": ["action", "type"]
                 },
                 {
                   "type": "object",
@@ -143,10 +150,11 @@ Schema ActionKeybindTopic::Schema() {
                       "items": {
                         "$ref": "#/$defs/Keybind"
                       }
-                    }
+                    },
+                    "type": "combined"
                   },
                   "additionalProperties": false,
-                  "required": ["actions", "keybinds"]
+                  "required": ["actions", "keybinds", "type"]
                 }
               ]
             }
@@ -178,6 +186,8 @@ nlohmann::json jsonKeybind(const KeyWithModifier& k, std::string identifier) {
 
 nlohmann::json ActionKeybindTopic::allActionsKeybinds() const {
     nlohmann::json json = {};
+    json["type"] = "combined";
+
     std::vector<openspace::Action> actions = global::actionManager->actions();
     std::sort(
         actions.begin(),
@@ -209,6 +219,7 @@ nlohmann::json ActionKeybindTopic::allActionsKeybinds() const {
         nlohmann::json keybindJson = jsonKeybind(keyBinding.first, keyBinding.second);
         json["keybinds"].push_back(keybindJson);
     }
+
     return json;
 }
 
@@ -224,10 +235,16 @@ nlohmann::json ActionKeybindTopic::action(const std::string& identifier) const {
     );
 
     if (found == actions.end()) {
-        return {};
+        throw ghoul::RuntimeError(std::format(
+            "No action found with identifier '{}'", identifier
+        ));
     }
     openspace::Action action = *found;
-    return action;
+
+    nlohmann::json json;
+    json["type"] = "action";
+    json["action"] = action;
+    return json;
 }
 
 } // namespace openspace

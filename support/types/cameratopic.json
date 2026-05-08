@@ -85,7 +85,11 @@
       "additionalProperties": false,
       "properties": {
         "event": {
-          "const": "start_subscription"
+          "enum": [
+            "start_subscription",
+            "stop_subscription"
+          ],
+          "type": "string"
         }
       },
       "required": [

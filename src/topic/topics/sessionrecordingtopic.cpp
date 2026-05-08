@@ -104,7 +104,7 @@ Schema SessionRecordingTopic::Schema() {
     nlohmann::json schema = nlohmann::json::parse(R"(
         {
           "$defs": {
-            "SessionState": {
+            "SessionRecordingState": {
               "type": "string",
               "enum": ["idle", "recording", "playing", "playing-paused"],
               "tsEnumNames": ["Idle", "Recording", "Playing", "Paused"]
@@ -146,7 +146,7 @@ Schema SessionRecordingTopic::Schema() {
             "data": {
               "type": "object",
               "properties": {
-                "state": { "$ref": "#/$defs/SessionState" },
+                "state": { "$ref": "#/$defs/SessionRecordingState" },
                 "files": {
                   "type": "array",
                   "items": { "type": "string" }
