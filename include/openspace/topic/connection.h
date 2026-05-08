@@ -71,6 +71,12 @@ public:
     const std::string& password() const;
 
 private:
+    struct ApiVersion {
+        int major = 0;
+        int minor = 0;
+        int patch = 0;
+    };
+
     std::map<TopicId, std::unique_ptr<Topic>> _topics;
     std::unique_ptr<ghoul::io::Socket> _socket;
     std::thread _thread;
@@ -78,6 +84,8 @@ private:
 
     std::string _address;
     bool _isAuthorized = false;
+    bool _hasApiVersion = false;
+    ApiVersion _connectedApiVersion;
     std::string _password;
 };
 
