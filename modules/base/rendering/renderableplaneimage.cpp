@@ -63,8 +63,9 @@ namespace {
         Property::Visibility::User
     };
 
-    // Creates a textured 3D plane, where the texture image is loaded from the internet
-    // through a web URL.
+    // Creates a textured 3D plane, where the texture image is loaded from either a
+    // filepath to a local image on disc, or a web URL to an online image. If an online
+    // image is used, the `IsUrl` paramter must be set to `true`."
     struct [[codegen::Dictionary(RenderablePlaneImage)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
@@ -72,7 +73,8 @@ namespace {
         // [[codegen::verbatim(RightTextureInfo.description)]]
         std::optional<std::string> rightTexture;
 
-        // Whether the provided path should be interpreted as a URL or a local file path.
+        // Whether the provided texture path(s) should be interpreted as a URL or a local
+        // file path.
         std::optional<bool> isUrl;
 
         // If this value is set to true, the image for this plane will not be loaded at
