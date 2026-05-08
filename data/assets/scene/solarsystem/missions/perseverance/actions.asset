@@ -31,11 +31,10 @@ local Restore = {
     openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Settings.Offset", 0)
     openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.MDEM200M.Settings.Offset", 0)
   ]],
-  Documentation = "Undoes the layer offsets for Perseverance landing",
+  Documentation = "Restores the layer offsets for Perseverance landing",
   GuiPath = "/Missions/Perseverance",
   IsLocal = false
 }
-
 
 
 asset.onInitialize(function()
@@ -44,8 +43,8 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(Setup)
   openspace.action.removeAction(Restore)
+  openspace.action.removeAction(Setup)
 end)
 
 asset.export("Setup", Setup.Identifier)
