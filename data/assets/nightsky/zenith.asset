@@ -49,7 +49,7 @@ local ZenithDot = {
     }
   },
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = asset.enabled,
     Size = 1000000,
     Origin = "Center",

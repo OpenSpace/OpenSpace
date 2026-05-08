@@ -20,7 +20,7 @@ local xy_n = {
   Identifier = "Ganymede_Plane_XY_N",
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = false,
     Size = Size,
     Texture = data .. "XY-n.png"
@@ -37,7 +37,7 @@ local xy_t = {
   Identifier = "Ganymede_Plane_XY_T",
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = false,
     Size = Size,
     Texture = data .. "XY-T.png"
@@ -54,7 +54,7 @@ local xy_u = {
   Identifier = "Ganymede_Plane_XY_U",
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = false,
     Size = Size,
     Texture = data .. "XY-U.png"
@@ -72,7 +72,7 @@ local xy_utot = {
   Identifier = "Ganymede_Plane_XY_Utot",
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = false,
     Size = Size,
     Texture = data .. "XY-Utot.png"
@@ -90,7 +90,7 @@ local xy_ux = {
   Identifier = "Ganymede_Plane_XY_Ux",
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = false,
     Size = Size,
     Texture = data .. "XY-Ux.png"
@@ -108,7 +108,7 @@ local xy_uy = {
   Identifier = "Ganymede_Plane_XY_Uy",
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = false,
     Size = Size,
     Texture = data .. "XY-Uy.png"
@@ -126,7 +126,7 @@ local xy_uz = {
   Identifier = "Ganymede_Plane_XY_Uz",
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = false,
     Size = Size,
     Texture = data .. "XY-Uz.png"
@@ -150,7 +150,7 @@ local xz_n = {
     }
   },
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = false,
     Size = Size,
     Texture = data .. "XZ-n.png"
@@ -173,7 +173,7 @@ local xz_t = {
     }
   },
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = false,
     Size = Size,
     Texture = data .. "XZ-T.png"
@@ -196,7 +196,7 @@ local xz_u = {
     }
   },
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = false,
     Size = Size,
     Texture = data .. "XZ-U.png"
@@ -220,7 +220,7 @@ local xz_utot = {
     }
   },
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = false,
     Size = Size,
     Texture = data .. "XZ-Utot.png"
@@ -244,7 +244,7 @@ local xz_ux = {
     }
   },
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = false,
     Size = Size,
     Texture = data .. "XZ-Ux.png"
@@ -268,7 +268,7 @@ local xz_uy = {
     }
   },
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = false,
     Size = Size,
     Texture = data .. "XZ-Uy.png"
@@ -292,7 +292,7 @@ local xz_uz = {
     }
   },
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = false,
     Size = Size,
     Texture = data .. "XZ-Uz.png"

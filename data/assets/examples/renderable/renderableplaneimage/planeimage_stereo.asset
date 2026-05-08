@@ -1,16 +1,17 @@
--- Basic
+-- Stereo
 -- This example shows how to create a textured plane in 3D space, where the texture is
--- loaded from the internet though a web URL.
+-- loaded from two local files on disk to create a stereo image.
 
 local Node = {
-  Identifier = "RenderablePlaneImageOnline_Example",
+  Identifier = "RenderablePlaneImage_Example_Stereo",
   Renderable = {
-    Type = "RenderablePlaneImageOnline",
+    Type = "RenderablePlaneImage",
     Size = 3.0E11,
-    URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg"
+    Texture = openspace.absPath("${DATA}/test2.jpg"),
+    RightTexture = openspace.absPath("${DATA}/test.jpg")
   },
   GUI = {
-    Name = "RenderablePlaneImageOnline - Basic",
+    Name = "RenderablePlaneImage - Stereo",
     Path = "/Examples"
   }
 }

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/renderableplaneimageonline.h>
+#include <modules/base/rendering/renderableplaneimage.h>
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
@@ -50,9 +50,7 @@ namespace {
         "Texture",
         "Sets the path of the texture that is displayed on this plane. The path can "
         "either be specified as a filepath to a local image on disc, or a web URL to an "
-        "online image. If this value is changed, the image at the new path will "
-        "automatically be loaded and displayed. During stereo rendering, this texture is "
-        "considered the left eye.",
+        "online image. During stereo rendering, this texture is considered the left eye.",
         Property::Visibility::User
     };
 
@@ -61,14 +59,13 @@ namespace {
         "Right Eye Texture",
         "Sets the path of the texture that is displayed on this plane for the right eye "
         "during stereo rendering. The path can either be specified as a filepath to a "
-        "local image on disc, or a web URL to an online image. If this value is changed, "
-        "the image at the new path will automatically be loaded and displayed.",
+        "local image on disc, or a web URL to an online image.",
         Property::Visibility::User
     };
 
     // Creates a textured 3D plane, where the texture image is loaded from the internet
     // through a web URL.
-    struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {
+    struct [[codegen::Dictionary(RenderablePlaneImage)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
 
@@ -84,18 +81,18 @@ namespace {
         std::optional<bool> lazyLoading;
     };
 } // namespace
-#include "renderableplaneimageonline_codegen.cpp"
+#include "renderableplaneimage_codegen.cpp"
 
 namespace openspace {
 
-Documentation RenderablePlaneImageOnline::Documentation() {
+Documentation RenderablePlaneImage::Documentation() {
     return codegen::doc<Parameters>(
-        "base_renderable_planeimageonline",
+        "base_renderable_planeimage",
         RenderablePlane::Documentation()
     );
 }
 
-RenderablePlaneImageOnline::RenderablePlaneImageOnline(
+RenderablePlaneImage::RenderablePlaneImage(
                                                       const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary, { .shouldUpdateIfDisabled = true })
     , _texturePath(TextureInfo)
@@ -154,11 +151,11 @@ RenderablePlaneImageOnline::RenderablePlaneImageOnline(
     });
 }
 
-void RenderablePlaneImageOnline::initializeGL() {
+void RenderablePlaneImage::initializeGL() {
     RenderablePlane::initializeGL();
 }
 
-void RenderablePlaneImageOnline::deinitializeGL() {
+void RenderablePlaneImage::deinitializeGL() {
     BaseModule::TextureManager.release(_texture);
     _texture = nullptr;
 
@@ -170,7 +167,7 @@ void RenderablePlaneImageOnline::deinitializeGL() {
     RenderablePlane::deinitializeGL();
 }
 
-void RenderablePlaneImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void RenderablePlaneImage::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_texture) {
         switch (global::windowDelegate->frustumMode()) {
             case WindowDelegate::Frustum::Mono:
@@ -189,7 +186,7 @@ void RenderablePlaneImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
     }
 }
 
-void RenderablePlaneImageOnline::update(const UpdateData& data) {
+void RenderablePlaneImage::update(const UpdateData& data) {
     ZoneScoped;
 
     RenderablePlane::update(data);
@@ -213,7 +210,7 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
 }
 
 std::future<DownloadManager::MemoryFile>
-RenderablePlaneImageOnline::downloadImageToMemory(const std::string& url)
+RenderablePlaneImage::downloadImageToMemory(const std::string& url)
 {
     return global::downloadManager->fetchFile(
         url,
@@ -232,7 +229,7 @@ RenderablePlaneImageOnline::downloadImageToMemory(const std::string& url)
     );
 }
 
-void RenderablePlaneImageOnline::loadTexture() {
+void RenderablePlaneImage::loadTexture() {
     ZoneScoped;
 
     if (_isUrl) {
@@ -421,7 +418,7 @@ void RenderablePlaneImageOnline::loadTexture() {
     }
 }
 
-void RenderablePlaneImageOnline::scaleToAspectRatio() {
+void RenderablePlaneImage::scaleToAspectRatio() {
     if (!_texture) {
         return;
     }

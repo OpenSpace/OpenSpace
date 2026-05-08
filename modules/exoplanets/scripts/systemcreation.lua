@@ -334,7 +334,7 @@ function addExoplanetSystem(data)
       Identifier = starIdentifier .. "_Glare",
       Parent = starIdentifier,
       Renderable = {
-        Type = "RenderablePlaneImageLocal",
+        Type = "RenderablePlaneImage",
         Size = size,
         Origin = "Center",
         Billboard = true,

@@ -44,7 +44,7 @@ local HydraText = {
     }
   },
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Size = 1995262.315,
     Origin = "Center",
     Billboard = true,
@@ -68,7 +68,7 @@ local KerberosText = {
     }
   },
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Size = 19952623.15,
     Origin = "Center",
     Billboard = true,
@@ -86,7 +86,7 @@ local NixText = {
   Identifier = "NixText",
   Parent = nixAsset.Nix.Identifier,
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Size = 19952623.15,
     Origin = "Center",
     Billboard = true,
@@ -110,7 +110,7 @@ local StyxText = {
     }
   },
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Size = 19952623.15,
     Origin = "Center",
     Billboard = true,

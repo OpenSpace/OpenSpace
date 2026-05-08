@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGE___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGE___H__
 
 #include <modules/base/rendering/renderableplane.h>
 
@@ -34,9 +34,9 @@
 
 namespace openspace {
 
-class RenderablePlaneImageOnline : public RenderablePlane {
+class RenderablePlaneImage : public RenderablePlane {
 public:
-    explicit RenderablePlaneImageOnline(const ghoul::Dictionary& dictionary);
+    explicit RenderablePlaneImage(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -77,4 +77,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGEONLINE___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGE___H__

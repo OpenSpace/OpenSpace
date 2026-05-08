@@ -1,0 +1,26 @@
+-- Online
+-- This example shows how to create a textured plane in 3D space, where the texture is
+-- loaded from the internet though a web URL.
+
+local Node = {
+  Identifier = "RenderablePlaneImage_Example_Online",
+  Renderable = {
+    Type = "RenderablePlaneImage",
+    Size = 3.0E11,
+    IsUrl = true,
+    Texture = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg",
+  },
+  GUI = {
+    Name = "RenderablePlaneImage - Online",
+    Path = "/Examples"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

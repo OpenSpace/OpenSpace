@@ -58,8 +58,7 @@ set(HEADER_FILES
   rendering/renderablenodearrow.h
   rendering/renderablenodeline.h
   rendering/renderableplane.h
-  rendering/renderableplaneimagelocal.h
-  rendering/renderableplaneimageonline.h
+  rendering/renderableplaneimage.h
   rendering/renderableplanetimevaryingimage.h
   rendering/renderableprism.h
   rendering/renderablesphere.h
@@ -136,8 +135,7 @@ set(SOURCE_FILES
   rendering/renderablenodearrow.cpp
   rendering/renderablenodeline.cpp
   rendering/renderableplane.cpp
-  rendering/renderableplaneimagelocal.cpp
-  rendering/renderableplaneimageonline.cpp
+  rendering/renderableplaneimage.cpp
   rendering/renderableplanetimevaryingimage.cpp
   rendering/renderableprism.cpp
   rendering/renderablesphere.cpp

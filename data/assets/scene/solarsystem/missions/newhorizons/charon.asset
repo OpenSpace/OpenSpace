@@ -78,7 +78,7 @@ local CharonText = {
     }
   },
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Size = 19952623.15,
     Origin = "Center",
     Billboard = true,

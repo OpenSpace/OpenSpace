@@ -32,7 +32,7 @@ local Front = {
     }
   },
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = asset.enabled,
     Size = Size,
     Origin = "Center",
@@ -59,7 +59,7 @@ local Right = {
     }
   },
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = asset.enabled,
     Size = Size,
     Origin = "Center",
@@ -86,7 +86,7 @@ local Back = {
     }
   },
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = asset.enabled,
     Size = Size,
     Origin = "Center",
@@ -113,7 +113,7 @@ local Left = {
     }
   },
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = asset.enabled,
     Size = Size,
     Origin = "Center",
@@ -140,7 +140,7 @@ local Top = {
     }
   },
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = asset.enabled,
     Size = Size,
     Origin = "Center",
@@ -167,7 +167,7 @@ local Bottom = {
     }
   },
   Renderable = {
-    Type = "RenderablePlaneImageLocal",
+    Type = "RenderablePlaneImage",
     Enabled = asset.enabled,
     Size = Size,
     Origin = "Center",
