@@ -1,0 +1,31 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderableplaneimage/planeimage_stereo.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderablePlaneImage_Example_Stereo",
+        "position": [
+          -345717447242.9131,
+          217439301217.99646,
+          763845660598.6719
+        ],
+        "pitch": 0.0,
+        "up": [
+          0.056314838151424074,
+          0.966686235643487,
+          -0.24969253257036667
+        ],
+        "yaw": 0.0,
+        "timestamp": "2026 MAY 07 16:11:35"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

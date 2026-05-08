@@ -3,12 +3,12 @@
   "commands": [
     {
       "type": "asset",
-      "value": "examples/renderable/renderableplaneimagelocal/planeimagelocal.asset"
+      "value": "examples/renderable/renderableplaneimage/planeimage.asset"
     },
     {
       "type": "navigationstate",
       "value": {
-        "anchor": "RenderablePlaneImageLocal_Example",
+        "anchor": "RenderablePlaneImage_Example",
         "position": [
           405816534893.7322,
           26005354353.713985,

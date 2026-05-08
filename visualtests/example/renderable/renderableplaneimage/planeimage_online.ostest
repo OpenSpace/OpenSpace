@@ -3,12 +3,12 @@
   "commands": [
     {
       "type": "asset",
-      "value": "examples/renderable/renderableplaneimageonline/planeimageonline_billboard.asset"
+      "value": "examples/renderable/renderableplaneimage/planeimage_online.asset"
     },
     {
       "type": "navigationstate",
       "value": {
-        "anchor": "RenderablePlaneImageOnline_Example_Billboard",
+        "anchor": "RenderablePlaneImage_Example_Online",
         "position": [
           -556858662944.094,
           -10193081549.396612,
@@ -21,7 +21,7 @@
           -0.00943951504674309
         ],
         "yaw": -0.004130253806713138,
-        "timestamp": "2025 JUL 13 12:03:11"
+        "timestamp": "2025 JUL 13 12:02:52"
       }
     },
     {

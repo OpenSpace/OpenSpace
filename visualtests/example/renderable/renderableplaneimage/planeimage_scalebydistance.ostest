@@ -3,12 +3,12 @@
   "commands": [
     {
       "type": "asset",
-      "value": "examples/renderable/renderableplaneimagelocal/planeimagelocal_scalebydistance.asset"
+      "value": "examples/renderable/renderableplaneimage/planeimage_scalebydistance.asset"
     },
     {
       "type": "navigationstate",
       "value": {
-        "anchor": "RenderablePlaneImageLocal_Example_ScaleByDistance",
+        "anchor": "RenderablePlaneImage_Example_ScaleByDistance",
         "position": [
           -57059.29910332726,
           -1044.4483090855433,
