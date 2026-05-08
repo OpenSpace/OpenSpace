@@ -296,13 +296,13 @@ openspace.fadeOut = function(identifier, fadeTime, endScript)
 
   if not hasEnabled then
     openspace.printError(
-      "Error when calling script 'openspace.fadeIn': " ..
+      "Error when calling script 'openspace.fadeOut': " ..
       "Could not find property '" .. enabledProperty .. "'"
     )
     return
   elseif not hasFade then
     openspace.printError(
-      "Error when calling script 'openspace.fadeIn': " ..
+      "Error when calling script 'openspace.fadeOut': " ..
       "Could not find property '" .. fadeProperty .. "'"
     )
     return
