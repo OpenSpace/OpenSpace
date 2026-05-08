@@ -77,6 +77,11 @@ namespace {
 
         // Whether the provided path should be interpreted as a URL or a local file path.
         std::optional<bool> isUrl;
+
+        // If this value is set to true, the image for this plane will not be loaded at
+        // startup but rather when plane is shown for the first time. Additionally, if the
+        // plane is hidden, the image will automatically be unloaded.
+        std::optional<bool> lazyLoading;
     };
 } // namespace
 #include "renderableplaneimageonline_codegen.cpp"
@@ -92,7 +97,7 @@ Documentation RenderablePlaneImageOnline::Documentation() {
 
 RenderablePlaneImageOnline::RenderablePlaneImageOnline(
                                                       const ghoul::Dictionary& dictionary)
-    : RenderablePlane(dictionary)
+    : RenderablePlane(dictionary, { .shouldUpdateIfDisabled = true })
     , _texturePath(TextureInfo)
     , _rightTexturePath(RightTextureInfo)
 {
@@ -109,7 +114,6 @@ RenderablePlaneImageOnline::RenderablePlaneImageOnline(
         _textureFile->setCallback([this]() { _textureIsDirty = true; });
     }
 
-    _textureIsDirty = true;
     _texturePath.onChange([this]() { _textureIsDirty = true; });
     addProperty(_texturePath);
 
@@ -128,6 +132,21 @@ RenderablePlaneImageOnline::RenderablePlaneImageOnline(
 
         _rightTexturePath.onChange([this]() { _textureIsDirty = true; });
         addProperty(_rightTexturePath);
+    }
+
+    _isLoadingLazily = p.lazyLoading.value_or(_isLoadingLazily);
+    if (_isLoadingLazily) {
+        _enabled.onChange([this]() {
+            if (_enabled) {
+                _textureIsDirty = true;
+            }
+            else {
+                _shouldUnloadTexture = true;
+            }
+        });
+    }
+    else {
+        _textureIsDirty = true;
     }
 
     _autoScale.onChange([this]() {
@@ -176,6 +195,19 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
     ZoneScoped;
 
     RenderablePlane::update(data);
+
+    if (_shouldUnloadTexture) [[unlikely]] {
+        BaseModule::TextureManager.release(_texture);
+        _texture = nullptr;
+
+        if (_useStereo) {
+            BaseModule::TextureManager.release(_rightTexture);
+            _rightTexture = nullptr;
+        }
+
+        _shouldUnloadTexture = false;
+        _textureIsDirty = false;
+    }
 
     if (_textureIsDirty) {
         loadTexture();
@@ -391,6 +423,10 @@ void RenderablePlaneImageOnline::loadTexture() {
 }
 
 void RenderablePlaneImageOnline::scaleToAspectRatio() {
+    if (!_texture) {
+        return;
+    }
+
     // Shape the plane based on the aspect ration of the image
     const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
     if (_textureDimensions != textureDim) {
