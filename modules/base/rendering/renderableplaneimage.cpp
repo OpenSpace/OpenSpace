@@ -94,9 +94,12 @@ Documentation RenderablePlaneImage::Documentation() {
     );
 }
 
-RenderablePlaneImage::RenderablePlaneImage(
-                                                      const ghoul::Dictionary& dictionary)
-    : RenderablePlane(dictionary, { .shouldUpdateIfDisabled = true })
+RenderablePlaneImage::RenderablePlaneImage(const ghoul::Dictionary& dictionary)
+    : RenderablePlane(dictionary,
+        {
+            .automaticallyUpdateRenderBin = false,
+            .shouldUpdateIfDisabled = true
+        })
     , _texturePath(TextureInfo)
     , _rightTexturePath(RightTextureInfo)
 {
