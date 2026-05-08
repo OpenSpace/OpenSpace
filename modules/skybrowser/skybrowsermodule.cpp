@@ -30,6 +30,7 @@
 #include <modules/skybrowser/include/skybrowsertopic.h>
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/topic/server.h>
 #include <openspace/topic/connection.h>
@@ -280,6 +281,8 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     ghoul::TemplateFactory<Topic>* fTopic = FactoryManager::ref().factory<Topic>();
     ghoul_assert(fTopic, "Topic factory was not created");
     fTopic->registerClass<SkyBrowserTopic>("skybrowser");
+
+    DocumentationEngine::ref().addSchema(SkyBrowserTopic::Schema());
 }
 
 void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId,

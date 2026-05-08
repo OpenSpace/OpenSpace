@@ -26,6 +26,7 @@
 
 #include <modules/skybrowser/skybrowsermodule.h>
 #include <modules/skybrowser/include/targetbrowserpair.h>
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/topic/connection.h>
@@ -36,11 +37,6 @@
 #include <vector>
 
 using nlohmann::json;
-
-namespace {
-    constexpr std::string_view SubscribeEvent = "start_subscription";
-    constexpr std::string_view UnsubscribeEvent = "stop_subscription";
-} // namespace
 
 namespace openspace {
 
@@ -61,12 +57,12 @@ SkyBrowserTopic::~SkyBrowserTopic() {
 
 void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
     const std::string event = json.at("event").get<std::string>();
-    if (event == UnsubscribeEvent) {
+    if (event == "stop_subscription") {
         _isDone = true;
         return;
     }
 
-    if (event != SubscribeEvent) {
+    if (event != "start_subscription") {
         _isDone = true;
         return;
     }
@@ -84,6 +80,134 @@ void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
 
 bool SkyBrowserTopic::isDone() const {
     return _isDone;
+}
+
+Schema SkyBrowserTopic::Schema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "$defs": {
+            "DisplayCopy": {
+              "type": "object",
+              "properties": {
+                "position": {
+                  "type": "array",
+                  "items": { "type": "number" },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "show": { "type": "boolean" },
+                "idShowProperty": { "type": "string" }
+              },
+              "additionalProperties": false,
+              "required": ["position", "show", "idShowProperty"]
+            },
+            "SkyBrowser": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "targetId": { "type": "string" },
+                "name": { "type": "string" },
+                "ra": { "type": "number" },
+                "dec": { "type": "number" },
+                "cartesianDirection": {
+                  "type": "array",
+                  "items": { "type": "number" },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "selectedImages": {
+                  "type": "array",
+                  "items": { "type": "integer" }
+                },
+                "fov": { "type": "number" },
+                "roll": { "type": "number" },
+                "isFacingCamera": { "type": "boolean" },
+                "isUsingRae": { "type": "boolean" },
+                "scale": { "type": "number" },
+                "ratio": { "type": "number" },
+                "borderRadius": { "type": "number" },
+                "opacities": {
+                  "type": "array",
+                  "items": { "type": "number" }
+                },
+                "color": {
+                  "type": "array",
+                  "items": { "type": "integer" },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "displayCopies": {
+                  "type": "object",
+                  "additionalProperties": { "$ref": "#/$defs/DisplayCopy" }
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "targetId",
+                "name",
+                "ra",
+                "dec",
+                "cartesianDirection",
+                "selectedImages",
+                "fov",
+                "roll",
+                "isFacingCamera",
+                "isUsingRae",
+                "scale",
+                "ratio",
+                "borderRadius",
+                "opacities",
+                "color",
+                "displayCopies"
+              ]
+            }
+          },
+          "title": "SkyBrowserTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "skybrowser" },
+            "topicPayload": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "event": { "const": "start_subscription" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["event"]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "event": { "const": "stop_subscription" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["event"]
+                }
+              ]
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "selectedBrowserId": { "type": "string" },
+                "cameraInSolarSystem": { "type": "boolean" },
+                "browsers": {
+                  "type": "object",
+                  "additionalProperties": { "$ref": "#/$defs/SkyBrowser" }
+                }
+              },
+              "additionalProperties": false,
+              "required": ["selectedBrowserId", "cameraInSolarSystem", "browsers"]
+            }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+    )");
+
+    return { "skybrowsertopic", schema };
 }
 
 void SkyBrowserTopic::sendBrowserData() {
