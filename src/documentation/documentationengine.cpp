@@ -113,7 +113,6 @@ namespace {
     constexpr std::string_view HelpKey = "help";
     constexpr std::string_view FileKey = "file";
     constexpr std::string_view LineKey = "line";
-    constexpr std::string_view LibraryKey = "library";
     constexpr std::string_view FullNameKey = "fullName";
     constexpr std::string_view FunctionsKey = "functions";
     constexpr std::string_view SourceLocationKey = "sourceLocation";
@@ -318,8 +317,6 @@ nlohmann::json DocumentationEngine::generateScriptEngineJson() const {
     for (const LuaLibrary& l : libraries) {
         nlohmann::json library;
         std::string libraryName = l.name;
-        // Keep the library key for backwards compatability
-        library[LibraryKey] = libraryName;
         library[NameKey] = libraryName;
         std::string os = std::string(OpenSpaceScriptingKey);
         library[FullNameKey] =
@@ -337,7 +334,7 @@ nlohmann::json DocumentationEngine::generateScriptEngineJson() const {
         sortJson(library[FunctionsKey], NameKey);
         json.push_back(library);
 
-        sortJson(json, LibraryKey);
+        sortJson(json, NameKey);
     }
     return json;
 }

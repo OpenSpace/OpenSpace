@@ -101,7 +101,6 @@ Schema DocumentationTopic::Schema() {
             "LuaLibrary": {
               "type": "object",
               "properties": {
-                "library": { "type": "string" },
                 "name": { "type": "string" },
                 "fullName": { "type": "string" },
                 "functions": {
@@ -110,7 +109,7 @@ Schema DocumentationTopic::Schema() {
                 }
               },
               "additionalProperties": false,
-              "required": ["library", "name", "fullName", "functions"]
+              "required": ["name", "fullName", "functions"]
             },
             "DocumentationMember": {
               "type": "object",

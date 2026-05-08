@@ -329,15 +329,11 @@
           },
           "type": "array"
         },
-        "library": {
-          "type": "string"
-        },
         "name": {
           "type": "string"
         }
       },
       "required": [
-        "library",
         "name",
         "fullName",
         "functions"
