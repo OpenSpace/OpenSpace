@@ -53,7 +53,10 @@ namespace {
 namespace openspace {
 
 Documentation StaticScale::Documentation() {
-    return codegen::doc<Parameters>("base_scale_static");
+    return codegen::doc<Parameters>(
+        "base_scale_static",
+        Scale::Documentation()
+    );
 }
 
 StaticScale::StaticScale(const ghoul::Dictionary& dictionary)

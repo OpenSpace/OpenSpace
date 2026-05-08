@@ -445,7 +445,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableStars::Documentation() {
-    return codegen::doc<Parameters>("space_renderable_stars");
+    return codegen::doc<Parameters>(
+        "space_renderable_stars",
+        Renderable::Documentation()
+    );
 }
 
 RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)

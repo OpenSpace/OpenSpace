@@ -564,8 +564,8 @@ void RenderableTimeVaryingFitsSphere::update(const UpdateData& data) {
                 }
                 file.status = File::FileStatus::Loaded;
                 trackOldest(file);
-                loadTexture();
             }
+            loadTexture();
         }
         // The case when we jumped passed last file where nextIdx is not < file.size()
         else if (currentTime >= _files[_activeTriggerTimeIndex].time && !_texture) {
@@ -630,8 +630,13 @@ void RenderableTimeVaryingFitsSphere::updateDynamicDownloading(double currentTim
         }
     }
     if (!filesToRead.empty()) {
+        const int previousActiveTriggerTimeIndex = _activeTriggerTimeIndex;
         computeSequenceEndTime();
         updateActiveTriggerTimeIndex(currentTime);
+
+        if (_activeTriggerTimeIndex != previousActiveTriggerTimeIndex) {
+            loadTexture();
+        }
     }
     if (_firstUpdate) {
         const bool isInInterval = !_files.empty() && currentTime >= _files[0].time &&

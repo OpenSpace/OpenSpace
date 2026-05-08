@@ -53,7 +53,11 @@ namespace {
 namespace openspace {
 
 Documentation ScreenSpaceSpout::Documentation() {
-    return codegen::doc<Parameters>("spout_screenspace_spout");
+    return codegen::doc<Parameters>(
+        "spout_screenspace_spout",
+        ScreenSpaceRenderable::Documentation(),
+        SpoutReceiverPropertyProxy::Documentation()
+    );
 }
 
 ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)

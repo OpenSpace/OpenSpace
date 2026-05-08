@@ -267,7 +267,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableNodeArrow::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_nodearrow");
+    return codegen::doc<Parameters>(
+        "base_renderable_nodearrow",
+        Renderable::Documentation()
+    );
 }
 
 RenderableNodeArrow::Shading::Shading()

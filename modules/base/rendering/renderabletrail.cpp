@@ -165,7 +165,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableTrail::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_trail");
+    return codegen::doc<Parameters>(
+        "base_renderable_trail",
+        Renderable::Documentation()
+    );
 }
 
 RenderableTrail::Appearance::Appearance()

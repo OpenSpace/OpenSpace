@@ -285,7 +285,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableMolecule::Documentation() {
-    return codegen::doc<Parameters>("molecule_renderable_molecule");
+    return codegen::doc<Parameters>(
+        "molecule_renderable_molecule",
+        Renderable::Documentation()
+    );
 }
 
 RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)

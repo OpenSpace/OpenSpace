@@ -83,7 +83,7 @@ void registerCoreClasses(DocumentationEngine& engine) {
     engine.addDocumentation(Scale::Documentation());
     engine.addDocumentation(SceneGraphNode::Documentation());
     engine.addDocumentation(ScreenSpaceRenderable::Documentation());
-    engine.addDocumentation(Task::documentation());
+    engine.addDocumentation(Task::Documentation());
     engine.addDocumentation(TimeRange::Documentation());
     engine.addDocumentation(Translation::Documentation());
     engine.addDocumentation(TimeFrame::Documentation());

@@ -51,7 +51,10 @@ namespace {
 namespace openspace {
 
 Documentation ScreenSpaceDebugPlane::Documentation() {
-    return codegen::doc<Parameters>("debugging_screenspace_debugplane");
+    return codegen::doc<Parameters>(
+        "debugging_screenspace_debugplane",
+        ScreenSpaceRenderable::Documentation()
+    );
 }
 
 ScreenSpaceDebugPlane::ScreenSpaceDebugPlane(const ghoul::Dictionary& dictionary)

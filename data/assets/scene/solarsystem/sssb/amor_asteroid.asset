@@ -6,12 +6,12 @@ local sssb = asset.resource({
   Name = "Small SolarSystem Body Data (Amor Asteroid)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_amor_asteroid",
-  Version = 4
+  Version = 5
 })
 
 
 local Object = {
-  Identifier = "sssb_amor_asteroid",
+  Identifier = "SSSB_Amor_Asteroid",
   Parent = transforms.SunEclipJ2000.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",

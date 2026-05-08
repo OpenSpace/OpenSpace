@@ -105,7 +105,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableOrbitDisc::Documentation() {
-    return codegen::doc<Parameters>("exoplanets_renderable_orbitdisc");
+    return codegen::doc<Parameters>(
+        "exoplanets_renderable_orbitdisc",
+        Renderable::Documentation()
+    );
 }
 
 RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)

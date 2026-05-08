@@ -305,7 +305,6 @@ void SettingsDialog::createWidgets() {
             "All",
             "NewYork",
             "Sweden",
-            "Utah",
             "None"
         });
         _layerServer->setCurrentText("All");

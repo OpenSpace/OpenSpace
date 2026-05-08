@@ -167,7 +167,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableTimeVaryingVolume::Documentation() {
-    return codegen::doc<Parameters>("volume_renderable_timevaryingvolume");
+    return codegen::doc<Parameters>(
+        "volume_renderable_timevaryingvolume",
+        Renderable::Documentation()
+    );
 }
 
 RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(

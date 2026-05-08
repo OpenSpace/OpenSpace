@@ -32,6 +32,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <ghoul/glm.h>
 #include <set>
+#include <vector>
 
 namespace openspace {
 
@@ -100,6 +101,9 @@ private:
      */
     void updateNodeSurfacePoints(const std::vector<TouchPoint>& touchPoints);
 
+    std::optional<glm::dvec3> computeSurfacePoint(const glm::dvec2& touchPosition,
+        const SceneGraphNode* node) const;
+
     bool isValidDirectTouchNode() const;
     bool isWithinDirectTouchDistance() const;
 
@@ -120,6 +124,13 @@ private:
     std::set<std::string> _sortedDefaultRenderableTypes;
 
     std::vector<SelectedBody> _selectedNodeSurfacePoints;
+
+    struct FirstTouchPoint {
+        size_t id = 0;
+        bool isValid = false;
+    };
+    std::vector<FirstTouchPoint> _firstTouchPoints;
+    bool _isValidFirstTouch = false;
 };
 
 } // namespace openspace

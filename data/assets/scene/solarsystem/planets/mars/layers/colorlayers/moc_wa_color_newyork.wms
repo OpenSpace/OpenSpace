@@ -1,6 +1,6 @@
 <GDAL_WMS>
   <Service name="TMS">
-    <ServerUrl>http://wms.openspace.amnh.org/Mars/Color/tile/${z}/${y}/${x}</ServerUrl>
+    <ServerUrl>http://amnh-us.wms.openspaceproject.com/Mars/Color/tile/${z}/${y}/${x}</ServerUrl>
   </Service>
   <DataWindow>
     <UpperLeftX>-180.0</UpperLeftX>

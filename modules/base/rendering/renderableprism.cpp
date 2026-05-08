@@ -123,7 +123,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderablePrism::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_prism");
+    return codegen::doc<Parameters>(
+        "base_renderable_prism",
+        Renderable::Documentation()
+    );
 }
 
 RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)

@@ -40,7 +40,9 @@ namespace {
         // The type of translation that is described in this element. The available types
         // of translations depend on the configuration of the application and can be
         // written to disk on application startup into the FactoryDocumentation.
-        std::string type [[codegen::annotation("Must name a valid Translation type")]];
+        std::string type
+            [[codegen::annotation("Must name a valid Translation type"),
+            codegen::private()]];
 
         // The time frame in which this `Translation` is applied. If the in-game time is
         // outside this range, no translation will be applied.

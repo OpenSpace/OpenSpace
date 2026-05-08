@@ -321,9 +321,9 @@ namespace {
         std::optional<bool> bypassLauncher;
 
         // Set which layer server should be preferd to be used, the options are
-        // \"All\", \"NewYork\", \"Sweden\", \"Utah\" and \"None\".
+        // \"All\", \"NewYork\", \"Sweden\", and \"None\".
         std::optional<std::string> layerServer [[codegen::inlist("All", "NewYork",
-            "Sweden", "Utah", "None")]];
+            "Sweden", "None")]];
 
         // The URL that is pinged to check which version of OpenSpace is the most current
         // if you don't want this request to happen, this value should not be set at all.
@@ -809,7 +809,6 @@ Configuration::LayerServer stringToLayerServer(std::string_view server) {
     if (server == "All") { return Configuration::LayerServer::All; }
     else if (server == "NewYork") { return Configuration::LayerServer::NewYork; }
     else if (server == "Sweden") { return Configuration::LayerServer::Sweden; }
-    else if (server == "Utah") { return Configuration::LayerServer::Utah; }
     else if (server == "None") { return Configuration::LayerServer::None; }
     else { throw ghoul::MissingCaseException(); }
 }
@@ -819,7 +818,6 @@ std::string layerServerToString(Configuration::LayerServer server) {
         case Configuration::LayerServer::All: return "All";
         case Configuration::LayerServer::NewYork: return "NewYork";
         case Configuration::LayerServer::Sweden: return "Sweden";
-        case Configuration::LayerServer::Utah: return "Utah";
         case Configuration::LayerServer::None: return "None";
         default: throw ghoul::MissingCaseException();
     }

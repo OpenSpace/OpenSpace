@@ -51,7 +51,8 @@ namespace {
     // type of `DashboardItem` to determine what that information is.
     struct [[codegen::Dictionary(DashboardItem)]] Parameters {
         // Determines the type of the DashbordItem that should be created.
-        std::string type;
+        std::string type [[codegen::annotation("Must name a valid DashboardItem type"),
+            codegen::private()]];
 
         // The unique identifier for this DashboardItem.
         std::string identifier [[codegen::identifier()]];

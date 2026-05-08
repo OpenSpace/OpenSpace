@@ -47,7 +47,7 @@ namespace {
 
 namespace openspace {
 
-Documentation KameleonMetadataToJsonTask::documentation() {
+Documentation KameleonMetadataToJsonTask::Documentation() {
     return codegen::doc<Parameters>("kameleon_task_metadatatojson");
 }
 

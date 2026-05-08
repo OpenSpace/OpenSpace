@@ -82,7 +82,7 @@ std::vector<openspace::Documentation> SolarBrowsingModule::documentations() cons
     return {
         RenderableSolarImagery::Documentation(),
         RenderableSolarImageryProjection::Documentation(),
-        HelioviewerDownloadTask::documentation()
+        HelioviewerDownloadTask::Documentation()
     };
 }
 

@@ -26,7 +26,7 @@
     {
       "type": "property",
       "value": {
-        "property": "Scene.sssb_amor_asteroid.Renderable.Enabled",
+        "property": "Scene.SSSB_Amor_Asteroid.Renderable.Enabled",
         "value": false
       }
     },

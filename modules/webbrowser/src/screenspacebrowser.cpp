@@ -108,7 +108,10 @@ void ScreenSpaceBrowser::ScreenSpaceRenderHandler::setTexture(GLuint t) {
 }
 
 Documentation ScreenSpaceBrowser::Documentation() {
-    return codegen::doc<Parameters>("webbrowser_screenspace_browser");
+    return codegen::doc<Parameters>(
+        "webbrowser_screenspace_browser",
+        ScreenSpaceRenderable::Documentation()
+    );
 }
 
 ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)

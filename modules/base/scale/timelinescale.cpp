@@ -62,7 +62,10 @@ namespace {
 namespace openspace {
 
 Documentation TimelineScale::Documentation() {
-    return codegen::doc<Parameters>("base_scale_keyframe");
+    return codegen::doc<Parameters>(
+        "base_scale_keyframe",
+        Scale::Documentation()
+    );
 }
 
 TimelineScale::TimelineScale(const ghoul::Dictionary& dictionary)
