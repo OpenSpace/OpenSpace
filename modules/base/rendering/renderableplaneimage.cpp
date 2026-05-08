@@ -65,7 +65,7 @@ namespace {
 
     // Creates a textured 3D plane, where the texture image is loaded from either a
     // filepath to a local image on disc, or a web URL to an online image. If an online
-    // image is used, the `IsUrl` paramter must be set to `true`."
+    // image is used, the `IsUrl` parameter must be set to `true`."
     struct [[codegen::Dictionary(RenderablePlaneImage)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
@@ -112,7 +112,6 @@ RenderablePlaneImage::RenderablePlaneImage(const ghoul::Dictionary& dictionary)
     }
     else {
         _texturePath = absPath(p.texture).string();
-        _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
     }
 
     _texturePath.setReadOnly(true);
@@ -126,8 +125,6 @@ RenderablePlaneImage::RenderablePlaneImage(const ghoul::Dictionary& dictionary)
         }
         else {
             _rightTexturePath = absPath(*p.rightTexture).string();
-            _rightTextureFile =
-                std::make_unique<ghoul::filesystem::File>(_rightTexturePath.value());
         }
 
         _rightTexturePath.setReadOnly(true);
@@ -173,21 +170,21 @@ void RenderablePlaneImage::deinitializeGL() {
 }
 
 void RenderablePlaneImage::bindTexture(ghoul::opengl::TextureUnit& unit) {
-    if (_texture) {
-        switch (global::windowDelegate->frustumMode()) {
-            case WindowDelegate::Frustum::Mono:
-            case WindowDelegate::Frustum::LeftEye:
+    switch (global::windowDelegate->frustumMode()) {
+        case WindowDelegate::Frustum::Mono:
+        case WindowDelegate::Frustum::LeftEye:
+            if (_texture) {
                 unit.bind(*_texture);
-                break;
-            case WindowDelegate::Frustum::RightEye:
-                if (_useStereo && _rightTexture) {
-                    unit.bind(*_rightTexture);
-                }
-                else if (!_useStereo){
-                    unit.bind(*_texture);
-                }
-                break;
-        }
+            }
+            break;
+        case WindowDelegate::Frustum::RightEye:
+            if (_useStereo && _rightTexture) {
+                unit.bind(*_rightTexture);
+            }
+            else if (!_useStereo && _texture){
+                unit.bind(*_texture);
+            }
+            break;
     }
 }
 
@@ -381,9 +378,6 @@ void RenderablePlaneImage::loadTexture() {
             }
         );
 
-        _textureFile =
-            std::make_unique<ghoul::filesystem::File>(_texturePath.value());
-
         if (_useStereo) {
             const unsigned int hash = ghoul::hashCRC32File(_rightTexturePath);
 
@@ -408,9 +402,6 @@ void RenderablePlaneImage::loadTexture() {
                     return texture;
                 }
             );
-
-            _rightTextureFile =
-                std::make_unique<ghoul::filesystem::File>(_rightTexturePath.value());
         }
     }
 
@@ -428,7 +419,7 @@ void RenderablePlaneImage::scaleToAspectRatio() {
         return;
     }
 
-    // Shape the plane based on the aspect ration of the image
+    // Shape the plane based on the aspect ratio of the image
     const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
     if (_textureDimensions != textureDim) {
         const float aspectRatio = textureDim.x / textureDim.y;

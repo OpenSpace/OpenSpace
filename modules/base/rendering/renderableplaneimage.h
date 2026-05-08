@@ -61,8 +61,6 @@ private:
 
     std::future<DownloadManager::MemoryFile> _imageFuture;
     std::future<DownloadManager::MemoryFile> _rightImageFuture;
-    std::unique_ptr<ghoul::filesystem::File> _textureFile;
-    std::unique_ptr<ghoul::filesystem::File> _rightTextureFile;
 
     ghoul::opengl::Texture* _texture = nullptr;
     ghoul::opengl::Texture* _rightTexture = nullptr;
