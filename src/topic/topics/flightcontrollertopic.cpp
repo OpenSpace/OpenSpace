@@ -93,7 +93,6 @@ FlightControllerTopic::FlightControllerTopic() {
 
     // Add WebsocketInputState to global states
     global::interactionHandler->websocketInputStates()[_topicId] = &_inputState;
-    std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0.f);
 
 }
 
@@ -110,8 +109,8 @@ void FlightControllerTopic::handleJson(const nlohmann::json& json) {
     const std::string& event = json.at("event").get<std::string>();
 
     if (event == "connect") {
-        // @TODO (anden88 2026-05-06): The API currently need to pass some kind of data to
-        // a topic, we'll just pass a connect event that does nothing
+        _isDone = false;
+        std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0.f);
         return;
     }
 
