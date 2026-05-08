@@ -35,9 +35,7 @@ namespace {
 namespace openspace {
 
 void TouchInputState::initialize() {
-    _lastTapTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::high_resolution_clock::now().time_since_epoch()
-    );
+    _lastTapTime = now();
 }
 
 void TouchInputState::touchDetectedCallback(TouchInput i) {
