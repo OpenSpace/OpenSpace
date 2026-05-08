@@ -141,21 +141,11 @@ void RenderablePlaneImageOnline::initializeGL() {
 }
 
 void RenderablePlaneImageOnline::deinitializeGL() {
-    if (_isUrl) {
-        delete _texture;
-    }
-    else {
-        BaseModule::TextureManager.release(_texture);
-    }
+    BaseModule::TextureManager.release(_texture);
     _texture = nullptr;
 
     if (_useStereo) {
-        if (_isUrl) {
-            delete _rightTexture;
-        }
-        else {
-            BaseModule::TextureManager.release(_rightTexture);
-        }
+        BaseModule::TextureManager.release(_rightTexture);
         _rightTexture = nullptr;
     }
 
@@ -233,15 +223,27 @@ void RenderablePlaneImageOnline::loadTexture() {
             }
 
             try {
-                _texture = ghoul::io::texture::loadTexture(
-                    reinterpret_cast<void*>(imageFile.buffer),
-                    imageFile.size,
-                    2,
-                    ghoul::opengl::Texture::SamplerInit{
-                        .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
-                    },
-                    imageFile.format
-                ).release();
+                _texture = BaseModule::TextureManager.request(
+                    _texturePath,
+                    [path = _texturePath.value(), file = imageFile]() -> std::unique_ptr<ghoul::opengl::Texture> {
+                        std::unique_ptr<ghoul::opengl::Texture> texture =
+                            ghoul::io::texture::loadTexture(
+                                reinterpret_cast<void*>(file.buffer),
+                                file.size,
+                                2,
+                                ghoul::opengl::Texture::SamplerInit{
+                                    .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                                },
+                                file.format
+                            );
+
+                        LDEBUGC(
+                            "RenderablePlaneImage",
+                            std::format("Loaded texture from URL '{}'", path)
+                        );
+                        return texture;
+                    }
+                );
             }
             catch (const ghoul::io::texture::InvalidLoadException& e) {
                 _textureIsDirty = false;
@@ -271,15 +273,27 @@ void RenderablePlaneImageOnline::loadTexture() {
                 }
 
                 try {
-                    _rightTexture = ghoul::io::texture::loadTexture(
-                        reinterpret_cast<void*>(imageFile.buffer),
-                        imageFile.size,
-                        2,
-                        ghoul::opengl::Texture::SamplerInit{
-                            .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
-                        },
-                        imageFile.format
-                    ).release();
+                    _rightTexture = BaseModule::TextureManager.request(
+                        _rightTexturePath,
+                        [path = _rightTexturePath.value(), file = imageFile]() -> std::unique_ptr<ghoul::opengl::Texture> {
+                            std::unique_ptr<ghoul::opengl::Texture> texture =
+                                ghoul::io::texture::loadTexture(
+                                    reinterpret_cast<void*>(file.buffer),
+                                    file.size,
+                                    2,
+                                    ghoul::opengl::Texture::SamplerInit{
+                                        .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                                    },
+                                    file.format
+                                );
+
+                            LDEBUGC(
+                                "RenderablePlaneImage",
+                                std::format("Loaded texture from URL '{}'", path)
+                            );
+                            return texture;
+                        }
+                    );
                 }
                 catch (const ghoul::io::texture::InvalidLoadException& e) {
                     _textureIsDirty = false;
