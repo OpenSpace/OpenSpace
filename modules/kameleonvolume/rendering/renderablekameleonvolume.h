@@ -55,6 +55,8 @@ public:
     void update(const UpdateData& data) override;
     bool isCachingEnabled() const;
 
+    static openspace::Documentation Documentation();
+
 private:
     void load();
     void loadFromPath(const std::string& path);

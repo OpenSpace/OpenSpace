@@ -67,9 +67,6 @@ private:
     InteractionType interpretInteraction(const std::vector<TouchInputHolder>& list,
         const std::vector<TouchInput>& lastProcessed);
 
-    void resetAfterInput();
-
-    std::array<TouchInputHolder, 2> _pinchInputs;
     glm::vec2 _centroid = glm::vec2(0.f);
 };
 

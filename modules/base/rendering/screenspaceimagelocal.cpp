@@ -70,7 +70,10 @@ namespace {
 namespace openspace {
 
 Documentation ScreenSpaceImageLocal::Documentation() {
-    return codegen::doc<Parameters>("base_screenspace_imagelocal");
+    return codegen::doc<Parameters>(
+        "base_screenspace_imagelocal",
+        ScreenSpaceRenderable::Documentation()
+    );
 }
 
 ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary)

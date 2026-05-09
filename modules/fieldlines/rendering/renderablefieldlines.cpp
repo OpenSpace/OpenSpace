@@ -134,6 +134,13 @@ namespace {
 #include "renderablefieldlines_codegen.cpp"
 
 namespace openspace {
+    
+Documentation RenderableFieldlines::Documentation() {
+    return codegen::doc<Parameters>(
+        "fieldlinessequence_renderable_fieldlines",
+        Renderable::Documentation()
+    );
+}
 
 RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)

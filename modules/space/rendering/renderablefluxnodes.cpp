@@ -281,7 +281,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableFluxNodes::Documentation() {
-    return codegen::doc<Parameters>("space_renderable_fluxnodes");
+    return codegen::doc<Parameters>(
+        "space_renderable_fluxnodes",
+        Renderable::Documentation()
+    );
 }
 
 RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)

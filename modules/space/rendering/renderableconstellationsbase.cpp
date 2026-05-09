@@ -93,7 +93,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableConstellationsBase::Documentation() {
-    return codegen::doc<Parameters>("space_renderable_constellationsbase");
+    return codegen::doc<Parameters>(
+        "space_renderable_constellationsbase",
+        Renderable::Documentation()
+    );
 }
 
 RenderableConstellationsBase::RenderableConstellationsBase(

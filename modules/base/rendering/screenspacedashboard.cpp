@@ -80,7 +80,10 @@ namespace {
 namespace openspace {
 
 Documentation ScreenSpaceDashboard::Documentation() {
-    return codegen::doc<Parameters>("base_screenspace_dashboard");
+    return codegen::doc<Parameters>(
+        "base_screenspace_dashboard",
+        ScreenSpaceRenderableFramebuffer::Documentation()
+    );
 }
 
 ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)

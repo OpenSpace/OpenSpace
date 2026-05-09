@@ -243,7 +243,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableLabel::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_labels");
+    return codegen::doc<Parameters>(
+        "base_renderable_labels",
+        Renderable::Documentation()
+    );
 }
 
 RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)

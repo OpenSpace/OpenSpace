@@ -12,7 +12,8 @@
       "addons/asteroids",
       "addons/dwarf_planets",
       "addons/interstellar_objects",
-      "addons/minor_moons"
+      "addons/minor_moons",
+      "addons/desi"
     ]
   },
   "camera": {

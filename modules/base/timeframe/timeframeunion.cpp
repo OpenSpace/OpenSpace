@@ -61,7 +61,10 @@ namespace {
 namespace openspace {
 
 Documentation TimeFrameUnion::Documentation() {
-    return codegen::doc<Parameters>("base_timeframe_union");
+    return codegen::doc<Parameters>(
+        "base_timeframe_union",
+        TimeFrame::Documentation()
+    );
 }
 
 TimeFrameUnion::TimeFrameUnion(const ghoul::Dictionary& dictionary) {

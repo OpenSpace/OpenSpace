@@ -69,6 +69,8 @@ public:
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& tasks) override;
 
+    static openspace::Documentation Documentation();
+
 private:
     BoolProperty _useGlobalTime;
     BoolProperty _loop;

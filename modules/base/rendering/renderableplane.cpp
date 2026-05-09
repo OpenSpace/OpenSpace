@@ -215,7 +215,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderablePlane::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_plane");
+    return codegen::doc<Parameters>(
+        "base_renderable_plane",
+        Renderable::Documentation()
+    );
 }
 
 RenderablePlane::DistanceScalingSettings::DistanceScalingSettings(

@@ -116,7 +116,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableRings::Documentation() {
-    return codegen::doc<Parameters>("space_renderable_rings");
+    return codegen::doc<Parameters>(
+        "space_renderable_rings",
+        Renderable::Documentation()
+    );
 }
 
 RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)

@@ -49,6 +49,7 @@ namespace openspace {
 Documentation ScreenSpaceVideo::Documentation() {
     return codegen::doc<Parameters>(
         "video_screenspace_video",
+        ScreenSpaceRenderable::Documentation(),
         VideoPlayer::Documentation()
     );
 }

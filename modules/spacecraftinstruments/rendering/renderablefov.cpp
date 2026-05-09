@@ -206,7 +206,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableFov::Documentation() {
-    return codegen::doc<Parameters>("spacecraftinstruments_renderable_fieldofview");
+    return codegen::doc<Parameters>(
+        "spacecraftinstruments_renderable_fieldofview",
+        Renderable::Documentation()
+    );
 }
 
 RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
@@ -261,6 +264,8 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    addProperty(Fadeable::_opacity);
 
     _instrument.spacecraft = p.body;
     _instrument.referenceFrame = p.frame;
@@ -815,6 +820,8 @@ void RenderableFov::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.intersectionEndColor, _colors.intersectionEnd);
     _program->setUniform(_uniformCache.squareColor, _colors.square);
     _program->setUniform(_uniformCache.interpolation, _interpolationTime);
+
+    _program->setUniform(_uniformCache.opacity, opacity());
 
     glLineWidth(_lineWidth);
     glBindVertexArray(_fieldOfViewBounds.vao);

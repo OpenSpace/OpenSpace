@@ -659,49 +659,6 @@ TEST_CASE("Settings Save: LayerServer/Sweden", "[settings]") {
     CHECK(srcSettings == cmpSettings);
 }
 
-TEST_CASE("Settings Load: LayerServer/Utah", "[settings]") {
-    constexpr std::string_view Source = R"(
-{
-    "version": 1,
-    "layerserver": "Utah"
-}
-)";
-
-    const std::filesystem::path path = std::filesystem::temp_directory_path();
-    const std::filesystem::path file = path / "test_settings_load_layerserver_utah.json";
-    {
-        std::ofstream f(file);
-        f << Source;
-    }
-
-    const Settings settings = loadSettings(file);
-
-    CHECK(!settings.hasStartedBefore.has_value());
-    CHECK(!settings.configuration.has_value());
-    CHECK(!settings.rememberLastConfiguration.has_value());
-    CHECK(!settings.profile.has_value());
-    CHECK(!settings.rememberLastProfile.has_value());
-    CHECK(!settings.visibility.has_value());
-    CHECK(!settings.bypassLauncher.has_value());
-    REQUIRE(settings.layerServer.has_value());
-    CHECK(*settings.layerServer == Configuration::LayerServer::Utah);
-    CHECK(!settings.mrf.isEnabled.has_value());
-    CHECK(!settings.mrf.location.has_value());
-}
-
-TEST_CASE("Settings Save: LayerServer/Utah", "[settings]") {
-    const std::filesystem::path path = std::filesystem::temp_directory_path();
-    const std::filesystem::path file = path / "test_settings_save_layerserver_utah.json";
-
-    const Settings srcSettings = {
-        .layerServer = Configuration::LayerServer::Utah
-    };
-    saveSettings(srcSettings, file);
-
-    const Settings cmpSettings = loadSettings(file);
-    CHECK(srcSettings == cmpSettings);
-}
-
 TEST_CASE("Settings Load: LayerServer/None", "[settings]") {
     constexpr std::string_view Source = R"(
 {

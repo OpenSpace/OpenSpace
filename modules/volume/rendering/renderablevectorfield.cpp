@@ -243,7 +243,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableVectorField::Documentation() {
-    return codegen::doc<Parameters>("volume_renderable_vectorfield");
+    return codegen::doc<Parameters>(
+        "volume_renderable_vectorfield",
+        Renderable::Documentation()
+    );
 }
 
 RenderableVectorField::ColorSettings::ColorSettings(const ghoul::Dictionary& dictionary)

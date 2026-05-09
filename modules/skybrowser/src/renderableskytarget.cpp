@@ -109,7 +109,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableSkyTarget::Documentation() {
-    return codegen::doc<Parameters>("skybrowser_renderable_skytarget");
+    return codegen::doc<Parameters>(
+        "skybrowser_renderable_skytarget",
+        RenderablePlane::Documentation()
+    );
 }
 
 RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)

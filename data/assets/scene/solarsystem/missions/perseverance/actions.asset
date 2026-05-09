@@ -2,7 +2,7 @@ local Setup = {
   Identifier = "os.perseverance.Setup",
   Name = "Setup and go to Perseverance",
   Command = [[
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset", -1685.5)
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Mola_NewYork.Settings.Offset", -1685.5)
     openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Settings.Offset", -1686.0)
     openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.MDEM200M.Settings.Offset", -1686)
     openspace.time.setPause(true)

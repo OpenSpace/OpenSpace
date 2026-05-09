@@ -410,7 +410,10 @@ namespace {
 namespace openspace {
 
 Documentation TimeFrameKernel::Documentation() {
-    return codegen::doc<Parameters>("space_timeframe_kernel");
+    return codegen::doc<Parameters>(
+        "space_timeframe_kernel",
+        TimeFrame::Documentation()
+    );
 }
 
 TimeFrameKernel::TimeFrameKernel(const ghoul::Dictionary& dictionary)

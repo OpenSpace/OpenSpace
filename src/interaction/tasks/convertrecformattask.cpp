@@ -48,8 +48,11 @@ namespace {
 
 namespace openspace {
 
-Documentation ConvertRecFormatTask::documentation() {
-    return codegen::doc<Parameters>("core_task_convertrecformat");
+Documentation ConvertRecFormatTask::Documentation() {
+    return codegen::doc<Parameters>(
+        "core_task_convertrecformat",
+        Task::Documentation()
+    );
 }
 
 ConvertRecFormatTask::ConvertRecFormatTask(const ghoul::Dictionary& dictionary) {

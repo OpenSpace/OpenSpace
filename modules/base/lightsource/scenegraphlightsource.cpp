@@ -70,7 +70,10 @@ namespace {
 namespace openspace {
 
 Documentation SceneGraphLightSource::Documentation() {
-    return codegen::doc<Parameters>("base_lightsource_scenegraph");
+    return codegen::doc<Parameters>(
+        "base_lightsource_scenegraph",
+        LightSource::Documentation()
+    );
 }
 
 SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary)

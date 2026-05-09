@@ -86,7 +86,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderablePlaneProjection::Documentation() {
-    return codegen::doc<Parameters>("spacecraftinstruments_renderable_planeprojection");
+    return codegen::doc<Parameters>(
+        "spacecraftinstruments_renderable_planeprojection",
+        Renderable::Documentation()
+    );
 }
 
 RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& dictionary)

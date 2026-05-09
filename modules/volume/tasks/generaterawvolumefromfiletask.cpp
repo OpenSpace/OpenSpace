@@ -72,7 +72,10 @@ namespace {
 namespace openspace {
 
 Documentation GenerateRawVolumeFromFileTask::Documentation() {
-    return codegen::doc<Parameters>("volume_task_generaterawvolumefromfile");
+    return codegen::doc<Parameters>(
+        "volume_task_generaterawvolumefromfile",
+        Task::Documentation()
+    );
 }
 
 GenerateRawVolumeFromFileTask::GenerateRawVolumeFromFileTask(

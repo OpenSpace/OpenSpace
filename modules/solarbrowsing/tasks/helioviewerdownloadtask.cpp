@@ -89,8 +89,11 @@ namespace {
 
 namespace openspace {
 
-openspace::Documentation HelioviewerDownloadTask::documentation() {
-    return codegen::doc<Parameters>("solarbrowsing_task_helioviewerdownload");
+openspace::Documentation HelioviewerDownloadTask::Documentation() {
+    return codegen::doc<Parameters>(
+        "solarbrowsing_task_helioviewerdownload",
+        Task::Documentation()
+    );
 }
 
 HelioviewerDownloadTask::HelioviewerDownloadTask(const ghoul::Dictionary& dictionary) {

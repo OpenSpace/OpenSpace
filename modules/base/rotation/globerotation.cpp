@@ -125,7 +125,10 @@ namespace {
 namespace openspace {
 
 Documentation GlobeRotation::Documentation() {
-    return codegen::doc<Parameters>("base_rotation_globe");
+    return codegen::doc<Parameters>(
+        "base_rotation_globe",
+        Rotation::Documentation()
+    );
 }
 
 GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
