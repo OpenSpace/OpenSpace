@@ -8,7 +8,7 @@ local coreKernels = asset.require("spice/core")
 
 
 
-local EndTime = "2024 JAN 22 00:00:00"
+local EndTime = "2032 DEC 22 09:12:39.457" -- Date from brief.exe sync/http/jwst_kernels/2/webb.bsp
 
 -- Trail of JWST relative the Earth Inertial for the first 30 minutes after launch
 -- Makes histroy of trail to stay at launch site, that a trail relative to Earth Center won't

@@ -10,11 +10,7 @@
     "scene/solarsystem/missions/voyager/mission",
     "scene/solarsystem/missions/voyager/voyager1",
     "scene/solarsystem/missions/voyager/voyager2",
-    "scene/solarsystem/missions/voyager/actions",
-    "scene/solarsystem/planets/jupiter/minor_moons",
-    "scene/solarsystem/planets/neptune/minor_moons",
-    "scene/solarsystem/planets/saturn/minor_moons",
-    "scene/solarsystem/planets/uranus/minor_moons"
+    "scene/solarsystem/missions/voyager/actions"
   ],
   "camera": {
     "aim": "",

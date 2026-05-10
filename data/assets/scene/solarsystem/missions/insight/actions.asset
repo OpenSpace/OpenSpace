@@ -1,12 +1,14 @@
+--offset is due landing kernel not accounting for heightmap. Could posibly be removed by using a newer kernel (this was a prelanding kernel)
 local Setup = {
   Identifier = "os.insight.Setup",
-  Name = "Setup scene for insight EDL",
+  Name = "Setup scene for Insight EDL",
   Command = [[
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Mola_NewYork.Settings.Offset", -469.300000)
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Settings.Offset", -470.850006)
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.MDEM200M.Settings.Offset", -470.000000)
+    openspace.setPropertyValue("Scene.Mars.Renderable.Layers.HeightLayers.Mola_*.Settings.Offset", -471.8)
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Settings.Offset", -471.8)
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.MDEM200M.Settings.Offset", -471.8)
     openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Enabled", true)
     openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-LS.Enabled", true)
+    openspace.fadeIn("Scene.Mars.Renderable.Layers.ColorLayers.CTX_blended")
     openspace.time.setPause(true)
     openspace.time.setTime("2018 NOV 26 19:39:01.68")
     openspace.navigation.setNavigationState({
@@ -18,21 +20,20 @@ local Setup = {
       Yaw = -0.0000446853
     })
   ]],
-  Documentation = "Set and goto Insight Landing",
+  Documentation = "Setup the scene for Insight EDL, including setting layer height offsets, time, and navigation state",
   GuiPath = "/Missions/Insight",
   IsLocal = false
 }
 
 local DisableLayers = {
   Identifier = "os.insight.DisableLayers",
-  Name = "Disable insight EDL layers",
+  Name = "Disable Insight EDL height layer offset",
   Command = [[
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Mola_NewYork.Settings.Offset", 0)
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Settings.Offset", 0)
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Enabled", false)
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-LS.Enabled", false)
+    openspace.setPropertyValue("Scene.Mars.Renderable.Layers.HeightLayers.Mola_*.Settings.Offset", 0.0)
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.MDEM200M.Settings.Offset", 0.0)
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Settings.Offset", 0.0)
   ]],
-  Documentation = "Disable Mars layer settings used for insight EDL",
+  Documentation = "Disable Mars layer height offsets used for Insight EDL",
   GuiPath = "/Missions/Insight",
   IsLocal = false
 }

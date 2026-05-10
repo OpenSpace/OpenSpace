@@ -15,7 +15,7 @@ local PerseveranceNavigationState = [[
 local Shortcuts = {
   {
     Command = [[
-      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Mola_NewYork.Settings.Offset", -1677.088867)
+      openspace.setPropertyValue("Scene.Mars.Renderable.Layers.HeightLayers.Mola_*.Settings.Offset", -1677.088867)
       openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset", -1677.088867)
     ]],
     Documentation = "Enable height layer offset for Perseverance landing trail",
@@ -25,7 +25,7 @@ local Shortcuts = {
   },
   {
     Command = [[
-      openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Mola_NewYork.Settings.Offset", 0)
+      openspace.setPropertyValue("Scene.Mars.Renderable.Layers.HeightLayers.Mola_*.Settings.Offset", 0)
       openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset", 0)
     ]],
     Documentation = "Disable Perseverance landing height layer offset",

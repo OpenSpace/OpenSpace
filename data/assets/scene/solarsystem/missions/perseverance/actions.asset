@@ -2,9 +2,9 @@ local Setup = {
   Identifier = "os.perseverance.Setup",
   Name = "Setup and go to Perseverance",
   Command = [[
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Mola_NewYork.Settings.Offset", -1685.5)
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Settings.Offset", -1686.0)
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.MDEM200M.Settings.Offset", -1686)
+    openspace.setPropertyValue("Scene.Mars.Renderable.Layers.HeightLayers.Mola_*.Settings.Offset", -1685.35)
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Settings.Offset", -1685.35)
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.MDEM200M.Settings.Offset", -1685.35)
     openspace.time.setPause(true)
     openspace.time.setTime("2021 FEB 18 20:32:16")
     openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Enabled", true)
@@ -23,16 +23,32 @@ local Setup = {
   IsLocal = false
 }
 
+local Restore = {
+  Identifier = "os.perseverance.Restore",
+  Name = "Disable Perseverance landing height layer offset",
+  Command = [[
+    openspace.setPropertyValue("Scene.Mars.Renderable.Layers.HeightLayers.Mola_*.Settings.Offset", 0)
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.HiRISE-LS-DEM.Settings.Offset", 0)
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.MDEM200M.Settings.Offset", 0)
+  ]],
+  Documentation = "Restores the layer offsets for Perseverance landing",
+  GuiPath = "/Missions/Perseverance",
+  IsLocal = false
+}
+
 
 asset.onInitialize(function()
   openspace.action.registerAction(Setup)
+  openspace.action.registerAction(Restore)
 end)
 
 asset.onDeinitialize(function()
+  openspace.action.removeAction(Restore)
   openspace.action.removeAction(Setup)
 end)
 
 asset.export("Setup", Setup.Identifier)
+asset.export("Restore", Restore.Identifier)
 
 
 

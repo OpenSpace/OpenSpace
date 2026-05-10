@@ -59,9 +59,9 @@ local GaiaStars = {
   },
   GUI = {
     Name = "Gaia Stars",
-    Path = "/Milky Way",
+    Path = "/Milky Way/Gaia",
     Focusable = false,
-    Description = "Radial Velocity subset of GaiaDR2"
+    Description = "Radial Velocity subset of Gaia DR2"
   }
 }
 
