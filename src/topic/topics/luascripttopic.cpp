@@ -24,8 +24,9 @@
 
 #include <openspace/topic/topics/luascripttopic.h>
 
-#include <openspace/json.h>
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
+#include <openspace/json.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/topic/connection.h>
 #include <openspace/topic/jsonconverters.h>
@@ -38,11 +39,6 @@
 #include <utility>
 
 namespace {
-    constexpr std::string_view KeyScript = "script";
-    constexpr std::string_view KeyFunction = "function";
-    constexpr std::string_view KeyArguments = "arguments";
-    constexpr std::string_view KeyReturn = "return";
-    constexpr std::string_view KeyShouldBeSynchronized = "shouldBeSynchronized";
     constexpr std::string_view _loggerCat = "LuaScriptTopic";
 
     std::string formatLua(const nlohmann::json::const_iterator& it);
@@ -140,16 +136,16 @@ namespace openspace {
 
 void LuaScriptTopic::handleJson(const nlohmann::json& json) {
     try {
-        const auto script = json.find(KeyScript);
-        const auto function = json.find(KeyFunction);
+        const auto script = json.find("script");
+        const auto function = json.find("function");
 
         if (script != json.end() && script->is_string()) {
             std::string luaScript = script->get<std::string>();
-            const auto ret = json.find(KeyReturn);
+            const auto ret = json.find("return");
             const bool shouldReturn =
                 (ret != json.end()) && ret->is_boolean() && ret->get<bool>();
 
-            const auto sync = json.find(KeyShouldBeSynchronized);
+            const auto sync = json.find("shouldBeSynchronized");
             bool shouldBeSynchronized = true;
             if (sync != json.end() && sync->is_boolean()) {
                 shouldBeSynchronized = sync->get<bool>();
@@ -159,18 +155,18 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
         }
         else if (function != json.end() && function->is_string()) {
             const std::string luaFunction = function->get<std::string>();
-            const auto ret = json.find(KeyReturn);
+            const auto ret = json.find("return");
             const bool shouldReturn =
                 (ret != json.end()) && ret->is_boolean() && ret->get<bool>();
 
-            const auto sync = json.find(KeyShouldBeSynchronized);
+            const auto sync = json.find("shouldBeSynchronized");
             bool shouldBeSynchronized = true;
             if (sync != json.end() && sync->is_boolean()) {
                 shouldBeSynchronized = sync->get<bool>();
             }
 
-            const nlohmann::json::const_iterator args = json.find(KeyArguments);
-            if (!args->is_array()) {
+            const nlohmann::json::const_iterator args = json.find("arguments");
+            if (args == json.end() || !args->is_array()) {
                 return;
             }
 
@@ -197,8 +193,7 @@ void LuaScriptTopic::runScript(std::string script, bool shouldReturn,
     if (shouldReturn) {
         callback = [this](const ghoul::Dictionary& data) {
             if (_connection) {
-                const nlohmann::json payload = wrappedPayload(data);
-                _connection->sendJson(payload);
+                sendData(data);
                 _waitingForReturnValue = false;
             }
         };
@@ -218,6 +213,55 @@ void LuaScriptTopic::runScript(std::string script, bool shouldReturn,
 
 bool LuaScriptTopic::isDone() const {
     return !_waitingForReturnValue;
+}
+
+Schema LuaScriptTopic::Schema() {
+    // topicPayload::Arguments is typed as unknown array since the arguments depend on the
+    // specific Lua script being called. Likewise, data is typed as unknown for the same
+    // reason
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "title": "LuaScriptTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "luascript" },
+            "topicPayload": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "script": { "type": "string" },
+                    "return": { "type": "boolean" },
+                    "shouldBeSynchronized": { "type": "boolean" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["script"]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "function": { "type": "string" },
+                    "arguments": {
+                      "type": "array",
+                      "items": {}
+                    },
+                    "return": { "type": "boolean" },
+                    "shouldBeSynchronized": { "type": "boolean" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["function", "arguments"]
+                }
+              ]
+            },
+            "data": {}
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+    )");
+
+    return { "luascripttopic", schema };
 }
 
 } // namespace openspace

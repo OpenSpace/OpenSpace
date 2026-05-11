@@ -24,6 +24,7 @@
 
 #include <openspace/topic/topics/actionkeybindtopic.h>
 
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
@@ -56,6 +57,120 @@ bool ActionKeybindTopic::isDone() const {
     return true;
 }
 
+Schema ActionKeybindTopic::Schema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "$defs": {
+            "Action": {
+              "type": "object",
+              "properties": {
+                "color": {
+                  "type": "array",
+                  "items": { "type": "number" },
+                  "maxItems": 4,
+                  "minItems": 4
+                },
+                "documentation": { "type": "string" },
+                "guiPath": { "type": "string" },
+                "identifier": { "type": "string" },
+                "isLocal": { "type": "boolean" },
+                "name": { "type": "string" }
+              },
+              "additionalProperties": false,
+              "required": ["identifier", "name", "isLocal", "documentation", "guiPath"]
+            },
+            "Keybind": {
+              "type": "object",
+              "properties": {
+                "action": { "type": "string" },
+                "key": { "type": "string" },
+                "modifiers": {
+                  "type": "object",
+                  "properties": {
+                    "shift": { "type": "boolean" },
+                    "control": { "type": "boolean" },
+                    "alt": { "type": "boolean" },
+                    "super": { "type": "boolean" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["shift", "control", "alt", "super"]
+                }
+              },
+              "additionalProperties": false,
+              "required": ["key", "modifiers", "action"]
+            }
+          },
+          "title": "ActionKeybindTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "actionsKeybinds" },
+            "topicPayload": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "event": { "const": "get_all" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["event"]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "event": { "const": "get_action" },
+                    "identifier": { "type": "string" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["event", "identifier"]
+                }
+              ]
+            },
+            "data": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "description": "Response to get_action",
+                  "properties": {
+                    "action": { "$ref": "#/$defs/Action" },
+                    "type": { "const": "action" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["action", "type"]
+                },
+                {
+                  "type": "object",
+                  "description": "Response to get_all",
+                  "properties": {
+                    "actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/$defs/Action"
+                      }
+                    },
+                    "keybinds": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/$defs/Keybind"
+                      }
+                    },
+                    "type": { "const": "combined" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["actions", "keybinds", "type"]
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+    )");
+
+    return { "actionkeybindtopic", schema };
+}
+
 nlohmann::json jsonKeybind(const KeyWithModifier& k, std::string identifier) {
     const openspace::Action& action = global::actionManager->action(identifier);
 
@@ -74,7 +189,9 @@ nlohmann::json jsonKeybind(const KeyWithModifier& k, std::string identifier) {
 }
 
 nlohmann::json ActionKeybindTopic::allActionsKeybinds() const {
-    nlohmann::json json = {};
+    nlohmann::json json;
+    json["type"] = "combined";
+
     std::vector<openspace::Action> actions = global::actionManager->actions();
     std::sort(
         actions.begin(),
@@ -106,6 +223,7 @@ nlohmann::json ActionKeybindTopic::allActionsKeybinds() const {
         nlohmann::json keybindJson = jsonKeybind(keyBinding.first, keyBinding.second);
         json["keybinds"].push_back(keybindJson);
     }
+
     return json;
 }
 
@@ -121,15 +239,16 @@ nlohmann::json ActionKeybindTopic::action(const std::string& identifier) const {
     );
 
     if (found == actions.end()) {
-        return {};
+        throw ghoul::RuntimeError(std::format(
+            "No action found with identifier '{}'", identifier
+        ));
     }
     openspace::Action action = *found;
-    return action;
-}
 
-void ActionKeybindTopic::sendData(nlohmann::json data) const {
-    nlohmann::json payload = wrappedPayload({ data });
-    _connection->sendJson(std::move(payload));
+    nlohmann::json json;
+    json["type"] = "action";
+    json["action"] = action;
+    return json;
 }
 
 } // namespace openspace

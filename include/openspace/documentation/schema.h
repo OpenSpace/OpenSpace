@@ -22,18 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/topic/topics/bouncetopic.h>
+#ifndef __OPENSPACE_CORE___SCHEMA___H__
+#define __OPENSPACE_CORE___SCHEMA___H__
 
-#include <openspace/topic/connection.h>
+#include <openspace/json.h>
+#include <string>
 
 namespace openspace {
 
-void BounceTopic::handleJson(const nlohmann::json& json) {
-    _connection->sendJson(json);
-}
-
-bool BounceTopic::isDone() const {
-    return false;
-}
+struct Schema {
+    /// A unique identifier which can be used to reference this Documentation
+    std::string id;
+    /// The JSON schema describing the types
+    nlohmann::json schema;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_CORE___SCHEMA___H__

@@ -114,6 +114,8 @@ public:
     using TemplateProperty<std::set<std::string>>::operator std::set<std::string>;
     using TemplateProperty<std::set<std::string>>::operator=;
 
+    static nlohmann::json Schema();
+
 private:
     void sortOptions();
     bool removeInvalidKeys(std::set<std::string>& keys) const;

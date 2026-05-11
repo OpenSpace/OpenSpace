@@ -24,6 +24,7 @@
 
 #include <openspace/topic/topics/propertytreetopic.h>
 
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>
@@ -35,10 +36,6 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "PropertyTreeTopic";
-
-    constexpr std::string_view StartSubscription = "start_subscription";
-    constexpr std::string_view StopSubscription = "stop_subscription";
-    constexpr std::string_view PropertyChanged = "property_changed";
 } // namespace
 
 using nlohmann::json;
@@ -58,16 +55,98 @@ std::string PropertyTreeTopic::type() const {
 void PropertyTreeTopic::handleJson(const nlohmann::json& json) {
     const std::string& event = json.at("event").get<std::string>();
 
-    if (event == StartSubscription) {
+    if (event == "start_subscription") {
         _isSubscribedTo = true;
     }
-    if (event == StopSubscription) {
+    if (event == "stop_subscription") {
         _isSubscribedTo = false;
     }
-    if (event == PropertyChanged && _isSubscribedTo) {
-        const nlohmann::json& payload = json.at("payload").get<nlohmann::json>();
-        _connection->sendJson(wrappedPayload(payload));
-    }
+}
+
+Schema PropertyTreeTopic::Schema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "$defs": {
+            "JsonValue": {
+              "anyOf": [
+                { "type": "string" },
+                { "type": "number" },
+                { "type": "boolean" },
+                {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/JsonValue" }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": { "$ref": "#/$defs/JsonValue" }
+                },
+                { "type": "null" }
+              ]
+            }
+          },
+          "title": "PropertyTreeTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "propertyTree" },
+            "topicPayload": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "event": { "const": "start_subscription" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["event"]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "event": { "const": "stop_subscription" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["event"]
+                }
+              ]
+            },
+            "data": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": { "$ref": "#/$defs/JsonValue" },
+                    "uri": {
+                      "type": "string",
+                      "description": "The URI of the property this value corresponds to"
+                    },
+                    "type": { "const": "value" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["value", "uri", "type"]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "metaData": { "$ref": "properties.json#/$defs/AnyPropertyMetaData" },
+                    "uri": {
+                      "type": "string",
+                      "description": "The URI of the property this value corresponds to"
+                    },
+                    "type": { "const": "metaData" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["metaData", "uri", "type"]
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+    )");
+
+    return { "propertytreetopic", schema };
 }
 
 } // namespace openspace

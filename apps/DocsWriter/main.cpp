@@ -66,6 +66,7 @@ int main(int, char** argv) {
     // Print out the documentation to the documentation folder
     // @TODO (ylvse, 2024-05-02) change this directory when integrating with jenkins?
     DocEng.writeJsonDocumentation();
+    DocEng.writeJsonSchema();
 
     global::openSpaceEngine->deinitialize();
 

@@ -33,6 +33,8 @@ namespace ghoul::logging { class Log; }
 
 namespace openspace {
 
+struct Schema;
+
 class ErrorLogTopic : public Topic {
 public:
     ErrorLogTopic() = default;
@@ -41,17 +43,27 @@ public:
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
 
+    static openspace::Schema Schema();
+
 private:
     /**
      * Creates a log object and register it to the `LogManager`, does nothing if an active
      * log already exists.
      */
-    void createLog(ghoul::logging::LogLevel logLevel);
+    void createLog();
 
     bool _isSubscribedTo = false;
 
     /// Non-owning but we remove the log from LogManager on destruction
     ghoul::logging::Log* _log = nullptr;
+
+    struct {
+        bool isTimeStamping = true;
+        bool isDateStamping = true;
+        bool isCategoryStamping = true;
+        bool isLogLevelStamping = true;
+        ghoul::logging::LogLevel logLevel = ghoul::logging::LogLevel::AllLogging;
+    } _logSettings;
 };
 
 } // namespace openspace
