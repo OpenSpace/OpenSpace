@@ -156,91 +156,91 @@ Schema EventTopic::Schema() {
             },
             "EventData": {
               "anyOf": [
-                { "$ref": "#/$defs/ActionAddedData" },
-                { "$ref": "#/$defs/ActionRemovedData" },
-                { "$ref": "#/$defs/ApplicationShutdownData" },
-                { "$ref": "#/$defs/AssetLoadingData" },
-                { "$ref": "#/$defs/CameraFocusTransitionData" },
-                { "$ref": "#/$defs/CameraMovedPositionData" },
-                { "$ref": "#/$defs/CameraPathFinishedData" },
-                { "$ref": "#/$defs/CameraPathStartedData" },
-                { "$ref": "#/$defs/CustomData" },
-                { "$ref": "#/$defs/FocusNodeChangedData" },
-                { "$ref": "#/$defs/GuiTreeUpdatedData" },
-                { "$ref": "#/$defs/InterpolationFinishedData" },
-                { "$ref": "#/$defs/MissionAddedData" },
-                { "$ref": "#/$defs/MissionEventReachedData" },
-                { "$ref": "#/$defs/MissionRemovedData" },
-                { "$ref": "#/$defs/ParallelConnectionData" },
-                { "$ref": "#/$defs/PlanetEclipsedData" },
-                { "$ref": "#/$defs/PointSpacecraftData" },
-                { "$ref": "#/$defs/ProfileLoadingFinishedData" },
-                { "$ref": "#/$defs/PropertyTreePrunedData" },
-                { "$ref": "#/$defs/PropertyTreeUpdatedData" },
-                { "$ref": "#/$defs/RenderableDisabledData" },
-                { "$ref": "#/$defs/RenderableEnabledData" },
-                { "$ref": "#/$defs/ScheduledScriptExecutedData" },
-                { "$ref": "#/$defs/SessionRecordingPlaybackData" },
-                { "$ref": "#/$defs/TimeOfInterestReachedData" }
+                { "$ref": "#/$defs/ActionAddedEventData" },
+                { "$ref": "#/$defs/ActionRemovedEventData" },
+                { "$ref": "#/$defs/ApplicationShutdownEventData" },
+                { "$ref": "#/$defs/AssetLoadingEventData" },
+                { "$ref": "#/$defs/CameraFocusTransitionEventData" },
+                { "$ref": "#/$defs/CameraMovedPositionEventData" },
+                { "$ref": "#/$defs/CameraPathFinishedEventData" },
+                { "$ref": "#/$defs/CameraPathStartedEventData" },
+                { "$ref": "#/$defs/CustomEventData" },
+                { "$ref": "#/$defs/FocusNodeChangedEventData" },
+                { "$ref": "#/$defs/GuiTreeUpdatedEventData" },
+                { "$ref": "#/$defs/InterpolationFinishedEventData" },
+                { "$ref": "#/$defs/MissionAddedEventData" },
+                { "$ref": "#/$defs/MissionEventReachedEventData" },
+                { "$ref": "#/$defs/MissionRemovedEventData" },
+                { "$ref": "#/$defs/ParallelConnectionEventData" },
+                { "$ref": "#/$defs/PlanetEclipsedEventData" },
+                { "$ref": "#/$defs/PointSpacecraftEventData" },
+                { "$ref": "#/$defs/ProfileLoadingFinishedEventData" },
+                { "$ref": "#/$defs/PropertyTreePrunedEventData" },
+                { "$ref": "#/$defs/PropertyTreeUpdatedEventData" },
+                { "$ref": "#/$defs/RenderableDisabledEventData" },
+                { "$ref": "#/$defs/RenderableEnabledEventData" },
+                { "$ref": "#/$defs/ScheduledScriptExecutedEventData" },
+                { "$ref": "#/$defs/SessionRecordingPlaybackEventData" },
+                { "$ref": "#/$defs/TimeOfInterestReachedEventData" }
               ]
             },
-            "ActionAddedData": {
+            "ActionAddedEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "ActionAdded" },
-                "uri": { "type": "string" }
+                "Uri": { "type": "string" }
               },
               "additionalProperties": false,
-              "required": ["event", "uri"]
+              "required": ["event", "Uri"]
             },
-            "ActionRemovedData": {
+            "ActionRemovedEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "ActionRemoved" },
-                "uri": { "type": "string" }
+                "Uri": { "type": "string" }
               },
               "additionalProperties": false,
-              "required": ["event", "uri"]
+              "required": ["event", "Uri"]
             },
-            "ApplicationShutdownData": {
+            "ApplicationShutdownEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "ApplicationShutdown" },
-                "state": {
+                "State": {
                   "type": "string",
                   "enum": ["Started", "Aborted", "Finished"]
                 }
               },
               "additionalProperties": false,
-              "required": ["event", "state"]
+              "required": ["event", "State"]
             },
-            "AssetLoadingData": {
+            "AssetLoadingEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "AssetLoading" },
-                "assetPath": { "type": "string" },
-                "state": {
+                "AssetPath": { "type": "string" },
+                "State": {
                   "type": "string",
                   "enum": ["Loaded", "Loading", "Unloaded", "Error"]
                 }
               },
               "additionalProperties": false,
-              "required": ["event", "assetPath", "state"]
+              "required": ["event", "AssetPath", "State"]
             },
-            "CameraFocusTransitionData": {
+            "CameraFocusTransitionEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "CameraFocusTransition" },
-                "node": { "type": "string" },
-                "transition": {
+                "Node": { "type": "string" },
+                "Transition": {
                   "type": "string",
                   "enum": ["Approaching", "Reaching", "Receding", "Exiting"]
                 }
               },
               "additionalProperties": false,
-              "required": ["event", "node", "transition"]
+              "required": ["event", "Node", "Transition"]
             },
-            "CameraMovedPositionData": {
+            "CameraMovedPositionEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "CameraMovedPosition" }
@@ -248,47 +248,47 @@ Schema EventTopic::Schema() {
               "additionalProperties": false,
               "required": ["event"]
             },
-            "CameraPathFinishedData": {
+            "CameraPathFinishedEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "CameraPathFinished" },
-                "origin": { "type": "string" },
-                "destination": { "type": "string" }
+                "Origin": { "type": "string" },
+                "Destination": { "type": "string" }
               },
               "additionalProperties": false,
-              "required": ["event", "origin", "destination"]
+              "required": ["event", "Origin", "Destination"]
             },
-            "CameraPathStartedData": {
+            "CameraPathStartedEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "CameraPathStarted" },
-                "origin": { "type": "string" },
-                "destination": { "type": "string" }
+                "Origin": { "type": "string" },
+                "Destination": { "type": "string" }
               },
               "additionalProperties": false,
-              "required": ["event", "origin", "destination"]
+              "required": ["event", "Origin", "Destination"]
             },
-            "CustomData": {
+            "CustomEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "Custom" },
-                "subtype": { "type": "string" },
-                "payload": { "type": "string" }
+                "Subtype": { "type": "string" },
+                "Payload": { "type": "string" }
               },
               "additionalProperties": false,
-              "required": ["event", "subtype", "payload"]
+              "required": ["event", "Subtype", "Payload"]
             },
-            "FocusNodeChangedData": {
+            "FocusNodeChangedEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "FocusNodeChanged" },
-                "oldNode": { "type": "string" },
-                "newNode": { "type": "string" }
+                "OldNode": { "type": "string" },
+                "NewNode": { "type": "string" }
               },
               "additionalProperties": false,
-              "required": ["event", "oldNode", "newNode"]
+              "required": ["event", "OldNode", "NewNode"]
             },
-            "GuiTreeUpdatedData": {
+            "GuiTreeUpdatedEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "GuiTreeUpdated" }
@@ -296,25 +296,25 @@ Schema EventTopic::Schema() {
               "additionalProperties": false,
               "required": ["event"]
             },
-            "InterpolationFinishedData": {
+            "InterpolationFinishedEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "InterpolationFinished" },
-                "property": { "type": "string" }
+                "Property": { "type": "string" }
               },
               "additionalProperties": false,
-              "required": ["event", "property"]
+              "required": ["event", "Property"]
             },
-            "MissionAddedData": {
+            "MissionAddedEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "MissionAdded" },
-                "identifier": { "type": "string" }
+                "Identifier": { "type": "string" }
               },
               "additionalProperties": false,
-              "required": ["event", "identifier"]
+              "required": ["event", "Identifier"]
             },
-            "MissionEventReachedData": {
+            "MissionEventReachedEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "MissionEventReached" }
@@ -322,49 +322,49 @@ Schema EventTopic::Schema() {
               "additionalProperties": false,
               "required": ["event"]
             },
-            "MissionRemovedData": {
+            "MissionRemovedEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "MissionRemoved" },
-                "identifier": { "type": "string" }
+                "Identifier": { "type": "string" }
               },
               "additionalProperties": false,
-              "required": ["event", "identifier"]
+              "required": ["event", "Identifier"]
             },
-            "ParallelConnectionData": {
+            "ParallelConnectionEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "ParallelConnection" },
-                "state": {
+                "State": {
                   "type": "string",
                   "enum": ["Established", "Lost", "HostshipGained", "HostshipLost"]
                 }
               },
               "additionalProperties": false,
-              "required": ["event", "state"]
+              "required": ["event", "State"]
             },
-            "PlanetEclipsedData": {
+            "PlanetEclipsedEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "PlanetEclipsed" },
-                "eclipsee": { "type": "string" },
-                "eclipser": { "type": "string" }
+                "Eclipsee": { "type": "string" },
+                "Eclipser": { "type": "string" }
               },
               "additionalProperties": false,
-              "required": ["event", "eclipsee", "eclipser"]
+              "required": ["event", "Eclipsee", "Eclipser"]
             },
-            "PointSpacecraftData": {
+            "PointSpacecraftEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "PointSpacecraft" },
-                "ra": { "type": "number" },
-                "dec": { "type": "number" },
-                "duration": { "type": "number" }
+                "Ra": { "type": "number" },
+                "Dec": { "type": "number" },
+                "Duration": { "type": "number" }
               },
               "additionalProperties": false,
-              "required": ["event", "ra", "dec", "duration"]
+              "required": ["event", "Ra", "Dec", "Duration"]
             },
-            "ProfileLoadingFinishedData": {
+            "ProfileLoadingFinishedEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "ProfileLoadingFinished" }
@@ -372,43 +372,43 @@ Schema EventTopic::Schema() {
               "additionalProperties": false,
               "required": ["event"]
             },
-            "PropertyTreePrunedData": {
+            "PropertyTreePrunedEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "PropertyTreePruned" },
-                "uri": { "type": "string" }
+                "Uri": { "type": "string" }
               },
               "additionalProperties": false,
-              "required": ["event", "uri"]
+              "required": ["event", "Uri"]
             },
-            "PropertyTreeUpdatedData": {
+            "PropertyTreeUpdatedEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "PropertyTreeUpdated" },
-                "uri": { "type": "string" }
+                "Uri": { "type": "string" }
               },
               "additionalProperties": false,
-              "required": ["event", "uri"]
+              "required": ["event", "Uri"]
             },
-            "RenderableDisabledData": {
+            "RenderableDisabledEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "RenderableDisabled" },
-                "node": { "type": "string" }
+                "Node": { "type": "string" }
               },
               "additionalProperties": false,
-              "required": ["event", "node"]
+              "required": ["event", "Node"]
             },
-            "RenderableEnabledData": {
+            "RenderableEnabledEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "RenderableEnabled" },
-                "node": { "type": "string" }
+                "Node": { "type": "string" }
               },
               "additionalProperties": false,
-              "required": ["event", "node"]
+              "required": ["event", "Node"]
             },
-            "ScheduledScriptExecutedData": {
+            "ScheduledScriptExecutedEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "ScheduledScriptExecuted" },
@@ -417,19 +417,19 @@ Schema EventTopic::Schema() {
               "additionalProperties": false,
               "required": ["event", "script"]
             },
-            "SessionRecordingPlaybackData": {
+            "SessionRecordingPlaybackEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "SessionRecordingPlayback" },
-                "state": {
+                "State": {
                   "type": "string",
                   "enum": ["Started", "Paused", "Resumed", "Finished"]
                 }
               },
               "additionalProperties": false,
-              "required": ["event", "state"]
+              "required": ["event", "State"]
             },
-            "TimeOfInterestReachedData": {
+            "TimeOfInterestReachedEventData": {
               "type": "object",
               "properties": {
                 "event": { "const": "TimeOfInterestReached" }
