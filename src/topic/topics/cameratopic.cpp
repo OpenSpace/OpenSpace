@@ -27,9 +27,9 @@
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
-#include <openspace/documentation/schema.h>
 #include <openspace/topic/connection.h>
 #include <openspace/topic/server.h>
 #include <openspace/util/distanceconversion.h>

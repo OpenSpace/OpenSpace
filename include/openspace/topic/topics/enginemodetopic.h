@@ -35,7 +35,7 @@ struct Schema;
 
 class EngineModeTopic : public Topic {
 public:
-    EngineModeTopic();
+    EngineModeTopic() = default;
     ~EngineModeTopic() override;
 
     void handleJson(const nlohmann::json& json) override;
