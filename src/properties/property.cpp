@@ -108,7 +108,7 @@ void Property::setVisibility(Visibility visibility) {
     // We only subscribe to meta data changes for visible properties, so if the visibility
     // changes during runtime, we need to notify the property owner about the change for
     // it to affect properties that are currently hidden
-    if (_owner) {
+    if (_owner && !_owner->uri().empty()) {
         global::eventEngine->publishEvent<EventPropertyTreeUpdated>(_owner->uri());
     }
 }
