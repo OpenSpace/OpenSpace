@@ -27,6 +27,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
+#include <openspace/util/timemanager.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <optional>
 #include <string>
@@ -35,10 +37,12 @@
 namespace {
     using namespace openspace;
 
+    constexpr std::string_view _loggerCat = "TimeFrameInterval";
+
     constexpr Property::PropertyInfo HasStartInfo = {
         "HasStart",
         "Has start",
-        "If enabled, this TimeFrame will be inactive before the Start.",
+        "If enabled, this TimeFrame will be inactive before the Start time.",
         Property::Visibility::User
     };
 
@@ -49,10 +53,18 @@ namespace {
         Property::Visibility::User
     };
 
+    constexpr Property::PropertyInfo JumpToStartInfo = {
+        "JumpToStart",
+        "Jump to start",
+        "Performs a time jump to the start of the interval. Disabled if no start time is "
+        "specified.",
+        Property::Visibility::NoviceUser
+    };
+
     constexpr Property::PropertyInfo HasEndInfo = {
         "HasEnd",
         "Has end",
-        "If enabled, this TimeFrame will be inactive after the End.",
+        "If enabled, this TimeFrame will be inactive after the End time.",
         Property::Visibility::User
     };
 
@@ -61,6 +73,14 @@ namespace {
         "End",
         "Specifies the time when this TimeFrame becomes inactive.",
         Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo JumpToEndInfo = {
+        "JumpToEnd",
+        "Jump to end",
+        "Performs a time jump to the end of the interval. Disabled if no end time is "
+        "specified.",
+        Property::Visibility::NoviceUser
     };
 
     // This `TimeFrame`'s validity is determined by a single start and end time in between
@@ -90,10 +110,32 @@ Documentation TimeFrameInterval::Documentation() {
 TimeFrameInterval::TimeFrameInterval(const ghoul::Dictionary& dictionary)
     : _hasStart(HasStartInfo, false)
     , _start(StartInfo, 0, 0, 1E9)
+    , _jumpToStart(JumpToStartInfo)
     , _hasEnd(HasEndInfo, false)
     , _end(EndInfo, 0, 0, 1E9)
+    , _jumpToEnd(JumpToEndInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _jumpToStart.onChange([this]() {
+        if (_hasStart) {
+            global::timeManager->setTimeNextFrame(Time(_start));
+        }
+        else {
+            LWARNING("Cannot jump to start because no start time is specified");
+        }
+    });
+    addProperty(_jumpToStart);
+
+    _jumpToEnd.onChange([this]() {
+        if (_hasEnd) {
+            global::timeManager->setTimeNextFrame(Time(_end));
+        }
+        else {
+            LWARNING("Cannot jump to end because no end time is specified");
+        }
+    });
+    addProperty(_jumpToEnd);
 
     if (p.start.has_value()) {
         if (std::holds_alternative<double>(*p.start)) {
@@ -122,6 +164,14 @@ TimeFrameInterval::TimeFrameInterval(const ghoul::Dictionary& dictionary)
     _hasEnd = p.end.has_value();
     addProperty(_hasEnd);
     addProperty(_end);
+
+    if (!_hasStart) {
+        _jumpToStart.setReadOnly(true);
+    }
+
+    if (!_hasEnd) {
+        _jumpToEnd.setReadOnly(true);
+    }
 }
 
 void TimeFrameInterval::update(const Time& time) {
