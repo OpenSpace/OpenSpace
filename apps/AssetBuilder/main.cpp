@@ -22,18 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/documentation/documentationengine.h>
+#include "mainwindow.h"
+#include "schema/assetschema.h"
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settings.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/ghoul.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <QApplication>
+#include <QFile>
+#include <QMessageBox>
 
-int main(int, char** argv) {
-    using namespace openspace;
+using namespace openspace;
 
+int main(int argc, char* argv[]) {
     ghoul::logging::LogManager::initialize(
         ghoul::logging::LogLevel::Debug,
         ghoul::logging::LogManager::ImmediateFlush::Yes
@@ -42,32 +46,41 @@ int main(int, char** argv) {
     ghoul::initialize();
     global::create();
 
-    // In order to initialize the engine, we need to specify the tokens
-    // We start by registering the path of the executable,
-    // to make it possible to find other files in the same directory
+    // Register the path of the executable, to make it possible to find other files in the
+    // same directory
     FileSys.registerPathToken(
         "${BIN}",
-        std::filesystem::path(argv[0]).parent_path(),
+        std::filesystem::current_path() / std::filesystem::path(argv[0]).parent_path(),
         ghoul::filesystem::FileSystem::Override::Yes
     );
 
-    std::filesystem::path configFile = findConfiguration();
+    std::filesystem::path cfgPath = findConfiguration();
 
     // Register the base path as the directory where the configuration file lives
-    std::filesystem::path base = configFile.parent_path();
+    std::filesystem::path base = cfgPath.parent_path();
     FileSys.registerPathToken("${BASE}", base);
 
-    *global::configuration = loadConfigurationFromFile(configFile.string(), "");
+    *global::configuration = loadConfigurationFromFile(cfgPath, findSettings());
     registerPathTokens(*global::configuration);
 
-    // Now that we have the tokens we can initialize the engine
     global::openSpaceEngine->initialize();
 
-    // Print out the documentation to the documentation folder
-    // @TODO (ylvse, 2024-05-02) change this directory when integrating with jenkins?
-    DocEng.writeJsonDocumentation();
+    QApplication app = QApplication(argc, argv);
+
+    QApplication::setApplicationName("AssetBuilder");
+    QApplication::setApplicationVersion("1.0.0");
+    QApplication::setOrganizationName("OpenSpace");
+
+    if (QFile style = QFile(":/qss/assetbuilder.qss");  style.open(QFile::ReadOnly)) {
+        app.setStyleSheet(QLatin1String(style.readAll()));
+    }
+
+    AssetSchema::instance();
+
+    MainWindow window;
+    window.showMaximized();
+    int res = app.exec();
 
     global::openSpaceEngine->deinitialize();
-
-    return 0;
-};
+    return res;
+}

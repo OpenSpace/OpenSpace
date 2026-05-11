@@ -22,52 +22,67 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/documentation/documentationengine.h>
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/settings.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/logging/logmanager.h>
+#ifndef __OPENSPACE_ASSETBUILDER___IDENTIFIERREGISTRY___H__
+#define __OPENSPACE_ASSETBUILDER___IDENTIFIERREGISTRY___H__
 
-int main(int, char** argv) {
-    using namespace openspace;
+#include <QObject>
 
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Debug,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
-    );
+#include <QStringList>
+#include <filesystem>
 
-    ghoul::initialize();
-    global::create();
+struct JAsset;
 
-    // In order to initialize the engine, we need to specify the tokens
-    // We start by registering the path of the executable,
-    // to make it possible to find other files in the same directory
-    FileSys.registerPathToken(
-        "${BIN}",
-        std::filesystem::path(argv[0]).parent_path(),
-        ghoul::filesystem::FileSystem::Override::Yes
-    );
+/**
+ * Maintains a list of all known identifiers from the current asset's content items and
+ * from parsed dependency files. Used to populate Identifier-type comboboxes in the schema
+ * form.
+ */
+class IdentifierRegistry final : public QObject {
+Q_OBJECT
+public:
+    /**
+     * Constructs an empty registry. The parent defaults to nullptr to follow Qt
+     * convention, though in practice a parent is always passed for lifetime management.
+     *
+     * \param parent Optional parent QObject for lifetime management
+     */
+    explicit IdentifierRegistry(QObject* parent);
 
-    std::filesystem::path configFile = findConfiguration();
+    /**
+     * Rebuilds the identifier list from the given asset. Collects identifiers from local
+     * content items and from each dependency file (resolved relative to the parent
+     * directory of assetPath). Emits registryChanged() only if the set actually changed.
+     *
+     * \param asset The current in-memory asset
+     * \param assetPath Path to the .jasset file (empty if untitled)
+     */
+    void rebuildFromAsset(const JAsset& asset, const std::filesystem::path& assetPath);
 
-    // Register the base path as the directory where the configuration file lives
-    std::filesystem::path base = configFile.parent_path();
-    FileSys.registerPathToken("${BASE}", base);
+    /**
+     * Returns the sorted, deduplicated list of all known identifiers.
+     */
+    QStringList knownIdentifiers() const;
 
-    *global::configuration = loadConfigurationFromFile(configFile.string(), "");
-    registerPathTokens(*global::configuration);
+signals:
+    /**
+     * Emitted when the identifier set changes after a rebuild.
+     */
+    void registryChanged();
 
-    // Now that we have the tokens we can initialize the engine
-    global::openSpaceEngine->initialize();
+    /**
+     * Emitted when duplicate identifiers are found across the asset's content items and
+     * dependency files.
+     *
+     * \param message Human-readable description of each duplicate and its sources
+     */
+    void duplicatesFound(const QString& message);
 
-    // Print out the documentation to the documentation folder
-    // @TODO (ylvse, 2024-05-02) change this directory when integrating with jenkins?
-    DocEng.writeJsonDocumentation();
+private:
+    /// Sorted, deduplicated list of all known identifiers
+    QStringList _identifiers;
 
-    global::openSpaceEngine->deinitialize();
-
-    return 0;
+    /// Last emitted duplicate warning (to avoid repeated popups)
+    QString _lastDuplicateWarning;
 };
+
+#endif // __OPENSPACE_ASSETBUILDER___IDENTIFIERREGISTRY___H__

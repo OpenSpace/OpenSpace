@@ -22,52 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/documentation/documentationengine.h>
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/settings.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/logging/logmanager.h>
+#ifndef __OPENSPACE_ASSETBUILDER___SIDEPANEL___H__
+#define __OPENSPACE_ASSETBUILDER___SIDEPANEL___H__
 
-int main(int, char** argv) {
-    using namespace openspace;
+#include <QWidget>
 
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Debug,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
-    );
+#include <filesystem>
 
-    ghoul::initialize();
-    global::create();
+class ContentsListWidget;
+class DependenciesWidget;
+struct JAsset;
+class MetadataWidget;
 
-    // In order to initialize the engine, we need to specify the tokens
-    // We start by registering the path of the executable,
-    // to make it possible to find other files in the same directory
-    FileSys.registerPathToken(
-        "${BIN}",
-        std::filesystem::path(argv[0]).parent_path(),
-        ghoul::filesystem::FileSystem::Override::Yes
-    );
+/**
+ * Thin container for the left-side panel. Owns a vertical QSplitter containing the
+ * contents list, dependencies list, and metadata form.
+ */
+class SidePanel final : public QWidget {
+Q_OBJECT
+public:
+    SidePanel(QWidget* parent, JAsset& asset, std::filesystem::path& path);
 
-    std::filesystem::path configFile = findConfiguration();
+    /**
+     * Refreshes all three child widgets.
+     */
+    void refreshAll();
 
-    // Register the base path as the directory where the configuration file lives
-    std::filesystem::path base = configFile.parent_path();
-    FileSys.registerPathToken("${BASE}", base);
+public slots:
+    /**
+     * Adds the file at \p filePath as a dependency.
+     *
+     * \param filePath Absolute path to the file to add
+     */
+    void addDependency(const QString& filePath);
 
-    *global::configuration = loadConfigurationFromFile(configFile.string(), "");
-    registerPathTokens(*global::configuration);
+signals:
+    /**
+     * Emitted when the contents list selection changes.
+     */
+    void selectionChanged(size_t row);
 
-    // Now that we have the tokens we can initialize the engine
-    global::openSpaceEngine->initialize();
+    /**
+     * Emitted whenever a child widget mutates the asset.
+     */
+    void assetModified();
 
-    // Print out the documentation to the documentation folder
-    // @TODO (ylvse, 2024-05-02) change this directory when integrating with jenkins?
-    DocEng.writeJsonDocumentation();
-
-    global::openSpaceEngine->deinitialize();
-
-    return 0;
+private:
+    ContentsListWidget* _contentsList = nullptr;
+    DependenciesWidget* _dependencies = nullptr;
+    MetadataWidget* _metadata = nullptr;
 };
+
+#endif // __OPENSPACE_ASSETBUILDER___SIDEPANEL___H__

@@ -22,52 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/documentation/documentationengine.h>
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/settings.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/logging/logmanager.h>
+#ifndef __OPENSPACE_ASSETBUILDER___COLORWIDGET___H__
+#define __OPENSPACE_ASSETBUILDER___COLORWIDGET___H__
 
-int main(int, char** argv) {
-    using namespace openspace;
+#include "form/matrixwidget.h"
 
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Debug,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
-    );
+class QPushButton;
 
-    ghoul::initialize();
-    global::create();
+/**
+ * MatrixWidget subclass for Color3/Color4 fields. Adds a 24x24 color swatch button that
+ * shows the current color and opens a QColorDialog on click.
+ */
+class ColorWidget final : public MatrixWidget {
+Q_OBJECT
+public:
+    /**
+     * \param nComponents 3 for RGB, 4 for RGBA
+     * \param parent Parent widget
+     */
+    explicit ColorWidget(int nComponents, QWidget* parent = nullptr);
 
-    // In order to initialize the engine, we need to specify the tokens
-    // We start by registering the path of the executable,
-    // to make it possible to find other files in the same directory
-    FileSys.registerPathToken(
-        "${BIN}",
-        std::filesystem::path(argv[0]).parent_path(),
-        ghoul::filesystem::FileSystem::Override::Yes
-    );
+    void setValues(const std::vector<double>& vals) override;
 
-    std::filesystem::path configFile = findConfiguration();
+private:
+    /**
+     * Updates the swatch button background to reflect the current field values.
+     */
+    void updateSwatch();
 
-    // Register the base path as the directory where the configuration file lives
-    std::filesystem::path base = configFile.parent_path();
-    FileSys.registerPathToken("${BASE}", base);
-
-    *global::configuration = loadConfigurationFromFile(configFile.string(), "");
-    registerPathTokens(*global::configuration);
-
-    // Now that we have the tokens we can initialize the engine
-    global::openSpaceEngine->initialize();
-
-    // Print out the documentation to the documentation folder
-    // @TODO (ylvse, 2024-05-02) change this directory when integrating with jenkins?
-    DocEng.writeJsonDocumentation();
-
-    global::openSpaceEngine->deinitialize();
-
-    return 0;
+    /// Color preview button that opens a QColorDialog on click
+    QPushButton* _swatchButton = nullptr;
 };
+
+#endif // __OPENSPACE_ASSETBUILDER___COLORWIDGET___H__

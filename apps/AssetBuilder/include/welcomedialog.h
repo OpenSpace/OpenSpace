@@ -22,52 +22,66 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/documentation/documentationengine.h>
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/settings.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/logging/logmanager.h>
+#ifndef __OPENSPACE_ASSETBUILDER___WELCOMEDIALOG___H__
+#define __OPENSPACE_ASSETBUILDER___WELCOMEDIALOG___H__
 
-int main(int, char** argv) {
-    using namespace openspace;
+#include <QDialog>
 
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Debug,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
-    );
+#include <filesystem>
 
-    ghoul::initialize();
-    global::create();
+/**
+ * Shown on application startup and when File -> New is triggered. Lets the user create a
+ * new asset or open an existing one.
+ *
+ * After exec() returns Accepted, read selectedAction() and selectedFile() to determine
+ * what the user chose.
+ */
+class WelcomeDialog final : public QDialog {
+Q_OBJECT
+public:
+    enum class Action {
+        None,
+        CreateEmpty, ///< Create a new blank SceneGraphNode asset
+        OpenFile ///< Open an existing .jasset file (path in selectedFile())
+    };
 
-    // In order to initialize the engine, we need to specify the tokens
-    // We start by registering the path of the executable,
-    // to make it possible to find other files in the same directory
-    FileSys.registerPathToken(
-        "${BIN}",
-        std::filesystem::path(argv[0]).parent_path(),
-        ghoul::filesystem::FileSystem::Override::Yes
-    );
+    explicit WelcomeDialog(QWidget* parent);
 
-    std::filesystem::path configFile = findConfiguration();
+    /**
+     * Returns the action the user chose before the dialog closed.
+     *
+     * \return The selected Action
+     */
+    Action selectedAction() const;
 
-    // Register the base path as the directory where the configuration file lives
-    std::filesystem::path base = configFile.parent_path();
-    FileSys.registerPathToken("${BASE}", base);
+    /**
+     * Returns the file path chosen when selectedAction() == OpenFile. Empty otherwise.
+     *
+     * \return The path to the selected .jasset file
+     */
+    std::filesystem::path selectedFile() const;
 
-    *global::configuration = loadConfigurationFromFile(configFile.string(), "");
-    registerPathTokens(*global::configuration);
+private slots:
+    /**
+     * Accepts the dialog with Action::CreateEmpty.
+     */
+    void createEmpty();
 
-    // Now that we have the tokens we can initialize the engine
-    global::openSpaceEngine->initialize();
+    /**
+     * Opens a file picker and accepts with Action::OpenFile on success.
+     */
+    void browseForFile();
 
-    // Print out the documentation to the documentation folder
-    // @TODO (ylvse, 2024-05-02) change this directory when integrating with jenkins?
-    DocEng.writeJsonDocumentation();
+    /**
+     * Accepts the dialog with Action::OpenFile using the given path.
+     *
+     * \param path The recently-used file path to open
+     */
+    void openRecentFile(const std::filesystem::path& path);
 
-    global::openSpaceEngine->deinitialize();
-
-    return 0;
+private:
+    Action _selectedAction = Action::None;
+    std::filesystem::path _selectedFile;
 };
+
+#endif // __OPENSPACE_ASSETBUILDER___WELCOMEDIALOG___H__

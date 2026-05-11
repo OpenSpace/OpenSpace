@@ -22,52 +22,43 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/documentation/documentationengine.h>
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/settings.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/logging/logmanager.h>
+#ifndef __OPENSPACE_ASSETBUILDER___METADATAWIDGET___H__
+#define __OPENSPACE_ASSETBUILDER___METADATAWIDGET___H__
 
-int main(int, char** argv) {
-    using namespace openspace;
+#include <QWidget>
 
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Debug,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
-    );
+struct JAsset;
+class QComboBox;
+class QLineEdit;
+class QPlainTextEdit;
 
-    ghoul::initialize();
-    global::create();
+/**
+ * Widget showing the asset metadata form (name, version, author, description, license).
+ */
+class MetadataWidget final : public QWidget {
+Q_OBJECT
+public:
+    MetadataWidget(QWidget* parent, JAsset& asset);
 
-    // In order to initialize the engine, we need to specify the tokens
-    // We start by registering the path of the executable,
-    // to make it possible to find other files in the same directory
-    FileSys.registerPathToken(
-        "${BIN}",
-        std::filesystem::path(argv[0]).parent_path(),
-        ghoul::filesystem::FileSystem::Override::Yes
-    );
+    /**
+     * Re-reads the asset metadata into the form fields.
+     */
+    void refresh();
 
-    std::filesystem::path configFile = findConfiguration();
+signals:
+    /**
+     * Emitted whenever this widget mutates the asset.
+     */
+    void assetModified();
 
-    // Register the base path as the directory where the configuration file lives
-    std::filesystem::path base = configFile.parent_path();
-    FileSys.registerPathToken("${BASE}", base);
+private:
+    JAsset& _asset;
 
-    *global::configuration = loadConfigurationFromFile(configFile.string(), "");
-    registerPathTokens(*global::configuration);
-
-    // Now that we have the tokens we can initialize the engine
-    global::openSpaceEngine->initialize();
-
-    // Print out the documentation to the documentation folder
-    // @TODO (ylvse, 2024-05-02) change this directory when integrating with jenkins?
-    DocEng.writeJsonDocumentation();
-
-    global::openSpaceEngine->deinitialize();
-
-    return 0;
+    QLineEdit* _nameEdit = nullptr;
+    QLineEdit* _versionEdit = nullptr;
+    QLineEdit* _authorEdit = nullptr;
+    QPlainTextEdit* _descriptionEdit = nullptr;
+    QComboBox* _licenseCombo = nullptr;
 };
+
+#endif // __OPENSPACE_ASSETBUILDER___METADATAWIDGET___H__

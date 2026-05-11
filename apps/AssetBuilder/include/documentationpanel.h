@@ -22,52 +22,46 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/documentation/documentationengine.h>
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/settings.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/logging/logmanager.h>
+#ifndef __OPENSPACE_ASSETBUILDER___DOCUMENTATIONPANEL___H__
+#define __OPENSPACE_ASSETBUILDER___DOCUMENTATIONPANEL___H__
 
-int main(int, char** argv) {
-    using namespace openspace;
+#include <QWidget>
 
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Debug,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
-    );
+#include <documentation.h>
 
-    ghoul::initialize();
-    global::create();
+class QFrame;
+class QLabel;
+class QTextBrowser;
 
-    // In order to initialize the engine, we need to specify the tokens
-    // We start by registering the path of the executable,
-    // to make it possible to find other files in the same directory
-    FileSys.registerPathToken(
-        "${BIN}",
-        std::filesystem::path(argv[0]).parent_path(),
-        ghoul::filesystem::FileSystem::Override::Yes
-    );
+/**
+ * Right-side documentation panel. Shows a field name, type, required/optional status,
+ * short description, and full documentation text when the user clicks a field info button
+ * in the editor.
+ */
+class DocumentationPanel final : public QWidget {
+Q_OBJECT
+public:
+    explicit DocumentationPanel(QWidget* parent);
 
-    std::filesystem::path configFile = findConfiguration();
+public slots:
+    /**
+     * Updates the panel to display documentation for the given field.
+     *
+     * \param info Documentation bundle with name, type, description, and documentation
+     */
+    void showDocumentation(const Documentation& info);
 
-    // Register the base path as the directory where the configuration file lives
-    std::filesystem::path base = configFile.parent_path();
-    FileSys.registerPathToken("${BASE}", base);
-
-    *global::configuration = loadConfigurationFromFile(configFile.string(), "");
-    registerPathTokens(*global::configuration);
-
-    // Now that we have the tokens we can initialize the engine
-    global::openSpaceEngine->initialize();
-
-    // Print out the documentation to the documentation folder
-    // @TODO (ylvse, 2024-05-02) change this directory when integrating with jenkins?
-    DocEng.writeJsonDocumentation();
-
-    global::openSpaceEngine->deinitialize();
-
-    return 0;
+private:
+    /// Display name of the documented field or type
+    QLabel* _nameLabel = nullptr;
+    /// "Type: X  Required/Optional" metadata line
+    QLabel* _metaLabel = nullptr;
+    /// Horizontal line between metadata and documentation text
+    QFrame* _separator = nullptr;
+    /// Short one-line description of the field
+    QLabel* _descriptionLabel = nullptr;
+    /// Full documentation text rendered from Markdown
+    QTextBrowser* _textBrowser = nullptr;
 };
+
+#endif // __OPENSPACE_ASSETBUILDER___DOCUMENTATIONPANEL___H__
