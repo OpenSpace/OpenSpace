@@ -31,6 +31,7 @@
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -55,7 +56,7 @@ enum class PlaybackMode {
 
 class VideoPlayer : public PropertyOwner, public Syncable {
 public:
-    BooleanType(PauseAfterSeek);
+    BooleanType(PlayAfterSeek);
 
     explicit VideoPlayer(const ghoul::Dictionary& dictionary);
     ~VideoPlayer() override;
@@ -63,11 +64,10 @@ public:
     void initialize();
 
     // Video interaction
-    void pause();
-    void play();
+    void preparePlay();
     void goToStart();
 
-    void seekToTime(double time, PauseAfterSeek pauseAfter = PauseAfterSeek::Yes);
+    void seekToTime(double time, PlayAfterSeek playAfter = PlayAfterSeek::No);
     void toggleMute();
 
     const std::unique_ptr<ghoul::opengl::Texture>& frameTexture() const;
@@ -89,14 +89,17 @@ private:
     struct SyncFlags {
         bool shouldGoToStart = false;
         bool shouldPlay = false;
+        bool shouldPause = false;
     };
 
-    // State keys
+    // State keys used to synchronize playback
     enum class PlaybackState : uint16_t {
         Undefined = 0,
-        Waiting,
+        Ready,
+        CountingDown,
         Playing,
         Paused,
+        Rewinding,
         EndOfFile
     };
 
@@ -151,6 +154,11 @@ private:
     bool checkFrameReached(double correctTime) const;
     void updateFrameDuration();
 
+    // Handles platback and gui states
+    void play();
+    void pause();
+    void setIsPlaying();
+
     // Properties for user interaction
     TriggerProperty _play;
     TriggerProperty _pause;
@@ -158,6 +166,7 @@ private:
     TriggerProperty _reload;
     BoolProperty _playAudio;
     BoolProperty _loopVideo;
+    IntProperty _playDelay;
 
     // Read-only properties for showing video information
     BoolProperty _isPlaying;

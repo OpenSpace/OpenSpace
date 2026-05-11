@@ -114,6 +114,15 @@ namespace {
         Property::Visibility::Developer
     };
 
+    constexpr Property::PropertyInfo PlayDelayInfo = {
+        "PlayDelay",
+        "Play Delay",
+        "The delay, in milliseconds, that the system will wait before issuing the play "
+        "command. A higher value will increase the time it takes for the video to start "
+        "but may result in a more synchronized playback start.",
+        Property::Visibility::Developer
+    };
+
     bool checkMpvError(int status) {
         if (status < 0) {
             LERROR(std::format("Libmpv API error: {}", mpv_error_string(status)));
@@ -131,6 +140,9 @@ namespace {
 
         // [[codegen::verbatim(LoopVideoInfo.description)]]
         std::optional<bool> loopVideo;
+
+        // [[codegen::verbatim(PlayDelayInfo.description)]] 
+        std::optional<int> playDelay;
 
         // [[codegen::verbatim(StartTimeInfo.description)]]
         std::optional<std::string> startTime [[codegen::datetime()]];
@@ -245,6 +257,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
     , _reload(ReloadInfo)
     , _playAudio(AudioInfo, false)
     , _loopVideo(LoopVideoInfo, true)
+    , _playDelay(PlayDelayInfo, 250, 0, 1000)
     , _isPlaying(IsPlayingInfo, false)
     , _startTime(StartTimeInfo, "")
     , _endTime(EndTimeInfo, "")
@@ -269,7 +282,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
 
     if (_playbackMode == PlaybackMode::RealTimeLoop) {
         // Video interaction. Only valid for real time looping
-        _play.onChange([this]() { play(); });
+        _play.onChange([this]() { preparePlay(); });
         addProperty(_play);
         _pause.onChange([this]() { pause(); });
         addProperty(_pause);
@@ -311,6 +324,9 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
     _reload.onChange([this]() { reload(); });
     addProperty(_reload);
 
+    _playDelay = p.playDelay.value_or(_playDelay);
+    addProperty(_playDelay);
+
     global::syncEngine->addSyncable(this);
 
     keys = {
@@ -346,34 +362,50 @@ VideoPlayer::~VideoPlayer() {
     destroy();
 }
 
-void VideoPlayer::pause() {
-    constexpr int IsPaused = 1;
-    setPropertyAsyncMpv(IsPaused, MpvKey::Pause);
-    _isPlaying = false;
-    if (global::windowDelegate->isMaster()) {
-        _playbackState = PlaybackState::Paused;
-    }
-}
-
 void VideoPlayer::play() {
-    if (_playbackState == PlaybackState::EndOfFile) {
-        if (global::windowDelegate->isMaster()) {
-            _syncFlags.shouldGoToStart = true;
-            _isPlaying = true;
-        }
-        return;
-    }
-
     constexpr int IsPaused = 0;
     setPropertyAsyncMpv(IsPaused, MpvKey::Pause);
-    _isPlaying = true;
     if (global::windowDelegate->isMaster()) {
         _playbackState = PlaybackState::Playing;
     }
 }
 
+void VideoPlayer::preparePlay() {
+    if (!global::windowDelegate->isMaster()) {
+        return;
+    }
+
+    if (_playbackState == PlaybackState::EndOfFile) {
+        _playbackState = PlaybackState::Rewinding;
+    }
+    else {
+        _playbackState = PlaybackState::Ready;
+    }
+}
+
+void VideoPlayer::pause() {
+    constexpr int IsPaused = 1;
+    setPropertyAsyncMpv(IsPaused, MpvKey::Pause);
+    if (global::windowDelegate->isMaster()) {
+        _playbackState = PlaybackState::Paused;
+    }
+}
+
 void VideoPlayer::goToStart() {
     seekToTime(0.0);
+}
+
+void VideoPlayer::setIsPlaying() {
+    if (_playbackState == PlaybackState::Playing ||
+        _playbackState == PlaybackState::Ready)
+    {
+        _isPlaying = true;
+    }
+    else if (_playbackState == PlaybackState::Paused ||
+        _playbackState == PlaybackState::EndOfFile)
+    {
+        _isPlaying = false;
+    }
 }
 
 void VideoPlayer::initialize() {
@@ -491,7 +523,7 @@ void VideoPlayer::initializeMpv() {
     _playbackState = PlaybackState::Paused;
 }
 
-void VideoPlayer::seekToTime(double time, PauseAfterSeek pauseAfter) {
+void VideoPlayer::seekToTime(double time, PlayAfterSeek playAfter) {
     if (_isSeeking || checkFrameReached(time)) {
         return;
     }
@@ -499,8 +531,8 @@ void VideoPlayer::seekToTime(double time, PauseAfterSeek pauseAfter) {
         pause();
     }
     setPropertyAsyncMpv(time, MpvKey::Time);
-    if (!pauseAfter) {
-        play();
+    if (playAfter) {
+        preparePlay();
     }
 }
 
@@ -769,8 +801,28 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             if (!prop) {
                 break;
             }
-            int* videoIsPaused = reinterpret_cast<int*>(prop->data);
-            _isPlaying = (* videoIsPaused == 0);
+            if (global::windowDelegate->isMaster()) {
+                int* videoIsPaused = reinterpret_cast<int*>(prop->data);
+                _playbackState = (*videoIsPaused == 0) ?
+                    PlaybackState::Playing : PlaybackState::Paused;
+            }
+            break;
+        }
+        case MpvKey::EndOfFile: {
+            if (!prop) {
+                break;
+            }
+            if (global::windowDelegate->isMaster()) {
+                int* isEndOfFile = reinterpret_cast<int*>(prop->data);
+                if (* isEndOfFile == 1) {
+                    if (_loopVideo) {
+                        _playbackState = PlaybackState::Rewinding;
+                    }
+                    else {
+                        _playbackState = PlaybackState::EndOfFile;
+                    }
+                }
+            }
             break;
         }
         case MpvKey::Meta: {
@@ -784,23 +836,6 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             }
             else {
                 LWARNING("No meta data could be read");
-            }
-            break;
-        }
-        case MpvKey::EndOfFile: {
-            if (!prop) {
-                break;
-            }
-
-            int* isEndOfFile = reinterpret_cast<int*>(prop->data);
-            if (global::windowDelegate->isMaster() && (* isEndOfFile == 1)) {
-                if (_loopVideo) {
-                    _syncFlags.shouldGoToStart = true;
-                    _isPlaying = true;
-                }
-                else {
-                    _playbackState = PlaybackState::EndOfFile;
-                }
             }
             break;
         }
@@ -818,23 +853,44 @@ void VideoPlayer::destroy() {
     mpv_destroy(_mpvHandle);
     _mpvHandle = nullptr;
     glDeleteFramebuffers(1, &_fbo);
+    _isInitialized = false;
+    _playbackState = PlaybackState::Undefined;
 }
 
 void VideoPlayer::preSync(bool isMaster) {
+    setIsPlaying();
     if (!isMaster) {
         return;
     }
 
     _correctPlaybackTime = _currentVideoTime;
-    if (_playbackMode == PlaybackMode::RealTimeLoop &&
-        _playbackState == PlaybackState::Waiting)
+    if (_playbackMode == PlaybackMode::RealTimeLoop)
     {
-        const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::high_resolution_clock::now().time_since_epoch()
-        );
-        const long long dt = _goTime.count() - now.count();
-        if (dt <= 0.0) {
-            _syncFlags.shouldPlay = true;
+        if (_playbackState == PlaybackState::Rewinding) {
+            _syncFlags.shouldGoToStart = true;
+            return;
+        }
+
+        if (_playbackState == PlaybackState::Ready) {
+            // Set new timer for a future time when seek (if made) is hopefully done
+            const long long delay = static_cast<long long>(_playDelay.value());
+            _goTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::high_resolution_clock::now().time_since_epoch() +
+                std::chrono::milliseconds(delay)
+            );
+
+            _playbackState = PlaybackState::CountingDown;
+            return;
+        }
+
+        if (_playbackState == PlaybackState::CountingDown) {
+            const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::high_resolution_clock::now().time_since_epoch()
+            );
+            const long long dt = _goTime.count() - now.count();
+            if (dt <= 0.0) {
+                _syncFlags.shouldPlay = true;
+            }
         }
     }
     else if (_playbackMode == PlaybackMode::MapToSimulationTime) {
@@ -858,31 +914,35 @@ void VideoPlayer::postSync(bool isMaster) {
     if (_playbackMode == PlaybackMode::RealTimeLoop) {
         // Ensure synchronized playback and states between Nodes and Master
         if (_syncFlags.shouldGoToStart) {
-            setPropertyAsyncMpv(0.0, MpvKey::Time);
+            goToStart();
             if (isMaster) {
-                _playbackState = PlaybackState::Waiting;
                 _syncFlags.shouldGoToStart = false;
-
-                // Set new timer 5 frames into the future when seek is (hopefully) done 
-                const long long delay = static_cast<long long>(5 * 1000.0 / _fps);
-                _goTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-                    std::chrono::high_resolution_clock::now().time_since_epoch() +
-                    std::chrono::milliseconds(delay)
-                );
+                _playbackState = PlaybackState::Ready;
             }
+            return;
         }
+
         if (_syncFlags.shouldPlay) {
             play();
             if (isMaster) {
                 _syncFlags.shouldPlay = false;
+                _syncFlags.shouldPause = false;
             }
+            return;
         }
+
         if (!_isPlaying && !isMaster) {
+            if (_isSeeking || checkFrameReached(_correctPlaybackTime)) {
+                return;
+            }
             seekToTime(_correctPlaybackTime);
         }
     }
     else {
         // MapToSimulationTime
+        if (_isSeeking || checkFrameReached(_correctPlaybackTime)) {
+            return;
+        }
         seekToTime(_correctPlaybackTime);
     }
 }
