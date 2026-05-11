@@ -34,7 +34,6 @@ namespace openspace {
 struct Schema;
 
 class EngineModeTopic : public Topic {
-
 public:
     EngineModeTopic();
     ~EngineModeTopic() override;
@@ -43,6 +42,7 @@ public:
     bool isDone() const override;
 
     static openspace::Schema Schema();
+
 private:
     static constexpr int UnsetOnChangeHandle = -1;
 

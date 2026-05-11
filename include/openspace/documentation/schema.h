@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___SCHEMA___H__
 #define __OPENSPACE_CORE___SCHEMA___H__
 
-#include <nlohmann/json.hpp>
+#include <openspace/json.h>
 #include <string>
 
 namespace openspace {
@@ -39,4 +39,4 @@ struct Schema {
 
 } // namespace openspace
 
-#endif // !__OPENSPACE_CORE___SCHEMA___H__
+#endif // __OPENSPACE_CORE___SCHEMA___H__

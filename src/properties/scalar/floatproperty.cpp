@@ -57,6 +57,7 @@ nlohmann::json FloatProperty::Schema() {
     nlohmann::json metaData = NumericalProperty<float>::MetaDataSchema();
     metaData["properties"]["type"] = { { "const", "FloatProperty" } };
     metaData["required"].push_back("type");
+    nlohmann::json sharedDefs = ExtractDefs(metaData);
 
     nlohmann::json typeDef = nlohmann::json::parse(R"(
         {
@@ -69,7 +70,6 @@ nlohmann::json FloatProperty::Schema() {
           "required": ["metaData", "uri", "value"]
         }
     )");
-    nlohmann::json sharedDefs = extractDefs(metaData);
     typeDef["properties"]["metaData"] = metaData;
 
     nlohmann::json schema;

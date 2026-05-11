@@ -57,25 +57,24 @@ SkyBrowserTopic::~SkyBrowserTopic() {
 
 void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
     const std::string event = json.at("event").get<std::string>();
+
+    if (event == "start_subscription" && _targetDataCallbackHandle == UnsetOnChangeHandle)
+    {
+        _targetDataCallbackHandle = global::server->addPreSyncCallback(
+            [this]() {
+                const auto now = std::chrono::system_clock::now();
+                if (now - _lastUpdateTime > _skyBrowserUpdateTime) {
+                    sendBrowserData();
+                    _lastUpdateTime = std::chrono::system_clock::now();
+                }
+            }
+        );
+    }
+
     if (event == "stop_subscription") {
         _isDone = true;
         return;
     }
-
-    if (event != "start_subscription") {
-        _isDone = true;
-        return;
-    }
-
-    _targetDataCallbackHandle = global::server->addPreSyncCallback(
-        [this]() {
-            const auto now = std::chrono::system_clock::now();
-            if (now - _lastUpdateTime > _skyBrowserUpdateTime) {
-                sendBrowserData();
-                _lastUpdateTime = std::chrono::system_clock::now();
-            }
-        }
-    );
 }
 
 bool SkyBrowserTopic::isDone() const {

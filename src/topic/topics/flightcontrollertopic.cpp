@@ -188,7 +188,7 @@ Schema FlightControllerTopic::Schema() {
           "properties": {
             "topicId": { "const": "flightcontroller" },
             "topicPayload": { "$ref": "#/$defs/FlightControllerCommand" },
-            "data": null
+            "data": { "type": "null" }
           },
           "additionalProperties": false,
           "required": ["topicId", "topicPayload", "data"]

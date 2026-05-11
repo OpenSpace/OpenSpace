@@ -63,6 +63,7 @@ nlohmann::json DMat2Property::Schema() {
     nlohmann::json metaData = NumericalProperty<glm::dmat2x2>::MetaDataSchema();
     metaData["properties"]["type"] = { { "const", "DMat2Property" } };
     metaData["required"].push_back("type");
+    nlohmann::json sharedDefs = ExtractDefs(metaData);
 
     nlohmann::json typeDef = nlohmann::json::parse(R"(
         {
@@ -80,7 +81,6 @@ nlohmann::json DMat2Property::Schema() {
           "required": ["metaData", "uri", "value"]
         }
     )");
-    nlohmann::json sharedDefs = extractDefs(metaData);
     typeDef["properties"]["metaData"] = metaData;
 
     nlohmann::json schema;

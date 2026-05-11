@@ -531,11 +531,13 @@ void DocumentationEngine::writeJsonSchema() {
             // @TODO (anden88 2026-05-04): Should we guard for duplicate typeNames?
             for (const auto& [typeName, typeDef] : propertySchema["typedefs"].items()) {
                 defs[typeName] = typeDef;
-                anyProperty.push_back({ {"$ref", std::format("#/$defs/{}", typeName)} });
+                anyProperty.push_back({
+                    { "$ref", std::format("#/$defs/{}", typeName) }
+                });
 
                 // We also store the union of all properties final metadata shapes under
                 // AnyPropertyMetaData this enables validation of the SubscriptionTopic,
-                // otherwise the metaData shape would be defined as a plain Json object {}
+                // otherwise the metaData shape would be defined as a plain JSON object
 
                 // Add a named metaData def for this type so AnyPropertyMetaData generates
                 // readable names like DoubleListPropertyMetaData
@@ -548,7 +550,7 @@ void DocumentationEngine::writeJsonSchema() {
         }
     }
 
-    defs["AnyPropertyMetaData"] = { { "anyOf", anyPropertyMetaData} };
+    defs["AnyPropertyMetaData"] = { { "anyOf", anyPropertyMetaData } };
     defs["AnyProperty"] = { { "anyOf", anyProperty } };
     defs["PropertyOwner"] = nlohmann::json::parse(R"(
         {
@@ -614,19 +616,19 @@ void DocumentationEngine::writeJsonSchema() {
         absPath("${BASE}/support/types/properties.json");
     std::ofstream propertiesFile = std::ofstream(propertiesPath);
 
-    if (propertiesFile) {
-        propertiesFile << propertiesJson.dump(2);
-    }
-    else {
+    if (!propertiesFile.good()) {
         throw ghoul::RuntimeError(std::format(
             "Could not open properties file: '{}'", propertiesPath
         ));
     }
+    propertiesFile << propertiesJson.dump(2);
 
     for (Schema& schema : _schemas) {
-        std::ofstream out = std::ofstream(absPath(std::format(
+        const std::string file = std::format(
             "{}/support/types/{}.json", "${BASE}", schema.id
-        )));
+        );
+        std::filesystem::path path = absPath(file);
+        std::ofstream out = std::ofstream(path);
         if (out) {
             // Add which schema version we're targeting, see
             // https://json-schema.org/understanding-json-schema/reference/schema#schema
@@ -634,7 +636,6 @@ void DocumentationEngine::writeJsonSchema() {
             out << schema.schema.dump(2);
             out << '\n';
         }
-        out.close();
     }
 }
 

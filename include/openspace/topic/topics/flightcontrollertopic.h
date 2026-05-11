@@ -42,6 +42,7 @@ public:
     bool isDone() const override;
 
     static openspace::Schema Schema();
+
 private:
     void disconnect();
     void processInputState(const nlohmann::json& json);

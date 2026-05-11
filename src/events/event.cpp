@@ -618,7 +618,7 @@ EventActionRemoved::EventActionRemoved(std::string_view uri_)
 {}
 
 EventAssetLoading::EventAssetLoading(const std::filesystem::path& assetPath_,
-    State newState)
+                                     State newState)
     : Event(Type)
     , assetPath(assetPath_)
     , state(newState)
@@ -630,8 +630,8 @@ EventApplicationShutdown::EventApplicationShutdown(State state_)
 {}
 
 EventCameraFocusTransition::EventCameraFocusTransition(const Camera* camera_,
-    const SceneGraphNode* node_,
-    Transition transition_)
+                                                       const SceneGraphNode* node_,
+                                                       Transition transition_)
     : Event(Type)
     , camera(camera_)
     , node(temporaryString(node_->identifier()))
@@ -663,7 +663,7 @@ CustomEvent::CustomEvent(std::string_view subtype_, std::string_view payload_)
 {}
 
 EventFocusNodeChanged::EventFocusNodeChanged(const SceneGraphNode* oldNode_,
-    const SceneGraphNode* newNode_)
+                                             const SceneGraphNode* newNode_)
     : Event(Type)
     , oldNode(oldNode_ ? temporaryString(oldNode_->identifier()) : "")
     , newNode(temporaryString(newNode_->identifier()))

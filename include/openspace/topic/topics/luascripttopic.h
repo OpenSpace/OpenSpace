@@ -37,6 +37,7 @@ public:
     bool isDone() const override;
 
     static openspace::Schema Schema();
+
 private:
     void runScript(std::string script, bool shouldReturn, bool shouldBeSynchronized);
 

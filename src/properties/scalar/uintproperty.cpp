@@ -72,6 +72,7 @@ nlohmann::json UIntProperty::Schema() {
     nlohmann::json metaData = NumericalProperty<unsigned int>::MetaDataSchema();
     metaData["properties"]["type"] = { { "const", "UIntProperty" } };
     metaData["required"].push_back("type");
+    nlohmann::json sharedDefs = ExtractDefs(metaData);
 
     nlohmann::json typeDef = nlohmann::json::parse(R"(
         {
@@ -84,7 +85,6 @@ nlohmann::json UIntProperty::Schema() {
           "required": ["metaData", "uri", "value"]
         }
     )");
-    nlohmann::json sharedDefs = extractDefs(metaData);
     typeDef["properties"]["metaData"] = metaData;
 
     nlohmann::json schema;

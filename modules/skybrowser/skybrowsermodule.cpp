@@ -282,7 +282,7 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     ghoul_assert(fTopic, "Topic factory was not created");
     fTopic->registerClass<SkyBrowserTopic>("skybrowser");
 
-    DocumentationEngine::ref().addSchema(SkyBrowserTopic::Schema());
+    DocEng.addSchema(SkyBrowserTopic::Schema());
 }
 
 void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId,

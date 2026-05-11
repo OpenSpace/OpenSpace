@@ -39,6 +39,7 @@ public:
     bool isDone() const override;
 
     static openspace::Schema Schema();
+
 private:
     bool authorize(const std::string& key);
 

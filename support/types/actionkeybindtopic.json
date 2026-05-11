@@ -46,16 +46,28 @@
           "type": "string"
         },
         "modifiers": {
-          "items": {
-            "enum": [
-              "shift",
-              "control",
-              "alt",
-              "super"
-            ],
-            "type": "string"
+          "additionalProperties": false,
+          "properties": {
+            "alt": {
+              "type": "boolean"
+            },
+            "control": {
+              "type": "boolean"
+            },
+            "shift": {
+              "type": "boolean"
+            },
+            "super": {
+              "type": "boolean"
+            }
           },
-          "type": "array"
+          "required": [
+            "shift",
+            "control",
+            "alt",
+            "super"
+          ],
+          "type": "object"
         }
       },
       "required": [
@@ -78,7 +90,9 @@
             "action": {
               "$ref": "#/$defs/Action"
             },
-            "type": "action"
+            "type": {
+              "const": "action"
+            }
           },
           "required": [
             "action",
@@ -102,7 +116,9 @@
               },
               "type": "array"
             },
-            "type": "combined"
+            "type": {
+              "const": "combined"
+            }
           },
           "required": [
             "actions",

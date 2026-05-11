@@ -57,6 +57,7 @@ nlohmann::json DoubleProperty::Schema() {
     nlohmann::json metaData = NumericalProperty<double>::MetaDataSchema();
     metaData["properties"]["type"] = { { "const", "DoubleProperty" } };
     metaData["required"].push_back("type");
+    nlohmann::json sharedDefs = ExtractDefs(metaData);
 
     nlohmann::json typeDef = nlohmann::json::parse(R"(
         {
@@ -69,7 +70,6 @@ nlohmann::json DoubleProperty::Schema() {
           "required": ["metaData", "uri", "value"]
         }
     )");
-    nlohmann::json sharedDefs = extractDefs(metaData);
     typeDef["properties"]["metaData"] = metaData;
 
     nlohmann::json schema;

@@ -168,8 +168,8 @@ void NumericalProperty<T>::interpolateValue(float t,
     );
 }
 
-template <typename T> nlohmann::json NumericalProperty<T>::MetaDataSchema() {
-
+template <typename T>
+nlohmann::json NumericalProperty<T>::MetaDataSchema() {
     nlohmann::json metaData = TemplateProperty<T>::MetaDataSchema();
 
     nlohmann::json additionalData;

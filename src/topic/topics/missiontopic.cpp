@@ -171,7 +171,7 @@ nlohmann::json MissionTopic::missionJson() const {
     for (auto const& [identifier, mission] : missions) {
         nlohmann::json missionJson;
         missionJson["mission"] = createPhaseJson(mission);
-        missionJson["capturetimes"] = captureTimesString;
+        missionJson["captureTimes"] = captureTimesString;
         json[identifier] = missionJson;
     }
     return json;

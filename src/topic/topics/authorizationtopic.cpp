@@ -38,14 +38,14 @@ namespace {
 
     enum class Status {
         Authorized,
-        IncorrecctKey,
+        IncorrectKey,
         BadRequest
     };
 
     std::string_view toString(Status response) {
         switch (response) {
             case Status::Authorized: return "authorized";
-            case Status::IncorrecctKey: return "incorrectKey";
+            case Status::IncorrectKey: return "incorrectKey";
             case Status::BadRequest: return "badRequest";
             default: throw ghoul::MissingCaseException();
         }
@@ -114,7 +114,7 @@ void AuthorizationTopic::handleJson(const nlohmann::json& json) {
                 LINFO("Client successfully authorized");
             }
             else {
-                sendData(response(Status::IncorrecctKey));
+                sendData(response(Status::IncorrectKey));
             }
         }
         catch (const std::out_of_range&) {

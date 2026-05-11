@@ -70,7 +70,6 @@ public:
      *
      * \param schema The property schema json object that is to be stored for later use
      */
-
     void addPropertySchema(const nlohmann::json& schema);
 
     /**

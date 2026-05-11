@@ -85,11 +85,15 @@ Schema ActionKeybindTopic::Schema() {
                 "action": { "type": "string" },
                 "key": { "type": "string" },
                 "modifiers": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": ["shift", "control", "alt", "super"]
-                  }
+                  "type": "object",
+                  "properties": {
+                    "shift": { "type": "boolean" },
+                    "control": { "type": "boolean" },
+                    "alt": { "type": "boolean" },
+                    "super": { "type": "boolean" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["shift", "control", "alt", "super"]
                 }
               },
               "additionalProperties": false,
@@ -130,7 +134,7 @@ Schema ActionKeybindTopic::Schema() {
                   "description": "Response to get_action",
                   "properties": {
                     "action": { "$ref": "#/$defs/Action" },
-                    "type": "action"
+                    "type": { "const": "action" }
                   },
                   "additionalProperties": false,
                   "required": ["action", "type"]
@@ -151,7 +155,7 @@ Schema ActionKeybindTopic::Schema() {
                         "$ref": "#/$defs/Keybind"
                       }
                     },
-                    "type": "combined"
+                    "type": { "const": "combined" }
                   },
                   "additionalProperties": false,
                   "required": ["actions", "keybinds", "type"]

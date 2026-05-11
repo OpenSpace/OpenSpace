@@ -45,6 +45,7 @@ public:
     bool isDone() const override;
 
     static openspace::Schema Schema();
+
 private:
     /**
      * Returns `true` if there is at least one subscription active, `false` otherwise.

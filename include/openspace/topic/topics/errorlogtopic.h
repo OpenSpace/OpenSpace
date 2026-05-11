@@ -44,14 +44,8 @@ public:
     bool isDone() const override;
 
     static openspace::Schema Schema();
+
 private:
-    struct Settings {
-        bool timeStamping = true;
-        bool dateStamping = true;
-        bool categoryStamping = true;
-        bool logLevelStamping = true;
-        ghoul::logging::LogLevel logLevel = ghoul::logging::LogLevel::AllLogging;
-    };
     /**
      * Creates a log object and register it to the `LogManager`, does nothing if an active
      * log already exists.
@@ -63,7 +57,13 @@ private:
     /// Non-owning but we remove the log from LogManager on destruction
     ghoul::logging::Log* _log = nullptr;
 
-    Settings _logSettings;
+    struct {
+        bool isTimeStamping = true;
+        bool isDateStamping = true;
+        bool isCategoryStamping = true;
+        bool isLogLevelStamping = true;
+        ghoul::logging::LogLevel logLevel = ghoul::logging::LogLevel::AllLogging;
+    } _logSettings;
 };
 
 } // namespace openspace

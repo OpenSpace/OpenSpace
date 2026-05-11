@@ -49,7 +49,6 @@ protected:
 
 private:
     nlohmann::json wrappedPayload(const nlohmann::json& payload) const;
-
 };
 
 } // namespace openspace

@@ -79,7 +79,7 @@ Schema TriggerPropertyTopic::Schema() {
               "additionalProperties": false,
               "required": ["property"]
             },
-            "data": null
+            "data": { "type": "null" }
           },
           "additionalProperties": false,
           "required": ["topicId", "topicPayload", "data"]

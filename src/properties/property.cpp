@@ -341,12 +341,14 @@ void Property::setLuaInterpolationTarget(lua_State*) {}
 void Property::interpolateValue(float, ghoul::EasingFunc<float>) {}
 
 nlohmann::json Property::MetaDataSchema() {
-    nlohmann::json schema = nlohmann::json::parse(R"(
+    return nlohmann::json::parse(R"(
         {
           "$defs": {
             "PropertyVisibility": {
               "type": "string",
-              "enum": ["Always", "NoviceUser", "User", "AdvancedUser", "Developer", "Hidden"]
+              "enum": [
+                "Always", "NoviceUser", "User", "AdvancedUser", "Developer", "Hidden"
+              ]
             }
           },
           "type": "object",
@@ -371,8 +373,6 @@ nlohmann::json Property::MetaDataSchema() {
           ]
         }
     )");
-
-    return schema;
 }
 
 nlohmann::json Property::ViewOptionsSchema() {
@@ -388,7 +388,7 @@ nlohmann::json Property::ViewOptionsSchema() {
     )");
 }
 
-nlohmann::json Property::extractDefs(nlohmann::json& metaData) {
+nlohmann::json Property::ExtractDefs(nlohmann::json& metaData) {
     nlohmann::json defs = metaData.value("$defs", nlohmann::json::object());
     metaData.erase("$defs");
     return defs;

@@ -173,7 +173,7 @@ Schema SetPropertyTopic::Schema() {
               "additionalProperties": false,
               "required": ["property", "value"]
             },
-            "data": null
+            "data": { "type": "null" }
           },
           "additionalProperties": false,
           "required": ["topicId", "topicPayload", "data"]

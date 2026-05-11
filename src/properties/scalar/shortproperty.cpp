@@ -57,6 +57,7 @@ nlohmann::json ShortProperty::Schema() {
     nlohmann::json metaData = NumericalProperty<short>::MetaDataSchema();
     metaData["properties"]["type"] = { { "const", "ShortProperty" } };
     metaData["required"].push_back("type");
+    nlohmann::json sharedDefs = ExtractDefs(metaData);
 
     nlohmann::json typeDef = nlohmann::json::parse(R"(
         {
@@ -69,7 +70,6 @@ nlohmann::json ShortProperty::Schema() {
           "required": ["metaData", "uri", "value"]
         }
     )");
-    nlohmann::json sharedDefs = extractDefs(metaData);
     typeDef["properties"]["metaData"] = metaData;
 
     nlohmann::json schema;

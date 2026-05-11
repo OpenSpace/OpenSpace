@@ -31,6 +31,7 @@
 #include <chrono>
 
 namespace openspace {
+
 struct Schema;
 
 class CameraTopic : public Topic {
@@ -42,6 +43,7 @@ public:
     bool isDone() const override;
 
     static openspace::Schema Schema();
+
 private:
     static constexpr int UnsetOnChangeHandle = -1;
 

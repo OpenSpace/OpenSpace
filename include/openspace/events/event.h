@@ -373,7 +373,7 @@ struct EventInterpolationFinished : public Event {
      *
      * \pre property_ must not be `nullptr`
      */
-    EventInterpolationFinished(const Property* property_);
+    explicit EventInterpolationFinished(const Property* property_);
     const tstring property;
 };
 
@@ -400,7 +400,7 @@ struct EventMissionAdded : public Event {
 struct EventMissionEventReached : public Event {
     static constexpr Type Type = Event::Type::MissionEventReached;
 
-    // Not sure which kind of parameters we want to pass here.
+    // Not sure which kind of parameters we want to pass here
     EventMissionEventReached();
 };
 
@@ -415,7 +415,7 @@ struct EventMissionRemoved : public Event {
      *
      * \param identifier The identifier of the mission removed
      */
-    EventMissionRemoved(std::string_view identifier);
+    explicit EventMissionRemoved(std::string_view identifier);
 
     const tstring identifier;
 };
@@ -612,7 +612,7 @@ struct EventSessionRecordingPlayback : public Event {
      * \param state_ The new state of the session recording; one of `Started`, `Paused`,
      *        `Resumed`, `Finished`
      */
-    EventSessionRecordingPlayback(State state_);
+    explicit EventSessionRecordingPlayback(State state_);
 
     const State state;
 };

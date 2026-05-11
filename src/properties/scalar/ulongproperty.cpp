@@ -64,6 +64,7 @@ nlohmann::json ULongProperty::Schema() {
     nlohmann::json metaData = NumericalProperty<unsigned long>::MetaDataSchema();
     metaData["properties"]["type"] = { { "const", "ULongProperty" } };
     metaData["required"].push_back("type");
+    nlohmann::json sharedDefs = ExtractDefs(metaData);
 
     nlohmann::json typeDef = nlohmann::json::parse(R"(
         {
@@ -76,7 +77,6 @@ nlohmann::json ULongProperty::Schema() {
           "required": ["metaData", "uri", "value"]
         }
     )");
-    nlohmann::json sharedDefs = extractDefs(metaData);
     typeDef["properties"]["metaData"] = metaData;
 
     nlohmann::json schema;

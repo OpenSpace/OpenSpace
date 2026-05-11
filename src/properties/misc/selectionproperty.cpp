@@ -161,6 +161,7 @@ nlohmann::json SelectionProperty::Schema() {
     )");
     metaData["required"].push_back("type");
     metaData["required"].push_back("additionalData");
+    nlohmann::json sharedDefs = ExtractDefs(metaData);
 
     nlohmann::json typeDef = nlohmann::json::parse(R"(
         {
@@ -176,7 +177,6 @@ nlohmann::json SelectionProperty::Schema() {
           "required": ["metaData", "uri", "value"]
         }
     )");
-    nlohmann::json sharedDefs = extractDefs(metaData);
     typeDef["properties"]["metaData"] = metaData;
 
     nlohmann::json schema;

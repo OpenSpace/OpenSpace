@@ -93,7 +93,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
-    "data": null,
+    "data": {
+      "type": "null"
+    },
     "topicId": {
       "const": "flightcontroller"
     },

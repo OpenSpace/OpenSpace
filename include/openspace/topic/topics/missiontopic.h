@@ -42,6 +42,7 @@ public:
     bool isDone() const override;
 
     static openspace::Schema Schema();
+
 private:
     nlohmann::json missionJson() const;
     nlohmann::json createPhaseJson(const MissionPhase& phase) const;

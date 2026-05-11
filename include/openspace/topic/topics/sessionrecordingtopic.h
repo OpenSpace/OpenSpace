@@ -42,6 +42,7 @@ public:
     bool isDone() const override;
 
     static openspace::Schema Schema();
+
 private:
     static constexpr int UnsetOnChangeHandle = -1;
 

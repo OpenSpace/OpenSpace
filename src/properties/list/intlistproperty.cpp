@@ -58,6 +58,7 @@ nlohmann::json IntListProperty::Schema() {
     nlohmann::json metaData = TemplateProperty<std::vector<int>>::MetaDataSchema();
     metaData["properties"]["type"] = { { "const", "IntListProperty" } };
     metaData["required"].push_back("type");
+    nlohmann::json sharedDefs = ExtractDefs(metaData);
 
     nlohmann::json typeDef = nlohmann::json::parse(R"(
         {
@@ -73,7 +74,6 @@ nlohmann::json IntListProperty::Schema() {
           "required": ["metaData", "uri", "value"]
         }
     )");
-    nlohmann::json sharedDefs = extractDefs(metaData);
     typeDef["properties"]["metaData"] = metaData;
 
     nlohmann::json schema;

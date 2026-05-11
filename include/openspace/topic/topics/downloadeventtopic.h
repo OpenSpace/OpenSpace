@@ -42,6 +42,7 @@ public:
     bool isDone() const override;
 
     static openspace::Schema Schema();
+
 private:
     bool _isSubscribedTo = false;
     int _subscriptionID = -1;

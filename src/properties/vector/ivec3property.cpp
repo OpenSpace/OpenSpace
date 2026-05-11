@@ -65,6 +65,7 @@ nlohmann::json IVec3Property::Schema() {
     metaData["properties"]["type"] = { { "const", "IVec3Property" } };
     metaData["properties"]["viewOptions"] = { { "$ref", "#/$defs/ViewOptions" } };
     metaData["required"].push_back("type");
+    nlohmann::json sharedDefs = ExtractDefs(metaData);
 
     nlohmann::json typeDef = nlohmann::json::parse(R"(
         {
@@ -82,7 +83,6 @@ nlohmann::json IVec3Property::Schema() {
           "required": ["metaData", "uri", "value"]
         }
     )");
-    nlohmann::json sharedDefs = extractDefs(metaData);
     typeDef["properties"]["metaData"] = metaData;
 
     nlohmann::json schema;

@@ -57,6 +57,7 @@ nlohmann::json BoolProperty::Schema() {
     nlohmann::json metaData = TemplateProperty<bool>::MetaDataSchema();
     metaData["properties"]["type"] = { { "const", "BoolProperty" } };
     metaData["required"].push_back("type");
+    nlohmann::json sharedDefs = ExtractDefs(metaData);
 
     nlohmann::json typeDef = nlohmann::json::parse(R"(
         {
@@ -69,7 +70,6 @@ nlohmann::json BoolProperty::Schema() {
           "required": ["metaData", "uri", "value"]
         }
     )");
-    nlohmann::json sharedDefs = extractDefs(metaData);
     typeDef["properties"]["metaData"] = metaData;
 
     nlohmann::json schema;

@@ -123,10 +123,10 @@ Schema SessionRecordingTopic::Schema() {
                     "event": { "const": "start_subscription" },
                     "properties": {
                       "type": "array",
+                      "minItems": 1,
                       "items": {
                         "type": "string",
-                        "enum": ["files", "state"],
-                        "minItems": 1
+                        "enum": ["files", "state"]
                       }
                     }
                   },

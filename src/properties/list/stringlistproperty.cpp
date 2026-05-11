@@ -55,9 +55,11 @@ std::string StringListProperty::stringValue() const {
 }
 
 nlohmann::json StringListProperty::Schema() {
-    nlohmann::json metaData = TemplateProperty<std::vector<std::string>>::MetaDataSchema();
+    nlohmann::json metaData =
+        TemplateProperty<std::vector<std::string>>::MetaDataSchema();
     metaData["properties"]["type"] = { { "const", "StringListProperty" } };
     metaData["required"].push_back("type");
+    nlohmann::json sharedDefs = ExtractDefs(metaData);
 
     nlohmann::json typeDef = nlohmann::json::parse(R"(
         {
@@ -73,7 +75,6 @@ nlohmann::json StringListProperty::Schema() {
           "required": ["metaData", "uri", "value"]
         }
     )");
-    nlohmann::json sharedDefs = extractDefs(metaData);
     typeDef["properties"]["metaData"] = metaData;
 
     nlohmann::json schema;

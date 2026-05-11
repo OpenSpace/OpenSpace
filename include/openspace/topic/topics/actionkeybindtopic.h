@@ -39,6 +39,7 @@ public:
     bool isDone() const override;
 
     static openspace::Schema Schema();
+
 private:
     nlohmann::json allActionsKeybinds() const;
     nlohmann::json action(const std::string& identifier) const;

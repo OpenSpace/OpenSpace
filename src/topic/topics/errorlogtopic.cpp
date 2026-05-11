@@ -49,37 +49,36 @@ void ErrorLogTopic::handleJson(const nlohmann::json& json) {
         // Check if we got log settings on subscription
         auto settingsJson = json.find("settings");
 
-        Settings settings;
         if (settingsJson != json.end()) {
             if (auto ll = settingsJson->find("logLevel"); ll != settingsJson->end()) {
                 std::string level = ll->get<std::string>();
-                settings.logLevel = ghoul::from_string<ghoul::logging::LogLevel>(level);
+                _logSettings.logLevel =
+                    ghoul::from_string<ghoul::logging::LogLevel>(level);
             }
 
             if (auto ts = settingsJson->find("timeStamping"); ts != settingsJson->end()) {
                 bool value = ts->get<bool>();
-                settings.timeStamping = value;
+                _logSettings.isTimeStamping = value;
             }
 
             if (auto ds = settingsJson->find("dateStamping"); ds != settingsJson->end()) {
                 bool value = ds->get<bool>();
-                settings.dateStamping = value;
+                _logSettings.isDateStamping = value;
             }
 
             auto cs = settingsJson->find("categoryStamping");
             if  (cs != settingsJson->end()) {
                 bool value = cs->get<bool>();
-                settings.categoryStamping = value;
+                _logSettings.isCategoryStamping = value;
             }
 
             auto lls = settingsJson->find("logLevelStamping");
             if (lls != settingsJson->end()) {
                 bool value = lls->get<bool>();
-                settings.logLevelStamping = value;
+                _logSettings.isLogLevelStamping = value;
             }
         }
 
-        _logSettings = settings;
         _isSubscribedTo = true;
         createLog();
     }
@@ -113,19 +112,19 @@ void ErrorLogTopic::createLog() {
         nlohmann::json payload;
         payload["message"] = message;
 
-        if (_logSettings.timeStamping) {
+        if (_logSettings.isTimeStamping) {
             payload["timeStamp"] = timeStamp;
         }
 
-        if (_logSettings.categoryStamping) {
+        if (_logSettings.isCategoryStamping) {
             payload["category"] = category;
         }
 
-        if (_logSettings.dateStamping) {
+        if (_logSettings.isDateStamping) {
             payload["dateStamp"] = dateStamp;
         }
 
-        if (_logSettings.logLevelStamping) {
+        if (_logSettings.isLogLevelStamping) {
             payload["level"] = ghoul::to_string(level);
         }
 

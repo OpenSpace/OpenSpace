@@ -71,15 +71,13 @@ namespace {
  * Returns the formatted ra, dec strings and distance for a given cartesian world
  * coordinate.
  */
-[[codegen::luawrap]] ghoul::Dictionary convertToRaDec(double x, double y, double z) {
+[[codegen::luawrap]] std::tuple<std::string, std::string, double> convertToRaDec(double x,
+                                                                                 double y,
+                                                                                 double z)
+{
     glm::dvec3 deg = galacticCartesianToIcrs(x, y, z);
     std::pair<std::string, std::string> raDecPair = decimalDegreesToIcrs(deg.x, deg.y);
-
-    ghoul::Dictionary res;
-    res.setValue("ra", raDecPair.first);
-    res.setValue("dec", raDecPair.second);
-    res.setValue("deg", deg.z);
-    return res;
+    return { raDecPair.first, raDecPair.second, deg.z };
 }
 
 [[codegen::luawrap]]
