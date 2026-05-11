@@ -7,7 +7,7 @@
     "scene/digitaluniverse/digitaluniverse",
     "scene/milkyway/constellations/constellation_art",
     "scene/milkyway/milkyway/volume",
-    "scene/solarsystem/dwarf_planets/pluto/system",
+    "scene/solarsystem/dwarf_planets/pluto/pluto",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/layers/colorlayers/blue_marble",
     "scene/solarsystem/planets/earth/layers/heightlayers/blue_marble_height",
