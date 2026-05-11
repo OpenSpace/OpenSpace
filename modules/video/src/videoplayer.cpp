@@ -419,7 +419,8 @@ void VideoPlayer::initializeMpv() {
     }
 
     // Set libmpv flags before initializing
-    // See order at https://github.com/mpv-player/mpv/blob/master/libmpv/client.h#L420
+    // See order at:
+    // https://github.com/mpv-player/mpv/blob/release/0.35/libmpv/client.h#L420
     // Avoiding async calls in uninitialized state
 
     // Allow only OpenGL (requires OpenGL 2.1+ or GLES 2.0+)
