@@ -189,7 +189,7 @@ nlohmann::json jsonKeybind(const KeyWithModifier& k, std::string identifier) {
 }
 
 nlohmann::json ActionKeybindTopic::allActionsKeybinds() const {
-    nlohmann::json json = {};
+    nlohmann::json json;
     json["type"] = "combined";
 
     std::vector<openspace::Action> actions = global::actionManager->actions();

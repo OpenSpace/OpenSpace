@@ -36,10 +36,6 @@ namespace {
 
 namespace openspace {
 
-SessionRecordingTopic::SessionRecordingTopic() {
-    LDEBUG("Starting new SessionRecording state subscription");
-}
-
 SessionRecordingTopic::~SessionRecordingTopic() {
     if (_stateCallbackHandle != UnsetOnChangeHandle) {
         global::sessionRecordingHandler->removeStateChangeCallback(_stateCallbackHandle);
@@ -55,7 +51,7 @@ void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
     }
 
     // @TODO (anden88 2026-04-16): There was a "refresh" command one could send that would
-    // send the jsondata back (or rather, any event string would do this) Do we need or
+    // send the JSON data back (or rather, any event string would do this). Do we need or
     // want to bring back a "refresh" command?
     if (event != "start_subscription") {
         return;

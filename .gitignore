@@ -36,6 +36,7 @@ Thumbs.db
 /sync/
 /temp/
 GPUCache/
+/support/types/*.json
 
 # Customization is not supposed to be committed
 customization.lua

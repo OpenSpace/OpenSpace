@@ -35,7 +35,7 @@ struct Schema;
 
 class SessionRecordingTopic : public Topic {
 public:
-    SessionRecordingTopic();
+    SessionRecordingTopic() = default;
     ~SessionRecordingTopic() override;
 
     void handleJson(const nlohmann::json& json) override;

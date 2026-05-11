@@ -24,9 +24,9 @@
 
 #include <openspace/topic/topics/documentationtopic.h>
 
+#include <openspace/documentation/documentationengine.h>
 #include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
-#include <openspace/documentation/documentationengine.h>
 #include <openspace/topic/connection.h>
 #include <openspace/topic/jsonconverters.h>
 
@@ -284,7 +284,7 @@ Schema DocumentationTopic::Schema() {
             "data": {
               "oneOf": [
                 {
-                  "description": "Response to lua",
+                  "description": "Response to Lua",
                   "type": "array",
                   "items": { "$ref": "#/$defs/LuaLibrary" }
                 },

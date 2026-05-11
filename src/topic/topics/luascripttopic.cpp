@@ -25,8 +25,8 @@
 #include <openspace/topic/topics/luascripttopic.h>
 
 #include <openspace/documentation/schema.h>
-#include <openspace/json.h>
 #include <openspace/engine/globals.h>
+#include <openspace/json.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/topic/connection.h>
 #include <openspace/topic/jsonconverters.h>

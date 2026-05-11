@@ -63,22 +63,18 @@ namespace {
     constexpr std::string_view _loggerCat = "FlightControllerTopic";
 
     const std::unordered_map<std::string, AxisType> AxisIndexMap ({
-        { "orbitX", AxisType::OrbitX},
-        { "orbitY", AxisType::OrbitY},
-        { "zoomIn", AxisType::ZoomIn},
-        { "zoomOut", AxisType::ZoomOut},
-        { "localRollX", AxisType::LocalRollX},
-        { "localRollY", AxisType::LocalRollY},
-        { "globalRollX", AxisType::GlobalRollX},
-        { "globalRollY", AxisType::GlobalRollY},
-        { "panX", AxisType::PanX},
-        { "panY", AxisType::PanY}
+        { "orbitX", AxisType::OrbitX },
+        { "orbitY", AxisType::OrbitY },
+        { "zoomIn", AxisType::ZoomIn },
+        { "zoomOut", AxisType::ZoomOut },
+        { "localRollX", AxisType::LocalRollX },
+        { "localRollY", AxisType::LocalRollY },
+        { "globalRollX", AxisType::GlobalRollX },
+        { "globalRollY", AxisType::GlobalRollY },
+        { "panX", AxisType::PanX },
+        { "panY", AxisType::PanY }
     });
 
-    //const std::unordered_map<std::string, Command> CommandMap ({
-    //    { Disconnect, Command::Disconnect },
-    //    { InputState, Command::InputState },
-    //});
 } // namespace
 
 namespace openspace {
@@ -93,7 +89,6 @@ FlightControllerTopic::FlightControllerTopic() {
 
     // Add WebsocketInputState to global states
     global::interactionHandler->websocketInputStates()[_topicId] = &_inputState;
-
 }
 
 FlightControllerTopic::~FlightControllerTopic() {

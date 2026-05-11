@@ -39,10 +39,6 @@ namespace {
 
 namespace openspace {
 
-EngineModeTopic::EngineModeTopic() {
-    LDEBUG("Starting new EngineMode subscription");
-}
-
 EngineModeTopic::~EngineModeTopic() {
     if (_modeCallbackHandle != UnsetOnChangeHandle) {
         global::openSpaceEngine->removeModeChangeCallback(_modeCallbackHandle);

@@ -149,7 +149,9 @@ Schema ErrorLogTopic::Schema() {
           "$defs": {
             "LogLevel": {
               "type": "string",
-              "enum": ["All", "Trace", "Debug", "Info", "Warning", "Error", "Fatal", "None"],
+              "enum": [
+                "All", "Trace", "Debug", "Info", "Warning", "Error", "Fatal", "None"
+              ],
               "tsEnumNames": [
                 "All",
                 "Trace",
@@ -229,6 +231,5 @@ Schema ErrorLogTopic::Schema() {
 
     return { "errorlogtopic", schema };
 }
-
 
 } // namespace openspace

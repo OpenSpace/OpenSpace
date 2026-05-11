@@ -118,7 +118,7 @@ Schema PropertyTreeTopic::Schema() {
                     "value": { "$ref": "#/$defs/JsonValue" },
                     "uri": {
                       "type": "string",
-                      "description": "The URI of the property that this value corresponds to"
+                      "description": "The URI of the property this value corresponds to"
                     },
                     "type": { "const": "value" }
                   },
@@ -131,7 +131,7 @@ Schema PropertyTreeTopic::Schema() {
                     "metaData": { "$ref": "properties.json#/$defs/AnyPropertyMetaData" },
                     "uri": {
                       "type": "string",
-                      "description": "The URI of the property that this value corresponds to"
+                      "description": "The URI of the property this value corresponds to"
                     },
                     "type": { "const": "metaData" }
                   },

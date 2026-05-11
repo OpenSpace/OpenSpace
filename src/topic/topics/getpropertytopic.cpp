@@ -117,7 +117,6 @@ Schema GetPropertyTopic::Schema() {
 }
 
 json GetPropertyTopic::propertyFromKey(const std::string& key) {
-
     Property* prop = property(key);
     if (prop) {
         nlohmann::json response;
