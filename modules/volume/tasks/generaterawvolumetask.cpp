@@ -60,7 +60,7 @@ namespace {
         std::string time;
 
         // A vector representing the number of cells in each dimension.
-        glm::ivec3 dimensions;
+        glm::ivec3 dimensions [[codegen::greaterequal(glm::ivec3(0))]];
 
         // A vector representing the lower bound of the domain.
         glm::dvec3 lowerDomainBound;

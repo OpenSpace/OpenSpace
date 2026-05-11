@@ -66,7 +66,7 @@ namespace {
         // [RenderableSolarImagery](#solarbrowsing_renderable_solarimagery) nodes. The
         // imagery from these nodes is projected onto the solar surface from the
         // perspective of the observing spacecraft.
-        std::vector<std::string> dependentNodes;
+        std::vector<std::string> dependentNodes [[codegen::identifier()]];
     };
 } // namespace
 #include "renderablesolarimageryprojection_codegen.cpp"

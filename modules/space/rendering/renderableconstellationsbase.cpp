@@ -77,7 +77,7 @@ namespace {
         std::optional<std::filesystem::path> namesFile;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        std::optional<float> lineWidth [[codegen::greater(0.f)]];
 
         // A list of constellations (given as abbreviations) to show. If empty or
         // excluded, all constellations will be shown.

@@ -47,7 +47,7 @@ namespace {
 
     struct [[codegen::Dictionary(VolumeClipPlane)]] Parameters {
         // [[codegen::verbatim(NormalInfo.description)]]
-        glm::vec3 normal;
+        glm::vec3 normal [[codegen::inrange(glm::vec3(-1.f), glm::vec3(1.f))]];
 
         // [[codegen::verbatim(OffsetsInfo.description)]]
         glm::vec3 offsets;

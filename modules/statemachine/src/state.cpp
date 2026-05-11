@@ -34,7 +34,7 @@ namespace {
     struct [[codegen::Dictionary(State)]] Parameters {
         // A string that will be used to identify the state. Cannot be the same as
         // any other state in the machine.
-        std::string identifier;
+        std::string identifier [[codegen::identifier()]];
 
         // A string containing a Lua script that will be executed when the state
         // is entered, i.e on a transition from another state.

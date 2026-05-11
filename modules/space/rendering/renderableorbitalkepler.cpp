@@ -236,13 +236,13 @@ namespace {
         int segmentQuality;
 
         // [[codegen::verbatim(TrailWidthInfo.description)]]
-        std::optional<float> trailWidth;
+        std::optional<float> trailWidth [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(ColorInfo.description)]]
         glm::dvec3 color [[codegen::color()]];
 
         // [[codegen::verbatim(TrailFadeInfo.description)]]
-        std::optional<float> trailFade;
+        std::optional<float> trailFade [[codegen::greaterequal(0.f)]];
 
         enum class RenderingMode {
             Trail,
@@ -274,10 +274,10 @@ namespace {
         std::optional<bool> enableOutline;
 
         // [[codegen::verbatim(OutlineColorInfo.description)]]
-        std::optional<glm::vec3> outlineColor;
+        std::optional<glm::vec3> outlineColor [[codegen::color()]];
 
         // [[codegen::verbatim(OutlineWidthInfo.description)]]
-        std::optional<float> outlineWidth;
+        std::optional<float> outlineWidth [[codegen::inrange(0.f, 1.f)]];
     };
 } // namespace
 #include "renderableorbitalkepler_codegen.cpp"
@@ -299,7 +299,7 @@ RenderableOrbitalKepler::Appearance::Appearance()
     })
     , color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , trailWidth(TrailWidthInfo, 2.f, 1.f, 20.f)
-    , pointSizeExponent(PointSizeExponentInfo, 1.0f, 0.f, 11.f)
+    , pointSizeExponent(PointSizeExponentInfo, 1.f, 0.f, 11.f)
     , enableMaxSize(EnableMaxSizeInfo, true)
     , maxSize(MaxSizeInfo, 5.f, 0.f, 45.f)
     , renderingModes(RenderingModeInfo)

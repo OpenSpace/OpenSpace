@@ -235,7 +235,7 @@ namespace {
         std::optional<float> arrowHeadWidthFactor [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(OffsetDistanceInfo.description)]]
-        std::optional<float> offset;
+        std::optional<float> offset [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(RelativeOffsetInfo.description)]]
         std::optional<bool> useRelativeOffset;

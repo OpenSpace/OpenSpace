@@ -78,7 +78,7 @@ namespace {
 
         // The image that is used on this plane before any image is loaded from the
         // `ImageSequencer`.
-        std::optional<std::string> texture;
+        std::optional<std::filesystem::path> texture;
     };
 } // namespace
 #include "renderableplaneprojection_codegen.cpp"
@@ -101,7 +101,7 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
     _defaultTarget = p.defaultTarget.value_or(_defaultTarget);
 
     if (p.texture.has_value()) {
-        _texturePath = absPath(*p.texture);
+        _texturePath = *p.texture;
         _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
     }
 }

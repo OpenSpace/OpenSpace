@@ -53,13 +53,6 @@ namespace {
     constexpr int PolygonBlending = 2;
     constexpr int ColorAddingBlending = 3;
 
-    std::map<std::string, int> BlendingMapping = {
-        { "Default", DefaultBlending },
-        { "Additive", AdditiveBlending },
-        { "Polygon", PolygonBlending },
-        { "Color Adding", ColorAddingBlending }
-    };
-
     enum class Orientation {
         Outside,
         Inside,
@@ -202,10 +195,10 @@ namespace {
         std::optional<bool> disableFadeInOut;
 
         // [[codegen::verbatim(FadeInThresholdInfo.description)]]
-        std::optional<float> fadeInThreshold;
+        std::optional<float> fadeInThreshold [[codegen::inrange(0.f, 1.f)]];
 
         // [[codegen::verbatim(FadeOutThresholdInfo.description)]]
-        std::optional<float> fadeOutThreshold [[codegen::inrange(0.0, 1.0)]];
+        std::optional<float> fadeOutThreshold [[codegen::inrange(0.f, 1.f)]];
 
         // [[codegen::verbatim(ColorMapInfo.description)]]
         std::optional<std::filesystem::path> colorMap;
@@ -213,8 +206,15 @@ namespace {
         // [[codegen::verbatim(UseColorMapInfo.description)]]
         std::optional<bool> useColorMap;
 
+        enum class Blending {
+            Default,
+            Additive,
+            Polygon,
+            ColorAdding [[codegen::key("Color Adding")]]
+        };
+
         // [[codegen::verbatim(BlendingOptionInfo.description)]]
-        std::optional<std::string> blendingOption;
+        std::optional<Blending> blendingOption;
 
         // [[codegen::verbatim(DisableDepthInfo.description)]]
         std::optional<bool> disableDepth;
@@ -301,8 +301,21 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     addProperty(_blendingFuncOption);
 
     if (p.blendingOption.has_value()) {
-        const std::string blendingOpt = *p.blendingOption;
-        _blendingFuncOption = BlendingMapping[blendingOpt];
+        const Parameters::Blending blending = *p.blendingOption;
+        switch (blending) {
+            case Parameters::Blending::Default:
+                _blendingFuncOption = DefaultBlending;
+                break;
+            case Parameters::Blending::Additive:
+                _blendingFuncOption = AdditiveBlending;
+                break;
+            case Parameters::Blending::Polygon:
+                _blendingFuncOption = PolygonBlending;
+                break;
+            case Parameters::Blending::ColorAdding:
+                _blendingFuncOption = ColorAddingBlending;
+                break;
+        }
     }
 
     _disableDepth = p.disableDepth.value_or(_disableDepth);

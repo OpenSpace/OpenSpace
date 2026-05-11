@@ -69,14 +69,6 @@ namespace {
     constexpr int PolygonBlending = 3;
     constexpr int ColorAddingBlending = 4;
 
-    std::map<std::string, int> BlendingMapping = {
-        { "Default", DefaultBlending },
-        { "Additive", AdditiveBlending },
-        { "Points and Lines", PointsAndLinesBlending },
-        { "Polygon", PolygonBlending },
-        { "Color Adding", ColorAddingBlending }
-    };
-
     constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
 
     constexpr Property::PropertyInfo EnableAnimationInfo = {
@@ -285,7 +277,8 @@ namespace {
         std::optional<glm::vec3> pivot;
 
         // [[codegen::verbatim(RotationVecInfo.description)]]
-        std::optional<glm::dvec3> rotationVector;
+        std::optional<glm::dvec3> rotationVector
+            [[codegen::inrange(glm::dvec3(-360.0), glm::dvec3(360.0))]];
 
         // [[codegen::verbatim(LightSourcesInfo.description)]]
         std::optional<std::vector<ghoul::Dictionary>> lightSources
@@ -297,8 +290,16 @@ namespace {
         // [[codegen::verbatim(RenderWireframeInfo.description)]]
         std::optional<bool> renderWireframe;
 
+        enum class Blending {
+            Default,
+            Additive,
+            PointsAndLines [[codegen::key("Points and Lines")]],
+            Polygon,
+            ColorAdding [[codegen::key("Color Adding")]]
+        };
+
         // [[codegen::verbatim(BlendingOptionInfo.description)]]
-        std::optional<std::string> blendingOption;
+        std::optional<Blending> blendingOption;
 
         // The path to a vertex shader program to use instead of the default shader.
         std::optional<std::filesystem::path> vertexShader;
@@ -310,7 +311,7 @@ namespace {
         std::optional<bool> useOverrideColor;
 
         // [[codegen::verbatim(OverrideColorInfo.description)]]
-        std::optional<glm::vec4> overrideColor;
+        std::optional<glm::vec4> overrideColor [[codegen::color()]];
     };
 } // namespace
 #include "renderablemodel_codegen.cpp"
@@ -586,9 +587,25 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_blendingFuncOption);
 
     if (p.blendingOption.has_value()) {
-        const std::string blendingOpt = *p.blendingOption;
-        _blendingFuncOption = BlendingMapping[blendingOpt];
-    }
+        const Parameters::Blending blending = *p.blendingOption;
+        switch (blending) {
+            case Parameters::Blending::Default:
+                _blendingFuncOption = DefaultBlending;
+                break;
+            case Parameters::Blending::Additive:
+                _blendingFuncOption = AdditiveBlending;
+                break;
+            case Parameters::Blending::PointsAndLines:
+                _blendingFuncOption = PointsAndLinesBlending;
+                break;
+            case Parameters::Blending::Polygon:
+                _blendingFuncOption = PolygonBlending;
+                break;
+            case Parameters::Blending::ColorAdding:
+                _blendingFuncOption = ColorAddingBlending;
+                break;
+        }
+    };
 
     _originalRenderBin = renderBin();
 }

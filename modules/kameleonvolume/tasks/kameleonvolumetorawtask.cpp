@@ -43,10 +43,10 @@ namespace {
         std::filesystem::path input;
 
         // The raw volume file to export data to.
-        std::string rawVolumeOutput [[codegen::annotation("A valid filepath")]];
+        std::filesystem::path rawVolumeOutput [[codegen::mustexist(false)]];
 
         // The Lua dictionary file to export metadata to.
-        std::string dictionaryOutput [[codegen::annotation("A valid filepath")]];
+        std::filesystem::path dictionaryOutput [[codegen::mustexist(false)]];
 
         // The variable name or names to read from the kameleon dataset.
         std::variant<std::string, std::vector<std::string>> variable;
@@ -88,8 +88,8 @@ KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictio
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _inputPath = p.input;
-    _rawVolumeOutputPath = absPath(p.rawVolumeOutput);
-    _dictionaryOutputPath = absPath(p.dictionaryOutput);
+    _rawVolumeOutputPath = p.rawVolumeOutput;
+    _dictionaryOutputPath = p.dictionaryOutput;
     if (std::holds_alternative<std::string>(p.variable)) {
         _variable = std::get<std::string>(p.variable);
     }

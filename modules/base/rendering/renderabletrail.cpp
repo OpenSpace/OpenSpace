@@ -139,16 +139,16 @@ namespace {
         std::optional<bool> enableFade;
 
         // [[codegen::verbatim(LineLengthInfo.description)]]
-        std::optional<float> lineLength;
+        std::optional<float> lineLength [[codegen::inrange(0.f, 1.f)]];
 
         // [[codegen::verbatim(LineFadeAmountInfo.description)]]
-        std::optional<float> lineFadeAmount;
+        std::optional<float> lineFadeAmount [[codegen::inrange(0.f, 1.f)]];
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(PointSizeInfo.description)]]
-        std::optional<int> pointSize;
+        std::optional<int> pointSize [[codegen::greaterequal(0)]];
 
         enum class RenderingMode {
             Lines,

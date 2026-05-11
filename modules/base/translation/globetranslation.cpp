@@ -118,10 +118,10 @@ namespace {
         std::string globe [[codegen::identifier()]];
 
         // [[codegen::verbatim(LatitudeInfo.description)]]
-        std::optional<double> latitude;
+        std::optional<double> latitude [[codegen::inrange(-90.0, 90.0)]];
 
         // [[codegen::verbatim(LongitudeInfo.description)]]
-        std::optional<double> longitude;
+        std::optional<double> longitude [[codegen::inrange(-180.0, 180.0)]];
 
         // [[codegen::verbatim(AltitudeInfo.description)]]
         std::optional<double> altitude;

@@ -140,13 +140,13 @@ namespace {
         std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(StartOffsetInfo.description)]]
-        std::optional<float> startOffset;
+        std::optional<float> startOffset [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(EndOffsetInfo.description)]]
-        std::optional<float> endOffset;
+        std::optional<float> endOffset [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(RelativeOffsetsInfo.description)]]
         std::optional<bool> useRelativeOffsets;

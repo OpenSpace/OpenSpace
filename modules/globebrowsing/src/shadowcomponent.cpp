@@ -79,7 +79,8 @@ namespace {
         std::optional<int> distanceFraction;
 
         // [[codegen::verbatim(DepthMapSizeInfo.description)]]
-        std::optional<glm::ivec2> depthMapSize [[codegen::greater({ 1280, 720 })]];
+        std::optional<glm::ivec2> depthMapSize
+            [[codegen::greater(glm::ivec2(1280, 720))]];
     };
 } // namespace
 #include "shadowcomponent_codegen.cpp"

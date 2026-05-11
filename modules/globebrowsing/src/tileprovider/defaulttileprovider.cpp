@@ -76,7 +76,7 @@ namespace {
 
         // The path to the file that is loaded by GDAL to produce tiles. Since GDAL
         // supports it, this can also be the textual representation of the contents of a
-        // loading file.
+        // loading file and doesn't have to be a file in the filesystem.
         std::string filePath;
 
         // The layer into which this tile provider is loaded.

@@ -108,7 +108,7 @@ namespace {
 
     struct [[codegen::Dictionary(WebGuiModule)]] Parameters {
         // [[codegen::verbatim(PortInfo.description)]]
-        std::optional<int> port [[codegen::key("HttpPort")]];
+        std::optional<int> port [[codegen::key("HttpPort"), codegen::inrange(1, 65535)]];
 
         // [[codegen::verbatim(AddressInfo.description)]]
         std::string address;

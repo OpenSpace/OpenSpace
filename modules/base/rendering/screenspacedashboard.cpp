@@ -63,7 +63,8 @@ namespace {
     // instance. This makes it useful both for reusing a global information overlay and
     // for creating dedicated screen-space panels with their own item composition.
     struct [[codegen::Dictionary(ScreenSpaceDashboard)]] Parameters {
-        std::optional<std::string> identifier [[codegen::private()]];
+        std::optional<std::string> identifier [[codegen::identifier(),
+            codegen::private()]];
 
         // [[codegen::verbatim(UseMainInfo.description)]]
         std::optional<bool> useMainDashboard;

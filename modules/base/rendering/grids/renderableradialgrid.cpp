@@ -96,16 +96,16 @@ namespace {
         std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(GridSegmentsInfo.description)]]
-        std::optional<glm::ivec2> gridSegments;
+        std::optional<glm::ivec2> gridSegments [[codegen::greaterequal(glm::ivec2(1))]];
 
         // [[codegen::verbatim(CircleSegmentsInfo.description)]]
         std::optional<int> circleSegments;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(RadiiInfo.description)]]
-        std::optional<glm::vec2> radii;
+        std::optional<glm::vec2> radii [[codegen::greaterequal(glm::vec2(0.f))]];
 
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels

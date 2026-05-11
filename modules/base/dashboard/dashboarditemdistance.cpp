@@ -128,13 +128,13 @@ namespace {
         TypeInfo sourceType;
 
         // [[codegen::verbatim(SourceNodeIdentifierInfo.description)]]
-        std::optional<std::string> sourceNodeIdentifier;
+        std::optional<std::string> sourceNodeIdentifier [[codegen::identifier()]];
 
         // [[codegen::verbatim(DestinationTypeInfo.description)]]
         TypeInfo destinationType;
 
         // [[codegen::verbatim(DestinationNodeIdentifierInfo.description)]]
-        std::optional<std::string> destinationNodeIdentifier;
+        std::optional<std::string> destinationNodeIdentifier [[codegen::identifier()]];
 
         // [[codegen::verbatim(SimplificationInfo.description)]]
         std::optional<bool> simplification;

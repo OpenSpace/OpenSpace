@@ -46,7 +46,7 @@ namespace {
 
     struct [[codegen::Dictionary(SingleImageProvider)]] Parameters {
         // [[codegen::verbatim(FilePathInfo.description)]]
-        std::string filePath;
+        std::filesystem::path filePath;
     };
 } // namespace
 #include "singleimagetileprovider_codegen.cpp"
@@ -64,7 +64,7 @@ SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _filePath = p.filePath;
+    _filePath = p.filePath.string();
     addProperty(_filePath);
 
     reset();

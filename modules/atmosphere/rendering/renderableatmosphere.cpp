@@ -185,7 +185,7 @@ namespace {
             // Individual light sources.
             struct SourceElement {
                 // The scene graph node name of the source.
-                std::string name;
+                std::string name [[codegen::identifier()]];
                 // The radius of the object in meters.
                 double radius;
             };
@@ -195,7 +195,7 @@ namespace {
             // Individual shadow casters.
             struct CasterElement {
                 // The scene graph node name of the source.
-                std::string name;
+                std::string name [[codegen::identifier()]];
                 // The radius of the object in meters.
                 double radius;
             };
@@ -267,7 +267,7 @@ namespace {
         std::optional<float> sunAngularSize [[codegen::inrange(0.0, 180.0)]];
 
         // [[codegen::verbatim(LightSourceNodeInfo.description)]]
-        std::optional<std::string> lightSourceNode;
+        std::optional<std::string> lightSourceNode [[codegen::identifier()]];
     };
 } // namespace
 #include "renderableatmosphere_codegen.cpp"

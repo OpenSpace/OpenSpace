@@ -54,7 +54,7 @@ namespace {
     // To load an image from a web URL, see
     // [ScreenSpaceImageOnline](#base_screenspace_imageonline).
     struct [[codegen::Dictionary(ScreenSpaceImageLocal)]] Parameters {
-        std::optional<std::string> identifier;
+        std::optional<std::string> identifier [[codegen::identifier()]];
 
         // [[codegen::verbatim(TexturePathInfo.description)]]
         std::optional<std::filesystem::path> texturePath;

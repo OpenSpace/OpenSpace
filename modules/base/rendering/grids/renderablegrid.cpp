@@ -111,16 +111,16 @@ namespace {
         std::optional<glm::vec3> highlightColor [[codegen::color()]];
 
         // [[codegen::verbatim(SegmentsInfo.description)]]
-        std::optional<glm::ivec2> segments;
+        std::optional<glm::ivec2> segments [[codegen::greater(glm::ivec2(0))]];
 
         // [[codegen::verbatim(HighlightRateInfo.description)]]
-        std::optional<glm::ivec2> highlightRate;
+        std::optional<glm::ivec2> highlightRate [[codegen::greater(glm::ivec2(0))]];
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(HighlightLineWidthInfo.description)]]
-        std::optional<float> highlightLineWidth;
+        std::optional<float> highlightLineWidth [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<glm::vec2> size;

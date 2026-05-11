@@ -190,7 +190,7 @@ namespace {
         std::optional<std::map<std::string, std::string>> frameConversions;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(StandoffDistanceInfo.description)]]
         std::optional<float> standOffDistance;

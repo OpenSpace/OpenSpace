@@ -68,7 +68,7 @@ namespace {
 
         // Specifies the tolerance to match the color to the chroma key when the
         // 'ChromaKey' type is selected for the 'Type'.
-        std::optional<float> chromaKeyTolerance;
+        std::optional<float> chromaKeyTolerance [[codegen::inrange(0.f, 1.f)]];
     };
 } // namespace
 #include "layeradjustment_codegen.cpp"

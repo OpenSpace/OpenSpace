@@ -95,10 +95,10 @@ namespace {
     // from the star).
     struct [[codegen::Dictionary(RenderableHabitableZone)]] Parameters {
         // [[codegen::verbatim(EffectiveTemperatureInfo.description)]]
-        float effectiveTemperature;
+        float effectiveTemperature [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(LuminosityInfo.description)]]
-        float luminosity;
+        float luminosity [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(OptimisticInfo.description)]]
         std::optional<bool> optimistic;

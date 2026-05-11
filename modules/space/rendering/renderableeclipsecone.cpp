@@ -166,10 +166,10 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableEclipseCone)]] Parameters {
         // [[codegen::verbatim(NumberPointsInfo.description)]]
-        std::optional<int> numberOfPoints;
+        std::optional<int> numberOfPoints [[codegen::greater(0)]];
 
         // [[codegen::verbatim(ShadowLengthInfo.description)]]
-        std::optional<float> shadowLength;
+        std::optional<float> shadowLength [[codegen::greater(0.f)]];
 
         // [[codegen::verbatim(ShowUmbralShadowInfo.description)]]
         std::optional<bool> showUmbralShadow;
@@ -184,19 +184,19 @@ namespace {
         std::optional<glm::vec4> penumbralShadowColor [[codegen::color()]];
 
         // [[codegen::verbatim(LightSourceInfo.description)]]
-        std::string lightSource;
+        std::string lightSource [[codegen::identifier()]];
 
         // [[codegen::verbatim(LightSourceFrameInfo.description)]]
         std::string lightSourceFrame;
 
         // [[codegen::verbatim(ShadowerInfo.description)]]
-        std::string shadower;
+        std::string shadower [[codegen::identifier()]];
 
         // [[codegen::verbatim(ShadowerFrameInfo.description)]]
         std::string shadowerFrame;
 
         // [[codegen::verbatim(ShadoweeInfo.description)]]
-        std::string shadowee;
+        std::string shadowee [[codegen::identifier()]];
     };
 } // namespace
 #include "renderableeclipsecone_codegen.cpp"

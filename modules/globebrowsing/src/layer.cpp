@@ -143,7 +143,7 @@ namespace {
         std::optional<int> zIndex [[codegen::greater(0)]];
 
         // The opacity value of the layer.
-        std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
+        std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
 
         struct Settings {
             // The gamma value that is applied to each pixel of the layer.

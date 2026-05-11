@@ -55,7 +55,8 @@ namespace {
     // from Helioviewer, but will never be shorter than the requested cadence.
     struct [[codegen::Dictionary(HelioviewerDownloadTask)]] Parameters {
         // Directory where the downloaded JP2 images will be stored.
-        std::string outputFolder [[codegen::annotation("A valid directory")]];
+        std::filesystem::path outputFolder [[codegen::directory(),
+            codegen::mustexist(false)]];
 
         // Name of the spacecraft or telescope.
         std::string name;
@@ -105,7 +106,7 @@ HelioviewerDownloadTask::HelioviewerDownloadTask(const ghoul::Dictionary& dictio
     _sourceId = p.sourceId;
     _name = p.name;
     _instrument = p.instrument;
-    _outputFolder = absPath(p.outputFolder);
+    _outputFolder = p.outputFolder;
     _colorMapPath = p.colorMap;
 }
 

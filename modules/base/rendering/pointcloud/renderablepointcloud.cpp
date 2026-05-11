@@ -422,16 +422,16 @@ namespace {
                 [[codegen::reference("base_sizemappingcomponent")]];
 
             // [[codegen::verbatim(ScaleExponentInfo.description)]]
-            std::optional<float> scaleExponent;
+            std::optional<float> scaleExponent [[codegen::greaterequal(0.f)]];
 
             // [[codegen::verbatim(ScaleFactorInfo.description)]]
-            std::optional<float> scaleFactor;
+            std::optional<float> scaleFactor [[codegen::greaterequal(0.f)]];
 
             // [[codegen::verbatim(UseMaxSizeControlInfo.description)]]
             std::optional<bool> enableMaxSizeControl;
 
             // [[codegen::verbatim(MaxSizeInfo.description)]]
-            std::optional<float> maxSize;
+            std::optional<float> maxSize [[codegen::greaterequal(0.f)]];
         };
         // Settings related to the scale of the points, whether they should limit to a
         // certain max size, etc.
@@ -449,10 +449,10 @@ namespace {
             std::optional<bool> enableOutline;
 
             // [[codegen::verbatim(OutlineColorInfo.description)]]
-            std::optional<glm::vec3> outlineColor;
+            std::optional<glm::vec3> outlineColor [[codegen::color()]];
 
             // [[codegen::verbatim(OutlineWidthInfo.description)]]
-            std::optional<float> outlineWidth;
+            std::optional<float> outlineWidth [[codegen::greaterequal(0.f)]];
 
             enum class [[codegen::map(OutlineStyle)]] OutlineStyle {
                 Round,

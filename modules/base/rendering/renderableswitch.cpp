@@ -61,7 +61,7 @@ namespace {
             renderableFar [[codegen::reference("core_renderable")]];
 
         // [[codegen::verbatim(DistanceThresholdInfo.description)]]
-        std::optional<double> distanceThreshold [[codegen::greater(0.f)]];
+        std::optional<double> distanceThreshold [[codegen::greaterequal(0.0)]];
     };
 } // namespace
 #include "renderableswitch_codegen.cpp"

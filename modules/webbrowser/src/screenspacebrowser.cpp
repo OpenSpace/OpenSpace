@@ -92,7 +92,7 @@ namespace {
         std::optional<std::string> url;
 
         // [[codegen::verbatim(DimensionsInfo.description)]]
-        std::optional<glm::vec2> dimensions [[codegen::greater({ 0, 0 })]];
+        std::optional<glm::vec2> dimensions [[codegen::greater(glm::vec2(0.f))]];
     };
 } // namespace
 #include "screenspacebrowser_codegen.cpp"

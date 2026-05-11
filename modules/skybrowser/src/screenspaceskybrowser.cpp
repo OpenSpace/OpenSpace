@@ -125,7 +125,7 @@ namespace {
     // an asset, it requires some extra scripting to work with the SkyBrowser feature.
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
         // [[codegen::verbatim(TextureQualityInfo.description)]]
-        std::optional<float> textureQuality;
+        std::optional<float> textureQuality [[codegen::inrange(0.f, 1.f)]];
 
         // [[codegen::verbatim(IsHiddenInfo.description)]]
         std::optional<bool> isHidden;
