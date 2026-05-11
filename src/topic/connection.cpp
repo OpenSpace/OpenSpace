@@ -114,7 +114,7 @@ void Connection::handleJson(const nlohmann::json& json) {
         else {
             // Older API version which did not have versioning
             _socket->disconnect();
-            throw ghoul::RuntimeError("Unsuported API version");
+            throw ghoul::RuntimeError("Unsupported API version");
         }
     }
 

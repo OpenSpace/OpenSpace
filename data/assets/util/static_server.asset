@@ -1,4 +1,4 @@
-local BackendHash = "0f2543a69aa6c1ecd15892c43c5196d4fdc55b8f"
+local BackendHash = "65173ee5ab5262a2af58599c3de4c6432fdc4559"
 
 local backend = asset.resource({
   Identifier = "WebGuiBackend",
