@@ -805,7 +805,8 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             if (global::windowDelegate->isMaster()) {
                 int* videoIsPaused = reinterpret_cast<int*>(prop->data);
                 _playbackState = (*videoIsPaused == 0) ?
-                    PlaybackState::Playing : PlaybackState::Paused;
+                    PlaybackState::Playing :
+                    PlaybackState::Paused;
             }
             break;
         }
@@ -815,13 +816,9 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             }
             if (global::windowDelegate->isMaster()) {
                 int* isEndOfFile = reinterpret_cast<int*>(prop->data);
-                if (* isEndOfFile == 1) {
-                    if (_loopVideo) {
-                        _playbackState = PlaybackState::Rewinding;
-                    }
-                    else {
-                        _playbackState = PlaybackState::EndOfFile;
-                    }
+                if (*isEndOfFile == 1) {
+                    _playbackState =
+                        _loopVideo ? PlaybackState::Rewinding : PlaybackState::EndOfFile;
                 }
             }
             break;
@@ -865,8 +862,7 @@ void VideoPlayer::preSync(bool isMaster) {
     }
 
     _correctPlaybackTime = _currentVideoTime;
-    if (_playbackMode == PlaybackMode::RealTimeLoop)
-    {
+    if (_playbackMode == PlaybackMode::RealTimeLoop) {
         if (_playbackState == PlaybackState::Rewinding) {
             _syncFlags.shouldGoToStart = true;
             return;
