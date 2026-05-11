@@ -31,12 +31,14 @@
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
 #include <client.h>
 #include <render.h>
+#include <chrono>
 #include <cstdint>
 #include <filesystem>
 #include <memory>
@@ -54,7 +56,7 @@ enum class PlaybackMode {
 
 class VideoPlayer : public PropertyOwner, public Syncable {
 public:
-    BooleanType(PauseAfterSeek);
+    BooleanType(PlayAfterSeek);
 
     explicit VideoPlayer(const ghoul::Dictionary& dictionary);
     ~VideoPlayer() override;
@@ -62,11 +64,10 @@ public:
     void initialize();
 
     // Video interaction
-    void pause();
-    void play();
+    void preparePlay();
     void goToStart();
 
-    void seekToTime(double time, PauseAfterSeek pauseAfter = PauseAfterSeek::Yes);
+    void seekToTime(double time, PlayAfterSeek playAfter = PlayAfterSeek::No);
     void toggleMute();
 
     const std::unique_ptr<ghoul::opengl::Texture>& frameTexture() const;
@@ -84,6 +85,24 @@ public:
     static openspace::Documentation Documentation();
 
 private:
+    // Flags used to synchronize playback
+    struct SyncFlags {
+        bool shouldGoToStart = false;
+        bool shouldPlay = false;
+        bool shouldPause = false;
+    };
+
+    // State keys used to synchronize playback
+    enum class PlaybackState : uint16_t {
+        Undefined = 0,
+        Ready,
+        CountingDown,
+        Playing,
+        Paused,
+        Rewinding,
+        EndOfFile
+    };
+
     // Libmpv keys
     enum class MpvKey : uint64_t {
         Duration = 1, // 0 is the default key in libmpv so avoid that
@@ -97,17 +116,13 @@ private:
         Mute,
         Command,
         Seek,
-        Loop
+        Loop,
+        EndOfFile
     };
 
     // Framebuffer
     void createTexture(glm::ivec2 size);
     void resizeTexture(glm::ivec2 size);
-
-    /**
-     * Has to be static because of C API.
-     */
-    static void onMpvRenderUpdate(void*);
 
     /**
      * Called first time in update.
@@ -136,8 +151,13 @@ private:
 
     // Map to simulation time functions
     double correctVideoPlaybackTime() const;
-    bool isWithingStartEndTime() const;
+    bool checkFrameReached(double correctTime) const;
     void updateFrameDuration();
+
+    // Handles platback and gui states
+    void play();
+    void pause();
+    void setIsPlaying();
 
     // Properties for user interaction
     TriggerProperty _play;
@@ -146,11 +166,19 @@ private:
     TriggerProperty _reload;
     BoolProperty _playAudio;
     BoolProperty _loopVideo;
+    IntProperty _playDelay;
 
     // Read-only properties for showing video information
     BoolProperty _isPlaying;
     StringProperty _startTime;
     StringProperty _endTime;
+
+    // Variables used when syncronizing play, pause and looping behavior
+    // (should only be modified by Master)
+    SyncFlags _syncFlags;
+    PlaybackState _playbackState = PlaybackState::Undefined;
+    std::chrono::duration<long long, std::milli> _goTime =
+        std::chrono::duration<long long, std::milli>::zero();
 
     // Video properties. Try to read all these values from the video
     std::filesystem::path _videoFile;
@@ -160,7 +188,6 @@ private:
     double _videoDuration = 0.0;
     /// Used for the fbos
     glm::ivec2 _videoResolution = glm::ivec2(2048, 1024);
-    bool _isPaused = false;
     /// Default is to loop
     PlaybackMode _playbackMode = PlaybackMode::RealTimeLoop;
 
@@ -168,7 +195,7 @@ private:
     std::map<MpvKey, const char*> keys;
     std::map<MpvKey, mpv_format> formats;
 
-    // Syncing with multiple nodes
+    // Syncing with multiple nodes (should only be modified by Master)
     double _correctPlaybackTime = 0.0;
 
     // Video stretching: map to simulation time animation mode
@@ -182,8 +209,6 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _frameTexture;
     /// Our OpenGL framebuffer where mpv renders to
     GLuint _fbo = 0;
-    /// Signals when libmpv has a new frame ready
-    int _wakeup = 0;
     /// If libmpv has been inititalized
     bool _isInitialized = false;
     /// Prevent seeking while already seeking
