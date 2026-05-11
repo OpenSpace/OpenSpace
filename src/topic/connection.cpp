@@ -97,7 +97,7 @@ void Connection::handleJson(const nlohmann::json& json) {
     auto topicJson = json.find("topic");
     auto payloadJson = json.find("payload");
 
-    if (!_hasApiVersion) {
+    if (!_connectedApiVersion.has_value()) {
         auto type = json.find("type");
         if (type != json.end() && *type == "apiHandshake") {
             auto apiVersion = json.find("apiVersion");
@@ -109,13 +109,12 @@ void Connection::handleJson(const nlohmann::json& json) {
                 .patch = version.at("patch").get<int>()
             };
 
-            _hasApiVersion = true;
             return;
         }
         else {
             // Older API version which did not have versioning
-            _connectedApiVersion = ApiVersion(0, 0, 0);
-            _hasApiVersion = true;
+            _socket->disconnect();
+            throw ghoul::RuntimeError("Unsuported API version");
         }
     }
 
@@ -226,6 +225,14 @@ Topic* Connection::findTopicByType(const std::string& type) {
     }
 
     return it->second.get();
+}
+
+Connection::ApiVersion Connection::apiVersion() const {
+    ghoul_assert(
+        _connectedApiVersion.has_value(),
+        "No API version received via 'apiHandshake' message"
+    );
+    return *_connectedApiVersion;
 }
 
 } // namespace openspace
