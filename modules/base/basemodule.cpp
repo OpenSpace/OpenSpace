@@ -62,6 +62,8 @@
 #include <modules/base/rendering/renderabletrailorbit.h>
 #include <modules/base/rendering/renderabletrailtrajectory.h>
 #include <modules/base/rendering/renderableplaneimage.h>
+#include <modules/base/rendering/renderableplaneimagelocal.h>
+#include <modules/base/rendering/renderableplaneimageonline.h>
 #include <modules/base/rendering/renderableplanetimevaryingimage.h>
 #include <modules/base/rendering/renderableprism.h>
 #include <modules/base/rendering/renderabletimevaryingsphere.h>
@@ -183,6 +185,8 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableNodeArrow>("RenderableNodeArrow");
     fRenderable->registerClass<RenderableNodeLine>("RenderableNodeLine");
     fRenderable->registerClass<RenderablePlaneImage>("RenderablePlaneImage");
+    fRenderable->registerClass<RenderablePlaneImageLocal>("RenderablePlaneImageLocal");
+    fRenderable->registerClass<RenderablePlaneImageOnline>("RenderablePlaneImageOnline");
     fRenderable->registerClass<RenderablePlaneTimeVaryingImage>(
         "RenderablePlaneTimeVaryingImage"
     );
@@ -293,6 +297,8 @@ std::vector<Documentation> BaseModule::documentations() const {
         RenderableNodeArrow::Documentation(),
         RenderableNodeLine::Documentation(),
         RenderablePlaneImage::Documentation(),
+        RenderablePlaneImageLocal::Documentation(),
+        RenderablePlaneImageOnline::Documentation(),
         RenderablePlaneTimeVaryingImage::Documentation(),
         RenderablePointCloud::Documentation(),
         RenderablePolygonCloud::Documentation(),
