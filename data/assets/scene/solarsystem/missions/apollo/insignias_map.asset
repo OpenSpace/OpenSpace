@@ -161,7 +161,7 @@ local Apollo17 = {
     }
   },
   Renderable = {
-    Type = "RenderablePlaneImage",
+    Type = "RenderablePlaneImageLocal",
     Size = 100000,
     Origin = "Center",
     Billboard = true,

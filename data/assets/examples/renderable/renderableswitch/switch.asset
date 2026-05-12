@@ -9,15 +9,14 @@ local Node = {
   Renderable = {
     Type = "RenderableSwitch",
     RenderableNear = {
-      Type = "RenderablePlaneImage",
+      Type = "RenderablePlaneImageLocal",
       Size = 300000000000,
       Texture = openspace.absPath("${DATA}/test.jpg")
     },
     RenderableFar = {
-      Type = "RenderablePlaneImage",
+      Type = "RenderablePlaneImageOnline",
       Size = 300000000000,
-      IsUrl = true,
-      Texture = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg"
+      URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg"
     },
     DistanceThreshold = 2000000000000
   },
