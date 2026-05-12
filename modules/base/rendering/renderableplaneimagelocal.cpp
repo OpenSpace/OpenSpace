@@ -26,6 +26,8 @@
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
@@ -45,14 +47,28 @@ namespace {
     constexpr Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
-        "A path to an image file to use as a texture for the plane.",
+        "A path to an image file to use as a texture for the plane. During stereo "
+        "rendering, this texture is considered the left eye.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo RightTextureInfo = {
+        "RightTexture",
+        "Right Eye Texture",
+        "Sets the path of the texture that is displayed on this plane for the right eye "
+        "during stereo rendering.",
         Property::Visibility::User
     };
 
     // Creates a textured 3D plane, where the texture is provided by a local file on disk.
+    // To use a stereo image set, a second image can be specified with the `RightTexture`
+    // property that will be used for the right eye during stereo rendering.
     struct [[codegen::Dictionary(RenderablePlaneImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
+
+        // [[codegen::verbatim(RightTextureInfo.description)]]
+        std::optional<std::string> rightTexture;
 
         // If this value is set to true, the image for this plane will not be loaded at
         // startup but rather when plane is shown for the first time. Additionally, if the
@@ -72,8 +88,13 @@ Documentation RenderablePlaneImageLocal::Documentation() {
 }
 
 RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary)
-    : RenderablePlane(dictionary)
+    : RenderablePlane(dictionary,
+        {
+            .automaticallyUpdateRenderBin = false,
+            .shouldUpdateIfDisabled = true
+        })
     , _texturePath(TextureInfo)
+    , _rightTexturePath(RightTextureInfo)
     , _textureIsDirty(_enabled)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -84,6 +105,16 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
 
     _texturePath.onChange([this]() { loadTexture(); });
     addProperty(_texturePath);
+
+    if (p.rightTexture.has_value()) {
+        _useStereo = true;
+        _rightTexturePath = absPath(*p.rightTexture).string();
+        _rightTextureFile = std::make_unique<ghoul::filesystem::File>(_rightTexturePath.value());
+        _rightTextureFile->setCallback([this]() { _textureIsDirty = true; });
+
+        _rightTexturePath.onChange([this]() { loadTexture(); });
+        addProperty(_rightTexturePath);
+    }
 
     _isLoadingLazily = p.lazyLoading.value_or(_isLoadingLazily);
     if (_isLoadingLazily) {
@@ -102,7 +133,7 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
             return;
         }
 
-        // Shape the plane based on the aspect ration of the image
+        // Shape the plane based on the aspect ratio of the image
         const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
         if (_textureDimensions == textureDim) {
             return;
@@ -128,26 +159,40 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
 void RenderablePlaneImageLocal::initializeGL() {
     RenderablePlane::initializeGL();
 
-    LWARNINGC(
-        "RenderablePlaneImageLocal",
-        "RenderablePlaneImageLocal is depricated, use RenderablePlaneImage instead"
-    );
-
     if (!_isLoadingLazily) {
         loadTexture();
-        _textureIsDirty = false;
     }
 }
 
 void RenderablePlaneImageLocal::deinitializeGL() {
-    _textureFile = nullptr;
-
     BaseModule::TextureManager.release(_texture);
+    _texture = nullptr;
+
+    if (_useStereo) {
+        BaseModule::TextureManager.release(_rightTexture);
+        _rightTexture = nullptr;
+    }
+
     RenderablePlane::deinitializeGL();
 }
 
 void RenderablePlaneImageLocal::bindTexture(ghoul::opengl::TextureUnit& unit) {
-    unit.bind(*_texture);
+    switch (global::windowDelegate->frustumMode()) {
+        case WindowDelegate::Frustum::Mono:
+        case WindowDelegate::Frustum::LeftEye:
+            if (_texture) {
+                unit.bind(*_texture);
+            }
+            break;
+        case WindowDelegate::Frustum::RightEye:
+            if (_useStereo && _rightTexture) {
+                unit.bind(*_rightTexture);
+            }
+            else if (!_useStereo && _texture) {
+                unit.bind(*_texture);
+            }
+            break;
+    }
 }
 
 void RenderablePlaneImageLocal::update(const UpdateData& data) {
@@ -158,12 +203,18 @@ void RenderablePlaneImageLocal::update(const UpdateData& data) {
     if (_shouldUnloadTexture) [[unlikely]] {
         BaseModule::TextureManager.release(_texture);
         _texture = nullptr;
+
+        if (_useStereo) {
+            BaseModule::TextureManager.release(_rightTexture);
+            _rightTexture = nullptr;
+        }
+
         _shouldUnloadTexture = false;
+        _textureIsDirty = false;
     }
 
     if (_textureIsDirty) [[unlikely]] {
         loadTexture();
-        _textureIsDirty = false;
     }
 }
 
@@ -171,6 +222,10 @@ void RenderablePlaneImageLocal::loadTexture() {
     ZoneScoped;
 
     if (_texturePath.value().empty()) {
+        return;
+    }
+
+    if (_useStereo && _rightTexturePath.value().empty()) {
         return;
     }
 
@@ -203,11 +258,48 @@ void RenderablePlaneImageLocal::loadTexture() {
     _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
     _textureFile->setCallback([this]() { _textureIsDirty = true; });
 
+    if (_useStereo) {
+        ghoul::opengl::Texture* t = _rightTexture;
+
+        const unsigned int hash = ghoul::hashCRC32File(_rightTexturePath);
+
+        _rightTexture = BaseModule::TextureManager.request(
+            std::to_string(hash),
+            [path = _rightTexturePath.value()]() ->
+                std::unique_ptr<ghoul::opengl::Texture>
+            {
+                std::unique_ptr<ghoul::opengl::Texture> texture =
+                    ghoul::io::texture::loadTexture(
+                        path,
+                        2,
+                        ghoul::opengl::Texture::SamplerInit{
+                            .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                        }
+                    );
+
+                LDEBUGC(
+                    "RenderablePlaneImageLocal",
+                    std::format("Loaded right texture from '{}'", absPath(path))
+                );
+                return texture;
+            }
+        );
+
+        BaseModule::TextureManager.release(t);
+
+        _rightTextureFile = std::make_unique<ghoul::filesystem::File>(_rightTexturePath.value());
+        _rightTextureFile->setCallback([this]() { _textureIsDirty = true; });
+    }
+
+    if (_texture && (!_useStereo || _rightTexture)) {
+        _textureIsDirty = false;
+    }
+
     if (!_autoScale) {
         return;
     }
 
-    // Shape the plane based on the aspect ration of the image
+    // Shape the plane based on the aspect ratio of the image
     const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
     if (_textureDimensions != textureDim) {
         const float aspectRatio = textureDim.x / textureDim.y;
