@@ -45,7 +45,8 @@ namespace {
         "Image URL",
         "Sets the URL of the texture that is displayed on this screen space plane. If "
         "this value is changed, the image at the new path will automatically be loaded "
-        "and displayed. During stereo rendering, this texture is considered the left eye.",
+        "and displayed. During stereo rendering, this texture is considered the left "
+        "eye.",
         Property::Visibility::User
     };
 
@@ -94,7 +95,7 @@ RenderablePlaneImageOnline::RenderablePlaneImageOnline(
     addProperty(_texturePath);
 
     if (p.rightUrl.has_value()) {
-        _useStereo = true;
+        _isStereo = true;
 
         _rightTexturePath.onChange([this]() { _textureIsDirty = true; });
         _rightTexturePath = *p.rightUrl;
@@ -124,10 +125,10 @@ void RenderablePlaneImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
             }
             break;
         case WindowDelegate::Frustum::RightEye:
-            if (_useStereo && _rightTexture) {
+            if (_isStereo && _rightTexture) {
                 unit.bind(*_rightTexture);
             }
-            else if (!_useStereo && _texture) {
+            else if (!_isStereo && _texture) {
                 unit.bind(*_texture);
             }
             break;
@@ -142,9 +143,8 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
     }
 
     if (!_texture && !_imageFuture.valid()) {
-        std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(
-            _texturePath
-        );
+        std::future<DownloadManager::MemoryFile> future =
+            downloadImageToMemory(_texturePath);
         if (future.valid()) {
             _imageFuture = std::move(future);
         }
@@ -178,11 +178,10 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
         }
     }
 
-    if (_useStereo) {
+    if (_isStereo) {
         if (!_rightTexture && !_rightImageFuture.valid()) {
-            std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(
-                _rightTexturePath
-            );
+            std::future<DownloadManager::MemoryFile> future =
+                downloadImageToMemory(_rightTexturePath);
             if (future.valid()) {
                 _rightImageFuture = std::move(future);
             }
@@ -221,7 +220,7 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
         }
     }
 
-    if (_texture && (!_useStereo || _rightTexture)) {
+    if (_texture && (!_isStereo || _rightTexture)) {
         _textureIsDirty = false;
     }
 
@@ -244,7 +243,7 @@ RenderablePlaneImageOnline::downloadImageToMemory(const std::string& url)
         [](const std::string& err) {
             LDEBUGC(
                 "RenderablePlaneImageOnline",
-                "Download to memory failed: " + err
+                std::format("Download to memory failed: {}", err)
             );
         }
     );

@@ -63,7 +63,7 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _rightTexture;
     glm::vec2 _textureDimensions = glm::vec2(0.f);
     bool _textureIsDirty = false;
-    bool _useStereo = false;
+    bool _isStereo = false;
 };
 
 } // namespace openspace

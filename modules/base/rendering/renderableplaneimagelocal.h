@@ -63,7 +63,7 @@ private:
     bool _isLoadingLazily = false;
     bool _shouldUnloadTexture = false;
     bool _textureIsDirty = false;
-    bool _useStereo = false;
+    bool _isStereo = false;
 };
 
 } // namespace openspace

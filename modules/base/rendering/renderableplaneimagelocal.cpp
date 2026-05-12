@@ -92,7 +92,8 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
         {
             .automaticallyUpdateRenderBin = false,
             .shouldUpdateIfDisabled = true
-        })
+        }
+    )
     , _texturePath(TextureInfo)
     , _rightTexturePath(RightTextureInfo)
     , _textureIsDirty(_enabled)
@@ -107,9 +108,10 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
     addProperty(_texturePath);
 
     if (p.rightTexture.has_value()) {
-        _useStereo = true;
+        _isStereo = true;
         _rightTexturePath = absPath(*p.rightTexture).string();
-        _rightTextureFile = std::make_unique<ghoul::filesystem::File>(_rightTexturePath.value());
+        _rightTextureFile =
+            std::make_unique<ghoul::filesystem::File>(_rightTexturePath.value());
         _rightTextureFile->setCallback([this]() { _textureIsDirty = true; });
 
         _rightTexturePath.onChange([this]() { loadTexture(); });
@@ -145,7 +147,7 @@ void RenderablePlaneImageLocal::deinitializeGL() {
     BaseModule::TextureManager.release(_texture);
     _texture = nullptr;
 
-    if (_useStereo) {
+    if (_isStereo) {
         BaseModule::TextureManager.release(_rightTexture);
         _rightTexture = nullptr;
     }
@@ -162,10 +164,10 @@ void RenderablePlaneImageLocal::bindTexture(ghoul::opengl::TextureUnit& unit) {
             }
             break;
         case WindowDelegate::Frustum::RightEye:
-            if (_useStereo && _rightTexture) {
+            if (_isStereo && _rightTexture) {
                 unit.bind(*_rightTexture);
             }
-            else if (!_useStereo && _texture) {
+            else if (!_isStereo && _texture) {
                 unit.bind(*_texture);
             }
             break;
@@ -181,7 +183,7 @@ void RenderablePlaneImageLocal::update(const UpdateData& data) {
         BaseModule::TextureManager.release(_texture);
         _texture = nullptr;
 
-        if (_useStereo) {
+        if (_isStereo) {
             BaseModule::TextureManager.release(_rightTexture);
             _rightTexture = nullptr;
         }
@@ -198,11 +200,8 @@ void RenderablePlaneImageLocal::update(const UpdateData& data) {
 void RenderablePlaneImageLocal::loadTexture() {
     ZoneScoped;
 
-    if (_texturePath.value().empty()) {
-        return;
-    }
-
-    if (_useStereo && _rightTexturePath.value().empty()) {
+    if (_texturePath.value().empty() || (_isStereo && _rightTexturePath.value().empty()))
+    {
         return;
     }
 
@@ -235,7 +234,7 @@ void RenderablePlaneImageLocal::loadTexture() {
     _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
     _textureFile->setCallback([this]() { _textureIsDirty = true; });
 
-    if (_useStereo) {
+    if (_isStereo) {
         ghoul::opengl::Texture* t = _rightTexture;
 
         const unsigned int hash = ghoul::hashCRC32File(_rightTexturePath);
@@ -264,11 +263,12 @@ void RenderablePlaneImageLocal::loadTexture() {
 
         BaseModule::TextureManager.release(t);
 
-        _rightTextureFile = std::make_unique<ghoul::filesystem::File>(_rightTexturePath.value());
+        _rightTextureFile =
+            std::make_unique<ghoul::filesystem::File>(_rightTexturePath.value());
         _rightTextureFile->setCallback([this]() { _textureIsDirty = true; });
     }
 
-    if (_texture && (!_useStereo || _rightTexture)) {
+    if (_texture && (!_isStereo || _rightTexture)) {
         _textureIsDirty = false;
     }
 
