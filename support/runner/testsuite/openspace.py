@@ -23,10 +23,9 @@
 ##########################################################################################
 
 import asyncio
-import glob
-import os
 import subprocess
 import time
+from pathlib import Path
 from typing import Any
 from openspace import Api
 from .test import Test, TestResult
@@ -39,13 +38,13 @@ def write_configuration_overwrite(base_path: str, data_path: str) -> None:
   are mostly for enabling caching to reduce the amount of testing and removing as much of
   the logging as possible which would otherwise pollute the usage results
   """
-  with open(f"{base_path}/openspace.cfg.override", "w") as f:
+  with open(Path(base_path) / "openspace.cfg.override", "w") as f:
     # Use a common sync folder outside of the build to prevent redownloading of data
-    sync_location = f"{data_path}/sync"
+    sync_location = (Path(data_path) / "sync").as_posix()
     f.write(f"Paths.SYNC = os.getenv([[OPENSPACE_SYNC]]) or [[{sync_location}]]\n")
 
     # Enable MRF caching for the same reason and to reduce dependency on external servers
-    mrf_location = f"{data_path}/mrf"
+    mrf_location = (Path(data_path) / "mrf").as_posix()
     f.write("ModuleConfigurations.GlobeBrowsing.MRFCacheEnabled = true\n")
     f.write(f"ModuleConfigurations.GlobeBrowsing.MRFCacheLocation = [[{mrf_location}]]\n")
 
@@ -119,7 +118,7 @@ async def internal_run(openspace: Any, os_api: Api, test: Test, shutdown: bool =
 
 
 
-def run_single_test(test_path: str, executable: str, per_profile_wait: dict[str, int]) -> TestResult | None:
+def run_single_test(test_path: str, executable: Path | str, per_profile_wait: dict[str, int]) -> TestResult | None:
   """
   Run the single test provided by `test_path` using the OpenSpace executable provided by
   `executable`. This will include starting OpenSpace as a subprocess using a known
@@ -140,18 +139,18 @@ def run_single_test(test_path: str, executable: str, per_profile_wait: dict[str,
 
   start_time = time.perf_counter()
   print(f"  Starting OpenSpace (Profile: {test.profile})")
+  executable_path = Path(executable).resolve()
   process = subprocess.Popen(
     [
-      os.path.abspath(executable),
-      "--config", f"{os.getcwd()}/1920-1080.json",
+      executable_path,
+      "--config", str(Path.cwd() / "1920-1080.json"),
       "--profile", test.profile,
       "--bypassLauncher"
     ],
-    cwd=os.path.dirname(os.path.abspath(executable)),
+    cwd=executable_path.parent,
     stdout=subprocess.DEVNULL,
     stderr=subprocess.PIPE
   )
-  assert process.stderr is not None
 
   # Add a sleeping time instead of repeatedly trying to reconnect. Starting up OpenSpace
   # in general takes longer than this, so we don't actually lose any time. If a
@@ -159,7 +158,7 @@ def run_single_test(test_path: str, executable: str, per_profile_wait: dict[str,
   wait_timer = per_profile_wait.get(test.profile, 15)
   time.sleep(wait_timer)
 
-  async def mainLoop():
+  async def main_loop():
     """
     The main loop of an async event loop that is needed for the OpenSpace Python API to
     work correctly. This will connect to OpenSpace, which then triggers the rest of the
@@ -170,11 +169,16 @@ def run_single_test(test_path: str, executable: str, per_profile_wait: dict[str,
     await os_api.connect()
     openspace = await os_api.library()
     print("  Connected to OpenSpace")
-    screenshot_folder, commit = await asyncio.create_task(internal_run(openspace, os_api, test))
+    screenshot_folder, commit = await internal_run(openspace, os_api, test)
     os_api.disconnect()
+    await asyncio.sleep(0)  # allow the API's internal async generators to finalize
     return screenshot_folder, commit
 
-  screenshot_folder, commit = asyncio.new_event_loop().run_until_complete(mainLoop())
+  loop = asyncio.new_event_loop()
+  try:
+    screenshot_folder, commit = loop.run_until_complete(main_loop())
+  finally:
+    loop.close()
 
 
   # Another wait while OpenSpace is shutting down
@@ -183,12 +187,13 @@ def run_single_test(test_path: str, executable: str, per_profile_wait: dict[str,
   # Get the error log from the OpenSpace subprocess
   error_log = process.stderr.read().decode()
 
-  # Kill the OpenSpace subprocess
+  # Kill the OpenSpace subprocess and wait for it to be reaped to avoid zombies
   process.kill()
+  process.wait()
   end_time = time.perf_counter()
 
   # Collect all screenshots taken by the test
-  files = glob.glob(f"{screenshot_folder}/*.png")
+  files = [str(p) for p in Path(screenshot_folder).glob("*.png")]
   print(f"Test images: {files}")
 
   result = TestResult()
@@ -220,7 +225,7 @@ def run_single_test_attached(test_path: str) -> TestResult | None:
 
   start_time = time.perf_counter()
 
-  async def mainLoop():
+  async def main_loop():
     """
     The main loop of an async event loop that is needed for the OpenSpace Python API to
     work correctly. This will connect to OpenSpace, which then triggers the rest of the
@@ -231,18 +236,21 @@ def run_single_test_attached(test_path: str) -> TestResult | None:
     await os_api.connect()
     openspace = await os_api.library()
     print("  Connected to OpenSpace")
-    screenshot_folder, commit = await asyncio.create_task(
-      internal_run(openspace, os_api, test, shutdown=False)
-    )
+    screenshot_folder, commit = await internal_run(openspace, os_api, test, shutdown=False)
     os_api.disconnect()
+    await asyncio.sleep(0)  # allow the API's internal async generators to finalize
     return screenshot_folder, commit
 
-  screenshot_folder, commit = asyncio.new_event_loop().run_until_complete(mainLoop())
+  loop = asyncio.new_event_loop()
+  try:
+    screenshot_folder, commit = loop.run_until_complete(main_loop())
+  finally:
+    loop.close()
 
   end_time = time.perf_counter()
 
   # Collect all screenshots taken by the test
-  files = glob.glob(f"{screenshot_folder}/*.png")
+  files = [str(p) for p in Path(screenshot_folder).glob("*.png")]
   print(f"Test images: {files}")
 
   result = TestResult()

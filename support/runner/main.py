@@ -24,7 +24,6 @@
 
 import argparse
 import datetime
-import glob
 import json
 import os
 import requests
@@ -80,9 +79,9 @@ def store_image(result: TestResult, file: str) -> None:
   Stores the images of the provided `TestResult` locally by creating the necessary folders
   if they don't exist and then saving the image. Only the latest test result are stored.
   """
-  dest_folder = f"tests/{result.group}"
-  os.makedirs(dest_folder, exist_ok=True)
-  destination = f"{dest_folder}/{result.name}.png"
+  dest_folder = Path("tests") / result.group
+  dest_folder.mkdir(parents=True, exist_ok=True)
+  destination = dest_folder / f"{result.name}.png"
   print(f"Copying file {file} -> {destination}")
   shutil.copy(file, destination)
 
@@ -125,7 +124,7 @@ if __name__ == "__main__":
   args = parser.parse_args()
 
   # Finding the root OpenSpace folder
-  dir = f"{Path(__file__).resolve().parent}/../.."
+  root_dir = Path(__file__).resolve().parents[2]
 
 
   global_start: float = time.perf_counter()
@@ -134,7 +133,7 @@ if __name__ == "__main__":
   hardware = ""
   runner_id = ""
   per_profile_wait: dict[str, int] = {}
-  if os.path.exists("config.json"):
+  if Path("config.json").exists():
     submit_images = True
     with open("config.json") as f:
       config = json.load(f)
@@ -149,7 +148,6 @@ if __name__ == "__main__":
     print(f"Per Profile wait: {per_profile_wait}")
   else:
     print("No 'config.json' provided. Test results will be stored locally instead")
-    submit_images = False
 
 
   executable = ""
@@ -160,32 +158,29 @@ if __name__ == "__main__":
     # Find the executable location and its name
     if os.name == "nt":
       # Windows
-      executable = f"{dir}/bin/RelWithDebInfo/OpenSpace.exe"
+      executable = root_dir / "bin" / "RelWithDebInfo" / "OpenSpace.exe"
     else:
       # Linux
-      executable = f"{dir}/bin/OpenSpace"
-    if not os.path.exists(executable):
+      executable = root_dir / "bin" / "OpenSpace"
+    if not executable.exists():
       raise Exception(f"Could not find executable '{executable}'")
 
-    if args.overwrite_path != None:
-      write_configuration_overwrite(dir, args.overwrite_path)
+    if args.overwrite_path is not None:
+      write_configuration_overwrite(root_dir, args.overwrite_path)
 
 
 
   # Running the tests
   if args.attach:
     test_arg = args.test.strip()
-    if os.path.isfile(test_arg):
-      path = test_arg
-    else:
-      path = f"{dir}/visualtests/{test_arg}.ostest"
+    path = Path(test_arg) if Path(test_arg).is_file() else root_dir / "visualtests" / f"{test_arg}.ostest"
 
-    if not os.path.isfile(path):
+    if not path.is_file():
       raise Exception(f"Could not find test '{path}'")
 
     timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
     try:
-      result = run_single_test_attached(path)
+      result = run_single_test_attached(str(path))
     except Exception as e:
       print(f"Test '{path}' failed with error: {e}")
     else:
@@ -199,14 +194,13 @@ if __name__ == "__main__":
   else:
     if args.test is None:
       print("Running all tests in OpenSpace folder")
-      files = glob.glob(f"{dir}/visualtests/**/*.ostest", recursive=True)
-      files = [f.replace(os.sep, "/") for f in files]
+      files = [str(p) for p in (root_dir / "visualtests").rglob("*.ostest")]
     else:
       tests = args.test.split(",")
       print(f"Running tests: {tests}")
-      files = [f"{dir}/visualtests/{test}.ostest" for test in tests]
+      files = [str(root_dir / "visualtests" / f"{test}.ostest") for test in tests]
       for path in files:
-        if not os.path.isfile(path):
+        if not Path(path).is_file():
           raise Exception(f"Could not find test '{path}'")
 
     for file in files:

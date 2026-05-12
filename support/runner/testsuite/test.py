@@ -24,10 +24,12 @@
 
 import asyncio
 import json
-import os
+from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 from .instruction import Instruction
 
+@dataclass
 class TestResult:
   """
   Stores the result of a single test run. It has the following members:
@@ -39,12 +41,12 @@ class TestResult:
     - `commit`: The commit hash for OpenSpace that was used to run the test
     - `error`: The contents of the error stream that was captured during the test run
   """
-  group: str
-  name: str
-  files: list[str]
-  timing: float
-  commit: str
-  error: str
+  group = ""
+  name = ""
+  files: list[str] = field(default_factory=list[str])
+  timing = 0.0
+  commit = ""
+  error = ""
 
 class Test:
   """
@@ -61,17 +63,19 @@ class Test:
   test_path: str
 
   def __init__(self, path: str) -> None:
-    assert(os.path.isfile(path))
-    self.test_path = path.replace(os.sep, "/")
+    if not Path(path).is_file():
+      raise Exception(f"Could not find test {path}")
+
+    self.test_path = Path(path).as_posix()
 
     with open(path) as f:
       content = json.load(f)
 
-    if content["profile"] is None:
+    if "profile" not in content:
       raise Exception(f"Missing 'profile' in test {path}'")
     self.profile = content["profile"]
 
-    if content["commands"] is None:
+    if "commands" not in content:
       raise Exception(f"Missing 'commands' in test {path}")
 
     self.skipTest = content.get("skip_test", False)
@@ -83,14 +87,10 @@ class Test:
       except Exception as error:
         raise Exception(f"Error loading test {path}: {error}")
 
-    number_screenshot_instruction = 0
-    for instruction in self.instructions:
-      if instruction.type == "screenshot":
-        number_screenshot_instruction = number_screenshot_instruction + 1
-
+    number_screenshot_instruction = sum(1 for i in self.instructions if i.type == "screenshot")
     if number_screenshot_instruction == 0:
       raise Exception(f"Error loading test {path}: No screenshot instruction")
-    if number_screenshot_instruction != 1:
+    if number_screenshot_instruction > 1:
       raise Exception(f"Error loading test {path}: Only a single screenshot supported")
 
 

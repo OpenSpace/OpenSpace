@@ -27,7 +27,7 @@ from typing import Any
 
 
 
-Allowed_Types = [
+ALLOWED_TYPES = frozenset([
   "action",
   "asset",
   "deltatime",
@@ -39,7 +39,7 @@ Allowed_Types = [
   "script",
   "time",
   "wait"
-]
+])
 
 
 
@@ -56,20 +56,13 @@ class Instruction:
   value: Any
 
   def __init__(self, obj: dict[str, Any]) -> None:
-    if not "type" in obj:
+    if "type" not in obj:
       raise Exception("Missing key 'type'")
-
-    if not obj["type"] in Allowed_Types:
-      type = obj["type"]
-      raise Exception(f"Invalid type '{type}'")
+    if obj["type"] not in ALLOWED_TYPES:
+      raise Exception(f"Invalid type '{obj["type"]}'")
 
     self.type = obj["type"]
-
-    # Just as simplification as not all types need a 'value' object
-    if not "value" in obj:
-      obj["value"] = {}
-
-    self.value = obj["value"]
+    self.value = obj.get("value", {})
 
 
 
@@ -168,7 +161,4 @@ class Instruction:
 
       case "wait":
         print(f"    Wait: {self.value}")
-        await asyncio.sleep(int(self.value))
-
-      case _:
-        raise Exception(f"Unrecognized instruction type '{self.type}'")
+        await asyncio.sleep(float(self.value))
