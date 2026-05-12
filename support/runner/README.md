@@ -3,9 +3,8 @@ The _Runner_ is a Python script that will execute and possibly submit test resul
 
 | Parameter | Description |
 | --------- | ----------- |
-| `--dir` | Points to the base folder of the OpenSpace version that is used to execute the tests. There needs to be a compiled version of OpenSpace available in that folder such that `bin/RelWithDebInfo/OpenSpace.exe` (on Windows) or `bin/OpenSpace` (on Linux) exists and is executable. The base test folder will also be taken from this parameter as `tests/visual`. |
 | `--test` | A comma-separated list of the group/name combination of the tests that should be run. The group of a test is all of the folders relative to the `tests/visual` server concatenated with the name of the test being the filename. For example a test in `tests/visual/mars/insight/landing.ostest` would have the group "mars/insight" and the name "landing". |
-| `--overwrite` | This path can be provided to store commonly used files that can be useful to keep between test runs. Right now, this is only used for the Sync folder and the MRF cache used by OpenSpace.|
+| `--overwrite` | This path can be provided to store commonly used files that can be useful to keep between test runs. Right now, this is only used for the Sync folder and the MRF cache used by OpenSpace. |
 
 Example: `python main.py --dir C:/Development/OpenSpace --test default/earth,rosetta/model default --overwrite C:/Development/TestCache`
 

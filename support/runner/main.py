@@ -30,6 +30,7 @@ import os
 import requests
 import shutil
 import time
+from pathlib import Path
 from testsuite.constants import test_base_dir
 from testsuite.openspace import write_configuration_overwrite, run_single_test, run_single_test_attached
 from testsuite.test import TestResult
@@ -94,13 +95,6 @@ def setup_argparse():
   arguments as a dictionary.
   """
   parser = argparse.ArgumentParser()
-  parser.add_argument(
-    "-d", "--dir",
-    dest="dir",
-    type=str,
-    help="Specifies the OpenSpace directory in which to run the tests.",
-    required=False
-  )
   parser.add_argument(
     "-t", "--test",
     dest="test",
@@ -169,28 +163,26 @@ if __name__ == "__main__":
 
   args = setup_argparse()
 
+  dir = f"{Path(__file__).resolve().parent}/../.."
   if args.attach:
     if not args.test:
       raise Exception("--attach requires exactly one test to be specified via --test")
     if "," in args.test:
       raise Exception("--attach requires exactly one test, not a comma-separated list")
   else:
-    if args.dir is None:
-      raise Exception("--dir is required when not using --attach")
-
     # Find the executable location and its name
     if os.name == "nt":
       # Windows
-      executable = f"{args.dir}/bin/RelWithDebInfo/OpenSpace.exe"
+      executable = f"{dir}/bin/RelWithDebInfo/OpenSpace.exe"
     else:
       # Linux
-      executable = f"{args.dir}/bin/OpenSpace"
+      executable = f"{dir}/bin/OpenSpace"
 
     if not os.path.exists(executable):
       raise Exception(f"Could not find executable '{executable}'")
 
   if not args.attach and args.overwrite_path != None:
-    write_configuration_overwrite(args.dir, args.overwrite_path)
+    write_configuration_overwrite(dir, args.overwrite_path)
 
 
 
@@ -199,10 +191,8 @@ if __name__ == "__main__":
     test_arg = args.test.strip()
     if os.path.isfile(test_arg):
       path = test_arg
-    elif args.dir:
-      path = f"{args.dir}/{test_base_dir}/{test_arg}.ostest"
     else:
-      path = f"{test_arg}.ostest"
+      path = f"{dir}/{test_base_dir}/{test_arg}.ostest"
 
     if not os.path.isfile(path):
       raise Exception(f"Could not find test '{path}'")
@@ -221,7 +211,7 @@ if __name__ == "__main__":
 
   elif args.test is None:
     print("Running all tests in OpenSpace folder")
-    files = glob.glob(f"{args.dir}/{test_base_dir}/**/*.ostest", recursive=True)
+    files = glob.glob(f"{dir}/{test_base_dir}/**/*.ostest", recursive=True)
     for file in files:
       # Normalize the path endings to always do forward slashes
       file = file.replace(os.sep, "/")
@@ -247,7 +237,7 @@ if __name__ == "__main__":
     tests = args.test.split(",")
     print(f"Running tests: {tests}")
     for test in tests:
-      path = f"{args.dir}/{test_base_dir}/{test}.ostest"
+      path = f"{dir}/{test_base_dir}/{test}.ostest"
       if not os.path.isfile(path):
         raise Exception(f"Could not find test '{path}'")
 

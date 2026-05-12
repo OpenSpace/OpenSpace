@@ -87,7 +87,7 @@ async def setup_test_run(openspace):
 
 
 
-async def internal_run(openspace, test, shutdown=True):
+async def internal_run(openspace, os_api, test, shutdown=True):
   """
   This function runs the actual test with the library object passed into it. It first sets
   up default values, then runs the individual instructions for the test, and retrieves
@@ -100,7 +100,7 @@ async def internal_run(openspace, test, shutdown=True):
   """
   print("  Starting test")
   await setup_test_run(openspace)
-  await test.run(openspace)
+  await test.run(openspace, os_api)
   print("  Finished test")
 
   # Get the location of the screenshot folder from OpenSpace. It should always be the
@@ -165,12 +165,10 @@ def run_single_test(test_path, executable, per_profile_wait) -> TestResult:
     """
     print("  Connecting...")
     os_api = Api("localhost", 4681)
-    os_api.connect()
-    openspace = await os_api.singleReturnLibrary()
-    # Injecting the main API into the library as we use it in some test instructions
-    openspace.__api__ = os_api
+    await os_api.connect()
+    openspace = await os_api.library()
     print("  Connected to OpenSpace")
-    screenshot_folder, commit = await asyncio.create_task(internal_run(openspace, test))
+    screenshot_folder, commit = await asyncio.create_task(internal_run(openspace, os_api, test))
     os_api.disconnect()
     return screenshot_folder, commit
 
@@ -225,11 +223,9 @@ def run_single_test_attached(test_path) -> TestResult:
     os_api = Api("localhost", 4681)
     os_api.connect()
     openspace = await os_api.singleReturnLibrary()
-    # Injecting the main API into the library as we use it in some test instructions
-    openspace.__api__ = os_api
     print("  Connected to OpenSpace")
     screenshot_folder, commit = await asyncio.create_task(
-      internal_run(openspace, test, shutdown=False)
+      internal_run(openspace, os_api, test, shutdown=False)
     )
     os_api.disconnect()
     return screenshot_folder, commit

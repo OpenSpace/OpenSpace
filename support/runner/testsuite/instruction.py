@@ -82,7 +82,7 @@ class Instruction:
 
 
 
-  async def run(self, openspace):
+  async def run(self, openspace, os_api):
     """
     Runs this instruction against the OpenSpace API object `openspace` that was passed to
     this function. If this instruction is not a valid instruction, either because it has
@@ -156,7 +156,7 @@ class Instruction:
 
       case "script":
         print(f"    Script: {self.value}")
-        await openspace.__api__.executeLuaScript(self.value, False, False)
+        await os_api.executeLuaScript(self.value, False, False)
 
       case "time":
         print(f"    Set Time: {self.value}")

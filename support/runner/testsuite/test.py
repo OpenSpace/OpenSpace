@@ -25,7 +25,6 @@
 import asyncio
 import json
 import os
-import time
 from .instruction import Instruction
 from .constants import test_base_dir
 
@@ -99,11 +98,11 @@ class Test:
     self.name = parts[-1]
 
 
-  async def run(self, openspace):
+  async def run(self, openspace, os_api):
     """
     Runs the actual instructions on the provided OpenSpace API instance. There is a
     mandatory 1s wait time between every instructions
     """
     for instruction in self.instructions:
-      await instruction.run(openspace)
+      await instruction.run(openspace, os_api)
       await asyncio.sleep(1.0)
