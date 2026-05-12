@@ -302,7 +302,7 @@ namespace {
 
         int matchIndex = 0;
         if (value.isDouble()) {
-            for (const QString& name : { "Double", "Integer" }) {
+            for (QString name : { "Double", "Integer" }) {
                 matchIndex = typeCombo->findText(name);
                 if (matchIndex >= 0) {
                     break;
@@ -324,8 +324,8 @@ namespace {
             }
         }
         else if (value.isString()) {
-            for (const QString& name : { "String", "Date and time", "File",
-                                         "Directory", "Identifier" })
+            for (QString name : { "String", "Date and time", "File", "Directory",
+                                     "Identifier" })
             {
                 matchIndex = typeCombo->findText(name);
                 if (matchIndex != -1) {
@@ -952,9 +952,9 @@ QWidget* SchemaFormWidget::createOptionalWrapper(MemberInfo& member, QWidget* fi
                     return;
                 }
             }
-            std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
-            if (lockedProperties) {
-                lockedProperties->erase(member.member.name);
+
+            if (std::shared_ptr<PropertyMap> props = _properties.lock();  props) {
+                props->erase(member.member.name);
             }
             setOptionalFieldActive(member, false);
             emit optionalFieldToggled(
@@ -1264,18 +1264,18 @@ void SchemaFormWidget::buildRefArrayCard(QBoxLayout* itemsLayout,
         &SearchDropdown::activated,
         this,
         [this, properties, memberName, index, innerLayout, category, dropdown]() {
-            std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
-            if (!lockedProperties) {
+            std::shared_ptr<PropertyMap> props = properties.lock();
+            if (!props) {
                 return;
             }
-            PropertyList& list = (*lockedProperties)[memberName].toList();
+            PropertyList& list = (*props)[memberName].toList();
             if (index >= list.size()) {
                 return;
             }
             list[index] = PropertyMap();
-            PropertyMap& itemProperties = list[index].toMap();
+            PropertyMap& itemProps = list[index].toMap();
             const QString typeName = dropdown->currentData().toString();
-            rebuildItemForm(innerLayout, itemProperties, typeName, category);
+            rebuildItemForm(innerLayout, itemProps, typeName, category);
             emit fieldChanged();
         }
     );
@@ -1296,11 +1296,11 @@ void SchemaFormWidget::buildRefArrayCard(QBoxLayout* itemsLayout,
         &QPushButton::clicked,
         this,
         [this, properties, memberName, index, itemsLayout, category, referenceId]() {
-            std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
-            if (!lockedProperties) {
+            std::shared_ptr<PropertyMap> props = properties.lock();
+            if (!props) {
                 return;
             }
-            PropertyList& list = (*lockedProperties)[memberName].toList();
+            PropertyList& list = (*props)[memberName].toList();
             if (index < list.size()) {
                 list.erase(list.begin() + static_cast<int>(index));
             }
@@ -1368,11 +1368,11 @@ void SchemaFormWidget::buildInlineArrayCard(QBoxLayout* itemsLayout,
         &QPushButton::clicked,
         this,
         [this, properties, memberName, index, itemsLayout, membersPtr]() {
-            std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
-            if (!lockedProperties) {
+            std::shared_ptr<PropertyMap> props = properties.lock();
+            if (!props) {
                 return;
             }
-            PropertyList& list = (*lockedProperties)[memberName].toList();
+            PropertyList& list = (*props)[memberName].toList();
             if (index < list.size()) {
                 list.erase(list.begin() + static_cast<int>(index));
             }
@@ -1431,12 +1431,12 @@ void SchemaFormWidget::buildRefArrayContent(CollapsibleSection* section,
         &QPushButton::clicked,
         this,
         [this, properties, memberName, itemsLayout, category, referenceId]() {
-            std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
-            if (!lockedProperties) {
+            std::shared_ptr<PropertyMap> props = properties.lock();
+            if (!props) {
                 return;
             }
-            (*lockedProperties)[memberName].toList().push_back(PropertyMap());
-            const size_t newIndex = (*lockedProperties)[memberName].toList().size() - 1;
+            (*props)[memberName].toList().push_back(PropertyMap());
+            const size_t newIndex = (*props)[memberName].toList().size() - 1;
             buildRefArrayCard(
                 itemsLayout,
                 memberName,
@@ -1579,14 +1579,14 @@ void SchemaFormWidget::buildPolymorphicRefContent(CollapsibleSection* section,
         [this, properties, memberName, innerLayout, dropdown, clearButton, category,
          previousIndex]()
         {
-            std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
-            if (!lockedProperties) {
+            std::shared_ptr<PropertyMap> props = properties.lock();
+            if (!props) {
                 return;
             }
 
             // Check if the user has filled in any fields beyond the "Type" key
-            const auto it = lockedProperties->find(memberName);
-            bool hasEntry = it != lockedProperties->end() && it->second.isMap();
+            const auto it = props->find(memberName);
+            bool hasEntry = it != props->end() && it->second.isMap();
             bool hasExistingData = hasEntry && it->second.toMap().size() > 1;
 
             if (hasExistingData) {
@@ -1603,8 +1603,8 @@ void SchemaFormWidget::buildPolymorphicRefContent(CollapsibleSection* section,
                 }
             }
 
-            (*lockedProperties)[memberName] = PropertyMap();
-            PropertyMap& subProperties = (*lockedProperties)[memberName].toMap();
+            (*props)[memberName] = PropertyMap();
+            PropertyMap& subProperties = (*props)[memberName].toMap();
 
             rebuildItemForm(
                 innerLayout,
@@ -1636,14 +1636,14 @@ void SchemaFormWidget::buildPolymorphicRefContent(CollapsibleSection* section,
         [this, properties, memberName, dropdown, innerLayout, clearButton,
          previousIndex]()
         {
-            std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
-            if (!lockedProperties) {
+            std::shared_ptr<PropertyMap> props = properties.lock();
+            if (!props) {
                 return;
             }
 
             // Check if the user has filled in any fields beyond the "Type" key
-            const auto it = lockedProperties->find(memberName);
-            bool hasEntry = it != lockedProperties->end() && it->second.isMap();
+            const auto it = props->find(memberName);
+            bool hasEntry = it != props->end() && it->second.isMap();
             bool hasExistingData = hasEntry && it->second.toMap().size() > 1;
 
             if (hasExistingData) {
@@ -1662,7 +1662,7 @@ void SchemaFormWidget::buildPolymorphicRefContent(CollapsibleSection* section,
             dropdown->setCurrentIndex(-1);
             clearButton->setVisible(false);
             clearLayout(innerLayout);
-            lockedProperties->erase(memberName);
+            props->erase(memberName);
             emit fieldChanged();
             *previousIndex = -1;
         }
@@ -1699,12 +1699,12 @@ void SchemaFormWidget::buildInlineArrayContent(CollapsibleSection* section,
         &QPushButton::clicked,
         this,
         [this, properties, memberName, itemsLayout, membersPtr]() {
-            std::shared_ptr<PropertyMap> lockedProperties = properties.lock();
-            if (!lockedProperties) {
+            std::shared_ptr<PropertyMap> props = properties.lock();
+            if (!props) {
                 return;
             }
-            (*lockedProperties)[memberName].toList().push_back(PropertyMap());
-            const size_t newIndex = (*lockedProperties)[memberName].toList().size() - 1;
+            (*props)[memberName].toList().push_back(PropertyMap());
+            const size_t newIndex = (*props)[memberName].toList().size() - 1;
 
             buildInlineArrayCard(
                 itemsLayout,

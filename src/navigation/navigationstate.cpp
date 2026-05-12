@@ -136,8 +136,8 @@ NavigationState::NavigationState(const nlohmann::json& json) {
     if (auto it = json.find("referenceframe");  it != json.end()) {
         referenceFrame = it->get<std::string>();
     }
-    else if (auto it = json.find("referenceFrame");  it != json.end()) {
-        referenceFrame = it->get<std::string>();
+    else if (auto it2 = json.find("referenceFrame");  it2 != json.end()) {
+        referenceFrame = it2->get<std::string>();
     }
     else {
         referenceFrame = anchor;

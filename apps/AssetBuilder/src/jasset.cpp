@@ -45,7 +45,7 @@ namespace {
             for (auto it = object.begin(); it != object.end(); it++) {
                 map[it.key().toStdString()] = jsonValueToProperty(it.value());
             }
-            return std::move(map);
+            return map;
         }
         if (value.isArray()) {
             PropertyList list;
@@ -53,7 +53,7 @@ namespace {
             for (const QJsonValue& item : array) {
                 list.push_back(jsonValueToProperty(item));
             }
-            return std::move(list);
+            return list;
         }
         return PropertyValue();
     }
