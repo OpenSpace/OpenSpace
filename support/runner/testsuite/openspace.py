@@ -27,12 +27,13 @@ import glob
 import os
 import subprocess
 import time
+from typing import Any
 from openspace import Api
 from .test import Test, TestResult
 
 
 
-def write_configuration_overwrite(base_path, data_path):
+def write_configuration_overwrite(base_path: str, data_path: str) -> None:
   """
   Creates a openspace.cfg override file that sets up a common testing environment. These
   are mostly for enabling caching to reduce the amount of testing and removing as much of
@@ -65,7 +66,7 @@ def write_configuration_overwrite(base_path, data_path):
 
 
 
-async def setup_test_run(openspace):
+async def setup_test_run(openspace: Any) -> None:
   """
   Setup settings that are common to all test runs. These are, in general, settings that
   are reasonably different between runs of OpenSpace, such as the local time, the commit
@@ -87,7 +88,7 @@ async def setup_test_run(openspace):
 
 
 
-async def internal_run(openspace, os_api, test, shutdown=True):
+async def internal_run(openspace: Any, os_api: Api, test: Test, shutdown: bool = True) -> tuple[str, str]:
   """
   This function runs the actual test with the library object passed into it. It first sets
   up default values, then runs the individual instructions for the test, and retrieves
@@ -118,7 +119,7 @@ async def internal_run(openspace, os_api, test, shutdown=True):
 
 
 
-def run_single_test(test_path, executable, per_profile_wait) -> TestResult:
+def run_single_test(test_path: str, executable: str, per_profile_wait: dict[str, int]) -> TestResult | None:
   """
   Run the single test provided by `test_path` using the OpenSpace executable provided by
   `executable`. This will include starting OpenSpace as a subprocess using a known
@@ -200,7 +201,7 @@ def run_single_test(test_path, executable, per_profile_wait) -> TestResult:
 
 
 
-def run_single_test_attached(test_path) -> TestResult:
+def run_single_test_attached(test_path: str) -> TestResult | None:
   """
   Run the single test provided by `test_path` against an already-running OpenSpace
   instance. Unlike `run_single_test`, this function does not start or stop OpenSpace —
@@ -226,8 +227,8 @@ def run_single_test_attached(test_path) -> TestResult:
     """
     print("  Connecting...")
     os_api = Api("localhost", 4681)
-    os_api.connect()
-    openspace = await os_api.singleReturnLibrary()
+    await os_api.connect()
+    openspace = await os_api.library()
     print("  Connected to OpenSpace")
     screenshot_folder, commit = await asyncio.create_task(
       internal_run(openspace, os_api, test, shutdown=False)

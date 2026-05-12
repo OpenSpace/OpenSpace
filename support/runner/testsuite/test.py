@@ -26,7 +26,6 @@ import asyncio
 import json
 import os
 from .instruction import Instruction
-from .constants import test_base_dir
 
 class TestResult:
   """
@@ -89,7 +88,7 @@ class Test:
 
     # Get the testname by removing everything before (and including) "test/visual" and
     # also removing the extension
-    start_idx = self.test_path.find(test_base_dir) + len(test_base_dir) + 1
+    start_idx = self.test_path.find("visualtests") + len("visualtests") + 1
     full = self.test_path[start_idx:-len(".ostest")]
     parts = full.split("/")
 

@@ -31,7 +31,6 @@ import requests
 import shutil
 import time
 from pathlib import Path
-from testsuite.constants import test_base_dir
 from testsuite.openspace import write_configuration_overwrite, run_single_test, run_single_test_attached
 from testsuite.test import TestResult
 
@@ -43,7 +42,7 @@ from testsuite.test import TestResult
 #       to the finished loading event instead
 
 def submit_image(result: TestResult, hardware: str, timestamp: str, file: str,
-                 runner: str, url: str):
+                 runner: str, url: str) -> None:
   """
   Submits a new candidate image to the provided URL. This function logs a method
   indicating whether the image submission succeeded
@@ -76,7 +75,7 @@ def submit_image(result: TestResult, hardware: str, timestamp: str, file: str,
 
 
 
-def store_image(result: TestResult, file: str):
+def store_image(result: TestResult, file: str) -> None:
   """
   Stores the images of the provided `TestResult` locally by creating the necessary folders
   if they don't exist and then saving the image. Only the latest test result are stored.
@@ -129,12 +128,17 @@ if __name__ == "__main__":
   dir = f"{Path(__file__).resolve().parent}/../.."
 
 
-  global_start = time.perf_counter()
+  global_start: float = time.perf_counter()
+  submit_images = False
+  submit_url = ""
+  hardware = ""
+  runner_id = ""
+  per_profile_wait: dict[str, int] = {}
   if os.path.exists("config.json"):
     submit_images = True
     with open("config.json") as f:
       config = json.load(f)
-      url = config["url"]
+      url: str = config["url"]
       submit_url = f"{url}/api/submit-test"
       hardware = config["hardware"]
       runner_id = config["id"]
@@ -174,7 +178,7 @@ if __name__ == "__main__":
     if os.path.isfile(test_arg):
       path = test_arg
     else:
-      path = f"{dir}/{test_base_dir}/{test_arg}.ostest"
+      path = f"{dir}/visualtests/{test_arg}.ostest"
 
     if not os.path.isfile(path):
       raise Exception(f"Could not find test '{path}'")
@@ -185,21 +189,22 @@ if __name__ == "__main__":
     except Exception as e:
       print(f"Test '{path}' failed with error: {e}")
     else:
-      for file in (result.files if result is not None else []):
-        if submit_images:
-          submit_image(result, hardware, timestamp, file, runner_id, submit_url)
-        else:
-          store_image(result, file)
+      if result is not None:
+        for file in result.files:
+          if submit_images:
+            submit_image(result, hardware, timestamp, file, runner_id, submit_url)
+          else:
+            store_image(result, file)
 
   else:
     if args.test is None:
       print("Running all tests in OpenSpace folder")
-      files = glob.glob(f"{dir}/{test_base_dir}/**/*.ostest", recursive=True)
+      files = glob.glob(f"{dir}/visualtests/**/*.ostest", recursive=True)
       files = [f.replace(os.sep, "/") for f in files]
     else:
       tests = args.test.split(",")
       print(f"Running tests: {tests}")
-      files = [f"{dir}/{test_base_dir}/{test}.ostest" for test in tests]
+      files = [f"{dir}/visualtests/{test}.ostest" for test in tests]
       for path in files:
         if not os.path.isfile(path):
           raise Exception(f"Could not find test '{path}'")
