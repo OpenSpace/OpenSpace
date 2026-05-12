@@ -102,26 +102,8 @@ RenderablePlaneImageOnline::RenderablePlaneImageOnline(
     }
 
     _autoScale.onChange([this]() {
-        if (!_autoScale) {
-            return;
-        }
-
-        // Shape the plane based on the aspect ratio of the image
-        const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
-        if (_textureDimensions != textureDim) {
-            const float aspectRatio = textureDim.x / textureDim.y;
-            const float planeAspectRatio = _size.value().x / _size.value().y;
-
-            if (std::abs(planeAspectRatio - aspectRatio) >
-                std::numeric_limits<float>::epsilon())
-            {
-                _size =
-                    aspectRatio > 0.f ?
-                    glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
-                    glm::vec2(_size.value().x, _size.value().y * aspectRatio);
-            }
-
-            _textureDimensions = textureDim;
+        if (_autoScale) {
+            scaleToAspectRatio();
         }
     });
 }
@@ -243,26 +225,8 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
         _textureIsDirty = false;
     }
 
-    if (!_autoScale) {
-        return;
-    }
-
-    // Shape the plane based on the aspect ratio of the image
-    const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
-    if (_textureDimensions != textureDim) {
-        const float aspectRatio = textureDim.x / textureDim.y;
-        const float planeAspectRatio = _size.value().x / _size.value().y;
-
-        if (std::abs(planeAspectRatio - aspectRatio) >
-            std::numeric_limits<float>::epsilon())
-        {
-            _size =
-                aspectRatio > 0.f ?
-                glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
-                glm::vec2(_size.value().x, _size.value().y * aspectRatio);
-        }
-
-        _textureDimensions = textureDim;
+    if (_autoScale) {
+        scaleToAspectRatio();
     }
 }
 
@@ -284,6 +248,30 @@ RenderablePlaneImageOnline::downloadImageToMemory(const std::string& url)
             );
         }
     );
+}
+
+void RenderablePlaneImageOnline::scaleToAspectRatio() {
+    if (!_texture) {
+        return;
+    }
+
+    // Shape the plane based on the aspect ratio of the image
+    const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+    if (_textureDimensions != textureDim) {
+        const float aspectRatio = textureDim.x / textureDim.y;
+        const float planeAspectRatio = _size.value().x / _size.value().y;
+
+        if (std::abs(planeAspectRatio - aspectRatio) >
+            std::numeric_limits<float>::epsilon())
+        {
+            _size =
+                aspectRatio > 0.f ?
+                glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
+                glm::vec2(_size.value().x, _size.value().y * aspectRatio);
+        }
+
+        _textureDimensions = textureDim;
+    }
 }
 
 } // namespace openspace

@@ -49,6 +49,8 @@ protected:
 private:
     void loadTexture();
 
+    void scaleToAspectRatio();
+
     StringProperty _texturePath;
     StringProperty _rightTexturePath;
 

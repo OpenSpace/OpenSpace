@@ -51,6 +51,8 @@ private:
     std::future<DownloadManager::MemoryFile> downloadImageToMemory(
         const std::string& url);
 
+    void scaleToAspectRatio();
+
     StringProperty _texturePath;
     StringProperty _rightTexturePath;
 

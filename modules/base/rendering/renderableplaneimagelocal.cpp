@@ -128,32 +128,9 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
         });
     }
 
-    _autoScale.onChange([this]() {
-        if (!_autoScale) {
-            return;
-        }
-
-        // Shape the plane based on the aspect ratio of the image
-        const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
-        if (_textureDimensions == textureDim) {
-            return;
-        }
-
-        const float aspectRatio = textureDim.x / textureDim.y;
-        const float planeAspectRatio = _size.value().x / _size.value().y;
-
-        if (std::abs(planeAspectRatio - aspectRatio) >
-            std::numeric_limits<float>::epsilon())
-        {
-            const glm::vec2 newSize =
-                aspectRatio > 0.f ?
-                glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
-                glm::vec2(_size.value().x, _size.value().y * aspectRatio);
-            _size = newSize;
-        }
-
-        _textureDimensions = textureDim;
-    });
+    if (_autoScale) {
+        scaleToAspectRatio();
+    }
 }
 
 void RenderablePlaneImageLocal::initializeGL() {
@@ -295,7 +272,13 @@ void RenderablePlaneImageLocal::loadTexture() {
         _textureIsDirty = false;
     }
 
-    if (!_autoScale) {
+    if (_autoScale) {
+        scaleToAspectRatio();
+    }
+}
+
+void RenderablePlaneImageLocal::scaleToAspectRatio() {
+    if (!_texture) {
         return;
     }
 
@@ -308,11 +291,10 @@ void RenderablePlaneImageLocal::loadTexture() {
         if (std::abs(planeAspectRatio - aspectRatio) >
             std::numeric_limits<float>::epsilon())
         {
-            const glm::vec2 newSize =
+            _size =
                 aspectRatio > 0.f ?
                 glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
                 glm::vec2(_size.value().x, _size.value().y * aspectRatio);
-            _size = newSize;
         }
 
         _textureDimensions = textureDim;
