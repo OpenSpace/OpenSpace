@@ -61,7 +61,6 @@
 #include <modules/base/rendering/renderableswitch.h>
 #include <modules/base/rendering/renderabletrailorbit.h>
 #include <modules/base/rendering/renderabletrailtrajectory.h>
-#include <modules/base/rendering/renderableplaneimage.h>
 #include <modules/base/rendering/renderableplaneimagelocal.h>
 #include <modules/base/rendering/renderableplaneimageonline.h>
 #include <modules/base/rendering/renderableplanetimevaryingimage.h>
@@ -184,7 +183,6 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableModel>("RenderableModel");
     fRenderable->registerClass<RenderableNodeArrow>("RenderableNodeArrow");
     fRenderable->registerClass<RenderableNodeLine>("RenderableNodeLine");
-    fRenderable->registerClass<RenderablePlaneImage>("RenderablePlaneImage");
     fRenderable->registerClass<RenderablePlaneImageLocal>("RenderablePlaneImageLocal");
     fRenderable->registerClass<RenderablePlaneImageOnline>("RenderablePlaneImageOnline");
     fRenderable->registerClass<RenderablePlaneTimeVaryingImage>(
@@ -296,7 +294,6 @@ std::vector<Documentation> BaseModule::documentations() const {
         RenderableModel::Documentation(),
         RenderableNodeArrow::Documentation(),
         RenderableNodeLine::Documentation(),
-        RenderablePlaneImage::Documentation(),
         RenderablePlaneImageLocal::Documentation(),
         RenderablePlaneImageOnline::Documentation(),
         RenderablePlaneTimeVaryingImage::Documentation(),
