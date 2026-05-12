@@ -23,6 +23,7 @@
 ##########################################################################################
 
 import asyncio
+from typing import Any
 
 
 
@@ -51,7 +52,10 @@ class Instruction:
   each paramater needs a `type` that identifies which kind of instruction it is and most
   instructions need a `value` that contains parameters for the instruction.
   """
-  def __init__(self, obj):
+  type: str
+  value: Any
+
+  def __init__(self, obj: dict[str, Any]) -> None:
     if not "type" in obj:
       raise Exception("Missing key 'type'")
 
@@ -69,7 +73,7 @@ class Instruction:
 
 
 
-  def __repr__(self):
+  def __repr__(self) -> str:
     if self.value == {}:
       return f"({self.type})"
     else:
@@ -77,12 +81,12 @@ class Instruction:
 
 
 
-  def is_screenshot(self):
+  def is_screenshot(self) -> bool:
     return self.type == "screenshot"
 
 
 
-  async def run(self, openspace, os_api):
+  async def run(self, openspace: Any, os_api: Any) -> None:
     """
     Runs this instruction against the OpenSpace API object `openspace` that was passed to
     this function. If this instruction is not a valid instruction, either because it has

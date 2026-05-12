@@ -152,7 +152,7 @@ if __name__ == "__main__":
     submit_images = False
 
 
-
+  executable = ""
   if args.attach:
     if not args.test or "," in args.test:
       raise Exception("--attach requires exactly one test, not a comma-separated list")

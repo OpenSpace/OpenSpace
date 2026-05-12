@@ -25,6 +25,7 @@
 import asyncio
 import json
 import os
+from typing import Any
 from .instruction import Instruction
 
 class TestResult:
@@ -52,7 +53,14 @@ class Test:
 
   For now only a single screenshot instruction is supported.
   """
-  def __init__(self, path: str):
+  skipTest: bool
+  profile: str
+  instructions: list[Instruction]
+  group: str
+  name: str
+  test_path: str
+
+  def __init__(self, path: str) -> None:
     assert(os.path.isfile(path))
     self.test_path = path.replace(os.sep, "/")
 
@@ -97,7 +105,7 @@ class Test:
     self.name = parts[-1]
 
 
-  async def run(self, openspace, os_api):
+  async def run(self, openspace: Any, os_api: Any) -> None:
     """
     Runs the actual instructions on the provided OpenSpace API instance. There is a
     mandatory 1s wait time between every instructions

@@ -151,6 +151,7 @@ def run_single_test(test_path: str, executable: str, per_profile_wait: dict[str,
     stdout=subprocess.DEVNULL,
     stderr=subprocess.PIPE
   )
+  assert process.stderr is not None
 
   # Add a sleeping time instead of repeatedly trying to reconnect. Starting up OpenSpace
   # in general takes longer than this, so we don't actually lose any time. If a
