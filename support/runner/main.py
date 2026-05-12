@@ -89,11 +89,7 @@ def store_image(result: TestResult, file: str):
 
 
 
-def setup_argparse():
-  """
-  Creates and sets up a parser for commandline arguments. This function returns the parsed
-  arguments as a dictionary.
-  """
+if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument(
     "-t", "--test",
@@ -117,15 +113,6 @@ def setup_argparse():
     required=False
   )
   parser.add_argument(
-    "-dr", "--dry-run",
-    dest="dry_run",
-    help="Provides a full list of the tests to be run in the proper order, but does not "
-      "run any tests.",
-    required=False,
-    action="store_true",
-    default=False
-  )
-  parser.add_argument(
     "-a", "--attach",
     dest="attach",
     help="Run a single test against an already-running OpenSpace instance without "
@@ -136,12 +123,12 @@ def setup_argparse():
     action="store_true",
     default=False
   )
-
   args = parser.parse_args()
-  return args
+
+  # Finding the root OpenSpace folder
+  dir = f"{Path(__file__).resolve().parent}/../.."
 
 
-if __name__ == "__main__":
   global_start = time.perf_counter()
   if os.path.exists("config.json"):
     submit_images = True
@@ -161,13 +148,9 @@ if __name__ == "__main__":
     submit_images = False
 
 
-  args = setup_argparse()
 
-  dir = f"{Path(__file__).resolve().parent}/../.."
   if args.attach:
-    if not args.test:
-      raise Exception("--attach requires exactly one test to be specified via --test")
-    if "," in args.test:
+    if not args.test or "," in args.test:
       raise Exception("--attach requires exactly one test, not a comma-separated list")
   else:
     # Find the executable location and its name
@@ -177,12 +160,11 @@ if __name__ == "__main__":
     else:
       # Linux
       executable = f"{dir}/bin/OpenSpace"
-
     if not os.path.exists(executable):
       raise Exception(f"Could not find executable '{executable}'")
 
-  if not args.attach and args.overwrite_path != None:
-    write_configuration_overwrite(dir, args.overwrite_path)
+    if args.overwrite_path != None:
+      write_configuration_overwrite(dir, args.overwrite_path)
 
 
 
@@ -209,16 +191,21 @@ if __name__ == "__main__":
         else:
           store_image(result, file)
 
-  elif args.test is None:
-    print("Running all tests in OpenSpace folder")
-    files = glob.glob(f"{dir}/{test_base_dir}/**/*.ostest", recursive=True)
+  else:
+    if args.test is None:
+      print("Running all tests in OpenSpace folder")
+      files = glob.glob(f"{dir}/{test_base_dir}/**/*.ostest", recursive=True)
+      files = [f.replace(os.sep, "/") for f in files]
+    else:
+      tests = args.test.split(",")
+      print(f"Running tests: {tests}")
+      files = [f"{dir}/{test_base_dir}/{test}.ostest" for test in tests]
+      for path in files:
+        if not os.path.isfile(path):
+          raise Exception(f"Could not find test '{path}'")
+
     for file in files:
-      # Normalize the path endings to always do forward slashes
-      file = file.replace(os.sep, "/")
       timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
-      if args.dry_run:
-        print(f"Test: '{file}' run against executable '{executable}'")
-        continue
 
       try:
         result = run_single_test(file, executable, per_profile_wait)
@@ -232,33 +219,6 @@ if __name__ == "__main__":
           submit_image(result, hardware, timestamp, img, runner_id, submit_url)
         else:
           store_image(result, img)
-      time.sleep(5.0)
-  elif not args.attach:
-    tests = args.test.split(",")
-    print(f"Running tests: {tests}")
-    for test in tests:
-      path = f"{dir}/{test_base_dir}/{test}.ostest"
-      if not os.path.isfile(path):
-        raise Exception(f"Could not find test '{path}'")
-
-      timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
-
-      if args.dry_run:
-        print(f"Test: '{path}' run against executable '{executable}'")
-        continue
-
-      try:
-        result = run_single_test(path, executable, per_profile_wait)
-      except Exception as e:
-        print(f"Test '{path}' failed with error: {e}")
-        continue
-      if result is None:
-        continue
-      for file in result.files:
-        if submit_images:
-          submit_image(result, hardware, timestamp, file, runner_id, submit_url)
-        else:
-          store_image(result, file)
       time.sleep(5.0)
 
   global_end = time.perf_counter()
