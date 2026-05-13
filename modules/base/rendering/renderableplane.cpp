@@ -248,7 +248,7 @@ RenderablePlane::DistanceScalingSettings::DistanceScalingSettings(
 
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary,
                                  RenderableSettings settings)
-    : Renderable(dictionary, settings)
+    : Renderable(dictionary, std::move(settings))
     , _blendMode(BlendModeInfo)
     , _renderOption(OrientationRenderOptionInfo)
     , _mirrorBackside(MirrorBacksideInfo, false)

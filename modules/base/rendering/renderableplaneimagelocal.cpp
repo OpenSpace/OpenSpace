@@ -68,7 +68,7 @@ namespace {
         std::string texture;
 
         // [[codegen::verbatim(RightTextureInfo.description)]]
-        std::optional<std::string> rightTexture;
+        std::optional<std::filesystem::path> rightTexture;
 
         // If this value is set to true, the image for this plane will not be loaded at
         // startup but rather when plane is shown for the first time. Additionally, if the
@@ -88,7 +88,8 @@ Documentation RenderablePlaneImageLocal::Documentation() {
 }
 
 RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary)
-    : RenderablePlane(dictionary,
+    : RenderablePlane(
+        dictionary,
         {
             .automaticallyUpdateRenderBin = false,
             .shouldUpdateIfDisabled = true
@@ -109,7 +110,7 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
 
     if (p.rightTexture.has_value()) {
         _isStereo = true;
-        _rightTexturePath = absPath(*p.rightTexture).string();
+        _rightTexturePath = (*p.rightTexture).string();
         _rightTextureFile =
             std::make_unique<ghoul::filesystem::File>(_rightTexturePath.value());
         _rightTextureFile->setCallback([this]() { _textureIsDirty = true; });
@@ -144,6 +145,9 @@ void RenderablePlaneImageLocal::initializeGL() {
 }
 
 void RenderablePlaneImageLocal::deinitializeGL() {
+    _textureFile = nullptr;
+    _rightTextureFile = nullptr;
+
     BaseModule::TextureManager.release(_texture);
     _texture = nullptr;
 
