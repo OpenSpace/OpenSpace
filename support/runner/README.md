@@ -3,10 +3,10 @@ The _Runner_ is a Python script that will execute and possibly submit test resul
 
 | Parameter | Description |
 | --------- | ----------- |
-| `--test` | A comma-separated list of the group/name combination of the tests that should be run. The group of a test is all of the folders relative to the `tests/visual` server concatenated with the name of the test being the filename. For example a test in `tests/visual/mars/insight/landing.ostest` would have the group "mars/insight" and the name "landing". |
+| `--test` | A comma-separated list of the group/name combination of the tests that should be run. The group of a test is all of the folders relative to the `visualtests` server concatenated with the name of the test being the filename. For example a test in `visualtests/mars/insight/landing.ostest` would have the group "mars/insight" and the name "landing". |
 | `--overwrite` | This path can be provided to store commonly used files that can be useful to keep between test runs. Right now, this is only used for the Sync folder and the MRF cache used by OpenSpace. |
 
-Example: `python main.py --dir C:/Development/OpenSpace --test default/earth,rosetta/model default --overwrite C:/Development/TestCache`
+Example: `python main.py --test default/earth,rosetta/model default --overwrite C:/Development/TestCache`
 
 Additionally, a `config.json` must be provided if tests are to be submitted to the regression server. The `config.sample.json` provides a stub that can be used as the starting point for configuring the JSON file.
 

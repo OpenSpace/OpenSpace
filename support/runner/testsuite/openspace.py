@@ -32,19 +32,19 @@ from .test import Test, TestResult
 
 
 
-def write_configuration_overwrite(base_path: str, data_path: str) -> None:
+def write_configuration_overwrite(base_path: Path, data_path: Path) -> None:
   """
   Creates a openspace.cfg override file that sets up a common testing environment. These
   are mostly for enabling caching to reduce the amount of testing and removing as much of
   the logging as possible which would otherwise pollute the usage results
   """
-  with open(Path(base_path) / "openspace.cfg.override", "w") as f:
+  with open(base_path / "openspace.cfg.override", "w") as f:
     # Use a common sync folder outside of the build to prevent redownloading of data
-    sync_location = (Path(data_path) / "sync").as_posix()
+    sync_location = (data_path / "sync").as_posix()
     f.write(f"Paths.SYNC = os.getenv([[OPENSPACE_SYNC]]) or [[{sync_location}]]\n")
 
     # Enable MRF caching for the same reason and to reduce dependency on external servers
-    mrf_location = (Path(data_path) / "mrf").as_posix()
+    mrf_location = (data_path / "mrf").as_posix()
     f.write("ModuleConfigurations.GlobeBrowsing.MRFCacheEnabled = true\n")
     f.write(f"ModuleConfigurations.GlobeBrowsing.MRFCacheLocation = [[{mrf_location}]]\n")
 

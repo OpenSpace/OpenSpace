@@ -166,7 +166,7 @@ if __name__ == "__main__":
       raise Exception(f"Could not find executable '{executable}'")
 
     if args.overwrite_path is not None:
-      write_configuration_overwrite(root_dir, args.overwrite_path)
+      write_configuration_overwrite(root_dir, Path(args.overwrite_path))
 
 
 
