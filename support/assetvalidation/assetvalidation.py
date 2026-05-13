@@ -36,6 +36,16 @@ verbose = False
 # Logging object
 logger = logging.getLogger(__name__)
 
+class OpenSpaceCrashException(Exception):
+  """
+  Raised when OpenSpace crashes mid-run, carrying the number of assets that were
+  successfully validated before the crash.
+  """
+  def __init__(self, completedCount: int, cause: Exception):
+    super().__init__(str(cause))
+    self.completedCount = completedCount
+    self.cause = cause
+
 def log(*values: object, logLevel = logging.DEBUG):
   """Custom log function to log messages to file and optionally to console"""
   msg = ' '.join(str(v) for v in values)
@@ -175,9 +185,14 @@ async def waitForAssetState(eventTopic, path: str, expectedState: str) -> str:
         )
         return state
 
-async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Api):
+async def internalRun(
+  openspace, assets: list[pathlib.Path], osDir: str, api: Api,
+  startIndex: int = 0, totalCount: int = 0
+):
   """Logic for running the asset validation tests"""
   assetCount = 0
+  if totalCount == 0:
+    totalCount = len(assets)
 
   logsettings = {
     "timeStamping": False,
@@ -192,7 +207,7 @@ async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Ap
     if (logLevel == "Fatal"):
       level = logging.CRITICAL
 
-    message = f"[{logMsg["category"]}]: {logMsg["message"]}"
+    message = f"['{path}'] - [{logMsg["category"]}]: {logMsg["message"]}"
     log(message, logLevel = level)
 
   cancelSubscriptionToErrorLog = api.subscribeToLogMessages(logsettings, onMessage)
@@ -204,62 +219,78 @@ async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Ap
     for root in roots.values():
       await openspace.asset.remove(root)
 
-  # Make sure we start on a completely empty scene
-  await unloadAssets()
-  await ensureEmptyScene(openspace, "Pre-emptying scene")
-
   eventTopic = api.subscribeToEvent("AssetLoading")
-  log("Subscribed to AssetLoadingFinished event")
+  log("Subscribed to AssetLoading event")
 
-  for asset in assets:
-    log(f"Handling asset {assetCount}/{len(assets) - 1}", logLevel = logging.INFO)
-    log(f"Asset: {asset}", logLevel = logging.INFO)
-
-    # We want to start with a cleared cache to make sure assets load correctly from
-    # scratch
-    removeCache(osDir)
-    global path
-    path = str(asset).replace(os.sep, "/")
-
-    # Load asset
-    log(f"Adding asset without cache")
-    await openspace.asset.add(path)
-    log("Waiting for AssetLoading 'Loaded' event")
-    await waitForAssetState(eventTopic, path, "Loaded")
-    log("Asset loaded")
-
-    # Unload asset
-    log("Unloading assets")
+  try:
+    # Make sure we start on a completely empty scene
     await unloadAssets()
-    log("Waiting for AssetLoading 'Unloaded' event")
-    await waitForAssetState(eventTopic, path, "Unloaded")
-    log("Ensuring scene is empty")
-    await ensureEmptyScene(openspace, asset)
+    await ensureEmptyScene(openspace, "Pre-emptying scene")
 
-    # Load asset using cache
-    log(f"Adding asset from cache")
-    await openspace.asset.add(path)
-    log("Waiting for AssetLoading 'Loaded' event")
-    await waitForAssetState(eventTopic, path, "Loaded")
-    log("Asset loaded")
+    for asset in assets:
+      globalIndex = startIndex + assetCount + 1
+      log(f"Handling asset {globalIndex}/{totalCount}", logLevel = logging.INFO)
+      log(f"Asset: {asset}", logLevel = logging.INFO)
 
-    # Unload assets again
-    log("Unloading assets")
-    await unloadAssets()
-    log("Waiting for AssetLoading 'Unloaded' event")
-    await waitForAssetState(eventTopic, path, "Unloaded")
-    log("Ensuring scene is empty")
-    await ensureEmptyScene(openspace, asset)
+      # We want to start with a cleared cache to make sure assets load correctly from
+      # scratch
+      removeCache(osDir)
+      global path
+      path = str(asset).replace(os.sep, "/")
 
-    assetCount += 1
-    log("Finished testing asset", logLevel = logging.INFO)
-    time.sleep(0.5) # Arbitrary sleep to let OpenSpace breathe
+      try:
+        # Load asset
+        log(f"Adding asset without cache")
+        await openspace.asset.add(path)
+        log("Waiting for AssetLoading 'Loaded' event")
+        await waitForAssetState(eventTopic, path, "Loaded")
+        log("Asset loaded")
 
-  # eventUnsubscribeToErrorLog.set()
-  eventTopic.cancel() # Unsubscribe to event
-  await cancelSubscriptionToErrorLog()
+        # Unload asset
+        log("Unloading assets")
+        await unloadAssets()
+        log("Waiting for AssetLoading 'Unloaded' event")
+        await waitForAssetState(eventTopic, path, "Unloaded")
+        log("Ensuring scene is empty")
+        await ensureEmptyScene(openspace, asset)
 
-async def mainLoop(files, osDir):
+        # Load asset using cache
+        log(f"Adding asset from cache")
+        await openspace.asset.add(path)
+        log("Waiting for AssetLoading 'Loaded' event")
+        await waitForAssetState(eventTopic, path, "Loaded")
+        log("Asset loaded")
+
+        # Unload assets again
+        log("Unloading assets")
+        await unloadAssets()
+        log("Waiting for AssetLoading 'Unloaded' event")
+        await waitForAssetState(eventTopic, path, "Unloaded")
+        log("Ensuring scene is empty")
+        await ensureEmptyScene(openspace, asset)
+
+        assetCount += 1
+        log("Finished testing asset", logLevel = logging.INFO)
+        time.sleep(0.5) # Arbitrary sleep to let OpenSpace breathe
+
+      except Exception as e:
+        raise OpenSpaceCrashException(assetCount, e)
+  finally:
+    try:
+      eventTopic.cancel()
+    except Exception:
+      pass
+    try:
+      await cancelSubscriptionToErrorLog()
+    except Exception:
+      pass
+
+  return assetCount
+
+async def mainLoop(files, osDir, startIndex: int = 0, totalCount: int = 0) -> int:
+  """Connects to OpenSpace and runs the asset validation. Returns the number of
+  successfully validated assets. Returns less than len(files) if a crash occurred.
+  """
   log("Connecting to OpenSpace...")
   api = Api("localhost", 4681)
   await api.connect()
@@ -267,11 +298,14 @@ async def mainLoop(files, osDir):
   log("Connected to OpenSpace")
 
   try:
-    await internalRun(openspace, files, osDir, api)
-  except Exception as e:
-    log(f"Exception during validation: {path}", logLevel = logging.ERROR)
-    log(f"Exception during validation: {e}", logLevel = logging.ERROR)
-  api.disconnect()
+    return await internalRun(openspace, files, osDir, api, startIndex, totalCount)
+  except OpenSpaceCrashException as e:
+    return e.completedCount
+  finally:
+    try:
+      api.disconnect()
+    except Exception:
+      pass
 
 def runAssetValidation(files: list[pathlib.Path], executable: str, args):
   """
@@ -292,14 +326,13 @@ def runAssetValidation(files: list[pathlib.Path], executable: str, args):
   global verbose
   verbose = args.verbose
 
-  levelNamesMapping = logging.getLevelNamesMapping()
+  logLevelNamesMapping = logging.getLevelNamesMapping()
 
-  if args.logLevel not in levelNamesMapping:
+  if args.logLevel not in logLevelNamesMapping:
     log(f"Invalid log level '{args.logLevel}' provided, defaulting to 'WARNING'",
       logLevel = logging.WARNING
     )
     args.logLevel = "WARNING"
-
 
   scriptDirectory = pathlib.Path(__file__).parent.resolve()
   logging.basicConfig(
@@ -307,30 +340,63 @@ def runAssetValidation(files: list[pathlib.Path], executable: str, args):
     format = '[%(asctime)s.%(msecs)03d] %(levelname)s: %(message)s',
     datefmt = '%Y-%m-%d | %H:%M:%S',
     encoding = 'utf-8',
-    level = levelNamesMapping[args.logLevel]
+    level = logLevelNamesMapping[args.logLevel]
   )
 
   startOpenSpace = args.startOS
+  process = None
+  remaining = list(files)
+  totalCount = len(files)
+  startIndex = 0
 
-  if startOpenSpace:
-    log("Starting OpenSpace...")
-    process = subprocess.Popen(
-      [ executable, "--bypassLauncher", "--profile", "empty"],
-      cwd=os.path.dirname(executable),
-      stdout=subprocess.DEVNULL,
-      stderr=subprocess.PIPE
+  while remaining:
+    if startOpenSpace:
+      log("Starting OpenSpace...", logLevel = logging.INFO)
+      process = subprocess.Popen(
+        [executable, "--bypassLauncher", "--profile", "empty"],
+        cwd=os.path.dirname(executable),
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE
+      )
+      time.sleep(5)
+
+    loop = asyncio.new_event_loop()
+    try:
+      completed = loop.run_until_complete(
+        mainLoop(remaining, args.dir, startIndex, totalCount)
+      )
+    finally:
+      # Cancel any tasks left pending by the API (e.g. async generator athrow,
+      # subscribeToLogMessages internal queue reader) before closing the loop to avoid
+      # "Task was destroyed but it is pending!" warnings
+      pending = asyncio.all_tasks(loop)
+      if pending:
+        for task in pending:
+          task.cancel()
+        loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
+      loop.close()
+
+    if startOpenSpace and process:
+      process.kill()
+      process.wait()
+      process = None
+
+    if completed >= len(remaining):
+      log("All assets validated", logLevel = logging.INFO)
+      break
+
+    # OpenSpace crashed - log the offending asset and continue with the next one
+    crashedAsset = remaining[completed]
+    log(
+      f"OpenSpace crashed during validation of '{crashedAsset}', skipping to next asset",
+      logLevel = logging.ERROR
     )
+    startIndex += completed + 1
+    remaining = remaining[completed + 1:]
 
-  # We wait for OpenSpace to start before trying to connect
-  if startOpenSpace:
-    time.sleep(5)
-
-  loop = asyncio.new_event_loop()
-  try:
-    loop.run_until_complete(mainLoop(files, args.dir))
-  finally:
-    loop.close()
-
-  if startOpenSpace:
-    process.kill()
-    process.wait()
+    if not startOpenSpace:
+      log(
+        "Cannot restart OpenSpace automatically (--start=False). Stopping validation.",
+        logLevel = logging.ERROR
+      )
+      break

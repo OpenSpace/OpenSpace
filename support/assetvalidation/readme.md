@@ -15,9 +15,12 @@ The project provides a `requirements.txt` with the necessary dependencies. Insta
 | `--at` | Start validating at asset number #. Useful if OpenSpace crashed during testing. Note: the order in which assets are loaded is not guaranteed to be the same between runs. |
 
 ```sh
+# Default run, validate all .assets
+python main.py --dir "C:/Development/OpenSpace"
+
+# Run with filter - validates any .asset in the 'examples' folder
 python main.py --dir "C:/Development/OpenSpace" --filter "examples/*"
 
-python main.py --dir "C:/Development/OpenSpace" --verbose=t --start=false --filter "examples/*"
-
+# Start at the 10th .asset and log everything from DEBUG messages and up
 python main.py --dir "C:/Development/OpenSpace" --filter "examples/*" --at 10 --logLevel "DEBUG"
 ```
