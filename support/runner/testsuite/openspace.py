@@ -118,7 +118,7 @@ async def internal_run(openspace: Any, os_api: Api, test: Test, shutdown: bool =
 
 
 
-def run_single_test(test_path: str, executable: Path | str, per_profile_wait: dict[str, int]) -> TestResult | None:
+def run_single_test(test_path: Path, executable: Path, per_profile_wait: dict[str, int]) -> TestResult | None:
   """
   Run the single test provided by `test_path` using the OpenSpace executable provided by
   `executable`. This will include starting OpenSpace as a subprocess using a known
@@ -185,6 +185,7 @@ def run_single_test(test_path: str, executable: Path | str, per_profile_wait: di
   time.sleep(5)
 
   # Get the error log from the OpenSpace subprocess
+  assert process.stderr is not None
   error_log = process.stderr.read().decode()
 
   # Kill the OpenSpace subprocess and wait for it to be reaped to avoid zombies
@@ -207,7 +208,7 @@ def run_single_test(test_path: str, executable: Path | str, per_profile_wait: di
 
 
 
-def run_single_test_attached(test_path: str) -> TestResult | None:
+def run_single_test_attached(test_path: Path) -> TestResult | None:
   """
   Run the single test provided by `test_path` against an already-running OpenSpace
   instance. Unlike `run_single_test`, this function does not start or stop OpenSpace —

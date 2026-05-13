@@ -62,11 +62,11 @@ class Test:
   name: str
   test_path: str
 
-  def __init__(self, path: str) -> None:
-    if not Path(path).is_file():
+  def __init__(self, path: Path) -> None:
+    if not path.is_file():
       raise Exception(f"Could not find test {path}")
 
-    self.test_path = Path(path).as_posix()
+    self.test_path = path.as_posix()
 
     with open(path) as f:
       content = json.load(f)
@@ -87,7 +87,7 @@ class Test:
       except Exception as error:
         raise Exception(f"Error loading test {path}: {error}")
 
-    number_screenshot_instruction = sum(1 for i in self.instructions if i.type == "screenshot")
+    number_screenshot_instruction = sum(1 for i in self.instructions if i.is_screenshot)
     if number_screenshot_instruction == 0:
       raise Exception(f"Error loading test {path}: No screenshot instruction")
     if number_screenshot_instruction > 1:

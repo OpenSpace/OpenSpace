@@ -127,7 +127,7 @@ if __name__ == "__main__":
   root_dir = Path(__file__).resolve().parents[2]
 
 
-  global_start: float = time.perf_counter()
+  total_start: float = time.perf_counter()
   submit_images = False
   submit_url = ""
   hardware = ""
@@ -150,10 +150,10 @@ if __name__ == "__main__":
     print("No 'config.json' provided. Test results will be stored locally instead")
 
 
-  executable = ""
+  executable: Path | None = None
   if args.attach:
     if not args.test or "," in args.test:
-      raise Exception("--attach requires exactly one test, not a comma-separated list")
+      raise SystemExit("--attach requires exactly one test, not a comma-separated list")
   else:
     # Find the executable location and its name
     if os.name == "nt":
@@ -163,11 +163,12 @@ if __name__ == "__main__":
       # Linux
       executable = root_dir / "bin" / "OpenSpace"
     if not executable.exists():
-      raise Exception(f"Could not find executable '{executable}'")
+      raise SystemExit(f"Could not find executable '{executable}'")
 
     if args.overwrite_path is not None:
       write_configuration_overwrite(root_dir, Path(args.overwrite_path))
 
+  assert executable is not None
 
 
   # Running the tests
@@ -176,11 +177,11 @@ if __name__ == "__main__":
     path = Path(test_arg) if Path(test_arg).is_file() else root_dir / "visualtests" / f"{test_arg}.ostest"
 
     if not path.is_file():
-      raise Exception(f"Could not find test '{path}'")
+      raise SystemExit(f"Could not find test '{path}'")
 
     timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
     try:
-      result = run_single_test_attached(str(path))
+      result = run_single_test_attached(path)
     except Exception as e:
       print(f"Test '{path}' failed with error: {e}")
     else:
@@ -194,14 +195,14 @@ if __name__ == "__main__":
   else:
     if args.test is None:
       print("Running all tests in OpenSpace folder")
-      files = [str(p) for p in (root_dir / "visualtests").rglob("*.ostest")]
+      files = [p for p in (root_dir / "visualtests").rglob("*.ostest")]
     else:
       tests = args.test.split(",")
       print(f"Running tests: {tests}")
-      files = [str(root_dir / "visualtests" / f"{test}.ostest") for test in tests]
+      files = [root_dir / "visualtests" / f"{test}.ostest" for test in tests]
       for path in files:
         if not Path(path).is_file():
-          raise Exception(f"Could not find test '{path}'")
+          raise SystemExit(f"Could not find test '{path}'")
 
     for file in files:
       timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
@@ -220,5 +221,5 @@ if __name__ == "__main__":
           store_image(result, img)
       time.sleep(5.0)
 
-  global_end = time.perf_counter()
-  print(f"Total time for all tests: {global_end - global_start}")
+  total_end = time.perf_counter()
+  print(f"Total time for all tests: {total_end - total_start}")
