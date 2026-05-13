@@ -41,12 +41,12 @@ class TestResult:
     - `commit`: The commit hash for OpenSpace that was used to run the test
     - `error`: The contents of the error stream that was captured during the test run
   """
-  group = ""
-  name = ""
-  files: list[str] = field(default_factory=list[str])
-  timing = 0.0
-  commit = ""
-  error = ""
+  group: str = ""
+  name: str = ""
+  files: list[str] = field(default_factory=list)
+  timing: float = 0.0
+  commit: str = ""
+  error: str = ""
 
 class Test:
   """
