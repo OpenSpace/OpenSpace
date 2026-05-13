@@ -33,6 +33,8 @@ import time
 
 # Global flag for verbose output
 verbose = False
+# Current asset path being validated, used in log message callbacks
+path = ""
 # Logging object
 logger = logging.getLogger(__name__)
 
@@ -188,7 +190,7 @@ async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Ap
     if (logLevel == "Fatal"):
       level = logging.CRITICAL
 
-    message = f"['{path}'] - [{logMsg["category"]}]: {logMsg["message"]}"
+    message = f"['{path}'] - [{logMsg['category']}]: {logMsg['message']}"
     log(message, logLevel = level)
 
   cancelSubscriptionToErrorLog = api.subscribeToLogMessages(logsettings, onMessage)
