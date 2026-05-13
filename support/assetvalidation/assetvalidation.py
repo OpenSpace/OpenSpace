@@ -69,36 +69,25 @@ def incrementLogNames():
     else:
       log.rename(f"{scriptDirectory}/log_{1}.txt")
 
-async def subscribeToErrorlog(api: Api, exit: asyncio.Event):
-  topic = api.subscribeToLogMessages({
-    "timeStamping": False,
-    "dateStamping": False,
-    "logLevel": "Warning"
-  })
-  log("Subscribed to error log", logLevel = logging.INFO)
-
-  async for future in topic.iterator():
-    message = await future
-
+async def subscribeToErrorlog(api: Api):
+  def onMessage(message):
     level = logging.WARNING
     if ("Error" in message):
       level = logging.ERROR
     if ("Fatal" in message):
       level = logging.CRITICAL
-
     log(message, logLevel = level)
 
-
-    if exit.is_set():
-      log("Unsubscribing from error log...")
-      topic.cancel()
-      log("Unsubscribed to error log", logLevel = logging.INFO)
-      break
+  cancelSubscription = api.subscribeToLogMessages({
+    "timeStamping": False,
+    "dateStamping": False,
+    "logLevel": "Warning"
+  }, onMessage)
+  log("Subscribed to error log")
+  return cancelSubscription
 
 def removeCache(osDir):
-  """
-  Clears the contents of the OpenSpace cache directory
-  """
+  """Clears the contents of the OpenSpace cache directory"""
   try:
     cacheDir = os.path.join(osDir, "cache")
     with os.scandir(cacheDir) as entries:
@@ -110,9 +99,10 @@ def removeCache(osDir):
   except OSError as e:
     log(f"Error removing cache: {e}", logLevel = logging.ERROR)
 
-async def ensureEmptyScene(openspace, loadedAsset: pathlib.Path):
-  """ Make sure that the scene is empty of all assets, actions, and screenspace
-  renderables. Unload and log any existing items
+async def ensureEmptyScene(openspace, loadedAsset: pathlib.Path | str):
+  """
+  Make sure that the scene is empty of all assets, actions, and screenspace renderables.
+  Unload and log any existing items
   """
   assets = await openspace.asset.allAssets()
   if assets:
@@ -164,24 +154,45 @@ async def ensureEmptyScene(openspace, loadedAsset: pathlib.Path):
       log(f"Removing dashboard item: '{dashboardItem}'", logLevel = logging.ERROR)
       await openspace.dashboard.removeDashboardItem(dashboardItem)
 
+async def waitForAssetState(eventTopic, path: str, expectedState: str) -> str:
+  """
+  Loop on AssetLoading events until the given asset path reaches the expected state.
+  Returns the final state received. Exits early and logs an error on 'Error' state.
+  """
+  log(f"Waiting for asset '{path}' to reach state '{expectedState}'")
+  while True:
+    event = await eventTopic.next()
+    assetPath = event.get("AssetPath", "").replace(os.sep, "/")
+    state = event.get("State", "")
+    log(f"Asset event: path='{assetPath}', state='{state}'")
+    if assetPath == path:
+      if state == expectedState:
+        log(f"Asset reached expected state '{expectedState}'")
+        return state
+      if state == "Error":
+        log(f"Asset '{path}' reached error state while waiting for '{expectedState}'",
+          logLevel = logging.ERROR
+        )
+        return state
+
 async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Api):
-  """
-  Logic for running the asset validation tests
-  """
-  assetCount = 1
+  """Logic for running the asset validation tests"""
+  assetCount = 0
 
   logsettings = {
     "timeStamping": False,
     "dateStamping": False,
     "logLevel": "Warning"
   }
-  def onMessage(message):
+  def onMessage(logMsg: dict[str, str]):
+    logLevel = logMsg["level"]
     level = logging.WARNING
-    if ("Error" in message):
+    if (logLevel == "Error"):
       level = logging.ERROR
-    if ("Fatal" in message):
+    if (logLevel == "Fatal"):
       level = logging.CRITICAL
 
+    message = f"[{logMsg["category"]}]: {logMsg["message"]}"
     log(message, logLevel = level)
 
   cancelSubscriptionToErrorLog = api.subscribeToLogMessages(logsettings, onMessage)
@@ -197,41 +208,46 @@ async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Ap
   await unloadAssets()
   await ensureEmptyScene(openspace, "Pre-emptying scene")
 
-  assetLoadingEvent = api.subscribeToEvent("AssetLoadingFinished")
-  log("Subscribed to AssetLoadingFinished event", logLevel = logging.INFO)
+  eventTopic = api.subscribeToEvent("AssetLoading")
+  log("Subscribed to AssetLoadingFinished event")
 
   for asset in assets:
-    log(f"Handling asset {assetCount}/{len(assets)}", logLevel = logging.INFO)
-    log(f"Asset: {asset}")
+    log(f"Handling asset {assetCount}/{len(assets) - 1}", logLevel = logging.INFO)
+    log(f"Asset: {asset}", logLevel = logging.INFO)
 
     # We want to start with a cleared cache to make sure assets load correctly from
     # scratch
     removeCache(osDir)
+    global path
     path = str(asset).replace(os.sep, "/")
 
     # Load asset
     log(f"Adding asset without cache")
     await openspace.asset.add(path)
-    log("Waiting for AssetLoadingFinished event")
-    await api.nextValue(assetLoadingEvent)
-    log("AssetLoadingFinished event received")
+    log("Waiting for AssetLoading 'Loaded' event")
+    await waitForAssetState(eventTopic, path, "Loaded")
+    log("Asset loaded")
 
     # Unload asset
     log("Unloading assets")
     await unloadAssets()
+    log("Waiting for AssetLoading 'Unloaded' event")
+    await waitForAssetState(eventTopic, path, "Unloaded")
     log("Ensuring scene is empty")
     await ensureEmptyScene(openspace, asset)
 
     # Load asset using cache
     log(f"Adding asset from cache")
     await openspace.asset.add(path)
-    log("Waiting for AssetLoadingFinished event")
-    await api.nextValue(assetLoadingEvent)
-    log("AssetLoadingFinished event received")
+    log("Waiting for AssetLoading 'Loaded' event")
+    await waitForAssetState(eventTopic, path, "Loaded")
+    log("Asset loaded")
 
     # Unload assets again
     log("Unloading assets")
     await unloadAssets()
+    log("Waiting for AssetLoading 'Unloaded' event")
+    await waitForAssetState(eventTopic, path, "Unloaded")
     log("Ensuring scene is empty")
     await ensureEmptyScene(openspace, asset)
 
@@ -240,39 +256,58 @@ async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Ap
     time.sleep(0.5) # Arbitrary sleep to let OpenSpace breathe
 
   # eventUnsubscribeToErrorLog.set()
-  assetLoadingEvent.cancel() # Unsubscribe to event
+  eventTopic.cancel() # Unsubscribe to event
   await cancelSubscriptionToErrorLog()
 
 async def mainLoop(files, osDir):
   log("Connecting to OpenSpace...")
   api = Api("localhost", 4681)
-  api.connect()
-  openspace = await api.singleReturnLibrary()
+  await api.connect()
+  openspace = await api.library()
   log("Connected to OpenSpace")
 
-  await asyncio.create_task(internalRun(openspace, files, osDir, api))
+  try:
+    await internalRun(openspace, files, osDir, api)
+  except Exception as e:
+    log(f"Exception during validation: {path}", logLevel = logging.ERROR)
+    log(f"Exception during validation: {e}", logLevel = logging.ERROR)
   api.disconnect()
 
 def runAssetValidation(files: list[pathlib.Path], executable: str, args):
-  """Run the validation on the given files using OpenSpace executable provided by
-  `executable`. This includes starting OpenSpace as a subprocess using a known
-  configuration file and the empty profile, establishing a connection using the Python
-  API to the OpenSpace instance, and then running the validation on the given files.
+  """
+  Run the validation on the given files using the OpenSpace executable provided by
+  `executable`. This establishes a connection using the Python API to the OpenSpace
+  instance and then runs the validation on the given files.
+
+  If `args.startOS` is True, OpenSpace is started using the `empty` profile as a
+  subprocess before connecting and killed after validation completes. If False, an
+  already-running OpenSpace instance is expected to be available.
 
   - `files` a list of file paths to the assets to validate
   - `executable` the path to the OpenSpace executable that should be run for the
-  validation
+  validation (only used when `args.startOS` is True)
   """
   incrementLogNames()
 
   global verbose
   verbose = args.verbose
+
+  levelNamesMapping = logging.getLevelNamesMapping()
+
+  if args.logLevel not in levelNamesMapping:
+    log(f"Invalid log level '{args.logLevel}' provided, defaulting to 'WARNING'",
+      logLevel = logging.WARNING
+    )
+    args.logLevel = "WARNING"
+
+
   scriptDirectory = pathlib.Path(__file__).parent.resolve()
-  logging.basicConfig(filename=f"{scriptDirectory}/log.txt",
-    format='[%(asctime)s.%(msecs)03d] %(levelname)s: %(message)s',
-    datefmt='%Y-%m-%d | %H:%M:%S',
-    encoding='utf-8',
-    level=logging.DEBUG if verbose else logging.WARNING
+  logging.basicConfig(
+    filename = f"{scriptDirectory}/log.txt",
+    format = '[%(asctime)s.%(msecs)03d] %(levelname)s: %(message)s',
+    datefmt = '%Y-%m-%d | %H:%M:%S',
+    encoding = 'utf-8',
+    level = levelNamesMapping[args.logLevel]
   )
 
   startOpenSpace = args.startOS
@@ -280,7 +315,7 @@ def runAssetValidation(files: list[pathlib.Path], executable: str, args):
   if startOpenSpace:
     log("Starting OpenSpace...")
     process = subprocess.Popen(
-      [ executable, "--bypassLauncher" ],
+      [ executable, "--bypassLauncher", "--profile", "empty"],
       cwd=os.path.dirname(executable),
       stdout=subprocess.DEVNULL,
       stderr=subprocess.PIPE
@@ -289,7 +324,13 @@ def runAssetValidation(files: list[pathlib.Path], executable: str, args):
   # We wait for OpenSpace to start before trying to connect
   if startOpenSpace:
     time.sleep(5)
-  asyncio.new_event_loop().run_until_complete(mainLoop(files, args.dir))
+
+  loop = asyncio.new_event_loop()
+  try:
+    loop.run_until_complete(mainLoop(files, args.dir))
+  finally:
+    loop.close()
 
   if startOpenSpace:
     process.kill()
+    process.wait()
