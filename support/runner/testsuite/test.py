@@ -72,7 +72,7 @@ class Test:
       content = json.load(f)
 
     if "profile" not in content:
-      raise Exception(f"Missing 'profile' in test {path}'")
+      raise Exception(f"Missing 'profile' in test {path}")
     self.profile = content["profile"]
 
     if "commands" not in content:
