@@ -331,7 +331,7 @@ def runAssetValidation(files: list[pathlib.Path], executable: str, args):
   scriptDirectory = pathlib.Path(__file__).parent.resolve()
   formatter = logging.Formatter(
     '[%(asctime)s.%(msecs)03d] %(levelname)s: %(message)s',
-    datefmt='%Y-%m-%d | %H:%M:%S'
+    datefmt='%Y-%m-%d %H:%M:%S'
   )
 
   # log.txt: only messages at or above the requested log level
