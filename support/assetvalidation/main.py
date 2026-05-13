@@ -102,6 +102,17 @@ def setupArgparse():
     type=int
   )
 
+  parser.add_argument(
+    "-t", "--timeout",
+    dest="timeout",
+    help="Timeout in seconds for loading a single asset. If OpenSpace does not finish "
+         "loading within this time the asset is skipped and validation continues with "
+         "the next one. Defaults to 180 seconds (3 minutes).",
+    required=False,
+    default=180,
+    type=int
+  )
+
   args = parser.parse_args()
   return args
 

@@ -13,6 +13,7 @@ The project provides a `requirements.txt` with the necessary dependencies. Insta
 | `--logLevel` | Sets the log level of reported messages. One of `DEBUG`, `INFO`, `WARNING` (default), `ERROR`, or `CRITICAL`. |
 | `--start` | If set to True (default), OpenSpace is started as a subprocess before running the validation. Set to False if OpenSpace is already running. |
 | `--at` | Start validating at asset number #. Useful if OpenSpace crashed during testing. Note: the order in which assets are loaded is not guaranteed to be the same between runs. |
+| `--timeout` | Timeout in seconds for loading a single asset. If OpenSpace does not finish within this time the asset is skipped and validation resumes with the next one. Defaults to 180 seconds (3 minutes). |
 
 ```sh
 # Default run, validate all .assets
