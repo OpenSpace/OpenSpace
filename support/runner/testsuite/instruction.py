@@ -59,7 +59,7 @@ class Instruction:
     if "type" not in obj:
       raise Exception("Missing key 'type'")
     if obj["type"] not in ALLOWED_TYPES:
-      raise Exception(f"Invalid type '{obj["type"]}'")
+      raise Exception(f"Invalid type '{obj['type']}'")
 
     self.type = obj["type"]
     self.value = obj.get("value", {})
