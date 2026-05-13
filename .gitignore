@@ -53,3 +53,5 @@ settings.json
 openspace.cfg.override
 
 support/runner/config.json
+support/runner/**/__pycache__
+support/runner/**/__pycache__

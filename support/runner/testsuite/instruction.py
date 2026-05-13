@@ -23,10 +23,11 @@
 ##########################################################################################
 
 import asyncio
+from typing import Any
 
 
 
-Allowed_Types = [
+ALLOWED_TYPES = frozenset([
   "action",
   "asset",
   "deltatime",
@@ -38,7 +39,7 @@ Allowed_Types = [
   "script",
   "time",
   "wait"
-]
+])
 
 
 
@@ -51,25 +52,21 @@ class Instruction:
   each paramater needs a `type` that identifies which kind of instruction it is and most
   instructions need a `value` that contains parameters for the instruction.
   """
-  def __init__(self, obj):
-    if not "type" in obj:
-      raise Exception("Missing key 'type'")
+  type: str
+  value: Any
 
-    if not obj["type"] in Allowed_Types:
-      type = obj["type"]
-      raise Exception(f"Invalid type '{type}'")
+  def __init__(self, obj: dict[str, Any]) -> None:
+    if "type" not in obj:
+      raise Exception("Missing key 'type'")
+    if obj["type"] not in ALLOWED_TYPES:
+      raise Exception(f"Invalid type '{obj['type']}'")
 
     self.type = obj["type"]
-
-    # Just as simplification as not all types need a 'value' object
-    if not "value" in obj:
-      obj["value"] = {}
-
-    self.value = obj["value"]
+    self.value = obj.get("value", {})
 
 
 
-  def __repr__(self):
+  def __repr__(self) -> str:
     if self.value == {}:
       return f"({self.type})"
     else:
@@ -77,12 +74,12 @@ class Instruction:
 
 
 
-  def is_screenshot(self):
+  def is_screenshot(self) -> bool:
     return self.type == "screenshot"
 
 
 
-  async def run(self, openspace):
+  async def run(self, openspace: Any, os_api: Any) -> None:
     """
     Runs this instruction against the OpenSpace API object `openspace` that was passed to
     this function. If this instruction is not a valid instruction, either because it has
@@ -156,7 +153,7 @@ class Instruction:
 
       case "script":
         print(f"    Script: {self.value}")
-        await openspace.__api__.executeLuaScript(self.value, False, False)
+        await os_api.executeLuaScript(self.value, False, False)
 
       case "time":
         print(f"    Set Time: {self.value}")
@@ -164,7 +161,4 @@ class Instruction:
 
       case "wait":
         print(f"    Wait: {self.value}")
-        await asyncio.sleep(int(self.value))
-
-      case _:
-        raise Exception(f"Unrecognized instruction type '{self.type}'")
+        await asyncio.sleep(float(self.value))

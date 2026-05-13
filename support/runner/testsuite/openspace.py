@@ -23,28 +23,28 @@
 ##########################################################################################
 
 import asyncio
-import glob
-import os
 import subprocess
 import time
+from pathlib import Path
+from typing import Any
 from openspace import Api
 from .test import Test, TestResult
 
 
 
-def write_configuration_overwrite(base_path, data_path):
+def write_configuration_overwrite(base_path: Path, data_path: Path) -> None:
   """
   Creates a openspace.cfg override file that sets up a common testing environment. These
   are mostly for enabling caching to reduce the amount of testing and removing as much of
   the logging as possible which would otherwise pollute the usage results
   """
-  with open(f"{base_path}/openspace.cfg.override", "w") as f:
+  with open(base_path / "openspace.cfg.override", "w") as f:
     # Use a common sync folder outside of the build to prevent redownloading of data
-    sync_location = f"{data_path}/sync"
+    sync_location = (data_path / "sync").as_posix()
     f.write(f"Paths.SYNC = os.getenv([[OPENSPACE_SYNC]]) or [[{sync_location}]]\n")
 
     # Enable MRF caching for the same reason and to reduce dependency on external servers
-    mrf_location = f"{data_path}/mrf"
+    mrf_location = (data_path / "mrf").as_posix()
     f.write("ModuleConfigurations.GlobeBrowsing.MRFCacheEnabled = true\n")
     f.write(f"ModuleConfigurations.GlobeBrowsing.MRFCacheLocation = [[{mrf_location}]]\n")
 
@@ -65,7 +65,7 @@ def write_configuration_overwrite(base_path, data_path):
 
 
 
-async def setup_test_run(openspace):
+async def setup_test_run(openspace: Any) -> None:
   """
   Setup settings that are common to all test runs. These are, in general, settings that
   are reasonably different between runs of OpenSpace, such as the local time, the commit
@@ -87,7 +87,7 @@ async def setup_test_run(openspace):
 
 
 
-async def internal_run(openspace, test, shutdown=True):
+async def internal_run(openspace: Any, os_api: Api, test: Test, shutdown: bool = True) -> tuple[str, str]:
   """
   This function runs the actual test with the library object passed into it. It first sets
   up default values, then runs the individual instructions for the test, and retrieves
@@ -100,7 +100,7 @@ async def internal_run(openspace, test, shutdown=True):
   """
   print("  Starting test")
   await setup_test_run(openspace)
-  await test.run(openspace)
+  await test.run(openspace, os_api)
   print("  Finished test")
 
   # Get the location of the screenshot folder from OpenSpace. It should always be the
@@ -118,7 +118,7 @@ async def internal_run(openspace, test, shutdown=True):
 
 
 
-def run_single_test(test_path, executable, per_profile_wait) -> TestResult:
+def run_single_test(test_path: str, executable: Path | str, per_profile_wait: dict[str, int]) -> TestResult | None:
   """
   Run the single test provided by `test_path` using the OpenSpace executable provided by
   `executable`. This will include starting OpenSpace as a subprocess using a known
@@ -139,14 +139,15 @@ def run_single_test(test_path, executable, per_profile_wait) -> TestResult:
 
   start_time = time.perf_counter()
   print(f"  Starting OpenSpace (Profile: {test.profile})")
+  executable_path = Path(executable).resolve()
   process = subprocess.Popen(
     [
-      os.path.abspath(executable),
-      "--config", f"{os.getcwd()}/1920-1080.json",
+      executable_path,
+      "--config", str(Path.cwd() / "1920-1080.json"),
       "--profile", test.profile,
       "--bypassLauncher"
     ],
-    cwd=os.path.dirname(os.path.abspath(executable)),
+    cwd=executable_path.parent,
     stdout=subprocess.DEVNULL,
     stderr=subprocess.PIPE
   )
@@ -157,7 +158,7 @@ def run_single_test(test_path, executable, per_profile_wait) -> TestResult:
   wait_timer = per_profile_wait.get(test.profile, 15)
   time.sleep(wait_timer)
 
-  async def mainLoop():
+  async def main_loop():
     """
     The main loop of an async event loop that is needed for the OpenSpace Python API to
     work correctly. This will connect to OpenSpace, which then triggers the rest of the
@@ -165,16 +166,19 @@ def run_single_test(test_path, executable, per_profile_wait) -> TestResult:
     """
     print("  Connecting...")
     os_api = Api("localhost", 4681)
-    os_api.connect()
-    openspace = await os_api.singleReturnLibrary()
-    # Injecting the main API into the library as we use it in some test instructions
-    openspace.__api__ = os_api
+    await os_api.connect()
+    openspace = await os_api.library()
     print("  Connected to OpenSpace")
-    screenshot_folder, commit = await asyncio.create_task(internal_run(openspace, test))
+    screenshot_folder, commit = await internal_run(openspace, os_api, test)
     os_api.disconnect()
+    await asyncio.sleep(0)  # allow the API's internal async generators to finalize
     return screenshot_folder, commit
 
-  screenshot_folder, commit = asyncio.new_event_loop().run_until_complete(mainLoop())
+  loop = asyncio.new_event_loop()
+  try:
+    screenshot_folder, commit = loop.run_until_complete(main_loop())
+  finally:
+    loop.close()
 
 
   # Another wait while OpenSpace is shutting down
@@ -183,12 +187,13 @@ def run_single_test(test_path, executable, per_profile_wait) -> TestResult:
   # Get the error log from the OpenSpace subprocess
   error_log = process.stderr.read().decode()
 
-  # Kill the OpenSpace subprocess
+  # Kill the OpenSpace subprocess and wait for it to be reaped to avoid zombies
   process.kill()
+  process.wait()
   end_time = time.perf_counter()
 
   # Collect all screenshots taken by the test
-  files = glob.glob(f"{screenshot_folder}/*.png")
+  files = [str(p) for p in Path(screenshot_folder).glob("*.png")]
   print(f"Test images: {files}")
 
   result = TestResult()
@@ -202,7 +207,7 @@ def run_single_test(test_path, executable, per_profile_wait) -> TestResult:
 
 
 
-def run_single_test_attached(test_path) -> TestResult:
+def run_single_test_attached(test_path: str) -> TestResult | None:
   """
   Run the single test provided by `test_path` against an already-running OpenSpace
   instance. Unlike `run_single_test`, this function does not start or stop OpenSpace —
@@ -213,9 +218,14 @@ def run_single_test_attached(test_path) -> TestResult:
   print(f"Running test (attached): {test_path}")
   test = Test(test_path)
 
+  # Skip the test if the test-creator asked for it
+  if test.skipTest:
+    print(f"  Skipping test {test_path}")
+    return None
+
   start_time = time.perf_counter()
 
-  async def mainLoop():
+  async def main_loop():
     """
     The main loop of an async event loop that is needed for the OpenSpace Python API to
     work correctly. This will connect to OpenSpace, which then triggers the rest of the
@@ -223,23 +233,24 @@ def run_single_test_attached(test_path) -> TestResult:
     """
     print("  Connecting...")
     os_api = Api("localhost", 4681)
-    os_api.connect()
-    openspace = await os_api.singleReturnLibrary()
-    # Injecting the main API into the library as we use it in some test instructions
-    openspace.__api__ = os_api
+    await os_api.connect()
+    openspace = await os_api.library()
     print("  Connected to OpenSpace")
-    screenshot_folder, commit = await asyncio.create_task(
-      internal_run(openspace, test, shutdown=False)
-    )
+    screenshot_folder, commit = await internal_run(openspace, os_api, test, shutdown=False)
     os_api.disconnect()
+    await asyncio.sleep(0)  # allow the API's internal async generators to finalize
     return screenshot_folder, commit
 
-  screenshot_folder, commit = asyncio.new_event_loop().run_until_complete(mainLoop())
+  loop = asyncio.new_event_loop()
+  try:
+    screenshot_folder, commit = loop.run_until_complete(main_loop())
+  finally:
+    loop.close()
 
   end_time = time.perf_counter()
 
   # Collect all screenshots taken by the test
-  files = glob.glob(f"{screenshot_folder}/*.png")
+  files = [str(p) for p in Path(screenshot_folder).glob("*.png")]
   print(f"Test images: {files}")
 
   result = TestResult()

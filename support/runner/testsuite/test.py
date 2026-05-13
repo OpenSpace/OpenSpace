@@ -24,11 +24,12 @@
 
 import asyncio
 import json
-import os
-import time
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
 from .instruction import Instruction
-from .constants import test_base_dir
 
+@dataclass
 class TestResult:
   """
   Stores the result of a single test run. It has the following members:
@@ -40,12 +41,12 @@ class TestResult:
     - `commit`: The commit hash for OpenSpace that was used to run the test
     - `error`: The contents of the error stream that was captured during the test run
   """
-  group: str
-  name: str
-  files: list[str]
-  timing: float
-  commit: str
-  error: str
+  group: str = ""
+  name: str = ""
+  files: list[str] = field(default_factory=list)
+  timing: float = 0.0
+  commit: str = ""
+  error: str = ""
 
 class Test:
   """
@@ -54,18 +55,27 @@ class Test:
 
   For now only a single screenshot instruction is supported.
   """
-  def __init__(self, path: str):
-    assert(os.path.isfile(path))
-    self.test_path = path.replace(os.sep, "/")
+  skipTest: bool
+  profile: str
+  instructions: list[Instruction]
+  group: str
+  name: str
+  test_path: str
+
+  def __init__(self, path: str) -> None:
+    if not Path(path).is_file():
+      raise Exception(f"Could not find test {path}")
+
+    self.test_path = Path(path).as_posix()
 
     with open(path) as f:
       content = json.load(f)
 
-    if content["profile"] is None:
-      raise Exception(f"Missing 'profile' in test {path}'")
+    if "profile" not in content:
+      raise Exception(f"Missing 'profile' in test {path}")
     self.profile = content["profile"]
 
-    if content["commands"] is None:
+    if "commands" not in content:
       raise Exception(f"Missing 'commands' in test {path}")
 
     self.skipTest = content.get("skip_test", False)
@@ -77,20 +87,16 @@ class Test:
       except Exception as error:
         raise Exception(f"Error loading test {path}: {error}")
 
-    number_screenshot_instruction = 0
-    for instruction in self.instructions:
-      if instruction.type == "screenshot":
-        number_screenshot_instruction = number_screenshot_instruction + 1
-
+    number_screenshot_instruction = sum(1 for i in self.instructions if i.type == "screenshot")
     if number_screenshot_instruction == 0:
       raise Exception(f"Error loading test {path}: No screenshot instruction")
-    if number_screenshot_instruction != 1:
+    if number_screenshot_instruction > 1:
       raise Exception(f"Error loading test {path}: Only a single screenshot supported")
 
 
     # Get the testname by removing everything before (and including) "test/visual" and
     # also removing the extension
-    start_idx = self.test_path.find(test_base_dir) + len(test_base_dir) + 1
+    start_idx = self.test_path.find("visualtests") + len("visualtests") + 1
     full = self.test_path[start_idx:-len(".ostest")]
     parts = full.split("/")
 
@@ -99,11 +105,11 @@ class Test:
     self.name = parts[-1]
 
 
-  async def run(self, openspace):
+  async def run(self, openspace: Any, os_api: Any) -> None:
     """
     Runs the actual instructions on the provided OpenSpace API instance. There is a
     mandatory 1s wait time between every instructions
     """
     for instruction in self.instructions:
-      await instruction.run(openspace)
+      await instruction.run(openspace, os_api)
       await asyncio.sleep(1.0)
