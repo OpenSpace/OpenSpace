@@ -149,7 +149,7 @@ class Instruction:
         # Give the screenshot writing some time to finish. It will be a maximum of two
         # frames to write a screenshot + whatever time it takes to write the actual
         # screenshot. The writing should be on the order of 100 ms + about 35 ms for two
-        # frames get us to 135 ms. Lets be on the safe side with a 15x margin and go for
+        # frames get us to 135 ms. Let's be on the safe side with a 15x margin and go for
         # a wait of 2 seconds
         await asyncio.sleep(2)
 

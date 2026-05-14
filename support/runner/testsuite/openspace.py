@@ -175,7 +175,7 @@ def run_single_test(test_path: Path, executable: Path | None, per_profile_wait: 
     await os_api.connect()
     openspace = await os_api.library()
     print("  Connected to OpenSpace")
-    screenshot_folder, commit = await internal_run(openspace, os_api, test, shutdown=not launch_process)
+    screenshot_folder, commit = await internal_run(openspace, os_api, test, shutdown=launch_process)
     os_api.disconnect()
     await asyncio.sleep(0)  # allow the API's internal async generators to finalize
     return screenshot_folder, commit

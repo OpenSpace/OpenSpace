@@ -168,7 +168,7 @@ if __name__ == "__main__":
     if args.overwrite_path is not None:
       write_configuration_overwrite(root_dir, Path(args.overwrite_path))
 
-  if executable is None:
+  if not args.attach and executable is None:
     raise SystemExit("Could not find executable")
 
 
