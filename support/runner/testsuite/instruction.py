@@ -62,7 +62,8 @@ class Instruction:
       raise ValueError(f"Invalid type '{obj['type']}'")
 
     self.instruction_type = obj["type"]
-    self.value = obj.get("value") or {}
+    val = obj.get("value")
+    self.value = val if val is not None else {}
 
 
 
@@ -165,4 +166,4 @@ class Instruction:
         await asyncio.sleep(float(self.value))
 
       case _:
-        raise ValueError(self.instruction_type)
+        raise ValueError(f"Unhandled instruction type: {self.instruction_type}")

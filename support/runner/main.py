@@ -30,7 +30,7 @@ import requests
 import shutil
 import time
 from pathlib import Path
-from testsuite.openspace import write_configuration_overwrite, run_single_test, run_single_test_attached
+from testsuite.openspace import write_configuration_overwrite, run_single_test
 from testsuite.test import TestResult
 
 
@@ -168,7 +168,8 @@ if __name__ == "__main__":
     if args.overwrite_path is not None:
       write_configuration_overwrite(root_dir, Path(args.overwrite_path))
 
-  assert executable is not None
+  if executable is None:
+    raise SystemExit("Could not find executable")
 
 
   # Running the tests
@@ -181,7 +182,7 @@ if __name__ == "__main__":
 
     timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
     try:
-      result = run_single_test_attached(path)
+      result = run_single_test(path, None, {})
     except Exception as e:
       print(f"Test '{path}' failed with error: {e}")
     else:
@@ -195,9 +196,9 @@ if __name__ == "__main__":
   else:
     if args.test is None:
       print("Running all tests in OpenSpace folder")
-      files = [p for p in (root_dir / "visualtests").rglob("*.ostest")]
+      files = list((root_dir / "visualtests").rglob("*.ostest"))
     else:
-      tests = args.test.split(",")
+      tests = [t.strip() for t in args.test.split(",")]
       print(f"Running tests: {tests}")
       files = [root_dir / "visualtests" / f"{test}.ostest" for test in tests]
       for path in files:

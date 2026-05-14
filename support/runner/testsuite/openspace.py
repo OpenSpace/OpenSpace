@@ -118,7 +118,7 @@ async def internal_run(openspace: Any, os_api: Api, test: Test, shutdown: bool =
 
 
 
-def run_single_test(test_path: Path, executable: Path, per_profile_wait: dict[str, int]) -> TestResult | None:
+def run_single_test(test_path: Path, executable: Path | None, per_profile_wait: dict[str, int]) -> TestResult | None:
   """
   Run the single test provided by `test_path` using the OpenSpace executable provided by
   `executable`. This will include starting OpenSpace as a subprocess using a known
@@ -129,34 +129,40 @@ def run_single_test(test_path: Path, executable: Path, per_profile_wait: dict[st
    - `test_path`: The path to the ostest file that should be run. This file must exist
    - `executable`: The path to the OpenSpace executable that should be run for the tests
   """
+  launch_process = executable is not None
+
   print(f"Running test: {test_path}")
   test = Test(test_path)
 
   # Skip the test if the test-creator asked for it
-  if test.skipTest:
+  if test.skip_test:
     print(f"  Skipping test {test_path}")
     return None
 
   start_time = time.perf_counter()
-  print(f"  Starting OpenSpace (Profile: {test.profile})")
-  executable_path = Path(executable).resolve()
-  process = subprocess.Popen(
-    [
-      executable_path,
-      "--config", str(Path.cwd() / "1920-1080.json"),
-      "--profile", test.profile,
-      "--bypassLauncher"
-    ],
-    cwd=executable_path.parent,
-    stdout=subprocess.DEVNULL,
-    stderr=subprocess.PIPE
-  )
 
-  # Add a sleeping time instead of repeatedly trying to reconnect. Starting up OpenSpace
-  # in general takes longer than this, so we don't actually lose any time. If a
-  # per-profile wait time is specified, we use that, otherwise we wait 15 seconds
-  wait_timer = per_profile_wait.get(test.profile, 15)
-  time.sleep(wait_timer)
+  if launch_process:
+    print(f"  Starting OpenSpace (Profile: {test.profile})")
+    executable_path = Path(executable).resolve()
+    process = subprocess.Popen(
+      [
+        executable_path,
+        "--config", str(Path.cwd() / "1920-1080.json"),
+        "--profile", test.profile,
+        "--bypassLauncher"
+      ],
+      cwd=executable_path.parent,
+      stdout=subprocess.DEVNULL,
+      stderr=subprocess.PIPE
+    )
+
+    # Add a sleeping time instead of repeatedly trying to reconnect. Starting up OpenSpace
+    # in general takes longer than this, so we don't actually lose any time. If a
+    # per-profile wait time is specified, we use that, otherwise we wait 15 seconds
+    wait_timer = per_profile_wait.get(test.profile, 15)
+    time.sleep(wait_timer)
+  else:
+    process = None
 
   async def main_loop():
     """
@@ -169,7 +175,7 @@ def run_single_test(test_path: Path, executable: Path, per_profile_wait: dict[st
     await os_api.connect()
     openspace = await os_api.library()
     print("  Connected to OpenSpace")
-    screenshot_folder, commit = await internal_run(openspace, os_api, test)
+    screenshot_folder, commit = await internal_run(openspace, os_api, test, shutdown=not launch_process)
     os_api.disconnect()
     await asyncio.sleep(0)  # allow the API's internal async generators to finalize
     return screenshot_folder, commit
@@ -180,17 +186,23 @@ def run_single_test(test_path: Path, executable: Path, per_profile_wait: dict[st
   finally:
     loop.close()
 
+    if launch_process:
+      assert process is not None
 
-  # Another wait while OpenSpace is shutting down
-  time.sleep(5)
+      # Another wait while OpenSpace is shutting down
+      time.sleep(5)
 
-  # Get the error log from the OpenSpace subprocess
-  assert process.stderr is not None
-  error_log = process.stderr.read().decode()
+      # Get the error log from the OpenSpace subprocess
+      if process.stderr is not None:
+        error_log = process.stderr.read().decode()
+      else:
+        error_log = "Error loading stderr"
+      # Kill the OpenSpace subprocess and wait for it to be reaped to avoid zombies
+      process.kill()
+      process.wait()
+    else:
+      error_log = ""
 
-  # Kill the OpenSpace subprocess and wait for it to be reaped to avoid zombies
-  process.kill()
-  process.wait()
   end_time = time.perf_counter()
 
   # Collect all screenshots taken by the test
@@ -204,61 +216,4 @@ def run_single_test(test_path: Path, executable: Path, per_profile_wait: dict[st
   result.timing = end_time - start_time
   result.commit = commit
   result.error = error_log
-  return result
-
-
-
-def run_single_test_attached(test_path: Path) -> TestResult | None:
-  """
-  Run the single test provided by `test_path` against an already-running OpenSpace
-  instance. Unlike `run_single_test`, this function does not start or stop OpenSpace —
-  it only connects to the running instance, executes the test, and then disconnects.
-
-   - `test_path`: The path to the ostest file that should be run. This file must exist
-  """
-  print(f"Running test (attached): {test_path}")
-  test = Test(test_path)
-
-  # Skip the test if the test-creator asked for it
-  if test.skipTest:
-    print(f"  Skipping test {test_path}")
-    return None
-
-  start_time = time.perf_counter()
-
-  async def main_loop():
-    """
-    The main loop of an async event loop that is needed for the OpenSpace Python API to
-    work correctly. This will connect to OpenSpace, which then triggers the rest of the
-    test run
-    """
-    print("  Connecting...")
-    os_api = Api("localhost", 4681)
-    await os_api.connect()
-    openspace = await os_api.library()
-    print("  Connected to OpenSpace")
-    screenshot_folder, commit = await internal_run(openspace, os_api, test, shutdown=False)
-    os_api.disconnect()
-    await asyncio.sleep(0)  # allow the API's internal async generators to finalize
-    return screenshot_folder, commit
-
-  loop = asyncio.new_event_loop()
-  try:
-    screenshot_folder, commit = loop.run_until_complete(main_loop())
-  finally:
-    loop.close()
-
-  end_time = time.perf_counter()
-
-  # Collect all screenshots taken by the test
-  files = [str(p) for p in Path(screenshot_folder).glob("*.png")]
-  print(f"Test images: {files}")
-
-  result = TestResult()
-  result.group = test.group
-  result.name = test.name
-  result.files = files
-  result.timing = end_time - start_time
-  result.commit = commit
-  result.error = ""
   return result

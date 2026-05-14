@@ -55,7 +55,7 @@ class Test:
 
   For now only a single screenshot instruction is supported.
   """
-  skipTest: bool
+  skip_test: bool
   profile: str
   instructions: list[Instruction]
   group: str
@@ -64,7 +64,7 @@ class Test:
 
   def __init__(self, path: Path) -> None:
     if not path.is_file():
-      raise Exception(f"Could not find test {path}")
+      raise FileNotFoundError(f"Could not find test {path}")
 
     self.test_path = path.as_posix()
 
@@ -72,20 +72,20 @@ class Test:
       content = json.load(f)
 
     if "profile" not in content:
-      raise Exception(f"Missing 'profile' in test {path}")
+      raise ValueError(f"Missing 'profile' in test {path}")
     self.profile = content["profile"]
 
     if "commands" not in content:
-      raise Exception(f"Missing 'commands' in test {path}")
+      raise ValueError(f"Missing 'commands' in test {path}")
 
-    self.skipTest = content.get("skip_test", False)
+    self.skip_test = content.get("skip_test", False)
 
     self.instructions = []
     for command in content["commands"]:
       try:
         self.instructions.append(Instruction(command))
       except Exception as error:
-        raise Exception(f"Error loading test {path}: {error}")
+        raise ValueError(f"Error loading test {path}: {error}")
 
     number_screenshot_instruction = sum(1 for i in self.instructions if i.is_screenshot)
     if number_screenshot_instruction == 0:
@@ -94,15 +94,15 @@ class Test:
       raise Exception(f"Error loading test {path}: Only a single screenshot supported")
 
 
-    # Get the testname by removing everything before (and including) "test/visual" and
+    # Get the testname by removing everything before (and including) "visualtests" and
     # also removing the extension
-    start_idx = self.test_path.find("visualtests") + len("visualtests") + 1
-    full = self.test_path[start_idx:-len(".ostest")]
-    parts = full.split("/")
+    parts = path.with_suffix("").parts
+    vis_idx = parts.index("visualtests")
+    sub_parts = parts[vis_idx + 1:]
 
     # The last part is the name of test, all others are combined to make the grouping
-    self.group = "-".join(parts[0:-1])
-    self.name = parts[-1]
+    self.group = "-".join(sub_parts[:-1])
+    self.name = sub_parts[-1]
 
 
   async def run(self, openspace: Any, os_api: Any) -> None:
