@@ -23,11 +23,11 @@
 ##########################################################################################
 
 import asyncio
-from typing import Any
+from typing import Any, Literal, get_args
 
 
 
-ALLOWED_TYPES = frozenset([
+InstructionType = Literal[
   "action",
   "asset",
   "deltatime",
@@ -39,7 +39,7 @@ ALLOWED_TYPES = frozenset([
   "script",
   "time",
   "wait"
-])
+]
 
 
 
@@ -52,30 +52,32 @@ class Instruction:
   each paramater needs a `type` that identifies which kind of instruction it is and most
   instructions need a `value` that contains parameters for the instruction.
   """
-  type: str
+  instruction_type: InstructionType
   value: Any
 
   def __init__(self, obj: dict[str, Any]) -> None:
     if "type" not in obj:
-      raise Exception("Missing key 'type'")
-    if obj["type"] not in ALLOWED_TYPES:
-      raise Exception(f"Invalid type '{obj['type']}'")
+      raise ValueError("Missing key 'type'")
+    if obj["type"] not in get_args(InstructionType):
+      raise ValueError(f"Invalid type '{obj['type']}'")
 
-    self.type = obj["type"]
-    self.value = obj.get("value", {})
+    self.instruction_type = obj["type"]
+    val = obj.get("value")
+    self.value = val if val is not None else {}
 
 
 
   def __repr__(self) -> str:
     if self.value == {}:
-      return f"({self.type})"
+      return f"({self.instruction_type})"
     else:
-      return f"({self.type}: {self.value})"
+      return f"({self.instruction_type}: {self.value})"
 
 
 
+  @property
   def is_screenshot(self) -> bool:
-    return self.type == "screenshot"
+    return self.instruction_type == "screenshot"
 
 
 
@@ -87,7 +89,7 @@ class Instruction:
     raised.
     """
 
-    match self.type:
+    match self.instruction_type:
       case "action":
         print(f"    Action: {self.value}")
         await openspace.action.triggerAction(self.value)
@@ -137,9 +139,9 @@ class Instruction:
 
       case "screenshot":
         print("    Take Screenshot")
-        # We'll wait an extra 5 seconds before taking a screenshot just to be sure that
+        # We'll wait an extra 2 seconds before taking a screenshot just to be sure that
         # everything is finished
-        await asyncio.sleep(5)
+        await asyncio.sleep(2)
 
         # Take the screenshot
         await openspace.takeScreenshot()
@@ -147,13 +149,13 @@ class Instruction:
         # Give the screenshot writing some time to finish. It will be a maximum of two
         # frames to write a screenshot + whatever time it takes to write the actual
         # screenshot. The writing should be on the order of 100 ms + about 35 ms for two
-        # frames get us to 135 ms. Lets be on the safe side with a 35x margin and go for
-        # a wait of 5 seconds
-        await asyncio.sleep(5)
+        # frames get us to 135 ms. Let's be on the safe side with a 15x margin and go for
+        # a wait of 2 seconds
+        await asyncio.sleep(2)
 
       case "script":
         print(f"    Script: {self.value}")
-        await os_api.executeLuaScript(self.value, False, False)
+        await os_api.executeLuaScript(self.value, getReturnValue=False, shouldBeSynchronized=False)
 
       case "time":
         print(f"    Set Time: {self.value}")
@@ -162,3 +164,6 @@ class Instruction:
       case "wait":
         print(f"    Wait: {self.value}")
         await asyncio.sleep(float(self.value))
+
+      case _:
+        raise ValueError(f"Unhandled instruction type: {self.instruction_type}")
