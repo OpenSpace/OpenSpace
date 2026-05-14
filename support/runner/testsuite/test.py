@@ -101,10 +101,12 @@ class Test:
     if "visualtests" in parts:
       vis_idx = parts.index("visualtests")
       sub_parts = parts[vis_idx + 1:]
-    elif path.is_absolute():
-      sub_parts = parts[1:]
     else:
-      sub_parts = parts
+      absolute_path = path.with_suffix("").resolve()
+      try:
+        sub_parts = absolute_path.relative_to(Path.cwd().resolve()).parts
+      except ValueError:
+        sub_parts = (absolute_path.parent.name, absolute_path.name)
 
     # The last part is the name of test, all others are combined to make the grouping
     self.group = "-".join(sub_parts[:-1])
