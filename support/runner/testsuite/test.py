@@ -95,10 +95,16 @@ class Test:
 
 
     # Get the testname by removing everything before (and including) "visualtests" and
-    # also removing the extension
+    # also removing the extension. If the file is not in a `visualtests` folder (for
+    # example when using --attach with a local test file), use the full file path.
     parts = path.with_suffix("").parts
-    vis_idx = parts.index("visualtests")
-    sub_parts = parts[vis_idx + 1:]
+    if "visualtests" in parts:
+      vis_idx = parts.index("visualtests")
+      sub_parts = parts[vis_idx + 1:]
+    elif path.is_absolute():
+      sub_parts = parts[1:]
+    else:
+      sub_parts = parts
 
     # The last part is the name of test, all others are combined to make the grouping
     self.group = "-".join(sub_parts[:-1])
