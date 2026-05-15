@@ -1,4 +1,3 @@
-asset.require("./base")
 local allTrailsAction = asset.require("actions/trails/toggle_all_trails")
 local allTrailsInstantAction = asset.require("actions/trails/toggle_all_trails")
 local constellations = asset.require("scene/milkyway/constellations/constellation_art")

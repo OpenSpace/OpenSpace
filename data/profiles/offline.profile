@@ -1,6 +1,7 @@
 {
   "assets": [
     "base_blank",
+    "base_keybindings",
     "customization/globebrowsing",
     "events/toggle_sun",
     "nightsky/nightsky",
