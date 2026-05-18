@@ -628,9 +628,9 @@ void RenderableTimeVaryingFitsSphere::updateDynamicDownloading(double currentTim
     const int previousActiveTriggerTimeIndex = _activeTriggerTimeIndex;
     const std::filesystem::path previousActiveFilePath =
         (_activeTriggerTimeIndex >= 0 &&
-         static_cast<size_t>(_activeTriggerTimeIndex) < _files.size())
-        ? _files[_activeTriggerTimeIndex].path
-        : std::filesystem::path{};
+         static_cast<size_t>(_activeTriggerTimeIndex) < _files.size()) ?
+         _files[_activeTriggerTimeIndex].path :
+         std::filesystem::path();
 
     for (const std::filesystem::path& filePath : filesToRead) {
         if (filePath.extension() == ".fits") {
@@ -643,9 +643,9 @@ void RenderableTimeVaryingFitsSphere::updateDynamicDownloading(double currentTim
 
         const std::filesystem::path activeFilePath =
             (_activeTriggerTimeIndex >= 0 &&
-             static_cast<size_t>(_activeTriggerTimeIndex) < _files.size())
-            ? _files[_activeTriggerTimeIndex].path
-            : std::filesystem::path{};
+             static_cast<size_t>(_activeTriggerTimeIndex) < _files.size()) ?
+             _files[_activeTriggerTimeIndex].path :
+             std::filesystem::path();
 
         if (_activeTriggerTimeIndex != previousActiveTriggerTimeIndex ||
             activeFilePath != previousActiveFilePath)
