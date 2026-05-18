@@ -1,0 +1,28 @@
+-- Stereo
+-- This example shows how to create a textured plane in 3D space, where the texture is
+-- loaded from two local files on disk to create a stereo image. The two different images
+-- will be used for the left and right eyes, respectively, when OpenSpace is used with
+-- stereo rendering.
+
+local Node = {
+  Identifier = "RenderablePlaneImageLocal_Example_Stereo",
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 3.0E11,
+    Texture = openspace.absPath("${DATA}/test2.jpg"),
+    RightTexture = openspace.absPath("${DATA}/test.jpg")
+  },
+  GUI = {
+    Name = "RenderablePlaneImageLocal - Stereo",
+    Path = "/Examples"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
