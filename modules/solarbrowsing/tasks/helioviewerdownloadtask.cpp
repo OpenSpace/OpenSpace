@@ -239,7 +239,7 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
             );
 
             // Skip existing files
-            if (std::filesystem::exists(outFilename)) {
+            if (std::filesystem::exists(absPath(outFilename))) {
                 size_t done = ++i;
                 {
                     std::lock_guard lock(progressMutex);
