@@ -723,8 +723,7 @@ void LauncherWindow::handleReturnFromWindowEditor(std::filesystem::path savePath
     std::filesystem::path p = std::filesystem::proximate(savePath, _userConfigPath);
 
     // Remove the file extension as the drop down menu only displays the raw names
-    p.replace_extension();
-    _windowConfigBox->populateList(p.string());
+    _windowConfigBox->populateList(p.generic_string());
 }
 
 void LauncherWindow::updateStartButton() const {
@@ -755,6 +754,13 @@ void LauncherWindow::updatePlaceholderText() {
 }
 
 void LauncherWindow::updateAddonsBox(const std::string& profile) {
+    // If we could not load profile properly
+    if (profile.empty()) {
+        _addonBox.model->clear();
+        _addonBox.combobox->setEnabled(false);
+        return;
+    }
+
     // Get a list of all of the potential variants
     std::vector<std::filesystem::path> addonsCore = ghoul::filesystem::walkDirectory(
         _profilePath,

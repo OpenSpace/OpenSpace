@@ -22,57 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___SPLITCOMBOBOX___H__
-#define __OPENSPACE_UI_LAUNCHER___SPLITCOMBOBOX___H__
+#include <QIcon>
 
-#include <QComboBox>
-
-#include <filesystem>
-#include <functional>
-#include <optional>
-#include <string>
-#include <utility>
-
-class QWidget;
-
-class SplitComboBox final : public QComboBox {
-Q_OBJECT
-public:
-    SplitComboBox(QWidget* parent, std::filesystem::path userPath, std::string userHeader,
-        std::filesystem::path hardcodedPath, std::string hardcodedHeader,
-        std::string specialFirst,
-        std::function<bool(const std::filesystem::path&)> fileFilter,
-        std::function<std::string(const std::filesystem::path&)> createTooltip);
-
-    void populateList(const std::string& preset);
-
-    std::pair<std::string, std::string> currentSelection() const;
-
-signals:
-    // Sends the path to the selection or `std::nullopt` iff there was a special non-file
-    // entry at the top and that one has been selected
-    void selectionChanged(std::optional<std::string> selection);
-
-private:
-    // Convert string into proper path depending on format: full path, relative path or
-    // variable expansion path (i.e ${...})
-    std::optional<std::filesystem::path> unrollPath(std::string pathString);
-
-    // Determines if a file, with or without file extension, exists for the given path
-    std::optional<std::filesystem::path> validatePath(const std::filesystem::path& p);
-
-    // Extracts GUI text from the path
-    std::string guiText(std::filesystem::path path);
-
-    std::filesystem::path _userPath;
-    std::string _userHeader;
-    std::filesystem::path _hardCodedPath;
-    std::string _hardCodedHeader;
-
-    std::string _specialFirst;
-
-    std::function<bool(const std::filesystem::path&)> _fileFilter;
-    std::function<std::string(const std::filesystem::path&)> _createTooltip;
-};
-
-#endif // __OPENSPACE_UI_LAUNCHER___SPLITCOMBOBOX___H__
+// Creates an icon that is used to represent user-generated content
+QIcon externalIcon();
