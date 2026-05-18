@@ -25,7 +25,7 @@
 import argparse
 import os
 import pathlib
-from AssetValidation import runAssetValidation
+from assetvalidation import runAssetValidation
 import re
 
 
@@ -68,9 +68,18 @@ def setupArgparse():
   parser.add_argument(
     "-v", "--verbose",
     dest="verbose",
-    help="Prints verbose output",
+    help="Prints verbose output to console",
     required=False,
     default=False,
+  )
+
+  parser.add_argument(
+    "-l", "--logLevel",
+    dest="logLevel",
+    help="Sets the log level of the reported messages. Can be one of 'DEBUG', 'INFO', " \
+    "'WARNING', 'ERROR', or 'CRITICAL'",
+    required=False,
+    default="WARNING"
   )
 
   parser.add_argument(
@@ -90,6 +99,17 @@ def setupArgparse():
          "the same between runs.",
     required=False,
     default=0,
+    type=int
+  )
+
+  parser.add_argument(
+    "-t", "--timeout",
+    dest="timeout",
+    help="Timeout in seconds for loading a single asset. If OpenSpace does not finish "
+         "loading within this time the asset is skipped and validation continues with "
+         "the next one. Defaults to 180 seconds (3 minutes).",
+    required=False,
+    default=180,
     type=int
   )
 
