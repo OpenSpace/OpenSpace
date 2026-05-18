@@ -624,17 +624,32 @@ void RenderableTimeVaryingFitsSphere::updateDynamicDownloading(double currentTim
     _dynamicFileDownloader->update(currentTime, deltaTime);
     const std::vector<std::filesystem::path>& filesToRead =
         _dynamicFileDownloader->downloadedFiles();
+
+    const int previousActiveTriggerTimeIndex = _activeTriggerTimeIndex;
+    const std::filesystem::path previousActiveFilePath =
+        (_activeTriggerTimeIndex >= 0 &&
+         static_cast<size_t>(_activeTriggerTimeIndex) < _files.size())
+        ? _files[_activeTriggerTimeIndex].path
+        : std::filesystem::path{};
+
     for (const std::filesystem::path& filePath : filesToRead) {
         if (filePath.extension() == ".fits") {
             readFileFromFits(filePath);
         }
     }
     if (!filesToRead.empty()) {
-        const int previousActiveTriggerTimeIndex = _activeTriggerTimeIndex;
         computeSequenceEndTime();
         updateActiveTriggerTimeIndex(currentTime);
 
-        if (_activeTriggerTimeIndex != previousActiveTriggerTimeIndex) {
+        const std::filesystem::path activeFilePath =
+            (_activeTriggerTimeIndex >= 0 &&
+             static_cast<size_t>(_activeTriggerTimeIndex) < _files.size())
+            ? _files[_activeTriggerTimeIndex].path
+            : std::filesystem::path{};
+
+        if (_activeTriggerTimeIndex != previousActiveTriggerTimeIndex ||
+            activeFilePath != previousActiveFilePath)
+        {
             loadTexture();
         }
     }
