@@ -816,6 +816,18 @@ void setSgctDelegateFunctions() {
             return currentDrawResolution;
         }
     };
+    sgctDelegate.maxDrawBufferResolution = []() {
+        glm::ivec2 max = glm::ivec2(0);
+        for (size_t i = 0; i < Engine::instance().windows().size(); i++) {
+            const int x = Engine::instance().windows()[i]->framebufferResolution().x;
+            const int y = Engine::instance().windows()[i]->framebufferResolution().y;
+            LDEBUG(std::format("Window {} drawbuffer resolution: ({}, {})", i, x, y));
+            max.x = std::max(max.x, x);
+            max.y = std::max(max.y, y);
+        }
+        LDEBUG(std::format("Max drawbuffer resolution: ({}, {})", max.x, max.y));
+        return max;
+    };
     sgctDelegate.currentViewportSize = []() {
         ZoneScoped;
 
