@@ -97,7 +97,7 @@ echo ### Build OpenSpace in RelWithDebInfo mode
 cmake^
   --build %~1^
   --config RelWithDebInfo^
-  --target OpenSpace AssetBuilder^
+  --target OpenSpace AssetBuilder TaskRunner^
   --parallel^
   -- /p:CL_MPcount=16
 exit /b 0
