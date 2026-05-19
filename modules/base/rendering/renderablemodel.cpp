@@ -35,6 +35,9 @@
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/scene/lightsource.h>
+#include <openspace/scene/rotation.h>
+#include <openspace/scene/scale.h>
+#include <openspace/scene/translation.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/io/model/modelgeometry.h>
@@ -312,6 +315,31 @@ namespace {
 
         // [[codegen::verbatim(OverrideColorInfo.description)]]
         std::optional<glm::vec4> overrideColor [[codegen::color()]];
+
+        // Name of a node to put a custom transformation onto.
+        std::optional<std::string> customTransformNodeName;
+
+        struct Transform {
+            // This node describes a translation that is applied to the scene graph node
+            // and all its children. Depending on the 'Type' of the translation, this can
+            // either be a static translation or a time-varying one.
+            std::optional<ghoul::Dictionary> translation
+                [[codegen::reference("core_translation")]];
+
+            // This nodes describes a rotation that is applied to the scene graph node and
+            // all its children. Depending on the 'Type' of the rotation, this can either
+            // be a static rotation or a time-varying one.
+            std::optional<ghoul::Dictionary> rotation
+                [[codegen::reference("core_rotation")]];
+
+            // This node describes a scaling that is applied to the scene graph node and
+            // all its children. Depending on the 'Type' of the scaling, this can either
+            // be a static scaling or a time-varying one.
+            std::optional<ghoul::Dictionary> scale [[codegen::reference("core_scale")]];
+        };
+
+        // The custom transformation to apply to the node specified by `CustomTransformNodeName`.
+        std::optional<Transform> customTransform;
     };
 } // namespace
 #include "renderablemodel_codegen.cpp"
@@ -608,10 +636,77 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     };
 
     _originalRenderBin = renderBin();
+
+    if (p.customTransform.has_value()) {
+        if (_modelHasAnimation && _enableAnimation) { // TODO
+            LERROR(std::format(
+                "Cannot apply custom transform to model '{}' with pre existing "
+                "animation. A custom transform cannot be applied in addition to an "
+                "animation.", _file
+            ));
+            return; // this has to be the last thing that the constructor does. Or we could use goto
+        }
+
+        if (!p.customTransformNodeName.has_value()) {
+            LWARNING(std::format(
+                "Custom transform given for model '{}' without a node name. The custom "
+                "transform will not be applied.", _file
+            ));
+            return; // this has to be the last thing that the constructor does. Or we could use goto
+        }
+
+        _hasCustomNodeTransform = true;
+        _customNodeTransform.modelNodeName = *p.customTransformNodeName;
+
+        if (p.customTransform->translation.has_value()) {
+            _customNodeTransform.translation = Translation::createFromDictionary(
+                *p.customTransform->translation
+            );
+
+            LDEBUG(std::format(
+                "Applied custom translation on node '{}' for model '{}'",
+                _customNodeTransform.modelNodeName, _file
+            ));
+            addPropertySubOwner(_customNodeTransform.translation.get());
+        }
+
+        if (p.customTransform->rotation.has_value()) {
+            _customNodeTransform.rotation = Rotation::createFromDictionary(
+                *p.customTransform->rotation
+            );
+
+            LDEBUG(std::format(
+                "Applied custom rotation on node '{}' for model '{}'",
+                _customNodeTransform.modelNodeName, _file
+            ));
+            addPropertySubOwner(_customNodeTransform.rotation.get());
+        }
+
+        if (p.customTransform->scale.has_value()) {
+            _customNodeTransform.scale =
+                Scale::createFromDictionary(*p.customTransform->scale);
+
+            LDEBUG(std::format(
+                "Applied custom scale on node '{}' for model '{}'",
+                _customNodeTransform.modelNodeName, _file
+            ));
+            addPropertySubOwner(_customNodeTransform.scale.get());
+        }
+    }
 }
 
 void RenderableModel::initialize() {
     ZoneScoped;
+
+    if (_customNodeTransform.translation) {
+        _customNodeTransform.translation->initialize();
+    }
+    if (_customNodeTransform.rotation) {
+        _customNodeTransform.rotation->initialize();
+    }
+    if (_customNodeTransform.scale) {
+        _customNodeTransform.scale->initialize();
+    }
 
     for (const std::unique_ptr<LightSource>& ls : _lightSources) {
         ls->initialize();
@@ -1161,6 +1256,38 @@ void RenderableModel::update(const UpdateData& data) {
         }
     }
 
+    if (_hasCustomNodeTransform) {
+        glm::dmat4 translation(1.0);
+        if (_customNodeTransform.translation) {
+            _customNodeTransform.translation->update(data);
+            translation = glm::translate(
+                glm::dmat4(1.0),
+                _customNodeTransform.translation->position()
+            );
+        }
+
+        glm::dmat4 rotation(1.0);
+        if (_customNodeTransform.rotation) {
+            _customNodeTransform.rotation->update(data);
+            rotation = glm::dmat4(_customNodeTransform.rotation->matrix());
+        }
+
+        glm::dmat4 scaling(1.0);
+        if (_customNodeTransform.scale) {
+            _customNodeTransform.scale->update(data);
+            scaling = glm::scale(
+                glm::dmat4(1.0),
+                _customNodeTransform.scale->scaleValue()
+            );
+        }
+
+        glm::dmat4 transform = translation * rotation * scaling;
+
+        _geometry->updateCustomNodeTransform(
+            transform,
+            _customNodeTransform.modelNodeName
+        );
+    }
 
     if (_geometry->hasAnimation() && !_animationStart.empty()) {
         double relativeTime = 0.0;

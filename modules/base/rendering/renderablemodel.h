@@ -138,6 +138,17 @@ private:
     Renderable::RenderBin _originalRenderBin;
 
     ghoul::opengl::ProgramObject* _depthMapProgram = nullptr;
+
+    /**
+     * Transformation defined by translation, rotation and scale.
+     */
+    struct {
+        ghoul::mm_unique_ptr<Translation> translation;
+        ghoul::mm_unique_ptr<Rotation> rotation;
+        ghoul::mm_unique_ptr<Scale> scale;
+        std::string modelNodeName;
+    } _customNodeTransform;
+    bool _hasCustomNodeTransform = false;
 };
 
 } // namespace openspace
