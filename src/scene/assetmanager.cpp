@@ -1097,19 +1097,24 @@ std::filesystem::path AssetManager::generateAssetPath(
     // Construct the full path including the .asset extension if there is no extension
     std::string fullAssetPath = std::format("{}{}", prefix, assetPath);
     std::filesystem::path path = absPath(fullAssetPath);
-    if (std::filesystem::exists(path)) {
+    if (std::filesystem::exists(path) && std::filesystem::is_regular_file(path)) {
         return path;
     }
-    else if (path.extension().empty()) {
+
+    if (path.extension().empty()) {
         std::filesystem::path pathAsset = path;
         pathAsset.replace_extension(".asset");
-        if (std::filesystem::exists(pathAsset)) {
+        if (std::filesystem::exists(pathAsset) &&
+            std::filesystem::is_regular_file(pathAsset))
+        {
             return pathAsset;
         }
 
         std::filesystem::path pathJasset = path;
         pathJasset.replace_extension(".jasset");
-        if (std::filesystem::exists(pathJasset)) {
+        if (std::filesystem::exists(pathJasset) &&
+            std::filesystem::is_regular_file(pathJasset))
+        {
             return pathJasset;
         }
     }
