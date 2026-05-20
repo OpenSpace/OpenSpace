@@ -25,6 +25,7 @@
 import asyncio
 import logging
 import os
+import re
 import subprocess
 import shutil
 import time
@@ -35,8 +36,25 @@ from pathlib import Path
 verbose = False
 # Current asset path being validated, used in log message callbacks
 path = ""
+# OpenSpace root directory, used for computing relative paths in log messages
+_rootDir: Path = Path()
 # Logging object
 logger = logging.getLogger(__name__)
+
+# Regex matching any Windows absolute path (e.g. C:\foo\bar or D:/foo/bar)
+_WIN_PATH_RE = re.compile(r'[A-Za-z]:[/\\][^\s\'"]*')
+
+def _relPath(p: Path | str) -> str:
+  """Return path relative to _rootDir with a leading slash, for display in logs.
+  For paths outside _rootDir (e.g. sync/cache dirs), returns the original path unchanged."""
+  try:
+    return "/" + Path(p).relative_to(_rootDir).as_posix()
+  except ValueError:
+    return str(p)
+
+def _sanitizePaths(text: str) -> str:
+  """Replace all absolute Windows paths embedded in a string with display-safe relative paths"""
+  return _WIN_PATH_RE.sub(lambda m: _relPath(m.group()), text)
 
 class OpenSpaceCrashException(Exception):
   """
@@ -99,9 +117,10 @@ async def ensureEmptyScene(openspace, loadedAsset: Path | str):
   Make sure that the scene is empty of all assets, actions, and screenspace renderables.
   Unload and log any existing items
   """
+  displayAsset = _relPath(loadedAsset)
   assets = await openspace.asset.allAssets()
   if assets:
-    log(f"Handling asset: {loadedAsset}: {len(assets)} assets are still loaded",
+    log(f"Handling asset: {displayAsset}: {len(assets)} assets are still loaded",
       logLevel = logging.ERROR
     )
     for asset in assets.values():
@@ -110,7 +129,7 @@ async def ensureEmptyScene(openspace, loadedAsset: Path | str):
 
   sceneGraphNodes = await openspace.sceneGraphNodes()
   if len(sceneGraphNodes) > 1: # Root is always returned
-    log(f"Handling asset: {loadedAsset}: {len(sceneGraphNodes) - 1} scene graph" + \
+    log(f"Handling asset: {displayAsset}: {len(sceneGraphNodes) - 1} scene graph" + \
         " nodes are still loaded",
         logLevel = logging.ERROR
     )
@@ -122,7 +141,7 @@ async def ensureEmptyScene(openspace, loadedAsset: Path | str):
 
   actions = await openspace.action.actions()
   if actions:
-    log(f"Handling asset: {loadedAsset}: {len(actions)} actions are still loaded",
+    log(f"Handling asset: {displayAsset}: {len(actions)} actions are still loaded",
       logLevel = logging.ERROR
     )
     for action in actions.values():
@@ -131,7 +150,7 @@ async def ensureEmptyScene(openspace, loadedAsset: Path | str):
 
   screenSpaceRenderables = await openspace.screenSpaceRenderables()
   if screenSpaceRenderables:
-    log(f"Handling asset: {loadedAsset}: {len(screenSpaceRenderables)} screen-space" +
+    log(f"Handling asset: {displayAsset}: {len(screenSpaceRenderables)} screen-space" +
         " renderables are still loaded",
         logLevel = logging.ERROR
     )
@@ -143,7 +162,7 @@ async def ensureEmptyScene(openspace, loadedAsset: Path | str):
 
   dashboardItems = await openspace.dashboard.dashboardItems()
   if dashboardItems:
-    log(f"Handling asset: {loadedAsset}: {len(dashboardItems)} dashboard items are" +
+    log(f"Handling asset: {displayAsset}: {len(dashboardItems)} dashboard items are" +
       " still loaded", logLevel = logging.ERROR)
     for dashboardItem in dashboardItems.values():
       log(f"Removing dashboard item: '{dashboardItem}'", logLevel = logging.ERROR)
@@ -154,18 +173,18 @@ async def waitForAssetState(eventTopic, path: str, expectedState: str) -> str:
   Loop on AssetLoading events until the given asset path reaches the expected state.
   Returns the final state received. Exits early and logs an error on 'Error' state.
   """
-  log(f"Waiting for asset '{path}' to reach state '{expectedState}'")
+  log(f"Waiting for asset '{_relPath(path)}' to reach state '{expectedState}'")
   while True:
     event = await eventTopic.next()
     assetPath = event.get("AssetPath", "").replace(os.sep, "/")
     state = event.get("State", "")
-    log(f"Asset event: path='{assetPath}', state='{state}'")
+    log(f"Asset event: path='{_relPath(assetPath)}', state='{state}'")
     if assetPath == path:
       if state == expectedState:
         log(f"Asset reached expected state '{expectedState}'")
         return state
       if state == "Error":
-        log(f"Asset '{path}' reached error state while waiting for '{expectedState}'",
+        log(f"Asset '{_relPath(path)}' reached error state while waiting for '{expectedState}'",
           logLevel = logging.ERROR
         )
         return state
@@ -190,7 +209,7 @@ async def internalRun(openspace, assets: list[Path], osDir: Path, api: Api,
     if (logLevel == "Fatal"):
       level = logging.CRITICAL
 
-    message = f"['{path}'] - [{logMsg['category']}]: {logMsg['message']}"
+    message = f"['{_relPath(path)}'] - [{logMsg['category']}]: {_sanitizePaths(logMsg['message'])}"
     log(message, logLevel = level)
 
   cancelSubscriptionToErrorLog = api.subscribeToLogMessages(logsettings, onMessage)
@@ -220,7 +239,7 @@ async def internalRun(openspace, assets: list[Path], osDir: Path, api: Api,
     for asset in assets:
       globalIndex = startIndex + assetCount + 1
       log(f"Handling asset {globalIndex}/{totalCount}", logLevel = logging.INFO)
-      log(f"Asset: {asset}", logLevel = logging.INFO)
+      log(f"Asset: '{_relPath(asset)}'", logLevel = logging.INFO)
 
       # We want to start with a cleared cache to make sure assets load correctly from
       # scratch
@@ -272,7 +291,7 @@ async def internalRun(openspace, assets: list[Path], osDir: Path, api: Api,
         raise OpenSpaceCrashException(assetCount, TimeoutError(f"Timed out after {timeout}s"))
 
       except Exception as e:
-        log(f"Unexpected error in '{asset}': {e}", logLevel = logging.ERROR)
+        log(f"Unexpected error in '{_relPath(asset)}': {e}", logLevel = logging.ERROR)
         raise OpenSpaceCrashException(assetCount, e)
   finally:
     try:
@@ -326,8 +345,9 @@ def runAssetValidation(files: list[Path], executable: Path, rootDir: Path, args)
   """
   incrementLogNames()
 
-  global verbose
+  global verbose, _rootDir
   verbose = args.verbose
+  _rootDir = rootDir / "data" / "assets"
 
   logLevelNamesMapping = logging.getLevelNamesMapping()
 
@@ -407,7 +427,7 @@ def runAssetValidation(files: list[Path], executable: Path, rootDir: Path, args)
     # OpenSpace crashed - log the offending asset and continue with the next one
     crashedAsset = remaining[completed]
     log(
-      f"OpenSpace crashed during validation of '{crashedAsset}', skipping to next asset\n",
+      f"OpenSpace crashed during validation of '{_relPath(crashedAsset)}', skipping to next asset\n",
       logLevel = logging.ERROR
     )
     startIndex += completed + 1

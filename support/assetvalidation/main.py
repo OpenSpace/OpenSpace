@@ -129,7 +129,7 @@ else:
 if not executable.exists():
   raise FileNotFoundError(f"Could not find OpenSpace executable at '{executable}'")
 
-files = list(Path(rootDir / "data").rglob("*.asset"))
+files = list(Path(rootDir / "data" / "assets").rglob("*.asset"))
 if args.filter:
   p = re.compile(args.filter)
   files = [x for x in files if re.search(p, str(x))]
