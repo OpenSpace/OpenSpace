@@ -5,9 +5,10 @@ This script validates all* assets files by loading them one at a time into an em
 The project provides a `requirements.txt` with the necessary dependencies. Install using e.g., pip `pip install -r /path/to/requirements.txt`
 
 ## Running validation tests
+The script must be run from within the OpenSpace repository. The root OpenSpace folder is derived automatically from the script's location (`support/assetvalidation/`), and the compiled executable is expected at `bin/RelWithDebInfo/OpenSpace.exe` (Windows) or `bin/OpenSpace` (Linux/Mac).
+
 | Parameter | Description |
 | --------- | ----------- |
-| `--dir` | Points to the base folder of the OpenSpace version that is used to execute the validation. There needs to be a compiled version of OpenSpace available in the folder such that `bin/RelWithDebInfo/OpenSpace.exe`(on Windows) or `bin/OpenSpace` (on Linux) exists and is executable. |
 | `--filter` | Regex string to filter the assets to validate |
 | `--verbose` | If set to True output messages will also be printed to the console. |
 | `--logLevel` | Sets the log level of reported messages. One of `DEBUG`, `INFO`, `WARNING` (default), `ERROR`, or `CRITICAL`. |
@@ -17,11 +18,11 @@ The project provides a `requirements.txt` with the necessary dependencies. Insta
 
 ```sh
 # Default run, validate all .assets
-python main.py --dir "C:/Development/OpenSpace"
+python main.py
 
 # Run with filter - validates any .asset in the 'examples' folder
-python main.py --dir "C:/Development/OpenSpace" --filter "examples/*"
+python main.py --filter "examples/*"
 
 # Start at the 10th .asset and log everything from DEBUG messages and up
-python main.py --dir "C:/Development/OpenSpace" --filter "examples/*" --at 10 --logLevel "DEBUG"
+python main.py --filter "examples/*" --at 10 --logLevel "DEBUG"
 ```

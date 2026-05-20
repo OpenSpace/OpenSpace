@@ -22,14 +22,14 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-from openspace import Api
 import asyncio
 import logging
 import os
-import pathlib
 import subprocess
 import shutil
 import time
+from openspace import Api
+from pathlib import Path
 
 # Global flag for verbose output
 verbose = False
@@ -68,7 +68,7 @@ def log(*values: object, logLevel = logging.DEBUG):
 
 def incrementLogNames():
   """Keeps the last 5 logs for each log file and increments each by one per run"""
-  scriptDirectory = pathlib.Path(__file__).parent.resolve()
+  scriptDirectory = Path(__file__).parent.resolve()
   for baseName in ["log", "log_debug"]:
     for n in range(5, 0, -1):
       rotated = scriptDirectory / f"{baseName}_{n}.txt"
@@ -81,10 +81,10 @@ def incrementLogNames():
     if current.exists():
       current.rename(scriptDirectory / f"{baseName}_1.txt")
 
-def removeCache(osDir):
+def removeCache(osDir: Path):
   """Clears the contents of the OpenSpace cache directory"""
   try:
-    cacheDir = os.path.join(osDir, "cache")
+    cacheDir = osDir / "cache"
     with os.scandir(cacheDir) as entries:
       for entry in entries:
         if entry.is_file():
@@ -94,7 +94,7 @@ def removeCache(osDir):
   except OSError as e:
     log(f"Error removing cache: {e}", logLevel = logging.ERROR)
 
-async def ensureEmptyScene(openspace, loadedAsset: pathlib.Path | str):
+async def ensureEmptyScene(openspace, loadedAsset: Path | str):
   """
   Make sure that the scene is empty of all assets, actions, and screenspace renderables.
   Unload and log any existing items
@@ -170,7 +170,7 @@ async def waitForAssetState(eventTopic, path: str, expectedState: str) -> str:
         )
         return state
 
-async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Api,
+async def internalRun(openspace, assets: list[Path], osDir: Path, api: Api,
                       startIndex: int = 0, totalCount: int = 0, timeout: int = 180) -> int:
   """Logic for running the asset validation tests"""
   assetCount = 0
@@ -195,10 +195,10 @@ async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Ap
 
   cancelSubscriptionToErrorLog = api.subscribeToLogMessages(logsettings, onMessage)
 
-  async def unloadAssets():
+  async def unloadAssets(newLine: bool = False):
     log("Getting root assets")
     roots = await openspace.asset.rootAssets()
-    log("Removing root assets")
+    log(f"Removing root assets{"\n" if newLine else ""}")
     for root in roots.values():
       await openspace.asset.remove(root)
 
@@ -207,7 +207,14 @@ async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Ap
 
   try:
     # Make sure we start on a completely empty scene
-    await unloadAssets()
+    await unloadAssets(newLine = True)
+    # Simulation time steps are added by C++ code and are not linked to asset, remove them
+    # manually here to avoid them interfering with the asset count and logs
+    actions = await openspace.action.actions()
+    for action in actions.values():
+      if "openspace.time.interpolateDeltaTime" not in action.get("Command", ""):
+        log(f"Removing non-time-step action: '{action}'", logLevel = logging.ERROR)
+      await openspace.action.removeAction(action)
     await ensureEmptyScene(openspace, "Pre-emptying scene")
 
     for asset in assets:
@@ -254,7 +261,7 @@ async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Ap
           await ensureEmptyScene(openspace, asset)
 
         assetCount += 1
-        log("Finished testing asset", logLevel = logging.INFO)
+        log("Finished testing asset\n", logLevel = logging.INFO)
         time.sleep(0.5) # Arbitrary sleep to let OpenSpace breathe
 
       except TimeoutError:
@@ -279,8 +286,8 @@ async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Ap
 
   return assetCount
 
-async def mainLoop(files, osDir, startIndex: int = 0, totalCount: int = 0,
-                   timeout: int = 180) -> int:
+async def mainLoop(files: list[Path], osDir: Path, startIndex: int = 0,
+                   totalCount: int = 0, timeout: int = 180) -> int:
   """
   Connects to OpenSpace and runs the asset validation. Returns the number of
   successfully validated assets. Returns less than len(files) if a crash occurred.
@@ -303,7 +310,7 @@ async def mainLoop(files, osDir, startIndex: int = 0, totalCount: int = 0,
     except Exception:
       pass
 
-def runAssetValidation(files: list[pathlib.Path], executable: str, args):
+def runAssetValidation(files: list[Path], executable: Path, rootDir: Path, args):
   """
   Run the validation on the given files using the OpenSpace executable provided by
   `executable`. This establishes a connection using the Python API to the OpenSpace
@@ -330,7 +337,7 @@ def runAssetValidation(files: list[pathlib.Path], executable: str, args):
     )
     args.logLevel = "WARNING"
 
-  scriptDirectory = pathlib.Path(__file__).parent.resolve()
+  scriptDirectory = Path(__file__).parent.resolve()
   formatter = logging.Formatter(
     '[%(asctime)s.%(msecs)03d] %(levelname)s: %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
@@ -366,16 +373,16 @@ def runAssetValidation(files: list[pathlib.Path], executable: str, args):
       log("Starting OpenSpace...", logLevel = logging.INFO)
       process = subprocess.Popen(
         [executable, "--bypassLauncher", "--profile", "empty"],
-        cwd=os.path.dirname(executable),
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.PIPE
+        cwd = executable.parent,
+        stdout = subprocess.DEVNULL,
+        stderr = subprocess.PIPE
       )
       time.sleep(5)
 
     loop = asyncio.new_event_loop()
     try:
       completed = loop.run_until_complete(
-        mainLoop(remaining, args.dir, startIndex, totalCount, args.timeout)
+        mainLoop(remaining, rootDir, startIndex, totalCount, args.timeout)
       )
     finally:
       # Cancel any tasks left pending by the API (e.g. async generator athrow,
@@ -400,7 +407,7 @@ def runAssetValidation(files: list[pathlib.Path], executable: str, args):
     # OpenSpace crashed - log the offending asset and continue with the next one
     crashedAsset = remaining[completed]
     log(
-      f"OpenSpace crashed during validation of '{crashedAsset}', skipping to next asset",
+      f"OpenSpace crashed during validation of '{crashedAsset}', skipping to next asset\n",
       logLevel = logging.ERROR
     )
     startIndex += completed + 1
