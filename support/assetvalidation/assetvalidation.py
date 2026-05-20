@@ -26,8 +26,8 @@ import asyncio
 import logging
 import os
 import re
-import subprocess
 import shutil
+import subprocess
 import time
 from openspace import Api
 from pathlib import Path
@@ -217,7 +217,8 @@ async def internalRun(openspace, assets: list[Path], osDir: Path, api: Api,
   async def unloadAssets(newLine: bool = False):
     log("Getting root assets")
     roots = await openspace.asset.rootAssets()
-    log(f"Removing root assets{"\n" if newLine else ""}")
+    newlineSuffix = "\n" if newLine else ""
+    log(f"Removing root assets{newlineSuffix}")
     for root in roots.values():
       await openspace.asset.remove(root)
 
@@ -281,7 +282,7 @@ async def internalRun(openspace, assets: list[Path], osDir: Path, api: Api,
 
         assetCount += 1
         log("Finished testing asset\n", logLevel = logging.INFO)
-        time.sleep(0.5) # Arbitrary sleep to let OpenSpace breathe
+        await asyncio.sleep(0.5) # Arbitrary sleep to let OpenSpace breathe
 
       except TimeoutError:
         log(
