@@ -24,8 +24,7 @@
 
 #include "splitcombobox.h"
 
-#include "externalicon.h"
-#include "usericon.h"
+#include "customicons.h"
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <QStandardItemModel>
@@ -85,24 +84,26 @@ void SplitComboBox::populateList(const std::string& preset) {
 
         if (specialPath.has_value()) {
             const std::filesystem::path& p = *specialPath;
+            const std::string pStr = p.string();
+            const std::string pGuiStr = guiText(p);
             if (p.string().starts_with(_userPath.string())) {
                 addItem(
                     iconUser,
-                    QString::fromStdString(guiText(p)),
-                    QString::fromStdString(p.string())
+                    QString::fromStdString(pGuiStr),
+                    QString::fromStdString(pStr)
                 );
             }
             else if (p.string().starts_with(_hardCodedPath.string())) {
                 addItem(
-                    QString::fromStdString(guiText(p)),
-                    QString::fromStdString(p.string())
+                    QString::fromStdString(pGuiStr),
+                    QString::fromStdString(pStr)
                 );
             }
             else {
                 addItem(
                     iconExternal,
-                    QString::fromStdString(guiText(p)),
-                    QString::fromStdString(p.string())
+                    QString::fromStdString(pGuiStr),
+                    QString::fromStdString(pStr)
                 );
             }
 
@@ -216,9 +217,10 @@ void SplitComboBox::populateList(const std::string& preset) {
         insertItem(0, QString::fromStdString(text), "");
         setCurrentIndex(0);
 
-        const QString toolTip = QString::fromStdString(
-            std::format("<p style='white-space: nowrap;'>{}</p>", text)
-        );
+        const QString toolTip = QString::fromStdString(std::format(
+            "<p style='white-space: nowrap;'>{}</p>",
+            text
+        ));
         setItemData(0, toolTip, Qt::ToolTipRole);
     } 
 }
@@ -230,12 +232,14 @@ std::pair<std::string, std::string> SplitComboBox::currentSelection() const {
     };
 }
 
-std::optional<std::filesystem::path> SplitComboBox::unrollPath(std::string pathString) {
+std::optional<std::filesystem::path> SplitComboBox::unrollPath(
+                                                            const std::string& pathString)
+{
     // Creates path based on system preference (forward slash or backslash)
     const std::filesystem::path inPath =
         std::filesystem::path(pathString).make_preferred();
 
-    // Determine if realtive of absolute path
+    // Determine if realtive or absolute path
     if (inPath.is_relative()) {
         // Check type of relative path
         const size_t beginning = pathString.find("${");
@@ -253,8 +257,10 @@ std::optional<std::filesystem::path> SplitComboBox::unrollPath(std::string pathS
             return std::nullopt;
         }
         else {
-            const auto uFilePath = validatePath(absPath(_userPath / inPath));
-            const auto hcFilePath= validatePath(absPath(_hardCodedPath / inPath));
+            const std::optional<std::filesystem::path> uFilePath =
+                validatePath(absPath(_userPath / inPath));
+            const std::optional<std::filesystem::path> hcFilePath =
+                validatePath(absPath(_hardCodedPath / inPath));
 
             if (uFilePath.has_value()) {
                 return *uFilePath;
@@ -266,7 +272,7 @@ std::optional<std::filesystem::path> SplitComboBox::unrollPath(std::string pathS
         }
     }
     else {
-        const auto file = validatePath(inPath);
+        const std::optional<std::filesystem::path> file = validatePath(inPath);
         if (file.has_value()) {
             return *file;
         }
@@ -277,17 +283,16 @@ std::optional<std::filesystem::path> SplitComboBox::unrollPath(std::string pathS
 }
 
 std::optional<std::filesystem::path> SplitComboBox::validatePath(
-                                                           const std::filesystem::path &p)
+                                                           const std::filesystem::path& p)
 {
-
     if (std::filesystem::is_directory(p)) {
-        return std::optional<std::filesystem::path>(std::nullopt);
+        return std::nullopt;
     }
 
     if (p.has_extension()) {
         return std::filesystem::is_regular_file(p) ?
             std::optional<std::filesystem::path>(p) :
-            std::optional<std::filesystem::path>(std::nullopt);
+            std::nullopt;
     }
 
     // Handle file check for paths without file extension
@@ -295,24 +300,24 @@ std::optional<std::filesystem::path> SplitComboBox::validatePath(
     if (std::filesystem::exists(p.parent_path())) {
         for (const auto& f : std::filesystem::directory_iterator(p.parent_path())) {
             if (f.is_regular_file() && f.path().stem() == name) {
-                return std::optional<std::filesystem::path>(f);
+                return f;
             }
         }
     }
 
     // Didn't find anything
-    return std::optional<std::filesystem::path>(std::nullopt);
+    return std::nullopt;
 }
-
 
 std::string SplitComboBox::guiText(std::filesystem::path absolutePath) {
     if (absolutePath.string().starts_with(_userPath.string())) {
-        auto uPath = std::filesystem::relative(absolutePath, _userPath);
+        std::filesystem::path uPath = std::filesystem::relative(absolutePath, _userPath);
         return uPath.replace_extension().generic_string();
     }
 
     if (absolutePath.string().starts_with(_hardCodedPath.string())) {
-        auto hcPath = std::filesystem::relative(absolutePath, _hardCodedPath);
+        std::filesystem::path hcPath =
+            std::filesystem::relative(absolutePath, _hardCodedPath);
         return hcPath.replace_extension().generic_string();
     }
 

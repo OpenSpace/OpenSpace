@@ -22,25 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "usericon.h"
+#include <QIcon>
 
-#include <QColor>
-#include <QFont>
-#include <QPainter>
-#include <QPixmap>
+// Creates an icon that is used to represent user-generated content
+QIcon userIcon();
 
-QIcon userIcon() {
-    QPixmap px = QPixmap(40, 50);
-    px.fill(Qt::transparent);
-
-    QPainter painter = QPainter(&px);
-    painter.setBrush(QColor(183, 211, 149, 255));
-    painter.drawEllipse(0, 10, 38, 38);
-
-    QFont f = QFont("Arial");
-    f.setPixelSize(28);
-    f.setBold(true);
-    painter.setFont(f);
-    painter.drawText(0, 10, 40, 40, Qt::AlignCenter, "U");
-    return QIcon(px);
-}
+// Creates an icon that is used to represent external content
+QIcon externalIcon();

@@ -56,7 +56,7 @@ signals:
 private:
     // Convert string into proper path depending on format: full path, relative path or
     // variable expansion path (i.e ${...})
-    std::optional<std::filesystem::path> unrollPath(std::string pathString);
+    std::optional<std::filesystem::path> unrollPath(const std::string& pathString);
 
     // Determines if a file, with or without file extension, exists for the given path
     std::optional<std::filesystem::path> validatePath(const std::filesystem::path& p);
