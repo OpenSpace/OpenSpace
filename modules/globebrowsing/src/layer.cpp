@@ -312,6 +312,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
             _parent.scheduleDeleteLayer(identifier());
         }
     });
+    _remove.setNeedsConfirmation(true);
 
     _renderSettings.onChange([this]() {
         // Only if we are a height layer will anyone care about these settings changing as
