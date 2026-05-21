@@ -18,11 +18,20 @@ local Node = {
     GeometryFile = model .. "BoxAnimated.glb",
     -- Use the line below insted of the one above if you want to use your own model
     --GeometryFile = "C:/path/to/model.fbx",
-    CustomTransformNodeName = "nodes[2]",
-    CustomTransform = {
-      Translation = {
-        Type = "StaticTranslation",
-        Position = {10, 10, 10}
+    CustomTransforms = {
+      {
+        NodeName = "nodes[2]",
+        Translation = {
+          Type = "StaticTranslation",
+          Position = {10, 0, 10}
+        }
+      },
+      {
+        NodeName = "nodes[1]",
+        Translation = {
+          Type = "StaticTranslation",
+          Position = {10, 10, 0}
+        }
       }
     }
   },

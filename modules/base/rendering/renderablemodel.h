@@ -142,13 +142,14 @@ private:
     /**
      * Transformation defined by translation, rotation and scale.
      */
-    struct {
+    struct NodeTransform {
+        std::string nodeName;
         ghoul::mm_unique_ptr<Translation> translation;
         ghoul::mm_unique_ptr<Rotation> rotation;
         ghoul::mm_unique_ptr<Scale> scale;
-        std::string modelNodeName;
-    } _customNodeTransform;
-    bool _hasCustomNodeTransform = false;
+    };
+    std::vector<NodeTransform> _customNodeTransforms;
+    bool _hasCustomNodeTransforms = false;
 };
 
 } // namespace openspace
