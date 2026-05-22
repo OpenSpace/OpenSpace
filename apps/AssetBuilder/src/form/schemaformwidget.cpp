@@ -1800,6 +1800,8 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
                 onChange();
             }
         );
+
+        return checkBox;
     }
     if (member.type == "Integer") {
         QLineEdit* lineEdit = new QLineEdit;
