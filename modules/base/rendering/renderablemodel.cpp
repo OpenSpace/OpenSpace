@@ -340,6 +340,10 @@ namespace {
 
         // The custom transformation
         std::optional<std::vector<NodeTransform>> customTransforms;
+
+        // Whether the custom transforms should replace the existing transform or add on
+        // top if it
+        std::optional<bool> customTransformsShouldOverride;
     };
 } // namespace
 #include "renderablemodel_codegen.cpp"
@@ -636,6 +640,9 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     };
 
     _originalRenderBin = renderBin();
+
+    _customNodeTransformsShouldOverride =
+        p.customTransformsShouldOverride.value_or(_customNodeTransformsShouldOverride);
 
     if (p.customTransforms.has_value()) {
         _hasCustomNodeTransforms = true;
@@ -1276,7 +1283,8 @@ void RenderableModel::update(const UpdateData& data) {
 
             _geometry->updateCustomNodeTransform(
                 finalTransform,
-                nodeTransform.nodeName
+                nodeTransform.nodeName,
+                _customNodeTransformsShouldOverride
             );
         }
     }

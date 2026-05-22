@@ -150,6 +150,7 @@ private:
     };
     std::vector<NodeTransform> _customNodeTransforms;
     bool _hasCustomNodeTransforms = false;
+    bool _customNodeTransformsShouldOverride = false;
 };
 
 } // namespace openspace
