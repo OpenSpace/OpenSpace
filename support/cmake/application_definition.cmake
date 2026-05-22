@@ -32,6 +32,11 @@ function (create_new_application application_name)
     # Register one global copy target so copy commands are defined exactly once
     if (NOT TARGET openspace_copy_external_dependencies)
       add_custom_target(openspace_copy_external_dependencies ALL)
+      add_custom_command(
+        TARGET openspace_copy_external_dependencies
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${application_name}>"
+      )
       foreach (file_i ${ext_lib})
         if (IS_DIRECTORY "${file_i}")
           get_filename_component(folder ${file_i} NAME)
