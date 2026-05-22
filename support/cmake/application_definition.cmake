@@ -31,7 +31,7 @@ function (create_new_application application_name)
     get_external_library_dependencies(ext_lib)
     # Register one global copy target so copy commands are defined exactly once
     if (NOT TARGET openspace_copy_external_dependencies)
-      add_custom_target(openspace_copy_external_dependencies ALL)
+      add_custom_target(openspace_copy_external_dependencies)
       add_custom_command(
         TARGET openspace_copy_external_dependencies
         POST_BUILD
