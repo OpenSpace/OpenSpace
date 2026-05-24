@@ -28,7 +28,7 @@ local Atmosphere = {
           -- Reflection coefficients are given in km^-1
           Scattering = { 0.005, 0.012, 0.08 },
           -- Extinction coefficients are a fraction of the Mie coefficients
-          Extinction = { 0.004 / 0.37, 0.004 / 0.37, 0.004 / 0.37 }
+          Extinction = { 0.005 / 0.4625, 0.012 / 0.4625, 0.08 / 0.4625 }
         },
         -- Height scale (atmosphere thickness for constant density) in km
         H_M = 14.85,
