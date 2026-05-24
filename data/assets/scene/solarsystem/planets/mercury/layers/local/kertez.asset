@@ -1,0 +1,49 @@
+local mercuryAsset = asset.require("scene/solarsystem/planets/mercury/globe")
+
+
+
+local data = asset.resource({
+  Name = "Mercury - Kertez",
+  Type = "HttpSynchronization",
+  Identifier = "mercury_layers_kertez",
+  Version = 1
+})
+
+
+local ColorLayer = {
+  Identifier = "Kertez",
+  Name = "Kertez [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Kertez_texture.vrt",
+  BlendMode = "Color"
+}
+
+local HeightLayer = {
+  Identifier = "Kertez",
+  Name = "Kertez [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Kertez_heightmap.vrt"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(mercuryAsset.Mercury.Identifier, "ColorLayers", ColorLayer)
+  openspace.globebrowsing.addLayer(mercuryAsset.Mercury.Identifier, "HeightLayers", HeightLayer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(mercuryAsset.Mercury.Identifier, "HeightLayers", HeightLayer)
+  openspace.globebrowsing.deleteLayer(mercuryAsset.Mercury.Identifier, "ColorLayers", ColorLayer)
+end)
+
+
+
+asset.meta = {
+  Name = "Mercury Kertez [Local]",
+  Description = [[A local layer for Kertez.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

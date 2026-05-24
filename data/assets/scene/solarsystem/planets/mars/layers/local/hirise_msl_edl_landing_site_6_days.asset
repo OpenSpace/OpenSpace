@@ -1,0 +1,49 @@
+local marsAsset = asset.require("scene/solarsystem/planets/mars/globe")
+
+
+
+local data = asset.resource({
+  Name = "HiRISE MSL EDL Landing Site 6 days",
+  Type = "HttpSynchronization",
+  Identifier = "mars_hirise_msl_edl_landing_site_6_days",
+  Version = 1
+})
+
+
+local ColorLayer = {
+  Identifier = "MSL_EDL_Landing_Site",
+  Name = "MSL EDL Landing Site [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "MSL_EDL_Landing_Site_6_Days_texture.vrt",
+  BlendMode = "Color"
+}
+
+local HeightLayer = {
+  Identifier = "MSL_EDL_Landing_Site",
+  Name = "MSL EDL Landing Site [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "MSL_EDL_Landing_Site_6_Days_hole_filled_heightmap.vrt"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "ColorLayers", ColorLayer)
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "HeightLayers", HeightLayer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "HeightLayers", HeightLayer)
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "ColorLayers", ColorLayer)
+end)
+
+
+
+asset.meta = {
+  Name = "HiRISE MSL EDL Landing Site 6 days [Local]",
+  Description = [[A local layer for MSL EDL Landing Site from the HiRISE instrument.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

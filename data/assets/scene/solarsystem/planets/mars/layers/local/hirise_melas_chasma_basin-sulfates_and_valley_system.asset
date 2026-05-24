@@ -1,0 +1,49 @@
+local marsAsset = asset.require("scene/solarsystem/planets/mars/globe")
+
+
+
+local data = asset.resource({
+  Name = "HiRISE Melas Chasma Basin - Sulfates and Valley System",
+  Type = "HttpSynchronization",
+  Identifier = "mars_hirise_melas_chasma_basin-sulfates_and_valley_system",
+  Version = 1
+})
+
+
+local ColorLayer = {
+  Identifier = "Melas_Chasma_Basin",
+  Name = "Melas Chasma Basin [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Sulfates_and_Valley_System_in_Melas_Chasma_Basin_Texture.vrt",
+  BlendMode = "Color"
+}
+
+local HeightLayer = {
+  Identifier = "Melas_Chasma_Basin",
+  Name = "Melas Chasma Basin [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Sulfates_and_Valley_System_in_Melas_Chasma_Basin_Heightmap.vrt"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "ColorLayers", ColorLayer)
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "HeightLayers", HeightLayer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "HeightLayers", HeightLayer)
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "ColorLayers", ColorLayer)
+end)
+
+
+
+asset.meta = {
+  Name = "HiRISE Sulfates and Valley System in Melas Chasma Basin [Local]",
+  Description = [[A local layer for Sulfates and Valley System in Melas Chasma Basin from the HiRISE instrument.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}
