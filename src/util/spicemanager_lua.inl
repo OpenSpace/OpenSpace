@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/misc/csvreader.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/format.h>
@@ -153,6 +154,10 @@ namespace {
                                          std::filesystem::path spk,
                                          int elementToExtract = 0)
 {
+    if (!std::filesystem::exists(tle)) {
+        throw ghoul::RuntimeError(std::format("Could not find TLE file '{}'", tle));
+    }
+
     // Code adopted from
     // https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getelm_c.html
     SpiceInt n = 0;
@@ -189,9 +194,6 @@ namespace {
     //
     // Load the TLE file
     //
-    if (!std::filesystem::exists(tle)) {
-        throw ghoul::RuntimeError(std::format("Could not find TLE file '{}'", tle));
-    }
     std::ifstream f = std::ifstream(tle, std::ios::binary);
     std::string contents = std::string(
         std::istreambuf_iterator<char>(f),
@@ -267,6 +269,177 @@ namespace {
     // Write the elements to a new SPK file
     const SpiceInt nCommentCharacters = 0;
     std::string internalFileName = std::format("Type 10 SPK for {}", tle);
+    std::string segmentId = "Segment";
+
+    if (std::filesystem::exists(spk)) {
+        std::filesystem::remove(spk);
+    }
+
+    std::string outFile = spk.string();
+    SpiceInt handle;
+    spkopn_c(outFile.c_str(), internalFileName.c_str(), nCommentCharacters, &handle);
+
+    spkw10_c(
+        handle,
+        bodyId,
+        399,
+        "J2000",
+        first,
+        last,
+        segmentId.c_str(),
+        constants.data(),
+        1,
+        elems.data(),
+        &epoch
+    );
+
+    spkcls_c(handle);
+
+    return bodyId;
+}
+
+/**
+ * This function converts a CSV file into SPK format and saves it at the provided path.
+ * The last parameter is only used if there are multiple craft specified in the provided
+ * CSV file and is selecting which (0-based index) of the list to create a kernel from.
+ *
+ * This function returns the SPICE ID of the object for which the kernel was created.
+ */
+[[codegen::luawrap]] int convertCSVtoSPK(std::filesystem::path csv,
+                                         std::filesystem::path spk,
+                                         int elementToExtract = 0)
+{
+    if (!std::filesystem::exists(csv)) {
+        throw ghoul::RuntimeError(std::format("Could not find CSV file '{}'", csv));
+    }
+
+
+    // The order of the columns are important as the SPICE conversion method requires the
+    // values to be in a specific order. The first block is treated separately from the
+    // second block, which is individually processed
+    const std::vector<std::string> columns = {
+        "MEAN_MOTION_DOT",
+        "MEAN_MOTION_DDOT",
+        "BSTAR",
+        "INCLINATION",
+        "RA_OF_ASC_NODE",
+        "ECCENTRICITY",
+        "ARG_OF_PERICENTER",
+        "MEAN_ANOMALY",
+        "MEAN_MOTION",
+
+        "EPOCH",
+        "NORAD_CAT_ID"
+    };
+    std::vector<std::vector<std::string>> parameters = ghoul::loadCSVFile(csv, columns);
+    if (elementToExtract >= parameters.size()) {
+        throw ghoul::RuntimeError(std::format(
+            "Requested element {} but only {} existed",
+            elementToExtract, parameters.size()
+        ));
+    }
+
+    std::vector<std::string> p = parameters[elementToExtract];
+    std::array<SpiceDouble, 10> elems = {};
+
+    // Converting the strings to numbers
+    for (size_t i = 0; i < 9; i++) {
+        std::string_view str = p[i];
+        double value = 0.0;
+        auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
+        if (ptr != str.data() + str.size() || ec != std::errc()) {
+            throw ghoul::RuntimeError(std::format(
+                "Error parsing '{}' of CSV file with error '{}'",
+                columns[i], std::make_error_code(ec).message()
+            ));
+        }
+        elems[i] = value;
+    }
+
+    // Need to convert the units from the OMM format into Spice format according to the
+    // tables at https://ccsds.org/Pubs/502x0b3e1.pdf and
+    // https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getelm_c.html
+
+    constexpr double MinutesPerDay = 24.0 * 60.0;
+
+    // MeanMotionDot:  rev/day^2 -> radians/minute^2
+    elems[0] = elems[0] * glm::two_pi<double>() / MinutesPerDay / MinutesPerDay;
+
+    // MeanMotionDotDot:  rev/day^2 -> radians/minute^3
+    elems[1] =
+        elems[1] * glm::two_pi<double>() / MinutesPerDay / MinutesPerDay / MinutesPerDay;
+
+    // Nothing to do with B*
+
+    // Inclination:  Deg -> rad
+    elems[3] = glm::radians(elems[3]);
+
+    // Ra of Ascending Node:  Deg -> rad
+    elems[4] = glm::radians(elems[4]);
+
+    // Nothing to do with eccentricity
+
+    // Arg of pericenter:  Deg -> rad
+    elems[6] = glm::radians(elems[6]);
+
+    // Mean Anomaly:  Deg -> rad
+    elems[7] = glm::radians(elems[7]);
+
+    // Mean Motion:  rev/day -> radians/minute
+    elems[8] = elems[8] * glm::two_pi<double>() / MinutesPerDay;
+
+
+    // Extract the epoch
+    SpiceDouble epoch = SpiceManager::ref().ephemerisTimeFromDate(p[9]);
+    elems[9] = epoch;
+
+
+    // Code adopted from
+    // https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getelm_c.html
+    SpiceInt n = 0;
+
+    //
+    // First exact the constants required by a type 10 SPK kernel
+    //
+
+    std::array<double, 8> constants;
+    // J2 gravitational harmonic for Earth
+    bodvcd_c(399, "J2", 1, &n, &constants[0]);
+
+    // J3 gravitational harmonic for Earth
+    bodvcd_c(399, "J3", 1, &n, &constants[1]);
+
+    // J4 gravitational harmonic for Earth
+    bodvcd_c(399, "J4", 1, &n, &constants[2]);
+
+    // Square root of the GM for Earth
+    bodvcd_c(399, "KE", 1, &n, &constants[3]);
+
+    // High altitude bound for atmospheric model
+    bodvcd_c(399, "QO", 1, &n, &constants[4]);
+
+    // Low altitude bound for atmospheric model
+    bodvcd_c(399, "SO", 1, &n, &constants[5]);
+
+    // Equatorial radius of the Earth
+    bodvcd_c(399, "ER", 1, &n, &constants[6]);
+
+    // Distance units/earth radius
+    bodvcd_c(399, "AE", 1, &n, &constants[7]);
+
+    // The size of a type SPK10 spice kernel is not affected by the time validity, so we
+    // just pick the greatest one
+    constexpr SpiceDouble first = -std::numeric_limits<double>::max();
+    constexpr SpiceDouble last = std::numeric_limits<double>::max();
+
+    // Earth-orbiting spacecraft usually lack a DSN identification code, so the NAIF ID
+    // is derived from the tracking ID assigned to it by NORAD via:
+    //   NAIF ID = -100000 - NORAD ID
+    int bodyId = -100000 - std::stoi(p[10]);
+
+    // Write the elements to a new SPK file
+    const SpiceInt nCommentCharacters = 0;
+    std::string internalFileName = std::format("Type 10 SPK for {}", csv);
     std::string segmentId = "Segment";
 
     if (std::filesystem::exists(spk)) {
