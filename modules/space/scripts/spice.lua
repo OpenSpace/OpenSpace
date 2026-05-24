@@ -62,7 +62,7 @@ openspace.space.tleToSpiceTranslation = function(tlePath)
   return translation, temporaryFile
 end
 
-openspace.space.csvToSpiceTranslation = function(tlePath)
+openspace.space.csvToSpiceTranslation = function(csvPath)
   --
   -- First we have to create a name for the temporary file
   --
@@ -70,7 +70,7 @@ openspace.space.csvToSpiceTranslation = function(tlePath)
   -- We first pass the path through the absPath function to both get rid of path tokens,
   -- but more importantly harmonize the path separators so we don't have to deal with
   -- / and \ variants
-  csvPath = openspace.absPath(tlePath)
+  csvPath = openspace.absPath(csvPath)
 
   -- We don't have a function to return the file component so we extract the directory
   -- and remove as many characters as it is long instead

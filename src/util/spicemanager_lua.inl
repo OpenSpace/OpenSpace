@@ -332,9 +332,9 @@ namespace {
         "NORAD_CAT_ID"
     };
     std::vector<std::vector<std::string>> parameters = ghoul::loadCSVFile(csv, columns);
-    if (elementToExtract >= parameters.size()) {
+    if (elementToExtract >= static_cast<int>(parameters.size())) {
         throw ghoul::RuntimeError(std::format(
-            "Requested element {} but only {} existed",
+            "Requested element {} but only {} elements were found",
             elementToExtract, parameters.size()
         ));
     }
@@ -399,7 +399,7 @@ namespace {
     SpiceInt n = 0;
 
     //
-    // First exact the constants required by a type 10 SPK kernel
+    // First extract the constants required by a type 10 SPK kernel
     //
 
     std::array<double, 8> constants;
