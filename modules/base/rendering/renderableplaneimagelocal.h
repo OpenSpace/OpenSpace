@@ -49,14 +49,21 @@ protected:
 private:
     void loadTexture();
 
+    void scaleToAspectRatio();
+
     StringProperty _texturePath;
+    StringProperty _rightTexturePath;
+
     ghoul::opengl::Texture* _texture = nullptr;
+    ghoul::opengl::Texture* _rightTexture = nullptr;
     glm::vec2 _textureDimensions = glm::vec2(0.f);
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
+    std::unique_ptr<ghoul::filesystem::File> _rightTextureFile;
 
     bool _isLoadingLazily = false;
     bool _shouldUnloadTexture = false;
     bool _textureIsDirty = false;
+    bool _isStereo = false;
 };
 
 } // namespace openspace
