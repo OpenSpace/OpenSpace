@@ -14,7 +14,7 @@ local Artemis2EarthTrail = {
       Type = "SpiceTranslation",
       Target = kernels.ID.Artemis,
       Observer = coreKernels.ID.Earth,
-      Frame = coreKernels.ID.Galactic
+      Frame = coreKernels.Frame.Galactic
     },
     Color = { 0.2, 0.78, 0.635 },
     Fade = 7.0,
@@ -74,7 +74,7 @@ asset.export(Artemis2MoonTrail)
 asset.meta = {
   Name = "Artemis 2 Trails",
   Description = "Trail of Artemis 2 in respect to Earth and the Moon",
-  Author = "Dan Tell, Tau immersive",
+  Author = "Dan Tell, Tau Immersive",
   URL = "http://tauimmersive.com",
   License = "MIT license"
 }

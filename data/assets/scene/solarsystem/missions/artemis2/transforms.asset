@@ -17,7 +17,7 @@ local Artemis2Position = {
   },
   GUI = {
     Name = "Artemis 2 Position",
-    Path = "/Solar System/Missions/Artemis",
+    Path = "/Solar System/Missions/Artemis 2",
     Focusable = false,
     Hidden = true
   }
