@@ -84,7 +84,8 @@ namespace {
         "Remove",
         "If this value is triggered, a script will be executed that will remove this "
         "layer before the next frame.",
-        Property::Visibility::User
+        Property::Visibility::User,
+        Property::NeedsConfirmation::Yes
     };
 
     constexpr Property::PropertyInfo ColorInfo = {
@@ -312,7 +313,6 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
             _parent.scheduleDeleteLayer(identifier());
         }
     });
-    _remove.setNeedsConfirmation(true);
 
     _renderSettings.onChange([this]() {
         // Only if we are a height layer will anyone care about these settings changing as
