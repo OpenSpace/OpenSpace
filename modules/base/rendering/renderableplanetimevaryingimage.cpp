@@ -73,7 +73,7 @@ Documentation RenderablePlaneTimeVaryingImage::Documentation() {
 
 RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
                                                       const ghoul::Dictionary& dictionary)
-    : RenderablePlane(dictionary)
+    : RenderablePlane(dictionary, { .shouldUpdateIfDisabled = true })
     , _sourceFolder(SourceFolderInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

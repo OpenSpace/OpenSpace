@@ -72,7 +72,7 @@ Documentation RenderablePlaneImageLocal::Documentation() {
 }
 
 RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary)
-    : RenderablePlane(dictionary)
+    : RenderablePlane(dictionary, { .shouldUpdateIfDisabled = true })
     , _texturePath(TextureInfo)
     , _textureIsDirty(_enabled)
 {

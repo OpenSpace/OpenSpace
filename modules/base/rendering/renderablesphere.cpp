@@ -231,8 +231,9 @@ Documentation RenderableSphere::Documentation() {
     );
 }
 
-RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
+RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary,
+                                   RenderableSettings settings)
+    : Renderable(dictionary, std::move(settings))
     , _size(SizeInfo, 1.f, 0.f, 1e25f)
     , _segments(SegmentsInfo, 16, 4, 1000)
     , _orientation(OrientationInfo)

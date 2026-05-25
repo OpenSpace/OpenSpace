@@ -43,7 +43,8 @@ namespace openspace {
 
 class RenderableSphere : public Renderable {
 public:
-    explicit RenderableSphere(const ghoul::Dictionary& dictionary);
+    explicit RenderableSphere(const ghoul::Dictionary& dictionary,
+        RenderableSettings settings = RenderableSettings());
 
     void initializeGL() override;
     void deinitializeGL() override;
