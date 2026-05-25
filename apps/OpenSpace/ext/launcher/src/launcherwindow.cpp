@@ -27,10 +27,10 @@
 #include "profile/profileedit.h"
 #include "sgctedit/sgctedit.h"
 #include "backgroundimage.h"
+#include "customicons.h"
 #include "notificationwindow.h"
 #include "settingsdialog.h"
 #include "splitcombobox.h"
-#include "usericon.h"
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/settings.h>
 #include <openspace/openspace.h>
@@ -721,10 +721,7 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
 void LauncherWindow::handleReturnFromWindowEditor(std::filesystem::path savePath) {
     // Truncate path to convert this back to path relative to _userConfigPath
     std::filesystem::path p = std::filesystem::proximate(savePath, _userConfigPath);
-
-    // Remove the file extension as the drop down menu only displays the raw names
-    p.replace_extension();
-    _windowConfigBox->populateList(p.string());
+    _windowConfigBox->populateList(p.generic_string());
 }
 
 void LauncherWindow::updateStartButton() const {
@@ -755,6 +752,13 @@ void LauncherWindow::updatePlaceholderText() {
 }
 
 void LauncherWindow::updateAddonsBox(const std::string& profile) {
+    // If we could not load profile properly
+    if (profile.empty()) {
+        _addonBox.model->clear();
+        _addonBox.combobox->setEnabled(false);
+        return;
+    }
+
     // Get a list of all of the potential variants
     std::vector<std::filesystem::path> addonsCore = ghoul::filesystem::walkDirectory(
         _profilePath,

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "usericon.h"
+#include "customicons.h"
 
 #include <QColor>
 #include <QFont>
@@ -42,5 +42,21 @@ QIcon userIcon() {
     f.setBold(true);
     painter.setFont(f);
     painter.drawText(0, 10, 40, 40, Qt::AlignCenter, "U");
+    return QIcon(px);
+}
+
+QIcon externalIcon() {
+    QPixmap px = QPixmap(40, 50);
+    px.fill(Qt::transparent);
+
+    QPainter painter = QPainter(&px);
+    painter.setBrush(QColor(124, 197, 245, 255));
+    painter.drawEllipse(0, 10, 38, 38);
+
+    QFont f = QFont("Arial");
+    f.setPixelSize(28);
+    f.setBold(true);
+    painter.setFont(f);
+    painter.drawText(0, 10, 40, 40, Qt::AlignCenter, "E");
     return QIcon(px);
 }

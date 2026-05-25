@@ -26,3 +26,6 @@
 
 // Creates an icon that is used to represent user-generated content
 QIcon userIcon();
+
+// Creates an icon that is used to represent external content
+QIcon externalIcon();

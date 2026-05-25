@@ -26,12 +26,12 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/set_openspace_compile_settings.cmake
 
 set(HEADER_FILES
   include/backgroundimage.h
+  include/customicons.h
   include/filesystemaccess.h
   include/launcherwindow.h
   include/notificationwindow.h
   include/settingsdialog.h
   include/splitcombobox.h
-  include/usericon.h
   include/windowcolors.h
   include/profile/actiondialog.h
   include/profile/additionalscriptsdialog.h
@@ -59,12 +59,12 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
   src/backgroundimage.cpp
+  src/customicons.cpp
   src/launcherwindow.cpp
   src/filesystemaccess.cpp
   src/notificationwindow.cpp
   src/settingsdialog.cpp
   src/splitcombobox.cpp
-  src/usericon.cpp
   src/windowcolors.cpp
   src/profile/actiondialog.cpp
   src/profile/additionalscriptsdialog.cpp

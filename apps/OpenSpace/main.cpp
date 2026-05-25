@@ -1392,7 +1392,7 @@ int main(int argc, char* argv[]) {
     std::string windowCfgPreset;
     if (commandlineArguments.windowConfig.has_value()) {
         windowCfgPreset = std::format(
-            "{} (from CLI)", global::configuration->windowConfiguration
+            "{}", global::configuration->windowConfiguration
         );
     }
     else {
