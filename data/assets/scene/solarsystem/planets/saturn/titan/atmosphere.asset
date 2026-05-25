@@ -24,21 +24,21 @@ local Atmosphere = {
       H_R = 20.0
     },
     Mie = {
-        Coefficients = {
-          -- Reflection coefficients are given in km^-1
-          Scattering = { 0.005, 0.012, 0.08 },
-          -- Extinction coefficients are a fraction of the Mie coefficients
-          Extinction = { 0.005 / 0.4625, 0.012 / 0.4625, 0.08 / 0.4625 }
-        },
-        -- Height scale (atmosphere thickness for constant density) in km
-        H_M = 14.85,
-        -- Mie Phase Function Value
-        -- (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
-        G = -0.52
+      Coefficients = {
+        -- Reflection coefficients are given in km^-1
+        Scattering = { 0.005, 0.012, 0.08 },
+        -- Extinction coefficients are a fraction of the Mie coefficients
+        Extinction = { 0.005 / 0.4625, 0.012 / 0.4625, 0.08 / 0.4625 }
+      },
+      -- Height scale (atmosphere thickness for constant density) in km
+      H_M = 14.85,
+      -- Mie Phase Function Value
+      -- (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
+      G = -0.52
     },
     Debug = {
-        PreCalculatedTextureScale = 1.0,
-        SaveCalculatedTextures = false
+      PreCalculatedTextureScale = 1.0,
+      SaveCalculatedTextures = false
     }
   },
   GUI = {
