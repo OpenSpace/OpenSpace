@@ -6,25 +6,26 @@
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/missions/artemis/artemis",
-    "scene/solarsystem/missions/artemis/toggle_trail"
+    "scene/solarsystem/missions/artemis/toggle_trail",
+    "scene/solarsystem/missions/artemis2/artemis2"
   ],
   "camera": {
     "aim": "",
-    "anchor": "ArtemisModel",
+    "anchor": "Artemis2Model",
     "frame": "Root",
-    "pitch": 0.008681,
+    "pitch": 0.00047288274629576405,
     "position": {
-      "x": 364.907409,
-      "y": -65.898746,
-      "z": 361.510673
+      "x": 593334.3991851807,
+      "y": -80421.27866363525,
+      "z": 139200.5686187744
     },
     "type": "setNavigationState",
     "up": {
-      "x": -0.128611,
-      "y": 0.94459,
-      "z": 0.302006
+      "x": 0.003356826933219176,
+      "y": 0.8720068806196053,
+      "z": 0.4894821057658859
     },
-    "yaw": -0.003474
+    "yaw": -0.0060679163186436935
   },
   "delta_times": [
     1.0,
@@ -100,7 +101,7 @@
   "time": {
     "is_paused": false,
     "type": "absolute",
-    "value": "2022-11-21T12:00:00"
+    "value": "2026 APR 06 22:40:09"
   },
   "version": {
     "major": 1,

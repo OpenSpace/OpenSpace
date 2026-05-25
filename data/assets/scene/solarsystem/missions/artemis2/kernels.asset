@@ -1,0 +1,21 @@
+local data = asset.resource({
+  Name = "Artemis 2 Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "artemis_2_kernels",
+  Version = 1
+})
+
+local ID = {
+  Artemis = -1024
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(data .. "artemis2.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(data .. "artemis2.bsp")
+end)
+
+asset.export("ID", ID)

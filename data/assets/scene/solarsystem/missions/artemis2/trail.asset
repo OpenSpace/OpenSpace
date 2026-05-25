@@ -1,0 +1,80 @@
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local Artemis2EarthTrail = {
+  Identifier = "Artemis2EarthTrail",
+  Parent = earthTransforms.EarthCenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Artemis,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.ID.Galactic
+    },
+    Color = { 0.2, 0.78, 0.635 },
+    Fade = 7.0,
+    StartTime = "2026 APR 02 01:49:00.000",
+    EndTime = "2026 APR 10 23:54:13.000",
+    SampleInterval = 60 -- Sample rate of once per minute
+  },
+  GUI = {
+    Name = "Artemis 2 Earth Trail",
+    Path = "/Solar System/Missions/Artemis 2/Trails",
+    Focusable = false,
+    Description = "Artemis 2 trail relative to Earth"
+  }
+}
+
+local Artemis2MoonTrail = {
+  Identifier = "Artemis2MoonTrail",
+  Parent = moonTransforms.MoonInertial.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Artemis,
+      Observer = coreKernels.ID.Moon,
+      Frame = coreKernels.Frame.Moon
+    },
+    Color = { 0.78, 0.43, 0.20 },
+    Fade = 7.0,
+    StartTime = "2026 APR 02 01:49:00.000",
+    EndTime = "2026 APR 10 23:54:13.000",
+    SampleInterval = 60 -- Sample rate of once per minute
+  },
+  GUI = {
+    Name = "Artemis 2 Moon Trail",
+    Path = "/Solar System/Missions/Artemis 2/Trails",
+    Focusable = false,
+    Description = "Artemis 2 trail relative to the Moon"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Artemis2EarthTrail)
+  openspace.addSceneGraphNode(Artemis2MoonTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Artemis2MoonTrail)
+  openspace.removeSceneGraphNode(Artemis2EarthTrail)
+end)
+
+asset.export(Artemis2EarthTrail)
+asset.export(Artemis2MoonTrail)
+
+
+
+asset.meta = {
+  Name = "Artemis 2 Trails",
+  Description = "Trail of Artemis 2 in respect to Earth and the Moon",
+  Author = "Dan Tell, Tau immersive",
+  URL = "http://tauimmersive.com",
+  License = "MIT license"
+}
