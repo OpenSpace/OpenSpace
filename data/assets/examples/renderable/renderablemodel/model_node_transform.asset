@@ -1,6 +1,6 @@
 -- Node Transform
 -- This example loads a model and applies a custom transformation to one of its internal
--- model nodes.
+-- model nodes identified by name.
 
 -- Load the example model from OpenSpace servers
 -- If you want to use your own model, this block of code can be safely deleted
@@ -18,21 +18,14 @@ local Node = {
     GeometryFile = model .. "BoxAnimated.glb",
     -- Use the line below insted of the one above if you want to use your own model
     --GeometryFile = "C:/path/to/model.fbx",
-    CustomTransformsShouldOverride = false,
     CustomTransforms = {
-      ["nodes[2]"] = {
+      ["nodes[2]"] = { -- Name of the internal node to apply the custom transformation to
         Translation = {
           Type = "StaticTranslation",
           Position = {10, 0, 0}
         }
       }
-    },
-    -- Animation Parameters:
-    EnableAnimation = true,
-    -- Start the animation and play it once at this time
-    AnimationStartTime = "2024 07 09 12:00:00",
-    -- Bounce the animation after the set start time
-    AnimationMode = "BounceFromStart",
+    }
   },
   GUI = {
     Name = "RenderableModel - Node Transform",

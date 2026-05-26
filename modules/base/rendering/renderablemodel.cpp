@@ -317,29 +317,34 @@ namespace {
         std::optional<glm::vec4> overrideColor [[codegen::color()]];
 
         struct NodeTransform {
-            // This node describes a translation that is applied to the scene graph node
-            // and all its children. Depending on the 'Type' of the translation, this can
-            // either be a static translation or a time-varying one.
+            // This describes a translation that is applied to an internal model node
+            // identified with name and all its children. Depending on the 'Type' of the
+            // translation, this can either be a static translation or a time-varying one.
             std::optional<ghoul::Dictionary> translation
                 [[codegen::reference("core_translation")]];
 
-            // This nodes describes a rotation that is applied to the scene graph node and
-            // all its children. Depending on the 'Type' of the rotation, this can either
-            // be a static rotation or a time-varying one.
+            // This describes a rotation that that is applied to an internal model node
+            // identified with name and all its children. Depending on the 'Type' of the
+            // rotation, this can either be a static rotation or a time-varying one.
             std::optional<ghoul::Dictionary> rotation
                 [[codegen::reference("core_rotation")]];
 
-            // This node describes a scaling that is applied to the scene graph node and
-            // all its children. Depending on the 'Type' of the scaling, this can either
-            // be a static scaling or a time-varying one.
+            // This describes a scaling that is applied to an internal model node
+            // identified with name and all its children. Depending on the 'Type' of the
+            // scaling, this can either be a static scaling or a time-varying one.
             std::optional<ghoul::Dictionary> scale [[codegen::reference("core_scale")]];
         };
 
-        // The custom transformation
+        // A map of custom transformations to apply to internal model nodes. The keys of
+        // the map are the named of the internal model nodes that the respective
+        // transformation should be applied to. The value is the transformation itself,
+        // which can be a translation, rotation, and/or scaling.
         std::optional<std::map<std::string, NodeTransform>> customTransforms;
 
-        // Whether the custom transforms should replace the existing transform or add on
-        // top if it
+        // Whether the custom transformations should replace any existing transformation
+        // of the affected internal mode node or not. If `true` then the custom
+        // transformation will replacce any internal transformation. If `false` then the
+        // custom transformation will be applied on top of any existing transformations.
         std::optional<bool> customTransformsShouldOverride;
     };
 } // namespace
@@ -716,6 +721,7 @@ void RenderableModel::initializeGL() {
         ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
     );
     _modelHasAnimation = _geometry->hasAnimation();
+    _geometry->setCustomTransformsOverride(_customNodeTransformsShouldOverride);
 
     // @TODO (abock, 2023-06-03) Leaving this here to address issue #2731. The
     // _modelHasAnimation has not been set to true in the constructor causing the
@@ -1277,11 +1283,7 @@ void RenderableModel::update(const UpdateData& data) {
 
             glm::dmat4 finalTransform = translation * rotation * scaling;
 
-            _geometry->updateCustomNodeTransform(
-                finalTransform,
-                nodeName,
-                _customNodeTransformsShouldOverride
-            );
+            _geometry->updateCustomNodeTransform(nodeName, finalTransform);
         }
     }
 
