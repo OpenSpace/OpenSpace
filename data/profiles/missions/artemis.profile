@@ -5,10 +5,10 @@
     "events/toggle_sun",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
-    "scene/solarsystem/missions/artemis/artemis",
-    "scene/solarsystem/missions/artemis/toggle_trail",
-    "scene/solarsystem/missions/artemis2/artemis2",
-    "scene/solarsystem/missions/artemis2/toggle_trail"
+    "scene/solarsystem/missions/artemis/artemis1/artemis",
+    "scene/solarsystem/missions/artemis/artemis1/toggle_trail",
+    "scene/solarsystem/missions/artemis/artemis2/artemis2",
+    "scene/solarsystem/missions/artemis/artemis2/toggle_trail"
   ],
   "camera": {
     "aim": "",
