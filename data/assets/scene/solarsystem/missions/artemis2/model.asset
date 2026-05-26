@@ -4,7 +4,7 @@ local transforms = asset.require("./transforms")
 
 
 local models = asset.resource({
-  Name = "Artemis Models",
+  Name = "Artemis II Models",
   Type = "HttpSynchronization",
   Identifier = "artemis_2_models",
   Version = 1
@@ -14,10 +14,15 @@ local Artemis2Model = {
   Identifier = "Artemis2Model",
   Parent = transforms.Artemis2Position.Identifier,
   ApproachFactor = 2700,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2026 APR 02 01:49:00.000",
+    End = "2026 APR 10 23:54:13.000"
+  },
   Transform = {
     Rotation = {
       Type = "FixedRotation",
-      Attached = "ArtemisModel2",
+      Attached = "Artemis2Model",
       XAxis = { 1.0, 0.0, 0.0 },
       XAxisOrthogonal = true,
       YAxis = sun.SunCenter.Identifier,
@@ -33,9 +38,9 @@ local Artemis2Model = {
     AmbientIntensity = 0.05
   },
   GUI = {
-    Name = "Orion (Artemis 2) Model",
-    Path = "/Solar System/Missions/Artemis 2",
-    Description = "Model of the Orion capsule for the Artemis-2 mission"
+    Name = "Orion Model (Artemis II)",
+    Path = "/Solar System/Missions/Artemis II",
+    Description = "Model of the Orion capsule for the Artemis II mission."
   }
 }
 
@@ -53,9 +58,9 @@ asset.export(Artemis2Model)
 
 
 asset.meta = {
-  Name = "Artemis 2 Model",
-  Description = "Orion capsule model for the Artemis 2 mission",
-  Author = "Dan Tell, Tau Immersive, model OpenSpace Team",
+  Name = "Artemis II Model",
+  Description = "Orion capsule model for the Artemis II mission.",
+  Author = "Dan Tell, Tau Immersive",
   URL = "http://tauimmersive.com",
   License = "MIT license"
 }

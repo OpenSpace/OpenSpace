@@ -4,7 +4,7 @@ local transforms = asset.require("./transforms")
 
 
 local models = asset.resource({
-  Name = "Artemis Models",
+  Name = "Artemis I Models",
   Type = "HttpSynchronization",
   Identifier = "artemis_1_models",
   Version = 1
@@ -15,6 +15,11 @@ local ArtemisModel = {
   Identifier = "ArtemisModel",
   Parent = transforms.ArtemisPosition.Identifier,
   ApproachFactor = 2700,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2022 NOV 16 08:19:00.000",
+    End = "2022 DEC 11 17:20:45.065"
+  },
   Transform = {
     Rotation = {
       Type = "FixedRotation",
@@ -35,9 +40,9 @@ local ArtemisModel = {
     EnableFaceCulling = false
   },
   GUI = {
-    Name = "Orion (Artemis-1) Model",
-    Path = "/Solar System/Missions/Artemis",
-    Description = "Model of the Orion capsule for the Artemis-1 mission"
+    Name = "Orion Model (Artemis I)",
+    Path = "/Solar System/Missions/Artemis I",
+    Description = "Model of the Orion capsule for the Artemis I mission"
   }
 }
 
@@ -55,8 +60,8 @@ asset.export(ArtemisModel)
 
 
 asset.meta = {
-  Name = "Artemis-1 Model",
-  Description = "Orion capsule model for the Artemis-1 mission",
+  Name = "Artemis I Model",
+  Description = "Orion capsule model for the Artemis I mission",
   Author = "OpenSpace Team",
   URL = "https://openspaceproject.com",
   License = "MIT license"

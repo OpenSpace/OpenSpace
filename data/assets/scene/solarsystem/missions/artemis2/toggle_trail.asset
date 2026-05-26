@@ -1,5 +1,5 @@
 local ToggleTrail = {
-  Identifier = "os.artemis.ToggleTrail",
+  Identifier = "os.artemis2.ToggleTrail",
   Name = "Toggle Artemis trails (auto)",
   Command = [[
     local node
@@ -9,12 +9,12 @@ local ToggleTrail = {
       node = openspace.navigation.getNavigationState().Anchor
     end
 
-    if node ~= "ArtemisModel" then
+    if node ~= "Artemis2Model" then
       return
     end
 
-    local earthTrail = "ArtemisEarthTrail"
-    local moonTrail = "ArtemisMoonTrail"
+    local earthTrail = "Artemis2EarthTrail"
+    local moonTrail = "Artemis2MoonTrail"
 
     local visibility
     if is_declared("args") then
@@ -41,7 +41,7 @@ local ToggleTrail = {
     end
 
      ]],
-  Documentation = [[Toggles the visibility of the Artemis I trails with an
+  Documentation = [[Toggles the visibility of the Artemis II trails with an
     approaching/exiting event. This action takes optional arguments to 1) determine which
     node is currently in focus and only hide Artemis trails if it is in focus (as the
     'Node') and 2) the transition direction (as 'Approaching' or 'Exiting')]],

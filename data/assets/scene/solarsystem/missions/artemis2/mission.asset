@@ -1,15 +1,15 @@
 local Mission = {
   Identifier = "Artemis2",
-  Name = "Artemis 2",
+  Name = "Artemis II",
   TimeRange = { Start = "2026 APR 01 22:35:12", End = "2026 APR 11 00:07:27" },
   Image = "https://data.openspaceproject.com/missions/artemis2/jsc2025e034457~medium.jpg",
-  Description = "Artemis II is NASA's first crewed test flight in the Artemis campaign. Four astronauts will fly aboard NASA's Orion spacecraft and confirm the spacecraft's systems operate as designed in the deep space environment. In this Golden Age of exploration and innovation, the Artemis missions will allow astronauts to explore the Moon for scientific discovery, economic benefits, and help build momentum for the first crewed missions to Mars. NASA's Reid Wiseman, Victor Glover, and Christina Koch, and CSA (Canadian Space Agency) astronaut Jeremy Hansen are the Artemis II astronauts.",
+  Description = "Artemis II is NASA's first crewed test flight in the Artemis campaign. Four astronauts flew aboard NASA's Orion spacecraft and confirmed the spacecraft's systems operate as designed in the deep space environment. In this Golden Age of exploration and innovation, the Artemis missions allowed astronauts to explore the Moon for scientific discovery, economic benefits, and helped build momentum for the first crewed missions to Mars. NASA's Reid Wiseman, Victor Glover, and Christina Koch, and CSA (Canadian Space Agency) astronaut Jeremy Hansen are the Artemis II astronauts.",
   Milestones = {
     {
-      Name = "Mission launch",
+      Name = "Mission Launch",
       Date = "2026 APR 01 22:35:12",
       Image = "https://data.openspaceproject.com/missions/artemis2/55182696113-0c4398702d-o-2.jpg",
-      Description = "The initial launch will be similar to Artemis I as SLS lofts Orion into space. With crew aboard this mission, Orion and the upper stage, called the interim cryogenic propulsion stage (ICPS), will then orbit Earth twice to ensure Orion's systems are working as expected while still close to home. Orion will start in an elliptical orbit that will be refined to a “safe” high Earth orbit of approximately 44,525 x 115 statute miles."
+      Description = "The initial launch was similar to Artemis I as SLS lofts Orion into space. With crew aboard this mission, Orion and the upper stage, called the interim cryogenic propulsion stage (ICPS), orbited Earth twice to ensure Orion's systems are working as expected while still close to home. Orion started in an elliptical orbit that was refined to a \"safe\" high Earth orbit of approximately 44,525 x 115 statute miles."
     },
     {
       Name = "Closest Approach to the Moon",
@@ -24,7 +24,7 @@ local Mission = {
       Image = "https://data.openspaceproject.com/missions/artemis2/art002e016204~large.jpg"
     },
     {
-      Name = "Orion landing",
+      Name = "Orion Landing",
       Date = "2026 APR 11 00:07:27",
       Description = "Splashdown occurred April 11, 2026, 00:07:27 UTC (April 10, 5:07:27 p.m. PDT local time), in the Pacific Ocean southwest of San Diego, California, where the U.S. Navy recovered the crew. It became the first crewed NASA mission to be recovered by the Navy since the Apollo-Soyuz Test Project in 1975.",
       Image = "https://data.openspaceproject.com/missions/artemis2/nhq202604100018.jpg"
@@ -33,23 +33,33 @@ local Mission = {
   Phases = {
     {
       Name = "Launch",
-      TimeRange = { Start = "2026 APR 01 22:35:12", End = "2026 APR 02 14:05:00" }
+      TimeRange = { Start = "2026 APR 01 22:35:12", End = "2026 APR 02 14:05:00" },
+      Description = "Artemis II begins as the Space Launch System lifts Orion and its crew from Kennedy Space Center. After reaching space, Orion enters Earth orbit for early spacecraft checkouts, crew operations, and preparations for the maneuvers that will send the mission toward the Moon.",
+      Image = "https://data.openspaceproject.com/missions/artemis2/ART002-E-23282.jpg"
     },
     {
-      Name = "TLI and Outbound coasting phase",
-      TimeRange = { Start = "2026 APR 02 23:49:00", End = "2026 APR 05 05:34:00" }
+      Name = "TLI and Outbound Coasting Phase",
+      TimeRange = { Start = "2026 APR 02 23:49:00", End = "2026 APR 05 05:34:00" },
+      Description = "Orion performs its trans-lunar injection burn, departing Earth orbit and entering a lunar free-return trajectory. During the outbound coast, the crew and flight controllers monitor spacecraft systems, refine the trajectory as needed, and prepare for the upcoming flyby.",
+      Image = "https://data.openspaceproject.com/missions/artemis2/55189687036_7504c9280d_o.jpg"
     },
     {
       Name = "Lunar Flyby",
-      TimeRange = { Start = "2026 APR 05 05:34:00", End = "2026 APR 07 18:22:00" }
+      TimeRange = { Start = "2026 APR 05 05:34:00", End = "2026 APR 07 18:22:00" },
+      Description = "As Orion enters the Moon's sphere of influence, lunar gravity bends the spacecraft's path around the far side of the Moon. The crew observes and documents the lunar surface while the flyby redirects Orion onto its return path toward Earth.",
+      Image = "https://data.openspaceproject.com/missions/artemis2/ART002-E-24179.jpg"
     },
     {
-      Name = "Inbound coasting phase",
-      TimeRange = { Start = "2026 APR 07 18:22:00", End = "2026 APR 10 23:32:00" }
+      Name = "Inbound Coasting Phase",
+      TimeRange = { Start = "2026 APR 07 18:22:00", End = "2026 APR 10 23:32:00" },
+      Description = "After leaving the Moon behind, Orion coasts back toward Earth on its free-return trajectory. The crew continues monitoring spacecraft performance while small trajectory corrections help target the precise entry corridor for a safe return.",
+      Image = "https://data.openspaceproject.com/missions/artemis2/55193772552_b8cfb47b7e_o2.jpg"
     },
     {
       Name = "Reentry and Splashdown",
-      TimeRange = { Start = "2026 APR 10 23:32:00", End = "2026 APR 11 00:07:00" }
+      TimeRange = { Start = "2026 APR 10 23:32:00", End = "2026 APR 11 00:07:00" },
+      Description = "Orion separates its crew module from the service module and begins the high-speed plunge into Earth's atmosphere. The heat shield, parachutes, and recovery systems bring the spacecraft safely down for splashdown and crew recovery in the Pacific Ocean.",
+      Image = "https://data.openspaceproject.com/missions/artemis2/9609116.jpg"
     }
   }
 }

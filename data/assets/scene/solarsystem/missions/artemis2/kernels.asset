@@ -1,12 +1,12 @@
 local data = asset.resource({
-  Name = "Artemis 2 Kernels",
+  Name = "Artemis II Kernels",
   Type = "HttpSynchronization",
   Identifier = "artemis_2_kernels",
   Version = 1
 })
 
 local ID = {
-  Artemis = -1024
+  Artemis2 = -1024
 }
 
 

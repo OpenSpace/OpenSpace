@@ -7,7 +7,8 @@
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/missions/artemis/artemis",
     "scene/solarsystem/missions/artemis/toggle_trail",
-    "scene/solarsystem/missions/artemis2/artemis2"
+    "scene/solarsystem/missions/artemis2/artemis2",
+    "scene/solarsystem/missions/artemis2/toggle_trail"
   ],
   "camera": {
     "aim": "",
@@ -51,17 +52,18 @@
   ],
   "mark_nodes": [
     "ArtemisModel",
+    "Artemis2Model",
     "Earth",
     "Moon",
     "Sun"
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "Artemis Profile. Adds the Orion capsule (Artemis-1) model with its trajectery.",
+    "description": "Artemis Profile. Adds the capsule for Artemis I and Artemis II together with the trajectories relative to Earth as well as relative to the Moon.",
     "license": "MIT License",
     "name": "Artemis",
     "url": "https://www.openspaceproject.com",
-    "version": "1.0"
+    "version": "2.0"
   },
   "panel_visibility": {
     "mission": true

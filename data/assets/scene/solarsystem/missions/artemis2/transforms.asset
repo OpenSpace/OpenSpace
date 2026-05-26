@@ -10,14 +10,14 @@ local Artemis2Position = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels.ID.Artemis,
+      Target = kernels.ID.Artemis2,
       Observer = coreKernels.ID.Earth,
       Frame = coreKernels.Frame.Galactic
     }
   },
   GUI = {
-    Name = "Artemis 2 Position",
-    Path = "/Solar System/Missions/Artemis 2",
+    Name = "Artemis II Position",
+    Path = "/Solar System/Missions/Artemis II",
     Focusable = false,
     Hidden = true
   }
@@ -37,8 +37,8 @@ asset.export(Artemis2Position)
 
 
 asset.meta = {
-  Name = "Artemis 2 Transforms",
-  Description = "Artemis 2 transforms, position relative to Earth",
+  Name = "Artemis II Transforms",
+  Description = "Artemis II transforms, position relative to Earth.",
   Author = "Dan Tell, Tau Immersive",
   URL = "http://tauimmersive.com",
   License = "MIT license"
