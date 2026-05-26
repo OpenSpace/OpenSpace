@@ -143,12 +143,11 @@ private:
      * Transformation defined by translation, rotation and scale.
      */
     struct NodeTransform {
-        std::string nodeName;
         ghoul::mm_unique_ptr<Translation> translation;
         ghoul::mm_unique_ptr<Rotation> rotation;
         ghoul::mm_unique_ptr<Scale> scale;
     };
-    std::vector<NodeTransform> _customNodeTransforms;
+    std::map<std::string, NodeTransform> _customNodeTransforms;
     bool _hasCustomNodeTransforms = false;
     bool _customNodeTransformsShouldOverride = false;
 };

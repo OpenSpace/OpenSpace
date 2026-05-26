@@ -317,9 +317,6 @@ namespace {
         std::optional<glm::vec4> overrideColor [[codegen::color()]];
 
         struct NodeTransform {
-            // Name of the node
-            std::string nodeName;
-
             // This node describes a translation that is applied to the scene graph node
             // and all its children. Depending on the 'Type' of the translation, this can
             // either be a static translation or a time-varying one.
@@ -339,7 +336,7 @@ namespace {
         };
 
         // The custom transformation
-        std::optional<std::vector<NodeTransform>> customTransforms;
+        std::optional<std::map<std::string, NodeTransform>> customTransforms;
 
         // Whether the custom transforms should replace the existing transform or add on
         // top if it
@@ -647,42 +644,41 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     if (p.customTransforms.has_value()) {
         _hasCustomNodeTransforms = true;
 
-        for (const auto& nodeTransform : *p.customTransforms) {
-            _customNodeTransforms.push_back(NodeTransform());
-            _customNodeTransforms.back().nodeName = nodeTransform.nodeName;
+        for (const auto& [nodeName, nodeTransform] : *p.customTransforms) {
+            _customNodeTransforms.insert({ nodeName, NodeTransform() });
 
             if (nodeTransform.translation.has_value()) {
-                _customNodeTransforms.back().translation =
+                _customNodeTransforms[nodeName].translation =
                     Translation::createFromDictionary(*nodeTransform.translation);
 
                 LDEBUG(std::format(
                     "Applied custom translation on node '{}' for model '{}'",
-                    nodeTransform.nodeName, _file
+                    nodeName, _file
                 ));
-                addPropertySubOwner(_customNodeTransforms.back().translation.get());
+                addPropertySubOwner(_customNodeTransforms[nodeName].translation.get());
             }
 
             if (nodeTransform.rotation.has_value()) {
-                _customNodeTransforms.back().rotation = Rotation::createFromDictionary(
+                _customNodeTransforms[nodeName].rotation = Rotation::createFromDictionary(
                     *nodeTransform.rotation
                 );
 
                 LDEBUG(std::format(
                     "Applied custom rotation on node '{}' for model '{}'",
-                    nodeTransform.nodeName, _file
+                    nodeName, _file
                 ));
-                addPropertySubOwner(_customNodeTransforms.back().rotation.get());
+                addPropertySubOwner(_customNodeTransforms[nodeName].rotation.get());
             }
 
             if (nodeTransform.scale.has_value()) {
-                _customNodeTransforms.back().scale =
+                _customNodeTransforms[nodeName].scale =
                     Scale::createFromDictionary(*nodeTransform.scale);
 
                 LDEBUG(std::format(
                     "Applied custom scale on node '{}' for model '{}'",
-                    nodeTransform.nodeName, _file
+                    nodeName, _file
                 ));
-                addPropertySubOwner(_customNodeTransforms.back().scale.get());
+                addPropertySubOwner(_customNodeTransforms[nodeName].scale.get());
             }
         }
     }
@@ -692,7 +688,7 @@ void RenderableModel::initialize() {
     ZoneScoped;
 
     if (_hasCustomNodeTransforms) {
-        for (const auto& nodeTransform : _customNodeTransforms) {
+        for (const auto& [nodeName, nodeTransform] : _customNodeTransforms) {
             if (nodeTransform.translation) {
                 nodeTransform.translation->initialize();
             }
@@ -1254,7 +1250,7 @@ void RenderableModel::update(const UpdateData& data) {
     }
 
     if (_hasCustomNodeTransforms) {
-        for (const auto& nodeTransform : _customNodeTransforms) {
+        for (const auto& [nodeName, nodeTransform] : _customNodeTransforms) {
             glm::dmat4 translation(1.0);
             if (nodeTransform.translation) {
                 nodeTransform.translation->update(data);
@@ -1283,7 +1279,7 @@ void RenderableModel::update(const UpdateData& data) {
 
             _geometry->updateCustomNodeTransform(
                 finalTransform,
-                nodeTransform.nodeName,
+                nodeName,
                 _customNodeTransformsShouldOverride
             );
         }
