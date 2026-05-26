@@ -72,10 +72,11 @@ namespace {
  * file and the original profile will be overwritten. The second argument determines if a
  * file that already exists should be overwritten, which is 'false' by default.
  */
-[[codegen::luawrap]] void saveSettingsToProfile(std::optional<std::string> saveFilePath,
-                                                bool shouldOverwrite = true)
+[[codegen::luawrap]] void saveSettingsToProfile(std::optional<std::string> saveFileName,
+                                                bool shouldOverwrite = false)
 {
-    if (!saveFilePath.has_value()) {
+    const bool receivedSaveFileName = saveFileName.has_value();
+    if (!saveFileName.has_value()) {
         std::time_t t = std::time(nullptr);
         std::tm* utcTime = std::gmtime(&t);
         ghoul_assert(utcTime, "Conversion to UTC failed");
@@ -99,9 +100,9 @@ namespace {
             std::format("Saving a copy of the old profile as '{}'", backupPath)
         );
         std::filesystem::copy(sourcePath, backupPath);
-        saveFilePath = path.stem().string();
+        saveFileName = path.stem().string();
     }
-    if (saveFilePath->empty()) {
+    if (saveFileName->empty()) {
         throw ghoul::lua::LuaError("Save filepath string is empty");
     }
 
@@ -110,28 +111,31 @@ namespace {
     NavigationState navState = global::navigationHandler->navigationState();
     global::profile->saveCurrentSettingsToProfile(root, currentTime, navState);
 
-    if (saveFilePath->contains('/')) {
+    if (saveFileName->contains('/')) {
         throw ghoul::lua::LuaError("Profile filename must not contain (/) elements");
     }
-    else if (saveFilePath->contains(':')) {
+    else if (saveFileName->contains(':')) {
         throw ghoul::lua::LuaError("Profile filename must not contain (:) elements");
     }
-    else if (saveFilePath->contains('.')) {
+    else if (saveFileName->contains('.')) {
         throw ghoul::lua::LuaError(
             "Only provide the filename to save without file extension"
         );
     }
 
     std::string absFilename = std::format(
-        "{}/{}.profile", absPath("${PROFILES}"), *saveFilePath
+        "{}/{}.profile", absPath("${PROFILES}"), *saveFileName
     );
     if (!std::filesystem::is_regular_file(absFilename)) {
         absFilename = std::format(
-            "{}/{}.profile", absPath("${USER_PROFILES}"), *saveFilePath
+            "{}/{}.profile", absPath("${USER_PROFILES}"), *saveFileName
         );
     }
 
-    if (std::filesystem::is_regular_file(absFilename) && !shouldOverwrite) {
+    if (std::filesystem::is_regular_file(absFilename) &&
+        !shouldOverwrite &&
+        receivedSaveFileName)
+    {
         throw ghoul::lua::LuaError(
             std::format(
                 "Unable to save profile '{}'. File of same name already exists",
