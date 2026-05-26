@@ -267,7 +267,7 @@ bool MainWindow::saveAssetAs() {
 
     const QString suggestion = (_editor && !_editor->filePath().empty()) ?
         QString::fromStdWString(_editor->filePath().wstring()) :
-        QString();
+        QString::fromStdString(absPath("${USER_ASSETS}").string());
 
     const QString path = QFileDialog::getSaveFileName(
         this,
