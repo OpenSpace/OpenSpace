@@ -90,28 +90,16 @@ namespace {
             utcTime->tm_sec
         );
         std::filesystem::path path = global::configuration->profile.profile;
+        const std::string extension = path.extension().string();
         path.replace_extension();
-        std::string newFile = std::format("{}_{}", path, time);
-        std::string sourcePath = std::format(
-            "{}/{}.profile",
-            absPath("${USER_PROFILES}"), global::configuration->profile.profile
-        );
-        std::string destPath = std::format(
-            "{}/{}.profile",
-            absPath("${PROFILES}"), global::configuration->profile.profile
-        );
-        if (!std::filesystem::is_regular_file(sourcePath)) {
-            sourcePath = std::format(
-                "{}/{}.profile",
-                absPath("${USER_PROFILES}"), global::configuration->profile.profile
-            );
-        }
+        const std::string backupPath = std::format("{}_{}{}", path, time, extension);
+        const std::string sourcePath = global::configuration->profile.profile;
         LINFOC(
             "Profile",
-            std::format("Saving a copy of the old profile as '{}'", newFile)
+            std::format("Saving a copy of the old profile as '{}'", backupPath)
         );
-        std::filesystem::copy(sourcePath, destPath);
-        saveFilePath = global::configuration->profile.profile;
+        std::filesystem::copy(sourcePath, backupPath);
+        saveFilePath = path.stem().string();
     }
     if (saveFilePath->empty()) {
         throw ghoul::lua::LuaError("Save filepath string is empty");
@@ -121,7 +109,6 @@ namespace {
     std::string currentTime = std::string(global::timeManager->time().ISO8601());
     NavigationState navState = global::navigationHandler->navigationState();
     global::profile->saveCurrentSettingsToProfile(root, currentTime, navState);
-    global::configuration->profile.profile = *saveFilePath;
 
     if (saveFilePath->contains('/')) {
         throw ghoul::lua::LuaError("Profile filename must not contain (/) elements");
@@ -139,7 +126,9 @@ namespace {
         "{}/{}.profile", absPath("${PROFILES}"), *saveFilePath
     );
     if (!std::filesystem::is_regular_file(absFilename)) {
-        absFilename = absPath("${USER_PROFILES}/" + *saveFilePath + ".profile").string();
+        absFilename = std::format(
+            "{}/{}.profile", absPath("${USER_PROFILES}"), *saveFilePath
+        );
     }
 
     if (std::filesystem::is_regular_file(absFilename) && !shouldOverwrite) {
@@ -150,6 +139,8 @@ namespace {
             )
         );
     }
+
+    global::configuration->profile.profile = absFilename;
 
     std::ofstream outFile = std::ofstream(absFilename, std::ofstream::out);
     if (!outFile.good()) {
