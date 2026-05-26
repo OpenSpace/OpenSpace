@@ -76,7 +76,7 @@ namespace {
                                                 bool shouldOverwrite = false)
 {
     const bool receivedSaveFileName = saveFileName.has_value();
-    if (!saveFileName.has_value()) {
+    if (!receivedSaveFileName) {
         std::time_t t = std::time(nullptr);
         std::tm* utcTime = std::gmtime(&t);
         ghoul_assert(utcTime, "Conversion to UTC failed");
