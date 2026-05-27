@@ -21,7 +21,7 @@ local Mission = {
     {
       Name = "Farthest Point from Earth",
       Date = "2026 APR 06 23:07:00",
-      Description = "During the Artemis II lunar flyby, Orion and its four-person crew reached the farthest point from Earth ever traveled by humans: about 252,756 miles from home. After looping around the far side of the Moon, the spacecraft used lunar gravity to redirect its free-return trajectory back toward Earth.",
+      Description = "During the Artemis II lunar flyby, Orion and its four-person crew reached the farthest point from Earth ever traveled by humans: about 252,756 miles or 406,771 km from home. After looping around the far side of the Moon, the spacecraft used lunar gravity to redirect its free-return trajectory back toward Earth.",
       Image = "https://data.openspaceproject.com/missions/artemis2/art002e016204~large.jpg"
     },
     {
