@@ -16,8 +16,8 @@ local ArtemisPosition = {
     }
   },
   GUI = {
-    Name = "Artemis-1 Position",
-    Path = "/Solar System/Missions/Artemis",
+    Name = "Artemis I Position",
+    Path = "/Solar System/Missions/Artemis I",
     Focusable = false,
     Hidden = true
   }
@@ -37,8 +37,8 @@ asset.export(ArtemisPosition)
 
 
 asset.meta = {
-  Name = "Artemis-1 Transforms",
-  Description = "Artemis-1 transforms, position relative to Earth",
+  Name = "Artemis I Transforms",
+  Description = "Artemis I transforms, position relative to Earth",
   Author = "OpenSpace Team",
   URL = "https://openspaceproject.com",
   License = "MIT license"

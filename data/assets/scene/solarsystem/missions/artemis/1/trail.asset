@@ -8,6 +8,11 @@ local coreKernels = asset.require("spice/core")
 local ArtemisEarthTrail = {
   Identifier = "ArtemisEarthTrail",
   Parent = earthAsset.EarthCenter.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2022 NOV 16 08:19:00.000",
+    End = "2022 DEC 11 17:20:45.065"
+  },
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
@@ -23,16 +28,21 @@ local ArtemisEarthTrail = {
     SampleInterval = 60 -- Sample rate of once per minute
   },
   GUI = {
-    Name = "Artemis-1 Earth Trail",
-    Path = "/Solar System/Missions/Artemis/Trails",
+    Name = "Artemis I Earth Trail",
+    Path = "/Solar System/Missions/Artemis I/Trails",
     Focusable = false,
-    Description = "Artemis-1 trail relative to Earth"
+    Description = "Artemis I trail relative to Earth"
   }
 }
 
 local ArtemisMoonTrail = {
   Identifier = "ArtemisMoonTrail",
   Parent = moonAsset.Moon.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2022 NOV 16 08:19:00.000",
+    End = "2022 DEC 11 17:20:45.065"
+  },
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
@@ -48,10 +58,10 @@ local ArtemisMoonTrail = {
     SampleInterval = 60 -- Sample rate of once per minute
   },
   GUI = {
-    Name = "Artemis-1 Moon Trail",
-    Path = "/Solar System/Missions/Artemis/Trails",
+    Name = "Artemis I Moon Trail",
+    Path = "/Solar System/Missions/Artemis I/Trails",
     Focusable = false,
-    Description = "Artemis-1 trail relative to the Moon"
+    Description = "Artemis I trail relative to the Moon"
   }
 }
 
@@ -72,8 +82,8 @@ asset.export(ArtemisMoonTrail)
 
 
 asset.meta = {
-  Name = "Artemis-1 Trails",
-  Description = "Trail of Artemis-1 in respect to Earth and the Moon",
+  Name = "Artemis I Trails",
+  Description = "Trail of Artemis I in respect to Earth and the Moon",
   Author = "OpenSpace Team",
   URL = "https://openspaceproject.com",
   License = "MIT license"
