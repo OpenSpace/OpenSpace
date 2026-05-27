@@ -323,7 +323,7 @@ namespace {
             std::optional<ghoul::Dictionary> translation
                 [[codegen::reference("core_translation")]];
 
-            // This describes a rotation that that is applied to an internal model node
+            // This describes a rotation that is applied to an internal model node
             // identified with name and all its children. Depending on the 'Type' of the
             // rotation, this can either be a static rotation or a time-varying one.
             std::optional<ghoul::Dictionary> rotation
@@ -336,14 +336,14 @@ namespace {
         };
 
         // A map of custom transformations to apply to internal model nodes. The keys of
-        // the map are the named of the internal model nodes that the respective
+        // the map are the names of the internal model nodes that the respective
         // transformation should be applied to. The value is the transformation itself,
         // which can be a translation, rotation, and/or scaling.
         std::optional<std::map<std::string, NodeTransform>> customTransforms;
 
         // Whether the custom transformations should replace any existing transformation
-        // of the affected internal mode node or not. If `true` then the custom
-        // transformation will replacce any internal transformation. If `false` then the
+        // of the affected internal model node or not. If `true` then the custom
+        // transformation will replace any internal transformation. If `false` then the
         // custom transformation will be applied on top of any existing transformations.
         std::optional<bool> customTransformsShouldOverride;
     };

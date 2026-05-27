@@ -16,7 +16,7 @@ local Node = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = model .. "BoxAnimated.glb",
-    -- Use the line below insted of the one above if you want to use your own model
+    -- Use the line below instead of the one above if you want to use your own model
     --GeometryFile = "C:/path/to/model.fbx",
     CustomTransforms = {
       ["nodes[2]"] = { -- Name of the internal node to apply the custom transformation to
