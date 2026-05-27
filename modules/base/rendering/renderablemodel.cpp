@@ -652,6 +652,17 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         for (const auto& [nodeName, nodeTransform] : *p.customTransforms) {
             _customNodeTransforms.insert({ nodeName, NodeTransform() });
 
+            std::string cleanNodeName = nodeName;
+            std::replace_if(
+                cleanNodeName.begin(),
+                cleanNodeName.end(),
+                [](auto ch) {
+                    std::string toRemove = ". \t\n";
+                    return toRemove.find(ch) != std::string::npos;
+                },
+                '_'
+            );
+
             if (nodeTransform.translation.has_value()) {
                 _customNodeTransforms[nodeName].translation =
                     Translation::createFromDictionary(*nodeTransform.translation);
@@ -660,6 +671,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                     "Applied custom translation on node '{}' for model '{}'",
                     nodeName, _file
                 ));
+
+                _customNodeTransforms[nodeName].translation->setIdentifier(
+                    "CustomNodeTranslation_" + cleanNodeName
+                );
+                _customNodeTransforms[nodeName].translation->setGuiName(
+                    "Custom Node Translation " + nodeName
+                );
                 addPropertySubOwner(_customNodeTransforms[nodeName].translation.get());
             }
 
@@ -672,6 +690,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                     "Applied custom rotation on node '{}' for model '{}'",
                     nodeName, _file
                 ));
+
+                _customNodeTransforms[nodeName].rotation->setIdentifier(
+                    "CustomNodeRotation_" + cleanNodeName
+                );
+                _customNodeTransforms[nodeName].rotation->setGuiName(
+                    "Custom Node Rotation " + nodeName
+                );
                 addPropertySubOwner(_customNodeTransforms[nodeName].rotation.get());
             }
 
@@ -683,6 +708,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                     "Applied custom scale on node '{}' for model '{}'",
                     nodeName, _file
                 ));
+
+                _customNodeTransforms[nodeName].scale->setIdentifier(
+                    "CustomNodeScale_" + cleanNodeName
+                );
+                _customNodeTransforms[nodeName].scale->setGuiName(
+                    "Custom Node Scale " + nodeName
+                );
                 addPropertySubOwner(_customNodeTransforms[nodeName].scale.get());
             }
         }
