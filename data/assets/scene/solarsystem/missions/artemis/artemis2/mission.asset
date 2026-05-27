@@ -2,8 +2,9 @@ local Mission = {
   Identifier = "Artemis2",
   Name = "Artemis II",
   TimeRange = { Start = "2026 APR 01 22:35:12", End = "2026 APR 11 00:07:27" },
-  Image = "https://data.openspaceproject.com/missions/artemis2/jsc2025e034457~medium.jpg",
+  Image = "https://data.openspaceproject.com/missions/artemis2/jsc2025e034457~medium.png",
   Description = "Artemis II is NASA's first crewed test flight in the Artemis campaign. Four astronauts flew aboard NASA's Orion spacecraft and confirmed that the spacecraft's systems operate as designed in the deep space environment. In this Golden Age of exploration and innovation, the Artemis missions allowed astronauts to explore the Moon for scientific discovery, economic benefits, and helped build momentum for the first crewed missions to Mars. NASA's Reid Wiseman, Victor Glover, and Christina Koch, and CSA (Canadian Space Agency) astronaut Jeremy Hansen are the Artemis II astronauts.",
+  Actions = { "os.artemis2.SetupLaunch", "os.artemis2.FocusMoon", "os.artemis2.FocusArtemis" },
   Milestones = {
     {
       Name = "Mission Launch",

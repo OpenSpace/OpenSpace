@@ -4,6 +4,7 @@ local Mission = {
   TimeRange = { Start = "2022 NOV 16 06:47:00", End = "2022 DEC 11 17:40:30" },
   Image = "https://data.openspaceproject.com/missions/artemis/em1_patch_final.png",
   Description = "With Artemis missions, NASA will land the first woman and first person of color on the Moon, using innovative technologies to explore more of the lunar surface than ever before. We will collaborate with commercial and international partners and establish the first long-term presence on the Moon. Then, we will use what we learn on and around the Moon to take the next giant leap: sending the first astronauts to Mars.",
+  Actions = { "os.artemis.SetupLaunch", "os.artemis.FocusMoon", "os.artemis.FocusArtemis" },
   Milestones = {
     {
       Name = "Mission Launch",

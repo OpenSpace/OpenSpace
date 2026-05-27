@@ -1,27 +1,27 @@
 local SetupLaunch = {
-  Identifier = "os.artemis.SetupLaunch",
-  Name = "Set to Artemis I launch time",
-  Command = [[openspace.time.setTime("2022-11-16T08:19:00.000")]],
+  Identifier = "os.artemis2.SetupLaunch",
+  Name = "Set to Artemis II launch time",
+  Command = "openspace.time.setTime('2026-04-01T22:35:12')",
   Documentation = "Set the time to the launch time of Artemis I",
-  GuiPath = "/Missions/Artemis I",
+  GuiPath = "/Missions/Artemis II",
   IsLocal = false
 }
 
 local FocusMoon = {
-  Identifier = "os.artemis.FocusMoon",
+  Identifier = "os.artemis2.FocusMoon",
   Name = "Focus on Moon",
   Command = "openspace.navigation.setFocus('Moon', true, true)",
   Documentation = "Set camera focus on the Moon",
-  GuiPath = "/Missions/Artemis I",
+  GuiPath = "/Missions/Artemis II",
   IsLocal = false
 }
 
 local FocusArtemis = {
-  Identifier = "os.artemis.FocusArtemis",
-  Name = "Focus on Artemis I",
+  Identifier = "os.artemis2.FocusArtemis",
+  Name = "Focus on Artemis II",
   Command = "openspace.navigation.setFocus('ArtemisModel', true, true)",
   Documentation = "Set camera focus on the Moon",
-  GuiPath = "/Missions/Artemis I",
+  GuiPath = "/Missions/Artemis II",
   IsLocal = false
 }
 
@@ -45,8 +45,8 @@ asset.export("FocusArtemis", FocusArtemis.Identifier)
 
 
 asset.meta = {
-  Name = "Actions - Artemis I",
-  Description = "Actions related to the Artemis I mission",
+  Name = "Actions - Artemis II",
+  Description = "Actions related to the Artemis II mission",
   Author = "OpenSpace Team",
   URL = "https://openspaceproject.com",
   License = "MIT license"
