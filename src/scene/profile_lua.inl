@@ -132,8 +132,7 @@ namespace {
         );
     }
 
-    if (std::filesystem::is_regular_file(absFilename) &&
-        !shouldOverwrite &&
+    if (std::filesystem::is_regular_file(absFilename) && !shouldOverwrite &&
         receivedSaveFileName)
     {
         throw ghoul::lua::LuaError(
