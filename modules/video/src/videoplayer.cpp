@@ -268,6 +268,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
 
     _videoFile = p.video;
     _loopVideo = p.loopVideo.value_or(_loopVideo);
+    _playAudio = p.playAudio.value_or(_playAudio);
 
     if (p.playbackMode.has_value()) {
         switch (*p.playbackMode) {
@@ -320,6 +321,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         _endTime.setReadOnly(true);
         addProperty(_endTime);
     }
+
 
     _reload.onChange([this]() { reload(); });
     addProperty(_reload);
@@ -410,6 +412,10 @@ void VideoPlayer::setIsPlaying() {
 
 void VideoPlayer::initialize() {
     initializeMpv();
+
+    // Calling this here as we need to apply the setting we have taken out of the
+    // parameters. We can't set the audio setting before Mpv is initialized
+    toggleMute();
 }
 
 void VideoPlayer::initializeMpv() {
