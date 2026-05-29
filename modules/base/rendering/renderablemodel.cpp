@@ -37,6 +37,7 @@
 #include <openspace/scene/lightsource.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
+#include <openspace/scene/scene.h>
 #include <openspace/scene/translation.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
@@ -73,6 +74,18 @@ namespace {
     constexpr int ColorAddingBlending = 4;
 
     constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
+
+    static const PropertyOwner::PropertyOwnerInfo CustomNodeTransformsInfo = {
+        "CustomNodeTransforms",
+        "Custom Node Transforms",
+        "Custom transformations for internal model nodes."
+    };
+
+    static const PropertyOwner::PropertyOwnerInfo CustomNodeTransformInfo = {
+        "CustomNodeTransform",
+        "Custom Node Transform",
+        "Custom transformation for an internal model node."
+    };
 
     constexpr Property::PropertyInfo EnableAnimationInfo = {
         "EnableAnimation",
@@ -345,7 +358,7 @@ namespace {
         // of the affected internal model node or not. If `true` then the custom
         // transformation will replace any internal transformation. If `false` then the
         // custom transformation will be applied on top of any existing transformations.
-        std::optional<bool> customTransformsShouldOverride;
+        std::optional<bool> replaceWithCustomNodeTransforms;
     };
 } // namespace
 #include "renderablemodel_codegen.cpp"
@@ -400,6 +413,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _useOverrideColor(UseOverrideColorInfo, false)
     , _overrideColor(OverrideColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
+    , _customNodeTransformsOwner(CustomNodeTransformsInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -643,25 +657,18 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     _originalRenderBin = renderBin();
 
-    _customNodeTransformsShouldOverride =
-        p.customTransformsShouldOverride.value_or(_customNodeTransformsShouldOverride);
+    _replaceWithCustomNodeTransforms =
+        p.replaceWithCustomNodeTransforms.value_or(_replaceWithCustomNodeTransforms);
 
     if (p.customTransforms.has_value()) {
-        _hasCustomNodeTransforms = true;
-
         for (const auto& [nodeName, nodeTransform] : *p.customTransforms) {
-            _customNodeTransforms.insert({ nodeName, NodeTransform() });
+            std::string cleanNodeName = makeIdentifier(nodeName);
 
-            std::string cleanNodeName = nodeName;
-            std::replace_if(
-                cleanNodeName.begin(),
-                cleanNodeName.end(),
-                [](auto ch) {
-                    std::string toRemove = ". \t\n";
-                    return toRemove.find(ch) != std::string::npos;
-                },
-                '_'
-            );
+            _nodeTransformOwners.push_back(PropertyOwner(CustomNodeTransformInfo));
+            _nodeTransformOwners.back().setIdentifier(cleanNodeName);
+            _nodeTransformOwners.back().setGuiName(nodeName);
+
+            _customNodeTransforms.insert({ nodeName, NodeTransform() });
 
             if (nodeTransform.translation.has_value()) {
                 _customNodeTransforms[nodeName].translation =
@@ -671,14 +678,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                     "Applied custom translation on node '{}' for model '{}'",
                     nodeName, _file
                 ));
-
-                _customNodeTransforms[nodeName].translation->setIdentifier(
-                    "CustomNodeTranslation_" + cleanNodeName
-                );
-                _customNodeTransforms[nodeName].translation->setGuiName(
-                    "Custom Node Translation " + nodeName
-                );
-                addPropertySubOwner(_customNodeTransforms[nodeName].translation.get());
+            }
+            else {
+                ghoul::Dictionary translation;
+                translation.setValue("Type", std::string("StaticTranslation"));
+                translation.setValue("Position", glm::dvec3(0.0));
+                _customNodeTransforms[nodeName].translation =
+                    Translation::createFromDictionary(translation);
             }
 
             if (nodeTransform.rotation.has_value()) {
@@ -690,14 +696,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                     "Applied custom rotation on node '{}' for model '{}'",
                     nodeName, _file
                 ));
-
-                _customNodeTransforms[nodeName].rotation->setIdentifier(
-                    "CustomNodeRotation_" + cleanNodeName
-                );
-                _customNodeTransforms[nodeName].rotation->setGuiName(
-                    "Custom Node Rotation " + nodeName
-                );
-                addPropertySubOwner(_customNodeTransforms[nodeName].rotation.get());
+            }
+            else {
+                ghoul::Dictionary rotation;
+                rotation.setValue("Type", std::string("StaticRotation"));
+                rotation.setValue("Rotation", glm::dvec3(0.0));
+                _customNodeTransforms[nodeName].rotation =
+                    Rotation::createFromDictionary(rotation);
             }
 
             if (nodeTransform.scale.has_value()) {
@@ -708,33 +713,43 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                     "Applied custom scale on node '{}' for model '{}'",
                     nodeName, _file
                 ));
-
-                _customNodeTransforms[nodeName].scale->setIdentifier(
-                    "CustomNodeScale_" + cleanNodeName
-                );
-                _customNodeTransforms[nodeName].scale->setGuiName(
-                    "Custom Node Scale " + nodeName
-                );
-                addPropertySubOwner(_customNodeTransforms[nodeName].scale.get());
             }
+            else {
+                ghoul::Dictionary scale;
+                scale.setValue("Type", std::string("StaticScale"));
+                scale.setValue("Scale", 1.0);
+                _customNodeTransforms[nodeName].scale =
+                    Scale::createFromDictionary(scale);
+            }
+
+            _nodeTransformOwners.back().addPropertySubOwner(
+                _customNodeTransforms[nodeName].translation.get()
+            );
+            _nodeTransformOwners.back().addPropertySubOwner(
+                _customNodeTransforms[nodeName].rotation.get()
+            );
+            _nodeTransformOwners.back().addPropertySubOwner(
+                _customNodeTransforms[nodeName].scale.get()
+            );
+
+            _customNodeTransformsOwner.addPropertySubOwner(_nodeTransformOwners.back());
         }
+        addPropertySubOwner(_customNodeTransformsOwner);
     }
 }
 
 void RenderableModel::initialize() {
     ZoneScoped;
 
-    if (_hasCustomNodeTransforms) {
-        for (const auto& [nodeName, nodeTransform] : _customNodeTransforms) {
-            if (nodeTransform.translation) {
-                nodeTransform.translation->initialize();
-            }
-            if (nodeTransform.rotation) {
-                nodeTransform.rotation->initialize();
-            }
-            if (nodeTransform.scale) {
-                nodeTransform.scale->initialize();
-            }
+    for (const auto& [nodeName, nodeTransform] : _customNodeTransforms) {
+        if (nodeTransform.translation) {
+            nodeTransform.translation->initialize();
+        }
+        if (nodeTransform.rotation) {
+            nodeTransform.rotation->initialize();
+        }
+        if (nodeTransform.scale) {
+            nodeTransform.scale->initialize();
         }
     }
 
@@ -753,7 +768,7 @@ void RenderableModel::initializeGL() {
         ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
     );
     _modelHasAnimation = _geometry->hasAnimation();
-    _geometry->setCustomTransformsOverride(_customNodeTransformsShouldOverride);
+    _geometry->setReplaceWithCustomTransforms(_replaceWithCustomNodeTransforms);
 
     // @TODO (abock, 2023-06-03) Leaving this here to address issue #2731. The
     // _modelHasAnimation has not been set to true in the constructor causing the
@@ -1287,36 +1302,34 @@ void RenderableModel::update(const UpdateData& data) {
         }
     }
 
-    if (_hasCustomNodeTransforms) {
-        for (const auto& [nodeName, nodeTransform] : _customNodeTransforms) {
-            glm::dmat4 translation(1.0);
-            if (nodeTransform.translation) {
-                nodeTransform.translation->update(data);
-                translation = glm::translate(
-                    glm::dmat4(1.0),
-                    nodeTransform.translation->position()
-                );
-            }
-
-            glm::dmat4 rotation(1.0);
-            if (nodeTransform.rotation) {
-                nodeTransform.rotation->update(data);
-                rotation = glm::dmat4(nodeTransform.rotation->matrix());
-            }
-
-            glm::dmat4 scaling(1.0);
-            if (nodeTransform.scale) {
-                nodeTransform.scale->update(data);
-                scaling = glm::scale(
-                    glm::dmat4(1.0),
-                    nodeTransform.scale->scaleValue()
-                );
-            }
-
-            glm::dmat4 finalTransform = translation * rotation * scaling;
-
-            _geometry->updateCustomNodeTransform(nodeName, finalTransform);
+    for (const auto& [nodeName, nodeTransform] : _customNodeTransforms) {
+        glm::dmat4 translation(1.0);
+        if (nodeTransform.translation) {
+            nodeTransform.translation->update(data);
+            translation = glm::translate(
+                glm::dmat4(1.0),
+                nodeTransform.translation->position()
+            );
         }
+
+        glm::dmat4 rotation(1.0);
+        if (nodeTransform.rotation) {
+            nodeTransform.rotation->update(data);
+            rotation = glm::dmat4(nodeTransform.rotation->matrix());
+        }
+
+        glm::dmat4 scaling(1.0);
+        if (nodeTransform.scale) {
+            nodeTransform.scale->update(data);
+            scaling = glm::scale(
+                glm::dmat4(1.0),
+                nodeTransform.scale->scaleValue()
+            );
+        }
+
+        glm::dmat4 finalTransform = translation * rotation * scaling;
+
+        _geometry->updateCustomNodeTransform(nodeName, finalTransform);
     }
 
     if (_geometry->hasAnimation() && !_animationStart.empty()) {

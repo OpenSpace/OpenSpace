@@ -148,8 +148,9 @@ private:
         ghoul::mm_unique_ptr<Scale> scale;
     };
     std::map<std::string, NodeTransform> _customNodeTransforms;
-    bool _hasCustomNodeTransforms = false;
-    bool _customNodeTransformsShouldOverride = false;
+    bool _replaceWithCustomNodeTransforms = false;
+    PropertyOwner _customNodeTransformsOwner;
+    std::vector<PropertyOwner> _nodeTransformOwners;
 };
 
 } // namespace openspace

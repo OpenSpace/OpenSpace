@@ -19,10 +19,10 @@ local Node = {
     -- Use the line below instead of the one above if you want to use your own model
     --GeometryFile = "C:/path/to/model.fbx",
     CustomTransforms = {
-      ["nodes[2]"] = { -- Name of the internal node to apply the custom transformation to
+      ["inner_box"] = { -- Name of the internal node to apply the custom transformation to
         Translation = {
           Type = "StaticTranslation",
-          Position = {10, 0, 0}
+          Position = {10.0, 0.0, 0.0}
         }
       }
     }
