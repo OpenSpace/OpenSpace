@@ -39,6 +39,7 @@
 #include <openspace/scene/scale.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/translation.h>
+#include <openspace/scripting/lualibrary.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/io/model/modelgeometry.h>
@@ -60,6 +61,8 @@
 #include <optional>
 #include <utility>
 #include <variant>
+
+#include "renderablemodel_lua.inl"
 
 namespace {
     using namespace openspace;
@@ -1430,6 +1433,15 @@ glm::dvec3 RenderableModel::center() const {
     transform *= glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
     glm::dmat4 model = parent()->modelTransform() * transform;
     return model * glm::dvec4(0.0, 0.0, 0.0, 1.0);
+}
+
+LuaLibrary RenderableModel::luaLibrary() {
+    return {
+        "model",
+        {
+            codegen::lua::PrintModelTree
+        }
+    };
 }
 
 } // namespace openspace

@@ -43,6 +43,7 @@ namespace ghoul::modelgeometry { class ModelGeometry; }
 namespace openspace {
 
 class LightSource;
+struct LuaLibrary;
 
 class RenderableModel : public Renderable, public Shadower {
 public:
@@ -59,6 +60,7 @@ public:
     void update(const UpdateData& data) override;
 
     static openspace::Documentation Documentation();
+    static LuaLibrary luaLibrary();
 
 private:
     enum class AnimationMode {
