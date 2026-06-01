@@ -25,5 +25,5 @@ end)
 
 asset.onDeinitialize(function()
   openspace.dashboard.removeDashboardItem(Item)
-  openspace.removeSceneGraphNode(Node1)
+  openspace.removeSceneGraphNode(Node)
 end)
