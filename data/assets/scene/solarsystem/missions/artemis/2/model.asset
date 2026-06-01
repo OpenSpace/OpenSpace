@@ -1,4 +1,4 @@
-local sun = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
 
 
@@ -7,7 +7,7 @@ local models = asset.resource({
   Name = "Artemis II Models",
   Type = "HttpSynchronization",
   Identifier = "artemis_2_models",
-  Version = 1
+  Version = 2
 })
 
 local Artemis2Model = {
@@ -25,17 +25,22 @@ local Artemis2Model = {
       Attached = "Artemis2Model",
       XAxis = { 1.0, 0.0, 0.0 },
       XAxisOrthogonal = true,
-      YAxis = sun.SunCenter.Identifier,
+      YAxis = sunAsset.SunCenter.Identifier,
       YAxisInvert = true
     }
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "artemis.glb",
+    GeometryFile = models .. "Orion_05.fbx",
+    ModelScale = "Centimeter",
+    AmbientIntensity = 0.4,
+    DiffuseIntensity = 1.0,
+    SpecularIntensity = 9.0,
+    SpecularPower = 12.5,
     LightSources = {
-      sun.LightSource
+      sunAsset.LightSource
     },
-    AmbientIntensity = 0.05
+    CastShadow = true
   },
   GUI = {
     Name = "Orion Model (Artemis II)",
