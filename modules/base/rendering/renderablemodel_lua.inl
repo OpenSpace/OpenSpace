@@ -30,23 +30,39 @@
 
 namespace {
 
-/**
- * Prints the model tree of the given model file. Will only work for assimp models.
- */
-[[codegen::luawrap]] void printModelTree(std::filesystem::path filename) {
-    ghoul_assert(!filename.empty(), "Filename must not be empty");
+    /**
+     * Prints the model tree of the \p filepath model file. The node names detected during
+     * reading and the hierarchy of the nodes will be printed. This is useful for debugging
+     * and finding correct node names for applying custom transformations to internal model
+     * nodes.
+     *
+     * \param filepath The model file on disk whose model tree should be printed.
+     *
+     * \throw ModelLoadException If there was an error reading the \p filepath
+     * \throw MissingReaderException If there was no reader for the specified \p filepath
+     * \pre \p filepath must not be empty
+     * \pre \p filepath must have an extension
+     * \pre At least one ModelReaderBase must have been added to the ModelReader before
+     *      (addReader)
+     * \pre The ModelReaderAssimp reader must have been added to the ModelReader before
+     *      (addReader)
+     * \pre The file at \p filepath must be a valid model file that can be read by the
+     *      ModelReaderAssimp reader
+     */
+[[codegen::luawrap]] void printModelTree(std::filesystem::path filepath) {
+    ghoul_assert(!filepath.empty(), "Filepath must not be empty");
 
-    std::string extension = filename.extension().string();
+    std::string extension = filepath.extension().string();
     if (!extension.empty()) {
         extension = extension.substr(1);
     }
-    ghoul_assert(!extension.empty(), "Filename must have an extension");
+    ghoul_assert(!extension.empty(), "Filepath must have an extension");
 
     ghoul::io::ModelReaderBase* reader =
         ghoul::io::ModelReader::ref().readerForExtension(extension);
 
     if (!reader) {
-        throw ghoul::io::ModelReader::MissingReaderException(extension, filename);
+        throw ghoul::io::ModelReader::MissingReaderException(extension, filepath);
     }
 
     // (malej 2026-05-29) Only the ModelReaderAssimp can print model trees
@@ -56,12 +72,12 @@ namespace {
     }
     catch (std::exception& e) {
         LERRORC("RenderableModel", std::format("Cannot find a suitable reader to print "
-            "the model tree for model {}", filename)
+            "the model tree for model {}", filepath)
         );
         return;
     }
 
-    typedReader->printModelTree(filename);
+    typedReader->printModelTree(filepath);
 }
 
 } // namespace
