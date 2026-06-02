@@ -1259,7 +1259,6 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
             _uniformCache.dvarScaleFactor,
             _sizeSettings.sizeMapping->scaleFactor
         );
-
     }
 
     _program->setUniform(_uniformCache.color, _colorSettings.pointColor);
