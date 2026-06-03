@@ -163,6 +163,11 @@ public:
     bool isInitializing() const;
 
     /**
+     * Blocks until the given node is no longer being initialized by the thread pool.
+     */
+    void waitForInitializingNode(SceneGraphNode* node) const;
+
+    /**
      * Adds an interpolation request for the passed \p prop that will run for
      * \p durationSeconds seconds. Every time the #updateInterpolations method is called
      * the Property will be notified that it has to update itself using the stored

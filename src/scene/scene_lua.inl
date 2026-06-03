@@ -917,6 +917,12 @@ namespace {
             removeNode(c);
         }
 
+        // The node we are trying to delete might still be initializing if it was added
+        // and we then tried to quickly remove it again. We must wait until the
+        // potentially asynchronous initializing has fully completed, otherwise the
+        // initializing code still be accessing the node after it is deleted
+        sceneGraph()->waitForInitializingNode(localNode);
+
         localNode->deinitializeGL();
         localNode->deinitialize();
         n = nullptr;

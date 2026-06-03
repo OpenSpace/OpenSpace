@@ -48,6 +48,14 @@ public:
     std::vector<SceneGraphNode*> takeInitializedNodes();
     bool isInitializing() const;
 
+    /**
+     * Blocks until the given node is no longer being initialized by the thread pool. This
+     * is safe to call even if the node was never submitted for initialization.
+     *
+     * \param node The scene graph node that we want to wait for
+     */
+    void waitForNode(SceneGraphNode* node) const;
+
 private:
     std::vector<SceneGraphNode*> _initializedNodes;
     std::unordered_set<SceneGraphNode*> _initializingNodes;
