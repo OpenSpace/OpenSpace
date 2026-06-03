@@ -75,7 +75,8 @@ namespace {
     constexpr Property::PropertyInfo InvertScaleInfo = {
         "InvertScale",
         "Invert scale",
-        "If true, the scale factor is inverted before being applied to the data values.",
+        "If true, the points will be scaled based on the inverse of the data value "
+        "(1/value), so that larger values result in a smaller scale, and vice versa.",
         Property::Visibility::AdvancedUser
     };
 
