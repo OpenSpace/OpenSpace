@@ -31,23 +31,19 @@
 namespace {
 
     /**
-     * Prints the model tree of the \p filepath model file. The node names detected during
-     * reading and the hierarchy of the nodes will be printed. This is useful for debugging
-     * and finding correct node names for applying custom transformations to internal model
-     * nodes.
+     * Prints the model tree of the given filepath model file. The node names detected
+     * during reading and the hierarchy of the nodes will be printed. This is useful for
+     * debugging and finding correct node names for applying custom transformations to
+     * internal model nodes.
+     *
+     * The given filepath must not be empty, must contain an extension, and must be a
+     * valid model file that can be read with the `ModelReaderAssimp` reader. The
+     * `ModelReaderAssimp` reader must have been added to the `ModelReader` before calling
+     * this function. Will throw a `ModelLoadException` if there was an error reading the
+     * file, or a `MissingReaderException` if there was no reader for the specified
+     * filepath.
      *
      * \param filepath The model file on disk whose model tree should be printed.
-     *
-     * \throw ModelLoadException If there was an error reading the \p filepath
-     * \throw MissingReaderException If there was no reader for the specified \p filepath
-     * \pre \p filepath must not be empty
-     * \pre \p filepath must have an extension
-     * \pre At least one ModelReaderBase must have been added to the ModelReader before
-     *      (addReader)
-     * \pre The ModelReaderAssimp reader must have been added to the ModelReader before
-     *      (addReader)
-     * \pre The file at \p filepath must be a valid model file that can be read by the
-     *      ModelReaderAssimp reader
      */
 [[codegen::luawrap]] void printModelTree(std::filesystem::path filepath) {
     ghoul_assert(!filepath.empty(), "Filepath must not be empty");
