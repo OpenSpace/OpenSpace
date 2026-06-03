@@ -128,4 +128,31 @@ bool SceneInitializer::isInitializing() const {
     return !_initializingNodes.empty();
 }
 
+void SceneInitializer::waitForNode(SceneGraphNode* node) const {
+    auto begin = std::chrono::high_resolution_clock::now();
+    while (true) {
+        {
+            const std::unique_lock lock(_mutex);
+            if (_initializingNodes.find(node) == _initializingNodes.end()) {
+                return;
+            }
+        }
+
+        // Print a message every second
+        auto now = std::chrono::high_resolution_clock::now();
+        if (now - begin > std::chrono::seconds(1)) {
+            LDEBUGC(
+                "SceneInitializer",
+                std::format(
+                    "Waiting for scene graph node '{}' to finish initializing",
+                    node->identifier()
+                )
+            );
+
+            begin = now;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
+}
+
 } // namespace openspace

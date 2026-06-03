@@ -477,6 +477,10 @@ bool Scene::isInitializing() const {
     return _initializer->isInitializing();
 }
 
+void Scene::waitForInitializingNode(SceneGraphNode* node) const {
+    _initializer->waitForNode(node);
+}
+
 void Scene::update(const UpdateData& data) {
     ZoneScoped;
 
