@@ -20,7 +20,7 @@ end
 -- Lua doesn't enjoy \ that are used by Windows extensively. So we convert all \ into /
 filename = filename:gsub("\\", "/")
 basename = basename:gsub("\\", "/")
-basename_without_extension = basename:sub(0, #basename - extension:len())
+local basename_without_extension = basename:sub(0, #basename - extension:len())
 
 local is_image_file = function(extension)
   return extension == ".png" or extension == ".jpg" or extension == ".jpeg" or
