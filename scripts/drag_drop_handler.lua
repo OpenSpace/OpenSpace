@@ -51,6 +51,31 @@ local is_wms_file = function(extension)
   return extension == ".wms"
 end
 
+local is_model_file = function(extension)
+  return
+    extension == ".obj" or extension == ".fbx" or extension == ".gltf" or
+    extension == ".glb" or extension == ".dae" or extension == ".zae" or
+    extension == ".blend" or extension == ".3ds" or extension == ".prj" or
+    extension == ".ase" or extension == ".ask" or extension == ".x" or
+    extension == ".stl" or extension == ".ifc" or extension == ".ifczip" or
+    extension == ".xgl" or extension == ".zgl" or extension == ".ply" or
+    extension == ".dxf" or extension == ".lwo" or extension == ".lws" or
+    extension == ".mot" or extension == ".lxo" or extension == ".ac" or
+    extension == ".ac3d" or extension == ".acc" or extension == ".ms3d" or
+    extension == ".cob" or extension == ".scn" or extension == ".amf" or
+    extension == ".md3" or extension == ".mdl" or extension == ".md2" or
+    extension == ".smd" or extension == ".vta" or extension == ".mdc" or
+    extension == ".md5anim" or extension == ".md5mesh" or extension == ".md5camera" or
+    extension == ".nff" or extension == ".enff" or extension == ".raw" or
+    extension == ".sib" or extension == ".off" or extension == ".irr" or
+    extension == ".irrmesh" or extension == ".q3o" or extension == ".q3s" or
+    extension == ".b3d" or extension == ".3d" or extension == ".uc" or
+    extension == ".mesh" or extension == ".mesh.xml" or extension == ".ogex" or
+    extension == ".pk3" or extension == ".bsp" or extension == ".ndo" or
+    extension == ".assbin" or extension == ".3mf" or extension == ".x3d" or
+    extension == ".x3db" or extension == ".m3d" or extension == ".osmodel"
+end
+
 
 if is_image_file(extension) then
   return [[
@@ -86,5 +111,46 @@ elseif is_wms_file(extension) then
         FilePath = ']] .. filename .. [['
       }
     )
+  ]]
+elseif is_model_file(extension) then
+return [[
+  local identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [[")
+  local camera_position = openspace.navigation.getNavigationState().Position
+  local camera_position_length = math.sqrt(camera_position[1]^2 + camera_position[2]^2 + camera_position[3]^2)
+  local normalized_camera_position = {
+    camera_position[1] / camera_position_length,
+    camera_position[2] / camera_position_length,
+    camera_position[3] / camera_position_length
+  }
+  local shifted_camera_position = {
+    camera_position[1] - normalized_camera_position[1] * 50.0,
+    camera_position[2] - normalized_camera_position[2] * 50.0,
+    camera_position[3] - normalized_camera_position[3] * 50.0
+  }
+  openspace.addSceneGraphNode({
+    Identifier = identifier,
+    Parent = openspace.navigation.getNavigationState().Anchor,
+    Transform = {
+      Translation = {
+        Type = "StaticTranslation",
+        Position = shifted_camera_position
+      }
+    },
+    Renderable = {
+      Type = "RenderableModel",
+      GeometryFile = "]] .. filename .. [[",
+      PerformShading = true,
+      LightSources = {
+        {
+          Type = "SceneGraphLightSource",
+          Identifier = "Sun",
+          Node = "SunIAU",
+          Intensity = 1.0
+        }
+      }
+    }
+  })
+  
+  openspace.scheduleScript("openspace.navigation.setFocus('" .. identifier .. "', true, true)", 0.1)
   ]]
 end
