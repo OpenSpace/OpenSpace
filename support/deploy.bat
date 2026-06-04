@@ -143,7 +143,6 @@ if "%~2"=="" (
   shaders/*^
   ACKNOWLEDGMENTS.md^
   CITATION.cff^
-  CODE_OF_CONDUCT.md^
   COMMIT.md^
   CREDITS.md^
   LICENSE.md^
@@ -154,6 +153,7 @@ if "%~2"=="" (
   modules/*/shaders/*^
   modules/*/scripts/*^
   modules/globebrowsing/gdal_data/*^
+  modules/molecule/ext/mold/src/shaders/*^
   modules/webgui/ext/nodejs/node.exe^
   ^
   %sync%^
