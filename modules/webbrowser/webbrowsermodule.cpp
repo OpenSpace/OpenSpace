@@ -157,6 +157,11 @@ WebBrowserModule::~WebBrowserModule() {}
 void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     ZoneScoped;
 
+    // Remove any previously existing cache folder
+    if (std::filesystem::exists(absPath("${BIN}/cefcache"))) {
+        std::filesystem::remove_all(absPath("${BIN}/cefcache"));
+    }
+
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _enabled = p.enabled.value_or(_enabled);
