@@ -148,6 +148,12 @@ void TouchInputState::updateOrAddTouchInput(TouchInput input) {
 void TouchInputState::removeTouchInput(TouchInput input) {
     _deferredRemovals.emplace_back(input);
 
+    // If the first touch point is landing the user interface, the point is not added to
+    // the list of touch points, so it cannot be removed
+    if (_touchPoints.empty()) {
+        return;
+    }
+
     // Update so the holder has the final gesture data
     TouchInputHolder& inputHolder = _touchPoints.front();
     if (inputHolder.holdsInput(input)) {
