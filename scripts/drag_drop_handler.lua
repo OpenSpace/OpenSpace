@@ -123,45 +123,45 @@ elseif is_wms_file(Extension) then
       }
     )
   ]]
-elseif is_model_file(Extension) then
-return [[
-  local identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [[")
-  local camera_position = openspace.navigation.getNavigationState().Position
-  local camera_position_length = math.sqrt(camera_position[1]^2 + camera_position[2]^2 + camera_position[3]^2)
-  local normalized_camera_position = {
-    camera_position[1] / camera_position_length,
-    camera_position[2] / camera_position_length,
-    camera_position[3] / camera_position_length
-  }
-  local shifted_camera_position = {
-    camera_position[1] - normalized_camera_position[1] * 50.0,
-    camera_position[2] - normalized_camera_position[2] * 50.0,
-    camera_position[3] - normalized_camera_position[3] * 50.0
-  }
-  openspace.addSceneGraphNode({
-    Identifier = identifier,
-    Parent = openspace.navigation.getNavigationState().Anchor,
-    Transform = {
-      Translation = {
-        Type = "StaticTranslation",
-        Position = shifted_camera_position
-      }
-    },
-    Renderable = {
-      Type = "RenderableModel",
-      GeometryFile = "]] .. Filename .. [[",
-      PerformShading = true,
-      LightSources = {
-        {
-          Type = "SceneGraphLightSource",
-          Identifier = "Sun",
-          Node = "SunIAU",
-          Intensity = 1.0
-        }
-      }
+elseif is_model_file(Extension, Basename) then
+  return [[
+    local identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [[")
+    local camera_position = openspace.navigation.getNavigationState().Position
+    local camera_position_length = math.sqrt(camera_position[1]^2 + camera_position[2]^2 + camera_position[3]^2)
+    local normalized_camera_position = {
+      camera_position[1] / camera_position_length,
+      camera_position[2] / camera_position_length,
+      camera_position[3] / camera_position_length
     }
-  })
-  
-  openspace.scheduleScript("openspace.navigation.setFocus('" .. identifier .. "', true, true)", 0.1)
+    local shifted_camera_position = {
+      camera_position[1] - normalized_camera_position[1] * 50.0,
+      camera_position[2] - normalized_camera_position[2] * 50.0,
+      camera_position[3] - normalized_camera_position[3] * 50.0
+    }
+    openspace.addSceneGraphNode({
+      Identifier = identifier,
+      Parent = openspace.navigation.getNavigationState().Anchor,
+      Transform = {
+        Translation = {
+          Type = "StaticTranslation",
+          Position = shifted_camera_position
+        }
+      },
+      Renderable = {
+        Type = "RenderableModel",
+        GeometryFile = "]] .. Filename .. [[",
+        PerformShading = openspace.hasSceneGraphNode("SunIAU"),
+        LightSources = openspace.hasSceneGraphNode("SunIAU") and {
+          {
+            Type = "SceneGraphLightSource",
+            Identifier = "Sun",
+            Node = "SunIAU",
+            Intensity = 1.0
+          }
+        } or {}
+      }
+    })
+    
+    openspace.scheduleScript("openspace.navigation.setFocus('" .. identifier .. "', true, true)", 0.1)
   ]]
 end
