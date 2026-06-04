@@ -1650,17 +1650,17 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
 #endif // WIN32
 
         ghoul::lua::push(s, f);
-        lua_setglobal(s, "filename");
+        lua_setglobal(s, "Filename");
 
         std::filesystem::path basename = f.filename();
         ghoul::lua::push(s, std::move(basename));
-        lua_setglobal(s, "basename");
+        lua_setglobal(s, "Basename");
 
         std::string extension = f.extension().string();
         extension = ghoul::toLowerCase(extension);
 
         ghoul::lua::push(s, extension);
-        lua_setglobal(s, "extension");
+        lua_setglobal(s, "Extension");
 
         int callStatus = lua_pcall(s, 0, 1, 0);
         if (callStatus != LUA_OK) {

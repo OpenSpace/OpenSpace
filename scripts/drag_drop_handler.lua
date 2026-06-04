@@ -11,16 +11,26 @@
 -- to the drag event.  If we don't want anything to happen, don't return anything or
 -- return an empty string
 
-if filename == nil or filename == "" or
-   basename == nil or basename == "" or
-   extension == nil or extension == "" then
+---@type string
+Filename = Filename
+
+---@type string
+Basename = Basename
+
+---@type string
+Extension = Extension
+
+
+if Filename == nil or Filename == "" or
+   Basename == nil or Basename == "" or
+   Extension == nil or Extension == "" then
   do return "" end
 end
 
 -- Lua doesn't enjoy \ that are used by Windows extensively. So we convert all \ into /
-filename = filename:gsub("\\", "/")
-basename = basename:gsub("\\", "/")
-local basename_without_extension = basename:sub(0, #basename - extension:len())
+Filename = Filename:gsub("\\", "/")
+Basename = Basename:gsub("\\", "/")
+local basename_without_extension = Basename:sub(0, #Basename - Extension:len())
 
 local is_image_file = function(extension)
   return extension == ".png" or extension == ".jpg" or extension == ".jpeg" or
@@ -77,42 +87,42 @@ local is_model_file = function(extension)
 end
 
 
-if is_image_file(extension) then
+if is_image_file(Extension) then
   return [[
   openspace.addScreenSpaceRenderable({
     Identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [["),
     Type = "ScreenSpaceImageLocal",
-    TexturePath = "]] .. filename .. [["
+    TexturePath = "]] .. Filename .. [["
   });]]
-elseif is_video_file(extension) then
+elseif is_video_file(Extension) then
   return [[
     openspace.addScreenSpaceRenderable({
       Identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [["),
       Type = "ScreenSpaceVideo",
-      Video = "]] .. filename .. [["
+      Video = "]] .. Filename .. [["
     });]]
-elseif is_asset_file(extension) then
+elseif is_asset_file(Extension) then
   return [[
-    if openspace.asset.isLoaded("]] .. filename .. [[") ~= true then
-      openspace.printInfo("Adding asset: ']] .. filename .. [[' (drag-and-drop)");
+    if openspace.asset.isLoaded("]] .. Filename .. [[") ~= true then
+      openspace.printInfo("Adding asset: ']] .. Filename .. [[' (drag-and-drop)");
     end
-    openspace.asset.add("]] .. filename .. '");'
-elseif is_recording_file(extension) then
-  return 'openspace.sessionRecording.startPlayback("' .. filename .. '")'
-elseif is_geojson_file(extension) then
-  return 'openspace.globebrowsing.addGeoJsonFromFile("' .. filename .. '")'
-elseif is_wms_file(extension) then
+    openspace.asset.add("]] .. Filename .. '");'
+elseif is_recording_file(Extension) then
+  return 'openspace.sessionRecording.startPlayback("' .. Filename .. '")'
+elseif is_geojson_file(Extension) then
+  return 'openspace.globebrowsing.addGeoJsonFromFile("' .. Filename .. '")'
+elseif is_wms_file(Extension) then
   return [[
     openspace.globebrowsing.addLayer(
       openspace.navigation.getNavigationState().Anchor,
       "ColorLayers",
       {
         Identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [["),
-        FilePath = ']] .. filename .. [['
+        FilePath = ']] .. Filename .. [['
       }
     )
   ]]
-elseif is_model_file(extension) then
+elseif is_model_file(Extension) then
 return [[
   local identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [[")
   local camera_position = openspace.navigation.getNavigationState().Position
@@ -138,7 +148,7 @@ return [[
     },
     Renderable = {
       Type = "RenderableModel",
-      GeometryFile = "]] .. filename .. [[",
+      GeometryFile = "]] .. Filename .. [[",
       PerformShading = true,
       LightSources = {
         {
