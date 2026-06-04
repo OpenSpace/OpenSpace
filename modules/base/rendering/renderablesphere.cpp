@@ -471,7 +471,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform("usingTransferFunction", _useColorMap);
     _shader->setUniform("transferFunction", transferFunctionUnit);
     _shader->setUniform("dataMinMaxValues", _dataMinMaxValues);
-    if (_useColorMap) {
+    if (_useColorMap && _transferFunction) {
         transferFunctionUnit.bind(_transferFunction->texture());
     }
 
