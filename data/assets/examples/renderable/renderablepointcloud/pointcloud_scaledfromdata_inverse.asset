@@ -20,7 +20,8 @@ local Node = {
         -- use the last of the provided options rather than the first one, which is
         -- otherwise used by default
         Parameter = "b",
-        -- Invert the size mapping, so that higher values in the column result in smaller points and vice versa
+        -- Invert the size mapping, so that higher values in the column result in
+        -- smaller points and vice versa
         InvertScale = true
       }
     }

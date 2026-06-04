@@ -217,7 +217,6 @@ SizeMappingComponent::SizeMappingComponent(const ghoul::Dictionary& dictionary)
     }
 
     isRadius = p.isRadius.value_or(isRadius);
-
     invertScale = p.invertScale.value_or(invertScale);
 }
 

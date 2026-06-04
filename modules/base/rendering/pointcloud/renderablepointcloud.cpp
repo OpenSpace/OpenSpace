@@ -752,7 +752,9 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
             [this]() { _dataIsDirty = true; }
         );
         _sizeSettings.sizeMapping->isRadius.onChange([this]() { _dataIsDirty = true; });
-        _sizeSettings.sizeMapping->invertScale.onChange([this]() { _dataIsDirty = true; });
+        _sizeSettings.sizeMapping->invertScale.onChange([this]() {
+            _dataIsDirty = true;
+        });
         _hasDatavarSize = true;
     }
 
