@@ -61,7 +61,8 @@ local is_wms_file = function(extension)
   return extension == ".wms"
 end
 
-local is_model_file = function(extension)
+local is_model_file = function(extension, basename)
+  local basenameLower = (basename or ""):lower()
   return
     extension == ".obj" or extension == ".fbx" or extension == ".gltf" or
     extension == ".glb" or extension == ".dae" or extension == ".zae" or
@@ -80,7 +81,7 @@ local is_model_file = function(extension)
     extension == ".sib" or extension == ".off" or extension == ".irr" or
     extension == ".irrmesh" or extension == ".q3o" or extension == ".q3s" or
     extension == ".b3d" or extension == ".3d" or extension == ".uc" or
-    extension == ".mesh" or extension == ".mesh.xml" or extension == ".ogex" or
+    extension == ".mesh" or basenameLower:match("%.mesh%.xml$") or extension == ".ogex" or
     extension == ".pk3" or extension == ".bsp" or extension == ".ndo" or
     extension == ".assbin" or extension == ".3mf" or extension == ".x3d" or
     extension == ".x3db" or extension == ".m3d" or extension == ".osmodel"
