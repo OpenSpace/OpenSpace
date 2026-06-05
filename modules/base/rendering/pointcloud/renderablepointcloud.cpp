@@ -752,6 +752,9 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
             [this]() { _dataIsDirty = true; }
         );
         _sizeSettings.sizeMapping->isRadius.onChange([this]() { _dataIsDirty = true; });
+        _sizeSettings.sizeMapping->invertScale.onChange([this]() {
+            _dataIsDirty = true;
+        });
         _hasDatavarSize = true;
     }
 
@@ -1642,7 +1645,16 @@ void RenderablePointCloud::addColorAndSizeDataForPoint(unsigned int index,
 
         // Convert to diameter if data is given as radius
         float multiplier = _sizeSettings.sizeMapping->isRadius ? 2.f : 1.f;
-        result.push_back(multiplier * e.data[sizeParamIndex]);
+        if (_sizeSettings.sizeMapping->invertScale) {
+            float value = multiplier * e.data[sizeParamIndex];
+            if (value != 0.f) {
+                value = 1.f / value;
+            }
+            result.push_back(value);
+        }
+        else {
+            result.push_back(multiplier * e.data[sizeParamIndex]);
+        }
     }
 }
 
