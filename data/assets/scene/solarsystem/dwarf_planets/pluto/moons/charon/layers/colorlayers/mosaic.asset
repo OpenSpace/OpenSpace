@@ -1,0 +1,43 @@
+local charonAsset = asset.require("scene/solarsystem/dwarf_planets/pluto/moons/charon/globe")
+
+
+
+local textures = asset.resource({
+  Name = "Charon Textures",
+  Type = "HttpSynchronization",
+  Identifier = "charon_textures",
+  Version = 3
+})
+
+
+local Layer = {
+  Identifier = "Mosaic",
+  Name = "Mosaic",
+  Enabled = asset.enabled,
+  ZIndex = 10,
+  FilePath = textures .. "NH_Charon_mosaic.png",
+  Description = "Offline Mosaic of images collected by the New Horizons spacecraft."
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(charonAsset.Charon.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(charonAsset.Charon.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "Charon New Horizons Mosaic",
+  Description = [[Fallback layer for Charon image if no internet is available. Contains a
+    a mosaicked map generated from New Horizons images.]],
+  Author = "OpenSpace Team",
+  URL = "https://astrogeology.usgs.gov/search/map/Charon/NewHorizons/" ..
+    "Charon_NewHorizons_Global_Mosaic_300m_Jul2017",
+  License = "NASA/PDS"
+}

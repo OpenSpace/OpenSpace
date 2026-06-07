@@ -9,6 +9,8 @@
     "scene/milkyway/constellations/constellation_art",
     "scene/milkyway/milkyway/volume",
     "scene/solarsystem/dwarf_planets/pluto/pluto",
+    "scene/solarsystem/dwarf_planets/pluto/layers/colorlayers/mosaic",
+    "scene/solarsystem/dwarf_planets/pluto/moons/charon/layers/colorlayers/mosaic",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/layers/colorlayers/blue_marble",
     "scene/solarsystem/planets/earth/layers/heightlayers/blue_marble_height",
