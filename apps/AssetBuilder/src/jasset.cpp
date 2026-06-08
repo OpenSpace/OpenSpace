@@ -43,7 +43,9 @@ namespace {
             PropertyMap map;
             const QJsonObject object = value.toObject();
             for (auto it = object.begin(); it != object.end(); it++) {
-                map[it.key().toStdString()] = jsonValueToProperty(it.value());
+                if (!it.value().isNull()) {
+                    map[it.key().toStdString()] = jsonValueToProperty(it.value());
+                }
             }
             return map;
         }
@@ -74,16 +76,18 @@ namespace {
         if (propertyValue.isMap()) {
             QJsonObject object;
             for (const auto& [key, value] : propertyValue.toMap()) {
-                object[QString::fromStdString(key)] = propertyToJsonValue(value);
+                if (QJsonValue v = propertyToJsonValue(value);  !v.isNull()) {
+                    object[QString::fromStdString(key)] = v;
+                }
             }
-            return object;
+            return object.isEmpty() ? QJsonValue() : object;
         }
         if (propertyValue.isList()) {
             QJsonArray array;
             for (const PropertyValue& item : propertyValue.toList()) {
                 array.append(propertyToJsonValue(item));
             }
-            return array;
+            return array.isEmpty() ? QJsonValue() : array;
         }
         return QJsonValue::Null;
     }
@@ -203,7 +207,9 @@ QJsonObject jassetToJson(const JAsset& asset) {
     for (const ContentItem& item : asset.contents) {
         QJsonObject itemObj;
         for (const auto& [key, value] : item.properties) {
-            itemObj[QString::fromStdString(key)] = propertyToJsonValue(value);
+            if (QJsonValue v = propertyToJsonValue(value);  !v.isNull()) {
+                itemObj[QString::fromStdString(key)] = v;
+            }
         }
         if (item.type == "SceneGraphNode") {
             scenegraphnodes.append(itemObj);
