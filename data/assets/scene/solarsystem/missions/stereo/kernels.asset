@@ -36,7 +36,14 @@ local Stereo_A_Kernels = {
   Stereo_A .. "ahead_2025_364_01.depm.bsp",
   Stereo_A .. "ahead_2026_015_01.depm.bsp",
   Stereo_A .. "ahead_2026_029_01.depm.bsp",
-  Stereo_A .. "ahead_2026_042_01.depm.bsp"
+  Stereo_A .. "ahead_2026_042_01.depm.bsp",
+  Stereo_A .. "ahead_2026_057_01.depm.bsp",
+  Stereo_A .. "ahead_2026_071_01.depm.bsp",
+  Stereo_A .. "ahead_2026_082_01.depm.bsp",
+  Stereo_A .. "ahead_2026_099_01.depm.bsp",
+  Stereo_A .. "ahead_2026_113_01.depm.bsp",
+  Stereo_A .. "ahead_2026_126_01.depm.bsp",
+  Stereo_A .. "ahead_2026_141_01.depm.bsp"
 }
 
 local ID = {

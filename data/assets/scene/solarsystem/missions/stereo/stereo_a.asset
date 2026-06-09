@@ -14,7 +14,7 @@ local models = asset.resource({
 })
 
 local MissionBegin = "2006 OCT 26 00:01:06"
-local MissionEnd = "2026 FEB 11 19:51:09"
+local MissionEnd = "2026 MAY 19 19:51:09"
 
 local StereoPosition = {
   Identifier = "STEREO_A_Position",

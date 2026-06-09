@@ -3,11 +3,6 @@ local stereo_a = asset.require("scene/solarsystem/missions/stereo/stereo_a")
 local SolarImagery = {
   Identifier = "SolarImagery_STEREO_A_Dynamic",
   Parent = stereo_a.Position.Identifier,
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = stereo_a.MissionBegin,
-    End = stereo_a.MissionEnd
-  },
   Renderable = {
     Type = "RenderableSolarImagery",
     ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing_runtime/stereo-a"),
