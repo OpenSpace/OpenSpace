@@ -385,7 +385,7 @@ void ScreenSpaceSkyBrowser::render(const RenderData& renderData) {
                 glm::translate(glm::mat4(1.f), coordinates) *
                 localRotation *
                 scaleMatrix();
-            draw(mat, renderData, true);
+            draw(mat, renderData, _useAcceleratedRendering);
         }
     }
 }

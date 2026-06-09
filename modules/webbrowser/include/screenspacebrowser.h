@@ -78,6 +78,7 @@ protected:
     UVec2Property _dimensions;
     std::unique_ptr<BrowserInstance> _browserInstance;
     bool _isDimensionsDirty = false;
+    bool _useAcceleratedRendering = false;
     TriggerProperty _reload;
 
     StringProperty _key;
@@ -99,7 +100,6 @@ private:
     CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
 
-    bool _useAcceleratedRendering = false;
     bool _isUrlDirty = false;
 };
 
