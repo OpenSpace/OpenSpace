@@ -1410,6 +1410,10 @@ void RenderablePointCloud::update(const UpdateData&) {
     }
 }
 
+const dataloader::Dataset* RenderablePointCloud::dataset() const {
+    return &_dataset;
+}
+
 glm::dvec3 RenderablePointCloud::transformedPosition(
                                                 const dataloader::Dataset::Entry& e) const
 {

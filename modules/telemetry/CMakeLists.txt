@@ -29,6 +29,7 @@ set(HEADER_FILES
   include/general/cameratelemetry.h
   include/general/focustelemetry.h
   include/general/nodestelemetry.h
+  include/general/pointcloudtelemetry.h
   include/general/timetelemetry.h
   include/specific/planetscomparesonification.h
   include/specific/planetsoverviewsonification.h
@@ -44,6 +45,8 @@ set(SOURCE_FILES
   src/general/focustelemetry.cpp
   src/general/nodestelemetry.cpp
   src/general/nodestelemetry_lua.inl
+  src/general/pointcloudtelemetry.cpp
+  src/general/pointcloudtelemetry_lua.inl
   src/general/timetelemetry.cpp
   src/specific/planetscomparesonification.cpp
   src/specific/planetsoverviewsonification.cpp

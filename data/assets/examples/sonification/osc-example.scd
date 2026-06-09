@@ -435,4 +435,33 @@ OSCdef.new(
 	'/Neptune'
 );
 
+// Point Cloud sonification
+// With the asset: data/assets/examples/renderable/renderablepointcloud/pointcloud.asset
+// and the script:
+// openspace.telemetry.setPointCloudIdentifier("RenderablePointCloud_Example")
+OSCdef.new(
+	\RenderablePointCloud_Example,
+	{
+		arg msg;
+
+		// msg[0] = OSC Label (The identifier of the point cloud).
+		// msg[1] = The unit for the distance to the camera, as a string in singular form
+		//          with the first letter capitalized. For example, "Meter".
+		// msg[2] = The index for the point in the point cloud that the upcoming 3 data
+		//          items are refering to.
+		// msg[3] = The distance from the camera to the point, in the distance unit
+		//          specified in the first data item.
+		// msg[4] = The horizontal angle to the point, in radians, with the current angle
+		//          calculation mode taken into account. For more information, see
+		//          https://docs.openspaceproject.com/latest/creating-data-assets/modules/
+		//          telemetry/angle-information.html.
+		// msg[5] = The elevation angle to the point, in radians, with the current angle
+		//          calculation mode taken into account. Again, see
+		//          https://docs.openspaceproject.com/latest/creating-data-assets/modules/
+		//          telemetry/angle-information.html for details.
+		("RenderablePointCloud_Example: " + msg).postln;
+	},
+	'/RenderablePointCloud_Example'
+);
+
 )

@@ -28,6 +28,7 @@
 #include <modules/telemetry/include/general/cameratelemetry.h>
 #include <modules/telemetry/include/general/focustelemetry.h>
 #include <modules/telemetry/include/general/nodestelemetry.h>
+#include <modules/telemetry/include/general/pointcloudtelemetry.h>
 #include <modules/telemetry/include/general/timetelemetry.h>
 #include <modules/telemetry/include/specific/planetscomparesonification.h>
 #include <modules/telemetry/include/specific/planetsoverviewsonification.h>
@@ -225,6 +226,12 @@ void TelemetryModule::internalInitialize(const ghoul::Dictionary& dictionary) {
         _telemetries.push_back(std::move(telemetry));
     }
 
+    {
+        auto telemetry = std::make_unique<PointCloudTelemetry>(_ipAddress, _port);
+        addPropertySubOwner(telemetry.get());
+        _telemetries.push_back(std::move(telemetry));
+    }
+
     // Only the master runs the TelemetryModule update thread
     if (global::windowDelegate->isMaster()) {
         _isRunning = true;
@@ -335,7 +342,8 @@ void TelemetryModule::update(std::atomic<bool>& isRunning) {
 std::vector<LuaLibrary> TelemetryModule::luaLibraries() const {
     return {
         NodesTelemetry::luaLibrary(),
-        PlanetsSonification::luaLibrary()
+        PlanetsSonification::luaLibrary(),
+        PointCloudTelemetry::luaLibrary()
     };
 }
 
