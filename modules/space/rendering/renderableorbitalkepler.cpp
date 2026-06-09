@@ -529,8 +529,8 @@ void RenderableOrbitalKepler::update(const UpdateData& data) {
         _forceUpdate = true;
     }
 
-    bool isPaused = data.time.j2000Seconds() == data.previousFrameTime.j2000Seconds();
-    if (!isPaused || _forceUpdate) {
+    const bool update = _lastTimestamp != data.time.j2000Seconds();
+    if (update || _forceUpdate) {
         std::for_each(
             std::execution::par_unseq,
             _threadIds.begin(),
@@ -539,6 +539,7 @@ void RenderableOrbitalKepler::update(const UpdateData& data) {
                 threadedSegmentCalculations(threadId, data);
             }
         );
+        _lastTimestamp = data.time.j2000Seconds();
     }
 
     _lineDrawCount = static_cast<GLsizei>(_segmentsPerOrbit.size() * 2);
