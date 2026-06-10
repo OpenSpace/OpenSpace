@@ -40,6 +40,14 @@ openspace.documentation = {
       Note that a number will be converted to a string automatically.]]
   },
   {
+    Name = "removeFromListProperty",
+    Arguments = {{ "identifier","String" }, { "value", "any" }},
+    Documentation = [[Removes a value from the list property with the given identifier.
+      The value can be any type, as long as it is the correct type for the given property.
+      Note that a number will be converted to a string automatically. If the value was 
+      not found, this function will not do anything.]]
+  },
+  {
     Name = "addToPropertyValue",
     Arguments = {{ "identifier", "String" } , { "value", "String | Number" }},
     Documentation = [[Add a value to the property with the given identifier. Works on both
@@ -167,6 +175,29 @@ openspace.appendToListProperty = function(propertyIdentifier, newItem)
   end
   table.insert(list, newItem)
   openspace.setPropertyValueSingle(propertyIdentifier, list)
+end
+
+openspace.removeFromListProperty = function(propertyIdentifier, item)
+  local list = openspace.propertyValue(propertyIdentifier)
+  if type(list) ~= "table" then
+    openspace.printError(
+      "Error when calling script 'openspace.appendToListProperty': " ..
+      "Could not append to non-list property '" .. propertyIdentifier .. "'"
+    )
+    return;
+  end
+
+  local removed = false
+  for k, v in ipairs(list) do
+    if v == item then
+      table.remove(list, k)
+      removed = true
+    end
+  end
+
+  if removed then
+    openspace.setPropertyValueSingle(propertyIdentifier, list)
+  end
 end
 
 openspace.addToPropertyValue = function(propertyIdentifier, valueToAdd)
