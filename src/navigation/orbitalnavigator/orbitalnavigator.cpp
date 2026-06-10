@@ -364,7 +364,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _useAdaptiveStereoscopicDepth(UseAdaptiveStereoscopicDepthInfo, true)
     , _stereoscopicDepthOfFocusSurface(
         StereoscopicDepthOfFocusSurfaceInfo,
-        21500.f,
+        40.f,
         0.25f,
         500000.f
     )
