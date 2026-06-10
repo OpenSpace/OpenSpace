@@ -24,6 +24,10 @@
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
+PATCH_COMMAND git -C "${CMAKE_SOURCE_DIR}/modules/molecule" apply "${CMAKE_CURRENT_SOURCE_DIR}/patch_1_md_os_h.patch"
+           && git -C "${CMAKE_SOURCE_DIR}/modules/molecule" apply "${CMAKE_CURRENT_SOURCE_DIR}/patch_2_md_os_c.patch"
+           && git -C "${CMAKE_SOURCE_DIR}/modules/molecule" apply "${CMAKE_CURRENT_SOURCE_DIR}/patch_3_md_gl_c.patch"
+
 set(HEADER_FILES
   moleculemodule.h
   src/renderablemolecule.h
