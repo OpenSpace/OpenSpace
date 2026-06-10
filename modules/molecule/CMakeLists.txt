@@ -25,15 +25,15 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 execute_process(
-  COMMAND git apply "${CMAKE_CURRENT_SOURCE_DIR}/patch_1_md_os_h.patch"
+  COMMAND git apply "${CMAKE_CURRENT_SOURCE_DIR}/pathpatch_1_md_os_h.patch"
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 execute_process(
-  COMMAND git apply "${CMAKE_CURRENT_SOURCE_DIR}/patch_2_md_os_c.patch"
+  COMMAND git apply "${CMAKE_CURRENT_SOURCE_DIR}/pathpatch_2_md_os_c.patch"
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 execute_process(
-  COMMAND git apply "${CMAKE_CURRENT_SOURCE_DIR}/patch_3_md_gl_c.patch"
+  COMMAND git apply "${CMAKE_CURRENT_SOURCE_DIR}/pathpatch_3_md_gl_c.patch"
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
