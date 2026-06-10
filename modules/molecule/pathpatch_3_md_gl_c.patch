@@ -1,6 +1,6 @@
 --- a/ext/mold/src/md_gl.c
 +++ b/ext/mold/src/md_gl.c
-@@ -25,6 +25,31 @@
+@@ -25,6 +25,41 @@
  
  #define UBO_SIZE (1 << 10)
  #define SHADER_BUF_SIZE KILOBYTES(14)
@@ -8,11 +8,14 @@
 +// ---------------------------------------------------------------------------
 +// Runtime shader path resolution
 +//
-+// OpenSpace layout on all platforms:
++// OpenSpace layout on all platforms in a release build:
 +//   <root>/bin/openspace    <- executable
 +//   <root>/modules/molecule/ext/mold/src/shaders/
++// OpenSpace layout on Windows in development build:
++//   <root>/bin/<Configuration>/OpenSpace  <- executable
 +//
 +// Resolves <exe_dir>/../modules/molecule/ext/mold/src/shaders/<file>
++// or <exe_dir>/../../modules/molecule/ext/mold/src/shaders/<file>
 +// at runtime: works for .deb, AppImage, Windows, and macOS.
 +// ---------------------------------------------------------------------------
 +#define MD_SHADER_PATH_SLOTS 8
@@ -24,10 +27,18 @@
 +    char* buf = bufs[slot % MD_SHADER_PATH_SLOTS];
 +    slot++;
 +    str_t exe_dir = md_path_exe_dir();
-+    snprintf(buf, MD_SHADER_PATH_LEN,
-+        "%.*s../modules/molecule/ext/mold/src/shaders%s",
-+        (int)exe_dir.len, exe_dir.ptr,
-+        filename);
++    if (str_ends_with(exe_dir, STR("bin/"))) {
++        snprintf(buf, MD_SHADER_PATH_LEN,
++            "%.*s../modules/molecule/ext/mold/src/shaders%s",
++            (int)exe_dir.len, exe_dir.ptr,
++            filename);
++    }
++    else {
++        snprintf(buf, MD_SHADER_PATH_LEN,
++            "%.*s../../modules/molecule/ext/mold/src/shaders%s",
++            (int)exe_dir.len, exe_dir.ptr,
++            filename);
++    }
 +    return buf;
 +}
 +
