@@ -11,16 +11,26 @@
 -- to the drag event.  If we don't want anything to happen, don't return anything or
 -- return an empty string
 
-if filename == nil or filename == "" or
-   basename == nil or basename == "" or
-   extension == nil or extension == "" then
+---@type string
+Filename = Filename
+
+---@type string
+Basename = Basename
+
+---@type string
+Extension = Extension
+
+
+if Filename == nil or Filename == "" or
+   Basename == nil or Basename == "" or
+   Extension == nil or Extension == "" then
   do return "" end
 end
 
 -- Lua doesn't enjoy \ that are used by Windows extensively. So we convert all \ into /
-filename = filename:gsub("\\", "/")
-basename = basename:gsub("\\", "/")
-basename_without_extension = basename:sub(0, #basename - extension:len())
+Filename = Filename:gsub("\\", "/")
+Basename = Basename:gsub("\\", "/")
+local basename_without_extension = Basename:sub(0, #Basename - Extension:len())
 
 local is_image_file = function(extension)
   return extension == ".png" or extension == ".jpg" or extension == ".jpeg" or
@@ -51,40 +61,107 @@ local is_wms_file = function(extension)
   return extension == ".wms"
 end
 
+local is_model_file = function(extension, basename)
+  local basenameLower = (basename or ""):lower()
+  return
+    extension == ".obj" or extension == ".fbx" or extension == ".gltf" or
+    extension == ".glb" or extension == ".dae" or extension == ".zae" or
+    extension == ".blend" or extension == ".3ds" or extension == ".prj" or
+    extension == ".ase" or extension == ".ask" or extension == ".x" or
+    extension == ".stl" or extension == ".ifc" or extension == ".ifczip" or
+    extension == ".xgl" or extension == ".zgl" or extension == ".ply" or
+    extension == ".dxf" or extension == ".lwo" or extension == ".lws" or
+    extension == ".mot" or extension == ".lxo" or extension == ".ac" or
+    extension == ".ac3d" or extension == ".acc" or extension == ".ms3d" or
+    extension == ".cob" or extension == ".scn" or extension == ".amf" or
+    extension == ".md3" or extension == ".mdl" or extension == ".md2" or
+    extension == ".smd" or extension == ".vta" or extension == ".mdc" or
+    extension == ".md5anim" or extension == ".md5mesh" or extension == ".md5camera" or
+    extension == ".nff" or extension == ".enff" or extension == ".raw" or
+    extension == ".sib" or extension == ".off" or extension == ".irr" or
+    extension == ".irrmesh" or extension == ".q3o" or extension == ".q3s" or
+    extension == ".b3d" or extension == ".3d" or extension == ".uc" or
+    extension == ".mesh" or basenameLower:match("%.mesh%.xml$") or extension == ".ogex" or
+    extension == ".pk3" or extension == ".bsp" or extension == ".ndo" or
+    extension == ".assbin" or extension == ".3mf" or extension == ".x3d" or
+    extension == ".x3db" or extension == ".m3d" or extension == ".osmodel"
+end
 
-if is_image_file(extension) then
+
+if is_image_file(Extension) then
   return [[
   openspace.addScreenSpaceRenderable({
     Identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [["),
     Type = "ScreenSpaceImageLocal",
-    TexturePath = "]] .. filename .. [["
+    TexturePath = "]] .. Filename .. [["
   });]]
-elseif is_video_file(extension) then
+elseif is_video_file(Extension) then
   return [[
     openspace.addScreenSpaceRenderable({
       Identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [["),
       Type = "ScreenSpaceVideo",
-      Video = "]] .. filename .. [["
+      Video = "]] .. Filename .. [["
     });]]
-elseif is_asset_file(extension) then
+elseif is_asset_file(Extension) then
   return [[
-    if openspace.asset.isLoaded("]] .. filename .. [[") ~= true then
-      openspace.printInfo("Adding asset: ']] .. filename .. [[' (drag-and-drop)");
+    if openspace.asset.isLoaded("]] .. Filename .. [[") ~= true then
+      openspace.printInfo("Adding asset: ']] .. Filename .. [[' (drag-and-drop)");
     end
-    openspace.asset.add("]] .. filename .. '");'
-elseif is_recording_file(extension) then
-  return 'openspace.sessionRecording.startPlayback("' .. filename .. '")'
-elseif is_geojson_file(extension) then
-  return 'openspace.globebrowsing.addGeoJsonFromFile("' .. filename .. '")'
-elseif is_wms_file(extension) then
+    openspace.asset.add("]] .. Filename .. '");'
+elseif is_recording_file(Extension) then
+  return 'openspace.sessionRecording.startPlayback("' .. Filename .. '")'
+elseif is_geojson_file(Extension) then
+  return 'openspace.globebrowsing.addGeoJsonFromFile("' .. Filename .. '")'
+elseif is_wms_file(Extension) then
   return [[
     openspace.globebrowsing.addLayer(
       openspace.navigation.getNavigationState().Anchor,
       "ColorLayers",
       {
         Identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [["),
-        FilePath = ']] .. filename .. [['
+        FilePath = ']] .. Filename .. [['
       }
     )
+  ]]
+elseif is_model_file(Extension, Basename) then
+  return [[
+    local identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [[")
+    local camera_position = openspace.navigation.getNavigationState().Position
+    local camera_position_length = math.sqrt(camera_position[1]^2 + camera_position[2]^2 + camera_position[3]^2)
+    local normalized_camera_position = {
+      camera_position[1] / camera_position_length,
+      camera_position[2] / camera_position_length,
+      camera_position[3] / camera_position_length
+    }
+    local shifted_camera_position = {
+      camera_position[1] - normalized_camera_position[1] * 50.0,
+      camera_position[2] - normalized_camera_position[2] * 50.0,
+      camera_position[3] - normalized_camera_position[3] * 50.0
+    }
+    openspace.addSceneGraphNode({
+      Identifier = identifier,
+      Parent = openspace.navigation.getNavigationState().Anchor,
+      Transform = {
+        Translation = {
+          Type = "StaticTranslation",
+          Position = shifted_camera_position
+        }
+      },
+      Renderable = {
+        Type = "RenderableModel",
+        GeometryFile = "]] .. Filename .. [[",
+        PerformShading = openspace.hasSceneGraphNode("SunIAU"),
+        LightSources = openspace.hasSceneGraphNode("SunIAU") and {
+          {
+            Type = "SceneGraphLightSource",
+            Identifier = "Sun",
+            Node = "SunIAU",
+            Intensity = 1.0
+          }
+        } or {}
+      }
+    })
+    
+    openspace.scheduleScript("openspace.navigation.setFocus('" .. identifier .. "', true, true)", 0.1)
   ]]
 end
