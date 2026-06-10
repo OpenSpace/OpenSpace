@@ -1,0 +1,101 @@
+--- a/ext/mold/src/md_gl.c
++++ b/ext/mold/src/md_gl.c
+@@ -25,6 +25,31 @@
+ 
+ #define UBO_SIZE (1 << 10)
+ #define SHADER_BUF_SIZE KILOBYTES(14)
+ 
++// ---------------------------------------------------------------------------
++// Runtime shader path resolution
++//
++// OpenSpace layout on all platforms:
++//   <root>/bin/openspace    <- executable
++//   <root>/modules/molecule/ext/mold/src/shaders/
++//
++// Resolves <exe_dir>/../modules/molecule/ext/mold/src/shaders/<file>
++// at runtime: works for .deb, AppImage, Windows, and macOS.
++// ---------------------------------------------------------------------------
++#define MD_SHADER_PATH_SLOTS 8
++#define MD_SHADER_PATH_LEN   512
++
++static const char* md_gl_shader_path(const char* filename) {
++    static char bufs[MD_SHADER_PATH_SLOTS][MD_SHADER_PATH_LEN];
++    static int slot = 0;
++    char* buf = bufs[slot % MD_SHADER_PATH_SLOTS];
++    slot++;
++    str_t exe_dir = md_path_exe_dir();
++    snprintf(buf, MD_SHADER_PATH_LEN,
++        "%.*s../modules/molecule/ext/mold/src/shaders%s",
++        (int)exe_dir.len, exe_dir.ptr,
++        filename);
++    return buf;
++}
++
+ static const char* default_shader_output = 
+ "layout(location = 0) out vec4 out_color;\n"
+@@ -877,7 +902,7 @@
+         GLuint comp_shader = glCreateShader(GL_COMPUTE_SHADER);
+ 
+         bool err;
+-        if ((err = compile_shader_from_file(comp_shader, MD_SHADER_DIR "/compute_aabb.comp", NULL, NULL)) != true) {
++        if ((err = compile_shader_from_file(comp_shader, md_gl_shader_path("/compute_aabb.comp"), NULL, NULL)) != true) {
+             return err;
+         }
+         ctx.program[GL_PROGRAM_COMPUTE_AABB].id = glCreateProgram();
+@@ -894,9 +919,9 @@
+         GLuint frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
+ 
+         bool err;
+-        if ((err = compile_shader_from_file(vert_shader, MD_SHADER_DIR "/draw_aabb.vert", NULL, NULL)) != true ||
+-            (err = compile_shader_from_file(geom_shader, MD_SHADER_DIR "/draw_aabb.geom", NULL, NULL)) != true ||
+-            (err = compile_shader_from_file(frag_shader, MD_SHADER_DIR "/cull_aabb.frag", NULL, NULL)) != true) {
++        if ((err = compile_shader_from_file(vert_shader, md_gl_shader_path("/draw_aabb.vert"), NULL, NULL)) != true ||
++            (err = compile_shader_from_file(geom_shader, md_gl_shader_path("/draw_aabb.geom"), NULL, NULL)) != true ||
++            (err = compile_shader_from_file(frag_shader, md_gl_shader_path("/cull_aabb.frag"), NULL, NULL)) != true) {
+             return err;
+         }
+         ctx.program[GL_PROGRAM_CULL_AABB].id = glCreateProgram();
+@@ -915,7 +940,7 @@
+     {
+         GLuint vert_shader = glCreateShader(GL_VERTEX_SHADER);
+ 
+-        if (!compile_shader_from_file(vert_shader, MD_SHADER_DIR "/extract_control_points.vert", NULL, NULL)) {
++        if (!compile_shader_from_file(vert_shader, md_gl_shader_path("/extract_control_points.vert"), NULL, NULL)) {
+             return false;
+         }
+         ctx.program[GL_PROGRAM_EXTRACT_CONTROL_POINTS].id = glCreateProgram();
+@@ -931,7 +956,7 @@
+     {
+         GLuint vert_shader = glCreateShader(GL_VERTEX_SHADER);
+ 
+-        if (!compile_shader_from_file(vert_shader, MD_SHADER_DIR "/compute_velocity.vert", NULL, NULL)) {
++        if (!compile_shader_from_file(vert_shader, md_gl_shader_path("/compute_velocity.vert"), NULL, NULL)) {
+             return false;
+         }
+         ctx.program[GL_PROGRAM_COMPUTE_VELOCITY].id = glCreateProgram();
+@@ -951,8 +976,8 @@
+         snprintf(defines, sizeof(defines), "#define NUM_SUBDIVISIONS %i", SPLINE_MAX_SUBDIVISION_COUNT);
+ 
+         bool err;
+-        if ((err = compile_shader_from_file(vert_shader, MD_SHADER_DIR "/compute_spline.vert", defines, NULL)) != true ||
+-            (err = compile_shader_from_file(geom_shader, MD_SHADER_DIR "/compute_spline.geom", defines, NULL)) != true) {
++        if ((err = compile_shader_from_file(vert_shader, md_gl_shader_path("/compute_spline.vert"), defines, NULL)) != true ||
++            (err = compile_shader_from_file(geom_shader, md_gl_shader_path("/compute_spline.geom"), defines, NULL)) != true) {
+             return err;
+         }
+         ctx.program[GL_PROGRAM_COMPUTE_SPLINE].id = glCreateProgram();
+@@ -992,10 +1017,10 @@
+         if (!custom_shader_snippet) {
+             custom_shader_snippet = default_shader_output;
+         }
+-        if (!create_permuted_program(shaders->space_fill, MD_SHADER_DIR "/space_fill.vert", MD_SHADER_DIR "/space_fill.geom", MD_SHADER_DIR "/space_fill.frag",  custom_shader_snippet)) return false;
+-        if (!create_permuted_program(shaders->licorice,   MD_SHADER_DIR "/licorice.vert",   MD_SHADER_DIR "/licorice.geom",   MD_SHADER_DIR "/licorice.frag",    custom_shader_snippet)) return false;
+-        if (!create_permuted_program(shaders->ribbons,    MD_SHADER_DIR "/ribbons.vert",    MD_SHADER_DIR "/ribbons.geom",    MD_SHADER_DIR "/ribbons.frag",     custom_shader_snippet)) return false;
+-        if (!create_permuted_program(shaders->cartoon,    MD_SHADER_DIR "/cartoon.vert",    MD_SHADER_DIR "/cartoon.geom",    MD_SHADER_DIR "/cartoon.frag",     custom_shader_snippet)) return false;
++        if (!create_permuted_program(shaders->space_fill, md_gl_shader_path("/space_fill.vert"), md_gl_shader_path("/space_fill.geom"), md_gl_shader_path("/space_fill.frag"),  custom_shader_snippet)) return false;
++        if (!create_permuted_program(shaders->licorice,   md_gl_shader_path("/licorice.vert"),   md_gl_shader_path("/licorice.geom"),   md_gl_shader_path("/licorice.frag"),    custom_shader_snippet)) return false;
++        if (!create_permuted_program(shaders->ribbons,    md_gl_shader_path("/ribbons.vert"),    md_gl_shader_path("/ribbons.geom"),    md_gl_shader_path("/ribbons.frag"),     custom_shader_snippet)) return false;
++        if (!create_permuted_program(shaders->cartoon,    md_gl_shader_path("/cartoon.vert"),    md_gl_shader_path("/cartoon.geom"),    md_gl_shader_path("/cartoon.frag"),     custom_shader_snippet)) return false;
+     }
+ 
+     return true;
