@@ -24,13 +24,6 @@
       }
     },
     {
-      "type": "property",
-      "value": {
-        "property": "Scene.SSSB_Amor_Asteroid.Renderable.Enabled",
-        "value": false
-      }
-    },
-    {
       "type": "screenshot"
     }
   ]
