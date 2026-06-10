@@ -24,6 +24,19 @@
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
+execute_process(
+  COMMAND git apply --verbose --recount --whitespace=fix "${CMAKE_CURRENT_SOURCE_DIR}/pathpatch_1_md_os_h.patch"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+execute_process(
+  COMMAND git apply --verbose --recount --whitespace=fix "${CMAKE_CURRENT_SOURCE_DIR}/pathpatch_2_md_os_c.patch"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+execute_process(
+  COMMAND git apply --verbose --recount --whitespace=fix "${CMAKE_CURRENT_SOURCE_DIR}/pathpatch_3_md_gl_c.patch"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
 set(HEADER_FILES
   moleculemodule.h
   src/renderablemolecule.h
