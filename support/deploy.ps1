@@ -142,7 +142,6 @@ $sevenZipArgs = @(
   "LICENSE.md",
   "openspace.cfg",
   "README.md",
-  "vc_redist.x64.exe",
   "modules/*/shaders/*",
   "modules/*/scripts/*",
   "modules/globebrowsing/gdal_data/*",
@@ -150,6 +149,9 @@ $sevenZipArgs = @(
   "modules/webgui/ext/nodejs/node.exe",
   "-x!documentation/.git"
 )
+if (Test-Path "vc_redist.x64.exe") {
+  $sevenZipArgs += "vc_redist.x64.exe"
+}
 Start-SevenZip @sevenZipArgs
 if ($LASTEXITCODE -ne 0) {
   Write-Error "7-Zip failed with exit code $LASTEXITCODE"
