@@ -3,7 +3,7 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 local sssb = asset.resource({
-  Name = "Small SolarSystem Body Data (Potentially hazardous Asteroids)",
+  Name = "Small SolarSystem Body Data (Potentially Hazardous Asteroids)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_pha",
   Version = 5
