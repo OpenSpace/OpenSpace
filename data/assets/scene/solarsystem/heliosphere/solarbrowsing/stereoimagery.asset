@@ -37,7 +37,7 @@ local SolarImagery = {
   },
   Renderable = {
     Type = "RenderableSolarImagery",
-    ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing/stereo")
+    ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing/stereo-a")
   },
   GUI = {
     Name = "STEREO A Imagery",
