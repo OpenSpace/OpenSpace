@@ -123,7 +123,7 @@ namespace {
     constexpr Property::PropertyInfo UseAdditiveBlendingInfo = {
         "UseAdditiveBlending",
         "Use additive blending",
-        "If enabled, the plane is blended additively with the background. If disabled,  "
+        "If enabled, the plane is blended additively with the background. If disabled, "
         "the plane is rendered fully opaque. Note that this may lead to weird behaviors "
         "when the plane is rendered with transparency.",
         Property::Visibility::AdvancedUser
@@ -612,6 +612,9 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     glBindVertexArray(_quadVao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
+
     _planeShader->deactivate();
 
     // Render frustum
@@ -648,9 +651,6 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     _frustumShader->deactivate();
 
     glDisable(GL_CULL_FACE);
-
-    global::renderEngine->openglStateCache().resetBlendState();
-    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableSolarImagery::update(const UpdateData& data) {
