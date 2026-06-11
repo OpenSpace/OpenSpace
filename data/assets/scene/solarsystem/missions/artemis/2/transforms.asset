@@ -6,13 +6,13 @@ local coreKernels = asset.require("spice/core")
 
 local Artemis2Position = {
   Identifier = "Artemis2Position",
-  Parent = earthTransforms.EarthCenter.Identifier,
+  Parent = earthTransforms.EarthBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
       Target = kernels.ID.Artemis2,
-      Observer = coreKernels.ID.Earth,
-      Frame = coreKernels.Frame.Galactic
+      Observer = coreKernels.ID.EarthBarycenter,
+      -- Frame = coreKernels.Frame.Galactic
     }
   },
   GUI = {
