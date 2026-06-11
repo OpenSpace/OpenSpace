@@ -43,6 +43,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <fstream>
@@ -117,6 +118,15 @@ namespace {
         "instrument. Note that data may not be continuously available across the entire "
         "displayed time span.",
         Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo UseAdditiveBlendingInfo = {
+        "UseAdditiveBlending",
+        "Use additive blending",
+        "If enabled, the plane is blended additively with the background. If disabled, "
+        "the plane is rendered fully opaque. Note that this may lead to weird behaviors "
+        "when the plane is rendered with transparency.",
+        Property::Visibility::AdvancedUser
     };
 
     constexpr Property::PropertyInfo ContrastValueInfo = {
@@ -203,6 +213,9 @@ namespace {
         // [[codegen::verbatim(DownsamplingLevelInfo.description)]]
         std::optional<int> downsamplingLevel;
 
+        // [[codegen::verbatim(UseAdditiveBlendingInfo.description)]]
+        std::optional<bool> useAdditiveBlending;
+
         // [[codegen::verbatim(ContrastValueInfo.description)]]
         std::optional<float> contrast;
 
@@ -238,6 +251,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     , _enableBorder(EnableBorderInfo, false)
     , _enableFrustum(EnableFrustumInfo, false)
     , _faceMode(FaceModeInfo)
+    , _useAdditiveBlending(UseAdditiveBlendingInfo, false)
     , _gammaValue(GammaValueInfo, 0.9f, 0.1f, 10.f)
     , _moveFactor(MoveFactorInfo, 1.0, 0.0, 1.0)
     , _downsamplingLevel(DownsamplingLevelInfo, 2, 0, 5)
@@ -355,6 +369,9 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     _moveFactor = p.moveFactor.value_or(_moveFactor);
     _moveFactor.onChange([this]() { createPlaneAndFrustum(_moveFactor); });
     addProperty(_moveFactor);
+
+    _useAdditiveBlending = p.useAdditiveBlending.value_or(_useAdditiveBlending);
+    addProperty(_useAdditiveBlending);
 
     _gammaValue = p.gamma.value_or(_gammaValue);
     addProperty(_gammaValue);
@@ -547,17 +564,11 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
 
     _rotation = std::move(rot);
 
-    const glm::dmat4 modelTransform =
+    const glm::dmat4 planeModelTransform =
         glm::translate(glm::dmat4(1.0), _position) *
         _rotation *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-    const glm::dmat4 modelViewTransform = viewMatrix * modelTransform;
-
-    // For frustum
-    const glm::dmat4 spacecraftModelTransform =
-        glm::translate(glm::dmat4(1.0), spacecraftPosWorld) *
-        _rotation *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+    const glm::dmat4 modelViewTransform = viewMatrix * planeModelTransform;
 
     _planeShader->activate();
     ghoul::opengl::TextureUnit imageUnit;
@@ -584,11 +595,34 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     // Must bind all sampler2D, otherwise undefined behavior
     _planeShader->setUniform(_uniformCachePlane.lut, tfUnit);
     _planeShader->setUniform(_uniformCachePlane.faceMode, _faceMode);
+    _planeShader->setUniform(
+        _uniformCachePlane.useAdditiveBlending,
+        _useAdditiveBlending
+    );
+
+    if (_useAdditiveBlending) {
+        glEnablei(GL_BLEND, 0);
+        glDepthMask(false);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    }
+    else {
+        glDisablei(GL_BLEND, 0);
+    }
 
     glBindVertexArray(_quadVao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
+
     _planeShader->deactivate();
+
+    // Render frustum
+    const glm::dmat4 spacecraftModelTransform =
+        glm::translate(glm::dmat4(1.0), spacecraftPosWorld) *
+        _rotation *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+
     _frustumShader->activate();
 
     _frustumShader->setUniform(_uniformCacheFrustum.scale, _currentScale);

@@ -104,6 +104,7 @@ private:
     BoolProperty _enableBorder;
     BoolProperty _enableFrustum;
     OptionProperty _faceMode;
+    BoolProperty _useAdditiveBlending;
     FloatProperty _gammaValue;
     DoubleProperty _moveFactor;
     IntProperty _downsamplingLevel;
@@ -134,7 +135,7 @@ private:
     // Image plane and frustum
     UniformCache(isCoronaGraph, scale, centerPixel, imageryTexture, planeOpacity,
         gammaValue, contrastValue, modelViewProjectionTransform, hasLut,
-        lut, faceMode) _uniformCachePlane;
+        lut, faceMode, useAdditiveBlending) _uniformCachePlane;
 
     UniformCache(planeOpacity, modelViewProjectionTransform,
         modelViewProjectionTransformPlane, scale, centerPixel) _uniformCacheFrustum;
