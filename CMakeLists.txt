@@ -32,10 +32,10 @@ project(OpenSpace LANGUAGES C CXX)
 # successfully without this next line, it can be removed
 set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
 
-set(OPENSPACE_RELEASE_BUILD OFF)
-set(OPENSPACE_VERSION_MAJOR)
-set(OPENSPACE_VERSION_MINOR)
-set(OPENSPACE_VERSION_PATCH)
+set(OPENSPACE_RELEASE_BUILD ON)
+set(OPENSPACE_VERSION_MAJOR 0)
+set(OPENSPACE_VERSION_MINOR 22)
+set(OPENSPACE_VERSION_PATCH 0)
 
 # Optionally disable vcpkg to prevent dependency conflicts
 set(DISABLE_VCPKG OFF CACHE BOOL "Disable the use of vcpkg libs for Windows builds")
