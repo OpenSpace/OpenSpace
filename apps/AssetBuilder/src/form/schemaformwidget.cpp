@@ -29,6 +29,7 @@
 #include "form/colorwidget.h"
 #include "form/matrixwidget.h"
 #include "form/searchdropdown.h"
+#include "form/stringlistwidget.h"
 #include "identifierregistry.h"
 #include "schema/assetschema.h"
 #include "path.h"
@@ -161,6 +162,9 @@ namespace {
         if (auto* checkBox = qobject_cast<QCheckBox*>(widget);  checkBox) {
             return checkBox->isChecked();
         }
+        if (auto* listWidget = qobject_cast<StringListWidget*>(widget);  listWidget) {
+            return listWidget->hasContent();
+        }
         if (auto* matrix = qobject_cast<MatrixWidget*>(widget);  matrix) {
             return matrix->hasContent();
         }
@@ -178,10 +182,35 @@ namespace {
     }
 
     void clearWidget(QWidget* widget) {
+        // Union containers: clear every child field widget and reset the combo to index 0
+        if (widget->objectName() == UnionContainerName) {
+            const auto children = widget->findChildren<QWidget*>(
+                QString(),
+                Qt::FindDirectChildrenOnly
+            );
+            for (QWidget* child : children) {
+                if (child->objectName() != UnionTypeComboName) {
+                    clearWidget(child);
+                }
+            }
+            if (auto* combo = widget->findChild<QComboBox*>(UnionTypeComboName);  combo) {
+                combo->blockSignals(true);
+                combo->setCurrentIndex(0);
+                combo->blockSignals(false);
+            }
+            return;
+        }
         if (auto* checkBox = qobject_cast<QCheckBox*>(widget);  checkBox) {
             checkBox->blockSignals(true);
             checkBox->setChecked(false);
             checkBox->blockSignals(false);
+        }
+        else if (auto* listWidget = qobject_cast<StringListWidget*>(widget);
+                 listWidget)
+        {
+            listWidget->blockSignals(true);
+            listWidget->clear();
+            listWidget->blockSignals(false);
         }
         else if (auto* matrix = qobject_cast<MatrixWidget*>(widget);  matrix) {
             matrix->blockSignals(true);
@@ -201,7 +230,7 @@ namespace {
                 lineEditFile->blockSignals(false);
             }
         }
-        else if (auto* combo = widget->findChild<QComboBox*>();  combo) {
+        else if (auto* combo = widget->findChild<QComboBox*>(); combo) {
             combo->blockSignals(true);
             combo->setCurrentText("");
             combo->blockSignals(false);
@@ -209,10 +238,23 @@ namespace {
     }
 
     void populateWidget(QWidget* widget, const PropertyValue& propertyValue) {
-        if (auto* checkBox = qobject_cast<QCheckBox*>(widget);  checkBox) {
+        if (auto* checkBox = qobject_cast<QCheckBox*>(widget); checkBox) {
             checkBox->blockSignals(true);
             checkBox->setChecked(propertyValue.isBool() ? propertyValue.toBool() : false);
             checkBox->blockSignals(false);
+        }
+        else if (auto* list = qobject_cast<StringListWidget*>(widget); list){
+            list->blockSignals(true);
+            if (propertyValue.isList()) {
+                QStringList items;
+                for (const PropertyValue& v : propertyValue.toList()) {
+                    if (v.isString()) {
+                        items << QString::fromStdString(v.toString());
+                    }
+                }
+                list->setValues(items);
+            }
+            list->blockSignals(false);
         }
         else if (auto* matrix = qobject_cast<MatrixWidget*>(widget);  matrix) {
             matrix->blockSignals(true);
@@ -316,7 +358,7 @@ namespace {
             for (int i = 0; i < typeCombo->count(); i++) {
                 const QString text = typeCombo->itemText(i);
                 if (text.startsWith("Vector") || text.startsWith("Color") ||
-                    text.startsWith("Matrix"))
+                    text.startsWith("Matrix") || text == "List of strings")
                 {
                     matchIndex = i;
                     break;
@@ -338,18 +380,24 @@ namespace {
         // setCurrentIndex triggers the show/hide lambda
         typeCombo->setCurrentIndex(matchIndex);
 
-        // Populate the now-visible field widget
+        // Populate the field widget for the matched type. The form is populated inside
+        // the constructor, before it is shown, so isVisible() reports false for every
+        // child here and cannot be used to find the active page. Instead rely on child
+        // order: the container's direct children are the type combo followed by the
+        // per-type field widgets in combo order, so the widget at matchIndex (after
+        // skipping the combo) is the one to fill.
+        QList<QWidget*> fieldWidgets;
         const auto children = container->findChildren<QWidget*>(
             QString(),
             Qt::FindDirectChildrenOnly
         );
-        for (QWidget* fieldWidget : children) {
-            if (fieldWidget->isVisible() &&
-                fieldWidget->objectName() != UnionTypeComboName)
-            {
-                populateWidget(fieldWidget, value);
-                break;
+        for (QWidget* child : children) {
+            if (child->objectName() != UnionTypeComboName) {
+                fieldWidgets.append(child);
             }
+        }
+        if (matchIndex >= 0 && matchIndex < fieldWidgets.size()) {
+            populateWidget(fieldWidgets[matchIndex], value);
         }
     }
 
@@ -1046,7 +1094,7 @@ void SchemaFormWidget::syncFieldWith(const std::string& memberName,
             &SchemaFormWidget::optionalFieldToggled,
             receiver,
             [receiver, memberName](const QString& name, bool active) {
-                if (name == memberName) {
+                if (name.toStdString() == memberName) {
                     receiver->setFieldActive(memberName, active);
                 }
             }
@@ -1770,14 +1818,51 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
             typeWidgets.append(widget);
         }
 
+        // Track the previously selected index so we can prompt before discarding a value
+        // when the user switches the union to a different type
+        auto previousIndex = std::make_shared<int>(typeCombo->currentIndex());
         connect(
             typeCombo,
             &QComboBox::currentIndexChanged,
             this,
-            [typeWidgets](int index) {
+            [this, typeWidgets, typeCombo, member, onChange, previousIndex](int index) {
+                const int previous = *previousIndex;
+                if (index == previous) {
+                    return;
+                }
+                // All union types write to the same property key, so the value entered
+                // for the old type would linger after switching. If that type still holds
+                // data, confirm before discarding it
+                const bool isValidIndex = previous >= 0 && previous < typeWidgets.size();
+                const bool hasContent = isValidIndex &&
+                    hasWidgetContent(typeWidgets[previous]);
+                if (hasContent) {
+                    const int result = QMessageBox::question(
+                        this,
+                        "Clear Field",
+                        QString("Switching the type of \"%1\" will clear its current "
+                            "value. Continue?").arg(splitPascalCase(member.name)),
+                        QMessageBox::Yes | QMessageBox::No
+                    );
+                    if (result != QMessageBox::Yes) {
+                        // User declined: revert the combo without re-triggering
+                        // this handler
+                        typeCombo->blockSignals(true);
+                        typeCombo->setCurrentIndex(previous);
+                        typeCombo->blockSignals(false);
+                        return;
+                    }
+                    clearWidget(typeWidgets[previous]);
+
+                    if (std::shared_ptr<PropertyMap> props = _properties.lock();  props) {
+                        props->erase(member.name);
+                    }
+                    onChange();
+                }
                 for (int i = 0; i < typeWidgets.size(); i++) {
                     typeWidgets[i]->setVisible(i == index);
                 }
+                *previousIndex = index;
             }
         );
 
@@ -2039,6 +2124,33 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
         horizontalLayout->addWidget(combo, 1);
         horizontalLayout->addWidget(browseButton);
         return container;
+    }
+    if (member.type == "List of strings") {
+        StringListWidget* listWidget = new StringListWidget;
+        connect(
+            listWidget,
+            &StringListWidget::valueChanged,
+            listWidget,
+            [this, member, listWidget, onChange]() {
+                std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
+                if (!lockedProperties) {
+                    return;
+                }
+                const QStringList values = listWidget->values();
+                if (values.isEmpty()) {
+                    lockedProperties->erase(member.name);
+                }
+                else {
+                    PropertyList list;
+                    for (const QString& v : values) {
+                        list.push_back(v.toStdString());
+                    }
+                    (*lockedProperties)[member.name] = std::move(list);
+                }
+                onChange();
+            }
+        );
+        return listWidget;
     }
     const QStringList options = parseInList(member.description);
     if (!options.isEmpty()) {
