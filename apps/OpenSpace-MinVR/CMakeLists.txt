@@ -28,7 +28,7 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/global_variables.cmake)
 set(MACOSX_BUNDLE_ICON_FILE openspace.icns)
 
 set(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT ON CACHE BOOL "" FORCE)
-add_subdirectory(ext/minvr)
+add_subdirectory(ext/minvr EXCLUDE_FROM_ALL)
 
 create_new_application(OpenSpace-MinVR
   ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
