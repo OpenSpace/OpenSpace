@@ -41,8 +41,10 @@ set(HEADER_FILES
   include/welcomedialog.h
   include/form/collapsiblesection.h
   include/form/colorwidget.h
+  include/form/flowlayout.h
   include/form/matrixwidget.h
   include/form/schemaformwidget.h
+  include/form/stringlistwidget.h
   include/form/searchdropdown.h
   include/schema/assetschema.h
 )
@@ -63,8 +65,10 @@ set(SOURCE_FILES
   src/welcomedialog.cpp
   src/form/collapsiblesection.cpp
   src/form/colorwidget.cpp
+  src/form/flowlayout.cpp
   src/form/matrixwidget.cpp
   src/form/schemaformwidget.cpp
+  src/form/stringlistwidget.cpp
   src/form/searchdropdown.cpp
   src/schema/assetschema.cpp
 )
