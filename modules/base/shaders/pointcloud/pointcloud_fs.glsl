@@ -118,6 +118,9 @@ Fragment getFragment() {
 
   if (hasSpriteTexture) {
     vec4 texColor = texture(spriteTexture, vec3(in_data.texCoords, in_data.textureLayer));
+    if (useTextureAlpha && texColor.a <= 0.01) {
+      discard;
+    }
     fullColor *= useTextureAlpha ? texColor : vec4(texColor.rgb, 1.0);
   }
 

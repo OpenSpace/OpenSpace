@@ -45,6 +45,7 @@
 #include <modules/base/rendering/grids/renderablegrid.h>
 #include <modules/base/rendering/grids/renderableradialgrid.h>
 #include <modules/base/rendering/grids/renderablesphericalgrid.h>
+#include <modules/base/rendering/pointcloud/renderableaurorasaurusobservationcloud.h>
 #include <modules/base/rendering/pointcloud/renderableinterpolatedpoints.h>
 #include <modules/base/rendering/pointcloud/renderablepointcloud.h>
 #include <modules/base/rendering/pointcloud/renderablepolygoncloud.h>
@@ -188,6 +189,9 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderablePlaneTimeVaryingImage>(
         "RenderablePlaneTimeVaryingImage"
     );
+    fRenderable->registerClass<RenderableAurorasaurusObservationCloud>(
+        "RenderableAurorasaurusObservationCloud"
+    );
     fRenderable->registerClass<RenderableInterpolatedPoints>(
         "RenderableInterpolatedPoints"
     );
@@ -289,6 +293,7 @@ std::vector<Documentation> BaseModule::documentations() const {
         RenderableDisc::Documentation(),
         RenderableDistanceLabel::Documentation(),
         RenderableGrid::Documentation(),
+        RenderableAurorasaurusObservationCloud::Documentation(),
         RenderableInterpolatedPoints::Documentation(),
         RenderableLabel::Documentation(),
         RenderableModel::Documentation(),
