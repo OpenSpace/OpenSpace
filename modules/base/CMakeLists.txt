@@ -133,6 +133,7 @@ set(SOURCE_FILES
   rendering/renderabledistancelabel.cpp
   rendering/renderablelabel.cpp
   rendering/renderablemodel.cpp
+  rendering/renderablemodel_lua.inl
   rendering/renderablenodearrow.cpp
   rendering/renderablenodeline.cpp
   rendering/renderableplane.cpp
