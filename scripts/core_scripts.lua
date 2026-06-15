@@ -182,7 +182,7 @@ openspace.removeFromListProperty = function(propertyIdentifier, item)
   if type(list) ~= "table" then
     openspace.printError(
       "Error when calling script 'openspace.appendToListProperty': " ..
-      "Could not append to non-list property '" .. propertyIdentifier .. "'"
+      "Could not remove from non-list property '" .. propertyIdentifier .. "'"
     )
     return;
   end
