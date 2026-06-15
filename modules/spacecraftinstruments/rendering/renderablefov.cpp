@@ -265,6 +265,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    setRenderBin(RenderBin::Overlay);
     addProperty(Fadeable::_opacity);
 
     _instrument.spacecraft = p.body;
