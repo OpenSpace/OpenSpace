@@ -21,9 +21,9 @@ local SNPPTrail = {
       Type = "GPTranslation",
       Observer = earthAsset.EarthInertial.Identifier,
       File = omm .. "SNPP.txt",
-      Format = "CSV",
-      RenderBinMode = "PostDeferredTransparent"
+      Format = "CSV"
     },
+    RenderBinMode = "PostDeferredTransparent",
     Color = { 0.9, 0.6715, 0.0 },
     Fade = 1.5,
     Resolution = 320
