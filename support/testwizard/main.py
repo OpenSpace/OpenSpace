@@ -340,8 +340,8 @@ async def internalRun(openspace):
 
 async def mainLoop():
   api = Api("localhost", 4681)
-  api.connect()
-  openspace = await api.singleReturnLibrary()
+  await api.connect()
+  openspace = await api.library()
 
   await asyncio.create_task(internalRun(openspace))
   api.disconnect()
