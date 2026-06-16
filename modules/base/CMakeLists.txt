@@ -50,7 +50,7 @@ set(HEADER_FILES
   rendering/pointcloud/renderableinterpolatedpoints.h
   rendering/pointcloud/renderablepointcloud.h
   rendering/pointcloud/renderablepolygoncloud.h
-  rendering/pointcloud/renderabletimedtexturedglobepointcloud.h
+  rendering/pointcloud/renderabletimedglobepointcloud.h
   rendering/pointcloud/sizemappingcomponent.h
   rendering/renderablecartesianaxes.h
   rendering/renderabledisc.h
@@ -130,7 +130,7 @@ set(SOURCE_FILES
   rendering/pointcloud/renderableinterpolatedpoints.cpp
   rendering/pointcloud/renderablepointcloud.cpp
   rendering/pointcloud/renderablepolygoncloud.cpp
-  rendering/pointcloud/renderabletimedtexturedglobepointcloud.cpp
+  rendering/pointcloud/renderabletimedglobepointcloud.cpp
   rendering/pointcloud/sizemappingcomponent.cpp
   rendering/renderablecartesianaxes.cpp
   rendering/renderabledisc.cpp

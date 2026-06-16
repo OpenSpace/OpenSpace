@@ -79,7 +79,7 @@ ghoul::Dictionary RenderableAurorasaurusObservationCloud::aurorasaurusDictionary
 
 RenderableAurorasaurusObservationCloud::RenderableAurorasaurusObservationCloud(
                                                   const ghoul::Dictionary& dictionary)
-    : RenderableTimedTexturedGlobePointCloud(aurorasaurusDictionary(dictionary))
+    : RenderableTimedGlobePointCloud(aurorasaurusDictionary(dictionary))
     , _observedAltitude(ObservedAltitudeInfo, 10000.f, 0.f, 1000000.f)
     , _notObservedAltitude(NotObservedAltitudeInfo, 9500.f, 0.f, 1000000.f)
 {

@@ -1,4 +1,4 @@
-#include <modules/base/rendering/pointcloud/renderabletimedtexturedglobepointcloud.h>
+#include <modules/base/rendering/pointcloud/renderabletimedglobepointcloud.h>
 
 #include <openspace/engine/globals.h>
 #include <openspace/util/timemanager.h>
@@ -20,7 +20,7 @@
 namespace {
     using namespace openspace;
 
-    constexpr std::string_view _loggerCat = "RenderableTimedTexturedGlobePointCloud";
+    constexpr std::string_view _loggerCat = "RenderableTimedGlobePointCloud";
 
     constexpr Property::PropertyInfo SourceFileInfo = {
         "SourceFile",
@@ -228,10 +228,10 @@ namespace {
 
 namespace openspace {
 
-openspace::Documentation RenderableTimedTexturedGlobePointCloud::Documentation() {
+openspace::Documentation RenderableTimedGlobePointCloud::Documentation() {
     return {
-        "RenderableTimedTexturedGlobePointCloud",
-        "base_renderable_timed_textured_globe_point_cloud",
+        "RenderableTimedGlobePointCloud",
+        "base_renderable_timed_globe_point_cloud",
         "A textured point cloud on a globe with per-point time intervals and geodetic CSV "
             "input.",
         {
@@ -260,8 +260,8 @@ openspace::Documentation RenderableTimedTexturedGlobePointCloud::Documentation()
     };
 }
 
-ghoul::Dictionary RenderableTimedTexturedGlobePointCloud::sanitizedDictionary(
-                                                 const ghoul::Dictionary& dictionary)
+ghoul::Dictionary RenderableTimedGlobePointCloud::sanitizedDictionary(
+                                                  const ghoul::Dictionary& dictionary)
 {
     ghoul::Dictionary result = dictionary;
     result.removeValue("SourceFile");
@@ -280,8 +280,8 @@ ghoul::Dictionary RenderableTimedTexturedGlobePointCloud::sanitizedDictionary(
     return result;
 }
 
-RenderableTimedTexturedGlobePointCloud::RenderableTimedTexturedGlobePointCloud(
-                                                  const ghoul::Dictionary& dictionary)
+RenderableTimedGlobePointCloud::RenderableTimedGlobePointCloud(
+                                                    const ghoul::Dictionary& dictionary)
     : RenderablePointCloud(sanitizedDictionary(dictionary))
     , _sourceFile(SourceFileInfo)
     , _ignoreTimeFiltering(IgnoreTimeFilteringInfo, false)
@@ -375,7 +375,7 @@ RenderableTimedTexturedGlobePointCloud::RenderableTimedTexturedGlobePointCloud(
     addProperty(_activePointCount);
 }
 
-void RenderableTimedTexturedGlobePointCloud::initialize() {
+void RenderableTimedGlobePointCloud::initialize() {
     RenderablePointCloud::initialize();
 
     loadPoints();
@@ -418,7 +418,7 @@ void RenderableTimedTexturedGlobePointCloud::initialize() {
     );
 }
 
-void RenderableTimedTexturedGlobePointCloud::update(const UpdateData& data) {
+void RenderableTimedGlobePointCloud::update(const UpdateData& data) {
     if (_ignoreTimeFiltering) {
         RenderablePointCloud::update(data);
         return;
@@ -448,7 +448,7 @@ void RenderableTimedTexturedGlobePointCloud::update(const UpdateData& data) {
     RenderablePointCloud::update(data);
 }
 
-void RenderableTimedTexturedGlobePointCloud::updateBufferData() {
+void RenderableTimedGlobePointCloud::updateBufferData() {
     if (_dataset.entries.empty()) {
         glBindVertexArray(_vao);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
@@ -467,8 +467,8 @@ void RenderableTimedTexturedGlobePointCloud::updateBufferData() {
     RenderablePointCloud::updateBufferData();
 }
 
-void RenderableTimedTexturedGlobePointCloud::validateSourceColumns(
-                                                   const HeaderMap& headerMap) const
+void RenderableTimedGlobePointCloud::validateSourceColumns(
+                                                    const HeaderMap& headerMap) const
 {
     requiredColumnIndex(headerMap, _latitudeColumn.value());
     requiredColumnIndex(headerMap, _longitudeColumn.value());
@@ -487,8 +487,8 @@ void RenderableTimedTexturedGlobePointCloud::validateSourceColumns(
     }
 }
 
-std::optional<RenderableTimedTexturedGlobePointCloud::TimedPoint>
-RenderableTimedTexturedGlobePointCloud::pointFromRow(const std::vector<std::string>& row,
+std::optional<RenderableTimedGlobePointCloud::TimedPoint>
+RenderableTimedGlobePointCloud::pointFromRow(const std::vector<std::string>& row,
                                                      const HeaderMap& headerMap) const
 {
     const size_t latitudeColumn = requiredColumnIndex(headerMap, _latitudeColumn.value());
@@ -565,7 +565,7 @@ RenderableTimedTexturedGlobePointCloud::pointFromRow(const std::vector<std::stri
     return point;
 }
 
-size_t RenderableTimedTexturedGlobePointCloud::requiredColumnIndex(
+size_t RenderableTimedGlobePointCloud::requiredColumnIndex(
                                             const HeaderMap& headerMap, std::string_view name)
 {
     const auto it = headerMap.find(std::string(name));
@@ -575,7 +575,7 @@ size_t RenderableTimedTexturedGlobePointCloud::requiredColumnIndex(
     return it->second;
 }
 
-std::optional<size_t> RenderableTimedTexturedGlobePointCloud::optionalColumnIndex(
+std::optional<size_t> RenderableTimedGlobePointCloud::optionalColumnIndex(
                                             const HeaderMap& headerMap, std::string_view name)
 {
     const auto it = headerMap.find(std::string(name));
@@ -585,7 +585,7 @@ std::optional<size_t> RenderableTimedTexturedGlobePointCloud::optionalColumnInde
     return it->second;
 }
 
-std::string RenderableTimedTexturedGlobePointCloud::normalizeTimeString(std::string value) {
+std::string RenderableTimedGlobePointCloud::normalizeTimeString(std::string value) {
     ghoul::trimWhitespace(value);
     if (value.empty()) {
         return value;
@@ -611,7 +611,7 @@ std::string RenderableTimedTexturedGlobePointCloud::normalizeTimeString(std::str
     return value;
 }
 
-std::string RenderableTimedTexturedGlobePointCloud::lowered(std::string value) {
+std::string RenderableTimedGlobePointCloud::lowered(std::string value) {
     ghoul::trimWhitespace(value);
     std::transform(
         value.begin(),
@@ -622,7 +622,7 @@ std::string RenderableTimedTexturedGlobePointCloud::lowered(std::string value) {
     return value;
 }
 
-glm::dvec3 RenderableTimedTexturedGlobePointCloud::cartesianPositionFromDegrees(
+glm::dvec3 RenderableTimedGlobePointCloud::cartesianPositionFromDegrees(
     double latitude,
     double longitude,
     double altitude,
@@ -638,7 +638,7 @@ glm::dvec3 RenderableTimedTexturedGlobePointCloud::cartesianPositionFromDegrees(
     );
 }
 
-int RenderableTimedTexturedGlobePointCloud::textureIndexForKey(std::string_view key) const {
+int RenderableTimedGlobePointCloud::textureIndexForKey(std::string_view key) const {
     if (_textureKeys.empty()) {
         throw ghoul::RuntimeError(
             "Texture keys were requested but no 'TextureKeys' were configured"
@@ -658,7 +658,7 @@ int RenderableTimedTexturedGlobePointCloud::textureIndexForKey(std::string_view 
     ));
 }
 
-void RenderableTimedTexturedGlobePointCloud::loadPoints() {
+void RenderableTimedGlobePointCloud::loadPoints() {
     if (!std::filesystem::is_regular_file(_dataPath)) {
         throw ghoul::RuntimeError(std::format(
             "Could not find globe point CSV file '{}'",
@@ -728,7 +728,7 @@ void RenderableTimedTexturedGlobePointCloud::loadPoints() {
     _loadedPointCount = static_cast<unsigned int>(_points.size());
 }
 
-void RenderableTimedTexturedGlobePointCloud::rebuildActiveSet(double currentTime) {
+void RenderableTimedGlobePointCloud::rebuildActiveSet(double currentTime) {
     std::fill(_activePointSlots.begin(), _activePointSlots.end(), -1);
     _activePointIndices.clear();
 
@@ -753,7 +753,7 @@ void RenderableTimedTexturedGlobePointCloud::rebuildActiveSet(double currentTime
     }
 }
 
-void RenderableTimedTexturedGlobePointCloud::advanceActiveSet(double currentTime) {
+void RenderableTimedGlobePointCloud::advanceActiveSet(double currentTime) {
     while (_nextStartIndex < _startTimes.size() && _startTimes[_nextStartIndex].first <= currentTime) {
         activatePoint(_startTimes[_nextStartIndex].second);
         ++_nextStartIndex;
@@ -765,7 +765,7 @@ void RenderableTimedTexturedGlobePointCloud::advanceActiveSet(double currentTime
     }
 }
 
-void RenderableTimedTexturedGlobePointCloud::activatePoint(size_t index) {
+void RenderableTimedGlobePointCloud::activatePoint(size_t index) {
     if (_activePointSlots[index] >= 0) {
         return;
     }
@@ -773,7 +773,7 @@ void RenderableTimedTexturedGlobePointCloud::activatePoint(size_t index) {
     _activePointIndices.push_back(index);
 }
 
-void RenderableTimedTexturedGlobePointCloud::deactivatePoint(size_t index) {
+void RenderableTimedGlobePointCloud::deactivatePoint(size_t index) {
     const int activeSlot = _activePointSlots[index];
     if (activeSlot < 0) {
         return;
@@ -787,7 +787,7 @@ void RenderableTimedTexturedGlobePointCloud::deactivatePoint(size_t index) {
     _activePointSlots[index] = -1;
 }
 
-void RenderableTimedTexturedGlobePointCloud::rebuildDatasetEntries() {
+void RenderableTimedGlobePointCloud::rebuildDatasetEntries() {
     _dataset.entries.clear();
     _dataset.entries.reserve(_activePointIndices.size());
 
@@ -804,7 +804,7 @@ void RenderableTimedTexturedGlobePointCloud::rebuildDatasetEntries() {
 }
 
 std::vector<dataloader::Dataset::Texture>
-RenderableTimedTexturedGlobePointCloud::textureMapping() const
+RenderableTimedGlobePointCloud::textureMapping() const
 {
     std::vector<dataloader::Dataset::Texture> result;
     result.reserve(_textureFiles.size());

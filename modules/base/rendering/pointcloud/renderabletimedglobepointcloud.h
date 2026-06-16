@@ -1,5 +1,5 @@
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLETIMEDTEXTUREDGLOBEPOINTCLOUD___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLETIMEDTEXTUREDGLOBEPOINTCLOUD___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLETIMEDGLOBEPOINTCLOUD___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLETIMEDGLOBEPOINTCLOUD___H__
 
 #include <modules/base/rendering/pointcloud/renderablepointcloud.h>
 
@@ -23,9 +23,9 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-class RenderableTimedTexturedGlobePointCloud : public RenderablePointCloud {
+class RenderableTimedGlobePointCloud : public RenderablePointCloud {
 public:
-    explicit RenderableTimedTexturedGlobePointCloud(const ghoul::Dictionary& dictionary);
+    explicit RenderableTimedGlobePointCloud(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void update(const UpdateData& data) override;
@@ -102,4 +102,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLETIMEDTEXTUREDGLOBEPOINTCLOUD___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLETIMEDGLOBEPOINTCLOUD___H__

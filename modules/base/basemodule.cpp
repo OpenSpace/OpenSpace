@@ -49,7 +49,7 @@
 #include <modules/base/rendering/pointcloud/renderableinterpolatedpoints.h>
 #include <modules/base/rendering/pointcloud/renderablepointcloud.h>
 #include <modules/base/rendering/pointcloud/renderablepolygoncloud.h>
-#include <modules/base/rendering/pointcloud/renderabletimedtexturedglobepointcloud.h>
+#include <modules/base/rendering/pointcloud/renderabletimedglobepointcloud.h>
 #include <modules/base/rendering/pointcloud/sizemappingcomponent.h>
 #include <modules/base/rendering/renderablecartesianaxes.h>
 #include <modules/base/rendering/renderabledisc.h>
@@ -193,8 +193,8 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableAurorasaurusObservationCloud>(
         "RenderableAurorasaurusObservationCloud"
     );
-    fRenderable->registerClass<RenderableTimedTexturedGlobePointCloud>(
-        "RenderableTimedTexturedGlobePointCloud"
+    fRenderable->registerClass<RenderableTimedGlobePointCloud>(
+        "RenderableTimedGlobePointCloud"
     );
     fRenderable->registerClass<RenderableInterpolatedPoints>(
         "RenderableInterpolatedPoints"
@@ -298,7 +298,7 @@ std::vector<Documentation> BaseModule::documentations() const {
         RenderableDistanceLabel::Documentation(),
         RenderableGrid::Documentation(),
         RenderableAurorasaurusObservationCloud::Documentation(),
-        RenderableTimedTexturedGlobePointCloud::Documentation(),
+        RenderableTimedGlobePointCloud::Documentation(),
         RenderableInterpolatedPoints::Documentation(),
         RenderableLabel::Documentation(),
         RenderableModel::Documentation(),

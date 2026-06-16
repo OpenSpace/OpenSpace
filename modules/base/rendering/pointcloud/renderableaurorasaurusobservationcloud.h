@@ -1,7 +1,7 @@
 #ifndef __OPENSPACE_MODULE_BASE___RENDERABLEAURORASAURUSOBSERVATIONCLOUD___H__
 #define __OPENSPACE_MODULE_BASE___RENDERABLEAURORASAURUSOBSERVATIONCLOUD___H__
 
-#include <modules/base/rendering/pointcloud/renderabletimedtexturedglobepointcloud.h>
+#include <modules/base/rendering/pointcloud/renderabletimedglobepointcloud.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -14,7 +14,7 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-class RenderableAurorasaurusObservationCloud : public RenderableTimedTexturedGlobePointCloud {
+class RenderableAurorasaurusObservationCloud : public RenderableTimedGlobePointCloud {
 public:
     explicit RenderableAurorasaurusObservationCloud(const ghoul::Dictionary& dictionary);
 
