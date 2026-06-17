@@ -402,8 +402,16 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
     lua_setglobal(state, "registerFunction");
 
 
-    for (const std::filesystem::path& script : library.scripts) {
-        ghoul::lua::runScriptFile(state, script);
+    try {
+        for (const std::filesystem::path& script : library.scripts) {
+            ghoul::lua::runScriptFile(state, script);
+        }
+    }
+    catch (...) {
+        // Remove the register function
+        lua_pushnil(state);
+        lua_setglobal(state, "registerFunction");
+        throw;
     }
 
     // Remove the register function
