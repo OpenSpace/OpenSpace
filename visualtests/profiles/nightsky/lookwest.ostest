@@ -1,0 +1,32 @@
+{
+  "profile": "nightsky",
+  "commands": [
+    {
+      "type": "script",
+      "value": "openspace.navigation.flyToGeo('Earth', 42.4777983094, -74.378376190727, 0, 0)"
+    },
+    {
+      "type": "script",
+      "value": "openspace.fadeIn(\"Scene.CardinalDirectionSphere.Renderable\")"
+    },
+    {
+      "type": "time",
+      "value": "2023-04-14T02:40:57.044"
+    },
+    {
+      "type": "action",
+      "value": "os.nightsky.LookingWest"
+    },
+    {
+      "type": "action",
+      "value": "os.nightsky.LevelHorizonPitch"
+    },
+    {
+      "type": "action",
+      "value": "os.FadeDownTrails"
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}
