@@ -356,7 +356,7 @@ void DeltaTimesDialog::transitionEditMode(int index, bool state) {
 }
 
 void DeltaTimesDialog::parseSelections() {
-    if ((_deltaTimesData.size() == 1) && (_deltaTimesData.at(0) == 0)) {
+    if (((_deltaTimesData.size() == 1) && (_deltaTimesData.at(0) == 0)) {
         _deltaTimesData.clear();
     }
     int finalNonzeroIndex = static_cast<int>(_deltaTimesData.size()) - 1;
@@ -364,11 +364,6 @@ void DeltaTimesDialog::parseSelections() {
         if (_deltaTimesData.at(finalNonzeroIndex) != 0) {
             break;
         }
-    }
-    std::vector<double> tempDt;
-    tempDt.reserve(finalNonzeroIndex);
-    for (int i = 0; i < (finalNonzeroIndex + 1); i++) {
-        tempDt.push_back(_deltaTimesData[i]);
     }
     *_deltaTimes = std::move(_deltaTimesData);
     accept();
