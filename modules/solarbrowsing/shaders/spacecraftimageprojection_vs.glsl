@@ -24,7 +24,7 @@
 
 #version __CONTEXT__
 
-#include "powerScaling/powerScaling_vs.glsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
 const int MaxSpacecraftObservatories = 7;
 

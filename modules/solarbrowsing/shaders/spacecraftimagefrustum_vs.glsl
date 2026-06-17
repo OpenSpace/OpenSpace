@@ -24,7 +24,7 @@
 
 #version __CONTEXT__
 
-#include "powerScaling/powerScaling_vs.glsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec4 in_position;
 
