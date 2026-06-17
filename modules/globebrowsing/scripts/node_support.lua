@@ -81,7 +81,6 @@ registerFunction(
       openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Rotation.Longitude", lon);
       if (use_altitude) then
           openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Altitude", alt);
-          openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Altitude", alt);
       end
   end
   }
