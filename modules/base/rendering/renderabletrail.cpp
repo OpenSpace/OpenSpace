@@ -213,10 +213,11 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_translation.get());
 
     _appearance.lineColor = p.color;
-    _appearance.useLineFade = p.enableFade.value_or(_appearance.useLineFade);
-    _appearance.lineLength = p.lineLength.value_or(_appearance.lineLength);
     _appearance.lineWidth = p.lineWidth.value_or(_appearance.lineWidth);
     _appearance.pointSize = p.pointSize.value_or(_appearance.pointSize);
+    _appearance.useLineFade = p.enableFade.value_or(_appearance.useLineFade);
+    _appearance.lineLength = p.lineLength.value_or(_appearance.lineLength);
+    _appearance.lineFadeAmount = p.lineFadeAmount.value_or(_appearance.lineFadeAmount);
 
     if (p.renderingMode.has_value()) {
         switch (*p.renderingMode) {
