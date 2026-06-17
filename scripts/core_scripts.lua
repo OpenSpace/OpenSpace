@@ -98,7 +98,7 @@ registerFunction(
       local list = openspace.propertyValue(propertyIdentifier)
       if type(list) ~= "table" then
         openspace.printError(
-          "Error when calling script 'openspace.appendToListProperty': " ..
+          "Error when calling script 'openspace.removeFromListProperty': " ..
           "Could not remove from non-list property '" .. propertyIdentifier .. "'"
         )
         return;
