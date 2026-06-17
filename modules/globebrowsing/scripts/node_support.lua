@@ -1,4 +1,4 @@
-openspace.globebrowsing.documentation = {
+registerFunction(
   {
     Name = "setNodePosition",
     Arguments = {
@@ -28,8 +28,24 @@ openspace.globebrowsing.documentation = {
       \\param longitude The longitude value for the new position, in degrees
       \\param altitude An optional altitude value for the new position, in meters. If
               excluded, an altitude of 0 will be used
-    ]]
-  },
+    ]],
+    Function = function(node_identifer, globe_identifier, lat, lon, altitude)
+      openspace.setParent(node_identifer, globe_identifier)
+      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Globe", globe_identifier);
+      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Latitude", lat);
+      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Longitude", lon);
+      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Rotation.Globe", globe_identifier);
+      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Rotation.Latitude", lat);
+      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Rotation.Longitude", lon);
+      if (altitude) then
+          openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Altitude", altitude);
+          openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Altitude", altitude);
+      end
+  end
+  }
+)
+
+registerFunction(
   {
     Name = "setNodePositionFromCamera",
     Arguments = {
@@ -53,36 +69,21 @@ openspace.globebrowsing.documentation = {
       \\param nodeIdentifier The identifier of the scene graph node to move
       \\param useAltitude If true, the camera's altitude will also be used for the new
               positions. Otherwise, it will not
-    ]]
+    ]],
+    Function = function(node_identifer, use_altitude)
+      local lat, lon, alt = openspace.globebrowsing.geoPositionForCamera();
+      local camera = openspace.navigation.getNavigationState();
+      openspace.setParent(node_identifer, camera.Anchor)
+      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Globe", camera.Anchor);
+      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Latitude", lat);
+      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Longitude", lon);
+      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Rotation.Globe", camera.Anchor);
+      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Rotation.Latitude", lat);
+      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Rotation.Longitude", lon);
+      if (use_altitude) then
+          openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Altitude", alt);
+          openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Altitude", alt);
+      end
+  end
   }
-}
-
-openspace.globebrowsing.setNodePosition = function (node_identifer, globe_identifier, lat, lon, altitude)
-    openspace.setParent(node_identifer, globe_identifier)
-    openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Globe", globe_identifier);
-    openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Latitude", lat);
-    openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Longitude", lon);
-    openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Rotation.Globe", globe_identifier);
-    openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Rotation.Latitude", lat);
-    openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Rotation.Longitude", lon);
-    if (altitude) then
-        openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Altitude", altitude);
-        openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Altitude", altitude);
-    end
-end
-
-openspace.globebrowsing.setNodePositionFromCamera = function (node_identifer, use_altitude)
-    local lat, lon, alt = openspace.globebrowsing.geoPositionForCamera();
-    local camera = openspace.navigation.getNavigationState();
-    openspace.setParent(node_identifer, camera.Anchor)
-    openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Globe", camera.Anchor);
-    openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Latitude", lat);
-    openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Longitude", lon);
-    openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Rotation.Globe", camera.Anchor);
-    openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Rotation.Latitude", lat);
-    openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Rotation.Longitude", lon);
-    if (use_altitude) then
-        openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Altitude", alt);
-        openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Altitude", alt);
-    end
-end
+)
