@@ -344,7 +344,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
         [](lua_State* L) {
             LuaLibrary* lib = ghoul::lua::userData<LuaLibrary>(L, 1);
 
-            ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::declareFunction");
+            ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::registerFunction");
 
             if (!ghoul::lua::hasValue<ghoul::Dictionary>(L)) {
                 ghoul::lua::luaError(L, "Invalid parameter. Needs table or function");
