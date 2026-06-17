@@ -29,16 +29,16 @@ registerFunction(
       \\param altitude An optional altitude value for the new position, in meters. If
               excluded, an altitude of 0 will be used
     ]],
-    Function = function(node_identifer, globe_identifier, lat, lon, altitude)
-      openspace.setParent(node_identifer, globe_identifier)
-      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Globe", globe_identifier);
-      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Latitude", lat);
-      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Longitude", lon);
-      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Rotation.Globe", globe_identifier);
-      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Rotation.Latitude", lat);
-      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Rotation.Longitude", lon);
+    Function = function(node_identifier, globe_identifier, lat, lon, altitude)
+      openspace.setParent(node_identifier, globe_identifier)
+      openspace.setPropertyValueSingle("Scene." .. node_identifier .. ".Translation.Globe", globe_identifier);
+      openspace.setPropertyValueSingle("Scene." .. node_identifier .. ".Translation.Latitude", lat);
+      openspace.setPropertyValueSingle("Scene." .. node_identifier .. ".Translation.Longitude", lon);
+      openspace.setPropertyValueSingle("Scene." .. node_identifier .. ".Rotation.Globe", globe_identifier);
+      openspace.setPropertyValueSingle("Scene." .. node_identifier .. ".Rotation.Latitude", lat);
+      openspace.setPropertyValueSingle("Scene." .. node_identifier .. ".Rotation.Longitude", lon);
       if (altitude) then
-          openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Altitude", altitude);
+          openspace.setPropertyValueSingle("Scene." .. node_identifier .. ".Translation.Altitude", altitude);
       end
   end
   }
@@ -69,18 +69,18 @@ registerFunction(
       \\param useAltitude If true, the camera's altitude will also be used for the new
               positions. Otherwise, it will not
     ]],
-    Function = function(node_identifer, use_altitude)
+    Function = function(node_identifier, use_altitude)
       local lat, lon, alt = openspace.globebrowsing.geoPositionForCamera();
       local camera = openspace.navigation.getNavigationState();
-      openspace.setParent(node_identifer, camera.Anchor)
-      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Globe", camera.Anchor);
-      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Latitude", lat);
-      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Longitude", lon);
-      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Rotation.Globe", camera.Anchor);
-      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Rotation.Latitude", lat);
-      openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Rotation.Longitude", lon);
+      openspace.setParent(node_identifier, camera.Anchor)
+      openspace.setPropertyValueSingle("Scene." .. node_identifier .. ".Translation.Globe", camera.Anchor);
+      openspace.setPropertyValueSingle("Scene." .. node_identifier .. ".Translation.Latitude", lat);
+      openspace.setPropertyValueSingle("Scene." .. node_identifier .. ".Translation.Longitude", lon);
+      openspace.setPropertyValueSingle("Scene." .. node_identifier .. ".Rotation.Globe", camera.Anchor);
+      openspace.setPropertyValueSingle("Scene." .. node_identifier .. ".Rotation.Latitude", lat);
+      openspace.setPropertyValueSingle("Scene." .. node_identifier .. ".Rotation.Longitude", lon);
       if (use_altitude) then
-          openspace.setPropertyValueSingle("Scene." .. node_identifer .. ".Translation.Altitude", alt);
+          openspace.setPropertyValueSingle("Scene." .. node_identifier .. ".Translation.Altitude", alt);
       end
   end
   }
