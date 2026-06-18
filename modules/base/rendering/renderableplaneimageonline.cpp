@@ -60,9 +60,10 @@ namespace {
     };
 
     // Creates a textured 3D plane, where the texture image is loaded from the internet
-    // through a web URL. To use a stereo image set, a second image can be specified with
-    // the `RightURL` property that will be used for the right eye during stereo
-    // rendering.
+    // through a web URL. 
+    //
+    // For stereo rendering, a second image can be specified using the `RightURL`
+    // property. This image will be used for the right eye.
     struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];

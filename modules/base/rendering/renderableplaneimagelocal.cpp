@@ -61,8 +61,9 @@ namespace {
     };
 
     // Creates a textured 3D plane, where the texture is provided by a local file on disk.
-    // To use a stereo image set, a second image can be specified with the `RightTexture`
-    // property that will be used for the right eye during stereo rendering.
+    //
+    // For stereo rendering, a second image can be specified using the `RightTexture`
+    // property. This image will be used for the right eye.
     struct [[codegen::Dictionary(RenderablePlaneImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::filesystem::path texture;
