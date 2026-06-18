@@ -198,9 +198,14 @@ void RenderablePlaneImageLocal::update(const UpdateData& data) {
 void RenderablePlaneImageLocal::loadTexture() {
     ZoneScoped;
 
-    if (_texturePath.value().empty() || (_isStereo && _rightTexturePath.value().empty()))
-    {
+    if (_texturePath.value().empty()) [[unlikely]] {
         return;
+    }
+    else if (_isStereo && _rightTexturePath.value().empty()) [[unlikely]] {
+        _isStereo = false;
+    }
+    else if (!_isStereo && !_rightTexturePath.value().empty()) [[unlikely]] {
+        _isStereo = true;
     }
 
     ghoul::opengl::Texture* t = _texture;

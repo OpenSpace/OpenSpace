@@ -142,6 +142,16 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
         return;
     }
 
+    if (_texturePath.value().empty()) [[unlikely]] {
+        return;
+    }
+    else if (_isStereo && _rightTexturePath.value().empty()) [[unlikely]] {
+        _isStereo = false;
+    }
+    else if (!_isStereo && !_rightTexturePath.value().empty()) [[unlikely]] {
+        _isStereo = true;
+    }
+
     if (!_texture && !_imageFuture.valid()) {
         std::future<DownloadManager::MemoryFile> future =
             downloadImageToMemory(_texturePath);
