@@ -6,8 +6,11 @@
       "value": "openspace.navigation.flyToGeo('Earth', 42.4777983094, -74.378376190727, 0, 0)"
     },
     {
-      "type": "script",
-      "value": "openspace.fadeIn(\"Scene.CardinalDirectionSphere.Renderable\")"
+      "type": "property",
+      "value": {
+        "property": "Scene.CardinalDirectionSphere.Renderable.Enabled",
+        "value": true
+      }
     },
     {
       "type": "time",
@@ -24,6 +27,10 @@
     {
       "type": "action",
       "value": "os.FadeDownTrails"
+    },
+    {
+      "type": "wait",
+      "value": 20
     },
     {
       "type": "screenshot"
