@@ -54,7 +54,7 @@ local function loadBookmarks(guiPath, bookmarkfile)
       },
       GUI = {
         Name = name,
-        Path = "/" .. guiPath
+        Path = path
       }
     }
 
