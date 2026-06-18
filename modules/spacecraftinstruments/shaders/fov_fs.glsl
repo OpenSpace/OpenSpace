@@ -24,6 +24,8 @@
 
 #include "fragment.glsl"
 
+uniform float opacity;
+
 in Data {
   vec4 color;
   float depth;
@@ -32,7 +34,7 @@ in Data {
 
 Fragment getFragment() {
   Fragment frag;
-  frag.color = in_data.color;
+  frag.color = vec4(in_data.color.rgb, in_data.color.a * opacity);
   frag.depth = in_data.depth;
   return frag;
 }

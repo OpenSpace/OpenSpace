@@ -31,6 +31,8 @@
 
 namespace openspace {
 
+struct Schema;
+
 class SkyBrowserTopic : public Topic {
 public:
     SkyBrowserTopic();
@@ -38,6 +40,8 @@ public:
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
+
+    static openspace::Schema Schema();
 
 private:
     static constexpr int UnsetOnChangeHandle = -1;

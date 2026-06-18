@@ -43,7 +43,10 @@ namespace {
 namespace openspace {
 
 Documentation MultiTranslation::Documentation() {
-    return codegen::doc<Parameters>("base_translation_multi");
+    return codegen::doc<Parameters>(
+        "base_translation_multi",
+        Translation::Documentation()
+    );
 }
 
 MultiTranslation::MultiTranslation(const ghoul::Dictionary& dictionary)

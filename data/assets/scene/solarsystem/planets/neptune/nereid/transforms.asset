@@ -12,11 +12,6 @@ local NereidPosition = {
       Type = "SpiceTranslation",
       Target = kernels.ID.Nereid,
       Observer = coreKernels.ID.NeptuneBarycenter
-    },
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = kernels.Frame.Nereid,
-      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {

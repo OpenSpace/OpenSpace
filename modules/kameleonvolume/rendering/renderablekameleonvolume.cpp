@@ -180,6 +180,13 @@ namespace {
 #include "renderablekameleonvolume_codegen.cpp"
 
 namespace openspace {
+    
+Documentation RenderableKameleonVolume::Documentation() {
+    return codegen::doc<Parameters>(
+        "kameleonvolume_renderable_kameleonvolume",
+        Renderable::Documentation()
+    );
+}
 
 RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)

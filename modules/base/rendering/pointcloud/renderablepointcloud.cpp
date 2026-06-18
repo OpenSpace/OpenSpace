@@ -422,16 +422,16 @@ namespace {
                 [[codegen::reference("base_sizemappingcomponent")]];
 
             // [[codegen::verbatim(ScaleExponentInfo.description)]]
-            std::optional<float> scaleExponent;
+            std::optional<float> scaleExponent [[codegen::greaterequal(0.f)]];
 
             // [[codegen::verbatim(ScaleFactorInfo.description)]]
-            std::optional<float> scaleFactor;
+            std::optional<float> scaleFactor [[codegen::greaterequal(0.f)]];
 
             // [[codegen::verbatim(UseMaxSizeControlInfo.description)]]
             std::optional<bool> enableMaxSizeControl;
 
             // [[codegen::verbatim(MaxSizeInfo.description)]]
-            std::optional<float> maxSize;
+            std::optional<float> maxSize [[codegen::greaterequal(0.f)]];
         };
         // Settings related to the scale of the points, whether they should limit to a
         // certain max size, etc.
@@ -449,10 +449,10 @@ namespace {
             std::optional<bool> enableOutline;
 
             // [[codegen::verbatim(OutlineColorInfo.description)]]
-            std::optional<glm::vec3> outlineColor;
+            std::optional<glm::vec3> outlineColor [[codegen::color()]];
 
             // [[codegen::verbatim(OutlineWidthInfo.description)]]
-            std::optional<float> outlineWidth;
+            std::optional<float> outlineWidth [[codegen::greaterequal(0.f)]];
 
             enum class [[codegen::map(OutlineStyle)]] OutlineStyle {
                 Round,
@@ -493,7 +493,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderablePointCloud::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_pointcloud");
+    return codegen::doc<Parameters>(
+        "base_renderable_pointcloud",
+        Renderable::Documentation()
+    );
 }
 
 RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictionary)
@@ -749,6 +752,9 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
             [this]() { _dataIsDirty = true; }
         );
         _sizeSettings.sizeMapping->isRadius.onChange([this]() { _dataIsDirty = true; });
+        _sizeSettings.sizeMapping->invertScale.onChange([this]() {
+            _dataIsDirty = true;
+        });
         _hasDatavarSize = true;
     }
 
@@ -1639,7 +1645,16 @@ void RenderablePointCloud::addColorAndSizeDataForPoint(unsigned int index,
 
         // Convert to diameter if data is given as radius
         float multiplier = _sizeSettings.sizeMapping->isRadius ? 2.f : 1.f;
-        result.push_back(multiplier * e.data[sizeParamIndex]);
+        if (_sizeSettings.sizeMapping->invertScale) {
+            float value = multiplier * e.data[sizeParamIndex];
+            if (value != 0.f) {
+                value = 1.f / value;
+            }
+            result.push_back(value);
+        }
+        else {
+            result.push_back(multiplier * e.data[sizeParamIndex]);
+        }
     }
 }
 

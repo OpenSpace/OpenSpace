@@ -47,6 +47,8 @@ public:
     std::string stringValue() const override final;
     using TemplateProperty<glm::dvec4>::operator=;
 
+    static nlohmann::json Schema();
+
 private:
     glm::dvec4 toValue(lua_State* state) const override final;
 };

@@ -155,7 +155,7 @@ local ClearImageProjections = {
   Identifier = "os.rosetta.ClearImageProjections",
   Name = "Clear 67P projections",
   Command = [[
-    openspace.setPropertyValue("Scene.67P.Renderable.ProjectionComponent.ClearAllProjections", true)
+    openspace.setPropertyValue("Scene.67P.Renderable.ProjectionComponent.ClearAllProjections", nil)
   ]],
   Documentation = "Removes all image projections from 67P",
   GuiPath = "/Missions/Rosetta",

@@ -16,7 +16,7 @@ local MoonInertial = {
   GUI = {
     Path = "/Solar System/Planets/Earth/Moon",
     Focusable = false,
-    Hidden = false
+    Hidden = true
   }
 }
 

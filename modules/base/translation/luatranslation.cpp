@@ -68,7 +68,10 @@ namespace {
 namespace openspace {
 
 Documentation LuaTranslation::Documentation() {
-    return codegen::doc<Parameters>("base_translation_lua");
+    return codegen::doc<Parameters>(
+        "base_translation_lua",
+        Translation::Documentation()
+    );
 }
 
 LuaTranslation::LuaTranslation(const ghoul::Dictionary& dictionary)

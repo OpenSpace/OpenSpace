@@ -1,0 +1,49 @@
+local marsAsset = asset.require("scene/solarsystem/planets/mars/globe")
+
+
+
+local data = asset.resource({
+  Name = "HiRISE Southwest Candor Chasma - Layered Rock Outcrops",
+  Type = "HttpSynchronization",
+  Identifier = "mars_hirise_southwest_candor_chasma-layered_rock_outcrops",
+  Version = 1
+})
+
+
+local ColorLayer = {
+  Identifier = "Southwest_Candor_Chasma",
+  Name = "Southwest Candor Chasma [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Texture.vrt",
+  BlendMode = "Color"
+}
+
+local HeightLayer = {
+  Identifier = "Southwest_Candor_Chasma",
+  Name = "Southwest Candor Chasma [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Heightmap.vrt"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "ColorLayers", ColorLayer)
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "HeightLayers", HeightLayer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "HeightLayers", HeightLayer)
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "ColorLayers", ColorLayer)
+end)
+
+
+
+asset.meta = {
+  Name = "HiRISE Layered Rock Outcrops in Southwest Candor Chasma [Local]",
+  Description = [[A local layer for Layered Rock Outcrops in Southwest Candor Chasma from the HiRISE instrument.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

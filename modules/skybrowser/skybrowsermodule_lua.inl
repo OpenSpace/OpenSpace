@@ -489,7 +489,7 @@ std::string prunedIdentifier(std::string identifier) {
         galacticTarget = glm::dvec3(0.0, 0.0, CelestialSphereRadius);
     }
     std::string guiPath = "/Sky Browser";
-    std::string url = "http://wwt.openspaceproject.com/1/openspace/";
+    std::string url = "http://wwt.openspaceproject.com/2/openspace/";
     double fov = 70.0;
     double size = sizeFromFov(fov, galacticTarget);
 

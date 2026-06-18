@@ -42,14 +42,15 @@ namespace {
         // This key specifies the type of Task that gets created. It has to be one of the
         // valid Tasks that are available for creation (see the FactoryDocumentation for a
         // list of possible Tasks), which depends on the configration of the application.
-        std::string type [[codegen::annotation("A valid Task created by a factory")]];
+        std::string type [[codegen::annotation("A valid Task created by a factory"),
+            codegen::private()]];
     };
 } // namespace
 #include "task_codegen.cpp"
 
 namespace openspace {
 
-Documentation Task::documentation() {
+Documentation Task::Documentation() {
     return codegen::doc<Parameters>("core_task");
 }
 

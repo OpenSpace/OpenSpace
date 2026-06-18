@@ -1,0 +1,49 @@
+local mercuryAsset = asset.require("scene/solarsystem/planets/mercury/globe")
+
+
+
+local data = asset.resource({
+  Name = "Mercury - Eminescu",
+  Type = "HttpSynchronization",
+  Identifier = "mercury_layers_eminescu",
+  Version = 1
+})
+
+
+local ColorLayer = {
+  Identifier = "Eminescu",
+  Name = "Eminescu [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Eminescu2_texture.vrt",
+  BlendMode = "Color"
+}
+
+local HeightLayer = {
+  Identifier = "Eminescu",
+  Name = "Eminescu [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Eminescu2_heightmap.vrt"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(mercuryAsset.Mercury.Identifier, "ColorLayers", ColorLayer)
+  openspace.globebrowsing.addLayer(mercuryAsset.Mercury.Identifier, "HeightLayers", HeightLayer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(mercuryAsset.Mercury.Identifier, "HeightLayers", HeightLayer)
+  openspace.globebrowsing.deleteLayer(mercuryAsset.Mercury.Identifier, "ColorLayers", ColorLayer)
+end)
+
+
+
+asset.meta = {
+  Name = "Mercury Eminescu [Local]",
+  Description = [[A local layer for Eminescu.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

@@ -4,9 +4,9 @@ local transforms = asset.require("./transforms")
 
 
 local modelFolder = asset.resource({
-  Name = "Hamuea Model",
+  Name = "Haumea Model",
   Type = "HttpSynchronization",
-  Identifier = "hamuea_model",
+  Identifier = "haumea_model",
   Version = 1
 })
 

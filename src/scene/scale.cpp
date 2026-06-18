@@ -37,7 +37,8 @@ namespace {
         // The type of the scaling that is described in this element. The available types
         // of scaling depend on the configuration of the application and can be written to
         // disk on application startup into the FactoryDocumentation.
-        std::string type [[codegen::annotation("Must name a valid Scale type")]];
+        std::string type [[codegen::annotation("Must name a valid Scale type"),
+            codegen::private()]];
 
         // The time frame in which this `Scale` is applied. If the in-game time is outside
         // this range, no scaling will be applied.

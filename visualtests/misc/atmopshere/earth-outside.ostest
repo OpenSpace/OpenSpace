@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "scene/solarsystem/planets/earth/globe"
+    },
+    {
+      "type": "asset",
+      "value": "scene/solarsystem/planets/earth/atmosphere"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Earth",
+        "position": [
+          8326045.611549184,
+          -10661384.70254524,
+          -12389507.096036147
+        ],
+        "pitch": 0.0026277647488151404,
+        "up": [
+          -0.2213541167487773,
+          -0.8077768033273549,
+          0.5463506117911909
+        ],
+        "yaw": -0.006658202062138515,
+        "timestamp": "2026 MAY 24 12:37:15"
+      }
+    },
+    {
+      "type": "wait",
+      "value": 5
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

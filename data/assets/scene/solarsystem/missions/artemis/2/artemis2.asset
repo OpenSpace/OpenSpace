@@ -1,0 +1,4 @@
+asset.require("./trail")
+asset.require("./model")
+asset.require("./actions")
+asset.require("./mission")

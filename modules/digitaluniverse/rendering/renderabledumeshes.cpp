@@ -131,7 +131,7 @@ namespace {
     struct [[codegen::Dictionary(RenderableDUMeshes)]] Parameters {
         // The path to the SPECK file that contains information about the astronomical
         // object being rendered.
-        std::string file;
+        std::filesystem::path file;
 
         // [[codegen::verbatim(DrawLabelInfo.description)]]
         std::optional<bool> drawLabels;
@@ -164,7 +164,7 @@ namespace {
         std::optional<glm::ivec2> textMinMaxSize;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(MeshColorInfo.description)]]
         std::optional<std::vector<glm::vec3>> meshColor;
@@ -175,7 +175,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableDUMeshes::Documentation() {
-    return codegen::doc<Parameters>("digitaluniverse_renderable_dumeshes");
+    return codegen::doc<Parameters>(
+        "digitaluniverse_renderable_dumeshes",
+        Renderable::Documentation()
+    );
 }
 
 RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)

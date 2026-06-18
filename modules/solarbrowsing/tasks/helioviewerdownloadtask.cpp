@@ -55,7 +55,8 @@ namespace {
     // from Helioviewer, but will never be shorter than the requested cadence.
     struct [[codegen::Dictionary(HelioviewerDownloadTask)]] Parameters {
         // Directory where the downloaded JP2 images will be stored.
-        std::string outputFolder [[codegen::annotation("A valid directory")]];
+        std::filesystem::path outputFolder [[codegen::directory(),
+            codegen::mustexist(false)]];
 
         // Name of the spacecraft or telescope.
         std::string name;
@@ -89,8 +90,11 @@ namespace {
 
 namespace openspace {
 
-openspace::Documentation HelioviewerDownloadTask::documentation() {
-    return codegen::doc<Parameters>("solarbrowsing_task_helioviewerdownload");
+openspace::Documentation HelioviewerDownloadTask::Documentation() {
+    return codegen::doc<Parameters>(
+        "solarbrowsing_task_helioviewerdownload",
+        Task::Documentation()
+    );
 }
 
 HelioviewerDownloadTask::HelioviewerDownloadTask(const ghoul::Dictionary& dictionary) {
@@ -102,7 +106,7 @@ HelioviewerDownloadTask::HelioviewerDownloadTask(const ghoul::Dictionary& dictio
     _sourceId = p.sourceId;
     _name = p.name;
     _instrument = p.instrument;
-    _outputFolder = absPath(p.outputFolder);
+    _outputFolder = p.outputFolder;
     _colorMapPath = p.colorMap;
 }
 
@@ -235,7 +239,7 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
             );
 
             // Skip existing files
-            if (std::filesystem::exists(outFilename)) {
+            if (std::filesystem::exists(absPath(outFilename))) {
                 size_t done = ++i;
                 {
                     std::lock_guard lock(progressMutex);

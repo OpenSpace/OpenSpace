@@ -48,13 +48,14 @@ namespace {
 
     struct [[codegen::Dictionary(GenerateRawVolumeFromFileTask)]] Parameters {
         // The volume file to import data from in CSV format.
-        std::string dataInputPath;
+        std::filesystem::path dataInputPath;
 
         // The raw volume file to export data to.
-        std::string rawVolumeOutput;
+        std::filesystem::path rawVolumeOutput [[codegen::mustexist(false)]];
 
         // The Lua dictionary file to export metadata to.
-        std::string dictionaryOutput;
+        std::filesystem::path dictionaryOutput [[codegen::directory(),
+            codegen::mustexist(false)]];
 
         // The data column value to use for the volume transfer function, must be one of
         // the names in the CSV header.
@@ -64,7 +65,7 @@ namespace {
         std::string time [[codegen::notempty()]];
 
         // A vector representing the number of cells in each dimension.
-        glm::ivec3 dimensions;
+        glm::ivec3 dimensions [[codegen::greaterequal(glm::ivec3(0))]];
     };
 } // namespace
 #include "generaterawvolumefromfiletask_codegen.cpp"
@@ -72,7 +73,10 @@ namespace {
 namespace openspace {
 
 Documentation GenerateRawVolumeFromFileTask::Documentation() {
-    return codegen::doc<Parameters>("volume_task_generaterawvolumefromfile");
+    return codegen::doc<Parameters>(
+        "volume_task_generaterawvolumefromfile",
+        Task::Documentation()
+    );
 }
 
 GenerateRawVolumeFromFileTask::GenerateRawVolumeFromFileTask(

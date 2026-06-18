@@ -131,6 +131,14 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
+    syncEngine = new (currentPos) SyncEngine(4096);
+    ghoul_assert(syncEngine, "No syncEngine");
+    currentPos += sizeof(SyncEngine);
+#else // ^^^^ WIN32 / !WIN32 vvvv
+    syncEngine = new SyncEngine(4096);
+#endif // WIN32
+
+#ifdef WIN32
     server = new (currentPos) Server;
     ghoul_assert(server, "No server");
     currentPos += sizeof(Server);
@@ -249,14 +257,6 @@ void create() {
     currentPos += sizeof(std::vector<std::unique_ptr<ScreenSpaceRenderable>>);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     screenSpaceRenderables = new std::vector<std::unique_ptr<ScreenSpaceRenderable>>;
-#endif // WIN32
-
-#ifdef WIN32
-    syncEngine = new (currentPos) SyncEngine(4096);
-    ghoul_assert(syncEngine, "No syncEngine");
-    currentPos += sizeof(SyncEngine);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    syncEngine = new SyncEngine(4096);
 #endif // WIN32
 
 #ifdef WIN32
@@ -527,13 +527,6 @@ void destroy() {
     delete timeManager;
 #endif // WIN32
 
-    LDEBUGC("Globals", "Destroying 'SyncEngine'");
-#ifdef WIN32
-    syncEngine->~SyncEngine();
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    delete syncEngine;
-#endif // WIN32
-
     LDEBUGC("Globals", "Destroying 'ScreenSpaceRenderables'");
 #ifdef WIN32
     screenSpaceRenderables->~vector();
@@ -637,6 +630,13 @@ void destroy() {
     server->~Server();
 #else // ^^^^ WIN32 / !WIN32 vvvv
     delete server;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'SyncEngine'");
+#ifdef WIN32
+    syncEngine->~SyncEngine();
+#else // ^^^^ WIN32 / !WIN32 vvvv
+    delete syncEngine;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'MemoryManager'");

@@ -1,0 +1,38 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "scene/solarsystem/planets/saturn/titan/globe"
+    },
+    {
+      "type": "asset",
+      "value": "scene/solarsystem/planets/saturn/titan/atmosphere"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Titan",
+        "position": [
+          7052720.156628544,
+          760398.851609604,
+          3050716.584021586
+        ],
+        "up": [
+          -0.33319293684895446,
+          0.7384641324930665,
+          0.5862194059012644
+        ],
+        "yaw": 5.897406066269113e-7,
+        "timestamp": "2026 MAY 24 12:47:24"
+      }
+    },
+    {
+      "type": "wait",
+      "value": 5
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

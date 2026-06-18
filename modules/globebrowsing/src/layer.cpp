@@ -84,7 +84,8 @@ namespace {
         "Remove",
         "If this value is triggered, a script will be executed that will remove this "
         "layer before the next frame.",
-        Property::Visibility::User
+        Property::Visibility::User,
+        Property::NeedsConfirmation::Yes
     };
 
     constexpr Property::PropertyInfo ColorInfo = {
@@ -143,7 +144,7 @@ namespace {
         std::optional<int> zIndex [[codegen::greater(0)]];
 
         // The opacity value of the layer.
-        std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
+        std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
 
         struct Settings {
             // The gamma value that is applied to each pixel of the layer.

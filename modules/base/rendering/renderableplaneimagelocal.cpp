@@ -65,7 +65,7 @@ namespace {
     // property that will be used for the right eye during stereo rendering.
     struct [[codegen::Dictionary(RenderablePlaneImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
-        std::string texture;
+        std::filesystem::path texture;
 
         // [[codegen::verbatim(RightTextureInfo.description)]]
         std::optional<std::filesystem::path> rightTexture;
@@ -88,20 +88,14 @@ Documentation RenderablePlaneImageLocal::Documentation() {
 }
 
 RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary)
-    : RenderablePlane(
-        dictionary,
-        {
-            .automaticallyUpdateRenderBin = false,
-            .shouldUpdateIfDisabled = true
-        }
-    )
+    : RenderablePlane(dictionary, { .shouldUpdateIfDisabled = true })
     , _texturePath(TextureInfo)
     , _rightTexturePath(RightTextureInfo)
     , _textureIsDirty(_enabled)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _texturePath = absPath(p.texture).string();
+    _texturePath = p.texture.string();
     _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
     _textureFile->setCallback([this]() { _textureIsDirty = true; });
 

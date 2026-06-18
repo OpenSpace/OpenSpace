@@ -1,0 +1,72 @@
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
+
+
+
+local models = asset.resource({
+  Name = "Artemis II Models",
+  Type = "HttpSynchronization",
+  Identifier = "artemis_2_models",
+  Version = 2
+})
+
+
+local Artemis2Model = {
+  Identifier = "Artemis2Model",
+  Parent = transforms.Artemis2Position.Identifier,
+  ApproachFactor = 2700,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2026 APR 02 01:49:00.000",
+    End = "2026 APR 10 23:54:13.000"
+  },
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "Artemis2Model",
+      XAxis = { 1.0, 0.0, 0.0 },
+      XAxisOrthogonal = true,
+      YAxis = sunAsset.SunCenter.Identifier,
+      YAxisInvert = true
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "Orion_05.fbx",
+    ModelScale = "Centimeter",
+    AmbientIntensity = 0.4,
+    DiffuseIntensity = 1.0,
+    SpecularIntensity = 9.0,
+    SpecularPower = 12.5,
+    LightSources = {
+      sunAsset.LightSource
+    },
+    CastShadow = true
+  },
+  GUI = {
+    Name = "Orion Model (Artemis II)",
+    Path = "/Solar System/Missions/Artemis II",
+    Description = "Model of the Orion capsule for the Artemis II mission."
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Artemis2Model)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Artemis2Model)
+end)
+
+asset.export(Artemis2Model)
+
+
+
+asset.meta = {
+  Name = "Artemis II Model",
+  Description = "Orion capsule model for the Artemis II mission.",
+  Author = "Dan Tell, Tau Immersive",
+  URL = "http://tauimmersive.com",
+  License = "MIT license"
+}

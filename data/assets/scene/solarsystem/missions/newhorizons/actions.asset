@@ -67,8 +67,8 @@ local ClearImageProjections = {
   Identifier = "os.newhorizons.ClearImageProjections",
   Name = "Clear image projections",
   Command = [[
-    openspace.setPropertyValue("Scene.PlutoProjection.Renderable.ProjectionComponent.ClearAllProjections", true)
-    openspace.setPropertyValue("Scene.CharonProjection.Renderable.ProjectionComponent.ClearAllProjections", true)
+    openspace.setPropertyValueSingle("Scene.PlutoProjection.Renderable.ProjectionComponent.ClearAllProjections", nil)
+    openspace.setPropertyValueSingle("Scene.CharonProjection.Renderable.ProjectionComponent.ClearAllProjections", nil)
   ]],
   Documentation = "Removes all image projections from Pluto and Charon",
   GuiPath = "/Missions/New Horizons",
@@ -80,8 +80,8 @@ local Approach = {
   Name = "Reset time and projections",
   Command = [[
     openspace.time.setTime("2015-07-14T09:00:00.000")
-    openspace.setPropertyValue("Scene.PlutoProjection.Renderable.ProjectionComponent.ClearAllProjections", true)
-    openspace.setPropertyValue("Scene.CharonProjection.Renderable.ProjectionComponent.ClearAllProjections", true)
+    openspace.setPropertyValueSingle("Scene.PlutoProjection.Renderable.ProjectionComponent.ClearAllProjections", nil)
+    openspace.setPropertyValueSingle("Scene.CharonProjection.Renderable.ProjectionComponent.ClearAllProjections", nil)
   ]],
   Documentation = "Jumps to the 14th of July 2015 at 0900 UTC and clears all projections",
   GuiPath = "/Missions/New Horizons",
@@ -173,7 +173,7 @@ local ToggleNewHorizonsLabels = {
   Identifier = "os.newhorizons.ToggleNewHorizonsLabels",
   Name = "Toggle New Horizons labels",
   Command = [[
-    openspace.toggleFade("Scene.Labels.Renderable")
+    openspace.toggleFade("Scene.NewHorizonsLabels.Renderable")
   ]],
   Documentation = "Toggles the visibility of the labels for the New Horizons instruments",
   GuiPath = "/Missions/New Horizons",

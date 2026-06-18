@@ -25,6 +25,7 @@
 #include <openspace/topic/topics/topic.h>
 
 #include <openspace/json.h>
+#include <openspace/topic/connection.h>
 #include <openspace/topic/server.h>
 #include <ghoul/misc/profiling.h>
 #include <utility>
@@ -36,6 +37,10 @@ void Topic::initialize(std::shared_ptr<Connection> connection, size_t topicId) {
     _topicId = topicId;
 }
 
+void Topic::sendData(const nlohmann::json& payload) {
+    _connection->sendJson(wrappedPayload(payload));
+}
+
 std::string Topic::type() const {
     return "";
 }
@@ -43,22 +48,9 @@ std::string Topic::type() const {
 nlohmann::json Topic::wrappedPayload(const nlohmann::json& payload) const {
     ZoneScoped;
 
-    // TODO: add message time
     nlohmann::json j = {
         { "topic", _topicId },
         { "payload", payload }
-    };
-    return j;
-}
-
-nlohmann::json Topic::wrappedError(std::string message, int code) {
-    ZoneScoped;
-
-    nlohmann::json j = {
-        { "topic", _topicId },
-        { "status", "error" },
-        { "message", message },
-        { "code", code }
     };
     return j;
 }

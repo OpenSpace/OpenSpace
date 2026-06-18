@@ -1,0 +1,45 @@
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local Artemis2Position = {
+  Identifier = "Artemis2Position",
+  Parent = earthTransforms.EarthBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Artemis2,
+      Observer = coreKernels.ID.EarthBarycenter,
+      -- Frame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "Artemis II Position",
+    Path = "/Solar System/Missions/Artemis II",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Artemis2Position)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Artemis2Position)
+end)
+
+asset.export(Artemis2Position)
+
+
+
+asset.meta = {
+  Name = "Artemis II Transforms",
+  Description = "Artemis II transforms, position relative to Earth.",
+  Author = "Dan Tell, Tau Immersive",
+  URL = "http://tauimmersive.com",
+  License = "MIT license"
+}

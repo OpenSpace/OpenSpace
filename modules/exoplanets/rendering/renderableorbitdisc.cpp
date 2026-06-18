@@ -88,10 +88,10 @@ namespace {
         std::filesystem::path texture;
 
         // [[codegen::verbatim(SizeInfo.description)]]
-        float size;
+        float size [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(EccentricityInfo.description)]]
-        float eccentricity;
+        float eccentricity [[codegen::inrange(0.f, 1.f)]];
 
         // [[codegen::verbatim(OffsetInfo.description)]]
         std::optional<glm::vec2> offset;
@@ -105,7 +105,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableOrbitDisc::Documentation() {
-    return codegen::doc<Parameters>("exoplanets_renderable_orbitdisc");
+    return codegen::doc<Parameters>(
+        "exoplanets_renderable_orbitdisc",
+        Renderable::Documentation()
+    );
 }
 
 RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)

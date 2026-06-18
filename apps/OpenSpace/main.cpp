@@ -1386,13 +1386,13 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    global::openSpaceEngine->registerPathTokens();
+    registerPathTokens(*global::configuration);
 
     // Call profile GUI
     std::string windowCfgPreset;
     if (commandlineArguments.windowConfig.has_value()) {
         windowCfgPreset = std::format(
-            "{} (from CLI)", global::configuration->windowConfiguration
+            "{}", global::configuration->windowConfiguration
         );
     }
     else {

@@ -47,7 +47,7 @@ public:
     virtual void perform(const ProgressCallback& onProgress) = 0;
     virtual std::string description() = 0;
 
-    static Documentation documentation();
+    static Documentation Documentation();
 };
 
 } // namespace openspace

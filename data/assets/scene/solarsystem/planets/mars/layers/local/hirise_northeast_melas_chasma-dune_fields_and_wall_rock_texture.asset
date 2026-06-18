@@ -1,0 +1,49 @@
+local marsAsset = asset.require("scene/solarsystem/planets/mars/globe")
+
+
+
+local data = asset.resource({
+  Name = "HiRISE Northeast Melas Chasma - Dune Fields and Wall Rock Texture",
+  Type = "HttpSynchronization",
+  Identifier = "mars_hirise_northeast_melas_chasma-dune_fields_and_wall_rock_texture",
+  Version = 1
+})
+
+
+local ColorLayer = {
+  Identifier = "Northeast_Melas_Chasma",
+  Name = "Northeast Melas Chasma [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "northeast_melas_chasma_dune_fields_and_wall_rock_texture.vrt",
+  BlendMode = "Color"
+}
+
+local HeightLayer = {
+  Identifier = "Northeast_Melas_Chasma",
+  Name = "Northeast Melas Chasma [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "northeast_melas_chasma_dune_fields_and_wall_rock_heightmap.vrt"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "ColorLayers", ColorLayer)
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "HeightLayers", HeightLayer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "HeightLayers", HeightLayer)
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "ColorLayers", ColorLayer)
+end)
+
+
+
+asset.meta = {
+  Name = "HiRISE Dune Fields and Wall Rock Texture in Northeast Melas Chasma [Local]",
+  Description = [[A local layer for Dune Fields and Wall Rock Texture in Northeast Melas Chasma from the HiRISE instrument.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

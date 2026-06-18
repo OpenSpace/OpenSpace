@@ -199,8 +199,8 @@ namespace {
     // gamma settings, border and background colors, et cetera.
     struct [[codegen::Dictionary(ScreenSpaceRenderable)]] Parameters {
         // The type of the `ScreenSpaceRenderable` that is to be created.
-        std::string type
-            [[codegen::annotation("Must name a valid ScreenSpaceRenderable")]];
+        std::string type [[codegen::annotation("Must name a valid ScreenSpaceRenderable"),
+            codegen::private()]];
 
         // The name of the `ScreenSpaceRenderable`, which will be shown in the GUI. This
         // does not have to be unique to the scene, but it is recommended to be.

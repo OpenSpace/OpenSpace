@@ -27,7 +27,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <cmath>
-#include <cstdlib>
 
 namespace openspace {
 

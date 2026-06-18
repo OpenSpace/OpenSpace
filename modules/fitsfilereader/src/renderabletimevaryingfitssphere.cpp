@@ -564,8 +564,8 @@ void RenderableTimeVaryingFitsSphere::update(const UpdateData& data) {
                 }
                 file.status = File::FileStatus::Loaded;
                 trackOldest(file);
-                loadTexture();
             }
+            loadTexture();
         }
         // The case when we jumped passed last file where nextIdx is not < file.size()
         else if (currentTime >= _files[_activeTriggerTimeIndex].time && !_texture) {
@@ -624,6 +624,14 @@ void RenderableTimeVaryingFitsSphere::updateDynamicDownloading(double currentTim
     _dynamicFileDownloader->update(currentTime, deltaTime);
     const std::vector<std::filesystem::path>& filesToRead =
         _dynamicFileDownloader->downloadedFiles();
+
+    const int previousActiveTriggerTimeIndex = _activeTriggerTimeIndex;
+    const std::filesystem::path previousActiveFilePath =
+        (_activeTriggerTimeIndex >= 0 &&
+         static_cast<size_t>(_activeTriggerTimeIndex) < _files.size()) ?
+         _files[_activeTriggerTimeIndex].path :
+         std::filesystem::path();
+
     for (const std::filesystem::path& filePath : filesToRead) {
         if (filePath.extension() == ".fits") {
             readFileFromFits(filePath);
@@ -632,6 +640,18 @@ void RenderableTimeVaryingFitsSphere::updateDynamicDownloading(double currentTim
     if (!filesToRead.empty()) {
         computeSequenceEndTime();
         updateActiveTriggerTimeIndex(currentTime);
+
+        const std::filesystem::path activeFilePath =
+            (_activeTriggerTimeIndex >= 0 &&
+             static_cast<size_t>(_activeTriggerTimeIndex) < _files.size()) ?
+             _files[_activeTriggerTimeIndex].path :
+             std::filesystem::path();
+
+        if (_activeTriggerTimeIndex != previousActiveTriggerTimeIndex ||
+            activeFilePath != previousActiveFilePath)
+        {
+            loadTexture();
+        }
     }
     if (_firstUpdate) {
         const bool isInInterval = !_files.empty() && currentTime >= _files[0].time &&

@@ -1,0 +1,49 @@
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/globe")
+
+
+
+local data = asset.resource({
+  Name = "Moon - LRO NAC Apollo 17",
+  Type = "HttpSynchronization",
+  Identifier = "moon_layers_lro_nac_apollo17",
+  Version = 1
+})
+
+
+local ColorLayer = {
+  Identifier = "LRO_NAC_Apollo_17",
+  Name = "LRO NAC Apollo 17 [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "NAC_DTM_APOLLO17_MOSAIC_120CM_Texture.vrt",
+  BlendMode = "Color"
+}
+
+local HeightLayer = {
+  Identifier = "LRO_NAC_Apollo_17",
+  Name = "LRO NAC Apollo 17 [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "NAC_DTM_APOLLO17_Heightmap.vrt"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(moonAsset.Moon.Identifier, "ColorLayers", ColorLayer)
+  openspace.globebrowsing.addLayer(moonAsset.Moon.Identifier, "HeightLayers", HeightLayer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(moonAsset.Moon.Identifier, "HeightLayers", HeightLayer)
+  openspace.globebrowsing.deleteLayer(moonAsset.Moon.Identifier, "ColorLayers", ColorLayer)
+end)
+
+
+
+asset.meta = {
+  Name = "LRO NAC Apollo 17 [Local]",
+  Description = [[A local layer for LRO NAC Apollo 17.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

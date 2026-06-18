@@ -72,10 +72,11 @@ namespace {
  * file and the original profile will be overwritten. The second argument determines if a
  * file that already exists should be overwritten, which is 'false' by default.
  */
-[[codegen::luawrap]] void saveSettingsToProfile(std::optional<std::string> saveFilePath,
-                                                bool shouldOverwrite = true)
+[[codegen::luawrap]] void saveSettingsToProfile(std::optional<std::string> saveFileName,
+                                                bool shouldOverwrite = false)
 {
-    if (!saveFilePath.has_value()) {
+    const bool receivedSaveFileName = saveFileName.has_value();
+    if (!receivedSaveFileName) {
         std::time_t t = std::time(nullptr);
         std::tm* utcTime = std::gmtime(&t);
         ghoul_assert(utcTime, "Conversion to UTC failed");
@@ -90,30 +91,18 @@ namespace {
             utcTime->tm_sec
         );
         std::filesystem::path path = global::configuration->profile.profile;
+        const std::string extension = path.extension().string();
         path.replace_extension();
-        std::string newFile = std::format("{}_{}", path, time);
-        std::string sourcePath = std::format(
-            "{}/{}.profile",
-            absPath("${USER_PROFILES}"), global::configuration->profile.profile
-        );
-        std::string destPath = std::format(
-            "{}/{}.profile",
-            absPath("${PROFILES}"), global::configuration->profile.profile
-        );
-        if (!std::filesystem::is_regular_file(sourcePath)) {
-            sourcePath = std::format(
-                "{}/{}.profile",
-                absPath("${USER_PROFILES}"), global::configuration->profile.profile
-            );
-        }
+        const std::string backupPath = std::format("{}_{}{}", path, time, extension);
+        const std::string sourcePath = global::configuration->profile.profile;
         LINFOC(
             "Profile",
-            std::format("Saving a copy of the old profile as '{}'", newFile)
+            std::format("Saving a copy of the old profile as '{}'", backupPath)
         );
-        std::filesystem::copy(sourcePath, destPath);
-        saveFilePath = global::configuration->profile.profile;
+        std::filesystem::copy(sourcePath, backupPath);
+        saveFileName = path.stem().string();
     }
-    if (saveFilePath->empty()) {
+    if (saveFileName->empty()) {
         throw ghoul::lua::LuaError("Save filepath string is empty");
     }
 
@@ -121,28 +110,31 @@ namespace {
     std::string currentTime = std::string(global::timeManager->time().ISO8601());
     NavigationState navState = global::navigationHandler->navigationState();
     global::profile->saveCurrentSettingsToProfile(root, currentTime, navState);
-    global::configuration->profile.profile = *saveFilePath;
 
-    if (saveFilePath->contains('/')) {
+    if (saveFileName->contains('/')) {
         throw ghoul::lua::LuaError("Profile filename must not contain (/) elements");
     }
-    else if (saveFilePath->contains(':')) {
+    else if (saveFileName->contains(':')) {
         throw ghoul::lua::LuaError("Profile filename must not contain (:) elements");
     }
-    else if (saveFilePath->contains('.')) {
+    else if (saveFileName->contains('.')) {
         throw ghoul::lua::LuaError(
             "Only provide the filename to save without file extension"
         );
     }
 
     std::string absFilename = std::format(
-        "{}/{}.profile", absPath("${PROFILES}"), *saveFilePath
+        "{}/{}.profile", absPath("${PROFILES}"), *saveFileName
     );
     if (!std::filesystem::is_regular_file(absFilename)) {
-        absFilename = absPath("${USER_PROFILES}/" + *saveFilePath + ".profile").string();
+        absFilename = std::format(
+            "{}/{}.profile", absPath("${USER_PROFILES}"), *saveFileName
+        );
     }
 
-    if (std::filesystem::is_regular_file(absFilename) && !shouldOverwrite) {
+    if (std::filesystem::is_regular_file(absFilename) && !shouldOverwrite &&
+        receivedSaveFileName)
+    {
         throw ghoul::lua::LuaError(
             std::format(
                 "Unable to save profile '{}'. File of same name already exists",
@@ -150,6 +142,8 @@ namespace {
             )
         );
     }
+
+    global::configuration->profile.profile = absFilename;
 
     std::ofstream outFile = std::ofstream(absFilename, std::ofstream::out);
     if (!outFile.good()) {

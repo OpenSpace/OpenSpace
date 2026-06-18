@@ -93,10 +93,10 @@ namespace {
         std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(LongSegmentsInfo.description)]]
-        std::optional<int> longSegments;
+        std::optional<int> longSegments [[codegen::greater(0)]];
 
         // [[codegen::verbatim(LatSegmentsInfo.description)]]
-        std::optional<int> latSegments;
+        std::optional<int> latSegments [[codegen::greater(0)]];
 
         // The number of segments the sphere is split into. Determines the resolution of
         // the rendered sphere. Should be an even value (if an odd value is provided, the
@@ -104,10 +104,10 @@ namespace {
         // setting `LongSegments` and `LatSegments` to the same value. If this value is
         // specified, it will overwrite the values provided in `LongSegments` and
         // `LatSegments`.
-        std::optional<int> segments;
+        std::optional<int> segments [[codegen::greater(0)]];
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
@@ -119,7 +119,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableSphericalGrid::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_sphericalgrid");
+    return codegen::doc<Parameters>(
+        "base_renderable_sphericalgrid",
+        Renderable::Documentation()
+    );
 }
 
 RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)

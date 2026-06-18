@@ -61,7 +61,7 @@ namespace {
             renderableFar [[codegen::reference("core_renderable")]];
 
         // [[codegen::verbatim(DistanceThresholdInfo.description)]]
-        std::optional<double> distanceThreshold [[codegen::greater(0.f)]];
+        std::optional<double> distanceThreshold [[codegen::greaterequal(0.0)]];
     };
 } // namespace
 #include "renderableswitch_codegen.cpp"
@@ -69,7 +69,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableSwitch::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_switch");
+    return codegen::doc<Parameters>(
+        "base_renderable_switch",
+        Renderable::Documentation()
+    );
 }
 
 RenderableSwitch::RenderableSwitch(const ghoul::Dictionary& dictionary)

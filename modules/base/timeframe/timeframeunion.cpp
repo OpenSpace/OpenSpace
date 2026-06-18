@@ -61,7 +61,10 @@ namespace {
 namespace openspace {
 
 Documentation TimeFrameUnion::Documentation() {
-    return codegen::doc<Parameters>("base_timeframe_union");
+    return codegen::doc<Parameters>(
+        "base_timeframe_union",
+        TimeFrame::Documentation()
+    );
 }
 
 TimeFrameUnion::TimeFrameUnion(const ghoul::Dictionary& dictionary) {
@@ -73,7 +76,9 @@ TimeFrameUnion::TimeFrameUnion(const ghoul::Dictionary& dictionary) {
         TimeFrame& subFrame = *_timeFrames.back();
         subFrame.setIdentifier(std::format("{}", i));
         subFrame.setGuiName(std::format("{}", i));
-        subFrame.setDescription(std::format("{}", i));
+        subFrame.setDescription(
+            std::format("Time frame {} in the list of time frames for the union.", i)
+        );
         addPropertySubOwner(*_timeFrames.back());
     }
 }

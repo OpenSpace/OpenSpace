@@ -1,0 +1,49 @@
+local mercuryAsset = asset.require("scene/solarsystem/planets/mercury/globe")
+
+
+
+local data = asset.resource({
+  Name = "Mercury - Sander",
+  Type = "HttpSynchronization",
+  Identifier = "mercury_layers_sander",
+  Version = 1
+})
+
+
+local ColorLayer = {
+  Identifier = "Sander",
+  Name = "Sander [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Sander_texture.vrt",
+  BlendMode = "Color"
+}
+
+local HeightLayer = {
+  Identifier = "Sander",
+  Name = "Sander [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Sander_heightmap.vrt"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(mercuryAsset.Mercury.Identifier, "ColorLayers", ColorLayer)
+  openspace.globebrowsing.addLayer(mercuryAsset.Mercury.Identifier, "HeightLayers", HeightLayer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(mercuryAsset.Mercury.Identifier, "HeightLayers", HeightLayer)
+  openspace.globebrowsing.deleteLayer(mercuryAsset.Mercury.Identifier, "ColorLayers", ColorLayer)
+end)
+
+
+
+asset.meta = {
+  Name = "Mercury Sander [Local]",
+  Description = [[A local layer for Sander.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

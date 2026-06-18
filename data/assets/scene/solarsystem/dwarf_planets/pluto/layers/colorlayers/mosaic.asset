@@ -1,0 +1,43 @@
+local plutoAsset = asset.require("scene/solarsystem/dwarf_planets/pluto/globe")
+
+
+
+local textures = asset.resource({
+  Name = "Pluto Textures",
+  Type = "HttpSynchronization",
+  Identifier = "pluto_textures",
+  Version = 5
+})
+
+
+local Layer = {
+  Identifier = "Mosaic",
+  Name = "Mosaic",
+  Enabled = asset.enabled,
+  ZIndex = 10,
+  FilePath = textures .. "NH_Pluto_mosaic_16384.png",
+  Description = "Offline Mosaic of images collected by the New Horizons spacecraft."
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(plutoAsset.Pluto.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(plutoAsset.Pluto.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "Pluto New Horizons Mosaic",
+  Description = [[Fallback layer for Pluto image if no internet is available. Contains a
+    a mosaicked map generated from New Horizons images.]],
+  Author = "OpenSpace Team",
+  URL = "https://astrogeology.usgs.gov/search/map/Pluto/NewHorizons/" ..
+    "Pluto_NewHorizons_Global_Mosaic_300m_Jul2017",
+  License = "NASA/PDS"
+}

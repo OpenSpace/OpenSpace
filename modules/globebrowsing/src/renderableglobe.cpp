@@ -617,7 +617,10 @@ Chunk::Chunk(const TileIndex& ti)
 {}
 
 Documentation RenderableGlobe::Documentation() {
-    return codegen::doc<Parameters>("globebrowsing_renderable_globe");
+    return codegen::doc<Parameters>(
+        "globebrowsing_renderable_globe",
+        Renderable::Documentation()
+    );
 }
 
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
@@ -638,7 +641,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         .levelByProjectedAreaElseDistance = BoolProperty(LevelProjectedAreaInfo, true),
         .resetTileProviders = TriggerProperty(ResetTileProviderInfo),
         .performFrustumCulling = BoolProperty(PerformFrustumCullingInfo, true),
-        .performHorizonCulling = BoolProperty(PerformHorizonCullingInfo, true),
+        .performHorizonCulling = BoolProperty(PerformHorizonCullingInfo, false),
         .modelSpaceRenderingCutoffLevel = IntProperty(ModelSpaceRenderingInfo, 14, 1, 22),
         .dynamicLodIterationCount = IntProperty(DynamicLodIterationCountInfo, 16, 4, 128)
     })

@@ -95,7 +95,7 @@ namespace {
         "AccurateTrailPositions",
         "Number of accurate trail points",
         "The number of vertices, each side of the object, that will be recalculated for "
-        "greater accuracy.This also ensures that the object connects with the trail.",
+        "greater accuracy. This also ensures that the object connects with the trail.",
         Property::Visibility::AdvancedUser
     };
 
@@ -114,7 +114,7 @@ namespace {
 
         // [[codegen::verbatim(TimeSubSampleInfo.description)]]
         // The final interval is calculated as SampleInterval/TimeStampSubsampleFactor.
-        std::optional<int> timeStampSubsampleFactor;
+        std::optional<int> timeStampSubsampleFactor [[codegen::greater(0)]];
 
         // [[codegen::verbatim(RenderFullPathInfo.description)]]
         std::optional<bool> showFullTrail;

@@ -99,16 +99,17 @@ namespace {
         std::filesystem::path texture;
 
         // [[codegen::verbatim(SizeInfo.description)]]
-        float size;
+        float size [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(OffsetInfo.description)]]
-        std::optional<glm::vec2> offset;
+        std::optional<glm::vec2> offset
+            [[codegen::inrange(glm::vec2(0.f), glm::vec2(1.f))]];
 
         // [[codegen::verbatim(NightFactorInfo.description)]]
-        std::optional<float> nightFactor;
+        std::optional<float> nightFactor [[codegen::inrange(0.f, 1.f)]];
 
         // [[codegen::verbatim(ColorFilterInfo.description)]]
-        std::optional<float> colorFilter;
+        std::optional<float> colorFilter [[codegen::inrange(0.f, 1.f)]];
     };
 } // namespace
 #include "renderablerings_codegen.cpp"
@@ -116,7 +117,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableRings::Documentation() {
-    return codegen::doc<Parameters>("space_renderable_rings");
+    return codegen::doc<Parameters>(
+        "space_renderable_rings",
+        Renderable::Documentation()
+    );
 }
 
 RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)

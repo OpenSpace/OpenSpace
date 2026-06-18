@@ -27,8 +27,6 @@ elseif (server == "NewYork") then
   asset.require("scene/solarsystem/planets/newyork_layers")
 elseif (server == "Sweden") then
   asset.require("scene/solarsystem/planets/sweden_layers")
-elseif (server == "Utah") then
-  asset.require("scene/solarsystem/planets/utah_layers")
 elseif (server == "None") then
   asset.require("scene/solarsystem/planets/base_layers")
 else

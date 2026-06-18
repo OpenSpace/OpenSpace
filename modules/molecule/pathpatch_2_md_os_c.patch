@@ -1,0 +1,68 @@
+--- a/ext/mold/src/core/md_os.c
++++ b/ext/mold/src/core/md_os.c
+@@ -6,6 +6,10 @@
+ #include "md_log.h"
+ #include "md_allocator.h"
+ 
++#if MD_PLATFORM_OSX
++#include <mach-o/dyld.h>
++#endif
++
+ #include <stdio.h>
+ #include <stdarg.h>
+@@ -88,6 +92,51 @@ str_t md_path_cwd() {
+     return res;
+ }
+ 
++static char EXE_DIR[MD_MAX_PATH];
++
++str_t md_path_exe_dir(void) {
++    if (EXE_DIR[0] != '\0') {
++        str_t res = { .ptr = EXE_DIR, .len = (int64_t)strnlen(EXE_DIR, sizeof(EXE_DIR)) };
++        return res;
++    }
++
++    char exe_path[MD_MAX_PATH] = "";
++
++#if MD_PLATFORM_WINDOWS
++    DWORD len = GetModuleFileNameA(NULL, exe_path, (DWORD)sizeof(exe_path));
++    if (len == 0 || len >= sizeof(exe_path)) {
++        MD_LOG_ERROR("md_path_exe_dir: GetModuleFileNameA failed");
++        goto fallback;
++    }
++    for (DWORD i = 0; i < len; i++) {
++        if (exe_path[i] == '\\') exe_path[i] = '/';
++    }
++#elif MD_PLATFORM_LINUX
++    ssize_t len = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
++    if (len <= 0) {
++        MD_LOG_ERROR("md_path_exe_dir: readlink /proc/self/exe failed");
++        goto fallback;
++    }
++    exe_path[len] = '\0';
++#elif MD_PLATFORM_OSX
++    uint32_t size = (uint32_t)sizeof(exe_path);
++    if (_NSGetExecutablePath(exe_path, &size) != 0) {
++        MD_LOG_ERROR("md_path_exe_dir: _NSGetExecutablePath failed");
++        goto fallback;
++    }
++#else
++    goto fallback;
++#endif
++
++    {
++        char* last_sep = strrchr(exe_path, '/');
++        size_t dir_len = last_sep ? (size_t)(last_sep - exe_path + 1) : 0;
++        strncpy(EXE_DIR, exe_path, dir_len);
++        EXE_DIR[dir_len] = '\0';
++    }
++    goto done;
++
++fallback:
++    strncpy(EXE_DIR, "./", sizeof(EXE_DIR) - 1);
++done:;
++    str_t res = { .ptr = EXE_DIR, .len = (int64_t)strnlen(EXE_DIR, sizeof(EXE_DIR)) };
++    return res;
++}
++
+ static inline str_t internal_fullpath(str_t path, md_allocator_i* alloc) {

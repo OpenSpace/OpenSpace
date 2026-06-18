@@ -38,10 +38,6 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "ServerModule: Connection";
-
-    constexpr std::string_view MessageKeyType = "type";
-    constexpr std::string_view MessageKeyPayload = "payload";
-    constexpr std::string_view MessageKeyTopic = "topic";
 } // namespace
 
 namespace openspace {
@@ -70,7 +66,7 @@ void Connection::handleMessage(const std::string& message) {
         LERROR(std::format("JSON handling error from: {}. {}", message, e.what()));
     }
     catch (const std::exception& e) {
-        LERROR(e.what());
+        LERROR(std::format("Unexpected error {}, from: {}", e.what(), message));
     }
     catch (...) {
         if (!isAuthorized()) {
@@ -98,8 +94,29 @@ void Connection::handleMessage(const std::string& message) {
 void Connection::handleJson(const nlohmann::json& json) {
     ZoneScoped;
 
-    auto topicJson = json.find(MessageKeyTopic);
-    auto payloadJson = json.find(MessageKeyPayload);
+    auto topicJson = json.find("topic");
+    auto payloadJson = json.find("payload");
+
+    if (!_connectedApiVersion.has_value()) {
+        auto type = json.find("type");
+        if (type != json.end() && *type == "apiHandshake") {
+            auto apiVersion = json.find("apiVersion");
+            nlohmann::json version = *apiVersion;
+
+            _connectedApiVersion = ApiVersion{
+                .major = version.at("major").get<int>(),
+                .minor = version.at("minor").get<int>(),
+                .patch = version.at("patch").get<int>()
+            };
+
+            return;
+        }
+        else {
+            // Older API version which did not have versioning
+            _socket->disconnect();
+            throw ghoul::RuntimeError("Unsupported API version");
+        }
+    }
 
     if (topicJson == json.end() || !topicJson->is_number_integer()) {
         LERROR("Topic must be an integer");
@@ -119,7 +136,7 @@ void Connection::handleJson(const nlohmann::json& json) {
         ZoneScopedN("New Topic");
 
         // The topic id is not registered: Initialize a new topic
-        auto typeJson = json.find(MessageKeyType);
+        auto typeJson = json.find("type");
         if (typeJson == json.end() || !typeJson->is_string()) {
             LERROR("Type must be specified as a string when a new topic is initialized");
             return;
@@ -208,6 +225,14 @@ Topic* Connection::findTopicByType(const std::string& type) {
     }
 
     return it->second.get();
+}
+
+Connection::ApiVersion Connection::apiVersion() const {
+    ghoul_assert(
+        _connectedApiVersion.has_value(),
+        "No API version received via 'apiHandshake' message"
+    );
+    return *_connectedApiVersion;
 }
 
 } // namespace openspace

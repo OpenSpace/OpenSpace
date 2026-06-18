@@ -58,32 +58,32 @@ struct Event {
     //     if they are triggered by events
     //  6. Add the new enum entry into the `toString` and `fromString` methods
     enum class Type : uint8_t {
-        ParallelConnection,
-        ProfileLoadingFinished,
-        AssetLoading,
-        ApplicationShutdown,
-        CameraFocusTransition,
-        TimeOfInterestReached,
-        MissionAdded,
-        MissionRemoved,
-        MissionEventReached,
-        PlanetEclipsed,
-        InterpolationFinished,
-        FocusNodeChanged,
-        PropertyTreeUpdated,
-        PropertyTreePruned,
         ActionAdded,
         ActionRemoved,
-        SessionRecordingPlayback,
-        PointSpacecraft,
-        RenderableEnabled,
-        RenderableDisabled,
-        CameraPathStarted,
-        CameraPathFinished,
+        ApplicationShutdown,
+        AssetLoading,
+        CameraFocusTransition,
         CameraMovedPosition,
-        ScheduledScriptExecuted,
-        GuiTreeUpdated,
+        CameraPathFinished,
+        CameraPathStarted,
         Custom,
+        FocusNodeChanged,
+        GuiTreeUpdated,
+        InterpolationFinished,
+        MissionAdded,
+        MissionEventReached,
+        MissionRemoved,
+        ParallelConnection,
+        PlanetEclipsed,
+        PointSpacecraft,
+        ProfileLoadingFinished,
+        PropertyTreePruned,
+        PropertyTreeUpdated,
+        RenderableDisabled,
+        RenderableEnabled,
+        ScheduledScriptExecuted,
+        SessionRecordingPlayback,
+        TimeOfInterestReached,
         Last // sentinel value
     };
     constexpr explicit Event(Type type_) : type(type_) {}
@@ -115,69 +115,39 @@ void logAllEvents(const Event* e);
 //
 
 /**
- * This event is created whenever something in the parallel connection subsystem changes.
- * The new state is sent as an argument with this event.
+ * This event is created when an action is added.
  */
-struct EventParallelConnection : public Event {
-    static constexpr Type Type = Event::Type::ParallelConnection;
-
-    enum class State : uint8_t {
-        Established,
-        Lost,
-        HostshipGained,
-        HostshipLost
-    };
+struct EventActionAdded : public Event {
+    static constexpr Type Type = Event::Type::ActionAdded;
 
     /**
-     * Creates an instance of an EventParallelConnection event.
+     * Creates an instance of an EventActionAdded event.
      *
-     * \param state_ The new state of the parallel connection system; is one of
-     *        `Established`, `Lost`, `HostshipGained`, or `HostshipLost`
+     * \param uri_ A string with the uri of the action that was added
+     *
+     * \pre uri_ must be a valid uri
      */
-    explicit EventParallelConnection(State state_);
-    State state;
+    explicit EventActionAdded(std::string_view uri_);
+
+    const tstring uri;
 };
 
 /**
- * This event is created when the loading of a profile is finished. This is emitted
- * regardless of whether it is the initial profile, or any subsequent profile is loaded.
+ * This event is created when an action is removed.
  */
-struct EventProfileLoadingFinished : public Event {
-    static constexpr Type Type = Event::Type::ProfileLoadingFinished;
+struct EventActionRemoved : public Event {
+    static constexpr Type Type = Event::Type::ActionRemoved;
 
     /**
-     * Creates an instance of an EventProfileLoadingFinished event.
-     */
-    EventProfileLoadingFinished();
-};
-
-/**
- * This event is created whenever the loading state of an assets changes. An asset can
- * enter one of four states: `Loading`, `Loaded`, `Unloaded`, or `Error`. This event is
- * emitted regardless of whether it is the initial startup of a profile, or any subsequent
- * asset being added or revmoed e.g., through add or drag-and-drop.
- */
-struct EventAssetLoading : public Event {
-    static constexpr Type Type = Event::Type::AssetLoading;
-
-    enum class State {
-        Loaded,
-        Loading,
-        Unloaded,
-        Error
-    };
-
-    /**
-     * Creates an instance of an AssetLoading event.
+     * Creates an instance of an EventActionRemoved event.
      *
-     * \param assetPath_ The path to the asset
-     * \param newState The new state of the asset given by 'asstPath_'; is one of
-     *        `Loading`, `Loaded`, `Unloaded`, or `Error`
+     * \param uri_ The uri of the action that was removed
+     *
+     * \pre uri_ must be a valid uri
      */
-    EventAssetLoading(const std::filesystem::path& assetPath_, State newState);
+    explicit EventActionRemoved(std::string_view uri_);
 
-    std::filesystem::path assetPath;
-    State state;
+    const tstring uri;
 };
 
 /**
@@ -202,6 +172,35 @@ struct EventApplicationShutdown : public Event {
      */
     explicit EventApplicationShutdown(State state_);
     const State state;
+};
+
+/**
+ * This event is created whenever the loading state of an assets changes. An asset can
+ * enter one of four states: `Loading`, `Loaded`, `Unloaded`, or `Error`. This event is
+ * emitted regardless of whether it is the initial startup of a profile, or any subsequent
+ * asset being added or removed e.g., through add or drag-and-drop.
+ */
+struct EventAssetLoading : public Event {
+    static constexpr Type Type = Event::Type::AssetLoading;
+
+    enum class State {
+        Loaded,
+        Loading,
+        Unloaded,
+        Error
+    };
+
+    /**
+     * Creates an instance of an AssetLoading event.
+     *
+     * \param assetPath_ The path to the asset
+     * \param newState The new state of the asset given by 'asstPath_'; is one of
+     *        `Loading`, `Loaded`, `Unloaded`, or `Error`
+     */
+    EventAssetLoading(const std::filesystem::path& assetPath_, State newState);
+
+    std::filesystem::path assetPath;
+    State state;
 };
 
 /**
@@ -252,108 +251,76 @@ struct EventCameraFocusTransition : public Event {
     const Transition transition;
 };
 
-
 /**
- * This event is created with a specific time of interest is reached. This event is
- * currently unused.
+ * This event is created when the a camera moves location.
  */
-struct EventTimeOfInterestReached : public Event {
-    static constexpr Type Type = Event::Type::TimeOfInterestReached;
+struct EventCameraMovedPosition : public Event {
+    static constexpr Type Type = Event::Type::CameraMovedPosition;
 
     /**
-     * Creates an instance of an EventTimeOfInterestReached event.
-     *
-     * \param time_ The time of interest that has been reached
-     * \param camera_ Information about the camera for the specific transition
+     * Creates an instance of an EventCameraMovedPosition event.
      */
-    EventTimeOfInterestReached(const Time* time_, const Camera* camera_);
-
-    const Time* time = nullptr;
-    const Camera* camera = nullptr;
-};
-
-
-/**
- * This event is created when a mission is added.
- */
-struct EventMissionAdded : public Event {
-    static constexpr Type Type = Event::Type::MissionAdded;
-
-    /**
-     * Creates an instance of an EventMissionAdded event.
-     *
-     * \param identifier The identifier of the mission added
-     */
-    EventMissionAdded(std::string_view identifier);
-
-    const tstring identifier;
+    EventCameraMovedPosition();
 };
 
 /**
- * This event is created when a mission is removed.
+ * This event is created when the a camera path is finished.
  */
-struct EventMissionRemoved : public Event {
-    static constexpr Type Type = Event::Type::MissionRemoved;
+struct EventCameraPathFinished : public Event {
+    static constexpr Type Type = Event::Type::CameraPathFinished;
 
     /**
-     * Creates an instance of an EventMissionRemoved event.
+     * Creates an instance of an CameraPathFinished event.
      *
-     * \param identifier The identifier of the mission removed
+     * \param origin_ The scene graph node from which the path started
+     * \param destination_ The scene graph node where the path ended
      */
-    EventMissionRemoved(std::string_view identifier);
+    EventCameraPathFinished(const SceneGraphNode* origin_,
+        const SceneGraphNode* destination_);
 
-    const tstring identifier;
+    const tstring origin;
+    const tstring destination;
 };
 
 /**
- * This event is created when the end of a mission phase is reached. This event is
- * currently unused.
+ * This event is created when the a camera path is started.
  */
-struct EventMissionEventReached : public Event {
-    static constexpr Type Type = Event::Type::MissionEventReached;
+struct EventCameraPathStarted : public Event {
+    static constexpr Type Type = Event::Type::CameraPathStarted;
 
-    // Not sure which kind of parameters we want to pass here.
-    EventMissionEventReached();
+    /**
+     * Creates an instance of an EventCameraPathStarted event.
+     *
+     * \param origin_ The scene graph node from which the path started
+     * \param destination_ The scene graph node at which the path ends
+     */
+    EventCameraPathStarted(const SceneGraphNode* origin_,
+        const SceneGraphNode* destination_);
+
+    const tstring origin;
+    const tstring destination;
 };
 
 /**
- * This event is created when a planet is eclipsed by a moon or a different planet. This
- * event is currently unused.
+ * A custom event type that can be used in a pinch when no explicit event type is
+ * available. This should only be used in special circumstances and it should be
+ * transitioned to a specific event type, if it is deemed to be useful.
  */
-struct EventPlanetEclipsed : public Event {
-    static constexpr Type Type = Event::Type::PlanetEclipsed;
+struct CustomEvent : public Event {
+    static constexpr Type Type = Event::Type::Custom;
 
     /**
-     * Creates an instance of an EventPlanetEclipsed event.
-
-     * \param eclipsee_ The scene graph node that is eclipsed by another object
-     * \param eclipser_ The scene graph node that is eclipsing the other object
+     * Creates an instance of a CustomEvent event.
      *
-     * \pre eclipsee_ must not be `nullptr`
-     * \pre eclipser_ must not be `nullptr`
+     * \param subtype_ A textual description of the custom subtype that is emitted
+     * \param payload_ The payload in a string form
+     *
+     * \pre subtype_ must not be empty
      */
-    EventPlanetEclipsed(const SceneGraphNode* eclipsee_, const SceneGraphNode* eclipser_);
+    CustomEvent(std::string_view subtype_, std::string_view payload_);
 
-    const tstring eclipsee;
-    const tstring eclipser;
-};
-
-/**
- * This event is created when the interpolation of a property value is finished. If the
- * interpolation time of a property change is 0s, this event is not fired.
- */
-struct EventInterpolationFinished : public Event {
-    static constexpr Type Type = Event::Type::InterpolationFinished;
-
-    /**
-     * Creates an instance of an EventInterpolationFinished event.
-     *
-     * \param property_ The property whose interpolation has finished
-     *
-     * \pre property_ must not be `nullptr`
-     */
-    EventInterpolationFinished(const Property* property_);
-    const tstring property;
+    const tstring subtype;
+    const tstring payload;
 };
 
 /**
@@ -380,101 +347,123 @@ struct EventFocusNodeChanged : public Event {
 };
 
 /**
- * This event is created a property owner or property has been added or has changed.
+ * This event is created when the custom ordering for a specific branch in the Scene GUI
+ * tree is changed. It signals to the UI that the tree should be updated.
  */
-struct EventPropertyTreeUpdated : public Event {
-    static constexpr Type Type = Event::Type::PropertyTreeUpdated;
+struct EventGuiTreeUpdated : public Event {
+    static constexpr Type Type = Event::Type::GuiTreeUpdated;
 
     /**
-     * Creates an instance of an EventPropertyTreeUpdated event.
-     *
-     * \param uri_ A string with the uri of the property or property owner that was added
-     *
-     * \pre uri_ must be a valid uri
+     * Creates an instance of an EventGuiTreeUpdated event.
      */
-    explicit EventPropertyTreeUpdated(std::string_view uri_);
-
-    const tstring uri;
+    EventGuiTreeUpdated();
 };
 
 /**
- * This event is created when a property owner or property is removed from a the property
- * tree.
+ * This event is created when the interpolation of a property value is finished. If the
+ * interpolation time of a property change is 0s, this event is not fired.
  */
-struct EventPropertyTreePruned : public Event {
-    static constexpr Type Type = Event::Type::PropertyTreePruned;
+struct EventInterpolationFinished : public Event {
+    static constexpr Type Type = Event::Type::InterpolationFinished;
 
     /**
-     * Creates an instance of an EventPropertyTreePruned event.
+     * Creates an instance of an EventInterpolationFinished event.
      *
-     * \param uri_ The uri of the property or property owner that was removed
+     * \param property_ The property whose interpolation has finished
      *
-     * \pre uri_ must be a valid uri
+     * \pre property_ must not be `nullptr`
      */
-    explicit EventPropertyTreePruned(std::string_view uri_);
-
-    const tstring uri;
+    explicit EventInterpolationFinished(const Property* property_);
+    const tstring property;
 };
 
 /**
- * This event is created when an action is added.
+ * This event is created when a mission is added.
  */
-struct EventActionAdded : public Event {
-    static constexpr Type Type = Event::Type::ActionAdded;
+struct EventMissionAdded : public Event {
+    static constexpr Type Type = Event::Type::MissionAdded;
 
     /**
-     * Creates an instance of an EventActionAdded event.
+     * Creates an instance of an EventMissionAdded event.
      *
-     * \param uri_ A string with the uri of the action that was added
-     *
-     * \pre uri_ must be a valid uri
+     * \param identifier The identifier of the mission added
      */
-    explicit EventActionAdded(std::string_view uri_);
+    EventMissionAdded(std::string_view identifier);
 
-    const tstring uri;
+    const tstring identifier;
 };
 
 /**
- * This event is created when an action is removed.
+ * This event is created when the end of a mission phase is reached. This event is
+ * currently unused.
  */
-struct EventActionRemoved : public Event {
-    static constexpr Type Type = Event::Type::ActionRemoved;
+struct EventMissionEventReached : public Event {
+    static constexpr Type Type = Event::Type::MissionEventReached;
 
-    /**
-     * Creates an instance of an EventActionRemoved event.
-     *
-     * \param uri_ The uri of the action that was removed
-     *
-     * \pre uri_ must be a valid uri
-     */
-    explicit EventActionRemoved(std::string_view uri_);
-
-    const tstring uri;
+    // Not sure which kind of parameters we want to pass here
+    EventMissionEventReached();
 };
 
 /**
- * This event is created when something regarding a session recording playback changes.
- * The event contains information about the new state of the session recording subsystem.
+ * This event is created when a mission is removed.
  */
-struct EventSessionRecordingPlayback : public Event {
-    static constexpr Type Type = Event::Type::SessionRecordingPlayback;
+struct EventMissionRemoved : public Event {
+    static constexpr Type Type = Event::Type::MissionRemoved;
 
-    enum class State {
-        Started,
-        Paused,
-        Resumed,
-        Finished
+    /**
+     * Creates an instance of an EventMissionRemoved event.
+     *
+     * \param identifier The identifier of the mission removed
+     */
+    explicit EventMissionRemoved(std::string_view identifier);
+
+    const tstring identifier;
+};
+
+/**
+ * This event is created whenever something in the parallel connection subsystem changes.
+ * The new state is sent as an argument with this event.
+ */
+struct EventParallelConnection : public Event {
+    static constexpr Type Type = Event::Type::ParallelConnection;
+
+    enum class State : uint8_t {
+        Established,
+        Lost,
+        HostshipGained,
+        HostshipLost
     };
 
     /**
-     * Creates an instance of an EventSessionRecordingPlayback event.
+     * Creates an instance of an EventParallelConnection event.
      *
-     * \param state_ The new state of the session recording; one of `Started`, `Paused`,
-     *        `Resumed`, `Finished`
+     * \param state_ The new state of the parallel connection system; is one of
+     *        `Established`, `Lost`, `HostshipGained`, or `HostshipLost`
      */
-    EventSessionRecordingPlayback(State state_);
+    explicit EventParallelConnection(State state_);
+    State state;
+};
 
-    const State state;
+/**
+ * This event is created when a planet is eclipsed by a moon or a different planet. This
+ * event is currently unused.
+ */
+struct EventPlanetEclipsed : public Event {
+    static constexpr Type Type = Event::Type::PlanetEclipsed;
+
+    /**
+     * Creates an instance of an EventPlanetEclipsed event.
+
+     * \param eclipsee_ The scene graph node that is eclipsed by another object
+     * \param eclipser_ The scene graph node that is eclipsing the other object
+     *
+     * \pre eclipsee_ must not be `nullptr`
+     * \pre eclipser_ must not be `nullptr`
+     */
+    EventPlanetEclipsed(const SceneGraphNode* eclipsee_, const SceneGraphNode* eclipser_);
+
+    const tstring eclipsee;
+    const tstring eclipser;
 };
 
 /**
@@ -502,22 +491,53 @@ struct EventPointSpacecraft : public Event {
 };
 
 /**
- * This event is created whenever a renderable is enabled. By the time this event is
- * signalled, the renderable has already been enabled.
+ * This event is created when the loading of a profile is finished. This is emitted
+ * regardless of whether it is the initial profile, or any subsequent profile is loaded.
  */
-struct EventRenderableEnabled : public Event {
-    static constexpr Type Type = Event::Type::RenderableEnabled;
+struct EventProfileLoadingFinished : public Event {
+    static constexpr Type Type = Event::Type::ProfileLoadingFinished;
 
     /**
-     * Creates an instance of an EventRenderableEnabled event.
-     *
-     * \param node_ The identifier of the node that contains the renderable
-     *
-     * \pre node_ must not be `nullptr`
+     * Creates an instance of an EventProfileLoadingFinished event.
      */
-    explicit EventRenderableEnabled(const SceneGraphNode* node_);
+    EventProfileLoadingFinished();
+};
 
-    const tstring node;
+/**
+ * This event is created when a property owner or property is removed from a the property
+ * tree.
+ */
+struct EventPropertyTreePruned : public Event {
+    static constexpr Type Type = Event::Type::PropertyTreePruned;
+
+    /**
+     * Creates an instance of an EventPropertyTreePruned event.
+     *
+     * \param uri_ The uri of the property or property owner that was removed
+     *
+     * \pre uri_ must be a valid uri
+     */
+    explicit EventPropertyTreePruned(std::string_view uri_);
+
+    const tstring uri;
+};
+
+/**
+ * This event is created a property owner or property has been added or has changed.
+ */
+struct EventPropertyTreeUpdated : public Event {
+    static constexpr Type Type = Event::Type::PropertyTreeUpdated;
+
+    /**
+     * Creates an instance of an EventPropertyTreeUpdated event.
+     *
+     * \param uri_ A string with the uri of the property or property owner that was added
+     *
+     * \pre uri_ must be a valid uri
+     */
+    explicit EventPropertyTreeUpdated(std::string_view uri_);
+
+    const tstring uri;
 };
 
 /**
@@ -540,53 +560,22 @@ struct EventRenderableDisabled : public Event {
 };
 
 /**
- * This event is created when the a camera path is started.
+ * This event is created whenever a renderable is enabled. By the time this event is
+ * signalled, the renderable has already been enabled.
  */
-struct EventCameraPathStarted : public Event {
-    static constexpr Type Type = Event::Type::CameraPathStarted;
+struct EventRenderableEnabled : public Event {
+    static constexpr Type Type = Event::Type::RenderableEnabled;
 
     /**
-     * Creates an instance of an EventCameraPathStarted event.
+     * Creates an instance of an EventRenderableEnabled event.
      *
-     * \param origin_ The scene graph node from which the path started
-     * \param destination_ The scene graph node at which the path ends
-     */
-    EventCameraPathStarted(const SceneGraphNode* origin_,
-        const SceneGraphNode* destination_);
-
-    const tstring origin;
-    const tstring destination;
-};
-
-/**
- * This event is created when the a camera path is finished.
- */
-struct EventCameraPathFinished : public Event {
-    static constexpr Type Type = Event::Type::CameraPathFinished;
-
-    /**
-     * Creates an instance of an EventCameraPathStarted event.
+     * \param node_ The identifier of the node that contains the renderable
      *
-     * \param origin_ The scene graph node from which the path started
-     * \param destination_ The scene graph node where the path ended
+     * \pre node_ must not be `nullptr`
      */
-    EventCameraPathFinished(const SceneGraphNode* origin_,
-        const SceneGraphNode* destination_);
+    explicit EventRenderableEnabled(const SceneGraphNode* node_);
 
-    const tstring origin;
-    const tstring destination;
-};
-
-/**
- * This event is created when the a camera moves location.
- */
-struct EventCameraMovedPosition : public Event {
-    static constexpr Type Type = Event::Type::CameraMovedPosition;
-
-    /**
-     * Creates an instance of an EventCameraMovedPosition event.
-     */
-    EventCameraMovedPosition();
+    const tstring node;
 };
 
 /**
@@ -604,38 +593,47 @@ struct EventScheduledScriptExecuted : public Event {
 };
 
 /**
- * This event is created when the custom ordering for a specific branch in the Scene GUI
- * tree is changed. It signals to the UI that the tree should be updated.
+ * This event is created when something regarding a session recording playback changes.
+ * The event contains information about the new state of the session recording subsystem.
  */
-struct EventGuiTreeUpdated : public Event {
-    static constexpr Type Type = Event::Type::GuiTreeUpdated;
+struct EventSessionRecordingPlayback : public Event {
+    static constexpr Type Type = Event::Type::SessionRecordingPlayback;
+
+    enum class State {
+        Started,
+        Paused,
+        Resumed,
+        Finished
+    };
 
     /**
-     * Creates an instance of an EventGuiTreeUpdated event.
+     * Creates an instance of an EventSessionRecordingPlayback event.
+     *
+     * \param state_ The new state of the session recording; one of `Started`, `Paused`,
+     *        `Resumed`, `Finished`
      */
-    EventGuiTreeUpdated();
+    explicit EventSessionRecordingPlayback(State state_);
+
+    const State state;
 };
 
 /**
- * A custom event type that can be used in a pinch when no explicit event type is
- * available. This should only be used in special circumstances and it should be
- * transitioned to a specific event type, if it is deemed to be useful.
+ * This event is created with a specific time of interest is reached. This event is
+ * currently unused.
  */
-struct CustomEvent : public Event {
-    static constexpr Type Type = Event::Type::Custom;
+struct EventTimeOfInterestReached : public Event {
+    static constexpr Type Type = Event::Type::TimeOfInterestReached;
 
     /**
-     * Creates an instance of a CustomEvent event.
+     * Creates an instance of an EventTimeOfInterestReached event.
      *
-     * \param subtype_ A textual description of the custom subtype that is emitted
-     * \param payload_ The payload in a string form
-     *
-     * \pre subtype_ must not be empty
+     * \param time_ The time of interest that has been reached
+     * \param camera_ Information about the camera for the specific transition
      */
-    CustomEvent(std::string_view subtype_, std::string_view payload_);
+    EventTimeOfInterestReached(const Time* time_, const Camera* camera_);
 
-    const tstring subtype;
-    const tstring payload;
+    const Time* time = nullptr;
+    const Camera* camera = nullptr;
 };
 
 } // namespace openspace

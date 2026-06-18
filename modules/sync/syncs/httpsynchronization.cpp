@@ -59,7 +59,7 @@ namespace {
         std::string identifier [[codegen::identifier()]];
 
         // The version of this resource that should be requested.
-        int version;
+        int version [[codegen::greaterequal(0)]];
 
         // Determines whether .zip files that are downloaded should automatically be
         // unzipped. If this value is not specified, no unzipping is performed.

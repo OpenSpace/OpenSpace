@@ -24,6 +24,7 @@
 
 #include <openspace/topic/topics/getpropertytopic.h>
 
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -41,11 +42,6 @@ using nlohmann::json;
 
 namespace {
     constexpr std::string_view _loggerCat = "GetPropertyTopic";
-    constexpr std::string_view AllPropertiesValue = "__allProperties";
-    constexpr std::string_view AllNodesValue = "__allNodes";
-    constexpr std::string_view AllScreenSpaceRenderablesValue =
-        "__screenSpaceRenderables";
-    constexpr std::string_view RootPropertyOwner = "__rootOwner";
 } // namespace
 
 namespace openspace {
@@ -57,57 +53,86 @@ void GetPropertyTopic::handleJson(const nlohmann::json& json) {
     ZoneText(requestedKey.c_str(), requestedKey.size());
     LDEBUG(std::format("Getting property '{}'...", requestedKey));
     nlohmann::json response;
-    if (requestedKey == AllPropertiesValue) {
-        response = allProperties();
-    }
-    else if (requestedKey == AllNodesValue) {
-        const std::vector<SceneGraphNode*>& nodes = sceneGraph()->allSceneGraphNodes();
-        response = wrappedPayload(nodes);
-    }
-    else if (requestedKey == AllScreenSpaceRenderablesValue) {
-        response = wrappedPayload({
-            { "value", global::renderEngine->screenSpaceRenderables() }
-        });
-    }
-    else if (requestedKey == RootPropertyOwner) {
-        response = wrappedPayload(global::rootPropertyOwner);
+
+    if (requestedKey == "__rootOwner") {
+        response["value"] = global::rootPropertyOwner;
+        response["type"] = "propertyOwner";
     }
     else {
         response = propertyFromKey(requestedKey);
     }
-    _connection->sendJson(response);
+    sendData(response);
 }
 
 bool GetPropertyTopic::isDone() const {
     return true;
 }
 
-json GetPropertyTopic::allProperties() {
-    const json payload {
+Schema GetPropertyTopic::Schema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
         {
-            "value",
-            {
-                global::renderEngine,
-                global::luaConsole,
-                global::parallelPeer,
-                global::navigationHandler
+          "title": "GetPropertyTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "get" },
+            "topicPayload": {
+              "type": "object",
+              "properties": {
+                "property": {
+                  "anyOf": [{ "const": "__rootOwner" }, { "type": "string" }]
+                }
+              },
+              "additionalProperties": false,
+              "required": ["property"]
+            },
+            "data": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": { "$ref": "properties.json#/$defs/PropertyOwner" },
+                    "type": { "const": "propertyOwner" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["value", "type"]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": { "$ref": "properties.json#/$defs/AnyProperty" },
+                    "type": { "const": "property" }
+                  },
+                  "additionalProperties": false,
+                  "required": ["value", "type"]
+                }
+              ]
             }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
         }
-    };
-    return wrappedPayload(payload);
+    )");
+
+    return { "getpropertytopic", schema };
 }
 
 json GetPropertyTopic::propertyFromKey(const std::string& key) {
     Property* prop = property(key);
     if (prop) {
-        return wrappedPayload(prop);
+        nlohmann::json response;
+        response["value"] = prop;
+        response["type"] = "property";
+        return response;
     }
     PropertyOwner* node = propertyOwner(key);
     if (node) {
-        return wrappedPayload(node);
+        nlohmann::json response;
+        response["value"] = node;
+        response["type"] = "propertyOwner";
+        return response;
     }
 
-    return wrappedError(std::format("Property '{}' not found", key), 404);
+    throw ghoul::RuntimeError(std::format("Property '{}' not found", key));
 }
 
 } // namespace openspace
