@@ -46,11 +46,19 @@ namespace {
 
     constexpr std::string_view _loggerCat = "PointCloudTelemetry";
 
-    // NOTE (malej 2026-06-04): OSC has a maximum message size in bytes, this limits the
-    // number of points to send. This number was found through trail and error. If the
+    // NOTE (malej 2026-06-04): OSC has a maximum message size in bytes; this limits the
+    // number of points to send. This number was found through trial and error. If the
     // message data structure changes, this upper limit might need to be updated. If this
-    // limit is esceeded, OpenSpace will crash.
-    constexpr int MaxNumOscPoints = 30;
+    // limit is exceeded, OpenSpace will crash.
+    constexpr int MaxNumOscPoints = 64;
+
+    // The label is considered part of the OSC message size, so we need to take it into
+    // account when determining the maximum number of points to send. If the maximum
+    // number of points is 64 (which is the maximum number of simultaneous sound processes
+    // SuperCollider can handle), then the maximum label length before a crash is this.
+    // OSC requires all message components to be a multiple of 4 bytes, so this is set to
+    // a multiple of 4.
+    constexpr int MaxLabelSize = 20;
 
     // Indices for data items
     constexpr int DistanceIndex = 0;
@@ -128,7 +136,7 @@ PointCloudTelemetry::PointCloudTelemetry(const std::string& ip, int port)
             LWARNING(std::format(
                 "The number of included points cannot be larger than {} due to the "
                 "message size limits of Open Sound Control. Reverting to the maximum "
-                "allowed value to avoid crash.",
+                "allowed value to avoid a crash.",
                 MaxNumOscPoints
             ));
             _numIncludedPoints = MaxNumOscPoints;
@@ -197,22 +205,22 @@ void PointCloudTelemetry::fetchPointCloud() {
         _pointCloud = nullptr;
         return;
     }
-    else if (!_pointCloud->dataset()) {
-        LERROR(std::format(
-            "Point cloud {} does not have a dataset", _pointCloudIdentifier
-        ));
-        _pointCloud = nullptr;
-        return;
-    }
-    else if (_pointCloud->dataset()->entries.empty()) {
+    else if (_pointCloud->dataset().entries.empty()) {
         LWARNING(std::format(
             "Dataset of point cloud {} does not have any entries", _pointCloudIdentifier
         ));
     }
 
-    _points.reserve(_pointCloud->dataset()->entries.size());
-    for (int i = 0; i < _pointCloud->dataset()->entries.size(); ++i) {
+    _points.reserve(_pointCloud->dataset().entries.size());
+    for (int i = 0; i < _pointCloud->dataset().entries.size(); ++i) {
         _points.push_back(TelemetryPoint(i));
+    }
+    
+    // The _iterators list is used to keep track of the order of the points based on
+    // distance to the camera without needing to change the order of the _points list
+    _iterators.reserve(_pointCloud->dataset().entries.size());
+    for (auto itr = _points.begin(); itr != _points.end(); ++itr) {
+        _iterators.push_back(itr);
     }
 }
 
@@ -241,15 +249,7 @@ void PointCloudTelemetry::update(const Camera* camera) {
 
     // Update data for all points in the point cloud
     bool anyDataWasUpdated = false;
-    for (int i = 0; i < _pointCloud->dataset()->entries.size(); ++i) {
-        // How far away is the point from the camera
-
-        double distance = calculateDistanceTo(
-            camera,
-            _pointCloud->dataset()->entries[i].position,
-            DistanceUnits[_distanceUnitOption]
-        );
-
+    for (int i = 0; i < _pointCloud->dataset().entries.size(); ++i) {
         if (updateData(camera, i, angleMode, includeElevation)) {
             anyDataWasUpdated = true;
         }
@@ -265,41 +265,45 @@ void PointCloudTelemetry::setPointCloudIdentifier(std::string identifier) {
     fetchPointCloud();
 }
 
-// Empty overidded functions
+// Empty overidden function
 bool PointCloudTelemetry::updateData(const Camera*) {
     return false;
 }
+
 void PointCloudTelemetry::sendData() {
-    std::string label = "/" + _pointCloudIdentifier;
+    // The label can not be longer than the maximum size, cut it if it is too long
+    // NOTE (malej 2026-06-16): The OSC receiver label must match this shortened version
+    std::string label = "/" + _pointCloudIdentifier.substr(0, MaxLabelSize);
     std::vector<OpenSoundControlDataType> data;
     
     int numPoints =
         std::min(_numIncludedPoints.value(), static_cast<int>(_points.size()));
     data.reserve(numPoints * NumDataItems);
 
-    data.push_back(_distanceUnitOption.getDescriptionByValue(
-        _distanceUnitOption.value()
-    ));
+    data.push_back(_distanceUnitOption.value());
 
-    // Resort the _points list based on distance to the camera
-    std::sort(_points.begin(), _points.end(),
-        [](const TelemetryPoint& a, const TelemetryPoint& b) {
-            return a.data[DistanceIndex] < b.data[DistanceIndex];
+    // Sort the _iterators list based on the distance from the point the iterator points
+    // to, and the camera
+    std::sort(
+        _iterators.begin(),
+        _iterators.end(),
+        [](const auto& a, const auto& b) {
+            return a->data[DistanceIndex] < b->data[DistanceIndex];
         }
     );
 
     for (int i = 0; i < numPoints; ++i) {
-        data.push_back(_points[i].index);
-        data.push_back(_points[i].data[DistanceIndex]);
-        data.push_back(_points[i].data[HorizontalAngleIndex]);
-        data.push_back(_points[i].data[VerticalAngleIndex]);
+        data.push_back(_iterators[i]->index);
+        data.push_back(_iterators[i]->data[DistanceIndex]);
+        data.push_back(_iterators[i]->data[HorizontalAngleIndex]);
+        data.push_back(_iterators[i]->data[VerticalAngleIndex]);
     }
 
     _connection->send(label, data);
 }
 
 
-bool PointCloudTelemetry::updateData(const Camera* camera, int entryIndex,
+bool PointCloudTelemetry::updateData(const Camera* camera, int index,
                                TelemetryModule::AngleCalculationMode angleCalculationMode,
                                                                     bool includeElevation)
 {
@@ -307,34 +311,16 @@ bool PointCloudTelemetry::updateData(const Camera* camera, int entryIndex,
         return false;
     }
 
-    if (entryIndex < 0 || _points.size() <= entryIndex) {
+    if (index < 0 || _points.size() <= index) {
         LWARNING(std::format(
-            "Point cloud dataset does not include index {}", entryIndex
-        ));
-        return false;
-    }
-
-    // Since the _points list is now sorted based on distance, we need to find the correct
-    // point index corresponding to the incoming entry index
-    int pointIndex = std::find_if(
-        _points.begin(),
-        _points.end(),
-        [entryIndex](const TelemetryPoint& p) {
-            return p.index == entryIndex;
-        }
-    ) - _points.begin();
-
-    if (pointIndex < 0 || _points.size() <= pointIndex) {
-        LWARNING(std::format(
-            "Could not find point clound point {} in the internal list of points {}",
-            entryIndex, pointIndex
+            "Point cloud dataset does not include index {}", index
         ));
         return false;
     }
 
     double distance = calculateDistanceTo(
         camera,
-        _pointCloud->dataset()->entries[entryIndex].position,
+        _pointCloud->dataset().entries[index].position,
         DistanceUnits[_distanceUnitOption]
     );
 
@@ -345,7 +331,7 @@ bool PointCloudTelemetry::updateData(const Camera* camera, int entryIndex,
 
     double horizontalAngle = calculateAngleTo(
         camera,
-        _pointCloud->dataset()->entries[entryIndex].position,
+        _pointCloud->dataset().entries[index].position,
         angleCalculationMode
     );
 
@@ -353,29 +339,29 @@ bool PointCloudTelemetry::updateData(const Camera* camera, int entryIndex,
     if (includeElevation) {
         verticalAngle = calculateElevationAngleTo(
             camera,
-            _pointCloud->dataset()->entries[entryIndex].position,
+            _pointCloud->dataset().entries[index].position,
             angleCalculationMode
         );
     }
 
     // Check if this data is new, otherwise don't update it
-    double prevDistance = _points[pointIndex].data[DistanceIndex];
-    double prevHorizontalAngle = _points[pointIndex].data[HorizontalAngleIndex];
-    double prevVerticalAngle = _points[pointIndex].data[VerticalAngleIndex];
+    double prevDistance = _points[index].data[DistanceIndex];
+    double prevHorizontalAngle = _points[index].data[HorizontalAngleIndex];
+    double prevVerticalAngle = _points[index].data[VerticalAngleIndex];
     bool dataWasUpdated = false;
 
     if (std::abs(prevDistance - distance) > _distancePrecision) {
-        _points[pointIndex].data[DistanceIndex] = distance;
+        _points[index].data[DistanceIndex] = distance;
         dataWasUpdated = true;
     }
 
     if (std::abs(prevHorizontalAngle - horizontalAngle) > _anglePrecision) {
-        _points[pointIndex].data[HorizontalAngleIndex] = horizontalAngle;
+        _points[index].data[HorizontalAngleIndex] = horizontalAngle;
         dataWasUpdated = true;
     }
 
     if (std::abs(prevVerticalAngle - verticalAngle) > _anglePrecision) {
-        _points[pointIndex].data[VerticalAngleIndex] = verticalAngle;
+        _points[index].data[VerticalAngleIndex] = verticalAngle;
         dataWasUpdated = true;
     }
 

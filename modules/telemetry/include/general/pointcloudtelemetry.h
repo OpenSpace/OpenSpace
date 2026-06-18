@@ -110,14 +110,14 @@ private:
      * point cloud entry.
      *
      * \param camera The camera in the scene
-     * \param entryIndex The index to the point in the point cloud whose internally stored
+     * \param index The index to the point in the point cloud whose internally stored
      *        data should be updated
      * \param angleCalculationMode The angle calculation mode to use. This determines
      *        which method to use when calculating the angle
      * \param includeElevation Whether the additional elevation angle should be calculated
      * \return `true` if the data is new compared to before, otherwise `false`
      */
-    bool updateData(const Camera* camera, int entryIndex,
+    bool updateData(const Camera* camera, int index,
         TelemetryModule::AngleCalculationMode angleCalculationMode,
         bool includeElevation);
 
@@ -135,6 +135,7 @@ private:
     std::string _pointCloudIdentifier;
     RenderablePointCloud* _pointCloud = nullptr;
     std::vector<TelemetryPoint> _points;
+    std::vector<std::vector<TelemetryPoint>::iterator> _iterators;
     double _anglePrecision = 0.0;
     double _distancePrecision = 0.0;
 };

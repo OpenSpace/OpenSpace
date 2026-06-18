@@ -30,7 +30,7 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "OpenSoundControlConnection";
-    constexpr int BufferSize = 1024;
+    constexpr int BufferSize = 2080; // Needs to be a multiplier of 4
 
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;

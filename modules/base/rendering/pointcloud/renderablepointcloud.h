@@ -78,7 +78,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    const dataloader::Dataset* dataset() const;
+    const dataloader::Dataset& dataset() const;
 
     static openspace::Documentation Documentation();
 
