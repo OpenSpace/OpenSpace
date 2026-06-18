@@ -10,7 +10,8 @@ local Node = {
     Type = "RenderablePlaneImageLocal",
     Size = 3.0E11,
     Texture = openspace.absPath("${DATA}/test2.jpg"),
-    RightTexture = openspace.absPath("${DATA}/test.jpg")
+    RightTexture = openspace.absPath("${DATA}/test.jpg"),
+    Billboard = true
   },
   GUI = {
     Name = "RenderablePlaneImageLocal - Stereo",

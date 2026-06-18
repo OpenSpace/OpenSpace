@@ -10,7 +10,8 @@ local Node = {
     Type = "RenderablePlaneImageOnline",
     Size = 3.0E11,
     URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg",
-    RightURL = "http://data.openspaceproject.com/examples/renderableplaneimageonline_2.jpg"
+    RightURL = "http://data.openspaceproject.com/examples/renderableplaneimageonline_2.jpg",
+    Billboard = true
   },
   GUI = {
     Name = "RenderablePlaneImageOnline - Stereo",
