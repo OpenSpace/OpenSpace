@@ -44,32 +44,32 @@ public:
 
     /**
      * Main update function to gather telemetry information from the list of points in the
-     * point cloud (distance, horizontal angle, vertical angle) and send it to the Open
-     * Sound Control receiver.
+     * point cloud (point index, distance, horizontal angle, vertical angle) and send it
+     * to the Open Sound Control receiver.
      *
-     * \param camera The camera in the scene
+     * \param camera The camera in the scene.
      */
     void update(const Camera* camera) override;
 
     /**
-     * Set the given identifier as the identifier of the pointcloud to gather telemetry
+     * Set the given identifier as the identifier of the point cloud to gather telemetry
      * data for.
      *
-     * \param identifier The identifier of the pointcloud to set
+     * \param identifier The identifier of the point cloud to gather telemetry data for.
      */
     void setPointCloudIdentifier(std::string identifier);
 
     /**
      * Returns the Lua library that contains all Lua functions available for the
-     * pointcloud telemetry.
+     * point cloud telemetry.
      *
      * \return The Lua library that contains all Lua functions available for the
-     *         pointcloud telemetry
+     *         point cloud telemetry.
      */
     static LuaLibrary luaLibrary();
 
 private:
-    static constexpr int NumDataItems = 4;
+    static constexpr int NumDataItemsPerPoint = 4;
 
     /**
      * Struct to hold data for all the points.
@@ -79,11 +79,14 @@ private:
 
         int index = -1;
 
-        /// Distance, horizontal angle, vertical angle (do not store the distance unit
-        /// here, the option property stores it instead)
-        std::vector<double> data = std::vector<double>(NumDataItems - 1, 0.0);
+        /// Distance, horizontal angle, vertical angle (index is stored seperatly).
+        std::vector<double> data = std::vector<double>(NumDataItemsPerPoint - 1, 0.0);
     };
 
+    /**
+     * Use the already set point cloud identifier to find it in the scene and store a
+     * pointer to it for easy access.
+     */
     void fetchPointCloud();
 
     /**
@@ -91,31 +94,32 @@ private:
      * additional arguments. Therefore, this implementation is left empty and the update
      * function is overriden to use the custom updateData function instead.
      *
-     * \param camera The camera in the scene (not used in this case)
-     * \return Always return `false` (this function is empty)
+     * \param camera The camera in the scene (not used in this case).
+     * \return Always return `false` (this function is empty).
      */
     bool updateData(const Camera* camera) override;
 
     /**
-     * Send current telemetry data for the points in the point cloud to the Open Sound
-     * Control receiver. The order of sent data is as follows: the unit used for the
-     * distance value, {point index, distance, horizontal angle, vertical angle} repeated
-     * for the X closest points to the camera, where X is the value fo the
-     * `NumIncludedPoints` property.
+     * Send the current telemetry data for the points in the point cloud to the Open Sound
+     * Control receiver. The order of the sent data is as follows: the unit used for the
+     * distance values, {point index, distance, horizontal angle, vertical angle}, where
+     * the items in parentheses are repeated for the X closest points to the camera. X is
+     * the value of the `NumIncludedPoints` property.
      */
     void sendData() override;
 
     /**
      * Update telemetry data (distance, horizontal angle, vertical angle) for the given
-     * point cloud entry.
+     * point index.
      *
-     * \param camera The camera in the scene
+     * \param camera The camera in the scene.
      * \param index The index to the point in the point cloud whose internally stored
-     *        data should be updated
+     *        data should be updated.
      * \param angleCalculationMode The angle calculation mode to use. This determines
-     *        which method to use when calculating the angle
-     * \param includeElevation Whether the additional elevation angle should be calculated
-     * \return `true` if the data is new compared to before, otherwise `false`
+     *        which method to use when calculating the angle.
+     * \param includeElevation Whether the additional elevation angle should be calculated.
+     * 
+     * \return `true` if the data is new compared to before, otherwise `false`.
      */
     bool updateData(const Camera* camera, int index,
         TelemetryModule::AngleCalculationMode angleCalculationMode,

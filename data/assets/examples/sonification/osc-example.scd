@@ -440,15 +440,43 @@ OSCdef.new(
 // and the script:
 // openspace.telemetry.setPointCloudIdentifier("RenderablePointCloud_Example")
 OSCdef.new(
-	\RenderablePointCloud_Example,
+	\RenderablePointCloud,
 	{
 		arg msg;
 
-		// msg[0] = OSC Label (The identifier of the point cloud).
-		// msg[1] = The unit for the distance to the camera, as a string in singular form
-		//          with the first letter capitalized. For example, "Meter".
+		// msg[0] = OSC Label (The identifier of the point cloud, shortened to 20
+		//          characters in size at most).
+		// msg[1] = The unit for the distance to the camera, as an integer, convert to
+		//          unit according to the following:
+		//          0: Nanometer,
+        //          1: Micrometer,
+        //          2: Millimeter,
+        //          3: Centimeter,
+        //          4: Decimeter,
+        //          5: Meter,
+        //          6: Kilometer,
+        //          7: AU,
+        //          8: Lighthour,
+        //          9: Lightday,
+        //          10: Lightmonth,
+        //          11: Lightyear,
+		//          12: Parsec,
+        //          13: Kiloparsec,
+        //          14: Megaparsec,
+        //          15: Gigaparsec,
+        //          16: Gigalightyear,
+        //          17: Thou,
+        //          18: Inch,
+        //          19: Foot,
+        //          20: Yard,
+        //          21: Chain,
+        //          22: Furlong,
+        //          23: Mile,
+        //          24: League,
+        //          25: Nautical Mile
 		// msg[2] = The index for the point in the point cloud that the upcoming 3 data
-		//          items are refering to.
+		//          items are refering to. This is the point that is closest to the
+		//          camera.
 		// msg[3] = The distance from the camera to the point, in the distance unit
 		//          specified in the first data item.
 		// msg[4] = The horizontal angle to the point, in radians, with the current angle
@@ -459,9 +487,14 @@ OSCdef.new(
 		//          calculation mode taken into account. Again, see
 		//          https://docs.openspaceproject.com/latest/creating-data-assets/modules/
 		//          telemetry/angle-information.html for details.
-		("RenderablePointCloud_Example: " + msg).postln;
+		// msg[6] = The index of the next point in the point cloud that the next 3 data
+		//          items refer to. This point is the second closest to the camera.
+		// msg[.. = A maximum of 64 points with 4 data items each are sent. Less points
+		//          is possible, the number of points sent can be chaecked with the
+		//          property "Modules.Telemetry.PointCloudTelemetry.NumIncludedPoints".
+		("RenderablePointCloud: " + msg).postln;
 	},
-	'/RenderablePointCloud_Example'
+	'/RenderablePointCloud'
 );
 
 )

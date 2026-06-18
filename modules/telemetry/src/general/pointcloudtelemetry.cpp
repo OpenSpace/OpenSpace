@@ -64,7 +64,6 @@ namespace {
     constexpr int DistanceIndex = 0;
     constexpr int HorizontalAngleIndex = 1;
     constexpr int VerticalAngleIndex = 2;
-    constexpr int DistanceUnitIndex = 3;
 
     static const PropertyOwner::PropertyOwnerInfo PointCloudTelemetryInfo = {
         "PointCloudTelemetry",
@@ -105,9 +104,9 @@ namespace {
         "NumIncludedPoints",
         "Number of Included Points",
         "Only the number of points specified will be included in the telemetry data. The "
-        "points are selected based on distance. For example, if this value is 100 then "
-        "only the 100 points closest to the camera will be included in the telemetry "
-        "data.",
+        "points are selected based on distance. For example, if this value is 50, then "
+        "only the 50 points closest to the camera will be included in the telemetry data "
+        "sent to the Open Sound Control receiver.",
         Property::Visibility::User
     };
 } // namespace
@@ -175,7 +174,7 @@ void PointCloudTelemetry::fetchPointCloud() {
     // Find the node
     SceneGraphNode* node = sceneGraphNode(_pointCloudIdentifier);
     if (!node) {
-        LERROR(std::format("Could not find point clound {}", _pointCloudIdentifier));
+        LERROR(std::format("Could not find point cloud {}", _pointCloudIdentifier));
         return;
     }
 
@@ -191,7 +190,7 @@ void PointCloudTelemetry::fetchPointCloud() {
 
     if (renderable->typeAsString() != "RenderablePointCloud") {
         LERROR(std::format(
-            "Not supported RenderableType {} detected", renderable->typeAsString()
+            "Not supported Renderable type {} detected", renderable->typeAsString()
         ));
         return;
     }
@@ -278,7 +277,9 @@ void PointCloudTelemetry::sendData() {
     
     int numPoints =
         std::min(_numIncludedPoints.value(), static_cast<int>(_points.size()));
-    data.reserve(numPoints * NumDataItems);
+
+    // Reserve space for all points plus the distance unit
+    data.reserve(numPoints * NumDataItemsPerPoint + 1);
 
     data.push_back(_distanceUnitOption.value());
 
