@@ -41,7 +41,7 @@ public:
      * \param vSpacing Vertical spacing between rows
      * \param parent Parent widget
      */
-    explicit FlowLayout(int hSpacing, int vSpacing, QWidget* parent);
+    FlowLayout(int hSpacing, int vSpacing, QWidget* parent);
 
     ~FlowLayout() override;
 

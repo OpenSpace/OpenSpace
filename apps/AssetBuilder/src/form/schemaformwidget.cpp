@@ -184,7 +184,7 @@ namespace {
     void clearWidget(QWidget* widget) {
         // Union containers: clear every child field widget and reset the combo to index 0
         if (widget->objectName() == UnionContainerName) {
-            const auto children = widget->findChildren<QWidget*>(
+            const QList<QWidget*> children = widget->findChildren<QWidget*>(
                 QString(),
                 Qt::FindDirectChildrenOnly
             );
@@ -230,7 +230,7 @@ namespace {
                 lineEditFile->blockSignals(false);
             }
         }
-        else if (auto* combo = widget->findChild<QComboBox*>(); combo) {
+        else if (auto* combo = widget->findChild<QComboBox*>();  combo) {
             combo->blockSignals(true);
             combo->setCurrentText("");
             combo->blockSignals(false);
@@ -238,12 +238,12 @@ namespace {
     }
 
     void populateWidget(QWidget* widget, const PropertyValue& propertyValue) {
-        if (auto* checkBox = qobject_cast<QCheckBox*>(widget); checkBox) {
+        if (auto* checkBox = qobject_cast<QCheckBox*>(widget);  checkBox) {
             checkBox->blockSignals(true);
             checkBox->setChecked(propertyValue.isBool() ? propertyValue.toBool() : false);
             checkBox->blockSignals(false);
         }
-        else if (auto* list = qobject_cast<StringListWidget*>(widget); list){
+        else if (auto* list = qobject_cast<StringListWidget*>(widget);  list){
             list->blockSignals(true);
             if (propertyValue.isList()) {
                 QStringList items;

@@ -45,7 +45,7 @@ StringListWidget::StringListWidget(QWidget* parent)
     // The FlowLayout reports its true (wrapped) height only via heightForWidth(). A
     // parent layout queries that only when the widget's size policy opts in, so enable
     // height-for-width here; otherwise the parent grid allocates just the one-row
-    // sizeHint and clips chips that wrap to later rows (e.g. when loading a long list).
+    // sizeHint and clips chips that wrap to later rows (e.g. when loading a long list)
     QSizePolicy selfPolicy = sizePolicy();
     selfPolicy.setHeightForWidth(true);
     setSizePolicy(selfPolicy);
@@ -54,7 +54,7 @@ StringListWidget::StringListWidget(QWidget* parent)
     outer->setContentsMargins(0, 0, 0, 0);
     outer->setSpacing(4);
 
-    // Chip area with flow layout — hidden when empty to avoid dead spacing
+    // Chip area with flow layout - hidden when empty to avoid dead spacing
     _chipArea = new QWidget(this);
     _chipArea->setVisible(false);
     new FlowLayout(ChipSpacing, ChipSpacing, _chipArea);
@@ -135,7 +135,7 @@ void StringListWidget::setValues(const QStringList& values) {
         }
     }
     _chipArea->setVisible(_chipArea->layout()->count() > 0);
-    // The chip count changed, so the wrapped height did too — prompt the parent layout
+    // The chip count changed, so the wrapped height did too - prompt the parent layout
     // to re-query heightForWidth and give the area room for every row
     _chipArea->updateGeometry();
     updateGeometry();
@@ -175,16 +175,21 @@ void StringListWidget::addChip(const QString& text) {
     chipLayout->addWidget(removeBtn);
 
     // Button to remove this chip: deletes the chip widget and emits valueChanged
-    connect(removeBtn, &QPushButton::clicked, this, [this, chip]() {
-        chip->setParent(nullptr);
-        delete chip;
-        // Forces the flow layout to recalculate positions and update geometry
-        _chipArea->layout()->activate();
-        // Hide the chip area if this was the last chip
-        const bool shouldShow = _chipArea->layout()->count() > 0;
-        _chipArea->setVisible(shouldShow);
-        emit valueChanged();
-    });
+    connect(
+        removeBtn,
+        &QPushButton::clicked,
+        this,
+        [this, chip]() {
+            chip->setParent(nullptr);
+            delete chip;
+            // Forces the flow layout to recalculate positions and update geometry
+            _chipArea->layout()->activate();
+            // Hide the chip area if this was the last chip
+            const bool shouldShow = _chipArea->layout()->count() > 0;
+            _chipArea->setVisible(shouldShow);
+            emit valueChanged();
+        }
+    );
 
     _chipArea->layout()->addWidget(chip);
 }
