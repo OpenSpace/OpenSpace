@@ -1,0 +1,7 @@
+asset.require("./aurorasaurusObservationCloud")
+asset.require("./aurorasaurusActions")
+asset.require("./auroraOvalLayer")
+asset.require("./northernViewline")
+asset.require("./southernViewline")
+asset.require("./storm")
+asset.require("./mission")

@@ -1,0 +1,3659 @@
+{
+ "dataID": 2638,
+ "files": [
+  {
+   "timestamp": "2024-05-10 15:00:17.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_150017_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:02:17.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_150217_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:04:17.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_150417_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:06:17.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_150617_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:08:17.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_150817_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:10:17.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_151017_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:10:54.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_151054_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:12:54.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_151254_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:14:54.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_151454_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:16:54.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_151654_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:18:54.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_151854_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:20:36.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_152036_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:22:36.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_152236_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:24:36.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_152436_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:26:36.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_152636_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:28:36.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_152836_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:30:36.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_153036_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:31:14.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_153114_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:33:14.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_153314_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:35:14.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_153514_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:37:14.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_153714_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:39:14.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_153914_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:41:14.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_154114_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:42:15.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_154215_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:44:15.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_154415_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:46:15.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_154615_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:48:15.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_154815_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:50:15.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_155015_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:50:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_155018_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:52:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_155218_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:54:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_155418_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:56:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_155618_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 15:58:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_155818_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:00:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_160018_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:00:21.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_160021_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:02:21.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_160221_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:04:21.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_160421_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:06:21.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_160621_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:08:21.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_160821_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:10:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_161019_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:12:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_161219_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:14:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_161419_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:15:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_161523_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:17:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_161723_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:19:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_161923_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:21:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_162123_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:23:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_162323_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:25:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_162523_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:27:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_162723_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:29:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_162923_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:31:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_163123_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:31:32.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_163132_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:33:32.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_163332_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:35:32.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_163532_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:37:32.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_163732_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:39:32.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_163932_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:41:32.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_164132_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:41:58.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_164158_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:43:58.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_164358_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:45:58.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_164558_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:46:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_164622_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:48:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_164822_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:50:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_165022_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:52:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_165222_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:54:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_165422_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:56:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_165622_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 16:58:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_165822_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:00:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_170018_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:02:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_170218_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:04:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_170418_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:06:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_170618_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:08:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_170818_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:10:13.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_171013_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:12:13.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_171213_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:14:13.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_171413_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:16:13.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_171613_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:18:13.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_171813_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:20:13.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_172013_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:21:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_172106_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:23:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_172306_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:25:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_172506_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:27:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_172706_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:29:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_172906_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:30:28.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_173028_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:32:28.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_173228_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:34:28.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_173428_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:36:28.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_173628_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:38:28.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_173828_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:40:28.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_174028_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:40:29.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_174029_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:42:29.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_174229_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:44:29.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_174429_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:46:29.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_174629_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:48:29.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_174829_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:50:29.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_175029_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:52:29.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_175229_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:54:29.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_175429_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:56:29.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_175629_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 17:58:29.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_175829_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:00:29.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_180029_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:02:29.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_180229_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:03:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_180347_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:05:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_180547_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:07:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_180747_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:09:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_180947_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:11:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_181147_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:13:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_181347_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:15:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_181547_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:17:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_181747_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:19:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_181947_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:21:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_182147_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:23:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_182312_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:25:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_182512_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:27:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_182712_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:29:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_182912_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:31:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_183112_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:33:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_183312_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:33:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_183324_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:35:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_183524_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:37:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_183724_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:38:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_183848_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:40:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_184048_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:42:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_184248_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:44:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_184448_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:46:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_184648_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:48:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_184848_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:50:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_185048_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:52:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_185248_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:52:51.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_185251_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:54:51.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_185451_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:56:51.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_185651_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 18:58:51.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_185851_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:00:51.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_190051_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:02:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_190242_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:04:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_190442_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:06:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_190642_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:08:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_190842_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:10:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_191042_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:12:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_191242_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:13:01.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_191301_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:15:01.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_191501_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:17:01.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_191701_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:18:52.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_191852_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:20:52.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_192052_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:22:52.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_192252_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:24:52.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_192452_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:26:52.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_192652_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:28:52.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_192852_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:29:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_192955_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:31:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_193155_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:33:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_193355_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:35:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_193555_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:37:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_193755_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:39:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_193955_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:41:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_194155_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:43:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_194355_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:45:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_194555_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:47:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_194755_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:49:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_194955_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:51:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_195155_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:53:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_195355_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:55:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_195555_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:56:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_195655_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 19:58:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_195855_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:00:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_200055_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:02:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_200255_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:04:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_200455_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:06:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_200655_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:08:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_200855_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:10:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_201055_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:12:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_201224_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:14:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_201424_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:16:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_201624_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:18:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_201824_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:20:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_202024_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:22:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_202224_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:22:50.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_202250_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:24:50.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_202450_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:26:50.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_202650_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:28:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_202830_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:30:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_203030_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:32:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_203230_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:34:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_203430_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:36:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_203630_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:38:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_203830_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:39:04.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_203904_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:41:04.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_204104_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:43:04.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_204304_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:45:04.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_204504_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:47:04.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_204704_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:49:04.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_204904_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:51:04.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_205104_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:53:04.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_205304_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:55:04.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_205504_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:57:04.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_205704_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:59:04.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_205904_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 20:59:44.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_205944_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:01:44.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_210144_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:03:44.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_210344_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:04:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_210453_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:06:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_210653_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:08:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_210853_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:10:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_211053_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:12:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_211253_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:13:31.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_211331_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:15:31.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_211531_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:17:31.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_211731_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:19:31.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_211931_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:21:31.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_212131_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:23:31.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_212331_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:23:38.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_212338_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:25:38.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_212538_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:27:38.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_212738_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:29:38.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_212938_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:31:38.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_213138_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:33:38.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_213338_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:35:38.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_213538_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:36:26.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_213626_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:38:26.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_213826_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:40:26.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_214026_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:42:26.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_214226_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:44:26.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_214426_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:45:00.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_214500_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:47:00.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_214700_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:49:00.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_214900_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:51:00.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_215100_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:53:00.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_215300_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:54:03.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_215403_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:56:03.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_215603_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:58:03.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_215803_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 21:59:32.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_215932_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:01:32.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_220132_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:03:32.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_220332_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:05:32.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_220532_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:07:32.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_220732_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:09:32.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_220932_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:11:32.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_221132_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:13:32.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_221332_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:14:14.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_221414_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:16:14.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_221614_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:18:14.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_221814_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:20:14.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_222014_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:22:14.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_222214_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:23:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_222342_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:25:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_222542_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:27:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_222742_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:29:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_222942_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:30:09.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_223009_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:32:09.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_223209_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:34:09.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_223409_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:36:09.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_223609_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:38:09.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_223809_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:40:09.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_224009_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:42:09.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_224209_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:43:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_224330_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:45:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_224530_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:47:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_224730_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:49:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_224930_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:51:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_225130_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:53:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_225330_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:55:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_225530_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:57:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_225730_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 22:59:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_225930_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:01:00.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_230100_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:03:00.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_230300_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:05:00.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_230500_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:06:15.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_230615_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:08:15.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_230815_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:10:15.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_231015_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:12:15.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_231215_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:14:15.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_231415_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:16:15.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_231615_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:18:15.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_231815_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:20:15.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_232015_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:22:15.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_232215_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:23:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_232319_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:25:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_232519_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:27:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_232719_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:29:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_232919_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:31:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_233119_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:31:37.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_233137_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:33:37.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_233337_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:35:37.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_233537_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:37:37.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_233737_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:39:37.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_233937_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:41:37.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_234137_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:43:37.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_234337_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:45:37.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_234537_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:45:57.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_234557_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:47:57.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_234757_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:49:57.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_234957_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:51:57.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_235157_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:53:57.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_235357_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:55:57.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_235557_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:57:57.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_235757_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-10 23:59:57.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240510_235957_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:01:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_000156_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:03:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_000356_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:05:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_000556_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:07:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_000756_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:09:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_000956_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:11:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_001156_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:12:58.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_001258_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:14:58.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_001458_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:16:58.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_001658_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:17:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_001743_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:19:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_001943_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:21:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_002143_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:23:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_002343_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:25:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_002543_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:27:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_002743_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:29:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_002943_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:31:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_003119_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:33:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_003319_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:35:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_003519_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:37:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_003719_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:39:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_003919_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:41:00.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_004100_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:43:00.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_004300_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:45:00.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_004500_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:47:00.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_004700_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:49:00.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_004900_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:50:33.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_005033_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:52:33.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_005233_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:54:33.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_005433_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:56:33.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_005633_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 00:58:33.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_005833_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:00:33.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_010033_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:01:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_010130_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:03:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_010330_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:05:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_010530_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:07:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_010730_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:09:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_010930_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:11:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_011123_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:13:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_011323_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:15:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_011523_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:17:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_011723_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:19:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_011923_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:21:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_012123_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:21:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_012147_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:23:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_012347_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:25:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_012547_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:27:16.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_012716_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:29:16.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_012916_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:31:16.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_013116_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:33:16.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_013316_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:35:16.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_013516_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:37:16.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_013716_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:39:16.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_013916_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:41:16.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_014116_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:42:41.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_014241_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:44:41.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_014441_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:46:41.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_014641_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:48:41.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_014841_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:50:41.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_015041_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:52:34.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_015234_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:54:34.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_015434_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:56:34.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_015634_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 01:58:34.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_015834_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:00:34.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_020034_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:02:05.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_020205_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:04:05.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_020405_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:06:05.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_020605_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:08:05.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_020805_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:10:05.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_021005_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:11:16.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_021116_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:13:16.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_021316_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:15:16.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_021516_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:17:16.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_021716_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:19:16.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_021916_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:21:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_022106_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:23:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_022306_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:25:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_022506_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:27:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_022706_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:29:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_022906_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:31:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_023106_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:32:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_023224_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:34:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_023424_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:36:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_023624_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:38:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_023824_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:40:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_024024_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:40:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_024048_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:42:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_024248_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:44:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_024448_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:46:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_024648_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:48:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_024848_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:50:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_025048_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:52:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_025248_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:53:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_025312_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:55:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_025512_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:57:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_025712_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:57:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_025722_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 02:59:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_025922_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:01:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_030122_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:03:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_030322_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:05:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_030522_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:07:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_030722_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:09:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_030922_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:11:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_031122_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:12:03.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_031203_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:14:03.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_031403_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:16:03.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_031603_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:18:03.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_031803_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:20:03.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_032003_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:21:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_032119_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:23:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_032319_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:25:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_032519_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:27:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_032719_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:29:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_032919_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:31:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_033119_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:31:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_033142_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:33:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_033342_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:35:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_033542_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:37:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_033742_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:39:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_033942_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:41:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_034123_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:43:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_034323_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:45:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_034523_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:47:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_034723_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:49:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_034923_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:51:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_035119_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:53:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_035319_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:55:19.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_035519_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:55:59.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_035559_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:57:59.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_035759_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 03:59:59.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_035959_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:01:59.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_040159_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:03:59.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_040359_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:05:59.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_040559_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:07:59.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_040759_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:09:59.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_040959_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:11:59.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_041159_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:13:59.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_041359_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:14:13.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_041413_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:16:13.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_041613_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:18:13.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_041813_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:20:13.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_042013_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:22:13.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_042213_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:24:13.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_042413_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:24:26.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_042426_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:26:26.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_042626_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:28:26.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_042826_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:30:26.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_043026_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:32:26.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_043226_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:33:37.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_043337_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:35:37.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_043537_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:37:37.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_043737_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:39:37.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_043937_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:40:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_044053_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:42:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_044253_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:44:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_044453_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:46:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_044653_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:48:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_044853_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:50:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_045053_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:52:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_045253_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:54:09.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_045409_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:56:09.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_045609_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 04:58:09.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_045809_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:00:09.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_050009_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:02:09.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_050209_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:03:33.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_050333_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:05:33.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_050533_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:06:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_050647_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:08:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_050847_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:10:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_051047_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:12:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_051247_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:14:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_051447_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:16:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_051647_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:18:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_051847_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:20:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_052047_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:22:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_052247_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:23:00.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_052300_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:25:00.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_052500_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:27:00.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_052700_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:29:00.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_052900_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:31:00.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_053100_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:33:00.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_053300_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:33:58.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_053358_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:35:58.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_053558_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:37:58.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_053758_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:38:37.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_053837_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:40:37.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_054037_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:42:37.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_054237_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:44:37.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_054437_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:46:37.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_054637_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:48:37.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_054837_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:50:37.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_055037_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:52:37.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_055237_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:53:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_055353_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:55:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_055553_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:57:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_055753_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 05:59:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_055953_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:01:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_060153_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:03:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_060353_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:05:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_060553_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:06:44.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_060644_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:08:44.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_060844_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:10:44.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_061044_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:12:44.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_061244_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:14:20.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_061420_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:16:20.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_061620_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:18:20.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_061820_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:20:20.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_062020_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:22:20.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_062220_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:24:20.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_062420_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:26:20.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_062620_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:27:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_062706_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:29:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_062906_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:31:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_063106_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:33:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_063306_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:35:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_063506_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:37:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_063706_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:39:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_063906_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:40:54.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_064054_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:42:54.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_064254_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:44:54.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_064454_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:46:54.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_064654_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:48:54.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_064854_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:50:54.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_065054_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:52:54.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_065254_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:54:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_065430_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:56:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_065630_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 06:58:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_065830_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:00:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_070030_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:02:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_070230_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:04:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_070430_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:04:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_070443_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:06:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_070643_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:08:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_070843_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:10:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_071043_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:12:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_071243_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:14:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_071443_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:16:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_071643_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:18:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_071843_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:20:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_072043_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:22:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_072243_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:23:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_072325_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:25:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_072525_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:27:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_072725_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:29:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_072925_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:31:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_073125_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:33:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_073325_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:34:49.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_073449_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:36:49.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_073649_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:38:49.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_073849_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:40:49.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_074049_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:42:49.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_074249_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:44:49.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_074449_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:45:02.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_074502_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:47:02.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_074702_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:49:02.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_074902_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:51:02.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_075102_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:52:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_075247_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:54:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_075447_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:56:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_075647_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 07:58:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_075847_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:00:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_080047_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:02:20.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_080220_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:04:20.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_080420_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:06:20.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_080620_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:08:20.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_080820_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:10:20.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_081020_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:12:20.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_081220_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:13:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_081347_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:15:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_081547_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:17:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_081747_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:19:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_081947_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:21:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_082147_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:23:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_082347_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:25:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_082547_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:27:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_082747_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:29:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_082947_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:31:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_083147_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:33:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_083325_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:35:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_083525_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:37:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_083725_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:39:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_083925_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:41:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_084125_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:42:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_084256_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:44:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_084456_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:46:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_084656_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:48:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_084856_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:50:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_085056_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:52:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_085256_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:54:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_085456_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:56:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_085656_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 08:58:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_085856_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:00:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_090056_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:02:49.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_090249_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:04:49.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_090449_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:06:49.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_090649_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:08:49.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_090849_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:10:49.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_091049_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:12:11.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_091211_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:14:11.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_091411_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:16:11.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_091611_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:18:11.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_091811_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:20:11.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_092011_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:22:11.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_092211_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:22:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_092243_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:24:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_092443_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:26:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_092643_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:28:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_092843_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:30:43.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_093043_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:31:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_093140_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:33:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_093340_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:35:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_093540_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:36:17.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_093617_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:38:17.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_093817_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:40:17.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_094017_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:42:17.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_094217_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:44:17.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_094417_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:46:17.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_094617_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:48:17.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_094817_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:50:17.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_095017_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:52:17.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_095217_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:52:57.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_095257_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:54:57.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_095457_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:56:57.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_095657_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 09:58:57.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_095857_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:00:57.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_100057_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:02:57.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_100257_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:04:51.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_100451_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:06:51.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_100651_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:08:51.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_100851_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:10:51.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_101051_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:12:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_101230_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:14:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_101430_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:16:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_101630_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:18:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_101830_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:20:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_102030_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:22:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_102230_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:23:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_102325_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:25:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_102525_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:27:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_102725_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:29:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_102925_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:31:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_103125_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:33:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_103325_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:34:38.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_103438_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:36:38.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_103638_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:38:38.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_103838_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:40:38.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_104038_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:42:38.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_104238_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:44:38.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_104438_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:45:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_104524_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:47:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_104724_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:49:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_104924_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:51:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_105124_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:53:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_105323_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:55:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_105523_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:57:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_105723_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 10:59:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_105923_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:01:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_110123_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:03:23.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_110323_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:04:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_110424_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:06:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_110624_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:08:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_110824_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:10:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_111024_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:12:24.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_111224_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:12:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_111242_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:14:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_111442_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:16:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_111642_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:18:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_111842_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:20:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_112042_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:22:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_112242_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:24:42.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_112442_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:26:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_112640_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:28:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_112840_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:30:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_113040_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:32:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_113240_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:32:51.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_113251_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:34:51.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_113451_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:36:51.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_113651_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:38:51.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_113851_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:40:51.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_114051_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:41:28.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_114128_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:43:28.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_114328_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:45:28.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_114528_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:47:28.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_114728_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:49:28.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_114928_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:51:28.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_115128_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:52:10.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_115210_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:54:10.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_115410_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:56:10.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_115610_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 11:58:10.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_115810_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:00:10.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_120010_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:02:10.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_120210_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:04:10.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_120410_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:06:10.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_120610_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:08:10.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_120810_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:10:10.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_121010_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:12:10.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_121210_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:14:10.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_121410_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:15:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_121540_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:17:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_121740_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:19:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_121940_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:21:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_122140_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:23:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_122340_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:25:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_122540_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:27:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_122740_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:29:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_122918_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:31:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_123118_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:33:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_123318_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:35:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_123518_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:37:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_123718_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:39:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_123918_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:41:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_124118_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:43:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_124318_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:45:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_124518_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:47:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_124718_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:49:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_124918_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:51:18.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_125118_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:52:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_125206_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:54:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_125406_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:56:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_125606_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 12:58:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_125806_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:00:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_130006_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:02:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_130206_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:04:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_130406_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:06:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_130606_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:08:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_130806_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:09:27.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_130927_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:11:27.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_131127_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:13:27.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_131327_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:15:27.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_131527_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:17:27.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_131727_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:18:46.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_131846_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:20:46.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_132046_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:22:46.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_132246_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:24:46.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_132446_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:26:46.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_132646_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:28:46.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_132846_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:30:46.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_133046_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:32:46.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_133246_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:34:46.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_133446_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:36:46.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_133646_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:38:46.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_133846_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:39:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_133912_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:41:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_134112_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:43:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_134312_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:45:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_134512_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:47:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_134712_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:49:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_134912_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:50:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_135022_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:52:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_135222_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:54:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_135422_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:56:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_135622_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 13:58:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_135822_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:00:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_140022_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:00:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_140040_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:02:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_140240_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:04:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_140440_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:06:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_140640_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:08:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_140840_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:09:54.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_140954_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:11:54.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_141154_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:13:54.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_141354_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:14:52.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_141452_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:16:52.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_141652_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:18:52.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_141852_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:20:52.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_142052_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:22:52.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_142252_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:24:52.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_142452_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:26:52.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_142652_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:28:49.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_142849_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:30:49.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_143049_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:32:49.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_143249_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:34:49.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_143449_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:36:49.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_143649_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:38:49.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_143849_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:40:49.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_144049_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:41:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_144130_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:43:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_144330_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:45:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_144530_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:47:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_144730_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:49:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_144930_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:51:30.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_145130_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:51:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_145155_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:53:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_145355_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:55:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_145555_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:57:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_145755_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 14:59:35.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_145935_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:01:35.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_150135_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:03:35.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_150335_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:05:35.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_150535_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:07:35.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_150735_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:09:35.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_150935_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:11:35.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_151135_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:12:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_151225_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:14:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_151425_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:16:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_151625_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:18:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_151825_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:19:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_151948_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:21:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_152148_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:23:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_152348_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:25:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_152548_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:27:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_152748_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:29:48.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_152948_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:29:50.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_152950_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:31:50.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_153150_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:33:50.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_153350_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:35:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_153522_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:37:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_153722_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:39:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_153922_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:41:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_154122_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:43:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_154322_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:45:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_154522_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:47:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_154722_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:49:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_154922_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:50:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_155047_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:52:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_155247_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:54:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_155447_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:56:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_155647_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 15:58:47.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_155847_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:00:36.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_160036_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:02:36.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_160236_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:04:36.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_160436_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:06:36.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_160636_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:08:36.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_160836_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:10:11.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_161011_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:12:11.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_161211_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:14:11.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_161411_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:16:11.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_161611_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:18:11.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_161811_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:20:11.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_162011_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:20:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_162022_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:22:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_162222_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:24:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_162422_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:26:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_162622_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:28:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_162822_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:30:22.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_163022_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:31:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_163106_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:33:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_163306_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:35:06.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_163506_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:36:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_163625_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:38:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_163825_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:40:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_164025_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:42:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_164225_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:44:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_164425_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:46:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_164625_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:48:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_164825_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:49:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_164912_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:51:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_165112_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:53:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_165312_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:55:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_165512_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:57:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_165712_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 16:59:12.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_165912_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:01:02.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_170102_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:03:02.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_170302_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:05:02.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_170502_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:07:02.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_170702_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:09:02.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_170902_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:10:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_171040_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:12:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_171240_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:14:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_171440_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:16:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_171640_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:18:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_171840_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:20:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_172040_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:20:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_172056_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:22:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_172256_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:24:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_172456_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:26:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_172656_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:28:56.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_172856_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:30:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_173053_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:32:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_173253_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:34:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_173453_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:36:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_173653_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:38:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_173853_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:40:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_174053_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:42:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_174253_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:44:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_174453_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:46:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_174653_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:48:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_174853_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:50:53.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_175053_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:51:13.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_175113_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:53:13.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_175313_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:55:13.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_175513_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:57:13.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_175713_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 17:59:13.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_175913_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:00:16.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_180016_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:02:16.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_180216_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:04:16.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_180416_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:06:16.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_180616_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:08:16.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_180816_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:09:20.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_180920_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:11:20.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_181120_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:13:20.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_181320_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:15:20.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_181520_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:17:20.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_181720_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:19:20.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_181920_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:19:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_181940_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:21:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_182140_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:23:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_182340_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:25:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_182540_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:27:40.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_182740_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:28:39.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_182839_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:30:39.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_183039_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:32:39.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_183239_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:34:03.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_183403_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:36:03.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_183603_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:38:03.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_183803_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:40:03.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_184003_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:42:03.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_184203_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:44:03.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_184403_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:46:03.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_184603_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:48:03.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_184803_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:48:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_184825_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:50:25.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_185025_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:50:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_185055_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:52:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_185255_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:54:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_185455_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:56:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_185655_zcut_mp.gif"
+  },
+  {
+   "timestamp": "2024-05-11 18:58:55.0",
+   "url": "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/geospace/SWMF2023-RT/MagnetopausePosition/2024/05/20240511_185855_zcut_mp.gif"
+  }
+ ],
+ "time.max": "2024-05-11 19:00:00.0",
+ "time.min": "2024-05-10 15:00:00.0"
+}

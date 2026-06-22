@@ -1,0 +1,79 @@
+
+  local enableViewline = {
+    Identifier = "os.enableViewline",
+    Name = "Enable Viewline",
+    Command = [[
+      openspace.fadeIn("Scene.Earth.Renderable.GeoJson.Viewline_2024-05*")
+      openspace.fadeIn("Scene.Earth.Renderable.GeoJson.southern_viewline_2024-05*")
+    ]],
+    Documentation = [[]],
+    GuiPath = "/Aurorasaurus/Prediction",
+    IsLocal = false
+  }
+
+  local disableViewline = {
+    Identifier = "os.disableViewline",
+    Name = "Disable Viewline",
+    Command = [[
+        openspace.fadeOut("Scene.Earth.Renderable.GeoJson.Viewline_2024-05*")
+        openspace.fadeOut("Scene.Earth.Renderable.GeoJson.southern_viewline_2024-05*")
+    ]],
+    Documentation = [[]],
+    GuiPath = "/Aurorasaurus/Prediction",
+    IsLocal = false
+  }
+
+  local enableOval = {
+    Identifier = "os.enableOval",
+    Name = "Enable Oval",
+    Command = [[
+      openspace.fadeIn("Scene.Earth.Renderable.GeoJson.AuroraOval_2024-05*")
+      openspace.setPropertyValueSingle("ScreenSpace.Legend-aurora-oval.Enabled", true)
+      openspace.setPropertyValueSingle(
+        "ScreenSpace.Legend-aurora-oval.Fade",
+        1.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear"
+      )
+    ]],
+    Documentation = [[]],
+    GuiPath = "/Aurorasaurus/Prediction",
+    IsLocal = false
+  }
+
+  local disableOval = {
+    Identifier = "os.disableOval",
+    Name = "Disable Oval",
+    Command = [[
+        openspace.fadeOut("Scene.Earth.Renderable.GeoJson.AuroraOval_2024-05*")
+        openspace.setPropertyValueSingle(
+          "ScreenSpace.Legend-aurora-oval.Fade",
+          0.0,
+          openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+          "Linear",
+          'openspace.setPropertyValueSingle("ScreenSpace.Legend-aurora-oval.Enabled", false)'
+        )
+    ]],
+    Documentation = [[]],
+    GuiPath = "/Aurorasaurus/Prediction",
+    IsLocal = false
+  }
+
+  asset.onInitialize(function()
+    openspace.action.registerAction(enableViewline)
+    openspace.action.registerAction(disableViewline)
+    openspace.action.registerAction(enableOval)
+    openspace.action.registerAction(disableOval)
+  end)
+
+  asset.onDeinitialize(function()
+    openspace.action.removeAction(enableViewline)
+    openspace.action.removeAction(disableViewline)
+    openspace.action.removeAction(enableOval)
+    openspace.action.removeAction(disableOval)
+  end)
+
+  asset.export("enableViewline", enableViewline.Identifier)
+  asset.export("disableViewline", disableViewline.Identifier)
+  asset.export("enableViewline", enableOval.Identifier)
+  asset.export("disableViewline", disableOval.Identifier)

@@ -1,0 +1,43 @@
+local earth = asset.require("scene/solarsystem/planets/earth/globe")
+local iconFolder = asset.resource("icons/newIcons2/")
+
+local observationCloud = {
+  Identifier = "AurorasaurusObservationCloud",
+  Parent = earth.Earth.Identifier,
+  Renderable = {
+    Type = "RenderableAurorasaurusObservationCloud",
+    ObservationFile = asset.resource("./newData/web_observations_2014-08-01_to_2025-08-02_cleaned.csv"),
+    IgnoreTimeFiltering = false,
+    Billboard = true,
+    UseAdditiveBlending = false,
+    RenderBinMode = "PostDeferredTransparent",
+    ObservedAltitude = 10000.0,
+    NotObservedAltitude = 9500.0,
+    Texture = {
+      Folder = iconFolder,
+      Enabled = true,
+      UseAlphaChannel = true,
+      AllowCompression = false
+    },
+    SizeSettings = {
+      ScaleExponent = 5.0,
+      ScaleFactor = 3.0,
+      EnableMaxSizeControl = true,
+      MaxSize = 4.0
+    }
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Observation Icons"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(observationCloud)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(observationCloud)
+end)
+
+asset.export(observationCloud)
