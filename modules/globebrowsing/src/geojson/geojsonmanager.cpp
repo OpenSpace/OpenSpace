@@ -81,6 +81,7 @@ void GeoJsonManager::addGeoJsonLayer(const ghoul::Dictionary& layerDict) {
         std::unique_ptr<GeoJsonComponent> geo =
             std::make_unique<GeoJsonComponent>(layerDict, *_parentGlobe);
 
+        geo->initialize();
         geo->initializeGL();
 
         GeoJsonComponent* ptr = geo.get();

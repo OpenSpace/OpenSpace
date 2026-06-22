@@ -27,12 +27,14 @@
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/scene/timeframe.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/lightsource.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/ellipsoid.h>
 #include <openspace/util/geodetic.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
@@ -46,11 +48,15 @@
 #include <geos/geom/Point.h>
 #include <geos/util/GEOSException.h>
 #include <algorithm>
+#include <array>
+#include <charconv>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <functional>
 #include <iterator>
+#include <optional>
+#include <string_view>
 #include <utility>
 
 namespace geos_nlohmann = nlohmann;
@@ -58,6 +64,141 @@ namespace geos_nlohmann = nlohmann;
 #include <geos/io/GeoJSON.h>
 #include <geos/io/GeoJSONReader.h>
 #include <geos/operation/valid/MakeValid.h>
+
+namespace {
+std::optional<int> parseInteger(std::string_view value) {
+    int result = 0;
+    const auto [ptr, ec] = std::from_chars(value.data(), value.data() + value.size(), result);
+    if (ec != std::errc() || ptr != value.data() + value.size()) {
+        return std::nullopt;
+    }
+    return result;
+}
+
+std::optional<unsigned int> monthIndex(std::string_view month) {
+    constexpr std::array<std::string_view, 12> Months = {
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    };
+    for (unsigned int i = 0; i < Months.size(); ++i) {
+        if (month == Months[i]) {
+            return i + 1;
+        }
+    }
+    return std::nullopt;
+}
+
+long long daysFromCivil(int year, unsigned int month, unsigned int day) {
+    year -= month <= 2 ? 1 : 0;
+    const int era = (year >= 0 ? year : year - 399) / 400;
+    const unsigned int yoe = static_cast<unsigned int>(year - era * 400);
+    const unsigned int doy = (153 * (month + (month > 2 ? -3 : 9)) + 2) / 5 + day - 1;
+    const unsigned int doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+    return static_cast<long long>(era) * 146097 + static_cast<long long>(doe) - 719468;
+}
+
+std::optional<double> parseTimeFrameString(std::string_view value) {
+    const auto parseClock = [](std::string_view clock)
+        -> std::optional<std::array<int, 3>>
+    {
+        if (clock.size() != 8 || clock[2] != ':' || clock[5] != ':') {
+            return std::nullopt;
+        }
+        const std::optional<int> hour = parseInteger(clock.substr(0, 2));
+        const std::optional<int> minute = parseInteger(clock.substr(3, 2));
+        const std::optional<int> second = parseInteger(clock.substr(6, 2));
+        if (!hour || !minute || !second) {
+            return std::nullopt;
+        }
+        return std::array<int, 3>{ *hour, *minute, *second };
+    };
+
+    int year = 0;
+    unsigned int month = 0;
+    unsigned int day = 0;
+    int hour = 0;
+    int minute = 0;
+    int second = 0;
+
+    if (value.size() >= 19 && value[4] == '-' && value[7] == '-' &&
+        (value[10] == 'T' || value[10] == ' '))
+    {
+        const std::optional<int> y = parseInteger(value.substr(0, 4));
+        const std::optional<int> m = parseInteger(value.substr(5, 2));
+        const std::optional<int> d = parseInteger(value.substr(8, 2));
+        const std::optional<std::array<int, 3>> clock = parseClock(value.substr(11, 8));
+        if (!y || !m || !d || !clock) {
+            return std::nullopt;
+        }
+        year = *y;
+        month = static_cast<unsigned int>(*m);
+        day = static_cast<unsigned int>(*d);
+        hour = (*clock)[0];
+        minute = (*clock)[1];
+        second = (*clock)[2];
+    }
+    else {
+        const size_t firstSpace = value.find(' ');
+        const size_t secondSpace = value.find(' ', firstSpace + 1);
+        const size_t thirdSpace = value.find(' ', secondSpace + 1);
+        if (
+            firstSpace == std::string_view::npos ||
+            secondSpace == std::string_view::npos ||
+            thirdSpace == std::string_view::npos
+        ) {
+            return std::nullopt;
+        }
+
+        const std::optional<int> y = parseInteger(value.substr(0, firstSpace));
+        const std::optional<unsigned int> m = monthIndex(
+            value.substr(firstSpace + 1, secondSpace - firstSpace - 1)
+        );
+        const std::optional<int> d = parseInteger(
+            value.substr(secondSpace + 1, thirdSpace - secondSpace - 1)
+        );
+        const std::optional<std::array<int, 3>> clock = parseClock(value.substr(thirdSpace + 1));
+        if (!y || !m || !d || !clock) {
+            return std::nullopt;
+        }
+        year = *y;
+        month = *m;
+        day = static_cast<unsigned int>(*d);
+        hour = (*clock)[0];
+        minute = (*clock)[1];
+        second = (*clock)[2];
+    }
+
+    const long long unixDays = daysFromCivil(year, month, day);
+    const long long j2000UnixDays = daysFromCivil(2000, 1, 1);
+    const long long dayDelta = unixDays - j2000UnixDays;
+    const long long seconds =
+        dayDelta * 86400ll +
+        static_cast<long long>(hour) * 3600ll +
+        static_cast<long long>(minute) * 60ll +
+        static_cast<long long>(second) -
+        12ll * 3600ll;
+    return static_cast<double>(seconds);
+}
+
+ghoul::Dictionary normalizedTimeFrameDictionary(const ghoul::Dictionary& dictionary) {
+    ghoul::Dictionary result = dictionary;
+    if (result.hasValue<std::string>("Start")) {
+        const std::string start = result.value<std::string>("Start");
+        const std::optional<double> parsed = parseTimeFrameString(start);
+        if (parsed.has_value()) {
+            result.setValue("Start", *parsed);
+        }
+    }
+    if (result.hasValue<std::string>("End")) {
+        const std::string end = result.value<std::string>("End");
+        const std::optional<double> parsed = parseTimeFrameString(end);
+        if (parsed.has_value()) {
+            result.setValue("End", *parsed);
+        }
+    }
+    return result;
+}
+} // namespace
 
 namespace {
     using namespace openspace;
@@ -208,6 +349,10 @@ namespace {
 
         // [[codegen::verbatim(PreventHeightUpdateInfo.description)]]
         std::optional<bool> preventHeightUpdate;
+
+        // If provided, this GeoJson layer is only visible while the timeframe is active.
+        std::optional<ghoul::Dictionary> timeFrame
+            [[codegen::reference("core_timeframe")]];
 
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
@@ -397,6 +542,13 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         p.preventHeightUpdate.value_or(_preventUpdatesFromHeightMap);
     addProperty(_preventUpdatesFromHeightMap);
 
+    if (p.timeFrame.has_value()) {
+        _timeFrame = TimeFrame::createFromDictionary(
+            normalizedTimeFrameDictionary(*p.timeFrame)
+        );
+        addPropertySubOwner(_timeFrame.get());
+    }
+
     _drawWireframe = p.drawWireframe.value_or(_drawWireframe);
     addProperty(_drawWireframe);
 
@@ -459,8 +611,16 @@ bool GeoJsonComponent::enabled() const {
     return _enabled;
 }
 
+bool GeoJsonComponent::isTimeFrameActive() const {
+    return !_timeFrame || _timeFrame->isActive();
+}
+
 void GeoJsonComponent::initialize() {
     ZoneScoped;
+
+    if (_timeFrame) {
+        _timeFrame->initialize();
+    }
 
     for (const std::unique_ptr<LightSource>& ls : _lightSources) {
         ls->initialize();
@@ -510,7 +670,7 @@ bool GeoJsonComponent::isReady() const {
 }
 
 void GeoJsonComponent::render(const RenderData& data) {
-    if (!_enabled || !isVisible()) {
+    if (!_enabled || !isVisible() || !isTimeFrameActive()) {
         return;
     }
 
@@ -565,7 +725,11 @@ void GeoJsonComponent::render(const RenderData& data) {
 }
 
 void GeoJsonComponent::update() {
-    if (!_enabled || !isVisible()) {
+    if (_timeFrame && global::timeManager) {
+        _timeFrame->update(global::timeManager->time());
+    }
+
+    if (!_enabled || !isVisible() || !isTimeFrameActive()) {
         return;
     }
 

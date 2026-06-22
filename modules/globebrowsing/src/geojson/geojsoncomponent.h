@@ -38,6 +38,7 @@
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/helper.h>
+#include <openspace/scene/timeframe.h>
 #include <memory>
 #include <optional>
 
@@ -72,6 +73,7 @@ public:
 
     bool isReady() const;
     bool enabled() const;
+    bool isTimeFrameActive() const;
 
     void render(const RenderData& data);
     void update();
@@ -132,6 +134,7 @@ private:
     BoolProperty _drawWireframe;
     BoolProperty _preventUpdatesFromHeightMap;
     TriggerProperty _forceUpdateHeightData;
+    ghoul::mm_unique_ptr<TimeFrame> _timeFrame;
 
     RenderableGlobe& _globeNode;
 
