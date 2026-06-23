@@ -356,7 +356,7 @@ void DeltaTimesDialog::transitionEditMode(int index, bool state) {
 }
 
 void DeltaTimesDialog::parseSelections() {
-    if (((_deltaTimesData.size() == 1) && (_deltaTimesData.at(0) == 0)) {
+    if ((_deltaTimesData.size() == 1) && (_deltaTimesData.at(0) == 0)) {
         _deltaTimesData.clear();
     }
     int finalNonzeroIndex = static_cast<int>(_deltaTimesData.size()) - 1;

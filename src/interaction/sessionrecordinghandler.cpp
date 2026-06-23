@@ -51,6 +51,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <array>
 #include <iterator>
@@ -780,13 +781,16 @@ std::vector<std::string> SessionRecordingHandler::playbackList() const {
 
     std::vector<std::string> fileList;
     namespace fs = std::filesystem;
-    for (const fs::directory_entry& e : fs::directory_iterator(path)) {
+    for (const fs::directory_entry& e : fs::recursive_directory_iterator(path)) {
         if (!e.is_regular_file()) {
             continue;
         }
 
-        // Remove path and keep only the filename
-        const std::string filename = e.path().filename().string();
+        // Keep the relative path to `path`
+        std::filesystem::path p = std::filesystem::proximate(e.path(), path);
+        std::string filename = p.string();
+        // Normalize the paths
+        filename = ghoul::replaceAll(filename, "\\", "/");
 #ifdef WIN32
         DWORD attributes = GetFileAttributes(e.path().string().c_str());
         bool isHidden = attributes & FILE_ATTRIBUTE_HIDDEN;
