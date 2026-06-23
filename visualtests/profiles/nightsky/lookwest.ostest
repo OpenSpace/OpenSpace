@@ -2,8 +2,22 @@
   "profile": "nightsky",
   "commands": [
     {
-      "type": "script",
-      "value": "openspace.navigation.flyToGeo('Earth', 42.4777983094, -74.378376190727, 0, 0)"
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Earth",
+        "position": [
+          1266870.4669270976,
+          -4530817.606449327,
+          4307620.03901477
+        ],
+        "pitch": 1.5707963204063,
+        "up": [
+          -0.9630610045214416,
+          -0.2692833110092255,
+          4.29514673827569e-09
+        ],
+        "timestamp": "2023 APR 14 01:46:47"
+      }
     },
     {
       "type": "property",
@@ -11,10 +25,6 @@
         "property": "Scene.CardinalDirectionSphere.Renderable.Enabled",
         "value": true
       }
-    },
-    {
-      "type": "time",
-      "value": "2023-04-14T02:40:57.044"
     },
     {
       "type": "action",
