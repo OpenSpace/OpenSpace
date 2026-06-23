@@ -1046,7 +1046,7 @@ void SchemaFormWidget::syncFieldWith(const std::string& memberName,
             &SchemaFormWidget::optionalFieldToggled,
             receiver,
             [receiver, memberName](const QString& name, bool active) {
-                if (name == memberName) {
+                if (name.toStdString() == memberName) {
                     receiver->setFieldActive(memberName, active);
                 }
             }
