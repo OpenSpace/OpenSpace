@@ -7,14 +7,19 @@ local Dashboard = {
   Name = "KPindex",
   Type = "ScreenSpaceDashboard",
   FaceCamera = false,
-  Scale = 3.0,
+  Scale = 0.75,
+  CartesianPosition = { -0.54, 0.13, -1.96 },
   Items = {
       {
-          Type = "DashboardItemText",
+          Type = "DashboardItemTimeVaryingText",
           Identifier = "KPindexText",
           GuiName = "Storm KP index",
-          Text = "",
           DataFile = asset.resource("./KPjson/observed_data.json"),
+          FormatString = "Observed KP Index: {:.1f}",
+          UseKpColoring = true,
+          TimestampsAreIntervalEnd = true,
+          FallbackMode = "HoldLastValue",
+          MissingText = "Observed KP Index: --",
           FontSize = 72
       }
   }
@@ -23,9 +28,9 @@ local Dashboard = {
 local marker = {
     Identifier = "target-marker",
     Name = "ISWA Cygnets",
-    Type = "ScreenSpaceImageOnline",
+    Type = "ScreenSpaceTimeVaryingImageOnline",
     FaceCamera = false,
-    JsonFilePath = asset.resource("./ISWAcygnets/magnetopause.json")
+    FilePath = asset.resource("./ISWAcygnets/magnetopause.json")
 }
 
 
@@ -111,7 +116,7 @@ end)
 asset.onDeinitialize(function()
   openspace.removeScreenSpaceRenderable(marker)
   --openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
-  openspace.addScreenSpaceRenderable(Dashboard)
+  openspace.removeScreenSpaceRenderable(Dashboard)
   --openspace.removeScreenSpaceRenderable(Browser)
 
   openspace.action.removeAction(ToggleISWACygnet)

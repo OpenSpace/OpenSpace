@@ -42,6 +42,7 @@ public:
 
     void initialize() override;
     void deinitializeGL() override;
+    void render(const RenderData& renderData) override;
     void update() override;
 
     static openspace::Documentation Documentation();
@@ -51,6 +52,7 @@ private:
     void loadJsonData(const std::filesystem::path& path);
     void computeSequenceEndTime();
     void loadImage(const std::string& imageUrl);
+    bool hasTextureToRender() const;
     int activeIndex(double currentTime) const;
 
     StringProperty _jsonFilePath;

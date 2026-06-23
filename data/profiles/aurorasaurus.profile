@@ -8,8 +8,8 @@
   "camera": {
     "altitude": 17000000.0,
     "anchor": "Earth",
-    "latitude": 66.6,
-    "longitude": 19.8,
+    "latitude": 58.5877,
+    "longitude": 16.1924,
     "type": "goToGeo"
   },
   "delta_times": [

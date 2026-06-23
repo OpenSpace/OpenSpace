@@ -105,6 +105,14 @@ void ScreenSpaceTimeVaryingImageOnline::deinitializeGL() {
     ScreenSpaceRenderable::deinitializeGL();
 }
 
+void ScreenSpaceTimeVaryingImageOnline::render(const RenderData& renderData) {
+    if (!hasTextureToRender()) {
+        return;
+    }
+
+    ScreenSpaceRenderable::render(renderData);
+}
+
 void ScreenSpaceTimeVaryingImageOnline::loadJsonData(const std::filesystem::path& path) {
     std::ifstream file = std::ifstream(path);
     if (!file.is_open()) {
@@ -122,6 +130,9 @@ void ScreenSpaceTimeVaryingImageOnline::loadJsonData(const std::filesystem::path
 
     _timestamps.clear();
     _urls.clear();
+    _activeIndex = -1;
+    _currentUrl.clear();
+    _texture = nullptr;
 
     for (const nlohmann::json& entry : json["files"]) {
         const std::string& timestamp = entry["timestamp"].get<std::string>();
@@ -135,6 +146,8 @@ void ScreenSpaceTimeVaryingImageOnline::loadJsonData(const std::filesystem::path
 }
 
 void ScreenSpaceTimeVaryingImageOnline::computeSequenceEndTime() {
+    _sequenceEndTime = 0.0;
+
     if (_timestamps.size() <= 1) {
         return;
     }
@@ -148,6 +161,9 @@ void ScreenSpaceTimeVaryingImageOnline::computeSequenceEndTime() {
 
 void ScreenSpaceTimeVaryingImageOnline::update() {
     if (_timestamps.empty()) {
+        _texture = nullptr;
+        _currentUrl.clear();
+        _activeIndex = -1;
         return;
     }
 
@@ -178,6 +194,7 @@ void ScreenSpaceTimeVaryingImageOnline::update() {
         const DownloadManager::MemoryFile imageFile = _imageFuture.get();
         _imageFuture = std::future<DownloadManager::MemoryFile>();
         if (imageFile.corrupted) {
+            _texture = nullptr;
             LERROR(std::format("Error loading image from URL '{}'", _currentUrl));
             return;
         }
@@ -198,9 +215,14 @@ void ScreenSpaceTimeVaryingImageOnline::update() {
             _objectSize = _texture->dimensions();
         }
         catch (const ghoul::io::texture::InvalidLoadException& e) {
+            _texture = nullptr;
             LERRORC(e.component, e.message);
         }
     }
+}
+
+bool ScreenSpaceTimeVaryingImageOnline::hasTextureToRender() const {
+    return _texture != nullptr;
 }
 
 int ScreenSpaceTimeVaryingImageOnline::activeIndex(double currentTime) const {

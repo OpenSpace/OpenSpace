@@ -21,9 +21,9 @@ local observationCloud = {
     },
     SizeSettings = {
       ScaleExponent = 5.0,
-      ScaleFactor = 3.0,
+      ScaleFactor = 2.0,
       EnableMaxSizeControl = true,
-      MaxSize = 4.0
+      MaxSize = 1.5
     }
   },
   GUI = {

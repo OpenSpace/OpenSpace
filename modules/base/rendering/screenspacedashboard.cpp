@@ -120,12 +120,20 @@ void ScreenSpaceDashboard::initializeGL() {
     ScreenSpaceRenderableFramebuffer::initializeGL();
 
     addRenderFunction([this]() {
-        glm::vec2 penPosition = glm::vec2(0.f, _size.value().x);
-
         if (_useMainDashboard) {
+            const glm::ivec2 dashboardStart = global::dashboard->startPositionOffset();
+            glm::vec2 penPosition = glm::vec2(
+                static_cast<float>(dashboardStart.x),
+                _size.value().y - static_cast<float>(dashboardStart.y)
+            );
             global::dashboard->render(penPosition);
         }
         else {
+            const glm::ivec2 dashboardStart = _dashboard.startPositionOffset();
+            glm::vec2 penPosition = glm::vec2(
+                static_cast<float>(dashboardStart.x),
+                _size.value().y - static_cast<float>(dashboardStart.y)
+            );
             _dashboard.render(penPosition);
         }
     });
