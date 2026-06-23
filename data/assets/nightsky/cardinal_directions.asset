@@ -70,7 +70,6 @@ local CardinalDirectionSphere = {
 }
 
 local showCommand = [[
-  local lat, lon, alt = openspace.globebrowsing.geoPositionForCamera()
   local camera = openspace.navigation.getNavigationState()
   openspace.setParent("CardinalDirectionsPosition", camera.Anchor)
   openspace.setPropertyValueSingle("Scene.CardinalDirectionsPosition.Translation.Globe", camera.Anchor)
