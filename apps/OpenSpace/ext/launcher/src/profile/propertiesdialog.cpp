@@ -408,7 +408,10 @@ void PropertiesDialog::selectLineFromScriptLog() {
                 // Remove the string markers around the property
                 const QString prop = textList[0].mid(1, textList[0].size() - 2).trimmed();
 
-                QString value = textList[1].trimmed();
+                // We need to reassemble the rest of the value since it might contain
+                // additional commas
+                textList.removeFirst();
+                QString value = textList.join(",").trimmed();
                 // If they exist, we need to replace the single string markers around the
                 // property, with double string markers
                 if (value.size() > 2) {
