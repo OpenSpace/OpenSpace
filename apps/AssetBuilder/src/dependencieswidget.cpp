@@ -38,7 +38,7 @@
 namespace {
     // We want to allow dependencies to be any file type
     // TODO (@ylvse 2026-04-19) Need to check if this is true?^
-    constexpr const char* FileFilter = "Asset files (*.jasset);;All files (*)";
+    constexpr const char* FileFilter = "Asset files (*.jasset *.asset);;All files (*)";
 
     // Icons for dependency status
     constexpr const char* IconExists = "\u2713";  // Checkmark
@@ -130,7 +130,7 @@ void DependenciesWidget::refresh() {
 void DependenciesWidget::addDependencyViaDialog() {
     const std::filesystem::path assetDirectory = _filePath.parent_path();
     const QString startDir = assetDirectory.empty() ?
-        QDir::homePath() :
+        QString::fromStdString(absPath("${USER_ASSETS}").string()) :
         QString::fromStdWString(assetDirectory.wstring());
 
     const QString selected = QFileDialog::getOpenFileName(

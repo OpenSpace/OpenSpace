@@ -10,6 +10,7 @@ local models = asset.resource({
   Version = 2
 })
 
+
 local Artemis2Model = {
   Identifier = "Artemis2Model",
   Parent = transforms.Artemis2Position.Identifier,

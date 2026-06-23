@@ -75,7 +75,7 @@ namespace {
         std::vector<std::string> lines;
 
         for (const std::string& dep : jasset.dependencies) {
-            lines.push_back(std::format("asset.require([[{}]])", dep));
+            lines.push_back(std::format("asset.require([[./{}]])", dep));
         }
 
         std::vector<std::string> sgns;

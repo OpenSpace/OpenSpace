@@ -364,6 +364,12 @@ void ScreenSpaceSkyBrowser::render(const RenderData& renderData) {
         ScreenSpaceBrowser::render(renderData);
     }
 
+    if (!_renderHandler->isTextureReady()) {
+        return;
+    }
+
+    _renderHandler->updateTexture();
+
     // Render the display copies
     for (size_t i = 0; i < _displayCopies.size(); i++) {
         if (_showDisplayCopies[i]->value()) {
