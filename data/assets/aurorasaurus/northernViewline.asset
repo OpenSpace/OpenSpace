@@ -1,6 +1,6 @@
 
 local earth = asset.require("scene/solarsystem/planets/earth/globe")
---TODO: Change this to user asset folder
+
 local geojsonPath = asset.resource("./geojson/northern_viewline_geojsons/")
 
 -- data\assets\aurorasaurus\geojson\northern_viewline_geojsons

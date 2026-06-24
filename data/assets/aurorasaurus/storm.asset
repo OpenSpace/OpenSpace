@@ -1,4 +1,4 @@
---local filepath = "C:/Users/alundkvi/Documents/work/data/auroraData/stormData/"
+
 local globe = asset.require("scene/solarsystem/planets/earth/globe")
 
 
@@ -8,7 +8,7 @@ local Dashboard = {
   Type = "ScreenSpaceDashboard",
   FaceCamera = false,
   Scale = 0.75,
-  CartesianPosition = { -0.54, 0.13, -1.96 },
+  CartesianPosition = { -0.84, 0.13, -1.96 },
   Items = {
       {
           Type = "DashboardItemTimeVaryingText",
@@ -30,6 +30,7 @@ local marker = {
     Name = "ISWA Cygnets",
     Type = "ScreenSpaceTimeVaryingImageOnline",
     FaceCamera = false,
+    CartesianPosition = { -1.34, 0.0, -1.96 },
     FilePath = asset.resource("./ISWAcygnets/magnetopause.json")
 }
 

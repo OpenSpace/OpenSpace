@@ -107,20 +107,20 @@ local ToggleLegend = {
 local Legend = {
   Identifier = "Legend-aurora-oval",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = "C:/Users/alundkvi/Documents/work/OpenSpace/user/data/assets/aurorasaurus/legends/oval_legend_v2.png",
+  TexturePath = asset.resource("./legends/oval_legend_v2.png"),
   FaceCamera = false,
   Scale = 0.15,
-  CartesianPosition = { -0.707970, -0.34, -2.2180 },
+  CartesianPosition = { -1.507970, -0.70, -2.2180 },
   Rotation = { 0.0, 0.0, 0.36652 }
 }
 
 local colorLegend = {
   Identifier = "color-legend-aurora-oval",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = "C:/Users/alundkvi/Documents/work/OpenSpace/user/data/assets/aurorasaurus/legends/colorLegendWifi.png",
+  TexturePath = asset.resource("./legends/colorLegendWifi.png"),
   FaceCamera = false,
   Scale = 0.15,
-  CartesianPosition = { -0.707970, -0.34, -2.2180 },
+  CartesianPosition = { -1.507970, -0.44, -2.2180 },
   Rotation = { 0.0, 0.0, 0.36652 }
 }
 
