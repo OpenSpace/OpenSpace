@@ -126,27 +126,9 @@ elseif is_wms_file(Extension) then
 elseif is_model_file(Extension, Basename) then
   return [[
     local identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [[")
-    local camera_position = openspace.navigation.getNavigationState().Position
-    local camera_position_length = math.sqrt(camera_position[1]^2 + camera_position[2]^2 + camera_position[3]^2)
-    local normalized_camera_position = {
-      camera_position[1] / camera_position_length,
-      camera_position[2] / camera_position_length,
-      camera_position[3] / camera_position_length
-    }
-    local shifted_camera_position = {
-      camera_position[1] - normalized_camera_position[1] * 50.0,
-      camera_position[2] - normalized_camera_position[2] * 50.0,
-      camera_position[3] - normalized_camera_position[3] * 50.0
-    }
     openspace.addSceneGraphNode({
       Identifier = identifier,
       Parent = openspace.navigation.getNavigationState().Anchor,
-      Transform = {
-        Translation = {
-          Type = "StaticTranslation",
-          Position = shifted_camera_position
-        }
-      },
       Renderable = {
         Type = "RenderableModel",
         GeometryFile = "]] .. Filename .. [[",
@@ -161,7 +143,24 @@ elseif is_model_file(Extension, Basename) then
         } or {}
       }
     })
-    
-    openspace.scheduleScript("openspace.navigation.setFocus('" .. identifier .. "', true, true)", 0.1)
+
+    openspace.scheduleScript(
+      "local bounding_sphere = openspace.boundingSphere('" .. identifier .. "');" ..
+      "local distance_factor = 10;" ..
+
+      "local camera_position = openspace.navigation.getNavigationState().Position;" ..
+      "local camera_position_length = math.sqrt(camera_position[1]^2 + camera_position[2]^2 + camera_position[3]^2);" ..
+      "local normalized_camera_position = { camera_position[1] / camera_position_length, camera_position[2] / camera_position_length, camera_position[3] / camera_position_length };" ..
+      "local shifted_camera_position = {" ..
+        "camera_position[1] - normalized_camera_position[1] * bounding_sphere * distance_factor," ..
+        "camera_position[2] - normalized_camera_position[2] * bounding_sphere * distance_factor," ..
+        "camera_position[3] - normalized_camera_position[3] * bounding_sphere * distance_factor" ..
+      "};" ..
+      "openspace.setPropertyValueSingle('Scene." .. identifier .. ".Translation.Position', shifted_camera_position);" ..
+      "",
+      0.1
+    )
+
+    openspace.scheduleScript("openspace.navigation.setFocus('" .. identifier .. "', true, true)", 0.2)
   ]]
 end
