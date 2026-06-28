@@ -106,6 +106,10 @@ struct [[codegen::Dictionary(Action)]] Action {
     // Determines whether the provided command will be executed locally or will be sent to
     // connected computers in a cluster or parallel connection environment.
     std::optional<bool> isLocal;
+
+    // Determines whether the provided command will be hidden from the user interface.
+    // This is just a hint that will be forwarded to the user interface.
+    std::optional<bool> isHidden;
 };
 
 /**
@@ -140,7 +144,8 @@ struct [[codegen::Dictionary(Action)]] Action {
         .guiPath = action.guiPath.value_or("/"),
         .color = action.color,
         .textColor = action.textColor,
-        .isLocal = openspace::Action::IsLocal(action.isLocal.value_or(false))
+        .isLocal = openspace::Action::IsLocal(action.isLocal.value_or(false)),
+        .isHidden = openspace::Action::IsHidden(action.isHidden.value_or(false))
     };
     global::actionManager->registerAction(std::move(a));
 }
@@ -173,6 +178,7 @@ struct [[codegen::Dictionary(Action)]] Action {
     }
     res.setValue("GuiPath", action.guiPath);
     res.setValue("IsLocal", action.isLocal == openspace::Action::IsLocal::Yes);
+    res.setValue("IsHidden", action.isHidden == openspace::Action::IsHidden::Yes);
     return res;
 }
 
@@ -198,6 +204,7 @@ struct [[codegen::Dictionary(Action)]] Action {
         }
         d.setValue("GuiPath", a.guiPath);
         d.setValue("IsLocal", a.isLocal == openspace::Action::IsLocal::Yes);
+        d.setValue("IsHidden", a.isHidden == openspace::Action::IsHidden::Yes);
         res.push_back(d);
     }
     return res;
