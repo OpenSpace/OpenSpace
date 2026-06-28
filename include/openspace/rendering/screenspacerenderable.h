@@ -160,6 +160,9 @@ protected:
     Vec4Property _backgroundColor;
     TriggerProperty _delete;
 
+    // A hint to the user interface to hide this screen space renderable
+    BoolProperty _isHidden;
+
     glm::ivec2 _objectSize = glm::ivec2(0);
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;

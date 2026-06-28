@@ -130,6 +130,7 @@ void to_json(json& j, const Action& action) {
         { "identifier", action.identifier },
         { "name", action.name },
         { "isLocal", action.isLocal == Action::IsLocal::Yes },
+        { "isHidden", action.isHidden == Action::IsHidden::Yes },
         { "documentation", action.documentation },
         { "guiPath", action.guiPath }
     };
