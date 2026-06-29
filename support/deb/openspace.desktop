@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=OpenSpace
+Comment=Explore the universe in an interactive 3D environment
+Exec=bash -i -c "openspace"
+# using bash execution to load env vars in .bashrc
+Icon=openspace
+Terminal=true
+Categories=Education;Science;Astronomy;Graphics;
+StartupNotify=true
+Keywords=space;planet;visualization;NASA
