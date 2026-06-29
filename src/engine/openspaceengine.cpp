@@ -1800,6 +1800,23 @@ void OpenSpaceEngine::removeModeChangeCallback(CallbackHandle handle) {
 }
 
 LuaLibrary OpenSpaceEngine::luaLibrary() {
+    std::vector<std::filesystem::path> scripts;
+    // Adding the core scripts
+    scripts.push_back(absPath("${SCRIPTS}/core_scripts.lua"));
+
+    // Add user defined scripts
+    if (FileSys.hasRegisteredToken("${USER_SCRIPTS}")) {
+        std::vector<std::filesystem::path> userFiles = ghoul::filesystem::walkDirectory(
+            absPath("${USER_SCRIPTS}"),
+            ghoul::filesystem::Recursive::Yes,
+            ghoul::filesystem::Sorted::Yes,
+            [](const std::filesystem::path& p) {
+                return p.extension() == ".lua" && std::filesystem::is_directory(p);
+            }
+        );
+        scripts.insert(scripts.end(), userFiles.begin(), userFiles.end());
+    }
+
     return {
         "",
         {
@@ -1823,9 +1840,7 @@ LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::VramInUse,
             codegen::lua::RamInUse
         },
-        {
-            absPath("${SCRIPTS}/core_scripts.lua")
-        }
+        std::move(scripts)
     };
 }
 
