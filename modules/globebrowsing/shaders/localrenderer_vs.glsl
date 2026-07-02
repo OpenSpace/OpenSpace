@@ -37,6 +37,7 @@ layout(location = 1) in vec2 in_texCoords;
 out Data {
   vec4 position;
   vec2 texCoords;
+  float isSkirt;
   vec3 ellipsoidNormalCameraSpace;
   vec3 levelWeights;
   vec3 positionCameraSpace;
@@ -107,6 +108,7 @@ void main() {
   );
 
   // Get the height value and apply skirts
+  out_data.isSkirt = tileVertexSkirtLength() > 0.0 ? 1.0 : 0.0;
   float height =
     tileHeightScaled(in_texCoords, out_data.levelWeights) - tileVertexSkirtLength() *
     100.0;
