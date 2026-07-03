@@ -26,6 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
@@ -44,15 +45,31 @@ namespace {
         "Image URL",
         "Sets the URL of the texture that is displayed on this screen space plane. If "
         "this value is changed, the image at the new path will automatically be loaded "
-        "and displayed.",
+        "and displayed. During stereo rendering, this texture is considered the left "
+        "eye.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo RightTextureInfo = {
+        "RightTexture",
+        "Right Eye Image URL",
+        "Sets the URL of the texture that is displayed on this plane for the right eye "
+        "during stereo rendering. If this value is changed, the image at the new path "
+        "will automatically be loaded and displayed.",
         Property::Visibility::User
     };
 
     // Creates a textured 3D plane, where the texture image is loaded from the internet
-    // through a web URL.
+    // through a web URL. 
+    //
+    // For stereo rendering, a second image can be specified using the `RightURL`
+    // property. This image will be used for the right eye.
     struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];
+
+        // [[codegen::verbatim(RightTextureInfo.description)]]
+        std::optional<std::string> rightUrl [[codegen::key("RightURL")]];
     };
 } // namespace
 #include "renderableplaneimageonline_codegen.cpp"
@@ -70,6 +87,7 @@ RenderablePlaneImageOnline::RenderablePlaneImageOnline(
                                                       const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _texturePath(TextureInfo)
+    , _rightTexturePath(RightTextureInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -77,40 +95,44 @@ RenderablePlaneImageOnline::RenderablePlaneImageOnline(
     _texturePath = p.url;
     addProperty(_texturePath);
 
+    if (p.rightUrl.has_value()) {
+        _isStereo = true;
+
+        _rightTexturePath.onChange([this]() { _textureIsDirty = true; });
+        _rightTexturePath = *p.rightUrl;
+        addProperty(_rightTexturePath);
+    }
+
     _autoScale.onChange([this]() {
-        if (!_autoScale) {
-            return;
-        }
-
-        // Shape the plane based on the aspect ration of the image
-        const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
-        if (_textureDimensions != textureDim) {
-            const float aspectRatio = textureDim.x / textureDim.y;
-            const float planeAspectRatio = _size.value().x / _size.value().y;
-
-            if (std::abs(planeAspectRatio - aspectRatio) >
-                std::numeric_limits<float>::epsilon())
-            {
-                _size =
-                    aspectRatio > 0.f ?
-                    glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
-                    glm::vec2(_size.value().x, _size.value().y * aspectRatio);
-            }
-
-            _textureDimensions = textureDim;
+        if (_autoScale) {
+            scaleToAspectRatio();
         }
     });
 }
 
 void RenderablePlaneImageOnline::deinitializeGL() {
     _texture = nullptr;
+    _rightTexture = nullptr;
 
     RenderablePlane::deinitializeGL();
 }
 
 void RenderablePlaneImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
-    if (_texture) {
-        unit.bind(*_texture);
+    switch (global::windowDelegate->frustumMode()) {
+        case WindowDelegate::Frustum::Mono:
+        case WindowDelegate::Frustum::LeftEye:
+            if (_texture) {
+                unit.bind(*_texture);
+            }
+            break;
+        case WindowDelegate::Frustum::RightEye:
+            if (_isStereo && _rightTexture) {
+                unit.bind(*_rightTexture);
+            }
+            else if (!_isStereo && _texture) {
+                unit.bind(*_texture);
+            }
+            break;
     }
 }
 
@@ -121,21 +143,30 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
         return;
     }
 
-    if (!_imageFuture.valid()) {
-        std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(
-            _texturePath
-        );
+    if (_texturePath.value().empty()) [[unlikely]] {
+        return;
+    }
+    else if (_isStereo && _rightTexturePath.value().empty()) [[unlikely]] {
+        _isStereo = false;
+    }
+    else if (!_isStereo && !_rightTexturePath.value().empty()) [[unlikely]] {
+        _isStereo = true;
+    }
+
+    if (!_texture && !_imageFuture.valid()) {
+        std::future<DownloadManager::MemoryFile> future =
+            downloadImageToMemory(_texturePath);
         if (future.valid()) {
             _imageFuture = std::move(future);
         }
     }
 
-    if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
+    if (!_texture && _imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
         const DownloadManager::MemoryFile imageFile = _imageFuture.get();
 
         if (imageFile.corrupted) {
             LERRORC(
-                "ScreenSpaceImageOnline",
+                "RenderablePlaneImageOnline",
                 std::format("Error loading image from URL '{}'", _texturePath.value())
             );
             return;
@@ -151,35 +182,61 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
                 },
                 imageFile.format
             );
-
-            _textureIsDirty = false;
-
-            if (!_autoScale) {
-                return;
-            }
-
-            // Shape the plane based on the aspect ration of the image
-            const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
-            if (_textureDimensions != textureDim) {
-                const float aspectRatio = textureDim.x / textureDim.y;
-                const float planeAspectRatio = _size.value().x / _size.value().y;
-
-                if (std::abs(planeAspectRatio - aspectRatio) >
-                    std::numeric_limits<float>::epsilon())
-                {
-                    _size =
-                        aspectRatio > 0.f ?
-                        glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
-                        glm::vec2(_size.value().x, _size.value().y * aspectRatio);
-                }
-
-                _textureDimensions = textureDim;
-            }
         }
         catch (const ghoul::io::texture::InvalidLoadException& e) {
             _textureIsDirty = false;
             LERRORC(e.component, e.message);
         }
+    }
+
+    if (_isStereo) {
+        if (!_rightTexture && !_rightImageFuture.valid()) {
+            std::future<DownloadManager::MemoryFile> future =
+                downloadImageToMemory(_rightTexturePath);
+            if (future.valid()) {
+                _rightImageFuture = std::move(future);
+            }
+        }
+
+        if (!_rightTexture && _rightImageFuture.valid() &&
+            DownloadManager::futureReady(_rightImageFuture))
+        {
+            const DownloadManager::MemoryFile imageFile = _rightImageFuture.get();
+
+            if (imageFile.corrupted) {
+                LERRORC(
+                    "RenderablePlaneImageOnline",
+                    std::format("Error loading right image from URL '{}'",
+                        _rightTexturePath.value()
+                    )
+                );
+                return;
+            }
+
+            try {
+                _rightTexture = ghoul::io::texture::loadTexture(
+                    reinterpret_cast<void*>(imageFile.buffer),
+                    imageFile.size,
+                    2,
+                    ghoul::opengl::Texture::SamplerInit{
+                        .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                    },
+                    imageFile.format
+                );
+            }
+            catch (const ghoul::io::texture::InvalidLoadException& e) {
+                _textureIsDirty = false;
+                LERRORC(e.component, e.message);
+            }
+        }
+    }
+
+    if (_texture && (!_isStereo || _rightTexture)) {
+        _textureIsDirty = false;
+    }
+
+    if (_autoScale) {
+        scaleToAspectRatio();
     }
 }
 
@@ -190,17 +247,41 @@ RenderablePlaneImageOnline::downloadImageToMemory(const std::string& url)
         url,
         [](const DownloadManager::MemoryFile&) {
             LDEBUGC(
-                "ScreenSpaceImageOnline",
-                "Download to memory finished for screen space image"
+                "RenderablePlaneImageOnline",
+                "Download to memory finished"
             );
         },
         [](const std::string& err) {
             LDEBUGC(
-                "ScreenSpaceImageOnline",
-                "Download to memory failer for screen space image: " + err
+                "RenderablePlaneImageOnline",
+                std::format("Download to memory failed: {}", err)
             );
         }
     );
+}
+
+void RenderablePlaneImageOnline::scaleToAspectRatio() {
+    if (!_texture) {
+        return;
+    }
+
+    // Shape the plane based on the aspect ratio of the image
+    const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+    if (_textureDimensions != textureDim) {
+        const float aspectRatio = textureDim.x / textureDim.y;
+        const float planeAspectRatio = _size.value().x / _size.value().y;
+
+        if (std::abs(planeAspectRatio - aspectRatio) >
+            std::numeric_limits<float>::epsilon())
+        {
+            _size =
+                aspectRatio > 0.f ?
+                glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
+                glm::vec2(_size.value().x, _size.value().y * aspectRatio);
+        }
+
+        _textureDimensions = textureDim;
+    }
 }
 
 } // namespace openspace
