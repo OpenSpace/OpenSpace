@@ -111,7 +111,7 @@ namespace {
         // If true (default), the loaded labels file will be cached so that it can be
         // loaded faster at a later time. Note that this also means that changes in the
         // file will not be registered until the cached file is deleted. Set to false to
-        // disable chaching and always do a fresh load of the label file.
+        // disable caching and always do a fresh load of the label file.
         std::optional<bool> useCaching;
 
         // The opacity of the labels.

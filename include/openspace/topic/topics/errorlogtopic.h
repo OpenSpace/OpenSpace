@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___ERRORLOGTOPIC____H__
-#define __OPENSPACE_CORE___ERRORLOGTOPIC____H__
+#ifndef __OPENSPACE_CORE___ERRORLOGTOPIC___H__
+#define __OPENSPACE_CORE___ERRORLOGTOPIC___H__
 
 #include <openspace/topic/topics/topic.h>
 
@@ -68,4 +68,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___ERRORLOGTOPIC____H__
+#endif // __OPENSPACE_CORE___ERRORLOGTOPIC___H__
