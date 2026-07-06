@@ -70,7 +70,7 @@ registerFunction(
               positions. Otherwise, it will not
     ]],
     Function = function(node_identifier, use_altitude)
-      local lat, lon, alt = openspace.globebrowsing.geoPositionForCamera();
+      local lat, lon, alt = table.unpack(openspace.globebrowsing.geoPositionForCamera());
       local camera = openspace.navigation.getNavigationState();
       openspace.setParent(node_identifier, camera.Anchor)
       openspace.setPropertyValueSingle("Scene." .. node_identifier .. ".Translation.Globe", camera.Anchor);
