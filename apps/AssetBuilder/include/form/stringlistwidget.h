@@ -27,6 +27,8 @@
 
 #include <QWidget>
 
+#include <QStringList>
+
 class QLineEdit;
 class QPushButton;
 

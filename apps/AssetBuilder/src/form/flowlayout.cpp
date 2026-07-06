@@ -28,6 +28,7 @@
 #include "form/flowlayout.h"
 
 #include <QWidget>
+#include <algorithm>
 
 FlowLayout::FlowLayout(int hSpacing, int vSpacing, QWidget* parent)
     : QLayout(parent)
