@@ -13,7 +13,7 @@
     "openspace.time.setPause(true)"
   ],
   "assets": [
-    "base_exoplanets",
+    "exoplanetexplorer/base",
     "exoplanetexplorer/actions/dome_setup",
     "exoplanetexplorer/actions/fade_glyphs",
     "exoplanetexplorer/events/fade_glyphs",
@@ -22,7 +22,7 @@
     "exoplanetexplorer/size_indicators",
     "exoplanetexplorer/show_info_at_startup",
     "scene/solarsystem/planets/earth/earth",
-    "scene/solarsystem/planets/earth/default_layers"
+    "scene/solarsystem/planets/earth/layers/default_layers"
   ],
   "camera": {
     "aim": "",
