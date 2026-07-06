@@ -108,9 +108,10 @@ void main() {
   );
 
   // Get the height value and apply skirts
-  out_data.isSkirt = tileVertexSkirtLength() > 0.0 ? 1.0 : 0.0;
+  float skirtLength = tileVertexSkirtLength();
+  out_data.isSkirt = skirtLength > 0.0 ? 1.0 : 0.0;
   float height =
-    tileHeightScaled(in_texCoords, out_data.levelWeights) - tileVertexSkirtLength() *
+    tileHeightScaled(in_texCoords, out_data.levelWeights) - skirtLength *
     100.0;
 
   // Translate the point along normal
