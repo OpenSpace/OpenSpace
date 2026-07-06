@@ -1,4 +1,4 @@
-openspace.debugging.documentation = {
+registerFunction(
   {
     Name = "createCoordinateAxes",
     Arguments = {
@@ -22,35 +22,35 @@ openspace.debugging.documentation = {
       \\param scale An optional parameter that specifies the size of the coordinate axes,
                     in meters. If not specified, the size is set to 2.5 times the
                     bounding sphere of the selected node.
-    ]]
-  }
-}
+    ]],
+    Function = function(nodeIdentifier, scale)
+      local node = nodeIdentifier or openspace.navigation.getNavigationState().Anchor
+      local property = "Scene." .. node .. ".EvaluatedBoundingSphere"
+      local sphere = openspace.propertyValue(property)
+      if sphere == -1 then
+        sphere = 1
+      end
+      local size = scale or sphere * 2.5
 
-openspace.debugging.createCoordinateAxes = function (nodeIdentifier, scale)
-  local node = nodeIdentifier or openspace.navigation.getNavigationState().Anchor
-  local sphere = openspace.propertyValue("Scene." .. node .. ".EvaluatedBoundingSphere")
-  if sphere == -1 then
-    sphere = 1
-  end
-  local size = scale or sphere * 2.5
-
-  local nodespec = {
-    Identifier = node .. "_DebugAxes",
-    Parent = node,
-    Transform = {
-      Scale = {
-        Type = "StaticScale",
-        Scale = size
+      local nodespec = {
+        Identifier = node .. "_DebugAxes",
+        Parent = node,
+        Transform = {
+          Scale = {
+            Type = "StaticScale",
+            Scale = size
+          }
+        },
+        Renderable = {
+          Type = "RenderableCartesianAxes"
+        },
+        GUI = {
+          Name = node .. " (Debug Axes)",
+          Path = openspace.propertyValue("Scene." .. node .. ".GuiPath")
+        }
       }
-    },
-    Renderable = {
-      Type = "RenderableCartesianAxes"
-    },
-    GUI = {
-      Name = node .. " (Debug Axes)",
-      Path = openspace.propertyValue("Scene." .. node .. ".GuiPath")
-    }
-  }
 
-  openspace.addSceneGraphNode(nodespec)
-end
+      openspace.addSceneGraphNode(nodespec)
+    end
+  }
+)

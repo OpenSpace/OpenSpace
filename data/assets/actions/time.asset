@@ -4,7 +4,7 @@ local ReverseRate = {
   Command = [[
 openspace.time.setDeltaTime(-openspace.time.deltaTime())
   ]],
-  Documentation = [[Reverse the rate of time]],
+  Documentation = "Reverse the rate of time",
   GuiPath = "/Time/Simulation Speed",
   IsLocal = false
 }
@@ -15,7 +15,7 @@ local SiderealDayIncrease = {
   Command = [[
 openspace.time.setTime(openspace.time.advancedTime(openspace.time.currentTime(), 86164.0905));
   ]],
-  Documentation = [[Advances time by a sidereal day (Instant)]],
+  Documentation = "Advances time by a sidereal day (Instant)",
   GuiPath = "/Time",
   IsLocal = false
 }
@@ -26,7 +26,7 @@ local SiderealDayDecrease = {
   Command = [[
 openspace.time.setTime(openspace.time.advancedTime(openspace.time.currentTime(), -86164.0905));
   ]],
-  Documentation = [[Decrements time by a sidereal day (Instant)]],
+  Documentation = "Decrements time by a sidereal day (Instant)",
   GuiPath = "/Time",
   IsLocal = false
 }
@@ -37,7 +37,7 @@ local SiderealWeekIncrease = {
   Command = [[
     openspace.time.setTime(openspace.time.advancedTime(openspace.time.currentTime(), 86164.0905 * 7));
   ]],
-  Documentation = [[Advances time by a sidereal week (Instant)]],
+  Documentation = "Advances time by a sidereal week (Instant)",
   GuiPath = "/Time",
   IsLocal = false
 }
@@ -48,7 +48,7 @@ local SiderealWeekDecrease = {
   Command = [[
     openspace.time.setTime(openspace.time.advancedTime(openspace.time.currentTime(), -86164.0905 * 7));
   ]],
-  Documentation = [[Decrements time by a sidereal week (Instant)]],
+  Documentation = "Decrements time by a sidereal week (Instant)",
   GuiPath = "/Time",
   IsLocal = false
 }
@@ -59,7 +59,7 @@ local SolarDayIncrease = {
   Command = [[
     openspace.time.setTime(openspace.time.advancedTime(openspace.time.UTC(), "1d"));
   ]],
-  Documentation = [[Advances time by a solar day (Instant)]],
+  Documentation = "Advances time by a solar day (Instant)",
   GuiPath = "/Time",
   IsLocal = false
 }
@@ -70,7 +70,7 @@ local SolarDayDecrease = {
   Command = [[
     openspace.time.setTime(openspace.time.advancedTime(openspace.time.UTC(), "-1d"));
   ]],
-  Documentation = [[Decrements time by a solar day (Instant)]],
+  Documentation = "Decrements time by a solar day (Instant)",
   GuiPath = "/Time",
   IsLocal = false
 }
@@ -81,7 +81,7 @@ local SolarWeekIncrease = {
   Command = [[
     openspace.time.setTime(openspace.time.advancedTime(openspace.time.UTC(), "7d"));
   ]],
-  Documentation = [[Advances time by a solar week (Instant)]],
+  Documentation = "Advances time by a solar week (Instant)",
   GuiPath = "/Time",
   IsLocal = false
 }
@@ -92,7 +92,7 @@ local SolarWeekDecrease = {
   Command = [[
     openspace.time.setTime(openspace.time.advancedTime(openspace.time.UTC(), "-7d"));
   ]],
-  Documentation = [[Decrements time by a solar week (Instant)]],
+  Documentation = "Decrements time by a solar week (Instant)",
   GuiPath = "/Time",
   IsLocal = false
 }
