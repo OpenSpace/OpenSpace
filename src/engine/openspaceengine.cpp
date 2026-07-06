@@ -1800,10 +1800,6 @@ void OpenSpaceEngine::removeModeChangeCallback(CallbackHandle handle) {
 }
 
 LuaLibrary OpenSpaceEngine::luaLibrary() {
-    std::vector<std::filesystem::path> scripts;
-    // Adding the core scripts
-    scripts.push_back(absPath("${SCRIPTS}/core_scripts.lua"));
-
     return {
         "",
         {
@@ -1827,7 +1823,9 @@ LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::VramInUse,
             codegen::lua::RamInUse
         },
-        std::move(scripts)
+        {
+            absPath("${SCRIPTS}/core_scripts.lua")
+        }
     };
 }
 
