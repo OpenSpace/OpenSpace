@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_ASSETBUILDER___UTILS___H__
-#define __OPENSPACE_ASSETBUILDER___UTILS___H__
+#ifndef __OPENSPACE_ASSETBUILDER___PATH___H__
+#define __OPENSPACE_ASSETBUILDER___PATH___H__
 
 #include <filesystem>
 #include <string>
@@ -61,4 +61,4 @@ PathType detectPathType(const std::string& path);
 std::filesystem::path resolvePath(const std::string& dependency,
     const std::filesystem::path& dataRoot, const std::filesystem::path& assetDirectory);
 
-#endif // __OPENSPACE_ASSETBUILDER___UTILS___H__
+#endif // __OPENSPACE_ASSETBUILDER___PATH___H__
