@@ -41,10 +41,12 @@ local ToggleTrail = {
     end
 
      ]],
-  Documentation = [[Toggles the visibility of the Artemis I trails with an
-    approaching/exiting event. This action takes optional arguments to 1) determine which
-    node is currently in focus and only hide Artemis trails if it is in focus (as the
-    'Node') and 2) the transition direction (as 'Approaching' or 'Exiting')]],
+  Documentation = [[
+    Toggles the visibility of the Artemis I trails with an approaching/exiting event. This
+    action takes optional arguments to 1) determine which node is currently in focus and
+    only hide Artemis trails if it is in focus (as the 'Node') and 2) the transition
+    direction (as 'Approaching' or 'Exiting')
+  ]],
   GuiPath = "/Artemis/Events",
   IsLocal = false
 }

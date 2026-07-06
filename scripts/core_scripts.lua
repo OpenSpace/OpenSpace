@@ -2,9 +2,10 @@ registerFunction(
   {
     Name = "markInterestingNodes",
     Arguments = {{ "sceneGraphNodes", "String[]" }},
-    Documentation = [[This function marks the scene graph nodes identified by name as
-      interesting, which will provide shortcut access to focus buttons and featured
-      properties.]],
+    Documentation = [[
+      This function marks the scene graph nodes identified by name as interesting, which
+      ll provide shortcut access to focus buttons and featured properties.
+    ]],
     Function = function(nodes)
       for _, n in pairs(nodes) do
         if openspace.hasSceneGraphNode(n) then
@@ -19,8 +20,10 @@ registerFunction(
   {
     Name = "markInterestingTimes",
     Arguments = {{ "times", "Table[]" }},
-    Documentation = [[This function marks interesting times for the current scene, which
-      will create shortcuts for a quick access.]],
+    Documentation = [[
+      This function marks interesting times for the current scene, which will create
+      shortcuts for a quick access.
+    ]],
     Function = function(times)
       for _, n in pairs(times) do
         local name = n["Name"] or n[1]
@@ -35,8 +38,9 @@ registerFunction(
   {
     Name = "removeInterestingNodes",
     Arguments = {{ "sceneGraphNodes", "String[]" }},
-    Documentation = [[This function removes unmarks the scene graph nodes identified by
-      name as interesting, thus removing the shortcuts from the features properties list.
+    Documentation = [[
+      This function removes unmarks the scene graph nodes identified by name as
+      teresting, thus removing the shortcuts from the features properties list.
     ]],
     Function = function(nodes)
       for _, n in pairs(nodes) do
@@ -52,8 +56,10 @@ registerFunction(
   {
     Name = "rebindKey",
     Arguments = {{ "oldKey", "String" }, { "newKey", "String" }},
-    Documentation = [[Rebinds all scripts from the old key (first argument) to the new
-      key (second argument).]],
+    Documentation = [[
+      Rebinds all scripts from the old key (first argument) to the new key (second
+      argument).
+    ]],
     Function = function(oldKey, newKey)
       local t = openspace.keyBindings(oldKey)
       openspace.clearKey(oldKey)
@@ -68,9 +74,11 @@ registerFunction(
   {
     Name = "appendToListProperty",
     Arguments = {{ "identifier","String" }, { "value", "any" }},
-    Documentation = [[Add a value to the list property with the given identifier. The
-      value can be any type, as long as it is the correct type for the given property.
-      Note that a number will be converted to a string automatically.]],
+    Documentation = [[
+      Add a value to the list property with the given identifier. The value can be any
+      type, as long as it is the correct type for the given property. Note that a number
+      will be converted to a string automatically.
+    ]],
     Function = function(propertyIdentifier, newItem)
       local list = openspace.propertyValue(propertyIdentifier)
       if type(list) ~= "table" then
@@ -90,10 +98,12 @@ registerFunction(
   {
     Name = "removeFromListProperty",
     Arguments = {{ "identifier","String" }, { "value", "any" }},
-    Documentation = [[Removes a value from the list property with the given identifier.
-      The value can be any type, as long as it is the correct type for the given property.
-      Note that a number will be converted to a string automatically. If the value was 
-      not found, this function will not do anything.]],
+    Documentation = [[
+      Removes a value from the list property with the given identifier. The value can be
+      any type, as long as it is the correct type for the given property. Note that a
+      number will be converted to a string automatically. If the value was not found, this
+      function will not do anything.
+    ]]
     Function = function(propertyIdentifier, item)
       local list = openspace.propertyValue(propertyIdentifier)
       if type(list) ~= "table" then
@@ -123,9 +133,11 @@ registerFunction(
   {
     Name = "addToPropertyValue",
     Arguments = {{ "identifier", "String" } , { "value", "String | Number" }},
-    Documentation = [[Add a value to the property with the given identifier. Works on both
-      numerical and string properties, where adding to a string property means appending
-      the given string value to the existing string value.]],
+    Documentation = [[
+      Add a value to the property with the given identifier. Works on both numerical and
+      string properties, where adding to a string property means appending the given
+      string value to the existing string value.
+    ]],
     Function = function(propertyIdentifier, valueToAdd)
       local value = openspace.propertyValue(propertyIdentifier)
       if type(value) == "string" then
@@ -142,7 +154,9 @@ registerFunction(
   {
     Name = "invertBooleanProperty",
     Arguments = {{ "identifier", "String" }},
-    Documentation = "Inverts the value of a boolean property with the given identifier.",
+    Documentation = [[
+      Inverts the value of a boolean property with the given identifier.
+    ]],
     Function = function(propertyIdentifier)
       local value = openspace.propertyValue(propertyIdentifier)
       if type(value) ~= "boolean" then
@@ -165,11 +179,13 @@ registerFunction(
       { "fadeTime", "Number?" },
       { "endScript", "String?" }
     },
-    Documentation = [[Fades in the node(s) with the given identifier over the given time
-      in seconds. The identifier can contain a tag and/or a wildcard to target several
-      nodes. If the fade time is not provided then the 'OpenSpaceEngine.FadeDuration'
-      property will be used instead. If the third argument (endScript) is provided then
-      that script will be run after the fade is finished.]],
+    Documentation = [[
+      Fades in the node(s) with the given identifier over the given time in seconds. The
+      identifier can contain a tag and/or a wildcard to target several nodes. If the fade
+      time is not provided then the 'OpenSpaceEngine.FadeDuration' property will be used
+      stead. If the third argument (endScript) is provided then that script will be run
+      ter the fade is finished.
+    ]],
     Function = function(identifier, fadeTime, endScript)
       -- Set default values for optional arguments
       endScript = endScript or ""
@@ -243,11 +259,13 @@ registerFunction(
       { "fadeTime", "Number?" },
       { "endScript", "String?" }
     },
-    Documentation = [[Fades out the node(s) with the given identifier over the given time
-      in seconds. The identifier can contain a tag and/or a wildcard to target several
-      nodes. If the fade time is not provided then the 'OpenSpaceEngine.FadeDuration'
-      property will be used instead. If the third argument (endScript) is provided then
-      that script will be run after the fade is finished.]],
+    Documentation = [[
+      Fades out the node(s) with the given identifier over the given time in seconds. The
+      identifier can contain a tag and/or a wildcard to target several nodes. If the fade
+      time is not provided then the 'OpenSpaceEngine.FadeDuration' property will be used
+      instead. If the third argument (endScript) is provided then that script will be run
+      ter the fade is finished.
+    ]],
     Function = function(identifier, fadeTime, endScript)
       -- Set default values for optional arguments
       endScript = endScript or ""
@@ -325,11 +343,13 @@ registerFunction(
       { "fadeTime", "Number?" },
       { "endScript", "String?" }
     },
-    Documentation = [[Toggles the fade state of the node(s) with the given identifier over
-      the given time in seconds. The identifier can contain a tag and/or a wildcard to
-      target several nodes. If the fade time is not provided then the
-      "OpenSpaceEngine.FadeDuration" property will be used instead. If the third argument
-      (endScript) is provided then that script will be run after the fade is finished.]],
+    Documentation = [[
+      Toggles the fade state of the node(s) with the given identifier over the given time
+      in seconds. The identifier can contain a tag and/or a wildcard to target several
+      nodes. If the fade time is not provided then the "OpenSpaceEngine.FadeDuration"
+      operty will be used instead. If the third argument (endScript) is provided then
+      at script will be run after the fade is finished.
+    ]],
     Function = function(renderable, fadeTime, endScript)
       if (fadeTime == nil) then
         fadeTime = openspace.propertyValue("OpenSpaceEngine.FadeDuration")

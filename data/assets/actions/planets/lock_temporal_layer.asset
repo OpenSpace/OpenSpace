@@ -8,8 +8,9 @@ local LockCurrent = {
     openspace.setPropertyValue("Scene." .. focusName .. ".*.FixedTime", dateTime)
     openspace.setPropertyValue("Scene." .. focusName .. ".*.UseFixedTime", true)
   ]],
-  Documentation = [[Set fixed date for all temporal layers for the currently 
-    focused node.]],
+  Documentation = [[
+    Set fixed date for all temporal layers for the currently focused node.
+  ]],
   GuiPath = "/Solar System",
   IsLocal = false
 }
@@ -24,8 +25,9 @@ local UnlockCurrent = {
     openspace.setPropertyValue("Scene." .. focusName .. ".*.UseFixedTime", false)
     openspace.setPropertyValue("Scene." .. focusName .. ".*.FixedTime", "")
   ]],
-  Documentation = [[Removes fixed date for all temporal layers for the currently
-     focused node.]],
+  Documentation = [[
+    Removes fixed date for all temporal layers for the currently focused node.
+  ]],
   GuiPath = "/Solar System",
   IsLocal = false
 }
