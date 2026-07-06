@@ -24,7 +24,7 @@
 
 #version __CONTEXT__
 
-#include "powerScaling/powerScaling_vs.glsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
 // The shader expands a single point vertex into an arrow originally pointing along +X
 // direction, it is then rotated to match the direction of the incomming vector.

@@ -37,7 +37,7 @@
 
 namespace {
     // We want to allow dependencies to be any file type
-    // TODO (@ylvse 2026-04-19) Need to check if this is true?^
+    // TODO (@ylvse 2026-04-19) Need to check if this is true?
     constexpr const char* FileFilter = "Asset files (*.jasset *.asset);;All files (*)";
 
     // Icons for dependency status

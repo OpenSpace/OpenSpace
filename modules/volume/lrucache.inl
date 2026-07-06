@@ -79,7 +79,7 @@ void LruCache<Key, Value, Container>::insert(const Key& key, const Value& value)
         evict();
     }
     auto iter = _tracker.insert(_tracker.end(), key);
-    _cache[key] = std::make_pair(value, iter);
+    _cache[key] = std::pair(value, iter);
 };
 
 } // namespace openspace

@@ -315,9 +315,6 @@ void PropertiesDialog::transitionToEditMode() {
     _buttonBox->setDisabled(true);
     _addFromScriptLog->setDisabled(true);
 
-    _commandLabel->setText("<font color='black'>Property Set Command</font>");
-    _propertyLabel->setText("<font color='black'>Property</font>");
-    _valueLabel->setText("<font color='black'>Value to set</font>");
     editBoxDisabled(false);
 }
 
@@ -330,9 +327,6 @@ void PropertiesDialog::transitionFromEditMode() {
     _buttonBox->setDisabled(false);
     _addFromScriptLog->setDisabled(false);
 
-    _commandLabel->setText("<font color='light gray'>Property Set Command</font>");
-    _propertyLabel->setText("<font color='light gray'>Property</font>");
-    _valueLabel->setText("<font color='light gray'>Value to set</font>");
     editBoxDisabled(true);
 }
 
@@ -408,7 +402,10 @@ void PropertiesDialog::selectLineFromScriptLog() {
                 // Remove the string markers around the property
                 const QString prop = textList[0].mid(1, textList[0].size() - 2).trimmed();
 
-                QString value = textList[1].trimmed();
+                // We need to reassemble the rest of the value since it might contain
+                // additional commas
+                textList.removeFirst();
+                QString value = textList.join(",").trimmed();
                 // If they exist, we need to replace the single string markers around the
                 // property, with double string markers
                 if (value.size() > 2) {
