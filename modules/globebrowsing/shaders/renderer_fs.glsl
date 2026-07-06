@@ -203,10 +203,10 @@ Fragment getFragment() {
   Fragment frag;
   frag.color = vec4(0.3, 0.3, 0.3, 1.0);
 
-  // Skirts are vertical walls that hide gaps between neighbouring tiles. They sit
-  // below the surface and are occluded while the globe is opaque, but once the globe
-  // is faded they become visible as stretched edges. Drop the skirt fragments when
-  // the globe is transparent.
+  // Skirts are vertical walls that hide gaps between neighboring tiles. They sit below
+  // the surface and are occluded while the globe is opaque, but once the globe is faded
+  // they become visible as stretched edges. Drop the skirt fragments when the globe is
+  // transparent
   if (opacity < 1.0 && in_data.isSkirt > 0.0) {
     discard;
   }
