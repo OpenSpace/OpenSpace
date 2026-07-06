@@ -57,35 +57,12 @@ namespace {
         return std::format("System: {}", host);
     }
 
-    void setDefaultValueOrbitVisuals(bool shouldShowIfDefault) {
-        using namespace openspace;
-        const std::string appearanceUri = "{defaultvalues_shape}.Renderable"; // @TODO (2026-02-12) This tag no longer exists
-        if (shouldShowIfDefault) {
-            // Draw using points
-            global::scriptEngine->queueScript(std::format(
-                "openspace.setPropertyValue('{0}.Appearance.Rendering', 1.0);"
-                "openspace.setPropertyValue('{0}.Appearance.PointSize', 64.0);"
-                "openspace.setPropertyValue('{0}.Appearance.EnableFade', false);"
-                "openspace.setPropertyValue('{0}.Resolution', 100);",
-                appearanceUri
-            ));
-        }
-        else {
-            // Draw using lines
-            global::scriptEngine->queueScript(std::format(
-                "openspace.setPropertyValue('{0}.Appearance.Rendering', 0.0);"
-                "openspace.setPropertyValue('{0}.Appearance.EnableFade', true);",
-                appearanceUri
-            ));
-        }
-    };
-
     // Set increased reach factors of all exoplanet renderables, to trigger fading out of
     // glyph cloud
     void setIncreasedReachfactors() {
         using namespace openspace;
         global::scriptEngine->queueScript(
-            "openspace.setPropertyValue('{exoplanet}.ApproachFactor', 15000000.0)"
+            "openspace.setPropertyValue('{exoplanet_planet}.ApproachFactor', 15000000.0)"
             "openspace.setPropertyValue('{exoplanet_system}.ApproachFactor', 15000000.0)"
         );
     }
@@ -298,7 +275,6 @@ void SystemViewer::renderSystemViewContent(const std::string& host) {
     if (!systemIsAdded) {
         if (ImGui::Button("Add system")) {
             addExoplanetSystem(host);
-            setDefaultValueOrbitVisuals(_highlightDefaultOrbits);
         }
     }
     else {
@@ -671,15 +647,6 @@ void SystemViewer::renderVisualsTabContent(const std::string& host,
         ImGui::Text("Global:");
         ImGui::SameLine();
         view::helper::renderHelpMarker("Applied globally, to all rendered exoplanet systems");
-
-        if (ImGui::Checkbox("Point orbit for default values", &_highlightDefaultOrbits)) {
-            setDefaultValueOrbitVisuals(_highlightDefaultOrbits);
-        }
-        ImGui::SameLine();
-        view::helper::renderHelpMarker(
-            "Orbits whose shape/inclination is set using default values will be "
-            "rendered as points instead of lines."
-        );
 
         bool colorOptionChanged = ImGui::Checkbox("Color planet orbits", &_colorOrbits);
 
