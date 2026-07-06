@@ -180,7 +180,8 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         ZoneScopedN("CefWebGuiModule::reload");
 
         if (_instance) {
-            _instance->reloadBrowser();
+            _enabled = false;
+            _enabled = true;
         }
     });
 
