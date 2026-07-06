@@ -273,7 +273,7 @@ windows_msvc: {
       cleanWs()
     } // node('windows')
   }
-},
+}
 // windows_ninja: {
 //   if (env.USE_BUILD_OS_WINDOWS == 'true') {
 //     node('windows') {
@@ -293,86 +293,4 @@ windows_msvc: {
 //       cleanWs()
 //     } // node('windows')
 //   }
-// },
-macos_make: {
-  if (env.USE_BUILD_OS_MACOS == 'true') {
-    node('macos') {
-      stage('macos-make/scm') {
-        deleteDir();
-        gitHelper.checkoutGit(url, branch);
-      }
-
-      stage('macos-make/build') {
-          compileHelper.build(compileHelper.Make(), compileHelper.Clang(), moduleCMakeFlags(), '', 'build-make');
-      }
-
-      if (env.RUN_UNIT_TESTS == 'true') {
-        stage('macos-make/test-codegen') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/Debug/codegentest');
-          }
-        }
-
-        stage('macos-make/test-sgct') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/Debug/SGCTTest');
-          }
-        }
-
-        stage('macos-make/test-ghoul') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/Debug/GhoulTest');
-          }
-        }
-
-        stage('macos-make/test-openspace') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/Debug/OpenSpaceTest');
-          }
-        }
-      }
-      cleanWs()
-    } // node('macos')
-  }
-},
-macos_xcode: {
-  if (env.USE_BUILD_OS_MACOS == 'true') {
-    node('macos') {
-      stage('macos-xcode/scm') {
-        deleteDir();
-        gitHelper.checkoutGit(url, branch);
-      }
-
-      stage('macos-xcode/build') {
-          compileHelper.build(compileHelper.Xcode(), compileHelper.Xcode(), moduleCMakeFlags(), '', 'build-xcode');
-      }
-
-      if (env.RUN_UNIT_TESTS == 'true') {
-        stage('macos-xcode/test-codegen') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/Debug/codegentest');
-          }
-        }
-
-        stage('macos-xcode/test-sgct') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/Debug/SGCTTest');
-          }
-        }
-
-        stage('macos-xcode/test-ghoul') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/Debug/GhoulTest');
-          }
-        }
-
-        stage('macos-xcode/test-openspace') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/Debug/OpenSpaceTest');
-          }
-        }
-      }
-       cleanWs()
-    } // node('macos')
-  }
-}
+// }

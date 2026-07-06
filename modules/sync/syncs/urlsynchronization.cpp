@@ -74,8 +74,9 @@ namespace {
         std::optional<bool> useHash;
 
         // Optional to provide filename to override the one which is otherwise
-        // automatically created from the url. If this value is specified, the url
-        // parameter only only contain exactly one URL.
+        // automatically created from the url. If this value is specified, and the URL
+        // parameter contains more than one file, each file will be stored with a prefix
+        // of `-{i}` where `i` is the zero-based position of the file in the URL array.
         std::optional<std::string> filename;
 
         // This variable determines the validity period of a file(s) in seconds before it
@@ -111,12 +112,6 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dictionary,
         throw ghoul::MissingCaseException();
     }
 
-    if (p.filename.has_value() && _urls.size() > 1) {
-        throw ghoul::RuntimeError(std::format(
-            "UrlSynchronization ({}) requested overwrite filename but specified {} URLs "
-            "to download, which is not legal", p.identifier, _urls.size()
-        ));
-    }
     _filename = p.filename.value_or(_filename);
     _forceOverride = p.forceOverride.value_or(_forceOverride);
 
@@ -312,8 +307,9 @@ bool UrlSynchronization::trySyncUrls() {
     std::atomic_bool startedAllDownloads = false;
     std::vector<std::unique_ptr<HttpFileDownload>> downloads;
 
+    int index = 0;
     for (const std::string& url : _urls) {
-        if (_filename.empty() || _urls.size() > 1) {
+        if (_filename.empty()) {
             std::filesystem::path fn = std::filesystem::path(url).filename();
             if (fn.empty() && url.back() == '/') {
                 // If the user provided a path that ends in / the `filename` will result
@@ -326,7 +322,16 @@ bool UrlSynchronization::trySyncUrls() {
             name.erase(std::remove(name.begin(), name.end(), '?'), name.end());
             _filename = name;
         }
-        std::filesystem::path destination = directory() / (_filename + ".tmp");
+
+        std::string filename = _filename;
+        if (!_filename.empty() && _urls.size() > 1) {
+            std::filesystem::path p = std::filesystem::path(_filename);
+            std::string stem = p.stem().string();
+            std::string extension = p.extension().string();
+            filename = std::format("{}-{}{}", stem, index, extension);
+        }
+
+        std::filesystem::path destination = directory() / (filename + ".tmp");
 
         if (sizeData.find(url) != sizeData.end()) {
             LWARNING(std::format("{}: Duplicate entry for '{}'", _identifier, url));
@@ -385,6 +390,7 @@ bool UrlSynchronization::trySyncUrls() {
         LDEBUG(std::format("Started downloading '{}'", dl->url()));
 
         dl->start();
+        index++;
     }
 
     startedAllDownloads = true;

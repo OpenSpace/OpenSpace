@@ -216,6 +216,6 @@ asset.meta = {
   Description = [[A cube that can be used to verify calibration in a complicated display
     environment]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

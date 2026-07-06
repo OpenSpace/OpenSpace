@@ -1,4 +1,4 @@
-local transforms = asset.require("./moon")
+local transforms = asset.require("./globe")
 
 
 
@@ -46,6 +46,6 @@ asset.meta = {
   Name = "Moon marker",
   Description = "Moon marker with name, sized for Earth view",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

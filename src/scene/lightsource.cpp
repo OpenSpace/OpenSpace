@@ -51,7 +51,8 @@ namespace {
     // in our solar system.
     struct [[codegen::Dictionary(LightSource)]] Parameters {
         // The type of light source that is described in this element.
-        std::string type [[codegen::annotation("Must name a valid `LightSource` type")]];
+        std::string type [[codegen::annotation("Must name a valid LightSource type"),
+            codegen::private()]];
 
         // The identifier of the light source.
         std::string identifier [[codegen::identifier()]];

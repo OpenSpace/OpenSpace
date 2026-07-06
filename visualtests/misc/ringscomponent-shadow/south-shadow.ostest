@@ -3,11 +3,11 @@
   "commands": [
     {
       "type": "asset",
-      "value": "scene/solarsystem/planets/saturn/saturn.asset"
+      "value": "scene/solarsystem/planets/saturn/globe.asset"
     },
     {
       "type": "asset",
-      "value": "scene/solarsystem/planets/saturn/default_layers.asset"
+      "value": "scene/solarsystem/planets/saturn/layers/default_layers.asset"
     },
     {
       "type": "navigationstate",
@@ -30,7 +30,7 @@
     },
     {
       "type": "wait",
-      "value": 10.0
+      "value": 5.0
     },
     {
       "type": "screenshot"

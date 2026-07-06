@@ -1,0 +1,56 @@
+local transforms = asset.require("./transforms")
+
+
+
+local MarsLabel = {
+  Identifier = "MarsLabel",
+  Parent = transforms.MarsBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Mars",
+    FontSize = 70.0,
+    Size = 8.50,
+    MinMaxSize = { 1, 50 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    TransformationMatrix = {
+      1.0, 0.0, 0.0, -8.0E6,
+      0.0, 1.0, 0.0, 0.0,
+      0.0, 0.0, 1.0, 1.0E7,
+      0.0, 0.0, 0.0, 1.0
+    },
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 1.5, 40.0 },
+    FadeWidths = { 1.0, 50.0 }
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "Mars Label",
+    Path = "/Solar System/Planets/Mars",
+    Focusable = false,
+    Description = "Main label for Mars"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MarsLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MarsLabel)
+end)
+
+asset.export(MarsLabel)
+
+
+
+asset.meta = {
+  Name = "Mars Label",
+  Description = "Label for Mars",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

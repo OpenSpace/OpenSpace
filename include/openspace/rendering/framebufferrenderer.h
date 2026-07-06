@@ -160,7 +160,9 @@ public:
         const glm::ivec4& viewport);
     void performDeferredTasks(const std::vector<DeferredcasterTask>& tasks,
         const glm::ivec4& viewport);
-    void render(Scene* scene, Camera* camera, float blackoutFactor);
+    void render(Scene* scene, Camera* camera, float blackoutFactor,
+        const glm::vec4& blackoutColor, float blackoutTextureFactor,
+        ghoul::opengl::Texture* blackoutTexture);
 
     /**
      * Update render data. Responsible for calling RenderEngine::setRenderData.
@@ -189,7 +191,9 @@ private:
         std::unique_ptr<ghoul::opengl::ProgramObject>
     >;
 
-    void applyTMO(float blackoutFactor, const glm::ivec4& viewport);
+    void applyTMO(float blackoutFactor, const glm::vec4& blackoutColor,
+        float blackoutTextureFactor, ghoul::opengl::Texture* blackoutTexture,
+        const glm::ivec4& viewport);
     void applyFXAA(const glm::ivec4& viewport);
     void updateDownscaleTextures() const;
     void writeDownscaledVolume(const glm::ivec4& viewport);
@@ -208,8 +212,9 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _fxaaProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _downscaledVolumeProgram;
 
-    UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
-        hue, saturation, value, viewport, resolution) _hdrUniformCache;
+    UniformCache(hdrFeedingTexture, blackoutFactor, blackoutColor, hasBlackoutTexture,
+        blackoutTexture, blackoutTextureFactor, hdrExposure, gamma, hue, saturation,
+        value, viewport, resolution) _hdrUniformCache;
     UniformCache(renderedTexture, inverseScreenSize, viewport,
         resolution) _fxaaUniformCache;
     UniformCache(downscaledRenderedVolume, downscaledRenderedVolumeDepth, viewport,

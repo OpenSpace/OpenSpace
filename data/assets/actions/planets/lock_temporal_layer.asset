@@ -78,6 +78,6 @@ asset.meta = {
   Description = [[Provides actions for locking and unlocking temporal layers to the
      current date.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

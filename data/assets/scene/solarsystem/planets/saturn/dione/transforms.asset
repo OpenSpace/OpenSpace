@@ -1,0 +1,49 @@
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local DionePosition = {
+  Identifier = "DionePosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Dione,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.Dione,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "Dione Position",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Dione",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(DionePosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(DionePosition)
+end)
+
+asset.export(DionePosition)
+
+
+
+asset.meta = {
+  Name = "Dione Position",
+  Description = "Dione position",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

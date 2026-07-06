@@ -1,0 +1,71 @@
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
+local kernels = asset.require("./kernels")
+
+
+
+local labelsPath = asset.resource({
+  Name = "Pluto Labels",
+  Type = "HttpSynchronization",
+  Identifier = "pluto_labels",
+  Version = 1
+})
+
+
+local Pluto = {
+  Identifier = "Pluto",
+  Parent = transforms.PlutoBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Pluto,
+      Observer = kernels.ID.PlutoBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.Pluto,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1173000, 1173000, 1173000 },
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "pluto.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 8.5,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 650000.0, 4000000.0 },
+      DistanceEPS = 500000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "planet_terrestrial", "dwarf_planet" },
+  GUI = {
+    Path = "/Solar System/Dwarf Planets/Pluto"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Pluto)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Pluto)
+end)
+
+asset.export(Pluto)
+
+
+
+asset.meta = {
+  Name = "Pluto",
+  Description = "Pluto globe",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

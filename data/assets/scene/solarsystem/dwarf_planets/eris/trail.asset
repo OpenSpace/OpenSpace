@@ -3,7 +3,7 @@ local transforms = asset.require("./transforms")
 
 
 
-local Trail = {
+local ErisTrail = {
   Identifier = "ErisTrail",
   Parent = sunTransforms.SunEclipJ2000.Identifier,
   Renderable = {
@@ -25,14 +25,14 @@ local Trail = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Trail)
+  openspace.addSceneGraphNode(ErisTrail)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Trail)
+  openspace.removeSceneGraphNode(ErisTrail)
 end)
 
-asset.export("Trail", Trail)
+asset.export(ErisTrail)
 
 
 

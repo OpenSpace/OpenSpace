@@ -10,6 +10,7 @@ local Item = {
   FormatString = "{}"
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Item)
 end)

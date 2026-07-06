@@ -206,14 +206,17 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableOrbitalKepler)]] Parameters {
-        // [[codegen::verbatim(PathInfo.description)]]
-        std::filesystem::path path;
+        // The file path or paths to the data file to read. If multiple paths are provided
+        // the contents are concatenated.
+        std::variant<std::filesystem::path, std::vector<std::filesystem::path>> path;
 
         enum class [[codegen::map(openspace::kepler::Format)]] Format {
             // A NORAD-style Two-Line element.
             TLE,
             // Orbit Mean-Elements Message in the KVN notation.
             OMM,
+            // CSV format that is provided by Celestrak
+            CSV,
             // JPL's Small Bodies Database.
             SBDB,
             // Minor Planet Center.
@@ -233,13 +236,13 @@ namespace {
         int segmentQuality;
 
         // [[codegen::verbatim(TrailWidthInfo.description)]]
-        std::optional<float> trailWidth;
+        std::optional<float> trailWidth [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(ColorInfo.description)]]
         glm::dvec3 color [[codegen::color()]];
 
         // [[codegen::verbatim(TrailFadeInfo.description)]]
-        std::optional<float> trailFade;
+        std::optional<float> trailFade [[codegen::greaterequal(0.f)]];
 
         enum class RenderingMode {
             Trail,
@@ -271,10 +274,10 @@ namespace {
         std::optional<bool> enableOutline;
 
         // [[codegen::verbatim(OutlineColorInfo.description)]]
-        std::optional<glm::vec3> outlineColor;
+        std::optional<glm::vec3> outlineColor [[codegen::color()]];
 
         // [[codegen::verbatim(OutlineWidthInfo.description)]]
-        std::optional<float> outlineWidth;
+        std::optional<float> outlineWidth [[codegen::inrange(0.f, 1.f)]];
     };
 } // namespace
 #include "renderableorbitalkepler_codegen.cpp"
@@ -282,7 +285,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableOrbitalKepler::Documentation() {
-    return codegen::doc<Parameters>("space_renderable_orbitalkepler");
+    return codegen::doc<Parameters>(
+        "space_renderable_orbitalkepler",
+        Renderable::Documentation()
+    );
 }
 
 RenderableOrbitalKepler::Appearance::Appearance()
@@ -293,7 +299,7 @@ RenderableOrbitalKepler::Appearance::Appearance()
     })
     , color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , trailWidth(TrailWidthInfo, 2.f, 1.f, 20.f)
-    , pointSizeExponent(PointSizeExponentInfo, 1.0f, 0.f, 11.f)
+    , pointSizeExponent(PointSizeExponentInfo, 1.f, 0.f, 11.f)
     , enableMaxSize(EnableMaxSizeInfo, true)
     , maxSize(MaxSizeInfo, 5.f, 0.f, 45.f)
     , renderingModes(RenderingModeInfo)
@@ -425,7 +431,18 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _contiguousMode.onChange([this]() { _updateDataBuffersAtNextRender = true; });
     addProperty(_contiguousMode);
 
-    _path = p.path.string();
+    if (std::holds_alternative<std::filesystem::path>(p.path)) {
+        _path = { std::get<std::filesystem::path>(p.path).string()};
+    }
+    else {
+        std::vector<std::filesystem::path> paths =
+            std::get<std::vector<std::filesystem::path>>(p.path);
+        std::vector<std::string> ps;
+        for (const std::filesystem::path& path : paths) {
+            ps.push_back(path.string());
+        }
+        _path = std::move(ps);
+    }
     _path.onChange([this]() { _updateDataBuffersAtNextRender = true; });
     addProperty(_path);
 }
@@ -512,8 +529,8 @@ void RenderableOrbitalKepler::update(const UpdateData& data) {
         _forceUpdate = true;
     }
 
-    bool isPaused = data.time.j2000Seconds() == data.previousFrameTime.j2000Seconds();
-    if (!isPaused || _forceUpdate) {
+    const bool update = _lastTimestamp != data.time.j2000Seconds();
+    if (update || _forceUpdate) {
         std::for_each(
             std::execution::par_unseq,
             _threadIds.begin(),
@@ -522,6 +539,7 @@ void RenderableOrbitalKepler::update(const UpdateData& data) {
                 threadedSegmentCalculations(threadId, data);
             }
         );
+        _lastTimestamp = data.time.j2000Seconds();
     }
 
     _lineDrawCount = static_cast<GLsizei>(_segmentsPerOrbit.size() * 2);
@@ -670,7 +688,13 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableOrbitalKepler::updateBuffers() {
-    _parameters = kepler::readFile(_path.value(), _format);
+    std::vector<std::string> ps = _path;
+    std::vector<std::filesystem::path> paths;
+    for (const std::string& p : ps) {
+        paths.push_back(p);
+    }
+
+    _parameters = kepler::readFiles(paths, _format);
     _nOrbits = static_cast<unsigned int>(_parameters.size());
 
     if (_startRenderIdx >= _nOrbits) {

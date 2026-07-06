@@ -18,6 +18,6 @@ asset.meta = {
     and Size Reference.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

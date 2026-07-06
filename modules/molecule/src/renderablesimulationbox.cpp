@@ -159,7 +159,7 @@ namespace {
             std::optional<std::string> trajectoryFile;
 
             // How many of this type of molecule should be rendered in the simulation box.
-            int count;
+            int count [[codegen::greaterequal(0)]];
         };
 
         // The list of files that are used to initiate this simulation box.
@@ -228,7 +228,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableSimulationBox::Documentation() {
-    return codegen::doc<Parameters>("molecule_renderable_simulationbox");
+    return codegen::doc<Parameters>(
+        "molecule_renderable_simulationbox",
+        Renderable::Documentation()
+    );
 }
 
 RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictionary)

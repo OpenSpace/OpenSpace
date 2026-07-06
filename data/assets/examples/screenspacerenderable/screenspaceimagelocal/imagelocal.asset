@@ -9,6 +9,7 @@ local Item = {
   Name = "ScreenSpaceImageLocal Example - Basic"
 }
 
+
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(Item)
 end)

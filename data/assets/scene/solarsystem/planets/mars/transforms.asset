@@ -38,6 +38,6 @@ asset.meta = {
   Name = "Mars Transforms",
   Description = "Transform with position for Mars",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

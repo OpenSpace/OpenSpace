@@ -63,8 +63,8 @@ int main(int argc, char** argv) {
     const std::filesystem::path base = configFile.parent_path();
     FileSys.registerPathToken("${BASE}", base);
 
-    *global::configuration = loadConfigurationFromFile(configFile, "", glm::ivec2(0));
-    global::openSpaceEngine->registerPathTokens();
+    *global::configuration = loadConfigurationFromFile(configFile, "");
+    registerPathTokens(*global::configuration);
     global::openSpaceEngine->initialize();
 
     ghoul::logging::LogManager::deinitialize();

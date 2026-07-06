@@ -138,6 +138,6 @@ asset.meta = {
     https://www.mps.mpg.de/planetary-science/juice-swi for more information.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

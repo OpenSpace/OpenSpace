@@ -75,6 +75,6 @@ asset.meta = {
   Name = "Gaia Abundance Galah",
   Description = "This asset contains a RenderableStars dataset with metallicity data",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT License"
 }

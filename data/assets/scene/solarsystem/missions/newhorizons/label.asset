@@ -1,4 +1,4 @@
-local NewHorizonsModel = asset.require("./model")
+local model = asset.require("./model")
 
 
 
@@ -11,11 +11,12 @@ local models = asset.resource({
 
 local Labels = {
   Identifier = "NewHorizonsLabels",
-  Parent = NewHorizonsModel.NewHorizons.Identifier,
+  Parent = model.NewHorizons.Identifier,
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = models .. "Labels.obj",
-    AmbientIntensity = 0.8
+    AmbientIntensity = 0.8,
+    EnableFaceCulling = false
   },
   GUI = {
     Path = "/Solar System/Missions/New Horizons",

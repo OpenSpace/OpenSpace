@@ -2,9 +2,9 @@ local transforms = asset.require("./transforms")
 
 
 
-local Label = {
+local SednaLabel = {
   Identifier = "SednaLabel",
-  Parent = transforms.Position.Identifier,
+  Parent = transforms.SednaPosition.Identifier,
   Renderable = {
     Type = "RenderableLabel",
     Enabled = asset.enabled,
@@ -30,14 +30,14 @@ local Label = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Label)
+  openspace.addSceneGraphNode(SednaLabel)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Label)
+  openspace.removeSceneGraphNode(SednaLabel)
 end)
 
-asset.export("Label", Label)
+asset.export(SednaLabel)
 
 
 

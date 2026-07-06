@@ -57,6 +57,8 @@ public:
         ghoul::EasingFunc<float> easingFunc = nullptr) override;
 
 protected:
+    static nlohmann::json MetaDataSchema();
+
     nlohmann::json generateAdditionalJsonDescription() const override;
     using TemplateProperty<T>::toValue;
 

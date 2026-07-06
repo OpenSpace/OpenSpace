@@ -1,12 +1,12 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (Starlink)",
+  Name = "Satellite CSV Data (Starlink)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_starlink",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=starlink&FORMAT=kvn",
+  Identifier = "satellite_csv_data_starlink",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=starlink&FORMAT=csv",
   Filename = "starlink.txt",
   -- The starlink satellites are updated every 2 hours. We reduce this update rate to
   -- every 4 hours to ease the load on the servers a bit
@@ -16,11 +16,11 @@ local omm = asset.resource({
 
 local StarlinkSatellites = {
   Identifier = "StarlinkSatellites",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "starlink.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.65, 0.55, 0.55 },
     TrailFade = 5,

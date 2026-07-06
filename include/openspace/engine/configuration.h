@@ -129,7 +129,6 @@ struct Configuration {
         All = 0,
         NewYork,
         Sweden,
-        Utah,
         None
     };
     LayerServer layerServer = LayerServer::All;
@@ -162,9 +161,6 @@ struct Configuration {
     };
     HTTPProxy httpProxy;
 
-    // Values not read from the openspace.cfg file
-    std::string sgctConfigNameInitialized;
-
     static openspace::Documentation Documentation();
     ghoul::lua::LuaState state;
 };
@@ -172,8 +168,9 @@ struct Configuration {
 std::filesystem::path findConfiguration(const std::string& filename = "openspace.cfg");
 
 Configuration loadConfigurationFromFile(const std::filesystem::path& configurationFile,
-    const std::filesystem::path& settingsFile,
-    const glm::ivec2& primaryMonitorResolution);
+    const std::filesystem::path& settingsFile);
+
+void registerPathTokens(const Configuration& configuration);
 
 Configuration::LayerServer stringToLayerServer(std::string_view server);
 std::string layerServerToString(Configuration::LayerServer server);

@@ -1,0 +1,189 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Naiad = {
+  Identifier = "Naiad",
+  Parent = transforms.NaiadPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 96000, 60000, 52000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Naiad",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Naiad"
+  }
+}
+
+local Thalassa = {
+  Identifier = "Thalassa",
+  Parent = transforms.ThalassaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 108000, 100000, 52000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Thalassa",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Thalassa"
+  }
+}
+
+local Despina = {
+  Identifier = "Despina",
+  Parent = transforms.DespinaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 180000, 148000, 128000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Despina",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Despina"
+  }
+}
+
+local Galatea = {
+  Identifier = "Galatea",
+  Parent = transforms.GalateaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 204000, 184000, 144000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Galatea",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Galatea"
+  }
+}
+
+local Larissa = {
+  Identifier = "Larissa",
+  Parent = transforms.LarissaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 216000, 204000, 168000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Larissa",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Larissa"
+  }
+}
+
+local Hippocamp = {
+  Identifier = "Hippocamp",
+  Parent = transforms.HippocampPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 16000, 16000, 16000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Hippocamp",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Hippocamp"
+  }
+}
+
+local Proteus = {
+  Identifier = "Proteus",
+  Parent = transforms.ProteusPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 436000, 416000, 402000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_neptune",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_neptune"
+  },
+  GUI = {
+    Name = "Proteus",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Proteus"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Naiad)
+  openspace.addSceneGraphNode(Thalassa)
+  openspace.addSceneGraphNode(Despina)
+  openspace.addSceneGraphNode(Galatea)
+  openspace.addSceneGraphNode(Larissa)
+  openspace.addSceneGraphNode(Hippocamp)
+  openspace.addSceneGraphNode(Proteus)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Proteus)
+  openspace.removeSceneGraphNode(Hippocamp)
+  openspace.removeSceneGraphNode(Larissa)
+  openspace.removeSceneGraphNode(Galatea)
+  openspace.removeSceneGraphNode(Despina)
+  openspace.removeSceneGraphNode(Thalassa)
+  openspace.removeSceneGraphNode(Naiad)
+end)
+
+asset.export(Naiad)
+asset.export(Thalassa)
+asset.export(Despina)
+asset.export(Galatea)
+asset.export(Larissa)
+asset.export(Hippocamp)
+asset.export(Proteus)
+
+
+
+asset.meta = {
+  Name = "Neptune Inner Moons Globe",
+  Description = [[Asset containing globes for Neptune' inner prograde moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

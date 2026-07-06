@@ -56,7 +56,7 @@ This repository contains the source code and example profiles for OpenSpace, but
 Requirements for compiling are:
 
   - CMake version 4.0 or above
-  - C++ compiler supporting C++23 (Visual Studio 2026 18, GCC13, Clang18)
+  - C++ compiler supporting C++23 (Visual Studio 2026 18, GCC15, Clang21)
   - <a href="https://www.qt.io/download">Qt</a>. Version 6.9 is recommended
 
 

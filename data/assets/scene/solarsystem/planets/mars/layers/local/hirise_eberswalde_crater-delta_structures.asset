@@ -1,0 +1,49 @@
+local marsAsset = asset.require("scene/solarsystem/planets/mars/globe")
+
+
+
+local data = asset.resource({
+  Name = "HiRISE Eberswalde Crater - Delta Structures",
+  Type = "HttpSynchronization",
+  Identifier = "mars_hirise_eberswalde_crater-delta_structures",
+  Version = 1
+})
+
+
+local ColorLayer = {
+  Identifier = "Eberswalde_Crater",
+  Name = "Eberswalde Crater [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Delta_Structure_in_Eberswalde_Crater_Texture.vrt",
+  BlendMode = "Color"
+}
+
+local HeightLayer = {
+  Identifier = "Eberswalde_Crater",
+  Name = "Eberswalde Crater [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Delta_Structure_in_Eberswalde_Crater_Heightmap.vrt"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "ColorLayers", ColorLayer)
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "HeightLayers", HeightLayer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "HeightLayers", HeightLayer)
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "ColorLayers", ColorLayer)
+end)
+
+
+
+asset.meta = {
+  Name = "HiRISE Delta Structures in Eberswalde Crater [Local]",
+  Description = [[A local layer for Delta Structures in Eberswalde Crater from the HiRISE instrument.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,45 @@
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
+
+
+
+local Ariel = {
+  Identifier = "Ariel",
+  Parent = transforms.ArielPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1162000, 1156000, 1155000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_major",
+    "moon_major_uranus"
+  },
+  GUI = {
+    Name = "Ariel",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Ariel"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Ariel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Ariel)
+end)
+
+asset.export(Ariel)
+
+
+
+asset.meta = {
+  Name = "Miranda Globe",
+  Description = [[Miranda Globe]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

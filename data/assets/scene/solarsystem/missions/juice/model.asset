@@ -42,7 +42,8 @@ local JuiceModel = {
         Intensity = 0.4,
         Enabled = false
       }
-    }
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Juice Model",
@@ -71,6 +72,6 @@ asset.meta = {
     https://www.cosmos.esa.int/web/esac-cmso/scifleet.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

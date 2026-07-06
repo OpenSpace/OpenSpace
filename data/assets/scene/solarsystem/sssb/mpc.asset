@@ -53,6 +53,6 @@ asset.meta = {
       Orbit Supplement, and the Minor Planet Electronic Circulars. For more information
       visit https://minorplanetcenter.net/iau/MPCORB.html.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

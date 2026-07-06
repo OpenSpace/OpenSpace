@@ -1,0 +1,45 @@
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
+
+
+
+local Umbriel = {
+  Identifier = "Umbriel",
+  Parent = transforms.UmbrielPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1169400, 1169400, 1169400 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_major",
+    "moon_major_uranus"
+  },
+  GUI = {
+    Name = "Umbriel",
+    Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Umbriel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Umbriel)
+end)
+
+asset.export(Umbriel)
+
+
+
+asset.meta = {
+  Name = "Miranda Globe",
+  Description = [[Miranda Globe]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

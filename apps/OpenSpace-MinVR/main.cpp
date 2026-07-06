@@ -379,25 +379,11 @@ int main(int argc, char** argv) {
         std::filesystem::path base = configurationFilePath.parent_path();
         FileSys.registerPathToken("${BASE}", std::move(base));
 
-#ifdef WIN32
-        glm::ivec2 size = glm::ivec2(1920, 1080);
-        DEVMODEW dm = { 0 };
-        dm.dmSize = sizeof(DEVMODEW);
-        BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
-        if (success) {
-            size.x = dm.dmPelsWidth;
-            size.y = dm.dmPelsHeight;
-        }
-#else // ^^^^ WIN32 // !WIN32 vvvv
-        const glm::ivec2 size = glm::ivec2(1920, 1080);
-#endif // WIN32
-
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
         *global::configuration = loadConfigurationFromFile(
             configurationFilePath,
-            findSettings(),
-            size
+            findSettings()
         );
 
         // If the user requested a commandline-based configuation script that should

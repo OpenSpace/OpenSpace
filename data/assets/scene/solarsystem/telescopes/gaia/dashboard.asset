@@ -1,5 +1,5 @@
 local gaia = asset.require("./gaia")
-local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 
 
 
@@ -10,7 +10,7 @@ local distance = {
   SourceType = "Node",
   SourceNodeIdentifier = gaia.Gaia.Identifier,
   DestinationType = "Node Surface",
-  DestinationNodeIdentifier = earth.Earth.Identifier
+  DestinationNodeIdentifier = earthAsset.Earth.Identifier
 }
 
 

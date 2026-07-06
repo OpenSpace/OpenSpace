@@ -1,0 +1,96 @@
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
+local saturnKernels = asset.require("./kernels")
+
+
+
+local texturesPath = asset.resource({
+  Type = "HttpSynchronization",
+  Name = "Saturn textures",
+  Identifier = "saturn_textures",
+  Version = 4
+})
+
+
+local Saturn = {
+  Identifier = "Saturn",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = saturnKernels.ID.Saturn,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.Saturn,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 60268000, 60268000, 54364000 },
+    Rings = {
+      -- Single Texture Values:
+      --Texture = texturesPath .. "/saturn_rings.png",
+      --ColorFilter = 0.15,
+
+      -- MultiTexture Values:
+      TextureFwrd = texturesPath .. "forward_original_single.png",
+      TextureBckwrd = texturesPath .. "back_original_single.png",
+      TextureUnlit = texturesPath .. "unlit_original_single.png",
+      TextureColor = texturesPath .. "color_original_single.png",
+      TextureTransparency = texturesPath .. "trans_original_single.png",
+      ColorFilter = 0.9,
+
+      NightFactor = 1.0,
+      Size = 140445000,
+      Offset = { 74500 / 140445.100671159, 1.0 }, -- min / max extend
+    },
+    ShadowGroup = {
+      Sources = {
+        { Name = "Sun", Radius = 696300000 },
+      },
+      Casters = {
+        { Name = "Mimas", Radius = 207000 },
+        { Name = "Enceladus", Radius = 252000 },
+        { Name = "Tethys", Radius = 531100 },
+        { Name = "Dione", Radius = 561400 },
+        { Name = "Rhea", Radius = 765000 },
+        { Name = "Titan", Radius = 2576000 },
+        { Name = "Iapetus", Radius = 734000 }
+      }
+    },
+    Shadows = {
+      Enabled = false,
+      DistanceFraction = 40.0
+    }
+  },
+  Tag = { "planet_solarSystem", "planet_giants" },
+  GUI = {
+    Name = "Saturn",
+    Path = "/Solar System/Planets/Saturn",
+    Description = "Saturn globe"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Saturn)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Saturn)
+end)
+
+asset.export(Saturn)
+
+
+
+asset.meta = {
+  Name = "Saturn",
+  Description = "Saturn globe",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

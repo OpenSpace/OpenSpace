@@ -54,7 +54,8 @@ namespace {
         // The type of the time frame that is described in this element. The available
         // types of scaling depend on the configuration of the application and can be
         // written to disk on application startup into the FactoryDocumentation.
-        std::string type [[codegen::annotation("Must name a valid TimeFrame type")]];
+        std::string type [[codegen::annotation("Must name a valid TimeFrame type"),
+            codegen::private()]];
     };
 } // namespace
 #include "timeframe_codegen.cpp"

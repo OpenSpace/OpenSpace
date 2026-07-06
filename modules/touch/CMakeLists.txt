@@ -39,8 +39,7 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 create_new_module(
   "Touch"
   touch_module
-  STATIC
-  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+  ${HEADER_FILES} ${SOURCE_FILES}
 )
 
 add_subdirectory(ext SYSTEM)

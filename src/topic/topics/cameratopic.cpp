@@ -27,6 +27,7 @@
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/topic/connection.h>
@@ -36,12 +37,7 @@
 #include <string_view>
 #include <utility>
 
-namespace {
-    constexpr std::string_view SubscribeEvent = "start_subscription";
-} // namespace
-
 namespace openspace {
-
 CameraTopic::CameraTopic()
     : _lastUpdateTime(std::chrono::system_clock::now())
 {}
@@ -59,20 +55,22 @@ bool CameraTopic::isDone() const {
 void CameraTopic::handleJson(const nlohmann::json& json) {
     const std::string event = json.at("event").get<std::string>();
 
-    if (event != SubscribeEvent) {
+    if (event != "start_subscription") {
         _isDone = true;
         return;
     }
 
-    _dataCallbackHandle = global::server->addPreSyncCallback(
-        [this]() {
-            const auto now = std::chrono::system_clock::now();
-            if (now - _lastUpdateTime > _cameraPositionUpdateTime) {
-                sendCameraData();
-                _lastUpdateTime = std::chrono::system_clock::now();
+    if (event == "start_subscription" && _dataCallbackHandle == UnsetOnChangeHandle) {
+        _dataCallbackHandle = global::server->addPreSyncCallback(
+            [this]() {
+                const auto now = std::chrono::system_clock::now();
+                if (now - _lastUpdateTime > _cameraPositionUpdateTime) {
+                    sendCameraData();
+                    _lastUpdateTime = std::chrono::system_clock::now();
+                }
             }
-        }
-    );
+        );
+    }
 }
 
 void CameraTopic::sendCameraData() {
@@ -101,7 +99,92 @@ void CameraTopic::sendCameraData() {
         { "subSolarLongitude", subSolar.y },
     };
 
-    _connection->sendJson(wrappedPayload(jsonData));
+    sendData(jsonData);
+}
+
+Schema CameraTopic::Schema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "title": "CameraTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "camera" },
+            "topicPayload": {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "type": "string",
+                  "enum": ["start_subscription", "stop_subscription"]
+                }
+              },
+              "additionalProperties": false,
+              "required": ["event"]
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "altitude": { "type": "number" },
+                "altitudeMeters": { "type": "number" },
+                "altitudeUnit": {
+                  "type": "string",
+                  "enum": [
+                    "nanometer",
+                    "nanometers",
+                    "micrometer",
+                    "micrometers",
+                    "millimeter",
+                    "millimeters",
+                    "meter",
+                    "meters",
+                    "Gigaparsec",
+                    "Gigaparsecs",
+                    "Megaparsec",
+                    "Megaparsecs",
+                    "Kiloparsec",
+                    "Kiloparsecs",
+                    "Parsec",
+                    "Parsecs",
+                    "Lightyear",
+                    "Lightyears",
+                    "Lightmonth",
+                    "Lightmonths",
+                    "Lightday",
+                    "Lightdays",
+                    "Lighthour",
+                    "Lighthours",
+                    "AU",
+                    "km"
+                  ]
+                },
+                "latitude": { "type": "number" },
+                "longitude": { "type": "number" },
+                "subSolarLatitude": { "type": "number" },
+                "subSolarLongitude": { "type": "number" },
+                "viewLatitude": { "type": "number" },
+                "viewLength": { "type": "number" },
+                "viewLongitude": { "type": "number" }
+              },
+              "additionalProperties": false,
+              "required": [
+                "latitude",
+                "longitude",
+                "altitude",
+                "altitudeUnit",
+                "altitudeMeters",
+                "viewLatitude",
+                "viewLongitude",
+                "viewLength",
+                "subSolarLatitude",
+                "subSolarLongitude"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+    )");
+
+    return { "cameratopic", schema };
 }
 
 } // namespace openspace

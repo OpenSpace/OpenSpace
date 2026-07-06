@@ -44,7 +44,10 @@ namespace {
 namespace openspace {
 
 Documentation MultiRotation::Documentation() {
-    return codegen::doc<Parameters>("base_rotation_multi");
+    return codegen::doc<Parameters>(
+        "base_rotation_multi",
+        Rotation::Documentation()
+    );
 }
 
 MultiRotation::MultiRotation(const ghoul::Dictionary& dictionary)

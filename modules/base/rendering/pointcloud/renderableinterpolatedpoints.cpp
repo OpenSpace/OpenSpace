@@ -139,9 +139,9 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    // RenderableInterpolatedPoints is a version of the RenderablePointCloud class, where
+    // This is a version of the [RenderablePointCloud](#base_renderable_pointcloud) where
     // the dataset may contain multiple time steps that can be interpolated between. It
-    // supports interpolation of both of positions and data values used for color mapping
+    // supports interpolation of both positions and data values used for color mapping
     // or size.
     //
     // The dataset should be structured in a way so that the first N rows correspond to
@@ -149,7 +149,6 @@ namespace {
     // positions, and so on. The number of objects in the dataset must be specified in the
     // asset.
     //
-    // MultiTexture:
     // Note that if using multiple textures for the points based on values in the dataset,
     // the used texture will be decided based on the first N set of points.
     struct [[codegen::Dictionary(RenderableInterpolatedPoints)]] Parameters {
@@ -159,10 +158,10 @@ namespace {
 
         struct Interpolation {
             // [[codegen::verbatim(InterpolationValueInfo.description)]]
-            std::optional<float> value;
+            std::optional<float> value [[codegen::inrange(0.f, 1.f)]];
 
             // [[codegen::verbatim(InterpolationSpeedInfo.description)]]
-            std::optional<float> speed;
+            std::optional<float> speed [[codegen::greater(0.f)]];
 
             // [[codegen::verbatim(UseSplineInfo.description)]]
             std::optional<bool> useSplineInterpolation;

@@ -9,6 +9,7 @@ local Item = {
   DisplayString = "Lua Console History Length: {}"
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Item)
 end)

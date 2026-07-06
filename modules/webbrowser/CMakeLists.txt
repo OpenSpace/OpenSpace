@@ -66,7 +66,7 @@ if (WIN32 OR UNIX)
   option(USE_SANDBOX OFF)
 endif ()
 # Add this project's cmake/ directory to the module path.
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(cef_support)
 
 # determine the current build platform
@@ -88,10 +88,23 @@ file(COPY ${CEF_ROOT}/Release/
   FILES_MATCHING PATTERN *
 )
 
+if (UNIX)
+  # CEF bundles a stripped-down libvulkan.so.1 that lacks symbols. Because the CEF directory
+  # is on the executable's RUNPATH, this stub gets loaded instead of the system Vulkan loader,
+  # breaking libraries that need the full symbol set
+  # We remove the bundled copies so the dynamic linker falls through to the system libvulkan
+  file(
+    REMOVE
+    "${CEF_ROOT}/Debug/libvulkan.so.1"
+    "${CEF_ROOT}/Release/libvulkan.so.1"
+    "${CEF_ROOT}/RelWithDebInfo/libvulkan.so.1"
+  )
+endif ()
+
 ##########################################################################################
 
 # Add the CEF binary distribution's cmake/ directory to the module path.
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CEF_ROOT}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CEF_ROOT}/cmake")
 
 # Load the CEF configuration (executes FindCEF.cmake).
 find_package(CEF REQUIRED)
@@ -278,7 +291,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 create_new_module(
   ${WEBBROWSER_MODULE_NAME}
   webbrowser_module
-  STATIC
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 

@@ -1,4 +1,4 @@
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local coreKernels = asset.require("spice/core")
 
 
@@ -42,7 +42,7 @@ local RotationMatrix = {
 
 local Voyager2 = {
   Identifier = "Voyager_2",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "1977-AUG-20 16:07:06.535",
@@ -66,13 +66,14 @@ local Voyager2 = {
     GeometryFile = models .. "Voyager.glb",
     ModelTransform = RotationMatrix,
     LightSources = {
-      sunTransforms.LightSource,
+      sunAsset.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
         Intensity = 0.5
       }
-    }
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Voyager 2",
@@ -86,7 +87,7 @@ local Voyager2 = {
 -- appear
 local VoyagerTrailCruiseEarthJupiter = {
   Identifier = "Voyager_2_Trail_Cruise_Earth_Jupiter",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = asset.enabled,
@@ -109,7 +110,7 @@ local VoyagerTrailCruiseEarthJupiter = {
 
 local VoyagerTrailEncounterJupiter = {
   Identifier = "Voyager_2_Trail_Encounter_Jupiter",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = asset.enabled,
@@ -134,7 +135,7 @@ local VoyagerTrailEncounterJupiter = {
 
 local VoyagerTrailCruiseJupiterSaturn = {
   Identifier = "Voyager_2_Trail_Cruise_Jupiter_Saturn",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = asset.enabled,
@@ -158,7 +159,7 @@ local VoyagerTrailCruiseJupiterSaturn = {
 
 local VoyagerTrailEncounterSaturn = {
   Identifier = "Voyager_2_Trail_Encounter_Saturn",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = asset.enabled,
@@ -183,7 +184,7 @@ local VoyagerTrailEncounterSaturn = {
 
 local VoyagerTrailCruiseSaturnUranus = {
   Identifier = "Voyager_2_Trail_Cruise_Saturn_Uranus",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = asset.enabled,
@@ -207,7 +208,7 @@ local VoyagerTrailCruiseSaturnUranus = {
 
 local VoyagerTrailEncounterUranus = {
   Identifier = "Voyager_2_Trail_Encounter_Uranus",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = asset.enabled,
@@ -232,7 +233,7 @@ local VoyagerTrailEncounterUranus = {
 
 local VoyagerTrailCruiseUranusNeptune = {
   Identifier = "Voyager_2_Trail_Cruise_Uranus_Neptune",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = asset.enabled,
@@ -256,7 +257,7 @@ local VoyagerTrailCruiseUranusNeptune = {
 
 local VoyagerTrailEncounterNeptune = {
   Identifier = "Voyager_2_Trail_Encounter_Neptune",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = asset.enabled,
@@ -281,7 +282,7 @@ local VoyagerTrailEncounterNeptune = {
 
 local VoyagerTrailCruiseNeptuneInf = {
   Identifier = "Voyager_2_Trail_Cruise_Neptune_Inf",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = asset.enabled,
@@ -369,6 +370,6 @@ asset.meta = {
     NASA Visualization Technology Applications And Development (VTAD)
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -262,8 +262,8 @@ local MoleculeFormic = {
   Parent = MoleculeRosetta.Identifier,
   Transform = {
     Translation = {
-        Type = "StaticTranslation",
-        Position = { 60.0, 20.0, 0.0 }
+      Type = "StaticTranslation",
+      Position = { 60.0, 20.0, 0.0 }
     }
   },
   Renderable = {
@@ -282,8 +282,8 @@ local MoleculeH20 = {
   Parent = MoleculeRosetta.Identifier,
   Transform = {
     Translation = {
-        Type = "StaticTranslation",
-        Position = { 0.0, 40.0, 0.0 }
+      Type = "StaticTranslation",
+      Position = { 0.0, 40.0, 0.0 }
     }
   },
   Renderable = {
@@ -302,8 +302,8 @@ local MoleculeMethanol = {
   Parent = MoleculeRosetta.Identifier,
   Transform = {
     Translation = {
-        Type = "StaticTranslation",
-        Position = { 20.0, 40.0, 0.0 }
+      Type = "StaticTranslation",
+      Position = { 20.0, 40.0, 0.0 }
     }
   },
   Renderable = {
@@ -322,8 +322,8 @@ local MoleculeMethylAcetate = {
   Parent = MoleculeRosetta.Identifier,
   Transform = {
     Translation = {
-        Type = "StaticTranslation",
-        Position = { 40.0, 40.0, 0.0 }
+      Type = "StaticTranslation",
+      Position = { 40.0, 40.0, 0.0 }
     }
   },
   Renderable = {
@@ -342,8 +342,8 @@ local MoleculeN2 = {
   Parent = MoleculeRosetta.Identifier,
   Transform = {
     Translation = {
-        Type = "StaticTranslation",
-        Position = { 60.0, 40.0, 0.0 }
+      Type = "StaticTranslation",
+      Position = { 60.0, 40.0, 0.0 }
     }
   },
   Renderable = {
@@ -362,8 +362,8 @@ local MoleculeO2 = {
   Parent = MoleculeRosetta.Identifier,
   Transform = {
     Translation = {
-        Type = "StaticTranslation",
-        Position = { 0.0, 60.0, 0.0 }
+      Type = "StaticTranslation",
+      Position = { 0.0, 60.0, 0.0 }
     }
   },
   Renderable = {
@@ -382,8 +382,8 @@ local MoleculePropanal = {
   Parent = MoleculeRosetta.Identifier,
   Transform = {
     Translation = {
-        Type = "StaticTranslation",
-        Position = { 20.0, 60.0, 0.0 }
+      Type = "StaticTranslation",
+      Position = { 20.0, 60.0, 0.0 }
     }
   },
   Renderable = {
@@ -457,6 +457,6 @@ asset.meta = {
   Description = [[Visualizes molecules that were found by Rosetta in the tail of comet
     67P/Churymov-Gerasimenko.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

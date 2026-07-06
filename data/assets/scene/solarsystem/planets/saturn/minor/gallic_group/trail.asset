@@ -1,0 +1,151 @@
+local transforms = asset.require("scene/solarsystem/planets/saturn/transforms")
+local kernels454 = asset.require("scene/solarsystem/planets/saturn/kernels454")
+local coreKernels = asset.require("spice/core")
+
+
+
+local AlbiorixTrail = {
+  Identifier = "AlbiorixTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.Albiorix,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 774.58,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_gallic",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Albiorix Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Albiorix",
+    Focusable = false
+  }
+}
+
+local BebhionnTrail = {
+  Identifier = "BebhionnTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.Bebhionn,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 838.77,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_gallic",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Bebhionn Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Bebhionn",
+    Focusable = false
+  }
+}
+
+local ErriapusTrail = {
+  Identifier = "ErriapusTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.Erriapus,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 844.89,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_gallic",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Erriapus Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Erriapus",
+    Focusable = false
+  }
+}
+
+local TarvosTrail = {
+  Identifier = "TarvosTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels454.ID.Tarvos,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 944.23,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_gallic",
+    "moonTrail_minor",
+    "moonTrail_minor_saturn"
+  },
+  GUI = {
+    Name = "Tarvos Trail",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Tarvos",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(AlbiorixTrail)
+  openspace.addSceneGraphNode(BebhionnTrail)
+  openspace.addSceneGraphNode(ErriapusTrail)
+  openspace.addSceneGraphNode(TarvosTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TarvosTrail)
+  openspace.removeSceneGraphNode(ErriapusTrail)
+  openspace.removeSceneGraphNode(BebhionnTrail)
+  openspace.removeSceneGraphNode(AlbiorixTrail)
+end)
+
+asset.export(AlbiorixTrail)
+asset.export(BebhionnTrail)
+asset.export(ErriapusTrail)
+asset.export(TarvosTrail)
+
+
+
+asset.meta = {
+  Name = "Saturn Gallic Group Moons Trails",
+  Description = [[Aasset containing trails for Saturn's Gallic Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

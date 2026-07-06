@@ -1,4 +1,4 @@
-local globe = asset.require("../../mercury")
+local mercuryAsset = asset.require("scene/solarsystem/planets/mercury/globe")
 
 
 
@@ -16,16 +16,16 @@ local Layer = {
   Enabled = asset.enabled,
   ZIndex = 100,
   FilePath = texturesPath .. "fesimap_02122015.png",
-  BlendMode = "Multiply"
+  BlendMode = "MultiplyMix"
 }
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(mercuryAsset.Mercury.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(mercuryAsset.Mercury.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export("layer", Layer)
@@ -36,6 +36,6 @@ asset.meta = {
   Name = "Mercury Iron Abundance",
   Description = "Iron Abundance layer for Mercury globe",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

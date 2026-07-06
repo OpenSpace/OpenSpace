@@ -1,12 +1,12 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
 local omm = asset.resource({
-  Name = "Satellite OMM Data (ARGOS)",
+  Name = "Satellite CSV Data (ARGOS)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_omm_data_argos",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=argos&FORMAT=kvn",
+  Identifier = "satellite_csv_data_argos",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=argos&FORMAT=csv",
   Filename = "argos.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -14,11 +14,11 @@ local omm = asset.resource({
 
 local Argos = {
   Identifier = "Argos",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = omm .. "argos.txt",
-    Format = "OMM",
+    Format = "CSV",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
     TrailFade = 17,

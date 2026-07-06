@@ -1,5 +1,5 @@
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+local marsAsset = asset.require("scene/solarsystem/planets/mars/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -11,7 +11,7 @@ local EndTime = "2021 FEB 18 20:32:16"
 
 local PerseveranceTrailSun = {
   Identifier = "PerseveranceTrailSun",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = false,
@@ -34,7 +34,7 @@ local PerseveranceTrailSun = {
 
 local PerseveranceTrailMars = {
   Identifier = "PerseveranceTrailMars",
-  Parent = marsTransforms.MarsBarycenter.Identifier,
+  Parent = marsAsset.MarsBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = false,

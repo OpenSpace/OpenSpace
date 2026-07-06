@@ -1,0 +1,1129 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Phoebe = {
+  Identifier = "Phoebe",
+  Parent = transforms.PhoebePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 218800, 217000, 203600 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Phoebe",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe"
+  }
+}
+
+local Skathi = {
+  Identifier = "Skathi",
+  Parent = transforms.SkathiPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 8000, 8000, 8000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Skathi",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skathi"
+  }
+}
+
+local S2007S2 = {
+  Identifier = "S2007S2",
+  Parent = transforms.S2007S2Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2007 S 2",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S2"
+  }
+}
+
+local Skoll = {
+  Identifier = "Skoll",
+  Parent = transforms.SkollPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Skoll",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skoll"
+  }
+}
+
+local S2004S13 = {
+  Identifier = "S2004S13",
+  Parent = transforms.S2004S13Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 13",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S13"
+  }
+}
+
+local Greip = {
+  Identifier = "Greip",
+  Parent = transforms.GreipPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Greip",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Greip"
+  }
+}
+
+local Hyrrokkin = {
+  Identifier = "Hyrrokkin",
+  Parent = transforms.HyrrokkinPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 8000, 8000, 8000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Hyrrokkin",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hyrrokkin"
+  }
+}
+
+local Jarnsaxa = {
+  Identifier = "Jarnsaxa",
+  Parent = transforms.JarnsaxaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Jarnsaxa",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Jarnsaxa"
+  }
+}
+
+local Mundilfari = {
+  Identifier = "Mundilfari",
+  Parent = transforms.MundilfariPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 7000, 7000, 7000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Mundilfari",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari"
+  }
+}
+
+local S2006S1 = {
+  Identifier = "S2006S1",
+  Parent = transforms.S2006S1Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 1",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S1"
+  }
+}
+
+local S2004S17 = {
+  Identifier = "S2004S17",
+  Parent = transforms.S2004S17Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 17",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S17"
+  }
+}
+
+local Bergelmir = {
+  Identifier = "Bergelmir",
+  Parent = transforms.BergelmirPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Bergelmir",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bergelmir"
+  }
+}
+
+local Narvi = {
+  Identifier = "Narvi",
+  Parent = transforms.NarviPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 7000, 7000, 7000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Narvi",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Narvi"
+  }
+}
+
+local Suttungr = {
+  Identifier = "Suttungr",
+  Parent = transforms.SuttungrPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 7000, 7000, 7000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Suttungr",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Suttungr"
+  }
+}
+
+local Hati = {
+  Identifier = "Hati",
+  Parent = transforms.HatiPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Hati",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hati"
+  }
+}
+
+local S2004S12 = {
+  Identifier = "S2004S12",
+  Parent = transforms.S2004S12Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 5000, 5000, 5000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 12",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S12"
+  }
+}
+
+local Farbauti = {
+  Identifier = "Farbauti",
+  Parent = transforms.FarbautiPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 5000, 5000, 5000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Farbauti",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Farbauti"
+  }
+}
+
+local Thrymr = {
+  Identifier = "Thrymr",
+  Parent = transforms.ThrymrPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 7000, 7000, 7000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Thrymr",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thrymr"
+  }
+}
+
+local Aegir = {
+  Identifier = "Aegir",
+  Parent = transforms.AegirPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Aegir",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Aegir"
+  }
+}
+
+local S2007S3 = {
+  Identifier = "S2007S3",
+  Parent = transforms.S2007S3Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 5000, 5000, 5000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2007 S 3",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S3"
+  }
+}
+
+local Bestla = {
+  Identifier = "Bestla",
+  Parent = transforms.BestlaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 7000, 7000, 7000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Bestla",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bestla"
+  }
+}
+
+local S2004S7 = {
+  Identifier = "S2004S7",
+  Parent = transforms.S2004S7Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 7",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S7"
+  }
+}
+
+local S2006S3 = {
+  Identifier = "S2006S3",
+  Parent = transforms.S2006S3Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2006 S 3",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S3"
+  }
+}
+
+local Fenrir = {
+  Identifier = "Fenrir",
+  Parent = transforms.FenrirPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Fenrir",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fenrir"
+  }
+}
+
+local Surtur = {
+  Identifier = "Surtur", -- Rising
+  Parent = transforms.SurturPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Surtur",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Surtur"
+  }
+}
+
+local Kari = {
+  Identifier = "Kari",
+  Parent = transforms.KariPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 7000, 7000, 7000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Kari",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari"
+  }
+}
+
+local Ymir = {
+  Identifier = "Ymir",
+  Parent = transforms.YmirPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 18000, 18000, 18000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Ymir",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Ymir"
+  }
+}
+
+local Loge = {
+  Identifier = "Loge",
+  Parent = transforms.LogePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Loge",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Loge"
+  }
+}
+
+local Fornjot = {
+  Identifier = "Fornjot",
+  Parent = transforms.FornjotPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Fornjot",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fornjot"
+  }
+}
+
+local Gridr = {
+  Identifier = "Gridr",
+  Parent = transforms.GridrPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Gridr",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gridr"
+  }
+}
+
+local Angrboda = {
+  Identifier = "Angrboda",
+  Parent = transforms.AngrbodaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Angrboda",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Angrboda"
+  }
+}
+
+local Skrymir = {
+  Identifier = "Skrymir",
+  Parent = transforms.SkrymirPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Skrymir",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skrymir"
+  }
+}
+
+local Gerd = {
+  Identifier = "Gerd",
+  Parent = transforms.GerdPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Gerd",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gerd"
+  }
+}
+
+local S2004S26 = {
+  Identifier = "S2004S26",
+  Parent = transforms.S2004S26Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 26",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S26"
+  }
+}
+
+local Eggther = {
+  Identifier = "Eggther",
+  Parent = transforms.EggtherPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6000, 6000, 6000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Eggther",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Eggther"
+  }
+}
+
+local Beli = {
+  Identifier = "Beli",
+  Parent = transforms.BeliPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Beli",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Beli"
+  }
+}
+
+local Gunnlod = {
+  Identifier = "Gunnlod",
+  Parent = transforms.GunnlodPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Gunnlod",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gunnlod"
+  }
+}
+
+local Thiazzi = {
+  Identifier = "Thiazzi",
+  Parent = transforms.ThiazziPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Thiazzi",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thiazzi"
+  }
+}
+
+local S2004S34 = {
+  Identifier = "S2004S34",
+  Parent = transforms.S2004S34Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 34",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S34"
+  }
+}
+
+local Alvaldi = {
+  Identifier = "Alvaldi",
+  Parent = transforms.AlvaldiPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 5000, 5000, 5000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Alvaldi",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Alvaldi"
+  }
+}
+
+local Geirrod = {
+  Identifier = "Geirrod",
+  Parent = transforms.GeirrodPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Geirrod",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Geirrod"
+  }
+}
+
+local S2004S28 = {
+  Identifier = "S2004S28",
+  Parent = transforms.S2004S28Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 28",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S28"
+  }
+}
+
+local S2004S21 = {
+  Identifier = "S2004S21",
+  Parent = transforms.S2004S21Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 21",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S21"
+  }
+}
+
+local S2004S36 = {
+  Identifier = "S2004S36",
+  Parent = transforms.S2004S36Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 36",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S36"
+  }
+}
+
+local S2004S37 = {
+  Identifier = "S2004S37",
+  Parent = transforms.S2004S37Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 37",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S37"
+  }
+}
+
+local S2004S39 = {
+  Identifier = "S2004S39",
+  Parent = transforms.S2004S39Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_norse",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "S/2004 S 39",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S39"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Phoebe)
+  openspace.addSceneGraphNode(Skathi)
+  openspace.addSceneGraphNode(S2007S2)
+  openspace.addSceneGraphNode(Skoll)
+  openspace.addSceneGraphNode(S2004S13)
+  openspace.addSceneGraphNode(Greip)
+  openspace.addSceneGraphNode(Hyrrokkin)
+  openspace.addSceneGraphNode(Jarnsaxa)
+  openspace.addSceneGraphNode(Mundilfari)
+  openspace.addSceneGraphNode(S2006S1)
+  openspace.addSceneGraphNode(S2004S17)
+  openspace.addSceneGraphNode(Bergelmir)
+  openspace.addSceneGraphNode(Narvi)
+  openspace.addSceneGraphNode(Suttungr)
+  openspace.addSceneGraphNode(Hati)
+  openspace.addSceneGraphNode(S2004S12)
+  openspace.addSceneGraphNode(Farbauti)
+  openspace.addSceneGraphNode(Thrymr)
+  openspace.addSceneGraphNode(Aegir)
+  openspace.addSceneGraphNode(S2007S3)
+  openspace.addSceneGraphNode(Bestla)
+  openspace.addSceneGraphNode(S2004S7)
+  openspace.addSceneGraphNode(S2006S3)
+  openspace.addSceneGraphNode(Fenrir)
+  openspace.addSceneGraphNode(Surtur)
+  openspace.addSceneGraphNode(Kari)
+  openspace.addSceneGraphNode(Ymir)
+  openspace.addSceneGraphNode(Loge)
+  openspace.addSceneGraphNode(Fornjot)
+  openspace.addSceneGraphNode(Gridr)
+  openspace.addSceneGraphNode(Angrboda)
+  openspace.addSceneGraphNode(Skrymir)
+  openspace.addSceneGraphNode(Gerd)
+  openspace.addSceneGraphNode(S2004S26)
+  openspace.addSceneGraphNode(Eggther)
+  openspace.addSceneGraphNode(Beli)
+  openspace.addSceneGraphNode(Gunnlod)
+  openspace.addSceneGraphNode(Thiazzi)
+  openspace.addSceneGraphNode(S2004S34)
+  openspace.addSceneGraphNode(Alvaldi)
+  openspace.addSceneGraphNode(Geirrod)
+  openspace.addSceneGraphNode(S2004S28)
+  openspace.addSceneGraphNode(S2004S21)
+  openspace.addSceneGraphNode(S2004S36)
+  openspace.addSceneGraphNode(S2004S37)
+  openspace.addSceneGraphNode(S2004S39)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2004S39)
+  openspace.removeSceneGraphNode(S2004S37)
+  openspace.removeSceneGraphNode(S2004S36)
+  openspace.removeSceneGraphNode(S2004S21)
+  openspace.removeSceneGraphNode(S2004S28)
+  openspace.removeSceneGraphNode(Geirrod)
+  openspace.removeSceneGraphNode(Alvaldi)
+  openspace.removeSceneGraphNode(S2004S34)
+  openspace.removeSceneGraphNode(Thiazzi)
+  openspace.removeSceneGraphNode(Gunnlod)
+  openspace.removeSceneGraphNode(Beli)
+  openspace.removeSceneGraphNode(Eggther)
+  openspace.removeSceneGraphNode(S2004S26)
+  openspace.removeSceneGraphNode(Gerd)
+  openspace.removeSceneGraphNode(Skrymir)
+  openspace.removeSceneGraphNode(Angrboda)
+  openspace.removeSceneGraphNode(Gridr)
+  openspace.removeSceneGraphNode(Fornjot)
+  openspace.removeSceneGraphNode(Loge)
+  openspace.removeSceneGraphNode(Ymir)
+  openspace.removeSceneGraphNode(Kari)
+  openspace.removeSceneGraphNode(Surtur)
+  openspace.removeSceneGraphNode(Fenrir)
+  openspace.removeSceneGraphNode(S2006S3)
+  openspace.removeSceneGraphNode(S2004S7)
+  openspace.removeSceneGraphNode(Bestla)
+  openspace.removeSceneGraphNode(S2007S3)
+  openspace.removeSceneGraphNode(Aegir)
+  openspace.removeSceneGraphNode(Thrymr)
+  openspace.removeSceneGraphNode(Farbauti)
+  openspace.removeSceneGraphNode(S2004S12)
+  openspace.removeSceneGraphNode(Hati)
+  openspace.removeSceneGraphNode(Suttungr)
+  openspace.removeSceneGraphNode(Narvi)
+  openspace.removeSceneGraphNode(Bergelmir)
+  openspace.removeSceneGraphNode(S2004S17)
+  openspace.removeSceneGraphNode(S2006S1)
+  openspace.removeSceneGraphNode(Mundilfari)
+  openspace.removeSceneGraphNode(Jarnsaxa)
+  openspace.removeSceneGraphNode(Hyrrokkin)
+  openspace.removeSceneGraphNode(Greip)
+  openspace.removeSceneGraphNode(S2004S13)
+  openspace.removeSceneGraphNode(Skoll)
+  openspace.removeSceneGraphNode(S2007S2)
+  openspace.removeSceneGraphNode(Skathi)
+  openspace.removeSceneGraphNode(Phoebe)
+end)
+
+asset.export(Phoebe)
+asset.export(Skathi)
+asset.export(S2007S2)
+asset.export(Skoll)
+asset.export(S2004S13)
+asset.export(Greip)
+asset.export(Hyrrokkin)
+asset.export(Jarnsaxa)
+asset.export(Mundilfari)
+asset.export(S2006S1)
+asset.export(S2004S17)
+asset.export(Bergelmir)
+asset.export(Narvi)
+asset.export(Suttungr)
+asset.export(Hati)
+asset.export(S2004S12)
+asset.export(Farbauti)
+asset.export(Thrymr)
+asset.export(Aegir)
+asset.export(S2007S3)
+asset.export(Bestla)
+asset.export(S2004S7)
+asset.export(S2006S3)
+asset.export(Fenrir)
+asset.export(Surtur)
+asset.export(Kari)
+asset.export(Ymir)
+asset.export(Loge)
+asset.export(Fornjot)
+asset.export(Gridr)
+asset.export(Angrboda)
+asset.export(Skrymir)
+asset.export(Gerd)
+asset.export(S2004S26)
+asset.export(Eggther)
+asset.export(Beli)
+asset.export(Gunnlod)
+asset.export(Thiazzi)
+asset.export(S2004S34)
+asset.export(Alvaldi)
+asset.export(Geirrod)
+asset.export(S2004S28)
+asset.export(S2004S21)
+asset.export(S2004S36)
+asset.export(S2004S37)
+asset.export(S2004S39)
+
+
+
+asset.meta = {
+  Name = "Saturn Norse Group Moons",
+  Description = [[Procedural Globe asset containing Saturn's Norse Group moons: Phoebe,
+    Skathi, S2007S2, Skoll, S2004S13, Greip, Hyrrokkin, Jarnsaxa, Mundilfari, S2006S1,
+    S2004S17, Bergelmir, Narvi, Suttungr, Hati, S2004S12, Farbauti, Thrymr, Aegir,
+    S2007S3, Bestla, S2004S7, S2006S3, Fenrir, Kari, Ymir, Loge, Fornjot. Blank globes and
+    SPICE trails are generated for each moon]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

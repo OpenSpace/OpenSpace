@@ -1,5 +1,5 @@
-local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -13,7 +13,7 @@ local trail = asset.resource({
 
 local GaiaTrail = {
   Identifier = "GaiaTrail",
-  Parent = earthTransforms.EarthCenter.Identifier,
+  Parent = earthAsset.EarthCenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
@@ -44,7 +44,7 @@ local GaiaTrail = {
 
 local GaiaTrailEclip = {
   Identifier = "GaiaTrail_Eclip",
-  Parent = sunTransforms.SunCenter.Identifier,
+  Parent = sunAsset.SunCenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
     Enabled = false,

@@ -1,0 +1,293 @@
+local transforms = asset.require("./transforms")
+
+
+
+local KiviuqLabel = {
+  Identifier = "KiviuqLabel",
+  Parent = transforms.KiviuqPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Kiviuq",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
+  GUI = {
+    Name = "Kiviuq Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq",
+    Focusable = false
+  }
+}
+
+local IjiraqLabel = {
+  Identifier = "IjiraqLabel",
+  Parent = transforms.IjiraqPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Ijiraq",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
+  GUI = {
+    Name = "Ijiraq Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Ijiraq",
+    Focusable = false
+  }
+}
+
+local PaaliaqLabel = {
+  Identifier = "PaaliaqLabel",
+  Parent = transforms.PaaliaqPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Paaliaq",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
+  GUI = {
+    Name = "Paaliaq Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Paaliaq",
+    Focusable = false
+  }
+}
+
+local SiarnaqLabel = {
+  Identifier = "SiarnaqLabel",
+  Parent = transforms.SiarnaqPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Siarnaq",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
+  GUI = {
+    Name = "Siarnaq Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq",
+    Focusable = false
+  }
+}
+
+local TarqeqLabel = {
+  Identifier = "TarqeqLabel",
+  Parent = transforms.TarqeqPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Tarqeq",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
+  GUI = {
+    Name = "Tarqeq Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Tarqeq",
+    Focusable = false
+  }
+}
+
+local S2004S29Label = {
+  Identifier = "S2004S29Label",
+  Parent = transforms.S2004S29Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 29",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
+  GUI = {
+    Name = "S/2004 S 29 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S29",
+    Focusable = false
+  }
+}
+
+local S2004S31Label = {
+  Identifier = "S2004S31Label",
+  Parent = transforms.S2004S31Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 31",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
+  GUI = {
+    Name = "S/2004 S 31 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S31",
+    Focusable = false
+  }
+}
+
+local S2019S01Label = {
+  Identifier = "S2019S01Label",
+  Parent = transforms.S2019S01Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 01",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
+  GUI = {
+    Name = "S/2019 S 01 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2019S01",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(KiviuqLabel)
+  openspace.addSceneGraphNode(IjiraqLabel)
+  openspace.addSceneGraphNode(PaaliaqLabel)
+  openspace.addSceneGraphNode(SiarnaqLabel)
+  openspace.addSceneGraphNode(TarqeqLabel)
+  openspace.addSceneGraphNode(S2004S29Label)
+  openspace.addSceneGraphNode(S2004S31Label)
+  openspace.addSceneGraphNode(S2019S01Label)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2019S01Label)
+  openspace.removeSceneGraphNode(S2004S31Label)
+  openspace.removeSceneGraphNode(S2004S29Label)
+  openspace.removeSceneGraphNode(TarqeqLabel)
+  openspace.removeSceneGraphNode(SiarnaqLabel)
+  openspace.removeSceneGraphNode(PaaliaqLabel)
+  openspace.removeSceneGraphNode(IjiraqLabel)
+  openspace.removeSceneGraphNode(KiviuqLabel)
+end)
+
+asset.export(KiviuqLabel)
+asset.export(IjiraqLabel)
+asset.export(PaaliaqLabel)
+asset.export(SiarnaqLabel)
+asset.export(TarqeqLabel)
+asset.export(S2004S29Label)
+asset.export(S2004S31Label)
+asset.export(S2019S01Label)
+
+
+
+asset.meta = {
+  Name = "Saturn Inuit Group Moons Labels",
+  Description = [[Asset containing labels for Saturn's Inuit Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

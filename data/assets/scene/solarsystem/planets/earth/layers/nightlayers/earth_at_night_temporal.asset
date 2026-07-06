@@ -1,4 +1,4 @@
-local globe = asset.require("../../earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 
 
 local NearConstantContrastLayer = {
@@ -139,12 +139,13 @@ local Layer = {
     of Earth's nocturnal landscape. See the individual layers for more information.]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "NightLayers", Layer)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "NightLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "NightLayers", Layer)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "NightLayers", Layer)
 end)
 
 asset.export("layer", Layer)

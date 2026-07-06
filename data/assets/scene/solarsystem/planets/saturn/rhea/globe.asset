@@ -1,0 +1,61 @@
+local transforms = asset.require("./transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local labelsPath = asset.resource({
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
+})
+
+
+local Rhea = {
+  Identifier = "Rhea",
+  Parent = transforms.RheaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = 765000,
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "rhea.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 9.0,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 500000.0, 2500000.0 },
+      DistanceEPS = 250000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
+  GUI = {
+    Name = "Rhea",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Rhea",
+    Description = "Second largest moon of Saturn"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Rhea)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Rhea)
+end)
+
+asset.export(Rhea)
+
+
+
+asset.meta = {
+  Name = "Rhea",
+  Description = "Rhea globe",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

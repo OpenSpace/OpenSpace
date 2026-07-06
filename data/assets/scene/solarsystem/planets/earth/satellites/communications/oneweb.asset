@@ -1,0 +1,55 @@
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+
+
+
+local omm = asset.resource({
+  Name = "Satellite CSV Data (OneWeb)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_csv_data_oneweb",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?GROUP=oneweb&FORMAT=csv",
+  Filename = "oneweb.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local OneWebSatellites = {
+  Identifier = "OneWebSatellites",
+  Parent = earthAsset.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableOrbitalKepler",
+    Path = omm .. "oneweb.txt",
+    Format = "CSV",
+    SegmentQuality = 3,
+    Color = { 0.75, 0.75, 0.35 },
+    TrailFade = 5,
+    PointSizeExponent = 5.0,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "earth_satellites" },
+  GUI = {
+    Name = "OneWeb",
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(OneWebSatellites)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(OneWebSatellites)
+end)
+
+asset.export(OneWebSatellites)
+
+
+
+asset.meta = {
+  Name = "Satellites Communications - OneWeb",
+  Description = "Satellites asset for Communications - OneWeb. Data from Celestrak",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.org/NORAD/elements/",
+  License = "Celestrak"
+}

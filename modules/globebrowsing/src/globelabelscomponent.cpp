@@ -218,13 +218,13 @@ namespace {
         std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
 
         // [[codegen::verbatim(FontSizeInfo.description)]]
-        std::optional<float> fontSize;
+        std::optional<float> fontSize [[codegen::greater(1.f)]];
 
         // [[codegen::verbatim(MinMaxSizeInfo.description)]]
         std::optional<glm::ivec2> minMaxSize;
 
         // [[codegen::verbatim(SizeInfo.description)]]
-        std::optional<float> size;
+        std::optional<float> size [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(HeightOffsetInfo.description)]]
         std::optional<float> heightOffset;

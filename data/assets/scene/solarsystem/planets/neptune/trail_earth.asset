@@ -1,5 +1,4 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
-local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 local coreKernels = asset.require("spice/core")
 local neptuneKernels = asset.require("./kernels095")
 
@@ -7,7 +6,7 @@ local neptuneKernels = asset.require("./kernels095")
 
 local NeptuneTrailEarth = {
   Identifier = "NeptuneTrailEarth",
-  Parent = earthTransforms.EarthBarycenter.Identifier,
+  Parent = earthAsset.EarthBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
     Enabled = false,
@@ -47,6 +46,6 @@ asset.meta = {
   Description = [[Alternate trail of Neptune, as observed by the Earth rather then the
     Sun]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -1,4 +1,4 @@
-local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
@@ -94,6 +94,6 @@ asset.meta = {
     actual position in London, England. But the asset also includes actions to move
     it to a position under the camera, or back to its original position.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

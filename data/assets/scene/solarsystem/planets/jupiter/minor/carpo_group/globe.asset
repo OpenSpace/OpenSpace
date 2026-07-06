@@ -1,0 +1,69 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Carpo = {
+  Identifier = "Carpo",
+  Parent = transforms.CarpoPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carpo",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Carpo",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/Carpo"
+  }
+}
+
+local S2018J4 = {
+  Identifier = "S2018J4",
+  Parent = transforms.S2018J4Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carpo",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2018 J 4",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/S2018J4"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Carpo)
+  openspace.addSceneGraphNode(S2018J4)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2018J4)
+  openspace.removeSceneGraphNode(Carpo)
+end)
+
+asset.export(Carpo)
+asset.export(S2018J4)
+
+
+
+asset.meta = {
+  Name = "Jupiter Carpo Group Moons Globe",
+  Description = [[Asset containing globes for Jupiter's Carpo Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

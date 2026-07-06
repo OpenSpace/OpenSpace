@@ -1,0 +1,10 @@
+{
+  "version": { "major": 1, "minor": 0 },
+  "identifier": "extragalactic_desi",
+  "name": "DESI Galaxies & Quasars",
+  "description": "Includes the DESI galaxy and quasar datasets.",
+  "assets": [
+    "scene/digitaluniverse/desi_galaxies_reduced",
+    "scene/digitaluniverse/desi_quasars"
+  ]
+}

@@ -42,6 +42,6 @@ asset.meta = {
   Name = "Actions - Turn ON/OFF all Minor Moons",
   Description = "Asset providing actions to turn ON/OFF all minor moons and their trails",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

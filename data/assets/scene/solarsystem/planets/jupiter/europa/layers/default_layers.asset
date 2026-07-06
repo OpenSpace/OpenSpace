@@ -1,0 +1,28 @@
+asset.require("./base_layers")
+asset.require("./local_layers")
+
+local server = openspace.layerServer();
+if (server == "All") then
+  asset.require("./newyork_layers")
+  asset.require("./sweden_layers")
+elseif (server == "NewYork") then
+  asset.require("./newyork_layers")
+elseif (server == "Sweden") then
+  asset.require("./sweden_layers")
+end
+
+asset.require("./sweden_layers")
+asset.require("./newyork_layers")
+
+
+
+asset.meta = {
+  Name = "Default Europa Layers",
+  Description = [[Default Europa layers are: Europa Texture & Voyager Global Mosaic.
+
+    Layers loaded from all available servers
+  ]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,44 @@
+local transforms = asset.require("scene/solarsystem/planets/uranus/transforms")
+local kernel = asset.require("scene/solarsystem/planets/uranus/kernels184")
+local coreKernels = asset.require("spice/core")
+
+
+
+local MargaretPosition = {
+  Identifier = "MargaretPosition",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernel.ID.Margaret,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  GUI = {
+    Name = "Margaret Position",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Prograde Moons/Margaret",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MargaretPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MargaretPosition)
+end)
+
+asset.export(MargaretPosition)
+
+
+
+asset.meta = {
+  Name = "Uranus Irregular Prograde Moons Positions",
+  Description = [[Asset containing positions for Uranus' irregular prograde moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

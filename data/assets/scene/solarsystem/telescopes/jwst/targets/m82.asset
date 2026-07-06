@@ -35,6 +35,6 @@ asset.meta = {
   Name = "M82 Galaxy Image",
   Description = "Screenspace image of the M82 Galaxy",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

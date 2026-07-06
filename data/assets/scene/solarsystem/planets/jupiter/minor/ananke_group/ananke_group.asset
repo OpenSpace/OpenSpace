@@ -1,0 +1,13 @@
+asset.require("./globe")
+asset.require("./trail")
+asset.require("./label", false)
+
+
+
+asset.meta = {
+  Name = "Meta asset for the Jupiter Ananke Group Moons",
+  Description = [[Meta asset for the Jupiter Ananke Group Moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

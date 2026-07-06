@@ -1,5 +1,5 @@
 asset.require("./colorlayers/blue_marble", false)
-asset.require("./colorlayers/esri_viirs_combo", asset.enabled)
+asset.require("./colorlayers/esri_viirs_combo", true)
 asset.require("./colorlayers/esri_noaa20_combo", false)
 asset.require("./colorlayers/esri_world_imagery", false)
 asset.require("./colorlayers/viirs_noaa20_temporal", false)
@@ -10,9 +10,9 @@ asset.require("./colorlayers/modis_terra_chlorophyll_a_temporal", false)
 asset.require("./colorlayers/ghrsst_l4_mur_sea_surface_temperature_temporal", false)
 
 asset.require("./heightlayers/blue_marble_height", false)
-asset.require("./heightlayers/terrain_tileset", asset.enabled)
+asset.require("./heightlayers/terrain_tileset", true)
 
-asset.require("./nightlayers/earth_at_night_2012", asset.enabled)
+asset.require("./nightlayers/earth_at_night_2012", true)
 asset.require("./nightlayers/earth_night_texture", false)
 asset.require("./nightlayers/earth_at_night_temporal", false)
 
@@ -22,7 +22,7 @@ asset.require("./overlays/reference_labels", false)
 asset.require("./overlays/tile_indices", false)
 asset.require("./overlays/size_reference", false)
 
-asset.require("./watermasks/modis_water_mask", asset.enabled)
+asset.require("./watermasks/modis_water_mask", true)
 
 
 
@@ -38,6 +38,6 @@ asset.meta = {
     Tile Indicies, Size Reference, and Modis Water Mask.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

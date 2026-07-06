@@ -28,6 +28,7 @@
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/csvreader.h>
 #include <ghoul/misc/stringhelper.h>
 #include <scn/scan.h>
 #include <fstream>
@@ -520,10 +521,17 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
 
     std::string header;
     while (ghoul::getline(f, header)) {
+        if (header.starts_with("No GP data found")) {
+            LWARNING(std::format("TLE file '{}' did not contain any data", file));
+            return std::vector<Parameters>();
+        }
+
         Parameters p;
 
         // Header
-        p.name = header;
+        std::string name = header;
+        ghoul::trimWhitespace(name);
+        p.name = std::move(name);
 
         // First line
         // Field Columns   Content
@@ -636,6 +644,11 @@ std::vector<Parameters> readOmmFile(const std::filesystem::path& file) {
     std::optional<Parameters> current = std::nullopt;
     std::string line;
     while (ghoul::getline(f, line)) {
+        if (line.starts_with("No GP data found")) {
+            LWARNING(std::format("OMM file '{}' did not contain any data", file));
+            return std::vector<Parameters>();
+        }
+
         if (line.empty() || line == "\r") {
             continue;
         }
@@ -711,6 +724,146 @@ std::vector<Parameters> readOmmFile(const std::filesystem::path& file) {
 
     if (current.has_value()) {
         result.push_back(*current);
+    }
+
+    return result;
+}
+
+std::vector<Parameters> readCsvFile(const std::filesystem::path& file) {
+    ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
+
+    {
+        // Tentatively load the CSV file to better detect if we got some other response
+        std::ifstream f = std::ifstream(file);
+        std::string line;
+        ghoul::getline(f, line);
+
+        if (line.starts_with("No GP data found")) {
+            LWARNING(std::format("OMM file '{}' did not contain any data", file));
+            return std::vector<Parameters>();
+        }
+    }
+
+    const std::vector<std::string> columns = {
+        "OBJECT_NAME",
+        "OBJECT_ID",
+        "EPOCH",
+        "MEAN_MOTION",
+        "ECCENTRICITY",
+        "INCLINATION",
+        "RA_OF_ASC_NODE",
+        "ARG_OF_PERICENTER",
+        "MEAN_ANOMALY"
+    };
+    std::vector<std::vector<std::string>> entries = ghoul::loadCSVFile(file, columns);
+
+    std::vector<Parameters> result;
+    result.reserve(entries.size());
+    for (const std::vector<std::string>& entry : entries) {
+        ghoul_assert(entry.size() == columns.size(), "Mismatched number of columns");
+
+        Parameters current = {
+            .name = entry[0],
+            .id = entry[1],
+            .epoch = epochFromOmmString(entry[2]) // CSV uses the same format as OMM
+        };
+        {
+            std::string_view meanMotion = entry[3];
+            double mm = 0.0;
+            auto [ptr, ec] = std::from_chars(
+                meanMotion.data(),
+                meanMotion.data() + meanMotion.size(),
+                mm
+            );
+            if (ptr != meanMotion.data() + meanMotion.size() || ec != std::errc()) {
+                throw ghoul::RuntimeError(std::format(
+                    "Error parsing 'MeanMotion' of CSV file with error '{}'",
+                    std::make_error_code(ec).message()
+                ));
+            }
+            if (mm == 0.0) {
+                throw ghoul::RuntimeError(
+                    "Error parsing 'MeanMotion' of CSV file. Mean motion of 0 not valid"
+                );
+            }
+
+            current.semiMajorAxis = calculateSemiMajorAxis(mm);
+            current.period = std::chrono::seconds(std::chrono::hours(24)).count() / mm;
+        }
+        {
+            std::string_view eccentricity = entry[4];
+            auto [ptr, ec] = std::from_chars(
+                eccentricity.data(),
+                eccentricity.data() + eccentricity.size(),
+                current.eccentricity
+            );
+            if (ptr != eccentricity.data() + eccentricity.size() || ec != std::errc()) {
+                throw ghoul::RuntimeError(std::format(
+                    "Error parsing 'Eccentricity' of CSV file with error '{}'",
+                    std::make_error_code(ec).message()
+                ));
+            }
+        }
+        {
+            std::string_view inclination = entry[5];
+            auto [ptr, ec] = std::from_chars(
+                inclination.data(),
+                inclination.data() + inclination.size(),
+                current.inclination
+            );
+            if (ptr != inclination.data() + inclination.size() || ec != std::errc()) {
+                throw ghoul::RuntimeError(std::format(
+                    "Error parsing 'Inclination' of CSV file with error '{}'",
+                    std::make_error_code(ec).message()
+                ));
+            }
+        }
+        {
+            std::string_view ascendingNode = entry[6];
+            auto [ptr, ec] = std::from_chars(
+                ascendingNode.data(),
+                ascendingNode.data() + ascendingNode.size(),
+                current.ascendingNode
+            );
+            if (ptr != ascendingNode.data() + ascendingNode.size() || ec != std::errc()) {
+                throw ghoul::RuntimeError(std::format(
+                    "Error parsing 'AscendingNode' of CSV file with error '{}'",
+                    std::make_error_code(ec).message()
+                ));
+            }
+        }
+        {
+            std::string_view argumentOfPeriapsis = entry[7];
+            auto [ptr, ec] = std::from_chars(
+                argumentOfPeriapsis.data(),
+                argumentOfPeriapsis.data() + argumentOfPeriapsis.size(),
+                current.argumentOfPeriapsis
+            );
+            if (ptr != argumentOfPeriapsis.data() + argumentOfPeriapsis.size() ||
+                ec != std::errc())
+            {
+                throw ghoul::RuntimeError(std::format(
+                    "Error parsing 'ArgumentOfPeriapsis' of CSV file with error '{}'",
+                    std::make_error_code(ec).message()
+                ));
+            }
+        }
+        {
+            std::string_view meanAnomaly = entry[8];
+            auto [ptr, ec] = std::from_chars(
+                meanAnomaly.data(),
+                meanAnomaly.data() + meanAnomaly.size(),
+                current.meanAnomaly
+            );
+            if (ptr != meanAnomaly.data() + meanAnomaly.size() || ec != std::errc()) {
+                throw ghoul::RuntimeError(std::format(
+                    "Error parsing 'MeanAnomaly' of CSV file with error '{}'",
+                    std::make_error_code(ec).message()
+                ));
+            }
+        }
+
+        result.push_back(current);
     }
 
     return result;
@@ -924,7 +1077,7 @@ std::optional<std::vector<Parameters>> loadCache(const std::filesystem::path& fi
     return res;
 }
 
-std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
+std::vector<Parameters> readFile(const std::filesystem::path& file, Format format) {
     std::filesystem::path cachedFile = FileSys.cacheManager()->cachedFilename(file);
     if (std::filesystem::is_regular_file(cachedFile)) {
         LINFO(std::format(
@@ -947,6 +1100,9 @@ std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
         case Format::OMM:
             res = readOmmFile(file);
             break;
+        case Format::CSV:
+            res = readCsvFile(file);
+            break;
         case Format::SBDB:
             res = readSbdbFile(file);
             break;
@@ -955,9 +1111,23 @@ std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
             break;
     }
 
-    LINFO(std::format("Saving cache '{}' for Kepler file '{}'", cachedFile, file));
-    saveCache(res, cachedFile);
+    if (!res.empty()) {
+        LINFO(std::format("Saving cache '{}' for Kepler file '{}'", cachedFile, file));
+        saveCache(res, cachedFile);
+    }
     return res;
+}
+
+std::vector<Parameters> readFiles(const std::vector<std::filesystem::path>& files,
+                                  Format format)
+{
+    std::vector<Parameters> result;
+
+    for (const std::filesystem::path& file : files) {
+        std::vector<Parameters> r = readFile(file, format);
+        result.insert(result.end(), r.begin(), r.end());
+    }
+    return result;
 }
 
 } // namespace openspace::kepler

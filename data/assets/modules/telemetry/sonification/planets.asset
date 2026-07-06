@@ -76,6 +76,6 @@ asset.meta = {
   Version = "1.0",
   Description = "The list of planets in the PlanetSonification",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

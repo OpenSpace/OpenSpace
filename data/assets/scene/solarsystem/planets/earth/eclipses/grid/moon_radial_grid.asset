@@ -1,10 +1,10 @@
-local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/globe")
 
 
 
 local orbitalPlaneGrid = {
   Identifier = "MoonOrbitalPlaneRadialGrid",
-  Parent = "Moon",
+  Parent = moonAsset.Moon.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -43,6 +43,6 @@ asset.meta = {
   Name = "Moon Orbital Plane",
   Description = "A grid that shows the orbital plane of the Moon",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

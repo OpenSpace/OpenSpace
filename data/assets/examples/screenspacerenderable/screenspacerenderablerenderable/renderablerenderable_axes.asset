@@ -15,6 +15,7 @@ local Item = {
   CameraFov = 80.0
 }
 
+
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(Item)
 end)

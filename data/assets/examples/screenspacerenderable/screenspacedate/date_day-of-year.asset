@@ -9,6 +9,7 @@ local Item = {
   TimeFormat = "YYYY DOY"
 }
 
+
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(Item)
 end)

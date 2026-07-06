@@ -1,0 +1,53 @@
+local plutoAsset = asset.require("scene/solarsystem/dwarf_planets/pluto/transforms")
+local plutoKernels = asset.require("scene/solarsystem/dwarf_planets/pluto/kernels")
+
+
+
+local KerberosTrail = {
+  Identifier = "KerberosTrail",
+  Parent = plutoAsset.PlutoBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = plutoKernels.ID.Kerberos,
+      Observer = plutoKernels.ID.PlutoBarycenter
+    },
+    Color = { 0.00, 0.62, 1.00 },
+    Period = 32.16756,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_dwarf",
+    "moonTrail_pluto",
+    "moonTrail_minor",
+    "moonTrail_minor_pluto"
+  },
+  GUI = {
+    Name = "Kerberos Trail",
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Kerberos",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(KerberosTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(KerberosTrail)
+end)
+
+asset.export(KerberosTrail)
+
+
+
+asset.meta = {
+  Name = "Kerberos Trail",
+  Description = "Trail for Pluto's moon Kerberos",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

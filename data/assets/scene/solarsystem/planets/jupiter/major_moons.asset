@@ -86,6 +86,6 @@ asset.meta = {
   Description = [[Meta asset containing Jupiters major moons: Callisto, Europa,
     Ganymede, and Io]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -1,0 +1,3733 @@
+local transforms = asset.require("./transforms")
+
+
+
+local S2004S54Label = {
+  Identifier = "S2004S54Label",
+  Parent = transforms.S2004S54Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 54",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2004 S 54 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2004S54",
+    Focusable = false
+  }
+}
+
+local S2004S55Label = {
+  Identifier = "S2004S55Label",
+  Parent = transforms.S2004S55Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 55",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2004 S 55 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2004S55",
+    Focusable = false
+  }
+}
+
+local S2004S56Label = {
+  Identifier = "S2004S56Label",
+  Parent = transforms.S2004S56Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 56",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2004 S 56 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S56",
+    Focusable = false
+  }
+}
+
+local S2004S57Label = {
+  Identifier = "S2004S57Label",
+  Parent = transforms.S2004S57Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 57",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2004 S 57 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S57",
+    Focusable = false
+  }
+}
+
+local S2004S58Label = {
+  Identifier = "S2004S58Label",
+  Parent = transforms.S2004S58Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 58",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2004 S 58 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2004S58",
+    Focusable = false
+  }
+}
+
+local S2004S59Label = {
+  Identifier = "S2004S59Label",
+  Parent = transforms.S2004S59Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 59",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2004 S 59 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S59",
+    Focusable = false
+  }
+}
+
+local S2004S60Label = {
+  Identifier = "S2004S60Label",
+  Parent = transforms.S2004S60Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 60",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2004 S 60 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2004S60",
+    Focusable = false
+  }
+}
+
+local S2004S61Label = {
+  Identifier = "S2004S61Label",
+  Parent = transforms.S2004S61Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 61",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2004 S 61 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2004S61",
+    Focusable = false
+  }
+}
+
+local S2005S6Label = {
+  Identifier = "S2005S6Label",
+  Parent = transforms.S2005S6Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2005 S 6",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2005 S 6 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2005S6",
+    Focusable = false
+  }
+}
+
+local S2005S7Label = {
+  Identifier = "S2005S7Label",
+  Parent = transforms.S2005S7Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2005 S 7",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2005 S 7 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2005S7",
+    Focusable = false
+  }
+}
+
+local S2006S21Label = {
+  Identifier = "S2006S21Label",
+  Parent = transforms.S2006S21Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2006 S 21",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2006 S 21 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S21",
+    Focusable = false
+  }
+}
+
+local S2006S22Label = {
+  Identifier = "S2006S22Label",
+  Parent = transforms.S2006S22Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2006 S 22",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2006 S 22 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S22",
+    Focusable = false
+  }
+}
+
+local S2006S23Label = {
+  Identifier = "S2006S23Label",
+  Parent = transforms.S2006S23Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2006 S 23",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2006 S 23 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2006S23",
+    Focusable = false
+  }
+}
+
+local S2006S24Label = {
+  Identifier = "S2006S24Label",
+  Parent = transforms.S2006S24Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2006 S 24",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2006 S 24 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S24",
+    Focusable = false
+  }
+}
+
+local S2006S25Label = {
+  Identifier = "S2006S25Label",
+  Parent = transforms.S2006S25Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2006 S 25",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2006 S 25 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S25",
+    Focusable = false
+  }
+}
+
+local S2006S26Label = {
+  Identifier = "S2006S26Label",
+  Parent = transforms.S2006S26Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2006 S 26",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2006 S 26 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S26",
+    Focusable = false
+  }
+}
+
+local S2006S27Label = {
+  Identifier = "S2006S27Label",
+  Parent = transforms.S2006S27Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2006 S 27",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2006 S 27 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2006S27",
+    Focusable = false
+  }
+}
+
+local S2006S28Label = {
+  Identifier = "S2006S28Label",
+  Parent = transforms.S2006S28Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2006 S 28",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2006 S 28 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2006S28",
+    Focusable = false
+  }
+}
+
+local S2006S29Label = {
+  Identifier = "S2006S29Label",
+  Parent = transforms.S2006S29Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2006 S 29",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2006 S 29 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2006S29",
+    Focusable = false
+  }
+}
+
+local S2007S10Label = {
+  Identifier = "S2007S10Label",
+  Parent = transforms.S2007S10Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2007 S 10",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2007 S 10 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2007S10",
+    Focusable = false
+  }
+}
+
+local S2007S11Label = {
+  Identifier = "S2007S11Label",
+  Parent = transforms.S2007S11Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2007 S 11",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2007 S 11 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2007S11",
+    Focusable = false
+  }
+}
+
+local S2019S22Label = {
+  Identifier = "S2019S22Label",
+  Parent = transforms.S2019S22Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 22",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 22 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2019S22",
+    Focusable = false
+  }
+}
+
+local S2019S23Label = {
+  Identifier = "S2019S23Label",
+  Parent = transforms.S2019S23Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 23",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 23 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2019S23",
+    Focusable = false
+  }
+}
+
+local S2019S24Label = {
+  Identifier = "S2019S24Label",
+  Parent = transforms.S2019S24Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 24",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 24 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2019S24",
+    Focusable = false
+  }
+}
+
+local S2019S25Label = {
+  Identifier = "S2019S25Label",
+  Parent = transforms.S2019S25Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 25",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 25 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2019S25",
+    Focusable = false
+  }
+}
+
+local S2019S26Label = {
+  Identifier = "S2019S26Label",
+  Parent = transforms.S2019S26Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 26",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 26 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2019S26",
+    Focusable = false
+  }
+}
+
+local S2019S27Label = {
+  Identifier = "S2019S27Label",
+  Parent = transforms.S2019S27Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 27",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 27 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S27",
+    Focusable = false
+  }
+}
+
+local S2019S28Label = {
+  Identifier = "S2019S28Label",
+  Parent = transforms.S2019S28Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 28",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 28 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S28",
+    Focusable = false
+  }
+}
+
+local S2019S29Label = {
+  Identifier = "S2019S29Label",
+  Parent = transforms.S2019S29Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 29",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 29 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2019S29",
+    Focusable = false
+  }
+}
+
+local S2019S30Label = {
+  Identifier = "S2019S30Label",
+  Parent = transforms.S2019S30Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 30",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 30 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S30",
+    Focusable = false
+  }
+}
+
+local S2019S31Label = {
+  Identifier = "S2019S31Label",
+  Parent = transforms.S2019S31Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 31",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 31 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2019S31",
+    Focusable = false
+  }
+}
+
+local S2019S32Label = {
+  Identifier = "S2019S32Label",
+  Parent = transforms.S2019S32Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 32",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 32 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2019S32",
+    Focusable = false
+  }
+}
+
+local S2019S33Label = {
+  Identifier = "S2019S33Label",
+  Parent = transforms.S2019S33Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 33",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 33 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S33",
+    Focusable = false
+  }
+}
+
+local S2019S34Label = {
+  Identifier = "S2019S34Label",
+  Parent = transforms.S2019S34Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 34",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 34 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2019S34",
+    Focusable = false
+  }
+}
+
+local S2019S35Label = {
+  Identifier = "S2019S35Label",
+  Parent = transforms.S2019S35Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 35",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 35 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S35",
+    Focusable = false
+  }
+}
+
+local S2019S36Label = {
+  Identifier = "S2019S36Label",
+  Parent = transforms.S2019S36Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 36",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 36 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S36",
+    Focusable = false
+  }
+}
+
+local S2019S37Label = {
+  Identifier = "S2019S37Label",
+  Parent = transforms.S2019S37Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 37",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 37 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2019S37",
+    Focusable = false
+  }
+}
+
+local S2019S38Label = {
+  Identifier = "S2019S38Label",
+  Parent = transforms.S2019S38Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 38",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 38 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S38",
+    Focusable = false
+  }
+}
+
+local S2019S39Label = {
+  Identifier = "S2019S39Label",
+  Parent = transforms.S2019S39Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 39",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 39 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S39",
+    Focusable = false
+  }
+}
+
+local S2019S40Label = {
+  Identifier = "S2019S40Label",
+  Parent = transforms.S2019S40Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 40",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 40 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S40",
+    Focusable = false
+  }
+}
+
+local S2019S41Label = {
+  Identifier = "S2019S41Label",
+  Parent = transforms.S2019S41Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 41",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 41 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S41",
+    Focusable = false
+  }
+}
+
+local S2019S42Label = {
+  Identifier = "S2019S42Label",
+  Parent = transforms.S2019S42Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 42",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 42 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S42",
+    Focusable = false
+  }
+}
+
+local S2019S43Label = {
+  Identifier = "S2019S43Label",
+  Parent = transforms.S2019S43Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 43",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 43 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2019S43",
+    Focusable = false
+  }
+}
+
+local S2019S44Label = {
+  Identifier = "S2019S44Label",
+  Parent = transforms.S2019S44Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2019 S 44",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2019 S 44 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2019S44",
+    Focusable = false
+  }
+}
+
+local S2020S11Label = {
+  Identifier = "S2020S11Label",
+  Parent = transforms.S2020S11Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 11",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 11 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2020S11",
+    Focusable = false
+  }
+}
+
+local S2020S12Label = {
+  Identifier = "S2020S12Label",
+  Parent = transforms.S2020S12Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 12",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 12 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2020S12",
+    Focusable = false
+  }
+}
+
+local S2020S13Label = {
+  Identifier = "S2020S13Label",
+  Parent = transforms.S2020S13Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 13",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 13 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2020S13",
+    Focusable = false
+  }
+}
+
+local S2020S14Label = {
+  Identifier = "S2020S14Label",
+  Parent = transforms.S2020S14Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 14",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 14 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S14",
+    Focusable = false
+  }
+}
+
+local S2020S15Label = {
+  Identifier = "S2020S15Label",
+  Parent = transforms.S2020S15Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 15",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 15 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2020S15",
+    Focusable = false
+  }
+}
+
+local S2020S16Label = {
+  Identifier = "S2020S16Label",
+  Parent = transforms.S2020S16Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 16",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 16 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S16",
+    Focusable = false
+  }
+}
+
+local S2020S17Label = {
+  Identifier = "S2020S17Label",
+  Parent = transforms.S2020S17Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 17",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 17 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2020S17",
+    Focusable = false
+  }
+}
+
+local S2020S18Label = {
+  Identifier = "S2020S18Label",
+  Parent = transforms.S2020S18Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 18",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 18 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S18",
+    Focusable = false
+  }
+}
+
+local S2020S19Label = {
+  Identifier = "S2020S19Label",
+  Parent = transforms.S2020S19Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 19",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 19 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2020S19",
+    Focusable = false
+  }
+}
+
+local S2020S20Label = {
+  Identifier = "S2020S20Label",
+  Parent = transforms.S2020S20Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 20",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 20 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S20",
+    Focusable = false
+  }
+}
+
+local S2020S21Label = {
+  Identifier = "S2020S21Label",
+  Parent = transforms.S2020S21Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 21",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 21 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S21",
+    Focusable = false
+  }
+}
+
+local S2020S22Label = {
+  Identifier = "S2020S22Label",
+  Parent = transforms.S2020S22Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 22",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 22 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S22",
+    Focusable = false
+  }
+}
+
+local S2020S23Label = {
+  Identifier = "S2020S23Label",
+  Parent = transforms.S2020S23Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 23",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 23 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S23",
+    Focusable = false
+  }
+}
+
+local S2020S24Label = {
+  Identifier = "S2020S24Label",
+  Parent = transforms.S2020S24Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 24",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 24 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S24",
+    Focusable = false
+  }
+}
+
+local S2020S25Label = {
+  Identifier = "S2020S25Label",
+  Parent = transforms.S2020S25Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 25",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 25 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S25",
+    Focusable = false
+  }
+}
+
+local S2020S26Label = {
+  Identifier = "S2020S26Label",
+  Parent = transforms.S2020S26Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 26",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 26 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S26",
+    Focusable = false
+  }
+}
+
+local S2020S27Label = {
+  Identifier = "S2020S27Label",
+  Parent = transforms.S2020S27Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 27",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 27 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2020S27",
+    Focusable = false
+  }
+}
+
+local S2020S28Label = {
+  Identifier = "S2020S28Label",
+  Parent = transforms.S2020S28Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 28",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 28 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S28",
+    Focusable = false
+  }
+}
+
+local S2020S29Label = {
+  Identifier = "S2020S29Label",
+  Parent = transforms.S2020S29Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 29",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 29 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S29",
+    Focusable = false
+  }
+}
+
+local S2020S30Label = {
+  Identifier = "S2020S30Label",
+  Parent = transforms.S2020S30Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 30",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 30 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2020S30",
+    Focusable = false
+  }
+}
+
+local S2020S31Label = {
+  Identifier = "S2020S31Label",
+  Parent = transforms.S2020S31Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 31",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 31 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S31",
+    Focusable = false
+  }
+}
+
+local S2020S32Label = {
+  Identifier = "S2020S32Label",
+  Parent = transforms.S2020S32Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 32",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 32 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S32",
+    Focusable = false
+  }
+}
+
+local S2020S33Label = {
+  Identifier = "S2020S33Label",
+  Parent = transforms.S2020S33Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 33",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 33 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S33",
+    Focusable = false
+  }
+}
+
+local S2020S34Label = {
+  Identifier = "S2020S34Label",
+  Parent = transforms.S2020S34Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 34",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 34 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S34",
+    Focusable = false
+  }
+}
+
+local S2020S35Label = {
+  Identifier = "S2020S35Label",
+  Parent = transforms.S2020S35Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 35",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 35 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2020S35",
+    Focusable = false
+  }
+}
+
+local S2020S36Label = {
+  Identifier = "S2020S36Label",
+  Parent = transforms.S2020S36Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 36",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 36 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S36",
+    Focusable = false
+  }
+}
+
+local S2020S37Label = {
+  Identifier = "S2020S37Label",
+  Parent = transforms.S2020S37Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 37",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 37 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2020S37",
+    Focusable = false
+  }
+}
+
+local S2020S38Label = {
+  Identifier = "S2020S38Label",
+  Parent = transforms.S2020S38Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 38",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 38 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S38",
+    Focusable = false
+  }
+}
+
+local S2020S39Label = {
+  Identifier = "S2020S39Label",
+  Parent = transforms.S2020S39Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 39",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 39 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S39",
+    Focusable = false
+  }
+}
+
+local S2020S40Label = {
+  Identifier = "S2020S40Label",
+  Parent = transforms.S2020S40Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 40",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 40 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S40",
+    Focusable = false
+  }
+}
+
+local S2020S41Label = {
+  Identifier = "S2020S41Label",
+  Parent = transforms.S2020S41Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 41",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 41 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S41",
+    Focusable = false
+  }
+}
+
+local S2020S42Label = {
+  Identifier = "S2020S42Label",
+  Parent = transforms.S2020S42Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 42",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 42 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S42",
+    Focusable = false
+  }
+}
+
+local S2020S43Label = {
+  Identifier = "S2020S43Label",
+  Parent = transforms.S2020S43Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 43",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 43 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S43",
+    Focusable = false
+  }
+}
+
+local S2020S44Label = {
+  Identifier = "S2020S44Label",
+  Parent = transforms.S2020S44Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2020 S 44",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2020 S 44 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2020S44",
+    Focusable = false
+  }
+}
+
+local S2023S1Label = {
+  Identifier = "S2023S1Label",
+  Parent = transforms.S2023S1Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 1",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 1 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2023S1",
+    Focusable = false
+  }
+}
+
+local S2023S2Label = {
+  Identifier = "S2023S2Label",
+  Parent = transforms.S2023S2Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 2",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 2 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2023S2",
+    Focusable = false
+  }
+}
+
+local S2023S3Label = {
+  Identifier = "S2023S3Label",
+  Parent = transforms.S2023S3Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 3",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 3 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2023S3",
+    Focusable = false
+  }
+}
+
+local S2023S4Label = {
+  Identifier = "S2023S4Label",
+  Parent = transforms.S2023S4Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 4",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 4 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S4",
+    Focusable = false
+  }
+}
+
+local S2023S5Label = {
+  Identifier = "S2023S5Label",
+  Parent = transforms.S2023S5Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 5",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 5 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S5",
+    Focusable = false
+  }
+}
+
+local S2023S6Label = {
+  Identifier = "S2023S6Label",
+  Parent = transforms.S2023S6Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 6",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 6 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2023S6",
+    Focusable = false
+  }
+}
+
+local S2023S7Label = {
+  Identifier = "S2023S7Label",
+  Parent = transforms.S2023S7Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 7",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 7 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq/S2023S7",
+    Focusable = false
+  }
+}
+
+local S2023S8Label = {
+  Identifier = "S2023S8Label",
+  Parent = transforms.S2023S8Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 8",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 8 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S8",
+    Focusable = false
+  }
+}
+
+local S2023S9Label = {
+  Identifier = "S2023S9Label",
+  Parent = transforms.S2023S9Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 9",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 9 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2023S9",
+    Focusable = false
+  }
+}
+
+local S2023S10Label = {
+  Identifier = "S2023S10Label",
+  Parent = transforms.S2023S10Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 10",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 10 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S10",
+    Focusable = false
+  }
+}
+
+local S2023S11Label = {
+  Identifier = "S2023S11Label",
+  Parent = transforms.S2023S11Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 11",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 11 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S11",
+    Focusable = false
+  }
+}
+
+local S2023S12Label = {
+  Identifier = "S2023S12Label",
+  Parent = transforms.S2023S12Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 12",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 12 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S12",
+    Focusable = false
+  }
+}
+
+local S2023S13Label = {
+  Identifier = "S2023S13Label",
+  Parent = transforms.S2023S13Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 13",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 13 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S13",
+    Focusable = false
+  }
+}
+
+local S2023S14Label = {
+  Identifier = "S2023S14Label",
+  Parent = transforms.S2023S14Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 14",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 14 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S14",
+    Focusable = false
+  }
+}
+
+local S2023S15Label = {
+  Identifier = "S2023S15Label",
+  Parent = transforms.S2023S15Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 15",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 15 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S15",
+    Focusable = false
+  }
+}
+
+local S2023S16Label = {
+  Identifier = "S2023S16Label",
+  Parent = transforms.S2023S16Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 16",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 16 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S16",
+    Focusable = false
+  }
+}
+
+local S2023S17Label = {
+  Identifier = "S2023S17Label",
+  Parent = transforms.S2023S17Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 17",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 17 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2023S17",
+    Focusable = false
+  }
+}
+
+local S2023S18Label = {
+  Identifier = "S2023S18Label",
+  Parent = transforms.S2023S18Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 18",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 18 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/S2023S18",
+    Focusable = false
+  }
+}
+
+local S2023S19Label = {
+  Identifier = "S2023S19Label",
+  Parent = transforms.S2023S19Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 19",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 19 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2023S19",
+    Focusable = false
+  }
+}
+
+local S2023S20Label = {
+  Identifier = "S2023S20Label",
+  Parent = transforms.S2023S20Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 20",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 20 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2023S20",
+    Focusable = false
+  }
+}
+
+local S2023S21Label = {
+  Identifier = "S2023S21Label",
+  Parent = transforms.S2023S21Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 21",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 21 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S21",
+    Focusable = false
+  }
+}
+
+local S2023S22Label = {
+  Identifier = "S2023S22Label",
+  Parent = transforms.S2023S22Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 22",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 22 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq/S2023S22",
+    Focusable = false
+  }
+}
+
+local S2023S23Label = {
+  Identifier = "S2023S23Label",
+  Parent = transforms.S2023S23Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 23",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 23 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S23",
+    Focusable = false
+  }
+}
+
+local S2023S24Label = {
+  Identifier = "S2023S24Label",
+  Parent = transforms.S2023S24Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 24",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 24 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S24",
+    Focusable = false
+  }
+}
+
+local S2023S25Label = {
+  Identifier = "S2023S25Label",
+  Parent = transforms.S2023S25Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 25",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 25 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S25",
+    Focusable = false
+  }
+}
+
+local S2023S26Label = {
+  Identifier = "S2023S26Label",
+  Parent = transforms.S2023S26Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 26",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 26 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S26",
+    Focusable = false
+  }
+}
+
+local S2023S27Label = {
+  Identifier = "S2023S27Label",
+  Parent = transforms.S2023S27Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 27",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 27 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2023S27",
+    Focusable = false
+  }
+}
+
+local S2023S28Label = {
+  Identifier = "S2023S28Label",
+  Parent = transforms.S2023S28Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 28",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 28 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S28",
+    Focusable = false
+  }
+}
+
+local S2023S29Label = {
+  Identifier = "S2023S29Label",
+  Parent = transforms.S2023S29Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 29",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 29 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2023S29",
+    Focusable = false
+  }
+}
+
+local S2023S30Label = {
+  Identifier = "S2023S30Label",
+  Parent = transforms.S2023S30Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 30",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 30 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2023S30",
+    Focusable = false
+  }
+}
+
+local S2023S31Label = {
+  Identifier = "S2023S31Label",
+  Parent = transforms.S2023S31Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 31",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 31 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S31",
+    Focusable = false
+  }
+}
+
+local S2023S32Label = {
+  Identifier = "S2023S32Label",
+  Parent = transforms.S2023S32Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 32",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 32 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S32",
+    Focusable = false
+  }
+}
+
+local S2023S33Label = {
+  Identifier = "S2023S33Label",
+  Parent = transforms.S2023S33Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 33",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 33 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari/S2023S33",
+    Focusable = false
+  }
+}
+
+local S2023S34Label = {
+  Identifier = "S2023S34Label",
+  Parent = transforms.S2023S34Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 34",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 34 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S34",
+    Focusable = false
+  }
+}
+
+local S2023S35Label = {
+  Identifier = "S2023S35Label",
+  Parent = transforms.S2023S35Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 35",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 35 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S35",
+    Focusable = false
+  }
+}
+
+local S2023S36Label = {
+  Identifier = "S2023S36Label",
+  Parent = transforms.S2023S36Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 36",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 36 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S36",
+    Focusable = false
+  }
+}
+
+local S2023S37Label = {
+  Identifier = "S2023S37Label",
+  Parent = transforms.S2023S37Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 37",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 37 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2023S37",
+    Focusable = false
+  }
+}
+
+local S2023S38Label = {
+  Identifier = "S2023S38Label",
+  Parent = transforms.S2023S38Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 38",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 38 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2023S38",
+    Focusable = false
+  }
+}
+
+local S2023S39Label = {
+  Identifier = "S2023S39Label",
+  Parent = transforms.S2023S39Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 39",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 39 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S39",
+    Focusable = false
+  }
+}
+
+local S2023S40Label = {
+  Identifier = "S2023S40Label",
+  Parent = transforms.S2023S40Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 40",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 40 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S40",
+    Focusable = false
+  }
+}
+
+local S2023S41Label = {
+  Identifier = "S2023S41Label",
+  Parent = transforms.S2023S41Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 41",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 41 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe/S2023S41",
+    Focusable = false
+  }
+}
+
+local S2023S42Label = {
+  Identifier = "S2023S42Label",
+  Parent = transforms.S2023S42Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 42",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 42 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S42",
+    Focusable = false
+  }
+}
+
+local S2023S43Label = {
+  Identifier = "S2023S43Label",
+  Parent = transforms.S2023S43Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 43",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 43 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S43",
+    Focusable = false
+  }
+}
+
+local S2023S44Label = {
+  Identifier = "S2023S44Label",
+  Parent = transforms.S2023S44Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 44",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 44 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S44",
+    Focusable = false
+  }
+}
+
+local S2023S45Label = {
+  Identifier = "S2023S45Label",
+  Parent = transforms.S2023S45Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 45",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 45 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S45",
+    Focusable = false
+  }
+}
+
+local S2023S46Label = {
+  Identifier = "S2023S46Label",
+  Parent = transforms.S2023S46Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 46",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 46 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Low-Inclination/S2023S46",
+    Focusable = false
+  }
+}
+
+local S2023S47Label = {
+  Identifier = "S2023S47Label",
+  Parent = transforms.S2023S47Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 47",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 47 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S47",
+    Focusable = false
+  }
+}
+
+local S2023S48Label = {
+  Identifier = "S2023S48Label",
+  Parent = transforms.S2023S48Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 48",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 48 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S48",
+    Focusable = false
+  }
+}
+
+local S2023S49Label = {
+  Identifier = "S2023S49Label",
+  Parent = transforms.S2023S49Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 49",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 49 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S49",
+    Focusable = false
+  }
+}
+
+local S2023S50Label = {
+  Identifier = "S2023S50Label",
+  Parent = transforms.S2023S50Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2023 S 50",
+    FontSize = 70.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
+  GUI = {
+    Name = "S/2023 S 50 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari/S2023S50",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(S2004S54Label)
+  openspace.addSceneGraphNode(S2004S55Label)
+  openspace.addSceneGraphNode(S2004S56Label)
+  openspace.addSceneGraphNode(S2004S57Label)
+  openspace.addSceneGraphNode(S2004S58Label)
+  openspace.addSceneGraphNode(S2004S59Label)
+  openspace.addSceneGraphNode(S2004S60Label)
+  openspace.addSceneGraphNode(S2004S61Label)
+  openspace.addSceneGraphNode(S2005S6Label)
+  openspace.addSceneGraphNode(S2005S7Label)
+  openspace.addSceneGraphNode(S2006S21Label)
+  openspace.addSceneGraphNode(S2006S22Label)
+  openspace.addSceneGraphNode(S2006S23Label)
+  openspace.addSceneGraphNode(S2006S24Label)
+  openspace.addSceneGraphNode(S2006S25Label)
+  openspace.addSceneGraphNode(S2006S26Label)
+  openspace.addSceneGraphNode(S2006S27Label)
+  openspace.addSceneGraphNode(S2006S28Label)
+  openspace.addSceneGraphNode(S2006S29Label)
+  openspace.addSceneGraphNode(S2007S10Label)
+  openspace.addSceneGraphNode(S2007S11Label)
+  openspace.addSceneGraphNode(S2019S22Label)
+  openspace.addSceneGraphNode(S2019S23Label)
+  openspace.addSceneGraphNode(S2019S24Label)
+  openspace.addSceneGraphNode(S2019S25Label)
+  openspace.addSceneGraphNode(S2019S26Label)
+  openspace.addSceneGraphNode(S2019S27Label)
+  openspace.addSceneGraphNode(S2019S28Label)
+  openspace.addSceneGraphNode(S2019S29Label)
+  openspace.addSceneGraphNode(S2019S30Label)
+  openspace.addSceneGraphNode(S2019S31Label)
+  openspace.addSceneGraphNode(S2019S32Label)
+  openspace.addSceneGraphNode(S2019S33Label)
+  openspace.addSceneGraphNode(S2019S34Label)
+  openspace.addSceneGraphNode(S2019S35Label)
+  openspace.addSceneGraphNode(S2019S36Label)
+  openspace.addSceneGraphNode(S2019S37Label)
+  openspace.addSceneGraphNode(S2019S38Label)
+  openspace.addSceneGraphNode(S2019S39Label)
+  openspace.addSceneGraphNode(S2019S40Label)
+  openspace.addSceneGraphNode(S2019S41Label)
+  openspace.addSceneGraphNode(S2019S42Label)
+  openspace.addSceneGraphNode(S2019S43Label)
+  openspace.addSceneGraphNode(S2019S44Label)
+  openspace.addSceneGraphNode(S2020S11Label)
+  openspace.addSceneGraphNode(S2020S12Label)
+  openspace.addSceneGraphNode(S2020S13Label)
+  openspace.addSceneGraphNode(S2020S14Label)
+  openspace.addSceneGraphNode(S2020S15Label)
+  openspace.addSceneGraphNode(S2020S16Label)
+  openspace.addSceneGraphNode(S2020S17Label)
+  openspace.addSceneGraphNode(S2020S18Label)
+  openspace.addSceneGraphNode(S2020S19Label)
+  openspace.addSceneGraphNode(S2020S20Label)
+  openspace.addSceneGraphNode(S2020S21Label)
+  openspace.addSceneGraphNode(S2020S22Label)
+  openspace.addSceneGraphNode(S2020S23Label)
+  openspace.addSceneGraphNode(S2020S24Label)
+  openspace.addSceneGraphNode(S2020S25Label)
+  openspace.addSceneGraphNode(S2020S26Label)
+  openspace.addSceneGraphNode(S2020S27Label)
+  openspace.addSceneGraphNode(S2020S28Label)
+  openspace.addSceneGraphNode(S2020S29Label)
+  openspace.addSceneGraphNode(S2020S30Label)
+  openspace.addSceneGraphNode(S2020S31Label)
+  openspace.addSceneGraphNode(S2020S32Label)
+  openspace.addSceneGraphNode(S2020S33Label)
+  openspace.addSceneGraphNode(S2020S34Label)
+  openspace.addSceneGraphNode(S2020S35Label)
+  openspace.addSceneGraphNode(S2020S36Label)
+  openspace.addSceneGraphNode(S2020S37Label)
+  openspace.addSceneGraphNode(S2020S38Label)
+  openspace.addSceneGraphNode(S2020S39Label)
+  openspace.addSceneGraphNode(S2020S40Label)
+  openspace.addSceneGraphNode(S2020S41Label)
+  openspace.addSceneGraphNode(S2020S42Label)
+  openspace.addSceneGraphNode(S2020S43Label)
+  openspace.addSceneGraphNode(S2020S44Label)
+  openspace.addSceneGraphNode(S2023S1Label)
+  openspace.addSceneGraphNode(S2023S2Label)
+  openspace.addSceneGraphNode(S2023S3Label)
+  openspace.addSceneGraphNode(S2023S4Label)
+  openspace.addSceneGraphNode(S2023S5Label)
+  openspace.addSceneGraphNode(S2023S6Label)
+  openspace.addSceneGraphNode(S2023S7Label)
+  openspace.addSceneGraphNode(S2023S8Label)
+  openspace.addSceneGraphNode(S2023S9Label)
+  openspace.addSceneGraphNode(S2023S10Label)
+  openspace.addSceneGraphNode(S2023S11Label)
+  openspace.addSceneGraphNode(S2023S12Label)
+  openspace.addSceneGraphNode(S2023S13Label)
+  openspace.addSceneGraphNode(S2023S14Label)
+  openspace.addSceneGraphNode(S2023S15Label)
+  openspace.addSceneGraphNode(S2023S16Label)
+  openspace.addSceneGraphNode(S2023S17Label)
+  openspace.addSceneGraphNode(S2023S18Label)
+  openspace.addSceneGraphNode(S2023S19Label)
+  openspace.addSceneGraphNode(S2023S20Label)
+  openspace.addSceneGraphNode(S2023S21Label)
+  openspace.addSceneGraphNode(S2023S22Label)
+  openspace.addSceneGraphNode(S2023S23Label)
+  openspace.addSceneGraphNode(S2023S24Label)
+  openspace.addSceneGraphNode(S2023S25Label)
+  openspace.addSceneGraphNode(S2023S26Label)
+  openspace.addSceneGraphNode(S2023S27Label)
+  openspace.addSceneGraphNode(S2023S28Label)
+  openspace.addSceneGraphNode(S2023S29Label)
+  openspace.addSceneGraphNode(S2023S30Label)
+  openspace.addSceneGraphNode(S2023S31Label)
+  openspace.addSceneGraphNode(S2023S32Label)
+  openspace.addSceneGraphNode(S2023S33Label)
+  openspace.addSceneGraphNode(S2023S34Label)
+  openspace.addSceneGraphNode(S2023S35Label)
+  openspace.addSceneGraphNode(S2023S36Label)
+  openspace.addSceneGraphNode(S2023S37Label)
+  openspace.addSceneGraphNode(S2023S38Label)
+  openspace.addSceneGraphNode(S2023S39Label)
+  openspace.addSceneGraphNode(S2023S40Label)
+  openspace.addSceneGraphNode(S2023S41Label)
+  openspace.addSceneGraphNode(S2023S42Label)
+  openspace.addSceneGraphNode(S2023S43Label)
+  openspace.addSceneGraphNode(S2023S44Label)
+  openspace.addSceneGraphNode(S2023S45Label)
+  openspace.addSceneGraphNode(S2023S46Label)
+  openspace.addSceneGraphNode(S2023S47Label)
+  openspace.addSceneGraphNode(S2023S48Label)
+  openspace.addSceneGraphNode(S2023S49Label)
+  openspace.addSceneGraphNode(S2023S50Label)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2023S50Label)
+  openspace.removeSceneGraphNode(S2023S49Label)
+  openspace.removeSceneGraphNode(S2023S48Label)
+  openspace.removeSceneGraphNode(S2023S47Label)
+  openspace.removeSceneGraphNode(S2023S46Label)
+  openspace.removeSceneGraphNode(S2023S45Label)
+  openspace.removeSceneGraphNode(S2023S44Label)
+  openspace.removeSceneGraphNode(S2023S43Label)
+  openspace.removeSceneGraphNode(S2023S42Label)
+  openspace.removeSceneGraphNode(S2023S41Label)
+  openspace.removeSceneGraphNode(S2023S40Label)
+  openspace.removeSceneGraphNode(S2023S39Label)
+  openspace.removeSceneGraphNode(S2023S38Label)
+  openspace.removeSceneGraphNode(S2023S37Label)
+  openspace.removeSceneGraphNode(S2023S36Label)
+  openspace.removeSceneGraphNode(S2023S35Label)
+  openspace.removeSceneGraphNode(S2023S34Label)
+  openspace.removeSceneGraphNode(S2023S33Label)
+  openspace.removeSceneGraphNode(S2023S32Label)
+  openspace.removeSceneGraphNode(S2023S31Label)
+  openspace.removeSceneGraphNode(S2023S30Label)
+  openspace.removeSceneGraphNode(S2023S29Label)
+  openspace.removeSceneGraphNode(S2023S28Label)
+  openspace.removeSceneGraphNode(S2023S27Label)
+  openspace.removeSceneGraphNode(S2023S26Label)
+  openspace.removeSceneGraphNode(S2023S25Label)
+  openspace.removeSceneGraphNode(S2023S24Label)
+  openspace.removeSceneGraphNode(S2023S23Label)
+  openspace.removeSceneGraphNode(S2023S22Label)
+  openspace.removeSceneGraphNode(S2023S21Label)
+  openspace.removeSceneGraphNode(S2023S20Label)
+  openspace.removeSceneGraphNode(S2023S19Label)
+  openspace.removeSceneGraphNode(S2023S18Label)
+  openspace.removeSceneGraphNode(S2023S17Label)
+  openspace.removeSceneGraphNode(S2023S16Label)
+  openspace.removeSceneGraphNode(S2023S15Label)
+  openspace.removeSceneGraphNode(S2023S14Label)
+  openspace.removeSceneGraphNode(S2023S13Label)
+  openspace.removeSceneGraphNode(S2023S12Label)
+  openspace.removeSceneGraphNode(S2023S11Label)
+  openspace.removeSceneGraphNode(S2023S10Label)
+  openspace.removeSceneGraphNode(S2023S9Label)
+  openspace.removeSceneGraphNode(S2023S8Label)
+  openspace.removeSceneGraphNode(S2023S7Label)
+  openspace.removeSceneGraphNode(S2023S6Label)
+  openspace.removeSceneGraphNode(S2023S5Label)
+  openspace.removeSceneGraphNode(S2023S4Label)
+  openspace.removeSceneGraphNode(S2023S3Label)
+  openspace.removeSceneGraphNode(S2023S2Label)
+  openspace.removeSceneGraphNode(S2023S1Label)
+  openspace.removeSceneGraphNode(S2020S44Label)
+  openspace.removeSceneGraphNode(S2020S43Label)
+  openspace.removeSceneGraphNode(S2020S42Label)
+  openspace.removeSceneGraphNode(S2020S41Label)
+  openspace.removeSceneGraphNode(S2020S40Label)
+  openspace.removeSceneGraphNode(S2020S39Label)
+  openspace.removeSceneGraphNode(S2020S38Label)
+  openspace.removeSceneGraphNode(S2020S37Label)
+  openspace.removeSceneGraphNode(S2020S36Label)
+  openspace.removeSceneGraphNode(S2020S35Label)
+  openspace.removeSceneGraphNode(S2020S34Label)
+  openspace.removeSceneGraphNode(S2020S33Label)
+  openspace.removeSceneGraphNode(S2020S32Label)
+  openspace.removeSceneGraphNode(S2020S31Label)
+  openspace.removeSceneGraphNode(S2020S30Label)
+  openspace.removeSceneGraphNode(S2020S29Label)
+  openspace.removeSceneGraphNode(S2020S28Label)
+  openspace.removeSceneGraphNode(S2020S27Label)
+  openspace.removeSceneGraphNode(S2020S26Label)
+  openspace.removeSceneGraphNode(S2020S25Label)
+  openspace.removeSceneGraphNode(S2020S24Label)
+  openspace.removeSceneGraphNode(S2020S23Label)
+  openspace.removeSceneGraphNode(S2020S22Label)
+  openspace.removeSceneGraphNode(S2020S21Label)
+  openspace.removeSceneGraphNode(S2020S20Label)
+  openspace.removeSceneGraphNode(S2020S19Label)
+  openspace.removeSceneGraphNode(S2020S18Label)
+  openspace.removeSceneGraphNode(S2020S17Label)
+  openspace.removeSceneGraphNode(S2020S16Label)
+  openspace.removeSceneGraphNode(S2020S15Label)
+  openspace.removeSceneGraphNode(S2020S14Label)
+  openspace.removeSceneGraphNode(S2020S13Label)
+  openspace.removeSceneGraphNode(S2020S12Label)
+  openspace.removeSceneGraphNode(S2020S11Label)
+  openspace.removeSceneGraphNode(S2019S44Label)
+  openspace.removeSceneGraphNode(S2019S43Label)
+  openspace.removeSceneGraphNode(S2019S42Label)
+  openspace.removeSceneGraphNode(S2019S41Label)
+  openspace.removeSceneGraphNode(S2019S40Label)
+  openspace.removeSceneGraphNode(S2019S39Label)
+  openspace.removeSceneGraphNode(S2019S38Label)
+  openspace.removeSceneGraphNode(S2019S37Label)
+  openspace.removeSceneGraphNode(S2019S36Label)
+  openspace.removeSceneGraphNode(S2019S35Label)
+  openspace.removeSceneGraphNode(S2019S34Label)
+  openspace.removeSceneGraphNode(S2019S33Label)
+  openspace.removeSceneGraphNode(S2019S32Label)
+  openspace.removeSceneGraphNode(S2019S31Label)
+  openspace.removeSceneGraphNode(S2019S30Label)
+  openspace.removeSceneGraphNode(S2019S29Label)
+  openspace.removeSceneGraphNode(S2019S28Label)
+  openspace.removeSceneGraphNode(S2019S27Label)
+  openspace.removeSceneGraphNode(S2019S26Label)
+  openspace.removeSceneGraphNode(S2019S25Label)
+  openspace.removeSceneGraphNode(S2019S24Label)
+  openspace.removeSceneGraphNode(S2019S23Label)
+  openspace.removeSceneGraphNode(S2019S22Label)
+  openspace.removeSceneGraphNode(S2007S11Label)
+  openspace.removeSceneGraphNode(S2007S10Label)
+  openspace.removeSceneGraphNode(S2006S29Label)
+  openspace.removeSceneGraphNode(S2006S28Label)
+  openspace.removeSceneGraphNode(S2006S27Label)
+  openspace.removeSceneGraphNode(S2006S26Label)
+  openspace.removeSceneGraphNode(S2006S25Label)
+  openspace.removeSceneGraphNode(S2006S24Label)
+  openspace.removeSceneGraphNode(S2006S23Label)
+  openspace.removeSceneGraphNode(S2006S22Label)
+  openspace.removeSceneGraphNode(S2006S21Label)
+  openspace.removeSceneGraphNode(S2005S7Label)
+  openspace.removeSceneGraphNode(S2005S6Label)
+  openspace.removeSceneGraphNode(S2004S61Label)
+  openspace.removeSceneGraphNode(S2004S60Label)
+  openspace.removeSceneGraphNode(S2004S59Label)
+  openspace.removeSceneGraphNode(S2004S58Label)
+  openspace.removeSceneGraphNode(S2004S57Label)
+  openspace.removeSceneGraphNode(S2004S56Label)
+  openspace.removeSceneGraphNode(S2004S55Label)
+  openspace.removeSceneGraphNode(S2004S54Label)
+end)
+
+asset.export(S2004S54Label)
+asset.export(S2004S55Label)
+asset.export(S2004S56Label)
+asset.export(S2004S57Label)
+asset.export(S2004S58Label)
+asset.export(S2004S59Label)
+asset.export(S2004S60Label)
+asset.export(S2004S61Label)
+asset.export(S2005S6Label)
+asset.export(S2005S7Label)
+asset.export(S2006S21Label)
+asset.export(S2006S22Label)
+asset.export(S2006S23Label)
+asset.export(S2006S24Label)
+asset.export(S2006S25Label)
+asset.export(S2006S26Label)
+asset.export(S2006S27Label)
+asset.export(S2006S28Label)
+asset.export(S2006S29Label)
+asset.export(S2007S10Label)
+asset.export(S2007S11Label)
+asset.export(S2019S22Label)
+asset.export(S2019S23Label)
+asset.export(S2019S24Label)
+asset.export(S2019S25Label)
+asset.export(S2019S26Label)
+asset.export(S2019S27Label)
+asset.export(S2019S28Label)
+asset.export(S2019S29Label)
+asset.export(S2019S30Label)
+asset.export(S2019S31Label)
+asset.export(S2019S32Label)
+asset.export(S2019S33Label)
+asset.export(S2019S34Label)
+asset.export(S2019S35Label)
+asset.export(S2019S36Label)
+asset.export(S2019S37Label)
+asset.export(S2019S38Label)
+asset.export(S2019S39Label)
+asset.export(S2019S40Label)
+asset.export(S2019S41Label)
+asset.export(S2019S42Label)
+asset.export(S2019S43Label)
+asset.export(S2019S44Label)
+asset.export(S2020S11Label)
+asset.export(S2020S12Label)
+asset.export(S2020S13Label)
+asset.export(S2020S14Label)
+asset.export(S2020S15Label)
+asset.export(S2020S16Label)
+asset.export(S2020S17Label)
+asset.export(S2020S18Label)
+asset.export(S2020S19Label)
+asset.export(S2020S20Label)
+asset.export(S2020S21Label)
+asset.export(S2020S22Label)
+asset.export(S2020S23Label)
+asset.export(S2020S24Label)
+asset.export(S2020S25Label)
+asset.export(S2020S26Label)
+asset.export(S2020S27Label)
+asset.export(S2020S28Label)
+asset.export(S2020S29Label)
+asset.export(S2020S30Label)
+asset.export(S2020S31Label)
+asset.export(S2020S32Label)
+asset.export(S2020S33Label)
+asset.export(S2020S34Label)
+asset.export(S2020S35Label)
+asset.export(S2020S36Label)
+asset.export(S2020S37Label)
+asset.export(S2020S38Label)
+asset.export(S2020S39Label)
+asset.export(S2020S40Label)
+asset.export(S2020S41Label)
+asset.export(S2020S42Label)
+asset.export(S2020S43Label)
+asset.export(S2020S44Label)
+asset.export(S2023S1Label)
+asset.export(S2023S2Label)
+asset.export(S2023S3Label)
+asset.export(S2023S4Label)
+asset.export(S2023S5Label)
+asset.export(S2023S6Label)
+asset.export(S2023S7Label)
+asset.export(S2023S8Label)
+asset.export(S2023S9Label)
+asset.export(S2023S10Label)
+asset.export(S2023S11Label)
+asset.export(S2023S12Label)
+asset.export(S2023S13Label)
+asset.export(S2023S14Label)
+asset.export(S2023S15Label)
+asset.export(S2023S16Label)
+asset.export(S2023S17Label)
+asset.export(S2023S18Label)
+asset.export(S2023S19Label)
+asset.export(S2023S20Label)
+asset.export(S2023S21Label)
+asset.export(S2023S22Label)
+asset.export(S2023S23Label)
+asset.export(S2023S24Label)
+asset.export(S2023S25Label)
+asset.export(S2023S26Label)
+asset.export(S2023S27Label)
+asset.export(S2023S28Label)
+asset.export(S2023S29Label)
+asset.export(S2023S30Label)
+asset.export(S2023S31Label)
+asset.export(S2023S32Label)
+asset.export(S2023S33Label)
+asset.export(S2023S34Label)
+asset.export(S2023S35Label)
+asset.export(S2023S36Label)
+asset.export(S2023S37Label)
+asset.export(S2023S38Label)
+asset.export(S2023S39Label)
+asset.export(S2023S40Label)
+asset.export(S2023S41Label)
+asset.export(S2023S42Label)
+asset.export(S2023S43Label)
+asset.export(S2023S44Label)
+asset.export(S2023S45Label)
+asset.export(S2023S46Label)
+asset.export(S2023S47Label)
+asset.export(S2023S48Label)
+asset.export(S2023S49Label)
+asset.export(S2023S50Label)
+
+
+
+asset.meta = {
+  Name = "Saturn Moons Labels -- March 2025 Discoveries",
+  Description = [[Asset containing labels for Saturn's moons discovered in March 2025.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

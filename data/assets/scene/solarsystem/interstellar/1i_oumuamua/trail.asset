@@ -1,0 +1,61 @@
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+local trajectory = asset.resource({
+  Name = "'Oumuamua Trajectory",
+  Type = "HttpSynchronization",
+  Identifier = "oumuamua_horizons",
+  Version = 3
+})
+
+
+local OumuamuaTrail = {
+  Identifier = "1I_OumuamuaTrail",
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = trajectory .. "horizons_oumuamua.hrz"
+      -- Target: 1I/'Oumuamua (A/2017 U1)
+      -- Observer: SSB
+      -- Start time: 2014-Jan-01 00:00:00 (first data point)
+      -- End time: 2050-Jan-01 00:00:00 (last data point)
+      -- Step size: 1 day
+    },
+    Color = { 0.85, 0.1, 0.85 },
+    StartTime = "2014 JAN 01 00:00:00",
+    EndTime = "2050 JAN 01 00:00:00",
+    SampleInterval = openspace.time.secondsPerDay()
+  },
+  GUI = {
+    Name = "1I/'Oumuamua Trail",
+    Path = "/Solar System/Interstellar/'Oumuamua",
+    Focusable = false,
+    Description = [[Trail of 'Oumuamua from 2014 JAN 01 00:00:00 to 2050 JAN 01 00:00:00.
+      Data from JPL Horizons]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(OumuamuaTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(OumuamuaTrail)
+end)
+
+asset.export(OumuamuaTrail)
+
+
+
+asset.meta = {
+  Name = "1I/'Oumuamua Trail",
+  Description = [[This asset contains the trail of 'Oumuamua from 2014 JAN 01 00:00:00 to
+    2050 JAN 01 00:00:00. Data from JPL Horizons]],
+  Author = "OpenSpace Team",
+  URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
+  License = "NASA"
+}

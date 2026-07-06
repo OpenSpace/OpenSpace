@@ -17,6 +17,7 @@ local Item = {
   DestinationType = "Camera"
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Node)
   openspace.dashboard.addDashboardItem(Item)

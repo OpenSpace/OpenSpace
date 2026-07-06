@@ -12,6 +12,6 @@ asset.meta = {
   Name = "Customization - User Interface",
   Description = "This asset is used by developers working on the GUI",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

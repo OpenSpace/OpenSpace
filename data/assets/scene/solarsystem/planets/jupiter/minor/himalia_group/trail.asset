@@ -1,0 +1,311 @@
+local transforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
+local kernels347 = asset.require("scene/solarsystem/planets/jupiter/kernels347")
+local coreKernels = asset.require("spice/core")
+
+
+
+local LedaTrail = {
+  Identifier = "LedaTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Leda,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 240.82,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_himalia",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Leda Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Leda",
+    Focusable = false
+  }
+}
+
+local HimaliaTrail = {
+  Identifier = "HimaliaTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Himalia,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 250.23,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_himalia",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Himalia Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Himalia",
+    Focusable = false
+  }
+}
+
+local LysitheaTrail = {
+  Identifier = "LysitheaTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Lysithea,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 259.89,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_himalia",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Lysithea Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Lysithea",
+    Focusable = false
+  }
+}
+
+local ElaraTrail = {
+  Identifier = "ElaraTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Elara,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 257.62,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_himalia",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Elara Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Elara",
+    Focusable = false
+  }
+}
+
+local DiaTrail = {
+  Identifier = "DiaTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Dia,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 287.93,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_himalia",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Dia Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Dia",
+    Focusable = false
+  }
+}
+
+local S2011J3Trail = {
+  Identifier = "S2011J3Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2011J3,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 261.77,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_himalia",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2011 J 3 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/S2011J3",
+    Focusable = false
+  }
+}
+
+local S2018J2Trail = {
+  Identifier = "S2018J2Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2018J2,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 250.88,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_himalia",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2018 J 2 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/S2018J2",
+    Focusable = false
+  }
+}
+
+local PandiaTrail = {
+  Identifier = "PandiaTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Pandia,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 251.911,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_himalia",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Pandia Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Pandia",
+    Focusable = false
+  }
+}
+
+local ErsaTrail = {
+  Identifier = "ErsaTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Ersa,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 249.229,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_himalia",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "Ersa Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Ersa",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(LedaTrail)
+  openspace.addSceneGraphNode(HimaliaTrail)
+  openspace.addSceneGraphNode(LysitheaTrail)
+  openspace.addSceneGraphNode(ElaraTrail)
+  openspace.addSceneGraphNode(DiaTrail)
+  openspace.addSceneGraphNode(S2011J3Trail)
+  openspace.addSceneGraphNode(S2018J2Trail)
+  openspace.addSceneGraphNode(PandiaTrail)
+  openspace.addSceneGraphNode(ErsaTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(ErsaTrail)
+  openspace.removeSceneGraphNode(PandiaTrail)
+  openspace.removeSceneGraphNode(S2018J2Trail)
+  openspace.removeSceneGraphNode(S2011J3Trail)
+  openspace.removeSceneGraphNode(DiaTrail)
+  openspace.removeSceneGraphNode(ElaraTrail)
+  openspace.removeSceneGraphNode(LysitheaTrail)
+  openspace.removeSceneGraphNode(HimaliaTrail)
+  openspace.removeSceneGraphNode(LedaTrail)
+end)
+
+asset.export(LedaTrail)
+asset.export(HimaliaTrail)
+asset.export(LysitheaTrail)
+asset.export(ElaraTrail)
+asset.export(DiaTrail)
+asset.export(S2011J3Trail)
+asset.export(S2018J2Trail)
+asset.export(PandiaTrail)
+asset.export(ErsaTrail)
+
+
+
+asset.meta = {
+  Name = "Jupiter Himalia Group Moons Trails",
+  Description = [[Asset containing trails for Jupiter's Himalia Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

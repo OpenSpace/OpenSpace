@@ -1,7 +1,7 @@
 asset.require("../actions")
 asset.require("./actions")
-local sun = asset.require("scene/solarsystem/sun/transforms")
-local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/globe")
 local descentKeyframes = asset.require("./lem_descent")
 local descentRotationKeyframes = asset.require("./lem_descent_rotation")
 local kernels = asset.require("./kernels")
@@ -28,10 +28,10 @@ local lemModel = asset.resource({
 
 local Apollo11Position = {
   Identifier = "Apollo11Position",
-  Parent = moon.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "1969 JUL 19 19:38:29.183",
+    Start = "1969 JUL 20 19:10:25.183",
     End = "1969 JUL 22 04:55:35.183"
   },
   Transform = {
@@ -52,11 +52,6 @@ local Apollo11Position = {
 local Apollo11Model = {
   Identifier = "Apollo11",
   Parent = Apollo11Position.Identifier,
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = "1969 JUL 19 19:38:29.183",
-    End = "1969 JUL 22 04:55:35.183"
-  },
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -67,7 +62,7 @@ local Apollo11Model = {
     Type = "RenderableModel",
     GeometryFile = models .. "Apollo_CSM_shrunk_rotated_xy_double_size.obj",
     LightSources = {
-      sun.LightSource,
+      sunAsset.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
@@ -83,7 +78,7 @@ local Apollo11Model = {
 
 local Apollo11MoonTrail = {
   Identifier = "Apollo11MoonTrail",
-  Parent = moon.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = false,
@@ -94,7 +89,7 @@ local Apollo11MoonTrail = {
       Frame = coreKernels.Frame.Moon
     },
     Color = { 0.18, 0.51, 0.75 },
-    StartTime = "1969 JUL 19 19:38:29.183",
+    StartTime = "1969 JUL 20 19:10:25.183",
     EndTime = "1969 JUL 22 04:55:35.183",
     SampleInterval = 60,
     EnableFade = false
@@ -132,7 +127,7 @@ local lemRotation = {
 
 local Apollo11LemTrail = {
   Identifier = "Apollo11LemTrail",
-  Parent = moon.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = false,
@@ -152,7 +147,7 @@ local Apollo11LemTrail = {
 
 local Apollo11LemPosition = {
   Identifier = "Apollo11LemPosition",
-  Parent = moon.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "1969 JUL 20 19:10:25.183"
@@ -173,7 +168,7 @@ local Apollo11LemDescentModel = {
   Parent = Apollo11LemPosition.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "1969 JUL 19 19:38:29.183",
+    Start = "1969 JUL 20 19:10:25.183",
     End = "1969 JUL 20 20:17:40.0"
   },
   Transform = {
@@ -188,13 +183,14 @@ local Apollo11LemDescentModel = {
     SpecularIntensity = 0.0,
     RotationVector = { 273.750, 28.0, 309.85 },
     LightSources = {
-      sun.LightSource,
+      sunAsset.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
         Intensity = 0.5
       }
-    }
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Apollo 11 Descent Lem",
@@ -207,7 +203,7 @@ local Apollo11LemLandedModel = {
   Parent = Apollo11LemPosition.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "1969 JUL 20 20:17:40.0"
+    Start = "1969 JUL 20 19:10:25.183"
   },
   Transform = {
     Scale = {
@@ -221,13 +217,14 @@ local Apollo11LemLandedModel = {
     SpecularIntensity = 0.0,
     RotationVector = { 273.750, 28.0, 309.85 },
     LightSources = {
-      sun.LightSource,
+      sunAsset.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
         Intensity = 0.5
       }
-    }
+    },
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Apollo 11 Landed Lem",
@@ -271,6 +268,6 @@ asset.meta = {
   Description = [[A meta asset that will include all of the other assets to show the
     Apollo 11 launch, orbit, and landing sequence.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

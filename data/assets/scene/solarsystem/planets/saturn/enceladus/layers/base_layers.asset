@@ -6,6 +6,6 @@ asset.meta = {
   Name = "Base Enceladus Layers",
   Description = "Base Enceladus layers are: Enceladus Texture",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -32,6 +32,7 @@
 #include <openspace/util/openspacemodule.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/assert.h>
@@ -48,10 +49,6 @@
 
 namespace {
     using namespace openspace;
-
-    // We can't use ${SCRIPTS} here as that hasn't been defined by this point
-    constexpr std::string_view InitialConfigHelper =
-        "${BASE}/scripts/configuration_helper.lua";
 
     struct [[codegen::Dictionary(Configuration)]] Parameters {
         // The SGCT configuration file that determines the window and view frustum
@@ -325,9 +322,9 @@ namespace {
         std::optional<bool> bypassLauncher;
 
         // Set which layer server should be preferd to be used, the options are
-        // \"All\", \"NewYork\", \"Sweden\", \"Utah\" and \"None\".
+        // \"All\", \"NewYork\", \"Sweden\", and \"None\".
         std::optional<std::string> layerServer [[codegen::inlist("All", "NewYork",
-            "Sweden", "Utah", "None")]];
+            "Sweden", "None")]];
 
         // The URL that is pinged to check which version of OpenSpace is the most current
         // if you don't want this request to happen, this value should not be set at all.
@@ -519,8 +516,6 @@ ghoul::Dictionary Configuration::createDictionary() {
         res.setValue("HttpProxy", httpProxyDict);
     }
 
-    res.setValue("SgctConfigNameInitialized", sgctConfigNameInitialized);
-
     return res;
 }
 
@@ -530,15 +525,6 @@ void parseLuaState(Configuration& configuration) {
     // Shorten the rest of this function
     Configuration& c = configuration;
     const LuaState& s = c.state;
-
-    // The sgctConfigNameInitialized is a bit special
-    lua_getglobal(s, "sgctconfiginitializeString");
-    c.sgctConfigNameInitialized = ghoul::lua::value<std::string>(
-        s,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-
 
     // The configuration file sets all values as global variables, so we need to pull them
     // into a table first so that we can pass that table to the dictionary constructor
@@ -699,7 +685,6 @@ void patchConfiguration(Configuration& configuration, const Settings& settings) 
         settings.configuration.has_value())
     {
         configuration.windowConfiguration = *settings.configuration;
-        configuration.sgctConfigNameInitialized.clear();
     }
     if (settings.rememberLastProfile.value_or(false)) {
         if (settings.profile.has_value()) {
@@ -740,7 +725,13 @@ Documentation Configuration::Documentation() {
     openspace::Documentation doc = codegen::doc<Parameters>("core_configuration");
 
     auto moduleConfiguration = std::make_shared<TableVerifier>();
-    for (OpenSpaceModule* mod : global::moduleEngine->modules()) {
+
+    const std::vector<OpenSpaceModule*> modules =
+        global::moduleEngine ?
+        global::moduleEngine->modules() :
+        std::vector<OpenSpaceModule*>();
+
+    for (OpenSpaceModule* mod : modules) {
         std::string name = mod->identifier();
         std::string id = mod->Documentation().id;
 
@@ -792,8 +783,7 @@ std::filesystem::path findConfiguration(const std::string& filename) {
 }
 
 Configuration loadConfigurationFromFile(const std::filesystem::path& configurationFile,
-                                        const std::filesystem::path& settingsFile,
-                                        const glm::ivec2& primaryMonitorResolution)
+                                        const std::filesystem::path& settingsFile)
 {
     ghoul_assert(std::filesystem::is_regular_file(configurationFile), "File must exist");
 
@@ -801,31 +791,6 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
     // Having the configuration not sandboxed is safe as there is no way for a third-party
     // file to have any input this early in the loading phase
     result.state = ghoul::lua::LuaState(ghoul::lua::LuaState::Sandboxed::No);
-
-    // Injecting the resolution of the primary screen into the Lua state
-    const std::string script = std::format(
-        "ScreenResolution = {{ x = {}, y = {} }}",
-        primaryMonitorResolution.x, primaryMonitorResolution.y
-    );
-    ghoul::lua::runScript(result.state, script);
-
-    // Local function to convert a dictionary to its JSON object's string representation
-    constexpr auto TableToJson = [](lua_State* state) {
-        if (!ghoul::lua::hasValue<ghoul::Dictionary>(state)) {
-            throw ghoul::lua::LuaError("TableToJson must receive a table object");
-        }
-        ghoul::Dictionary dict = ghoul::lua::value<ghoul::Dictionary>(state);
-        std::string stringRepresentation = formatJson(dict);
-        ghoul::lua::push(state, std::move(stringRepresentation));
-        return 1;
-    };
-    lua_pushcfunction(result.state, TableToJson);
-    lua_setglobal(result.state, "TableToJson");
-
-    // If there is an initial config helper file, load it into the state
-    if (std::filesystem::is_regular_file(absPath(InitialConfigHelper))) {
-        ghoul::lua::runScriptFile(result.state, absPath(InitialConfigHelper));
-    }
 
     // Load the configuration file into the state
     ghoul::lua::runScriptFile(result.state, configurationFile);
@@ -847,11 +812,40 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
     return result;
 }
 
+void registerPathTokens(const Configuration& configuration) {
+    // Registering Path tokens. If the BASE path is set, it is the only one that will
+    // overwrite the default path of the cfg directory
+    using T = std::string;
+    for (const std::pair<const T, T>& path : configuration.pathTokens) {
+        std::string fullKey = std::format("${{{}}}", path.first);
+        LDEBUGC(
+            "Configuration",
+            std::format("Registering path '{}': {}", fullKey, path.second)
+        );
+
+        const bool overrideBase = (fullKey == "${BASE}");
+        if (overrideBase) {
+            LINFOC(
+                "Configuration",
+                std::format("Overriding base path with '{}'", path.second)
+            );
+        }
+
+        const bool overrideTemporary = (fullKey == "${TEMPORARY}");
+
+        using Override = ghoul::filesystem::FileSystem::Override;
+        FileSys.registerPathToken(
+            std::move(fullKey),
+            path.second,
+            Override(overrideBase || overrideTemporary)
+        );
+    }
+}
+
 Configuration::LayerServer stringToLayerServer(std::string_view server) {
     if (server == "All") { return Configuration::LayerServer::All; }
     else if (server == "NewYork") { return Configuration::LayerServer::NewYork; }
     else if (server == "Sweden") { return Configuration::LayerServer::Sweden; }
-    else if (server == "Utah") { return Configuration::LayerServer::Utah; }
     else if (server == "None") { return Configuration::LayerServer::None; }
     else { throw ghoul::MissingCaseException(); }
 }
@@ -861,7 +855,6 @@ std::string layerServerToString(Configuration::LayerServer server) {
         case Configuration::LayerServer::All: return "All";
         case Configuration::LayerServer::NewYork: return "NewYork";
         case Configuration::LayerServer::Sweden: return "Sweden";
-        case Configuration::LayerServer::Utah: return "Utah";
         case Configuration::LayerServer::None: return "None";
         default: throw ghoul::MissingCaseException();
     }

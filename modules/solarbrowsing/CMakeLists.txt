@@ -67,7 +67,10 @@ add_subdirectory(${OPENJPEG_ROOT_DIR} SYSTEM)
 set_target_properties(openjp2 PROPERTIES FOLDER "External")
 target_link_libraries(openspace-module-solarbrowsing PRIVATE openjp2)
 
-target_include_directories(openspace-module-solarbrowsing SYSTEM PUBLIC ${HEADER_FILES})
+set_target_properties(opj_compress PROPERTIES FOLDER "External")
+set_target_properties(opj_decompress PROPERTIES FOLDER "External")
+set_target_properties(opj_dump PROPERTIES FOLDER "External")
+
 
 target_include_directories(
   openspace-module-solarbrowsing PUBLIC

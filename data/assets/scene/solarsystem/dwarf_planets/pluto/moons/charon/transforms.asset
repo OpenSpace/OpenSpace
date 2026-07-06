@@ -1,0 +1,49 @@
+local plutoAsset = asset.require("scene/solarsystem/dwarf_planets/pluto/transforms")
+local plutoKernels = asset.require("scene/solarsystem/dwarf_planets/pluto/kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local CharonPosition = {
+  Identifier = "CharonPosition",
+  Parent = plutoAsset.PlutoBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = plutoKernels.ID.Charon,
+      Observer = plutoKernels.ID.PlutoBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = plutoKernels.Frame.Charon,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "Charon Position",
+    Path = "/Solar System/Dwarf Planets/Pluto/Charon",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(CharonPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(CharonPosition)
+end)
+
+asset.export(CharonPosition)
+
+
+
+asset.meta = {
+  Name = "Charon Position",
+  Description = "Charon position",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

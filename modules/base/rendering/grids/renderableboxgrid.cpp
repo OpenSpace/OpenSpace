@@ -69,7 +69,7 @@ namespace {
         std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<glm::vec3> size;
@@ -80,7 +80,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableBoxGrid::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_boxgrid");
+    return codegen::doc<Parameters>(
+        "base_renderable_boxgrid",
+        Renderable::Documentation()
+    );
 }
 
 RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)

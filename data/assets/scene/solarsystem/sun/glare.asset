@@ -48,6 +48,6 @@ asset.meta = {
   Name = "Sun Glare",
   Description = "Image plane with sun glare effect",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

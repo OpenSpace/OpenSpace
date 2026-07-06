@@ -163,6 +163,7 @@ set(OPENSPACE_SOURCE
   scene/asset.cpp
   scene/assetmanager.cpp
   scene/assetmanager_lua.inl
+  scene/jasset.cpp
   scene/lightsource.cpp
   scene/profile.cpp
   scene/profile_lua.inl
@@ -189,7 +190,6 @@ set(OPENSPACE_SOURCE
   topic/server.cpp
   topic/topics/actionkeybindtopic.cpp
   topic/topics/authorizationtopic.cpp
-  topic/topics/bouncetopic.cpp
   topic/topics/camerapathtopic.cpp
   topic/topics/cameratopic.cpp
   topic/topics/documentationtopic.cpp
@@ -262,6 +262,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/documentation/core_registration.h
   ${PROJECT_SOURCE_DIR}/include/openspace/documentation/documentation.h
   ${PROJECT_SOURCE_DIR}/include/openspace/documentation/documentationengine.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/documentation/schema.h
   ${PROJECT_SOURCE_DIR}/include/openspace/documentation/verifier.h
   ${PROJECT_SOURCE_DIR}/include/openspace/documentation/verifier.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/engine/configuration.h
@@ -389,6 +390,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/volumeraycaster.h
   ${PROJECT_SOURCE_DIR}/include/openspace/scene/asset.h
   ${PROJECT_SOURCE_DIR}/include/openspace/scene/assetmanager.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/scene/jasset.h
   ${PROJECT_SOURCE_DIR}/include/openspace/scene/lightsource.h
   ${PROJECT_SOURCE_DIR}/include/openspace/scene/profile.h
   ${PROJECT_SOURCE_DIR}/include/openspace/scene/rotation.h
@@ -410,7 +412,6 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/server.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/actionkeybindtopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/authorizationtopic.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/bouncetopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/camerapathtopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/cameratopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/documentationtopic.h
@@ -629,9 +630,3 @@ endif ()
 
 set_openspace_compile_settings(openspace-core)
 target_link_libraries(openspace-core PUBLIC Ghoul spice external-curl)
-
-# Just in case, create the bin directory
-add_custom_command(
-  TARGET openspace-core
-  PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-)

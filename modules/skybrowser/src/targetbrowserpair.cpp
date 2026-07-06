@@ -171,14 +171,23 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
     const glm::dvec2 spherical = targetDirectionEquatorial();
     const glm::dvec3 cartesian = sphericalToCartesian(spherical);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    std::vector<std::string> selectedImagesIndices;
+    std::vector<int> selectedImagesIndices;
 
     for (const std::string& imageUrl : selectedImages()) {
         const bool imageExists = module->wwtDataHandler().image(imageUrl).has_value();
         ghoul_assert(imageExists, "Image doesn't exist in the wwt catalog!");
-        selectedImagesIndices.push_back(
-            module->wwtDataHandler().image(imageUrl)->identifier
-        );
+        try {
+            selectedImagesIndices.push_back(
+                std::stoi(module->wwtDataHandler().image(imageUrl)->identifier)
+            );
+        }
+        catch (std::invalid_argument const& e) {
+            throw ghoul::RuntimeError(std::format(
+                "Unable to parse id '{}', {}",
+                module->wwtDataHandler().image(imageUrl)->identifier,
+                e.what()
+            ));
+        }
     }
 
     ghoul::Dictionary res = _browser->data();

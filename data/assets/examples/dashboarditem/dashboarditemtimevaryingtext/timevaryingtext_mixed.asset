@@ -8,6 +8,7 @@ local Item = {
   DataFile = asset.resource("data/dummydata_mixed.json"),
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Item)
 end)

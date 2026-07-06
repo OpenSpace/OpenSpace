@@ -1,0 +1,163 @@
+local transforms = asset.require("./transforms")
+
+
+
+local MetisLabel = {
+  Identifier = "MetisLabel",
+  Parent = transforms.MetisPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Metis",
+    FontSize = 50.0,
+    Size = 5.6,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.1, 3.0 },
+    FadeWidths = { 0.1, 3.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_inner"
+  },
+  GUI = {
+    Name = "Metis Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Metis",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Metis (inner group)"
+  }
+}
+
+local AdrasteaLabel = {
+  Identifier = "AdrasteaLabel",
+  Parent = transforms.AdrasteaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Adrastea",
+    FontSize = 50.0,
+    Size = 5.6,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.1, 3.0 },
+    FadeWidths = { 0.1, 3.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_inner"
+  },
+  GUI = {
+    Name = "Adrastea Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Adrastea",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Adrastea (inner group)"
+  }
+}
+
+local AmaltheaLabel = {
+  Identifier = "AmaltheaLabel",
+  Parent = transforms.AmaltheaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Amalthea",
+    FontSize = 50.0,
+    Size = 5.6,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.1, 3.0 },
+    FadeWidths = { 0.1, 3.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_inner"
+  },
+  GUI = {
+    Name = "Amalthea Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Amalthea",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Amalthea (inner group)"
+  }
+}
+
+local ThebeLabel = {
+  Identifier = "ThebeLabel",
+  Parent = transforms.ThebePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Thebe",
+    FontSize = 50.0,
+    Size = 5.6,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.1, 3.0 },
+    FadeWidths = { 0.1, 3.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_inner"
+  },
+  GUI = {
+    Name = "Thebe Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Thebe",
+    Focusable = false,
+    Description = "Label for Jupiter's moon Thebe (inner group)"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MetisLabel)
+  openspace.addSceneGraphNode(AdrasteaLabel)
+  openspace.addSceneGraphNode(AmaltheaLabel)
+  openspace.addSceneGraphNode(ThebeLabel)
+end)
+
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MetisLabel)
+  openspace.removeSceneGraphNode(AdrasteaLabel)
+  openspace.removeSceneGraphNode(AmaltheaLabel)
+  openspace.removeSceneGraphNode(ThebeLabel)
+end)
+
+
+asset.export(MetisLabel)
+asset.export(AdrasteaLabel)
+asset.export(AmaltheaLabel)
+asset.export(ThebeLabel)
+
+
+
+asset.meta = {
+  Name = "Jupiter Inner Group Moons Labels",
+  Description = [[Asset containing labels for Jupiter's Inner Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

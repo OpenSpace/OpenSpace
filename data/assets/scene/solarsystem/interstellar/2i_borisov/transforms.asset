@@ -1,0 +1,53 @@
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+local trajectory = asset.resource({
+  Name = "C-2019 Q4 Borisov Trajectory",
+  Type = "HttpSynchronization",
+  Identifier = "borisov_horizons",
+  Version = 3
+})
+
+
+local BorisovPosition = {
+  Identifier = "2I_BorisovPosition",
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = trajectory .. "horizons_c2019q4borisov.hrz"
+    }
+  },
+  GUI = {
+    Name = "2I/Borisov",
+    Path = "/Solar System/Interstellar/Borisov",
+    Description = [[Position of C-2019 Q4 Borisov from 2015 JAN 01 00:00:00
+    to 2050 JAN 01 00:00:00. Data from JPL Horizons]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(BorisovPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(BorisovPosition)
+end)
+
+-- As the identifier starts with a number, it is not a valid Lua identifier
+asset.export("BorisovPosition", BorisovPosition)
+
+
+
+asset.meta = {
+  Name = "2I/Borisov Position",
+  Description = [[This asset contains the trail and position of C-2019 Q4 Borisov from
+    2015 JAN 01 00:00:00 to 2050 JAN 01 00:00:00. Data from JPL Horizons]],
+  Author = "OpenSpace Team",
+  URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
+  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All
+    documents available from this server may be protected under the U.S. and Foreign
+    Copyright Laws]]
+}

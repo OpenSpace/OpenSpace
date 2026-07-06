@@ -199,7 +199,7 @@ namespace {
  * \return The size of the image in pixels
  */
 [[codegen::luawrap]] glm::ivec2 imageSize(std::filesystem::path path) {
-    return ghoul::io::texture::imageSize(path);
+    return ghoul::io::texture::imageInfo(path).dimensions;
 }
 
 /**

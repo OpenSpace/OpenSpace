@@ -10,6 +10,6 @@ asset.meta = {
   Description = [[Meta asset for space debris of Earth. Containing groups: debris_asat,
     debris_breezem, debris_fengyun, debris_iridium33, and debris_kosmos2251]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

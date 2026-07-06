@@ -1,4 +1,4 @@
-local globe = asset.require("../../earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 
 
 
@@ -74,14 +74,14 @@ local QuakebarCombined = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", Layer)
   openspace.addScreenSpaceRenderable(Legend)
   openspace.addScreenSpaceRenderable(Quakebar)
   openspace.addScreenSpaceRenderable(QuakebarCombined)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", Layer)
   openspace.removeScreenSpaceRenderable(Legend)
   openspace.removeScreenSpaceRenderable(Quakebar)
   openspace.removeScreenSpaceRenderable(QuakebarCombined)

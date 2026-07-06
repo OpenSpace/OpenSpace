@@ -122,6 +122,6 @@ asset.meta = {
   Description = [[Grids that help show the Sun's orientation and rotation in relation to
     Earth, including the Carrington prime meridian and Earth-facing longitudes.]],
   Author = "CCMC",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

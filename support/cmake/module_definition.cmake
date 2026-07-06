@@ -31,9 +31,8 @@ include(GenerateExportHeader)
 # returned in <output_library_name> for outside configuration
 # The library will have the name openspace-module-<name> and has all of their
 # dependencies set correctly.
-# The 'library_mode' determines whether the module is linked STATIC or SHARED
 # Dependencies will have to be set in a file called "include.cmake"
-function (create_new_module module_name output_library_name library_mode)
+function (create_new_module module_name output_library_name)
   # Create a library name of the style: openspace-module-${name}
   create_library_name(${module_name} library_name)
 
@@ -41,7 +40,7 @@ function (create_new_module module_name output_library_name library_mode)
   get_module_files(${module_name} module_files)
 
   # Create the library
-  add_library(${library_name} ${library_mode} ${module_files} ${ARGN})
+  add_library(${library_name} STATIC ${module_files} ${ARGN})
 
   # Set compile settings that are common to all modules
   set_openspace_compile_settings(${library_name})

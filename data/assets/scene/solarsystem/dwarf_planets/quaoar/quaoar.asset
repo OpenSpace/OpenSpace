@@ -1,4 +1,4 @@
-asset.require("./planet")
+asset.require("./globe")
 asset.require("./trail")
 asset.require("./label", false)
 

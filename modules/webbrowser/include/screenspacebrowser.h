@@ -78,12 +78,12 @@ protected:
     UVec2Property _dimensions;
     std::unique_ptr<BrowserInstance> _browserInstance;
     bool _isDimensionsDirty = false;
+    bool _useAcceleratedRendering = false;
     TriggerProperty _reload;
 
     StringProperty _key;
     TriggerProperty _triggerKey;
 
-private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {
     public:
         void draw() override;
@@ -91,15 +91,15 @@ private:
 
         void setTexture(GLuint t);
     };
+    CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
+private:
 
     void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
     StringProperty _url;
 
-    CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
 
-    bool _useAcceleratedRendering = false;
     bool _isUrlDirty = false;
 };
 

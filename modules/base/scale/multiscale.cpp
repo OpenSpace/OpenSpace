@@ -42,7 +42,10 @@ namespace {
 namespace openspace {
 
 Documentation MultiScale::Documentation() {
-    return codegen::doc<Parameters>("base_scale_multi");
+    return codegen::doc<Parameters>(
+        "base_scale_multi",
+        Scale::Documentation()
+    );
 }
 
 MultiScale::MultiScale(const ghoul::Dictionary& dictionary)

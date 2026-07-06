@@ -51,7 +51,10 @@ namespace {
 namespace openspace {
 
 Documentation CameraLightSource::Documentation() {
-    return codegen::doc<Parameters>("base_lightsource_camera");
+    return codegen::doc<Parameters>(
+        "base_lightsource_camera",
+        LightSource::Documentation()
+    );
 }
 
 CameraLightSource::CameraLightSource(const ghoul::Dictionary& dictionary)

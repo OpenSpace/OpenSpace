@@ -55,6 +55,39 @@ local ToggleMinorMoonTrails = {
   IsLocal = false
 }
 
+local ToggleVoyager1Trails = {
+  Identifier = "os.voyager.ToggleVoyager1Trails",
+  Name = "Toggle Voyager 1 trails",
+  Command = [[
+    openspace.toggleFade("Scene.Voyager_1_Trail_Encounter_Jupiter.Renderable")
+    openspace.toggleFade("Scene.Voyager_1_Trail_Cruise_Jupiter_Saturn.Renderable")
+    openspace.toggleFade("Scene.Voyager_1_Trail_Encounter_Saturn.Renderable")
+    openspace.toggleFade("Scene.Voyager_1_Trail_Cruise_Saturn_Inf.Renderable")
+  ]],
+  Documentation = "Toggle all trails for Voyager 1",
+  GuiPath = "/Missions/Voyager",
+  IsLocal = false
+}
+
+local ToggleVoyager2Trails = {
+  Identifier = "os.voyager.ToggleVoyager2Trails",
+  Name = "Toggle Voyager 2 trails",
+  Command = [[
+    openspace.toggleFade("Scene.Voyager_2_Trail_Cruise_Earth_Jupiter.Renderable")
+    openspace.toggleFade("Scene.Voyager_2_Trail_Encounter_Jupiter.Renderable")
+    openspace.toggleFade("Scene.Voyager_2_Trail_Cruise_Jupiter_Saturn.Renderable")
+    openspace.toggleFade("Scene.Voyager_2_Trail_Encounter_Saturn.Renderable")
+    openspace.toggleFade("Scene.Voyager_2_Trail_Cruise_Saturn_Uranus.Renderable")
+    openspace.toggleFade("Scene.Voyager_2_Trail_Encounter_Uranus.Renderable")
+    openspace.toggleFade("Scene.Voyager_2_Trail_Cruise_Uranus_Neptune.Renderable")
+    openspace.toggleFade("Scene.Voyager_2_Trail_Encounter_Neptune.Renderable")
+    openspace.toggleFade("Scene.Voyager_2_Trail_Cruise_Neptune_Inf.Renderable")
+  ]],
+  Documentation = "Toggle all trails for Voyager 2",
+  GuiPath = "/Missions/Voyager",
+  IsLocal = false
+}
+
 
 asset.onInitialize(function()
   openspace.action.registerAction(SetupJupiterApproach)
@@ -62,9 +95,13 @@ asset.onInitialize(function()
   openspace.action.registerAction(JupiterFocus)
   openspace.action.registerAction(SaturnFocus)
   openspace.action.registerAction(ToggleMinorMoonTrails)
+  openspace.action.registerAction(ToggleVoyager1Trails)
+  openspace.action.registerAction(ToggleVoyager2Trails)
 end)
 
 asset.onDeinitialize(function()
+  openspace.action.removeAction(ToggleVoyager2Trails)
+  openspace.action.removeAction(ToggleVoyager1Trails)
   openspace.action.removeAction(ToggleMinorMoonTrails)
   openspace.action.removeAction(SaturnFocus)
   openspace.action.removeAction(JupiterFocus)
@@ -84,6 +121,6 @@ asset.meta = {
   Name = "Voyager Actions",
   Description = "Actions related to the Voyager 1 and 2 missions",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

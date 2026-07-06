@@ -139,16 +139,16 @@ namespace {
         std::optional<bool> enableFade;
 
         // [[codegen::verbatim(LineLengthInfo.description)]]
-        std::optional<float> lineLength;
+        std::optional<float> lineLength [[codegen::inrange(0.f, 1.f)]];
 
         // [[codegen::verbatim(LineFadeAmountInfo.description)]]
-        std::optional<float> lineFadeAmount;
+        std::optional<float> lineFadeAmount [[codegen::inrange(0.f, 1.f)]];
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(PointSizeInfo.description)]]
-        std::optional<int> pointSize;
+        std::optional<int> pointSize [[codegen::greaterequal(0)]];
 
         enum class RenderingMode {
             Lines,
@@ -165,7 +165,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableTrail::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_trail");
+    return codegen::doc<Parameters>(
+        "base_renderable_trail",
+        Renderable::Documentation()
+    );
 }
 
 RenderableTrail::Appearance::Appearance()
@@ -210,10 +213,11 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_translation.get());
 
     _appearance.lineColor = p.color;
-    _appearance.useLineFade = p.enableFade.value_or(_appearance.useLineFade);
-    _appearance.lineLength = p.lineLength.value_or(_appearance.lineLength);
     _appearance.lineWidth = p.lineWidth.value_or(_appearance.lineWidth);
     _appearance.pointSize = p.pointSize.value_or(_appearance.pointSize);
+    _appearance.useLineFade = p.enableFade.value_or(_appearance.useLineFade);
+    _appearance.lineLength = p.lineLength.value_or(_appearance.lineLength);
+    _appearance.lineFadeAmount = p.lineFadeAmount.value_or(_appearance.lineFadeAmount);
 
     if (p.renderingMode.has_value()) {
         switch (*p.renderingMode) {

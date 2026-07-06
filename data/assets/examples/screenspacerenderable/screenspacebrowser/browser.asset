@@ -8,6 +8,7 @@ local Item = {
   Name = "ScreenSpaceBrowser Example - Basic"
 }
 
+
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(Item)
 end)

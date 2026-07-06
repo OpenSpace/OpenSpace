@@ -24,6 +24,7 @@
 
 #include "openspace/topic/topics/timetopic.h"
 
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/topic/connection.h>
 #include <openspace/util/timemanager.h>
@@ -34,8 +35,6 @@
 using nlohmann::json;
 
 namespace {
-    constexpr std::string_view SubscribeEvent = "start_subscription";
-    constexpr std::string_view UnsubscribeEvent = "stop_subscription";
     constexpr std::chrono::milliseconds TimeUpdateInterval(50);
 } // namespace
 
@@ -61,18 +60,18 @@ TimeTopic::~TimeTopic() {
 
 void TimeTopic::handleJson(const nlohmann::json& json) {
     const std::string event = json.at("event").get<std::string>();
-    if (event == UnsubscribeEvent) {
+    if (event == "stop_subscription") {
+        _isDone = true;
+        return;
+    }
+
+    if (event != "start_subscription") {
         _isDone = true;
         return;
     }
 
     sendFullTimeData();
     sendDeltaTimeSteps();
-
-    if (event != SubscribeEvent) {
-        _isDone = true;
-        return;
-    }
 
     _timeCallbackHandle = global::timeManager->addTimeChangeCallback([this]() {
         const auto now = std::chrono::system_clock::now();
@@ -110,6 +109,51 @@ bool TimeTopic::isDone() const {
     return _isDone;
 }
 
+Schema TimeTopic::Schema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "title": "TimeTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "time" },
+            "topicPayload": {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "type": "string",
+                  "enum": ["start_subscription", "stop_subscription"]
+                }
+              },
+              "additionalProperties": false,
+              "required": ["event"]
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "time": { "type": "string" },
+                "deltaTime": { "type": "number" },
+                "targetDeltaTime": { "type": "number" },
+                "isPaused": { "type": "boolean" },
+                "deltaTimeSteps": {
+                  "type": "array",
+                  "items": { "type": "number" }
+                },
+                "hasNextStep": { "type": "boolean" },
+                "hasPrevStep": { "type": "boolean" },
+                "nextStep": { "type": "number" },
+                "prevStep": { "type": "number" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+    )");
+
+    return { "timetopic", schema };
+}
+
 json TimeTopic::getNextPrevDeltaTimeStepJson() {
     const std::optional<double> nextStep = global::timeManager->nextDeltaTimeStep();
     const std::optional<double> prevStep = global::timeManager->previousDeltaTimeStep();
@@ -138,8 +182,7 @@ void TimeTopic::sendCurrentTime() {
     const json timeJson = {
         { "time", global::timeManager->time().ISO8601() }
     };
-    const json payload = wrappedPayload(timeJson);
-    _connection->sendJson(payload);
+    sendData(timeJson);
     _lastUpdateTime = std::chrono::system_clock::now();
 }
 
@@ -159,7 +202,7 @@ void TimeTopic::sendFullTimeData() {
     const json nextPrevJson = getNextPrevDeltaTimeStepJson();
     timeJson.insert(nextPrevJson.begin(), nextPrevJson.end());
 
-    _connection->sendJson(wrappedPayload(timeJson));
+    sendData(timeJson);
     _lastUpdateTime = std::chrono::system_clock::now();
     _lastPauseState = isPaused;
     _lastTargetDeltaTime = targetDeltaTime;
@@ -175,7 +218,7 @@ void TimeTopic::sendDeltaTimeSteps() {
     const json nextPrevJson = getNextPrevDeltaTimeStepJson();
     deltaTimeStepsJson.insert(nextPrevJson.begin(), nextPrevJson.end());
 
-    _connection->sendJson(wrappedPayload(deltaTimeStepsJson));
+    sendData(deltaTimeStepsJson);
     _lastDeltaTimeSteps = steps;
 }
 

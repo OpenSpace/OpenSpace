@@ -26,6 +26,7 @@ local Item = {
   Scale = 1.0
 }
 
+
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(Item)
 end)

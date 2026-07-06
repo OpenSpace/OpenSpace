@@ -66,7 +66,7 @@ namespace {
         "Offset",
         "Offset",
         "The width of the disc, given as two values that specify the lower and upper "
-        "deviation from the semi major axis, respectively. The values are relative to "
+        "deviation from the semi-major axis, respectively. The values are relative to "
         "the size of the semi-major axis. That is, 0 means no deviation from the "
         "semi-major axis and 1 is a whole semi-major axis's worth of deviation.",
         Property::Visibility::AdvancedUser
@@ -80,15 +80,18 @@ namespace {
         Property::Visibility::NoviceUser
     };
 
+    // Renders a disc around a planetary orbit to visualize properties such as positional
+    // uncertainty along the orbit. The disc width is defined as a deviation from the
+    // semi-major axis, with separate values for the inner and outer offsets.
     struct [[codegen::Dictionary(RenderableOrbitDisc)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::filesystem::path texture;
 
         // [[codegen::verbatim(SizeInfo.description)]]
-        float size;
+        float size [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(EccentricityInfo.description)]]
-        float eccentricity;
+        float eccentricity [[codegen::inrange(0.f, 1.f)]];
 
         // [[codegen::verbatim(OffsetInfo.description)]]
         std::optional<glm::vec2> offset;
@@ -102,7 +105,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableOrbitDisc::Documentation() {
-    return codegen::doc<Parameters>("exoplanets_renderable_orbitdisc");
+    return codegen::doc<Parameters>(
+        "exoplanets_renderable_orbitdisc",
+        Renderable::Documentation()
+    );
 }
 
 RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)

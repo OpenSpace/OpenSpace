@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 local kernels = asset.require("../kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -6,7 +6,7 @@ local coreKernels = asset.require("spice/core")
 
 local JuiceTrailEarth = {
   Identifier = "JuiceTrailEarth",
-  Parent = transforms.EarthBarycenter.Identifier,
+  Parent = earthAsset.EarthBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
@@ -46,6 +46,6 @@ asset.meta = {
     The trajectory of the Juice spacecraft relative to the Earth barycenter
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

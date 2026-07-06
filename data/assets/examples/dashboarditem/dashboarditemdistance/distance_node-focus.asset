@@ -17,6 +17,7 @@ local Item = {
   DestinationType = "Focus"
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Node)
   openspace.dashboard.addDashboardItem(Item)

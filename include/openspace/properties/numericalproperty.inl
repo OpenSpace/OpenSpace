@@ -158,12 +158,69 @@ template <typename T>
 void NumericalProperty<T>::interpolateValue(float t,
                                             ghoul::EasingFunc<float> easingFunction)
 {
+    t = std::clamp(t, 0.f, 1.f);
+
     if (easingFunction) {
         t = easingFunction(t);
     }
     TemplateProperty<T>::setValue(
         static_cast<T>(glm::mix(_interpolationStart, _interpolationEnd, t))
     );
+}
+
+template <typename T>
+nlohmann::json NumericalProperty<T>::MetaDataSchema() {
+    nlohmann::json metaData = TemplateProperty<T>::MetaDataSchema();
+
+    nlohmann::json additionalData;
+    if constexpr (ghoul::isGlmVector<T>() || ghoul::isGlmMatrix<T>()) {
+        metaData["$defs"]["AdditionalDataVectorMatrix"] = nlohmann::json::parse(R"(
+            {
+              "type": "object",
+              "properties": {
+                "min": {
+                  "type": "array",
+                  "items": { "type": "number" }
+                },
+                "max": {
+                  "type": "array",
+                  "items": { "type": "number" }
+                },
+                "step": {
+                  "type": "array",
+                  "items": { "type": "number" }
+                },
+                "exponent": { "type": "number" }
+              },
+              "additionalProperties": false,
+              "required": ["min", "max", "step", "exponent"]
+            }
+        )");
+        metaData["properties"]["additionalData"] = {
+            { "$ref", "#/$defs/AdditionalDataVectorMatrix" }
+        };
+    }
+    else {
+        metaData["$defs"]["AdditionalDataNumber"] = nlohmann::json::parse(R"(
+            {
+              "type": "object",
+              "properties": {
+                "min": { "type": "number" },
+                "max": { "type": "number" },
+                "step": { "type": "number" },
+                "exponent": { "type": "number" }
+              },
+              "additionalProperties": false,
+              "required": ["min", "max", "step", "exponent"]
+            }
+        )");
+        metaData["properties"]["additionalData"] = {
+            { "$ref", "#/$defs/AdditionalDataNumber" }
+        };
+    }
+
+    metaData["required"].push_back("additionalData");
+    return metaData;
 }
 
 } // namespace openspace

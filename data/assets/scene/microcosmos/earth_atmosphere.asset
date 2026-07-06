@@ -1,4 +1,4 @@
-local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 
 
 
@@ -30,11 +30,11 @@ local Longitude = 16.1924
 -- Troposphere
 local EarthMoleculesTroposphere = {
   Identifier = "EarthMoleculesTroposphere",
-  Parent = earth.Earth.Identifier,
+  Parent = earthAsset.Earth.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = earth.Earth.Identifier,
+      Globe = earthAsset.Earth.Identifier,
       Latitude = Latitude,
       Longitude = Longitude,
       Altitude = 10000.0
@@ -80,11 +80,11 @@ local EarthMoleculesTroposphere = {
 -- Thermosphere
 local EarthMoleculesThermosphere = {
   Identifier = "EarthMoleculesThermosphere",
-  Parent = earth.Earth.Identifier,
+  Parent = earthAsset.Earth.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = earth.Earth.Identifier,
+      Globe = earthAsset.Earth.Identifier,
       Latitude = Latitude,
       Longitude = Longitude,
       Altitude = 100000.0
@@ -143,6 +143,6 @@ asset.meta = {
     water are shown in correct proportions. In the thermosphere, the proportions are
     reduced to represent the atmospheric thinning at those altitudes.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

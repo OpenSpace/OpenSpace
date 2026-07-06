@@ -60,6 +60,6 @@ asset.meta = {
     in other assets. See more information on resources on the OpenSpace wiki page.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

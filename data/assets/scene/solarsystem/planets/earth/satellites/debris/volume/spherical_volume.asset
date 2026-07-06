@@ -1,7 +1,7 @@
 -- Before using this asset, the volume data itself needs to be generated,
 -- using the task 'data/tasks/volume/debristasks/generate_debris_volume.task'
 
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
@@ -9,7 +9,7 @@ local MaxApogee = 10946320
 
 local DebrisVolumeSpherical = {
   Identifier = "DebrisVolumeSpherical",
-  Parent = transforms.EarthInertial.Identifier,
+  Parent = earthAsset.EarthInertial.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",

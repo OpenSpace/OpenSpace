@@ -1,0 +1,60 @@
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+local coreKernels = asset.require("spice/core")
+
+
+
+local omm = asset.resource({
+  Name = "Satellite CSV Data (Hubble)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_csv_data_hst",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?CATNR=20580&FORMAT=csv",
+  Filename = "hst.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+
+local HubblePosition = {
+  Identifier = "HubblePosition",
+  Parent = earthAsset.EarthInertial.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GPTranslation",
+      Observer = earthAsset.EarthInertial.Identifier,
+      File = omm .. "hst.txt",
+      Format = "CSV"
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.Galactic,
+      DestinationFrame = coreKernels.Frame.J2000
+    }
+  },
+  Tag = { "earth_satellites", "hubble" },
+  GUI = {
+    Name = "Hubble Position",
+    Path = "/Solar System/Planets/Earth/Satellites/Hubble",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(HubblePosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(HubblePosition)
+end)
+
+asset.export(HubblePosition)
+
+
+
+asset.meta = {
+  Name = "Hubble Space Telescope Position",
+  Description = "Position for Hubble Space Telescope, trail from Celestrak",
+  Author = "Dan Tell",
+  URL = "www.calacademy.org",
+  License = "CC-BY"
+}

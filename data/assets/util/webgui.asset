@@ -4,7 +4,7 @@ local guiCustomization = asset.require("customization/gui")
 
 
 -- Select which commit hashes to use for the UI frontend
-local frontendHash = "0e1020b6029cd26d7ce80da9b1b2eaa476c128ed"
+local frontendHash = "3688417d71c53c93171579d61dc464f75b514860"
 
 -- The name of the file to download from the server
 local frontendFile = "frontend.zip"
@@ -17,7 +17,7 @@ local frontend = asset.resource({
 })
 
 
-local showcomposerHash = "9071d8bc80d16dc1e081017e02297915563f0a64"
+local showcomposerHash = "5aa159ca506b108e469856c14040362f5d587ee0"
 local showcomposerFile = "showcomposer.zip"
 
 local showcomposer = asset.resource({
@@ -131,6 +131,6 @@ end)
 asset.meta = {
   Name = "WebGUI",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

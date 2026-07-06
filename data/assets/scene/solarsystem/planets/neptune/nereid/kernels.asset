@@ -1,0 +1,26 @@
+local coreKernels = asset.require("spice/core")
+
+
+
+local kernels = asset.resource({
+  Name = "Neptune Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "neptune_kernels",
+  Version = 3
+})
+
+
+local ID = {
+  Nereid = "NEREID"
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "nep101xl-802.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels .. "nep101xl-802.bsp")
+end)
+
+asset.export("ID", ID)

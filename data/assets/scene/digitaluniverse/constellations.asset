@@ -52,7 +52,7 @@ local Constellations = {
     Unit = "pc",
     DimInAtmosphere = true
   },
-  Tag = { "daytime_hidden" },
+  Tag = { "daytime_hidden", "constellation_marking"  },
   GUI = {
     Name = "Constellation Lines",
     Path = "/Milky Way/Constellations",

@@ -1,4 +1,4 @@
-local ssb = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 local pioneer_horizons = asset.resource({
   Name = "Pioneer horizons",
@@ -10,7 +10,7 @@ local pioneer_horizons = asset.resource({
 
 local Pioneer10 = {
   Identifier = "Pioneer10_Horizons",
-  Parent = ssb.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = false,
@@ -40,7 +40,7 @@ local Pioneer10 = {
 
 local Pioneer11 = {
   Identifier = "Pioneer11_Horizons",
-  Parent = ssb.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = false,
@@ -90,6 +90,6 @@ asset.meta = {
     performance then SPICE but lower resolution. Data is from shortly after mission
     launches until January 1st, 2030]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

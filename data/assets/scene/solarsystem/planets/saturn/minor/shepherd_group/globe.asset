@@ -1,0 +1,190 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Prometheus = {
+  Identifier = "Prometheus",
+  Parent = transforms.PrometheusPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 135600, 79400, 59400 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_shepherd",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Prometheus",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Prometheus"
+  }
+}
+
+local Pandora = {
+  Identifier = "Pandora",
+  Parent = transforms.PandoraPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 104000, 81000, 64000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_shepherd",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Pandora",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pandora"
+  }
+}
+
+local Atlas = {
+  Identifier = "Atlas",
+  Parent = transforms.AtlasPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 40800, 35400, 18800 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_shepherd",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Atlas",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Atlas"
+  }
+}
+
+local Janus = {
+  Identifier = "Janus",
+  Parent = transforms.JanusPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 203000, 185000, 152600 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_shepherd",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Janus",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Janus"
+  }
+}
+
+local Epimetheus = {
+  Identifier = "Epimetheus",
+  Parent = transforms.EpimetheusPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 129800, 114000, 106200 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_shepherd",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Epimetheus",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Epimetheus"
+  }
+}
+
+local Daphnis = {
+  Identifier = "Daphnis",
+  Parent = transforms.DaphnisPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 8600, 8200, 6400 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_shepherd",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Daphnis",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Daphnis"
+  }
+}
+
+local Pan = {
+  Identifier = "Pan",
+  Parent = transforms.PanPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 34400, 31400, 20800 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_saturn",
+    "moon_shepherd",
+    "moon_minor",
+    "moon_minor_saturn"
+  },
+  GUI = {
+    Name = "Pan",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pan"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Prometheus)
+  openspace.addSceneGraphNode(Pandora)
+  openspace.addSceneGraphNode(Atlas)
+  openspace.addSceneGraphNode(Janus)
+  openspace.addSceneGraphNode(Epimetheus)
+  openspace.addSceneGraphNode(Daphnis)
+  openspace.addSceneGraphNode(Pan)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Prometheus)
+  openspace.removeSceneGraphNode(Pandora)
+  openspace.removeSceneGraphNode(Atlas)
+  openspace.removeSceneGraphNode(Janus)
+  openspace.removeSceneGraphNode(Epimetheus)
+  openspace.removeSceneGraphNode(Daphnis)
+  openspace.removeSceneGraphNode(Pan)
+end)
+
+asset.export(Prometheus)
+asset.export(Pandora)
+asset.export(Atlas)
+asset.export(Janus)
+asset.export(Epimetheus)
+asset.export(Daphnis)
+asset.export(Pan)
+
+
+asset.meta = {
+  Name = "Saturn Shepherd Moons",
+  Description = [[Procedural Globe asset containing Saturn's Shepherd moons: Prometheus,
+    Pandora, Atlas, Janus, Epimetheus, Daphnis and Pan. Blank globes and SPICE trails are
+    generated for each moon]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

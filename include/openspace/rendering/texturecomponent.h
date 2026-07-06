@@ -52,6 +52,8 @@ public:
      */
     void loadFromFile(const std::filesystem::path& path);
 
+    void unloadTexture();
+
     /**
      * Function to call in a renderable's update function to make sure the texture is kept
      * up to date.

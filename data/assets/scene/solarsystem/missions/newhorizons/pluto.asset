@@ -1,5 +1,4 @@
 local transforms = asset.require("./transforms")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 

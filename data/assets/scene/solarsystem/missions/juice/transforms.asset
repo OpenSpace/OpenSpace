@@ -1,5 +1,5 @@
-local jupiterTransforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
-local kernelsJup = asset.require("scene/solarsystem/planets/jupiter/kernels")
+local jupiterAsset = asset.require("scene/solarsystem/planets/jupiter/transforms")
+local jupiterKernels = asset.require("scene/solarsystem/planets/jupiter/kernels")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -7,7 +7,7 @@ local coreKernels = asset.require("spice/core")
 
 local Juice = {
   Identifier = "Juice",
-  Parent = jupiterTransforms.JupiterBarycenter.Identifier,
+  Parent = jupiterAsset.JupiterBarycenter.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "2023 APR 14 12:43:25.842",
@@ -34,11 +34,11 @@ local Juice = {
 
 local GanymedePosition = {
   Identifier = "GanymedePosition",
-  Parent = jupiterTransforms.JupiterBarycenter.Identifier,
+  Parent = jupiterAsset.JupiterBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernelsJup.ID.Ganymede,
+      Target = jupiterKernels.ID.Ganymede,
       Observer = coreKernels.ID.JupiterBarycenter
     }
   },
@@ -96,6 +96,6 @@ asset.meta = {
     system
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

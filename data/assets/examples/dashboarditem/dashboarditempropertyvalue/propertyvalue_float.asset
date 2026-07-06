@@ -9,6 +9,7 @@ local Item = {
   DisplayString = "Gamma Correction: {}"
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Item)
 end)

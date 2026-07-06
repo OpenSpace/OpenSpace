@@ -1,0 +1,61 @@
+local transforms = asset.require("./transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local labelsPath = asset.resource({
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
+})
+
+
+local Titan = {
+  Identifier = "Titan",
+  Parent = transforms.TitanPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = 2576000,
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "titan.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 9.6,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 5000000.0, 7500000.0 },
+      DistanceEPS = 1350000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_major_saturn" },
+  GUI = {
+    Name = "Titan",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Titan",
+    Description = "Largest moon of Saturn"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Titan)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Titan)
+end)
+
+asset.export(Titan)
+
+
+
+asset.meta = {
+  Name = "Titan",
+  Description = "Titan globe",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

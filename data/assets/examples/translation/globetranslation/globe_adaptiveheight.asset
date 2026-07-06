@@ -41,6 +41,7 @@ local Node = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Globe)
   -- The layer is designed for a globe with Earth scale. So we need to scale it down for

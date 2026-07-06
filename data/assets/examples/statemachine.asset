@@ -1,7 +1,7 @@
 -- Create a state machine with a few different states. The state machine can be controlled through
 -- the scripting commands from the state machine module.
 
-asset.require("scene/solarsystem/planets/earth/earth")
+asset.require("scene/solarsystem/planets/earth/globe")
 asset.require("scene/digitaluniverse/constellations")
 
 local function targetNode(nodeIdentifier)
@@ -82,6 +82,6 @@ asset.meta = {
   Description = [[Example of how to create a state machine in OpenSpace, where each
     state and transition between states may trigger different behaviors.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

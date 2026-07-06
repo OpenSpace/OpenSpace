@@ -1,0 +1,739 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Herse = {
+  Identifier = "Herse",
+  Parent = transforms.HersePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Herse",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Herse"
+  }
+}
+
+local Aitne = {
+  Identifier = "Aitne",
+  Parent = transforms.AitnePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Aitne",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Aitne"
+  }
+}
+
+local Kale = {
+  Identifier = "Kale",
+  Parent = transforms.KalePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Kale",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kale"
+  }
+}
+
+local Taygete = {
+  Identifier = "Taygete",
+  Parent = transforms.TaygetePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 5000, 5000, 5000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Taygete",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Taygete"
+  }
+}
+
+local Chaldene = {
+  Identifier = "Chaldene",
+  Parent = transforms.ChaldenePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Chaldene",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Chaldene"
+  }
+}
+
+local Erinome = {
+  Identifier = "Erinome",
+  Parent = transforms.ErinomePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Erinome",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Erinome"
+  }
+}
+
+local Kallichore = {
+  Identifier = "Kallichore",
+  Parent = transforms.KallichorePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Kallichore",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kallichore"
+  }
+}
+
+local Kalyke = {
+  Identifier = "Kalyke",
+  Parent = transforms.KalykePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 5000, 5000, 5000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Kalyke",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kalyke"
+  }
+}
+
+local Pasithee = {
+  Identifier = "Pasithee",
+  Parent = transforms.PasitheePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Pasithee",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Pasithee"
+  }
+}
+
+local S2010J1 = {
+  Identifier = "S2010J1",
+  Parent = transforms.S2010J1Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2010 J 1",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2010J1"
+  }
+}
+
+local Eukelade = {
+  Identifier = "Eukelade",
+  Parent = transforms.EukeladePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Eukelade",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Eukelade"
+  }
+}
+
+local Arche = {
+  Identifier = "Arche",
+  Parent = transforms.ArchePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 3000, 3000, 3000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Arche",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Arche"
+  }
+}
+
+local Isonoe = {
+  Identifier = "Isonoe",
+  Parent = transforms.IsonoePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Isonoe",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Isonoe"
+  }
+}
+
+local Carme = {
+  Identifier = "Carme",
+  Parent = transforms.CarmePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 46000, 46000, 46000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Carme",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Carme"
+  }
+}
+
+local S2003J5 = {
+  Identifier = "S2003J5",
+  Parent = transforms.S2003J5Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 4000, 4000, 4000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 5",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J5"
+  }
+}
+
+local S2018J3 = {
+  Identifier = "S2018J3",
+  Parent = transforms.S2018J3Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2018 J 3",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2018J3"
+  }
+}
+
+local S2021J4 = {
+  Identifier = "S2021J4",
+  Parent = transforms.S2021J4Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2021 J 4",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J4"
+  }
+}
+
+local S2021J5 = {
+  Identifier = "S2021J5",
+  Parent = transforms.S2021J5Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2021 J 5",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J5"
+  }
+}
+
+local S2021J6 = {
+  Identifier = "S2021J6",
+  Parent = transforms.S2021J6Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2021 J 6",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J6"
+  }
+}
+
+local S2016J3 = {
+  Identifier = "S2016J3",
+  Parent = transforms.S2016J3Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2016 J 3",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2016J3"
+  }
+}
+
+local S2022J1 = {
+  Identifier = "S2022J1",
+  Parent = transforms.S2022J1Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2022 J 1",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J1"
+  }
+}
+
+local S2022J2 = {
+  Identifier = "S2022J2",
+  Parent = transforms.S2022J2Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2022 J 2",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J2"
+  }
+}
+
+local S2017J2 = {
+  Identifier = "S2017J2",
+  Parent = transforms.S2017J2Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 2",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J2"
+  }
+}
+
+local S2017J5 = {
+  Identifier = "S2017J5",
+  Parent = transforms.S2017J5Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 5",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J5"
+  }
+}
+
+local S2017J8 = {
+  Identifier = "S2017J8",
+  Parent = transforms.S2017J8Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 8",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J8"
+  }
+}
+
+local S2011J1 = {
+  Identifier = "S2011J1",
+  Parent = transforms.S2011J1Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2011 J 1",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2011J1"
+  }
+}
+
+local S2003J9 = {
+  Identifier = "S2003J9",
+  Parent = transforms.S2003J9Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 9",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J9"
+  }
+}
+
+local S2003J10 = {
+  Identifier = "S2003J10",
+  Parent = transforms.S2003J10Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 2000, 2000, 2000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_carme",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 10",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J10"
+  }
+}
+
+local S2017J11 = {
+  Identifier = "S2017J11",
+  Parent = transforms.S2017J11Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 } -- 2km in diameter
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2017 J 11",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J11"
+  }
+}
+
+local S2003J24 = {
+  Identifier = "S2003J24",
+  Parent = transforms.S2003J24Position.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 } -- 2km in diameter
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 24",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J24"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Herse)
+  openspace.addSceneGraphNode(Aitne)
+  openspace.addSceneGraphNode(Kale)
+  openspace.addSceneGraphNode(Taygete)
+  openspace.addSceneGraphNode(Chaldene)
+  openspace.addSceneGraphNode(Erinome)
+  openspace.addSceneGraphNode(Kallichore)
+  openspace.addSceneGraphNode(Kalyke)
+  openspace.addSceneGraphNode(Pasithee)
+  openspace.addSceneGraphNode(S2010J1)
+  openspace.addSceneGraphNode(Eukelade)
+  openspace.addSceneGraphNode(Arche)
+  openspace.addSceneGraphNode(Isonoe)
+  openspace.addSceneGraphNode(Carme)
+  openspace.addSceneGraphNode(S2003J5)
+  openspace.addSceneGraphNode(S2018J3)
+  openspace.addSceneGraphNode(S2021J4)
+  openspace.addSceneGraphNode(S2021J5)
+  openspace.addSceneGraphNode(S2021J6)
+  openspace.addSceneGraphNode(S2016J3)
+  openspace.addSceneGraphNode(S2022J1)
+  openspace.addSceneGraphNode(S2022J2)
+  openspace.addSceneGraphNode(S2017J2)
+  openspace.addSceneGraphNode(S2017J5)
+  openspace.addSceneGraphNode(S2017J8)
+  openspace.addSceneGraphNode(S2011J1)
+  openspace.addSceneGraphNode(S2003J9)
+  openspace.addSceneGraphNode(S2003J10)
+  openspace.addSceneGraphNode(S2017J11)
+  openspace.addSceneGraphNode(S2003J24)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2003J24)
+  openspace.removeSceneGraphNode(S2017J11)
+  openspace.removeSceneGraphNode(S2003J10)
+  openspace.removeSceneGraphNode(S2003J9)
+  openspace.removeSceneGraphNode(S2011J1)
+  openspace.removeSceneGraphNode(S2017J8)
+  openspace.removeSceneGraphNode(S2017J5)
+  openspace.removeSceneGraphNode(S2017J2)
+  openspace.removeSceneGraphNode(S2022J2)
+  openspace.removeSceneGraphNode(S2022J1)
+  openspace.removeSceneGraphNode(S2016J3)
+  openspace.removeSceneGraphNode(S2021J6)
+  openspace.removeSceneGraphNode(S2021J5)
+  openspace.removeSceneGraphNode(S2021J4)
+  openspace.removeSceneGraphNode(S2018J3)
+  openspace.removeSceneGraphNode(S2003J5)
+  openspace.removeSceneGraphNode(Carme)
+  openspace.removeSceneGraphNode(Isonoe)
+  openspace.removeSceneGraphNode(Arche)
+  openspace.removeSceneGraphNode(Eukelade)
+  openspace.removeSceneGraphNode(S2010J1)
+  openspace.removeSceneGraphNode(Pasithee)
+  openspace.removeSceneGraphNode(Kalyke)
+  openspace.removeSceneGraphNode(Kallichore)
+  openspace.removeSceneGraphNode(Erinome)
+  openspace.removeSceneGraphNode(Chaldene)
+  openspace.removeSceneGraphNode(Taygete)
+  openspace.removeSceneGraphNode(Kale)
+  openspace.removeSceneGraphNode(Aitne)
+  openspace.removeSceneGraphNode(Herse)
+end)
+
+asset.export(Herse)
+asset.export(Aitne)
+asset.export(Kale)
+asset.export(Taygete)
+asset.export(Chaldene)
+asset.export(Erinome)
+asset.export(Kallichore)
+asset.export(Kalyke)
+asset.export(Pasithee)
+asset.export(S2010J1)
+asset.export(Eukelade)
+asset.export(Arche)
+asset.export(Isonoe)
+asset.export(Carme)
+asset.export(S2003J5)
+asset.export(S2018J3)
+asset.export(S2021J4)
+asset.export(S2021J5)
+asset.export(S2021J6)
+asset.export(S2016J3)
+asset.export(S2022J1)
+asset.export(S2022J2)
+asset.export(S2017J2)
+asset.export(S2017J5)
+asset.export(S2017J8)
+asset.export(S2011J1)
+asset.export(S2003J9)
+asset.export(S2003J10)
+asset.export(S2003J24)
+asset.export(S2017J11)
+
+asset.meta = {
+  Name = "Jupiter Carme Group Moons Globes",
+  Description = [[Asset containing globes for Jupiter's Carme Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

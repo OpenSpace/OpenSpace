@@ -1,4 +1,4 @@
-local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 
 
 
@@ -24,11 +24,11 @@ local ExampleToronto = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExampleToronto)
+  openspace.globebrowsing.addGeoJson(earthAsset.Earth.Identifier, ExampleToronto)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, ExampleToronto)
+  openspace.globebrowsing.deleteGeoJson(earthAsset.Earth.Identifier, ExampleToronto)
 end)
 
 asset.export(ExampleToronto)
@@ -40,6 +40,6 @@ asset.meta = {
   Description = [[GeoJson example asset that shows the neighborhoods of the city Toronto,
     Canada, as polygons. Data source: https://handsondataviz.org/geojsonio.html]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

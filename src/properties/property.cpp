@@ -108,7 +108,7 @@ void Property::setVisibility(Visibility visibility) {
     // We only subscribe to meta data changes for visible properties, so if the visibility
     // changes during runtime, we need to notify the property owner about the change for
     // it to affect properties that are currently hidden
-    if (_owner) {
+    if (_owner && !_owner->uri().empty()) {
         global::eventEngine->publishEvent<EventPropertyTreeUpdated>(_owner->uri());
     }
 }
@@ -256,11 +256,9 @@ void Property::notifyChangeListeners() {
         return;
     }
     nlohmann::json payload;
-    payload["event"] = "property_changed";
-    payload["payload"] = {
-        { "property", uri() },
-        { "value", nlohmann::json::parse(jsonValue()) }
-    };
+    payload["uri"] = uri();
+    payload["value"] = nlohmann::json::parse(jsonValue());
+    payload["type"] = "value";
     global::server->passDataToTopic("propertyTree", payload);
 }
 
@@ -275,11 +273,9 @@ void Property::notifyMetaDataChangeListeners() {
         return;
     }
     nlohmann::json payload;
-    payload["event"] = "property_changed";
-    payload["payload"] = {
-        { "property", uri() },
-        { "metaData", generateJsonDescription() }
-    };
+    payload["uri"] = uri();
+    payload["metaData"] = generateJsonDescription();
+    payload["type"] = "metaData";
     global::server->passDataToTopic("propertyTree", payload);
 }
 
@@ -343,5 +339,59 @@ nlohmann::json Property::generateAdditionalJsonDescription() const {
 
 void Property::setLuaInterpolationTarget(lua_State*) {}
 void Property::interpolateValue(float, ghoul::EasingFunc<float>) {}
+
+nlohmann::json Property::MetaDataSchema() {
+    return nlohmann::json::parse(R"(
+        {
+          "$defs": {
+            "PropertyVisibility": {
+              "type": "string",
+              "enum": [
+                "Always", "NoviceUser", "User", "AdvancedUser", "Developer", "Hidden"
+              ]
+            }
+          },
+          "type": "object",
+          "properties": {
+            "identifier": { "type": "string" },
+            "description": { "type": "string" },
+            "guiName": { "type": "string" },
+            "group": { "type": "string" },
+            "isReadOnly": { "type": "boolean" },
+            "needsConfirmation": { "type": "boolean" },
+            "visibility": { "$ref": "#/$defs/PropertyVisibility" }
+          },
+          "additionalProperties": false,
+          "required": [
+            "identifier",
+            "description",
+            "guiName",
+            "group",
+            "isReadOnly",
+            "needsConfirmation",
+            "visibility"
+          ]
+        }
+    )");
+}
+
+nlohmann::json Property::ViewOptionsSchema() {
+    return nlohmann::json::parse(R"(
+        {
+          "type": "object",
+          "properties": {
+            "Color": { "type": "boolean" },
+            "MinMaxRange": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        }
+    )");
+}
+
+nlohmann::json Property::ExtractDefs(nlohmann::json& metaData) {
+    nlohmann::json defs = metaData.value("$defs", nlohmann::json::object());
+    metaData.erase("$defs");
+    return defs;
+}
 
 } // namespace openspace

@@ -1,0 +1,224 @@
+local transforms = asset.require("./transforms")
+
+
+
+local NaiadLabel = {
+  Identifier = "NaiadLabel",
+  Parent = transforms.NaiadPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Naiad",
+    FontSize = 70.0,
+    Size = 5.2,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100, 800.0 },
+    FadeWidths = { 100, 1200.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Naiad Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Naiad",
+    Focusable = false,
+    Description = "Label for Neptune's moon Naiad (Inner Moons)"
+  }
+}
+
+local ThalassaLabel = {
+  Identifier = "ThalassaLabel",
+  Parent = transforms.ThalassaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Thalassa",
+    FontSize = 70.0,
+    Size = 5.2,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100, 800.0 },
+    FadeWidths = { 100, 1200.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Thalassa Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Thalassa",
+    Focusable = false,
+    Description = "Label for Neptune's moon Thalassa (Inner Moons)"
+  }
+}
+
+local DespinaLabel = {
+  Identifier = "DespinaLabel",
+  Parent = transforms.DespinaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Despina",
+    FontSize = 70.0,
+    Size = 5.2,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100, 800.0 },
+    FadeWidths = { 100, 1200.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Despina Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Despina",
+    Focusable = false,
+    Description = "Label for Neptune's moon Despina (Inner Moons)"
+  }
+}
+
+local GalateaLabel = {
+  Identifier = "GalateaLabel",
+  Parent = transforms.GalateaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Galatea",
+    FontSize = 70.0,
+    Size = 5.2,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100, 800.0 },
+    FadeWidths = { 100, 1200.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Galatea Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Galatea",
+    Focusable = false,
+    Description = "Label for Neptune's moon Galatea (Inner Moons)"
+  }
+}
+
+local LarissaLabel = {
+  Identifier = "LarissaLabel",
+  Parent = transforms.LarissaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Larissa",
+    FontSize = 70.0,
+    Size = 5.2,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100, 800.0 },
+    FadeWidths = { 100, 1200.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Larissa Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Larissa",
+    Focusable = false,
+    Description = "Label for Neptune's moon Larissa (Inner Moons)"
+  }
+}
+
+local HippocampLabel = {
+  Identifier = "HippocampLabel",
+  Parent = transforms.HippocampPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Hippocamp",
+    FontSize = 70.0,
+    Size = 5.2,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100, 800.0 },
+    FadeWidths = { 100, 1200.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Hippocamp Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Hippocamp",
+    Focusable = false,
+    Description = "Label for Neptune's moon Hippocamp (Inner Moons)"
+  }
+}
+
+local ProteusLabel = {
+  Identifier = "ProteusLabel",
+  Parent = transforms.ProteusPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Proteus",
+    FontSize = 70.0,
+    Size = 5.2,
+    MinMaxSize = { 1, 20 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100, 800.0 },
+    FadeWidths = { 100, 1200.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "Proteus Label",
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Proteus",
+    Focusable = false,
+    Description = "Label for Neptune's moon Proteus (Inner Moons)"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NaiadLabel)
+  openspace.addSceneGraphNode(ThalassaLabel)
+  openspace.addSceneGraphNode(DespinaLabel)
+  openspace.addSceneGraphNode(GalateaLabel)
+  openspace.addSceneGraphNode(LarissaLabel)
+  openspace.addSceneGraphNode(HippocampLabel)
+  openspace.addSceneGraphNode(ProteusLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(ProteusLabel)
+  openspace.removeSceneGraphNode(HippocampLabel)
+  openspace.removeSceneGraphNode(LarissaLabel)
+  openspace.removeSceneGraphNode(GalateaLabel)
+  openspace.removeSceneGraphNode(DespinaLabel)
+  openspace.removeSceneGraphNode(ThalassaLabel)
+  openspace.removeSceneGraphNode(NaiadLabel)
+end)
+
+asset.export(NaiadLabel)
+asset.export(ThalassaLabel)
+asset.export(DespinaLabel)
+asset.export(GalateaLabel)
+asset.export(LarissaLabel)
+asset.export(HippocampLabel)
+asset.export(ProteusLabel)
+
+
+
+asset.meta = {
+  Name = "Neptune Inner Moons Labels",
+  Description = [[Asset containing labels for Neptune' inner prograde moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

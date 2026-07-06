@@ -1,0 +1,237 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Francisco = {
+  Identifier = "Francisco",
+  Parent = transforms.FranciscoPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 22000, 22000, 22000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_irregular_retrograde",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Francisco",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Francisco"
+  }
+}
+
+local Caliban = {
+  Identifier = "Caliban",
+  Parent = transforms.CalibanPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 72000, 72000, 72000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_irregular_retrograde",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Caliban",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Caliban"
+  }
+}
+
+local Stephano = {
+  Identifier = "Stephano",
+  Parent = transforms.StephanoPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 32000, 32000, 32000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_irregular_retrograde",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Stephano",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Stephano"
+  }
+}
+
+local Trinculo = {
+  Identifier = "Trinculo",
+  Parent = transforms.TrinculoPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 18000, 18000, 18000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_irregular_retrograde",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Trinculo",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Trinculo"
+  }
+}
+
+local Sycorax = {
+  Identifier = "Sycorax",
+  Parent = transforms.SycoraxPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 165000, 165000, 165000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_irregular_retrograde",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Sycorax",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Sycorax"
+  }
+}
+
+local Prospero = {
+  Identifier = "Prospero",
+  Parent = transforms.ProsperoPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 50000, 50000, 50000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_irregular_retrograde",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Prospero",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Prospero"
+  }
+}
+
+local Setebos = {
+  Identifier = "Setebos",
+  Parent = transforms.SetebosPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 48000, 48000, 48000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_irregular_retrograde",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Setebos",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Setebos"
+  }
+}
+
+local Ferdinand = {
+  Identifier = "Ferdinand",
+  Parent = transforms.FerdinandPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 20000, 20000, 20000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_irregular_retrograde",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "Ferdinand",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Ferdinand"
+  }
+}
+
+local S2023U1 = {
+  Identifier = "S2023U1",
+  Parent = transforms.S2023U1Position.S2023U1,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 5000, 5000, 5000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_irregular_retrograde",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "S/2023 U 1",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/S2023U1"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Francisco)
+  openspace.addSceneGraphNode(Caliban)
+  openspace.addSceneGraphNode(Stephano)
+  openspace.addSceneGraphNode(Trinculo)
+  openspace.addSceneGraphNode(Sycorax)
+  openspace.addSceneGraphNode(Prospero)
+  openspace.addSceneGraphNode(Setebos)
+  openspace.addSceneGraphNode(Ferdinand)
+  openspace.addSceneGraphNode(S2023U1)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2023U1)
+  openspace.removeSceneGraphNode(Ferdinand)
+  openspace.removeSceneGraphNode(Setebos)
+  openspace.removeSceneGraphNode(Prospero)
+  openspace.removeSceneGraphNode(Sycorax)
+  openspace.removeSceneGraphNode(Trinculo)
+  openspace.removeSceneGraphNode(Stephano)
+  openspace.removeSceneGraphNode(Caliban)
+  openspace.removeSceneGraphNode(Francisco)
+end)
+
+asset.export(Francisco)
+asset.export(Caliban)
+asset.export(Stephano)
+asset.export(Trinculo)
+asset.export(Sycorax)
+asset.export(Prospero)
+asset.export(Setebos)
+asset.export(Ferdinand)
+asset.export(S2023U1)
+
+
+
+asset.meta = {
+  Name = "Uranus Irregular Retrograde Moons Globes",
+  Description = [[Asset containing globes for Uranus' irregular retrograde moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

@@ -365,11 +365,6 @@ void DeltaTimesDialog::parseSelections() {
             break;
         }
     }
-    std::vector<double> tempDt;
-    tempDt.reserve(finalNonzeroIndex);
-    for (int i = 0; i < (finalNonzeroIndex + 1); i++) {
-        tempDt.push_back(_deltaTimesData[i]);
-    }
     *_deltaTimes = std::move(_deltaTimesData);
     accept();
 }

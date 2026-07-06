@@ -9,6 +9,7 @@ local Item = {
   DisplayFormat = "DegreeMinuteSeconds"
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Item)
 end)

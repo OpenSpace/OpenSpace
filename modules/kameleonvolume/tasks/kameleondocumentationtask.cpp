@@ -53,22 +53,25 @@ namespace {
         std::filesystem::path input;
 
         // The HTML file to write documentation to.
-        std::string output [[codegen::annotation("A valid filepath")]];
+        std::filesystem::path output [[codegen::mustexist(false)]];
     };
 } // namespace
 #include "kameleondocumentationtask_codegen.cpp"
 
 namespace openspace {
 
-Documentation KameleonDocumentationTask::documentation() {
-    return codegen::doc<Parameters>("kameleon_task_documentation");
+Documentation KameleonDocumentationTask::Documentation() {
+    return codegen::doc<Parameters>(
+        "kameleon_task_documentation",
+        Task::Documentation()
+    );
 }
 
 KameleonDocumentationTask::KameleonDocumentationTask(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    _inputPath = absPath(p.input);
-    _outputPath = absPath(p.output);
+    _inputPath = p.input;
+    _outputPath = p.output;
 }
 
 std::string KameleonDocumentationTask::description() {

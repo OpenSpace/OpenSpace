@@ -85,15 +85,17 @@ namespace {
        Property::Visibility::User
     };
 
+    // This is a utility renderable used by the SkyBrowser module to visualize a
+    // crosshair-like target in the sky.
     struct [[codegen::Dictionary(RenderableSkyTarget)]] Parameters {
         // [[codegen::verbatim(crossHairSizeInfo.description)]]
-        std::optional<float> crossHairSize;
+        std::optional<float> crossHairSize [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(RectangleThresholdInfo.description)]]
-        std::optional<float> rectangleThreshold;
+        std::optional<float> rectangleThreshold [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(VerticalFovInfo.description)]]
         std::optional<double> verticalFov;
@@ -107,7 +109,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableSkyTarget::Documentation() {
-    return codegen::doc<Parameters>("skybrowser_renderable_skytarget");
+    return codegen::doc<Parameters>(
+        "skybrowser_renderable_skytarget",
+        RenderablePlane::Documentation()
+    );
 }
 
 RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)

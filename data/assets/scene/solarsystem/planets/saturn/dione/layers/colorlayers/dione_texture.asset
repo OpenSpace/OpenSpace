@@ -1,4 +1,4 @@
-local globe = asset.require("../../dione")
+local dioneAsset = asset.require("scene/solarsystem/planets/saturn/dione/globe")
 
 
 
@@ -19,11 +19,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Dione.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(dioneAsset.Dione.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Dione.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(dioneAsset.Dione.Identifier, "ColorLayers", Layer)
 end)
 
 asset.export("layer", Layer)
@@ -34,6 +34,6 @@ asset.meta = {
   Name = "Dione Texutre",
   Description = "Default jpg texture for Dione",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

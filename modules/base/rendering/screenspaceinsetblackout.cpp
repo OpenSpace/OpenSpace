@@ -246,6 +246,9 @@ namespace {
             // File path for the texture that should be used when displaying the
             // calibration grid.
             std::optional<std::filesystem::path> calibrationTexturePath;
+
+            // [[codegen::verbatim(CalibrationPatternInfo.description)]]
+            std::optional<bool> enableCalibrationPattern;
         };
         BlackoutShape blackoutshape;
     };
@@ -255,7 +258,10 @@ namespace {
 namespace openspace {
 
 Documentation ScreenSpaceInsetBlackout::Documentation() {
-    return codegen::doc<Parameters>("base_screenspace_insetblackout");
+    return codegen::doc<Parameters>(
+        "base_screenspace_insetblackout",
+        ScreenSpaceRenderable::Documentation()
+    );
 }
 
 ScreenSpaceInsetBlackout::BlackoutShape::Point::Point(glm::vec2& inData,
@@ -411,6 +417,8 @@ ScreenSpaceInsetBlackout::BlackoutShape::BlackoutShape(
     addPropertySubOwner(*leftSpline);
 
     // Add additional controls to GUI
+    enableCalibrationPattern =
+        params.blackoutshape.enableCalibrationPattern.value_or(enableCalibrationPattern);
     enableCalibrationPattern.onChange([this]() { textureTypeHasChanged = true; });
     addProperty(enableCalibrationPattern);
 

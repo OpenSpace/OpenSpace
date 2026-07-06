@@ -28,8 +28,8 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/space/kepler.h>
+#include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
-#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
@@ -84,6 +84,8 @@ private:
     void updateBuffers();
     void threadedSegmentCalculations(int threadId, const UpdateData& data);
 
+    double _lastTimestamp = std::numeric_limits<double>::min();
+
     const int _nThreads = 0;
     std::vector<int> _threadIds;
     std::vector<int> _orbitsPerThread;
@@ -131,7 +133,7 @@ private:
     UIntProperty _segmentQuality;
     UIntProperty _startRenderIdx;
     UIntProperty _sizeRender;
-    StringProperty _path;
+    StringListProperty _path;
     BoolProperty _contiguousMode;
     kepler::Format _format;
     RenderableOrbitalKepler::Appearance _appearance;

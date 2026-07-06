@@ -1,0 +1,62 @@
+local transforms = asset.require("./transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
+local kernels = asset.require("./kernels")
+
+
+
+local models = asset.resource({
+  Name = "ISS Models",
+  Type = "HttpSynchronization",
+  Identifier = "iss_model",
+  Version = 3
+})
+
+
+local IssModel = {
+  Identifier = "ISS",
+  Parent = transforms.ISSPosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.ISS,
+      DestinationFrame = coreKernels.Frame.J2000
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "ISS.fbx",
+    ModelScale = "Centimeter",
+    LightSources = {
+      sunAsset.LightSource
+    },
+    PerformShading = true,
+    EnableFaceCulling = false
+  },
+  Tag = { "earth_satellites", "ISS", "space_stations" },
+  GUI = {
+    Name = "ISS",
+    Path = "/Solar System/Planets/Earth/Satellites/ISS"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(IssModel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(IssModel)
+end)
+
+asset.export(IssModel)
+
+
+
+asset.meta = {
+  Name = "International Space Station Model",
+  Description = "Model for ISS. Model file from NASA 3D models.",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.org/NORAD/elements/",
+  License = "CC-BY"
+}

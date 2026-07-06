@@ -1,4 +1,4 @@
-local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 local data = asset.require("../hybrid_data")
 
 
@@ -16,11 +16,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Layer)
+  openspace.globebrowsing.addGeoJson(earthAsset.Earth.Identifier, Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Layer)
+  openspace.globebrowsing.deleteGeoJson(earthAsset.Earth.Identifier, Layer)
 end)
 
 
@@ -30,6 +30,6 @@ asset.meta = {
   Description = [[Hybrid eclipse map for 2013-11-03. The GeoJSON is adapted from the
     data provided by Xavier M. Jubier (http://xjubier.free.fr).]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

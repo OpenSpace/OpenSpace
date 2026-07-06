@@ -1,0 +1,86 @@
+local transforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
+local kernels347 = asset.require("scene/solarsystem/planets/jupiter/kernels347")
+local coreKernels = asset.require("spice/core")
+
+
+
+local EuphemePosition = {
+  Identifier = "EuphemePosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Eupheme,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Eupheme Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Group/Eupheme",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local S2003J19Position = {
+  Identifier = "S2003J19Position",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2003J19,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "S/2003 J 19 Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Group/S2003J19",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local ValetudoPosition = {
+  Identifier = "ValetudoPosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Valetudo,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Valetudo Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Group/Valetudo",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(EuphemePosition)
+  openspace.addSceneGraphNode(S2003J19Position)
+  openspace.addSceneGraphNode(ValetudoPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(ValetudoPosition)
+  openspace.removeSceneGraphNode(S2003J19Position)
+  openspace.removeSceneGraphNode(EuphemePosition)
+end)
+
+asset.export(EuphemePosition)
+asset.export(S2003J19Position)
+asset.export(ValetudoPosition)
+
+
+
+asset.meta = {
+  Name = "Jupiter Pasiphae Other Moons Positions",
+  Description = [[Asset containing positions for Jupiter's Other Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

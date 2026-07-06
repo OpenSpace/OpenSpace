@@ -1,0 +1,1585 @@
+local transforms = asset.require("./transforms")
+
+
+
+local PhoebeLabel = {
+  Identifier = "PhoebeLabel",
+  Parent = transforms.PhoebePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Phoebe",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Phoebe Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe",
+    Focusable = false
+  }
+}
+
+local SkathiLabel = {
+  Identifier = "SkathiLabel",
+  Parent = transforms.SkathiPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Skathi",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Skathi Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skathi",
+    Focusable = false
+  }
+}
+
+local S2007S2Label = {
+  Identifier = "S2007S2Label",
+  Parent = transforms.S2007S2Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2007 S 2",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "S/2007 S 2 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S2",
+    Focusable = false
+  }
+}
+
+local SkollLabel = {
+  Identifier = "SkollLabel",
+  Parent = transforms.SkollPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Skoll",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Skoll Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skoll",
+    Focusable = false
+  }
+}
+
+local S2004S13Label = {
+  Identifier = "S2004S13Label",
+  Parent = transforms.S2004S13Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 13",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "S/2004 S 13 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S13",
+    Focusable = false
+  }
+}
+
+local GreipLabel = {
+  Identifier = "GreipLabel",
+  Parent = transforms.GreipPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Greip",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Greip Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Greip",
+    Focusable = false
+  }
+}
+
+local HyrrokkinLabel = {
+  Identifier = "HyrrokkinLabel",
+  Parent = transforms.HyrrokkinPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Hyrrokkin",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Hyrrokkin Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hyrrokkin",
+    Focusable = false
+  }
+}
+
+local JarnsaxaLabel = {
+  Identifier = "JarnsaxaLabel",
+  Parent = transforms.JarnsaxaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Jarnsaxa",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Jarnsaxa Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Jarnsaxa",
+    Focusable = false
+  }
+}
+
+local MundilfariLabel = {
+  Identifier = "MundilfariLabel",
+  Parent = transforms.MundilfariPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Mundilfari",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Mundilfari Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari",
+    Focusable = false
+  }
+}
+
+local S2006S1Label = {
+  Identifier = "S2006S1Label",
+  Parent = transforms.S2006S1Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2006 S 1",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "S/2006 S 1 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S1",
+    Focusable = false
+  }
+}
+
+local S2004S17Label = {
+  Identifier = "S2004S17Label",
+  Parent = transforms.S2004S17Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 17",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "S/2004 S 17 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S17",
+    Focusable = false
+  }
+}
+
+local BergelmirLabel = {
+  Identifier = "BergelmirLabel",
+  Parent = transforms.BergelmirPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Bergelmir",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Bergelmir Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bergelmir",
+    Focusable = false
+  }
+}
+
+local NarviLabel = {
+  Identifier = "NarviLabel",
+  Parent = transforms.NarviPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Narvi",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Narvi Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Narvi",
+    Focusable = false
+  }
+}
+
+local SuttungrLabel = {
+  Identifier = "SuttungrLabel",
+  Parent = transforms.SuttungrPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Suttungr",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Suttungr Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Suttungr",
+    Focusable = false
+  }
+}
+
+local HatiLabel = {
+  Identifier = "HatiLabel",
+  Parent = transforms.HatiPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Hati",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Hati Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hati",
+    Focusable = false
+  }
+}
+
+local S2004S12Label = {
+  Identifier = "S2004S12Label",
+  Parent = transforms.S2004S12Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 12",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "S/2004 S 12 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S12",
+    Focusable = false
+  }
+}
+
+local FarbautiLabel = {
+  Identifier = "FarbautiLabel",
+  Parent = transforms.FarbautiPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Farbauti",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Farbauti Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Farbauti",
+    Focusable = false
+  }
+}
+
+local ThrymrLabel = {
+  Identifier = "ThrymrLabel",
+  Parent = transforms.ThrymrPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Thrymr",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Thrymr Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thrymr",
+    Focusable = false
+  }
+}
+
+local AegirLabel = {
+  Identifier = "AegirLabel",
+  Parent = transforms.AegirPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Aegir",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Aegir Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Aegir",
+    Focusable = false
+  }
+}
+
+local S2007S3Label = {
+  Identifier = "S2007S3Label",
+  Parent = transforms.S2007S3Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2007 S 3",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "S/2007 S 3 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S3",
+    Focusable = false
+  }
+}
+
+local BestlaLabel = {
+  Identifier = "BestlaLabel",
+  Parent = transforms.BestlaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Bestla",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Bestla Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bestla",
+    Focusable = false
+  }
+}
+
+local S2004S7Label = {
+  Identifier = "S2004S7Label",
+  Parent = transforms.S2004S7Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 7",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "S/2004 S 7 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S7",
+    Focusable = false
+  }
+}
+
+local S2006S3Label = {
+  Identifier = "S2006S3Label",
+  Parent = transforms.S2006S3Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2006 S 3",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "S/2006 S 3 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S3",
+    Focusable = false
+  }
+}
+
+local FenrirLabel = {
+  Identifier = "FenrireLabel",
+  Parent = transforms.FenrirPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Fenrir",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Fenrir Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fenrir",
+    Focusable = false
+  }
+}
+
+local SurturLabel = {
+  Identifier = "SurturLabel",
+  Parent = transforms.SurturPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Surtur",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Surtur Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Surtur",
+    Focusable = false
+  }
+}
+
+local KariLabel = {
+  Identifier = "KariLabel",
+  Parent = transforms.KariPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Kari",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Kari Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari",
+    Focusable = false
+  }
+}
+
+local YmirLabel = {
+  Identifier = "YmirLabel",
+  Parent = transforms.YmirPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Ymir",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Ymir Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Ymir",
+    Focusable = false
+  }
+}
+
+local LogeLabel = {
+  Identifier = "LogeLabel",
+  Parent = transforms.LogePosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Cyllene",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Loge Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Loge",
+    Focusable = false
+  }
+}
+
+local FornjotLabel = {
+  Identifier = "FornjotLabel",
+  Parent = transforms.FornjotPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Fornjot",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Fornjot Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fornjot",
+    Focusable = false
+  }
+}
+
+local GridrLabel = {
+  Identifier = "GridrLabel",
+  Parent = transforms.GridrPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Gridr",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Gridr Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gridr",
+    Focusable = false
+  }
+}
+
+local AngrbodaLabel = {
+  Identifier = "AngrbodaLabel",
+  Parent = transforms.AngrbodaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Angrboda",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Angrboda Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Angrboda",
+    Focusable = false
+  }
+}
+
+local SkrymirLabel = {
+  Identifier = "SkrymirLabel",
+  Parent = transforms.SkrymirPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Skrymir",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Skrymir Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skrymir",
+    Focusable = false
+  }
+}
+
+local GerdLabel = {
+  Identifier = "GerdLabel",
+  Parent = transforms.GerdPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Gerd",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Gerd Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gerd",
+    Focusable = false
+  }
+}
+
+local S2004S26Label = {
+  Identifier = "S2004S26Label",
+  Parent = transforms.S2004S26Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 26",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "S/2004 S 26 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S26",
+    Focusable = false
+  }
+}
+
+local EggtherLabel = {
+  Identifier = "EggtherLabel",
+  Parent = transforms.EggtherPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Eggther",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Eggther Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Eggther",
+    Focusable = false
+  }
+}
+
+local BeliLabel = {
+  Identifier = "BeliLabel",
+  Parent = transforms.BeliPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Beli",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Beli Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Beli",
+    Focusable = false
+  }
+}
+
+local GunnlodLabel = {
+  Identifier = "GunnlodLabel",
+  Parent = transforms.GunnlodPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Gunnlod",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Gunnlod Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gunnlod",
+    Focusable = false
+  }
+}
+
+local ThiazziLabel = {
+  Identifier = "ThiazziLabel",
+  Parent = transforms.ThiazziPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Thiazzi",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Thiazzi Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thiazzi",
+    Focusable = false
+  }
+}
+
+local S2004S34Label = {
+  Identifier = "S2004S34Label",
+  Parent = transforms.S2004S34Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 34",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "S/2004 S 34 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S34",
+    Focusable = false
+  }
+}
+
+local AlvaldiLabel = {
+  Identifier = "AlvaldiLabel",
+  Parent = transforms.AlvaldiPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Alvaldi",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Alvaldi Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Alvaldi",
+    Focusable = false
+  }
+}
+
+local GeirrodLabel = {
+  Identifier = "GeirrodLabel",
+  Parent = transforms.GeirrodPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Geirrod",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "Geirrod Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Geirrod",
+    Focusable = false
+  }
+}
+
+local S2004S28Label = {
+  Identifier = "S2004S28Label",
+  Parent = transforms.S2004S28Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 28",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "S/2004 S 28 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S28",
+    Focusable = false
+  }
+}
+
+local S2004S21Label = {
+  Identifier = "S2004S21Label",
+  Parent = transforms.S2004S21Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 21",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "S/2004 S 21 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S21",
+    Focusable = false
+  }
+}
+
+local S2004S36Label = {
+  Identifier = "S2004S36Label",
+  Parent = transforms.S2004S36Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 36",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "S/2004 S 36 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S36",
+    Focusable = false
+  }
+}
+
+local S2004S37Label = {
+  Identifier = "S2004S37Label",
+  Parent = transforms.S2004S37Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 37",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "S/2004 S 37 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S37",
+    Focusable = false
+  }
+}
+
+local S2004S39Label = {
+  Identifier = "S2004S39Label",
+  Parent = transforms.S2004S39Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "S/2004 S 39",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.25, 90.0 },
+    FadeWidths = { 0.25, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
+  GUI = {
+    Name = "S/2004 S 39 Label",
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S39",
+    Focusable = false
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PhoebeLabel)
+  openspace.addSceneGraphNode(SkathiLabel)
+  openspace.addSceneGraphNode(S2007S2Label)
+  openspace.addSceneGraphNode(SkollLabel)
+  openspace.addSceneGraphNode(S2004S13Label)
+  openspace.addSceneGraphNode(GreipLabel)
+  openspace.addSceneGraphNode(HyrrokkinLabel)
+  openspace.addSceneGraphNode(JarnsaxaLabel)
+  openspace.addSceneGraphNode(MundilfariLabel)
+  openspace.addSceneGraphNode(S2006S1Label)
+  openspace.addSceneGraphNode(S2004S17Label)
+  openspace.addSceneGraphNode(BergelmirLabel)
+  openspace.addSceneGraphNode(NarviLabel)
+  openspace.addSceneGraphNode(SuttungrLabel)
+  openspace.addSceneGraphNode(HatiLabel)
+  openspace.addSceneGraphNode(S2004S12Label)
+  openspace.addSceneGraphNode(FarbautiLabel)
+  openspace.addSceneGraphNode(ThrymrLabel)
+  openspace.addSceneGraphNode(AegirLabel)
+  openspace.addSceneGraphNode(S2007S3Label)
+  openspace.addSceneGraphNode(BestlaLabel)
+  openspace.addSceneGraphNode(S2004S7Label)
+  openspace.addSceneGraphNode(S2006S3Label)
+  openspace.addSceneGraphNode(FenrirLabel)
+  openspace.addSceneGraphNode(SurturLabel)
+  openspace.addSceneGraphNode(KariLabel)
+  openspace.addSceneGraphNode(YmirLabel)
+  openspace.addSceneGraphNode(LogeLabel)
+  openspace.addSceneGraphNode(FornjotLabel)
+  openspace.addSceneGraphNode(GridrLabel)
+  openspace.addSceneGraphNode(AngrbodaLabel)
+  openspace.addSceneGraphNode(SkrymirLabel)
+  openspace.addSceneGraphNode(GerdLabel)
+  openspace.addSceneGraphNode(S2004S26Label)
+  openspace.addSceneGraphNode(EggtherLabel)
+  openspace.addSceneGraphNode(BeliLabel)
+  openspace.addSceneGraphNode(GunnlodLabel)
+  openspace.addSceneGraphNode(ThiazziLabel)
+  openspace.addSceneGraphNode(S2004S34Label)
+  openspace.addSceneGraphNode(AlvaldiLabel)
+  openspace.addSceneGraphNode(GeirrodLabel)
+  openspace.addSceneGraphNode(S2004S28Label)
+  openspace.addSceneGraphNode(S2004S21Label)
+  openspace.addSceneGraphNode(S2004S36Label)
+  openspace.addSceneGraphNode(S2004S37Label)
+  openspace.addSceneGraphNode(S2004S39Label)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2004S39Label)
+  openspace.removeSceneGraphNode(S2004S37Label)
+  openspace.removeSceneGraphNode(S2004S36Label)
+  openspace.removeSceneGraphNode(S2004S21Label)
+  openspace.removeSceneGraphNode(S2004S28Label)
+  openspace.removeSceneGraphNode(GeirrodLabel)
+  openspace.removeSceneGraphNode(AlvaldiLabel)
+  openspace.removeSceneGraphNode(S2004S34Label)
+  openspace.removeSceneGraphNode(ThiazziLabel)
+  openspace.removeSceneGraphNode(GunnlodLabel)
+  openspace.removeSceneGraphNode(BeliLabel)
+  openspace.removeSceneGraphNode(EggtherLabel)
+  openspace.removeSceneGraphNode(S2004S26Label)
+  openspace.removeSceneGraphNode(GerdLabel)
+  openspace.removeSceneGraphNode(SkrymirLabel)
+  openspace.removeSceneGraphNode(AngrbodaLabel)
+  openspace.removeSceneGraphNode(GridrLabel)
+  openspace.removeSceneGraphNode(FornjotLabel)
+  openspace.removeSceneGraphNode(LogeLabel)
+  openspace.removeSceneGraphNode(YmirLabel)
+  openspace.removeSceneGraphNode(KariLabel)
+  openspace.removeSceneGraphNode(SurturLabel)
+  openspace.removeSceneGraphNode(FenrirLabel)
+  openspace.removeSceneGraphNode(S2006S3Label)
+  openspace.removeSceneGraphNode(S2004S7Label)
+  openspace.removeSceneGraphNode(BestlaLabel)
+  openspace.removeSceneGraphNode(S2007S3Label)
+  openspace.removeSceneGraphNode(AegirLabel)
+  openspace.removeSceneGraphNode(ThrymrLabel)
+  openspace.removeSceneGraphNode(FarbautiLabel)
+  openspace.removeSceneGraphNode(S2004S12Label)
+  openspace.removeSceneGraphNode(HatiLabel)
+  openspace.removeSceneGraphNode(SuttungrLabel)
+  openspace.removeSceneGraphNode(NarviLabel)
+  openspace.removeSceneGraphNode(BergelmirLabel)
+  openspace.removeSceneGraphNode(S2004S17Label)
+  openspace.removeSceneGraphNode(S2006S1Label)
+  openspace.removeSceneGraphNode(MundilfariLabel)
+  openspace.removeSceneGraphNode(JarnsaxaLabel)
+  openspace.removeSceneGraphNode(HyrrokkinLabel)
+  openspace.removeSceneGraphNode(GreipLabel)
+  openspace.removeSceneGraphNode(S2004S13Label)
+  openspace.removeSceneGraphNode(SkollLabel)
+  openspace.removeSceneGraphNode(S2007S2Label)
+  openspace.removeSceneGraphNode(SkathiLabel)
+  openspace.removeSceneGraphNode(PhoebeLabel)
+end)
+
+asset.export(PhoebeLabel)
+asset.export(SkathiLabel)
+asset.export(S2007S2Label)
+asset.export(SkollLabel)
+asset.export(S2004S13Label)
+asset.export(GreipLabel)
+asset.export(HyrrokkinLabel)
+asset.export(JarnsaxaLabel)
+asset.export(MundilfariLabel)
+asset.export(S2006S1Label)
+asset.export(S2004S17Label)
+asset.export(BergelmirLabel)
+asset.export(NarviLabel)
+asset.export(SuttungrLabel)
+asset.export(HatiLabel)
+asset.export(S2004S12Label)
+asset.export(FarbautiLabel)
+asset.export(ThrymrLabel)
+asset.export(AegirLabel)
+asset.export(S2007S3Label)
+asset.export(BestlaLabel)
+asset.export(S2004S7Label)
+asset.export(S2006S3Label)
+asset.export(FenrirLabel)
+asset.export(SurturLabel)
+asset.export(KariLabel)
+asset.export(YmirLabel)
+asset.export(LogeLabel)
+asset.export(FornjotLabel)
+asset.export(GridrLabel)
+asset.export(AngrbodaLabel)
+asset.export(SkrymirLabel)
+asset.export(GerdLabel)
+asset.export(S2004S26Label)
+asset.export(EggtherLabel)
+asset.export(BeliLabel)
+asset.export(GunnlodLabel)
+asset.export(ThiazziLabel)
+asset.export(S2004S34Label)
+asset.export(AlvaldiLabel)
+asset.export(GeirrodLabel)
+asset.export(S2004S28Label)
+asset.export(S2004S21Label)
+asset.export(S2004S36Label)
+asset.export(S2004S37Label)
+asset.export(S2004S39Label)
+
+
+
+asset.meta = {
+  Name = "Saturn Norse Group Moons Labels",
+  Description = [[Asset containing labels for Saturn's Norse Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

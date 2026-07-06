@@ -46,6 +46,7 @@ uniform bool useBelowRangeColor;
 
 uniform bool hasSpriteTexture;
 uniform sampler2DArray spriteTexture;
+uniform bool useTextureAlpha;
 
 uniform bool useColorMap;
 uniform sampler1D colorMapTexture;
@@ -116,7 +117,8 @@ Fragment getFragment() {
   }
 
   if (hasSpriteTexture) {
-    fullColor *= texture(spriteTexture, vec3(in_data.texCoords, in_data.textureLayer));
+    vec4 texColor = texture(spriteTexture, vec3(in_data.texCoords, in_data.textureLayer));
+    fullColor *= useTextureAlpha ? texColor : vec4(texColor.rgb, 1.0);
   }
 
   // Border

@@ -1,0 +1,56 @@
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+local trajectory = asset.resource({
+  Name = "3I/ATLAS Trajectory",
+  Type = "HttpSynchronization",
+  Identifier = "atlas_horizons",
+  Version = 1
+})
+
+
+local AtlasTrail = {
+  Identifier = "3I_AtlasTrail",
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = trajectory .. "i3_atlas.hrz"
+    },
+    Color = { 0.85, 0.85, 0.0 },
+    StartTime = "2020 JUL 01 00:00:00",
+    EndTime = "2030 JUL 01 00:00:00",
+    SampleInterval = openspace.time.secondsPerDay() / 2
+  },
+  GUI = {
+    Name = "3I/ATLAS Trail",
+    Path = "/Solar System/Interstellar/ATLAS",
+    Focusable = false,
+    Description = [[Trail of 3I/ATLAS from 2020 JUL 01 00:00:00 to 2030 JUL 01 00:00:00.
+      Data from JPL Horizons.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(AtlasTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(AtlasTrail)
+end)
+
+asset.export(AtlasTrail)
+
+
+
+asset.meta = {
+  Name = "3I/ATLAS Trail",
+  Description = [[This asset contains the trail of 3I/ATLAS from 2020 JUL 01 00:00:00 to
+    2030 JUL 01 00:00:00. Data from JPL Horizons.]],
+  Author = "OpenSpace Team",
+  URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
+  License = "NASA"
+}

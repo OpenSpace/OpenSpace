@@ -1,0 +1,14 @@
+asset.require("./globe")
+asset.require("./layers/default_layers")
+asset.require("./trail")
+asset.require("./label", false)
+
+
+
+asset.meta = {
+  Name = "Charon",
+  Description = "Charon globe, layers, trail, and label",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

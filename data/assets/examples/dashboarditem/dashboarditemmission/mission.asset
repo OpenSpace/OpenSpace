@@ -7,6 +7,7 @@ local Item = {
   Type = "DashboardItemMission"
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Item)
 end)

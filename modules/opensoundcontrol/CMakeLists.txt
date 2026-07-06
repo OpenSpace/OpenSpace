@@ -25,21 +25,19 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/opensoundcontrolconnection.h
+  include/opensoundcontrolconnection.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/opensoundcontrolconnection.cpp
+  src/opensoundcontrolconnection.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module(
   "OpenSoundControl"
   opensoundcontrol_module
-  STATIC
-  ${HEADER_FILES}
-  ${SOURCE_FILES}
+  ${HEADER_FILES} ${SOURCE_FILES}
 )
 
 begin_dependency("oscpack")

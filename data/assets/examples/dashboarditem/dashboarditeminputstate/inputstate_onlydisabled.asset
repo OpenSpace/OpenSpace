@@ -8,6 +8,7 @@ local Item = {
   ShowWhenDisabled = true
 }
 
+
 asset.onInitialize(function()
   openspace.dashboard.addDashboardItem(Item)
 end)

@@ -1,5 +1,5 @@
-local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/globe")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -7,7 +7,7 @@ local coreKernels = asset.require("spice/core")
 
 local LaunchTrail = {
   Identifier = "Apollo8LaunchTrail",
-  Parent = earth_transforms.EarthIAU.Identifier,
+  Parent = earthAsset.EarthIAU.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
@@ -31,7 +31,7 @@ local LaunchTrail = {
 
 local MoonTrail = {
   Identifier = "Apollo8MoonTrail",
-  Parent = moon.Moon.Identifier,
+  Parent = moonAsset.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = false,
@@ -55,7 +55,7 @@ local MoonTrail = {
 
 local EarthBarycenterTrail = {
   Identifier = "Apollo8EarthBarycenterTrail",
-  Parent = earth_transforms.EarthCenter.Identifier,
+  Parent = earthAsset.EarthCenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = false,
@@ -104,6 +104,6 @@ asset.meta = {
     capsule after the trans-lunar injection, and finally a Moon-centered trail that shows
     the trajectory of the spacecraft in the Moon's reference frame.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

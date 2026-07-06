@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
 local coreKernels = asset.require("spice/core")
 
 
@@ -16,7 +16,7 @@ local Frame = {
 
 local GeocentricSolarMagnetosphericStatic  = {
   Identifier = "GeocentricSolarMagnetosphericStatic",
-  Parent = transforms.EarthCenter.Identifier,
+  Parent = earthAsset.EarthCenter.Identifier,
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
@@ -61,6 +61,6 @@ asset.meta = {
   Version = "1.0",
   Description = "A static version of Earth transform GSM Reference Frame. Geocentric Solar Magnetospheric",
   Author = "CCMC",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

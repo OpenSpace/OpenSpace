@@ -170,6 +170,11 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
+    // Renders a single text label in 3D space. The label is rendered as a billboard,
+    // that is, it is always oriented to face the camera.
+    //
+    // The label can be rendered with a fade-in effect based on the distance from the
+    // camera.
     struct [[codegen::Dictionary(RenderableLabel)]] Parameters {
         enum class [[codegen::map(BlendMode)]] BlendMode {
             Normal,
@@ -194,10 +199,10 @@ namespace {
         std::optional<std::string> text;
 
         // [[codegen::verbatim(FontSizeInfo.description)]]
-        std::optional<float> fontSize;
+        std::optional<float> fontSize [[codegen::greater(0.f)]];
 
         // [[codegen::verbatim(SizeInfo.description)]]
-        std::optional<float> size;
+        std::optional<float> size [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(MinMaxSizeInfo.description)]]
         std::optional<glm::ivec2> minMaxSize;
@@ -227,10 +232,11 @@ namespace {
         std::optional<Unit> fadeUnit;
 
         // [[codegen::verbatim(FadeDistancesInfo.description)]]
-        std::optional<glm::vec2> fadeDistances;
+        std::optional<glm::vec2> fadeDistances
+            [[codegen::greaterequal(glm::vec2(0.f))]];
 
         // [[codegen::verbatim(FadeWidthsInfo.description)]]
-        std::optional<glm::vec2> fadeWidths;
+        std::optional<glm::vec2> fadeWidths [[codegen::greaterequal(glm::vec2(0.f))]];
     };
 } // namespace
 #include "renderablelabel_codegen.cpp"
@@ -238,7 +244,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableLabel::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_labels");
+    return codegen::doc<Parameters>(
+        "base_renderable_labels",
+        Renderable::Documentation()
+    );
 }
 
 RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)

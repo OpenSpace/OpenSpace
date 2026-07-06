@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local transforms = asset.require("scene/solarsystem/planets/earth/moon/globe")
 local coreKernels = asset.require("spice/core")
 
 
@@ -42,6 +42,6 @@ asset.meta = {
   Name = "Eclipse Shadow",
   Description = "The penumbral and umbral shadow eclipses for the Earth-Moon system",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

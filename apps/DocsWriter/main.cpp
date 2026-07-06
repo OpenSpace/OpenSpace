@@ -57,12 +57,8 @@ int main(int, char** argv) {
     std::filesystem::path base = configFile.parent_path();
     FileSys.registerPathToken("${BASE}", base);
 
-    *global::configuration = loadConfigurationFromFile(
-        configFile.string(),
-        "",
-        glm::ivec2(0)
-    );
-    openspace::global::openSpaceEngine->registerPathTokens();
+    *global::configuration = loadConfigurationFromFile(configFile.string(), "");
+    registerPathTokens(*global::configuration);
 
     // Now that we have the tokens we can initialize the engine
     global::openSpaceEngine->initialize();
@@ -70,6 +66,7 @@ int main(int, char** argv) {
     // Print out the documentation to the documentation folder
     // @TODO (ylvse, 2024-05-02) change this directory when integrating with jenkins?
     DocEng.writeJsonDocumentation();
+    DocEng.writeJsonSchema();
 
     global::openSpaceEngine->deinitialize();
 

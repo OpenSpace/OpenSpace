@@ -1,4 +1,4 @@
-local globe = asset.require("../../earth")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
 
 
 
@@ -92,15 +92,15 @@ asset.onInitialize(function()
     openspace.unzipFile(syncedDirectory .. "colorbar.zip", colorbarDestination, true)
   end
 
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerField)
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerObs)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerField)
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerObs)
   openspace.addScreenSpaceRenderable(Colorbar)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeScreenSpaceRenderable(Colorbar)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerObs)
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerField)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerObs)
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", LayerField)
 end)
 
 asset.export(LayerField)

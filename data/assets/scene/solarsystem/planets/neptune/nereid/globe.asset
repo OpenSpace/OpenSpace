@@ -1,0 +1,39 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Nereid = {
+  Identifier = "Nereid",
+  Parent = transforms.NereidPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 357000, 340000, 340000 }
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_neptune", "moon_major_neptune" },
+  GUI = {
+    Name = "Nereid",
+    Path = "/Solar System/Planets/Neptune/Major Moons/Nereid"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Nereid)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Nereid)
+end)
+
+asset.export(Nereid)
+
+
+
+asset.meta = {
+  Name = "Nereid",
+  Description = [[Procedural Globe asset containing Neptune's moon: Nereid. A blank globe
+    and SPICE trail are generated for the moon]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

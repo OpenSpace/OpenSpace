@@ -653,6 +653,6 @@ asset.meta = {
     of the James Webb Space Telescope looks smoother.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -1,0 +1,61 @@
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
+
+
+
+local modelFolder = asset.resource({
+  Name = "Makemake Model",
+  Type = "HttpSynchronization",
+  Identifier = "makemake_model",
+  Version = 1
+})
+
+
+local MakemakeModel = {
+  Identifier = "MakemakeModel",
+  Parent = transforms.MakemakePosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "ConstantRotation",
+      RotationAxis = { 0.0, 0.0, 1.0 },
+      RotationRate = 1.0 / (10.273 * 60.0 * 60.0)
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = modelFolder .. "Makemake_1_1430.glb",
+    SpecularIntensity = 0.0,
+    AmbientIntensity = 0.0,
+    ModelScale = "Kilometer",
+    LightSources = {
+      sunAsset.LightSource
+    }
+  },
+  GUI = {
+    Name = "Makemake",
+    Path = "/Solar System/Dwarf Planets/Makemake",
+    Description = [[A 3D model of Makemake. Credit: NASA Visualization Technology
+      Applications and Development (VTAD).]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MakemakeModel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MakemakeModel)
+end)
+
+asset.export(MakemakeModel)
+
+
+
+asset.meta = {
+  Name = "Makemake Model",
+  Description = [[Model of Makemake]],
+  Author = "OpenSpace Team",
+  URL = "https://solarsystem.nasa.gov/planets/dwarf-planets/makemake/in-depth/",
+  License = "MIT"
+}

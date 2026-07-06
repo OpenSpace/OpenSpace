@@ -1,0 +1,52 @@
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
+local uranusKernels = asset.require("./kernels")
+
+
+
+local Uranus = {
+  Identifier = "Uranus",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = uranusKernels.ID.Uranus,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.Uranus,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 25559000, 25559000, 24973000 }
+  },
+  Tag = { "planet_solarSystem", "planet_giants" },
+  GUI = {
+    Name = "Uranus",
+    Path = "/Solar System/Planets/Uranus"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Uranus)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Uranus)
+end)
+
+asset.export(Uranus)
+
+
+
+asset.meta = {
+  Name = "Uranus",
+  Description = "Uranus globe",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

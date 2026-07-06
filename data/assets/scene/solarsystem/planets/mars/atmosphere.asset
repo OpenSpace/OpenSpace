@@ -1,10 +1,10 @@
-local transforms = asset.require("./mars")
+local globe = asset.require("./globe")
 
 
 
 local Atmosphere = {
   Identifier = "MarsAtmosphere",
-  Parent = transforms.Mars.Identifier,
+  Parent = globe.Mars.Identifier,
   Renderable = {
     Type = "RenderableAtmosphere",
     -- Atmosphere radius in Km
@@ -69,6 +69,6 @@ asset.meta = {
   Name = "Mars Atmosphere",
   Description = "RenderableAtmosphere for Mars",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

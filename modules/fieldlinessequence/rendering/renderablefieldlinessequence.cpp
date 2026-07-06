@@ -415,7 +415,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableFieldlinesSequence::Documentation() {
-    return codegen::doc<Parameters>("fieldlinessequence_renderable_fieldlinessequence");
+    return codegen::doc<Parameters>(
+        "fieldlinessequence_renderable_fieldlinessequence",
+        Renderable::Documentation()
+    );
 }
 
 RenderableFieldlinesSequence::RenderableFieldlinesSequence(

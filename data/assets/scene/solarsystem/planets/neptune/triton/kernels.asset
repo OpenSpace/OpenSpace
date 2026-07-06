@@ -1,0 +1,31 @@
+local coreKernels = asset.require("spice/core")
+
+
+
+local kernels = asset.resource({
+  Name = "Neptune Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "neptune_kernels",
+  Version = 3
+})
+
+
+local ID = {
+  Triton = "TRITON"
+}
+
+local Frame = {
+  Triton = coreKernels.Frame.Triton
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "nep097.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels .. "nep097.bsp")
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)

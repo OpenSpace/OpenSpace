@@ -25,28 +25,27 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 include(../webbrowser/cmake/webbrowser_helpers.cmake)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set(CMAKE_MODULE_PATH CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(nodejs_support)
 
 set(WEBGUI_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "WEBGUI_MODULE_PATH")
 
-set(OPENSPACE_HEADER_FILES
+set(HEADER_FILES
   webguimodule.h
 )
-source_group("Header Files" FILES ${OPENSPACE_HEADER_FILES})
+source_group("Header Files" FILES ${HEADER_FILES})
 
-set(OPENSPACE_SOURCE_FILES
+set(SOURCE_FILES
   webguimodule.cpp
 )
-source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})
+source_group("Source Files" FILES ${SOURCE_FILES})
 
 DownloadNodeJs("22.15.0" "${CMAKE_CURRENT_SOURCE_DIR}/ext/nodejs")
 
 create_new_module(
   WebGui
   webgui_module
-  STATIC
-  ${OPENSPACE_HEADER_FILES} ${OPENSPACE_SOURCE_FILES}
+  ${HEADER_FILES} ${SOURCE_FILES}
 )
 
 set_modules_dependency_on_cef_libraries(${webgui_module})

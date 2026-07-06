@@ -247,6 +247,6 @@ asset.meta = {
   Name = "Joystick controller: PS5",
   Description = "Joystick controller configuration for PS5",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

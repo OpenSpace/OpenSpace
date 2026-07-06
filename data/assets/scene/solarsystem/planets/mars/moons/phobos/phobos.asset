@@ -1,0 +1,13 @@
+asset.require("./model")
+asset.require("./trail")
+asset.require("./label", false)
+
+
+
+asset.meta = {
+  Name = "Phobos",
+  Description = [[Trail, Model and Label of Phobos.]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

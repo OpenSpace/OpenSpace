@@ -6,6 +6,6 @@ asset.meta = {
   Name = "Satellites",
   Description = "Default Earth Satellites. This file is loads satellites_interesting",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

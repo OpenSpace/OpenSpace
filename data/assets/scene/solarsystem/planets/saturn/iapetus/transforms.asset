@@ -1,0 +1,49 @@
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local IapetusPosition = {
+  Identifier = "IapetusPosition",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Iapetus,
+      Observer = coreKernels.ID.SaturnBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Iapetus,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "Iapetus Position",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Iapetus",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(IapetusPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(IapetusPosition)
+end)
+
+asset.export(IapetusPosition)
+
+
+
+asset.meta = {
+  Name = "Iapetus Position",
+  Description = "Iapetus position",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

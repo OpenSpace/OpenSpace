@@ -42,6 +42,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -491,7 +492,11 @@ std::vector<std::string> FramebufferRenderer::shadowGroups() const {
     return res;
 }
 
-void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::ivec4& viewport) {
+void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::vec4& blackoutColor,
+                                   float blackoutTextureFactor,
+                                   ghoul::opengl::Texture* blackoutTexture,
+                                   const glm::ivec4& viewport)
+{
     ZoneScoped;
     TracyGpuZone("applyTMO");
 
@@ -502,6 +507,23 @@ void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::ivec4& viewp
     _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrFeedingTexture, hdrFeedingUnit);
 
     _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutFactor, blackoutFactor);
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutColor, blackoutColor);
+    ghoul::opengl::TextureUnit blackoutTextureUnit;
+    if (blackoutTexture) {
+        blackoutTextureUnit.bind(*blackoutTexture);
+    }
+    _hdrFilteringProgram->setUniform(
+        _hdrUniformCache.hasBlackoutTexture,
+        blackoutTexture != nullptr
+    );
+    _hdrFilteringProgram->setUniform(
+        _hdrUniformCache.blackoutTextureFactor,
+        blackoutTextureFactor
+    );
+    _hdrFilteringProgram->setUniform(
+        _hdrUniformCache.blackoutTexture,
+        blackoutTextureUnit
+    );
     _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrExposure, _hdrExposure);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.gamma, _gamma);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.hue, _hue);
@@ -1156,7 +1178,11 @@ void FramebufferRenderer::updateDownscaledVolume() {
     );
 }
 
-void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
+void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor,
+                                 const glm::vec4& blackoutColor,
+                                 float blackoutTextureFactor,
+                                 ghoul::opengl::Texture* blackoutTexture)
+{
     ZoneScoped;
     TracyGpuZone("FramebufferRenderer");
 
@@ -1294,7 +1320,13 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         TracyGpuZone("Apply TMO");
         const ghoul::GLDebugGroup group("Apply TMO");
 
-        applyTMO(blackoutFactor, viewport);
+        applyTMO(
+            blackoutFactor,
+            blackoutColor,
+            blackoutTextureFactor,
+            blackoutTexture,
+            viewport
+        );
     }
 
     if (_enableFXAA) {

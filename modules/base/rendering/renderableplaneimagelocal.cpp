@@ -52,10 +52,10 @@ namespace {
     // Creates a textured 3D plane, where the texture is provided by a local file on disk.
     struct [[codegen::Dictionary(RenderablePlaneImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
-        std::string texture;
+        std::filesystem::path texture;
 
         // If this value is set to true, the image for this plane will not be loaded at
-        // startup but rather when image is shown for the first time. Additionally, if the
+        // startup but rather when plane is shown for the first time. Additionally, if the
         // plane is hidden, the image will automatically be unloaded.
         std::optional<bool> lazyLoading;
     };
@@ -72,27 +72,27 @@ Documentation RenderablePlaneImageLocal::Documentation() {
 }
 
 RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary)
-    : RenderablePlane(dictionary)
+    : RenderablePlane(dictionary, { .shouldUpdateIfDisabled = true })
     , _texturePath(TextureInfo)
+    , _textureIsDirty(_enabled)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _texturePath = absPath(p.texture).string();
+    _texturePath = p.texture.string();
     _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
-
-    addProperty(_texturePath);
-    _texturePath.onChange([this]() { loadTexture(); });
     _textureFile->setCallback([this]() { _textureIsDirty = true; });
+
+    _texturePath.onChange([this]() { loadTexture(); });
+    addProperty(_texturePath);
 
     _isLoadingLazily = p.lazyLoading.value_or(_isLoadingLazily);
     if (_isLoadingLazily) {
         _enabled.onChange([this]() {
-            if (!_enabled) {
-                BaseModule::TextureManager.release(_texture);
-                _texture = nullptr;
-            }
             if (_enabled) {
                 _textureIsDirty = true;
+            }
+            else {
+                _shouldUnloadTexture = true;
             }
         });
     }
@@ -130,6 +130,7 @@ void RenderablePlaneImageLocal::initializeGL() {
 
     if (!_isLoadingLazily) {
         loadTexture();
+        _textureIsDirty = false;
     }
 }
 
@@ -148,6 +149,12 @@ void RenderablePlaneImageLocal::update(const UpdateData& data) {
     ZoneScoped;
 
     RenderablePlane::update(data);
+
+    if (_shouldUnloadTexture) [[unlikely]] {
+        BaseModule::TextureManager.release(_texture);
+        _texture = nullptr;
+        _shouldUnloadTexture = false;
+    }
 
     if (_textureIsDirty) [[unlikely]] {
         loadTexture();
@@ -173,7 +180,7 @@ void RenderablePlaneImageLocal::loadTexture() {
                 ghoul::io::texture::loadTexture(
                     absPath(path),
                     2,
-                    ghoul::opengl::Texture::SamplerInit {
+                    ghoul::opengl::Texture::SamplerInit{
                         .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
                     }
                 );

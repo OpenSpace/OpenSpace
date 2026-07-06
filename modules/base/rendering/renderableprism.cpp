@@ -92,27 +92,30 @@ namespace {
         Property::Visibility::User
     };
 
+    // Renders a prism shape defined by two polygonal shapes (base and top) connected by
+    // lines. The number of polygon segments is determined by the `Segments`
+    // property, with the same number being used for both the base and the top.
     struct [[codegen::Dictionary(RenderablePrism)]] Parameters {
         // [[codegen::verbatim(SegmentsInfo.description)]]
-        int segments;
+        int segments [[codegen::greaterequal(3)]];
 
         // [[codegen::verbatim(LinesInfo.description)]]
-        std::optional<int> lines;
+        std::optional<int> lines [[codegen::greaterequal(0)]];
 
         // [[codegen::verbatim(RadiusInfo.description)]]
-        std::optional<float> radius;
+        std::optional<float> radius [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(BaseRadiusInfo.description)]]
-        std::optional<float> baseRadius;
+        std::optional<float> baseRadius [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(LineColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(LengthInfo.description)]]
-        std::optional<float> length;
+        std::optional<float> length [[codegen::greaterequal(0.f)]];
     };
 } // namespace
 #include "renderableprism_codegen.cpp"
@@ -120,7 +123,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderablePrism::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_prism");
+    return codegen::doc<Parameters>(
+        "base_renderable_prism",
+        Renderable::Documentation()
+    );
 }
 
 RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)

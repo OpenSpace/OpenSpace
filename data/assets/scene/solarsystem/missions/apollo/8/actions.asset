@@ -50,6 +50,6 @@ asset.meta = {
   Name = "Apollo 8 Actions",
   Description = "Asset with actions related to the Apollo 8 mission",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

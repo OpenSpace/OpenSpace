@@ -1,0 +1,44 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Orcus = {
+  Identifier = "Orcus",
+  Parent = transforms.OrcusPosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "ConstantRotation",
+      RotationAxis = { 0.0, 0.0, 1.0 },
+      RotationRate = 1.0 / (13.188 * 60.0 * 60.0)
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 910000, 910000, 917000 }
+  },
+  GUI = {
+    Name = "Orcus",
+    Path = "/Solar System/Dwarf Planets/Orcus"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Orcus)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Orcus)
+end)
+
+asset.export(Orcus)
+
+
+
+asset.meta = {
+  Name = "Orcus Globe",
+  Description = [[Globe of Orcus]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

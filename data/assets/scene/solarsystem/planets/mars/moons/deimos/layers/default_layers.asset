@@ -1,0 +1,11 @@
+asset.require("./colorlayers/viking", true)
+
+
+
+asset.meta = {
+  Name = "Default Deimos Layers",
+  Description = "Default Deimos layers are: Viking",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

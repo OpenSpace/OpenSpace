@@ -36,6 +36,6 @@ asset.meta = {
   Name = "Ring Nebula Image",
   Description = "Screenspace image of the Ring Nebula",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

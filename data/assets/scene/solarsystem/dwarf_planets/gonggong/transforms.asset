@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
 local AU = 1.496e+8
@@ -15,9 +15,9 @@ local Translation = {
   Period = 201582.9642396014 * 60 * 60 * 24
 }
 
-local Position = {
+local GonggongPosition = {
   Identifier = "GonggongPosition",
-  Parent = transforms.SunEclipJ2000.Identifier,
+  Parent = sunAsset.SunEclipJ2000.Identifier,
   Transform = {
     Translation = Translation
   },
@@ -31,15 +31,15 @@ local Position = {
 
 
 asset.onInitialize(function()
-    openspace.addSceneGraphNode(Position)
+  openspace.addSceneGraphNode(GonggongPosition)
 end)
 
 asset.onDeinitialize(function()
-    openspace.removeSceneGraphNode(Position)
+  openspace.removeSceneGraphNode(GonggongPosition)
 end)
 
 asset.export("Translation", Translation)
-asset.export("Position", Position)
+asset.export(GonggongPosition)
 
 
 

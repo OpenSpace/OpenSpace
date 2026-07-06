@@ -50,6 +50,8 @@ namespace {
             TLE,
             // Orbit Mean-Elements Message in the KVN notation.
             OMM,
+            // CSV format that is provided by Celestrak
+            CSV,
             // JPL's Small Bodies Database.
             SBDB
         };
@@ -69,7 +71,7 @@ namespace {
     ghoul::Dictionary gpDictionaryToKepler(const ghoul::Dictionary& dictionary) {
         const Parameters p = codegen::bake<Parameters>(dictionary);
         if (!std::filesystem::is_regular_file(p.file)) {
-            throw ghoul::RuntimeError("The provided TLE file must exist");
+            throw ghoul::RuntimeError("The provided GP file must exist");
         }
 
         int element = p.element.value_or(1);

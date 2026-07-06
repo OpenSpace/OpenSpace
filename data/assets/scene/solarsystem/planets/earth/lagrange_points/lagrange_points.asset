@@ -11,6 +11,6 @@ asset.meta = {
   Description = [[Meta asset to include all the Earth Lagrange points. Includes L1, L2,
     L3, L4 and L5]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

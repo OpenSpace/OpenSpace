@@ -1,0 +1,12 @@
+asset.require("./transforms")
+asset.require("./trail")
+
+
+
+asset.meta = {
+  Name = "Hubble Space Telescope",
+  Description = "Meta asset for Hubble Space Telescope",
+  Author = "Dan Tell",
+  URL = "www.calacademy.org",
+  License = "CC-BY"
+}

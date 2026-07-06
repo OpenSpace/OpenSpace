@@ -1,0 +1,76 @@
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
+local kernels = asset.require("./kernels")
+
+
+
+local labelsPath = asset.resource({
+  Name = "Mars Labels",
+  Type = "HttpSynchronization",
+  Identifier = "mars_labels",
+  Version = 1
+})
+
+
+-- local MarsRadii = { 3396190.0, 3396190.0, 3376200.0 }
+local MarsRadii = { 3396190.0, 3396190.0, 3396190.0 }
+
+local Mars = {
+  Identifier = "Mars",
+  Parent = transforms.MarsBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Mars,
+      Observer = coreKernels.ID.MarsBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.Mars,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = MarsRadii,
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "mars.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 8.7,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 750000.0, 2000000.0 },
+      DistanceEPS = 2500000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "planet_solarSystem", "planet_terrestrial" },
+  GUI = {
+    Name = "Mars",
+    Path = "/Solar System/Planets/Mars",
+    Description = "Main globe for Mars with labels and map layers"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Mars)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Mars)
+end)
+
+asset.export(Mars)
+
+
+
+asset.meta = {
+  Name = "Mars",
+  Description = "Mars globe",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

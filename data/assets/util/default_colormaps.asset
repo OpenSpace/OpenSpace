@@ -193,6 +193,6 @@ asset.meta = {
     color maps are created and categorized based on the ones in Matplotlib.
     https://matplotlib.org/stable/users/explain/colors/colormaps.html]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

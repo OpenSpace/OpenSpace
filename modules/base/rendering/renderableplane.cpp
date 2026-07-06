@@ -215,11 +215,14 @@ namespace {
 namespace openspace {
 
 Documentation RenderablePlane::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_plane");
+    return codegen::doc<Parameters>(
+        "base_renderable_plane",
+        Renderable::Documentation()
+    );
 }
 
 RenderablePlane::DistanceScalingSettings::DistanceScalingSettings(
-    const ghoul::Dictionary& dictionary)
+                                                      const ghoul::Dictionary& dictionary)
     : PropertyOwner({ "DistanceScaling", "Distance Scaling", "" })
     , scaleByDistance(ScaleByDistanceInfo, false)
     , apparentSizeMultiplier(ApparentSizeMultiplierInfo, 1.f)
@@ -246,8 +249,14 @@ RenderablePlane::DistanceScalingSettings::DistanceScalingSettings(
     addProperty(scaleByDistanceMinHeight);
 }
 
-RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
+static constexpr RenderableSettings defaultSettings(RenderableSettings settings) {
+    settings.automaticallyUpdateRenderBin = false;
+    return settings;
+}
+
+RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary,
+                                 RenderableSettings settings)
+    : Renderable(dictionary, defaultSettings(settings))
     , _blendMode(BlendModeInfo)
     , _renderOption(OrientationRenderOptionInfo)
     , _mirrorBackside(MirrorBacksideInfo, false)

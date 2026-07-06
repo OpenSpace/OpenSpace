@@ -51,6 +51,6 @@ asset.meta = {
   Name = "Home Label",
   Description = Object.GUI.Description,
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

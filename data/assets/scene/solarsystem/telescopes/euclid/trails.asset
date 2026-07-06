@@ -1,7 +1,7 @@
 local kernels = asset.require("./kernels")
-local earth = asset.require("scene/solarsystem/planets/earth/transforms")
-local solarsystem = asset.require("scene/solarsystem/sun/transforms")
-local transforms = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/transforms")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+local l2Asset = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/transforms")
 local l2kernels = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -11,7 +11,7 @@ local EndTime = "2031 OCT 13 00:37:22.437"
 
 local EuclidTrailSun = {
   Identifier = "EuclidTrailSun",
-  Parent = solarsystem.SolarSystemBarycenter.Identifier,
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
@@ -33,7 +33,7 @@ local EuclidTrailSun = {
 
 local EuclidTrailEarth = {
   Identifier = "EuclidTrailEarth",
-  Parent = earth.EarthBarycenter.Identifier,
+  Parent = earthAsset.EarthBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
@@ -55,7 +55,7 @@ local EuclidTrailEarth = {
 
 local EuclidTrailOrbit = {
   Identifier = "EuclidTrailOrbit",
-  Parent = transforms.L2Position.Identifier,
+  Parent = l2Asset.L2Position.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = StartTime,
@@ -83,7 +83,7 @@ local EuclidTrailOrbit = {
 
 local EuclidTrailCoRevOrbit = {
   Identifier = "EuclidTrailCoRevOrbit",
-  Parent = transforms.L2CoRevFrame.Identifier,
+  Parent = l2Asset.L2CoRevFrame.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = StartTime,
@@ -135,6 +135,6 @@ asset.meta = {
   Name = "Euclid Trails",
   Description = "This asset contains the trails for the Euclid spacecraft relative to the Earth and the Sun.",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

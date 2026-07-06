@@ -1,0 +1,12 @@
+asset.require("./colorlayers/viking", true)
+asset.require("./colorlayers/mars_express", true)
+
+
+
+asset.meta = {
+  Name = "Default Phobos Layers",
+  Description = "Default Phobos layers are: Viking and Mars Express",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

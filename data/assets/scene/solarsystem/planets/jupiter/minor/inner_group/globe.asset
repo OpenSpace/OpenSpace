@@ -1,0 +1,119 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Metis = {
+  Identifier = "Metis",
+  Parent = transforms.MetisPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 60000, 40000, 34000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Metis",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Metis"
+  }
+}
+
+local Adrastea = {
+  Identifier = "Adrastea",
+  Parent = transforms.AdrasteaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 20000, 16000, 14000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Adrastea",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Adrastea"
+  }
+}
+
+local Amalthea = {
+  Identifier = "Amalthea",
+  Parent = transforms.AmaltheaPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 250000, 146000, 128000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Amalthea",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Amalthea"
+  }
+}
+
+local Thebe = {
+  Identifier = "Thebe",
+  Parent = transforms.ThebePosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 116000, 98000, 84000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "Thebe",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Inner Group/Thebe"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Metis)
+  openspace.addSceneGraphNode(Adrastea)
+  openspace.addSceneGraphNode(Amalthea)
+  openspace.addSceneGraphNode(Thebe)
+end)
+
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Metis)
+  openspace.removeSceneGraphNode(Adrastea)
+  openspace.removeSceneGraphNode(Amalthea)
+  openspace.removeSceneGraphNode(Thebe)
+end)
+
+
+asset.export(Metis)
+asset.export(Adrastea)
+asset.export(Amalthea)
+asset.export(Thebe)
+
+
+
+asset.meta = {
+  Name = "Jupiter Inner Group Moons Globes",
+  Description = [[Asset containing globes for Jupiter's Inner Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

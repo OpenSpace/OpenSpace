@@ -30,6 +30,8 @@
 
 namespace openspace {
 
+struct Schema;
+
 class CameraPathTopic : public Topic {
 public:
     CameraPathTopic();
@@ -37,6 +39,8 @@ public:
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
+
+    static openspace::Schema Schema();
 
 private:
     static constexpr int UnsetOnChangeHandle = -1;

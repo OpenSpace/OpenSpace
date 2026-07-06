@@ -1,0 +1,49 @@
+local marsAsset = asset.require("scene/solarsystem/planets/mars/globe")
+
+
+
+local data = asset.resource({
+  Name = "CTX West Candor Chasma",
+  Type = "HttpSynchronization",
+  Identifier = "mars_ctx_west_candor",
+  Version = 1
+})
+
+
+local ColorLayer = {
+  Identifier = "West_Candor",
+  Name = "West Candor [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "west_candor_chasma.vrt",
+  BlendMode = "Color"
+}
+
+local HeightLayer = {
+  Identifier = "West_Candor",
+  Name = "West Candor [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "west_candor_chasma_dem.vrt"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "ColorLayers", ColorLayer)
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "HeightLayers", HeightLayer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "HeightLayers", HeightLayer)
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "ColorLayers", ColorLayer)
+end)
+
+
+
+asset.meta = {
+  Name = "CTX West Candor Chasma [Local]",
+  Description = [[A local layer for West Candor Chasma from the CTX instrument.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

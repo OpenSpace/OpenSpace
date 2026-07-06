@@ -24,6 +24,6 @@ asset.meta = {
   Name = "Rosetta actions",
   Description = "Actions related to the Rosetta mission",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

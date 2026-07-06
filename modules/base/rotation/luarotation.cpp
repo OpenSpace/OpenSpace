@@ -68,7 +68,10 @@ namespace {
 namespace openspace {
 
 Documentation LuaRotation::Documentation() {
-    return codegen::doc<Parameters>("base_rotation_lua");
+    return codegen::doc<Parameters>(
+        "base_rotation_lua",
+        Rotation::Documentation()
+    );
 }
 
 LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary)

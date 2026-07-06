@@ -1,0 +1,44 @@
+local transforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
+local kernels347 = asset.require("scene/solarsystem/planets/jupiter/kernels347")
+local coreKernels = asset.require("spice/core")
+
+
+
+local ThemistoPosition = {
+  Identifier = "ThemistoPosition",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.Themisto,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  GUI = {
+    Name = "Themisto Position",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Themisto Group/Themisto",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(ThemistoPosition)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(ThemistoPosition)
+end)
+
+asset.export(ThemistoPosition)
+
+
+
+asset.meta = {
+  Name = "Jupiter Themisto Group Moons Positions",
+  Description = [[Asset containing the positions for Jupiter's Themisto Group moons.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

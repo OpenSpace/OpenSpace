@@ -15,7 +15,7 @@ local Translation = {
   Period = 205472.1258735657 * 60 * 60 * 24
 }
 
-local Position = {
+local ErisPosition = {
   Identifier = "ErisPosition",
   Parent = transforms.SunEclipJ2000.Identifier,
   Transform = {
@@ -31,15 +31,15 @@ local Position = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Position)
+  openspace.addSceneGraphNode(ErisPosition)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Position)
+  openspace.removeSceneGraphNode(ErisPosition)
 end)
 
 asset.export("Translation", Translation)
-asset.export("Position", Position)
+asset.export(ErisPosition)
 
 
 

@@ -9,6 +9,7 @@ local Item = {
   FormatString = "{}"
 }
 
+
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(Item)
 end)

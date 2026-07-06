@@ -27,10 +27,10 @@
 #include "profile/profileedit.h"
 #include "sgctedit/sgctedit.h"
 #include "backgroundimage.h"
+#include "customicons.h"
 #include "notificationwindow.h"
 #include "settingsdialog.h"
 #include "splitcombobox.h"
-#include "usericon.h"
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/settings.h>
 #include <openspace/openspace.h>
@@ -375,8 +375,8 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
 
 
     _editWindowButton = new QPushButton("Edit", centralWidget);
-    _editWindowButton->setVisible(true);
     _editWindowButton->setObjectName("small");
+    _editWindowButton->setVisible(true);
     _editWindowButton->setGeometry(geometry::EditWindowButton);
     _editWindowButton->setCursor(Qt::PointingHandCursor);
     _editWindowButton->setAutoDefault(true);
@@ -721,10 +721,7 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
 void LauncherWindow::handleReturnFromWindowEditor(std::filesystem::path savePath) {
     // Truncate path to convert this back to path relative to _userConfigPath
     std::filesystem::path p = std::filesystem::proximate(savePath, _userConfigPath);
-
-    // Remove the file extension as the drop down menu only displays the raw names
-    p.replace_extension();
-    _windowConfigBox->populateList(p.string());
+    _windowConfigBox->populateList(p.generic_string());
 }
 
 void LauncherWindow::updateStartButton() const {
@@ -755,6 +752,13 @@ void LauncherWindow::updatePlaceholderText() {
 }
 
 void LauncherWindow::updateAddonsBox(const std::string& profile) {
+    // If we could not load profile properly
+    if (profile.empty()) {
+        _addonBox.model->clear();
+        _addonBox.combobox->setEnabled(false);
+        return;
+    }
+
     // Get a list of all of the potential variants
     std::vector<std::filesystem::path> addonsCore = ghoul::filesystem::walkDirectory(
         _profilePath,
@@ -776,15 +780,14 @@ void LauncherWindow::updateAddonsBox(const std::string& profile) {
     const std::filesystem::path coreCandidate = _profilePath / profile;
     const std::filesystem::path userCandidate = _userProfilePath / profile;
 
-    ghoul_assert(
-        std::filesystem::exists(coreCandidate) || std::filesystem::exists(userCandidate),
-        "One of the two options must exist"
-    );
-
-    Profile p = Profile(
-        // User path has precedence
-        std::filesystem::exists(userCandidate) ? userCandidate : coreCandidate
-    );
+    std::optional<Profile> p;
+    // User path has precedence
+    if (std::filesystem::exists(userCandidate)) {
+        p = Profile(userCandidate);
+    }
+    else if (std::filesystem::exists(coreCandidate)) {
+        p = Profile(coreCandidate);
+    }
 
     QIcon icon = userIcon();
 
@@ -804,7 +807,8 @@ void LauncherWindow::updateAddonsBox(const std::string& profile) {
     };
 
     const bool hasProfileAddons =
-        !p.addons.custom.empty() || !p.addons.recommended.empty();
+        p.has_value() &&
+        (!p->addons.custom.empty() || !p->addons.recommended.empty());
     const bool hasGlobalAddons = !addonsCore.empty() || !addonsUser.empty();
 
     // Stores the list of the adds explicitly mentioned by the profile so that we can
@@ -818,7 +822,8 @@ void LauncherWindow::updateAddonsBox(const std::string& profile) {
         _addonBox.model->appendRow(header);
 
         // First the custom
-        for (const Addon& addon : p.addons.custom) {
+        ghoul_assert(p.has_value(), "Profile must exist");
+        for (const Addon& addon : p->addons.custom) {
             profileAddons.insert(addon.identifier);
 
             constexpr bool IsUserFolder = false;
@@ -826,7 +831,7 @@ void LauncherWindow::updateAddonsBox(const std::string& profile) {
             _addonBox.model->appendRow(i);
         }
         // Then the recommended
-        for (const Addon& addon : p.addons.recommended) {
+        for (const Addon& addon : p->addons.recommended) {
             profileAddons.insert(addon.identifier);
 
             constexpr bool IsUserFolder = false;

@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -16,9 +16,9 @@ local Translation = {
   Period = 102662.1853273871 * 60 * 60 * 24
 }
 
-local Position = {
+local HaumeaPosition = {
   Identifier = "HaumeaPosition",
-  Parent = transforms.SunEclipJ2000.Identifier,
+  Parent = sunAsset.SunEclipJ2000.Identifier,
   Transform = {
     Translation = Translation
   },
@@ -32,15 +32,15 @@ local Position = {
 
 
 asset.onInitialize(function()
-    openspace.addSceneGraphNode(Position)
+  openspace.addSceneGraphNode(HaumeaPosition)
 end)
 
 asset.onDeinitialize(function()
-    openspace.removeSceneGraphNode(Position)
+  openspace.removeSceneGraphNode(HaumeaPosition)
 end)
 
 asset.export("Translation", Translation)
-asset.export("Position", Position)
+asset.export(HaumeaPosition)
 
 
 

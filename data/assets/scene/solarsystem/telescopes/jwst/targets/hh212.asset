@@ -33,6 +33,6 @@ asset.meta = {
   Name = "HH 212 Image",
   Description = "Screenspace image of HH 212",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

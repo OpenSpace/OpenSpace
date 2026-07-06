@@ -34,13 +34,13 @@ namespace openspace {
 EnvelopePoint::EnvelopePoint(glm::vec3 c, float x, float y)
     : color(std::move(c))
     , colorHex(hexadecimalFromVec3(color))
-    , position({ x, y })
+    , position(std::pair(x, y))
 {}
 
 EnvelopePoint::EnvelopePoint(std::string c, float x, float y)
     : color(hexadecimalToRGBConversion(c))
     , colorHex(std::move(c))
-    , position(std::make_pair(x, y))
+    , position(std::pair(x, y))
 {}
 
 Envelope::Envelope(std::vector<EnvelopePoint> vec)

@@ -1,0 +1,13 @@
+asset.require("./transforms")
+asset.require("./trail")
+asset.require("./label", false)
+
+
+
+asset.meta = {
+  Name = "Aqua",
+  Description = "Meta asset for the Aqua satellite",
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.org/NORAD/elements/",
+  License = "CC-BY"
+}

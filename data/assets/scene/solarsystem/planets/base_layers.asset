@@ -6,24 +6,23 @@ asset.require("./earth/layers/base_layers")
 
 asset.require("./mars/layers/base_layers")
 
-asset.require("./jupiter/default_layers")
-asset.require("./jupiter/callisto/default_layers")
-asset.require("./jupiter/europa/layers/local_layers")
-asset.require("./jupiter/ganymede/default_layers")
-asset.require("./jupiter/io/default_layers")
+asset.require("./jupiter/layers/default_layers")
+asset.require("./jupiter/callisto/layers/default_layers")
+asset.require("./jupiter/europa/layers/default_layers")
+asset.require("./jupiter/ganymede/layers/default_layers")
+asset.require("./jupiter/io/layers/default_layers")
 
-asset.require("./saturn/default_layers")
-asset.require("./saturn/dione/default_layers")
-asset.require("./saturn/hyperion/default_layers")
-asset.require("./saturn/iapetus/default_layers")
-asset.require("./saturn/mimas/default_layers")
-asset.require("./saturn/rhea/default_layers")
-asset.require("./saturn/tethys/default_layers")
-asset.require("./saturn/titan/default_layers")
+asset.require("./saturn/layers/default_layers")
+asset.require("./saturn/dione/layers/default_layers")
+asset.require("./saturn/iapetus/layers/default_layers")
+asset.require("./saturn/mimas/layers/default_layers")
+asset.require("./saturn/rhea/layers/default_layers")
+asset.require("./saturn/tethys/layers/default_layers")
+asset.require("./saturn/titan/layers/default_layers")
 
-asset.require("./uranus/default_layers")
+asset.require("./uranus/layers/default_layers")
 
-asset.require("./neptune/default_layers")
+asset.require("./neptune/layers/default_layers")
 
 
 
@@ -35,6 +34,6 @@ asset.meta = {
     dependent on internet access.
   ]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

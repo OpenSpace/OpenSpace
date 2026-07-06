@@ -22,6 +22,6 @@ asset.meta = {
   Name = "Dashboard - Velocity",
   Description = "This asset provides a dashboard item that shows the camera's velocity",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

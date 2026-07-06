@@ -65,6 +65,6 @@ asset.meta = {
   Description = [[This mission file provides information about the Apollo missions and
     their respective timelines.]],
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

@@ -133,6 +133,7 @@ set(SOURCE_FILES
   rendering/renderabledistancelabel.cpp
   rendering/renderablelabel.cpp
   rendering/renderablemodel.cpp
+  rendering/renderablemodel_lua.inl
   rendering/renderablenodearrow.cpp
   rendering/renderablenodeline.cpp
   rendering/renderableplane.cpp
@@ -221,7 +222,6 @@ source_group("Shader Files" FILES ${SHADER_FILES})
 create_new_module(
   "Base"
   base_module
-  STATIC
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 target_precompile_headers(${base_module} PRIVATE

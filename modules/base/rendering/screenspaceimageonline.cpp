@@ -53,7 +53,7 @@ namespace {
     // To load an image from a local file on disk, see
     // [`ScreenSpaceImageLocal`](#base_screenspace_imagelocal).
     struct [[codegen::Dictionary(ScreenSpaceImageOnline)]] Parameters {
-        std::optional<std::string> identifier;
+        std::optional<std::string> identifier [[codegen::identifier()]];
 
         // [[codegen::verbatim(TextureInfo.description)]]
         std::optional<std::string> url [[codegen::key("URL")]];
@@ -64,7 +64,10 @@ namespace {
 namespace openspace {
 
 Documentation ScreenSpaceImageOnline::Documentation() {
-    return codegen::doc<Parameters>("base_screenspace_imageonline");
+    return codegen::doc<Parameters>(
+        "base_screenspace_imageonline",
+        ScreenSpaceRenderable::Documentation()
+    );
 }
 
 ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary)
@@ -115,21 +118,15 @@ void ScreenSpaceImageOnline::update() {
         }
 
         try {
-            // @TODO (2026-02-18, abock): This code was settings the swizzle mask only if
-            // the returned image was having a single Red channel. This can't currently be
-            // expressed unfortunately
-            ghoul::opengl::Texture::SamplerInit samplerInit = {
-                // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-                //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
-                .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
-                //.swizzleMask = std::array<GLenum, 4>{ GL_RED, GL_RED, GL_RED, GL_ONE }
-            };
-
             _texture = ghoul::io::texture::loadTexture(
                 reinterpret_cast<void*>(imageFile.buffer),
                 imageFile.size,
                 2,
-                samplerInit,
+                ghoul::opengl::Texture::SamplerInit{
+                    // TODO: AnisotropicMipMap crashes on ATI cards ---abock
+                    //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
+                    .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                },
                 imageFile.format
             );
 

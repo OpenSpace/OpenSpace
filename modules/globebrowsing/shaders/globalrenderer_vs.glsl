@@ -164,7 +164,7 @@ void main() {
 
 #if nDepthMaps > 0
   for (int idx = 0; idx < nDepthMaps; idx++) {
-    out_data.positions_lightspace[idx] =
+    out_data.positionsLightspace[idx] =
       vec4(lightView[idx] * (inverseView * dvec4(out_data.positionCameraSpace, 1.0)));
   }
 #endif // nDepthMaps > 0

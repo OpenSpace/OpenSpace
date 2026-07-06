@@ -10,6 +10,6 @@ asset.meta = {
   Description =
     "This asset includes all of the other assets for the BepiColombo mission.",
   Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
+  URL = "https://openspaceproject.com",
   License = "MIT license"
 }

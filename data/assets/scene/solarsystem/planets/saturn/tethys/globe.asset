@@ -1,0 +1,59 @@
+local transforms = asset.require("./transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local labelsPath = asset.resource({
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
+})
+
+
+local Tethys = {
+  Identifier = "Tethys",
+  Parent = transforms.TethysPosition.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = 531100,
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "tethys.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 8.3,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 500000.0, 1500000.0 },
+      DistanceEPS = 200000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
+  GUI = {
+    Path = "/Solar System/Planets/Saturn/Major Moons/Tethys"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Tethys)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Tethys)
+end)
+
+asset.export(Tethys)
+
+
+
+asset.meta = {
+  Name = "Tethys",
+  Description = "Tethys globe",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}
