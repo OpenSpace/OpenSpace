@@ -1031,6 +1031,9 @@ void OpenSpaceEngine::createUserDirectoriesIfNecessary() {
     if (!std::filesystem::exists(absPath("${USER_CONFIG}"))) {
         std::filesystem::create_directories(absPath("${USER_CONFIG}"));
     }
+    if (!std::filesystem::exists(absPath("${USER_SCRIPTS}"))) {
+        std::filesystem::create_directories(absPath("${USER_SCRIPTS}"));
+    }
     if (!std::filesystem::is_directory(absPath("${USER_WEBPANELS}"))) {
         std::filesystem::create_directories(absPath("${USER_WEBPANELS}"));
     }
