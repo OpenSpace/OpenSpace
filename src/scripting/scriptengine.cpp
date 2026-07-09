@@ -485,11 +485,12 @@ void ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library,
 std::vector<std::string> ScriptEngine::allLuaFunctions() const {
     ZoneScoped;
 
-    std::vector<std::string> result;
+    std::vector<std::string> result = luaFunctions(_rootLibrary, "");
     for (const LuaLibrary& library : _registeredLibraries) {
         std::vector<std::string> r = luaFunctions(library, "openspace.");
         result.insert(result.end(), r.begin(), r.end());
     }
+
     return result;
 }
 
