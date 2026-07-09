@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * OpenSpace                                                                             *
+ * Nova                                                                             *
  *                                                                                       *
  * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
@@ -169,7 +169,7 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
     std::string dumpFile;
     if (OPENSPACE_IS_RELEASE_BUILD) {
         dumpFile = std::format(
-            "OpenSpace_{}_{}_{}-{}-{}-{}-{}-{}-{}--{}--{}.dmp",
+            "Nova_{}_{}_{}-{}-{}-{}-{}-{}-{}--{}--{}.dmp",
             OPENSPACE_VERSION_MAJOR,
             OPENSPACE_VERSION_MINOR,
             OPENSPACE_VERSION_PATCH,
@@ -185,7 +185,7 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
     }
     else {
         dumpFile = std::format(
-            "OpenSpace_{}-{}-{}-{}-{}-{}--{}--{}.dmp",
+            "Nova_{}-{}-{}-{}-{}-{}--{}--{}.dmp",
             stLocalTime.wYear,
             stLocalTime.wMonth,
             stLocalTime.wDay,
@@ -300,12 +300,12 @@ void mainInitFunc(GLFWwindow*) {
     sgct::Engine::instance().setCapturePath(screenshotPath);
     FileSys.registerPathToken("${STARTUP_SCREENSHOT}", std::move(screenshotPath));
 
-    LDEBUG("Initializing OpenSpace Engine started");
+    LDEBUG("Initializing Nova Engine started");
     global::openSpaceEngine->initialize();
-    LDEBUG("Initializing OpenSpace Engine finished");
+    LDEBUG("Initializing Nova Engine finished");
 
     {
-        const std::filesystem::path path = absPath("${DATA}/openspace-icon.png");
+        const std::filesystem::path path = absPath("${DATA}/nova-icon.png");
         int x = 0;
         int y = 0;
         int n = 0;
@@ -328,9 +328,9 @@ void mainInitFunc(GLFWwindow*) {
     currentWindow = Engine::instance().windows().front().get();
     currentViewport = currentWindow->viewports().front().get();
 
-    LDEBUG("Initializing OpenGL in OpenSpace Engine started");
+    LDEBUG("Initializing OpenGL in Nova Engine started");
     global::openSpaceEngine->initializeGL();
-    LDEBUG("Initializing OpenGL in OpenSpace Engine finished");
+    LDEBUG("Initializing OpenGL in Nova Engine finished");
 
 
 
@@ -1210,7 +1210,7 @@ int main(int argc, char* argv[]) {
         commandlineArguments.configuration,
         "--file",
         "-f",
-        "Provides the path to the OpenSpace configuration file. Only the '${TEMPORARY}' "
+        "Provides the path to the Nova configuration file. Only the '${TEMPORARY}' "
         "path token is available and any other path has to be specified relative to the "
         "current working directory."
     ));
@@ -1218,8 +1218,8 @@ int main(int argc, char* argv[]) {
         commandlineArguments.windowConfig,
         "--config",
         "-c",
-        "Specifies the window configuration file that should be used to start OpenSpace "
-        "and that will override whatever is specified in the `openspace.cfg` or the "
+        "Specifies the window configuration file that should be used to start Nova "
+        "and that will override whatever is specified in the `nova.cfg` or the "
         "settings. This value can include path tokens, so for example "
         "`${CONFIG}/single.json` is a valid value."
     ));
@@ -1227,8 +1227,8 @@ int main(int argc, char* argv[]) {
         commandlineArguments.profile,
         "--profile",
         "-p",
-        "Specifies the profile that should be used to start OpenSpace and that overrides "
-        "the profile specified in the `openspace.cfg` and the settings."
+        "Specifies the profile that should be used to start Nova and that overrides "
+        "the profile specified in the `nova.cfg` and the settings."
     ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
         commandlineArguments.profileAddons,
@@ -1243,8 +1243,8 @@ int main(int argc, char* argv[]) {
         commandlineArguments.propertyVisibility,
         "--propertyVisibility",
         "",
-        "Specifies UI visibility settings for properties that this OpenSpace is using. "
-        "This value overrides the values specified in the `openspace.cfg` and the "
+        "Specifies UI visibility settings for properties that this Nova is using. "
+        "This value overrides the values specified in the `nova.cfg` and the "
         "settings and also the environment variable, if that value is provided. Allowed "
         "values for this parameter are: `Developer`, `AdvancedUser`, `User`, and "
         "`NoviceUser`."
@@ -1253,7 +1253,7 @@ int main(int argc, char* argv[]) {
         commandlineArguments.task,
         "--task",
         "-t",
-        "Specifies a task that will be run after OpenSpace has been initialized. Once "
+        "Specifies a task that will be run after Nova has been initialized. Once "
         "the task finishes, the application will automatically close again. All other "
         "commandline arguments are ignored, if a task is specified."
     ));
@@ -1262,7 +1262,7 @@ int main(int argc, char* argv[]) {
         "--bypassLauncher",
         "-b",
         "Specifies whether the Launcher should be shown at startup or not. This value "
-        "overrides the value specified in the `openspace.cfg` and the settings."
+        "overrides the value specified in the `nova.cfg` and the settings."
     ));
 
     parser.setCommandLine({ argv, argv + argc });
@@ -1294,7 +1294,7 @@ int main(int argc, char* argv[]) {
     //
     setSgctDelegateFunctions();
 
-    // Create the OpenSpace engine and get arguments for the SGCT engine
+    // Create the Nova engine and get arguments for the SGCT engine
     std::string windowConfiguration;
     bool isGeneratedWindowConfig = true;
     try {
@@ -1410,9 +1410,9 @@ int main(int argc, char* argv[]) {
         if (const size_t it = pwd.find_first_of("'\"[]");  it != std::string::npos) {
             QMessageBox::warning(
                 nullptr,
-                "OpenSpace",
+                "Nova",
                 QString::fromStdString(std::format(
-                    "The OpenSpace folder is started from must not contain any of \"'\", "
+                    "The Nova folder is started from must not contain any of \"'\", "
                     "\"\"\", [, or ]. Path is: {}. Unexpected errors will occur when "
                     "proceeding to run the software", pwd
                 ))
@@ -1602,7 +1602,7 @@ int main(int argc, char* argv[]) {
     global::openSpaceEngine->deinitialize();
     global::destroy();
 
-    // Clear function bindings to avoid crash after destroying the OpenSpace Engine
+    // Clear function bindings to avoid crash after destroying the Nova Engine
     Log::instance().setLogCallback(nullptr);
 
     LDEBUG("Destroying SGCT Engine");

@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * OpenSpace                                                                             *
+ * Nova                                                                             *
  *                                                                                       *
  * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
@@ -117,7 +117,7 @@ void ModulesDialog::createWidgets() {
         layout->addWidget(_moduleLabel);
 
         _moduleEdit = new QLineEdit;
-        _moduleEdit->setToolTip("Name of OpenSpace module related to this profile");
+        _moduleEdit->setToolTip("Name of Nova module related to this profile");
         layout->addWidget(_moduleEdit);
 
         _loadedLabel = new QLabel("Command if Module is Loaded");
@@ -125,7 +125,7 @@ void ModulesDialog::createWidgets() {
 
         _loadedEdit = new QLineEdit;
         _loadedEdit->setToolTip(
-            "Lua command(s) to execute if OpenSpace has been compiled with the module"
+            "Lua command(s) to execute if Nova has been compiled with the module"
         );
         layout->addWidget(_loadedEdit);
 
@@ -134,7 +134,7 @@ void ModulesDialog::createWidgets() {
 
         _notLoadedEdit = new QLineEdit;
         _notLoadedEdit->setToolTip(
-            "Lua command(s) to execute if the module is not present in the OpenSpace "
+            "Lua command(s) to execute if the module is not present in the Nova "
             "application (for example steps to account for a missing module)"
         );
         layout->addWidget(_notLoadedEdit);

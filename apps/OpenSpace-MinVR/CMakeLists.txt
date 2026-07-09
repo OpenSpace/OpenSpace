@@ -25,19 +25,19 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/application_definition.cmake)
 include(${PROJECT_SOURCE_DIR}/support/cmake/global_variables.cmake)
 
-set(MACOSX_BUNDLE_ICON_FILE openspace.icns)
+set(MACOSX_BUNDLE_ICON_FILE nova.icns)
 
 set(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT ON CACHE BOOL "" FORCE)
 add_subdirectory(ext/minvr)
 
 create_new_application(OpenSpace-MinVR
   ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/openspace.rc
-  ${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns
+  ${CMAKE_CURRENT_SOURCE_DIR}/nova.rc
+  ${CMAKE_CURRENT_SOURCE_DIR}/nova.icns
 )
 
 set_source_files_properties(
-  ${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns
+  ${CMAKE_CURRENT_SOURCE_DIR}/nova.icns
   PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
 )
 
@@ -56,7 +56,7 @@ target_link_libraries(OpenSpace-MinVR PUBLIC openspace-core openspace-module-col
 # target as of July 2017, which is needed.
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   if (WIN32)
-    set(RESOURCE_FILE openspace.rc)
+    set(RESOURCE_FILE nova.rc)
   endif ()
 
   # Add the CEF binary distribution's cmake/ directory to the module path and

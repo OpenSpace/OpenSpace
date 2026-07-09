@@ -1,6 +1,6 @@
 ##########################################################################################
 #                                                                                        #
-# OpenSpace                                                                              #
+# Nova                                                                              #
 #                                                                                        #
 # Copyright (c) 2014-2026                                                                #
 #                                                                                        #
@@ -26,7 +26,7 @@ set(CPACK_MONOLITHIC_INSTALL TRUE)
 
 include(InstallRequiredSystemLibraries)
 
-set(CPACK_PACKAGE_NAME "OpenSpace")
+set(CPACK_PACKAGE_NAME "Nova")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.md")
 set(CPACK_PACKAGE_VERSION_MAJOR "${OPENSPACE_VERSION_MAJOR}")
@@ -35,7 +35,7 @@ set(CPACK_PACKAGE_VERSION_PATCH "${OPENSPACE_VERSION_PATCH}")
 set(OPENSPACE_VERSION_NUMBER
   "${OPENSPACE_VERSION_MAJOR}.${OPENSPACE_VERSION_MINOR}.${OPENSPACE_VERSION_PATCH}"
 )
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "OpenSpace ${OPENSPACE_VERSION_NUMBER}")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "Nova ${OPENSPACE_VERSION_NUMBER}")
 set(CPACK_PACKAGE_FILE_NAME
   "${CPACK_PACKAGE_NAME} ${OPENSPACE_VERSION_NUMBER}"
 )
@@ -63,7 +63,7 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/ DESTINATION scripts)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/shaders/ DESTINATION shaders)
 
 install(FILES
-  ${PROJECT_SOURCE_DIR}/openspace.cfg
+  ${PROJECT_SOURCE_DIR}/nova.cfg
   ${PROJECT_SOURCE_DIR}/CREDITS.md
   ${PROJECT_SOURCE_DIR}/LICENSE.md
   ${PROJECT_SOURCE_DIR}/README.md
@@ -73,41 +73,41 @@ install(FILES
 if (WIN32)
   set(CPACK_GENERATOR ZIP)
   # Need backslash for correct subdirectory paths
-  set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}\\\\apps\\\\OpenSpace\\\\openspace.png")
+  set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}\\\\apps\\\\OpenSpace\\\\nova.png")
   set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}\\\\${OPENSPACE_VERSION_NUMBER}")
 else ()
   set(CPACK_GENERATOR TGZ)
-  set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/apps/OpenSpace/openspace.png")
+  set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/apps/OpenSpace/nova.png")
   set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}/${OPENSPACE_VERSION_NUMBER}")
 endif ()
 
-option(OPENSPACE_CREATE_INSTALLER "Create an OpenSpace installer from the package" OFF)
+option(OPENSPACE_CREATE_INSTALLER "Create an Nova installer from the package" OFF)
 
 if (OPENSPACE_CREATE_INSTALLER)
-  set(CPACK_PACKAGE_EXECUTABLES "openspace;OpenSpace")
+  set(CPACK_PACKAGE_EXECUTABLES "openspace;Nova")
   if (WIN32)
     set(CPACK_GENERATOR "ZIP;NSIS")
-    # OpenSpace does NOT seem to handle C:/Program Files/ without crashing
+    # Nova does NOT seem to handle C:/Program Files/ without crashing
     set(CPACK_NSIS_INSTALL_ROOT "C:")
     # There is a bug in NSI that does not handle full unix paths properly. Make
     # sure there is at least one set of four (4) backlashes.
     set(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_FILE_NAME}")
     # Create the desktop link
-    set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "CreateShortCut '$DESKTOP\\\\${CPACK_NSIS_DISPLAY_NAME}.lnk' '$INSTDIR\\\\bin\\\\OpenSpace.exe' ")
+    set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "CreateShortCut '$DESKTOP\\\\${CPACK_NSIS_DISPLAY_NAME}.lnk' '$INSTDIR\\\\bin\\\\Nova.exe' ")
     # Delete the desktop link
     set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "Delete '$DESKTOP\\\\${CPACK_NSIS_DISPLAY_NAME}.lnk' ")
     # The icon to start the application.
-    set(CPACK_NSIS_MUI_ICON "${PROJECT_SOURCE_DIR}\\\\apps\\\\OpenSpace\\\\openspace.ico")
+    set(CPACK_NSIS_MUI_ICON "${PROJECT_SOURCE_DIR}\\\\apps\\\\OpenSpace\\\\nova.ico")
     # Add a link to the application website in the startup menu.
-    set(CPACK_NSIS_MENU_LINKS "http://openspaceproject.com/" "OpenSpace Homepage")
+    set(CPACK_NSIS_MENU_LINKS "http://novaengine.com/" "Nova Homepage")
     # Set the icon for the application in the Add/Remove programs section.
-    set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\OpenSpace.exe")
+    set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\Nova.exe")
     # The mail address for the maintainer of the application in the Add/Remove programs section
     set(CPACK_NSIS_CONTACT alexander.bock@liu.se)
     # The url of the application in the Add/Remove programs section
-    set(CPACK_NSIS_URL_INFO_ABOUT "http://openspaceproject.com/")
+    set(CPACK_NSIS_URL_INFO_ABOUT "http://novaengine.com/")
     # Help URL
-    set(CPACK_NSIS_HELP_LINK "http://openspaceproject.com/")
+    set(CPACK_NSIS_HELP_LINK "http://novaengine.com/")
   endif ()
 endif ()
 

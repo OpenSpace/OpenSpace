@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${PROJECT_SOURCE_DIR}/support/cmake/set_openspace_compile_settings.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/set_nova_compile_settings.cmake)
 
 set(HEADER_FILES
   include/backgroundimage.h

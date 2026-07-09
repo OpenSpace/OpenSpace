@@ -23,7 +23,7 @@
 ##########################################################################################
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
-include(${PROJECT_SOURCE_DIR}/support/cmake/set_openspace_compile_settings.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/set_nova_compile_settings.cmake)
 
 include(GenerateExportHeader)
 

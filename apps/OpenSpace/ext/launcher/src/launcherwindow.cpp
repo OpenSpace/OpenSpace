@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * OpenSpace                                                                             *
+ * Nova                                                                             *
  *                                                                                       *
  * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
@@ -153,7 +153,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         }
     );
 
-    setWindowTitle("OpenSpace Launcher");
+    setWindowTitle("Nova Launcher");
     setFixedSize(FullScreenWidth, FullScreenHeight);
     setAutoFillBackground(false);
 
@@ -192,7 +192,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         QLabel* logoImage = new QLabel(centralWidget);
         logoImage->setObjectName("clear");
         logoImage->setGeometry(geometry::LogoImage);
-        logoImage->setPixmap(QPixmap(":/images/openspace-horiz-logo-small.png"));
+        logoImage->setPixmap(QPixmap(":/images/nova-horiz-logo-small.png"));
     }
 
     {
@@ -216,7 +216,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         _userProfilePath,
         "--- User Profiles ---",
         _profilePath,
-        "--- OpenSpace Profiles ---",
+        "--- Nova Profiles ---",
         "",
         [](const std::filesystem::path& p) { return p.extension() == ".profile"; },
         [](const std::filesystem::path& p) {
@@ -339,7 +339,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         _userConfigPath,
         "--- User Configurations ---",
         _configPath,
-        "--- OpenSpace Configuration ---",
+        "--- Nova Configuration ---",
         sgctConfigName,
         [](const std::filesystem::path& p) {
             // @TODO (abock, 2025-02-10) Remove once the schema is baked into the code
@@ -416,7 +416,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     _startButton->setGeometry(geometry::StartButton);
     _startButton->setCursor(Qt::PointingHandCursor);
     _startButton->setAutoDefault(true);
-    _startButton->setAccessibleName("Start OpenSpace");
+    _startButton->setAccessibleName("Start Nova");
     _startButton->setFocus(Qt::OtherFocusReason);
     updateStartButton();
 
@@ -491,7 +491,7 @@ void LauncherWindow::selectProfile(std::optional<std::string> selection) {
 
 void LauncherWindow::selectConfiguration(std::optional<std::string> selection) {
     if (!selection.has_value()) {
-        // The first entry is the value read from the openspace.cfg file
+        // The first entry is the value read from the nova.cfg file
         _editWindowButton->setEnabled(false);
         _editWindowButton->setToolTip(
             "Cannot edit the default configuration since it is not a file"

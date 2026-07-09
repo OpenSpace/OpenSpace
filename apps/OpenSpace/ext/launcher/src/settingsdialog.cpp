@@ -1,6 +1,6 @@
 /*****************************************************************************************
  *                                                                                       *
- * OpenSpace                                                                             *
+ * Nova                                                                             *
  *                                                                                       *
  * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
@@ -111,7 +111,7 @@ void SettingsDialog::createWidgets() {
         _rememberLastProfile = new QCheckBox("Keep Last Profile");
         _rememberLastProfile->setToolTip(
             "If this setting is checked, the application will remember the profile that "
-            "was loaded into OpenSpace and will use it at the next startup as well"
+            "was loaded into Nova and will use it at the next startup as well"
         );
         
         connect(
@@ -297,7 +297,7 @@ void SettingsDialog::createWidgets() {
         QLabel* conf = new QLabel("Layer Server");
         conf->setToolTip(
             "This setting sets the default server to be used for the layers that "
-            "are hosted by the OpenSpace team"
+            "are hosted by the Nova team"
         );
         layout->addWidget(conf, 14, 0);
 
@@ -353,10 +353,10 @@ void SettingsDialog::createWidgets() {
         QLabel* mrfConf = new QLabel("MRF Cache Location");
         conf->setToolTip(
             "This is the place where the MRF cache files are located. Please note that "
-            "these files can potentially become quite large when using OpenSpace for a "
+            "these files can potentially become quite large when using Nova for a "
             "long while and when visiting new places regularly. If this value is left "
             "blank, the cached files will be stored in the 'mrf_cache' folder in the "
-            "OpenSpace base folder."
+            "Nova base folder."
         );
         layout->addWidget(mrfConf, 17, 0);
 

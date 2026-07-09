@@ -112,7 +112,7 @@
 #include "Psapi.h"
 #endif // WIN32
 
-#include "openspaceengine_lua.inl"
+#include "novaengine_lua.inl"
 
 namespace {
     using namespace openspace;

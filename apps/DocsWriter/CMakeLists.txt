@@ -35,7 +35,7 @@ target_link_libraries(DocsWriter PRIVATE openspace-core openspace-module-collect
 # target as of July 2017, which is needed.
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   if (WIN32)
-    set(RESOURCE_FILE openspace.rc)
+    set(RESOURCE_FILE nova.rc)
   endif ()
 
   # Add the CEF binary distribution's cmake/ directory to the module path and

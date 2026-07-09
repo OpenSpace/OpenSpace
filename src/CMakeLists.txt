@@ -22,10 +22,10 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${PROJECT_SOURCE_DIR}/support/cmake/set_openspace_compile_settings.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/set_nova_compile_settings.cmake)
 
 set(OPENSPACE_SOURCE
-  openspace.cpp
+  nova.cpp
   camera/camera.cpp
   camera/camerapose.cpp
   data/colormaploader.cpp
@@ -44,8 +44,8 @@ set(OPENSPACE_SOURCE
   engine/logfactory.cpp
   engine/moduleengine.cpp
   engine/moduleengine_lua.inl
-  engine/openspaceengine.cpp
-  engine/openspaceengine_lua.inl
+  engine/novaengine.cpp
+  engine/novaengine_lua.inl
   engine/settings.cpp
   engine/syncengine.cpp
   events/event.cpp
@@ -223,7 +223,7 @@ set(OPENSPACE_SOURCE
   util/httprequest.cpp
   util/json_helper.cpp
   util/keys.cpp
-  util/openspacemodule.cpp
+  util/novamodule.cpp
   util/planegeometry.cpp
   util/progressbar.cpp
   util/resourcesynchronization.cpp
@@ -613,7 +613,7 @@ target_precompile_headers(openspace-core PRIVATE
 add_dependencies(openspace-core run_codegen)
 
 configure_file(
-  ${PROJECT_SOURCE_DIR}/support/cmake/openspace_header.template
+  ${PROJECT_SOURCE_DIR}/support/cmake/nova_header.template
   ${CMAKE_BINARY_DIR}/_generated/include/openspace/openspace.h
   @ONLY
 )

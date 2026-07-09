@@ -1,6 +1,6 @@
 ##########################################################################################
 #                                                                                        #
-# OpenSpace                                                                              #
+# Nova                                                                              #
 #                                                                                        #
 # Copyright (c) 2014-2026                                                                #
 #                                                                                        #
@@ -31,7 +31,7 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/application_definition.cmake)
 #####
 # OpenVR
 #####
-option(OPENSPACE_OPENVR_SUPPORT "Build OpenSpace application with OpenVR support" OFF)
+option(OPENSPACE_OPENVR_SUPPORT "Build Nova application with OpenVR support" OFF)
 
 if (OPENSPACE_OPENVR_SUPPORT)
   begin_header("Dependency: OpenVR")
@@ -66,37 +66,37 @@ endif ()
 # Spout
 #####
 if (SGCT_SPOUT_SUPPORT AND NOT OPENSPACE_MODULE_SPOUT)
-  message(WARNING "Spout support from SGCT was requested, but OpenSpace Spout module was disabled")
+  message(WARNING "Spout support from SGCT was requested, but Nova Spout module was disabled")
   message(STATUS "Enabling module as dependency")
   set(OPENSPACE_MODULE_SPOUT ON CACHE BOOL "Build OPENSPACE_MODULE_SPOUTModule" FORCE)
 endif ()
 
 
-create_new_application(OpenSpace
+create_new_application(Nova
   ${SGCT_OPENVR_FILES}
   ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/openspace.rc
-  ${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns
+  ${CMAKE_CURRENT_SOURCE_DIR}/nova.rc
+  ${CMAKE_CURRENT_SOURCE_DIR}/nova.icns
 )
 
-set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/nova.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
 target_include_directories(
-  OpenSpace PRIVATE
+  Nova PRIVATE
   ${OPENVR_INCLUDE_DIRS}
   ${SGCT_OPENVR_INCLUDE_DIRECTORY}
   ${SPOUT_INCLUDE_DIRS}
 )
 
-target_link_libraries(OpenSpace PRIVATE openspace-core openspace-module-collection ${OPENVR_LIBRARY} ${SPOUT_LIBRARY})
+target_link_libraries(Nova PRIVATE openspace-core openspace-module-collection ${OPENVR_LIBRARY} ${SPOUT_LIBRARY})
 
-target_compile_definitions(OpenSpace PRIVATE
+target_compile_definitions(Nova PRIVATE
   ${SGCT_OPENVR_DEFINITIONS}
   ${SPOUT_DEFINITIONS}
 )
 
 if (OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION)
-  target_compile_definitions(OpenSpace PRIVATE "OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION")
+  target_compile_definitions(Nova PRIVATE "OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION")
 endif ()
 
 begin_header("Dependency: SGCT")
@@ -109,11 +109,11 @@ set(SGCT_DEP_INCLUDE_SCN OFF CACHE BOOL "" FORCE)
 set(SGCT_DEP_INCLUDE_CATCH2 OFF CACHE BOOL "" FORCE)
 
 if (NOT OPENSPACE_HAVE_TESTS)
-  # Unless overriden, disable sgct tests if OpenSpace tests are disabled
+  # Unless overriden, disable sgct tests if Nova tests are disabled
   set(SGCT_BUILD_TESTS FALSE CACHE BOOL "Enable ghoul unit tests")
 endif()
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
-target_link_libraries(OpenSpace PRIVATE sgct)
+target_link_libraries(Nova PRIVATE sgct)
 
 set_target_properties(sgct PROPERTIES FOLDER "External")
 set_target_properties(glfw PROPERTIES FOLDER "External")
@@ -122,10 +122,10 @@ if (TARGET SGCTTest)
 endif ()
 
 if (UNIX)
-  target_link_libraries(OpenSpace PRIVATE Xcursor Xinerama X11)
+  target_link_libraries(Nova PRIVATE Xcursor Xinerama X11)
 endif ()
 
-add_custom_command(TARGET OpenSpace POST_BUILD
+add_custom_command(TARGET Nova POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
   ${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct/sgct.schema.json
   ${CMAKE_CURRENT_SOURCE_DIR}/../../config/schema/sgct.schema.json
@@ -139,8 +139,8 @@ option(OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER "Build Launcher GUI" ON)
 if (OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER)
   begin_header("Dependency: Profile Editor")
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/launcher)
-  target_link_libraries(OpenSpace PRIVATE openspace-ui-launcher)
-  target_compile_definitions(OpenSpace PRIVATE OPENSPACE_HAS_LAUNCHER)
+  target_link_libraries(Nova PRIVATE openspace-ui-launcher)
+  target_compile_definitions(Nova PRIVATE OPENSPACE_HAS_LAUNCHER)
   end_header("Dependency: Profile Editor")
 
   if (WIN32)
@@ -148,8 +148,8 @@ if (OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER)
     get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
     get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
     add_custom_command(
-      TARGET OpenSpace POST_BUILD
-      COMMAND "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime --no-translations \"$<TARGET_FILE:OpenSpace>\"
+      TARGET Nova POST_BUILD
+      COMMAND "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime --no-translations \"$<TARGET_FILE:Nova>\"
       COMMENT "Deploying Qt libraries"
     )
   endif ()
@@ -163,7 +163,7 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   set(PROJECT_ARCH "x86_64")
 
   if (WIN32)
-    set(RESOURCE_FILE openspace.rc)
+    set(RESOURCE_FILE nova.rc)
   endif ()
 
   # Add the CEF binary distribution's cmake/ directory to the module path and
@@ -171,7 +171,7 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
   include(webbrowser_helpers)
 
-  set_cef_targets("${CEF_ROOT}" OpenSpace)
+  set_cef_targets("${CEF_ROOT}" Nova)
   run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
 else ()
   message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again")
@@ -180,17 +180,17 @@ endif ()
 if (MSVC)
   begin_header("Dependency: Dbghelp")
   # This library is used for being able to output the callstack if an exception escapes
-  target_link_libraries(OpenSpace PRIVATE Dbghelp.lib)
+  target_link_libraries(Nova PRIVATE Dbghelp.lib)
   end_header()
 endif ()
 
 if (OPENSPACE_NVTOOLS_ENABLED)
-  target_link_libraries(OpenSpace PRIVATE "${OPENSPACE_NVTOOLS_PATH}/lib/x64/nvToolsExt64_1.lib")
+  target_link_libraries(Nova PRIVATE "${OPENSPACE_NVTOOLS_PATH}/lib/x64/nvToolsExt64_1.lib")
 endif ()
 
 if (WIN32)
-  add_custom_command(TARGET OpenSpace POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:OpenSpace> $<TARGET_FILE_DIR:OpenSpace>
+  add_custom_command(TARGET Nova POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:Nova> $<TARGET_FILE_DIR:Nova>
     COMMAND_EXPAND_LISTS
   )
 endif ()

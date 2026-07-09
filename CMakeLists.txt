@@ -1,6 +1,6 @@
 ##########################################################################################
 #                                                                                        #
-# OpenSpace                                                                              #
+# Nova                                                                              #
 #                                                                                        #
 # Copyright (c) 2014-2026                                                                #
 #                                                                                        #
@@ -22,9 +22,9 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-cmake_minimum_required(VERSION 4.0)
+cmake_minimum_required(VERSION 3.28)
 
-project(OpenSpace LANGUAGES C CXX)
+project(Nova LANGUAGES C CXX)
 
 # CMake 4.0 will no longer allow minimum required version below 3.5 and some of our
 # dependencies have not been updated to reflect this. To make things work, we blanked
@@ -52,11 +52,11 @@ endif ()
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
 include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
 
-begin_header("Configuring OpenSpace project")
+begin_header("Configuring Nova project")
 
 # Bail out if the user tries to generate a 32 bit project
 if (NOT ${CMAKE_SIZEOF_VOID_P} EQUAL 8)
-  message(FATAL_ERROR "OpenSpace can only be generated for 64 bit architectures.")
+  message(FATAL_ERROR "Nova can only be generated for 64 bit architectures.")
 endif ()
 
 ##########################################################################################
@@ -107,7 +107,7 @@ execute_process(
   COMMAND_ERROR_IS_FATAL ANY
 )
 
-option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
+option(OPENSPACE_HAVE_TESTS "Activate the Nova unit tests" ON)
 
 if (MSVC)
   option(OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION "Raise exceptions when encountering Inf's or Nan's in floating point numbers" OFF)
@@ -153,8 +153,8 @@ add_subdirectory(apps)
 end_header("End: Configuring Applications")
 
 
-if (MSVC AND TARGET OpenSpace)
-  set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT OpenSpace)
+if (MSVC AND TARGET Nova)
+  set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Nova)
 endif ()
 
 
@@ -163,7 +163,7 @@ if (OPENSPACE_HAVE_TESTS)
   set_target_properties(run_test_codegen PROPERTIES FOLDER "Unit Tests/support")
   set_target_properties(codegentest PROPERTIES FOLDER "Unit Tests")
 
-  begin_header("Generating OpenSpace unit test")
+  begin_header("Generating Nova unit test")
   add_subdirectory(tests)
   end_header()
 endif ()
@@ -174,7 +174,7 @@ endif ()
 # target as of July 2017, which is needed.
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   if (WIN32)
-    set(RESOURCE_FILE openspace.rc)
+    set(RESOURCE_FILE nova.rc)
   endif ()
 
   # Add the CEF binary distribution's cmake/ directory to the module path and
@@ -192,4 +192,4 @@ endif ()
 # Manage the CPack packaging
 include(${PROJECT_SOURCE_DIR}/support/cmake/packaging.cmake)
 
-end_header("End: Configuring OpenSpace project")
+end_header("End: Configuring Nova project")
