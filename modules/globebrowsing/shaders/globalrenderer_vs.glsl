@@ -37,6 +37,7 @@ layout(location = 1) in vec2 in_texCoords;
 out Data {
   vec4 position;
   vec2 texCoords;
+  float isSkirt;
   vec3 ellipsoidNormalCameraSpace;
   vec3 levelWeights;
   vec3 positionCameraSpace;
@@ -119,8 +120,10 @@ void main() {
   );
 
   // Get the height value and apply skirts
+  float skirtLength = tileVertexSkirtLength();
+  out_data.isSkirt = skirtLength > 0.0 ? 1.0 : 0.0;
   float height =
-    tileHeight(in_texCoords, out_data.levelWeights) - tileVertexSkirtLength();
+    tileHeight(in_texCoords, out_data.levelWeights) - skirtLength;
 
 #if USE_ACCURATE_NORMALS
   // Calculate tangents
