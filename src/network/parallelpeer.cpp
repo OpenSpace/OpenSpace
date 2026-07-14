@@ -527,9 +527,9 @@ void ParallelPeer::setName(std::string name) {
     _name = std::move(name);
 }
 
-void ParallelPeer::requestHostship() {
+void ParallelPeer::requestHostship(std::optional<std::string> hostPassword) {
     std::vector<char> buffer;
-    std::string hostPw = _hostPassword;
+    std::string hostPw = hostPassword.value_or(_hostPassword);
     uint16_t hostPwSize = static_cast<uint16_t>(hostPw.size());
     buffer.insert(
         buffer.end(),
