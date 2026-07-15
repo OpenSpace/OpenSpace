@@ -116,7 +116,7 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
-    ImGuiWindowFlags flags = ImGuiWindowFlags_None; // ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_HorizontalScrollbar;
+    ImGuiWindowFlags flags = ImGuiWindowFlags_None;
 
     if (!ImGui::BeginPopupModal("Set columns", NULL, flags)) {
         return;

@@ -14,7 +14,7 @@ import math
 import json
 
 # Enable for easier API query debugging
-PRINT_QUERIES = False
+PRINT_QUERIES = True
 
 # T - temperature (Kelvin)
 # lam - wavelength (meter)
@@ -60,6 +60,7 @@ NEW_API = 'https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query='
 
 DATA_FOLDER = '../data/'
 dataFileName = DATA_FOLDER + 'aggregated_data'
+USE_COMPOSITE_DATASET = True
 
 # Create data folder if not exists
 if not os.path.exists(DATA_FOLDER):
@@ -91,22 +92,44 @@ print("Downloading all confirmed planets from NExSci's Exoplanets Archive..")
 
 columns='*'
 
-print("Downloading default_flag=1")
-where1 = 'where+default_flag=1+and+upper%28soltype%29+like+%27%25CONF%25%27'
-full1 = NEW_API + 'select+' + columns + '+from+ps+' + where1 + '&format=csv'
+# Exclude some problematic columns
+EXCLUDED_COLUMNS = [
+    'pl_insolstr'
+]
 
-if PRINT_QUERIES:
-    print("Query: " + full1)
-df0 = pd.read_csv(full1, index_col=None, low_memory=False)
+if (not USE_COMPOSITE_DATASET):
+    print("Downloading default_flag=1")
+    where1 = 'where+default_flag=1+and+upper%28soltype%29+like+%27%25CONF%25%27'
+    full1 = NEW_API + 'select+' + columns + '+from+ps+' + where1 + '&format=csv'
+
+    if PRINT_QUERIES:
+        print("Query: " + full1)
+    df0 = pd.read_csv(full1, index_col=None, low_memory=False)
 
 
-print("Downloading default_flag=0")
-where0 = 'where+default_flag=0+and+upper%28soltype%29+like+%27%25CONF%25%27'
-full0 = NEW_API + 'select+' + columns + '+from+ps+' + where0 + '&format=csv'
+    print("Downloading default_flag=0")
+    where0 = 'where+default_flag=0+and+upper%28soltype%29+like+%27%25CONF%25%27'
+    full0 = NEW_API + 'select+' + columns + '+from+ps+' + where0 + '&format=csv'
 
-if PRINT_QUERIES:
-    print("Query: " + full0)
-df1 = pd.read_csv(full0, index_col=None, low_memory=False)
+    if PRINT_QUERIES:
+        print("Query: " + full0)
+    df1 = pd.read_csv(full0, index_col=None, low_memory=False)
+
+    print("Aggregating data...")
+
+    # concatenates data sets
+    df = pd.concat([df0,df1])
+else :
+    print("Downloading composite dataset")
+    where = '' # no where check here - just get everything
+    full = NEW_API + 'select+' + columns + '+from+pscomppars+' + where + '&format=csv'
+
+    if PRINT_QUERIES:
+        print("Query: " + full)
+    df = pd.read_csv(full, index_col=None, low_memory=False)
+
+if EXCLUDED_COLUMNS:
+    df = df.drop(columns=EXCLUDED_COLUMNS)
 
 with open(DATA_FOLDER + 'last_update_time.txt', 'w+') as ff:
     ff.write(str(datetime.now()))
@@ -118,13 +141,7 @@ positionColumns = 'pl_name,sy_dist,sy_disterr1,sy_disterr2,ra,dec'
 full_comppars= NEW_API + 'select+' + positionColumns + '+from+pscomppars&format=csv'
 df_comppars = pd.read_csv(full_comppars, index_col=None)
 
-###
-## Aggregate data
-###
-print("Aggregating data and computing additional parameters...")
-
-# concatenates data sets
-df = pd.concat([df0,df1])
+print("Computing additional parameters...")
 
 # Create a copy of gaia_dr2_id column, just named gaia_id. When this code was first
 # written, there was no gaia_dr3_id column, so it was just called gaia_id. Now, there is
@@ -147,23 +164,26 @@ df = df.sort_values(by='pl_pubdate', ascending=False)
 
 # df = df.sort_values(by='dt_obj', ascending=False)
 
-## Build up a filter to remove results from the Stassun et al. 2017 paper,
-#  which are often more recent but less precise than previous publications
-df.loc[df['pl_refname'].str.contains("STASSUN"), 'pl_refname'].unique()
-data_filter = (
-    (df['pl_refname'] != '<a refstr=STASSUN_ET_AL__2017 href=https://ui.adsabs.harvard.edu/abs/2017AJ....153..136S/abstract target=ref>Stassun et al. 2017</a>')
-)
+# In the self-consistent dataset, do some processing based on the reference
+if (not USE_COMPOSITE_DATASET):
+    ## Build up a filter to remove results from the Stassun et al. 2017 paper,
+    #  which are often more recent but less precise than previous publications
+    print("Filtering out Stassun et al. 2017 results")
+    df.loc[df['pl_refname'].str.contains("STASSUN"), 'pl_refname'].unique()
+    data_filter = (
+        (df['pl_refname'] != '<a refstr=STASSUN_ET_AL__2017 href=https://ui.adsabs.harvard.edu/abs/2017AJ....153..136S/abstract target=ref>Stassun et al. 2017</a>')
+    )
 
-# Create separate columns with just the name and the url for the reference
-df['pl_refname_name'] = df['pl_refname'].str.extract('>(.*)<')
-df['pl_refname_url'] = df['pl_refname'].str.extract('href=(.*) target')
+    # Create separate columns with just the name and the url for the reference
+    df['pl_refname_name'] = df['pl_refname'].str.extract('>(.*)<')
+    df['pl_refname_url'] = df['pl_refname'].str.extract('href=(.*) target')
 
-# ## Group by planet name and grab the most recent record
-cols = df.columns.to_list()[1:]
-agg_dict = dict(zip(cols, ['first'] * len(cols)))
+    # ## Group by planet name and grab the most recent record
+    cols = df.columns.to_list()[1:]
+    agg_dict = dict(zip(cols, ['first'] * len(cols)))
 
-# aggregate
-df = df[data_filter].groupby('pl_name', as_index = False).agg(agg_dict)
+    # aggregate
+    df = df[data_filter].groupby('pl_name', as_index = False).agg(agg_dict)
 
 # fill in columns where mass or radius are only in Jupiter units
 df.fillna({'pl_rade': df.pl_radj*Rjup}, inplace=True)
@@ -517,25 +537,34 @@ df.drop(columns=['hz_score_scale', 'hz_orbsmax'], inplace=True)
 # Then it was moved to be a little more pessimistic, so that (L, ecc) = (10^-4, 0.7)
 # Upper line was computed with the same tilt, but computed to go through the point (L, ecc) = (1, 0.6)
 
-## -------------------------------------------------------------##
-## ADD ANY OTHER COMPUTATIONS YOU WANT HERE ##
+## ------------------------------------------------------------- ##
+## ADD ANY OTHER COMPUTATIONS YOU WANT HERE                      ##
+## ------------------------------------------------------------- ##
+
+# Just the first character of the spectral type
+df['st_spectype_short'] = df['st_spectype'].str[0]
 
 
 ##################################################################
 # Write out data file
 ##################################################################
 
-# Remove single quotes in names, etc.. Causes problems when saving to javascript
-df.replace({'\'': ''}, regex=True, inplace=True)
-
 # NaN values should be considered missing values. Replace with empty strings
 df = df.fillna('')
+
+# Remove single quotes in names, etc.. Causes problems when saving to javascript and when
+# creating strings in c++
+df.replace({'\'': ''}, regex=True, inplace=True)
 
 print("Writing data to file...")
 df.to_csv(dataFileName + ".csv", index=False)
 
 # Also print json string as a variable in a javascript file
 jsonString = df.to_json(orient='records')
+
+with open(dataFileName + ".json", 'w') as f:
+    f.write(jsonString)
+
 with open(dataFileName + ".js", 'w') as f:
     f.write("let dataString = ")
     f.write("'" + jsonString + "'")
