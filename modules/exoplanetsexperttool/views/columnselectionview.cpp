@@ -116,13 +116,12 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
-    ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_HorizontalScrollbar;
+    ImGuiWindowFlags flags = ImGuiWindowFlags_None; // ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_HorizontalScrollbar;
 
     if (!ImGui::BeginPopupModal("Set columns", NULL, flags)) {
         return;
     }
 
-    constexpr const int MaxItemsPerColumn = 20;
     int nSelected = 0;
 
     auto resetSelection = [this]() {
@@ -153,7 +152,7 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
         _savedSelectedOtherColumns = _selectedOtherColumns;
     };
 
-    ImGui::Text(
+    ImGui::TextWrapped(
         "This view controls which data columns are exposed in the application. "
         "Only the selected columns will be exposed in the table view, can be "
         "used for color mapping, filtering, et cetera. "
@@ -216,7 +215,7 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
             "the .json file with data settings."
         );
 
-        ImGui::SameLine();
+        ImGui::SameLine(0, 20);
 
         ImGui::PushID("clear_default");
         if (ImGui::Button("Clear selection")) {
@@ -231,14 +230,16 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
         }
         ImGui::PopID();
 
-        ImGui::BeginGroup();
-        for (int i = 0; i < _namedColumns.size(); i++) {
-            if (i % MaxItemsPerColumn == 0) {
-                ImGui::EndGroup();
-                ImGui::SameLine();
-                ImGui::BeginGroup();
-            }
+        ImGui::BeginChild(
+            "NamedColumns",
+            ImVec2(
+                ImGui::GetContentRegionAvail().x * 0.4f,
+                ImGui::GetContentRegionAvail().y * 0.8f
+            ),
+            false
+        );
 
+        for (int i = 0; i < _namedColumns.size(); i++) {
             const ColumnKey& c = _namedColumns[i];
 
             bool isSelected = _selectedNamedColumns[i];
@@ -255,11 +256,11 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
                 view::helper::renderHelpMarker(dataSettings.description(c).c_str());
             }
         }
-        ImGui::EndGroup();
+        ImGui::EndChild();
 
         ImGui::EndGroup();
     }
-    ImGui::SameLine();
+    ImGui::SameLine(0, 10);
 
     // Other columns
     ImGui::BeginGroup();
@@ -271,7 +272,7 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
             "This is any other columns that may exist in the dataset."
         );
 
-        ImGui::SameLine();
+        ImGui::SameLine(0, 20);
 
         ImGui::PushID("clear_other");
         if (ImGui::Button("Clear selection")) {
@@ -279,68 +280,152 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
         }
         ImGui::PopID();
 
-        ImGui::BeginGroup();
-        for (int i = 0; i < _otherColumns.size(); i++) {
-            if (i % MaxItemsPerColumn == 0) {
-                ImGui::EndGroup();
-                ImGui::SameLine();
-                ImGui::BeginGroup();
-            }
+        ImGui::SameLine(0, 20);
+        static bool showOnlySelected = false;
+        ImGui::Checkbox("Show only checked", &showOnlySelected);
 
+        static ImGuiTextFilter filter;
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.4f);
+        filter.Draw();
+        ImGui::SameLine();
+        if (ImGui::Button("Clear")) {
+            filter.Clear();
+        }
+
+        ImGui::BeginChild(
+            "OtherColumns",
+            ImVec2(
+                ImGui::GetContentRegionAvail().x * 0.9f,
+                ImGui::GetContentRegionAvail().y * 0.8f
+            ),
+            false
+        );
+        ImGui::Columns(2, nullptr, false);
+        for (int i = 0; i < _otherColumns.size(); i++) {
             const ColumnKey& c = _otherColumns[i];
 
+            if (!filter.PassFilter(c.c_str())) {
+                continue;
+            }
+
             bool isSelected = _selectedOtherColumns[i];
+
+            if (showOnlySelected && !isSelected) {
+                continue;
+            }
+
             ImGui::Checkbox(dataSettings.columnName(c), &isSelected);
             _selectedOtherColumns[i] = isSelected;
 
             nSelected += _selectedOtherColumns[i] ? 1 : 0;
+
+            ImGui::NextColumn();
         }
-        ImGui::EndGroup();
+        ImGui::Columns(1);
+        ImGui::EndChild();
 
         ImGui::EndGroup();
     }
 
-    bool isInvalidColumnNr = nSelected > IMGUI_TABLE_MAX_COLUMNS || nSelected == 0;
-    glm::vec4 textColor =
-        isInvalidColumnNr ? view::colors::Error : view::colors::DescriptiveText;
+    // Selected columns summary
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+    ImGui::BeginGroup();
+    {
+        ImGui::Text("Selected columns:");
+        // Always include name column
+        bool hasNameColumn = !dataSettings.nameColumn().empty();
+        const ColumnKey nameColumn = hasNameColumn ? dataSettings.nameColumn() : "name";
+        std::string columnsText = dataSettings.columnName(nameColumn);
 
-    ImGui::TextColored(
-        view::helper::toImVec4(textColor),
-        std::format(
-            "Selected: {} / {}", nSelected, IMGUI_TABLE_MAX_COLUMNS
-        ).c_str()
-    );
+        // Add selected named columns
+        for (int i = 0; i < _namedColumns.size(); i++) {
+            if (_selectedNamedColumns[i]) {
+                columnsText += ", " + std::string(dataSettings.columnName(_namedColumns[i]));
+            }
+        }
 
-    // Ok / Cancel
-    if (isInvalidColumnNr) {
-        ImGui::PushStyleColor(
-            ImGuiCol_Button,
-            view::helper::toImVec4(view::colors::DisabledButton)
-        );
-        ImGui::PushStyleColor(
-            ImGuiCol_ButtonHovered,
-            view::helper::toImVec4(view::colors::DisabledButton)
-        );
-        ImGui::PushStyleColor(
-            ImGuiCol_ButtonActive,
-            view::helper::toImVec4(view::colors::DisabledButton)
-        );
+        // Add selected other columns
+        for (int i = 0; i < _otherColumns.size(); i++) {
+            if (_selectedOtherColumns[i]) {
+                columnsText += ", " + std::string(dataSettings.columnName(_otherColumns[i]));
+            }
+        }
+
+        ImGui::TextWrapped("%s", columnsText.c_str());
+
+        ImGui::EndGroup();
     }
+    ImGui::Spacing();
 
-    if (ImGui::Button("OK", ImVec2(120, 0)) && !isInvalidColumnNr) {
-        applySelection(nSelected);
-        ImGui::CloseCurrentPopup();
-    }
 
-    if (isInvalidColumnNr) {
-        ImGui::PopStyleColor(3);
-    }
 
-    ImGui::SetItemDefaultFocus();
-    ImGui::SameLine();
-    if (ImGui::Button("Cancel", ImVec2(120, 0))) {
-        resetSelection();
-        ImGui::CloseCurrentPopup();
+    // Confirmaiton / Cancellation
+    {
+        // Push to bottom of window
+        float buttonHeight = ImGui::GetFrameHeightWithSpacing() * 2; // Space for text + buttons
+        float availableHeight = ImGui::GetContentRegionAvail().y;
+        if (availableHeight > buttonHeight) {
+            ImGui::Dummy(ImVec2(0.0f, availableHeight - buttonHeight));
+        }
+
+        ImGui::Separator();
+
+        bool isInvalidColumnNr = nSelected > IMGUI_TABLE_MAX_COLUMNS || nSelected == 0;
+        glm::vec4 textColor =
+            isInvalidColumnNr ? view::colors::Error : view::colors::DescriptiveText;
+
+        // Float to right
+        float buttonWidth = 120.0f;
+        float spacing = ImGui::GetStyle().ItemSpacing.x;
+        float textWidth = ImGui::CalcTextSize(
+            std::format("Selected: {} / {}", nSelected, IMGUI_TABLE_MAX_COLUMNS).c_str()
+        ).x;
+        float totalWidth = textWidth + spacing + buttonWidth + spacing + buttonWidth;
+
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - totalWidth);
+
+        ImGui::TextColored(
+            view::helper::toImVec4(textColor),
+            std::format(
+                "Selected: {} / {}", nSelected, IMGUI_TABLE_MAX_COLUMNS
+            ).c_str()
+        );
+
+        ImGui::SameLine();
+
+        // Ok / Cancel
+        if (isInvalidColumnNr) {
+            ImGui::PushStyleColor(
+                ImGuiCol_Button,
+                view::helper::toImVec4(view::colors::DisabledButton)
+            );
+            ImGui::PushStyleColor(
+                ImGuiCol_ButtonHovered,
+                view::helper::toImVec4(view::colors::DisabledButton)
+            );
+            ImGui::PushStyleColor(
+                ImGuiCol_ButtonActive,
+                view::helper::toImVec4(view::colors::DisabledButton)
+            );
+        }
+
+        if (ImGui::Button("OK", ImVec2(120, 0)) && !isInvalidColumnNr) {
+            applySelection(nSelected);
+            ImGui::CloseCurrentPopup();
+        }
+
+        if (isInvalidColumnNr) {
+            ImGui::PopStyleColor(3);
+        }
+
+        ImGui::SetItemDefaultFocus();
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+            resetSelection();
+            ImGui::CloseCurrentPopup();
+        }
     }
     ImGui::EndPopup();
 }
