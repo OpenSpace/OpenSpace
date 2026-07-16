@@ -322,6 +322,35 @@ std::vector<std::string> hostStarsWithSufficientData() {
     return result;
 }
 
+/**
+ * Compute the rotation matrix for an orbital plane based on Keplerian orbital elements.
+ * The matrix is used to transform coordinates from the orbital plane to the reference
+ * coordinate system.
+ *
+ * \param inclination The inclination of the orbit in degrees (angle between the orbital
+ *        plane and the reference plane)
+ * \param ascendingNode The longitude of the ascending node in degrees (angle from the
+ *        reference direction to the point where the orbit crosses the reference plane
+ *        going northward). Default is 180 degrees
+ * \param argumentOfPeriapsis The argument of periapsis in degrees (angle from the
+ *        ascending node to the periapsis). Default is 90 degrees
+ *
+ * \return A 3x3 rotation matrix that transforms coordinates from the orbital plane to
+ *         the reference coordinate system
+ */
+[[codegen::luawrap]] glm::dmat3 computeOrbitPlaneRotationMatrix(float inclination,
+                                                             float ascendingNode = 180.f,
+                                                        float argumentOfPeriapsis = 90.f)
+{
+    return static_cast<glm::dmat3>(
+        openspace::computeOrbitPlaneRotationMatrix(
+            inclination,
+            ascendingNode,
+            argumentOfPeriapsis
+        )
+    );
+}
+
 } // namespace
 
 #include "exoplanetsmodule_lua_codegen.cpp"

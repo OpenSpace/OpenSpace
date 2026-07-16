@@ -220,7 +220,9 @@ bool SystemViewer::systemCanBeAdded(const std::string& host) const {
 }
 
 void SystemViewer::addExoplanetSystem(const std::string& host) const {
-    global::scriptEngine->queueScript("openspace.exoplanets.addExoplanetSystem('" + host + "')");
+    global::scriptEngine->queueScript(std::format(
+        "openspace.exoplanets.addExoplanetSystem(\"{}\")", host
+    ));
 }
 
 void SystemViewer::addOrTargetPlanet(const ExoplanetItem& item) const {
@@ -608,12 +610,12 @@ void SystemViewer::renderVisualsTabContent(const std::string& host,
         const Renderable* inclinationPlane = renderable(inclinationPlaneId);
         if (inclinationPlane) {
             bool enabled = inclinationPlane->isEnabled();
-            if (ImGui::Checkbox("Show 90 degree inclination plane", &enabled)) {
+            if (ImGui::Checkbox("Show 90-degree inclination plane", &enabled)) {
                 setRenderableEnabled(inclinationPlaneId, enabled);
             }
             ImGui::SameLine();
             view::helper::renderHelpMarker(
-                "Show a grid plane that represents 90 degree inclinaiton, "
+                "Show a grid plane that represents 90 degree inclination, "
                 "i.e. orbits in this plane are visible \"edge-on\" from Earth"
             );
         }

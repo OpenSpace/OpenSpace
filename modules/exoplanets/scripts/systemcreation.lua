@@ -371,6 +371,65 @@ function addExoplanetSystem(data)
   end
 
   --------------------------------------------------------------------
+  -- ExoplanetExplorer Visuals
+  --------------------------------------------------------------------
+  local maxSemiMajor = 0.0
+  local meanSemiMajor = 0.0
+  local numPlanetsWithSemiMajor = 0
+  for planetId,planetData in pairs(data.Planets) do
+    if hasValue(planetData.SemiMajorAxis) then
+      maxSemiMajor = math.max(maxSemiMajor, planetData.SemiMajorAxis)
+      meanSemiMajor = meanSemiMajor + planetData.SemiMajorAxis
+      numPlanetsWithSemiMajor = numPlanetsWithSemiMajor + 1
+    end
+  end
+  meanSemiMajor = meanSemiMajor / numPlanetsWithSemiMajor
+
+  local Arrow = {
+    Identifier = starIdentifier .. "_EarthDirectionArrow",
+    Parent = starIdentifier,
+    Renderable = {
+      Type = "RenderableNodeArrow",
+      StartNode = starIdentifier,
+      EndNode = "Earth", -- TODO: Do not hardcode this, but find the Earth node dynamically
+      Offset = 1.5 * maxSemiMajor,
+      Length = 0.5 * maxSemiMajor,
+      Width = 0.015 * maxSemiMajor
+    },
+    GUI = {
+      Name = "Earth Direction Arrow (" .. starIdentifier .. ")",
+      Path = guiPath
+    }
+  }
+  openspace.addSceneGraphNode(Arrow)
+
+  local planeRotation = openspace.exoplanets.computeOrbitPlaneRotationMatrix(90.0);
+
+  local Plane = {
+    Identifier = starIdentifier .. "_EdgeOnInclinationPlane",
+    Parent = starIdentifier,
+    Transform = {
+      Rotation = {
+        Type = "StaticRotation",
+        Rotation = planeRotation
+      }
+    },
+    Renderable = {
+      Type = "RenderableGrid",
+      Enabled = false,
+      Size = { 2.0 * meanSemiMajor, 2.0 * meanSemiMajor },
+      Color = { 0.4, 0.4, 0.4 },
+      Segments = { 10, 10 }
+    },
+    GUI = {
+      Name = "Edge-on Inclination Plane (" .. starIdentifier .. ")",
+      Path = guiPath,
+      Description = "A plane that is aligned with a 90 degree inclination (edge-on)."
+    }
+  }
+  openspace.addSceneGraphNode(Plane)
+
+  --------------------------------------------------------------------
   -- Planets
   --------------------------------------------------------------------
   local defaultPlanetTexture = openspace.propertyValue(

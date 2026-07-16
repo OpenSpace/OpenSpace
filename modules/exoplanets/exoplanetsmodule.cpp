@@ -431,7 +431,8 @@ LuaLibrary ExoplanetsModule::luaLibrary() const {
             codegen::lua::SystemData,
             codegen::lua::ListOfExoplanets,
             codegen::lua::ListAvailableExoplanetSystems,
-            codegen::lua::LoadSystemDataFromCsv
+            codegen::lua::LoadSystemDataFromCsv,
+            codegen::lua::ComputeOrbitPlaneRotationMatrix
         },
         .scripts = {
             absPath("${MODULE_EXOPLANETS}/scripts/systemcreation.lua")
