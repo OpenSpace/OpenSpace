@@ -235,17 +235,17 @@ void SystemViewer::addOrTargetPlanet(const ExoplanetItem& item) const {
         // we can't do it until the system is added to the scene
         setIncreasedReachfactors();
 
-        global::scriptEngine->queueScript(
-            "openspace.setPropertyValueSingle("
-                "'NavigationHandler.OrbitalNavigator.Anchor',"
-                "'" + planetIdentifier(item) + "'"
-            ");"
+        global::scriptEngine->queueScript(std::format(
+            "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '{}');"
             "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"
-            "openspace.setPropertyValueSingle("
-                "'NavigationHandler.OrbitalNavigator.RetargetAnchor', "
-                "nil"
-            ");"
-        );
+            , planetIdentifier(item)
+        ));
+
+        if (!ImGui::GetIO().KeyShift) {
+            global::scriptEngine->queueScript(
+                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+            );
+        }
     }
 }
 
@@ -254,13 +254,11 @@ void SystemViewer::flyToStar(std::string_view hostIdentifier) const {
     // we can't do it until the system is added to the scene
     setIncreasedReachfactors();
 
-    global::scriptEngine->queueScript(
-        "openspace.setPropertyValueSingle("
-        "'NavigationHandler.OrbitalNavigator.Anchor',"
-        "'" + std::string(hostIdentifier) +
-        "')"
-        "openspace.navigation.zoomToDistanceRelative(100.0, 5.0);"
-    );
+    global::scriptEngine->queueScript(std::format(
+        "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '{}')"
+        "openspace.navigation.zoomToDistanceRelative(100.0, 5.0);",
+        hostIdentifier
+    ));
 }
 
 void SystemViewer::renderSystemViewContent(const std::string& host) {
@@ -287,10 +285,15 @@ void SystemViewer::renderSystemViewContent(const std::string& host) {
 
             global::scriptEngine->queueScript(std::format(
                 "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '{}');"
-                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"
-                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);",
+                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');",
                 hostIdentifier
             ));
+
+            if (!ImGui::GetIO().KeyShift) {
+                global::scriptEngine->queueScript(
+                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+                );
+            }
         }
 
         ImGui::SameLine();
