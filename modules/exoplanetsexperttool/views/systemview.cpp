@@ -111,7 +111,7 @@ namespace {
 
         global::scriptEngine->queueScript(std::format(
             "openspace.setPropertyValueSingle('{0}.LineWidth', {1});"
-            "openspace.setPropertyValueSingle('{0}.Fade', {2});",
+            "openspace.setPropertyValueSingle('{0}.LineFadeAmount', {2});",
             appearance, width, fade
         ));
     };
@@ -710,7 +710,7 @@ void SystemViewer::renderVisualsTabContent(const std::string& host,
                     const ExoplanetItem& p = _dataViewer.data()[planetIndex];
                     if (colorOptionChanged) {
                         // First time we change color
-                        setTrailThicknessAndFade(p, 20.f, 30.f);
+                        setTrailThicknessAndFade(p, 20.f, 0.f);
                     }
 
                     glm::vec3 color = glm::vec3(
