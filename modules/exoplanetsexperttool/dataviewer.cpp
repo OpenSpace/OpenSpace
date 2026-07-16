@@ -1147,6 +1147,13 @@ void DataViewer::renderFileMenu() {
             // TODO: Menu to save the current set of filters.
             // To a settings .json file? Or a completely new file format?
         }
+
+        ImGui::Separator();
+        ImGui::Text("Current data file:");
+        ImGui::Text(currentDataFile().filename().string().c_str());
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("%s", currentDataFile().string().c_str());
+        }
         ImGui::EndMenu();
     }
 
