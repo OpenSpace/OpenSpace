@@ -591,10 +591,6 @@ void SystemViewer::renderVisualsTabContent(const std::string& host,
 
     ImGui::BeginGroup();
     {
-        ImGui::Text("Local:");
-        ImGui::SameLine();
-        view::helper::renderHelpMarker("Applied to just this individual system");
-
         const std::string sizeRingId = hostIdentifier + "_1AU_Circle";
         const Renderable* sizeRing = renderable(sizeRingId);
         if (sizeRing) {
@@ -683,11 +679,7 @@ void SystemViewer::renderVisualsTabContent(const std::string& host,
     ImGui::SameLine();
     ImGui::BeginGroup();
     {
-        ImGui::Text("Global:");
-        ImGui::SameLine();
-        view::helper::renderHelpMarker("Applied globally, to all rendered exoplanet systems");
-
-        bool colorOptionChanged = ImGui::Checkbox("Color planet orbits", &_colorOrbits);
+        bool colorOptionChanged = ImGui::Checkbox("Color planet orbits", &_shouldColorOrbits);
 
         static bool colorVariableInitialized = false;
         static ColorMappingView::ColorMappedVariable orbitColorVariable;
@@ -699,7 +691,7 @@ void SystemViewer::renderVisualsTabContent(const std::string& host,
             colorVariableInitialized = true;
         }
 
-        if (_colorOrbits) {
+        if (_shouldColorOrbits) {
             bool colorEditChanged = _dataViewer.colorMappingView()->renderColormapEdit(
                 orbitColorVariable,
                 hostIdentifier

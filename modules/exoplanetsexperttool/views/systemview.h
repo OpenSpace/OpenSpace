@@ -59,7 +59,7 @@ private:
 
     std::list<std::string> _shownPlanetSystemWindows;
 
-    bool _colorOrbits = false;
+    bool _shouldColorOrbits = false;
     bool _highlightDefaultOrbits = false;
 
 };
