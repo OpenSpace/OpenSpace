@@ -66,7 +66,7 @@ namespace {
         try {
             std::string file;
             j.at("datafile").get_to(file);
-            s.dataFile = file;
+            s.dataFile = absPath("${MODULE_EXOPLANETSEXPERTTOOL}") / file;
 
             const nlohmann::json dataMapping = j.at("data_mapping");
             dataMapping.at("position_ra").get_to(s.dataMapping.positionRa);
@@ -232,7 +232,7 @@ DataSettings DataLoader::loadDataSettingsFromJson() {
 }
 
 std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
-    std::filesystem::path csvFilePath = absPath("${MODULE_EXOPLANETSEXPERTTOOL}") / settings.dataFile;
+    std::filesystem::path csvFilePath = settings.dataFile;
 
     if (!std::filesystem::is_regular_file(csvFilePath)) {
         LERROR(std::format("Could not find input data file '{}'", csvFilePath));

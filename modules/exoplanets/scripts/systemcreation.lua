@@ -671,7 +671,8 @@ registerFunction(
   {
     Name = "loadExoplanetsFromCsv",
     Arguments = {
-      { "csvFile", "String" }
+      { "csvFile", "String" },
+      { "host", "String?" }
     },
     Documentation = [[
       Load a set of exoplanets based on custom data, in the form of a CSV file, and add
@@ -691,9 +692,17 @@ registerFunction(
       rendering performance.
 
       \\param csvFile A path to a .csv file that contains the data for the exoplanets
+      \\param host (Optional) The name of a host star to load planets for. If provided,
+                   only planets for that host star will be loaded. If not provided, all
+                   planets in the file will be loaded.
     ]],
-    Function = function(csvFile)
-      local dataList = openspace.exoplanets.loadSystemDataFromCsv(csvFile)
+    Function = function(csvFile, host)
+      local dataList = nil
+      if not host or openspace.isEmpty(host) then
+        dataList = openspace.exoplanets.loadSystemDataFromCsv(csvFile)
+      else
+        dataList = openspace.exoplanets.loadSystemDataFromCsv(csvFile, host)
+      end
       for _,data in pairs(dataList) do
         addExoplanetSystem(data)
       end

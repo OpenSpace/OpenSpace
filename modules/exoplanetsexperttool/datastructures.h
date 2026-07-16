@@ -77,6 +77,9 @@ struct DataPoint {
 // TODO: Automatically determine which columns have uncertainty and should be
 // represented with a datapoint.
 
+// TODO (2026-07-16, emmbr): Can this be combined with the Exoplanet module's
+// datastructure, so we can load a planet system from that one directly instead
+// of loading the CSV file again?
 struct ExoplanetItem {
     int id; // Id used for UI (same as row number in data file)
 

@@ -34,6 +34,7 @@
 #include <modules/exoplanetsexperttool/views/systemview.h>
 #include <openspace/properties/list/intlistproperty.h>
 #include <ghoul/glm.h>
+#include <filesystem>
 #include <memory>
 #include <optional>
 #include <unordered_map>
@@ -51,6 +52,8 @@ public:
     void initializeGL();
 
     // Accessors and functions that are needed for the other views
+
+    std::filesystem::path currentDataFile() const;
 
     // Check if a column is numeric. If it isn't, then it is text based
     bool isNumericColumn(size_t index) const;

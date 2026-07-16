@@ -244,13 +244,15 @@ std::vector<std::string> hostStarsWithSufficientData() {
   * few required ones are not selected by default.
   *
   * \param csvFile A path to the CSV file to load the data from
+  * \param hostName If specified, load only data for a given star
   *
   * \return A list of objects of the type
   *         [ExoplanetSystemData](#exoplanets_data_exoplanetsystem), that can be used to
   *         create the scene graph nodes for the exoplanet systems
   */
 [[codegen::luawrap]] std::vector<ghoul::Dictionary> loadSystemDataFromCsv(
-                                                                      std::string csvFile)
+                                                                      std::string csvFile,
+                                                      std::optional<std::string> hostName)
 {
     using PlanetData = ExoplanetsDataPreparationTask::PlanetData;
 
@@ -272,9 +274,33 @@ std::vector<std::string> hostStarsWithSufficientData() {
 
     LINFO(std::format("Reading exoplanet data from file '{}'", csvFile));
 
+
+    // If filtering by host, find the hostname column index once for efficiency
+    int hostColumnIndex = -1;
+    if (hostName.has_value()) {
+        for (size_t i = 0; i < columnNames.size(); i++) {
+            if (columnNames[i] == "hostname") {
+                hostColumnIndex = static_cast<int>(i);
+                break;
+            }
+        }
+    }
+
     // Parse the file line by line to compose system information
     std::string row;
     while (ghoul::getline(inputDataFile, row)) {
+        // Fast pre-filter by hostname before expensive parsing
+        if (hostName.has_value() && hostColumnIndex >= 0) {
+            std::istringstream ss(row);
+            std::string token;
+            for (int i = 0; i <= hostColumnIndex; i++) {
+                ghoul::getline(ss, token, ',');
+            }
+            if (token != hostName.value()) {
+                continue;
+            }
+        }
+
         PlanetData planetData = ExoplanetsDataPreparationTask::parseDataRow(
             row,
             columnNames,

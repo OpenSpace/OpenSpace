@@ -220,8 +220,13 @@ bool SystemViewer::systemCanBeAdded(const std::string& host) const {
 }
 
 void SystemViewer::addExoplanetSystem(const std::string& host) const {
+    std::string dataFile = _dataViewer.currentDataFile().string();
+    // Replace backslashes with forward slashes for Lua script compatibility
+    std::replace(dataFile.begin(), dataFile.end(), '\\', '/');
+
     global::scriptEngine->queueScript(std::format(
-        "openspace.exoplanets.addExoplanetSystem(\"{}\")", host
+        "openspace.exoplanets.loadExoplanetsFromCsv('{}', \"{}\")",
+        dataFile, host
     ));
 }
 

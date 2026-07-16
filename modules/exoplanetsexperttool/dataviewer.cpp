@@ -239,6 +239,10 @@ void DataViewer::initializeGL() {
     _colorMappingView->initializeGL();
 }
 
+std::filesystem::path DataViewer::currentDataFile() const {
+    return _dataSettings.dataFile;
+}
+
 std::variant<const char*, float> DataViewer::columnValue(const ColumnKey& key,
                                                          const ExoplanetItem& item) const
 {
