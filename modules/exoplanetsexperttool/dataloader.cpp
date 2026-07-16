@@ -380,39 +380,36 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
     std::map<std::string, bool> colIsNumeric;
     auto firstDataValues = planets.front().dataColumns;
 
-    // Determine the type of all other columns
+    // Determine column types and replace missing values in numeric columns in one pass
     for (const auto& [key, _] : firstDataValues) {
         // Default is text
-        colIsNumeric[key] = false;
+        bool isNumeric = false;
 
-        // Find first entry with a value and use that to determine category
-        for (auto p : planets) {
-            std::variant<std::string, float> value = p.dataColumns[key];
+        // Find first entry with a value to determine type
+        for (ExoplanetItem& p : planets) {
+            std::variant<std::string, float>& value = p.dataColumns[key];
             if (std::holds_alternative<std::string>(value) &&
                 std::get<std::string>(value).empty())
             {
-                continue; // do nothing
+                continue;
             }
             else {
-                colIsNumeric[key] = std::holds_alternative<float>(value);
+                isNumeric = std::holds_alternative<float>(value);
                 break;
             }
         }
-    }
 
-    // Replace all the missing values in the numeric columns with NaN values
-    for (const auto& [key, _] : firstDataValues) {
-        if (!colIsNumeric[key]) {
-            continue;
-        }
+        colIsNumeric[key] = isNumeric;
 
-        // Find first entry with a value and use that to determine category
-        for (ExoplanetItem& p : planets) {
-            std::variant<std::string, float> value = p.dataColumns[key];
-            if (std::holds_alternative<std::string>(value) &&
-                std::get<std::string>(value).empty())
-            {
-                p.dataColumns[key] = std::numeric_limits<float>::quiet_NaN();
+        // If numeric, replace all empty string values with NaN
+        if (isNumeric) {
+            for (ExoplanetItem& p : planets) {
+                std::variant<std::string, float>& value = p.dataColumns[key];
+                if (std::holds_alternative<std::string>(value) &&
+                    std::get<std::string>(value).empty())
+                {
+                    p.dataColumns[key] = std::numeric_limits<float>::quiet_NaN();
+                }
             }
         }
     }
