@@ -124,13 +124,17 @@ private:
     DoubleProperty _properMotionEpoch;
     BoolProperty _enableFadeInDistance;
 
+    BoolProperty _shouldHideOnCloseup;
+    DoubleProperty _hideOnCloseupDistance;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(
         modelMatrix, cameraViewProjectionMatrix, cameraUp, eyePosition, colorOption,
         useProperMotion, diffTime, magnitudeExponent, sizeComposition, lumCent,
         radiusCent, colorTexture, opacity, otherDataTexture, otherDataRange,
         filterOutOfRange, fixedColor, glareTexture, glareMultiplier, glareGamma,
-        glareScale, hasCore, coreTexture, coreMultiplier, coreGamma, coreScale
+        glareScale, hasCore, coreTexture, coreMultiplier, coreGamma, coreScale,
+        hideOnCloseup, hideOnCloseupDistance
     ) _uniformCache;
 
     bool _speckFileIsDirty = true;

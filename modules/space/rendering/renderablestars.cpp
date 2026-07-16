@@ -315,6 +315,22 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
+    // ExoplanetExplorer
+    constexpr Property::PropertyInfo HideOnCloseupInfo = {
+        "HideOnCloseup",
+        "Hide on close-up",
+        "Enables/Disables hiding of individual stars when the camera is too close.",
+        Property::Visibility::AdvancedUser
+    };
+
+    constexpr Property::PropertyInfo HideOnCloseupDistanceInfo = {
+        "HideOnCloseupDistance",
+        "Hide on close-up distance",
+        "Specifies the distance at which individual stars will start to be hidden when "
+        "the camera is too close. The distance is given in meters.",
+        Property::Visibility::AdvancedUser
+    };
+
     // Renders large star catalogs as a point-based star field using data loaded from a
     // SPECK file or a CSV file (see [here](/building-content/point-data/data-formats)
     // for more information on the available data formats). It is intended for
@@ -438,6 +454,12 @@ namespace {
 
         // [[codegen::verbatim(EnableFadeInInfo.description)]]
         std::optional<bool> enableFadeIn;
+
+        // [[codegen::verbatim(HideOnCloseupInfo.description)]]
+        std::optional<bool> hideOnCloseup;
+
+        // [[codegen::verbatim(HideOnCloseupDistanceInfo.description)]]
+        std::optional<double> hideOnCloseupDistance;
     };
 } // namespace
 #include "renderablestars_codegen.cpp"
@@ -506,6 +528,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     , _useProperMotion(UseProperMotionInfo, true)
     , _properMotionEpoch(ProperMotionEpochInfo, 0.0)
     , _enableFadeInDistance(EnableFadeInInfo, false)
+    , _shouldHideOnCloseup(HideOnCloseupInfo, false)
+    , _hideOnCloseupDistance(HideOnCloseupDistanceInfo, 1e16)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -688,6 +712,12 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _staticFilterValue = p.staticFilter;
     _staticFilterReplacementValue =
         p.staticFilterReplacement.value_or(_staticFilterReplacementValue);
+
+    _shouldHideOnCloseup = p.hideOnCloseup.value_or(_shouldHideOnCloseup);
+    addProperty(_shouldHideOnCloseup);
+
+    _hideOnCloseupDistance = p.hideOnCloseupDistance.value_or(_hideOnCloseupDistance);
+    addProperty(_hideOnCloseupDistance);
 }
 
 void RenderableStars::initializeGL() {
@@ -908,6 +938,8 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.otherDataRange, _otherDataRange);
     _program->setUniform(_uniformCache.filterOutOfRange, _filterOutOfRange);
 
+    _program->setUniform(_uniformCache.hideOnCloseup, _shouldHideOnCloseup);
+    _program->setUniform(_uniformCache.hideOnCloseupDistance, _hideOnCloseupDistance);
 
     glBindVertexArray(_vao);
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_dataset.entries.size()));

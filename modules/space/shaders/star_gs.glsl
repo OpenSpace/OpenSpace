@@ -54,6 +54,10 @@ uniform float radiusCent;
 uniform dmat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
 
+uniform bool hideOnCloseup;
+uniform double hideOnCloseupDistance;
+
+
 const double Parsec = 3.08567756E16;
 
 // FRAGILE
@@ -113,6 +117,25 @@ void main() {
   out_data.position = pos;
   dvec4 dpos = modelMatrix * dvec4(pos, 1.0);
 
+  // ExoplanetExplorer: Fade out the star as it gets close to the camera
+  float hideByDistanceScale = 1.0;
+  if (hideOnCloseup) {
+    double distanceToStar = distance(dvec3(dpos), eyePosition);
+    const double fadeStartDistance = hideOnCloseupDistance;
+    const double fadeEndDistance = 1.5 * fadeStartDistance;
+
+    if (distanceToStar < fadeStartDistance) {
+      return;
+    }
+
+    if (distanceToStar < fadeEndDistance) {
+      hideByDistanceScale = float(
+        (distanceToStar - fadeStartDistance) /
+        (fadeEndDistance - fadeStartDistance)
+      );
+    }
+  }
+
   out_data.bv = in_data[0].bvLumAbsMag.x;
   out_data.velocity = in_data[0].velocity;
   out_data.speed = in_data[0].speed;
@@ -147,6 +170,8 @@ void main() {
 
     scaleMultiply = scaleForApparentMagnitude(dpos.xyz, absMagnitude);
   }
+
+  scaleMultiply *= hideByDistanceScale;
 
   dvec3 normal = eyePosition - dpos.xyz;
   dvec3 newRight = normalize(cross(cameraUp, normal));
