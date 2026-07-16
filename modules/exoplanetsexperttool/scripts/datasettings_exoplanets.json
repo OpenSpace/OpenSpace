@@ -1,5 +1,5 @@
 {
-    "datafile": "data/aggregated_data.csv",
+    "datafile": "${MODULE_EXOPLANETSEXPERTTOOL}/data/aggregated_data.csv",
     "data_mapping": {
         "position_ra": "ra",
         "position_dec": "dec",

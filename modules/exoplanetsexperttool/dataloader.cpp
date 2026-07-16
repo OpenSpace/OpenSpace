@@ -66,7 +66,7 @@ namespace {
         try {
             std::string file;
             j.at("datafile").get_to(file);
-            s.dataFile = absPath("${MODULE_EXOPLANETSEXPERTTOOL}") / file;
+            s.dataFile = absPath(file);
 
             const nlohmann::json dataMapping = j.at("data_mapping");
             dataMapping.at("position_ra").get_to(s.dataMapping.positionRa);
