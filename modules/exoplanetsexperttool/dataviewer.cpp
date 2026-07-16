@@ -447,7 +447,7 @@ void DataViewer::initializeCallbacks() {
             // Target is an expolanet system => show top menu
             system = node->identifier();
         }
-        else if (hasTag(node, "exoplanet")) {
+        else if (hasTag(node, "exoplanet_planet")) {
             // The system is the parent
             system = node->parent()->identifier();
         }
