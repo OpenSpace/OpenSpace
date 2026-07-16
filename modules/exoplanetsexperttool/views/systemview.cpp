@@ -34,6 +34,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <modules/imgui/include/imgui_include.h>
 
 namespace {
@@ -370,10 +371,12 @@ void SystemViewer::renderOverviewTabContent(const std::string& host,
     float wScale = io.FontGlobalScale;
     float hScale = wScale * (wScale < 1.f ? 1.f : 0.9f);
 
+    float boxHeight = 150.f * hScale;
+
     // General information about the system
     ImGui::BeginChild(
         std::format("overview_left{}", host).c_str(),
-        ImVec2(300 * wScale, 150 * hScale),
+        ImVec2(ImGui::GetContentRegionAvailWidth() * 0.5f, boxHeight),
         true
     );
     {
@@ -384,31 +387,26 @@ void SystemViewer::renderOverviewTabContent(const std::string& host,
         ImGui::SameLine();
         view::helper::renderDescriptiveText("(Parsec)");
 
+        view::helper::renderDescriptiveText("Stars: ");
+        ImGui::SameLine(indent);
+        _dataViewer.renderColumnValue("sy_snum", first);
+
         view::helper::renderDescriptiveText("In habitable zone: ");
         ImGui::SameLine(indent);
-        ImGui::Text("x"); // TODO: add detals of how many
-
-        ImGui::Text("");
-
-        ImGui::Text("TODO: Other general interesting");
-        ImGui::Text("info about the system");
+        ImGui::Text("TODO"); // TODO: add detals of how many
     }
     ImGui::EndChild();
     ImGui::SameLine();
     ImGui::BeginChild(
         std::format("overview_right{}", host).c_str(),
-        ImVec2(190 * wScale, 150 * hScale),
+        ImVec2(0, boxHeight),
         true
     );
     {
+        ImGui::Text("Main star");
+
         const float indent = 100.f * wScale;
         // Star information
-        view::helper::renderDescriptiveText("Stars: ");
-        ImGui::SameLine(indent);
-        _dataViewer.renderColumnValue("sy_snum", first);
-
-        ImGui::Text("");
-
         view::helper::renderDescriptiveText("Teff: ");
         ImGui::SameLine(indent);
         _dataViewer.renderColumnValue("st_teff", first);
@@ -432,6 +430,10 @@ void SystemViewer::renderOverviewTabContent(const std::string& host,
         _dataViewer.renderColumnValue("st_age", first);
         ImGui::SameLine();
         view::helper::renderDescriptiveText("(Gyr)");
+
+        view::helper::renderDescriptiveText("Type: ");
+        ImGui::SameLine(indent);
+        _dataViewer.renderColumnValue("st_spectype", first);
     }
     ImGui::EndChild();
 
@@ -446,8 +448,6 @@ void SystemViewer::renderOverviewTabContent(const std::string& host,
     };
 
     const float avgColumnIndent = columnIndent(nPlanets) + avgExtraIndent;
-
-    ImGui::Text("");
 
     for (size_t i = 0; i < nPlanets; ++i) {
         size_t index = planetIndices[i];
@@ -486,15 +486,12 @@ void SystemViewer::renderOverviewTabContent(const std::string& host,
 
     // TODO: Avoid hardcoded column names
     std::vector<std::pair<std::string, ColumnKey>> columns = {
-        {"ESM", "ESM"},
-        {"TSM", "TSM"},
         {"Radius", "pl_rade"},
         {"Mass", "pl_bmasse"},
         {"Incl.", "pl_orbincl"},
         {"Orbit", "pl_orbsmax"},
         {"Period", "pl_orbper"},
         {"Ecc", "pl_orbeccen"},
-        {"Method", "discoverymethod"}
     };
 
     for (const std::pair<std::string, ColumnKey>& pair : columns) {
@@ -511,14 +508,53 @@ void SystemViewer::renderOverviewTabContent(const std::string& host,
 
         if (_dataViewer.meanValue(colKey).has_value()) {
             ImGui::SameLine(avgColumnIndent);
-            view::helper::renderDescriptiveText(std::format("{:.2f}", *_dataViewer.meanValue(colKey)).c_str());
+            view::helper::renderDescriptiveText(
+                std::format("{:.2f}", *_dataViewer.meanValue(colKey)).c_str()
+            );
         }
     }
     // TODO: Highlight values that are very different from average
 
     ImGui::Separator();
 
-    ImGui::Text("");
+    // Render the method column separately, to process the text a bit
+    const ColumnKey MethodKey = "discoverymethod";
+    view::helper::renderDescriptiveText("Method: ");
+    for (size_t i = 0; i < nPlanets; ++i) {
+        size_t index = planetIndices[i];
+        const ExoplanetItem& p = _dataViewer.data()[index];
+
+        ImGui::SameLine(columnIndent(i));
+        ImGui::PushItemWidth(static_cast<float>(indent));
+
+        // Check if the column exists
+        if (p.dataColumns.find(MethodKey) == p.dataColumns.end()) {
+            ImGui::Text("N/A");
+            continue;
+        }
+
+        const std::variant<std::string, float>& value = p.dataColumns.at(MethodKey);
+
+        if (std::holds_alternative<float>(value)) {
+            throw ghoul::RuntimeError(std::format("Wrong column type for {}!", MethodKey));
+        }
+
+        const std::string method = std::get<std::string>(value);
+        std::vector<std::string> words = ghoul::tokenizeString(method, ' ');
+        std::string methodAbbrev;
+        for (const std::string& w : words) {
+            if (!w.empty()) {
+                methodAbbrev += w[0];
+            }
+        }
+
+        ImGui::Text("%s", methodAbbrev.c_str());
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("%s", method.c_str());
+        }
+    }
+
+    ImGui::Separator();
 
     for (size_t i = 0; i < nPlanets; ++i) {
         size_t index = planetIndices[i];
