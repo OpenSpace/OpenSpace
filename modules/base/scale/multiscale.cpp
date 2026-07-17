@@ -75,6 +75,7 @@ void MultiScale::update(const UpdateData& data) {
     for (const ghoul::mm_unique_ptr<Scale>& scale : _scales) {
         scale->update(data);
     }
+    Scale::update(data);
 }
 
 glm::dvec3 MultiScale::scaleValue(const UpdateData& data) const {

@@ -77,6 +77,7 @@ void MultiRotation::update(const UpdateData& data) {
     for (const ghoul::mm_unique_ptr<Rotation>& rot : _rotations) {
         rot->update(data);
     }
+    Rotation::update(data);
 }
 
 glm::dmat3 MultiRotation::matrix(const UpdateData& data) const {
