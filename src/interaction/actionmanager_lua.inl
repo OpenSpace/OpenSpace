@@ -114,7 +114,7 @@ struct [[codegen::Dictionary(Action)]] Action {
  * is to be executed, and the optional third argument is the name used in a user-interface
  * to refer to this action. The fourth is a human readable description of the command for
  * documentation purposes. The fifth is the GUI path and the last parameter determines
- * whether the action should be executed locally (= false) or remotely (= true, the
+ * whether the action should be executed locally (= true) or remotely (= false, the
  * default).
  */
 [[codegen::luawrap]] void registerAction(Action action) {
