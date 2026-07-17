@@ -27,7 +27,7 @@ registerFunction(
       local node = nodeIdentifier or openspace.navigation.getNavigationState().Anchor
       local property = "Scene." .. node .. ".EvaluatedBoundingSphere"
       local sphere = openspace.propertyValue(property)
-      if sphere == -1 then
+      if sphere == 0 then
         sphere = 1
       end
       local size = scale or sphere * 2.5
