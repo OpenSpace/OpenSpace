@@ -4,7 +4,7 @@ local initializeAll = false
 local function addJoystickAsset(joystick)
   if joystick == "Wireless Controller" then
     openspace.asset.add("./util/joysticks/ps4")
-  elseif joystick == "Xbox Controller" or joystick == "Xbox Wireless Controller" then
+  elseif joystick == "Xbox Controller" or joystick == "Wireless Xbox Controller" then
     openspace.asset.add("./util/joysticks/xbox")
   elseif joystick == "Microsoft X-Box 360 pad" then
     openspace.asset.add("./util/joysticks/microsoft-xbox-360-pad")
