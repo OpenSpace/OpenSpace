@@ -61,9 +61,10 @@ local PS5Controller = {
 }
 
 
+local name = "DualSense Wireless Controller"
+
 asset.onInitialize(function()
   local controller = PS5Controller
-  local name = "DualSense Wireless Controller"
 
   local deadzoneJoysticks = 0.2
   local deadzoneTriggers = 0.05
@@ -239,6 +240,10 @@ asset.onInitialize(function()
     ]],
     ""  -- <-- Description of your custom script here (optional)
   )
+end)
+
+asset.onDeinitialize(function()
+  openspace.navigation.unbindJoystick(name)
 end)
 
 

@@ -228,6 +228,10 @@ asset.onInitialize(function()
   )
 end)
 
+asset.onDeinitialize(function()
+  openspace.navigation.unbindJoystick(name)
+end)
+
 
 
 asset.meta = {

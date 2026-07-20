@@ -43,9 +43,14 @@ local SpaceMouse = {
 }
 
 
-asset.onInitialize(function()
+-- GLFW Controller names that should use this mapping
+local names = {
+  "SpaceNavigator",
+  "3Dconnexion Universal Receiver" -- Wireless version uses the generic receiver
+}
+
+function bindInputs(name)
   local controller = SpaceMouse
-  local name = "SpaceNavigator"
 
   openspace.navigation.bindJoystickAxis(name, controller.Push.LeftRight, "Orbit X", false, "JoystickLike", true, false, 40.0)
   openspace.navigation.bindJoystickAxis(name, controller.Push.BackForth, "Orbit Y", false, "JoystickLike", true, false, 40.0)
@@ -67,13 +72,24 @@ asset.onInitialize(function()
     joystickHelper.permaBindGlobalRoll(name, controller.Tilt.LeftRight),
     "Switch to global roll mode"
   )
+end
+
+asset.onInitialize(function()
+  for _, name in ipairs(names) do
+    bindInputs(name)
+  end
+end)
+
+asset.onDeinitialize(function()
+  for _, name in ipairs(names) do
+    openspace.navigation.unbindJoystick(name)
+  end
 end)
 
 
-
 asset.meta = {
-  Name = "Joystick controller: SpaceMouse compact (wired)",
-  Description = "Joystick controller configuration for SpaceMouse compact (wired)",
+  Name = "Joystick controller: SpaceMouse compact",
+  Description = "Joystick controller configuration for SpaceMouse compact",
   Author = "OpenSpace Team",
   URL = "https://openspaceproject.com",
   License = "MIT license"

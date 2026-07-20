@@ -51,9 +51,15 @@ local XBoxController = {
   }
 }
 
-local name = "Xbox Controller"
+-- GLFW Controller names that should use this mapping. If your Xbox controller
+-- is not listed here, you can add it to the list and it should work
+local names = {
+  "Xbox Controller",
+  -- @TODO (2026-07-20, emmbr) Not sure this is a correct name any more
+  "Wireless Xbox Controller"
+}
 
-asset.onInitialize(function()
+function bindInputs(name)
   local controller = XBoxController
 
   local deadzoneJoysticks = 0.2
@@ -194,15 +200,27 @@ asset.onInitialize(function()
     [[openspace.invertBooleanProperty("NavigationHandler.OrbitalNavigator.Friction.RollFriction")]],
     "Toggle roll friction"
   )
+end
+
+
+asset.onInitialize(function()
+  for _, name in ipairs(names) do
+    bindInputs(name)
+  end
 end)
 
 asset.onDeinitialize(function()
-  openspace.navigation.unbindJoystick(name)
+  for _, name in ipairs(names) do
+    openspace.navigation.unbindJoystick(name)
+  end
 end)
 
+
+
+
 asset.meta = {
-  Name = "Joystick controller: Xbox (wired)",
-  Description = "Joystick controller configuration for Xbox (wired)",
+  Name = "Joystick controller: Xbox",
+  Description = "Joystick controller configuration for Xbox",
   Author = "OpenSpace Team",
   URL = "https://openspaceproject.com",
   License = "MIT license"
