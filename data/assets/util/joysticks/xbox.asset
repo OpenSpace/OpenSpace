@@ -142,7 +142,6 @@ function bindInputs(name)
     "Go forwards in time, faster the more times this button is pressed"
   )
 
-    -- Pause
   openspace.navigation.bindJoystickButton(
     name,
     controller.DPad.Up,
