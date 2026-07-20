@@ -422,11 +422,11 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
             datamessagestructures::ScriptMessage sm;
             sm.deserialize(buffer);
 
-            // No sync or send because this has already been recived by a peer, don't send
-            // it back again
+            // No send because this has already been recived by a peer, don't send it
+            // back again
             global::scriptEngine->queueScript({
                 .code = sm._script,
-                .synchronized = ScriptEngine::Script::ShouldBeSynchronized::No,
+                .synchronized = ScriptEngine::Script::ShouldBeSynchronized::Yes,
                 .sendToRemote = ScriptEngine::Script::ShouldSendToRemote::No
             });
             break;
