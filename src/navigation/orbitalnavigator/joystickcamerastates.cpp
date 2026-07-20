@@ -427,4 +427,19 @@ JoystickCameraStates::findOrAddJoystickMapping(const std::string& joystickName)
     return joystick;
 }
 
+void JoystickCameraStates::unbindJoystick(const std::string& joystickName) {
+    auto it = std::find_if(
+        _joysticks.begin(),
+        _joysticks.end(),
+        [&joystickName](const JoystickMapping& j) {
+            return j.name == joystickName;
+        }
+    );
+
+    if (it != _joysticks.end()) {
+        LDEBUG(std::format("Unbinding joystick '{}'", joystickName));
+        _joysticks.erase(it);
+    }
+}
+
 } // namespace openspace

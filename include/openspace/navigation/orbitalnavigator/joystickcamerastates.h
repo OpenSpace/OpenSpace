@@ -102,7 +102,6 @@ public:
         std::string propertyUri, float min = 0.f, float max = 1.f,
         AxisInvert shouldInvert = AxisInvert::No, bool isRemote = true
     );
-
     AxisInformation axisMapping(const std::string& joystickName, int axis) const;
 
     void setDeadzone(const std::string& joystickName, int axis, float deadzone);
@@ -114,6 +113,8 @@ public:
     void clearButtonCommand(const std::string& joystickName, int button);
     std::vector<std::string> buttonCommand(const std::string& joystickName,
         int button) const;
+
+    void unbindJoystick(const std::string& joystickName);
 
 private:
     // There is one of these structs for each connected joystick, describing the orbital
