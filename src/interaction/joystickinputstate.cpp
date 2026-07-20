@@ -65,6 +65,10 @@ void JoystickInputState::updateButtonState(bool isPressed, int buttonIndex) {
     }
 }
 
+void JoystickInputState::resetInputs() {
+    initializeAxesAndButtons();
+}
+
 int JoystickInputStates::numAxes(const std::string& joystickName) const {
     if (joystickName.empty()) {
         int maxNumAxes = -1;

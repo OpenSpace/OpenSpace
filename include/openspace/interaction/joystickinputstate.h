@@ -73,7 +73,7 @@ struct JoystickInputState {
     std::vector<JoystickAction> buttons;
 
     /**
-     * Initialize the aces and buttons vectors based on the currently set number of axes
+     * Initialize the axes and buttons vectors based on the currently set number of axes
      * and buttons.
      */
     void initializeAxesAndButtons();
@@ -86,6 +86,13 @@ struct JoystickInputState {
      * \param buttonIndex The index of the button to update the state for
      */
     void updateButtonState(bool isPressed, int buttonIndex);
+
+    /**
+     * Reset the axes and buttons to their default values. This function is called when a
+     * controller is disconnected, to ensure that any ongoing input is not considered valid
+     * anymore.
+     */
+    void resetInputs();
 };
 
 /// The maximum number of joysticks that are supported by this system. This number is

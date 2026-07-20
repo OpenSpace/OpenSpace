@@ -247,6 +247,13 @@ void checkJoystickStatus() {
 
         const int isPresent = glfwJoystickPresent(i);
         if (isPresent == GLFW_FALSE) {
+            if (joystick.isConnected) {
+                LDEBUGC(
+                    "Game Controller",
+                    std::format("Controller '{}' disconnected", joystick.name)
+                );
+                joystick.resetInputs();
+            }
             joystick.isConnected = false;
             continue;
         }
