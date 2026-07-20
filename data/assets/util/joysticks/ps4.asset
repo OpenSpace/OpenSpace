@@ -57,10 +57,10 @@ local PS4Controller = {
   }
 }
 
+local name = "Wireless Controller"
 
 asset.onInitialize(function()
   local controller = PS4Controller
-  local name = "Wireless Controller"
 
   local deadzoneJoysticks = 0.2
   local deadzoneTriggers = 0.05
