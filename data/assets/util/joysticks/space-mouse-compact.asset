@@ -45,7 +45,7 @@ local names = {
 }
 
 
-function bindInputs(name)
+local function bindInputs(name)
   local controller = SpaceMouse
 
   openspace.navigation.bindJoystickAxis(name, controller.Push.LeftRight, "Orbit X", false, "JoystickLike", true, false, 40.0)

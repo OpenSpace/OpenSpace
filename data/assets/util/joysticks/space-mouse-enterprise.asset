@@ -44,7 +44,7 @@ local names = {
   "3Dconnexion Universal Receiver" -- Wireless version uses the generic receiver
 }
 
-function bindInputs(name)
+local function bindInputs(name)
   local controller = SpaceMouse
 
   local deadzone = 0.15

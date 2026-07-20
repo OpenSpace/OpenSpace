@@ -191,8 +191,10 @@ asset.onInitialize(function()
   openspace.navigation.bindJoystickButton(
     name,
     controller.Y,
-    [[openspace.invertBooleanProperty("NavigationHandler.OrbitalNavigator.Friction.RollFriction")]],
-    "Toggle roll friction"
+    [[
+      -- <-- Copy paste your custom script here
+    ]],
+    ""  -- <-- Description of your custom script here (optional)
   )
 end)
 

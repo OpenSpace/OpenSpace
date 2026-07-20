@@ -59,7 +59,7 @@ local names = {
 }
 
 
-function bindInputs(name)
+local function bindInputs(name)
   local controller = XBoxController
 
   local deadzoneJoysticks = 0.2
@@ -196,8 +196,10 @@ function bindInputs(name)
   openspace.navigation.bindJoystickButton(
     name,
     controller.Y,
-    [[openspace.invertBooleanProperty("NavigationHandler.OrbitalNavigator.Friction.RollFriction")]],
-    "Toggle roll friction"
+    [[
+      -- <-- Copy paste your custom script here
+    ]],
+    ""  -- <-- Description of your custom script here (optional)
   )
 end
 
