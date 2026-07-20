@@ -55,7 +55,6 @@ local XBoxController = {
 -- is not listed here, you can add it to the list and it should work
 local names = {
   "Xbox Controller",
-  -- @TODO (2026-07-20, emmbr) Not sure this is a correct name any more
   "Wireless Xbox Controller"
 }
 
