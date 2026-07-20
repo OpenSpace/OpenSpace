@@ -261,6 +261,10 @@ void checkJoystickStatus() {
             glfwGetJoystickButtons(i, &joystick.nButtons);
 
             joystick.initializeAxesAndButtons();
+            LDEBUGC(
+                "Game Controller",
+                std::format("Detected controller: '{}'", joystick.name)
+            );
         }
 
         const float* axes = glfwGetJoystickAxes(i, &joystick.nAxes);

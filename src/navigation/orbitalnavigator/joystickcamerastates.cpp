@@ -437,7 +437,7 @@ void JoystickCameraStates::unbindJoystick(const std::string& joystickName) {
     );
 
     if (it != _joysticks.end()) {
-        LDEBUG(std::format("Unbinding joystick '{}'", joystickName));
+        LDEBUG(std::format("Unbinding joystick mapping for '{}'", joystickName));
         _joysticks.erase(it);
     }
 }
