@@ -58,6 +58,7 @@ local names = {
   "Wireless Xbox Controller"
 }
 
+
 function bindInputs(name)
   local controller = XBoxController
 

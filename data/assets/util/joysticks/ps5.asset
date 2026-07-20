@@ -56,8 +56,8 @@ local PS5Controller = {
   }
 }
 
-
 local name = "DualSense Wireless Controller"
+
 
 asset.onInitialize(function()
   local controller = PS5Controller

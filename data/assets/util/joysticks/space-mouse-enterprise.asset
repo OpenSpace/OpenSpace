@@ -76,6 +76,7 @@ asset.onDeinitialize(function()
 end)
 
 
+
 asset.meta = {
   Name = "Joystick controller: SpaceMouse enterprise",
   Description = "Joystick controller configuration for SpaceMouse enterprise",
