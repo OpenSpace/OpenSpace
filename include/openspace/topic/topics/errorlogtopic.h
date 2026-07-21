@@ -46,16 +46,23 @@ public:
     static openspace::Schema Schema();
 
 private:
+    static constexpr int UnsetOnChangeHandle = -1;
+
     /**
      * Creates a log object and register it to the `LogManager`, does nothing if an active
      * log already exists.
      */
     void createLog();
 
+    void flushQueuedMessages();
+
     bool _isSubscribedTo = false;
+    int _dataCallbackHandle = UnsetOnChangeHandle;
 
     /// Non-owning but we remove the log from LogManager on destruction
     ghoul::logging::Log* _log = nullptr;
+    std::vector<nlohmann::json> _queuedMessages;
+    std::mutex _queuedMessagesMutex;
 
     struct {
         bool isTimeStamping = true;
