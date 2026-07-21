@@ -27,7 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/network/parallelconnection.h>
+#include <openspace/network/astrocastconnection.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec4property.h>
@@ -63,7 +63,7 @@ public:
     void setCommandInputButton(Key key);
 
 private:
-    void parallelConnectionChanged(const ParallelConnection::Status& status);
+    void astrocastConnectionChanged(const AstrocastConnection::Status& status);
     void addToCommand(const std::string& c);
     void registerKeyHandlers();
     void registerKeyHandler(Key key, KeyModifier modifier,

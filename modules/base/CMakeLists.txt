@@ -26,6 +26,7 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   dashboard/dashboarditemangle.h
+  dashboard/dashboarditemastrocastconnection.h
   dashboard/dashboarditemcameraorientation.h
   dashboard/dashboarditemdate.h
   dashboard/dashboarditemdistance.h
@@ -33,7 +34,6 @@ set(HEADER_FILES
   dashboard/dashboarditemframerate.h
   dashboard/dashboarditeminputstate.h
   dashboard/dashboarditemmission.h
-  dashboard/dashboarditemparallelconnection.h
   dashboard/dashboarditempropertyvalue.h
   dashboard/dashboarditemsimulationincrement.h
   dashboard/dashboarditemspacing.h
@@ -104,6 +104,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   dashboard/dashboarditemangle.cpp
+  dashboard/dashboarditemastrocastconnection.cpp
   dashboard/dashboarditemcameraorientation.cpp
   dashboard/dashboarditemdate.cpp
   dashboard/dashboarditemdistance.cpp
@@ -111,7 +112,6 @@ set(SOURCE_FILES
   dashboard/dashboarditemframerate.cpp
   dashboard/dashboarditeminputstate.cpp
   dashboard/dashboarditemmission.cpp
-  dashboard/dashboarditemparallelconnection.cpp
   dashboard/dashboarditempropertyvalue.cpp
   dashboard/dashboarditemsimulationincrement.cpp
   dashboard/dashboarditemspacing.cpp

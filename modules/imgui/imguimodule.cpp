@@ -31,7 +31,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/network/parallelpeer.h>
+#include <openspace/network/astrocastpeer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
@@ -274,7 +274,7 @@ void ImGUIModule::internalInitialize(const ghoul::Dictionary&) {
         global::sessionRecordingHandler,
         global::timeManager,
         global::renderEngine,
-        global::parallelPeer,
+        global::astrocast,
         global::luaConsole,
         global::dashboard
     });

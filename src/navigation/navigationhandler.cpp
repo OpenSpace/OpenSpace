@@ -31,8 +31,8 @@
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/navigation/waypoint.h>
-#include <openspace/network/parallelconnection.h>
-#include <openspace/network/parallelpeer.h>
+#include <openspace/network/astrocastconnection.h>
+#include <openspace/network/astrocastpeer.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -103,12 +103,12 @@ NavigationHandler::~NavigationHandler() {}
 void NavigationHandler::initialize() {
     ZoneScoped;
 
-    global::parallelPeer->connectionEvent().subscribe(
+    global::astrocast->connectionEvent().subscribe(
         "NavigationHandler",
         "statusChanged",
         [this]() {
-            _useKeyFrameInteraction = (global::parallelPeer->status() ==
-                ParallelConnection::Status::ClientWithHost);
+            _useKeyFrameInteraction = (global::astrocast->status() ==
+                AstrocastConnection::Status::ClientWithHost);
         }
     );
 }
@@ -116,7 +116,7 @@ void NavigationHandler::initialize() {
 void NavigationHandler::deinitialize() {
     ZoneScoped;
 
-    global::parallelPeer->connectionEvent().unsubscribe("NavigationHandler");
+    global::astrocast->connectionEvent().unsubscribe("NavigationHandler");
 }
 
 void NavigationHandler::setFocusNode(SceneGraphNode* node) {

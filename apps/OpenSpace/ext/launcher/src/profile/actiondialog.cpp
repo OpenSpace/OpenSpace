@@ -209,7 +209,7 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         "If this value is checked, the action will only ever affect the OpenSpace "
         "instance that is executing it. If running a 'regular' OpenSpace instance, this "
         "setting will not make any difference, but it is necessary in a clustered "
-        "environment or when using a parallel connection, in which case it determines "
+        "environment or when using an astrocast connection, in which case it determines "
         "whether a command should be executed only locally or send to all remote "
         "instances as well"
     );

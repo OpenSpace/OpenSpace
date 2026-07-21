@@ -29,7 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
-#include <openspace/network/parallelpeer.h>
+#include <openspace/network/astrocastpeer.h>
 #include <openspace/util/syncbuffer.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
@@ -558,9 +558,9 @@ void ScriptEngine::preSync(bool isMaster) {
             }
             _scriptsToSync.push_back(item.code);
 
-            // Send to other peers (parallel connection)
-            if (global::parallelPeer->isHost() && item.sendToRemote) {
-                global::parallelPeer->sendScript(item.code);
+            // Send to other peers (astrocast connection)
+            if (global::astrocast->isHost() && item.sendToRemote) {
+                global::astrocast->sendScript(item.code);
             }
         }
     }

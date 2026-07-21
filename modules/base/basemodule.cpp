@@ -25,6 +25,7 @@
 #include <modules/base/basemodule.h>
 
 #include <modules/base/dashboard/dashboarditemangle.h>
+#include <modules/base/dashboard/dashboarditemastrocastconnection.h>
 #include <modules/base/dashboard/dashboarditemcameraorientation.h>
 #include <modules/base/dashboard/dashboarditemdate.h>
 #include <modules/base/dashboard/dashboarditemdistance.h>
@@ -32,7 +33,6 @@
 #include <modules/base/dashboard/dashboarditemframerate.h>
 #include <modules/base/dashboard/dashboarditeminputstate.h>
 #include <modules/base/dashboard/dashboarditemmission.h>
-#include <modules/base/dashboard/dashboarditemparallelconnection.h>
 #include <modules/base/dashboard/dashboarditempropertyvalue.h>
 #include <modules/base/dashboard/dashboarditemsimulationincrement.h>
 #include <modules/base/dashboard/dashboarditemspacing.h>
@@ -136,6 +136,9 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fDashboard, "Dashboard factory was not created");
 
     fDashboard->registerClass<DashboardItemAngle>("DashboardItemAngle");
+    fDashboard->registerClass<DashboardItemAstrocastConnection>(
+        "DashboardItemAstrocastConnection"
+    );
     fDashboard->registerClass<DashboardItemCameraOrientation>(
         "DashboardItemCameraOrientation"
     );
@@ -145,9 +148,6 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fDashboard->registerClass<DashboardItemFramerate>("DashboardItemFramerate");
     fDashboard->registerClass<DashboardItemInputState>("DashboardItemInputState");
     fDashboard->registerClass<DashboardItemMission>("DashboardItemMission");
-    fDashboard->registerClass<DashboardItemParallelConnection>(
-        "DashboardItemParallelConnection"
-    );
     fDashboard->registerClass<DashboardItemPropertyValue>(
         "DashboardItemPropertyValue"
     );
@@ -266,6 +266,7 @@ void BaseModule::internalDeinitializeGL() {
 std::vector<Documentation> BaseModule::documentations() const {
     return {
         DashboardItemAngle::Documentation(),
+        DashboardItemAstrocastConnection::Documentation(),
         DashboardItemCameraOrientation::Documentation(),
         DashboardItemDate::Documentation(),
         DashboardItemDistance::Documentation(),
@@ -273,7 +274,6 @@ std::vector<Documentation> BaseModule::documentations() const {
         DashboardItemFramerate::Documentation(),
         DashboardItemInputState::Documentation(),
         DashboardItemMission::Documentation(),
-        DashboardItemParallelConnection::Documentation(),
         DashboardItemPropertyValue::Documentation(),
         DashboardItemSimulationIncrement::Documentation(),
         DashboardItemSpacing::Documentation(),

@@ -74,7 +74,7 @@ struct Action {
     /// If this value is set to `Yes`, the execution of this action is restricted to the
     /// current OpenSpace instance. If it is `No`, it is synchronized to other OpenSpace
     /// instances, for example other nodes in a cluster environment, or to other OpenSpace
-    /// instances using a parallel connection
+    /// instances using an astrocast connection
     IsLocal isLocal = IsLocal::No;
 };
 

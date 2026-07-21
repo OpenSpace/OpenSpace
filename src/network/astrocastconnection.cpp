@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/network/parallelconnection.h>
+#include <openspace/network/astrocastconnection.h>
 
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
@@ -30,37 +30,37 @@
 #include <utility>
 
 namespace {
-    constexpr std::string_view _loggerCat = "ParallelConnection";
+    constexpr std::string_view _loggerCat = "AstrocastConnection";
 } // namespace
 
 namespace openspace {
 
-ParallelConnection::Message::Message(MessageType t, std::vector<char> c)
+AstrocastConnection::Message::Message(MessageType t, std::vector<char> c)
     : type(t)
     , content(std::move(c))
 {}
 
-ParallelConnection::DataMessage::DataMessage(datamessagestructures::Type t,
+AstrocastConnection::DataMessage::DataMessage(datamessagestructures::Type t,
                                              double time, std::vector<char> c)
     : type(t)
     , timestamp(time)
     , content(std::move(c))
 {}
 
-ParallelConnection::ConnectionLostError::ConnectionLostError(bool shouldLogError_)
-    : ghoul::RuntimeError("Parallel connection lost", "ParallelConnection")
+AstrocastConnection::ConnectionLostError::ConnectionLostError(bool shouldLogError_)
+    : ghoul::RuntimeError("Astrocast connection lost", "AstrocastConnection")
     , shouldLogError(shouldLogError_)
 {}
 
-ParallelConnection::ParallelConnection(std::unique_ptr<ghoul::io::TcpSocket> socket)
+AstrocastConnection::AstrocastConnection(std::unique_ptr<ghoul::io::TcpSocket> socket)
     : _socket(std::move(socket))
 {}
 
-bool ParallelConnection::isConnectedOrConnecting() const {
+bool AstrocastConnection::isConnectedOrConnecting() const {
     return _socket != nullptr && (_socket->isConnected() || _socket->isConnecting());
 }
 
-void ParallelConnection::sendDataMessage(const DataMessage& dataMessage) {
+void AstrocastConnection::sendDataMessage(const DataMessage& dataMessage) {
     const uint8_t dataMessageTypeOut = static_cast<uint8_t>(dataMessage.type);
     const double dataMessageTimestamp = dataMessage.timestamp;
 
@@ -85,7 +85,7 @@ void ParallelConnection::sendDataMessage(const DataMessage& dataMessage) {
     sendMessage(Message(MessageType::Data, messageContent));
 }
 
-bool ParallelConnection::sendMessage(const Message& message) {
+bool AstrocastConnection::sendMessage(const Message& message) {
     const uint8_t messageTypeOut = static_cast<uint8_t>(message.type);
     const uint32_t messageSizeOut = static_cast<uint32_t>(message.content.size());
     std::vector<char> payload;
@@ -118,18 +118,18 @@ bool ParallelConnection::sendMessage(const Message& message) {
     return res;
 }
 
-void ParallelConnection::disconnect() {
+void AstrocastConnection::disconnect() {
     _shouldDisconnect = true;
     if (_socket) {
         _socket->disconnect();
     }
 }
 
-ghoul::io::TcpSocket* ParallelConnection::socket() {
+ghoul::io::TcpSocket* AstrocastConnection::socket() {
     return _socket.get();
 }
 
-ParallelConnection::Message ParallelConnection::receiveMessage() {
+AstrocastConnection::Message AstrocastConnection::receiveMessage() {
     // Header consists of...
     constexpr size_t HeaderSize =
         2 * sizeof(char) + // OS

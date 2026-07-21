@@ -22,14 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/imgui/include/guiparallelcomponent.h>
+#include <modules/imgui/include/guiastrocastcomponent.h>
 
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/network/parallelconnection.h>
-#include <openspace/network/parallelpeer.h>
+#include <openspace/network/astrocastconnection.h>
+#include <openspace/network/astrocastpeer.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/format.h>
 
@@ -37,7 +37,7 @@ namespace {
     using namespace openspace;
 
     void renderHost() {
-        const size_t nConnections = global::parallelPeer->nConnections();
+        const size_t nConnections = global::astrocast->nConnections();
 
         std::string connectionInfo;
         const size_t nClients = nConnections - 1;
@@ -52,40 +52,40 @@ namespace {
 
         const bool resignHostship = ImGui::Button("Resign hostship");
         if (resignHostship) {
-            global::parallelPeer->resignHostship();
+            global::astrocast->resignHostship();
         }
     }
 } // namespace
 
 namespace openspace {
 
-GuiParallelComponent::GuiParallelComponent()
-    : GuiPropertyComponent("Parallel", "Parallel Connection")
+GuiAstrocastComponent::GuiAstrocastComponent()
+    : GuiPropertyComponent("Astrocast", "Astrocast Connection")
 {}
 
-void GuiParallelComponent::renderDisconnected() {
+void GuiAstrocastComponent::renderDisconnected() {
     ImGui::Text("Not connected");
 
     const bool connect = ImGui::Button("Connect");
     if (connect) {
-        global::parallelPeer->connect();
+        global::astrocast->connect();
     }
 }
 
-void GuiParallelComponent::renderConnecting() {
+void GuiAstrocastComponent::renderConnecting() {
     ImGui::Text("Connecting...");
 
     const bool cancel = ImGui::Button("Cancel connection");
     if (cancel) {
-        global::parallelPeer->disconnect();
+        global::astrocast->disconnect();
     }
 }
 
-void GuiParallelComponent::renderClientWithHost() {
-    ParallelPeer& parallel = *global::parallelPeer;
+void GuiAstrocastComponent::renderClientWithHost() {
+    Astrocast& astrocast = *global::astrocast;
 
-    std::string connectionInfo = "Session hosted by \"" + parallel.hostName() + "\"\n";
-    const size_t nConnections = parallel.nConnections();
+    std::string connectionInfo = "Session hosted by \"" + astrocast.hostName() + "\"\n";
+    const size_t nConnections = astrocast.nConnections();
     const size_t nClients = nConnections - 1;
 
     if (nClients > 2) {
@@ -116,13 +116,13 @@ void GuiParallelComponent::renderClientWithHost() {
         "CameraKeyframes: {}", nCameraKeyframes
     );
     const std::string latencyStandardDeviation = std::format(
-        "Latency standard deviation: {} s", parallel.latencyStandardDeviation()
+        "Latency standard deviation: {} s", astrocast.latencyStandardDeviation()
     );
 
     const bool resetTimeOffset = ImGui::Button("Reset time offset");
 
     if (resetTimeOffset) {
-        parallel.resetTimeOffset();
+        astrocast.resetTimeOffset();
     }
 
     ImGui::Text("%s", timeKeyframeInfo.c_str());
@@ -130,9 +130,9 @@ void GuiParallelComponent::renderClientWithHost() {
     ImGui::Text("%s", latencyStandardDeviation.c_str());
 }
 
-void GuiParallelComponent::renderClientWithoutHost() {
-    std::string connectionInfo = "Connected to parallel session with no host\n";
-    const size_t nConnections = global::parallelPeer->nConnections();
+void GuiAstrocastComponent::renderClientWithoutHost() {
+    std::string connectionInfo = "Connected to astrocast session with no host\n";
+    const size_t nConnections = global::astrocast->nConnections();
 
     if (nConnections > 2) {
         connectionInfo += std::format(
@@ -153,46 +153,46 @@ void GuiParallelComponent::renderClientWithoutHost() {
     renderClientCommon();
 }
 
-void GuiParallelComponent::renderClientCommon() {
+void GuiAstrocastComponent::renderClientCommon() {
     const bool requestHostship = ImGui::Button("Request hostship");
     if (requestHostship) {
-        global::parallelPeer->requestHostship();
+        global::astrocast->requestHostship();
     }
 
     const bool disconnect = ImGui::Button("Disconnect");
     if (disconnect) {
-        global::parallelPeer->disconnect();
+        global::astrocast->disconnect();
     }
 }
 
-void GuiParallelComponent::render() {
+void GuiAstrocastComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool v = _isEnabled;
-    ImGui::Begin("Parallel Connection", &v);
+    ImGui::Begin("Astrocast Connection", &v);
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    const ParallelConnection::Status status = global::parallelPeer->status();
+    const AstrocastConnection::Status status = global::astrocast->status();
 
     switch (status) {
-        case ParallelConnection::Status::Disconnected:
+        case AstrocastConnection::Status::Disconnected:
             renderDisconnected();
             break;
-        case ParallelConnection::Status::Connecting:
+        case AstrocastConnection::Status::Connecting:
             renderConnecting();
             break;
-        case ParallelConnection::Status::ClientWithHost:
+        case AstrocastConnection::Status::ClientWithHost:
             renderClientWithHost();
             break;
-        case ParallelConnection::Status::ClientWithoutHost:
+        case AstrocastConnection::Status::ClientWithoutHost:
             renderClientWithoutHost();
             break;
-        case ParallelConnection::Status::Host:
+        case AstrocastConnection::Status::Host:
             renderHost();
             break;
     }
 
-    GuiPropertyComponent::renderPropertyOwner(global::parallelPeer);
+    GuiPropertyComponent::renderPropertyOwner(global::astrocast);
     ImGui::End();
 }
 

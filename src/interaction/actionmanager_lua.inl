@@ -104,7 +104,7 @@ struct [[codegen::Dictionary(Action)]] Action {
     std::optional<glm::vec4> textColor [[codegen::color()]];
 
     // Determines whether the provided command will be executed locally or will be sent to
-    // connected computers in a cluster or parallel connection environment.
+    // connected computers in a cluster or astrocast connection environment.
     std::optional<bool> isLocal;
 };
 

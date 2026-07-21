@@ -37,7 +37,7 @@ namespace {
 
 /**
  * Binds a key to Lua command to both execute locally and broadcast to all clients if this
- * node is hosting a parallel connection.
+ * node is hosting an astrocast connection.
  */
 [[codegen::luawrap]] void bindKey(std::string key,
                                   std::variant<std::string, ghoul::Dictionary> action)

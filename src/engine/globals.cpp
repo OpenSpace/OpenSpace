@@ -39,7 +39,7 @@
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/network/parallelpeer.h>
+#include <openspace/network/astrocastpeer.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/deferredcastermanager.h>
@@ -83,7 +83,7 @@ namespace {
         sizeof(LuaConsole) +
         sizeof(MissionManager) +
         sizeof(ModuleEngine) +
-        sizeof(ParallelPeer) +
+        sizeof(Astrocast) +
         sizeof(RaycasterManager) +
         sizeof(RenderEngine) +
         sizeof(std::vector<std::unique_ptr<ScreenSpaceRenderable>>) +
@@ -227,11 +227,11 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    parallelPeer = new (currentPos) ParallelPeer;
-    ghoul_assert(parallelPeer, "No parallelPeer");
-    currentPos += sizeof(ParallelPeer);
+    astrocast = new (currentPos) Astrocast;
+    ghoul_assert(astrocast, "No astrocast");
+    currentPos += sizeof(Astrocast);
 #else // ^^^^ WIN32 / !WIN32 vvvv
-    parallelPeer = new ParallelPeer;
+    astrocast = new Astrocast;
 #endif // WIN32
 
 #ifdef WIN32
@@ -407,7 +407,7 @@ void initialize() {
 
     rootPropertyOwner->addPropertySubOwner(global::server);
 
-    rootPropertyOwner->addPropertySubOwner(global::parallelPeer);
+    rootPropertyOwner->addPropertySubOwner(global::astrocast);
     rootPropertyOwner->addPropertySubOwner(global::luaConsole);
     rootPropertyOwner->addPropertySubOwner(global::dashboard);
 
@@ -548,11 +548,11 @@ void destroy() {
     delete raycasterManager;
 #endif // WIN32
 
-    LDEBUGC("Globals", "Destroying 'ParallelPeer'");
+    LDEBUGC("Globals", "Destroying 'Astrocast'");
 #ifdef WIN32
-    parallelPeer->~ParallelPeer();
+    astrocast->~Astrocast();
 #else // ^^^^ WIN32 / !WIN32 vvvv
-    delete parallelPeer;
+    delete astrocast;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'ModuleEngine'");

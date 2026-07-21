@@ -22,12 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PARALLELPEER___H__
-#define __OPENSPACE_CORE___PARALLELPEER___H__
+#ifndef __OPENSPACE_CORE___ASTROCAST___H__
+#define __OPENSPACE_CORE___ASTROCAST___H__
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/network/parallelconnection.h>
+#include <openspace/network/astrocastconnection.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/timemanager.h>
@@ -43,10 +43,10 @@ namespace openspace {
 
 struct LuaLibrary;
 
-class ParallelPeer : public PropertyOwner {
+class Astrocast : public PropertyOwner {
 public:
-    ParallelPeer();
-    ~ParallelPeer() override;
+    Astrocast();
+    ~Astrocast() override;
 
     void connect();
     void setPort(std::string port);
@@ -67,20 +67,20 @@ public:
 
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
-     * remote OS parallel connection.
+     * remote OpenSpace astrocast connection.
      */
     static LuaLibrary luaLibrary();
-    ParallelConnection::Status status();
+    AstrocastConnection::Status status();
     int nConnections();
     ghoul::Event<>& connectionEvent();
 
 private:
-    void queueInMessage(const ParallelConnection::Message& message);
+    void queueInMessage(const AstrocastConnection::Message& message);
 
     void sendAuthentication();
     void handleCommunication();
 
-    void handleMessage(const ParallelConnection::Message&);
+    void handleMessage(const AstrocastConnection::Message&);
     void dataMessageReceived(const std::vector<char>& message);
     void connectionStatusMessageReceived(const std::vector<char>& message);
     void nConnectionsMessageReceived(const std::vector<char>& message);
@@ -88,7 +88,7 @@ private:
     void sendCameraKeyframe();
     void sendTimeTimeline();
 
-    void setStatus(ParallelConnection::Status status);
+    void setStatus(AstrocastConnection::Status status);
     void setHostName(const std::string& hostName);
     void setNConnections(size_t nConnections);
 
@@ -114,12 +114,12 @@ private:
     std::atomic_bool _shouldDisconnect = false;
 
     std::atomic<size_t> _nConnections = 0;
-    std::atomic<ParallelConnection::Status> _status =
-        ParallelConnection::Status::Disconnected;
+    std::atomic<AstrocastConnection::Status> _status =
+        AstrocastConnection::Status::Disconnected;
 
     std::string _hostName;
 
-    std::deque<ParallelConnection::Message> _receiveBuffer;
+    std::deque<AstrocastConnection::Message> _receiveBuffer;
     std::mutex _receiveBufferMutex;
 
     std::atomic<bool> _timeJumped;
@@ -131,7 +131,7 @@ private:
     std::unique_ptr<std::thread> _receiveThread = nullptr;
     std::shared_ptr<ghoul::Event<>> _connectionEvent;
 
-    ParallelConnection _connection;
+    AstrocastConnection _connection;
 
     TimeManager::CallbackHandle _timeJumpCallback = -1;
     TimeManager::CallbackHandle _timeTimelineChangeCallback = -1;
@@ -139,4 +139,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___PARALLELPEER___H__
+#endif // __OPENSPACE_CORE___ASTROCAST___H__

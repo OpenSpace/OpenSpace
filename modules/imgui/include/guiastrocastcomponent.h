@@ -22,23 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMPARALLELCONNECTION___H__
-#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMPARALLELCONNECTION___H__
+#ifndef __OPENSPACE_MODULE_IMGUI___GUIASTROCASTCOMPONENT___H__
+#define __OPENSPACE_MODULE_IMGUI___GUIASTROCASTCOMPONENT___H__
 
-#include <openspace/rendering/dashboardtextitem.h>
+#include <modules/imgui/include/guipropertycomponent.h>
 
 namespace openspace {
 
-class DashboardItemParallelConnection : public DashboardTextItem {
+class GuiAstrocastComponent : public GuiPropertyComponent {
 public:
-    explicit DashboardItemParallelConnection(const ghoul::Dictionary& dictionary);
-    ~DashboardItemParallelConnection() override = default;
+    GuiAstrocastComponent();
 
-    void update() override;
+    void render() override;
 
-    static openspace::Documentation Documentation();
+private:
+    void renderDisconnected();
+    void renderConnecting();
+    void renderClientWithHost();
+    void renderClientWithoutHost();
+    void renderClientCommon();
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMPARALLELCONNECTION___H__
+#endif // __OPENSPACE_MODULE_IMGUI___GUIASTROCASTCOMPONENT___H__

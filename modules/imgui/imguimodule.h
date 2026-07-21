@@ -28,6 +28,7 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <modules/imgui/include/guiactioncomponent.h>
+#include <modules/imgui/include/guiastrocastcomponent.h>
 #include <modules/imgui/include/guicomponent.h>
 #include <modules/imgui/include/guifilepathcomponent.h>
 #include <modules/imgui/include/guigibscomponent.h>
@@ -36,7 +37,6 @@
 #include <modules/imgui/include/guijoystickcomponent.h>
 #include <modules/imgui/include/guimemorycomponent.h>
 #include <modules/imgui/include/guimissioncomponent.h>
-#include <modules/imgui/include/guiparallelcomponent.h>
 #include <modules/imgui/include/guipropertycomponent.h>
 #include <modules/imgui/include/guiscenecomponent.h>
 #include <modules/imgui/include/guishadowcomponent.h>
@@ -91,7 +91,7 @@ private:
     GuiSpaceTimeComponent _spaceTime;
     GuiJoystickComponent _joystick;
     GuiActionComponent _actions;
-    GuiParallelComponent _parallel;
+    GuiAstrocastComponent _astrocast;
     GuiGlobeBrowsingComponent _globeBrowsing;
     GuiGIBSComponent _gibs;
     GuiMissionComponent _mission;
@@ -112,7 +112,7 @@ private:
         &_spaceTime,
         &_joystick,
         &_actions,
-        &_parallel,
+        &_astrocast,
         &_globeBrowsing,
         &_gibs,
         &_mission,

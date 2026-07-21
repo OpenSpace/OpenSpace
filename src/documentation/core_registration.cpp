@@ -41,7 +41,7 @@
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/navigation/path.h>
 #include <openspace/navigation/pathnavigator.h>
-#include <openspace/network/parallelpeer.h>
+#include <openspace/network/astrocastpeer.h>
 #include <openspace/properties/list/doublelistproperty.h>
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/list/stringlistproperty.h>
@@ -225,7 +225,7 @@ void registerCoreClasses(ScriptEngine& engine) {
     engine.addLibrary(MissionManager::luaLibrary());
     engine.addLibrary(ModuleEngine::luaLibrary());
     engine.addLibrary(OpenSpaceEngine::luaLibrary());
-    engine.addLibrary(ParallelPeer::luaLibrary());
+    engine.addLibrary(Astrocast::luaLibrary());
     engine.addLibrary(Profile::luaLibrary());
     engine.addLibrary(RenderEngine::luaLibrary());
     engine.addLibrary(SpiceManager::luaLibrary());

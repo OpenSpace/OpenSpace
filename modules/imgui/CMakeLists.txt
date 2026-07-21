@@ -26,6 +26,7 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   include/guiactioncomponent.h
+  include/guiastrocastcomponent.h
   include/guicomponent.h
   include/guifilepathcomponent.h
   include/guigibscomponent.h
@@ -34,7 +35,6 @@ set(HEADER_FILES
   include/guijoystickcomponent.h
   include/guimemorycomponent.h
   include/guimissioncomponent.h
-  include/guiparallelcomponent.h
   include/guipropertycomponent.h
   include/guiscenecomponent.h
   include/guishadowcomponent.h
@@ -46,6 +46,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   src/guiactioncomponent.cpp
+  src/guiastrocastcomponent.cpp
   src/guicomponent.cpp
   src/guifilepathcomponent.cpp
   src/guigibscomponent.cpp
@@ -54,7 +55,6 @@ set(SOURCE_FILES
   src/guijoystickcomponent.cpp
   src/guimemorycomponent.cpp
   src/guimissioncomponent.cpp
-  src/guiparallelcomponent.cpp
   src/guipropertycomponent.cpp
   src/guiscenecomponent.cpp
   src/guishadowcomponent.cpp

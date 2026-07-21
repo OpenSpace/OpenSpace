@@ -22,51 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/dashboard/dashboarditemparallelconnection.h>
+#include <modules/base/dashboard/dashboarditemastrocastconnection.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/network/parallelconnection.h>
-#include <openspace/network/parallelpeer.h>
+#include <openspace/network/astrocastconnection.h>
+#include <openspace/network/astrocastpeer.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    // Displays information about the status of the parallel connection, which is whether
+    // Displays information about the status of the astrocast connection, which is whether
     // OpenSpace is directly connected to other OpenSpace instances and can either control
     // those instances or be controlled by the master of the session. If OpenSpace is not
     // connected, this `DashboardItem` will not display anything.
     //
     // The information presented contains how many clients are connected to the same
     // session and whether this machine is currently the host of the session.
-    struct [[codegen::Dictionary(DashboardItemParallelConnection)]] Parameters {};
+    struct [[codegen::Dictionary(DashboardItemAstrocastConnection)]] Parameters {};
 } // namespace
-#include "dashboarditemparallelconnection_codegen.cpp"
+#include "dashboarditemastrocastconnection_codegen.cpp"
 
 namespace openspace {
 
-Documentation DashboardItemParallelConnection::Documentation() {
+Documentation DashboardItemAstrocastConnection::Documentation() {
     return codegen::doc<Parameters>(
-        "base_dashboarditem_parallelconnection",
+        "base_dashboarditem_astrocastconnection",
         DashboardTextItem::Documentation()
     );
 }
 
-DashboardItemParallelConnection::DashboardItemParallelConnection(
+DashboardItemAstrocastConnection::DashboardItemAstrocastConnection(
                                                       const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)
 {}
 
-void DashboardItemParallelConnection::update() {
+void DashboardItemAstrocastConnection::update() {
     ZoneScoped;
 
-    const ParallelConnection::Status status = global::parallelPeer->status();
-    const size_t nConnections = global::parallelPeer->nConnections();
-    const std::string& hostName = global::parallelPeer->hostName();
+    const AstrocastConnection::Status status = global::astrocast->status();
+    const size_t nConnections = global::astrocast->nConnections();
+    const std::string& hostName = global::astrocast->hostName();
 
     int nClients = static_cast<int>(nConnections);
-    if (status == ParallelConnection::Status::Host) {
+    if (status == AstrocastConnection::Status::Host) {
         nClients--;
         constexpr std::string_view Singular = "Hosting session with {} client";
         constexpr std::string_view Plural = "Hosting session with {} clients";
@@ -76,16 +76,16 @@ void DashboardItemParallelConnection::update() {
             std::format(Singular, nClients) :
             std::format(Plural, nClients);
     }
-    else if (status == ParallelConnection::Status::ClientWithHost) {
+    else if (status == AstrocastConnection::Status::ClientWithHost) {
         nClients--;
         _buffer = std::format("Session hosted by '{}'", hostName);
     }
-    else if (status == ParallelConnection::Status::ClientWithoutHost) {
+    else if (status == AstrocastConnection::Status::ClientWithoutHost) {
         _buffer = "Host is disconnected";
     }
 
-    if (status == ParallelConnection::Status::ClientWithHost ||
-        status == ParallelConnection::Status::ClientWithoutHost)
+    if (status == AstrocastConnection::Status::ClientWithHost ||
+        status == AstrocastConnection::Status::ClientWithoutHost)
     {
         _buffer += "\n";
 

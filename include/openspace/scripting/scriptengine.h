@@ -71,7 +71,7 @@ public:
         ShouldBeSynchronized synchronized = ShouldBeSynchronized::Yes;
 
         /// Determines whether a script should be send to a distant OpenSpace instance
-        /// that is not part of the same cluster. This is used in the ParallelConnection
+        /// that is not part of the same cluster. This is used in the AstrocastConnection
         /// feature that can connect OpenSpace instances in a connection that does not
         /// require instantaneous synchronization
         ShouldSendToRemote sendToRemote = ShouldSendToRemote::Yes;
