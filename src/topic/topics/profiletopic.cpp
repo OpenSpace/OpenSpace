@@ -29,8 +29,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/settings.h>
 #include <openspace/scene/profile.h>
-#include <openspace/topic/connection.h>
-#include <openspace/topic/jsonconverters.h>
 
 namespace openspace {
 

@@ -26,10 +26,7 @@
 
 #include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
-#include <openspace/topic/connection.h>
 #include <openspace/util/downloadeventengine.h>
-#include <ghoul/format.h>
-#include <string_view>
 
 namespace {
     constexpr std::chrono::milliseconds CallbackUpdateInterval(250);

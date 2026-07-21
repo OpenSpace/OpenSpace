@@ -28,9 +28,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/json.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/topic/connection.h>
 #include <openspace/topic/jsonconverters.h>
-#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionary.h>
