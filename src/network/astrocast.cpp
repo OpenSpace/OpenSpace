@@ -38,6 +38,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeline.h>
+#include <ghoul/format.h>
 #include <ghoul/io/socket/tcpsocket.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
@@ -45,9 +46,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <limits>
-#include <utility>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
 #include <string_view>
 #include <utility>
 
@@ -58,6 +56,162 @@ namespace {
 
     constexpr std::string_view _loggerCat = "Astrocast";
     constexpr size_t MaxLatencyDiffs = 64;
+
+    // Gonna do some UTF-like magic once we reach 255 to introduce a second byte or so
+    static constexpr uint8_t ProtocolVersion = 7;
+
+    class ConnectionLostError final : public ghoul::RuntimeError {
+    public:
+        explicit ConnectionLostError(bool shouldLogError_ = true)
+            : ghoul::RuntimeError("Astrocast connection lost", "Astrocast")
+            , shouldLogError(shouldLogError_)
+        {}
+
+        bool shouldLogError;
+    };
+
+    Astrocast::DataMessage createCameraKeyframe() {
+        NavigationHandler& navHandler = *global::navigationHandler;
+        const SceneGraphNode* focusNode = navHandler.orbitalNavigator().anchorNode();
+
+        // Create a keyframe with current position and orientation of camera
+        datamessagestructures::CameraKeyframe kf;
+        kf._position = navHandler.orbitalNavigator().anchorNodeToCameraVector();
+
+        kf._followNodeRotation = navHandler.orbitalNavigator().followingAnchorRotation();
+        if (kf._followNodeRotation) {
+            kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
+            kf._rotation = navHandler.orbitalNavigator().anchorNodeToCameraRotation();
+        }
+        else {
+            kf._rotation = navHandler.camera()->rotationQuaternion();
+        }
+
+        kf._focusNode = focusNode->identifier();
+        kf._scale = navHandler.camera()->scaling();
+        kf._timestamp = global::windowDelegate->applicationTime();
+
+        std::vector<char> buffer;
+        kf.serialize(buffer);
+
+        const double timestamp = global::windowDelegate->applicationTime();
+        return Astrocast::DataMessage(
+            datamessagestructures::Type::CameraData,
+            timestamp,
+            buffer
+        );
+    }
+
+    Astrocast::DataMessage createTimeKeyframe(bool timeJumped) {
+        // Create a keyframe with current position and orientation of camera
+        const Timeline<TimeManager::TimeKeyframeData>& timeline =
+            global::timeManager->timeline();
+        std::deque<Keyframe<TimeManager::TimeKeyframeData>> keyframes =
+            timeline.keyframes();
+
+        datamessagestructures::TimeTimeline timelineMessage;
+        timelineMessage._clear = true;
+        timelineMessage._keyframes.reserve(timeline.nKeyframes());
+
+        // Case 1: Copy all keyframes from the native timeline
+        for (size_t i = 0; i < timeline.nKeyframes(); i++) {
+            const Keyframe<TimeManager::TimeKeyframeData>& kf = keyframes.at(i);
+
+            datamessagestructures::TimeKeyframe kfMessage;
+            kfMessage._time = kf.data.time.j2000Seconds();
+            kfMessage._dt = kf.data.delta;
+            kfMessage._paused = kf.data.pause;
+            kfMessage._requiresTimeJump = kf.data.jump;
+            kfMessage._timestamp = kf.timestamp;
+            timelineMessage._keyframes.push_back(kfMessage);
+        }
+
+        // Case 2: Send one keyframe to represent the curernt time. If time jumped this
+        // frame, this is represented in the keyframe
+        if (timeline.nKeyframes() == 0) {
+            datamessagestructures::TimeKeyframe kfMessage;
+            kfMessage._time = global::timeManager->time().j2000Seconds();
+            kfMessage._dt = global::timeManager->targetDeltaTime();
+            kfMessage._paused = global::timeManager->isPaused();
+            kfMessage._timestamp = global::windowDelegate->applicationTime();
+            kfMessage._requiresTimeJump = timeJumped;
+            timelineMessage._keyframes.push_back(kfMessage);
+        }
+
+        std::vector<char> buffer;
+        timelineMessage.serialize(buffer);
+
+        const double timestamp = global::windowDelegate->applicationTime();
+        return Astrocast::DataMessage(
+            datamessagestructures::Type::TimelineData,
+            timestamp,
+            buffer
+        );
+    }
+
+    bool sendMessage(const Astrocast::Message& message, ghoul::io::TcpSocket& socket) {
+        const uint8_t messageTypeOut = static_cast<uint8_t>(message.type);
+        const uint32_t messageSizeOut = static_cast<uint32_t>(message.content.size());
+        std::vector<char> payload;
+        payload.reserve(2 + 2 * sizeof(uint8_t) + sizeof(uint32_t) + messageSizeOut);
+
+        // Insert header into buffer
+        payload.push_back('O');
+        payload.push_back('S');
+
+        payload.insert(
+            payload.end(),
+            reinterpret_cast<const char*>(&ProtocolVersion),
+            reinterpret_cast<const char*>(&ProtocolVersion) + sizeof(uint8_t)
+        );
+
+        payload.insert(
+            payload.end(),
+            reinterpret_cast<const char*>(&messageTypeOut),
+            reinterpret_cast<const char*>(&messageTypeOut) + sizeof(uint8_t)
+        );
+
+        payload.insert(
+            payload.end(),
+            reinterpret_cast<const char*>(&messageSizeOut),
+            reinterpret_cast<const char*>(&messageSizeOut) + sizeof(uint32_t)
+        );
+
+        payload.insert(payload.end(), message.content.begin(), message.content.end());
+
+        const bool res = socket.put<char>(payload.data(), payload.size());
+        return res;
+    }
+
+    void sendDataMessage(const Astrocast::DataMessage& dataMessage,
+                         ghoul::io::TcpSocket& socket)
+    {
+        const uint8_t dataMessageTypeOut = static_cast<uint8_t>(dataMessage.type);
+        const double dataMessageTimestamp = dataMessage.timestamp;
+
+        std::vector<char> messageContent;
+        messageContent.insert(
+            messageContent.end(),
+            reinterpret_cast<const char*>(&dataMessageTypeOut),
+            reinterpret_cast<const char*>(&dataMessageTypeOut) + sizeof(uint8_t)
+        );
+
+        messageContent.insert(
+            messageContent.end(),
+            reinterpret_cast<const char*>(&dataMessageTimestamp),
+            reinterpret_cast<const char*>(&dataMessageTimestamp) + sizeof(double)
+        );
+
+        messageContent.insert(
+            messageContent.end(),
+            dataMessage.content.begin(),
+            dataMessage.content.end()
+        );
+
+        sendMessage(
+            Astrocast::Message(Astrocast::MessageType::Data, messageContent), socket
+        );
+    }
 
     constexpr Property::PropertyInfo PasswordInfo = {
         "Password",
@@ -136,23 +290,6 @@ namespace {
 
 namespace openspace {
     
-Astrocast::Message::Message(MessageType t, std::vector<char> c)
-    : type(t)
-    , content(std::move(c))
-{}
-
-Astrocast::DataMessage::DataMessage(datamessagestructures::Type t,
-                                             double time, std::vector<char> c)
-    : type(t)
-    , timestamp(time)
-    , content(std::move(c))
-{}
-
-Astrocast::ConnectionLostError::ConnectionLostError(bool shouldLogError_)
-    : ghoul::RuntimeError("Astrocast connection lost", "Astrocast")
-    , shouldLogError(shouldLogError_)
-{}
-
 Astrocast::Astrocast()
     : PropertyOwner({ "Astrocast", "Astrocast" })
     , _password(PasswordInfo)
@@ -191,10 +328,8 @@ void Astrocast::connect() {
 
     setStatus(Status::Connecting);
 
-    _socket = std::make_unique<ghoul::io::TcpSocket>(
-        _address,
-        std::atoi(_port.value().c_str())
-    );
+    std::string p = _port.value();
+    _socket = std::make_unique<ghoul::io::TcpSocket>(_address, std::atoi(p.c_str()));
 
     _socket->connect();
 
@@ -292,43 +427,7 @@ void Astrocast::sendAuthentication() {
     buffer.insert(buffer.end(), name.begin(), name.end());
 
     // Send message
-    sendMessage(Message(MessageType::Authentication, buffer));
-}
-
-void Astrocast::queueInMessage(const Message& message) {
-    const std::unique_lock lock(_receiveBufferMutex);
-    _receiveBuffer.push_back(message);
-}
-
-void Astrocast::handleMessage(const Message& message) {
-    switch (message.type) {
-        case MessageType::Data:
-            dataMessageReceived(message.content);
-            break;
-        case MessageType::ConnectionStatus:
-            connectionStatusMessageReceived(message.content);
-            break;
-        case MessageType::NConnections:
-            nConnectionsMessageReceived(message.content);
-            break;
-        default:
-            // Unknown message type
-            break;
-    }
-}
-
-void Astrocast::analyzeTimeDifference(double messageTimestamp) {
-    const std::unique_lock lock(_latencyMutex);
-
-    const double timeDiff = global::windowDelegate->applicationTime() - messageTimestamp;
-    if (_latencyDiffs.empty()) {
-        _initialTimeDiff = timeDiff;
-    }
-    const double latencyDiff = timeDiff - _initialTimeDiff;
-    if (_latencyDiffs.size() >= MaxLatencyDiffs) {
-        _latencyDiffs.pop_front();
-    }
-    _latencyDiffs.push_back(latencyDiff);
+    sendMessage(Message(MessageType::Authentication, buffer), *_socket);
 }
 
 double Astrocast::convertTimestamp(double messageTimestamp) {
@@ -366,7 +465,20 @@ void Astrocast::dataMessageReceived(const std::vector<char>& message) {
     const double timestamp = *(reinterpret_cast<const double*>(message.data() + offset));
     offset += sizeof(double);
 
-    analyzeTimeDifference(timestamp);
+    {
+        // Analyze time difference
+        const std::unique_lock lock(_latencyMutex);
+
+        const double timeDiff = global::windowDelegate->applicationTime() - timestamp;
+        if (_latencyDiffs.empty()) {
+            _initialTimeDiff = timeDiff;
+        }
+        const double latencyDiff = timeDiff - _initialTimeDiff;
+        if (_latencyDiffs.size() >= MaxLatencyDiffs) {
+            _latencyDiffs.pop_front();
+        }
+        _latencyDiffs.push_back(latencyDiff);
+    }
 
     const std::vector<char> buffer(message.begin() + offset, message.end());
     switch (static_cast<datamessagestructures::Type>(type)) {
@@ -486,9 +598,10 @@ void Astrocast::connectionStatusMessageReceived(const std::vector<char>& message
         return;
     }
 
-    _latencyMutex.lock();
-    _latencyDiffs.clear();
-    _latencyMutex.unlock();
+    {
+        const std::unique_lock lk(_latencyMutex);
+        _latencyDiffs.clear();
+    }
     setHostName(hostName);
 
     if (status == _status) {
@@ -514,8 +627,9 @@ void Astrocast::nConnectionsMessageReceived(const std::vector<char>& message) {
 void Astrocast::handleCommunication() {
     while (!_shouldDisconnect && isConnectedOrConnecting()) {
         try {
-            const Message m = receiveMessage();
-            queueInMessage(m);
+            Message message = receiveMessage();
+            const std::unique_lock lock(_receiveBufferMutex);
+            _receiveBuffer.push_back(std::move(message));
         }
         catch (const ConnectionLostError& e) {
             if (e.shouldLogError) {
@@ -553,11 +667,11 @@ void Astrocast::requestHostship(std::optional<std::string> hostPassword) {
     );
     buffer.insert(buffer.end(), hostPw.begin(), hostPw.end());
 
-    sendMessage(Message(MessageType::HostshipRequest, buffer));
+    sendMessage(Message(MessageType::HostshipRequest, buffer), *_socket);
 }
 
 void Astrocast::resignHostship() {
-    sendMessage(Message(MessageType::HostshipResignation, std::vector<char>()));
+    sendMessage(Message(MessageType::HostshipResignation, std::vector<char>()), *_socket);
 }
 
 void Astrocast::setPassword(std::string password) {
@@ -580,13 +694,12 @@ void Astrocast::sendScript(std::string script) {
     std::vector<char> buffer;
     sm.serialize(buffer);
 
-    const double timestamp = global::windowDelegate->applicationTime();
     const DataMessage message = DataMessage(
         datamessagestructures::Type::ScriptData,
-        timestamp,
+        global::windowDelegate->applicationTime(),
         buffer
     );
-    sendDataMessage(message);
+    sendDataMessage(message, *_socket);
 }
 
 void Astrocast::resetTimeOffset() {
@@ -602,7 +715,22 @@ void Astrocast::preSynchronization() {
     const std::unique_lock lock(_receiveBufferMutex);
     while (!_receiveBuffer.empty()) {
         const Message& message = _receiveBuffer.front();
-        handleMessage(message);
+
+        switch (message.type) {
+            case MessageType::Data:
+                dataMessageReceived(message.content);
+                break;
+            case MessageType::ConnectionStatus:
+                connectionStatusMessageReceived(message.content);
+                break;
+            case MessageType::NConnections:
+                nConnectionsMessageReceived(message.content);
+                break;
+            default:
+                // Unknown message type
+                break;
+        }
+
         _receiveBuffer.pop_front();
     }
 
@@ -610,13 +738,17 @@ void Astrocast::preSynchronization() {
         const double now = global::windowDelegate->applicationTime();
 
         if (_lastCameraKeyframeTimestamp + _cameraKeyframeInterval < now) {
-            sendCameraKeyframe();
+            DataMessage message = createCameraKeyframe();
+            sendDataMessage(message, *_socket);
+
             _lastCameraKeyframeTimestamp = now;
         }
         if (_timeTimelineChanged ||
             _lastTimeKeyframeTimestamp + _timeKeyframeInterval < now)
         {
-            sendTimeTimeline();
+            DataMessage message = createTimeKeyframe(_timeJumped);
+            sendDataMessage(message, *_socket);
+
             _lastTimeKeyframeTimestamp = now;
             _timeJumped = false;
             _timeTimelineChanged = false;
@@ -723,167 +855,12 @@ const std::string& Astrocast::hostName() {
     return _hostName;
 }
 
-void Astrocast::sendCameraKeyframe() {
-    NavigationHandler& navHandler = *global::navigationHandler;
-
-    const SceneGraphNode* focusNode =
-        navHandler.orbitalNavigator().anchorNode();
-    if (!focusNode) {
-        return;
-    }
-
-    // Create a keyframe with current position and orientation of camera
-    datamessagestructures::CameraKeyframe kf;
-    kf._position = navHandler.orbitalNavigator().anchorNodeToCameraVector();
-
-    kf._followNodeRotation = navHandler.orbitalNavigator().followingAnchorRotation();
-    if (kf._followNodeRotation) {
-        kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
-        kf._rotation = navHandler.orbitalNavigator().anchorNodeToCameraRotation();
-    }
-    else {
-        kf._rotation = navHandler.camera()->rotationQuaternion();
-    }
-
-    kf._focusNode = focusNode->identifier();
-    kf._scale = navHandler.camera()->scaling();
-    kf._timestamp = global::windowDelegate->applicationTime();
-
-    std::vector<char> buffer;
-    kf.serialize(buffer);
-
-    const double timestamp = global::windowDelegate->applicationTime();
-    sendDataMessage(DataMessage(
-        datamessagestructures::Type::CameraData,
-        timestamp,
-        buffer
-    ));
-}
-
-void Astrocast::sendTimeTimeline() {
-    // Create a keyframe with current position and orientation of camera
-    const Timeline<TimeManager::TimeKeyframeData>& timeline =
-        global::timeManager->timeline();
-    std::deque<Keyframe<TimeManager::TimeKeyframeData>> keyframes = timeline.keyframes();
-
-    datamessagestructures::TimeTimeline timelineMessage;
-    timelineMessage._clear = true;
-    timelineMessage._keyframes.reserve(timeline.nKeyframes());
-
-    // Case 1: Copy all keyframes from the native timeline
-    for (size_t i = 0; i < timeline.nKeyframes(); i++) {
-        const Keyframe<TimeManager::TimeKeyframeData>& kf = keyframes.at(i);
-
-        datamessagestructures::TimeKeyframe kfMessage;
-        kfMessage._time = kf.data.time.j2000Seconds();
-        kfMessage._dt = kf.data.delta;
-        kfMessage._paused = kf.data.pause;
-        kfMessage._requiresTimeJump = kf.data.jump;
-        kfMessage._timestamp = kf.timestamp;
-
-        timelineMessage._keyframes.push_back(kfMessage);
-    }
-
-    // Case 2: Send one keyframe to represent the curernt time. If time jumped this frame,
-    // this is represented in the keyframe
-    if (timeline.nKeyframes() == 0) {
-        datamessagestructures::TimeKeyframe kfMessage;
-        kfMessage._time = global::timeManager->time().j2000Seconds();
-        kfMessage._dt = global::timeManager->targetDeltaTime();
-        kfMessage._paused = global::timeManager->isPaused();
-        kfMessage._timestamp = global::windowDelegate->applicationTime();
-        kfMessage._requiresTimeJump = _timeJumped;
-        timelineMessage._keyframes.push_back(kfMessage);
-    }
-
-    std::vector<char> buffer;
-    timelineMessage.serialize(buffer);
-
-    const double timestamp = global::windowDelegate->applicationTime();
-    sendDataMessage(DataMessage(
-        datamessagestructures::Type::TimelineData,
-        timestamp,
-        buffer
-    ));
-}
-
 ghoul::Event<>& Astrocast::connectionEvent() {
     return *_connectionEvent;
 }
 
-LuaLibrary Astrocast::luaLibrary() {
-    return {
-        "astrocast",
-        {
-            codegen::lua::Connect,
-            codegen::lua::Disconnect,
-            codegen::lua::RequestHostship,
-            codegen::lua::ResignHostship,
-            codegen::lua::JoinServer
-        }
-    };
-}
-
 bool Astrocast::isConnectedOrConnecting() const {
     return _socket != nullptr && (_socket->isConnected() || _socket->isConnecting());
-}
-
-void Astrocast::sendDataMessage(const DataMessage& dataMessage) {
-    const uint8_t dataMessageTypeOut = static_cast<uint8_t>(dataMessage.type);
-    const double dataMessageTimestamp = dataMessage.timestamp;
-
-    std::vector<char> messageContent;
-    messageContent.insert(
-        messageContent.end(),
-        reinterpret_cast<const char*>(&dataMessageTypeOut),
-        reinterpret_cast<const char*>(&dataMessageTypeOut) + sizeof(uint8_t)
-    );
-
-    messageContent.insert(
-        messageContent.end(),
-        reinterpret_cast<const char*>(&dataMessageTimestamp),
-        reinterpret_cast<const char*>(&dataMessageTimestamp) + sizeof(double)
-    );
-
-    messageContent.insert(messageContent.end(),
-        dataMessage.content.begin(),
-        dataMessage.content.end()
-    );
-
-    sendMessage(Message(MessageType::Data, messageContent));
-}
-
-bool Astrocast::sendMessage(const Message& message) {
-    const uint8_t messageTypeOut = static_cast<uint8_t>(message.type);
-    const uint32_t messageSizeOut = static_cast<uint32_t>(message.content.size());
-    std::vector<char> payload;
-
-    // Insert header into buffer
-    payload.push_back('O');
-    payload.push_back('S');
-
-    payload.insert(
-        payload.end(),
-        reinterpret_cast<const char*>(&ProtocolVersion),
-        reinterpret_cast<const char*>(&ProtocolVersion) + sizeof(uint8_t)
-    );
-
-    payload.insert(
-        payload.end(),
-        reinterpret_cast<const char*>(&messageTypeOut),
-        reinterpret_cast<const char*>(&messageTypeOut) + sizeof(uint8_t)
-    );
-
-    payload.insert(
-        payload.end(),
-        reinterpret_cast<const char*>(&messageSizeOut),
-        reinterpret_cast<const char*>(&messageSizeOut) + sizeof(uint32_t)
-    );
-
-    payload.insert(payload.end(), message.content.begin(), message.content.end());
-
-    const bool res = _socket->put<char>(payload.data(), payload.size());
-    return res;
 }
 
 Astrocast::Message Astrocast::receiveMessage() {
@@ -948,6 +925,19 @@ Astrocast::Message Astrocast::receiveMessage() {
 
     // And delegate decoding depending on type
     return Message(static_cast<MessageType>(messageTypeIn), messageBuffer);
+}
+
+LuaLibrary Astrocast::luaLibrary() {
+    return {
+        "astrocast",
+        {
+            codegen::lua::Connect,
+            codegen::lua::Disconnect,
+            codegen::lua::RequestHostship,
+            codegen::lua::ResignHostship,
+            codegen::lua::JoinServer
+        }
+    };
 }
 
 } // namespace openspace

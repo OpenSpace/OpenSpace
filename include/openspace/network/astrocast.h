@@ -67,27 +67,14 @@ public:
     };
 
     struct Message {
-        Message() = default;
-        Message(MessageType t, std::vector<char> c);
-
         MessageType type;
         std::vector<char> content;
     };
 
     struct DataMessage {
-        DataMessage() = default;
-        DataMessage(datamessagestructures::Type t, double time, std::vector<char> c);
-
         datamessagestructures::Type type;
         double timestamp;
         std::vector<char> content;
-    };
-
-    class ConnectionLostError final : public ghoul::RuntimeError {
-    public:
-        explicit ConnectionLostError(bool shouldLogError_ = true);
-
-        bool shouldLogError;
     };
 
     Astrocast();
@@ -110,45 +97,29 @@ public:
     void resetTimeOffset();
     double latencyStandardDeviation() const;
 
-    /**
-     * Returns the Lua library that contains all Lua functions available to affect the
-     * remote OpenSpace astrocast connection.
-     */
-    static LuaLibrary luaLibrary();
     Status status();
     int nConnections();
     ghoul::Event<>& connectionEvent();
 
-private:
-    void queueInMessage(const Message& message);
+    static LuaLibrary luaLibrary();
 
+private:
     void sendAuthentication();
     void handleCommunication();
 
-    void handleMessage(const Message&);
     void dataMessageReceived(const std::vector<char>& message);
     void connectionStatusMessageReceived(const std::vector<char>& message);
     void nConnectionsMessageReceived(const std::vector<char>& message);
-
-    void sendCameraKeyframe();
-    void sendTimeTimeline();
 
     void setStatus(Status status);
     void setHostName(const std::string& hostName);
     void setNConnections(size_t nConnections);
 
     double convertTimestamp(double messageTimestamp);
-    void analyzeTimeDifference(double messageTimestamp);
 
     bool isConnectedOrConnecting() const;
-    void sendDataMessage(const DataMessage& dataMessage);
-    bool sendMessage(const Message& message);
 
     Message receiveMessage();
-
-    // Gonna do some UTF-like magic once we reach 255 to introduce a second byte or so
-    static constexpr uint8_t ProtocolVersion = 7;
-
 
     StringProperty _password;
     StringProperty _hostPassword;
@@ -183,12 +154,11 @@ private:
     double _initialTimeDiff = 0.0;
 
     std::unique_ptr<std::thread> _receiveThread = nullptr;
+    std::unique_ptr<ghoul::io::TcpSocket> _socket;
     std::shared_ptr<ghoul::Event<>> _connectionEvent;
 
     TimeManager::CallbackHandle _timeJumpCallback = -1;
     TimeManager::CallbackHandle _timeTimelineChangeCallback = -1;
-
-    std::unique_ptr<ghoul::io::TcpSocket> _socket;
 };
 
 } // namespace openspace
