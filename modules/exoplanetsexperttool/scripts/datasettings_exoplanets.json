@@ -304,7 +304,7 @@
                     "filter": [
                         {
                             "column": "discoverymethod",
-                            "query": "-transit, -radial -imaging -microlensing"
+                            "query": "-transit, -radial, -imaging, -microlensing"
                         }
                     ]
                 }
