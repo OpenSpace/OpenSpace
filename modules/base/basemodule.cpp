@@ -25,7 +25,7 @@
 #include <modules/base/basemodule.h>
 
 #include <modules/base/dashboard/dashboarditemangle.h>
-#include <modules/base/dashboard/dashboarditemastrocastconnection.h>
+#include <modules/base/dashboard/dashboarditemastrocast.h>
 #include <modules/base/dashboard/dashboarditemcameraorientation.h>
 #include <modules/base/dashboard/dashboarditemdate.h>
 #include <modules/base/dashboard/dashboarditemdistance.h>
@@ -136,9 +136,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fDashboard, "Dashboard factory was not created");
 
     fDashboard->registerClass<DashboardItemAngle>("DashboardItemAngle");
-    fDashboard->registerClass<DashboardItemAstrocastConnection>(
-        "DashboardItemAstrocastConnection"
-    );
+    fDashboard->registerClass<DashboardItemAstrocast>("DashboardItemAstrocast");
     fDashboard->registerClass<DashboardItemCameraOrientation>(
         "DashboardItemCameraOrientation"
     );
@@ -266,7 +264,7 @@ void BaseModule::internalDeinitializeGL() {
 std::vector<Documentation> BaseModule::documentations() const {
     return {
         DashboardItemAngle::Documentation(),
-        DashboardItemAstrocastConnection::Documentation(),
+        DashboardItemAstrocast::Documentation(),
         DashboardItemCameraOrientation::Documentation(),
         DashboardItemDate::Documentation(),
         DashboardItemDistance::Documentation(),

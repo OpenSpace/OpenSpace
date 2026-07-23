@@ -22,79 +22,65 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___ASTROCASTCONNECTION___H__
-#define __OPENSPACE_CORE___ASTROCASTCONNECTION___H__
+#include <utility>
 
-#include <openspace/network/messagestructures.h>
-#include <ghoul/io/socket/tcpsocket.h>
-#include <ghoul/misc/exception.h>
-#include <cstdint>
-#include <memory>
-#include <vector>
+using namespace openspace;
 
-namespace openspace {
+namespace {
 
-class AstrocastConnection {
-public:
-    enum class Status : uint32_t {
-        Disconnected = 0,
-        Connecting,
-        ClientWithoutHost,
-        ClientWithHost,
-        Host
-    };
+[[codegen::luawrap]] void joinServer(std::string port, std::string address,
+                                     std::string serverName, std::string password,
+                                     std::string hostpassword = "",
+                                     std::string name = "Anonymous")
+{
+    if (global::windowDelegate->isMaster()) {
+        Astrocast* peer = global::astrocast;
+        peer->setPort(std::move(port));
+        peer->setAddress(std::move(address));
+        peer->setPassword(std::move(password));
+        peer->setHostPassword(std::move(hostpassword));
+        peer->setServerName(std::move(serverName));
+        peer->setName(std::move(name));
+        peer->connect();
+    }
+}
 
-    enum class MessageType : uint8_t {
-        Authentication = 0,
-        Data,
-        ConnectionStatus,
-        HostshipRequest,
-        HostshipResignation,
-        NConnections
-    };
+/**
+ * Connect to astrocasting.
+ */
+[[codegen::luawrap]] void connect() {
+    if (global::windowDelegate->isMaster()) {
+        global::astrocast->connect();
+    }
+}
 
-    struct Message {
-        Message() = default;
-        Message(MessageType t, std::vector<char> c);
+/**
+ * Disconnect from astrocasting.
+ */
+[[codegen::luawrap]] void disconnect() {
+    if (global::windowDelegate->isMaster()) {
+        global::astrocast->disconnect();
+    }
+}
 
-        MessageType type;
-        std::vector<char> content;
-    };
+/**
+ * Request to be the host for this session.
+ */
+[[codegen::luawrap]] void requestHostship(std::optional<std::string> hostPassword) {
+    if (global::windowDelegate->isMaster()) {
+        global::astrocast->requestHostship(hostPassword);
+    }
+}
 
-    struct DataMessage {
-        DataMessage() = default;
-        DataMessage(datamessagestructures::Type t, double time, std::vector<char> c);
+/**
+ * Resign hostship.
+ */
+[[codegen::luawrap]] void resignHostship() {
+    if (global::windowDelegate->isMaster()) {
+        global::astrocast->resignHostship();
+    }
+}
 
-        datamessagestructures::Type type;
-        double timestamp;
-        std::vector<char> content;
-    };
+} // namespace
 
-    class ConnectionLostError final : public ghoul::RuntimeError {
-    public:
-        explicit ConnectionLostError(bool shouldLogError_ = true);
-
-        bool shouldLogError;
-    };
-
-    explicit AstrocastConnection(std::unique_ptr<ghoul::io::TcpSocket> socket);
-
-    bool isConnectedOrConnecting() const;
-    void sendDataMessage(const AstrocastConnection::DataMessage& dataMessage);
-    bool sendMessage(const AstrocastConnection::Message& message);
-    void disconnect();
-    ghoul::io::TcpSocket* socket();
-
-    AstrocastConnection::Message receiveMessage();
-
-    // Gonna do some UTF-like magic once we reach 255 to introduce a second byte or so
-    static constexpr uint8_t ProtocolVersion = 7;
-
-private:
-    std::unique_ptr<ghoul::io::TcpSocket> _socket;
-    bool _shouldDisconnect = false;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_CORE___ASTROCASTCONNECTION___H__
+#include "astrocast_lua_codegen.cpp"

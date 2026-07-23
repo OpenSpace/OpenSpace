@@ -39,7 +39,7 @@
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/network/astrocastpeer.h>
+#include <openspace/network/astrocast.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/deferredcastermanager.h>

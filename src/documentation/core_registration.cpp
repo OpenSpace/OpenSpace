@@ -41,7 +41,7 @@
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/navigation/path.h>
 #include <openspace/navigation/pathnavigator.h>
-#include <openspace/network/astrocastpeer.h>
+#include <openspace/network/astrocast.h>
 #include <openspace/properties/list/doublelistproperty.h>
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/list/stringlistproperty.h>

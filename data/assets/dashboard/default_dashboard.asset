@@ -2,7 +2,7 @@ asset.require("./date")
 asset.require("./simulationincrement")
 asset.require("./distance")
 asset.require("./framerate")
-asset.require("./parallelconnection")
+asset.require("./astrocast")
 asset.require("./globelocation")
 
 

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/network/astrocastpeer.h>
+#include <openspace/network/astrocast.h>
 
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
@@ -46,8 +46,12 @@
 #include <cstdlib>
 #include <limits>
 #include <utility>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
+#include <string_view>
+#include <utility>
 
-#include "astrocastpeer_lua.inl"
+#include "astrocast_lua.inl"
 
 namespace {
     using namespace openspace;
@@ -131,6 +135,23 @@ namespace {
 } // namespace
 
 namespace openspace {
+    
+Astrocast::Message::Message(MessageType t, std::vector<char> c)
+    : type(t)
+    , content(std::move(c))
+{}
+
+Astrocast::DataMessage::DataMessage(datamessagestructures::Type t,
+                                             double time, std::vector<char> c)
+    : type(t)
+    , timestamp(time)
+    , content(std::move(c))
+{}
+
+Astrocast::ConnectionLostError::ConnectionLostError(bool shouldLogError_)
+    : ghoul::RuntimeError("Astrocast connection lost", "Astrocast")
+    , shouldLogError(shouldLogError_)
+{}
 
 Astrocast::Astrocast()
     : PropertyOwner({ "Astrocast", "Astrocast" })
@@ -144,7 +165,6 @@ Astrocast::Astrocast()
     , _timeKeyframeInterval(TimeKeyFrameInfo, 0.1f, 0.f, 1.f)
     , _cameraKeyframeInterval(CameraKeyFrameInfo, 0.1f, 0.f, 1.f)
     , _connectionEvent(std::make_shared<ghoul::Event<>>())
-    , _connection(nullptr)
 {
     addProperty(_name);
     addProperty(_serverName);
@@ -169,15 +189,14 @@ Astrocast::~Astrocast() {
 void Astrocast::connect() {
     disconnect();
 
-    setStatus(AstrocastConnection::Status::Connecting);
+    setStatus(Status::Connecting);
 
-    auto socket = std::make_unique<ghoul::io::TcpSocket>(
+    _socket = std::make_unique<ghoul::io::TcpSocket>(
         _address,
         std::atoi(_port.value().c_str())
     );
 
-    socket->connect();
-    _connection = AstrocastConnection(std::move(socket));
+    _socket->connect();
 
     sendAuthentication();
 
@@ -186,13 +205,15 @@ void Astrocast::connect() {
 
 void Astrocast::disconnect() {
     _shouldDisconnect = true;
-    _connection.disconnect();
+    if (_socket) {
+        _socket->disconnect();
+    }
     if (_receiveThread && _receiveThread->joinable()) {
         _receiveThread->join();
         _receiveThread = nullptr;
     }
     _shouldDisconnect = false;
-    setStatus(AstrocastConnection::Status::Disconnected);
+    setStatus(Status::Disconnected);
 }
 
 void Astrocast::sendAuthentication() {
@@ -271,26 +292,23 @@ void Astrocast::sendAuthentication() {
     buffer.insert(buffer.end(), name.begin(), name.end());
 
     // Send message
-    _connection.sendMessage(AstrocastConnection::Message(
-        AstrocastConnection::MessageType::Authentication,
-        buffer
-    ));
+    sendMessage(Message(MessageType::Authentication, buffer));
 }
 
-void Astrocast::queueInMessage(const AstrocastConnection::Message& message) {
+void Astrocast::queueInMessage(const Message& message) {
     const std::unique_lock lock(_receiveBufferMutex);
     _receiveBuffer.push_back(message);
 }
 
-void Astrocast::handleMessage(const AstrocastConnection::Message& message) {
+void Astrocast::handleMessage(const Message& message) {
     switch (message.type) {
-        case AstrocastConnection::MessageType::Data:
+        case MessageType::Data:
             dataMessageReceived(message.content);
             break;
-        case AstrocastConnection::MessageType::ConnectionStatus:
+        case MessageType::ConnectionStatus:
             connectionStatusMessageReceived(message.content);
             break;
-        case AstrocastConnection::MessageType::NConnections:
+        case MessageType::NConnections:
             nConnectionsMessageReceived(message.content);
             break;
         default:
@@ -447,9 +465,7 @@ void Astrocast::connectionStatusMessageReceived(const std::vector<char>& message
     }
     size_t pointer = 0;
     const uint8_t statusIn = *(reinterpret_cast<const uint8_t*>(&message[pointer]));
-    const AstrocastConnection::Status status = static_cast<AstrocastConnection::Status>(
-        statusIn
-    );
+    const Status status = static_cast<Status>(statusIn);
     pointer += sizeof(uint8_t);
 
     const uint8_t hostNameSize = *(reinterpret_cast<const uint8_t*>(&message[pointer]));
@@ -465,7 +481,7 @@ void Astrocast::connectionStatusMessageReceived(const std::vector<char>& message
         hostName = std::string(&message[pointer], hostNameSize);
     }
 
-    if (status > AstrocastConnection::Status::Host) {
+    if (status > Status::Host) {
         LERROR("Invalid status");
         return;
     }
@@ -496,18 +512,18 @@ void Astrocast::nConnectionsMessageReceived(const std::vector<char>& message) {
 }
 
 void Astrocast::handleCommunication() {
-    while (!_shouldDisconnect && _connection.isConnectedOrConnecting()) {
+    while (!_shouldDisconnect && isConnectedOrConnecting()) {
         try {
-            const AstrocastConnection::Message m = _connection.receiveMessage();
+            const Message m = receiveMessage();
             queueInMessage(m);
         }
-        catch (const AstrocastConnection::ConnectionLostError& e) {
+        catch (const ConnectionLostError& e) {
             if (e.shouldLogError) {
                 LERROR("Astrocast connection lost");
             }
         }
     }
-    setStatus(AstrocastConnection::Status::Disconnected);
+    setStatus(Status::Disconnected);
 }
 
 void Astrocast::setPort(std::string port) {
@@ -537,21 +553,11 @@ void Astrocast::requestHostship(std::optional<std::string> hostPassword) {
     );
     buffer.insert(buffer.end(), hostPw.begin(), hostPw.end());
 
-    _connection.sendMessage(
-        AstrocastConnection::Message(
-            AstrocastConnection::MessageType::HostshipRequest,
-            buffer
-        )
-    );
+    sendMessage(Message(MessageType::HostshipRequest, buffer));
 }
 
 void Astrocast::resignHostship() {
-    _connection.sendMessage(
-        AstrocastConnection::Message(
-            AstrocastConnection::MessageType::HostshipResignation,
-            std::vector<char>()
-        )
-    );
+    sendMessage(Message(MessageType::HostshipResignation, std::vector<char>()));
 }
 
 void Astrocast::setPassword(std::string password) {
@@ -575,12 +581,12 @@ void Astrocast::sendScript(std::string script) {
     sm.serialize(buffer);
 
     const double timestamp = global::windowDelegate->applicationTime();
-    const AstrocastConnection::DataMessage message = AstrocastConnection::DataMessage(
+    const DataMessage message = DataMessage(
         datamessagestructures::Type::ScriptData,
         timestamp,
         buffer
     );
-    _connection.sendDataMessage(message);
+    sendDataMessage(message);
 }
 
 void Astrocast::resetTimeOffset() {
@@ -595,7 +601,7 @@ void Astrocast::preSynchronization() {
 
     const std::unique_lock lock(_receiveBufferMutex);
     while (!_receiveBuffer.empty()) {
-        const AstrocastConnection::Message& message = _receiveBuffer.front();
+        const Message& message = _receiveBuffer.front();
         handleMessage(message);
         _receiveBuffer.pop_front();
     }
@@ -621,9 +627,9 @@ void Astrocast::preSynchronization() {
     }
 }
 
-void Astrocast::setStatus(AstrocastConnection::Status status) {
+void Astrocast::setStatus(Status status) {
     if (_status != status) {
-        const AstrocastConnection::Status prevStatus = _status;
+        const Status prevStatus = _status;
         _status = status;
         _timeJumped = true;
         _connectionEvent->publish("statusChanged");
@@ -631,24 +637,21 @@ void Astrocast::setStatus(AstrocastConnection::Status status) {
 
         EventEngine* ee = global::eventEngine;
         const bool isConnected =
-            status == AstrocastConnection::Status::ClientWithoutHost ||
-            status == AstrocastConnection::Status::ClientWithHost ||
-            status == AstrocastConnection::Status::Host;
+            status == Status::ClientWithoutHost || status == Status::ClientWithHost ||
+            status == Status::Host;
         const bool wasConnected =
-            prevStatus == AstrocastConnection::Status::ClientWithoutHost ||
-            prevStatus == AstrocastConnection::Status::ClientWithHost ||
-            prevStatus == AstrocastConnection::Status::Host;
-        const bool isDisconnected = status == AstrocastConnection::Status::Disconnected;
+            prevStatus == Status::ClientWithoutHost ||
+            prevStatus == Status::ClientWithHost || prevStatus == Status::Host;
+        const bool isDisconnected = status == Status::Disconnected;
         const bool wasDisconnected =
-            prevStatus == AstrocastConnection::Status::Disconnected;
-        const bool isHost = status == AstrocastConnection::Status::Host;
-        const bool wasHost = prevStatus == AstrocastConnection::Status::Host;
+            prevStatus == Status::Disconnected;
+        const bool isHost = status == Status::Host;
+        const bool wasHost = prevStatus == Status::Host;
         const bool isClient =
-            status == AstrocastConnection::Status::ClientWithoutHost ||
-            status == AstrocastConnection::Status::ClientWithHost;
+            status == Status::ClientWithoutHost || status == Status::ClientWithHost;
         const bool wasClient =
-            prevStatus == AstrocastConnection::Status::ClientWithoutHost ||
-            prevStatus == AstrocastConnection::Status::ClientWithHost;
+            prevStatus == Status::ClientWithoutHost ||
+            prevStatus == Status::ClientWithHost;
 
 
         if (isDisconnected && wasConnected) {
@@ -690,7 +693,7 @@ void Astrocast::setStatus(AstrocastConnection::Status status) {
     }
 }
 
-AstrocastConnection::Status Astrocast::status() {
+Astrocast::Status Astrocast::status() {
     return _status;
 }
 
@@ -706,7 +709,7 @@ int Astrocast::nConnections() {
 }
 
 bool Astrocast::isHost() {
-    return _status == AstrocastConnection::Status::Host;
+    return _status == Status::Host;
 }
 
 void Astrocast::setHostName(const std::string& hostName) {
@@ -750,7 +753,7 @@ void Astrocast::sendCameraKeyframe() {
     kf.serialize(buffer);
 
     const double timestamp = global::windowDelegate->applicationTime();
-    _connection.sendDataMessage(AstrocastConnection::DataMessage(
+    sendDataMessage(DataMessage(
         datamessagestructures::Type::CameraData,
         timestamp,
         buffer
@@ -797,7 +800,7 @@ void Astrocast::sendTimeTimeline() {
     timelineMessage.serialize(buffer);
 
     const double timestamp = global::windowDelegate->applicationTime();
-    _connection.sendDataMessage(AstrocastConnection::DataMessage(
+    sendDataMessage(DataMessage(
         datamessagestructures::Type::TimelineData,
         timestamp,
         buffer
@@ -819,6 +822,132 @@ LuaLibrary Astrocast::luaLibrary() {
             codegen::lua::JoinServer
         }
     };
+}
+
+bool Astrocast::isConnectedOrConnecting() const {
+    return _socket != nullptr && (_socket->isConnected() || _socket->isConnecting());
+}
+
+void Astrocast::sendDataMessage(const DataMessage& dataMessage) {
+    const uint8_t dataMessageTypeOut = static_cast<uint8_t>(dataMessage.type);
+    const double dataMessageTimestamp = dataMessage.timestamp;
+
+    std::vector<char> messageContent;
+    messageContent.insert(
+        messageContent.end(),
+        reinterpret_cast<const char*>(&dataMessageTypeOut),
+        reinterpret_cast<const char*>(&dataMessageTypeOut) + sizeof(uint8_t)
+    );
+
+    messageContent.insert(
+        messageContent.end(),
+        reinterpret_cast<const char*>(&dataMessageTimestamp),
+        reinterpret_cast<const char*>(&dataMessageTimestamp) + sizeof(double)
+    );
+
+    messageContent.insert(messageContent.end(),
+        dataMessage.content.begin(),
+        dataMessage.content.end()
+    );
+
+    sendMessage(Message(MessageType::Data, messageContent));
+}
+
+bool Astrocast::sendMessage(const Message& message) {
+    const uint8_t messageTypeOut = static_cast<uint8_t>(message.type);
+    const uint32_t messageSizeOut = static_cast<uint32_t>(message.content.size());
+    std::vector<char> payload;
+
+    // Insert header into buffer
+    payload.push_back('O');
+    payload.push_back('S');
+
+    payload.insert(
+        payload.end(),
+        reinterpret_cast<const char*>(&ProtocolVersion),
+        reinterpret_cast<const char*>(&ProtocolVersion) + sizeof(uint8_t)
+    );
+
+    payload.insert(
+        payload.end(),
+        reinterpret_cast<const char*>(&messageTypeOut),
+        reinterpret_cast<const char*>(&messageTypeOut) + sizeof(uint8_t)
+    );
+
+    payload.insert(
+        payload.end(),
+        reinterpret_cast<const char*>(&messageSizeOut),
+        reinterpret_cast<const char*>(&messageSizeOut) + sizeof(uint32_t)
+    );
+
+    payload.insert(payload.end(), message.content.begin(), message.content.end());
+
+    const bool res = _socket->put<char>(payload.data(), payload.size());
+    return res;
+}
+
+Astrocast::Message Astrocast::receiveMessage() {
+    // Header consists of...
+    constexpr size_t HeaderSize =
+        2 * sizeof(char) + // OS
+        sizeof(uint8_t) +  // Protocol version
+        sizeof(uint8_t) +  // Message type
+        sizeof(uint32_t);  // message size
+
+    // Create basic buffer for receiving first part of messages
+    std::vector<char> headerBuffer(HeaderSize);
+    std::vector<char> messageBuffer;
+
+    // Receive the header data
+    if (!_socket->get(headerBuffer.data(), HeaderSize)) {
+        // The `get` call is blocking until something happens, so we might end up here if
+        // the socket properly closed or if the loading legitimately failed
+        if (_shouldDisconnect) {
+            throw ConnectionLostError(false);
+        }
+        else {
+            LERROR("Failed to read header from socket. Disconnecting");
+            throw ConnectionLostError();
+        }
+    }
+
+    // Make sure that header matches this version of OpenSpace
+    if (headerBuffer[0] != 'O' || headerBuffer[1] != 'S') {
+        LERROR("Expected to read message header 'OS' from socket");
+        throw ConnectionLostError();
+    }
+
+    size_t offset = 2;
+    const uint8_t protocolVersionIn =
+        *reinterpret_cast<uint8_t*>(headerBuffer.data() + offset);
+    offset += sizeof(uint8_t);
+
+    if (protocolVersionIn != ProtocolVersion) {
+        LERROR(std::format(
+            "Protocol versions do not match. Remote version: {}, Local version: {}",
+            protocolVersionIn, ProtocolVersion
+        ));
+        throw ConnectionLostError();
+    }
+
+    const uint8_t messageTypeIn =
+        *reinterpret_cast<uint8_t*>(headerBuffer.data() + offset);
+    offset += sizeof(uint8_t);
+
+    const uint32_t messageSizeIn =
+        *reinterpret_cast<uint32_t*>(headerBuffer.data() + offset);
+
+    const size_t messageSize = messageSizeIn;
+
+    // Receive the payload
+    messageBuffer.resize(messageSize);
+    if (!_socket->get(messageBuffer.data(), messageSize)) {
+        LERROR("Failed to read message from socket. Disconnecting");
+        throw ConnectionLostError();
+    }
+
+    // And delegate decoding depending on type
+    return Message(static_cast<MessageType>(messageTypeIn), messageBuffer);
 }
 
 } // namespace openspace

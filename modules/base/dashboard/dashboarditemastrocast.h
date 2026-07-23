@@ -22,65 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <utility>
+#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMASTROCAST___H__
+#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMASTROCAST___H__
 
-using namespace openspace;
+#include <openspace/rendering/dashboardtextitem.h>
 
-namespace {
+namespace openspace {
 
-[[codegen::luawrap]] void joinServer(std::string port, std::string address,
-                                     std::string serverName, std::string password,
-                                     std::string hostpassword = "",
-                                     std::string name = "Anonymous")
-{
-    if (global::windowDelegate->isMaster()) {
-        Astrocast* peer = global::astrocast;
-        peer->setPort(std::move(port));
-        peer->setAddress(std::move(address));
-        peer->setPassword(std::move(password));
-        peer->setHostPassword(std::move(hostpassword));
-        peer->setServerName(std::move(serverName));
-        peer->setName(std::move(name));
-        peer->connect();
-    }
-}
+class DashboardItemAstrocast : public DashboardTextItem {
+public:
+    explicit DashboardItemAstrocast(const ghoul::Dictionary& dictionary);
+    ~DashboardItemAstrocast() override = default;
 
-/**
- * Connect to astrocasting.
- */
-[[codegen::luawrap]] void connect() {
-    if (global::windowDelegate->isMaster()) {
-        global::astrocast->connect();
-    }
-}
+    void update() override;
 
-/**
- * Disconnect from astrocasting.
- */
-[[codegen::luawrap]] void disconnect() {
-    if (global::windowDelegate->isMaster()) {
-        global::astrocast->disconnect();
-    }
-}
+    static openspace::Documentation Documentation();
+};
 
-/**
- * Request to be the host for this session.
- */
-[[codegen::luawrap]] void requestHostship(std::optional<std::string> hostPassword) {
-    if (global::windowDelegate->isMaster()) {
-        global::astrocast->requestHostship(hostPassword);
-    }
-}
+} // namespace openspace
 
-/**
- * Resign hostship.
- */
-[[codegen::luawrap]] void resignHostship() {
-    if (global::windowDelegate->isMaster()) {
-        global::astrocast->resignHostship();
-    }
-}
-
-} // namespace
-
-#include "astrocastpeer_lua_codegen.cpp"
+#endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMASTROCAST___H__

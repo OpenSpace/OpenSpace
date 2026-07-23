@@ -48,8 +48,7 @@
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/navigation/waypoint.h>
-#include <openspace/network/astrocastconnection.h>
-#include <openspace/network/astrocastpeer.h>
+#include <openspace/network/astrocast.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/luaconsole.h>
@@ -960,7 +959,7 @@ void OpenSpaceEngine::deinitialize() {
     global::navigationHandler->deinitialize();
 
     LTRACE("deinitialize(begin)");
-    if (global::astrocast->status() != AstrocastConnection::Status::Disconnected) {
+    if (global::astrocast->status() != Astrocast::Status::Disconnected) {
         global::astrocast->disconnect();
     }
     if (global::renderEngine->scene() && global::renderEngine->scene()->camera()) {

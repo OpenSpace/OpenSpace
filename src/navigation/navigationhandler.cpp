@@ -31,8 +31,7 @@
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/navigation/waypoint.h>
-#include <openspace/network/astrocastconnection.h>
-#include <openspace/network/astrocastpeer.h>
+#include <openspace/network/astrocast.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -108,7 +107,7 @@ void NavigationHandler::initialize() {
         "statusChanged",
         [this]() {
             _useKeyFrameInteraction = (global::astrocast->status() ==
-                AstrocastConnection::Status::ClientWithHost);
+                Astrocast::Status::ClientWithHost);
         }
     );
 }

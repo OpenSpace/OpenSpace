@@ -31,7 +31,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/network/astrocastpeer.h>
+#include <openspace/network/astrocast.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderengine.h>

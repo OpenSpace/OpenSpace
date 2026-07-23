@@ -27,17 +27,21 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/network/astrocastconnection.h>
+#include <openspace/network/messagestructures.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/designpattern/event.h>
+#include <ghoul/io/socket/tcpsocket.h>
+#include <ghoul/misc/exception.h>
 #include <atomic>
+#include <cstdint>
 #include <deque>
 #include <memory>
 #include <mutex>
 #include <optional>
 #include <thread>
+#include <vector>
 
 namespace openspace {
 
@@ -45,6 +49,47 @@ struct LuaLibrary;
 
 class Astrocast : public PropertyOwner {
 public:
+    enum class Status : uint32_t {
+        Disconnected = 0,
+        Connecting,
+        ClientWithoutHost,
+        ClientWithHost,
+        Host
+    };
+
+    enum class MessageType : uint8_t {
+        Authentication = 0,
+        Data,
+        ConnectionStatus,
+        HostshipRequest,
+        HostshipResignation,
+        NConnections
+    };
+
+    struct Message {
+        Message() = default;
+        Message(MessageType t, std::vector<char> c);
+
+        MessageType type;
+        std::vector<char> content;
+    };
+
+    struct DataMessage {
+        DataMessage() = default;
+        DataMessage(datamessagestructures::Type t, double time, std::vector<char> c);
+
+        datamessagestructures::Type type;
+        double timestamp;
+        std::vector<char> content;
+    };
+
+    class ConnectionLostError final : public ghoul::RuntimeError {
+    public:
+        explicit ConnectionLostError(bool shouldLogError_ = true);
+
+        bool shouldLogError;
+    };
+
     Astrocast();
     ~Astrocast() override;
 
@@ -70,17 +115,17 @@ public:
      * remote OpenSpace astrocast connection.
      */
     static LuaLibrary luaLibrary();
-    AstrocastConnection::Status status();
+    Status status();
     int nConnections();
     ghoul::Event<>& connectionEvent();
 
 private:
-    void queueInMessage(const AstrocastConnection::Message& message);
+    void queueInMessage(const Message& message);
 
     void sendAuthentication();
     void handleCommunication();
 
-    void handleMessage(const AstrocastConnection::Message&);
+    void handleMessage(const Message&);
     void dataMessageReceived(const std::vector<char>& message);
     void connectionStatusMessageReceived(const std::vector<char>& message);
     void nConnectionsMessageReceived(const std::vector<char>& message);
@@ -88,12 +133,22 @@ private:
     void sendCameraKeyframe();
     void sendTimeTimeline();
 
-    void setStatus(AstrocastConnection::Status status);
+    void setStatus(Status status);
     void setHostName(const std::string& hostName);
     void setNConnections(size_t nConnections);
 
     double convertTimestamp(double messageTimestamp);
     void analyzeTimeDifference(double messageTimestamp);
+
+    bool isConnectedOrConnecting() const;
+    void sendDataMessage(const DataMessage& dataMessage);
+    bool sendMessage(const Message& message);
+
+    Message receiveMessage();
+
+    // Gonna do some UTF-like magic once we reach 255 to introduce a second byte or so
+    static constexpr uint8_t ProtocolVersion = 7;
+
 
     StringProperty _password;
     StringProperty _hostPassword;
@@ -114,12 +169,11 @@ private:
     std::atomic_bool _shouldDisconnect = false;
 
     std::atomic<size_t> _nConnections = 0;
-    std::atomic<AstrocastConnection::Status> _status =
-        AstrocastConnection::Status::Disconnected;
+    std::atomic<Status> _status = Status::Disconnected;
 
     std::string _hostName;
 
-    std::deque<AstrocastConnection::Message> _receiveBuffer;
+    std::deque<Message> _receiveBuffer;
     std::mutex _receiveBufferMutex;
 
     std::atomic<bool> _timeJumped;
@@ -131,10 +185,10 @@ private:
     std::unique_ptr<std::thread> _receiveThread = nullptr;
     std::shared_ptr<ghoul::Event<>> _connectionEvent;
 
-    AstrocastConnection _connection;
-
     TimeManager::CallbackHandle _timeJumpCallback = -1;
     TimeManager::CallbackHandle _timeTimelineChangeCallback = -1;
+
+    std::unique_ptr<ghoul::io::TcpSocket> _socket;
 };
 
 } // namespace openspace

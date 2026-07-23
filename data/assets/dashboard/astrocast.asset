@@ -1,7 +1,7 @@
 local Item = {
-  Type = "DashboardItemParallelConnection",
-  Identifier = "ParallelConnection",
-  GuiName = "Parallel Connection"
+  Type = "DashboardItemAstrocast",
+  Identifier = "Astrocast",
+  GuiName = "Astrocast"
 }
 
 
@@ -18,8 +18,8 @@ asset.export(Item)
 
 
 asset.meta = {
-  Name = "Dashboard - ParallelConnection",
-  Description = "This asset provides a ParallelConnection dashboard item",
+  Name = "Dashboard - AstroCast",
+  Description = "This asset provides an Astrocast dashboard item",
   Author = "OpenSpace Team",
   URL = "https://openspaceproject.com",
   License = "MIT license"

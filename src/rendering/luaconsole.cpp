@@ -26,7 +26,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/network/astrocastpeer.h>
+#include <openspace/network/astrocast.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/cachemanager.h>
@@ -258,7 +258,7 @@ void LuaConsole::initialize() {
         "luaConsole",
         "statusChanged",
         [this]() {
-            const AstrocastConnection::Status status = global::astrocast->status();
+            const Astrocast::Status status = global::astrocast->status();
             astrocastConnectionChanged(status);
         }
     );
@@ -327,9 +327,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
                 if (_shouldSendToRemote) {
                     _shouldSendToRemote = false;
                 }
-                else if (global::astrocast->status() ==
-                         AstrocastConnection::Status::Host)
-                {
+                else if (global::astrocast->status() == Astrocast::Status::Host) {
                     _shouldSendToRemote = true;
                 }
             }
@@ -673,9 +671,9 @@ void LuaConsole::render() {
     else if (_shouldSendToRemote) {
         const glm::vec4 Red(1.f, 0.f, 0.f, 1.f);
 
-        const AstrocastConnection::Status status = global::astrocast->status();
+        const Astrocast::Status status = global::astrocast->status();
         const int nClients =
-            status != AstrocastConnection::Status::Disconnected ?
+            status != Astrocast::Status::Disconnected ?
             global::astrocast->nConnections() - 1 :
             0;
 
@@ -711,8 +709,8 @@ void LuaConsole::addToCommand(const std::string& c) {
     _inputPosition += length;
 }
 
-void LuaConsole::astrocastConnectionChanged(const AstrocastConnection::Status& status) {
-    _shouldSendToRemote = (status == AstrocastConnection::Status::Host);
+void LuaConsole::astrocastConnectionChanged(const Astrocast::Status& status) {
+    _shouldSendToRemote = (status == Astrocast::Status::Host);
 }
 
 void LuaConsole::registerKeyHandler(Key key, KeyModifier modifier,

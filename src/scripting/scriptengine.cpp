@@ -29,7 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
-#include <openspace/network/astrocastpeer.h>
+#include <openspace/network/astrocast.h>
 #include <openspace/util/syncbuffer.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>

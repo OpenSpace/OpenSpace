@@ -26,7 +26,7 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   dashboard/dashboarditemangle.h
-  dashboard/dashboarditemastrocastconnection.h
+  dashboard/dashboarditemastrocast.h
   dashboard/dashboarditemcameraorientation.h
   dashboard/dashboarditemdate.h
   dashboard/dashboarditemdistance.h
@@ -104,7 +104,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   dashboard/dashboarditemangle.cpp
-  dashboard/dashboarditemastrocastconnection.cpp
+  dashboard/dashboarditemastrocast.cpp
   dashboard/dashboarditemcameraorientation.cpp
   dashboard/dashboarditemdate.cpp
   dashboard/dashboarditemdistance.cpp

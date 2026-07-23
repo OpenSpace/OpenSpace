@@ -33,6 +33,7 @@ namespace ghoul::fontrendering { class FontManager; }
 namespace openspace {
 
 class ActionManager;
+class Astrocast;
 struct Configuration;
 class Dashboard;
 class DeferredcasterManager;
@@ -49,7 +50,6 @@ class MissionManager;
 class ModuleEngine;
 class NavigationHandler;
 class OpenSpaceEngine;
-class Astrocast;
 class Profile;
 class PropertyOwner;
 class RaycasterManager;

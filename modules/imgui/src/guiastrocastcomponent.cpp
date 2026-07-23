@@ -28,8 +28,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/network/astrocastconnection.h>
-#include <openspace/network/astrocastpeer.h>
+#include <openspace/network/astrocast.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/format.h>
 
@@ -172,22 +171,22 @@ void GuiAstrocastComponent::render() {
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    const AstrocastConnection::Status status = global::astrocast->status();
+    const Astrocast::Status status = global::astrocast->status();
 
     switch (status) {
-        case AstrocastConnection::Status::Disconnected:
+        case Astrocast::Status::Disconnected:
             renderDisconnected();
             break;
-        case AstrocastConnection::Status::Connecting:
+        case Astrocast::Status::Connecting:
             renderConnecting();
             break;
-        case AstrocastConnection::Status::ClientWithHost:
+        case Astrocast::Status::ClientWithHost:
             renderClientWithHost();
             break;
-        case AstrocastConnection::Status::ClientWithoutHost:
+        case Astrocast::Status::ClientWithoutHost:
             renderClientWithoutHost();
             break;
-        case AstrocastConnection::Status::Host:
+        case Astrocast::Status::Host:
             renderHost();
             break;
     }

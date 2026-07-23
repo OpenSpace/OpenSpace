@@ -22,12 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/dashboard/dashboarditemastrocastconnection.h>
+#include <modules/base/dashboard/dashboarditemastrocast.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/network/astrocastconnection.h>
-#include <openspace/network/astrocastpeer.h>
+#include <openspace/network/astrocast.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
@@ -40,33 +39,32 @@ namespace {
     //
     // The information presented contains how many clients are connected to the same
     // session and whether this machine is currently the host of the session.
-    struct [[codegen::Dictionary(DashboardItemAstrocastConnection)]] Parameters {};
+    struct [[codegen::Dictionary(DashboardItemAstrocast)]] Parameters {};
 } // namespace
-#include "dashboarditemastrocastconnection_codegen.cpp"
+#include "dashboarditemastrocast_codegen.cpp"
 
 namespace openspace {
 
-Documentation DashboardItemAstrocastConnection::Documentation() {
+Documentation DashboardItemAstrocast::Documentation() {
     return codegen::doc<Parameters>(
-        "base_dashboarditem_astrocastconnection",
+        "base_dashboarditem_astrocast",
         DashboardTextItem::Documentation()
     );
 }
 
-DashboardItemAstrocastConnection::DashboardItemAstrocastConnection(
-                                                      const ghoul::Dictionary& dictionary)
+DashboardItemAstrocast::DashboardItemAstrocast(const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)
 {}
 
-void DashboardItemAstrocastConnection::update() {
+void DashboardItemAstrocast::update() {
     ZoneScoped;
 
-    const AstrocastConnection::Status status = global::astrocast->status();
+    const Astrocast::Status status = global::astrocast->status();
     const size_t nConnections = global::astrocast->nConnections();
     const std::string& hostName = global::astrocast->hostName();
 
     int nClients = static_cast<int>(nConnections);
-    if (status == AstrocastConnection::Status::Host) {
+    if (status == Astrocast::Status::Host) {
         nClients--;
         constexpr std::string_view Singular = "Hosting session with {} client";
         constexpr std::string_view Plural = "Hosting session with {} clients";
@@ -76,16 +74,16 @@ void DashboardItemAstrocastConnection::update() {
             std::format(Singular, nClients) :
             std::format(Plural, nClients);
     }
-    else if (status == AstrocastConnection::Status::ClientWithHost) {
+    else if (status == Astrocast::Status::ClientWithHost) {
         nClients--;
         _buffer = std::format("Session hosted by '{}'", hostName);
     }
-    else if (status == AstrocastConnection::Status::ClientWithoutHost) {
+    else if (status == Astrocast::Status::ClientWithoutHost) {
         _buffer = "Host is disconnected";
     }
 
-    if (status == AstrocastConnection::Status::ClientWithHost ||
-        status == AstrocastConnection::Status::ClientWithoutHost)
+    if (status == Astrocast::Status::ClientWithHost ||
+        status == Astrocast::Status::ClientWithoutHost)
     {
         _buffer += "\n";
 

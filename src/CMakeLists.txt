@@ -96,9 +96,8 @@ set(OPENSPACE_SOURCE
   navigation/waypoint.cpp
   network/messagestructures.cpp
   network/messagestructureshelper.cpp
-  network/astrocastconnection.cpp
-  network/astrocastpeer.cpp
-  network/astrocastpeer_lua.inl
+  network/astrocast.cpp
+  network/astrocast_lua.inl
   properties/property.cpp
   properties/propertyowner.cpp
   properties/list/doublelistproperty.cpp
@@ -317,8 +316,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/pathcurve.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/pathnavigator.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/waypoint.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/network/astrocastconnection.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/network/astrocastpeer.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/network/astrocast.h
   ${PROJECT_SOURCE_DIR}/include/openspace/network/messagestructures.h
   ${PROJECT_SOURCE_DIR}/include/openspace/network/messagestructureshelper.h
   ${PROJECT_SOURCE_DIR}/include/openspace/properties/numericalproperty.h
