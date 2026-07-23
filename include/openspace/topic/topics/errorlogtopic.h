@@ -28,6 +28,7 @@
 #include <openspace/topic/topics/topic.h>
 
 #include <ghoul/logging/loglevel.h>
+#include <optional>
 
 namespace ghoul::logging { class Log; }
 
@@ -46,8 +47,6 @@ public:
     static openspace::Schema Schema();
 
 private:
-    static constexpr int UnsetOnChangeHandle = -1;
-
     /**
      * Creates a log object and register it to the `LogManager`, does nothing if an active
      * log already exists.
@@ -57,7 +56,7 @@ private:
     void flushQueuedMessages();
 
     bool _isSubscribedTo = false;
-    int _dataCallbackHandle = UnsetOnChangeHandle;
+    std::optional<int> _dataCallbackHandle;
 
     /// Non-owning but we remove the log from LogManager on destruction
     ghoul::logging::Log* _log = nullptr;

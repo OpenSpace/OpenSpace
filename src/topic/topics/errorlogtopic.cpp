@@ -40,8 +40,8 @@ ErrorLogTopic::~ErrorLogTopic() {
         ghoul::logging::LogManager::ref().removeLog(_log);
         _log = nullptr;
     }
-    if (_dataCallbackHandle != UnsetOnChangeHandle) {
-        global::server->removePreSyncCallback(_dataCallbackHandle);
+    if (_dataCallbackHandle.has_value()) {
+        global::server->removePreSyncCallback(*_dataCallbackHandle);
     }
 }
 
@@ -136,14 +136,11 @@ void ErrorLogTopic::createLog() {
         _queuedMessages.push_back(std::move(payload));
     };
 
-    auto log = std::make_unique<NotificationLog>(
-        onLogging,
-        _logSettings.logLevel
-    );
+    auto log = std::make_unique<NotificationLog>(onLogging, _logSettings.logLevel);
     _log = log.get();
     ghoul::logging::LogManager::ref().addLog(std::move(log));
 
-    if (_dataCallbackHandle == UnsetOnChangeHandle) {
+    if (!_dataCallbackHandle.has_value()) {
         _dataCallbackHandle = global::server->addPreSyncCallback(
             [this]() {
                 flushQueuedMessages();
