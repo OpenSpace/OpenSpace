@@ -187,7 +187,11 @@ local function bindInputs(name)
   openspace.navigation.bindJoystickButton(
     name,
     controller.LeftStickButton,
-    "openspace.navigation.jumpTo(openspace.navigation.currentAnchor())",
+    [[
+      openspace.navigation.jumpTo(
+        openspace.propertyValue("NavigationHandler.OrbitalNavigator.Anchor")
+      )
+    ]],
     "Jump to current anchor"
   )
 
