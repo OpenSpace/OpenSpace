@@ -63,7 +63,7 @@ public:
     float estimatedRemainingTimeInPath() const;
 
     void updateCamera(double deltaTime);
-    void createPath(const ghoul::Dictionary& dictionary);
+    void createPath(ghoul::Dictionary dictionary);
     void clearPath();
     void startPath();
     void abortPath();
@@ -117,6 +117,8 @@ private:
     FloatProperty _linearRotationSpeedFactor;
     DoubleProperty _minValidBoundingSphere;
     StringListProperty _relevantNodeTags;
+    BoolProperty _useCustomFlyToDuration;
+    FloatProperty _customFlyToDuration;
 
     std::vector<SceneGraphNode*> _relevantNodes;
     bool _hasInitializedRelevantNodes = false;
