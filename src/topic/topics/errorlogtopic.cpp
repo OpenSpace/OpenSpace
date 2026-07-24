@@ -25,7 +25,9 @@
 #include <openspace/topic/topics/errorlogtopic.h>
 
 #include <openspace/documentation/schema.h>
+#include <openspace/engine/globals.h>
 #include <openspace/topic/notificationlog.h>
+#include <openspace/topic/server.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/stringconversion.h>
 #include <string_view>
@@ -37,6 +39,9 @@ ErrorLogTopic::~ErrorLogTopic() {
     if (_log) {
         ghoul::logging::LogManager::ref().removeLog(_log);
         _log = nullptr;
+    }
+    if (_dataCallbackHandle.has_value()) {
+        global::server->removePreSyncCallback(*_dataCallbackHandle);
     }
 }
 
@@ -126,15 +131,35 @@ void ErrorLogTopic::createLog() {
             payload["level"] = ghoul::to_string(level);
         }
 
-        sendData(std::move(payload));
+        // Queue the message to be sent
+        const std::unique_lock lock(_queuedMessagesMutex);
+        _queuedMessages.push_back(std::move(payload));
     };
 
-    auto log = std::make_unique<NotificationLog>(
-        onLogging,
-        _logSettings.logLevel
-    );
+    auto log = std::make_unique<NotificationLog>(onLogging, _logSettings.logLevel);
     _log = log.get();
     ghoul::logging::LogManager::ref().addLog(std::move(log));
+
+    if (!_dataCallbackHandle.has_value()) {
+        _dataCallbackHandle = global::server->addPreSyncCallback(
+            [this]() {
+                flushQueuedMessages();
+            }
+        );
+    }
+}
+
+void ErrorLogTopic::flushQueuedMessages() {
+    std::vector<nlohmann::json> messagesToSend;
+    {
+        const std::unique_lock lock(_queuedMessagesMutex);
+        std::swap(messagesToSend, _queuedMessages);
+    }
+
+    for (const nlohmann::json& message : messagesToSend) {
+        sendData(message);
+    }
+
 }
 
 bool ErrorLogTopic::isDone() const {
