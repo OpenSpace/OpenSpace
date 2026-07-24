@@ -517,6 +517,17 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 }
 
 /**
+ * Remove all bindings for a joystick or game controller, including both axes and buttons.
+ *
+ * \param joystickName The name for the joystick or game controller
+ */
+[[codegen::luawrap]] void unbindJoystick(std::string joystickName) {
+    global::navigationHandler->orbitalNavigator().joystickStates().unbindJoystick(
+        joystickName
+    );
+}
+
+/**
  * Get the Lua script that is currently bound to be executed when the provided button is
  * pressed/triggered.
  *

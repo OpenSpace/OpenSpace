@@ -1,7 +1,3 @@
-local joystickHelper = asset.require("./joystick_helper")
-
-
-
 -- Allowed values for the third parameter of bindJoystickAxis:
 -- "None"
 -- "Orbit X"
@@ -42,10 +38,15 @@ local SpaceMouse = {
   RightButton = 1
 }
 
+-- GLFW Controller names that should use this mapping
+local names = {
+  "SpaceNavigator",
+  "3Dconnexion Universal Receiver" -- Wireless version uses the generic receiver
+}
 
-asset.onInitialize(function()
+
+local function bindInputs(name)
   local controller = SpaceMouse
-  local name = "SpaceNavigator"
 
   openspace.navigation.bindJoystickAxis(name, controller.Push.LeftRight, "Orbit X", false, "JoystickLike", true, false, 40.0)
   openspace.navigation.bindJoystickAxis(name, controller.Push.BackForth, "Orbit Y", false, "JoystickLike", true, false, 40.0)
@@ -54,26 +55,49 @@ asset.onInitialize(function()
   openspace.navigation.bindJoystickAxis(name, controller.Push.UpDown, "Zoom", false, "JoystickLike", true, false, 40.0)
   openspace.navigation.bindJoystickAxis(name, controller.Tilt.LeftRight, "LocalRoll", false, "JoystickLike", true, false, 35.0)
 
+  local function setRollModeScript(mode)
+    return [[
+      -- Save current axis state
+      local axis = openspace.navigation.joystickAxis("]] .. name .. [[", ]] .. controller.Tilt.LeftRight .. [[)
+
+      -- Set new axis state
+      openspace.navigation.bindJoystickAxis("]] .. name .. [[", ]] .. controller.Tilt.LeftRight .. [[, "]] .. mode .. [[", axis.Inverted, axis.JoystickType, axis.Sticky, axis.Flip, axis.Sensitivity)
+    ]]
+  end
+
   openspace.navigation.bindJoystickButton(
     name,
     controller.LeftButton,
-    joystickHelper.permaBindLocalRoll(name, controller.Tilt.LeftRight),
+    setRollModeScript("LocalRoll"),
     "Switch to local roll mode"
   )
 
   openspace.navigation.bindJoystickButton(
     name,
     controller.RightButton,
-    joystickHelper.permaBindGlobalRoll(name, controller.Tilt.LeftRight),
+    setRollModeScript("GlobalRoll"),
     "Switch to global roll mode"
   )
+end
+
+
+asset.onInitialize(function()
+  for _, name in ipairs(names) do
+    bindInputs(name)
+  end
+end)
+
+asset.onDeinitialize(function()
+  for _, name in ipairs(names) do
+    openspace.navigation.unbindJoystick(name)
+  end
 end)
 
 
 
 asset.meta = {
-  Name = "Joystick controller: SpaceMouse compact (wired)",
-  Description = "Joystick controller configuration for SpaceMouse compact (wired)",
+  Name = "Joystick controller: SpaceMouse compact",
+  Description = "Joystick controller configuration for SpaceMouse compact",
   Author = "OpenSpace Team",
   URL = "https://openspaceproject.com",
   License = "MIT license"
