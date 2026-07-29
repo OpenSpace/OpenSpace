@@ -35,7 +35,7 @@ namespace {
 
     struct [[codegen::Dictionary(ConvertRecFormatTask)]] Parameters {
         std::filesystem::path inputFilePath;
-        std::filesystem::path outputFilePath;
+        std::filesystem::path outputFilePath [[codegen::mustexist(false)]];
 
         enum class DataMode {
             Ascii,
