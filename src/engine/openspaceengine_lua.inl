@@ -367,6 +367,24 @@ namespace {
     return static_cast<double>(global::openSpaceEngine->ramInUse());
 }
 
+/**
+ * Returns the name of the computer.
+ */
+[[codegen::luawrap]] std::string computerName() {
+#ifdef WIN32
+    std::array<char, MAX_COMPUTERNAME_LENGTH + 1> Buffer = {};
+    DWORD size = MAX_COMPUTERNAME_LENGTH;
+    GetComputerNameExA(ComputerNameDnsHostname, Buffer.data(), &size);
+    const std::string_view name = std::string_view(Buffer.data(), size);
+    return std::string(name);
+#else // ^^^^ WIN32 // !WIN32
+    std::array<char, 256> Buffer = {};
+    gethostname(Buffer.data(), Buffer.size());
+    const std::string_view name = Buffer.data();
+    return std::string(name);
+#endif // WIN32
+}
+
 } // namespace
 
 #include "openspaceengine_lua_codegen.cpp"

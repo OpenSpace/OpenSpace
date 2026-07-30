@@ -1841,7 +1841,8 @@ LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::LoadJson,
             codegen::lua::ResolveShortcut,
             codegen::lua::VramInUse,
-            codegen::lua::RamInUse
+            codegen::lua::RamInUse,
+            codegen::lua::ComputerName
         },
         std::move(scripts)
     };
