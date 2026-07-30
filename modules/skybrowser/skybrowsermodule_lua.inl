@@ -354,12 +354,18 @@ std::string prunedIdentifier(std::string identifier) {
 }
 
 /**
- * Returns a table of data regarding the current view and the sky browsers and targets.
+ * Returns a table of data regarding the current view and the sky browsers and targets. If
+ * no browser is currently selected, an empty table is returned.
  *
  * \return A table of data regarding the current targets
  */
 [[codegen::luawrap]] ghoul::Dictionary targetData() {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+    const std::string& browserId = module->selectedBrowserId();
+    if (browserId.empty()) {
+        return ghoul::Dictionary();
+    }
+
     ghoul::Dictionary data;
 
     // The current viewport data for OpenSpace
