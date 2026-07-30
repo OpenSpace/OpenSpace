@@ -64,7 +64,16 @@ enum class DistanceUnit {
     Furlong,
     Mile,
     League,
-    NauticalMile
+    NauticalMile,
+
+    // SI-scaled units
+    Megameter,
+    Gigameter,
+    Terameter,
+    Petameter,
+    Exameter,
+    Zettameter,
+    Yottameter
 };
 
 struct DistanceUnitName {
@@ -73,7 +82,7 @@ struct DistanceUnitName {
     std::string_view abbreviation;
 };
 
-constexpr std::array<DistanceUnit, static_cast<int>(DistanceUnit::NauticalMile) + 1>
+constexpr std::array<DistanceUnit, static_cast<int>(DistanceUnit::Yottameter) + 1>
 DistanceUnits = {
     DistanceUnit::Nanometer, DistanceUnit::Micrometer, DistanceUnit::Millimeter,
     DistanceUnit::Centimeter, DistanceUnit::Decimeter, DistanceUnit::Meter,
@@ -83,12 +92,14 @@ DistanceUnits = {
     DistanceUnit::Gigaparsec, DistanceUnit::Gigalightyear, DistanceUnit::Thou,
     DistanceUnit::Inch, DistanceUnit::Foot, DistanceUnit::Yard, DistanceUnit::Chain,
     DistanceUnit::Furlong, DistanceUnit::Mile, DistanceUnit::League,
-    DistanceUnit::NauticalMile
+    DistanceUnit::NauticalMile, DistanceUnit::Megameter, DistanceUnit::Gigameter,
+    DistanceUnit::Terameter, DistanceUnit::Petameter, DistanceUnit::Exameter,
+    DistanceUnit::Zettameter, DistanceUnit::Yottameter
 };
 
 // Note that the syntax here is required when initializing constexpr std::arrays with
 // structs
-constexpr std::array<DistanceUnitName, static_cast<int>(DistanceUnit::NauticalMile) + 1>
+constexpr std::array<DistanceUnitName, static_cast<int>(DistanceUnit::Yottameter) + 1>
 DistanceUnitNames { {
     { "Nanometer", "Nanometers", "nm" },
     { "Micrometer", "Micrometers", "um" },
@@ -115,7 +126,14 @@ DistanceUnitNames { {
     { "Furlong", "Furlongs", "fur" },
     { "Mile", "Miles", "mi" },
     { "League", "Leagues", "league" },
-    { "Nautical Mile", "Nautical Miles", "NM" }
+    { "Nautical Mile", "Nautical Miles", "NM" },
+    { "Megameter", "Megameters", "Mm" },
+    { "Gigameter", "Gigameters", "Gm" },
+    { "Terameter", "Terameters", "Tm" },
+    { "Petameter", "Petameters", "Pm" },
+    { "Exameter", "Exameters", "Em" },
+    { "Zettameter", "Zettameters", "Zm" },
+    { "Yottameter", "Yottameters", "Ym" }
 }};
 
 constexpr bool isValidDistanceUnitName(std::string_view name) {
@@ -226,6 +244,20 @@ constexpr double convertMeters(double meters, DistanceUnit requestedUnit) {
             return meters / (3.0 * distanceconstants::Mile);
         case DistanceUnit::NauticalMile:
             return meters / distanceconstants::NauticalMile;
+        case DistanceUnit::Megameter:
+            return meters / 1'000'000.0;
+        case DistanceUnit::Gigameter:
+            return meters / 1'000'000'000.0;
+        case DistanceUnit::Terameter:
+            return meters / 1'000'000'000'000.0;
+        case DistanceUnit::Petameter:
+            return meters / 1'000'000'000'000'000.0;
+        case DistanceUnit::Exameter:
+            return meters / 1'000'000'000'000'000'000.0;
+        case DistanceUnit::Zettameter:
+            return meters / 1'000'000'000'000'000'000'000.0;
+        case DistanceUnit::Yottameter:
+            return meters / 1'000'000'000'000'000'000'000'000.0;
         default:
             throw ghoul::MissingCaseException();
     }
@@ -285,6 +317,20 @@ constexpr double toMeter(DistanceUnit unit) {
             return 3.0 * distanceconstants::Mile;
         case DistanceUnit::NauticalMile:
             return distanceconstants::NauticalMile;
+        case DistanceUnit::Megameter:
+            return 1'000'000.0;
+        case DistanceUnit::Gigameter:
+            return 1'000'000'000.0;
+        case DistanceUnit::Terameter:
+            return 1'000'000'000'000.0;
+        case DistanceUnit::Petameter:
+            return 1'000'000'000'000'000.0;
+        case DistanceUnit::Exameter:
+            return 1'000'000'000'000'000'000.0;
+        case DistanceUnit::Zettameter:
+            return 1'000'000'000'000'000'000'000.0;
+        case DistanceUnit::Yottameter:
+            return 1'000'000'000'000'000'000'000'000.0;
         default:
             throw ghoul::MissingCaseException();
     }
