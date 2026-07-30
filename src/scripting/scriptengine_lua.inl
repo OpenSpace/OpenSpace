@@ -94,6 +94,16 @@ int printFatal(lua_State* L) {
 }
 
 /**
+ * Returns the size of the provided file. The file must exist for this function to work.
+ *
+ * \param file The path to the file
+ * \return The size of the file
+ */
+[[codegen::luawrap]] double fileSize(std::string file) {
+    return static_cast<double>(std::filesystem::file_size(file));
+}
+
+/**
  * Reads a file from disk and return its contents.
  */
 [[codegen::luawrap]] std::string readFile(std::filesystem::path file) {

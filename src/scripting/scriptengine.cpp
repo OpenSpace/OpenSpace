@@ -787,6 +787,7 @@ void ScriptEngine::addBaseLibrary() {
             codegen::lua::AbsolutePath,
             codegen::lua::SetPathToken,
             codegen::lua::FileExists,
+            codegen::lua::FileSize,
             codegen::lua::ReadFile,
             codegen::lua::ReadFileLines,
             codegen::lua::DirectoryExists,
