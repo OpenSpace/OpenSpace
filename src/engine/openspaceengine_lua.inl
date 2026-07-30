@@ -99,9 +99,20 @@ namespace {
 }
 
 /**
- * Downloads a file from Lua interpreter.
+ * Downloads the provided `url` into the location provided by `savePath`.
+ *
+ * \param url The URL to the file that should be downloaded
+ * \param savePath The location on disk where the file should be downloaded to
+ * \param waitForCompletion If `true`, this function will wait until the download is
+ *        finished. If the parameter is `false`, the download will occur in the background
+ *        and this function returns immediately
+ * \param overrideExistingFile If `true`, the file will be downloaded even if a file
+ *        already exists at the `savePath` location. The existing file will be overritten.
+ *        If it is `false` and a file already exists, no file will be downloaded
+ * \return `true` if the download completed successfully, `false` otherwise. IMPORTANT:
+ *         If `waitForCompletion` is `true`, this function will always return `true` 
  */
-[[codegen::luawrap]] void downloadFile(std::string url, std::string savePath,
+[[codegen::luawrap]] bool downloadFile(std::string url, std::string savePath,
                                        bool waitForCompletion = false,
                                        bool overrideExistingFile = true)
 {
@@ -118,13 +129,24 @@ namespace {
     if (waitForCompletion) {
         if (!future) {
             // The download file already exists and override is disabled
-            return;
+            return true;
         }
         while (!future->isFinished && future->errorMessage.empty()) {
             // Just wait
             LTRACEC("OpenSpaceEngine", std::format("waiting '{}'", future->errorMessage));
         }
+
+        if (!future->errorMessage.empty()) {
+            LERRORC("OpenSpaceEngine", future->errorMessage);
+            std::filesystem::remove(savePath);
+            return false;
+        }
+        else {
+            return true;
+        }
     }
+
+    return true;
 }
 
 /**
