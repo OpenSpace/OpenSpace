@@ -86,7 +86,7 @@ private:
     IntListProperty _selectedIndices;
     BoolProperty _useFixedRingWidth;
 
-    OptionProperty _renderOption;
+    OptionProperty _orientationRenderOption;
 
     FloatProperty _darkenFactor;
 

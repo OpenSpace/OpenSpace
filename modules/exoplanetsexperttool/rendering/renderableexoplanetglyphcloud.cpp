@@ -49,7 +49,7 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ExoplanetGlyphCloud";
 
-    enum RenderOption {
+    enum OrientationRenderOption {
         ViewDirection = 0,
         PositionNormal
     };
@@ -106,14 +106,14 @@ namespace {
         // [[codegen::verbatim(DarkenFactorInfo.description)]]
         std::optional<float> darkenFactor [[codegen::inrange(0.f, 1.f)]];
 
-        enum class [[codegen::map(RenderOption)]] RenderOption {
+        enum class [[codegen::map(OrientationRenderOption)]] OrientationRenderOption {
             ViewDirection [[codegen::key("Camera View Direction")]],
             PositionNormal [[codegen::key("Camera Position Normal")]]
         };
 
         // The billboard orientation to use for rendering the points.
         // This can be either "Camera View Direction" or "Camera Position Normal".
-        std::optional<RenderOption> billboard;
+        std::optional<OrientationRenderOption> billboard;
     };
 #include "renderableexoplanetglyphcloud_codegen.cpp"
 } // namespace
@@ -132,7 +132,7 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
     , _scale(ScaleInfo, 1.f, 0.f, 10.f)
     , _selectedIndices(SelectionInfo)
     , _useFixedRingWidth(UseFixedWidthInfo, true)
-    , _renderOption(OrientationRenderOptionInfo)
+    , _orientationRenderOption(OrientationRenderOptionInfo)
     , _darkenFactor(DarkenFactorInfo, 0.3f, 0.f, 1.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -150,13 +150,20 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
     _useFixedRingWidth = p.useFixedWidth.value_or(_useFixedRingWidth);
     addProperty(_useFixedRingWidth);
 
-    _renderOption.addOption(RenderOption::ViewDirection, "Camera View Direction");
-    _renderOption.addOption(RenderOption::PositionNormal, "Camera Position Normal");
+    _orientationRenderOption.addOption(
+        OrientationRenderOption::ViewDirection,
+        "Camera View Direction"
+    );
+    _orientationRenderOption.addOption(
+        OrientationRenderOption::PositionNormal,
+        "Camera Position Normal"
+    );
 
-    _renderOption = p.billboard.has_value() ?
-        codegen::map<RenderOption>(*p.billboard) : RenderOption::ViewDirection;
+    _orientationRenderOption = p.billboard.has_value() ?
+        codegen::map<OrientationRenderOption>(*p.billboard) :
+        OrientationRenderOption::ViewDirection;
 
-    addProperty(_renderOption);
+    addProperty(_orientationRenderOption);
 
     addProperty(_darkenFactor);
 
@@ -347,7 +354,7 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
     }
     glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
 
-    _program->setUniform(_uniformCache.renderOption, _renderOption.value());
+    _program->setUniform(_uniformCache.renderOption, _orientationRenderOption.value());
 
     _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
     _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));
