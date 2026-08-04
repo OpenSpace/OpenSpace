@@ -144,9 +144,9 @@ namespace {
         Property::Visibility::User
     };
 
-    constexpr Property::PropertyInfo IsHiddenInfo = {
-        "Hidden",
-        "Hidden",
+    constexpr Property::PropertyInfo GuiIsHiddenInfo = {
+        "GuiHidden",
+        "GUI Hidden",
         "If this value is set to `true`, this ScreenSpaceRenderable will indicate to the "
         "user interface that it should not be shown.",
         Property::Visibility::Hidden
@@ -358,7 +358,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         glm::vec4(1.f)
     )
     , _delete(DeleteInfo)
-    , _isHidden(IsHiddenInfo, false)
+    , _guiIsHidden(GuiIsHiddenInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -466,8 +466,8 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     });
     addProperty(_delete);
 
-    _isHidden = p.hidden.value_or(_isHidden);
-    addProperty(_isHidden);
+    _guiIsHidden = p.hidden.value_or(_guiIsHidden);
+    addProperty(_guiIsHidden);
 }
 
 ScreenSpaceRenderable::~ScreenSpaceRenderable() {}
