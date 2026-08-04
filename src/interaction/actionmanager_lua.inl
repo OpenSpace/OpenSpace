@@ -152,7 +152,8 @@ struct [[codegen::Dictionary(Action)]] Action {
 
 /**
  * Returns information about the action as a table with the keys 'Identifier', 'Command',
- * 'Name', 'Documentation', 'GuiPath', and 'Synchronization'.
+* Returns information about the action as a table with the keys: `Identifier`, `Command`,
+* `Name`, `Documentation`, `GuiPath`, `IsLocal`, and `IsHidden`.
  */
 [[codegen::luawrap]] ghoul::Dictionary action(std::string identifier) {
     if (identifier.empty()) {
@@ -185,7 +186,8 @@ struct [[codegen::Dictionary(Action)]] Action {
 /**
  * Returns all registered actions in the system as a table of tables each containing the
  * keys 'Identifier', 'Command', 'Name', 'Documentation', 'GuiPath', and
- * 'Synchronization'.
+* keys: `Identifier`, `Command`, `Name`, `Documentation`, `GuiPath`,
+* `IsLocal`, and `IsHidden`.
  */
 [[codegen::luawrap]] std::vector<ghoul::Dictionary> actions() {
     std::vector<ghoul::Dictionary> res;
