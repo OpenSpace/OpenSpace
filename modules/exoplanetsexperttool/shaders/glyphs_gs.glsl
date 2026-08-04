@@ -29,7 +29,7 @@
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 
-const int MaxColors = 8;
+const int MaxColors = 4;
 
 in Data {
   flat float component;

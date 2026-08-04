@@ -24,7 +24,7 @@
 
 #include "fragment.glsl"
 
-const int MaxColors = 8;
+const int MaxColors = 4;
 
 in Data {
   flat float component;

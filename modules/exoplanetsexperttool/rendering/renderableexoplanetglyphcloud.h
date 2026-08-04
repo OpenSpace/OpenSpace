@@ -44,11 +44,11 @@ namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace::exoplanets {
 
-constexpr size_t MaxNumberColors = 8;
-
 class RenderableExoplanetGlyphCloud : public Renderable {
 public:
     RenderableExoplanetGlyphCloud(const ghoul::Dictionary& dictionary);
+
+    static const size_t MaxNumberColors = 4;
 
     /**
      * Return the index of the currently hovered glyph, or -1 if none is hovered

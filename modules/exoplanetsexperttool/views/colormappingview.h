@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COLORMAPPINGVIEW___H__
 
 #include <modules/exoplanetsexperttool/datastructures.h>
-#include <string>
 #include <vector>
 
 namespace openspace::exoplanets {

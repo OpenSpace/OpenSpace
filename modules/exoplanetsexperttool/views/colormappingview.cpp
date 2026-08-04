@@ -24,8 +24,8 @@
 
 #include <modules/exoplanetsexperttool/views/colormappingview.h>
 
-#include <modules/exoplanetsexperttool/datahelper.h>
 #include <modules/exoplanetsexperttool/dataviewer.h>
+#include <modules/exoplanetsexperttool/rendering/renderableexoplanetglyphcloud.h>
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <implot.h>
@@ -155,7 +155,7 @@ bool ColorMappingView::renderViewContent() {
 
     // Colormap for each selected variable
     if (ImGui::Button("+ Add variable")) {
-        if (_variableSelection.size() < 8) {
+        if (_variableSelection.size() < RenderableExoplanetGlyphCloud::MaxNumberColors) {
             ColorMappedVariable newVariable = { .columnIndex = _firstNumericColumnIndex };
             _variableSelection.push_back(newVariable);
             cmapWasChanged = true;
