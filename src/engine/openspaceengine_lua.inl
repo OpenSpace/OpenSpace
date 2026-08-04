@@ -37,6 +37,10 @@
 #include <array>
 #include <iterator>
 
+#ifndef WIN32
+#include <unistd.h>
+#endif // WIN32
+
 using namespace openspace;
 
 namespace {
