@@ -152,7 +152,8 @@ struct [[codegen::Dictionary(Action)]] Action {
 
 /**
  * Returns information about the action as a table with the keys 'Identifier', 'Command',
- * 'Name', 'Documentation', 'GuiPath', and 'Synchronization'.
+* Returns information about the action as a table with the keys: `Identifier`, `Command`,
+* `Name`, `Documentation`, `GuiPath`, `IsLocal`, and `IsHidden`.
  */
 [[codegen::luawrap]] ghoul::Dictionary action(std::string identifier) {
     if (identifier.empty()) {
