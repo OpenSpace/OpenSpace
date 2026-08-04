@@ -632,7 +632,8 @@ void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
             d.colors[j] = item.colors[j];
         }
 
-        // @TODO: Why do we increase by one here?
+        // Increase by one to avoid having 0 as a valid index, since we use 0 in the
+        // shader to indicate "no point"
         d.index = item.index + 1;
 
         if (static_cast<int>(d.index) > maxIndex) {
