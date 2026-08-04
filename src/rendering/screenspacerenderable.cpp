@@ -272,7 +272,7 @@ namespace {
         // Renderables with a single property change.
         std::optional<std::variant<std::string, std::vector<std::string>>> tag;
 
-        // [[codegen::verbatim(IsHiddenInfo.description)]]
+        // [[codegen::verbatim(GuiIsHiddenInfo.description)]]
         std::optional<bool> hidden;
     };
 } // namespace
