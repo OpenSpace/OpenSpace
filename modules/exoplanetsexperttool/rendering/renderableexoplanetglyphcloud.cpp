@@ -54,6 +54,11 @@ namespace {
         PositionNormal
     };
 
+    enum GlyphMode {
+        Rings = 0,
+        Inclination
+    };
+
     constexpr Property::PropertyInfo ScaleInfo = {
         "Scale",
         "Scale",
@@ -86,6 +91,13 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
+    constexpr Property::PropertyInfo GlyphModeInfo = {
+        "GlyphMode",
+        "Glyph mode",
+        "Controls which visual representation to use for the exoplanet glyps.",
+        Property::Visibility::User
+    };
+
     constexpr Property::PropertyInfo DarkenFactorInfo = {
         "DarkenFactor",
         "Darker factor (on highlight)",
@@ -114,6 +126,14 @@ namespace {
         // The billboard orientation to use for rendering the points.
         // This can be either "Camera View Direction" or "Camera Position Normal".
         std::optional<OrientationRenderOption> billboard;
+
+        enum class [[codegen::map(GlyphMode)]] GlyphMode {
+            Rings,
+            Inclination
+        };
+
+        // [[codegen::verbatim(GlyphModeInfo.description)]]
+        std::optional<GlyphMode> glyphMode;
     };
 #include "renderableexoplanetglyphcloud_codegen.cpp"
 } // namespace
@@ -133,6 +153,7 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
     , _selectedIndices(SelectionInfo)
     , _useFixedRingWidth(UseFixedWidthInfo, true)
     , _orientationRenderOption(OrientationRenderOptionInfo)
+    , _glyphMode(GlyphModeInfo)
     , _darkenFactor(DarkenFactorInfo, 0.3f, 0.f, 1.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -165,6 +186,15 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
 
     addProperty(_orientationRenderOption);
 
+    _glyphMode.addOption(GlyphMode::Rings, "Rings");
+    _glyphMode.addOption(GlyphMode::Inclination, "Inclination");
+    _glyphMode = p.glyphMode.has_value() ?
+        codegen::map<GlyphMode>(*p.glyphMode) :
+        GlyphMode::Rings;
+    _glyphMode.onChange([this]() { _glyphModeChanged = true; });
+    addProperty(_glyphMode);
+
+    _darkenFactor = p.darkenFactor.value_or(_darkenFactor);
     addProperty(_darkenFactor);
 
     updateDataIfChanged();
@@ -257,14 +287,7 @@ void RenderableExoplanetGlyphCloud::initialize() {
 }
 
 void RenderableExoplanetGlyphCloud::initializeGL() {
-    _program = global::renderEngine->buildRenderProgram(
-        "ExoGlyphCloud",
-        absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/glyphs_vs.glsl"),
-        absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/glyphs_fs.glsl"),
-        absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/glyphs_gs.glsl")
-    );
-
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+    initializeShaders();
 
     // Generate texture and frame buffer for rendering glyph id
     glCreateFramebuffers(1, &_glyphIdFbo);
@@ -298,10 +321,33 @@ void RenderableExoplanetGlyphCloud::deinitializeGL() {
     glDeleteVertexArrays(1, &_selectedVao);
     glDeleteBuffers(1, &_selectedVbo);
 
-    if (_program) {
-        global::renderEngine->removeRenderProgram(_program.get());
-        _program = nullptr;
+    if (_programRings) {
+        global::renderEngine->removeRenderProgram(_programRings.get());
+        _programRings = nullptr;
     }
+
+    if (_programInclination) {
+        global::renderEngine->removeRenderProgram(_programInclination.get());
+        _programInclination = nullptr;
+    }
+}
+
+void RenderableExoplanetGlyphCloud::initializeShaders() {
+    _programRings = global::renderEngine->buildRenderProgram(
+        "ExoGlyphCloud_Rings",
+        absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/glyphs_vs.glsl"),
+        absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/glyphs_fs.glsl"),
+        absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/glyphs_gs.glsl")
+    );
+    ghoul::opengl::updateUniformLocations(*_programRings, _uniformCacheRings);
+
+    _programInclination = global::renderEngine->buildRenderProgram(
+        "ExoGlyphCloud_Inclination",
+        absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/glyphs_inclination_vs.glsl"),
+        absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/glyphs_inclination_fs.glsl"),
+        absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/glyphs_inclination_gs.glsl")
+    );
+    ghoul::opengl::updateUniformLocations(*_programInclination, _uniformCacheInclination);
 }
 
 void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks&) {
@@ -309,35 +355,93 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
         return;
     }
 
-    _program->activate();
+    // Select the appropriate program and uniform cache based on mode
+    ghoul::opengl::ProgramObject* program = nullptr;
+    if (_glyphMode == GlyphMode::Rings) {
+        program = _programRings.get();
+    }
+    else if (_glyphMode == GlyphMode::Inclination) {
+        program = _programInclination.get();
+    }
+    else {
+        throw ghoul::MissingCaseException();
+    }
 
+    program->activate();
+
+    // Setup all uniforms
+    setupCommonUniforms(*program, data);
+
+    if (_glyphMode == GlyphMode::Rings) {
+        setupRingsSpecificUniforms(*program, data);
+    }
+
+    // 1st rendering pass: render the glyphs normally, with correct color
+    renderMainPass();
+
+    // 2nd rendering pass: Render IDs to a separate texture every frame as well
+    // To use for picking. We only need to do this on the master node
+    if (global::windowDelegate->isMaster()) {
+        renderIndexTexture(*program);
+    }
+
+    // 3rd rendering pass: Render selected points on top
+    renderSelectedPoints(*program);
+
+    program->deactivate();
+    glBindVertexArray(0);
+
+    // Restores GL State
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
+}
+
+void RenderableExoplanetGlyphCloud::setupCommonUniforms(
+                                                    ghoul::opengl::ProgramObject& program,
+                                                                   const RenderData& data)
+{
     const glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     const glm::dmat4 viewProjectionMatrix =
         glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix();
 
-    const glm::dmat4 modelViewProjectionMatrix = viewProjectionMatrix * modelTransform;
+    // Get the correct uniform cache based on mode
+    if (_glyphMode == GlyphMode::Rings) {
+        program.setUniform(_uniformCacheRings.modelMatrix, modelTransform);
+        program.setUniform(_uniformCacheRings.cameraViewProjectionMatrix, viewProjectionMatrix);
+        program.setUniform(_uniformCacheRings.opacity, opacity());
+        program.setUniform(_uniformCacheRings.scale, _scale);
+        program.setUniform(_uniformCacheRings.onTop, false);
+        program.setUniform(_uniformCacheRings.maxIndex, _maxIndex);
+        program.setUniform(_uniformCacheRings.currentIndex, _currentlyHoveredIndex + 1);
+        program.setUniform(_uniformCacheRings.isHighlightMode, _shouldHighlightHovered);
+        program.setUniform(_uniformCacheRings.darkenFactor, _darkenFactor);
+        program.setUniform(_uniformCacheRings.cameraPosition, data.camera.position());
+    }
+    else if (_glyphMode == GlyphMode::Inclination) {
+        program.setUniform(_uniformCacheInclination.modelMatrix, modelTransform);
+        program.setUniform(_uniformCacheInclination.cameraViewProjectionMatrix, viewProjectionMatrix);
+        program.setUniform(_uniformCacheInclination.opacity, opacity());
+        program.setUniform(_uniformCacheInclination.scale, _scale);
+        program.setUniform(_uniformCacheInclination.onTop, false);
+        program.setUniform(_uniformCacheInclination.maxIndex, _maxIndex);
+        program.setUniform(_uniformCacheInclination.currentIndex, _currentlyHoveredIndex + 1);
+        program.setUniform(_uniformCacheInclination.isHighlightMode, _shouldHighlightHovered);
+        program.setUniform(_uniformCacheInclination.darkenFactor, _darkenFactor);
+        program.setUniform(_uniformCacheInclination.cameraPosition, data.camera.position());
+    }
 
-    _program->setUniform(_uniformCache.modelMatrix, modelTransform);
-    _program->setUniform(
-        _uniformCache.cameraViewProjectionMatrix,
-        glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
-    );
+    program.setUniform("isRenderIndexStep", false);
+}
 
-    _program->setUniform(_uniformCache.opacity, opacity());
-    _program->setUniform(_uniformCache.scale, _scale);
-    _program->setUniform(_uniformCache.onTop, false);
-    _program->setUniform(_uniformCache.isRenderIndexStep, false);
-    _program->setUniform(_uniformCache.maxIndex, _maxIndex);
-    _program->setUniform(_uniformCache.currentIndex, _currentlyHoveredIndex + 1); // Plus one to map offset in shader
-
-    _program->setUniform(_uniformCache.useFixedRingWidth, _useFixedRingWidth);
-
-    _program->setUniform(_uniformCache.isHighlightMode, _shouldHighlightHovered);
-    _program->setUniform(_uniformCache.darkenFactor, _darkenFactor);
+void RenderableExoplanetGlyphCloud::setupRingsSpecificUniforms(
+    ghoul::opengl::ProgramObject& program,
+    const RenderData& data)
+{
+    program.setUniform(_uniformCacheRings.useFixedRingWidth, _useFixedRingWidth);
 
     glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
     glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
@@ -354,91 +458,97 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
     }
     glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
 
-    _program->setUniform(_uniformCache.renderOption, _orientationRenderOption.value());
-
-    _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
-    _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));
-
-    _program->setUniform(_uniformCache.cameraPosition, data.camera.position());
-    _program->setUniform(
-        _uniformCache.cameraLookUp,
+    program.setUniform(_uniformCacheRings.renderOption, _orientationRenderOption.value());
+    program.setUniform(_uniformCacheRings.up, glm::vec3(orthoUp));
+    program.setUniform(_uniformCacheRings.right, glm::vec3(orthoRight));
+    program.setUniform(
+        _uniformCacheRings.cameraLookUp,
         glm::vec3(data.camera.lookUpVectorWorldSpace())
     );
+}
 
+void RenderableExoplanetGlyphCloud::renderMainPass() {
+    glEnablei(GL_BLEND, 0);
+    glDepthMask(true);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glBindVertexArray(_pointsVao);
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_glyphData.size()));
+}
+
+void RenderableExoplanetGlyphCloud::renderIndexTexture(
+                                                    ghoul::opengl::ProgramObject& program)
+{
     // Start by getting the viewport size
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
-    // 1st rendering pass: render the glyphs normally, with correct color
+    program.setUniform("isRenderIndexStep", true);
+    GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _glyphIdFbo);
+    GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, drawBuffers);
+
+    glm::uvec3 textureDim = _glyphIdTexture->dimensions();
+
+    // Potentially update texture size
+    if (static_cast<unsigned int>(viewport[2]) != textureDim.x ||
+        static_cast<unsigned int>(viewport[3]) != textureDim.y)
     {
-        glEnablei(GL_BLEND, 0);
-        glDepthMask(true);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        glBindVertexArray(_pointsVao);
-        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_glyphData.size()));
+        createGlyphIdTexture(glm::uvec3(viewport[2], viewport[3], 1));
     }
 
-    // 2nd rendering pass: Render IDs to a separate texture every frame as well
-    // To use for picking. We only need to do this on the master node
-    if (global::windowDelegate->isMaster()) {
-        _program->setUniform(_uniformCache.isRenderIndexStep, true);
-        GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
+    // Clear the previous values from the texture
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, _glyphIdFbo);
-        GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-        glDrawBuffers(1, drawBuffers);
+    // No blending please
+    glDisablei(GL_BLEND, 0);
 
-        glm::uvec3 textureDim = _glyphIdTexture->dimensions();
+    // Draw again! And specify viewport size
+    glViewport(viewport[0], viewport[1], textureDim.x, textureDim.y);
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_glyphData.size()));
 
-        // Potentially upate texture size
-        if (static_cast<unsigned int>(viewport[2]) != textureDim.x ||
-            static_cast<unsigned int>(viewport[3]) != textureDim.y)
-        {
-            createGlyphIdTexture(glm::uvec3(viewport[2], viewport[3], 1));
-        }
+    // Reset index rendering, viewport size and frame buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+    program.setUniform("isRenderIndexStep", false);
+    glEnablei(GL_BLEND, 0);
 
-        // Clear the previous values from the texture
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // Save viewport size
+    _lastViewPortSize = glm::ivec2(viewport[2], viewport[3]);
+}
 
-        // No blending please
-        glDisablei(GL_BLEND, 0);
-
-        // Draw again! And specify viewport size
-        glViewport(viewport[0], viewport[1], textureDim.x, textureDim.y);
-        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_glyphData.size()));
-
-        // Reset index rendering, viewport size and frame buffer
-        glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-        glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-        _program->setUniform(_uniformCache.isRenderIndexStep, false);
-        glEnablei(GL_BLEND, 0);
-
-        // Save viewport size
-        _lastViewPortSize = glm::ivec2(viewport[2], viewport[3]);
-    }
-
-    // Selected points
+void RenderableExoplanetGlyphCloud::renderSelectedPoints(
+                                                    ghoul::opengl::ProgramObject& program)
+{
     const size_t nSelected = _selectedIndices.value().size();
-    if (nSelected > 0) {
-        _program->setUniform(_uniformCache.opacity, 1.f);
-        _program->setUniform(_uniformCache.onTop, true);
-        glBindVertexArray(_selectedVao);
-        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(nSelected));
+    if (nSelected == 0) {
+        return;
     }
 
-    glBindVertexArray(0);
-    _program->deactivate();
+    if (_glyphMode == GlyphMode::Rings) {
+        program.setUniform(_uniformCacheRings.opacity, 1.f);
+        program.setUniform(_uniformCacheRings.onTop, true);
+    }
+    else if (_glyphMode == GlyphMode::Inclination) {
+        program.setUniform(_uniformCacheInclination.opacity, 1.f);
+        program.setUniform(_uniformCacheInclination.onTop, true);
+    }
 
-    // Restores GL State
-    global::renderEngine->openglStateCache().resetBlendState();
-    global::renderEngine->openglStateCache().resetDepthState();
+    glBindVertexArray(_selectedVao);
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(nSelected));
 }
 
 void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
-    if (_program->isDirty()) {
-        _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+    if (_programInclination->isDirty()) {
+        _programInclination->rebuildFromFile();
+        ghoul::opengl::updateUniformLocations(*_programInclination, _uniformCacheInclination);
+    }
+
+    if (_programRings->isDirty()) {
+        _programRings->rebuildFromFile();
+        ghoul::opengl::updateUniformLocations(*_programRings, _uniformCacheRings);
     }
 
     updateDataIfChanged();
@@ -452,6 +562,7 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
         );
         mapVertexAttributes(_pointsVao);
         glVertexArrayVertexBuffer(_pointsVao, 0, _pointsVbo, 0, sizeof(GlyphData));
+        _renderDataIsDirty = false;
     }
 
     if (_selectionChanged) {
@@ -490,10 +601,11 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
             mapVertexAttributes(_selectedVao);
             glVertexArrayVertexBuffer(_selectedVao, 0, _selectedVbo, 0, sizeof(GlyphData));
         }
+
+        _selectionChanged = false;
     }
 
-    _renderDataIsDirty = false;
-    _selectionChanged = false;
+    _glyphModeChanged = false;
 }
 
 void RenderableExoplanetGlyphCloud::createGlyphIdTexture(const glm::uvec3 dimensions) {
@@ -529,66 +641,62 @@ void RenderableExoplanetGlyphCloud::createGlyphIdTexture(const glm::uvec3 dimens
 }
 
 void RenderableExoplanetGlyphCloud::mapVertexAttributes(GLuint vao) {
-    GLint positionAttribute = _program->attributeLocation("in_position");
-    glEnableVertexArrayAttrib(vao, positionAttribute);
-    glVertexArrayAttribBinding(vao, positionAttribute, 0);
+    // First the attributes common to both modes
+
+    // Location 0: in_position
+    glEnableVertexArrayAttrib(vao, 0);
+    glVertexArrayAttribBinding(vao, 0, 0);
     glVertexArrayAttribFormat(
-        vao,
-        positionAttribute,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
+        vao, 0, 3, GL_FLOAT, GL_FALSE,
         offsetof(GlyphData, position)
     );
 
-    GLint componentAttribute = _program->attributeLocation("in_component");
-    glEnableVertexArrayAttrib(vao, componentAttribute);
-    glVertexArrayAttribBinding(vao, componentAttribute, 0);
+    // Location 1: in_component
+    glEnableVertexArrayAttrib(vao, 1);
+    glVertexArrayAttribBinding(vao, 1, 0);
     glVertexArrayAttribFormat(
-        vao,
-        componentAttribute,
-        1,
-        GL_FLOAT,
-        GL_FALSE,
+        vao, 1, 1, GL_FLOAT, GL_FALSE,
         offsetof(GlyphData, component)
     );
 
-    GLint indexAttribute = _program->attributeLocation("in_glyphIndex");
-    glEnableVertexArrayAttrib(vao, indexAttribute);
-    glVertexArrayAttribBinding(vao, indexAttribute, 0);
+    // Location 2: in_glyphIndex
+    glEnableVertexArrayAttrib(vao, 2);
+    glVertexArrayAttribBinding(vao, 2, 0);
     glVertexArrayAttribIFormat(
-        vao,
-        indexAttribute,
-        1,
-        GL_INT,
+        vao, 2, 1, GL_INT,
         offsetof(GlyphData, index)
     );
 
-    GLint nColorsAttribute = _program->attributeLocation("in_nColors");
-    glEnableVertexArrayAttrib(vao, nColorsAttribute);
-    glVertexArrayAttribBinding(vao, nColorsAttribute, 0);
-    glVertexArrayAttribIFormat(
-        vao,
-        nColorsAttribute,
-        1,
-        GL_INT,
-        offsetof(GlyphData, nColors)
-    );
+    if (_glyphMode == GlyphMode::Rings) {
+        // Location 3: in_nColors
+        glEnableVertexArrayAttrib(vao, 3);
+        glVertexArrayAttribBinding(vao, 3, 0);
+        glVertexArrayAttribIFormat(
+            vao, 3, 1, GL_INT,
+            offsetof(GlyphData, nColors)
+        );
 
-    GLint colorAttribute = _program->attributeLocation("in_colors");
-    for (int i = 0; i < MaxNumberColors; i++) {
-        GLint currentColorIndex = colorAttribute + i;
-        glEnableVertexArrayAttrib(vao, currentColorIndex);
-        glVertexArrayAttribBinding(vao, currentColorIndex, 0);
+        // Locations 4-7: in_colors[4] array
+        for (int i = 0; i < 4; i++) {
+            int location = 4 + i;
+            glEnableVertexArrayAttrib(vao, location);
+            glVertexArrayAttribBinding(vao, location, 0);
+            glVertexArrayAttribFormat(
+                vao, location, 4, GL_FLOAT, GL_FALSE,
+                offsetof(GlyphData, colors) + i * 4 * sizeof(float)
+            );
+        }
+    }
+    else if (_glyphMode == GlyphMode::Inclination) {
+        // Location 3: in_inclinationVector
+        glEnableVertexArrayAttrib(vao, 3);
+        glVertexArrayAttribBinding(vao, 3, 0);
         glVertexArrayAttribFormat(
-            vao,
-            currentColorIndex,
-            4,
-            GL_FLOAT,
-            GL_FALSE,
-            offsetof(GlyphData, colors) + i * 4 * sizeof(float)
+            vao, 3, 3, GL_FLOAT, GL_FALSE,
+            offsetof(GlyphData, inclinationVector)
         );
     }
+    else throw ghoul::MissingCaseException();
 }
 
 void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
@@ -597,8 +705,9 @@ void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
     using GlyphRenderData = ExoplanetsExpertToolModule::GlyphRenderData;
     GlyphRenderData syncedData = mod->glyphRenderData();
 
-    // Check if timstamp was updated, to avoid unnecessary updates
-    if (syncedData.timeStamp <= _lastDataTimeStamp) {
+    // Check if timestamp was updated, to avoid unnecessary updates. But always update
+    // if the glyph mode changed, since the data needs to be reprocessed for the new mode
+    if (!_glyphModeChanged && (syncedData.timeStamp <= _lastDataTimeStamp)) {
         return; // No update
     }
 
@@ -614,7 +723,6 @@ void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
 
     _glyphData.reserve(nPoints);
     _glyphIndices.reserve(nPoints);
-
     int maxIndex = -1;
 
     for (const GlyphRenderData::Item& item : syncedData.items) {
@@ -622,22 +730,7 @@ void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
 
         // Position is given in parsec
         d.position = glm::vec3(item.position * distanceconstants::Parsec);
-
         d.component = static_cast<float>(item.component);
-
-        size_t nColors = item.colors.size();
-        d.nColors = static_cast<int>(nColors);
-
-        // Clear all color slots first (defensive programming)
-        for (size_t i = 0; i < MaxNumberColors; i++) {
-            d.colors[i] = glm::vec4(0.0f);
-        }
-
-        // Limit the number of colors to the maximum supported by the shader
-        size_t temp = std::min(nColors, MaxNumberColors);
-        for (size_t j = 0; j < temp; j++) {
-            d.colors[j] = item.colors[j];
-        }
 
         // Increase by one to avoid having 0 as a valid index, since we use 0 in the
         // shader to indicate "no point"
@@ -645,6 +738,27 @@ void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
 
         if (static_cast<int>(d.index) > maxIndex) {
             maxIndex = static_cast<int>(d.index);
+        }
+
+        // Mode-specific data population
+        if (_glyphMode == GlyphMode::Rings) {
+            size_t nColors = item.colors.size();
+            d.nColors = static_cast<int>(nColors);
+
+            // Clear all color slots first (defensive programming)
+            for (size_t i = 0; i < MaxNumberColors; i++) {
+                d.colors[i] = glm::vec4(0.0f);
+            }
+
+            // Limit the number of colors to the maximum supported by the shader
+            size_t temp = std::min(nColors, MaxNumberColors);
+            for (size_t j = 0; j < temp; j++) {
+                d.colors[j] = item.colors[j];
+            }
+        }
+        else if (_glyphMode == GlyphMode::Inclination) {
+            // TODO: Get actual inclination vector from data
+            d.inclinationVector = glm::vec3(0.f, 0.f, 1.f);
         }
 
         _glyphData.push_back(std::move(d));

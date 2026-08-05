@@ -60,42 +60,73 @@ public:
     void deinitialize() override;
     void deinitializeGL() override;
 
-    void initializeSelectionCallbacks();
-
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
-
-    void updateDataIfChanged();
 
     static openspace::Documentation Documentation();
 
 private:
+    void initializeSelectionCallbacks();
+    void initializeShaders();
+
     void createGlyphIdTexture(const glm::uvec3 dimensions);
     void mapVertexAttributes(GLuint vao);
 
+    void updateDataIfChanged();
+
+    // Rendering helper methods
+    void setupCommonUniforms(
+        ghoul::opengl::ProgramObject& program,
+        const RenderData& data
+    );
+    void setupRingsSpecificUniforms(
+        ghoul::opengl::ProgramObject& program,
+        const RenderData& data
+    );
+    void renderMainPass();
+    void renderIndexTexture(ghoul::opengl::ProgramObject& program);
+    void renderSelectedPoints(ghoul::opengl::ProgramObject& program);
+
     bool _renderDataIsDirty = true;
     bool _selectionChanged = true;
+    bool _glyphModeChanged = false;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
-    UniformCache(modelMatrix, cameraViewProjectionMatrix, onTop, useFixedRingWidth,
-        opacity, scale, maxIndex, currentIndex, isRenderIndexStep, renderOption, up,
-        right, cameraPosition, cameraLookUp, isHighlightMode, darkenFactor
-    ) _uniformCache;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _programRings = nullptr;
+
+    UniformCache(modelMatrix, cameraViewProjectionMatrix, onTop, opacity, scale, maxIndex,
+        currentIndex, cameraPosition, isHighlightMode, darkenFactor,
+        // Rings specific uniforms
+        renderOption, up, right, cameraLookUp,  useFixedRingWidth
+    ) _uniformCacheRings;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _programInclination = nullptr;
+
+    UniformCache(modelMatrix, cameraViewProjectionMatrix, onTop, opacity, scale, maxIndex,
+        currentIndex, cameraPosition, isHighlightMode, darkenFactor
+    ) _uniformCacheInclination;
 
     FloatProperty _scale;
     IntListProperty _selectedIndices;
     BoolProperty _useFixedRingWidth;
 
     OptionProperty _orientationRenderOption;
+    OptionProperty _glyphMode;
 
     FloatProperty _darkenFactor;
 
+    // Unified glyph data structure
     struct GlyphData {
+        // Base data (always present)
         glm::vec3 position;
         float component = -1.f;
         size_t index = 0;
+
+        // Rings mode data
         int nColors = -1;
         std::array<glm::vec4, MaxNumberColors> colors = {};
+
+        // Inclination mode data
+        glm::vec3 inclinationVector = glm::vec3(0.f);
     };
 
     std::vector<GlyphData> _glyphData;
