@@ -25,6 +25,7 @@
 #include <modules/exoplanetsexperttool/rendering/renderableexoplanetglyphcloud.h>
 
 #include <modules/exoplanetsexperttool/exoplanetsexperttoolmodule.h>
+#include <modules/exoplanets/exoplanetshelper.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
@@ -40,7 +41,6 @@
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <fstream>
 #include <optional>
 #include <string_view>
 
@@ -438,8 +438,8 @@ void RenderableExoplanetGlyphCloud::setupCommonUniforms(
 }
 
 void RenderableExoplanetGlyphCloud::setupRingsSpecificUniforms(
-    ghoul::opengl::ProgramObject& program,
-    const RenderData& data)
+                                                    ghoul::opengl::ProgramObject& program,
+                                                                   const RenderData& data)
 {
     program.setUniform(_uniformCacheRings.useFixedRingWidth, _useFixedRingWidth);
 
@@ -736,10 +736,6 @@ void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
         // shader to indicate "no point"
         d.index = item.index + 1;
 
-        if (static_cast<int>(d.index) > maxIndex) {
-            maxIndex = static_cast<int>(d.index);
-        }
-
         // Mode-specific data population
         if (_glyphMode == GlyphMode::Rings) {
             size_t nColors = item.colors.size();
@@ -757,8 +753,18 @@ void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
             }
         }
         else if (_glyphMode == GlyphMode::Inclination) {
-            // TODO: Get actual inclination vector from data
-            d.inclinationVector = glm::vec3(0.f, 0.f, 1.f);
+            // Rotation corresponding to a plane whose normal is facing Earth
+            glm::dmat3 systemRotation = computeSystemRotation(d.position);
+
+            constexpr std::string_view inclinationColumn = "pl_orbincl";
+            // TODO: Load system's index from the dataset
+
+            // This is the up vector of the orbit plane, in world space
+            d.inclinationVector = systemRotation * glm::vec3(0.f, 0.f, 1.f);
+        }
+
+        if (static_cast<int>(d.index) > maxIndex) {
+            maxIndex = static_cast<int>(d.index);
         }
 
         _glyphData.push_back(std::move(d));

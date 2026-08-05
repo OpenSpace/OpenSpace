@@ -55,6 +55,8 @@ Fragment getFragment() {
 
   float component = in_data.component;
 
+  bool isCurrentHoveredGlyph = in_data.glyphIndex == currentIndex;
+
   // Render selection icon
   if (onTop && radius > 1.0 && (abs(x - y) < 0.2 || abs(-1.0 * x - y) < 0.2)) {
     frag.color = vec4(1.0);
@@ -65,7 +67,11 @@ Fragment getFragment() {
     discard;
   }
 
-  float width = 0.6 * 1.0 / component; // Make it a little smaller than full width
+  float ringWidth = isRenderIndexStep ? 0.95 : 0.4;
+  if (isCurrentHoveredGlyph && !isRenderIndexStep) {
+    ringWidth *= 1.5;
+  }
+  float width = ringWidth * 1.0 / component;
   float minRadius = 1.0 - width;
 
   float coord = (radius - minRadius) / (1.0 - minRadius);
@@ -73,7 +79,7 @@ Fragment getFragment() {
     discard;
   }
 
-  vec4 color = vec4(1.0); // TODO
+  vec4 color = vec4(0.7, 0.7, 0.0, 1.0); // TODO
   color.a *= opacity;
 
   // If the glyph is not visible due to too transparent, don't include this pixel
@@ -89,8 +95,6 @@ Fragment getFragment() {
     frag.disableLDR2HDR = true;
   }
   else {
-    bool isCurrentHoveredGlyph = in_data.glyphIndex == currentIndex;
-
     // Ring border
     float borderWidth = isCurrentHoveredGlyph ? 0.2: 0.13;
     if (coord > 1.0 - borderWidth || coord < 1.0 - 1.0 + borderWidth) {

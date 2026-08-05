@@ -64,9 +64,10 @@ void main() {
   out_data.glyphIndex = in_data[0].glyphIndex;
 
   dvec4 dpos = in_data[0].dposWorld;
+  vec3 inclinationVector = normalize(in_data[0].inclinationVector);
 
-  vec3 scaledRight = vec3(1.0, 0.0, 0.0);
-  vec3 scaledUp = vec3(0.0, 1.0, 0.0);
+  vec3 scaledRight = normalize(cross(inclinationVector, vec3(0.0, 1.0, 0.0)));
+  vec3 scaledUp = normalize(cross(scaledRight, inclinationVector));
 
   // Limit the max size of the points, as the angle in "FOV" that the point is allowed
   // to take up. Note that the max size is for the diameter, and we need the radius
