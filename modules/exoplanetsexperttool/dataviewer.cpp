@@ -126,6 +126,15 @@ namespace {
 #endif
     }
 
+    std::string glyphPropertyUri(const std::string& p) {
+        using namespace openspace;
+        return std::format(
+            "Scene.{}.Renderable.{}",
+            ExoplanetsExpertToolModule::GlyphCloudIdentifier,
+            p
+        );
+    };
+
     constexpr const openspace::Property::PropertyInfo ExternalSelectionInfo =
     {
         "ExternalSelection",
@@ -1276,16 +1285,7 @@ void DataViewer::renderSettingsMenuContent() {
     // This function also renders the buttons that opens the modal
     _columnSelectionView.renderColumnSettingsView(_columns, _dataSettings);
 
-    if (ImGui::Checkbox("Use fixed ring width", &useFixedWidth)) {
-        global::scriptEngine->queueScript(std::format(
-            "openspace.setPropertyValueSingle('{}', {})",
-            std::format(
-                "Scene.{}.Renderable.UseFixedWidth",
-                ExoplanetsExpertToolModule::GlyphCloudIdentifier
-            ),
-            useFixedWidth
-        ));
-    }
+    ImGui::Separator();
 
     if (ImGui::Checkbox("Show Kepler FOV cue", &showKepler)) {
         global::scriptEngine->queueScript(std::format(
@@ -1300,6 +1300,28 @@ void DataViewer::renderSettingsMenuContent() {
             "openspace.setPropertyValueSingle('{}', {})",
             "Scene.MilkyWayEarthLine.Renderable.Enabled",
             showMilkyWayLine
+        ));
+    }
+
+    ImGui::Separator();
+
+    const char* items[] = { "Rings", "Inclination" };
+    static int item_current = 0;
+    ImGui::SetNextItemWidth(120);
+    if (ImGui::Combo("Glyph mode", &item_current, items, IM_ARRAYSIZE(items))) {
+        global::scriptEngine->queueScript(std::format(
+            "openspace.setPropertyValueSingle('{}', '{}')",
+            glyphPropertyUri("GlyphMode"),
+            items[item_current]
+        ));
+    };
+
+    bool isInRingMode = item_current == 0;
+    if (isInRingMode && ImGui::Checkbox("Use fixed ring width", &useFixedWidth)) {
+        global::scriptEngine->queueScript(std::format(
+            "openspace.setPropertyValueSingle('{}', {})",
+            glyphPropertyUri("UseFixedWidth"),
+            useFixedWidth
         ));
     }
 
