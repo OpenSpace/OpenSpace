@@ -46,7 +46,7 @@ public:
 
 private:
     FloatProperty _intensity;
-    StringProperty _sceneGraphNodeReference;
+    StringProperty _nodeIdentifier;
 
     SceneGraphNode* _sceneGraphNode = nullptr;
 };
