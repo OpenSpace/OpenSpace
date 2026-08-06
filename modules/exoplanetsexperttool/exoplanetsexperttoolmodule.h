@@ -52,6 +52,7 @@ public:
             size_t component; // Index in system
             glm::dvec3 position;
             std::vector<glm::vec4> colors;
+            float inclination;
         };
         std::vector<Item> items;
 

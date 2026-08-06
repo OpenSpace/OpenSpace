@@ -1371,6 +1371,18 @@ void DataViewer::updateGlyphRenderData() {
                 )
             );
         }
+
+        constexpr std::string InclinationKey= "pl_orbincl"; // TODO: Do not hardcode
+        const std::variant<std::string, float>& inclination =
+            item.dataColumns.at(InclinationKey);
+
+        if (std::holds_alternative<float>(inclination)) {
+            renderItem.inclination = std::get<float>(inclination);
+        }
+        else {
+            renderItem.inclination = std::numeric_limits<float>::quiet_NaN();
+        }
+
         data.push_back(renderItem);
     }
     data.shrink_to_fit();

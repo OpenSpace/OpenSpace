@@ -756,11 +756,14 @@ void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
             // Rotation corresponding to a plane whose normal is facing Earth
             glm::dmat3 systemRotation = computeSystemRotation(d.position);
 
-            constexpr std::string_view inclinationColumn = "pl_orbincl";
-            // TODO: Load system's index from the dataset
+            if (std::isnan(item.inclination)) {
+                continue; // Skip this point if inclination is not defined
+            }
+
+            glm::dmat3 planeRotation = computeOrbitPlaneRotationMatrix(item.inclination);
 
             // This is the up vector of the orbit plane, in world space
-            d.inclinationVector = systemRotation * glm::vec3(0.f, 0.f, 1.f);
+            d.inclinationVector = systemRotation * planeRotation * glm::vec3(0.f, 0.f, 1.f);
         }
 
         if (static_cast<int>(d.index) > maxIndex) {
