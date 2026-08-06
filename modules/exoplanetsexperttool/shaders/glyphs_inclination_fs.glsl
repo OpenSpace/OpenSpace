@@ -67,7 +67,7 @@ Fragment getFragment() {
     discard;
   }
 
-  float ringWidth = isRenderIndexStep ? 0.95 : 0.4;
+  float ringWidth = isRenderIndexStep ? 0.95 : 0.6;
   if (isCurrentHoveredGlyph && !isRenderIndexStep) {
     ringWidth *= 1.5;
   }
