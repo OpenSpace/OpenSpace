@@ -94,27 +94,33 @@ void main() {
     vec4(cameraViewProjectionMatrix * dvec4(scaledUp, 0.0));
 
   dvec4 dposClip = cameraViewProjectionMatrix * dpos;
-  vec4 lowerLeft = vec4(dposClip - scaledRightClip - scaledUpClip);
-  out_data.depthClipSpace = lowerLeft.w * (1 - int(onTop));
 
   // Lower left
   out_data.texCoords = Corners[0];
+  vec4 lowerLeft = vec4(dposClip - scaledRightClip - scaledUpClip);
   gl_Position = z_normalization(lowerLeft);
+  out_data.depthClipSpace = lowerLeft.w * (1 - int(onTop));
   EmitVertex();
 
   // Lower right
   out_data.texCoords = Corners[1];
-  gl_Position = z_normalization(vec4(dposClip + scaledRightClip - scaledUpClip));
+  vec4 lowerRight = vec4(dposClip + scaledRightClip - scaledUpClip);
+  gl_Position = z_normalization(lowerRight);
+  out_data.depthClipSpace = lowerRight.w * (1 - int(onTop));
   EmitVertex();
 
   // Upper left
   out_data.texCoords = Corners[2];
-  gl_Position = z_normalization(vec4(dposClip + scaledUpClip - scaledRightClip));
+  vec4 upperLeft = vec4(dposClip - scaledRightClip + scaledUpClip);
+  gl_Position = z_normalization(upperLeft);
+  out_data.depthClipSpace = upperLeft.w * (1 - int(onTop));
   EmitVertex();
 
   // Upper right
   out_data.texCoords = Corners[3];
-  gl_Position = z_normalization(vec4(dposClip + scaledUpClip + scaledRightClip));
+  vec4 upperRight = vec4(dposClip + scaledRightClip + scaledUpClip);
+  gl_Position = z_normalization(upperRight);
+  out_data.depthClipSpace = upperRight.w * (1 - int(onTop));
   EmitVertex();
 
   EndPrimitive();
