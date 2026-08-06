@@ -159,7 +159,6 @@ void ErrorLogTopic::flushQueuedMessages() {
     for (const nlohmann::json& message : messagesToSend) {
         sendData(message);
     }
-
 }
 
 bool ErrorLogTopic::isDone() const {
