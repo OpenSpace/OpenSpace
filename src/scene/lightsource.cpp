@@ -57,6 +57,10 @@ namespace {
         // The identifier of the light source.
         std::string identifier [[codegen::identifier()]];
 
+        // An optional name for the light source, to show in the GUI. If not specified,
+        // the identifier is used.
+        std::optional<std::string> name;
+
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
     };
@@ -80,20 +84,24 @@ std::unique_ptr<LightSource> LightSource::createFromDictionary(
 
     ghoul::TemplateFactory<LightSource>* factory =
         FactoryManager::ref().factory<LightSource>();
-    LightSource* source = factory->create(p.type, dictionary);
-    source->setIdentifier(p.identifier);
 
-    source->_type = p.type;
+    LightSource* source = factory->create(p.type, dictionary);
+
     return std::unique_ptr<LightSource>(source);
 }
 
 LightSource::LightSource(const ghoul::Dictionary& dictionary)
-    : PropertyOwner({ "LightSource", "Light Source" })
+    : PropertyOwner({ "LightSource" })
     , _enabled(EnabledInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    addProperty(_enabled);
+
     _enabled = p.enabled.value_or(_enabled);
+    addProperty(_enabled);
+
+    _type = p.type;
+    _identifier = p.identifier;
+    _guiName = p.name.value_or(_identifier);
 }
 
 bool LightSource::initialize() {
