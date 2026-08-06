@@ -1121,11 +1121,16 @@ void DataViewer::updateFilteredRowsProperty(std::optional<std::vector<size_t>> c
             );
         }
 
-        global::scriptEngine->queueScript(std::format(
-            "openspace.setPropertyValueSingle('{}', {{{}}})", // @TODO: does this work?
+        const std::string script = std::format(
+            "openspace.setPropertyValueSingle('{}', {{{}}})",
             filteredRowsProperty->uri(),
             ghoul::join(indices, ",")
-        ));
+        );
+
+        global::scriptEngine->queueScript({
+            .code = script,
+            .addToLog = ScriptEngine::Script::ShouldBeLogged::No
+        });
     }
 }
 
@@ -1398,9 +1403,15 @@ void DataViewer::updateSelectionInRenderable() {
         ExoplanetsExpertToolModule::GlyphCloudIdentifier
     );
 
-    global::scriptEngine->queueScript(
-        "openspace.setPropertyValueSingle('" + uri + "', { " + indices + " })"
+    const std::string script = std::format(
+        "openspace.setPropertyValueSingle('{}', {{ {} }})",
+        uri, indices
     );
+
+    global::scriptEngine->queueScript({
+        .code = script,
+        .addToLog = ScriptEngine::Script::ShouldBeLogged::No
+    });
 }
 
 void DataViewer::refocusView() const {
