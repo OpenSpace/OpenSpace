@@ -31,6 +31,7 @@ in Data {
   flat int glyphIndex;
   vec2 texCoords; // [-1, 1]
   float sizeFactor; // The factor used for the radius of the ring
+  vec4 color;
 } in_data;
 
 uniform float opacity;
@@ -79,7 +80,7 @@ Fragment getFragment() {
     discard;
   }
 
-  vec4 color = vec4(0.7, 0.7, 0.0, 1.0); // TODO
+  vec4 color = in_data.color;
   color.a *= opacity;
 
   // If the glyph is not visible due to too transparent, don't include this pixel

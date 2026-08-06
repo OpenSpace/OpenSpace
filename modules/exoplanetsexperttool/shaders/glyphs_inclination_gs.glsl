@@ -34,6 +34,7 @@ in Data {
   flat int glyphIndex;
   flat dvec4 dposWorld;
   flat vec3 inclinationVector;
+  flat vec4 color;
 } in_data[];
 
 out Data {
@@ -43,6 +44,7 @@ out Data {
   flat int glyphIndex;
   vec2 texCoords;
   float sizeFactor; // The factor used for the radius of the ring
+  vec4 color;
 } out_data;
 
 uniform dmat4 modelMatrix;
@@ -62,6 +64,7 @@ const vec2 Corners[4] = vec2[4](
 void main() {
   out_data.component = in_data[0].component;
   out_data.glyphIndex = in_data[0].glyphIndex;
+  out_data.color = in_data[0].color;
 
   dvec4 dpos = in_data[0].dposWorld;
   vec3 inclinationVector = normalize(in_data[0].inclinationVector);

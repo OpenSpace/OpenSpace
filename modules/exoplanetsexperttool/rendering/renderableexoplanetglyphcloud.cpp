@@ -695,6 +695,12 @@ void RenderableExoplanetGlyphCloud::mapVertexAttributes(GLuint vao) {
             vao, 3, 3, GL_FLOAT, GL_FALSE,
             offsetof(GlyphData, inclinationVector)
         );
+
+        // Location 4: in_colors[0] (only one color used for inclination mode)
+        glVertexArrayAttribFormat(
+            vao, 4, 4, GL_FLOAT, GL_FALSE,
+            offsetof(GlyphData, colors)
+        );
     }
     else throw ghoul::MissingCaseException();
 }
@@ -736,15 +742,15 @@ void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
         // shader to indicate "no point"
         d.index = item.index + 1;
 
+        // Clear all color slots first (defensive programming)
+        for (size_t i = 0; i < MaxNumberColors; i++) {
+            d.colors[i] = glm::vec4(0.0f);
+        }
+
         // Mode-specific data population
         if (_glyphMode == GlyphMode::Rings) {
             size_t nColors = item.colors.size();
             d.nColors = static_cast<int>(nColors);
-
-            // Clear all color slots first (defensive programming)
-            for (size_t i = 0; i < MaxNumberColors; i++) {
-                d.colors[i] = glm::vec4(0.0f);
-            }
 
             // Limit the number of colors to the maximum supported by the shader
             size_t temp = std::min(nColors, MaxNumberColors);
@@ -764,6 +770,9 @@ void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
 
             // This is the up vector of the orbit plane, in world space
             d.inclinationVector = systemRotation * planeRotation * glm::vec3(0.f, 0.f, 1.f);
+
+            // Use just one of the colors
+            d.colors[0] = item.colors[0];
         }
 
         if (static_cast<int>(d.index) > maxIndex) {

@@ -30,12 +30,14 @@ layout(location = 0) in vec3 in_position;
 layout(location = 1) in float in_component;
 layout(location = 2) in int in_glyphIndex;
 layout(location = 3) in vec3 in_inclinationVector;
+layout(location = 4) in vec4 in_color;
 
 out Data {
   flat float component;
   flat int glyphIndex;
   flat dvec4 dposWorld;
   flat vec3 inclinationVector;
+  flat vec4 color;
 } out_data;
 
 uniform dmat4 modelMatrix;
@@ -45,4 +47,5 @@ void main() {
   out_data.dposWorld = modelMatrix * dvec4(in_position, 1.0);
   out_data.glyphIndex = in_glyphIndex;
   out_data.inclinationVector = in_inclinationVector;
+  out_data.color = in_color;
 }
