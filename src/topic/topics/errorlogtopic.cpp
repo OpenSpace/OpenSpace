@@ -108,26 +108,28 @@ void ErrorLogTopic::createLog() {
         return;
     }
 
-    auto onLogging = [this](std::string_view timeStamp, std::string_view dateStamp,
+    // _logSettings is an anonymous struct hence the use of auto
+    const auto logSettings = _logSettings;
+    auto onLogging = [this, logSettings](std::string_view timeStamp, std::string_view dateStamp,
                             std::string_view category, ghoul::logging::LogLevel level,
                             std::string_view message)
     {
         nlohmann::json payload;
         payload["message"] = message;
 
-        if (_logSettings.isTimeStamping) {
+        if (logSettings.isTimeStamping) {
             payload["timeStamp"] = timeStamp;
         }
 
-        if (_logSettings.isCategoryStamping) {
+        if (logSettings.isCategoryStamping) {
             payload["category"] = category;
         }
 
-        if (_logSettings.isDateStamping) {
+        if (logSettings.isDateStamping) {
             payload["dateStamp"] = dateStamp;
         }
 
-        if (_logSettings.isLogLevelStamping) {
+        if (logSettings.isLogLevelStamping) {
             payload["level"] = ghoul::to_string(level);
         }
 
