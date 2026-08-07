@@ -354,7 +354,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
             glm::vec3(0.f),
             glm::vec3(1.f)
         ),
-        . backgroundColor = Vec4Property(
+        .backgroundColor = Vec4Property(
             BackgroundColorInfo,
             glm::vec4(0.f),
             glm::vec4(0.f),
