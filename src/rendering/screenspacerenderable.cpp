@@ -344,7 +344,8 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
             glm::vec3(0.f),
             glm::vec3(-glm::pi<float>()),
             glm::vec3(glm::pi<float>())
-        )
+        ),
+        .faceCamera = BoolProperty(FaceCameraInfo, true)
     }
     , _style {
         .owner = PropertyOwner(StyleInfo),
@@ -374,7 +375,6 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         }
     }
     , _renderDuringBlackout(RenderDuringBlackoutInfo, false)
-    , _faceCamera(FaceCameraInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -420,6 +420,9 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     _placement.localRotation = p.rotation.value_or(_placement.localRotation);
     _placement.owner.addProperty(_placement.localRotation);
 
+    _placement.faceCamera = p.faceCamera.value_or(_placement.faceCamera);
+    _placement.owner.addProperty(_placement.faceCamera);
+
     addPropertySubOwner(_placement.owner);
 
     //
@@ -451,9 +454,6 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
 
     _renderDuringBlackout = p.renderDuringBlackout.value_or(_renderDuringBlackout);
     addProperty(_renderDuringBlackout);
-
-    _faceCamera = p.faceCamera.value_or(_faceCamera);
-    addProperty(_faceCamera);
 
     if (p.tag.has_value()) {
         if (std::holds_alternative<std::string>(*p.tag)) {
@@ -511,7 +511,7 @@ bool ScreenSpaceRenderable::isUsingRaeCoords() const {
 }
 
 bool ScreenSpaceRenderable::isFacingCamera() const {
-    return _faceCamera;
+    return _placement.faceCamera;
 }
 
 void ScreenSpaceRenderable::setEnabled(bool isEnabled) {
@@ -636,7 +636,7 @@ glm::mat4 ScreenSpaceRenderable::globalRotationMatrix() {
 
 glm::mat4 ScreenSpaceRenderable::localRotationMatrix() {
     glm::mat4 rotation = glm::mat4(1.f);
-    if (_faceCamera) {
+    if (_placement.faceCamera) {
         const glm::vec3 translation = _placement.useRadiusAzimuthElevation ?
             sphericalToCartesian(raeToSpherical(_placement.rae)) :
             _placement.cartesian;

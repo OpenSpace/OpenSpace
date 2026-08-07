@@ -147,6 +147,8 @@ protected:
         FloatProperty scale;
         // Local rotation (roll, pitch, yaw)
         Vec3Property localRotation;
+
+        BoolProperty faceCamera;
     } _placement;
 
     struct {
@@ -164,7 +166,6 @@ protected:
     } _style;
 
     BoolProperty _renderDuringBlackout;
-    BoolProperty _faceCamera;
 
     glm::ivec2 _objectSize = glm::ivec2(0);
 

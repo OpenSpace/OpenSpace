@@ -378,7 +378,7 @@ void ScreenSpaceSkyBrowser::render(const RenderData& renderData) {
                 coordinates = sphericalToCartesian(raeToSpherical(coordinates));
             }
             glm::mat4 localRotation = glm::mat4(1.f);
-            if (_faceCamera) {
+            if (_placement.faceCamera) {
                 localRotation = glm::inverse(glm::lookAt(
                     glm::vec3(0.f),
                     glm::normalize(coordinates),
