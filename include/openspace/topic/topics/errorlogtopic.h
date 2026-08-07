@@ -28,6 +28,7 @@
 #include <openspace/topic/topics/topic.h>
 
 #include <ghoul/logging/loglevel.h>
+#include <optional>
 
 namespace ghoul::logging { class Log; }
 
@@ -52,10 +53,15 @@ private:
      */
     void createLog();
 
+    void flushQueuedMessages();
+
     bool _isSubscribedTo = false;
+    std::optional<int> _dataCallbackHandle;
 
     /// Non-owning but we remove the log from LogManager on destruction
     ghoul::logging::Log* _log = nullptr;
+    std::vector<nlohmann::json> _queuedMessages;
+    std::mutex _queuedMessagesMutex;
 
     struct {
         bool isTimeStamping = true;

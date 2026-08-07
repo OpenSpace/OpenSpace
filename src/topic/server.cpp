@@ -97,6 +97,7 @@ Server::Server()
     global::callback::preSync->emplace_back([this]() {
         using K = CallbackHandle;
         using V = CallbackFunction;
+        // Loop over all registered callbacks and call them
         for (const std::pair<K, V>& it : _preSyncCallbacks) {
             it.second();
         }
